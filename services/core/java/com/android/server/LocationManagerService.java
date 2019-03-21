@@ -2943,7 +2943,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public int getGnssCapabilities(String packageName) {
+    public long getGnssCapabilities(String packageName) {
         mContext.enforceCallingPermission(
                 android.Manifest.permission.LOCATION_HARDWARE,
                 "Location Hardware permission not granted to obtain GNSS chipset capabilities.");

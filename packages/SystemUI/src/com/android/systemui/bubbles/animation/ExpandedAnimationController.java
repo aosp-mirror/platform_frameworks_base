@@ -198,6 +198,19 @@ public class ExpandedAnimationController
     }
 
     /**
+     * Animates the bubbles to {@link #getExpandedY()} position. Used in response to IME showing.
+     */
+    public void updateYPosition(Runnable after) {
+        if (mLayout == null) return;
+
+        for (int i = 0; i < mLayout.getChildCount(); i++) {
+            boolean isLast = i == mLayout.getChildCount() - 1;
+            mLayout.animateValueForChildAtIndex(DynamicAnimation.TRANSLATION_Y, i,
+                    getExpandedY(), isLast ? after : null);
+        }
+    }
+
+    /**
      * Animates the bubbles, starting at the given index, to the left or right by the given number
      * of bubble widths. Passing zero for numBubbleWidths will animate the bubbles to their normal
      * positions.
@@ -213,18 +226,25 @@ public class ExpandedAnimationController
 
     /** The Y value of the row of expanded bubbles. */
     public float getExpandedY() {
-        boolean showOnTop = mLayout != null
-                && BubbleController.showBubblesAtTop(mLayout.getContext());
-        final WindowInsets insets = mLayout != null ? mLayout.getRootWindowInsets() : null;
-        if (showOnTop && insets != null) {
+        if (mLayout == null || mLayout.getRootWindowInsets() == null) {
+            return 0;
+        }
+        final boolean showOnTop = BubbleController.showBubblesAtTop(mLayout.getContext());
+        final WindowInsets insets = mLayout.getRootWindowInsets();
+        if (showOnTop) {
             return mBubblePaddingPx + Math.max(
                     mStatusBarHeight,
                     insets.getDisplayCutout() != null
                             ? insets.getDisplayCutout().getSafeInsetTop()
                             : 0);
         } else {
-            int bottomInset = insets != null ? insets.getSystemWindowInsetBottom() : 0;
-            return mDisplaySize.y - mBubbleSizePx - (mPipDismissHeight - bottomInset);
+            int keyboardHeight = insets.getSystemWindowInsetBottom()
+                    - insets.getStableInsetBottom();
+            float bottomInset = keyboardHeight > 0
+                    ? keyboardHeight
+                    : (mPipDismissHeight - insets.getStableInsetBottom());
+            // Stable insets are excluded from display size, so we must subtract it
+            return mDisplaySize.y - mBubbleSizePx - mBubblePaddingPx - bottomInset;
         }
     }
 

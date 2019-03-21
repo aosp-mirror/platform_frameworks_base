@@ -427,7 +427,7 @@ public abstract class AugmentedAutofillService extends Service {
                 mFocusedValue = focusedValue;
                 if (mCallback != null) {
                     try {
-                        if (mCallback.isCompleted()) {
+                        if (!mCallback.isCompleted()) {
                             mCallback.cancel();
                         }
                     } catch (RemoteException e) {

@@ -628,6 +628,9 @@ public class BiometricService extends SystemService {
                             null /* description */);
                     // Then give it the bundle to do magic behavior..
                     intent.putExtra(KeyguardManager.EXTRA_BIOMETRIC_PROMPT_BUNDLE, bundle);
+                    // Create a new task with this activity located at the root.
+                    intent.setFlags(
+                            Intent.FLAG_ACTIVITY_MULTIPLE_TASK | Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
                     getContext().startActivityAsUser(intent, UserHandle.CURRENT);
                 });
                 return;

@@ -25,6 +25,7 @@ import android.content.UriMatcher;
 import android.content.pm.ProviderInfo;
 import android.database.Cursor;
 import android.net.Uri;
+import android.util.Log;
 
 /**
  * Base class for a search indexable provider. Such provider offers data to be indexed either
@@ -112,19 +113,26 @@ public abstract class SearchIndexablesProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
                         String sortOrder) {
-        switch (mMatcher.match(uri)) {
-            case MATCH_RES_CODE:
-                return queryXmlResources(null);
-            case MATCH_RAW_CODE:
-                return queryRawData(null);
-            case MATCH_NON_INDEXABLE_KEYS_CODE:
-                return queryNonIndexableKeys(null);
-            case MATCH_SITE_MAP_PAIRS_CODE:
-                return querySiteMapPairs();
-            case MATCH_SLICE_URI_PAIRS_CODE:
-                return querySliceUriPairs();
-            default:
-                throw new UnsupportedOperationException("Unknown Uri " + uri);
+        try {
+            switch (mMatcher.match(uri)) {
+                case MATCH_RES_CODE:
+                    return queryXmlResources(null);
+                case MATCH_RAW_CODE:
+                    return queryRawData(null);
+                case MATCH_NON_INDEXABLE_KEYS_CODE:
+                    return queryNonIndexableKeys(null);
+                case MATCH_SITE_MAP_PAIRS_CODE:
+                    return querySiteMapPairs();
+                case MATCH_SLICE_URI_PAIRS_CODE:
+                    return querySliceUriPairs();
+                default:
+                    throw new UnsupportedOperationException("Unknown Uri " + uri);
+            }
+        } catch (UnsupportedOperationException e) {
+            throw e;
+        } catch (Exception e) {
+            Log.e(TAG, "Provider querying exception:", e);
+            return null;
         }
     }
 

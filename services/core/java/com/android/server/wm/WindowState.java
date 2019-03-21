@@ -205,6 +205,7 @@ import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.function.Predicate;
 
 /** A window in the window manager. */
@@ -362,6 +363,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      *{@link android.app.IActivityTaskManager#resizeDockedStack}.
      */
     private final Rect mInsetFrame = new Rect();
+
+    /**
+     * List of rects where system gestures should be ignored.
+     *
+     * Coordinates are relative to the window's position.
+     */
+    private final List<Rect> mExclusionRects = new ArrayList<>();
 
     // If a window showing a wallpaper: the requested offset for the
     // wallpaper; if a wallpaper window: the currently applied offset.
@@ -610,6 +618,24 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mPendingSeamlessRotate = null;
             mWmService.markForSeamlessRotation(this, false);
         }
+    }
+
+    List<Rect> getSystemGestureExclusion() {
+        return mExclusionRects;
+    }
+
+    /**
+     * Sets the system gesture exclusion rects.
+     *
+     * @return {@code true} if anything changed
+     */
+    boolean setSystemGestureExclusion(List<Rect> exclusionRects) {
+        if (mExclusionRects.equals(exclusionRects)) {
+            return false;
+        }
+        mExclusionRects.clear();
+        mExclusionRects.addAll(exclusionRects);
+        return true;
     }
 
     interface PowerManagerWrapper {

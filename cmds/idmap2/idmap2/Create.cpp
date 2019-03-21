@@ -33,14 +33,17 @@
 using android::ApkAssets;
 using android::idmap2::BinaryStreamVisitor;
 using android::idmap2::CommandLineOptions;
+using android::idmap2::Error;
 using android::idmap2::Idmap;
 using android::idmap2::PoliciesToBitmask;
 using android::idmap2::PolicyBitmask;
 using android::idmap2::PolicyFlags;
+using android::idmap2::Result;
+using android::idmap2::Unit;
 using android::idmap2::utils::kIdmapFilePermissionMask;
 using android::idmap2::utils::UidHasWriteAccessToPath;
 
-bool Create(const std::vector<std::string>& args, std::ostream& out_error) {
+Result<Unit> Create(const std::vector<std::string>& args) {
   SYSTRACE << "Create " << args;
   std::string target_apk_path;
   std::string overlay_apk_path;
@@ -63,15 +66,14 @@ bool Create(const std::vector<std::string>& args, std::ostream& out_error) {
                           &policies)
           .OptionalFlag("--ignore-overlayable", "disables overlayable and policy checks",
                         &ignore_overlayable);
-  if (!opts.Parse(args, out_error)) {
-    return false;
+  const auto opts_ok = opts.Parse(args);
+  if (!opts_ok) {
+    return opts_ok.GetError();
   }
 
   const uid_t uid = getuid();
   if (!UidHasWriteAccessToPath(uid, idmap_path)) {
-    out_error << "error: uid " << uid << " does not have write access to " << idmap_path
-              << std::endl;
-    return false;
+    return Error("uid %d does not have write access to %s", uid, idmap_path.c_str());
   }
 
   PolicyBitmask fulfilled_policies = 0;
@@ -79,8 +81,7 @@ bool Create(const std::vector<std::string>& args, std::ostream& out_error) {
   if (conv_result) {
     fulfilled_policies |= *conv_result;
   } else {
-    out_error << "error: " << conv_result.GetErrorMessage() << std::endl;
-    return false;
+    return conv_result.GetError();
   }
 
   if (fulfilled_policies == 0) {
@@ -89,36 +90,33 @@ bool Create(const std::vector<std::string>& args, std::ostream& out_error) {
 
   const std::unique_ptr<const ApkAssets> target_apk = ApkAssets::Load(target_apk_path);
   if (!target_apk) {
-    out_error << "error: failed to load apk " << target_apk_path << std::endl;
-    return false;
+    return Error("failed to load apk %s", target_apk_path.c_str());
   }
 
   const std::unique_ptr<const ApkAssets> overlay_apk = ApkAssets::Load(overlay_apk_path);
   if (!overlay_apk) {
-    out_error << "error: failed to load apk " << overlay_apk_path << std::endl;
-    return false;
+    return Error("failed to load apk %s", overlay_apk_path.c_str());
   }
 
+  std::stringstream stream;
   const std::unique_ptr<const Idmap> idmap =
       Idmap::FromApkAssets(target_apk_path, *target_apk, overlay_apk_path, *overlay_apk,
-                           fulfilled_policies, !ignore_overlayable, out_error);
+                           fulfilled_policies, !ignore_overlayable, stream);
   if (!idmap) {
-    return false;
+    return Error("failed to create idmap: %s", stream.str().c_str());
   }
 
   umask(kIdmapFilePermissionMask);
   std::ofstream fout(idmap_path);
   if (fout.fail()) {
-    out_error << "failed to open idmap path " << idmap_path << std::endl;
-    return false;
+    return Error("failed to open idmap path %s", idmap_path.c_str());
   }
   BinaryStreamVisitor visitor(fout);
   idmap->accept(&visitor);
   fout.close();
   if (fout.fail()) {
-    out_error << "failed to write to idmap path " << idmap_path << std::endl;
-    return false;
+    return Error("failed to write to idmap path %s", idmap_path.c_str());
   }
 
-  return true;
+  return Unit{};
 }

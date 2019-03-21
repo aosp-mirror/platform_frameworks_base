@@ -2438,7 +2438,7 @@ public class Intent implements Parcelable, Cloneable {
      * Broadcast Action: A rollback has been committed.
      *
      * <p class="note">This is a protected intent that can only be sent
-     * by the system.
+     * by the system. The receiver must hold MANAGE_ROLLBACK permission.
      *
      * @hide
      */

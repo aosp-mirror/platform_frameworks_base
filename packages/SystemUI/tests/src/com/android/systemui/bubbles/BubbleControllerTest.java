@@ -44,6 +44,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -66,6 +67,9 @@ public class BubbleControllerTest extends SysuiTestCase {
     private IActivityManager mActivityManager;
     @Mock
     private DozeParameters mDozeParameters;
+    @Mock
+    private ConfigurationController mConfigurationController;
+
     private FrameLayout mStatusBarView;
     @Captor
     private ArgumentCaptor<NotificationEntryListener> mEntryListenerCaptor;
@@ -97,6 +101,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         mStatusBarView = new FrameLayout(mContext);
         mDependency.injectTestDependency(NotificationEntryManager.class, mNotificationEntryManager);
 
+
         // Bubbles get added to status bar window view
         mStatusBarWindowController = new StatusBarWindowController(mContext, mWindowManager,
                 mActivityManager, mDozeParameters);
@@ -115,7 +120,7 @@ public class BubbleControllerTest extends SysuiTestCase {
 
         mBubbleData = new BubbleData();
         mBubbleController = new TestableBubbleController(mContext, mStatusBarWindowController,
-                mBubbleData);
+                mBubbleData, mConfigurationController);
         mBubbleController.setBubbleStateChangeListener(mBubbleStateChangeListener);
         mBubbleController.setExpandListener(mBubbleExpandListener);
 
@@ -331,8 +336,9 @@ public class BubbleControllerTest extends SysuiTestCase {
     static class TestableBubbleController extends BubbleController {
         // Let's assume surfaces can be synchronized immediately.
         TestableBubbleController(Context context,
-                StatusBarWindowController statusBarWindowController, BubbleData data) {
-            super(context, statusBarWindowController, data, Runnable::run);
+                StatusBarWindowController statusBarWindowController, BubbleData data,
+                ConfigurationController configurationController) {
+            super(context, statusBarWindowController, data, Runnable::run, configurationController);
         }
 
         @Override

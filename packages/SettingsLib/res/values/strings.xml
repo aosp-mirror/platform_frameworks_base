@@ -185,8 +185,12 @@
 
     <!-- Connected devices settings. Message when Bluetooth is connected and active, showing remote device status and battery level. [CHAR LIMIT=NONE] -->
     <string name="bluetooth_active_battery_level">Active, <xliff:g id="battery_level_as_percentage">%1$s</xliff:g> battery</string>
+    <!-- Connected devices settings. Message when Bluetooth is connected and active, showing remote device status and battery level for untethered headset. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_active_battery_level_untethered">Active, L: <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g> battery, R: <xliff:g id="battery_level_as_percentage" example="25%">%2$s</xliff:g> battery</string>
     <!-- Connected devices settings. Message when Bluetooth is connected but not in use, showing remote device battery level. [CHAR LIMIT=NONE] -->
     <string name="bluetooth_battery_level"><xliff:g id="battery_level_as_percentage">%1$s</xliff:g> battery</string>
+    <!-- Connected devices settings. Message when Bluetooth is connected but not in use, showing remote device battery level for untethered headset. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_battery_level_untethered">L: <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g> battery, R: <xliff:g id="battery_level_as_percentage" example="25%">%2$s</xliff:g> battery</string>
     <!-- Connected devices settings. Message when Bluetooth is connected and active but no battery information, showing remote device status. [CHAR LIMIT=NONE] -->
     <string name="bluetooth_active_no_battery_level">Active</string>
 

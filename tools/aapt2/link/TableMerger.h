@@ -85,8 +85,8 @@ class TableMerger {
 
   bool MergeImpl(const Source& src, ResourceTable* src_table, bool overlay, bool allow_new);
 
-  bool DoMerge(const Source& src, ResourceTable* src_table, ResourceTablePackage* src_package,
-               bool mangle_package, bool overlay, bool allow_new_resources);
+  bool DoMerge(const Source& src, ResourceTablePackage* src_package, bool mangle_package,
+               bool overlay, bool allow_new_resources);
 
   std::unique_ptr<FileReference> CloneAndMangleFile(const std::string& package,
                                                     const FileReference& value);

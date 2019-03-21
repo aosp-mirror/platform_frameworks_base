@@ -104,8 +104,7 @@ Status Idmap2Service::verifyIdmap(const std::string& overlay_apk_path,
   std::ifstream fin(idmap_path);
   const std::unique_ptr<const IdmapHeader> header = IdmapHeader::FromBinaryStream(fin);
   fin.close();
-  std::stringstream dev_null;
-  *_aidl_return = header && header->IsUpToDate(dev_null);
+  *_aidl_return = header && header->IsUpToDate();
 
   // TODO(b/119328308): Check that the set of fulfilled policies of the overlay has not changed
 

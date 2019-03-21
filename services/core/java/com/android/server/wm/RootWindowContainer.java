@@ -682,6 +682,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         // Finally update all input windows now that the window changes have stabilized.
         forAllDisplays(dc -> {
             dc.getInputMonitor().updateInputWindowsLw(true /*force*/);
+            dc.updateSystemGestureExclusion();
         });
 
         mWmService.setHoldScreenLocked(mHoldScreen);

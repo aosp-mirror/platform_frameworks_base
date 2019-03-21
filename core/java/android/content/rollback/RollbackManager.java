@@ -76,10 +76,12 @@ public final class RollbackManager {
     /**
      * Returns a list of all currently available rollbacks.
      *
-     * @throws SecurityException if the caller does not have the
-     *            MANAGE_ROLLBACKS permission.
+     * @throws SecurityException if the caller does not have appropriate permissions.
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_ROLLBACKS,
+            android.Manifest.permission.TEST_MANAGE_ROLLBACKS
+    })
     @NonNull
     public List<RollbackInfo> getAvailableRollbacks() {
         try {
@@ -104,10 +106,12 @@ public final class RollbackManager {
      * rolled back from.
      *
      * @return the recently committed rollbacks
-     * @throws SecurityException if the caller does not have the
-     *            MANAGE_ROLLBACKS permission.
+     * @throws SecurityException if the caller does not have appropriate permissions.
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_ROLLBACKS,
+            android.Manifest.permission.TEST_MANAGE_ROLLBACKS
+    })
     public @NonNull List<RollbackInfo> getRecentlyCommittedRollbacks() {
         try {
             return mBinder.getRecentlyExecutedRollbacks().getList();
@@ -190,10 +194,12 @@ public final class RollbackManager {
      * @param statusReceiver where to deliver the results. Intents sent to
      *                       this receiver contain {@link #EXTRA_STATUS}
      *                       and {@link #EXTRA_STATUS_MESSAGE}.
-     * @throws SecurityException if the caller does not have the
-     *            MANAGE_ROLLBACKS permission.
+     * @throws SecurityException if the caller does not have appropriate permissions.
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_ROLLBACKS,
+            android.Manifest.permission.TEST_MANAGE_ROLLBACKS
+    })
     public void commitRollback(int rollbackId, @NonNull List<VersionedPackage> causePackages,
             @NonNull IntentSender statusReceiver) {
         try {
@@ -210,12 +216,11 @@ public final class RollbackManager {
      * across device reboot, by simulating what happens on reboot without
      * actually rebooting the device.
      *
-     * @throws SecurityException if the caller does not have the
-     *            MANAGE_ROLLBACKS permission.
+     * @throws SecurityException if the caller does not have appropriate permissions.
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS)
+    @RequiresPermission(android.Manifest.permission.TEST_MANAGE_ROLLBACKS)
     @TestApi
     public void reloadPersistedData() {
         try {
@@ -232,12 +237,11 @@ public final class RollbackManager {
      * recently committed rollbacks that contain the given package.
      *
      * @param packageName the name of the package to expire data for.
-     * @throws SecurityException if the caller does not have the
-     *            MANAGE_ROLLBACKS permission.
+     * @throws SecurityException if the caller does not have appropriate permissions.
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS)
+    @RequiresPermission(android.Manifest.permission.TEST_MANAGE_ROLLBACKS)
     @TestApi
     public void expireRollbackForPackage(@NonNull String packageName) {
         try {

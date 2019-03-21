@@ -32,6 +32,10 @@ import java.util.Objects;
  * If {@link #getCommandCode()} is {@link #COMMAND_CODE_CUSTOM}), it's custom command and
  * {@link #getCustomCommand()} shouldn't be {@code null}.
  * <p>
+ * Refer to the
+ * <a href="{@docRoot}reference/androidx/media2/SessionCommand2.html">AndroidX SessionCommand</a>
+ * class for the list of valid commands.
+ * <p>
  * This API is not generally intended for third party application developers.
  * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
  * <a href="{@docRoot}reference/androidx/media2/package-summary.html">Media2 Library</a>

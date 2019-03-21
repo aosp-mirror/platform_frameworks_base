@@ -21,6 +21,9 @@ import static android.Manifest.permission.WRITE_MEDIA_STORAGE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.OP_LEGACY_STORAGE;
 import static android.app.AppOpsManager.OP_REQUEST_INSTALL_PACKAGES;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_HIDDEN;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
+import static android.content.pm.PackageManager.GET_PERMISSIONS;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
@@ -74,6 +77,7 @@ import android.content.res.ObbInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.DropBoxManager;
 import android.os.Environment;
 import android.os.Environment.UserEnvironment;
@@ -208,6 +212,13 @@ class StorageManagerService extends IStorageManager.Stub
     private static final boolean ENABLE_LEGACY_GREYLIST = SystemProperties
             .getBoolean(StorageManager.PROP_LEGACY_GREYLIST, true);
 
+    /**
+     * If {@code 1}, enables the isolated storage feature. If {@code -1},
+     * disables the isolated storage feature. If {@code 0}, uses the default
+     * value from the build system.
+     */
+    private static final String ISOLATED_STORAGE_ENABLED = "isolated_storage_enabled";
+
     public static class Lifecycle extends SystemService {
         private StorageManagerService mStorageManagerService;
 
@@ -293,6 +304,19 @@ class StorageManagerService extends IStorageManager.Stub
     private static final String ATTR_CREATED_MILLIS = "createdMillis";
     private static final String ATTR_LAST_TRIM_MILLIS = "lastTrimMillis";
     private static final String ATTR_LAST_BENCH_MILLIS = "lastBenchMillis";
+
+    private static final String[] LEGACY_STORAGE_PERMISSIONS = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+    };
+
+    private static final String[] ALL_STORAGE_PERMISSIONS = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_MEDIA_AUDIO,
+            Manifest.permission.READ_MEDIA_VIDEO,
+            Manifest.permission.READ_MEDIA_IMAGES
+    };
 
     private final AtomicFile mSettingsFile;
 
@@ -797,7 +821,7 @@ class StorageManagerService extends IStorageManager.Stub
                 }
             });
         // For now, simply clone property when it changes
-        DeviceConfig.addOnPropertyChangedListener(DeviceConfig.Storage.NAMESPACE,
+        DeviceConfig.addOnPropertyChangedListener(DeviceConfig.NAMESPACE_STORAGE,
                 mContext.getMainExecutor(), (namespace, name, value) -> {
                     refreshIsolatedStorageSettings();
                 });
@@ -837,8 +861,7 @@ class StorageManagerService extends IStorageManager.Stub
         // Always copy value from newer DeviceConfig location
         Settings.Global.putString(mResolver,
                 Settings.Global.ISOLATED_STORAGE_REMOTE,
-                DeviceConfig.getProperty(DeviceConfig.Storage.NAMESPACE,
-                        DeviceConfig.Storage.ISOLATED_STORAGE_ENABLED));
+                DeviceConfig.getProperty(DeviceConfig.NAMESPACE_STORAGE, ISOLATED_STORAGE_ENABLED));
 
         final int local = Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.ISOLATED_STORAGE_LOCAL, 0);
@@ -1687,23 +1710,27 @@ class StorageManagerService extends IStorageManager.Stub
      * If we're enabling isolated storage, we need to remember which existing
      * apps have already been using shared storage, and grant them legacy access
      * to keep them running smoothly.
+     *
+     * @see com.android.server.pm.permission.PermissionManagerService
+     *      #applyLegacyStoragePermissionModel
      */
     private void applyLegacyStorage() {
         final AppOpsManager appOps = mContext.getSystemService(AppOpsManager.class);
         final UserManagerInternal um = LocalServices.getService(UserManagerInternal.class);
         for (int userId : um.getUserIds()) {
+            final UserHandle user = UserHandle.of(userId);
             final PackageManager pm;
             try {
-                pm = mContext.createPackageContextAsUser(mContext.getPackageName(),
-                        0, UserHandle.of(userId)).getPackageManager();
+                pm = mContext.createPackageContextAsUser(mContext.getPackageName(), 0,
+                        user).getPackageManager();
             } catch (PackageManager.NameNotFoundException e) {
                 throw new RuntimeException(e);
             }
 
-            final List<PackageInfo> pkgs = pm.getPackagesHoldingPermissions(new String[] {
-                    android.Manifest.permission.READ_EXTERNAL_STORAGE,
-                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-            }, MATCH_UNINSTALLED_PACKAGES | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE);
+            final List<PackageInfo> pkgs = pm.getPackagesHoldingPermissions(
+                    LEGACY_STORAGE_PERMISSIONS,
+                    MATCH_UNINSTALLED_PACKAGES | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE
+                            | GET_PERMISSIONS);
             for (PackageInfo pkg : pkgs) {
                 final int uid = pkg.applicationInfo.uid;
                 final String packageName = pkg.applicationInfo.packageName;
@@ -1716,8 +1743,28 @@ class StorageManagerService extends IStorageManager.Stub
                 Log.d(TAG, "Found " + uid + " " + packageName
                         + " with granted storage access, last accessed " + lastAccess);
                 if (lastAccess > 0) {
-                    appOps.setMode(AppOpsManager.OP_LEGACY_STORAGE,
-                            uid, packageName, AppOpsManager.MODE_ALLOWED);
+                    appOps.setUidMode(AppOpsManager.OP_LEGACY_STORAGE, uid,
+                            AppOpsManager.MODE_ALLOWED);
+
+                    // Grandfather pre-Q app by granting all permissions and fixing them. The user
+                    // needs to uninstall the app to revoke the permissions.
+                    // TODO: Deal with shard Uids
+                    if (pkg.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.Q) {
+                        for (String perm : ALL_STORAGE_PERMISSIONS) {
+                            if (ArrayUtils.contains(pkg.requestedPermissions, perm)) {
+                                pm.grantRuntimePermission(packageName, perm, user);
+
+                                int flags = FLAG_PERMISSION_SYSTEM_FIXED;
+                                if (!ArrayUtils.contains(LEGACY_STORAGE_PERMISSIONS, perm)) {
+                                    flags |= FLAG_PERMISSION_HIDDEN;
+                                }
+
+                                pm.updatePermissionFlags(perm, packageName,
+                                        FLAG_PERMISSION_SYSTEM_FIXED | FLAG_PERMISSION_HIDDEN,
+                                        flags, user);
+                            }
+                        }
+                    }
                 }
             }
         }

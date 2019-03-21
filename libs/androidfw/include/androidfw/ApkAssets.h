@@ -80,6 +80,10 @@ class ApkAssets {
     return loaded_arsc_.get();
   }
 
+  inline bool IsOverlay() const {
+    return idmap_asset_.get() != nullptr;
+  }
+
  private:
   DISALLOW_COPY_AND_ASSIGN(ApkAssets);
 

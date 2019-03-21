@@ -269,7 +269,7 @@ public class AttentionDetector {
      */
     @VisibleForTesting
     boolean isAttentionServiceSupported() {
-        return mAttentionManager.isAttentionServiceSupported();
+        return mAttentionManager != null && mAttentionManager.isAttentionServiceSupported();
     }
 
     public void dump(PrintWriter pw) {

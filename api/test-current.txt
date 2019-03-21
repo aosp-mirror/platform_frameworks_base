@@ -14,6 +14,7 @@ package android {
     field public static final String MANAGE_ROLLBACKS = "android.permission.MANAGE_ROLLBACKS";
     field public static final String READ_CELL_BROADCASTS = "android.permission.READ_CELL_BROADCASTS";
     field public static final String REMOVE_TASKS = "android.permission.REMOVE_TASKS";
+    field public static final String TEST_MANAGE_ROLLBACKS = "android.permission.TEST_MANAGE_ROLLBACKS";
     field public static final String WRITE_DEVICE_CONFIG = "android.permission.WRITE_DEVICE_CONFIG";
     field public static final String WRITE_MEDIA_STORAGE = "android.permission.WRITE_MEDIA_STORAGE";
     field public static final String WRITE_OBB = "android.permission.WRITE_OBB";
@@ -171,6 +172,7 @@ package android.app {
     field public static final String OPSTR_GET_ACCOUNTS = "android:get_accounts";
     field public static final String OPSTR_GPS = "android:gps";
     field public static final String OPSTR_INSTANT_APP_START_FOREGROUND = "android:instant_app_start_foreground";
+    field public static final String OPSTR_LEGACY_STORAGE = "android:legacy_storage";
     field public static final String OPSTR_MANAGE_IPSEC_TUNNELS = "android:manage_ipsec_tunnels";
     field public static final String OPSTR_MUTE_MICROPHONE = "android:mute_microphone";
     field public static final String OPSTR_NEIGHBORING_CELLS = "android:neighboring_cells";
@@ -658,6 +660,7 @@ package android.content.pm {
     method @RequiresPermission(anyOf={"android.permission.GRANT_RUNTIME_PERMISSIONS", "android.permission.REVOKE_RUNTIME_PERMISSIONS"}) public abstract void updatePermissionFlags(String, String, int, int, @NonNull android.os.UserHandle);
     field public static final String FEATURE_ADOPTABLE_STORAGE = "android.software.adoptable_storage";
     field public static final String FEATURE_FILE_BASED_ENCRYPTION = "android.software.file_based_encryption";
+    field public static final int FLAG_PERMISSION_HIDDEN = 1024; // 0x400
     field public static final int FLAG_PERMISSION_REVIEW_REQUIRED = 64; // 0x40
     field public static final int FLAG_PERMISSION_REVOKE_ON_UPGRADE = 8; // 0x8
     field public static final int FLAG_PERMISSION_REVOKE_WHEN_REQUESTED = 128; // 0x80
@@ -723,11 +726,11 @@ package android.content.rollback {
   }
 
   public final class RollbackManager {
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) public void commitRollback(int, @NonNull java.util.List<android.content.pm.VersionedPackage>, @NonNull android.content.IntentSender);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) public void expireRollbackForPackage(@NonNull String);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) @NonNull public java.util.List<android.content.rollback.RollbackInfo> getAvailableRollbacks();
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) @NonNull public java.util.List<android.content.rollback.RollbackInfo> getRecentlyCommittedRollbacks();
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) public void reloadPersistedData();
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_ROLLBACKS, android.Manifest.permission.TEST_MANAGE_ROLLBACKS}) public void commitRollback(int, @NonNull java.util.List<android.content.pm.VersionedPackage>, @NonNull android.content.IntentSender);
+    method @RequiresPermission(android.Manifest.permission.TEST_MANAGE_ROLLBACKS) public void expireRollbackForPackage(@NonNull String);
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_ROLLBACKS, android.Manifest.permission.TEST_MANAGE_ROLLBACKS}) @NonNull public java.util.List<android.content.rollback.RollbackInfo> getAvailableRollbacks();
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_ROLLBACKS, android.Manifest.permission.TEST_MANAGE_ROLLBACKS}) @NonNull public java.util.List<android.content.rollback.RollbackInfo> getRecentlyCommittedRollbacks();
+    method @RequiresPermission(android.Manifest.permission.TEST_MANAGE_ROLLBACKS) public void reloadPersistedData();
     field public static final String EXTRA_STATUS = "android.content.rollback.extra.STATUS";
     field public static final String EXTRA_STATUS_MESSAGE = "android.content.rollback.extra.STATUS_MESSAGE";
     field public static final String PROPERTY_ROLLBACK_LIFETIME_MILLIS = "rollback_lifetime_in_millis";
@@ -2396,6 +2399,7 @@ package android.service.contentcapture {
     method public int getEventType();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.service.contentcapture.ActivityEvent> CREATOR;
+    field public static final int TYPE_ACTIVITY_DESTROYED = 24; // 0x18
     field public static final int TYPE_ACTIVITY_PAUSED = 2; // 0x2
     field public static final int TYPE_ACTIVITY_RESUMED = 1; // 0x1
     field public static final int TYPE_ACTIVITY_STOPPED = 23; // 0x17
@@ -2414,6 +2418,7 @@ package android.service.contentcapture {
     method public void onUserDataRemovalRequest(@NonNull android.view.contentcapture.UserDataRemovalRequest);
     method public final void setContentCaptureWhitelist(@Nullable java.util.Set<java.lang.String>, @Nullable java.util.Set<android.content.ComponentName>);
     field public static final String SERVICE_INTERFACE = "android.service.contentcapture.ContentCaptureService";
+    field public static final String SERVICE_META_DATA = "android.content_capture";
   }
 
   public final class SnapshotData implements android.os.Parcelable {

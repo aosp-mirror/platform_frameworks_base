@@ -2305,4 +2305,8 @@ enum PageId {
 
     // Open: Settings > Special App Access > Do not disturb control for app
     ZEN_ACCESS_DETAIL = 1692;
+
+    // OPEN: Settings > Face > Remove face
+    // OS: Q
+    DIALOG_FACE_REMOVE = 1693;
 }

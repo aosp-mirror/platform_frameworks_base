@@ -2705,15 +2705,20 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         // If the animation needs to be cropped then an animation bounds layer is created as a child
         // of the pinned stack or animation layer. The leash is then reparented to this new layer.
         if (mNeedsAnimationBoundsLayer) {
-            final TaskStack stack = getStack();
-            if (stack == null) {
-                return;
+            mTmpRect.setEmpty();
+            final Task task = getTask();
+            if (getDisplayContent().mAppTransitionController.isTransitWithinTask(
+                    getTransit(), task)) {
+                task.getBounds(mTmpRect);
+            } else {
+                final TaskStack stack = getStack();
+                if (stack == null) {
+                    return;
+                }
+                // Set clip rect to stack bounds.
+                stack.getBounds(mTmpRect);
             }
             mAnimationBoundsLayer = createAnimationBoundsLayer(t);
-
-            // Set clip rect to stack bounds.
-            mTmpRect.setEmpty();
-            stack.getBounds(mTmpRect);
 
             // Crop to stack bounds.
             t.setWindowCrop(mAnimationBoundsLayer, mTmpRect);

@@ -742,7 +742,7 @@ interface IPackageManager {
 
     String getAppPredictionServicePackageName();
 
-    String getContentCaptureServicePackageName();
+    String getSystemCaptionsServicePackageName();
 
     String getIncidentReportApproverPackageName();
 

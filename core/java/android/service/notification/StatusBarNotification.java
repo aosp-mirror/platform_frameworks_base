@@ -292,9 +292,9 @@ public class StatusBarNotification implements Parcelable {
         return uid;
     }
 
-    /** The package that posted the notification.
-     *<p>
-     * Might be different from {@link #getPackageName()} if the app owning the notification has
+    /**
+     * The package that posted the notification.
+     * <p> Might be different from {@link #getPackageName()} if the app owning the notification has
      * a {@link NotificationManager#setNotificationDelegate(String) notification delegate}.
      */
     public @NonNull String getOpPkg() {

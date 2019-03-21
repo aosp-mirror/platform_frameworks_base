@@ -174,6 +174,7 @@ class ProcessRecord implements WindowProcessListener {
     boolean hasStartedServices; // Are there any started services running in this process?
     private boolean mHasForegroundServices; // Running any services that are foreground?
     private int mFgServiceTypes; // Type of foreground service, if there is a foreground service.
+    private int mRepFgServiceTypes; // Last reported foreground service types.
     private boolean mHasForegroundActivities; // Running any activities that are foreground?
     boolean repForegroundActivities; // Last reported foreground activities.
     boolean systemNoUi;         // This is a system process, but not currently showing UI.
@@ -1077,6 +1078,18 @@ class ProcessRecord implements WindowProcessListener {
     boolean hasLocationForegroundServices() {
         return mHasForegroundServices
                 && (mFgServiceTypes & ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION) != 0;
+    }
+
+    int getForegroundServiceTypes() {
+        return mHasForegroundServices ? mFgServiceTypes : 0;
+    }
+
+    int getReportedForegroundServiceTypes() {
+        return mRepFgServiceTypes;
+    }
+
+    void setReportedForegroundServiceTypes(int foregroundServiceTypes) {
+        mRepFgServiceTypes = foregroundServiceTypes;
     }
 
     void setHasForegroundActivities(boolean hasForegroundActivities) {

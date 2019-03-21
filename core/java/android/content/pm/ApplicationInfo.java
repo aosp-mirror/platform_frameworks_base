@@ -671,6 +671,14 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public static final int PRIVATE_FLAG_ALLOW_AUDIO_PLAYBACK_CAPTURE  = 1 << 27;
 
+    /**
+     * Indicates whether this package is in fact a runtime resource overlay.
+     *
+     * @hide
+     */
+    public static final int PRIVATE_FLAG_IS_RESOURCE_OVERLAY = 1 << 28;
+
+
     /** @hide */
     @IntDef(flag = true, prefix = { "PRIVATE_FLAG_" }, value = {
             PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE,
@@ -683,6 +691,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             PRIVATE_FLAG_HAS_DOMAIN_URLS,
             PRIVATE_FLAG_HIDDEN,
             PRIVATE_FLAG_INSTANT,
+            PRIVATE_FLAG_IS_RESOURCE_OVERLAY,
             PRIVATE_FLAG_ISOLATED_SPLIT_LOADING,
             PRIVATE_FLAG_OEM,
             PRIVATE_FLAG_PARTIALLY_DIRECT_BOOT_AWARE,
@@ -2020,6 +2029,14 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public boolean requestsIsolatedSplitLoading() {
         return (privateFlags & ApplicationInfo.PRIVATE_FLAG_ISOLATED_SPLIT_LOADING) != 0;
+    }
+
+    /**
+     * Returns true if the package has declared in its manifest that it is a
+     * runtime resource overlay.
+     */
+    public boolean isResourceOverlay() {
+        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_IS_RESOURCE_OVERLAY) != 0;
     }
 
     /**

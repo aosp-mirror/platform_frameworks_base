@@ -7120,6 +7120,18 @@ message MetricsEvent {
     // Open: Settings > Special App Access > Do not disturb control for app
     ZEN_ACCESS_DETAIL = 1692;
 
+    // OPEN: Settings > Face > Remove face
+    // OS: Q
+    DIALOG_FACE_REMOVE = 1693;
+
+    // FIELD - Detailed reason in screen wake. One of WAKE_REASON_* in PowerManager.
+    // OS: Q
+    FIELD_SCREEN_WAKE_REASON = 1694;
+
+    // FIELD - Detailed reason in screen sleep. One of GO_TO_SLEEP_REASON_* in PowerManager.
+    // OS: Q
+    FIELD_SCREEN_SLEEP_REASON = 1695;
+
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS

@@ -78,6 +78,21 @@ public abstract class ContentCaptureService extends Service {
     public static final String SERVICE_INTERFACE =
             "android.service.contentcapture.ContentCaptureService";
 
+    /**
+     * Name under which a ContentCaptureService component publishes information about itself.
+     *
+     * <p>This meta-data should reference an XML resource containing a
+     * <code>&lt;{@link
+     * android.R.styleable#ContentCaptureService content-capture-service}&gt;</code> tag.
+     *
+     * <p>This is a a sample XML file configuring a ContentCaptureService:
+     * <pre> &lt;content-capture-service
+     *     android:settingsActivity="foo.bar.SettingsActivity"
+     *     . . .
+     * /&gt;</pre>
+     */
+    public static final String SERVICE_META_DATA = "android.content_capture";
+
     private Handler mHandler;
     private IContentCaptureServiceCallback mCallback;
 

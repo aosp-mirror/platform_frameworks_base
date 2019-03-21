@@ -94,6 +94,9 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     private boolean mActivityViewReady = false;
     private PendingIntent mBubbleIntent;
 
+    private boolean mKeyboardVisible;
+    private boolean mNeedsNewHeight;
+
     private int mMinHeight;
     private int mHeaderHeight;
     private int mBubbleHeight;
@@ -227,21 +230,15 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                 true /* singleTaskInstance */);
         addView(mActivityView);
 
-        mActivityView.setOnApplyWindowInsetsListener((View view, WindowInsets insets) -> {
-            ActivityView activityView = (ActivityView) view;
-            // Here we assume that the position of the ActivityView on the screen
-            // remains regardless of IME status. When we move ActivityView, the
-            // forwardedInsets should be computed not against the current location
-            // and size, but against the post-moved location and size.
-            Point displaySize = new Point();
-            view.getContext().getDisplay().getSize(displaySize);
-            int[] windowLocation = view.getLocationOnScreen();
-            final int windowBottom = windowLocation[1] + view.getHeight();
+        setOnApplyWindowInsetsListener((View view, WindowInsets insets) -> {
+            // Keep track of IME displaying because we should not make any adjustments that might
+            // cause a config change while the IME is displayed otherwise it'll loose focus.
             final int keyboardHeight = insets.getSystemWindowInsetBottom()
                     - insets.getStableInsetBottom();
-            final int insetsBottom = Math.max(0,
-                    windowBottom + keyboardHeight - displaySize.y);
-            activityView.setForwardedInsets(Insets.of(0, 0, 0, insetsBottom));
+            mKeyboardVisible = keyboardHeight != 0;
+            if (!mKeyboardVisible && mNeedsNewHeight) {
+                updateHeight();
+            }
             return view.onApplyWindowInsets(insets);
         });
 
@@ -255,6 +252,34 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                 addView(viewWrapper);
             }
             addView(mPointerView);
+        }
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        mKeyboardVisible = false;
+        mNeedsNewHeight = false;
+        if (mActivityView != null) {
+            mActivityView.setForwardedInsets(Insets.of(0, 0, 0, 0));
+        }
+    }
+
+    /**
+     * Called by {@link BubbleStackView} when the insets for the expanded state should be updated.
+     * This should be done post-move and post-animation.
+     */
+    void updateInsets(WindowInsets insets) {
+        if (usingActivityView()) {
+            Point displaySize = new Point();
+            mActivityView.getContext().getDisplay().getSize(displaySize);
+            int[] windowLocation = mActivityView.getLocationOnScreen();
+            final int windowBottom = windowLocation[1] + mActivityView.getHeight();
+            final int keyboardHeight = insets.getSystemWindowInsetBottom()
+                    - insets.getStableInsetBottom();
+            final int insetsBottom = Math.max(0,
+                    windowBottom + keyboardHeight - displaySize.y);
+            mActivityView.setForwardedInsets(Insets.of(0, 0, 0, insetsBottom));
         }
     }
 
@@ -354,6 +379,13 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         }
     }
 
+    /**
+     * Update bubble expanded view header when user toggles dark mode.
+     */
+    void updateHeaderColor() {
+        mHeaderView.setBackgroundColor(mContext.getColor(R.attr.colorAccent));
+    }
+
     private void updateHeaderView() {
         mSettingsIcon.setContentDescription(getResources().getString(
                 R.string.bubbles_settings_button_description, mAppName));
@@ -441,9 +473,15 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
             int height = Math.min(desiredHeight, max);
             height = Math.max(height, mMinHeight);
             LayoutParams lp = (LayoutParams) mActivityView.getLayoutParams();
-            lp.height = height;
-            mBubbleHeight = height;
-            mActivityView.setLayoutParams(lp);
+            mNeedsNewHeight =  lp.height != height;
+            if (!mKeyboardVisible) {
+                // If the keyboard is visible... don't adjust the height because that will cause
+                // a configuration change and the keyboard will be lost.
+                lp.height = height;
+                mBubbleHeight = height;
+                mActivityView.setLayoutParams(lp);
+                mNeedsNewHeight = false;
+            }
         } else {
             mBubbleHeight = mNotifRow != null ? mNotifRow.getIntrinsicHeight() : mMinHeight;
         }

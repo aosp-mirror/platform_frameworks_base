@@ -99,6 +99,7 @@ class ShortcutPackage extends ShortcutPackageItem {
     private static final String ATTR_ICON_RES_ID = "icon-res";
     private static final String ATTR_ICON_RES_NAME = "icon-resname";
     private static final String ATTR_BITMAP_PATH = "bitmap-path";
+    private static final String ATTR_LOCUS_ID = "locus-id";
 
     private static final String ATTR_PERSON_NAME = "name";
     private static final String ATTR_PERSON_URI = "uri";
@@ -1473,6 +1474,10 @@ class ShortcutPackage extends ShortcutPackageItem {
         ShortcutService.writeAttr(out, ATTR_DISABLED_REASON, si.getDisabledReason());
         ShortcutService.writeAttr(out, ATTR_TIMESTAMP,
                 si.getLastChangedTimestamp());
+        final LocusId locusId = si.getLocusId();
+        if (locusId != null) {
+            ShortcutService.writeAttr(out, ATTR_LOCUS_ID, si.getLocusId().getId());
+        }
         if (forBackup) {
             // Don't write icon information.  Also drop the dynamic flag.
 
@@ -1612,6 +1617,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         int iconResId;
         String iconResName;
         String bitmapPath;
+        final String locusIdString;
         int backupVersionCode;
         ArraySet<String> categories = null;
         ArrayList<Person> persons = new ArrayList<>();
@@ -1638,6 +1644,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         iconResId = (int) ShortcutService.parseLongAttribute(parser, ATTR_ICON_RES_ID);
         iconResName = ShortcutService.parseStringAttribute(parser, ATTR_ICON_RES_NAME);
         bitmapPath = ShortcutService.parseStringAttribute(parser, ATTR_BITMAP_PATH);
+        locusIdString = ShortcutService.parseStringAttribute(parser, ATTR_LOCUS_ID);
 
         final int outerDepth = parser.getDepth();
         int type;
@@ -1703,7 +1710,7 @@ class ShortcutPackage extends ShortcutPackageItem {
             flags |= ShortcutInfo.FLAG_SHADOW;
         }
 
-        LocusId locusId = null; // LocusId is not  set on XML.
+        final LocusId locusId = locusIdString == null ? null : new LocusId(locusIdString);
 
         return new ShortcutInfo(
                 userId, id, packageName, activityComponent, /* icon= */ null,

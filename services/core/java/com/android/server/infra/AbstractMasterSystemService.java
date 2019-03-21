@@ -332,21 +332,31 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
      * with the test results.
      *
      * @throws SecurityException if caller is not allowed to manage this service's settings.
+     *
+     * @return whether the enabled state changed.
      */
-    public final void setDefaultServiceEnabled(@UserIdInt int userId, boolean enabled) {
+    public final boolean setDefaultServiceEnabled(@UserIdInt int userId, boolean enabled) {
         Slog.i(mTag, "setDefaultServiceEnabled() for userId " + userId + ": " + enabled);
         enforceCallingPermissionForManagement();
 
         synchronized (mLock) {
+            final boolean changed = mServiceNameResolver.setDefaultServiceEnabled(userId, enabled);
+            if (!changed) {
+                if (verbose) {
+                    Slog.v(mTag, "setDefaultServiceEnabled(" + userId + "): already " + enabled);
+                }
+                return false;
+            }
+
             final S oldService = peekServiceForUserLocked(userId);
             if (oldService != null) {
                 oldService.removeSelfFromCacheLocked();
             }
-            mServiceNameResolver.setDefaultServiceEnabled(userId, enabled);
 
             // Must update the service on cache so its initialization code is triggered
             updateCachedServiceLocked(userId);
         }
+        return true;
     }
 
     /**

@@ -4984,9 +4984,6 @@ public class Editor {
             if (magnifierTopLeft == null) {
                 return;
             }
-            final Rect surfaceInsets =
-                    mTextView.getViewRootImpl().mWindowAttributes.surfaceInsets;
-            magnifierTopLeft.offset(-surfaceInsets.left, -surfaceInsets.top);
             final Rect magnifierRect = new Rect(magnifierTopLeft.x, magnifierTopLeft.y,
                     magnifierTopLeft.x + mMagnifierAnimator.mMagnifier.getWidth(),
                     magnifierTopLeft.y + mMagnifierAnimator.mMagnifier.getHeight());

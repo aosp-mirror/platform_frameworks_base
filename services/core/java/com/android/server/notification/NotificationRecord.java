@@ -438,6 +438,8 @@ public final class NotificationRecord {
         if (getAudioAttributes() != null) {
             getAudioAttributes().writeToProto(proto, NotificationRecordProto.AUDIO_ATTRIBUTES);
         }
+        proto.write(NotificationRecordProto.PACKAGE, sbn.getPackageName());
+        proto.write(NotificationRecordProto.DELEGATE_PACKAGE, sbn.getOpPkg());
 
         proto.end(token);
     }
@@ -458,6 +460,7 @@ public final class NotificationRecord {
         pw.println(prefix + this);
         prefix = prefix + "  ";
         pw.println(prefix + "uid=" + sbn.getUid() + " userId=" + sbn.getUserId());
+        pw.println(prefix + "opPkg=" + sbn.getOpPkg());
         pw.println(prefix + "icon=" + iconStr);
         pw.println(prefix + "flags=0x" + Integer.toHexString(notification.flags));
         pw.println(prefix + "pri=" + notification.priority);

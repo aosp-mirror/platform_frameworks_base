@@ -186,6 +186,7 @@ package android {
     field public static final String SUBSTITUTE_NOTIFICATION_APP_NAME = "android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME";
     field public static final String SUBSTITUTE_SHARE_TARGET_APP_NAME_AND_ICON = "android.permission.SUBSTITUTE_SHARE_TARGET_APP_NAME_AND_ICON";
     field public static final String SUSPEND_APPS = "android.permission.SUSPEND_APPS";
+    field public static final String TEST_MANAGE_ROLLBACKS = "android.permission.TEST_MANAGE_ROLLBACKS";
     field public static final String TETHER_PRIVILEGED = "android.permission.TETHER_PRIVILEGED";
     field public static final String TV_INPUT_HARDWARE = "android.permission.TV_INPUT_HARDWARE";
     field public static final String TV_VIRTUAL_REMOTE_CONTROLLER = "android.permission.TV_VIRTUAL_REMOTE_CONTROLLER";
@@ -338,6 +339,7 @@ package android.app {
     field public static final String OPSTR_GET_ACCOUNTS = "android:get_accounts";
     field public static final String OPSTR_GPS = "android:gps";
     field public static final String OPSTR_INSTANT_APP_START_FOREGROUND = "android:instant_app_start_foreground";
+    field public static final String OPSTR_LEGACY_STORAGE = "android:legacy_storage";
     field public static final String OPSTR_MANAGE_IPSEC_TUNNELS = "android:manage_ipsec_tunnels";
     field public static final String OPSTR_MUTE_MICROPHONE = "android:mute_microphone";
     field public static final String OPSTR_NEIGHBORING_CELLS = "android:neighboring_cells";
@@ -1478,6 +1480,7 @@ package android.content.om {
   }
 
   public class OverlayManager {
+    method @Nullable public android.content.om.OverlayInfo getOverlayInfo(@NonNull String, @NonNull android.os.UserHandle);
     method public java.util.List<android.content.om.OverlayInfo> getOverlayInfosForTarget(@Nullable String, int);
     method public boolean setEnabled(@Nullable String, boolean, int);
     method public boolean setEnabledExclusiveInCategory(@Nullable String, int);
@@ -1647,6 +1650,7 @@ package android.content.pm {
     field public static final String FEATURE_BROADCAST_RADIO = "android.hardware.broadcastradio";
     field public static final String FEATURE_TELEPHONY_CARRIERLOCK = "android.hardware.telephony.carrierlock";
     field public static final int FLAG_PERMISSION_GRANTED_BY_DEFAULT = 32; // 0x20
+    field public static final int FLAG_PERMISSION_HIDDEN = 1024; // 0x400
     field public static final int FLAG_PERMISSION_POLICY_FIXED = 4; // 0x4
     field public static final int FLAG_PERMISSION_REVIEW_REQUIRED = 64; // 0x40
     field public static final int FLAG_PERMISSION_REVOKE_ON_UPGRADE = 8; // 0x8
@@ -1717,7 +1721,7 @@ package android.content.pm {
     method public void onPermissionsChanged(int);
   }
 
-  @IntDef(prefix={"FLAG_PERMISSION_"}, value={android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET, android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_POLICY_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_ON_UPGRADE, android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT, android.content.pm.PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED, android.content.pm.PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface PackageManager.PermissionFlags {
+  @IntDef(prefix={"FLAG_PERMISSION_"}, value={android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET, android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_POLICY_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_ON_UPGRADE, android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT, android.content.pm.PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED, android.content.pm.PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED, android.content.pm.PackageManager.FLAG_PERMISSION_HIDDEN}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface PackageManager.PermissionFlags {
   }
 
   public class PermissionGroupInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
@@ -1836,9 +1840,9 @@ package android.content.rollback {
   }
 
   public final class RollbackManager {
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) public void commitRollback(int, @NonNull java.util.List<android.content.pm.VersionedPackage>, @NonNull android.content.IntentSender);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) @NonNull public java.util.List<android.content.rollback.RollbackInfo> getAvailableRollbacks();
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) @NonNull public java.util.List<android.content.rollback.RollbackInfo> getRecentlyCommittedRollbacks();
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_ROLLBACKS, android.Manifest.permission.TEST_MANAGE_ROLLBACKS}) public void commitRollback(int, @NonNull java.util.List<android.content.pm.VersionedPackage>, @NonNull android.content.IntentSender);
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_ROLLBACKS, android.Manifest.permission.TEST_MANAGE_ROLLBACKS}) @NonNull public java.util.List<android.content.rollback.RollbackInfo> getAvailableRollbacks();
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_ROLLBACKS, android.Manifest.permission.TEST_MANAGE_ROLLBACKS}) @NonNull public java.util.List<android.content.rollback.RollbackInfo> getRecentlyCommittedRollbacks();
     field public static final String EXTRA_STATUS = "android.content.rollback.extra.STATUS";
     field public static final String EXTRA_STATUS_MESSAGE = "android.content.rollback.extra.STATUS_MESSAGE";
     field public static final int STATUS_FAILURE = 1; // 0x1
@@ -3066,6 +3070,19 @@ package android.location {
     method public void onLocationBatch(java.util.List<android.location.Location>);
   }
 
+  public final class GnssCapabilities {
+    method public boolean hasCapability(int);
+    field public static final int GEOFENCING = 2; // 0x2
+    field public static final int LOW_POWER_MODE = 0; // 0x0
+    field public static final int MEASUREMENTS = 3; // 0x3
+    field public static final int MEASUREMENT_CORRECTIONS = 5; // 0x5
+    field public static final int MEASUREMENT_CORRECTIONS_EXCESS_PATH_LENGTH = 7; // 0x7
+    field public static final int MEASUREMENT_CORRECTIONS_LOS_SATS = 6; // 0x6
+    field public static final int MEASUREMENT_CORRECTIONS_REFLECTING_PLANE = 8; // 0x8
+    field public static final int NAV_MESSAGES = 4; // 0x4
+    field public static final int SATELLITE_BLACKLIST = 1; // 0x1
+  }
+
   public final class GnssMeasurementCorrections implements android.os.Parcelable {
     method public int describeContents();
     method @FloatRange(from=-1000.0F, to=10000.0f) public double getAltitudeMeters();
@@ -3373,7 +3390,7 @@ package android.location {
   public class LocationManager {
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void flushGnssBatch();
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public int getGnssBatchSize();
-    method public int getGnssCapabilities();
+    method @Nullable public android.location.GnssCapabilities getGnssCapabilities();
     method @Nullable public String getLocationControllerExtraPackage();
     method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public void injectGnssMeasurementCorrections(@NonNull android.location.GnssMeasurementCorrections);
     method public boolean isLocationControllerExtraPackageEnabled();
@@ -5884,6 +5901,7 @@ package android.provider {
     field public static final String NAMESPACE_RUNTIME_NATIVE = "runtime_native";
     field public static final String NAMESPACE_RUNTIME_NATIVE_BOOT = "runtime_native_boot";
     field public static final String NAMESPACE_SCHEDULER = "scheduler";
+    field public static final String NAMESPACE_STORAGE = "storage";
     field public static final String NAMESPACE_SYSTEMUI = "systemui";
     field public static final String NAMESPACE_TEXTCLASSIFIER = "textclassifier";
   }
@@ -5910,11 +5928,6 @@ package android.provider {
     method public long getLong(@NonNull String, long);
     method @NonNull public String getNamespace();
     method @Nullable public String getString(@NonNull String, @Nullable String);
-  }
-
-  public static interface DeviceConfig.Storage {
-    field public static final String ISOLATED_STORAGE_ENABLED = "isolated_storage_enabled";
-    field public static final String NAMESPACE = "storage";
   }
 
   public static interface DeviceConfig.Telephony {
@@ -6118,6 +6131,7 @@ package android.provider {
     field public static final String LOCATION_PERMISSIONS_UPGRADE_TO_Q_MODE = "location_permissions_upgrade_to_q_mode";
     field public static final String LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS = "lock_screen_allow_private_notifications";
     field public static final String LOCK_SCREEN_SHOW_NOTIFICATIONS = "lock_screen_show_notifications";
+    field public static final String ODI_CAPTIONS_ENABLED = "odi_captions_enabled";
     field public static final String THEME_CUSTOMIZATION_OVERLAY_PACKAGES = "theme_customization_overlay_packages";
     field public static final String USER_SETUP_COMPLETE = "user_setup_complete";
     field public static final int USER_SETUP_PERSONALIZATION_COMPLETE = 10; // 0xa
@@ -6428,6 +6442,7 @@ package android.service.contentcapture {
     method public int getEventType();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.service.contentcapture.ActivityEvent> CREATOR;
+    field public static final int TYPE_ACTIVITY_DESTROYED = 24; // 0x18
     field public static final int TYPE_ACTIVITY_PAUSED = 2; // 0x2
     field public static final int TYPE_ACTIVITY_RESUMED = 1; // 0x1
     field public static final int TYPE_ACTIVITY_STOPPED = 23; // 0x17
@@ -6446,6 +6461,7 @@ package android.service.contentcapture {
     method public void onUserDataRemovalRequest(@NonNull android.view.contentcapture.UserDataRemovalRequest);
     method public final void setContentCaptureWhitelist(@Nullable java.util.Set<java.lang.String>, @Nullable java.util.Set<android.content.ComponentName>);
     field public static final String SERVICE_INTERFACE = "android.service.contentcapture.ContentCaptureService";
+    field public static final String SERVICE_META_DATA = "android.content_capture";
   }
 
   public final class SnapshotData implements android.os.Parcelable {
@@ -8574,7 +8590,7 @@ package android.telephony.ims {
     field public final java.util.HashMap<java.lang.String,android.os.Bundle> mParticipants;
   }
 
-  public class ImsException extends java.lang.Exception {
+  public final class ImsException extends java.lang.Exception {
     ctor public ImsException(@Nullable String);
     ctor public ImsException(@Nullable String, int);
     ctor public ImsException(@Nullable String, int, @Nullable Throwable);

@@ -819,8 +819,7 @@
         android:permissionGroup="android.permission-group.UNDEFINED"
         android:label="@string/permlab_sdcardRead"
         android:description="@string/permdesc_sdcardRead"
-        android:protectionLevel="dangerous"
-        android:permissionFlags="removed" />
+        android:protectionLevel="dangerous" />
 
     <!-- Allows an application to write to external storage.
          <p class="note"><strong>Note:</strong> If <em>both</em> your <a
@@ -841,8 +840,7 @@
         android:permissionGroup="android.permission-group.UNDEFINED"
         android:label="@string/permlab_sdcardWrite"
         android:description="@string/permdesc_sdcardWrite"
-        android:protectionLevel="dangerous"
-        android:permissionFlags="removed" />
+        android:protectionLevel="dangerous" />
 
     <!-- Runtime permission controlling access to the user's shared aural media
          collection. -->
@@ -3928,6 +3926,10 @@
     <!-- @SystemApi @TestApi @hide Allows managing apk level rollbacks. -->
     <permission android:name="android.permission.MANAGE_ROLLBACKS"
         android:protectionLevel="signature|verifier" />
+
+    <!-- @SystemApi @TestApi @hide Allows testing apk level rollbacks. -->
+    <permission android:name="android.permission.TEST_MANAGE_ROLLBACKS"
+        android:protectionLevel="signature" />
 
     <!-- @SystemApi @hide Allows an application to mark other applications as harmful -->
     <permission android:name="android.permission.SET_HARMFUL_APP_WARNINGS"

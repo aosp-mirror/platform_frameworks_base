@@ -144,6 +144,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final String ATTR_INSTALLER_PACKAGE_NAME = "installerPackageName";
     private static final String ATTR_INSTALLER_UID = "installerUid";
     private static final String ATTR_CREATED_MILLIS = "createdMillis";
+    private static final String ATTR_UPDATED_MILLIS = "updatedMillis";
     private static final String ATTR_SESSION_STAGE_DIR = "sessionStageDir";
     private static final String ATTR_SESSION_STAGE_CID = "sessionStageCid";
     private static final String ATTR_PREPARED = "prepared";
@@ -198,6 +199,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private final AtomicInteger mActiveCount = new AtomicInteger();
 
     private final Object mLock = new Object();
+
+    /** Timestamp of the last time this session changed state  */
+    @GuardedBy("mLock")
+    long updatedMillis;
 
     /** Uid of the creator of this session. */
     private final int mOriginalInstallerUid;
@@ -422,6 +427,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mInstallerUid = installerUid;
         this.params = params;
         this.createdMillis = createdMillis;
+        this.updatedMillis = createdMillis;
         this.stageDir = stageDir;
         this.stageCid = stageCid;
         if (childSessionIds != null) {
@@ -518,6 +524,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     boolean isCommitted() {
         synchronized (mLock) {
             return mCommitted;
+        }
+    }
+
+    /** Returns true if a staged session has reached a final state and can be forgotten about  */
+    public boolean isStagedAndInTerminalState() {
+        synchronized (mLock) {
+            return params.isStaged && (mStagedSessionApplied || mStagedSessionFailed);
         }
     }
 
@@ -1031,6 +1044,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 // in the code above
                 throw new PackageManagerException(e);
             }
+        }
+    }
+
+    /** Update the timestamp of when the staged session last changed state */
+    public void markUpdated() {
+        synchronized (mLock) {
+            this.updatedMillis = System.currentTimeMillis();
         }
     }
 
@@ -2114,7 +2134,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private void destroyInternal() {
         synchronized (mLock) {
             mSealed = true;
-            if (!params.isStaged) {
+            if (!params.isStaged || isStagedAndInTerminalState()) {
                 mDestroyed = true;
             }
             // Force shut down all bridges
@@ -2224,6 +2244,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     mInstallerPackageName);
             writeIntAttribute(out, ATTR_INSTALLER_UID, mInstallerUid);
             writeLongAttribute(out, ATTR_CREATED_MILLIS, createdMillis);
+            writeLongAttribute(out, ATTR_UPDATED_MILLIS, updatedMillis);
             if (stageDir != null) {
                 writeStringAttribute(out, ATTR_SESSION_STAGE_DIR,
                         stageDir.getAbsolutePath());
@@ -2326,6 +2347,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final int installerUid = readIntAttribute(in, ATTR_INSTALLER_UID, pm.getPackageUid(
                 installerPackageName, PackageManager.MATCH_UNINSTALLED_PACKAGES, userId));
         final long createdMillis = readLongAttribute(in, ATTR_CREATED_MILLIS);
+        long updatedMillis = readLongAttribute(in, ATTR_UPDATED_MILLIS);
         final String stageDirRaw = readStringAttribute(in, ATTR_SESSION_STAGE_DIR);
         final File stageDir = (stageDirRaw != null) ? new File(stageDirRaw) : null;
         final String stageCid = readStringAttribute(in, ATTR_SESSION_STAGE_CID);
