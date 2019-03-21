@@ -353,7 +353,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         FileOutputStream fos = mPolicyFile.startWrite();
         fos.write(preupgradeXml.getBytes());
         mPolicyFile.finishWrite(fos);
-        FileInputStream fStream = new FileInputStream(mFile);
 
         // Setup managed services
         mListener = mListeners.new ManagedServiceInfo(
@@ -368,6 +367,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         ManagedServices.Config dndConfig = new ManagedServices.Config();
         dndConfig.xmlTag = ConditionProviders.TAG_ENABLED_DND_APPS;
         when(mConditionProviders.getConfig()).thenReturn(dndConfig);
+
+        when(mAssistants.isAdjustmentAllowed(anyString())).thenReturn(true);
 
         try {
             mService.init(mTestableLooper.getLooper(),

@@ -4106,9 +4106,11 @@ public class NotificationManagerService extends SystemService {
         if (r == null) {
             return;
         }
-        if (adjustment.getSignals() != null) {
-            Bundle.setDefusable(adjustment.getSignals(), true);
-            r.addAdjustment(adjustment);
+        if (mAssistants.isAdjustmentAllowed(adjustment.getKey())) {
+            if (adjustment.getSignals() != null) {
+                Bundle.setDefusable(adjustment.getSignals(), true);
+                r.addAdjustment(adjustment);
+            }
         }
     }
 
@@ -7310,6 +7312,12 @@ public class NotificationManagerService extends SystemService {
                 List<String> types = new ArrayList<>();
                 types.addAll(mAllowedAdjustments);
                 return types;
+            }
+        }
+
+        protected boolean isAdjustmentAllowed(String type) {
+            synchronized (mLock) {
+                return mAllowedAdjustments.contains(type);
             }
         }
 
