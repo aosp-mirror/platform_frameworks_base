@@ -1169,6 +1169,8 @@ public final class ResponderLocation implements Parcelable {
      * (see 802.11REVmc Section 11.12.3 - Registered STA Operation).
      * <p>
      * Only valid if {@link #isLciSubelementValid()} returns true, or will throw an exception.
+     *
+     * @hide
      */
     public boolean getRegisteredLocationDseIndication() {
         if (!mIsLciValid) {
@@ -1185,6 +1187,8 @@ public final class ResponderLocation implements Parcelable {
      * (see 802.11REVmc Section 11.12.3 - Registered STA Operation).
      * <p>
      * Only valid if {@link #isLciSubelementValid()} returns true, or will throw an exception.
+     *
+     * @hide
      */
     public boolean getDependentStationIndication() {
         if (!mIsLciValid) {
