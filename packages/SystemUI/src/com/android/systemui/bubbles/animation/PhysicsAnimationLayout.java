@@ -226,9 +226,6 @@ public class PhysicsAnimationLayout extends FrameLayout {
     protected final HashMap<DynamicAnimation.ViewProperty, Runnable> mEndActionForProperty =
             new HashMap<>();
 
-    /** Set of currently rendered transient views. */
-    private final Set<View> mTransientViews = new HashSet<>();
-
     /** The currently active animation controller. */
     private PhysicsAnimationController mController;
 
@@ -328,18 +325,6 @@ public class PhysicsAnimationLayout extends FrameLayout {
         removeView(getChildAt(index));
     }
 
-    @Override
-    public void addTransientView(View view, int index) {
-        super.addTransientView(view, index);
-        mTransientViews.add(view);
-    }
-
-    @Override
-    public void removeTransientView(View view) {
-        super.removeTransientView(view);
-        mTransientViews.remove(view);
-    }
-
     /** Immediately moves the view from wherever it currently is, to the given index. */
     public void moveViewTo(View view, int index) {
         super.removeView(view);
@@ -363,7 +348,9 @@ public class PhysicsAnimationLayout extends FrameLayout {
             // Tell the controller to animate this view out, and call the callback when it's
             // finished.
             mController.onChildRemoved(view, index, () -> {
-                // Done animating, remove the transient view.
+                // The controller says it's done with the transient view, cancel animations in case
+                // any are still running and then remove it.
+                cancelAnimationsOnView(view);
                 removeTransientView(view);
 
                 if (callback != null) {
@@ -470,13 +457,11 @@ public class PhysicsAnimationLayout extends FrameLayout {
             DynamicAnimation.ViewProperty property, View child, int index) {
         SpringAnimation newAnim = new SpringAnimation(child, property);
         newAnim.addUpdateListener((animation, value, velocity) -> {
+            final int indexOfChild = indexOfChild(child);
             final int nextAnimInChain =
-                    mController.getNextAnimationInChain(property, indexOfChild(child));
+                    mController.getNextAnimationInChain(property, indexOfChild);
 
-            // If the controller doesn't want us to chain, or if we're a transient view in the
-            // process of being removed, don't chain.
-            if (nextAnimInChain == PhysicsAnimationController.NONE
-                    || mTransientViews.contains(child)) {
+            if (nextAnimInChain == PhysicsAnimationController.NONE || indexOfChild < 0) {
                 return;
             }
 
