@@ -20,7 +20,6 @@
           package="com.android.networkstack"
           android:versionCode="11"
           android:versionName="Q-initial">
-    <uses-sdk android:minSdkVersion="28" android:targetSdkVersion="28" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
