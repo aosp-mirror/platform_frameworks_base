@@ -70,7 +70,8 @@ public class RcsMessageStore {
     public RcsParticipantQueryResult getRcsParticipants(
             @Nullable RcsParticipantQueryParams queryParameters)
             throws RcsMessageStoreException {
-        return RcsControllerCall.call(iRcs -> iRcs.getParticipants(queryParameters));
+        return new RcsParticipantQueryResult(
+                RcsControllerCall.call(iRcs -> iRcs.getParticipants(queryParameters)));
     }
 
     /**
@@ -86,7 +87,8 @@ public class RcsMessageStore {
     public RcsParticipantQueryResult getRcsParticipants(
             @NonNull RcsQueryContinuationToken continuationToken)
             throws RcsMessageStoreException {
-        return RcsControllerCall.call(iRcs -> iRcs.getParticipantsWithToken(continuationToken));
+        return new RcsParticipantQueryResult(
+                RcsControllerCall.call(iRcs -> iRcs.getParticipantsWithToken(continuationToken)));
     }
 
     /**
@@ -121,7 +123,7 @@ public class RcsMessageStore {
      * Returns the first chunk of existing {@link RcsEvent}s in the common storage.
      *
      * @param queryParams Parameters to specify to return a subset of all RcsEvents.
-     *                        Passing a value of null will return all events.
+     *                    Passing a value of null will return all events.
      * @throws RcsMessageStoreException if the query could not be completed on the storage
      */
     @WorkerThread
@@ -152,7 +154,6 @@ public class RcsMessageStore {
      *
      * @param persistableEvent The {@link RcsEvent} to persist into storage.
      * @throws RcsMessageStoreException if the query could not be completed on the storage
-     *
      * @see RcsGroupThreadNameChangedEvent
      * @see RcsGroupThreadIconChangedEvent
      * @see RcsGroupThreadParticipantJoinedEvent
