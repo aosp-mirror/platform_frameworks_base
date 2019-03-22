@@ -5126,7 +5126,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // Start home.
         mActivityTaskManagerInternal.startHomeOnDisplay(mCurrentUserId, "startDockOrHome",
-                displayId, fromHomeKey);
+                displayId, true /* allowInstrumenting */, fromHomeKey);
     }
 
     /**
