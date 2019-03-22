@@ -1257,6 +1257,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
                 scheduleWriteLocked();
             }
+            uidState.evalForegroundOps(mOpModeWatchers);
         }
 
         String[] uidPackageNames = getPackagesForUid(uid);
@@ -2414,8 +2415,6 @@ public class AppOpsService extends IAppOpsService.Stub {
     private void commitUidPendingStateLocked(UidState uidState) {
         final boolean lastForeground = uidState.state <= UID_STATE_MAX_LAST_NON_RESTRICTED;
         final boolean nowForeground = uidState.pendingState <= UID_STATE_MAX_LAST_NON_RESTRICTED;
-        uidState.state = uidState.pendingState;
-        uidState.pendingStateCommitTime = 0;
         if (uidState.hasForegroundWatchers && lastForeground != nowForeground) {
             for (int fgi = uidState.foregroundOps.size() - 1; fgi >= 0; fgi--) {
                 if (!uidState.foregroundOps.valueAt(fgi)) {
@@ -2424,11 +2423,10 @@ public class AppOpsService extends IAppOpsService.Stub {
                 final int code = uidState.foregroundOps.keyAt(fgi);
                 // For location ops we consider fg state only if the fg service
                 // is of location type, for all other ops any fg service will do.
-                final long resolvedLastRestrictedUidState = resolveFirstUnrestrictedUidState(code);
-                final boolean resolvedLastFg = uidState.state <= resolvedLastRestrictedUidState;
-                final boolean resolvedNowBg = uidState.pendingState
-                        <= resolvedLastRestrictedUidState;
-                if (resolvedLastFg == resolvedNowBg) {
+                final long firstUnrestrictedUidState = resolveFirstUnrestrictedUidState(code);
+                final boolean resolvedLastFg = uidState.state <= firstUnrestrictedUidState;
+                final boolean resolvedNowFg = uidState.pendingState <= firstUnrestrictedUidState;
+                if (resolvedLastFg == resolvedNowFg) {
                     continue;
                 }
                 final ArraySet<ModeCallback> callbacks = mOpModeWatchers.get(code);
@@ -2460,6 +2458,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
             }
         }
+        uidState.state = uidState.pendingState;
+        uidState.pendingStateCommitTime = 0;
     }
 
     private Ops getOpsRawLocked(int uid, String packageName, boolean edit,
