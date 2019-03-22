@@ -19,7 +19,7 @@
     android:id="@+id/quick_qs_status_icons"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="8dp"
+    android:layout_marginTop="@dimen/qs_header_top_margin"
     android:layout_marginBottom="14dp"
     android:layout_marginStart="@dimen/status_bar_padding_start"
     android:layout_marginEnd="@dimen/status_bar_padding_end"

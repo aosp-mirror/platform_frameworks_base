@@ -30,13 +30,6 @@
     android:clipChildren="false"
     android:clipToPadding="false">
 
-    <View
-        android:id="@+id/qs_footer_divider"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_gravity="top"
-        android:background="?android:attr/dividerHorizontal"/>
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
