@@ -476,7 +476,7 @@ public abstract class NotificationListenerService extends Service {
      * @param hideSilentStatusIcons whether or not status bar icons should be hidden for silent
      *                              notifications
      */
-    public void onStatusBarIconsBehaviorChanged(boolean hideSilentStatusIcons) {
+    public void onSilentStatusBarIconsVisibilityChanged(boolean hideSilentStatusIcons) {
         // optional
     }
 
@@ -2255,7 +2255,7 @@ public abstract class NotificationListenerService extends Service {
                 } break;
 
                 case MSG_ON_STATUS_BAR_ICON_BEHAVIOR_CHANGED: {
-                    onStatusBarIconsBehaviorChanged((Boolean) msg.obj);
+                    onSilentStatusBarIconsVisibilityChanged((Boolean) msg.obj);
                 } break;
             }
         }
