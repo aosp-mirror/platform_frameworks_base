@@ -92,7 +92,6 @@
                     android:layout_width="@dimen/multi_user_avatar_expanded_size"
                     android:layout_height="@dimen/multi_user_avatar_expanded_size"
                     android:layout_gravity="center"
-                    android:tint="?android:attr/colorAccent"
                     android:scaleType="centerInside"/>
             </com.android.systemui.statusbar.phone.MultiUserSwitch>
 
