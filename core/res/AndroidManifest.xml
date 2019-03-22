@@ -1562,6 +1562,12 @@
     <permission android:name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi Allows an internal user to set signal strength in NetworkRequest. This kind of
+         request will wake up device when signal strength meets the given value.
+         @hide -->
+    <permission android:name="android.permission.NETWORK_SIGNAL_STRENGTH_WAKEUP"
+                android:protectionLevel="signature|privileged" />
+
     <!-- @SystemApi Allows a system application to access hardware packet offload capabilities.
          @hide -->
     <permission android:name="android.permission.PACKET_KEEPALIVE_OFFLOAD"

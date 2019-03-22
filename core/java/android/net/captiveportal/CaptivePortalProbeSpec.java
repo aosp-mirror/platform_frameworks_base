@@ -50,8 +50,7 @@ public abstract class CaptivePortalProbeSpec {
     private final String mEncodedSpec;
     private final URL mUrl;
 
-    CaptivePortalProbeSpec(@NonNull String encodedSpec, @NonNull URL url)
-            throws NullPointerException {
+    CaptivePortalProbeSpec(@NonNull String encodedSpec, @NonNull URL url) {
         mEncodedSpec = checkNotNull(encodedSpec);
         mUrl = checkNotNull(url);
     }
