@@ -157,7 +157,6 @@ Landroid/bluetooth/IBluetoothStateChangeCallback$Stub;-><init>()V
 Landroid/companion/ICompanionDeviceDiscoveryService$Stub;-><init>()V
 Landroid/companion/ICompanionDeviceDiscoveryServiceCallback;->onDeviceSelected(Ljava/lang/String;ILjava/lang/String;)V
 Landroid/companion/ICompanionDeviceDiscoveryServiceCallback;->onDeviceSelectionCancel()V
-Landroid/companion/IFindDeviceCallback;->onSuccess(Landroid/app/PendingIntent;)V
 Landroid/content/IClipboard$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/content/IClipboard$Stub;->asInterface(Landroid/os/IBinder;)Landroid/content/IClipboard;
 Landroid/content/IContentService$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
@@ -239,7 +238,6 @@ Landroid/database/IContentObserver$Stub;->asInterface(Landroid/os/IBinder;)Landr
 Landroid/database/IContentObserver;->onChange(ZLandroid/net/Uri;I)V
 Landroid/database/sqlite/SQLiteConnectionPool;->$assertionsDisabled:Z
 Landroid/database/sqlite/SQLiteDatabase;->$assertionsDisabled:Z
-Landroid/filterfw/GraphEnvironment;->addReferences([Ljava/lang/Object;)V
 Landroid/hardware/camera2/CameraCharacteristics;->CONTROL_AVAILABLE_HIGH_SPEED_VIDEO_CONFIGURATIONS:Landroid/hardware/camera2/CameraCharacteristics$Key;
 Landroid/hardware/camera2/CameraCharacteristics;->CONTROL_MAX_REGIONS:Landroid/hardware/camera2/CameraCharacteristics$Key;
 Landroid/hardware/camera2/CameraCharacteristics;->DEPTH_AVAILABLE_DEPTH_MIN_FRAME_DURATIONS:Landroid/hardware/camera2/CameraCharacteristics$Key;
@@ -293,7 +291,6 @@ Landroid/hardware/camera2/CaptureResult;->SYNC_FRAME_NUMBER:Landroid/hardware/ca
 Landroid/hardware/camera2/CaptureResult;->TONEMAP_CURVE_BLUE:Landroid/hardware/camera2/CaptureResult$Key;
 Landroid/hardware/camera2/CaptureResult;->TONEMAP_CURVE_GREEN:Landroid/hardware/camera2/CaptureResult$Key;
 Landroid/hardware/camera2/CaptureResult;->TONEMAP_CURVE_RED:Landroid/hardware/camera2/CaptureResult$Key;
-Landroid/hardware/camera2/utils/HashCodeHelpers;->hashCode([I)I
 Landroid/hardware/display/IDisplayManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/hardware/display/IDisplayManager;
 Landroid/hardware/fingerprint/IFingerprintService$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/hardware/fingerprint/IFingerprintService$Stub;->asInterface(Landroid/os/IBinder;)Landroid/hardware/fingerprint/IFingerprintService;
@@ -305,8 +302,6 @@ Landroid/hardware/location/IActivityRecognitionHardwareClient$Stub;-><init>()V
 Landroid/hardware/location/IContextHubService$Stub;->asInterface(Landroid/os/IBinder;)Landroid/hardware/location/IContextHubService;
 Landroid/hardware/usb/IUsbManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/hardware/usb/IUsbManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/hardware/usb/IUsbManager;
-Landroid/inputmethodservice/IInputMethodSessionWrapper;->mCaller:Lcom/android/internal/os/HandlerCaller;
-Landroid/inputmethodservice/IInputMethodWrapper;->mCaller:Lcom/android/internal/os/HandlerCaller;
 Landroid/location/ICountryDetector$Stub;->asInterface(Landroid/os/IBinder;)Landroid/location/ICountryDetector;
 Landroid/location/ICountryListener$Stub;-><init>()V
 Landroid/location/IGeocodeProvider$Stub;-><init>()V
@@ -321,7 +316,6 @@ Landroid/location/ILocationManager$Stub;->asInterface(Landroid/os/IBinder;)Landr
 Landroid/location/ILocationManager$Stub;->TRANSACTION_getAllProviders:I
 Landroid/location/INetInitiatedListener$Stub;-><init>()V
 Landroid/location/LocationManager$ListenerTransport;-><init>(Landroid/location/LocationManager;Landroid/location/LocationListener;Landroid/os/Looper;)V
-Landroid/media/effect/SingleFilterEffect;-><init>(Landroid/media/effect/EffectContext;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Object;)V
 Landroid/media/IAudioRoutesObserver$Stub;-><init>()V
 Landroid/media/IAudioService$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/media/IAudioService$Stub;-><init>()V
@@ -366,7 +360,6 @@ Landroid/net/InterfaceConfiguration;-><init>()V
 Landroid/net/LinkProperties$ProvisioningChange;->values()[Landroid/net/LinkProperties$ProvisioningChange;
 Landroid/net/MobileLinkQualityInfo;-><init>()V
 Landroid/net/nsd/INsdManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/net/nsd/INsdManager;
-Landroid/net/nsd/INsdManager;->getMessenger()Landroid/os/Messenger;
 Landroid/net/sip/ISipSession$Stub;->asInterface(Landroid/os/IBinder;)Landroid/net/sip/ISipSession;
 Landroid/net/SntpClient;-><init>()V
 Landroid/net/wifi/IWifiManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
@@ -411,7 +404,6 @@ Landroid/os/storage/IObbActionListener$Stub;-><init>()V
 Landroid/os/storage/IStorageManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/os/storage/IStorageManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/os/storage/IStorageManager;
 Landroid/os/storage/StorageEventListener;-><init>()V
-Landroid/preference/PreferenceGroupAdapter;->getItem(I)Landroid/preference/Preference;
 Landroid/R$styleable;->ActionBar:[I
 Landroid/R$styleable;->ActionBar_background:I
 Landroid/R$styleable;->ActionBar_backgroundSplit:I
@@ -677,17 +669,6 @@ Landroid/R$styleable;->Window:[I
 Landroid/R$styleable;->Window_windowBackground:I
 Landroid/R$styleable;->Window_windowFrame:I
 Landroid/security/IKeyChainService$Stub;->asInterface(Landroid/os/IBinder;)Landroid/security/IKeyChainService;
-Landroid/security/keymaster/KeymasterBlobArgument;-><init>(ILandroid/os/Parcel;)V
-Landroid/security/keymaster/KeymasterBlobArgument;-><init>(I[B)V
-Landroid/security/keymaster/KeymasterBlobArgument;->blob:[B
-Landroid/security/keymaster/KeymasterBooleanArgument;-><init>(ILandroid/os/Parcel;)V
-Landroid/security/keymaster/KeymasterDateArgument;-><init>(ILandroid/os/Parcel;)V
-Landroid/security/keymaster/KeymasterIntArgument;-><init>(II)V
-Landroid/security/keymaster/KeymasterIntArgument;-><init>(ILandroid/os/Parcel;)V
-Landroid/security/keymaster/KeymasterIntArgument;->value:I
-Landroid/security/keymaster/KeymasterLongArgument;-><init>(IJ)V
-Landroid/security/keymaster/KeymasterLongArgument;-><init>(ILandroid/os/Parcel;)V
-Landroid/security/keymaster/KeymasterLongArgument;->value:J
 Landroid/security/keystore/IKeystoreService$Stub;->asInterface(Landroid/os/IBinder;)Landroid/security/keystore/IKeystoreService;
 Landroid/security/keystore/IKeystoreService;->clear_uid(J)I
 Landroid/security/keystore/IKeystoreService;->del(Ljava/lang/String;I)I
@@ -711,13 +692,10 @@ Landroid/service/persistentdata/IPersistentDataBlockService$Stub;->asInterface(L
 Landroid/service/vr/IVrManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/service/vr/IVrManager;
 Landroid/service/wallpaper/IWallpaperConnection$Stub;-><init>()V
 Landroid/service/wallpaper/IWallpaperService$Stub;->asInterface(Landroid/os/IBinder;)Landroid/service/wallpaper/IWallpaperService;
-Landroid/telecom/Log;->i(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Object;)V
-Landroid/telecom/Log;->w(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Object;)V
 Landroid/telephony/ims/compat/feature/MMTelFeature;-><init>()V
 Landroid/telephony/ims/compat/ImsService;-><init>()V
 Landroid/telephony/ims/compat/stub/ImsCallSessionImplBase;-><init>()V
 Landroid/telephony/ims/compat/stub/ImsUtListenerImplBase;-><init>()V
-Landroid/telephony/JapanesePhoneNumberFormatter;->format(Landroid/text/Editable;)V
 Landroid/telephony/mbms/IMbmsStreamingSessionCallback$Stub;-><init>()V
 Landroid/telephony/mbms/IStreamingServiceCallback$Stub;-><init>()V
 Landroid/telephony/mbms/vendor/IMbmsStreamingService$Stub;->asInterface(Landroid/os/IBinder;)Landroid/telephony/mbms/vendor/IMbmsStreamingService;
@@ -747,14 +725,8 @@ Landroid/telephony/SmsCbMessage;->isCmasMessage()Z
 Landroid/telephony/SmsCbMessage;->isEmergencyMessage()Z
 Landroid/telephony/TelephonyManager$MultiSimVariants;->values()[Landroid/telephony/TelephonyManager$MultiSimVariants;
 Landroid/util/Singleton;-><init>()V
-Landroid/util/XmlPullAttributes;-><init>(Lorg/xmlpull/v1/XmlPullParser;)V
-Landroid/util/XmlPullAttributes;->mParser:Lorg/xmlpull/v1/XmlPullParser;
-Landroid/view/accessibility/IAccessibilityInteractionConnectionCallback;->setFindAccessibilityNodeInfoResult(Landroid/view/accessibility/AccessibilityNodeInfo;I)V
-Landroid/view/accessibility/IAccessibilityInteractionConnectionCallback;->setFindAccessibilityNodeInfosResult(Ljava/util/List;I)V
-Landroid/view/accessibility/IAccessibilityInteractionConnectionCallback;->setPerformAccessibilityActionResult(ZI)V
 Landroid/view/accessibility/IAccessibilityManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/view/accessibility/IAccessibilityManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/view/accessibility/IAccessibilityManager;
-Landroid/view/accessibility/IAccessibilityManager;->getEnabledAccessibilityServiceList(II)Ljava/util/List;
 Landroid/view/AccessibilityIterators$AbstractTextSegmentIterator;-><init>()V
 Landroid/view/autofill/IAutoFillManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/view/autofill/IAutoFillManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/view/autofill/IAutoFillManager;
