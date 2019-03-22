@@ -4489,8 +4489,7 @@ public final class PowerManagerService extends SystemService
         }
 
         @Override // Binder call
-        public boolean setDynamicPowerSavings(boolean dynamicPowerSavingsEnabled,
-                int disableThreshold) {
+        public boolean setDynamicPowerSaveHint(boolean powerSaveHint, int disableThreshold) {
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.POWER_SAVER,
                     "updateDynamicPowerSavings");
             final long ident = Binder.clearCallingIdentity();
@@ -4503,7 +4502,7 @@ public final class PowerManagerService extends SystemService
                     // abort updating if we weren't able to succeed on the threshold
                     success &= Settings.Global.putInt(resolver,
                             Settings.Global.DYNAMIC_POWER_SAVINGS_ENABLED,
-                            dynamicPowerSavingsEnabled ? 1 : 0);
+                            powerSaveHint ? 1 : 0);
                 }
                 return success;
             } finally {
@@ -4542,13 +4541,13 @@ public final class PowerManagerService extends SystemService
         }
 
         @Override // Binder call
-        public int getPowerSaveMode() {
+        public int getPowerSaveModeTrigger() {
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.POWER_SAVER, null);
             final long ident = Binder.clearCallingIdentity();
             try {
                 return Settings.Global.getInt(mContext.getContentResolver(),
-                        Settings.Global.AUTOMATIC_POWER_SAVER_MODE,
-                        PowerManager.POWER_SAVER_MODE_PERCENTAGE);
+                        Settings.Global.AUTOMATIC_POWER_SAVE_MODE,
+                        PowerManager.POWER_SAVE_MODE_TRIGGER_PERCENTAGE);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

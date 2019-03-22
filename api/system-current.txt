@@ -5424,14 +5424,14 @@ package android.os {
   public final class PowerManager {
     method @RequiresPermission(allOf={android.Manifest.permission.READ_DREAM_STATE, android.Manifest.permission.WRITE_DREAM_STATE}) public void dream(long);
     method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public boolean forceSuspend();
-    method @RequiresPermission(android.Manifest.permission.POWER_SAVER) public int getPowerSaveMode();
+    method @RequiresPermission(android.Manifest.permission.POWER_SAVER) public int getPowerSaveModeTrigger();
     method @RequiresPermission(anyOf={android.Manifest.permission.DEVICE_POWER, android.Manifest.permission.POWER_SAVER}) public boolean setAdaptivePowerSaveEnabled(boolean);
     method @RequiresPermission(anyOf={android.Manifest.permission.DEVICE_POWER, android.Manifest.permission.POWER_SAVER}) public boolean setAdaptivePowerSavePolicy(@NonNull android.os.BatterySaverPolicyConfig);
-    method @RequiresPermission(android.Manifest.permission.POWER_SAVER) public boolean setDynamicPowerSavings(boolean, int);
+    method @RequiresPermission(android.Manifest.permission.POWER_SAVER) public boolean setDynamicPowerSaveHint(boolean, int);
     method @RequiresPermission(anyOf={android.Manifest.permission.DEVICE_POWER, android.Manifest.permission.POWER_SAVER}) public boolean setPowerSaveModeEnabled(boolean);
     method @RequiresPermission(anyOf={android.Manifest.permission.DEVICE_POWER, android.Manifest.permission.USER_ACTIVITY}) public void userActivity(long, int, int);
-    field public static final int POWER_SAVER_MODE_DYNAMIC = 1; // 0x1
-    field public static final int POWER_SAVER_MODE_PERCENTAGE = 0; // 0x0
+    field public static final int POWER_SAVE_MODE_TRIGGER_DYNAMIC = 1; // 0x1
+    field public static final int POWER_SAVE_MODE_TRIGGER_PERCENTAGE = 0; // 0x0
     field public static final int USER_ACTIVITY_EVENT_ACCESSIBILITY = 3; // 0x3
     field public static final int USER_ACTIVITY_EVENT_BUTTON = 1; // 0x1
     field public static final int USER_ACTIVITY_EVENT_OTHER = 0; // 0x0
