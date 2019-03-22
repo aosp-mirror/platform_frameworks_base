@@ -3933,7 +3933,7 @@
     <permission android:name="android.permission.MANAGE_ROLLBACKS"
         android:protectionLevel="signature|verifier" />
 
-    <!-- @SystemApi @TestApi @hide Allows testing apk level rollbacks. -->
+    <!-- @TestApi @hide Allows testing apk level rollbacks. -->
     <permission android:name="android.permission.TEST_MANAGE_ROLLBACKS"
         android:protectionLevel="signature" />
 
