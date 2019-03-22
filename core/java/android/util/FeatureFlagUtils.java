@@ -59,7 +59,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SCREENRECORD_LONG_PRESS, "false");
         DEFAULT_FLAGS.put(GLOBAL_ACTIONS_GRID_ENABLED, "true");
         DEFAULT_FLAGS.put(GLOBAL_ACTIONS_PANEL_ENABLED, "true");
-        DEFAULT_FLAGS.put("settings_wifi_details_saved_screen", "false");
+        DEFAULT_FLAGS.put("settings_wifi_details_saved_screen", "true");
         DEFAULT_FLAGS.put("settings_wifi_details_datausage_header", "false");
     }
 
