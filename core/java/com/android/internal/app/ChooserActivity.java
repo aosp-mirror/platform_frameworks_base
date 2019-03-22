@@ -1277,11 +1277,10 @@ public class ChooserActivity extends ResolverActivity {
         }
         mAppPredictor.notifyAppTargetEvent(
                 new AppTargetEvent.Builder(
-                    new AppTarget(
-                        new AppTargetId(shortcutId),
-                        componentName.getPackageName(),
-                        componentName.getClassName(),
-                        getUser()),
+                    new AppTarget.Builder(new AppTargetId(shortcutId))
+                        .setTarget(componentName.getPackageName(), getUser())
+                        .setClassName(componentName.getClassName())
+                        .build(),
                     AppTargetEvent.ACTION_LAUNCH
                 ).setLaunchLocation(LAUNCH_LOCATON_DIRECT_SHARE)
                 .build());
