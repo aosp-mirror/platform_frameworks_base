@@ -50,8 +50,6 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.Region.Op;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.util.AttributeSet;
@@ -149,10 +147,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private boolean mDeadZoneConsuming = false;
     private final NavigationBarTransitions mBarTransitions;
     private final OverviewProxyService mOverviewProxyService;
-
-    // workaround for LayoutTransitions leaving the nav buttons in a weird state (bug 5549288)
-    final static boolean WORKAROUND_INVALID_LAYOUT = true;
-    final static int MSG_CHECK_INVALID_LAYOUT = 8686;
 
     // performs manual animation in sync with layout transitions
     private final NavTransitionListener mTransitionListener = new NavTransitionListener();
@@ -260,29 +254,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             return mGestureHelper.onTouchEvent(event);
         }
     };
-
-    private class H extends Handler {
-        public void handleMessage(Message m) {
-            switch (m.what) {
-                case MSG_CHECK_INVALID_LAYOUT:
-                    final String how = "" + m.obj;
-                    final int w = getWidth();
-                    final int h = getHeight();
-                    final int vw = getCurrentView().getWidth();
-                    final int vh = getCurrentView().getHeight();
-
-                    if (h != vh || w != vw) {
-                        Log.w(TAG, String.format(
-                            "*** Invalid layout in navigation bar (%s this=%dx%d cur=%dx%d)",
-                            how, w, h, vw, vh));
-                        if (WORKAROUND_INVALID_LAYOUT) {
-                            requestLayout();
-                        }
-                    }
-                    break;
-            }
-        }
-    }
 
     private final AccessibilityDelegate mQuickStepAccessibilityDelegate
             = new AccessibilityDelegate() {
@@ -451,7 +422,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 mQuickScrubAction, null /* swipeLeftEdgeAction */, null /* swipeRightEdgeAction */
         };
 
-        mPrototypeController = new NavigationPrototypeController(mHandler, mContext);
+        mPrototypeController = new NavigationPrototypeController(mContext);
         mPrototypeController.register();
         mPrototypeController.setOnPrototypeChangedListener(mPrototypeListener);
         mColorAdaptionController = new NavBarTintController(this, getLightTransitionsController());
@@ -597,8 +568,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     public void abortCurrentGesture() {
         getHomeButton().abortCurrentGesture();
     }
-
-    private H mHandler = new H();
 
     public View getCurrentView() {
         return mCurrentView;
@@ -1200,23 +1169,23 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     }
 
     @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int w = MeasureSpec.getSize(widthMeasureSpec);
+        int h = MeasureSpec.getSize(heightMeasureSpec);
         if (DEBUG) Log.d(TAG, String.format(
-                    "onSizeChanged: (%dx%d) old: (%dx%d)", w, h, oldw, oldh));
+                "onMeasure: (%dx%d) old: (%dx%d)", w, h, getMeasuredWidth(), getMeasuredHeight()));
 
         final boolean newVertical = w > 0 && h > w;
         if (newVertical != mIsVertical) {
             mIsVertical = newVertical;
             if (DEBUG) {
-                Log.d(TAG, String.format("onSizeChanged: h=%d, w=%d, vert=%s", h, w,
+                Log.d(TAG, String.format("onMeasure: h=%d, w=%d, vert=%s", h, w,
                         mIsVertical ? "y" : "n"));
             }
             reorient();
             notifyVerticalChangedListener(newVertical);
         }
-
-        postCheckForInvalidLayout("sizeChanged");
-        super.onSizeChanged(w, h, oldw, oldh);
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
     private void notifyVerticalChangedListener(boolean newVertical) {
@@ -1271,28 +1240,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         return uiCarModeChanged;
     }
 
-    /*
-    @Override
-    protected void onLayout (boolean changed, int left, int top, int right, int bottom) {
-        if (DEBUG) Log.d(TAG, String.format(
-                    "onLayout: %s (%d,%d,%d,%d)",
-                    changed?"changed":"notchanged", left, top, right, bottom));
-        super.onLayout(changed, left, top, right, bottom);
-    }
-
-    // uncomment this for extra defensiveness in WORKAROUND_INVALID_LAYOUT situations: if all else
-    // fails, any touch on the display will fix the layout.
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-        if (DEBUG) Log.d(TAG, "onInterceptTouchEvent: " + ev.toString());
-        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
-            postCheckForInvalidLayout("touch");
-        }
-        return super.onInterceptTouchEvent(ev);
-    }
-    */
-
-
     private String getResourceName(int resId) {
         if (resId != 0) {
             final android.content.res.Resources res = getContext().getResources();
@@ -1304,10 +1251,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         } else {
             return "(null)";
         }
-    }
-
-    private void postCheckForInvalidLayout(final String how) {
-        mHandler.obtainMessage(MSG_CHECK_INVALID_LAYOUT, 0, 0, how).sendToTarget();
     }
 
     private static String visibilityToString(int vis) {
@@ -1478,7 +1421,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         void onVerticalChanged(boolean isVertical);
     }
 
-    private final Consumer<Boolean> mDockedListener = exists -> mHandler.post(() -> {
+    private final Consumer<Boolean> mDockedListener = exists -> post(() -> {
         mDockedStackExists = exists;
         updateRecentsIcon();
     });

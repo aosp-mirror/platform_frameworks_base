@@ -68,8 +68,8 @@ public class NavigationPrototypeController extends ContentObserver {
 
     private final Context mContext;
 
-    public NavigationPrototypeController(Handler handler, Context context) {
-        super(handler);
+    public NavigationPrototypeController(Context context) {
+        super(new Handler());
         mContext = context;
         updateSwipeLTRBackSetting();
     }
