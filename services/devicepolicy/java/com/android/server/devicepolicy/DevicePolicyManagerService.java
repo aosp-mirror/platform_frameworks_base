@@ -5246,12 +5246,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 // would allow bypassing of the maximum time to lock.
                 mInjector.settingsGlobalPutInt(Settings.Global.STAY_ON_WHILE_PLUGGED_IN, 0);
             }
+            getPowerManagerInternal().setMaximumScreenOffTimeoutFromDeviceAdmin(
+                    UserHandle.USER_SYSTEM, timeMs);
         } finally {
             mInjector.binderRestoreCallingIdentity(ident);
         }
-
-        getPowerManagerInternal().setMaximumScreenOffTimeoutFromDeviceAdmin(
-                UserHandle.USER_SYSTEM, timeMs);
     }
 
     private void updateProfileLockTimeoutLocked(@UserIdInt int userId) {
@@ -5269,8 +5268,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         policy.mLastMaximumTimeToLock = timeMs;
 
-        getPowerManagerInternal().setMaximumScreenOffTimeoutFromDeviceAdmin(
-                userId, policy.mLastMaximumTimeToLock);
+        final long ident = mInjector.binderClearCallingIdentity();
+        try {
+            getPowerManagerInternal().setMaximumScreenOffTimeoutFromDeviceAdmin(
+                    userId, policy.mLastMaximumTimeToLock);
+        } finally {
+            mInjector.binderRestoreCallingIdentity(ident);
+        }
     }
 
     @Override
