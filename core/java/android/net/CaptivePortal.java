@@ -64,8 +64,6 @@ public class CaptivePortal implements Parcelable {
     private final IBinder mBinder;
 
     /** @hide */
-    @SystemApi
-    @TestApi
     public CaptivePortal(@NonNull IBinder binder) {
         mBinder = binder;
     }
