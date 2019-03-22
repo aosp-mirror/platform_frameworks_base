@@ -1480,18 +1480,6 @@ public class PermissionManagerService {
             for (int i = 0; i < numPerms; i++) {
                 String permission = pkg.requestedPermissions.get(i);
 
-                int op = permissionToOpCode(permission);
-                if (op == OP_NONE) {
-                    continue;
-                }
-
-                // Runtime permissions are per uid, not per package, hence per package app-op
-                // modes should never have been set. It is possible to set them via the shell
-                // though. Revert such settings during boot to get the device back into a good
-                // state.
-                LocalServices.getService(AppOpsManagerInternal.class).setAllPkgModesToDefault(
-                        op, getUid(userId, getAppId(pkg.applicationInfo.uid)));
-
                 // For pre-M apps the runtime permission do not store the state
                 if (pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.M) {
                     continue;
