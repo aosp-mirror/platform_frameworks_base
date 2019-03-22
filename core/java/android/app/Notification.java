@@ -21,6 +21,7 @@ import static android.graphics.drawable.Icon.TYPE_BITMAP;
 import static com.android.internal.util.ContrastColorUtil.satisfiesTextContrast;
 
 import android.annotation.ColorInt;
+import android.annotation.DimenRes;
 import android.annotation.DrawableRes;
 import android.annotation.IdRes;
 import android.annotation.IntDef;
@@ -8521,6 +8522,7 @@ public class Notification implements Parcelable
         private PendingIntent mDeleteIntent;
         private Icon mIcon;
         private int mDesiredHeight;
+        @DimenRes private int mDesiredHeightResId;
         private int mFlags;
 
         /**
@@ -8547,10 +8549,11 @@ public class Notification implements Parcelable
         private static final int FLAG_SUPPRESS_INITIAL_NOTIFICATION = 0x00000002;
 
         private BubbleMetadata(PendingIntent expandIntent, PendingIntent deleteIntent,
-                Icon icon, int height) {
+                Icon icon, int height, @DimenRes int heightResId) {
             mPendingIntent = expandIntent;
             mIcon = icon;
             mDesiredHeight = height;
+            mDesiredHeightResId = heightResId;
             mDeleteIntent = deleteIntent;
         }
 
@@ -8562,6 +8565,7 @@ public class Notification implements Parcelable
             if (in.readInt() != 0) {
                 mDeleteIntent = PendingIntent.CREATOR.createFromParcel(in);
             }
+            mDesiredHeightResId = in.readInt();
         }
 
         /**
@@ -8589,11 +8593,20 @@ public class Notification implements Parcelable
         }
 
         /**
-         * @return the ideal height for the floating window that app content defined by
+         * @return the ideal height, in DPs, for the floating window that app content defined by
          * {@link #getIntent()} for this bubble.
          */
         public int getDesiredHeight() {
             return mDesiredHeight;
+        }
+
+        /**
+         * @return the resId of ideal height for the floating window that app content defined by
+         * {@link #getIntent()} for this bubble.
+         */
+        @DimenRes
+        public int getDesiredHeightResId() {
+            return mDesiredHeightResId;
         }
 
         /**
@@ -8643,6 +8656,7 @@ public class Notification implements Parcelable
             if (mDeleteIntent != null) {
                 mDeleteIntent.writeToParcel(out, 0);
             }
+            out.writeInt(mDesiredHeightResId);
         }
 
         private void setFlags(int flags) {
@@ -8657,6 +8671,7 @@ public class Notification implements Parcelable
             private PendingIntent mPendingIntent;
             private Icon mIcon;
             private int mDesiredHeight;
+            @DimenRes private int mDesiredHeightResId;
             private int mFlags;
             private PendingIntent mDeleteIntent;
 
@@ -8709,13 +8724,35 @@ public class Notification implements Parcelable
             }
 
             /**
-             * Sets the desired height for the app content defined by
+             * Sets the desired height in DPs for the app content defined by
              * {@link #setIntent(PendingIntent)}, this height may not be respected if there is not
              * enough space on the screen or if the provided height is too small to be useful.
+             * <p>
+             * If {@link #setDesiredHeightResId(int)} was previously called on this builder, the
+             * previous value set will be cleared after calling this method, and this value will
+             * be used instead.
              */
             @NonNull
             public BubbleMetadata.Builder setDesiredHeight(int height) {
                 mDesiredHeight = Math.max(height, 0);
+                mDesiredHeightResId = 0;
+                return this;
+            }
+
+
+            /**
+             * Sets the desired height via resId for the app content defined by
+             * {@link #setIntent(PendingIntent)}, this height may not be respected if there is not
+             * enough space on the screen or if the provided height is too small to be useful.
+             * <p>
+             * If {@link #setDesiredHeight(int)} was previously called on this builder, the
+             * previous value set will be cleared after calling this method, and this value will
+             * be used instead.
+             */
+            @NonNull
+            public BubbleMetadata.Builder setDesiredHeightResId(@DimenRes int heightResId) {
+                mDesiredHeightResId = heightResId;
+                mDesiredHeight = 0;
                 return this;
             }
 
@@ -8777,7 +8814,7 @@ public class Notification implements Parcelable
                     throw new IllegalStateException("Must supply an icon for the bubble");
                 }
                 BubbleMetadata data = new BubbleMetadata(mPendingIntent, mDeleteIntent,
-                        mIcon, mDesiredHeight);
+                        mIcon, mDesiredHeight, mDesiredHeightResId);
                 data.setFlags(mFlags);
                 return data;
             }
