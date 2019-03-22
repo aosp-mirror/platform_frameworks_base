@@ -458,6 +458,7 @@ public final class TextClassifierImpl implements TextClassifier {
                 remoteAction = labeledIntentResult.remoteAction;
                 ExtrasUtils.putActionIntent(extras, labeledIntentResult.resolvedIntent);
             }
+            ExtrasUtils.putSerializedEntityData(extras, nativeSuggestion.getSerializedEntityData());
             ExtrasUtils.putEntitiesExtras(
                     extras,
                     TemplateIntentFactory.nameVariantsToBundle(nativeSuggestion.getEntityData()));
@@ -618,9 +619,7 @@ public final class TextClassifierImpl implements TextClassifier {
         AnnotatorModel.ClassificationResult highestScoringResult =
                 typeCount > 0 ? classifications[0] : null;
         for (int i = 0; i < typeCount; i++) {
-            builder.setEntityType(
-                    classifications[i].getCollection(),
-                    classifications[i].getScore());
+            builder.setEntityType(classifications[i]);
             if (classifications[i].getScore() > highestScoringResult.getScore()) {
                 highestScoringResult = classifications[i];
             }
@@ -663,7 +662,6 @@ public final class TextClassifierImpl implements TextClassifier {
             }
             builder.addAction(action, intent);
         }
-
         return builder.setId(createId(text, start, end)).build();
     }
 
