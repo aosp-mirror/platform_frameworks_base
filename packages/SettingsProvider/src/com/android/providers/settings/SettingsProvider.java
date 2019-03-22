@@ -3235,7 +3235,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 175;
+            private static final int SETTINGS_VERSION = 176;
 
             private final int mUserId;
 
@@ -4284,6 +4284,31 @@ public class SettingsProvider extends ContentProvider {
                     }
 
                     currentVersion = 175;
+                }
+
+                if (currentVersion == 175) {
+                    // Version 175: Set the default value for System Settings:
+                    // RING_VIBRATION_INTENSITY. If the notification vibration intensity has been
+                    // set and ring vibration intensity hasn't, the ring vibration intensity should
+                    // followed notification vibration intensity.
+
+                    final SettingsState systemSettings = getSystemSettingsLocked(userId);
+
+                    Setting notificationVibrationIntensity = systemSettings.getSettingLocked(
+                            Settings.System.NOTIFICATION_VIBRATION_INTENSITY);
+
+                    Setting ringVibrationIntensity = systemSettings.getSettingLocked(
+                            Settings.System.RING_VIBRATION_INTENSITY);
+
+                    if (!notificationVibrationIntensity.isNull()
+                            && ringVibrationIntensity.isNull()) {
+                        systemSettings.insertSettingLocked(
+                                Settings.System.RING_VIBRATION_INTENSITY,
+                                notificationVibrationIntensity.getValue(),
+                                null , true, SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+
+                    currentVersion = 176;
                 }
 
                 // vXXX: Add new settings above this point.
