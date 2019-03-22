@@ -174,7 +174,11 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
             ds.startBugreport(callingUid, callingPackage,
                     bugreportFd, screenshotFd, bugreportMode, myListener);
         } catch (RemoteException e) {
-            reportError(listener, IDumpstateListener.BUGREPORT_ERROR_RUNTIME_ERROR);
+            // bugreportd service is already started now. We need to kill it to manage the
+            // lifecycle correctly. If we don't subsequent callers will get
+            // BUGREPORT_ERROR_ANOTHER_REPORT_IN_PROGRESS error.
+            // Note that listener will be notified by the death recipient below.
+            cancelBugreport();
         }
     }
 
