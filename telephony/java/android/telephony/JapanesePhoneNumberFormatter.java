@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.UnsupportedAppUsage;
 import android.text.Editable;
 
 /*
@@ -154,6 +155,7 @@ import android.text.Editable;
     -35, -35, -35, -35, -35, -35, -35, -35, -35, -45,
     -26, -15, -15, -15, -15, -15, -15, -15, -15, -15};
 
+    @UnsupportedAppUsage
     public static void format(Editable text) {
         // Here, "root" means the position of "'":
         // 0'3, 0'90, and +81'-90

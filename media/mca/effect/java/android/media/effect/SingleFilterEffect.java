@@ -17,6 +17,7 @@
 
 package android.media.effect;
 
+import android.annotation.UnsupportedAppUsage;
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterFactory;
 import android.filterfw.core.FilterFunction;
@@ -44,6 +45,7 @@ public class SingleFilterEffect extends FilterEffect {
      * @param outputName The name of the output image port.
      * @param finalParameters Key-value pairs of final input port assignments.
      */
+    @UnsupportedAppUsage
     public SingleFilterEffect(EffectContext context,
                               String name,
                               Class filterClass,

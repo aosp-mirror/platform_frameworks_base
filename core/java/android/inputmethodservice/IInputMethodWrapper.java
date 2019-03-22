@@ -18,6 +18,7 @@ package android.inputmethodservice;
 
 import android.annotation.BinderThread;
 import android.annotation.MainThread;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Binder;
@@ -73,6 +74,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
 
     final WeakReference<AbstractInputMethodService> mTarget;
     final Context mContext;
+    @UnsupportedAppUsage
     final HandlerCaller mCaller;
     final WeakReference<InputMethod> mInputMethod;
     final int mTargetSdkVersion;
