@@ -33,7 +33,7 @@ interface IPredictionManager {
 
     void notifyAppTargetEvent(in AppPredictionSessionId sessionId, in AppTargetEvent event);
 
-    void notifyLocationShown(in AppPredictionSessionId sessionId, in String launchLocation,
+    void notifyLaunchLocationShown(in AppPredictionSessionId sessionId, in String launchLocation,
             in ParceledListSlice targetIds);
 
     void sortAppTargets(in AppPredictionSessionId sessionId, in ParceledListSlice targets,

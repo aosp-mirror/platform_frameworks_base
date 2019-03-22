@@ -86,11 +86,12 @@ public abstract class AppPredictionService extends Service {
         }
 
         @Override
-        public void notifyLocationShown(AppPredictionSessionId sessionId, String launchLocation,
-                ParceledListSlice targetIds) {
+        public void notifyLaunchLocationShown(AppPredictionSessionId sessionId,
+                String launchLocation, ParceledListSlice targetIds) {
             mHandler.sendMessage(
-                    obtainMessage(AppPredictionService::onLocationShown, AppPredictionService.this,
-                            sessionId, launchLocation, targetIds.getList()));
+                    obtainMessage(AppPredictionService::onLaunchLocationShown,
+                            AppPredictionService.this, sessionId, launchLocation,
+                            targetIds.getList()));
         }
 
         @Override
@@ -158,7 +159,7 @@ public abstract class AppPredictionService extends Service {
      * Called by a client app to indication a particular location has been shown to the user.
      */
     @MainThread
-    public abstract void onLocationShown(@NonNull AppPredictionSessionId sessionId,
+    public abstract void onLaunchLocationShown(@NonNull AppPredictionSessionId sessionId,
             @NonNull String launchLocation, @NonNull List<AppTargetId> targetIds);
 
     private void doCreatePredictionSession(@NonNull AppPredictionContext context,
