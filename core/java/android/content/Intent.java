@@ -2118,29 +2118,6 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.REVIEW_ONGOING_PERMISSION_USAGE";
 
     /**
-     * Activity action: Launch UI to review uses of permissions for a single app.
-     * <p>
-     * Input: {@link #EXTRA_PACKAGE_NAME} specifies the package whose
-     * permissions will be reviewed (mandatory).
-     * </p>
-     * <p>
-     * Output: Nothing.
-     * </p>
-     * <p class="note">
-     * This requires {@link android.Manifest.permission#GRANT_RUNTIME_PERMISSIONS} permission.
-     * </p>
-     *
-     * @see #EXTRA_PACKAGE_NAME
-     *
-     * @hide
-     */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS)
-    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_REVIEW_APP_PERMISSION_USAGE =
-            "android.intent.action.REVIEW_APP_PERMISSION_USAGE";
-
-    /**
      * Activity action: Launch UI to review running accessibility services.
      * <p>
      * Input: Nothing.
