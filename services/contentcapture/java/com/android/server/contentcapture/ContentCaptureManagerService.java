@@ -18,6 +18,12 @@ package com.android.server.contentcapture;
 
 import static android.Manifest.permission.MANAGE_CONTENT_CAPTURE;
 import static android.content.Context.CONTENT_CAPTURE_MANAGER_SERVICE;
+import static android.view.contentcapture.ContentCaptureManager.RESULT_CODE_FALSE;
+import static android.view.contentcapture.ContentCaptureManager.RESULT_CODE_OK;
+import static android.view.contentcapture.ContentCaptureManager.RESULT_CODE_SECURITY_EXCEPTION;
+import static android.view.contentcapture.ContentCaptureManager.RESULT_CODE_TRUE;
+
+import static com.android.internal.util.SyncResultReceiver.bundleFor;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -57,7 +63,6 @@ import com.android.internal.infra.AbstractRemoteService;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
-import com.android.internal.util.SyncResultReceiver;
 import com.android.server.LocalServices;
 import com.android.server.infra.AbstractMasterSystemService;
 import com.android.server.infra.FrameworkResourcesServiceNameResolver;
@@ -414,8 +419,7 @@ public final class ContentCaptureManagerService extends
         if (isService) return true;
 
         try {
-            result.send(ContentCaptureManager.RESULT_CODE_NOT_SERVICE,
-                    /* resultData= */ null);
+            result.send(RESULT_CODE_SECURITY_EXCEPTION, /* resultData= */ null);
         } catch (RemoteException e) {
             Slog.w(mTag, "Unable to send isContentCaptureFeatureEnabled(): " + e);
         }
@@ -518,8 +522,7 @@ public final class ContentCaptureManagerService extends
                 connectedServiceComponentName = service.getServiceComponentName();
             }
             try {
-                result.send(/* resultCode= */ 0,
-                        SyncResultReceiver.bundleFor(connectedServiceComponentName));
+                result.send(RESULT_CODE_OK, bundleFor(connectedServiceComponentName));
             } catch (RemoteException e) {
                 Slog.w(mTag, "Unable to send service component name: " + e);
             }
@@ -547,10 +550,36 @@ public final class ContentCaptureManagerService extends
                 enabled = !mDisabledByDeviceConfig && !isDisabledBySettingsLocked(userId);
             }
             try {
-                result.send(enabled ? ContentCaptureManager.RESULT_CODE_TRUE
-                        : ContentCaptureManager.RESULT_CODE_FALSE, /* resultData= */null);
+                result.send(enabled ? RESULT_CODE_TRUE : RESULT_CODE_FALSE, /* resultData= */null);
             } catch (RemoteException e) {
                 Slog.w(mTag, "Unable to send isContentCaptureFeatureEnabled(): " + e);
+            }
+        }
+
+        @Override
+        public void getServiceSettingsActivity(@NonNull IResultReceiver result) {
+            try {
+                enforceCallingPermissionForManagement();
+            } catch (SecurityException e) {
+                try {
+                    result.send(RESULT_CODE_SECURITY_EXCEPTION, bundleFor(e.getMessage()));
+                } catch (RemoteException e2) {
+                    Slog.w(mTag, "Unable to send getServiceSettingsIntent() exception: " + e2);
+                    return;
+                }
+            }
+
+            final int userId = UserHandle.getCallingUserId();
+            final ComponentName componentName;
+            synchronized (mLock) {
+                final ContentCapturePerUserService service = getServiceForUserLocked(userId);
+                if (service == null) return;
+                componentName = service.getServiceSettingsActivityLocked();
+            }
+            try {
+                result.send(RESULT_CODE_OK, bundleFor(componentName));
+            } catch (RemoteException e) {
+                Slog.w(mTag, "Unable to send getServiceSettingsIntent(): " + e);
             }
         }
 
