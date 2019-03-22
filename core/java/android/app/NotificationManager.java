@@ -315,7 +315,8 @@ public class NotificationManager {
      * This tag should contain a localized name of the type of the zen rule provided by the
      * activity.
      */
-    public static final String META_DATA_AUTOMATIC_RULE_TYPE = "android.app.automatic.ruleType";
+    public static final String META_DATA_AUTOMATIC_RULE_TYPE =
+            "android.service.zen.automatic.ruleType";
 
     /**
      * An optional {@code meta-data} tag for activities that handle
@@ -325,7 +326,7 @@ public class NotificationManager {
      * can be created for this rule type. Omit or enter a value <= 0 to allow unlimited instances.
      */
     public static final String META_DATA_RULE_INSTANCE_LIMIT =
-            "android.app.zen.automatic.ruleInstanceLimit";
+            "android.service.zen.automatic.ruleInstanceLimit";
 
     /** Value signifying that the user has not expressed a per-app visibility override value.
      * @hide */
