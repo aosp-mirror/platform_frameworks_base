@@ -21,6 +21,7 @@ import android.widget.ActionMenuPresenter;
 import android.widget.ActionMenuView;
 import com.android.internal.view.menu.MenuBuilder;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
@@ -58,6 +59,7 @@ public class ActionBarContextView extends AbsActionBarView {
         this(context, null);
     }
     
+    @UnsupportedAppUsage
     public ActionBarContextView(Context context, AttributeSet attrs) {
         this(context, attrs, com.android.internal.R.attr.actionModeStyle);
     }

@@ -16,6 +16,7 @@
 
 package com.android.internal.os;
 
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.ApplicationErrorReport;
@@ -48,8 +49,10 @@ public class RuntimeInit {
     final static boolean DEBUG = false;
 
     /** true if commonInit() has been called */
+    @UnsupportedAppUsage
     private static boolean initialized;
 
+    @UnsupportedAppUsage
     private static IBinder mApplicationObject;
 
     private static volatile boolean mCrashing = false;
@@ -186,6 +189,7 @@ public class RuntimeInit {
         }
     }
 
+    @UnsupportedAppUsage
     protected static final void commonInit() {
         if (DEBUG) Slog.d(TAG, "Entered RuntimeInit!");
 
@@ -315,6 +319,7 @@ public class RuntimeInit {
         return new MethodAndArgsCaller(m, argv);
     }
 
+    @UnsupportedAppUsage
     public static final void main(String[] argv) {
         enableDdms();
         if (argv.length == 2 && argv[1].equals("application")) {
@@ -402,6 +407,7 @@ public class RuntimeInit {
         mApplicationObject = app;
     }
 
+    @UnsupportedAppUsage
     public static final IBinder getApplicationObject() {
         return mApplicationObject;
     }

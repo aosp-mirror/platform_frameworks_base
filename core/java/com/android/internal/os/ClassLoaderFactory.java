@@ -16,6 +16,7 @@
 
 package com.android.internal.os;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Trace;
 
 import dalvik.system.DelegateLastClassLoader;
@@ -132,6 +133,7 @@ public class ClassLoaderFactory {
         return classLoader;
     }
 
+    @UnsupportedAppUsage
     private static native String createClassloaderNamespace(ClassLoader classLoader,
                                                             int targetSdkVersion,
                                                             String librarySearchPath,

@@ -17,6 +17,7 @@
 package com.android.internal.view.menu;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
@@ -69,6 +70,7 @@ public class ActionMenuItem implements MenuItem {
     private static final int HIDDEN         = 0x00000008;
     private static final int ENABLED        = 0x00000010;
 
+    @UnsupportedAppUsage
     public ActionMenuItem(Context context, int group, int id, int categoryOrder, int ordering,
             CharSequence title) {
         mContext = context;

@@ -27,6 +27,7 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.PasswordMetrics;
 import android.app.trust.IStrongAuthTracker;
@@ -169,7 +170,9 @@ public class LockPatternUtils {
     public static final String SYNTHETIC_PASSWORD_ENABLED_KEY = "enable-sp";
     private static final String HISTORY_DELIMITER = ",";
 
+    @UnsupportedAppUsage
     private final Context mContext;
+    @UnsupportedAppUsage
     private final ContentResolver mContentResolver;
     private DevicePolicyManager mDevicePolicyManager;
     private ILockSettings mLockSettingsService;
@@ -213,6 +216,7 @@ public class LockPatternUtils {
 
     public static final class RequestThrottledException extends Exception {
         private int mTimeoutMs;
+        @UnsupportedAppUsage
         public RequestThrottledException(int timeoutMs) {
             mTimeoutMs = timeoutMs;
         }
@@ -221,12 +225,14 @@ public class LockPatternUtils {
          * @return The amount of time in ms before another request may
          * be executed
          */
+        @UnsupportedAppUsage
         public int getTimeoutMs() {
             return mTimeoutMs;
         }
 
     }
 
+    @UnsupportedAppUsage
     public DevicePolicyManager getDevicePolicyManager() {
         if (mDevicePolicyManager == null) {
             mDevicePolicyManager =
@@ -255,6 +261,7 @@ public class LockPatternUtils {
         return trust;
     }
 
+    @UnsupportedAppUsage
     public LockPatternUtils(Context context) {
         mContext = context;
         mContentResolver = context.getContentResolver();
@@ -263,6 +270,7 @@ public class LockPatternUtils {
         mHandler = looper != null ? new Handler(looper) : null;
     }
 
+    @UnsupportedAppUsage
     @VisibleForTesting
     public ILockSettings getLockSettings() {
         if (mLockSettingsService == null) {
@@ -317,6 +325,7 @@ public class LockPatternUtils {
         return getDevicePolicyManager().getPasswordMinimumNonLetter(null, userId);
     }
 
+    @UnsupportedAppUsage
     public void reportFailedPasswordAttempt(int userId) {
         if (userId == USER_FRP && frpCredentialEnabled(mContext)) {
             return;
@@ -325,6 +334,7 @@ public class LockPatternUtils {
         getTrustManager().reportUnlockAttempt(false /* authenticated */, userId);
     }
 
+    @UnsupportedAppUsage
     public void reportSuccessfulPasswordAttempt(int userId) {
         if (userId == USER_FRP && frpCredentialEnabled(mContext)) {
             return;
@@ -485,6 +495,7 @@ public class LockPatternUtils {
      * @param password The password to check.
      * @return Whether the password matches the stored one.
      */
+    @UnsupportedAppUsage
     public boolean checkPassword(String password, int userId) throws RequestThrottledException {
         byte[] passwordBytes = password != null ? password.getBytes() : null;
         return checkPassword(passwordBytes, userId, null /* progressCallback */);
@@ -638,6 +649,7 @@ public class LockPatternUtils {
      * Used by device policy manager to validate the current password
      * information it has.
      */
+    @UnsupportedAppUsage
     public int getActivePasswordQuality(int userId) {
         int quality = getKeyguardStoredPasswordQuality(userId);
 
@@ -717,6 +729,7 @@ public class LockPatternUtils {
      *
      * @return true if lock screen is disabled
      */
+    @UnsupportedAppUsage
     public boolean isLockScreenDisabled(int userId) {
         if (isSecure(userId)) {
             return false;
@@ -814,16 +827,19 @@ public class LockPatternUtils {
         }
     }
 
+    @UnsupportedAppUsage
     public void setOwnerInfo(String info, int userId) {
         setString(LOCK_SCREEN_OWNER_INFO, info, userId);
         updateCryptoUserInfo(userId);
     }
 
+    @UnsupportedAppUsage
     public void setOwnerInfoEnabled(boolean enabled, int userId) {
         setBoolean(LOCK_SCREEN_OWNER_INFO_ENABLED, enabled, userId);
         updateCryptoUserInfo(userId);
     }
 
+    @UnsupportedAppUsage
     public String getOwnerInfo(int userId) {
         return getString(LOCK_SCREEN_OWNER_INFO, userId);
     }
@@ -1056,6 +1072,7 @@ public class LockPatternUtils {
      * encrypted with the default password.
      * @return true if device encryption is enabled
      */
+    @UnsupportedAppUsage
     public static boolean isDeviceEncryptionEnabled() {
         return StorageManager.isEncrypted();
     }
@@ -1081,6 +1098,7 @@ public class LockPatternUtils {
      *
      * @return stored password quality
      */
+    @UnsupportedAppUsage
     public int getKeyguardStoredPasswordQuality(int userHandle) {
         return (int) getLong(PASSWORD_TYPE_KEY, PASSWORD_QUALITY_UNSPECIFIED, userHandle);
     }
@@ -1198,6 +1216,7 @@ public class LockPatternUtils {
      * @return The pattern in string form.
      * @deprecated Use patternToByteArray instead.
      */
+    @UnsupportedAppUsage
     @Deprecated
     public static String patternToString(List<LockPatternView.Cell> pattern) {
         return new String(patternToByteArray(pattern));
@@ -1247,6 +1266,7 @@ public class LockPatternUtils {
      * @param pattern the gesture pattern.
      * @return the hash of the pattern in a byte array.
      */
+    @UnsupportedAppUsage
     public static byte[] patternToHash(List<LockPatternView.Cell> pattern) {
         if (pattern == null) {
             return null;
@@ -1344,11 +1364,13 @@ public class LockPatternUtils {
      * @param userId the user for which to report the value
      * @return Whether the lock screen is secured.
      */
+    @UnsupportedAppUsage
     public boolean isSecure(int userId) {
         int mode = getKeyguardStoredPasswordQuality(userId);
         return isLockPatternEnabled(mode, userId) || isLockPasswordEnabled(mode, userId);
     }
 
+    @UnsupportedAppUsage
     public boolean isLockPasswordEnabled(int userId) {
         return isLockPasswordEnabled(getKeyguardStoredPasswordQuality(userId), userId);
     }
@@ -1366,6 +1388,7 @@ public class LockPatternUtils {
     /**
      * @return Whether the lock pattern is enabled
      */
+    @UnsupportedAppUsage
     public boolean isLockPatternEnabled(int userId) {
         return isLockPatternEnabled(getKeyguardStoredPasswordQuality(userId), userId);
     }
@@ -1390,6 +1413,7 @@ public class LockPatternUtils {
     /**
      * @return Whether the visible pattern is enabled.
      */
+    @UnsupportedAppUsage
     public boolean isVisiblePatternEnabled(int userId) {
         return getBoolean(Settings.Secure.LOCK_PATTERN_VISIBLE, false, userId);
     }
@@ -1449,6 +1473,7 @@ public class LockPatternUtils {
     /**
      * @return Whether tactile feedback for the pattern is enabled.
      */
+    @UnsupportedAppUsage
     public boolean isTactileFeedbackEnabled() {
         return Settings.System.getIntForUser(mContentResolver,
                 Settings.System.HAPTIC_FEEDBACK_ENABLED, 1, UserHandle.USER_CURRENT) != 0;
@@ -1459,6 +1484,7 @@ public class LockPatternUtils {
      * pattern until the deadline has passed.
      * @return the chosen deadline.
      */
+    @UnsupportedAppUsage
     public long setLockoutAttemptDeadline(int userId, int timeoutMs) {
         final long deadline = SystemClock.elapsedRealtime() + timeoutMs;
         if (userId == USER_FRP) {
@@ -1511,6 +1537,7 @@ public class LockPatternUtils {
         }
     }
 
+    @UnsupportedAppUsage
     private void setLong(String secureSettingKey, long value, int userHandle) {
         try {
             getLockSettings().setLong(secureSettingKey, value, userHandle);
@@ -1520,6 +1547,7 @@ public class LockPatternUtils {
         }
     }
 
+    @UnsupportedAppUsage
     private String getString(String secureSettingKey, int userHandle) {
         try {
             return getLockSettings().getString(secureSettingKey, null, userHandle);
@@ -1528,6 +1556,7 @@ public class LockPatternUtils {
         }
     }
 
+    @UnsupportedAppUsage
     private void setString(String secureSettingKey, String value, int userHandle) {
         try {
             getLockSettings().setString(secureSettingKey, value, userHandle);
@@ -1541,6 +1570,7 @@ public class LockPatternUtils {
         setBoolean(LOCKSCREEN_POWER_BUTTON_INSTANTLY_LOCKS, enabled, userId);
     }
 
+    @UnsupportedAppUsage
     public boolean getPowerButtonInstantlyLocks(int userId) {
         return getBoolean(LOCKSCREEN_POWER_BUTTON_INSTANTLY_LOCKS, true, userId);
     }

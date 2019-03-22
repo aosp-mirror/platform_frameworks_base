@@ -27,6 +27,7 @@ import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
@@ -294,6 +295,7 @@ public abstract class AbsActionBarView extends ViewGroup {
         return isOverflowReserved() && getVisibility() == VISIBLE;
     }
 
+    @UnsupportedAppUsage
     public void dismissPopupMenus() {
         if (mActionMenuPresenter != null) {
             mActionMenuPresenter.dismissPopupMenus();

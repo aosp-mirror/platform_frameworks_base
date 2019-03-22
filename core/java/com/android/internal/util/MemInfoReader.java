@@ -16,12 +16,14 @@
 
 package com.android.internal.util;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Debug;
 import android.os.StrictMode;
 
 public final class MemInfoReader {
     final long[] mInfos = new long[Debug.MEMINFO_COUNT];
 
+    @UnsupportedAppUsage
     public void readMemInfo() {
         // Permit disk reads here, as /proc/meminfo isn't really "on
         // disk" and should be fast.  TODO: make BlockGuard ignore
@@ -37,6 +39,7 @@ public final class MemInfoReader {
     /**
      * Total amount of RAM available to the kernel.
      */
+    @UnsupportedAppUsage
     public long getTotalSize() {
         return mInfos[Debug.MEMINFO_TOTAL] * 1024;
     }
@@ -44,6 +47,7 @@ public final class MemInfoReader {
     /**
      * Amount of RAM that is not being used for anything.
      */
+    @UnsupportedAppUsage
     public long getFreeSize() {
         return mInfos[Debug.MEMINFO_FREE] * 1024;
     }
@@ -52,6 +56,7 @@ public final class MemInfoReader {
      * Amount of RAM that the kernel is being used for caches, not counting caches
      * that are mapped in to processes.
      */
+    @UnsupportedAppUsage
     public long getCachedSize() {
         return getCachedSizeKb() * 1024;
     }
@@ -107,6 +112,7 @@ public final class MemInfoReader {
         return mInfos[Debug.MEMINFO_ZRAM_TOTAL];
     }
 
+    @UnsupportedAppUsage
     public long[] getRawInfo() {
         return mInfos;
     }
