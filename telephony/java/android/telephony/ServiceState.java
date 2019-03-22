@@ -1586,7 +1586,7 @@ public class ServiceState implements Parcelable {
                 == NetworkRegistrationInfo.REGISTRATION_STATE_HOME) {
             // If the device is on IWLAN, return IWLAN as the network type. This is to simulate the
             // behavior of legacy mode device. In the future caller should use
-            // getNetworkRegistrationInfo() to retrieve the actual data network type on cellular
+            // requestNetworkRegistrationInfo() to retrieve the actual data network type on cellular
             // or on IWLAN.
             return iwlanRegState.getAccessNetworkTechnology();
         }
