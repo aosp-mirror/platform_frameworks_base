@@ -2226,7 +2226,6 @@ public class DevicePolicyManager {
      * <ul>
      *     <li>{@link #PROVISIONING_MODE_FULLY_MANAGED_DEVICE}</li>
      *     <li>{@link #PROVISIONING_MODE_MANAGED_PROFILE}</li>
-     *     <li>{@link #PROVISIONING_MODE_MANAGED_PROFILE_ON_FULLY_MANAGED_DEVICE}</li>
      * </ul>
      *
      * <p>The target activity may also return the account that needs to be migrated from primary
@@ -2253,7 +2252,6 @@ public class DevicePolicyManager {
      * <ul>
      *     <li>{@link #PROVISIONING_MODE_FULLY_MANAGED_DEVICE}</li>
      *     <li>{@link #PROVISIONING_MODE_MANAGED_PROFILE}</li>
-     *     <li>{@link #PROVISIONING_MODE_MANAGED_PROFILE_ON_FULLY_MANAGED_DEVICE}</li>
      * </ul>
      */
     public static final String EXTRA_PROVISIONING_MODE =
@@ -2268,11 +2266,6 @@ public class DevicePolicyManager {
      * The provisioning mode for managed profile.
      */
     public static final int PROVISIONING_MODE_MANAGED_PROFILE = 2;
-
-    /**
-     * The provisioning mode for managed profile on a fully managed device.
-     */
-    public static final int PROVISIONING_MODE_MANAGED_PROFILE_ON_FULLY_MANAGED_DEVICE = 3;
 
     /**
      * Activity action: Starts the administrator to show policy compliance for the provisioning.
