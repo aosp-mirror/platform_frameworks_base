@@ -8587,38 +8587,6 @@ public final class Settings {
                 "packages_to_clear_data_before_full_restore";
 
         /**
-         * Indicates the location state should be maintained after sensor privacy is disabled.
-         * @hide
-         */
-        public static final String MAINTAIN_LOCATION_AFTER_SP_DISABLED = "0";
-
-        /**
-         * Indicates location should be reenabled after sensor privacy is disabled.
-         * @hide
-         */
-        public static final String REENABLE_LOCATION_AFTER_SP_DISABLED = "1";
-
-        /**
-         * Indicates the state of airplane mode should be maintained after sensor privacy is
-         * disabled.
-         * @hide
-         */
-        public static final String MAINTAIN_AIRPLANE_MODE_AFTER_SP_DISABLED = "0";
-
-        /**
-         * Indicates airplane mode should be disabled after sensor privacy is disabled.
-         * @hide
-         */
-        public static final String DISABLE_AIRPLANE_MODE_AFTER_SP_DISABLED = "1";
-
-        /**
-         * The state of all sensors managed by SensorPrivacyService when sensor privacy is enabled.
-         * @hide
-         */
-        public static final String SENSOR_PRIVACY_SENSOR_STATE =
-                "sensor_privacy_sensor_state";
-
-        /**
          * Setting to determine whether to use the new notification priority handling features.
          * @hide
          */
