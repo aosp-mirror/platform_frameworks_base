@@ -86,7 +86,8 @@ public final class TextClassifierImpl implements TextClassifier {
             new File("/data/misc/textclassifier/lang_id.model");
 
     // Actions
-    private static final String ACTIONS_FACTORY_MODEL_FILENAME_REGEX = "actions_suggestions.model";
+    private static final String ACTIONS_FACTORY_MODEL_FILENAME_REGEX =
+            "actions_suggestions\\.(.*)\\.model";
     private static final File UPDATED_ACTIONS_MODEL =
             new File("/data/misc/textclassifier/actions_suggestions.model");
 
