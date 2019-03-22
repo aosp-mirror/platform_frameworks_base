@@ -1829,6 +1829,12 @@
     <permission android:name="android.permission.BIND_INCALL_SERVICE"
         android:protectionLevel="signature|privileged" />
 
+    <!-- Allows the app to request network scans from telephony.
+         <p>Not for use by third-party applications.
+         @SystemApi @hide-->
+    <permission android:name="android.permission.NETWORK_SCAN"
+        android:protectionLevel="signature|privileged" />
+
     <!-- Must be required by a link {@link android.telephony.VisualVoicemailService} to ensure that
          only the system can bind to it.
          <p>Protection level: signature|privileged
