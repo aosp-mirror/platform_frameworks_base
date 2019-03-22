@@ -60,8 +60,6 @@ class ResolverRankerServiceResolverComparator extends AbstractResolverComparator
 
     private static final boolean DEBUG = false;
 
-    private static final int NUM_OF_TOP_ANNOTATIONS_TO_USE = 3;
-
     // One week
     private static final long USAGE_STATS_PERIOD = 1000 * 60 * 60 * 24 * 7;
 
@@ -80,11 +78,6 @@ class ResolverRankerServiceResolverComparator extends AbstractResolverComparator
     private static final int WATCHDOG_TIMEOUT_MILLIS = 500;
 
     private final Collator mCollator;
-    private final boolean mHttp;
-    // can be null if mHttp == false or current user has no default browser package
-    private final String mDefaultBrowserPackageName;
-    private final PackageManager mPm;
-    private final UsageStatsManager mUsm;
     private final Map<String, UsageStats> mStats;
     private final long mCurrentTime;
     private final long mSinceTime;
@@ -92,8 +85,6 @@ class ResolverRankerServiceResolverComparator extends AbstractResolverComparator
     private final String mReferrerPackage;
     private final Object mLock = new Object();
     private ArrayList<ResolverTarget> mTargets;
-    private String mContentType;
-    private String[] mAnnotations;
     private String mAction;
     private ComponentName mResolvedRankerName;
     private ComponentName mRankerServiceName;
@@ -155,43 +146,17 @@ class ResolverRankerServiceResolverComparator extends AbstractResolverComparator
 
     public ResolverRankerServiceResolverComparator(Context context, Intent intent,
                 String referrerPackage, AfterCompute afterCompute) {
+        super(context, intent);
         mCollator = Collator.getInstance(context.getResources().getConfiguration().locale);
-        String scheme = intent.getScheme();
-        mHttp = "http".equals(scheme) || "https".equals(scheme);
         mReferrerPackage = referrerPackage;
         mAfterCompute = afterCompute;
         mContext = context;
 
-        mPm = context.getPackageManager();
-        mUsm = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
-
         mCurrentTime = System.currentTimeMillis();
         mSinceTime = mCurrentTime - USAGE_STATS_PERIOD;
         mStats = mUsm.queryAndAggregateUsageStats(mSinceTime, mCurrentTime);
-        mContentType = intent.getType();
-        getContentAnnotations(intent);
         mAction = intent.getAction();
         mRankerServiceName = new ComponentName(mContext, this.getClass());
-
-        mDefaultBrowserPackageName = mHttp
-                ? mPm.getDefaultBrowserPackageNameAsUser(UserHandle.myUserId())
-                : null;
-    }
-
-    // get annotations of content from intent.
-    private void getContentAnnotations(Intent intent) {
-        ArrayList<String> annotations = intent.getStringArrayListExtra(
-                Intent.EXTRA_CONTENT_ANNOTATIONS);
-        if (annotations != null) {
-            int size = annotations.size();
-            if (size > NUM_OF_TOP_ANNOTATIONS_TO_USE) {
-                size = NUM_OF_TOP_ANNOTATIONS_TO_USE;
-            }
-            mAnnotations = new String[size];
-            for (int i = 0; i < size; i++) {
-                mAnnotations[i] = annotations.get(i);
-            }
-        }
     }
 
     // compute features for each target according to usage stats of targets.
@@ -286,36 +251,7 @@ class ResolverRankerServiceResolverComparator extends AbstractResolverComparator
     }
 
     @Override
-    public int compare(ResolvedComponentInfo lhsp, ResolvedComponentInfo rhsp) {
-        final ResolveInfo lhs = lhsp.getResolveInfoAt(0);
-        final ResolveInfo rhs = rhsp.getResolveInfoAt(0);
-
-        // We want to put the one targeted to another user at the end of the dialog.
-        if (lhs.targetUserId != UserHandle.USER_CURRENT) {
-            return rhs.targetUserId != UserHandle.USER_CURRENT ? 0 : 1;
-        }
-        if (rhs.targetUserId != UserHandle.USER_CURRENT) {
-            return -1;
-        }
-
-        if (mHttp) {
-            // Special case: we want filters that match URI paths/schemes to be
-            // ordered before others.  This is for the case when opening URIs,
-            // to make native apps go above browsers - except for 1 even more special case
-            // which is the default browser, as we want that to go above them all.
-            if (isDefaultBrowser(lhs)) {
-                return -1;
-            }
-            if (isDefaultBrowser(rhs)) {
-                return 1;
-            }
-            final boolean lhsSpecific = ResolverActivity.isSpecificUriMatch(lhs.match);
-            final boolean rhsSpecific = ResolverActivity.isSpecificUriMatch(rhs.match);
-            if (lhsSpecific != rhsSpecific) {
-                return lhsSpecific ? -1 : 1;
-            }
-        }
-
+    public int compare(ResolveInfo lhs, ResolveInfo rhs) {
         if (mStats != null) {
             final ResolverTarget lhsTarget = mTargetsDict.get(new ComponentName(
                     lhs.activityInfo.packageName, lhs.activityInfo.name));
@@ -347,13 +283,6 @@ class ResolverRankerServiceResolverComparator extends AbstractResolverComparator
             return target.getSelectProbability();
         }
         return 0;
-    }
-
-    @Override
-    public void updateChooserCounts(String packageName, int userId, String action) {
-        if (mUsm != null) {
-            mUsm.reportChooserSelection(packageName, userId, mContentType, mAnnotations, action);
-        }
     }
 
     // update ranking model when the connection to it is valid.
@@ -405,20 +334,6 @@ class ResolverRankerServiceResolverComparator extends AbstractResolverComparator
         if (DEBUG) {
             Log.d(TAG, "Unbinded Resolver Ranker.");
         }
-    }
-
-    private boolean isDefaultBrowser(ResolveInfo ri) {
-        // It makes sense to prefer the default browser
-        // only if the targeted user is the current user
-        if (ri.targetUserId != UserHandle.USER_CURRENT) {
-            return false;
-        }
-
-        if (ri.activityInfo.packageName != null
-                && ri.activityInfo.packageName.equals(mDefaultBrowserPackageName)) {
-            return true;
-        }
-        return false;
     }
 
     // records metrics for evaluation.
