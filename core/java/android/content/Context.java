@@ -5329,6 +5329,7 @@ public abstract class Context {
      * @return display ID associated with this {@link Context}.
      * @hide
      */
+    @TestApi
     public abstract int getDisplayId();
 
     /**
