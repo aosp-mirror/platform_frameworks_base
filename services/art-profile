@@ -1136,7 +1136,7 @@ Lcom/android/server/DropBoxManagerService$4;
 Lcom/android/server/DropBoxManagerService$EntryFile;
 Lcom/android/server/DropBoxManagerService$FileList;
 Lcom/android/server/DropBoxManagerService;
-Lcom/android/server/DynamicAndroidService;
+Lcom/android/server/DynamicSystemService;
 Lcom/android/server/EntropyMixer$1;
 Lcom/android/server/EntropyMixer$2;
 Lcom/android/server/EntropyMixer;
@@ -4769,9 +4769,9 @@ PLcom/android/server/DropBoxManagerService$2;->getNextEntry(Ljava/lang/String;JL
 PLcom/android/server/DropBoxManagerService$EntryFile;->getFile(Ljava/io/File;)Ljava/io/File;
 PLcom/android/server/DropBoxManagerService;->checkPermission(ILjava/lang/String;)Z
 PLcom/android/server/DropBoxManagerService;->getNextEntry(Ljava/lang/String;JLjava/lang/String;)Landroid/os/DropBoxManager$Entry;
-PLcom/android/server/DynamicAndroidService;->connect(Landroid/os/IBinder$DeathRecipient;)Landroid/gsi/IGsiService;
-PLcom/android/server/DynamicAndroidService;->getGsiService()Landroid/gsi/IGsiService;
-PLcom/android/server/DynamicAndroidService;->isInUse()Z
+PLcom/android/server/DynamicSystemService;->connect(Landroid/os/IBinder$DeathRecipient;)Landroid/gsi/IGsiService;
+PLcom/android/server/DynamicSystemService;->getGsiService()Landroid/gsi/IGsiService;
+PLcom/android/server/DynamicSystemService;->isInUse()Z
 PLcom/android/server/EntropyMixer$1;->handleMessage(Landroid/os/Message;)V
 PLcom/android/server/EntropyMixer$2;->onReceive(Landroid/content/Context;Landroid/content/Intent;)V
 PLcom/android/server/EventLogTags;->writeBatterySaverMode(IIIIILjava/lang/String;I)V
@@ -15043,7 +15043,7 @@ SPLcom/android/server/DropBoxManagerService;->isTagEnabled(Ljava/lang/String;)Z
 SPLcom/android/server/DropBoxManagerService;->onBootPhase(I)V
 SPLcom/android/server/DropBoxManagerService;->onStart()V
 SPLcom/android/server/DropBoxManagerService;->trimToFit()J
-SPLcom/android/server/DynamicAndroidService;-><init>(Landroid/content/Context;)V
+SPLcom/android/server/DynamicSystemService;-><init>(Landroid/content/Context;)V
 SPLcom/android/server/EntropyMixer;-><init>(Landroid/content/Context;)V
 SPLcom/android/server/EntropyMixer;-><init>(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 SPLcom/android/server/EntropyMixer;->addDeviceSpecificEntropy()V

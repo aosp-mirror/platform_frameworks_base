@@ -14,50 +14,51 @@
  * limitations under the License.
  */
 
-package android.os;
+package android.os.image;
 
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.gsi.GsiProgress;
+import android.os.RemoteException;
 
 /**
- * The DynamicAndroidManager offers a mechanism to use a new Android image temporarily. After the
+ * The DynamicSystemManager offers a mechanism to use a new system image temporarily. After the
  * installation, the device can reboot into this image with a new created /data. This image will
  * last until the next reboot and then the device will go back to the original image. However the
  * installed image and the new created /data are not deleted but disabled. Thus the application can
  * either re-enable the installed image by calling {@link #toggle} or use the {@link #remove} to
  * delete it completely. In other words, there are three device states: no installation, installed
- * and running. The procedure to install a DynamicAndroid starts with a {@link #startInstallation},
+ * and running. The procedure to install a DynamicSystem starts with a {@link #startInstallation},
  * followed by a series of {@link #write} and ends with a {@link commit}. Once the installation is
  * complete, the device state changes from no installation to the installed state and a followed
- * reboot will change its state to running. Note one instance of dynamic android can exist on a
- * given device thus the {@link #startInstallation} will fail if the device is currently running a
- * DynamicAndroid.
+ * reboot will change its state to running. Note one instance of DynamicSystem can exist on a given
+ * device thus the {@link #startInstallation} will fail if the device is currently running a
+ * DynamicSystem.
  *
  * @hide
  */
-@SystemService(Context.DYNAMIC_ANDROID_SERVICE)
-public class DynamicAndroidManager {
-    private static final String TAG = "DynamicAndroidManager";
+@SystemService(Context.DYNAMIC_SYSTEM_SERVICE)
+public class DynamicSystemManager {
+    private static final String TAG = "DynamicSystemManager";
 
-    private final IDynamicAndroidService mService;
+    private final IDynamicSystemService mService;
 
     /** {@hide} */
-    public DynamicAndroidManager(IDynamicAndroidService service) {
+    public DynamicSystemManager(IDynamicSystemService service) {
         mService = service;
     }
 
-    /** The DynamicAndroidManager.Session represents a started session for the installation. */
+    /** The DynamicSystemManager.Session represents a started session for the installation. */
     public class Session {
         private Session() {}
         /**
-         * Write a chunk of the DynamicAndroid system image
+         * Write a chunk of the DynamicSystem system image
          *
          * @return {@code true} if the call succeeds. {@code false} if there is any native runtime
          *     error.
          */
-        @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_ANDROID)
+        @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
         public boolean write(byte[] buf) {
             try {
                 return mService.write(buf);
@@ -72,7 +73,7 @@ public class DynamicAndroidManager {
          * @return {@code true} if the call succeeds. {@code false} if there is any native runtime
          *     error.
          */
-        @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_ANDROID)
+        @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
         public boolean commit() {
             try {
                 return mService.commit();
@@ -82,16 +83,16 @@ public class DynamicAndroidManager {
         }
     }
     /**
-     * Start DynamicAndroid installation. This call may take an unbounded amount of time. The caller
+     * Start DynamicSystem installation. This call may take an unbounded amount of time. The caller
      * may use another thread to call the getStartProgress() to get the progress.
      *
      * @param systemSize system size in bytes
      * @param userdataSize userdata size in bytes
      * @return {@code true} if the call succeeds. {@code false} either the device does not contain
-     *     enough space or a DynamicAndroid is currently in use where the {@link #isInUse} would be
+     *     enough space or a DynamicSystem is currently in use where the {@link #isInUse} would be
      *     true.
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_ANDROID)
+    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
     public Session startInstallation(long systemSize, long userdataSize) {
         try {
             if (mService.startInstallation(systemSize, userdataSize)) {
@@ -112,7 +113,7 @@ public class DynamicAndroidManager {
      *     status field can be IGsiService.STATUS_NO_OPERATION, IGsiService.STATUS_WORKING or
      *     IGsiService.STATUS_COMPLETE.
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_ANDROID)
+    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
     public GsiProgress getInstallationProgress() {
         try {
             return mService.getInstallationProgress();
@@ -129,7 +130,7 @@ public class DynamicAndroidManager {
      * @return {@code true} if the call succeeds. {@code false} if there is no installation
      *     currently.
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_ANDROID)
+    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
     public boolean abort() {
         try {
             return mService.abort();
@@ -138,8 +139,8 @@ public class DynamicAndroidManager {
         }
     }
 
-    /** @return {@code true} if the device is running a dynamic android */
-    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_ANDROID)
+    /** @return {@code true} if the device is running a dynamic system */
+    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
     public boolean isInUse() {
         try {
             return mService.isInUse();
@@ -148,8 +149,8 @@ public class DynamicAndroidManager {
         }
     }
 
-    /** @return {@code true} if the device has a dynamic android installed */
-    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_ANDROID)
+    /** @return {@code true} if the device has a dynamic system installed */
+    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
     public boolean isInstalled() {
         try {
             return mService.isInstalled();
@@ -159,11 +160,11 @@ public class DynamicAndroidManager {
     }
 
     /**
-     * Remove DynamicAndroid installation if present
+     * Remove DynamicSystem installation if present
      *
      * @return {@code true} if the call succeeds. {@code false} if there is no installed image.
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_ANDROID)
+    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
     public boolean remove() {
         try {
             return mService.remove();
@@ -173,11 +174,11 @@ public class DynamicAndroidManager {
     }
 
     /**
-     * Enable DynamicAndroid when it's not enabled, otherwise, disable it.
+     * Enable DynamicSystem when it's not enabled, otherwise, disable it.
      *
      * @return {@code true} if the call succeeds. {@code false} if there is no installed image.
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_ANDROID)
+    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
     public boolean toggle() {
         try {
             return mService.toggle();

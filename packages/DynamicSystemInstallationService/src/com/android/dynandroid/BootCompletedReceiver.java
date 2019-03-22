@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.dynandroid;
+package com.android.dynsystem;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DynamicAndroidClient;
 import android.content.Intent;
 import android.os.UserHandle;
+import android.os.image.DynamicSystemClient;
 import android.util.Log;
 
 
 /**
  * A BoardcastReceiver waiting for ACTION_BOOT_COMPLETED and ask
  * the service to display a notification if we are currently running
- * in DynamicAndroid.
+ * in DynamicSystem.
  */
 public class BootCompletedReceiver extends BroadcastReceiver {
 
@@ -41,9 +41,9 @@ public class BootCompletedReceiver extends BroadcastReceiver {
 
         if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
             Intent startServiceIntent = new Intent(
-                    context, DynamicAndroidInstallationService.class);
+                    context, DynamicSystemInstallationService.class);
 
-            startServiceIntent.setAction(DynamicAndroidClient.ACTION_NOTIFY_IF_IN_USE);
+            startServiceIntent.setAction(DynamicSystemClient.ACTION_NOTIFY_IF_IN_USE);
             context.startServiceAsUser(startServiceIntent, UserHandle.SYSTEM);
         }
     }

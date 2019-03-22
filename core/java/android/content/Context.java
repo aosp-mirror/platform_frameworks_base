@@ -4644,11 +4644,10 @@ public abstract class Context {
 
      /**
      * Use with {@link #getSystemService(String)} to retrieve an
-     * {@link android.os.DynamicAndroidManager}.
+     * {@link android.os.image.DynamicSystemManager}.
      * @hide
      */
-    @SystemApi
-    public static final String DYNAMIC_ANDROID_SERVICE = "dynamic_android";
+    public static final String DYNAMIC_SYSTEM_SERVICE = "dynamic_system";
 
     /**
      * Determine whether the given permission is allowed for a particular

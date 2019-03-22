@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.dynandroid;
+package com.android.dynsystem;
 
 import android.gsi.GsiProgress;
 import android.os.AsyncTask;
-import android.os.DynamicAndroidManager;
+import android.os.image.DynamicSystemManager;
 import android.util.Log;
 import android.webkit.URLUtil;
 
@@ -60,9 +60,9 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Integer> {
     private final String mUrl;
     private final long mSystemSize;
     private final long mUserdataSize;
-    private final DynamicAndroidManager mDynamicAndroid;
+    private final DynamicSystemManager mDynSystem;
     private final InstallStatusListener mListener;
-    private DynamicAndroidManager.Session mInstallationSession;
+    private DynamicSystemManager.Session mInstallationSession;
 
     private int mResult = NO_RESULT;
 
@@ -70,11 +70,11 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Integer> {
 
 
     InstallationAsyncTask(String url, long systemSize, long userdataSize,
-            DynamicAndroidManager dynAndroid, InstallStatusListener listener) {
+            DynamicSystemManager dynSystem, InstallStatusListener listener) {
         mUrl = url;
         mSystemSize = systemSize;
         mUserdataSize = userdataSize;
-        mDynamicAndroid = dynAndroid;
+        mDynSystem = dynSystem;
         mListener = listener;
     }
 
@@ -98,7 +98,7 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Integer> {
 
             Thread thread = new Thread(() -> {
                 mInstallationSession =
-                        mDynamicAndroid.startInstallation(mSystemSize, mUserdataSize);
+                        mDynSystem.startInstallation(mSystemSize, mUserdataSize);
             });
 
 
@@ -106,12 +106,12 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Integer> {
 
             while (thread.isAlive()) {
                 if (isCancelled()) {
-                    boolean aborted = mDynamicAndroid.abort();
-                    Log.d(TAG, "Called DynamicAndroidManager.abort(), result = " + aborted);
+                    boolean aborted = mDynSystem.abort();
+                    Log.d(TAG, "Called DynamicSystemManager.abort(), result = " + aborted);
                     return RESULT_OK;
                 }
 
-                GsiProgress progress = mDynamicAndroid.getInstallationProgress();
+                GsiProgress progress = mDynSystem.getInstallationProgress();
                 installedSize = progress.bytes_processed;
 
                 if (installedSize > reportedInstalledSize + minStepToReport) {
@@ -146,7 +146,7 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Integer> {
                         ? bytes : Arrays.copyOf(bytes, numBytesRead);
 
                 if (!mInstallationSession.write(writeBuffer)) {
-                    throw new IOException("Failed write() to DynamicAndroid");
+                    throw new IOException("Failed write() to DynamicSystem");
                 }
 
                 installedSize += numBytesRead;

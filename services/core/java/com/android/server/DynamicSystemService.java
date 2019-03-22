@@ -22,25 +22,25 @@ import android.gsi.GsiProgress;
 import android.gsi.IGsiService;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
-import android.os.IDynamicAndroidService;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.os.image.IDynamicSystemService;
 import android.util.Slog;
 
 /**
- * DynamicAndroidService implements IDynamicAndroidService. It provides permission check before
+ * DynamicSystemService implements IDynamicSystemService. It provides permission check before
  * passing requests to gsid
  */
-public class DynamicAndroidService extends IDynamicAndroidService.Stub implements DeathRecipient {
-    private static final String TAG = "DynamicAndroidService";
+public class DynamicSystemService extends IDynamicSystemService.Stub implements DeathRecipient {
+    private static final String TAG = "DynamicSystemService";
     private static final String NO_SERVICE_ERROR = "no gsiservice";
     private static final int GSID_ROUGH_TIMEOUT_MS = 8192;
 
     private Context mContext;
     private volatile IGsiService mGsiService;
 
-    DynamicAndroidService(Context context) {
+    DynamicSystemService(Context context) {
         mContext = context;
     }
 
@@ -93,9 +93,9 @@ public class DynamicAndroidService extends IDynamicAndroidService.Stub implement
 
     private void checkPermission() {
         if (mContext.checkCallingOrSelfPermission(
-                        android.Manifest.permission.MANAGE_DYNAMIC_ANDROID)
+                        android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
                 != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires MANAGE_DYNAMIC_ANDROID permission");
+            throw new SecurityException("Requires MANAGE_DYNAMIC_SYSTEM permission");
         }
     }
 
