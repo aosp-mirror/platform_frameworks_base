@@ -12,6 +12,7 @@ package android {
     field public static final String ACCESS_MTP = "android.permission.ACCESS_MTP";
     field public static final String ACCESS_NETWORK_CONDITIONS = "android.permission.ACCESS_NETWORK_CONDITIONS";
     field public static final String ACCESS_NOTIFICATIONS = "android.permission.ACCESS_NOTIFICATIONS";
+    field public static final String ACCESS_SHARED_LIBRARIES = "android.permission.ACCESS_SHARED_LIBRARIES";
     field public static final String ACCESS_SHORTCUTS = "android.permission.ACCESS_SHORTCUTS";
     field public static final String ACCESS_SURFACE_FLINGER = "android.permission.ACCESS_SURFACE_FLINGER";
     field public static final String ACTIVITY_EMBEDDING = "android.permission.ACTIVITY_EMBEDDING";
@@ -1615,6 +1616,7 @@ package android.content.pm {
     method public abstract java.util.List<android.content.IntentFilter> getAllIntentFilters(String);
     method @NonNull @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public android.content.pm.ApplicationInfo getApplicationInfoAsUser(@NonNull String, int, @NonNull android.os.UserHandle) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull public android.content.pm.dex.ArtManager getArtManager();
+    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_SHARED_LIBRARIES) public java.util.List<android.content.pm.SharedLibraryInfo> getDeclaredSharedLibraries(@NonNull String, int);
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public abstract String getDefaultBrowserPackageNameAsUser(int);
     method @Nullable @RequiresPermission(android.Manifest.permission.SET_HARMFUL_APP_WARNINGS) public CharSequence getHarmfulAppWarning(@NonNull String);
     method public String getIncidentReportApproverPackageName();

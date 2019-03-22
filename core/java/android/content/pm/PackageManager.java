@@ -4239,6 +4239,24 @@ public abstract class PackageManager {
             @InstallFlags int flags, @UserIdInt int userId);
 
     /**
+     * Get the list of shared libraries declared by a package.
+     *
+     * @param packageName the package name to query
+     * @param flags the flags to filter packages
+     * @return the shared library list
+     *
+     * @hide
+     */
+    @NonNull
+    @RequiresPermission(Manifest.permission.ACCESS_SHARED_LIBRARIES)
+    @SystemApi
+    public List<SharedLibraryInfo> getDeclaredSharedLibraries(@NonNull String packageName,
+            @InstallFlags int flags) {
+        throw new UnsupportedOperationException(
+                "getDeclaredSharedLibraries() not implemented in subclass");
+    }
+
+    /**
      * Get the name of the package hosting the services shared library.
      *
      * @return The library host package.
