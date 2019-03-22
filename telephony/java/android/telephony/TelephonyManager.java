@@ -1428,6 +1428,70 @@ public class TelephonyManager {
     public static final String EXTRA_ANOMALY_DESCRIPTION =
             "android.telephony.extra.ANOMALY_DESCRIPTION";
 
+    /**
+     * Broadcast intent sent to indicate primary (non-opportunistic) subscription list has changed.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_PRIMARY_SUBSCRIPTION_LIST_CHANGED =
+            "android.telephony.action.PRIMARY_SUBSCRIPTION_LIST_CHANGED";
+
+    /**
+     * Integer intent extra to be used with {@link #ACTION_PRIMARY_SUBSCRIPTION_LIST_CHANGED}
+     * to indicate whether a SIM selection is needed to choose default subscription.
+     *
+     * @hide
+     */
+    public static final String EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE =
+            "android.telephony.extra.DEFAULT_SUBSCRIPTION_SELECT_TYPE";
+
+    /**
+     * Used as an int value for {@link #EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE}
+     * to indicate there's no need to re-select any default subscription.
+     * @hide
+     */
+    public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_NONE = 0;
+
+    /**
+     * Used as an int value for {@link #EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE}
+     * to indicate there's a need to select default data subscription.
+     * @hide
+     */
+    public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_DATA = 1;
+
+    /**
+     * Used as an int value for {@link #EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE}
+     * to indicate there's a need to select default voice call subscription.
+     * @hide
+     */
+    public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_VOICE = 2;
+
+    /**
+     * Used as an int value for {@link #EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE}
+     * to indicate there's a need to select default sms subscription.
+     * @hide
+     */
+    public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_SMS = 3;
+
+    /**
+     * Used as an int value for {@link #EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE}
+     * to indicate user to decide whether current SIM should be preferred for all
+     * data / voice / sms.
+     * @hide
+     */
+    public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_FOR_ALL_TYPES = 4;
+
+    /**
+     * Integer intent extra to be used with
+     * {@link #EXTRA_DEFAULT_SUBSCRIPTION_SELECT_FOR_ALL_TYPES}
+     * to indicate which SIM is being selected.
+     *
+     * @hide
+     */
+    public static final String EXTRA_DEFAULT_SUBSCRIPTION_ID =
+            "android.telephony.extra.DEFAULT_SUBSCRIPTION_ID";
+
     //
     //
     // Device Info
