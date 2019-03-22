@@ -521,7 +521,7 @@ public final class AutofillManagerService
                 new FieldClassificationStrategy(getContext(), UserHandle.USER_CURRENT);
 
         strategy.calculateScores(callback, Arrays.asList(AutofillValue.forText(value1)),
-                new String[] { value2 }, null, algorithmName, null, null, null);
+                new String[] { value2 }, new String[] { null }, algorithmName, null, null, null);
     }
 
     // Called by Shell command.
