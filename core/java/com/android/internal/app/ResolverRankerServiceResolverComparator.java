@@ -46,7 +46,6 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,10 +53,10 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Ranks and compares packages based on usage stats.
+ * Ranks and compares packages based on usage stats and uses the {@link ResolverRankerService}.
  */
-class ResolverComparator implements Comparator<ResolvedComponentInfo> {
-    private static final String TAG = "ResolverComparator";
+class ResolverRankerServiceResolverComparator extends AbstractResolverComparator {
+    private static final String TAG = "RRSResolverComparator";
 
     private static final boolean DEBUG = false;
 
@@ -100,7 +99,6 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
     private ComponentName mRankerServiceName;
     private IResolverRankerService mRanker;
     private ResolverRankerServiceConnection mConnection;
-    private AfterCompute mAfterCompute;
     private Context mContext;
     private CountDownLatch mConnectSignal;
 
@@ -155,12 +153,8 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
         }
     };
 
-    public interface AfterCompute {
-        public void afterCompute ();
-    }
-
-    public ResolverComparator(Context context, Intent intent, String referrerPackage,
-                              AfterCompute afterCompute) {
+    public ResolverRankerServiceResolverComparator(Context context, Intent intent,
+                String referrerPackage, AfterCompute afterCompute) {
         mCollator = Collator.getInstance(context.getResources().getConfiguration().locale);
         String scheme = intent.getScheme();
         mHttp = "http".equals(scheme) || "https".equals(scheme);
@@ -185,7 +179,7 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
     }
 
     // get annotations of content from intent.
-    public void getContentAnnotations(Intent intent) {
+    private void getContentAnnotations(Intent intent) {
         ArrayList<String> annotations = intent.getStringArrayListExtra(
                 Intent.EXTRA_CONTENT_ANNOTATIONS);
         if (annotations != null) {
@@ -200,11 +194,8 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
         }
     }
 
-    public void setCallBack(AfterCompute afterCompute) {
-        mAfterCompute = afterCompute;
-    }
-
     // compute features for each target according to usage stats of targets.
+    @Override
     public void compute(List<ResolvedComponentInfo> targets) {
         reset();
 
@@ -349,6 +340,7 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
         return mCollator.compare(sa.toString().trim(), sb.toString().trim());
     }
 
+    @Override
     public float getScore(ComponentName name) {
         final ResolverTarget target = mTargetsDict.get(name);
         if (target != null) {
@@ -357,6 +349,7 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
         return 0;
     }
 
+    @Override
     public void updateChooserCounts(String packageName, int userId, String action) {
         if (mUsm != null) {
             mUsm.reportChooserSelection(packageName, userId, mContentType, mAnnotations, action);
@@ -364,6 +357,7 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
     }
 
     // update ranking model when the connection to it is valid.
+    @Override
     public void updateModel(ComponentName componentName) {
         synchronized (mLock) {
             if (mRanker != null) {
@@ -397,6 +391,7 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
     }
 
     // unbind the service and clear unhandled messges.
+    @Override
     public void destroy() {
         mHandler.removeMessages(RESOLVER_RANKER_SERVICE_RESULT);
         mHandler.removeMessages(RESOLVER_RANKER_RESULT_TIMEOUT);
@@ -478,8 +473,8 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
                 if (!ResolverRankerService.BIND_PERMISSION.equals(perm)) {
                     Log.w(TAG, "ResolverRankerService " + componentName + " does not require"
                             + " permission " + ResolverRankerService.BIND_PERMISSION
-                            + " - this service will not be queried for ResolverComparator."
-                            + " add android:permission=\""
+                            + " - this service will not be queried for "
+                            + "ResolverRankerServiceResolverComparator. add android:permission=\""
                             + ResolverRankerService.BIND_PERMISSION + "\""
                             + " to the <service> tag for " + componentName
                             + " in the manifest.");
@@ -490,7 +485,8 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
                         resolveInfo.serviceInfo.packageName)) {
                     Log.w(TAG, "ResolverRankerService " + componentName + " does not hold"
                             + " permission " + ResolverRankerService.HOLD_PERMISSION
-                            + " - this service will not be queried for ResolverComparator.");
+                            + " - this service will not be queried for "
+                            + "ResolverRankerServiceResolverComparator.");
                     continue;
                 }
             } catch (NameNotFoundException e) {
