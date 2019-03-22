@@ -146,5 +146,9 @@
         <attr name="showAirplaneMode" format="boolean" />
     </declare-styleable>
 
+    <declare-styleable name="CaptionsToggleImageButton">
+        <attr name="optedOut" format="boolean" />
+    </declare-styleable>
+
 </resources>
 

@@ -282,6 +282,13 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                 Settings.Secure.ODI_CAPTIONS_ENABLED, isEnabled ? 1 : 0);
     }
 
+    @Override
+    public boolean isCaptionStreamOptedOut() {
+        int currentValue = Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.ODI_CAPTIONS_OPTED_OUT, 0);
+        return currentValue == 1;
+    }
+
     public void getCaptionsComponentState(boolean fromTooltip) {
         if (mDestroyed) return;
         mWorker.obtainMessage(W.GET_CAPTIONS_COMPONENT_STATE, fromTooltip).sendToTarget();

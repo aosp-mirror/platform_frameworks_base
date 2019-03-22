@@ -15,6 +15,7 @@
 -->
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:sysui="http://schemas.android.com/apk/res-auto"
     android:id="@+id/volume_dialog_container"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
@@ -117,16 +118,17 @@
             android:clipToPadding="false"
             android:translationZ="@dimen/volume_dialog_elevation"
             android:background="@drawable/rounded_bg_full">
-            <com.android.keyguard.AlphaOptimizedImageButton
+            <com.android.systemui.volume.CaptionsToggleImageButton
                 android:id="@+id/odi_captions_icon"
                 android:src="@drawable/ic_volume_odi_captions_disabled"
                 style="@style/VolumeButtons"
                 android:background="@drawable/rounded_ripple"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:tint="@color/accent_tint_color_selector"
+                android:tint="@color/caption_tint_color_selector"
                 android:layout_gravity="center"
-                android:soundEffectsEnabled="false" />
+                android:soundEffectsEnabled="false"
+                sysui:optedOut="false"/>
         </FrameLayout>
 
     </LinearLayout>

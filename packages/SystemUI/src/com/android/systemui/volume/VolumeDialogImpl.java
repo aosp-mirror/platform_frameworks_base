@@ -133,7 +133,7 @@ public class VolumeDialogImpl implements VolumeDialog {
     private ViewGroup mRinger;
     private ImageButton mRingerIcon;
     private ViewGroup mODICaptionsView;
-    private ImageButton mODICaptionsIcon;
+    private CaptionsToggleImageButton mODICaptionsIcon;
     private View mSettingsView;
     private ImageButton mSettingsIcon;
     private FrameLayout mZenIcon;
@@ -587,11 +587,15 @@ public class VolumeDialogImpl implements VolumeDialog {
     }
 
     private void updateCaptionsIcon() {
-        mHandler.post(
-                mODICaptionsIcon.setImageResourceAsync(
-                        mController.areCaptionsEnabled()
-                                ? R.drawable.ic_volume_odi_captions
-                                : R.drawable.ic_volume_odi_captions_disabled));
+        boolean componentEnabled = mController.areCaptionsEnabled();
+        if (mODICaptionsIcon.getComponentEnabled() != componentEnabled) {
+            mHandler.post(mODICaptionsIcon.setComponentEnabled(componentEnabled));
+        }
+
+        boolean isOptedOut = mController.isCaptionStreamOptedOut();
+        if (mODICaptionsIcon.getOptedOut() != isOptedOut) {
+            mHandler.post(() -> mODICaptionsIcon.setOptedOut(isOptedOut));
+        }
     }
 
     private void onCaptionIconClicked() {
@@ -952,7 +956,7 @@ public class VolumeDialogImpl implements VolumeDialog {
     }
 
     private void updateVolumeRowH(VolumeRow row) {
-        if (D.BUG) Log.d(TAG, "updateVolumeRowH s=" + row.stream);
+        if (D.BUG) Log.i(TAG, "updateVolumeRowH s=" + row.stream);
         if (mState == null) return;
         final StreamState ss = mState.states.get(row.stream);
         if (ss == null) return;
