@@ -125,7 +125,6 @@ public class DataSourceDesc {
         private static final int SOURCE_TYPE_UNKNOWN = 0;
         private static final int SOURCE_TYPE_URI = 1;
         private static final int SOURCE_TYPE_FILE = 2;
-        private static final int SOURCE_TYPE_CALLBACK = 3;
 
         private int mSourceType = SOURCE_TYPE_UNKNOWN;
         private String mMediaId;
@@ -141,9 +140,6 @@ public class DataSourceDesc {
         private ParcelFileDescriptor mPFD;
         private long mOffset = 0;
         private long mLength = FileDataSourceDesc.FD_LENGTH_UNKNOWN;
-
-        // For CallbackDataSourceDesc
-        private DataSourceCallback mDataSourceCallback;
 
         /**
          * Constructs a new BuilderBase with the defaults.
@@ -173,9 +169,6 @@ public class DataSourceDesc {
                 mUri = ((UriDataSourceDesc) dsd).getUri();
                 mHeader = ((UriDataSourceDesc) dsd).getHeaders();
                 mCookies = ((UriDataSourceDesc) dsd).getCookies();
-            } else if (dsd instanceof CallbackDataSourceDesc) {
-                mSourceType = SOURCE_TYPE_CALLBACK;
-                mDataSourceCallback = ((CallbackDataSourceDesc) dsd).getDataSourceCallback();
             } else {
                 throw new IllegalStateException("Unknown source type:" + mSourceType);
             }
@@ -204,9 +197,6 @@ public class DataSourceDesc {
             } else if (mSourceType == SOURCE_TYPE_URI) {
                 desc = new UriDataSourceDesc(
                         mMediaId, mStartPositionMs, mEndPositionMs, mUri, mHeader, mCookies);
-            } else if (mSourceType == SOURCE_TYPE_CALLBACK) {
-                desc = new CallbackDataSourceDesc(
-                        mMediaId, mStartPositionMs, mEndPositionMs, mDataSourceCallback);
             } else {
                 throw new IllegalStateException("Unknown source type:" + mSourceType);
             }
@@ -326,7 +316,7 @@ public class DataSourceDesc {
 
         /**
          * Sets the data source (ParcelFileDescriptor) to use. The ParcelFileDescriptor must be
-         * seekable (N.B. a LocalSocket is not seekable). When the {@link FileDataSourceDesc}
+         * seekable (N.B. a LocalSocket is not seekable). When the {@link DataSourceDesc}
          * created by this builder is passed to {@link MediaPlayer2} via
          * {@link MediaPlayer2#setDataSource},
          * {@link MediaPlayer2#setNextDataSource} or
@@ -347,7 +337,7 @@ public class DataSourceDesc {
 
         /**
          * Sets the data source (ParcelFileDescriptor) to use. The ParcelFileDescriptor must be
-         * seekable (N.B. a LocalSocket is not seekable). When the {@link FileDataSourceDesc}
+         * seekable (N.B. a LocalSocket is not seekable). When the {@link DataSourceDesc}
          * created by this builder is passed to {@link MediaPlayer2} via
          * {@link MediaPlayer2#setDataSource},
          * {@link MediaPlayer2#setNextDataSource} or
@@ -367,7 +357,9 @@ public class DataSourceDesc {
         public Builder setDataSource(
                 @NonNull ParcelFileDescriptor pfd, long offset, long length) {
             setSourceType(SOURCE_TYPE_FILE);
-            Media2Utils.checkArgument(pfd != null, "pfd cannot be null.");
+            if (pfd == null) {
+                throw new NullPointerException("pfd cannot be null.");
+            }
             if (offset < 0) {
                 offset = 0;
             }
@@ -377,20 +369,6 @@ public class DataSourceDesc {
             mPFD = pfd;
             mOffset = offset;
             mLength = length;
-            return this;
-        }
-
-        /**
-         * Sets the data source (DataSourceCallback) to use.
-         *
-         * @param dscb the DataSourceCallback for the media to play
-         * @return the same Builder instance.
-         * @throws NullPointerException if dscb is null.
-         */
-        public @NonNull Builder setDataSource(@NonNull DataSourceCallback dscb) {
-            setSourceType(SOURCE_TYPE_CALLBACK);
-            Media2Utils.checkArgument(dscb != null, "data source cannot be null.");
-            mDataSourceCallback = dscb;
             return this;
         }
 
