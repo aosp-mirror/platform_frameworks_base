@@ -4029,7 +4029,6 @@ package android.metrics {
 package android.net {
 
   public class CaptivePortal implements android.os.Parcelable {
-    ctor public CaptivePortal(@NonNull android.os.IBinder);
     method public void logEvent(int, @NonNull String);
     method public void useNetwork();
     field public static final int APP_RETURN_DISMISSED = 0; // 0x0
@@ -4040,12 +4039,12 @@ package android.net {
   public class ConnectivityManager {
     method @RequiresPermission(android.Manifest.permission.PACKET_KEEPALIVE_OFFLOAD) public android.net.SocketKeepalive createNattKeepalive(@NonNull android.net.Network, @NonNull java.io.FileDescriptor, @NonNull java.net.InetAddress, @NonNull java.net.InetAddress, @NonNull java.util.concurrent.Executor, @NonNull android.net.SocketKeepalive.Callback);
     method @RequiresPermission(android.Manifest.permission.PACKET_KEEPALIVE_OFFLOAD) public android.net.SocketKeepalive createSocketKeepalive(@NonNull android.net.Network, @NonNull java.net.Socket, @NonNull java.util.concurrent.Executor, @NonNull android.net.SocketKeepalive.Callback);
-    method public boolean getAvoidBadWifi();
     method @RequiresPermission(android.Manifest.permission.LOCAL_MAC_ADDRESS) public String getCaptivePortalServerUrl();
     method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void getLatestTetheringEntitlementResult(int, boolean, @NonNull java.util.concurrent.Executor, @NonNull android.net.ConnectivityManager.OnTetheringEntitlementResultListener);
     method @RequiresPermission(anyOf={android.Manifest.permission.TETHER_PRIVILEGED, android.Manifest.permission.WRITE_SETTINGS}) public boolean isTetheringSupported();
     method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void registerTetheringEventCallback(@NonNull java.util.concurrent.Executor, @NonNull android.net.ConnectivityManager.OnTetheringEventCallback);
     method @RequiresPermission(anyOf={"android.permission.NETWORK_SETTINGS", android.Manifest.permission.NETWORK_SETUP_WIZARD, "android.permission.NETWORK_STACK"}) public void setAirplaneMode(boolean);
+    method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, "android.permission.NETWORK_STACK"}) public boolean shouldAvoidBadWifi();
     method @RequiresPermission(android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK) public void startCaptivePortalApp(@NonNull android.net.Network, @NonNull android.os.Bundle);
     method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void startTethering(int, boolean, android.net.ConnectivityManager.OnStartTetheringCallback);
     method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void startTethering(int, boolean, android.net.ConnectivityManager.OnStartTetheringCallback, android.os.Handler);

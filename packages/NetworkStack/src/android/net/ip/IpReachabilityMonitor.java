@@ -332,7 +332,7 @@ public class IpReachabilityMonitor {
     }
 
     private boolean avoidingBadLinks() {
-        return !mUsingMultinetworkPolicyTracker || mCm.getAvoidBadWifi();
+        return !mUsingMultinetworkPolicyTracker || mCm.shouldAvoidBadWifi();
     }
 
     public void probeAll() {
