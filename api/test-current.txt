@@ -1078,10 +1078,6 @@ package android.media {
     method public android.media.BufferingParams.Builder setResumePlaybackMarkMs(int);
   }
 
-  public class CallbackDataSourceDesc extends android.media.DataSourceDesc {
-    method @NonNull public android.media.DataSourceCallback getDataSourceCallback();
-  }
-
   public class FileDataSourceDesc extends android.media.DataSourceDesc {
     method public long getLength();
     method public long getOffset();

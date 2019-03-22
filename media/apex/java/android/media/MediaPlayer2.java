@@ -878,22 +878,27 @@ public class MediaPlayer2 implements AutoCloseable, AudioRouting {
             throws IOException {
         Media2Utils.checkArgument(dsd != null, "the DataSourceDesc cannot be null");
 
-        if (dsd instanceof CallbackDataSourceDesc) {
-            CallbackDataSourceDesc cbDSD = (CallbackDataSourceDesc) dsd;
-            handleDataSource(isCurrent,
-                             srcId,
-                             cbDSD.getDataSourceCallback(),
-                             cbDSD.getStartPosition(),
-                             cbDSD.getEndPosition());
-        } else if (dsd instanceof FileDataSourceDesc) {
+        if (dsd instanceof FileDataSourceDesc) {
             FileDataSourceDesc fileDSD = (FileDataSourceDesc) dsd;
-            handleDataSource(isCurrent,
-                             srcId,
-                             fileDSD.getParcelFileDescriptor(),
-                             fileDSD.getOffset(),
-                             fileDSD.getLength(),
-                             fileDSD.getStartPosition(),
-                             fileDSD.getEndPosition());
+            ParcelFileDescriptor pfd = fileDSD.getParcelFileDescriptor();
+            if (pfd.getStatSize() == -1) {
+                // Underlying pipeline doesn't understand '-1' size. Create a wrapper for
+                // translation.
+                // TODO: Make native code handle '-1' size.
+                handleDataSource(isCurrent,
+                        srcId,
+                        new ProxyDataSourceCallback(pfd),
+                        fileDSD.getStartPosition(),
+                        fileDSD.getEndPosition());
+            } else {
+                handleDataSource(isCurrent,
+                        srcId,
+                        pfd,
+                        fileDSD.getOffset(),
+                        fileDSD.getLength(),
+                        fileDSD.getStartPosition(),
+                        fileDSD.getEndPosition());
+            }
         } else if (dsd instanceof UriDataSourceDesc) {
             UriDataSourceDesc uriDSD = (UriDataSourceDesc) dsd;
             handleDataSource(isCurrent,
