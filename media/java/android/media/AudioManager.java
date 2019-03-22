@@ -3308,7 +3308,8 @@ public class AudioManager {
         try {
             MediaProjection projection = policy.getMediaProjection();
             String regId = service.registerAudioPolicy(policy.getConfig(), policy.cb(),
-                    policy.hasFocusListener(), policy.isFocusPolicy(), policy.isVolumeController(),
+                    policy.hasFocusListener(), policy.isFocusPolicy(), policy.isTestFocusPolicy(),
+                    policy.isVolumeController(),
                     projection == null ? null : projection.getProjection());
             if (regId == null) {
                 return ERROR;

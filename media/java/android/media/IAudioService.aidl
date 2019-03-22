@@ -196,6 +196,7 @@ interface IAudioService {
 
     String registerAudioPolicy(in AudioPolicyConfig policyConfig,
             in IAudioPolicyCallback pcb, boolean hasFocusListener, boolean isFocusPolicy,
+            boolean isTestFocusPolicy,
             boolean isVolumeController, in IMediaProjection projection);
 
     oneway void unregisterAudioPolicyAsync(in IAudioPolicyCallback pcb);
