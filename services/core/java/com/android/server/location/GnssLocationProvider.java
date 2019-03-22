@@ -180,9 +180,10 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     private static final int SET_REQUEST = 3;
     private static final int INJECT_NTP_TIME = 5;
-    private static final int DOWNLOAD_XTRA_DATA = 6;
+    // PSDS stands for Predicted Satellite Data Service
+    private static final int DOWNLOAD_PSDS_DATA = 6;
     private static final int UPDATE_LOCATION = 7;  // Handle external location from network listener
-    private static final int DOWNLOAD_XTRA_DATA_FINISHED = 11;
+    private static final int DOWNLOAD_PSDS_DATA_FINISHED = 11;
     private static final int SUBSCRIPTION_OR_CARRIER_CONFIG_CHANGED = 12;
     private static final int INITIALIZE_HANDLER = 13;
     private static final int REQUEST_LOCATION = 16;
@@ -295,19 +296,19 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     // Typical hot TTTF is ~5 seconds, so 10 seconds seems sane.
     private static final int GPS_POLLING_THRESHOLD_INTERVAL = 10 * 1000;
 
-    // how long to wait if we have a network error in NTP or XTRA downloading
+    // how long to wait if we have a network error in NTP or PSDS downloading
     // the initial value of the exponential backoff
     // current setting - 5 minutes
     private static final long RETRY_INTERVAL = 5 * 60 * 1000;
-    // how long to wait if we have a network error in NTP or XTRA downloading
+    // how long to wait if we have a network error in NTP or PSDS downloading
     // the max value of the exponential backoff
     // current setting - 4 hours
     private static final long MAX_RETRY_INTERVAL = 4 * 60 * 60 * 1000;
 
-    // Timeout when holding wakelocks for downloading XTRA data.
-    private static final long DOWNLOAD_XTRA_DATA_TIMEOUT_MS = 60 * 1000;
+    // Timeout when holding wakelocks for downloading PSDS data.
+    private static final long DOWNLOAD_PSDS_DATA_TIMEOUT_MS = 60 * 1000;
 
-    private final ExponentialBackOff mXtraBackOff = new ExponentialBackOff(RETRY_INTERVAL,
+    private final ExponentialBackOff mPsdsBackOff = new ExponentialBackOff(RETRY_INTERVAL,
             MAX_RETRY_INTERVAL);
 
     // true if we are enabled, protected by this
@@ -315,14 +316,14 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     private boolean mShutdown;
 
-    // states for injecting ntp and downloading xtra data
+    // states for injecting ntp and downloading psds data
     private static final int STATE_PENDING_NETWORK = 0;
     private static final int STATE_DOWNLOADING = 1;
     private static final int STATE_IDLE = 2;
 
-    // flags to trigger NTP or XTRA data download when network becomes available
-    // initialized to true so we do NTP and XTRA when the network comes up after booting
-    private int mDownloadXtraDataPending = STATE_PENDING_NETWORK;
+    // flags to trigger NTP or PSDS data download when network becomes available
+    // initialized to true so we do NTP and PSDS when the network comes up after booting
+    private int mDownloadPsdsDataPending = STATE_PENDING_NETWORK;
 
     // true if GPS is navigating
     private boolean mNavigating;
@@ -346,8 +347,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     // capabilities reported through the top level IGnssCallback.hal
     private volatile int mTopHalCapabilities;
 
-    // true if XTRA is supported
-    private boolean mSupportsXtra;
+    // true if PSDS is supported
+    private boolean mSupportsPsds;
 
     // for calculating time to first fix
     private long mFixRequestTime = 0;
@@ -404,8 +405,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     // Wakelocks
     private final static String WAKELOCK_KEY = "GnssLocationProvider";
     private final PowerManager.WakeLock mWakeLock;
-    private static final String DOWNLOAD_EXTRA_WAKELOCK_KEY = "GnssLocationProviderXtraDownload";
-    private final PowerManager.WakeLock mDownloadXtraWakeLock;
+    private static final String DOWNLOAD_EXTRA_WAKELOCK_KEY = "GnssLocationProviderPsdsDownload";
+    private final PowerManager.WakeLock mDownloadPsdsWakeLock;
 
     // Alarms
     private final static String ALARM_WAKEUP = "com.android.internal.location.ALARM_WAKEUP";
@@ -592,10 +593,10 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_KEY);
         mWakeLock.setReferenceCounted(true);
 
-        // Create a separate wake lock for xtra downloader as it may be released due to timeout.
-        mDownloadXtraWakeLock = mPowerManager.newWakeLock(
+        // Create a separate wake lock for psds downloader as it may be released due to timeout.
+        mDownloadPsdsWakeLock = mPowerManager.newWakeLock(
                 PowerManager.PARTIAL_WAKE_LOCK, DOWNLOAD_EXTRA_WAKELOCK_KEY);
-        mDownloadXtraWakeLock.setReferenceCounted(true);
+        mDownloadPsdsWakeLock.setReferenceCounted(true);
 
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         mWakeupIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ALARM_WAKEUP), 0);
@@ -701,10 +702,10 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
      */
     private void onNetworkAvailable() {
         mNtpTimeHelper.onNetworkAvailable();
-        if (mDownloadXtraDataPending == STATE_PENDING_NETWORK) {
-            if (mSupportsXtra) {
+        if (mDownloadPsdsDataPending == STATE_PENDING_NETWORK) {
+            if (mSupportsPsds) {
                 // Download only if supported, (prevents an unnecessary on-boot download)
-                xtraDownloadRequest();
+                psdsDownloadRequest();
             }
         }
     }
@@ -811,61 +812,61 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         return false;
     }
 
-    private void handleDownloadXtraData() {
-        if (!mSupportsXtra) {
-            // native code reports xtra not supported, don't try
-            Log.d(TAG, "handleDownloadXtraData() called when Xtra not supported");
+    private void handleDownloadPsdsData() {
+        if (!mSupportsPsds) {
+            // native code reports psds not supported, don't try
+            Log.d(TAG, "handleDownloadPsdsData() called when PSDS not supported");
             return;
         }
-        if (mDownloadXtraDataPending == STATE_DOWNLOADING) {
+        if (mDownloadPsdsDataPending == STATE_DOWNLOADING) {
             // already downloading data
             return;
         }
         if (!mNetworkConnectivityHandler.isDataNetworkConnected()) {
             // try again when network is up
-            mDownloadXtraDataPending = STATE_PENDING_NETWORK;
+            mDownloadPsdsDataPending = STATE_PENDING_NETWORK;
             return;
         }
-        mDownloadXtraDataPending = STATE_DOWNLOADING;
+        mDownloadPsdsDataPending = STATE_DOWNLOADING;
 
         // hold wake lock while task runs
-        mDownloadXtraWakeLock.acquire(DOWNLOAD_XTRA_DATA_TIMEOUT_MS);
-        Log.i(TAG, "WakeLock acquired by handleDownloadXtraData()");
+        mDownloadPsdsWakeLock.acquire(DOWNLOAD_PSDS_DATA_TIMEOUT_MS);
+        Log.i(TAG, "WakeLock acquired by handleDownloadPsdsData()");
         AsyncTask.THREAD_POOL_EXECUTOR.execute(() -> {
-            GpsXtraDownloader xtraDownloader = new GpsXtraDownloader(
+            GpsPsdsDownloader psdsDownloader = new GpsPsdsDownloader(
                     mGnssConfiguration.getProperties());
-            byte[] data = xtraDownloader.downloadXtraData();
+            byte[] data = psdsDownloader.downloadPsdsData();
             if (data != null) {
-                if (DEBUG) Log.d(TAG, "calling native_inject_xtra_data");
-                native_inject_xtra_data(data, data.length);
-                mXtraBackOff.reset();
+                if (DEBUG) Log.d(TAG, "calling native_inject_psds_data");
+                native_inject_psds_data(data, data.length);
+                mPsdsBackOff.reset();
             }
 
-            sendMessage(DOWNLOAD_XTRA_DATA_FINISHED, 0, null);
+            sendMessage(DOWNLOAD_PSDS_DATA_FINISHED, 0, null);
 
             if (data == null) {
                 // try again later
                 // since this is delayed and not urgent we do not hold a wake lock here
-                mHandler.sendEmptyMessageDelayed(DOWNLOAD_XTRA_DATA,
-                        mXtraBackOff.nextBackoffMillis());
+                mHandler.sendEmptyMessageDelayed(DOWNLOAD_PSDS_DATA,
+                        mPsdsBackOff.nextBackoffMillis());
             }
 
             // Release wake lock held by task, synchronize on mLock in case multiple
             // download tasks overrun.
             synchronized (mLock) {
-                if (mDownloadXtraWakeLock.isHeld()) {
+                if (mDownloadPsdsWakeLock.isHeld()) {
                     // This wakelock may have time-out, if a timeout was specified.
                     // Catch (and ignore) any timeout exceptions.
                     try {
-                        mDownloadXtraWakeLock.release();
-                        if (DEBUG) Log.d(TAG, "WakeLock released by handleDownloadXtraData()");
+                        mDownloadPsdsWakeLock.release();
+                        if (DEBUG) Log.d(TAG, "WakeLock released by handleDownloadPsdsData()");
                     } catch (Exception e) {
                         Log.i(TAG, "Wakelock timeout & release race exception in "
-                                + "handleDownloadXtraData()", e);
+                                + "handleDownloadPsdsData()", e);
                     }
                 } else {
                     Log.e(TAG, "WakeLock expired before release in "
-                            + "handleDownloadXtraData()");
+                            + "handleDownloadPsdsData()");
                 }
             }
         });
@@ -920,7 +921,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
         if (inited) {
             mEnabled = true;
-            mSupportsXtra = native_supports_xtra();
+            mSupportsPsds = native_supports_psds();
 
             // TODO: remove the following native calls if we can make sure they are redundant.
             if (mSuplServerHost != null) {
@@ -1162,9 +1163,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 deleteAidingData(extras);
             } else if ("force_time_injection".equals(command)) {
                 requestUtcTime();
-            } else if ("force_xtra_injection".equals(command)) {
-                if (mSupportsXtra) {
-                    xtraDownloadRequest();
+            } else if ("force_psds_injection".equals(command)) {
+                if (mSupportsPsds) {
+                    psdsDownloadRequest();
                 }
             } else {
                 Log.w(TAG, "sendExtraCommand: unknown command " + command);
@@ -1677,9 +1678,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     }
 
     @NativeEntryPoint
-    private void xtraDownloadRequest() {
-        if (DEBUG) Log.d(TAG, "xtraDownloadRequest");
-        sendMessage(DOWNLOAD_XTRA_DATA, 0, null);
+    private void psdsDownloadRequest() {
+        if (DEBUG) Log.d(TAG, "psdsDownloadRequest");
+        sendMessage(DOWNLOAD_PSDS_DATA, 0, null);
     }
 
     /**
@@ -2012,11 +2013,11 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 case REQUEST_LOCATION:
                     handleRequestLocation(msg.arg1 == 1, (boolean) msg.obj);
                     break;
-                case DOWNLOAD_XTRA_DATA:
-                    handleDownloadXtraData();
+                case DOWNLOAD_PSDS_DATA:
+                    handleDownloadPsdsData();
                     break;
-                case DOWNLOAD_XTRA_DATA_FINISHED:
-                    mDownloadXtraDataPending = STATE_IDLE;
+                case DOWNLOAD_PSDS_DATA_FINISHED:
+                    mDownloadPsdsDataPending = STATE_IDLE;
                     break;
                 case UPDATE_LOCATION:
                     handleUpdateLocation((Location) msg.obj);
@@ -2166,10 +2167,10 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 return "INJECT_NTP_TIME";
             case REQUEST_LOCATION:
                 return "REQUEST_LOCATION";
-            case DOWNLOAD_XTRA_DATA:
-                return "DOWNLOAD_XTRA_DATA";
-            case DOWNLOAD_XTRA_DATA_FINISHED:
-                return "DOWNLOAD_XTRA_DATA_FINISHED";
+            case DOWNLOAD_PSDS_DATA:
+                return "DOWNLOAD_PSDS_DATA";
+            case DOWNLOAD_PSDS_DATA_FINISHED:
+                return "DOWNLOAD_PSDS_DATA_FINISHED";
             case UPDATE_LOCATION:
                 return "UPDATE_LOCATION";
             case SUBSCRIPTION_OR_CARRIER_CONFIG_CHANGED:
@@ -2266,12 +2267,12 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     private native void native_inject_location(double latitude, double longitude, float accuracy);
 
-    // XTRA Support
+    // PSDS Support
     private native void native_inject_time(long time, long timeReference, int uncertainty);
 
-    private native boolean native_supports_xtra();
+    private native boolean native_supports_psds();
 
-    private native void native_inject_xtra_data(byte[] data, int length);
+    private native void native_inject_psds_data(byte[] data, int length);
 
     // DEBUG Support
     private native String native_get_internal_state();
