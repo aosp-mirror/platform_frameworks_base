@@ -28,6 +28,7 @@ import android.view.WindowInsets;
 import android.widget.FrameLayout;
 
 import androidx.dynamicanimation.animation.DynamicAnimation;
+import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
@@ -38,6 +39,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -113,25 +115,17 @@ public class PhysicsAnimationLayoutTestCase extends SysuiTestCase {
             throws InterruptedException {
         final CountDownLatch animLatch = new CountDownLatch(properties.length);
         for (DynamicAnimation.ViewProperty property : properties) {
-            mLayout.setTestEndListenerForProperty(new OneTimeEndListener() {
-                @Override
-                public void onAnimationEnd(DynamicAnimation animation, boolean canceled,
-                        float value,
-                        float velocity) {
-                    super.onAnimationEnd(animation, canceled, value, velocity);
-                    animLatch.countDown();
-                }
-            }, property);
+            mLayout.setTestEndActionForProperty(animLatch::countDown, property);
         }
-        animLatch.await(1, TimeUnit.SECONDS);
+
+        animLatch.await(2, TimeUnit.SECONDS);
     }
 
-    /** Uses a latch to wait for the message queue to finish. */
+    /** Uses a latch to wait for the main thread message queue to finish. */
     void waitForLayoutMessageQueue() throws InterruptedException {
-        // Wait for layout, then the view should be actually removed.
         CountDownLatch layoutLatch = new CountDownLatch(1);
         mMainThreadHandler.post(layoutLatch::countDown);
-        layoutLatch.await(1, TimeUnit.SECONDS);
+        layoutLatch.await(2, TimeUnit.SECONDS);
     }
 
     /**
@@ -145,8 +139,9 @@ public class PhysicsAnimationLayoutTestCase extends SysuiTestCase {
 
         @Override
         public void setController(PhysicsAnimationController controller) {
-            mMainThreadHandler.post(() -> super.setController(controller));
-            waitForMessageQueueAndIgnoreIfInterrupted();
+            runOnMainThreadAndBlock(
+                    () -> super.setController(
+                            new MainThreadAnimationControllerWrapper(controller)));
         }
 
         @Override
@@ -160,59 +155,139 @@ public class PhysicsAnimationLayoutTestCase extends SysuiTestCase {
         }
 
         @Override
-        protected void animateValueForChildAtIndex(DynamicAnimation.ViewProperty property,
-                int index, float value, float startVel, Runnable after) {
-            mMainThreadHandler.post(() ->
-                    super.animateValueForChildAtIndex(property, index, value, startVel, after));
-        }
-
-        @Override
         public WindowInsets getRootWindowInsets() {
             return mWindowInsets;
         }
 
         @Override
-        public void removeView(View view) {
-            mMainThreadHandler.post(() ->
-                    super.removeView(view));
-            waitForMessageQueueAndIgnoreIfInterrupted();
+        public void addView(View child, int index) {
+            child.setTag(R.id.physics_animator_tag, new TestablePhysicsPropertyAnimator(child));
+            super.addView(child, index);
         }
 
         @Override
         public void addView(View child, int index, ViewGroup.LayoutParams params) {
-            mMainThreadHandler.post(() ->
-                    super.addView(child, index, params));
-            waitForMessageQueueAndIgnoreIfInterrupted();
+            child.setTag(R.id.physics_animator_tag, new TestablePhysicsPropertyAnimator(child));
+            super.addView(child, index, params);
         }
 
         /**
-         * Wait for the queue but just catch and print the exception if interrupted, since we can't
-         * just add the exception to the overridden methods' signatures.
+         * Sets an end action that will be called after the 'real' end action that was already set.
          */
-        private void waitForMessageQueueAndIgnoreIfInterrupted() {
-            try {
-                waitForLayoutMessageQueue();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        private void setTestEndActionForProperty(
+                Runnable action, DynamicAnimation.ViewProperty property) {
+            final Runnable realEndAction = mEndActionForProperty.get(property);
+
+            setEndActionForProperty(() -> {
+                if (realEndAction != null) {
+                    realEndAction.run();
+                }
+
+                action.run();
+            }, property);
+        }
+
+        /** PhysicsPropertyAnimator that posts its animations to the main thread. */
+        protected class TestablePhysicsPropertyAnimator extends PhysicsPropertyAnimator {
+            public TestablePhysicsPropertyAnimator(View view) {
+                super(view);
+            }
+
+            @Override
+            protected void animateValueForChild(DynamicAnimation.ViewProperty property, View view,
+                    float value, float startVel, long startDelay, Runnable[] afterCallbacks) {
+                mMainThreadHandler.post(() -> super.animateValueForChild(
+                        property, view, value, startVel, startDelay, afterCallbacks));
             }
         }
 
         /**
-         * Sets an end listener that will be called after the 'real' end listener that was already
-         * set.
+         * Wrapper around an animation controller that dispatches methods that could start
+         * animations to the main thread.
          */
-        private void setTestEndListenerForProperty(DynamicAnimation.OnAnimationEndListener listener,
-                DynamicAnimation.ViewProperty property) {
-            final DynamicAnimation.OnAnimationEndListener realEndListener =
-                    mEndListenerForProperty.get(property);
+        protected class MainThreadAnimationControllerWrapper extends PhysicsAnimationController {
 
-            setEndListenerForProperty((animation, canceled, value, velocity) -> {
-                if (realEndListener != null) {
-                    realEndListener.onAnimationEnd(animation, canceled, value, velocity);
+            private final PhysicsAnimationController mWrappedController;
+
+            protected MainThreadAnimationControllerWrapper(PhysicsAnimationController controller) {
+                mWrappedController = controller;
+            }
+
+            @Override
+            protected void setLayout(PhysicsAnimationLayout layout) {
+                mWrappedController.setLayout(layout);
+            }
+
+            @Override
+            protected PhysicsAnimationLayout getLayout() {
+                return mWrappedController.getLayout();
+            }
+
+            @Override
+            Set<DynamicAnimation.ViewProperty> getAnimatedProperties() {
+                return mWrappedController.getAnimatedProperties();
+            }
+
+            @Override
+            int getNextAnimationInChain(DynamicAnimation.ViewProperty property, int index) {
+                return mWrappedController.getNextAnimationInChain(property, index);
+            }
+
+            @Override
+            float getOffsetForChainedPropertyAnimation(DynamicAnimation.ViewProperty property) {
+                return mWrappedController.getOffsetForChainedPropertyAnimation(property);
+            }
+
+            @Override
+            SpringForce getSpringForce(DynamicAnimation.ViewProperty property, View view) {
+                return mWrappedController.getSpringForce(property, view);
+            }
+
+            @Override
+            void onChildAdded(View child, int index) {
+                runOnMainThreadAndBlock(() -> mWrappedController.onChildAdded(child, index));
+            }
+
+            @Override
+            void onChildRemoved(View child, int index, Runnable finishRemoval) {
+                runOnMainThreadAndBlock(
+                        () -> mWrappedController.onChildRemoved(child, index, finishRemoval));
+            }
+
+            @Override
+            protected void setChildVisibility(View child, int index, int visibility) {
+                mWrappedController.setChildVisibility(child, index, visibility);
+            }
+
+            @Override
+            protected PhysicsPropertyAnimator animationForChild(View child) {
+                PhysicsPropertyAnimator animator =
+                        (PhysicsPropertyAnimator) child.getTag(R.id.physics_animator_tag);
+
+                if (!(animator instanceof TestablePhysicsPropertyAnimator)) {
+                    animator = new TestablePhysicsPropertyAnimator(child);
+                    child.setTag(R.id.physics_animator_tag, animator);
                 }
 
-                listener.onAnimationEnd(animation, canceled, value, velocity);
-            }, property);
+                return animator;
+            }
+        }
+    }
+
+    /**
+     * Posts the given Runnable on the main thread, and blocks the calling thread until it's run.
+     */
+    private void runOnMainThreadAndBlock(Runnable action) {
+        final CountDownLatch latch = new CountDownLatch(1);
+        mMainThreadHandler.post(() -> {
+            action.run();
+            latch.countDown();
+        });
+
+        try {
+            latch.await(5, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 }
