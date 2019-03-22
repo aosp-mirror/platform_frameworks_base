@@ -313,7 +313,7 @@ public class DynamicSystemClient {
      * allows it to send status updates to {@link #OnStatusChangedListener}. It is recommanded
      * to bind before calling {@link #start} and get status updates.
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
+    @RequiresPermission(android.Manifest.permission.INSTALL_DYNAMIC_SYSTEM)
     public void bind() {
         Intent intent = new Intent();
         intent.setClassName("com.android.dynsystem",
@@ -328,7 +328,7 @@ public class DynamicSystemClient {
      * Unbind from {@code DynamicSystem} installation service. Unbinding from the installation
      * service stops it from sending following status updates.
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
+    @RequiresPermission(android.Manifest.permission.INSTALL_DYNAMIC_SYSTEM)
     public void unbind() {
         if (!mBound) {
             return;
@@ -361,7 +361,7 @@ public class DynamicSystemClient {
      * @param systemUrl A network URL or a file URL to system image.
      * @param systemSize size of system image.
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
+    @RequiresPermission(android.Manifest.permission.INSTALL_DYNAMIC_SYSTEM)
     public void start(@NonNull Uri systemUrl, @BytesLong long systemSize) {
         start(systemUrl, systemSize, DEFAULT_USERDATA_SIZE);
     }
@@ -378,7 +378,7 @@ public class DynamicSystemClient {
      * @param systemSize size of system image.
      * @param userdataSize bytes reserved for userdata.
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
+    @RequiresPermission(android.Manifest.permission.INSTALL_DYNAMIC_SYSTEM)
     public void start(@NonNull Uri systemUrl, @BytesLong long systemSize,
             @BytesLong long userdataSize) {
         Intent intent = new Intent();

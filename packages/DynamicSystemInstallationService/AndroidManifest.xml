@@ -16,7 +16,7 @@
             android:name=".DynamicSystemInstallationService"
             android:enabled="true"
             android:exported="true"
-            android:permission="android.permission.MANAGE_DYNAMIC_SYSTEM"
+            android:permission="android.permission.INSTALL_DYNAMIC_SYSTEM"
             android:process=":dynsystem">
             <intent-filter>
                 <action android:name="android.os.image.action.NOTIFY_IF_IN_USE" />
@@ -26,7 +26,7 @@
 
         <activity android:name=".VerificationActivity"
             android:exported="true"
-            android:permission="android.permission.MANAGE_DYNAMIC_SYSTEM"
+            android:permission="android.permission.INSTALL_DYNAMIC_SYSTEM"
             android:theme="@android:style/Theme.Material.Light.Dialog.NoActionBar"
             android:process=":dynsystem">
             <intent-filter>
