@@ -3862,6 +3862,14 @@ class StorageManagerService extends IStorageManager.Stub
                         case "jp.naver.line.android": // b/124767356
                         case "com.mxtech.videoplayer.ad": // b/124531483
                         case "com.whatsapp": // b/124766614
+                        case "com.maxmpz.audioplayer": // b/127886230
+                        case "com.estrongs.android.pop": // b/127926473
+                        case "com.roidapp.photogrid": // b/128269119
+                        case "com.cleanmaster.mguard": // b/128384413
+                        case "com.skype.raider": // b/128487044
+                        case "org.telegram.messenger": // b/128652960
+                        case "com.jrtstudio.AnotherMusicPlayer": // b/129084562
+                        case "ak.alizandro.smartaudiobookplayer": // b/129084042
                             return Zygote.MOUNT_EXTERNAL_LEGACY;
                     }
                 }
