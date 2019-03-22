@@ -877,10 +877,17 @@ public class ChooserActivity extends ResolverActivity {
         }
         mChooserRowAdapter = new ChooserRowAdapter(mChooserListAdapter);
         mChooserRowAdapter.registerDataSetObserver(new OffsetDataSetObserver(adapterView));
-        adapterView.setAdapter(mChooserRowAdapter);
         if (listView != null) {
             listView.setItemsCanFocus(true);
+            listView.addOnLayoutChangeListener(
+                    (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+                        if (mChooserRowAdapter.calculateMaxTargetsPerRow(right - left)) {
+                            adapterView.setAdapter(mChooserRowAdapter);
+                        }
+                    });
         }
+
+        adapterView.setAdapter(mChooserRowAdapter);
     }
 
     @Override
@@ -2063,13 +2070,16 @@ public class ChooserActivity extends ResolverActivity {
     class ChooserRowAdapter extends BaseAdapter {
         private ChooserListAdapter mChooserListAdapter;
         private final LayoutInflater mLayoutInflater;
-        private int mAnimationCount = 0;
+        private int mCalculatedMaxTargetsPerRow = MAX_TARGETS_PER_ROW_LANDSCAPE;
 
         private DirectShareViewHolder mDirectShareViewHolder;
 
         private static final int VIEW_TYPE_DIRECT_SHARE = 0;
         private static final int VIEW_TYPE_NORMAL = 1;
         private static final int VIEW_TYPE_CONTENT_PREVIEW = 2;
+
+        private static final int MAX_TARGETS_PER_ROW_PORTRAIT = 4;
+        private static final int MAX_TARGETS_PER_ROW_LANDSCAPE = 8;
 
         public ChooserRowAdapter(ChooserListAdapter wrappedAdapter) {
             mChooserListAdapter = wrappedAdapter;
@@ -2090,9 +2100,40 @@ public class ChooserActivity extends ResolverActivity {
             });
         }
 
+        /**
+         * Determine how many targets can comfortably fit in a single row.
+         *
+         * @param width The new row width to use for recalculation
+         * @return true if the numbers of targets per row has changed
+         */
+        public boolean calculateMaxTargetsPerRow(int width) {
+            int targetWidth = getResources().getDimensionPixelSize(
+                    R.dimen.chooser_target_width);
+
+            if (targetWidth == 0 || width == 0) {
+                return false;
+            }
+
+            int margin = getResources().getDimensionPixelSize(
+                    R.dimen.chooser_edge_margin_normal);
+
+            int newCount =  (width - margin * 2) / targetWidth;
+            if (newCount != mCalculatedMaxTargetsPerRow) {
+                mCalculatedMaxTargetsPerRow = newCount;
+                return true;
+            }
+
+            return false;
+        }
+
         private int getMaxTargetsPerRow() {
-            // this will soon hold logic for portrait/landscape
-            return 4;
+            int maxTargets = MAX_TARGETS_PER_ROW_PORTRAIT;
+            if (getResources().getConfiguration().orientation
+                    == Configuration.ORIENTATION_LANDSCAPE) {
+                maxTargets = MAX_TARGETS_PER_ROW_LANDSCAPE;
+            }
+
+            return Math.min(maxTargets, mCalculatedMaxTargetsPerRow);
         }
 
         @Override
@@ -2159,9 +2200,7 @@ public class ChooserActivity extends ResolverActivity {
                 holder = (RowViewHolder) convertView.getTag();
             }
 
-            bindViewHolder(position, holder,
-                    viewType == VIEW_TYPE_DIRECT_SHARE
-                            ? ChooserListAdapter.MAX_SERVICE_TARGETS : getMaxTargetsPerRow());
+            bindViewHolder(position, holder);
 
             return holder.getViewGroup();
         }
@@ -2278,7 +2317,7 @@ public class ChooserActivity extends ResolverActivity {
             }
         }
 
-        void bindViewHolder(int rowPosition, RowViewHolder holder, int columnCount) {
+        void bindViewHolder(int rowPosition, RowViewHolder holder) {
             final int start = getFirstRowPosition(rowPosition);
             final int startType = mChooserListAdapter.getPositionTargetType(start);
 
@@ -2295,6 +2334,7 @@ public class ChooserActivity extends ResolverActivity {
                 setVertPadding(row, 0, 0);
             }
 
+            int columnCount = holder.getColumnCount();
             int end = start + columnCount - 1;
             while (mChooserListAdapter.getPositionTargetType(end) != startType && end >= start) {
                 end--;
@@ -2329,33 +2369,12 @@ public class ChooserActivity extends ResolverActivity {
             for (int i = 0; i < columnCount; i++) {
                 final View v = holder.getView(i);
                 if (start + i <= end) {
-                    setCellVisibility(holder, i, View.VISIBLE);
+                    holder.setViewVisibility(i, View.VISIBLE);
                     holder.setItemIndex(i, start + i);
                     mChooserListAdapter.bindView(holder.getItemIndex(i), v);
                 } else {
-                    setCellVisibility(holder, i, View.INVISIBLE);
+                    holder.setViewVisibility(i, View.INVISIBLE);
                 }
-            }
-        }
-
-        private void setCellVisibility(RowViewHolder holder, int i, int visibility) {
-            final View v = holder.getView(i);
-            if (visibility == View.VISIBLE) {
-                holder.setViewVisibility(i, true);
-                v.setVisibility(visibility);
-                v.setAlpha(1.0f);
-            } else if (visibility == View.INVISIBLE && holder.getViewVisibility(i)) {
-                holder.setViewVisibility(i, false);
-
-                ValueAnimator fadeAnim = ObjectAnimator.ofFloat(v, "alpha", 1.0f, 0f);
-                fadeAnim.setDuration(NO_DIRECT_SHARE_ANIM_IN_MILLIS);
-                fadeAnim.setInterpolator(new AccelerateInterpolator(1.0f));
-                fadeAnim.addListener(new AnimatorListenerAdapter() {
-                    public void onAnimationEnd(Animator animation) {
-                        v.setVisibility(View.INVISIBLE);
-                    }
-                });
-                fadeAnim.start();
             }
         }
 
@@ -2394,13 +2413,11 @@ public class ChooserActivity extends ResolverActivity {
         protected int mMeasuredRowHeight;
         private int[] mItemIndices;
         protected final View[] mCells;
-        private final boolean[] mCellVisibility;
         private final int mColumnCount;
 
         RowViewHolder(int cellCount) {
             this.mCells = new View[cellCount];
             this.mItemIndices = new int[cellCount];
-            this.mCellVisibility = new boolean[cellCount];
             this.mColumnCount = cellCount;
         }
 
@@ -2410,16 +2427,10 @@ public class ChooserActivity extends ResolverActivity {
 
         abstract ViewGroup getRow(int index);
 
+        abstract void setViewVisibility(int i, int visibility);
+
         public int getColumnCount() {
             return mColumnCount;
-        }
-
-        public void setViewVisibility(int index, boolean visibility) {
-            mCellVisibility[index] = visibility;
-        }
-
-        public boolean getViewVisibility(int index) {
-            return mCellVisibility[index];
         }
 
         public void measure() {
@@ -2477,6 +2488,10 @@ public class ChooserActivity extends ResolverActivity {
 
             return mRow;
         }
+
+        public void setViewVisibility(int i, int visibility) {
+            getView(i).setVisibility(visibility);
+        }
     }
 
     class DirectShareViewHolder extends RowViewHolder {
@@ -2489,12 +2504,15 @@ public class ChooserActivity extends ResolverActivity {
         private int mDirectShareCurrHeight = 0;
         private int mDirectShareMaxHeight = 0;
 
+        private final boolean[] mCellVisibility;
+
         DirectShareViewHolder(ViewGroup parent, List<ViewGroup> rows, int cellCountPerRow) {
             super(rows.size() * cellCountPerRow);
 
             this.mParent = parent;
             this.mRows = rows;
             this.mCellCountPerRow = cellCountPerRow;
+            this.mCellVisibility = new boolean[rows.size() * cellCountPerRow];
         }
 
         public ViewGroup addView(int index, View v) {
@@ -2531,6 +2549,27 @@ public class ChooserActivity extends ResolverActivity {
 
         public int getMeasuredRowHeight() {
             return mDirectShareCurrHeight;
+        }
+
+        public void setViewVisibility(int i, int visibility) {
+            final View v = getView(i);
+            if (visibility == View.VISIBLE) {
+                mCellVisibility[i] = true;
+                v.setVisibility(visibility);
+                v.setAlpha(1.0f);
+            } else if (visibility == View.INVISIBLE && mCellVisibility[i]) {
+                mCellVisibility[i] = false;
+
+                ValueAnimator fadeAnim = ObjectAnimator.ofFloat(v, "alpha", 1.0f, 0f);
+                fadeAnim.setDuration(NO_DIRECT_SHARE_ANIM_IN_MILLIS);
+                fadeAnim.setInterpolator(new AccelerateInterpolator(1.0f));
+                fadeAnim.addListener(new AnimatorListenerAdapter() {
+                    public void onAnimationEnd(Animator animation) {
+                        v.setVisibility(View.INVISIBLE);
+                    }
+                });
+                fadeAnim.start();
+            }
         }
 
         public void handleScroll(AbsListView view, int y, int oldy, int maxTargetsPerRow) {
