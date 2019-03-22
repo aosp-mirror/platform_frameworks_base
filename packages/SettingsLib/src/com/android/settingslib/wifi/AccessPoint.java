@@ -48,13 +48,14 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import androidx.annotation.NonNull;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.style.TtsSpan;
 import android.util.ArraySet;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.R;
@@ -1243,6 +1244,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
                     int id = context.getResources()
                             .getIdentifier("network_available_sign_in", "string", "android");
                     return context.getString(id);
+                } else if (nc.hasCapability(
+                        NetworkCapabilities.NET_CAPABILITY_PARTIAL_CONNECTIVITY)) {
+                    return context.getString(R.string.wifi_limited_connection);
                 } else if (!nc.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)) {
                     return context.getString(R.string.wifi_connected_no_internet);
                 }
