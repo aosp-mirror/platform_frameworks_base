@@ -2771,6 +2771,7 @@
   <java-symbol type="dimen" name="chooser_edge_margin_normal" />
   <java-symbol type="dimen" name="chooser_preview_image_font_size"/>
   <java-symbol type="dimen" name="chooser_preview_width" />
+  <java-symbol type="dimen" name="chooser_max_collapsed_height" />
   <java-symbol type="layout" name="chooser_grid" />
   <java-symbol type="layout" name="chooser_grid_preview_text" />
   <java-symbol type="layout" name="chooser_grid_preview_image" />
