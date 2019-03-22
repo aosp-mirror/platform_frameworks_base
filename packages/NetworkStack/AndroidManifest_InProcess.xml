@@ -20,6 +20,7 @@
           package="com.android.networkstack.inprocess"
           android:sharedUserId="android.uid.system"
           android:process="system">
+    <uses-sdk android:minSdkVersion="28" android:targetSdkVersion="28" />
     <application>
         <service android:name="com.android.server.NetworkStackService" android:process="system">
             <intent-filter>
