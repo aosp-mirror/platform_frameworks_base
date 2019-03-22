@@ -802,7 +802,7 @@
     <string name="permgrouprequest_visual">Allow
         &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to access your photos and videos?</string>
     <!-- Subtitle of the message shown to the user when the apps requests permission to access photos and videos [CHAR LIMIT=150]-->
-    <string name="permgrouprequestdetail_visual">Locations and other people in your photos and videos can be identified by the app</string>
+    <string name="permgrouprequestdetail_visual">This includes any locations tagged in your photos and videos</string>
 
     <!-- Title for the capability of an accessibility service to retrieve window content. -->
     <string name="capability_title_canRetrieveWindowContent">Retrieve window content</string>
