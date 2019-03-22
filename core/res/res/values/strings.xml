@@ -3283,17 +3283,35 @@
     <string name="dump_heap_notification"><xliff:g id="proc">%1$s</xliff:g> exceeded memory
         limit</string>
 
+    <!-- Notification text to tell the user that a heap dump that they initiated for a process is ready [CHAR LIMIT=NONE] -->
+    <string name="dump_heap_ready_notification">
+        <xliff:g id="proc" example="com.android.example">%1$s</xliff:g> heap dump ready</string>
+
     <!-- Notification details to tell the user that a process has exceeded its memory limit. -->
     <string name="dump_heap_notification_detail">Heap dump collected. Tap to share.</string>
 
     <!-- Title of dialog prompting the user to share a heap dump. -->
     <string name="dump_heap_title">Share heap dump?</string>
 
-    <!-- Text of dialog prompting the user to share a heap dump. -->
-    <string name="dump_heap_text">The process <xliff:g id="proc">%1$s</xliff:g> has exceeded
-        its process memory limit of <xliff:g id="size">%2$s</xliff:g>.  A heap dump is available
+    <!-- Text of dialog prompting the user to share a heap dump for an application [CHAR LIMIT=NONE] -->
+    <string name="dump_heap_text">The
+        <xliff:g id="proc" example="com.android.example">%1$s</xliff:g> process has exceeded
+        its memory limit of <xliff:g id="size" example="350MB">%2$s</xliff:g>. A heap dump is available
         for you to share with its developer.  Be careful: this heap dump can contain any
         of your personal information that the application has access to.</string>
+
+    <!-- Text of dialog prompting the user to share a heap dump for a system process [CHAR LIMIT=NONE] -->
+    <string name="dump_heap_system_text">The
+        <xliff:g id="proc" example="Android System">%1$s</xliff:g> process has exceeded
+        its memory limit of <xliff:g id="size" example="350MB">%2$s</xliff:g>. A heap dump is available
+        for you to share. Be careful: this heap dump can contain any sensitive personal information
+        that the process has access to.</string>
+
+    <!-- Text of dialog prompting the user to share a heap dump that they initiated [CHAR LIMIT=NONE] -->
+    <string name="dump_heap_ready_text">A heap dump of
+        <xliff:g id="proc" example="com.android.example">%1$s</xliff:g>\u2019s process is available
+        for you to share. Be careful: this heap dump may contain any sensitive personal information
+        that the process has access to.</string>
 
     <!-- Displayed in the title of the chooser for things to do with text that
          is to be sent to another application. For example, I can send

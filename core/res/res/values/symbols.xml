@@ -2114,8 +2114,11 @@
   <java-symbol type="string" name="device_storage_monitor_notification_channel" />
   <java-symbol type="string" name="dlg_ok" />
   <java-symbol type="string" name="dump_heap_notification" />
+  <java-symbol type="string" name="dump_heap_ready_notification" />
   <java-symbol type="string" name="dump_heap_notification_detail" />
   <java-symbol type="string" name="dump_heap_text" />
+  <java-symbol type="string" name="dump_heap_ready_text" />
+  <java-symbol type="string" name="dump_heap_system_text" />
   <java-symbol type="string" name="dump_heap_title" />
   <java-symbol type="string" name="factorytest_failed" />
   <java-symbol type="string" name="factorytest_no_action" />
