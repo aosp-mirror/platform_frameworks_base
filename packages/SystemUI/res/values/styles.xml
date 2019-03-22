@@ -353,13 +353,13 @@
     <style name="AutoSizingList">
         <item name="enableAutoSizing">true</item>
     </style>
-    <style name="Theme.AlertDialogHost" parent="android:Theme.DeviceDefault">
+    <style name="Theme.MediaProjectionAlertDialog" parent="android:Theme.DeviceDefault">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowIsFloating">true</item>
-        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:backgroundDimEnabled">true</item>
         <item name="android:alertDialogTheme">@style/Theme.SystemUI.Dialog.Alert</item>
     </style>
 
