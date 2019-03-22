@@ -95,6 +95,7 @@ package android {
     field public static final String MODIFY_PARENTAL_CONTROLS = "android.permission.MODIFY_PARENTAL_CONTROLS";
     field public static final String MODIFY_QUIET_MODE = "android.permission.MODIFY_QUIET_MODE";
     field public static final String MOVE_PACKAGE = "android.permission.MOVE_PACKAGE";
+    field public static final String NETWORK_SCAN = "android.permission.NETWORK_SCAN";
     field public static final String NETWORK_SETUP_WIZARD = "android.permission.NETWORK_SETUP_WIZARD";
     field public static final String NOTIFICATION_DURING_SETUP = "android.permission.NOTIFICATION_DURING_SETUP";
     field public static final String NOTIFY_TV_INPUTS = "android.permission.NOTIFY_TV_INPUTS";
