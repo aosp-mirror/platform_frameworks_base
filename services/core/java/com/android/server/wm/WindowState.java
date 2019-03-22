@@ -213,7 +213,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     static final String TAG = TAG_WITH_CLASS_NAME ? "WindowState" : TAG_WM;
 
     // The minimal size of a window within the usable area of the freeform stack.
-    // TODO(multi-window): fix the min sizes when we have mininum width/height support,
+    // TODO(multi-window): fix the min sizes when we have minimum width/height support,
     //                     use hard-coded min sizes for now.
     static final int MINIMUM_VISIBLE_WIDTH_IN_DP = 48;
     static final int MINIMUM_VISIBLE_HEIGHT_IN_DP = 32;
@@ -2183,8 +2183,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
-    int getSurfaceTouchableRegion(Region region, int flags) {
+    int getSurfaceTouchableRegion(InputWindowHandle inputWindowHandle, int flags) {
         final boolean modal = (flags & (FLAG_NOT_TOUCH_MODAL | FLAG_NOT_FOCUSABLE)) == 0;
+        final Region region = inputWindowHandle.touchableRegion;
+        setTouchableRegionCropIfNeeded(inputWindowHandle);
+
         if (mAppToken != null && !mAppToken.getResolvedOverrideBounds().isEmpty()) {
             // There may have touchable letterboxes around the activity, so in order to let the
             // letterboxes are able to receive touch event and slip to activity, the activity with
@@ -2246,6 +2249,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 region.set(-dw, -dh, dw + dw, dh + dh);
                 // Subtract the area that cannot be touched.
                 region.op(touchExcludeRegion, Region.Op.DIFFERENCE);
+                inputWindowHandle.setTouchableRegionCrop(null);
             }
             touchExcludeRegion.recycle();
         } else {
@@ -2918,6 +2922,20 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         cropRegionToStackBoundsIfNeeded(outRegion);
         subtractTouchExcludeRegionIfNeeded(outRegion);
+    }
+
+    private void setTouchableRegionCropIfNeeded(InputWindowHandle handle) {
+        final Task task = getTask();
+        if (task == null || !task.cropWindowsToStackBounds()) {
+            return;
+        }
+
+        final TaskStack stack = task.mStack;
+        if (stack == null) {
+            return;
+        }
+
+        handle.setTouchableRegionCrop(stack.getSurfaceControl());
     }
 
     private void cropRegionToStackBoundsIfNeeded(Region region) {
