@@ -338,6 +338,14 @@ public abstract class Context {
     public static final int BIND_ADJUST_BELOW_PERCEPTIBLE = 0x0100;
 
     /**
+     * Flag for {@link #bindService}: If binding from an app that has specific capabilities
+     * due to its foreground state such as an activity or foreground service, then this flag will
+     * allow the bound app to get the same capabilities, as long as it has the required permissions
+     * as well.
+     */
+    public static final int BIND_INCLUDE_CAPABILITIES = 0x00001000;
+
+    /**
      * Flag for {@link #bindService}: This flag is intended to be used only by the system to adjust
      * the scheduling policy for IMEs (and any other out-of-process user-visible components that
      * work closely with the top app) so that UI hosted in such services can have the same
