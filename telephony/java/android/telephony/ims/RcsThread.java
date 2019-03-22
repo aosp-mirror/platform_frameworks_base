@@ -33,6 +33,7 @@ import com.android.internal.annotations.VisibleForTesting;
 public abstract class RcsThread {
     /**
      * The rcs_participant_thread_id that represents this thread in the database
+     *
      * @hide
      */
     protected int mThreadId;
@@ -110,7 +111,8 @@ public abstract class RcsThread {
     public RcsMessageQueryResult getMessages() throws RcsMessageStoreException {
         RcsMessageQueryParams queryParameters =
                 new RcsMessageQueryParams.Builder().setThread(this).build();
-        return RcsControllerCall.call(iRcs -> iRcs.getMessages(queryParameters));
+        return new RcsMessageQueryResult(
+                RcsControllerCall.call(iRcs -> iRcs.getMessages(queryParameters)));
     }
 
     /**
