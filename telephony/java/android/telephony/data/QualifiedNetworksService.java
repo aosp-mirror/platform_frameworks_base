@@ -17,7 +17,6 @@
 package android.telephony.data;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Intent;
@@ -34,14 +33,21 @@ import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.util.List;
+
 /**
- * Base class of the qualified networks service. Services that extend QualifiedNetworksService must
- * register the service in their AndroidManifest to be detected by the framework. They must be
- * protected by the permission "android.permission.BIND_TELEPHONY_QUALIFIED_NETWORKS_SERVICE".
- * The qualified networks service definition in the manifest must follow the following format:
+ * Base class of the qualified networks service, which is a vendor service providing up-to-date
+ * qualified network information to the frameworks for data handover control. A qualified network
+ * is defined as an access network that is ready for bringing up data connection for given APN
+ * types.
+ *
+ * Services that extend QualifiedNetworksService must register the service in their AndroidManifest
+ * to be detected by the framework. They must be protected by the permission
+ * "android.permission.BIND_TELEPHONY_DATA_SERVICE". The qualified networks service definition in
+ * the manifest must follow the following format:
  * ...
  * <service android:name=".xxxQualifiedNetworksService"
- *     android:permission="android.permission.BIND_TELEPHONY_QUALIFIED_NETWORKS_SERVICE" >
+ *     android:permission="android.permission.BIND_TELEPHONY_DATA_SERVICE" >
  *     <intent-filter>
  *         <action android:name="android.telephony.data.QualifiedNetworksService" />
  *     </intent-filter>
@@ -55,28 +61,28 @@ public abstract class QualifiedNetworksService extends Service {
     public static final String QUALIFIED_NETWORKS_SERVICE_INTERFACE =
             "android.telephony.data.QualifiedNetworksService";
 
-    private static final int QNS_CREATE_NETWORK_AVAILABILITY_UPDATER                = 1;
-    private static final int QNS_REMOVE_NETWORK_AVAILABILITY_UPDATER                = 2;
-    private static final int QNS_REMOVE_ALL_NETWORK_AVAILABILITY_UPDATERS           = 3;
+    private static final int QNS_CREATE_NETWORK_AVAILABILITY_PROVIDER               = 1;
+    private static final int QNS_REMOVE_NETWORK_AVAILABILITY_PROVIDER               = 2;
+    private static final int QNS_REMOVE_ALL_NETWORK_AVAILABILITY_PROVIDERS          = 3;
     private static final int QNS_UPDATE_QUALIFIED_NETWORKS                          = 4;
 
     private final HandlerThread mHandlerThread;
 
     private final QualifiedNetworksServiceHandler mHandler;
 
-    private final SparseArray<NetworkAvailabilityUpdater> mUpdaters = new SparseArray<>();
+    private final SparseArray<NetworkAvailabilityProvider> mProviders = new SparseArray<>();
 
     /** @hide */
     @VisibleForTesting
     public final IQualifiedNetworksServiceWrapper mBinder = new IQualifiedNetworksServiceWrapper();
 
     /**
-     * The abstract class of the network availability updater implementation. The vendor qualified
+     * The abstract class of the network availability provider implementation. The vendor qualified
      * network service must extend this class to report the available networks for data
-     * connection setup. Note that each instance of network availability updater is associated with
+     * connection setup. Note that each instance of network availability provider is associated with
      * one physical SIM slot.
      */
-    public abstract class NetworkAvailabilityUpdater implements AutoCloseable {
+    public abstract class NetworkAvailabilityProvider implements AutoCloseable {
         private final int mSlotIndex;
 
         private IQualifiedNetworksServiceCallback mCallback;
@@ -89,14 +95,14 @@ public abstract class QualifiedNetworksService extends Service {
 
         /**
          * Constructor
-         * @param slotIndex SIM slot index the network availability updater associated with.
+         * @param slotIndex SIM slot index the network availability provider associated with.
          */
-        public NetworkAvailabilityUpdater(int slotIndex) {
+        public NetworkAvailabilityProvider(int slotIndex) {
             mSlotIndex = slotIndex;
         }
 
         /**
-         * @return SIM slot index the network availability updater associated with.
+         * @return SIM slot index the network availability provider associated with.
          */
         public final int getSlotIndex() {
             return mSlotIndex;
@@ -121,7 +127,7 @@ public abstract class QualifiedNetworksService extends Service {
         }
 
         /**
-         * Update the qualified networks list. Network availability updater must invoke this method
+         * Update the qualified networks list. Network availability provider must invoke this method
          * whenever the qualified networks changes. If this method is never invoked for certain
          * APN types, then frameworks will always use the default (i.e. cellular) data and network
          * service.
@@ -129,14 +135,16 @@ public abstract class QualifiedNetworksService extends Service {
          * @param apnTypes APN types of the qualified networks. This must be a bitmask combination
          * of {@link ApnSetting.ApnType}.
          * @param qualifiedNetworkTypes List of network types which are qualified for data
-         * connection setup for {@link @apnType} in the preferred order. Each element in the array
-         * is a {@link AccessNetworkType}. An empty list or null indicates no networks are qualified
+         * connection setup for {@link @apnType} in the preferred order. Each element in the list
+         * is a {@link AccessNetworkType}. An empty list indicates no networks are qualified
          * for data setup.
          */
-        public final void updateQualifiedNetworkTypes(@ApnType int apnTypes,
-                                                      @Nullable int[] qualifiedNetworkTypes) {
+        public final void updateQualifiedNetworkTypes(
+                @ApnType int apnTypes, @NonNull List<Integer> qualifiedNetworkTypes) {
+            int[] qualifiedNetworkTypesArray =
+                    qualifiedNetworkTypes.stream().mapToInt(i->i).toArray();
             mHandler.obtainMessage(QNS_UPDATE_QUALIFIED_NETWORKS, mSlotIndex, apnTypes,
-                    qualifiedNetworkTypes).sendToTarget();
+                    qualifiedNetworkTypesArray).sendToTarget();
         }
 
         private void onUpdateQualifiedNetworkTypes(@ApnType int apnTypes,
@@ -152,7 +160,7 @@ public abstract class QualifiedNetworksService extends Service {
         }
 
         /**
-         * Called when the qualified networks updater is removed. The extended class should
+         * Called when the qualified networks provider is removed. The extended class should
          * implement this method to perform cleanup works.
          */
         @Override
@@ -168,48 +176,48 @@ public abstract class QualifiedNetworksService extends Service {
         public void handleMessage(Message message) {
             IQualifiedNetworksServiceCallback callback;
             final int slotIndex = message.arg1;
-            NetworkAvailabilityUpdater updater = mUpdaters.get(slotIndex);
+            NetworkAvailabilityProvider provider = mProviders.get(slotIndex);
 
             switch (message.what) {
-                case QNS_CREATE_NETWORK_AVAILABILITY_UPDATER:
-                    if (mUpdaters.get(slotIndex) != null) {
-                        loge("Network availability updater for slot " + slotIndex
+                case QNS_CREATE_NETWORK_AVAILABILITY_PROVIDER:
+                    if (mProviders.get(slotIndex) != null) {
+                        loge("Network availability provider for slot " + slotIndex
                                 + " already existed.");
                         return;
                     }
 
-                    updater = createNetworkAvailabilityUpdater(slotIndex);
-                    if (updater != null) {
-                        mUpdaters.put(slotIndex, updater);
+                    provider = onCreateNetworkAvailabilityProvider(slotIndex);
+                    if (provider != null) {
+                        mProviders.put(slotIndex, provider);
 
                         callback = (IQualifiedNetworksServiceCallback) message.obj;
-                        updater.registerForQualifiedNetworkTypesChanged(callback);
+                        provider.registerForQualifiedNetworkTypesChanged(callback);
                     } else {
-                        loge("Failed to create network availability updater. slot index = "
+                        loge("Failed to create network availability provider. slot index = "
                                 + slotIndex);
                     }
                     break;
 
-                case QNS_REMOVE_NETWORK_AVAILABILITY_UPDATER:
-                    if (updater != null) {
-                        updater.close();
-                        mUpdaters.remove(slotIndex);
+                case QNS_REMOVE_NETWORK_AVAILABILITY_PROVIDER:
+                    if (provider != null) {
+                        provider.close();
+                        mProviders.remove(slotIndex);
                     }
                     break;
 
-                case QNS_REMOVE_ALL_NETWORK_AVAILABILITY_UPDATERS:
-                    for (int i = 0; i < mUpdaters.size(); i++) {
-                        updater = mUpdaters.get(i);
-                        if (updater != null) {
-                            updater.close();
+                case QNS_REMOVE_ALL_NETWORK_AVAILABILITY_PROVIDERS:
+                    for (int i = 0; i < mProviders.size(); i++) {
+                        provider = mProviders.get(i);
+                        if (provider != null) {
+                            provider.close();
                         }
                     }
-                    mUpdaters.clear();
+                    mProviders.clear();
                     break;
 
                 case QNS_UPDATE_QUALIFIED_NETWORKS:
-                    if (updater == null) break;
-                    updater.onUpdateQualifiedNetworkTypes(message.arg2, (int[]) message.obj);
+                    if (provider == null) break;
+                    provider.onUpdateQualifiedNetworkTypes(message.arg2, (int[]) message.obj);
                     break;
             }
         }
@@ -227,8 +235,8 @@ public abstract class QualifiedNetworksService extends Service {
     }
 
     /**
-     * Create the instance of {@link NetworkAvailabilityUpdater}. Vendor qualified network service
-     * must override this method to facilitate the creation of {@link NetworkAvailabilityUpdater}
+     * Create the instance of {@link NetworkAvailabilityProvider}. Vendor qualified network service
+     * must override this method to facilitate the creation of {@link NetworkAvailabilityProvider}
      * instances. The system will call this method after binding the qualified networks service for
      * each active SIM slot index.
      *
@@ -236,7 +244,7 @@ public abstract class QualifiedNetworksService extends Service {
      * @return Qualified networks service instance
      */
     @NonNull
-    public abstract NetworkAvailabilityUpdater createNetworkAvailabilityUpdater(int slotIndex);
+    public abstract NetworkAvailabilityProvider onCreateNetworkAvailabilityProvider(int slotIndex);
 
     /** @hide */
     @Override
@@ -251,7 +259,7 @@ public abstract class QualifiedNetworksService extends Service {
     /** @hide */
     @Override
     public boolean onUnbind(Intent intent) {
-        mHandler.obtainMessage(QNS_REMOVE_ALL_NETWORK_AVAILABILITY_UPDATERS).sendToTarget();
+        mHandler.obtainMessage(QNS_REMOVE_ALL_NETWORK_AVAILABILITY_PROVIDERS).sendToTarget();
         return false;
     }
 
@@ -267,15 +275,15 @@ public abstract class QualifiedNetworksService extends Service {
      */
     private class IQualifiedNetworksServiceWrapper extends IQualifiedNetworksService.Stub {
         @Override
-        public void createNetworkAvailabilityUpdater(int slotIndex,
-                                                     IQualifiedNetworksServiceCallback callback) {
-            mHandler.obtainMessage(QNS_CREATE_NETWORK_AVAILABILITY_UPDATER, slotIndex, 0,
+        public void createNetworkAvailabilityProvider(int slotIndex,
+                                                      IQualifiedNetworksServiceCallback callback) {
+            mHandler.obtainMessage(QNS_CREATE_NETWORK_AVAILABILITY_PROVIDER, slotIndex, 0,
                     callback).sendToTarget();
         }
 
         @Override
-        public void removeNetworkAvailabilityUpdater(int slotIndex) {
-            mHandler.obtainMessage(QNS_REMOVE_NETWORK_AVAILABILITY_UPDATER, slotIndex, 0)
+        public void removeNetworkAvailabilityProvider(int slotIndex) {
+            mHandler.obtainMessage(QNS_REMOVE_NETWORK_AVAILABILITY_PROVIDER, slotIndex, 0)
                     .sendToTarget();
         }
     }

@@ -28,9 +28,9 @@ import java.lang.ref.WeakReference;
 
 /**
  * Network service callback. Object of this class is passed to NetworkServiceProvider upon
- * calling getNetworkRegistrationInfo, to receive asynchronous feedback from NetworkServiceProvider
- * upon onGetNetworkRegistrationInfoComplete. It's like a wrapper of INetworkServiceCallback
- * because INetworkServiceCallback can't be a parameter type in public APIs.
+ * calling requestNetworkRegistrationInfo, to receive asynchronous feedback from
+ * NetworkServiceProvider upon onRequestNetworkRegistrationInfoComplete. It's like a wrapper of
+ * INetworkServiceCallback because INetworkServiceCallback can't be a parameter type in public APIs.
  *
  * @hide
  */
@@ -70,20 +70,20 @@ public class NetworkServiceCallback {
 
     /**
      * Called to indicate result of
-     * {@link NetworkServiceProvider#getNetworkRegistrationInfo(int, NetworkServiceCallback)}
+     * {@link NetworkServiceProvider#requestNetworkRegistrationInfo(int, NetworkServiceCallback)}
      *
      * @param result Result status like {@link NetworkServiceCallback#RESULT_SUCCESS} or
-     *                {@link NetworkServiceCallback#RESULT_ERROR_UNSUPPORTED}
+     * {@link NetworkServiceCallback#RESULT_ERROR_UNSUPPORTED}
      * @param state The state information to be returned to callback.
      */
-    public void onGetNetworkRegistrationInfoComplete(int result,
-                                                      @Nullable NetworkRegistrationInfo state) {
+    public void onRequestNetworkRegistrationInfoComplete(int result,
+                                                         @Nullable NetworkRegistrationInfo state) {
         INetworkServiceCallback callback = mCallback.get();
         if (callback != null) {
             try {
-                callback.onGetNetworkRegistrationInfoComplete(result, state);
+                callback.onRequestNetworkRegistrationInfoComplete(result, state);
             } catch (RemoteException e) {
-                Rlog.e(mTag, "Failed to onGetNetworkRegistrationInfoComplete on the remote");
+                Rlog.e(mTag, "Failed to onRequestNetworkRegistrationInfoComplete on the remote");
             }
         } else {
             Rlog.e(mTag, "Weak reference of callback is null.");
