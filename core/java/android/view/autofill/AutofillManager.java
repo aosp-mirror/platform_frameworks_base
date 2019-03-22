@@ -16,7 +16,6 @@
 
 package android.view.autofill;
 
-import static android.service.autofill.FillRequest.FLAG_AUGMENTED_AUTOFILL_REQUEST;
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.view.autofill.Helper.sDebug;
 import static android.view.autofill.Helper.sVerbose;
@@ -228,6 +227,7 @@ public final class AutofillManager {
     /** @hide */ public static final int FLAG_ADD_CLIENT_ENABLED = 0x1;
     /** @hide */ public static final int FLAG_ADD_CLIENT_DEBUG = 0x2;
     /** @hide */ public static final int FLAG_ADD_CLIENT_VERBOSE = 0x4;
+    /** @hide */ public static final int FLAG_ADD_CLIENT_ENABLED_FOR_AUGMENTED_AUTOFILL_ONLY = 0x8;
 
     /** @hide */ public static final int FLAG_SESSION_FOR_AUGMENTED_AUTOFILL_ONLY = 0x1;
 
@@ -519,6 +519,13 @@ public final class AutofillManager {
     /** When set, session is only used for augmented autofill requests. */
     @GuardedBy("mLock")
     private boolean mForAugmentedAutofillOnly;
+
+    /**
+     * When set, standard autofill is enabled, but sessions can still be created for augmented
+     * autofill only.
+     */
+    @GuardedBy("mLock")
+    private boolean mEnabledForAugmentedAutofillOnly;
 
     /** @hide */
     public interface AutofillClient {
@@ -946,7 +953,7 @@ public final class AutofillManager {
 
         ensureServiceClientAddedIfNeededLocked();
 
-        if (!mEnabled) {
+        if (!mEnabled && !mEnabledForAugmentedAutofillOnly) {
             if (sVerbose) Log.v(TAG, "ignoring notifyViewEntered(" + id + "): disabled");
 
             if (mCallback != null) {
@@ -988,7 +995,7 @@ public final class AutofillManager {
     void notifyViewExitedLocked(@NonNull View view) {
         ensureServiceClientAddedIfNeededLocked();
 
-        if (mEnabled && isActiveLocked()) {
+        if ((mEnabled || mEnabledForAugmentedAutofillOnly) && isActiveLocked()) {
             // dont notify exited when Activity is already in background
             if (!isClientDisablingEnterExitEvent()) {
                 final AutofillId id = view.getAutofillId();
@@ -1104,7 +1111,7 @@ public final class AutofillManager {
 
         ensureServiceClientAddedIfNeededLocked();
 
-        if (!mEnabled) {
+        if (!mEnabled && !mEnabledForAugmentedAutofillOnly) {
             if (sVerbose) {
                 Log.v(TAG, "ignoring notifyViewEntered(" + id + "): disabled");
             }
@@ -1155,7 +1162,7 @@ public final class AutofillManager {
     private void notifyViewExitedLocked(@NonNull View view, int virtualId) {
         ensureServiceClientAddedIfNeededLocked();
 
-        if (mEnabled && isActiveLocked()) {
+        if ((mEnabled || mEnabledForAugmentedAutofillOnly) && isActiveLocked()) {
             // don't notify exited when Activity is already in background
             if (!isClientDisablingEnterExitEvent()) {
                 final AutofillId id = getAutofillId(view, virtualId);
@@ -1674,14 +1681,17 @@ public final class AutofillManager {
     private void startSessionLocked(@NonNull AutofillId id, @NonNull Rect bounds,
             @NonNull AutofillValue value, int flags) {
         if (mEnteredForAugmentedAutofillIds != null
-                && mEnteredForAugmentedAutofillIds.contains(id)) {
+                && mEnteredForAugmentedAutofillIds.contains(id)
+                || mEnabledForAugmentedAutofillOnly) {
             if (sVerbose) Log.v(TAG, "Starting session for augmented autofill on " + id);
-            flags |= FLAG_AUGMENTED_AUTOFILL_REQUEST;
+            flags |= FLAG_ADD_CLIENT_ENABLED_FOR_AUGMENTED_AUTOFILL_ONLY;
         }
         if (sVerbose) {
             Log.v(TAG, "startSessionLocked(): id=" + id + ", bounds=" + bounds + ", value=" + value
                     + ", flags=" + flags + ", state=" + getStateAsStringLocked()
                     + ", compatMode=" + isCompatibilityModeEnabledLocked()
+                    + ", augmentedOnly=" + mForAugmentedAutofillOnly
+                    + ", enabledAugmentedOnly=" + mEnabledForAugmentedAutofillOnly
                     + ", enteredIds=" + mEnteredIds);
         }
         if (mState != STATE_UNKNOWN && !isFinishedLocked() && (flags & FLAG_MANUAL_REQUEST) == 0) {
@@ -1776,7 +1786,8 @@ public final class AutofillManager {
 
     @GuardedBy("mLock")
     private void ensureServiceClientAddedIfNeededLocked() {
-        if (getClient() == null) {
+        final AutofillClient client = getClient();
+        if (client == null) {
             return;
         }
 
@@ -1785,11 +1796,18 @@ public final class AutofillManager {
             try {
                 final int userId = mContext.getUserId();
                 final SyncResultReceiver receiver = new SyncResultReceiver(SYNC_CALLS_TIMEOUT_MS);
-                mService.addClient(mServiceClient, userId, receiver);
+                mService.addClient(mServiceClient, client.autofillClientGetComponentName(),
+                        userId, receiver);
                 final int flags = receiver.getIntResult();
                 mEnabled = (flags & FLAG_ADD_CLIENT_ENABLED) != 0;
                 sDebug = (flags & FLAG_ADD_CLIENT_DEBUG) != 0;
                 sVerbose = (flags & FLAG_ADD_CLIENT_VERBOSE) != 0;
+                mEnabledForAugmentedAutofillOnly = (flags
+                        & FLAG_ADD_CLIENT_ENABLED_FOR_AUGMENTED_AUTOFILL_ONLY) != 0;
+                if (sVerbose) {
+                    Log.v(TAG, "receiver results: flags=" + flags + " enabled=" + mEnabled
+                            + ", enabledForAugmentedOnly: " + mEnabledForAugmentedAutofillOnly);
+                }
                 final IAutoFillManager service = mService;
                 final IAutoFillManagerClient serviceClient = mServiceClient;
                 mServiceClientCleaner = Cleaner.create(this, () -> {
@@ -2406,6 +2424,7 @@ public final class AutofillManager {
             pw.print(" ("); pw.print(client.autofillClientGetActivityToken()); pw.println(')');
         }
         pw.print(pfx); pw.print("enabled: "); pw.println(mEnabled);
+        pw.print(pfx); pw.print("enabledAugmentedOnly: "); pw.println(mForAugmentedAutofillOnly);
         pw.print(pfx); pw.print("hasService: "); pw.println(mService != null);
         pw.print(pfx); pw.print("hasCallback: "); pw.println(mCallback != null);
         pw.print(pfx); pw.print("onInvisibleCalled "); pw.println(mOnInvisibleCalled);
