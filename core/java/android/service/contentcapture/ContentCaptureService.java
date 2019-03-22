@@ -367,7 +367,6 @@ public abstract class ContentCaptureService extends Service {
             stateFlags = initialState;
         } else {
             stateFlags |= ContentCaptureSession.STATE_DISABLED;
-
         }
         setClientState(clientReceiver, stateFlags, mClientInterface.asBinder());
     }

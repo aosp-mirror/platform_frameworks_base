@@ -172,6 +172,22 @@ public final class ContentCaptureManagerService extends
     }
 
     @Override // from AbstractMasterSystemService
+    protected void onServicePackageUpdatingLocked(int userId) {
+        final ContentCapturePerUserService service = getServiceForUserLocked(userId);
+        if (service != null) {
+            service.onPackageUpdatingLocked();
+        }
+    }
+
+    @Override // from AbstractMasterSystemService
+    protected void onServicePackageUpdatedLocked(@UserIdInt int userId) {
+        final ContentCapturePerUserService service = getServiceForUserLocked(userId);
+        if (service != null) {
+            service.onPackageUpdatedLocked();
+        }
+    }
+
+    @Override // from AbstractMasterSystemService
     protected void enforceCallingPermissionForManagement() {
         getContext().enforceCallingPermission(MANAGE_CONTENT_CAPTURE, mTag);
     }

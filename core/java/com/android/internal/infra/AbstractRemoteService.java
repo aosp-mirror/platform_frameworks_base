@@ -481,7 +481,11 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "[" + mComponentName + "]";
+        return getClass().getSimpleName() + "[" + mComponentName
+                + " " + System.identityHashCode(this)
+                + (mService != null ? " (bound)" : " (unbound)")
+                + (mDestroyed ? " (destroyed)" : "")
+                + "]";
     }
 
     /**
