@@ -58,7 +58,14 @@ import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_HOME;
 import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_NOTIFICATIONS;
 import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_OVERVIEW;
 import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_NONE;
+import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC;
+import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC;
+import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
+import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_MANAGED;
+import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
+import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX;
+import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
 import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_MODE_OFF;
 import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_MODE_OPPORTUNISTIC;
@@ -3475,15 +3482,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     static void validateQualityConstant(int quality) {
         switch (quality) {
-            case DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED:
-            case DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK:
-            case DevicePolicyManager.PASSWORD_QUALITY_SOMETHING:
-            case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
-            case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX:
-            case DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC:
-            case DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC:
-            case DevicePolicyManager.PASSWORD_QUALITY_COMPLEX:
-            case DevicePolicyManager.PASSWORD_QUALITY_MANAGED:
+            case PASSWORD_QUALITY_UNSPECIFIED:
+            case PASSWORD_QUALITY_BIOMETRIC_WEAK:
+            case PASSWORD_QUALITY_SOMETHING:
+            case PASSWORD_QUALITY_NUMERIC:
+            case PASSWORD_QUALITY_NUMERIC_COMPLEX:
+            case PASSWORD_QUALITY_ALPHABETIC:
+            case PASSWORD_QUALITY_ALPHANUMERIC:
+            case PASSWORD_QUALITY_COMPLEX:
+            case PASSWORD_QUALITY_MANAGED:
                 return;
         }
         throw new IllegalArgumentException("Invalid quality constant: 0x"
@@ -4747,41 +4754,36 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             // setActivePasswordState has never been called for it.
             metrics = new PasswordMetrics();
         }
+
         return isPasswordSufficientForUserWithoutCheckpointLocked(metrics, userHandle, parent);
     }
 
     /**
-     * Returns {@code true} if the password represented by the {@code passwordMetrics} argument
+     * Returns {@code true} if the password represented by the {@code metrics} argument
      * sufficiently fulfills the password requirements for the user corresponding to
-     * {@code userHandle} (or its parent, if {@code parent} is set to {@code true}).
+     * {@code userId} (or its parent, if {@code parent} is set to {@code true}).
      */
     private boolean isPasswordSufficientForUserWithoutCheckpointLocked(
-            PasswordMetrics passwordMetrics, int userHandle, boolean parent) {
-        final int requiredPasswordQuality = getPasswordQuality(null, userHandle, parent);
+            PasswordMetrics metrics, @UserIdInt int userId, boolean parent) {
+        final int requiredQuality = getPasswordQuality(null, userId, parent);
 
-        if (passwordMetrics.quality < requiredPasswordQuality) {
+        if (requiredQuality >= PASSWORD_QUALITY_NUMERIC
+                && metrics.length < getPasswordMinimumLength(null, userId, parent)) {
             return false;
         }
-        if (requiredPasswordQuality >= DevicePolicyManager.PASSWORD_QUALITY_NUMERIC
-                && passwordMetrics.length < getPasswordMinimumLength(
-                        null, userHandle, parent)) {
-            return false;
+
+        // PASSWORD_QUALITY_COMPLEX doesn't represent actual password quality, it means that number
+        // of characters of each class should be checked instead of quality itself.
+        if (requiredQuality == PASSWORD_QUALITY_COMPLEX) {
+            return metrics.upperCase >= getPasswordMinimumUpperCase(null, userId, parent)
+                    && metrics.lowerCase >= getPasswordMinimumLowerCase(null, userId, parent)
+                    && metrics.letters >= getPasswordMinimumLetters(null, userId, parent)
+                    && metrics.numeric >= getPasswordMinimumNumeric(null, userId, parent)
+                    && metrics.symbols >= getPasswordMinimumSymbols(null, userId, parent)
+                    && metrics.nonLetter >= getPasswordMinimumNonLetter(null, userId, parent);
+        } else {
+            return metrics.quality >= requiredQuality;
         }
-        if (requiredPasswordQuality != DevicePolicyManager.PASSWORD_QUALITY_COMPLEX) {
-            return true;
-        }
-        return passwordMetrics.upperCase >= getPasswordMinimumUpperCase(
-                    null, userHandle, parent)
-                && passwordMetrics.lowerCase >= getPasswordMinimumLowerCase(
-                        null, userHandle, parent)
-                && passwordMetrics.letters >= getPasswordMinimumLetters(
-                        null, userHandle, parent)
-                && passwordMetrics.numeric >= getPasswordMinimumNumeric(
-                        null, userHandle, parent)
-                && passwordMetrics.symbols >= getPasswordMinimumSymbols(
-                        null, userHandle, parent)
-                && passwordMetrics.nonLetter >= getPasswordMinimumNonLetter(
-                        null, userHandle, parent);
     }
 
     @Override
@@ -5042,14 +5044,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         int quality;
         synchronized (getLockObject()) {
             quality = getPasswordQuality(null, userHandle, /* parent */ false);
-            if (quality == DevicePolicyManager.PASSWORD_QUALITY_MANAGED) {
+            if (quality == PASSWORD_QUALITY_MANAGED) {
                 quality = PASSWORD_QUALITY_UNSPECIFIED;
             }
             // TODO(b/120484642): remove getBytes() below
             final PasswordMetrics metrics = PasswordMetrics.computeForPassword(password.getBytes());
             final int realQuality = metrics.quality;
-            if (realQuality < quality
-                    && quality != DevicePolicyManager.PASSWORD_QUALITY_COMPLEX) {
+            if (realQuality < quality && quality != PASSWORD_QUALITY_COMPLEX) {
                 Slog.w(LOG_TAG, "resetPassword: password quality 0x"
                         + Integer.toHexString(realQuality)
                         + " does not meet required quality 0x"
@@ -5063,7 +5064,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         + " does not meet required length " + length);
                 return false;
             }
-            if (quality == DevicePolicyManager.PASSWORD_QUALITY_COMPLEX) {
+            if (quality == PASSWORD_QUALITY_COMPLEX) {
                 int neededLetters = getPasswordMinimumLetters(null, userHandle, /* parent */ false);
                 if(metrics.letters < neededLetters) {
                     Slog.w(LOG_TAG, "resetPassword: number of letters " + metrics.letters
