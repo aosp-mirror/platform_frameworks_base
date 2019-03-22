@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.preference.Preference.OnPreferenceChangeInternalListener;
@@ -208,6 +209,7 @@ public class PreferenceGroupAdapter extends BaseAdapter
         return mPreferenceList.size();
     }
 
+    @UnsupportedAppUsage
     public Preference getItem(int position) {
         if (position < 0 || position >= getCount()) return null;
         return mPreferenceList.get(position);
