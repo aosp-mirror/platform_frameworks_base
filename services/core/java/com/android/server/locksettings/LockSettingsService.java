@@ -323,8 +323,8 @@ public class LockSettingsService extends ILockSettings.Stub {
             }
             Arrays.fill(newPasswordChars, '\u0000');
             final int quality = DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC;
-            setLockCredentialInternal(newPassword, CREDENTIAL_TYPE_PASSWORD,
-                    managedUserPassword, quality, managedUserId);
+            setLockCredentialInternal(newPassword, CREDENTIAL_TYPE_PASSWORD, managedUserPassword,
+                    quality, managedUserId, false);
             // We store a private credential for the managed user that's unlocked by the primary
             // account holder's credential. As such, the user will never be prompted to enter this
             // password directly, so we always store a password.
@@ -1302,12 +1302,14 @@ public class LockSettingsService extends ILockSettings.Stub {
                     if (profilePasswordMap != null && profilePasswordMap.containsKey(managedUserId)) {
                         setLockCredentialInternal(null, CREDENTIAL_TYPE_NONE,
                                 profilePasswordMap.get(managedUserId),
-                                DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, managedUserId);
+                                DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, managedUserId,
+                                false);
                     } else {
                         Slog.wtf(TAG, "clear tied profile challenges, but no password supplied.");
                         // Supplying null here would lead to untrusted credential change
                         setLockCredentialInternal(null, CREDENTIAL_TYPE_NONE, null,
-                                DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, managedUserId);
+                                DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, managedUserId,
+                                true);
                     }
                     mStorage.removeChildProfileLock(managedUserId);
                     removeKeystoreProfileKey(managedUserId);
@@ -1330,8 +1332,8 @@ public class LockSettingsService extends ILockSettings.Stub {
     // should call setLockCredentialInternal.
     @Override
     public void setLockCredential(byte[] credential, int type,
-            byte[] savedCredential, int requestedQuality, int userId)
-            throws RemoteException {
+            byte[] savedCredential, int requestedQuality, int userId,
+            boolean allowUntrustedChange) throws RemoteException {
 
         if (!mLockPatternUtils.hasSecureLockScreen()) {
             throw new UnsupportedOperationException(
@@ -1339,7 +1341,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
         checkWritePermission(userId);
         synchronized (mSeparateChallengeLock) {
-            setLockCredentialInternal(credential, type, savedCredential, requestedQuality, userId);
+            setLockCredentialInternal(credential, type, savedCredential, requestedQuality, userId,
+                    allowUntrustedChange);
             setSeparateProfileChallengeEnabledLocked(userId, true, null);
             notifyPasswordChanged(userId);
         }
@@ -1347,7 +1350,8 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private void setLockCredentialInternal(byte[] credential, @CredentialType int credentialType,
-            byte[] savedCredential, int requestedQuality, int userId) throws RemoteException {
+            byte[] savedCredential, int requestedQuality, int userId,
+            boolean allowUntrustedChange) throws RemoteException {
         // Normalize savedCredential and credential such that empty string is always represented
         // as null.
         if (savedCredential == null || savedCredential.length == 0) {
@@ -1359,7 +1363,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         synchronized (mSpManager) {
             if (isSyntheticPasswordBasedCredentialLocked(userId)) {
                 spBasedSetLockCredentialInternalLocked(credential, credentialType, savedCredential,
-                        requestedQuality, userId);
+                        requestedQuality, userId, allowUntrustedChange);
                 return;
             }
         }
@@ -1410,7 +1414,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 initializeSyntheticPasswordLocked(currentHandle.hash, savedCredential,
                         currentHandle.type, requestedQuality, userId);
                 spBasedSetLockCredentialInternalLocked(credential, credentialType, savedCredential,
-                        requestedQuality, userId);
+                        requestedQuality, userId, allowUntrustedChange);
                 return;
             }
         }
@@ -1705,7 +1709,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             mStrongAuth.reportSuccessfulStrongAuthUnlock(userId);
             if (shouldReEnrollBaseZero) {
                 setLockCredentialInternal(credential, storedHash.type, credentialToVerify,
-                        DevicePolicyManager.PASSWORD_QUALITY_SOMETHING, userId);
+                        DevicePolicyManager.PASSWORD_QUALITY_SOMETHING, userId, false);
             }
         }
 
@@ -1796,7 +1800,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                         storedHash.type == CREDENTIAL_TYPE_PATTERN
                                 ? DevicePolicyManager.PASSWORD_QUALITY_SOMETHING
                                 : DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC
-                                /* TODO(roosa): keep the same password quality */, userId);
+                                /* TODO(roosa): keep the same password quality */, userId, false);
                 if (!hasChallenge) {
                     notifyActivePasswordMetricsAvailable(storedHash.type, credential, userId);
                     // Use credentials to create recoverable keystore snapshot.
@@ -1841,7 +1845,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                     /* TODO(roosa): keep the same password quality */;
             if (shouldReEnroll) {
                 setLockCredentialInternal(credential, storedHash.type, credential,
-                        reEnrollQuality, userId);
+                        reEnrollQuality, userId, false);
             } else {
                 // Now that we've cleared of all required GK migration, let's do the final
                 // migration to synthetic password.
@@ -2544,7 +2548,8 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     @GuardedBy("mSpManager")
     private void spBasedSetLockCredentialInternalLocked(byte[] credential, int credentialType,
-            byte[] savedCredential, int requestedQuality, int userId) throws RemoteException {
+            byte[] savedCredential, int requestedQuality, int userId,
+            boolean allowUntrustedChange) throws RemoteException {
         if (DEBUG) Slog.d(TAG, "spBasedSetLockCredentialInternalLocked: user=" + userId);
         if (isManagedProfileWithUnifiedLock(userId)) {
             // get credential from keystore when managed profile has unified lock
@@ -2565,27 +2570,31 @@ public class LockSettingsService extends ILockSettings.Stub {
         VerifyCredentialResponse response = authResult.gkResponse;
         AuthenticationToken auth = authResult.authToken;
 
-        // If existing credential is provided, then it must match.
+        // If existing credential is provided, the existing credential must match.
         if (savedCredential != null && auth == null) {
-            throw new RemoteException("Failed to enroll " +
-                    (credentialType == CREDENTIAL_TYPE_PASSWORD ? "password" : "pattern"));
+            throw new IllegalStateException("Failed to enroll "
+                    + (credentialType == CREDENTIAL_TYPE_PASSWORD
+                    ? "password" : "pattern"));
         }
-
         boolean untrustedReset = false;
         if (auth != null) {
             onAuthTokenKnownForUser(userId, auth);
-        } else if (response != null
-                && response.getResponseCode() == VerifyCredentialResponse.RESPONSE_ERROR) {
+        } else if (response == null) {
+            throw new IllegalStateException("Password change failed.");
+        } else if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_ERROR) {
             // We are performing an untrusted credential change, by DevicePolicyManager or other
             // internal callers that don't provide the existing credential
             Slog.w(TAG, "Untrusted credential change invoked");
             // Try to get a cached auth token, so we can keep SP unchanged.
             auth = mSpCache.get(userId);
+            if (!allowUntrustedChange) {
+                throw new IllegalStateException("Untrusted credential change was invoked but it was"
+                        + " not allowed. This is likely a bug. Auth token is null: "
+                        + Boolean.toString(auth == null));
+            }
             untrustedReset = true;
-        } else /* response == null || responseCode == VerifyCredentialResponse.RESPONSE_RETRY */ {
-            Slog.w(TAG, "spBasedSetLockCredentialInternalLocked: " +
-                    (response != null ? "rate limit exceeded" : "failed"));
-            return;
+        } else /* responseCode == VerifyCredentialResponse.RESPONSE_RETRY */ {
+            throw new IllegalStateException("Rate limit exceeded, so password was not changed.");
         }
 
         if (auth != null) {
