@@ -703,8 +703,8 @@ message ConnectionEvent {
     // External scorer
     NOMINATOR_EXTERNAL_SCORED = 6;
 
-    // Netrec
-    NOMINATOR_NETREC = 7;
+    // Network Specifier
+    NOMINATOR_SPECIFIER = 7;
 
     // User connected choice override
     NOMINATOR_SAVED_USER_CONNECT_CHOICE = 8;
