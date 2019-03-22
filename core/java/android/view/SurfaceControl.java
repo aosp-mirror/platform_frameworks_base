@@ -432,6 +432,11 @@ public final class SurfaceControl implements Parcelable {
 
     /**
      * Builder class for {@link SurfaceControl} objects.
+     *
+     * By default the surface will be hidden, and have "unset" bounds, meaning it can
+     * be as large as the bounds of its parent if a buffer or child so requires.
+     *
+     * It is necessary to set at least a name via {@link Builder#setName}
      */
     public static class Builder {
         private SurfaceSession mSession;
@@ -466,11 +471,11 @@ public final class SurfaceControl implements Parcelable {
         @NonNull
         public SurfaceControl build() {
             if (mWidth < 0 || mHeight < 0) {
-                throw new IllegalArgumentException(
+                throw new IllegalStateException(
                         "width and height must be positive or unset");
             }
             if ((mWidth > 0 || mHeight > 0) && (isColorLayerSet() || isContainerLayerSet())) {
-                throw new IllegalArgumentException(
+                throw new IllegalStateException(
                         "Only buffer layers can set a valid buffer size.");
             }
             return new SurfaceControl(
@@ -860,7 +865,9 @@ public final class SurfaceControl implements Parcelable {
      * Release the local reference to the server-side surface. The surface
      * may continue to exist on-screen as long as its parent continues
      * to exist. To explicitly remove a surface from the screen use
-     * {@link Transaction#reparent} with a null-parent.
+     * {@link Transaction#reparent} with a null-parent. After release,
+     * {@link #isValid} will return false and other methods will throw
+     * an exception.
      *
      * Always call release() when you're done with a SurfaceControl.
      */
@@ -902,7 +909,8 @@ public final class SurfaceControl implements Parcelable {
 
     /**
      * Check whether this instance points to a valid layer with the system-compositor. For
-     * example this may be false if construction failed, or the layer was released.
+     * example this may be false if construction failed, or the layer was released
+     * ({@link #release}).
      *
      * @return Whether this SurfaceControl is valid.
      */
@@ -2042,8 +2050,7 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
-         * Close the transaction, if the transaction was not already applied this will cancel the
-         * transaction.
+         * Release the native transaction object, without applying it.
          */
         @Override
         public void close() {
@@ -2128,8 +2135,8 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
-         * Set the default buffer size for the SurfaceControl, if there is an
-         * {@link Surface} assosciated with the control, then
+         * Set the default buffer size for the SurfaceControl, if there is a
+         * {@link Surface} associated with the control, then
          * this will be the default size for buffers dequeued from it.
          * @param sc The surface to set the buffer size for.
          * @param w The default width
