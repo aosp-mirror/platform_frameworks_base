@@ -3439,10 +3439,18 @@ public class MediaPlayer2 implements AutoCloseable, AudioRouting {
 
         /**
          * Mutable builder to create a {@link MediaPlayer2.DrmPreparationInfo} object.
+         *
+         * {@link Builder#Builder(UUID) UUID} must not be null; {@link #setKeyType keyType}
+         * must be one of {@link MediaDrm#KEY_TYPE_STREAMING} or {@link MediaDrm#KEY_TYPE_OFFLINE}.
+         * <p>
+         * When {@link #setKeyType keyType} is {@link MediaDrm#KEY_TYPE_STREAMING},
+         * {@link #setInitData(byte[]) initData} and {@link #setMimeType(String) mimeType}
+         * must not be null; When {@link #setKeyType keyType} is {@link MediaDrm#KEY_TYPE_OFFLINE},
+         * {@link #setKeySetId(byte[]) keySetId} must not be null.
          */
         public static final class Builder {
 
-            private UUID mUUID;
+            private final UUID mUUID;
             private byte[] mKeySetId;
             private byte[] mInitData;
             private String mMimeType;
@@ -3450,15 +3458,11 @@ public class MediaPlayer2 implements AutoCloseable, AudioRouting {
             private Map<String, String> mOptionalParameters;
 
             /**
-             * Set UUID of the crypto scheme selected to decrypt content. An UUID can be retrieved
-             * from the source listening to {@link MediaPlayer2.DrmEventCallback#onDrmInfo}.
-             *
-             * @param uuid of selected crypto scheme
-             * @return this
+             * @param uuid UUID of the crypto scheme selected to decrypt content. An UUID can be
+             * retrieved from the source listening to {@link DrmEventCallback#onDrmInfo}.
              */
-            public @NonNull Builder setUuid(@NonNull UUID uuid) {
+            public Builder(@NonNull UUID uuid) {
                 this.mUUID = uuid;
-                return this;
             }
 
             /**
@@ -3531,12 +3535,16 @@ public class MediaPlayer2 implements AutoCloseable, AudioRouting {
             }
 
             /**
-             * @return an immutable {@link MediaPlayer2.DrmPreparationInfo} representing the
-             *         settings of this builder
+             * @return an immutable {@link DrmPreparationInfo} based on settings of this builder
              */
-            public @NonNull MediaPlayer2.DrmPreparationInfo build() {
-                return new MediaPlayer2.DrmPreparationInfo(mUUID, mKeySetId, mInitData, mMimeType,
-                        mKeyType, mOptionalParameters);
+            @NonNull
+            public DrmPreparationInfo build() {
+                final DrmPreparationInfo info = new DrmPreparationInfo(mUUID, mKeySetId, mInitData,
+                        mMimeType, mKeyType, mOptionalParameters);
+                if (!info.isValid()) {
+                    throw new IllegalArgumentException("invalid DrmPreparationInfo");
+                }
+                return info;
             }
 
         }
@@ -3572,13 +3580,61 @@ public class MediaPlayer2 implements AutoCloseable, AudioRouting {
             }
             return false;
         }
+
+        /**
+         * @return UUID of the crypto scheme selected to decrypt content.
+         */
+        @NonNull
+        public UUID getUuid() {
+            return mUUID;
+        }
+
+        /**
+         * @return identifier of the persisted offline key.
+         */
+        @Nullable
+        public byte[] getKeySetId() {
+            return mKeySetId;
+        }
+
+        /**
+         * @return container-specific DRM initialization data.
+         */
+        @Nullable
+        public byte[] getInitData() {
+            return mInitData;
+        }
+
+        /**
+         * @return mime type of the content
+         */
+        @Nullable
+        public String getMimeType() {
+            return mMimeType;
+        }
+
+        /**
+         * @return type of the key request.
+         */
+        @MediaPlayer2.MediaDrmKeyType
+        public int getKeyType() {
+            return mKeyType;
+        }
+
+        /**
+         * @return optional parameters to be included in the {@link MediaDrm.KeyRequest}.
+         */
+        @Nullable
+        public Map<String, String> getOptionalParameters() {
+            return mOptionalParameters;
+        }
     }
 
     /**
      * Interface definition for callbacks to be invoked when the player has the corresponding
      * DRM events.
      */
-    public static class DrmEventCallback {
+    public static abstract class DrmEventCallback {
 
         /**
          * Called to indicate DRM info is available. Return a {@link DrmPreparationInfo} object that
@@ -3591,10 +3647,9 @@ public class MediaPlayer2 implements AutoCloseable, AudioRouting {
          * @return a {@link DrmPreparationInfo} object to initialize DRM playback, or null to skip
          *         DRM initialization
          */
-        public @Nullable DrmPreparationInfo onDrmInfo(@NonNull MediaPlayer2 mp,
-                @NonNull DataSourceDesc dsd, @NonNull DrmInfo drmInfo) {
-            return null;
-        }
+        @Nullable
+        public abstract DrmPreparationInfo onDrmInfo(@NonNull MediaPlayer2 mp,
+                @NonNull DataSourceDesc dsd, @NonNull DrmInfo drmInfo);
 
         /**
          * Called to give the app the opportunity to configure DRM before the session is created.
@@ -3629,10 +3684,9 @@ public class MediaPlayer2 implements AutoCloseable, AudioRouting {
          *         throwing an {@link RuntimeException} from this callback would trigger an
          *         {@link EventCallback#onError}.
          */
-        public @NonNull byte[] onDrmKeyRequest(@NonNull MediaPlayer2 mp,
-                @NonNull DataSourceDesc dsd, @NonNull MediaDrm.KeyRequest request) {
-            return new byte[0];
-        }
+        @NonNull
+        public abstract byte[] onDrmKeyRequest(@NonNull MediaPlayer2 mp,
+                @NonNull DataSourceDesc dsd, @NonNull MediaDrm.KeyRequest request);
 
         /**
          * Called to notify the client that {@code mp} is ready to decrypt DRM protected data source
@@ -3657,10 +3711,11 @@ public class MediaPlayer2 implements AutoCloseable, AudioRouting {
     /**
      * Registers the callback to be invoked for various DRM events.
      *
+     * This is a synchronous call.
+     *
      * @param eventCallback the callback that will be run
      * @param executor the executor through which the callback should be invoked
      */
-    // This is a synchronous call.
     public void setDrmEventCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull DrmEventCallback eventCallback) {
         if (eventCallback == null) {
@@ -3677,8 +3732,9 @@ public class MediaPlayer2 implements AutoCloseable, AudioRouting {
 
     /**
      * Clear the {@link DrmEventCallback}.
+     *
+     * This is a synchronous call.
      */
-    // This is a synchronous call.
     public void clearDrmEventCallback() {
         synchronized (mDrmEventCallbackLock) {
             mDrmEventCallback = null;
