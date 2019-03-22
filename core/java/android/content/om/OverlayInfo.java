@@ -18,12 +18,14 @@ package android.content.om;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 
 /**
  * Immutable overlay information about a package. All PackageInfos that
@@ -138,6 +140,14 @@ public final class OverlayInfo implements Parcelable {
     public final String targetPackageName;
 
     /**
+     * Name of the target overlayable declaration.
+     *
+     * @hide
+     */
+    @SystemApi
+    public final String targetOverlayableName;
+
+    /**
      * Category of the overlay package
      *
      * @hide
@@ -190,16 +200,19 @@ public final class OverlayInfo implements Parcelable {
      * @hide
      */
     public OverlayInfo(@NonNull OverlayInfo source, @State int state) {
-        this(source.packageName, source.targetPackageName, source.category, source.baseCodePath,
-                state, source.userId, source.priority, source.isStatic);
+        this(source.packageName, source.targetPackageName, source.targetOverlayableName,
+                source.category, source.baseCodePath, state, source.userId, source.priority,
+                source.isStatic);
     }
 
     /** @hide */
     public OverlayInfo(@NonNull String packageName, @NonNull String targetPackageName,
-            @NonNull String category, @NonNull String baseCodePath, int state, int userId,
+            @Nullable String targetOverlayableName, @Nullable String category,
+            @NonNull String baseCodePath, int state, int userId,
             int priority, boolean isStatic) {
         this.packageName = packageName;
         this.targetPackageName = targetPackageName;
+        this.targetOverlayableName = targetOverlayableName;
         this.category = category;
         this.baseCodePath = baseCodePath;
         this.state = state;
@@ -213,6 +226,7 @@ public final class OverlayInfo implements Parcelable {
     public OverlayInfo(Parcel source) {
         packageName = source.readString();
         targetPackageName = source.readString();
+        targetOverlayableName = source.readString();
         category = source.readString();
         baseCodePath = source.readString();
         state = source.readInt();
@@ -256,6 +270,7 @@ public final class OverlayInfo implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(packageName);
         dest.writeString(targetPackageName);
+        dest.writeString(targetOverlayableName);
         dest.writeString(category);
         dest.writeString(baseCodePath);
         dest.writeInt(state);
@@ -335,6 +350,8 @@ public final class OverlayInfo implements Parcelable {
         result = prime * result + state;
         result = prime * result + ((packageName == null) ? 0 : packageName.hashCode());
         result = prime * result + ((targetPackageName == null) ? 0 : targetPackageName.hashCode());
+        result = prime * result + ((targetOverlayableName == null) ? 0
+                : targetOverlayableName.hashCode());
         result = prime * result + ((category == null) ? 0 : category.hashCode());
         result = prime * result + ((baseCodePath == null) ? 0 : baseCodePath.hashCode());
         return result;
@@ -364,7 +381,10 @@ public final class OverlayInfo implements Parcelable {
         if (!targetPackageName.equals(other.targetPackageName)) {
             return false;
         }
-        if (!category.equals(other.category)) {
+        if (!Objects.equals(targetOverlayableName, other.targetOverlayableName)) {
+            return false;
+        }
+        if (!Objects.equals(category, other.category)) {
             return false;
         }
         if (!baseCodePath.equals(other.baseCodePath)) {
@@ -375,7 +395,9 @@ public final class OverlayInfo implements Parcelable {
 
     @Override
     public String toString() {
-        return "OverlayInfo { overlay=" + packageName + ", target=" + targetPackageName + ", state="
-                + state + " (" + stateToString(state) + "), userId=" + userId + " }";
+        return "OverlayInfo { overlay=" + packageName + ", targetPackage=" + targetPackageName
+                + ((targetOverlayableName == null) ? ""
+                : ", targetOverlyabale=" + targetOverlayableName)
+                + ", state=" + state + " (" + stateToString(state) + "), userId=" + userId + " }";
     }
 }
