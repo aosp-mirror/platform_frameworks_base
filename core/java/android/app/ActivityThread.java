@@ -4521,7 +4521,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         if (!show && !r.stopped) {
             performStopActivityInner(r, null /* stopInfo */, show, false /* saveState */,
                     false /* finalStateRequest */, "handleWindowVisibility");
-        } else if (show && r.stopped) {
+        } else if (show && r.getLifecycleState() == ON_STOP) {
             // If we are getting ready to gc after going to the background, well
             // we are back active so skip it.
             unscheduleGcIdler();
