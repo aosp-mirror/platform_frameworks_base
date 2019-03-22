@@ -1855,6 +1855,7 @@ public class ServiceState implements Parcelable {
     /**
      * @hide
      */
+    @TestApi
     public void addNetworkRegistrationInfo(NetworkRegistrationInfo regState) {
         if (regState == null) return;
 

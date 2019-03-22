@@ -2555,8 +2555,32 @@ package android.telecom {
 
 package android.telephony {
 
+  public final class AccessNetworkConstants {
+    field public static final int TRANSPORT_TYPE_WLAN = 2; // 0x2
+    field public static final int TRANSPORT_TYPE_WWAN = 1; // 0x1
+  }
+
   public class CarrierConfigManager {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void overrideConfig(int, @Nullable android.os.PersistableBundle);
+  }
+
+  public final class DataSpecificRegistrationInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.telephony.LteVopsSupportInfo getLteVopsSupportInfo();
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.DataSpecificRegistrationInfo> CREATOR;
+  }
+
+  public final class LteVopsSupportInfo implements android.os.Parcelable {
+    ctor public LteVopsSupportInfo(int, int);
+    method public int describeContents();
+    method public int getEmcBearerSupport();
+    method public int getVopsSupport();
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.LteVopsSupportInfo> CREATOR;
+    field public static final int LTE_STATUS_NOT_AVAILABLE = 1; // 0x1
+    field public static final int LTE_STATUS_NOT_SUPPORTED = 3; // 0x3
+    field public static final int LTE_STATUS_SUPPORTED = 2; // 0x2
   }
 
   public class MbmsDownloadSession implements java.lang.AutoCloseable {
@@ -2571,7 +2595,52 @@ package android.telephony {
     field public static final String MBMS_STREAMING_SERVICE_OVERRIDE_METADATA = "mbms-streaming-service-override";
   }
 
+  public final class NetworkRegistrationInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getAccessNetworkTechnology();
+    method @NonNull public java.util.List<java.lang.Integer> getAvailableServices();
+    method @Nullable public android.telephony.CellIdentity getCellIdentity();
+    method @Nullable public android.telephony.DataSpecificRegistrationInfo getDataSpecificInfo();
+    method public int getDomain();
+    method public int getRegistrationState();
+    method public int getRejectCause();
+    method public int getRoamingType();
+    method public int getTransportType();
+    method public boolean isEmergencyEnabled();
+    method public boolean isRoaming();
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.NetworkRegistrationInfo> CREATOR;
+    field public static final int DOMAIN_CS = 1; // 0x1
+    field public static final int DOMAIN_PS = 2; // 0x2
+    field public static final int REGISTRATION_STATE_DENIED = 3; // 0x3
+    field public static final int REGISTRATION_STATE_HOME = 1; // 0x1
+    field public static final int REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING = 0; // 0x0
+    field public static final int REGISTRATION_STATE_NOT_REGISTERED_SEARCHING = 2; // 0x2
+    field public static final int REGISTRATION_STATE_ROAMING = 5; // 0x5
+    field public static final int REGISTRATION_STATE_UNKNOWN = 4; // 0x4
+    field public static final int SERVICE_TYPE_DATA = 2; // 0x2
+    field public static final int SERVICE_TYPE_EMERGENCY = 5; // 0x5
+    field public static final int SERVICE_TYPE_SMS = 3; // 0x3
+    field public static final int SERVICE_TYPE_UNKNOWN = 0; // 0x0
+    field public static final int SERVICE_TYPE_VIDEO = 4; // 0x4
+    field public static final int SERVICE_TYPE_VOICE = 1; // 0x1
+  }
+
+  public static final class NetworkRegistrationInfo.Builder {
+    ctor public NetworkRegistrationInfo.Builder();
+    method @NonNull public android.telephony.NetworkRegistrationInfo build();
+    method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setAccessNetworkTechnology(int);
+    method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setAvailableServices(@NonNull java.util.List<java.lang.Integer>);
+    method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setCellIdentity(@Nullable android.telephony.CellIdentity);
+    method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setDomain(int);
+    method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setEmergencyOnly(boolean);
+    method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setRegistrationState(int);
+    method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setRejectCause(int);
+    method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setTransportType(int);
+  }
+
   public class ServiceState implements android.os.Parcelable {
+    method public void addNetworkRegistrationInfo(android.telephony.NetworkRegistrationInfo);
     method public void setCdmaSystemAndNetworkId(int, int);
     method public void setCellBandwidths(int[]);
     method public void setChannelNumber(int);
