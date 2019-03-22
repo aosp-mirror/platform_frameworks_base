@@ -88,10 +88,10 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeDestroy(long nativeObject);
     private static native void nativeDisconnect(long nativeObject);
 
-    private static native GraphicBuffer nativeScreenshot(IBinder displayToken,
+    private static native ScreenshotGraphicBuffer nativeScreenshot(IBinder displayToken,
             Rect sourceCrop, int width, int height, boolean useIdentityTransform, int rotation,
             boolean captureSecureLayers);
-    private static native GraphicBuffer nativeCaptureLayers(IBinder layerHandleToken,
+    private static native ScreenshotGraphicBuffer nativeCaptureLayers(IBinder layerHandleToken,
             Rect sourceCrop, float frameScale);
 
     private static native long nativeCreateTransaction();
@@ -429,6 +429,46 @@ public final class SurfaceControl implements Parcelable {
      * @hide
      */
     public static final int METADATA_TASK_ID = 3;
+
+    /**
+     * A wrapper around GraphicBuffer that contains extra information about how to
+     * interpret the screenshot GraphicBuffer.
+     * @hide
+     */
+    public static class ScreenshotGraphicBuffer {
+        private final GraphicBuffer mGraphicBuffer;
+        private final ColorSpace mColorSpace;
+
+        public ScreenshotGraphicBuffer(GraphicBuffer graphicBuffer, ColorSpace colorSpace) {
+            mGraphicBuffer = graphicBuffer;
+            mColorSpace = colorSpace;
+        }
+
+       /**
+        * Create ScreenshotGraphicBuffer from existing native GraphicBuffer object.
+        * @param width The width in pixels of the buffer
+        * @param height The height in pixels of the buffer
+        * @param format The format of each pixel as specified in {@link PixelFormat}
+        * @param usage Hint indicating how the buffer will be used
+        * @param unwrappedNativeObject The native object of GraphicBuffer
+        * @param namedColorSpace Integer value of a named color space {@link ColorSpace.Named}
+        */
+        private static ScreenshotGraphicBuffer createFromNative(int width, int height, int format,
+                int usage, long unwrappedNativeObject, int namedColorSpace) {
+            GraphicBuffer graphicBuffer = GraphicBuffer.createFromExisting(width, height, format,
+                    usage, unwrappedNativeObject);
+            ColorSpace colorSpace = ColorSpace.get(ColorSpace.Named.values()[namedColorSpace]);
+            return new ScreenshotGraphicBuffer(graphicBuffer, colorSpace);
+        }
+
+        public ColorSpace getColorSpace() {
+            return mColorSpace;
+        }
+
+        public GraphicBuffer getGraphicBuffer() {
+            return mGraphicBuffer;
+        }
+    }
 
     /**
      * Builder class for {@link SurfaceControl} objects.
@@ -1823,10 +1863,10 @@ public final class SurfaceControl implements Parcelable {
             throw new IllegalArgumentException("consumer must not be null");
         }
 
-        final GraphicBuffer buffer = screenshotToBuffer(display, sourceCrop, width, height,
-                useIdentityTransform, rotation);
+        final ScreenshotGraphicBuffer buffer = screenshotToBuffer(display, sourceCrop, width,
+                height, useIdentityTransform, rotation);
         try {
-            consumer.attachAndQueueBuffer(buffer);
+            consumer.attachAndQueueBuffer(buffer.getGraphicBuffer());
         } catch (RuntimeException e) {
             Log.w(TAG, "Failed to take screenshot - " + e.getMessage());
         }
@@ -1869,17 +1909,16 @@ public final class SurfaceControl implements Parcelable {
         }
 
         SurfaceControl.rotateCropForSF(sourceCrop, rotation);
-        final GraphicBuffer buffer = screenshotToBuffer(displayToken, sourceCrop, width, height,
-                useIdentityTransform, rotation);
+        final ScreenshotGraphicBuffer buffer = screenshotToBuffer(displayToken, sourceCrop, width,
+                height, useIdentityTransform, rotation);
 
         if (buffer == null) {
             Log.w(TAG, "Failed to take screenshot");
             return null;
         }
-        // TODO(b/116112787) Now that hardware bitmap creation can take color space, we
-        // should continue to fix screenshot.
-        return Bitmap.wrapHardwareBuffer(HardwareBuffer.createFromGraphicBuffer(buffer),
-                ColorSpace.get(ColorSpace.Named.SRGB));
+        return Bitmap.wrapHardwareBuffer(
+                HardwareBuffer.createFromGraphicBuffer(buffer.getGraphicBuffer()),
+                buffer.getColorSpace());
     }
 
     /**
@@ -1905,8 +1944,8 @@ public final class SurfaceControl implements Parcelable {
      * @return Returns a GraphicBuffer that contains the captured content.
      * @hide
      */
-    public static GraphicBuffer screenshotToBuffer(IBinder display, Rect sourceCrop, int width,
-            int height, boolean useIdentityTransform, int rotation) {
+    public static ScreenshotGraphicBuffer screenshotToBuffer(IBinder display, Rect sourceCrop,
+            int width, int height, boolean useIdentityTransform, int rotation) {
         if (display == null) {
             throw new IllegalArgumentException("displayToken must not be null");
         }
@@ -1925,7 +1964,7 @@ public final class SurfaceControl implements Parcelable {
      *
      * @hide
      */
-    public static GraphicBuffer screenshotToBufferWithSecureLayersUnsafe(IBinder display,
+    public static ScreenshotGraphicBuffer screenshotToBufferWithSecureLayersUnsafe(IBinder display,
             Rect sourceCrop, int width, int height, boolean useIdentityTransform,
             int rotation) {
         if (display == null) {
@@ -1959,7 +1998,7 @@ public final class SurfaceControl implements Parcelable {
      * @return Returns a GraphicBuffer that contains the layer capture.
      * @hide
      */
-    public static GraphicBuffer captureLayers(IBinder layerHandleToken, Rect sourceCrop,
+    public static ScreenshotGraphicBuffer captureLayers(IBinder layerHandleToken, Rect sourceCrop,
             float frameScale) {
         return nativeCaptureLayers(layerHandleToken, sourceCrop, frameScale);
     }
