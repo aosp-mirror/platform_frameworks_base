@@ -40,6 +40,7 @@ import android.graphics.Rect;
 import android.metrics.LogMaker;
 import android.os.AsyncTask;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -1212,6 +1213,18 @@ final class AutofillManagerServiceImpl
 
     @GuardedBy("mLock")
     boolean isWhitelistedForAugmentedAutofillLocked(@NonNull ComponentName componentName) {
+        if (Build.IS_USER && mMaster.mAugmentedAutofillResolver.isTemporary(mUserId)) {
+            final String serviceName = mMaster.mAugmentedAutofillResolver.getServiceName(mUserId);
+            final ComponentName component = ComponentName.unflattenFromString(serviceName);
+            final String servicePackage = component == null ? null : component.getPackageName();
+            final String packageName = componentName.getPackageName();
+            if (!packageName.equals(servicePackage)) {
+                Slog.w(TAG, "Ignoring package " + packageName + " for augmented autofill while "
+                        + "using temporary service " + servicePackage);
+                return false;
+            }
+        }
+
         return mAugmentedWhitelistHelper.isWhitelisted(componentName);
     }
 

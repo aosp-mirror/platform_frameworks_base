@@ -40,6 +40,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ServiceInfo;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.UserHandle;
@@ -455,6 +456,7 @@ final class ContentCapturePerUserService
     }
 
     @GuardedBy("mLock")
+    @Nullable
     ContentCaptureOptions getOptionsForPackageLocked(@NonNull String packageName) {
         if (!mWhitelistHelper.isWhitelisted(packageName)) {
             if (mMaster.verbose) {
@@ -465,6 +467,14 @@ final class ContentCapturePerUserService
 
         final ArraySet<ComponentName> whitelistedComponents = mWhitelistHelper
                 .getWhitelistedComponents(packageName);
+        if (Build.IS_USER && isTemporaryServiceSetLocked()) {
+            final String servicePackageName = getServicePackageName();
+            if (!packageName.equals(servicePackageName)) {
+                Slog.w(mTag, "Ignoring package " + packageName
+                        + " while using temporary service " + servicePackageName);
+                return null;
+            }
+        }
         ContentCaptureOptions options = new ContentCaptureOptions(mMaster.mDevCfgLoggingLevel,
                 mMaster.mDevCfgMaxBufferSize, mMaster.mDevCfgIdleFlushingFrequencyMs,
                 mMaster.mDevCfgTextChangeFlushingFrequencyMs, mMaster.mDevCfgLogHistorySize,
