@@ -63,7 +63,7 @@ public class GraphicsEnvironment {
     private static final long SYSTEM_DRIVER_VERSION_CODE = 0;
     private static final String PROPERTY_GFX_DRIVER = "ro.gfx.driver.0";
     private static final String PROPERTY_GFX_DRIVER_BUILD_TIME = "ro.gfx.driver_build_time";
-    private static final String METADATA_DRIVER_BUILD_TIME = "driver_build_time";
+    private static final String METADATA_DRIVER_BUILD_TIME = "com.android.gamedriver.build_time";
     private static final String ANGLE_RULES_FILE = "a4a_rules.json";
     private static final String ANGLE_TEMP_RULES = "debug.angle.rules";
     private static final String ACTION_ANGLE_FOR_ANDROID = "android.app.action.ANGLE_FOR_ANDROID";
@@ -702,7 +702,7 @@ public class GraphicsEnvironment {
 
         final String driverBuildTime = driverAppInfo.metaData.getString(METADATA_DRIVER_BUILD_TIME);
         if (driverBuildTime == null || driverBuildTime.isEmpty()) {
-            throw new IllegalArgumentException("driver_build_time meta-data is not set");
+            throw new IllegalArgumentException("com.android.gamedriver.build_time is not set");
         }
         // driver_build_time in the meta-data is in "L<Unix epoch timestamp>" format. e.g. L123456.
         // Long.parseLong will throw if the meta-data "driver_build_time" is not set properly.
