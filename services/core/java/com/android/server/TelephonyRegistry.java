@@ -73,10 +73,12 @@ import com.android.server.am.BatteryStatsService;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.OptionalInt;
 
 /**
  * Since phone process can be restarted, this class provides a centralized place
@@ -1159,17 +1161,28 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     @Override
     public void notifyCarrierNetworkChange(boolean active) {
-        enforceNotifyPermissionOrCarrierPrivilege("notifyCarrierNetworkChange()");
+        // only CarrierService with carrier privilege rule should have the permission.
+        int subId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+        try {
+            subId = Arrays.stream(SubscriptionManager.from(mContext)
+                    .getActiveSubscriptionIdList())
+                    .filter(i -> TelephonyPermissions.checkCarrierPrivilegeForSubId(i))
+                    .findFirst().getAsInt();
+        } catch (NoSuchElementException ex) {
+            log("notifyCarrierNetworkChange without carrier privilege");
+        }
+        int phoneId = SubscriptionManager.getPhoneId(subId);
 
         if (VDBG) {
-            log("notifyCarrierNetworkChange: active=" + active);
+            log("notifyCarrierNetworkChange: active=" + active + "subId: " + subId);
         }
 
         synchronized (mRecords) {
             mCarrierNetworkChangeState = active;
             for (Record r : mRecords) {
                 if (r.matchPhoneStateListenerEvent(
-                        PhoneStateListener.LISTEN_CARRIER_NETWORK_CHANGE)) {
+                        PhoneStateListener.LISTEN_CARRIER_NETWORK_CHANGE) &&
+                        idMatch(r.subId, subId, phoneId)) {
                     try {
                         r.callback.onCarrierNetworkChange(active);
                     } catch (RemoteException ex) {

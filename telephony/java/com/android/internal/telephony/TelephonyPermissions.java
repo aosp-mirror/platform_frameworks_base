@@ -123,6 +123,19 @@ public final class TelephonyPermissions {
                 context, TELEPHONY_SUPPLIER, subId, pid, uid, callingPackage, message);
     }
 
+    /**
+     * Check whether the calling packages has carrier privileges for the passing subscription.
+     * @return {@code true} if the caller has carrier privileges, {@false} otherwise.
+     */
+    public static boolean checkCarrierPrivilegeForSubId(int subId) {
+        if (SubscriptionManager.isValidSubscriptionId(subId)
+                && getCarrierPrivilegeStatus(TELEPHONY_SUPPLIER, subId, Binder.getCallingUid())
+                == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
+            return true;
+        }
+        return false;
+    }
+
     @VisibleForTesting
     public static boolean checkReadPhoneState(
             Context context, Supplier<ITelephony> telephonySupplier, int subId, int pid, int uid,
@@ -204,9 +217,7 @@ public final class TelephonyPermissions {
         }
         // Calling packages with carrier privileges will also have access to device identifiers, but
         // this may be removed in a future release.
-        if (SubscriptionManager.isValidSubscriptionId(subId) && getCarrierPrivilegeStatus(
-                TELEPHONY_SUPPLIER, subId, uid)
-                == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
+        if (checkCarrierPrivilegeForSubId(subId)) {
             return true;
         }
         // else the calling package is not authorized to access the device identifiers; call
@@ -243,9 +254,7 @@ public final class TelephonyPermissions {
         }
         // If the calling package has carrier privileges then allow access to the subscriber
         // identifiers.
-        if (SubscriptionManager.isValidSubscriptionId(subId) && getCarrierPrivilegeStatus(
-                TELEPHONY_SUPPLIER, subId, uid)
-                == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
+        if (checkCarrierPrivilegeForSubId(subId)) {
             return true;
         }
         return reportAccessDeniedToReadIdentifiers(context, subId, pid, uid, callingPackage,
@@ -365,9 +374,7 @@ public final class TelephonyPermissions {
                         uid) == PackageManager.PERMISSION_GRANTED) {
                     return false;
                 }
-                if (SubscriptionManager.isValidSubscriptionId(subId)
-                        && getCarrierPrivilegeStatus(TELEPHONY_SUPPLIER, subId, uid)
-                        == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
+                if (checkCarrierPrivilegeForSubId(subId)) {
                     return false;
                 }
             }
