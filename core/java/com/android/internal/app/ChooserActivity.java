@@ -237,7 +237,7 @@ public class ChooserActivity extends ResolverActivity {
                     if (DEBUG) {
                         Log.d(TAG, "CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT; unbinding services");
                     }
-                    if (isDestroyed()) {
+                    if (mChooserListAdapter == null || isDestroyed()) {
                         break;
                     }
                     unbindRemainingServices();
@@ -822,6 +822,7 @@ public class ChooserActivity extends ResolverActivity {
             mRefinementResultReceiver = null;
         }
         unbindRemainingServices();
+        mChooserHandler.removeMessages(CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT);
         mChooserHandler.removeMessages(CHOOSER_TARGET_SERVICE_RESULT);
         if (USE_PREDICTION_MANAGER_FOR_DIRECT_TARGETS) {
             mAppPredictor.unregisterPredictionUpdates(mAppPredictorCallback);
