@@ -194,6 +194,11 @@ public:
             int32_t state, const std::vector<int64_t>& experimentIds) override;
 
     /**
+     * Binder call to get registered experiment IDs.
+     */
+    virtual Status getRegisteredExperimentIds(std::vector<int64_t>* expIdsOut);
+
+    /**
      * Binder call to get SpeakerImpedance atom.
      */
     virtual Return<void> reportSpeakerImpedance(const SpeakerImpedance& speakerImpedance) override;

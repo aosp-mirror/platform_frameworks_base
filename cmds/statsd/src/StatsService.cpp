@@ -65,8 +65,6 @@ constexpr const char* kOpUsage = "android:get_usage_stats";
 
 // for StatsDataDumpProto
 const int FIELD_ID_REPORTS_LIST = 1;
-// for TrainInfo experiment id serialization
-const int FIELD_ID_EXPERIMENT_ID = 1;
 
 static binder::Status ok() {
     return binder::Status::ok();
@@ -1181,7 +1179,7 @@ Status StatsService::unregisterPullerCallback(int32_t atomTag, const String16& p
 Status StatsService::sendBinaryPushStateChangedAtom(const android::String16& trainName,
                                                     int64_t trainVersionCode, int options,
                                                     int32_t state,
-                                                    const std::vector<int64_t>& experimentIds) {
+                                                    const std::vector<int64_t>& experimentIdsIn) {
     uid_t uid = IPCThreadState::self()->getCallingUid();
     // For testing
     if (uid == AID_ROOT || uid == AID_SYSTEM || uid == AID_SHELL) {
@@ -1201,7 +1199,7 @@ Status StatsService::sendBinaryPushStateChangedAtom(const android::String16& tra
 
     bool readTrainInfoSuccess = false;
     InstallTrainInfo trainInfo;
-    if (trainVersionCode == -1 || experimentIds.empty() || trainName.size() == 0) {
+    if (trainVersionCode == -1 || experimentIdsIn.empty() || trainName.size() == 0) {
         readTrainInfoSuccess = StorageManager::readTrainInfo(trainInfo);
     }
 
@@ -1209,27 +1207,19 @@ Status StatsService::sendBinaryPushStateChangedAtom(const android::String16& tra
         trainVersionCode = trainInfo.trainVersionCode;
     }
 
-    vector<uint8_t> experimentIdsProtoBuffer;
-    if (readTrainInfoSuccess && experimentIds.empty()) {
-        experimentIdsProtoBuffer = trainInfo.experimentIds;
+    // Find the right experiment IDs
+    std::vector<int64_t> experimentIds;
+    if (readTrainInfoSuccess && experimentIdsIn.empty()) {
+        experimentIds = trainInfo.experimentIds;
     } else {
-        ProtoOutputStream proto;
-        for (const auto& expId : experimentIds) {
-            proto.write(FIELD_TYPE_INT64 | FIELD_COUNT_REPEATED | FIELD_ID_EXPERIMENT_ID,
-                        (long long)expId);
-        }
-
-        experimentIdsProtoBuffer.resize(proto.size());
-        size_t pos = 0;
-        sp<ProtoReader> reader = proto.data();
-        while (reader->readBuffer() != NULL) {
-            size_t toRead = reader->currentToRead();
-            std::memcpy(&(experimentIdsProtoBuffer[pos]), reader->readBuffer(), toRead);
-            pos += toRead;
-            reader->move(toRead);
-        }
+        experimentIds = experimentIdsIn;
     }
 
+    // Flatten the experiment IDs to proto
+    vector<uint8_t> experimentIdsProtoBuffer;
+    writeExperimentIdsToProto(experimentIds, &experimentIdsProtoBuffer);
+
+    // Find the right train name
     std::string trainNameUtf8;
     if (readTrainInfoSuccess && trainName.size() == 0) {
         trainNameUtf8 = trainInfo.trainName;
@@ -1244,7 +1234,34 @@ Status StatsService::sendBinaryPushStateChangedAtom(const android::String16& tra
     LogEvent event(trainNameUtf8, trainVersionCode, requiresStaging, rollbackEnabled,
                    requiresLowLatencyMonitor, state, experimentIdsProtoBuffer, userId);
     mProcessor->OnLogEvent(&event);
-    StorageManager::writeTrainInfo(trainVersionCode, trainNameUtf8, state, experimentIdsProtoBuffer);
+    StorageManager::writeTrainInfo(trainVersionCode, trainNameUtf8, state, experimentIds);
+    return Status::ok();
+}
+
+Status StatsService::getRegisteredExperimentIds(std::vector<int64_t>* experimentIdsOut) {
+    uid_t uid = IPCThreadState::self()->getCallingUid();
+
+    // Caller must be granted these permissions
+    if (!checkCallingPermission(String16(kPermissionDump))) {
+        return exception(binder::Status::EX_SECURITY,
+                         StringPrintf("UID %d lacks permission %s", uid, kPermissionDump));
+    }
+    if (!checkCallingPermission(String16(kPermissionUsage))) {
+        return exception(binder::Status::EX_SECURITY,
+                         StringPrintf("UID %d lacks permission %s", uid, kPermissionUsage));
+    }
+    // TODO: add verifier permission
+
+    // Read the latest train info
+    InstallTrainInfo trainInfo;
+    if (!StorageManager::readTrainInfo(trainInfo)) {
+        // No train info means no experiment IDs, return an empty list
+        experimentIdsOut->clear();
+        return Status::ok();
+    }
+
+    // Copy the experiment IDs to the out vector
+    experimentIdsOut->assign(trainInfo.experimentIds.begin(), trainInfo.experimentIds.end());
     return Status::ok();
 }
 
