@@ -2564,7 +2564,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
                                     || (nai.networkMisc.acceptPartialConnectivity
                                             && nai.partialConnectivity);
                     // Once a network is determined to have partial connectivity, it cannot
-                    // go back to full connectivity without a disconnect.
+                    // go back to full connectivity without a disconnect. This is because
+                    // NetworkMonitor can only communicate either PARTIAL_CONNECTIVITY or VALID,
+                    // but not both.
+                    // TODO: Provide multi-testResult to improve the communication between
+                    // ConnectivityService and NetworkMonitor, so that ConnectivityService could
+                    // know the real status of network.
                     final boolean partialConnectivityChanged =
                             (partialConnectivity && !nai.partialConnectivity);
 
@@ -3581,9 +3586,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // NetworkMonitor detects the network is partial connectivity. Need to change the design to
         // popup the notification immediately when the network is partial connectivity.
         if (nai.partialConnectivity) {
-            // Treat PARTIAL_CONNECTIVITY as NO_INTERNET temporary until Settings has been updated.
-            // TODO: Need to change back to PARTIAL_CONNECTIVITY when Settings part is merged.
-            showNetworkNotification(nai, NotificationType.NO_INTERNET);
+            showNetworkNotification(nai, NotificationType.PARTIAL_CONNECTIVITY);
         } else {
             showNetworkNotification(nai, NotificationType.NO_INTERNET);
         }
