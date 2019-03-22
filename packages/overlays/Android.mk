@@ -39,7 +39,10 @@ LOCAL_REQUIRED_MODULES := \
 	IconShapeRoundedRectOverlay \
 	IconShapeSquareOverlay \
 	IconShapeSquircleOverlay \
-	IconShapeTeardropOverlay
+	IconShapeTeardropOverlay \
+	NavigationBarMode3ButtonOverlay \
+	NavigationBarMode2ButtonOverlay \
+	NavigationBarModeGesturalOverlay
 
 include $(BUILD_PHONY_PACKAGE)
 include $(CLEAR_VARS)

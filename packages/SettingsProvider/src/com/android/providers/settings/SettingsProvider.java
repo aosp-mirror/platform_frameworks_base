@@ -19,6 +19,12 @@ package com.android.providers.settings;
 import static android.os.Process.ROOT_UID;
 import static android.os.Process.SHELL_UID;
 import static android.os.Process.SYSTEM_UID;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_2BUTTON;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_2BUTTON_OVERLAY;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -33,6 +39,8 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.om.IOverlayManager;
+import android.content.om.OverlayInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
@@ -3235,7 +3243,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 176;
+            private static final int SETTINGS_VERSION = 177;
 
             private final int mUserId;
 
@@ -4310,6 +4318,57 @@ public class SettingsProvider extends ContentProvider {
 
                     currentVersion = 176;
                 }
+
+                if (currentVersion == 176) {
+                    // Version 176: Migrate the existing swipe up setting into the resource overlay
+                    //              for the navigation bar interaction mode.
+
+                    final IOverlayManager overlayManager = IOverlayManager.Stub.asInterface(
+                            ServiceManager.getService(Context.OVERLAY_SERVICE));
+                    int navBarMode = -1;
+
+                    // Migrate the swipe up setting only if it is set
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    final Setting swipeUpSetting = secureSettings.getSettingLocked(
+                            Secure.SWIPE_UP_TO_SWITCH_APPS_ENABLED);
+                    if (swipeUpSetting != null && !swipeUpSetting.isNull()) {
+                        navBarMode = swipeUpSetting.getValue().equals("1")
+                                ? NAV_BAR_MODE_2BUTTON
+                                : NAV_BAR_MODE_3BUTTON;
+                    }
+
+                    // Temporary: Only for migration for dogfooders, to be removed
+                    try {
+                        final OverlayInfo info = overlayManager.getOverlayInfo(
+                                "com.android.internal.experiment.navbar.type.inset",
+                                UserHandle.USER_CURRENT);
+                        if (info != null && info.isEnabled()) {
+                            navBarMode = NAV_BAR_MODE_GESTURAL;
+                        }
+                    } catch (RemoteException e) {
+                        // Ingore, fall through
+                    }
+
+                    if (navBarMode != -1) {
+                        try {
+                            overlayManager.setEnabled(NAV_BAR_MODE_3BUTTON_OVERLAY,
+                                    navBarMode == NAV_BAR_MODE_3BUTTON,
+                                    UserHandle.USER_CURRENT);
+                            overlayManager.setEnabled(NAV_BAR_MODE_2BUTTON_OVERLAY,
+                                    navBarMode == NAV_BAR_MODE_2BUTTON,
+                                    UserHandle.USER_CURRENT);
+                            overlayManager.setEnabled(NAV_BAR_MODE_GESTURAL_OVERLAY,
+                                    navBarMode == NAV_BAR_MODE_GESTURAL,
+                                    UserHandle.USER_CURRENT);
+                        } catch (RemoteException e) {
+                            throw new IllegalStateException(
+                                    "Failed to set nav bar interaction mode overlay");
+                        }
+                    }
+
+                    currentVersion = 177;
+                }
+
 
                 // vXXX: Add new settings above this point.
 
