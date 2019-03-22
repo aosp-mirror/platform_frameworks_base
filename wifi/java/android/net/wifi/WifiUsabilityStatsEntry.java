@@ -345,7 +345,7 @@ public final class WifiUsabilityStatsEntry implements Parcelable {
     }
 
     /** Whether the primary registered cell of current entry is same as that of previous entry */
-    public boolean getIsSameRegisteredCell() {
+    public boolean isSameRegisteredCell() {
         return mIsSameRegisteredCell;
     }
 }
