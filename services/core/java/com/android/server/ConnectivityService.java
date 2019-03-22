@@ -3470,8 +3470,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return mMultinetworkPolicyTracker.getAvoidBadWifi();
     }
 
-    @Override
-    public boolean getAvoidBadWifi() {
+    /**
+     * Return whether the device should maintain continuous, working connectivity by switching away
+     * from WiFi networks having no connectivity.
+     * @see MultinetworkPolicyTracker#getAvoidBadWifi()
+     */
+    public boolean shouldAvoidBadWifi() {
         if (!checkNetworkStackPermission()) {
             throw new SecurityException("avoidBadWifi requires NETWORK_STACK permission");
         }
