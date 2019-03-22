@@ -42,7 +42,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Color;
+import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -132,8 +132,6 @@ public class ResolverActivity extends Activity {
 
     /** See {@link #setRetainInOnStop}. */
     private boolean mRetainInOnStop;
-
-    SimpleIconFactory mSimpleIconFactory;
 
     private final PackageMonitor mPackageMonitor = new PackageMonitor() {
         @Override public void onSomePackagesChanged() {
@@ -310,11 +308,6 @@ public class ResolverActivity extends Activity {
         // We don't want to support Always Use if browsable layout is being used,
         // as to mitigate Intent Capturing vulnerability
         mSupportsAlwaysUseOption = supportsAlwaysUseOption && !mUseLayoutForBrowsables;
-
-        final int iconSize = getResources().getDimensionPixelSize(R.dimen.resolver_icon_size);
-        final int badgeSize = getResources().getDimensionPixelSize(R.dimen.resolver_badge_size);
-        mSimpleIconFactory = new SimpleIconFactory(this, mIconDpi, iconSize, badgeSize);
-        mSimpleIconFactory.setWrapperBackgroundColor(Color.WHITE);
 
         if (configureContentView(mIntents, initialIntents, rList)) {
             return;
@@ -500,64 +493,150 @@ public class ResolverActivity extends Activity {
         }
     }
 
-    @Nullable
-    Drawable getIcon(Resources res, int resId) {
-        Drawable result;
-        try {
-            result = res.getDrawableForDensity(resId, mIconDpi);
-        } catch (Resources.NotFoundException e) {
-            result = null;
-        }
-
-        return result;
-    }
 
     /**
-     * Loads the icon for the provided ResolveInfo. Defaults to using the application icon over
+     * Loads the icon for the provided ApplicationInfo. Defaults to using the application icon over
      * any IntentFilter or Activity icon to increase user understanding, with an exception for
      * applications that hold the right permission. Always attempts to use icon resources over
      * PackageManager loading mechanisms so badging can be done by iconloader.
      */
-    Drawable loadIconForResolveInfo(ResolveInfo ri) {
-        Drawable dr = null;
+    private abstract class TargetPresentationGetter {
+        @Nullable abstract Drawable getIconSubstitute();
+        @Nullable abstract String getAppSubLabel();
 
-        // Allow for app icon override given the right permission
-        if (PackageManager.PERMISSION_GRANTED == mPm.checkPermission(
-                android.Manifest.permission.SUBSTITUTE_SHARE_TARGET_APP_NAME_AND_ICON,
-                ri.activityInfo.applicationInfo.packageName)) {
-            try {
-                if (ri.resolvePackageName != null && ri.icon != 0) {
-                    dr = getIcon(mPm.getResourcesForApplication(ri.resolvePackageName), ri.icon);
-                }
-                if (dr == null) {
-                    final int iconRes = ri.getIconResource();
-                    if (iconRes != 0) {
-                        dr = getIcon(mPm.getResourcesForApplication(ri.activityInfo.packageName),
-                                iconRes);
+        private final ApplicationInfo mAi;
+        private final boolean mHasSubstitutePermission;
+
+        TargetPresentationGetter(ApplicationInfo ai) {
+            mAi = ai;
+            mHasSubstitutePermission = PackageManager.PERMISSION_GRANTED == mPm.checkPermission(
+                    android.Manifest.permission.SUBSTITUTE_SHARE_TARGET_APP_NAME_AND_ICON,
+                    mAi.packageName);
+        }
+
+        Drawable getIcon() {
+            return new BitmapDrawable(getResources(), getIconBitmap());
+        }
+
+        Bitmap getIconBitmap() {
+            Drawable dr = null;
+            if (mHasSubstitutePermission) {
+                dr = getIconSubstitute();
+            }
+
+            if (dr == null) {
+                try {
+                    if (mAi.icon != 0) {
+                        dr = loadIconFromResource(mPm.getResourcesForApplication(mAi), mAi.icon);
                     }
+                } catch (NameNotFoundException ignore) {
+                }
+            }
+
+            // Fall back to ApplicationInfo#loadIcon if nothing has been loaded
+            if (dr == null) {
+                dr = mAi.loadIcon(mPm);
+            }
+
+            SimpleIconFactory sif = SimpleIconFactory.obtain(ResolverActivity.this);
+            Bitmap icon = sif.createUserBadgedIconBitmap(dr, Process.myUserHandle());
+            sif.recycle();
+
+            return icon;
+        }
+
+        String getLabel() {
+            String label = null;
+            // Apps with the substitute permission will always show the sublabel as their label
+            if (mHasSubstitutePermission) {
+                label = getAppSubLabel();
+            }
+
+            if (label == null) {
+                label = (String) mAi.loadLabel(mPm);
+            }
+
+            return label;
+        }
+
+        String getSubLabel() {
+            // Apps with the substitute permission will never have a sublabel
+            if (mHasSubstitutePermission) return null;
+            return getAppSubLabel();
+        }
+
+        @Nullable
+        protected Drawable loadIconFromResource(Resources res, int resId) {
+            return res.getDrawableForDensity(resId, mIconDpi);
+        }
+
+    }
+
+    protected class ResolveInfoPresentationGetter extends TargetPresentationGetter {
+
+        private final ResolveInfo mRi;
+
+        ResolveInfoPresentationGetter(ResolveInfo ri) {
+            super(ri.activityInfo.applicationInfo);
+            mRi = ri;
+        }
+
+        @Override
+        Drawable getIconSubstitute() {
+            Drawable dr = null;
+            try {
+                // Do not use ResolveInfo#getIconResource() as it defaults to the app
+                if (mRi.resolvePackageName != null && mRi.icon != 0) {
+                    dr = loadIconFromResource(
+                            mPm.getResourcesForApplication(mRi.resolvePackageName), mRi.icon);
                 }
             } catch (NameNotFoundException e) {
                 Log.e(TAG, "SUBSTITUTE_SHARE_TARGET_APP_NAME_AND_ICON permission granted but "
                         + "couldn't find resources for package", e);
             }
+
+            return dr;
         }
 
-        // Use app icons for better user association
-        if (dr == null) {
+        @Override
+        String getAppSubLabel() {
+            return (String) mRi.loadLabel(mPm);
+        }
+    }
+
+    protected class ActivityInfoPresentationGetter extends TargetPresentationGetter {
+        private final ActivityInfo mActivityInfo;
+        protected ActivityInfoPresentationGetter(ActivityInfo activityInfo) {
+            super(activityInfo.applicationInfo);
+            mActivityInfo = activityInfo;
+        }
+
+        @Override
+        Drawable getIconSubstitute() {
+            Drawable dr = null;
             try {
-                dr = getIcon(mPm.getResourcesForApplication(ri.activityInfo.applicationInfo),
-                        ri.activityInfo.applicationInfo.icon);
-            } catch (NameNotFoundException ignore) {
+                // Do not use ActivityInfo#getIconResource() as it defaults to the app
+                if (mActivityInfo.icon != 0) {
+                    dr = loadIconFromResource(
+                            mPm.getResourcesForApplication(mActivityInfo.applicationInfo),
+                            mActivityInfo.icon);
+                }
+            } catch (NameNotFoundException e) {
+                Log.e(TAG, "SUBSTITUTE_SHARE_TARGET_APP_NAME_AND_ICON permission granted but "
+                        + "couldn't find resources for package", e);
             }
+
+            return dr;
         }
 
-        // Fall back to ApplicationInfo#loadIcon if nothing has been loaded
-        if (dr == null) {
-            dr = ri.activityInfo.applicationInfo.loadIcon(mPm);
+        @Override
+        String getAppSubLabel() {
+            return (String) mActivityInfo.loadLabel(mPm);
         }
+    }
 
-        return new BitmapDrawable(this.getResources(),
-                mSimpleIconFactory.createUserBadgedIconBitmap(dr, Process.myUserHandle()));
+    Drawable loadIconForResolveInfo(ResolveInfo ri) {
+        return (new ResolveInfoPresentationGetter(ri)).getIcon();
     }
 
     @Override
@@ -1250,33 +1329,6 @@ public class ResolverActivity extends Activity {
             return mDisplayIcon;
         }
 
-        public Drawable getBadgeIcon() {
-            // We only expose a badge if we have extended info.
-            // The badge is a higher-priority disambiguation signal
-            // but we don't need one if we wouldn't show extended info at all.
-            if (TextUtils.isEmpty(getExtendedInfo())) {
-                return null;
-            }
-
-            if (mBadge == null && mResolveInfo != null && mResolveInfo.activityInfo != null
-                    && mResolveInfo.activityInfo.applicationInfo != null) {
-                if (mResolveInfo.activityInfo.icon == 0 || mResolveInfo.activityInfo.icon
-                        == mResolveInfo.activityInfo.applicationInfo.icon) {
-                    // Badging an icon with exactly the same icon is silly.
-                    // If the activityInfo icon resid is 0 it will fall back
-                    // to the application's icon, making it a match.
-                    return null;
-                }
-                mBadge = mResolveInfo.activityInfo.applicationInfo.loadIcon(mPm);
-            }
-            return mBadge;
-        }
-
-        @Override
-        public CharSequence getBadgeContentDescription() {
-            return null;
-        }
-
         @Override
         public TargetInfo cloneFilledIn(Intent fillInIntent, int flags) {
             return new DisplayResolveInfo(this, fillInIntent, flags);
@@ -1413,19 +1465,9 @@ public class ResolverActivity extends Activity {
         CharSequence getExtendedInfo();
 
         /**
-         * @return The drawable that should be used to represent this target
+         * @return The drawable that should be used to represent this target including badge
          */
         Drawable getDisplayIcon();
-
-        /**
-         * @return The (small) icon to badge the target with
-         */
-        Drawable getBadgeIcon();
-
-        /**
-         * @return The content description for the badge icon
-         */
-        CharSequence getBadgeContentDescription();
 
         /**
          * Clone this target with the given fill-in information.
@@ -1963,16 +2005,6 @@ public class ResolverActivity extends Activity {
                 new LoadAdapterIconTask((DisplayResolveInfo) info).execute();
             }
             holder.icon.setImageDrawable(info.getDisplayIcon());
-            if (holder.badge != null) {
-                final Drawable badge = info.getBadgeIcon();
-                if (badge != null) {
-                    holder.badge.setImageDrawable(badge);
-                    holder.badge.setContentDescription(info.getBadgeContentDescription());
-                    holder.badge.setVisibility(View.VISIBLE);
-                } else {
-                    holder.badge.setVisibility(View.GONE);
-                }
-            }
         }
     }
 
@@ -2027,13 +2059,11 @@ public class ResolverActivity extends Activity {
         public TextView text;
         public TextView text2;
         public ImageView icon;
-        public ImageView badge;
 
         public ViewHolder(View view) {
             text = (TextView) view.findViewById(com.android.internal.R.id.text1);
             text2 = (TextView) view.findViewById(com.android.internal.R.id.text2);
             icon = (ImageView) view.findViewById(R.id.icon);
-            badge = (ImageView) view.findViewById(R.id.target_badge);
         }
     }
 

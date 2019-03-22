@@ -58,6 +58,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.metrics.LogMaker;
@@ -1465,14 +1466,6 @@ public class ChooserActivity extends ResolverActivity {
             return null;
         }
 
-        public Drawable getBadgeIcon() {
-            return null;
-        }
-
-        public CharSequence getBadgeContentDescription() {
-            return null;
-        }
-
         public TargetInfo cloneFilledIn(Intent fillInIntent, int flags) {
             return null;
         }
@@ -1561,31 +1554,49 @@ public class ChooserActivity extends ResolverActivity {
          */
         // TODO(121287224): Refactor code to apply the suggestion above
         private Drawable getChooserTargetIconDrawable(ChooserTarget target) {
+            Drawable directShareIcon = null;
+
+            // First get the target drawable and associated activity info
             final Icon icon = target.getIcon();
             if (icon != null) {
-                return icon.loadDrawable(ChooserActivity.this);
-            }
-            if (!USE_SHORTCUT_MANAGER_FOR_DIRECT_TARGETS) {
-                return null;
-            }
-
-            Bundle extras = target.getIntentExtras();
-            if (extras == null || !extras.containsKey(Intent.EXTRA_SHORTCUT_ID)) {
-                return null;
-            }
-            CharSequence shortcutId = extras.getCharSequence(Intent.EXTRA_SHORTCUT_ID);
-            LauncherApps launcherApps = (LauncherApps) getSystemService(
-                    Context.LAUNCHER_APPS_SERVICE);
-            final LauncherApps.ShortcutQuery q = new LauncherApps.ShortcutQuery();
-            q.setPackage(target.getComponentName().getPackageName());
-            q.setShortcutIds(Arrays.asList(shortcutId.toString()));
-            q.setQueryFlags(LauncherApps.ShortcutQuery.FLAG_MATCH_DYNAMIC);
-            final List<ShortcutInfo> shortcuts = launcherApps.getShortcuts(q, getUser());
-            if (shortcuts != null && shortcuts.size() > 0) {
-                return launcherApps.getShortcutIconDrawable(shortcuts.get(0), 0);
+                directShareIcon = icon.loadDrawable(ChooserActivity.this);
+            } else if (USE_SHORTCUT_MANAGER_FOR_DIRECT_TARGETS) {
+                Bundle extras = target.getIntentExtras();
+                if (extras != null && extras.containsKey(Intent.EXTRA_SHORTCUT_ID)) {
+                    CharSequence shortcutId = extras.getCharSequence(Intent.EXTRA_SHORTCUT_ID);
+                    LauncherApps launcherApps = (LauncherApps) getSystemService(
+                            Context.LAUNCHER_APPS_SERVICE);
+                    final LauncherApps.ShortcutQuery q = new LauncherApps.ShortcutQuery();
+                    q.setPackage(target.getComponentName().getPackageName());
+                    q.setShortcutIds(Arrays.asList(shortcutId.toString()));
+                    q.setQueryFlags(LauncherApps.ShortcutQuery.FLAG_MATCH_DYNAMIC);
+                    final List<ShortcutInfo> shortcuts = launcherApps.getShortcuts(q, getUser());
+                    if (shortcuts != null && shortcuts.size() > 0) {
+                        directShareIcon = launcherApps.getShortcutIconDrawable(shortcuts.get(0), 0);
+                    }
+                }
             }
 
-            return null;
+            if (directShareIcon == null) return null;
+
+            ActivityInfo info = null;
+            try {
+                info = mPm.getActivityInfo(target.getComponentName(), 0);
+            } catch (NameNotFoundException error) {
+                Log.e(TAG, "Could not find activity associated with ChooserTarget");
+            }
+
+            if (info == null) return null;
+
+            // Now fetch app icon and raster with no badging even in work profile
+            Bitmap appIcon = (new ActivityInfoPresentationGetter(info)).getIconBitmap();
+
+            // Raster target drawable with appIcon as a badge
+            SimpleIconFactory sif = SimpleIconFactory.obtain(ChooserActivity.this);
+            Bitmap directShareBadgedIcon = sif.createAppBadgedIconBitmap(directShareIcon, appIcon);
+            sif.recycle();
+
+            return new BitmapDrawable(getResources(), directShareBadgedIcon);
         }
 
         public float getModifiedScore() {
@@ -1681,16 +1692,6 @@ public class ChooserActivity extends ResolverActivity {
         @Override
         public Drawable getDisplayIcon() {
             return mDisplayIcon;
-        }
-
-        @Override
-        public Drawable getBadgeIcon() {
-            return mBadgeIcon;
-        }
-
-        @Override
-        public CharSequence getBadgeContentDescription() {
-            return mBadgeContentDescription;
         }
 
         public ChooserTarget getChooserTarget() {
