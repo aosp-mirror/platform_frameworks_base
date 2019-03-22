@@ -3344,6 +3344,10 @@ public final class MediaStore {
      * substantial changes, and that data should be rescanned.
      * <p>
      * No other assumptions should be made about the meaning of the version.
+     *
+     * @param volumeName specific volume to obtain an opaque version string for.
+     *            Must be one of the values returned from
+     *            {@link #getAllVolumeNames(Context)}.
      */
     public static @NonNull String getVersion(@NonNull Context context, @NonNull String volumeName) {
         final ContentResolver resolver = context.getContentResolver();
