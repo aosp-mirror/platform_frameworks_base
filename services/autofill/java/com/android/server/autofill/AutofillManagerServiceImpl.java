@@ -83,7 +83,6 @@ import com.android.server.autofill.AutofillManagerService.AutofillCompatState;
 import com.android.server.autofill.RemoteAugmentedAutofillService.RemoteAugmentedAutofillServiceCallbacks;
 import com.android.server.autofill.ui.AutoFillUI;
 import com.android.server.infra.AbstractPerUserSystemService;
-import com.android.server.infra.FrameworkResourcesServiceNameResolver;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -159,13 +158,6 @@ final class AutofillManagerServiceImpl
     /** When was {@link PruneTask} last executed? */
     private long mLastPrune = 0;
 
-    // TODO(b/128911469): move to AutofillManagerService
-    /**
-     * Object used to set the name of the augmented autofill service.
-     */
-    @NonNull
-    final FrameworkResourcesServiceNameResolver mAugmentedAutofillResolver;
-
     /**
      * Reference to the {@link RemoteAugmentedAutofillService}, is set on demand.
      */
@@ -194,11 +186,6 @@ final class AutofillManagerServiceImpl
         mUi = ui;
         mFieldClassificationStrategy = new FieldClassificationStrategy(getContext(), userId);
         mAutofillCompatState = autofillCompatState;
-
-        mAugmentedAutofillResolver = new FrameworkResourcesServiceNameResolver(master.getContext(),
-                com.android.internal.R.string.config_defaultAugmentedAutofillService);
-        mAugmentedAutofillResolver.setOnTemporaryServiceNameChangedCallback(
-                (u, s) -> updateRemoteAugmentedAutofillService());
 
         updateLocked(disabled);
     }
@@ -951,8 +938,7 @@ final class AutofillManagerServiceImpl
                 .getString(R.string.config_defaultAutofillService));
 
         pw.print(prefix); pw.println("mAugmentedAutofillNamer: ");
-        pw.print(prefix2); mAugmentedAutofillResolver.dumpShort(pw); pw.println();
-        pw.print(prefix2); mAugmentedAutofillResolver.dumpShort(pw, mUserId); pw.println();
+        pw.print(prefix2); mMaster.mAugmentedAutofillResolver.dumpShort(pw, mUserId); pw.println();
 
         if (mRemoteAugmentedAutofillService != null) {
             pw.print(prefix); pw.println("RemoteAugmentedAutofillService: ");
@@ -1109,7 +1095,7 @@ final class AutofillManagerServiceImpl
     @GuardedBy("mLock")
     @Nullable RemoteAugmentedAutofillService getRemoteAugmentedAutofillServiceLocked() {
         if (mRemoteAugmentedAutofillService == null) {
-            final String serviceName = mAugmentedAutofillResolver.getServiceName(mUserId);
+            final String serviceName = mMaster.mAugmentedAutofillResolver.getServiceName(mUserId);
             if (serviceName == null) {
                 if (mMaster.verbose) {
                     Slog.v(TAG, "getRemoteAugmentedAutofillServiceLocked(): not set");
@@ -1117,8 +1103,8 @@ final class AutofillManagerServiceImpl
                 return null;
             }
             final Pair<ServiceInfo, ComponentName> pair = RemoteAugmentedAutofillService
-                    .getComponentName(
-                            serviceName, mUserId, mAugmentedAutofillResolver.isTemporary(mUserId));
+                    .getComponentName(serviceName, mUserId,
+                            mMaster.mAugmentedAutofillResolver.isTemporary(mUserId));
             if (pair == null) return null;
 
             mRemoteAugmentedAutofillServiceInfo = pair.first;
@@ -1148,7 +1134,8 @@ final class AutofillManagerServiceImpl
     }
 
     /**
-     * Called when the {@link #mAugmentedAutofillResolver} changed (among other places).
+     * Called when the {@link AutofillManagerService#mAugmentedAutofillResolver}
+     * changed (among other places).
      */
     void updateRemoteAugmentedAutofillService() {
         synchronized (mLock) {
