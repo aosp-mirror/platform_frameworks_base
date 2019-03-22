@@ -140,21 +140,21 @@ public class DataServiceCallback {
     }
 
     /**
-     * Called to indicate result for the request {@link DataServiceProvider#getDataCallList(
+     * Called to indicate result for the request {@link DataServiceProvider#requestDataCallList(
      * DataServiceCallback)}.
      *
      * @param result The result code. Must be one of the {@link ResultCode}.
      * @param dataCallList List of the current active data connection. If no data call is presented,
      * set it to an empty list.
      */
-    public void onGetDataCallListComplete(@ResultCode int result,
-                                          @NonNull List<DataCallResponse> dataCallList) {
+    public void onRequestDataCallListComplete(@ResultCode int result,
+                                              @NonNull List<DataCallResponse> dataCallList) {
         IDataServiceCallback callback = mCallback.get();
         if (callback != null) {
             try {
-                callback.onGetDataCallListComplete(result, dataCallList);
+                callback.onRequestDataCallListComplete(result, dataCallList);
             } catch (RemoteException e) {
-                Rlog.e(TAG, "Failed to onGetDataCallListComplete on the remote");
+                Rlog.e(TAG, "Failed to onRequestDataCallListComplete on the remote");
             }
         }
     }
