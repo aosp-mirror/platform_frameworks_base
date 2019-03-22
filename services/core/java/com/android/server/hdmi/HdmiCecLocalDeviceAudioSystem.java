@@ -970,7 +970,10 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     @ServiceThreadOnly
     void doManualPortSwitching(int portId, IHdmiControlCallback callback) {
         assertRunOnServiceThread();
-        // TODO: validate port ID
+        if (!mService.isValidPortId(portId)) {
+            invokeCallback(callback, HdmiControlManager.RESULT_TARGET_NOT_AVAILABLE);
+            return;
+        }
         if (portId == getLocalActivePort()) {
             invokeCallback(callback, HdmiControlManager.RESULT_SUCCESS);
             return;
