@@ -5320,6 +5320,21 @@
     <string name="battery_saver_sticky_disabled_notification_title">Battery Saver won\u2019t reactivate until battery low again</string>
     <!-- Summary of notification letting users know why battery saver didn't turn back on automatically after the device was unplugged [CHAR_LIMIT=NONE] -->
     <string name="battery_saver_sticky_disabled_notification_summary">Battery has been charged to a sufficient level. Battery Saver won\u2019t reactivate until the battery is low again.</string>
+    <!-- Title of notification letting users know the battery level at the time the notification was posted [CHAR_LIMIT=80] -->
+    <string name="battery_saver_charged_notification_title" product="default">Phone <xliff:g id="charge level" example="90%">%1$s</xliff:g> charged</string>
+    <!-- Title of notification letting users know the battery level at the time the notification was posted [CHAR_LIMIT=80] -->
+    <string name="battery_saver_charged_notification_title" product="tablet">Tablet <xliff:g id="charge level" example="90%">%1$s</xliff:g> charged</string>
+    <!-- Title of notification letting users know the battery level at the time the notification was posted [CHAR_LIMIT=80] -->
+    <string name="battery_saver_charged_notification_title" product="device">Device <xliff:g id="charge level" example="90%">%1$s</xliff:g> charged</string>
+    <!-- Summary of notification letting users know that battery saver is now off [CHAR_LIMIT=NONE] -->
+    <string name="battery_saver_off_notification_summary">Battery Saver is off. Features no longer restricted.</string>
+    <!-- Alternative summary of notification letting users know that battery saver has been turned off.
+     If it's easy to translate the difference between "Battery Saver turned off. Features no longer restricted."
+     and "Battery Saver is off. Features no longer restricted." into the target language,
+     then translate "Battery Saver turned off. Features no longer restricted."
+     If the translation doesn't make a difference or the difference is hard to capture in the target language,
+     then translate "Battery Saver is off. Features no longer restricted." instead. [CHAR_LIMIT=NONE] -->
+    <string name="battery_saver_off_alternative_notification_summary">Battery Saver turned off. Features no longer restricted.</string>
 
     <!-- Description of media type: folder or directory that contains additional files. [CHAR LIMIT=32] -->
     <string name="mime_type_folder">Folder</string>
