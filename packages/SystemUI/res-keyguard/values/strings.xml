@@ -444,15 +444,15 @@ number">%d</xliff:g> remaining attempts before SIM becomes permanently unusable.
     <!-- Minutes displayed in words on the typographic clock face. [CHAR LIMIT=20] -->
     <string-array name="type_clock_minutes">
         <item>O\u2019Clock</item>
-        <item>O\u2019One</item>
-        <item>O\u2019Two</item>
-        <item>O\u2019Three</item>
-        <item>O\u2019Four</item>
-        <item>O\u2019Five</item>
-        <item>O\u2019Six</item>
-        <item>O\u2019Seven</item>
-        <item>O\u2019Eight</item>
-        <item>O\u2019Nine</item>
+        <item>Oh One</item>
+        <item>Oh Two</item>
+        <item>Oh Three</item>
+        <item>Oh Four</item>
+        <item>Oh Five</item>
+        <item>Oh Six</item>
+        <item>Oh Seven</item>
+        <item>Oh Eight</item>
+        <item>Oh Nine</item>
         <item>Ten</item>
         <item>Eleven</item>
         <item>Twelve</item>
