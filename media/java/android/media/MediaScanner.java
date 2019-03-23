@@ -116,7 +116,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * The MediaScanner class is not thread-safe, so it should only be used in a single threaded manner.
  *
  * {@hide}
+ *
+ * @deprecated this media scanner has served faithfully for many years, but it's
+ *             become tedious to test and maintain, mainly due to the way it
+ *             weaves obscurely between managed and native code. It's been
+ *             replaced by {@code ModernMediaScanner} in the
+ *             {@code MediaProvider} package.
  */
+@Deprecated
 public class MediaScanner implements AutoCloseable {
     static {
         System.loadLibrary("media_jni");
