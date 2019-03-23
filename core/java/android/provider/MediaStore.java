@@ -1381,6 +1381,11 @@ public final class MediaStore {
         }
 
         /** @hide */
+        public static @NonNull Uri getContentUri(@NonNull String volumeName, long id) {
+            return ContentUris.withAppendedId(getContentUri(volumeName), id);
+        }
+
+        /** @hide */
         public static @NonNull Uri getContentUriForPath(@NonNull String path) {
             return getContentUri(getVolumeName(new File(path)));
         }
@@ -1750,6 +1755,11 @@ public final class MediaStore {
             public static Uri getContentUri(String volumeName) {
                 return AUTHORITY_URI.buildUpon().appendPath(volumeName).appendPath("images")
                         .appendPath("media").build();
+            }
+
+            /** @hide */
+            public static @NonNull Uri getContentUri(@NonNull String volumeName, long id) {
+                return ContentUris.withAppendedId(getContentUri(volumeName), id);
             }
 
             /**
@@ -2238,6 +2248,11 @@ public final class MediaStore {
             public static Uri getContentUri(String volumeName) {
                 return AUTHORITY_URI.buildUpon().appendPath(volumeName).appendPath("audio")
                         .appendPath("media").build();
+            }
+
+            /** @hide */
+            public static @NonNull Uri getContentUri(@NonNull String volumeName, long id) {
+                return ContentUris.withAppendedId(getContentUri(volumeName), id);
             }
 
             /**
@@ -3016,6 +3031,11 @@ public final class MediaStore {
             public static Uri getContentUri(String volumeName) {
                 return AUTHORITY_URI.buildUpon().appendPath(volumeName).appendPath("video")
                         .appendPath("media").build();
+            }
+
+            /** @hide */
+            public static @NonNull Uri getContentUri(@NonNull String volumeName, long id) {
+                return ContentUris.withAppendedId(getContentUri(volumeName), id);
             }
 
             /**
