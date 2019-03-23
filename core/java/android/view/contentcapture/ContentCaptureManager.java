@@ -246,6 +246,7 @@ public final class ContentCaptureManager {
     @UiThread
     public void onActivityCreated(@NonNull IBinder applicationToken,
             @NonNull ComponentName activityComponent, int flags) {
+        if (mOptions.lite) return;
         synchronized (mLock) {
             mFlags |= flags;
             getMainContentCaptureSession().start(applicationToken, activityComponent, mFlags);
@@ -255,18 +256,21 @@ public final class ContentCaptureManager {
     /** @hide */
     @UiThread
     public void onActivityResumed() {
+        if (mOptions.lite) return;
         getMainContentCaptureSession().notifySessionLifecycle(/* started= */ true);
     }
 
     /** @hide */
     @UiThread
     public void onActivityPaused() {
+        if (mOptions.lite) return;
         getMainContentCaptureSession().notifySessionLifecycle(/* started= */ false);
     }
 
     /** @hide */
     @UiThread
     public void onActivityDestroyed() {
+        if (mOptions.lite) return;
         getMainContentCaptureSession().destroy();
     }
 
@@ -279,6 +283,7 @@ public final class ContentCaptureManager {
      */
     @UiThread
     public void flush(@FlushReason int reason) {
+        if (mOptions.lite) return;
         getMainContentCaptureSession().flush(reason);
     }
 
@@ -288,7 +293,7 @@ public final class ContentCaptureManager {
      */
     @Nullable
     public ComponentName getServiceComponentName() {
-        if (!isContentCaptureEnabled()) return null;
+        if (!isContentCaptureEnabled() && !mOptions.lite) return null;
 
         final SyncResultReceiver resultReceiver = new SyncResultReceiver(SYNC_CALLS_TIMEOUT_MS);
         try {
@@ -307,6 +312,7 @@ public final class ContentCaptureManager {
      *
      * @hide
      */
+    // TODO: use "lite" options as it's done by activities from the content capture service
     @Nullable
     public static ComponentName getServiceSettingsComponentName() {
         final IBinder binder = ServiceManager
@@ -342,6 +348,8 @@ public final class ContentCaptureManager {
      * </ul>
      */
     public boolean isContentCaptureEnabled() {
+        if (mOptions.lite) return false;
+
         final MainContentCaptureSession mainSession;
         synchronized (mLock) {
             mainSession = mMainSession;
