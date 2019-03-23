@@ -1132,7 +1132,7 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
+    @TestApi
     public void setVoiceRoamingType(@RoamingType int type) {
         NetworkRegistrationInfo regState = getNetworkRegistrationInfo(
                 NetworkRegistrationInfo.DOMAIN_CS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
@@ -1153,7 +1153,7 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
+    @TestApi
     public void setDataRoamingType(@RoamingType int type) {
         NetworkRegistrationInfo regState = getNetworkRegistrationInfo(
                 NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
