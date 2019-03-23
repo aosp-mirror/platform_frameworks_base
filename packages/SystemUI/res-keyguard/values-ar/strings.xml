@@ -205,66 +205,13 @@
     <item msgid="2233497913571137419">"العاشرة"</item>
     <item msgid="5621554266768657830">"الحادية عشرة"</item>
   </string-array>
-  <string-array name="type_clock_minutes">
-    <item msgid="8322049385467207985">"بالضبط"</item>
-    <item msgid="8837126587669001578">"الواحدة بالضبط"</item>
-    <item msgid="4294343372940455660">"الثانية بالضبط"</item>
-    <item msgid="7129166637707421536">"الثالثة بالضبط"</item>
-    <item msgid="7579404865008788673">"الرابعة بالضبط"</item>
-    <item msgid="3873924689207380586">"الخاسة بالضبط"</item>
-    <item msgid="4849565597850069377">"السادسة بالضبط"</item>
-    <item msgid="4404219424523572364">"السابعة بالضبط"</item>
-    <item msgid="8740481214764087329">"الثامنة بالضبط"</item>
-    <item msgid="1713216865806811237">"التاسعة بالضبط"</item>
-    <item msgid="3508406095411245038">"عَشر"</item>
-    <item msgid="7161996337755311711">"إحدى عشرة"</item>
-    <item msgid="4044549963329624197">"اثنتا عشرة"</item>
-    <item msgid="333373157917379088">"ثلاث عشرة"</item>
-    <item msgid="2631202907124819385">"أربع عشرة"</item>
-    <item msgid="6472396076858033453">"خمس عشرة"</item>
-    <item msgid="8656981856181581643">"ست عشرة"</item>
-    <item msgid="7289026608562030619">"سبع عشرة"</item>
-    <item msgid="3881477602692646573">"ثمان عشرة"</item>
-    <item msgid="3358129827772984226">"تسع عشرة"</item>
-    <item msgid="3308575407402865807">"عشرون"</item>
-    <item msgid="5346560955382229629">"إحدى\nوعشرون"</item>
-    <item msgid="226750304761473436">"اثنتان\nوعشرون"</item>
-    <item msgid="616811325336838734">"ثلاث\nوعشرون"</item>
-    <item msgid="616346116869053440">"أربع\nوعشرون"</item>
-    <item msgid="4642996410384042830">"خمس\nوعشرون"</item>
-    <item msgid="7506092849993571465">"ست\nوعشرون"</item>
-    <item msgid="1915078191101042031">"سبع\nوعشرون"</item>
-    <item msgid="4292378641900520252">"ثمانٍ\nوعشرون"</item>
-    <item msgid="5339513901773103696">"تسع\nوعشرون"</item>
-    <item msgid="3574673250891657607">"ثلاثون"</item>
-    <item msgid="5796923836589110940">"إحدى\nوثلاثون"</item>
-    <item msgid="5859323597571702052">"اثنتا\nوثلاثون"</item>
-    <item msgid="5133326723148876507">"ثلاث\nوثلاثون"</item>
-    <item msgid="2693999494655663096">"أربع\nوثلاثون"</item>
-    <item msgid="3316754944962836197">"خمس\nوثلاثون"</item>
-    <item msgid="816891008836796723">"ست\nوثلاثون"</item>
-    <item msgid="9158890488666520078">"سبع\nوثلاثون"</item>
-    <item msgid="1894769703213894011">"ثمانٍ\nوثلاثون"</item>
-    <item msgid="5638820345598572399">"تسع\nوثلاثون"</item>
-    <item msgid="8838304023017895439">"أربعون"</item>
-    <item msgid="1834742948932559597">"واحد\nوأربعون"</item>
-    <item msgid="6573707308847773944">"اثنتان\nوأربعون"</item>
-    <item msgid="2450149950652678001">"ثلاث\nوأربعون"</item>
-    <item msgid="2874667401318178036">"أربع\nوأربعون"</item>
-    <item msgid="3391101532763048862">"خمس\nوأربعون"</item>
-    <item msgid="1671489330863254362">"ست\nوأربعون"</item>
-    <item msgid="5916017359554531038">"سبع\nوأربعون"</item>
-    <item msgid="8205413177993059967">"ثمانٍ\nوأربعون"</item>
-    <item msgid="6607867415142171302">"تسع\nوأربعون"</item>
-    <item msgid="8358850748472089162">"خمسون"</item>
-    <item msgid="3551313125255080234">"إحدى\nوخمسون"</item>
-    <item msgid="1559678130725716542">"اثنتان\nوخمسون"</item>
-    <item msgid="431441994725492377">"ثلاث\nوخمسون"</item>
-    <item msgid="6345774640539623024">"أربع\nوخمسون"</item>
-    <item msgid="8018192990793931120">"خمس\nوخمسون"</item>
-    <item msgid="6187650843754604534">"ست\nوخمسون"</item>
-    <item msgid="8727240174015993259">"سبع\nوخمسون"</item>
-    <item msgid="848339003778952950">"ثمانٍ\nوخمسون"</item>
-    <item msgid="5798985802835423618">"تسع\nوخمسون"</item>
-  </string-array>
+    <!-- no translation found for type_clock_minutes:1 (2091812961809760681) -->
+    <!-- no translation found for type_clock_minutes:2 (1496435384877290709) -->
+    <!-- no translation found for type_clock_minutes:3 (881846472976674129) -->
+    <!-- no translation found for type_clock_minutes:4 (2784477043911540584) -->
+    <!-- no translation found for type_clock_minutes:5 (1610928853656700614) -->
+    <!-- no translation found for type_clock_minutes:6 (2317806244043886658) -->
+    <!-- no translation found for type_clock_minutes:7 (3318687539120971327) -->
+    <!-- no translation found for type_clock_minutes:8 (5701600693712102348) -->
+    <!-- no translation found for type_clock_minutes:9 (3247381605947372495) -->
 </resources>
