@@ -40,14 +40,14 @@ public class CameraTestResultPrinter {
     private Instrumentation mInst = null;
     private boolean mWriteToFile = true;
 
-
     public CameraTestResultPrinter(Instrumentation instrumentation, boolean writeToFile) {
         mInst = instrumentation;
         mWriteToFile = writeToFile;
 
         // Create a log directory if not exists.
         File baseDir = new File(RESULT_DIR);
-        if (!baseDir.exists() && !baseDir.mkdirs()) {
+        baseDir.mkdirs();
+        if (!baseDir.isDirectory()) {
             throw new IllegalStateException("Couldn't create directory for logs: " + baseDir);
         }
         Log.v(TAG, String.format("Saving test results under: %s", baseDir.getAbsolutePath()));
