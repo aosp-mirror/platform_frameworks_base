@@ -1584,7 +1584,7 @@
     <!-- Error message shown when the face hardware can't be accessed. [CHAR LIMIT=50] -->
     <string name="face_error_hw_not_available">Face hardware not available.</string>
     <!-- Error message shown when the face hardware timer has expired and the user needs to restart the operation. [CHAR LIMIT=50] -->
-    <string name="face_error_timeout">Face time out reached. Try again.</string>
+    <string name="face_error_timeout">Face timeout reached. Try again.</string>
     <!-- Error message shown when the face hardware has run out of room for storing faces. [CHAR LIMIT=50] -->
     <string name="face_error_no_space">Face can\u2019t be stored.</string>
     <!-- Generic error message shown when the face operation (e.g. enrollment or authentication) is canceled. Generally not shown to the user. [CHAR LIMIT=50] -->
@@ -1596,11 +1596,11 @@
     <!-- Generic error message shown when the face operation fails because strong authentication is required. [CHAR LIMIT=50] -->
     <string name="face_error_lockout_permanent">Too many attempts. Facial authentication disabled.</string>
     <!-- Generic error message shown when the face hardware can't recognize the face. [CHAR LIMIT=50] -->
-    <string name="face_error_unable_to_process">Try again.</string>
+    <string name="face_error_unable_to_process">Can\u2019t verify face. Try again.</string>
     <!-- Generic error message shown when the user has no enrolled face. [CHAR LIMIT=50] -->
-    <string name="face_error_not_enrolled">No face enrolled.</string>
+    <string name="face_error_not_enrolled">You haven\u2019t set up face authentication.</string>
     <!-- Generic error message shown when the app requests face authentication on a device without a sensor. [CHAR LIMIT=60] -->
-    <string name="face_error_hw_not_present">This device does not have a face authentication sensor.</string>
+    <string name="face_error_hw_not_present">Face authentication is not supported on this device.</string>
 
     <!-- Template to be used to name enrolled faces by default. [CHAR LIMIT=10] -->
     <string name="face_name_template">Face <xliff:g id="faceId" example="1">%d</xliff:g></string>
