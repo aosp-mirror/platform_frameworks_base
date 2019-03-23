@@ -802,7 +802,7 @@
     <string name="permgrouprequest_visual">Allow
         &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to access your photos and videos?</string>
     <!-- Subtitle of the message shown to the user when the apps requests permission to access photos and videos [CHAR LIMIT=150]-->
-    <string name="permgrouprequestdetail_visual">Locations and other people in your photos and videos can be identified by the app</string>
+    <string name="permgrouprequestdetail_visual">This includes any locations tagged in your photos and videos</string>
 
     <!-- Title for the capability of an accessibility service to retrieve window content. -->
     <string name="capability_title_canRetrieveWindowContent">Retrieve window content</string>
@@ -1584,7 +1584,7 @@
     <!-- Error message shown when the face hardware can't be accessed. [CHAR LIMIT=50] -->
     <string name="face_error_hw_not_available">Face hardware not available.</string>
     <!-- Error message shown when the face hardware timer has expired and the user needs to restart the operation. [CHAR LIMIT=50] -->
-    <string name="face_error_timeout">Face time out reached. Try again.</string>
+    <string name="face_error_timeout">Face timeout reached. Try again.</string>
     <!-- Error message shown when the face hardware has run out of room for storing faces. [CHAR LIMIT=50] -->
     <string name="face_error_no_space">Face can\u2019t be stored.</string>
     <!-- Generic error message shown when the face operation (e.g. enrollment or authentication) is canceled. Generally not shown to the user. [CHAR LIMIT=50] -->
@@ -1596,11 +1596,11 @@
     <!-- Generic error message shown when the face operation fails because strong authentication is required. [CHAR LIMIT=50] -->
     <string name="face_error_lockout_permanent">Too many attempts. Facial authentication disabled.</string>
     <!-- Generic error message shown when the face hardware can't recognize the face. [CHAR LIMIT=50] -->
-    <string name="face_error_unable_to_process">Try again.</string>
+    <string name="face_error_unable_to_process">Can\u2019t verify face. Try again.</string>
     <!-- Generic error message shown when the user has no enrolled face. [CHAR LIMIT=50] -->
-    <string name="face_error_not_enrolled">No face enrolled.</string>
+    <string name="face_error_not_enrolled">You haven\u2019t set up face authentication.</string>
     <!-- Generic error message shown when the app requests face authentication on a device without a sensor. [CHAR LIMIT=60] -->
-    <string name="face_error_hw_not_present">This device does not have a face authentication sensor.</string>
+    <string name="face_error_hw_not_present">Face authentication is not supported on this device.</string>
 
     <!-- Template to be used to name enrolled faces by default. [CHAR LIMIT=10] -->
     <string name="face_name_template">Face <xliff:g id="faceId" example="1">%d</xliff:g></string>
@@ -3283,17 +3283,35 @@
     <string name="dump_heap_notification"><xliff:g id="proc">%1$s</xliff:g> exceeded memory
         limit</string>
 
+    <!-- Notification text to tell the user that a heap dump that they initiated for a process is ready [CHAR LIMIT=NONE] -->
+    <string name="dump_heap_ready_notification">
+        <xliff:g id="proc" example="com.android.example">%1$s</xliff:g> heap dump ready</string>
+
     <!-- Notification details to tell the user that a process has exceeded its memory limit. -->
     <string name="dump_heap_notification_detail">Heap dump collected. Tap to share.</string>
 
     <!-- Title of dialog prompting the user to share a heap dump. -->
     <string name="dump_heap_title">Share heap dump?</string>
 
-    <!-- Text of dialog prompting the user to share a heap dump. -->
-    <string name="dump_heap_text">The process <xliff:g id="proc">%1$s</xliff:g> has exceeded
-        its process memory limit of <xliff:g id="size">%2$s</xliff:g>.  A heap dump is available
+    <!-- Text of dialog prompting the user to share a heap dump for an application [CHAR LIMIT=NONE] -->
+    <string name="dump_heap_text">The
+        <xliff:g id="proc" example="com.android.example">%1$s</xliff:g> process has exceeded
+        its memory limit of <xliff:g id="size" example="350MB">%2$s</xliff:g>. A heap dump is available
         for you to share with its developer.  Be careful: this heap dump can contain any
         of your personal information that the application has access to.</string>
+
+    <!-- Text of dialog prompting the user to share a heap dump for a system process [CHAR LIMIT=NONE] -->
+    <string name="dump_heap_system_text">The
+        <xliff:g id="proc" example="Android System">%1$s</xliff:g> process has exceeded
+        its memory limit of <xliff:g id="size" example="350MB">%2$s</xliff:g>. A heap dump is available
+        for you to share. Be careful: this heap dump can contain any sensitive personal information
+        that the process has access to.</string>
+
+    <!-- Text of dialog prompting the user to share a heap dump that they initiated [CHAR LIMIT=NONE] -->
+    <string name="dump_heap_ready_text">A heap dump of
+        <xliff:g id="proc" example="com.android.example">%1$s</xliff:g>\u2019s process is available
+        for you to share. Be careful: this heap dump may contain any sensitive personal information
+        that the process has access to.</string>
 
     <!-- Displayed in the title of the chooser for things to do with text that
          is to be sent to another application. For example, I can send
@@ -5294,6 +5312,29 @@
     <string name="dynamic_mode_notification_title">Battery may run out before usual charge</string>
     <!-- Summary of notification letting users know why battery saver was turned on automatically [CHAR_LIMIT=NONE]-->
     <string name="dynamic_mode_notification_summary">Battery Saver activated to extend battery life</string>
+
+    <!-- Battery saver strings -->
+    <!-- The user visible name of the notification channel for battery saver notifications [CHAR_LIMIT=80] -->
+    <string name="battery_saver_notification_channel_name">Battery Saver</string>
+    <!-- Title of notification letting users know why battery saver didn't turn back on automatically after the device was unplugged [CHAR_LIMIT=NONE] -->
+    <string name="battery_saver_sticky_disabled_notification_title">Battery Saver won\u2019t reactivate until battery low again</string>
+    <!-- Summary of notification letting users know why battery saver didn't turn back on automatically after the device was unplugged [CHAR_LIMIT=NONE] -->
+    <string name="battery_saver_sticky_disabled_notification_summary">Battery has been charged to a sufficient level. Battery Saver won\u2019t reactivate until the battery is low again.</string>
+    <!-- Title of notification letting users know the battery level at the time the notification was posted [CHAR_LIMIT=80] -->
+    <string name="battery_saver_charged_notification_title" product="default">Phone <xliff:g id="charge level" example="90%">%1$s</xliff:g> charged</string>
+    <!-- Title of notification letting users know the battery level at the time the notification was posted [CHAR_LIMIT=80] -->
+    <string name="battery_saver_charged_notification_title" product="tablet">Tablet <xliff:g id="charge level" example="90%">%1$s</xliff:g> charged</string>
+    <!-- Title of notification letting users know the battery level at the time the notification was posted [CHAR_LIMIT=80] -->
+    <string name="battery_saver_charged_notification_title" product="device">Device <xliff:g id="charge level" example="90%">%1$s</xliff:g> charged</string>
+    <!-- Summary of notification letting users know that battery saver is now off [CHAR_LIMIT=NONE] -->
+    <string name="battery_saver_off_notification_summary">Battery Saver is off. Features no longer restricted.</string>
+    <!-- Alternative summary of notification letting users know that battery saver has been turned off.
+     If it's easy to translate the difference between "Battery Saver turned off. Features no longer restricted."
+     and "Battery Saver is off. Features no longer restricted." into the target language,
+     then translate "Battery Saver turned off. Features no longer restricted."
+     If the translation doesn't make a difference or the difference is hard to capture in the target language,
+     then translate "Battery Saver is off. Features no longer restricted." instead. [CHAR_LIMIT=NONE] -->
+    <string name="battery_saver_off_alternative_notification_summary">Battery Saver turned off. Features no longer restricted.</string>
 
     <!-- Description of media type: folder or directory that contains additional files. [CHAR LIMIT=32] -->
     <string name="mime_type_folder">Folder</string>

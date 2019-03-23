@@ -19,9 +19,7 @@ package com.android.systemui;
 import android.content.Context;
 import android.graphics.Rect;
 import android.opengl.GLSurfaceView;
-import android.os.Build;
 import android.service.wallpaper.WallpaperService;
-import android.util.Log;
 import android.view.SurfaceHolder;
 
 import com.android.systemui.glwallpaper.ImageWallpaperRenderer;
@@ -34,15 +32,7 @@ public class ImageWallpaper extends WallpaperService {
     private static final String TAG = ImageWallpaper.class.getSimpleName();
 
     @Override
-    public void onCreate() {
-        super.onCreate();
-    }
-
-    @Override
     public Engine onCreateEngine() {
-        if (Build.IS_DEBUGGABLE) {
-            Log.v(TAG, "We are using GLEngine");
-        }
         return new GLEngine(this);
     }
 
@@ -72,8 +62,15 @@ public class ImageWallpaper extends WallpaperService {
             }
         }
 
+        @Override
+        public void onDestroy() {
+            if (mWallpaperSurfaceView != null) {
+                mWallpaperSurfaceView.onPause();
+            }
+        }
+
         private class GLWallpaperSurfaceView extends GLSurfaceView implements ImageGLView {
-            private WallpaperStatusListener mWallpaperChangedListener;
+            private WallpaperStatusListener mWallpaperStatusListener;
 
             GLWallpaperSurfaceView(Context context) {
                 super(context);
@@ -88,18 +85,18 @@ public class ImageWallpaper extends WallpaperService {
             @Override
             public void setRenderer(Renderer renderer) {
                 super.setRenderer(renderer);
-                mWallpaperChangedListener = (WallpaperStatusListener) renderer;
+                mWallpaperStatusListener = (WallpaperStatusListener) renderer;
             }
 
             private void notifyAmbientModeChanged(boolean inAmbient, long duration) {
-                if (mWallpaperChangedListener != null) {
-                    mWallpaperChangedListener.onAmbientModeChanged(inAmbient, duration);
+                if (mWallpaperStatusListener != null) {
+                    mWallpaperStatusListener.onAmbientModeChanged(inAmbient, duration);
                 }
             }
 
             private void notifyOffsetsChanged(float xOffset, float yOffset) {
-                if (mWallpaperChangedListener != null) {
-                    mWallpaperChangedListener.onOffsetsChanged(
+                if (mWallpaperStatusListener != null) {
+                    mWallpaperStatusListener.onOffsetsChanged(
                             xOffset, yOffset, getHolder().getSurfaceFrame());
                 }
             }

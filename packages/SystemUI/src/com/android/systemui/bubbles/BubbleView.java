@@ -193,11 +193,19 @@ public class BubbleView extends FrameLayout {
         if (mEntry == null) {
             return;
         }
+        Notification.BubbleMetadata metadata = mEntry.getBubbleMetadata();
         Notification n = mEntry.notification.getNotification();
-        boolean isLarge = n.getLargeIcon() != null;
-        Icon ic = isLarge ? n.getLargeIcon() : n.getSmallIcon();
+        Icon ic;
+        boolean needsTint;
+        if (metadata != null) {
+            ic = metadata.getIcon();
+            needsTint = ic.getType() != Icon.TYPE_ADAPTIVE_BITMAP;
+        } else {
+            needsTint = n.getLargeIcon() == null;
+            ic = needsTint ? n.getSmallIcon() : n.getLargeIcon();
+        }
         Drawable iconDrawable = ic.loadDrawable(mContext);
-        if (!isLarge) {
+        if (needsTint) {
             // Center icon on coloured background
             iconDrawable.setTint(Color.WHITE); // TODO: dark mode
             Drawable bg = new ColorDrawable(n.color);

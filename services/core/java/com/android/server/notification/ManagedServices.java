@@ -347,6 +347,9 @@ abstract public class ManagedServices {
                 }
             }
         }
+
+        writeExtraXmlTags(out);
+
         out.endTag(null, getConfig().xmlTag);
     }
 
@@ -354,6 +357,16 @@ abstract public class ManagedServices {
      * Writes extra xml attributes to {@link #TAG_MANAGED_SERVICES} tag.
      */
     protected void writeExtraAttributes(XmlSerializer out, int userId) throws IOException {}
+
+    /**
+     * Writes extra xml tags within the parent tag specified in {@link Config#xmlTag}.
+     */
+    protected void writeExtraXmlTags(XmlSerializer out) throws IOException {}
+
+    /**
+     * This is called to process tags other than {@link #TAG_MANAGED_SERVICES}.
+     */
+    protected void readExtraTag(String tag, XmlPullParser parser) throws IOException {}
 
     protected void migrateToXml() {
         loadAllowedComponentsFromSettings();
@@ -391,6 +404,8 @@ abstract public class ManagedServices {
                         }
                         mUseXml = true;
                     }
+                } else {
+                    readExtraTag(tag, parser);
                 }
             }
         }

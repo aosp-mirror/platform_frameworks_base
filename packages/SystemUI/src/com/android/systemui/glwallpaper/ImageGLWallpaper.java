@@ -110,9 +110,10 @@ class ImageGLWallpaper {
         mTextureBuffer.position(0);
     }
 
-    void setup() {
+    void setup(Bitmap bitmap) {
         setupAttributes();
         setupUniforms();
+        setupTexture(bitmap);
     }
 
     private void setupAttributes() {
@@ -159,7 +160,7 @@ class ImageGLWallpaper {
         glDrawArrays(GL_TRIANGLES, 0, VERTICES.length / 2);
     }
 
-    void setupTexture(Bitmap bitmap) {
+    private void setupTexture(Bitmap bitmap) {
         final int[] tids = new int[1];
 
         if (bitmap == null) {
@@ -174,7 +175,7 @@ class ImageGLWallpaper {
             return;
         }
 
-        // Bind a named texture to a texturing target.
+        // Bind a named texture to a target.
         glBindTexture(GL_TEXTURE_2D, tids[0]);
         // Load the bitmap data and copy it over into the texture object that is currently bound.
         GLUtils.texImage2D(GL_TEXTURE_2D, 0, bitmap, 0);
@@ -195,15 +196,8 @@ class ImageGLWallpaper {
         glUniform1i(mUniTexture, 0);
     }
 
-    void adjustTextureCoordinates(Bitmap bitmap, int surfaceWidth, int surfaceHeight,
-            float xOffset, float yOffset) {
-        if (bitmap == null) {
-            Log.d(TAG, "adjustTextureCoordinates: invalid bitmap");
-            return;
-        }
-
-        int bitmapWidth = bitmap.getWidth();
-        int bitmapHeight = bitmap.getHeight();
+    void adjustTextureCoordinates(int bitmapWidth, int bitmapHeight,
+            int surfaceWidth, int surfaceHeight, float xOffset, float yOffset) {
         float ratioW = 1f;
         float ratioH = 1f;
         float rX = 0f;

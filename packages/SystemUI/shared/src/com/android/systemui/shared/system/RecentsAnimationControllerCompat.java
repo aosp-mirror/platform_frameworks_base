@@ -84,4 +84,20 @@ public class RecentsAnimationControllerCompat {
             Log.e(TAG, "Failed to finish recents animation", e);
         }
     }
+
+    public void setCancelWithDeferredScreenshot(boolean screenshot) {
+        try {
+            mAnimationController.setCancelWithDeferredScreenshot(screenshot);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to set cancel with deferred screenshot", e);
+        }
+    }
+
+    public void cleanupScreenshot() {
+        try {
+            mAnimationController.cleanupScreenshot();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to clean up screenshot of recents animation", e);
+        }
+    }
 }

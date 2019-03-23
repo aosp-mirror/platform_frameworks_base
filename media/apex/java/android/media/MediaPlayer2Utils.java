@@ -36,6 +36,8 @@ public class MediaPlayer2Utils {
                 .setSampleRate(sampleRate)
                 .setChannelMask(channelMask)
                 .build();
-        return AudioManager.isOffloadedPlaybackSupported(format);
+        //TODO MP2 needs to pass AudioAttributes for this query, instead of using default attr
+        return AudioManager.isOffloadedPlaybackSupported(format,
+                (new AudioAttributes.Builder()).build());
     }
 }

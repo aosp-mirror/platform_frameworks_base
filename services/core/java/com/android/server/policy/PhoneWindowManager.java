@@ -917,9 +917,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         mWindowManagerFuncs.onPowerKeyDown(interactive);
 
-        // Abort possibly stuck animations.
-        mHandler.post(mWindowManagerFuncs::triggerAnimationFailsafe);
-
         // Latch power key state to detect screenshot chord.
         if (interactive && !mScreenshotChordPowerKeyTriggered
                 && (event.getFlags() & KeyEvent.FLAG_FALLBACK) == 0) {
@@ -1026,6 +1023,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         cancelPendingPowerKeyAction();
 
         if (!handled) {
+            if ((event.getFlags() & KeyEvent.FLAG_LONG_PRESS) == 0) {
+                // Abort possibly stuck animations only when power key up without long press case.
+                mHandler.post(mWindowManagerFuncs::triggerAnimationFailsafe);
+            }
+
             // Figure out how to handle the key now that it has been released.
             mPowerKeyPressCounter += 1;
 
@@ -2520,7 +2522,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private static final int[] WINDOW_TYPES_WHERE_HOME_DOESNT_WORK = {
-            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             WindowManager.LayoutParams.TYPE_SYSTEM_ALERT,
             WindowManager.LayoutParams.TYPE_SYSTEM_ERROR,
         };
@@ -3362,9 +3363,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      */
     void launchHomeFromHotKey(int displayId, final boolean awakenFromDreams,
             final boolean respectKeyguard) {
-        // Abort possibly stuck animations.
-        mHandler.post(mWindowManagerFuncs::triggerAnimationFailsafe);
-
         if (respectKeyguard) {
             if (isKeyguardShowingAndNotOccluded()) {
                 // don't launch home if keyguard showing
@@ -5128,7 +5126,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // Start home.
         mActivityTaskManagerInternal.startHomeOnDisplay(mCurrentUserId, "startDockOrHome",
-                displayId, fromHomeKey);
+                displayId, true /* allowInstrumenting */, fromHomeKey);
     }
 
     /**
@@ -5216,13 +5214,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private VibrationEffect getVibrationEffect(int effectId) {
         long[] pattern;
         switch (effectId) {
-            case HapticFeedbackConstants.CLOCK_TICK:
             case HapticFeedbackConstants.CONTEXT_CLICK:
                 return VibrationEffect.get(VibrationEffect.EFFECT_TICK);
             case HapticFeedbackConstants.TEXT_HANDLE_MOVE:
                 if (!mHapticTextHandleEnabled) {
                     return null;
                 }
+                // fallthrough
+            case HapticFeedbackConstants.CLOCK_TICK:
+                return VibrationEffect.get(VibrationEffect.EFFECT_TEXTURE_TICK);
             case HapticFeedbackConstants.KEYBOARD_RELEASE:
             case HapticFeedbackConstants.VIRTUAL_KEY_RELEASE:
             case HapticFeedbackConstants.ENTRY_BUMP:

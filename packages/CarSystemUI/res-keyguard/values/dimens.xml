@@ -19,8 +19,8 @@
     <dimen name="num_pad_margin_right">144dp</dimen>
     <dimen name="num_pad_key_width">80dp</dimen>
     <dimen name="num_pad_key_height">80dp</dimen>
-    <dimen name="num_pad_key_margin_horizontal">@dimen/car_padding_6</dimen>
-    <dimen name="num_pad_key_margin_bottom">@dimen/car_padding_5</dimen>
+    <dimen name="num_pad_key_margin_horizontal">@*android:dimen/car_padding_5</dimen>
+    <dimen name="num_pad_key_margin_bottom">@*android:dimen/car_padding_5</dimen>
     <dimen name="pin_entry_height">@dimen/num_pad_key_height</dimen>
     <dimen name="divider_height">1dp</dimen>
     <dimen name="key_enter_margin_top">128dp</dimen>

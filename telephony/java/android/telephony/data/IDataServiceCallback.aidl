@@ -28,6 +28,6 @@ oneway interface IDataServiceCallback
     void onDeactivateDataCallComplete(int result);
     void onSetInitialAttachApnComplete(int result);
     void onSetDataProfileComplete(int result);
-    void onGetDataCallListComplete(int result, in List<DataCallResponse> dataCallList);
+    void onRequestDataCallListComplete(int result, in List<DataCallResponse> dataCallList);
     void onDataCallListChanged(in List<DataCallResponse> dataCallList);
 }

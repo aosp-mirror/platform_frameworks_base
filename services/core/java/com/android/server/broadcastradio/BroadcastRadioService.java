@@ -16,7 +16,6 @@
 
 package com.android.server.broadcastradio;
 
-import android.annotation.NonNull;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -26,14 +25,13 @@ import android.hardware.radio.IRadioService;
 import android.hardware.radio.ITuner;
 import android.hardware.radio.ITunerCallback;
 import android.hardware.radio.RadioManager;
-import android.os.ParcelableException;
 import android.os.RemoteException;
 import android.util.Slog;
 
-import com.android.internal.util.Preconditions;
 import com.android.server.SystemService;
 import com.android.server.broadcastradio.hal2.AnnouncementAggregator;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -45,29 +43,25 @@ public class BroadcastRadioService extends SystemService {
 
     private final ServiceImpl mServiceImpl = new ServiceImpl();
 
-    private final com.android.server.broadcastradio.hal1.BroadcastRadioService mHal1 =
-            new com.android.server.broadcastradio.hal1.BroadcastRadioService();
-    private final com.android.server.broadcastradio.hal2.BroadcastRadioService mHal2 =
-            new com.android.server.broadcastradio.hal2.BroadcastRadioService();
+    private final com.android.server.broadcastradio.hal1.BroadcastRadioService mHal1;
+    private final com.android.server.broadcastradio.hal2.BroadcastRadioService mHal2;
 
     private final Object mLock = new Object();
-    private List<RadioManager.ModuleProperties> mModules = null;
+    private List<RadioManager.ModuleProperties> mV1Modules = null;
 
     public BroadcastRadioService(Context context) {
         super(context);
+
+        mHal1 = new com.android.server.broadcastradio.hal1.BroadcastRadioService();
+        mV1Modules = mHal1.loadModules();
+        OptionalInt max = mV1Modules.stream().mapToInt(RadioManager.ModuleProperties::getId).max();
+        mHal2 = new com.android.server.broadcastradio.hal2.BroadcastRadioService(
+                max.isPresent() ? max.getAsInt() + 1 : 0);
     }
 
     @Override
     public void onStart() {
         publishBinderService(Context.RADIO_SERVICE, mServiceImpl);
-    }
-
-    /**
-     * Finds next available index for newly loaded modules.
-     */
-    private static int getNextId(@NonNull List<RadioManager.ModuleProperties> modules) {
-        OptionalInt max = modules.stream().mapToInt(RadioManager.ModuleProperties::getId).max();
-        return max.isPresent() ? max.getAsInt() + 1 : 0;
     }
 
     private class ServiceImpl extends IRadioService.Stub {
@@ -81,14 +75,10 @@ public class BroadcastRadioService extends SystemService {
         @Override
         public List<RadioManager.ModuleProperties> listModules() {
             enforcePolicyAccess();
-            synchronized (mLock) {
-                if (mModules != null) return mModules;
-
-                mModules = mHal1.loadModules();
-                mModules.addAll(mHal2.loadModules(getNextId(mModules)));
-
-                return mModules;
-            }
+            List<RadioManager.ModuleProperties> modules = new ArrayList<>();
+            modules.addAll(mV1Modules);
+            modules.addAll(mHal2.listModules());
+            return modules;
         }
 
         @Override

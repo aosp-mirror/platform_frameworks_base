@@ -50,6 +50,13 @@ public abstract class AttentionManagerInternal {
      */
     public abstract void cancelAttentionCheck(int requestCode);
 
+    /**
+     * Disables the dependants.
+     *
+     * Example: called if the service does not have sufficient permissions to perform the task.
+     */
+    public abstract void disableSelf();
+
     /** Internal interface for attention callback. */
     public abstract static class AttentionCallbackInternal {
         /**

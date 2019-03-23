@@ -58,6 +58,10 @@ public class ImageWallpaperRenderer implements GLSurfaceView.Renderer,
     private int mWidth = 0;
     private int mHeight = 0;
 
+    private Bitmap mBitmap;
+    private int mBitmapWidth = 0;
+    private int mBitmapHeight = 0;
+
     public ImageWallpaperRenderer(Context context, ImageGLView glView) {
         mWallpaperManager = context.getSystemService(WallpaperManager.class);
         if (mWallpaperManager == null) {
@@ -71,8 +75,12 @@ public class ImageWallpaperRenderer implements GLSurfaceView.Renderer,
         mGLView = glView;
 
         if (mWallpaperManager != null) {
+            mBitmap = mWallpaperManager.getBitmap();
+            mBitmapWidth = mBitmap.getWidth();
+            mBitmapHeight = mBitmap.getHeight();
             // Compute per85 as transition threshold, this is an async work.
-            mImageProcessHelper.startComputingPercentile85(mWallpaperManager.getBitmap());
+            mImageProcessHelper.startComputingPercentile85(mBitmap);
+            mWallpaperManager.forgetLoadedWallpaper();
         }
     }
 
@@ -81,8 +89,8 @@ public class ImageWallpaperRenderer implements GLSurfaceView.Renderer,
         glClearColor(0f, 0f, 0f, 1.0f);
         mProgram.useGLProgram(
                 R.raw.image_wallpaper_vertex_shader, R.raw.image_wallpaper_fragment_shader);
-        mWallpaper.setup();
-        mWallpaper.setupTexture(mWallpaperManager.getBitmap());
+        mWallpaper.setup(mBitmap);
+        mBitmap = null;
     }
 
     @Override
@@ -94,8 +102,8 @@ public class ImageWallpaperRenderer implements GLSurfaceView.Renderer,
         }
         mWidth = width;
         mHeight = height;
-        mWallpaper.adjustTextureCoordinates(mWallpaperManager.getBitmap(),
-                width, height, mXOffset, mYOffset);
+        mWallpaper.adjustTextureCoordinates(
+                mBitmapWidth, mBitmapHeight, width, height, mXOffset, mYOffset);
     }
 
     @Override
@@ -132,13 +140,7 @@ public class ImageWallpaperRenderer implements GLSurfaceView.Renderer,
 
     @Override
     public void onOffsetsChanged(float xOffset, float yOffset, Rect frame) {
-        if (frame == null || mWallpaperManager == null
-                || (xOffset == mXOffset && yOffset == mYOffset)) {
-            return;
-        }
-
-        Bitmap bitmap = mWallpaperManager.getBitmap();
-        if (bitmap == null) {
+        if (frame == null || (xOffset == mXOffset && yOffset == mYOffset)) {
             return;
         }
 
@@ -151,7 +153,8 @@ public class ImageWallpaperRenderer implements GLSurfaceView.Renderer,
             Log.d(TAG, "onOffsetsChanged: width=" + width + ", height=" + height
                     + ", xOffset=" + mXOffset + ", yOffset=" + mYOffset);
         }
-        mWallpaper.adjustTextureCoordinates(bitmap, width, height, mXOffset, mYOffset);
+        mWallpaper.adjustTextureCoordinates(
+                mBitmapWidth, mBitmapHeight, width, height, mXOffset, mYOffset);
         requestRender();
     }
 

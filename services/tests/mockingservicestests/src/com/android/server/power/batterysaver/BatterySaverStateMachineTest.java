@@ -112,7 +112,7 @@ public class BatterySaverStateMachineTest {
                             Global.LOW_POWER_MODE_STICKY_AUTO_DISABLE_ENABLED, 0) != 0,
                     mPersistedState.global.getOrDefault(
                             Global.LOW_POWER_MODE_STICKY_AUTO_DISABLE_LEVEL, 90),
-                    mPersistedState.global.getOrDefault(Global.AUTOMATIC_POWER_SAVER_MODE, 0),
+                    mPersistedState.global.getOrDefault(Global.AUTOMATIC_POWER_SAVE_MODE, 0),
                     mPersistedState.global.getOrDefault(
                             Global.DYNAMIC_POWER_SAVINGS_ENABLED, 0) != 0,
                     mPersistedState.global.getOrDefault(
@@ -321,7 +321,7 @@ public class BatterySaverStateMachineTest {
     @Test
     public void testAutoBatterySaver() {
         mDevice.putGlobalSetting(Global.LOW_POWER_MODE_TRIGGER_LEVEL, 50);
-        mDevice.putGlobalSetting(Global.AUTOMATIC_POWER_SAVER_MODE, 0);
+        mDevice.putGlobalSetting(Global.AUTOMATIC_POWER_SAVE_MODE, 0);
 
         assertEquals(false, mDevice.batterySaverEnabled);
         assertEquals(100, mPersistedState.batteryLevel);
@@ -789,7 +789,7 @@ public class BatterySaverStateMachineTest {
                 .thenReturn(true);
         initDevice();
         mDevice.putGlobalSetting(Global.LOW_POWER_MODE_TRIGGER_LEVEL, 50);
-        mDevice.putGlobalSetting(Global.AUTOMATIC_POWER_SAVER_MODE, 0);
+        mDevice.putGlobalSetting(Global.AUTOMATIC_POWER_SAVE_MODE, 0);
 
         mTarget.setBatterySaverEnabledManually(true);
 
@@ -906,8 +906,8 @@ public class BatterySaverStateMachineTest {
     @Test
     public void testAutoBatterySaver_smartBatterySaverEnabled() {
         mDevice.putGlobalSetting(Global.DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD, 50);
-        mDevice.putGlobalSetting(Global.AUTOMATIC_POWER_SAVER_MODE,
-                PowerManager.POWER_SAVER_MODE_DYNAMIC);
+        mDevice.putGlobalSetting(Global.AUTOMATIC_POWER_SAVE_MODE,
+                PowerManager.POWER_SAVE_MODE_TRIGGER_DYNAMIC);
         mDevice.putGlobalSetting(Global.DYNAMIC_POWER_SAVINGS_ENABLED, 0);
 
         assertEquals(false, mDevice.batterySaverEnabled);
@@ -1029,8 +1029,8 @@ public class BatterySaverStateMachineTest {
         // Test dynamic threshold higher than automatic to make sure it doesn't interfere when it's
         // not enabled.
         mDevice.putGlobalSetting(Global.DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD, 50);
-        mDevice.putGlobalSetting(Global.AUTOMATIC_POWER_SAVER_MODE,
-                PowerManager.POWER_SAVER_MODE_PERCENTAGE);
+        mDevice.putGlobalSetting(Global.AUTOMATIC_POWER_SAVE_MODE,
+                PowerManager.POWER_SAVE_MODE_TRIGGER_PERCENTAGE);
         mDevice.putGlobalSetting(Global.DYNAMIC_POWER_SAVINGS_ENABLED, 0);
 
         assertEquals(false, mDevice.batterySaverEnabled);
@@ -1138,8 +1138,8 @@ public class BatterySaverStateMachineTest {
         // not enabled.
         mDevice.putGlobalSetting(Global.LOW_POWER_MODE_TRIGGER_LEVEL, 50);
         mDevice.putGlobalSetting(Global.DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD, 30);
-        mDevice.putGlobalSetting(Global.AUTOMATIC_POWER_SAVER_MODE,
-                PowerManager.POWER_SAVER_MODE_DYNAMIC);
+        mDevice.putGlobalSetting(Global.AUTOMATIC_POWER_SAVE_MODE,
+                PowerManager.POWER_SAVE_MODE_TRIGGER_DYNAMIC);
         mDevice.putGlobalSetting(Global.DYNAMIC_POWER_SAVINGS_ENABLED, 1);
 
         assertEquals(false, mDevice.batterySaverEnabled);

@@ -353,7 +353,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         FileOutputStream fos = mPolicyFile.startWrite();
         fos.write(preupgradeXml.getBytes());
         mPolicyFile.finishWrite(fos);
-        FileInputStream fStream = new FileInputStream(mFile);
 
         // Setup managed services
         mListener = mListeners.new ManagedServiceInfo(
@@ -368,6 +367,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         ManagedServices.Config dndConfig = new ManagedServices.Config();
         dndConfig.xmlTag = ConditionProviders.TAG_ENABLED_DND_APPS;
         when(mConditionProviders.getConfig()).thenReturn(dndConfig);
+
+        when(mAssistants.isAdjustmentAllowed(anyString())).thenReturn(true);
 
         try {
             mService.init(mTestableLooper.getLooper(),
@@ -391,7 +392,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         mBinderService.createNotificationChannels(
                 PKG, new ParceledListSlice(Arrays.asList(mTestNotificationChannel)));
-        assertNotNull(mBinderService.getNotificationChannel(PKG, TEST_CHANNEL_ID));
+        assertNotNull(mBinderService.getNotificationChannel(
+                PKG, mContext.getUserId(), PKG, TEST_CHANNEL_ID));
     }
 
     @After
@@ -497,7 +499,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.createNotificationChannels(PKG,
                 new ParceledListSlice(Arrays.asList(channel)));
         final NotificationChannel createdChannel =
-                mBinderService.getNotificationChannel(PKG, "id");
+                mBinderService.getNotificationChannel(PKG, mContext.getUserId(), PKG, "id");
         assertTrue(createdChannel != null);
     }
 
@@ -520,8 +522,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 new NotificationChannel("id2", "name", IMPORTANCE_DEFAULT);
         mBinderService.createNotificationChannels(PKG,
                 new ParceledListSlice(Arrays.asList(channel1, channel2)));
-        assertTrue(mBinderService.getNotificationChannel(PKG, "id1") != null);
-        assertTrue(mBinderService.getNotificationChannel(PKG, "id2") != null);
+        assertTrue(mBinderService.getNotificationChannel(
+                PKG, mContext.getUserId(), PKG, "id1") != null);
+        assertTrue(mBinderService.getNotificationChannel(
+                PKG, mContext.getUserId(), PKG, "id2") != null);
     }
 
     @Test
@@ -538,7 +542,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.createNotificationChannels(PKG,
                 new ParceledListSlice(Arrays.asList(dupeChannel)));
         final NotificationChannel createdChannel =
-                mBinderService.getNotificationChannel(PKG, "id");
+                mBinderService.getNotificationChannel(PKG, mContext.getUserId(), PKG, "id");
         assertEquals(IMPORTANCE_DEFAULT, createdChannel.getImportance());
     }
 
@@ -556,7 +560,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.createNotificationChannels(PKG,
                 new ParceledListSlice(Arrays.asList(dupeChannel)));
         final NotificationChannel createdChannel =
-                mBinderService.getNotificationChannel(PKG, "id");
+                mBinderService.getNotificationChannel(PKG, mContext.getUserId(), PKG, "id");
         assertEquals(NotificationManager.IMPORTANCE_LOW, createdChannel.getImportance());
     }
 
@@ -579,7 +583,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.createNotificationChannels(PKG,
                 new ParceledListSlice(Arrays.asList(dupeChannel)));
         final NotificationChannel createdChannel =
-                mBinderService.getNotificationChannel(PKG, "id");
+                mBinderService.getNotificationChannel(PKG, mContext.getUserId(), PKG, "id");
         assertEquals(IMPORTANCE_HIGH, createdChannel.getImportance());
     }
 
@@ -593,7 +597,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.createNotificationChannels(PKG,
                 new ParceledListSlice(Arrays.asList(channel1, channel2)));
         final NotificationChannel createdChannel =
-                mBinderService.getNotificationChannel(PKG, "id");
+                mBinderService.getNotificationChannel(PKG, mContext.getUserId(), PKG, "id");
         assertEquals(IMPORTANCE_DEFAULT, createdChannel.getImportance());
     }
 
@@ -646,8 +650,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals(1, mBinderService.getActiveNotifications(sbn.getPackageName()).length);
         assertEquals(IMPORTANCE_LOW,
                 mService.getNotificationRecord(sbn.getKey()).getImportance());
-        assertEquals(IMPORTANCE_LOW,
-                mBinderService.getNotificationChannel(PKG, channel.getId()).getImportance());
+        assertEquals(IMPORTANCE_LOW, mBinderService.getNotificationChannel(
+                PKG, mContext.getUserId(), PKG, channel.getId()).getImportance());
     }
 
     @Test
@@ -664,8 +668,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 new NotificationChannel("blockedbyuser", "name", IMPORTANCE_NONE);
         mBinderService.updateNotificationChannelForPackage(PKG, mUid, update);
         waitForIdle();
-        assertEquals(IMPORTANCE_NONE,
-                mBinderService.getNotificationChannel(PKG, channel.getId()).getImportance());
+        assertEquals(IMPORTANCE_NONE, mBinderService.getNotificationChannel(
+                PKG, mContext.getUserId(), PKG, channel.getId()).getImportance());
 
         StatusBarNotification sbn = generateNotificationRecord(channel).sbn;
         sbn.getNotification().flags |= FLAG_FOREGROUND_SERVICE;
@@ -677,8 +681,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals(1, mBinderService.getActiveNotifications(sbn.getPackageName()).length);
         assertEquals(IMPORTANCE_LOW,
                 mService.getNotificationRecord(sbn.getKey()).getImportance());
-        assertEquals(IMPORTANCE_LOW,
-                mBinderService.getNotificationChannel(PKG, channel.getId()).getImportance());
+        assertEquals(IMPORTANCE_LOW, mBinderService.getNotificationChannel(
+                PKG, mContext.getUserId(), PKG, channel.getId()).getImportance());
         mBinderService.cancelNotificationWithTag(PKG, "tag", sbn.getId(), sbn.getUserId());
         waitForIdle();
 
@@ -686,8 +690,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         update.setFgServiceShown(true);
         mBinderService.updateNotificationChannelForPackage(PKG, mUid, update);
         waitForIdle();
-        assertEquals(IMPORTANCE_NONE,
-                mBinderService.getNotificationChannel(PKG, channel.getId()).getImportance());
+        assertEquals(IMPORTANCE_NONE, mBinderService.getNotificationChannel(
+                PKG, mContext.getUserId(), PKG, channel.getId()).getImportance());
 
         sbn = generateNotificationRecord(channel).sbn;
         sbn.getNotification().flags |= FLAG_FOREGROUND_SERVICE;
@@ -697,8 +701,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // The second time it is shown, we keep the user's preference.
         assertEquals(0, mBinderService.getActiveNotifications(sbn.getPackageName()).length);
         assertNull(mService.getNotificationRecord(sbn.getKey()));
-        assertEquals(IMPORTANCE_NONE,
-                mBinderService.getNotificationChannel(PKG, channel.getId()).getImportance());
+        assertEquals(IMPORTANCE_NONE, mBinderService.getNotificationChannel(
+                PKG, mContext.getUserId(), PKG, channel.getId()).getImportance());
     }
 
     @Test
@@ -2692,7 +2696,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mService.getNotificationRecord(sbn.getKey()).getImportance());
 
         NotificationChannel defaultChannel = mBinderService.getNotificationChannel(
-                preOPkg, NotificationChannel.DEFAULT_CHANNEL_ID);
+                preOPkg, mContext.getUserId(), preOPkg, NotificationChannel.DEFAULT_CHANNEL_ID);
         assertEquals(IMPORTANCE_UNSPECIFIED, defaultChannel.getImportance());
     }
 
@@ -4192,6 +4196,25 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testgetNotificationChannels_crossUser() throws Exception {
+        // same user no problem
+        mBinderService.getNotificationChannels("src", "target", mContext.getUserId());
+
+        // cross user, no permission, problem
+        try {
+            mBinderService.getNotificationChannels("src", "target", mContext.getUserId() + 1);
+            fail("Should not be callable cross user without cross user permission");
+        } catch (SecurityException e) {
+            // good
+        }
+
+        // cross user, with permission, no problem
+        TestablePermissions perms = mContext.getTestablePermissions();
+        perms.setPermission(android.Manifest.permission.INTERACT_ACROSS_USERS, PERMISSION_GRANTED);
+        mBinderService.getNotificationChannels("src", "target", mContext.getUserId() + 1);
+    }
+
+    @Test
     public void setDefaultAssistantForUser_fromConfigXml() {
         clearDeviceConfig();
         ComponentName xmlConfig = new ComponentName("config", "xml");
@@ -4263,5 +4286,19 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 SystemUiDeviceConfigFlags.NAS_DEFAULT_SERVICE,
                 componentName,
                 false);
+    }
+
+    public void testGetAllowedAssistantCapabilities() throws Exception {
+        List<String> capabilities = mBinderService.getAllowedAssistantCapabilities(null);
+        assertNotNull(capabilities);
+
+        for (int i = capabilities.size() - 1; i >= 0; i--) {
+            String capability = capabilities.get(i);
+            mBinderService.disallowAssistantCapability(capability);
+            assertEquals(i + 1, mBinderService.getAllowedAssistantCapabilities(null).size());
+            List<String> currentCapabilities = mBinderService.getAllowedAssistantCapabilities(null);
+            assertNotNull(currentCapabilities);
+            assertFalse(currentCapabilities.contains(capability));
+        }
     }
 }

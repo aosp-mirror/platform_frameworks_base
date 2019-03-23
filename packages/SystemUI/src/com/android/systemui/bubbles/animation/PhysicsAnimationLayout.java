@@ -27,8 +27,11 @@ import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.systemui.R;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -45,6 +48,35 @@ public class PhysicsAnimationLayout extends FrameLayout {
      * layout.
      */
     abstract static class PhysicsAnimationController {
+
+        /** Configures a given {@link PhysicsPropertyAnimator} for a view at the given index. */
+        interface ChildAnimationConfigurator {
+
+            /**
+             * Called to configure the animator for the view at the given index.
+             *
+             * This method should make use of methods such as
+             * {@link PhysicsPropertyAnimator#translationX} and
+             * {@link PhysicsPropertyAnimator#withStartDelay} to configure the animation.
+             *
+             * Implementations should not call {@link PhysicsPropertyAnimator#start}, this will
+             * happen elsewhere after configuration is complete.
+             */
+            void configureAnimationForChildAtIndex(int index, PhysicsPropertyAnimator animation);
+        }
+
+        /**
+         * Returned by {@link #animationsForChildrenFromIndex} to allow starting multiple animations
+         * on multiple child views at the same time.
+         */
+        interface MultiAnimationStarter {
+
+            /**
+             * Start all animations and call the given end actions once all animations have
+             * completed.
+             */
+            void startAll(Runnable... endActions);
+        }
 
         /**
          * Constant to return from {@link #getNextAnimationInChain} if the animation should not be
@@ -98,7 +130,7 @@ public class PhysicsAnimationLayout extends FrameLayout {
          * by getChildAt() and getChildCount().
          *
          * The controller can perform animations on the child (either manually, or by using
-         * {@link #animateValueForChild}), and then call finishRemoval when complete.
+         * {@link #animationForChild(View)}), and then call finishRemoval when complete.
          *
          * finishRemoval must be called by implementations of this method, or transient views will
          * never be removed.
@@ -125,14 +157,74 @@ public class PhysicsAnimationLayout extends FrameLayout {
         protected void setChildVisibility(View child, int index, int visibility) {
             child.setVisibility(visibility);
         }
+
+        /**
+         * Returns a {@link PhysicsPropertyAnimator} instance for the given child view.
+         */
+        protected PhysicsPropertyAnimator animationForChild(View child) {
+            PhysicsPropertyAnimator animator =
+                    (PhysicsPropertyAnimator) child.getTag(R.id.physics_animator_tag);
+
+            if (animator == null) {
+                animator = mLayout.new PhysicsPropertyAnimator(child);
+                child.setTag(R.id.physics_animator_tag, animator);
+            }
+
+            return animator;
+        }
+
+        /** Returns a {@link PhysicsPropertyAnimator} instance for child at the given index. */
+        protected PhysicsPropertyAnimator animationForChildAtIndex(int index) {
+            return animationForChild(mLayout.getChildAt(index));
+        }
+
+        /**
+         * Returns a {@link MultiAnimationStarter} whose startAll method will start the physics
+         * animations for all children from startIndex onward. The provided configurator will be
+         * called with each child's {@link PhysicsPropertyAnimator}, where it can set up each
+         * animation appropriately.
+         */
+        protected MultiAnimationStarter animationsForChildrenFromIndex(
+                int startIndex, ChildAnimationConfigurator configurator) {
+            final Set<DynamicAnimation.ViewProperty> allAnimatedProperties = new HashSet<>();
+            final List<PhysicsPropertyAnimator> allChildAnims = new ArrayList<>();
+
+            // Retrieve the animator for each child, ask the configurator to configure it, then save
+            // it and the properties it chose to animate.
+            for (int i = startIndex; i < mLayout.getChildCount(); i++) {
+                final PhysicsPropertyAnimator anim = animationForChildAtIndex(i);
+                configurator.configureAnimationForChildAtIndex(i, anim);
+                allAnimatedProperties.addAll(anim.getAnimatedProperties());
+                allChildAnims.add(anim);
+            }
+
+            // Return a MultiAnimationStarter that will start all of the child animations, and also
+            // add a multiple property end listener to the layout that will call the end action
+            // provided to startAll() once all animations on the animated properties complete.
+            return (endActions) -> {
+                if (endActions != null) {
+                    mLayout.setEndActionForMultipleProperties(
+                            () -> {
+                                for (Runnable action : endActions) {
+                                    action.run();
+                                }
+                            },
+                            allAnimatedProperties.toArray(
+                                    new DynamicAnimation.ViewProperty[0]));
+                }
+
+                for (PhysicsPropertyAnimator childAnim : allChildAnims) {
+                    childAnim.start();
+                }
+            };
+        }
     }
 
     /**
-     * End listeners that are called when every child's animation of the given property has
-     * finished.
+     * End actions that are called when every child's animation of the given property has finished.
      */
-    protected final HashMap<DynamicAnimation.ViewProperty, DynamicAnimation.OnAnimationEndListener>
-            mEndListenerForProperty = new HashMap<>();
+    protected final HashMap<DynamicAnimation.ViewProperty, Runnable> mEndActionForProperty =
+            new HashMap<>();
 
     /** Set of currently rendered transient views. */
     private final Set<View> mTransientViews = new HashSet<>();
@@ -165,7 +257,7 @@ public class PhysicsAnimationLayout extends FrameLayout {
      */
     public void setController(PhysicsAnimationController controller) {
         cancelAllAnimations();
-        mEndListenerForProperty.clear();
+        mEndActionForProperty.clear();
 
         this.mController = controller;
         mController.setLayout(this);
@@ -177,26 +269,27 @@ public class PhysicsAnimationLayout extends FrameLayout {
     }
 
     /**
-     * Sets an end listener that will be called when all child animations for a given property have
+     * Sets an end action that will be run when all child animations for a given property have
      * stopped running.
      */
-    public void setEndListenerForProperty(
-            DynamicAnimation.OnAnimationEndListener listener,
-            DynamicAnimation.ViewProperty property) {
-        mEndListenerForProperty.put(property, listener);
+    public void setEndActionForProperty(Runnable action, DynamicAnimation.ViewProperty property) {
+        mEndActionForProperty.put(property, action);
     }
 
     /**
-     * Sets an end listener that will be called whenever any of the given properties' animations
-     * end. For example, setting a listener for TRANSLATION_X and TRANSLATION_Y will result in that
-     * listener being called twice - once when all TRANSLATION_X animations end, and again when all
-     * TRANSLATION_Y animations end.
+     * Sets an end action that will be run when all child animations for all of the given properties
+     * have stopped running.
      */
-    public void setEndListenerForProperties(
-            DynamicAnimation.OnAnimationEndListener endListener,
-            DynamicAnimation.ViewProperty... properties) {
+    public void setEndActionForMultipleProperties(
+            Runnable action, DynamicAnimation.ViewProperty... properties) {
+        final Runnable checkIfAllFinished = () -> {
+            if (!arePropertiesAnimating(properties)) {
+                action.run();
+            }
+        };
+
         for (DynamicAnimation.ViewProperty property : properties) {
-            setEndListenerForProperty(endListener, property);
+            setEndActionForProperty(checkIfAllFinished, property);
         }
     }
 
@@ -204,8 +297,8 @@ public class PhysicsAnimationLayout extends FrameLayout {
      * Removes the end listener that would have been called when all child animations for a given
      * property stopped running.
      */
-    public void removeEndListenerForProperty(DynamicAnimation.ViewProperty property) {
-        mEndListenerForProperty.remove(property);
+    public void removeEndActionForProperty(DynamicAnimation.ViewProperty property) {
+        mEndActionForProperty.remove(property);
     }
 
     @Override
@@ -228,6 +321,11 @@ public class PhysicsAnimationLayout extends FrameLayout {
     @Override
     public void removeView(View view) {
         removeViewAndThen(view, /* callback */ null);
+    }
+
+    @Override
+    public void removeViewAt(int index) {
+        removeView(getChildAt(index));
     }
 
     @Override
@@ -304,7 +402,10 @@ public class PhysicsAnimationLayout extends FrameLayout {
 
         for (int i = 0; i < getChildCount(); i++) {
             for (DynamicAnimation.ViewProperty property : mController.getAnimatedProperties()) {
-                getAnimationAtIndex(property, i).cancel();
+                final DynamicAnimation anim = getAnimationAtIndex(property, i);
+                if (anim != null) {
+                    anim.cancel();
+                }
             }
         }
     }
@@ -314,107 +415,6 @@ public class PhysicsAnimationLayout extends FrameLayout {
         for (DynamicAnimation.ViewProperty property : mController.getAnimatedProperties()) {
             getAnimationFromView(property, view).cancel();
         }
-    }
-
-    /**
-     * Animates the property of the given child view, then runs the callback provided when the
-     * animation ends.
-     */
-    protected void animateValueForChild(
-            DynamicAnimation.ViewProperty property,
-            View view,
-            float value,
-            float startVel,
-            Runnable after) {
-        if (view != null) {
-            final SpringAnimation animation =
-                    (SpringAnimation) view.getTag(getTagIdForProperty(property));
-            if (after != null) {
-                animation.addEndListener(new OneTimeEndListener() {
-                    @Override
-                    public void onAnimationEnd(DynamicAnimation animation, boolean canceled,
-                            float value, float velocity) {
-                        super.onAnimationEnd(animation, canceled, value, velocity);
-                        after.run();
-                    }
-                });
-            }
-
-            // Set the start velocity if it's something other than the not-set value.
-            if (startVel != Float.MAX_VALUE) {
-                animation.setStartVelocity(startVel);
-            }
-
-            animation.animateToFinalPosition(value);
-        }
-    }
-
-    protected void animateValueForChild(
-            DynamicAnimation.ViewProperty property,
-            View view,
-            float value,
-            Runnable after) {
-        animateValueForChild(property, view, value, Float.MAX_VALUE, after);
-    }
-
-    protected void animateValueForChild(
-            DynamicAnimation.ViewProperty property,
-            View view,
-            float value) {
-        animateValueForChild(property, view, value, Float.MAX_VALUE, /* after */ null);
-    }
-
-    protected void animateValueForChild(
-            DynamicAnimation.ViewProperty property,
-            View view,
-            float value,
-            float startVel) {
-        animateValueForChild(property, view, value, startVel, /* after */ null);
-    }
-
-    /**
-     * Animates the property of the child at the given index to the given value, then runs the
-     * callback provided when the animation ends.
-     */
-    protected void animateValueForChildAtIndex(
-            DynamicAnimation.ViewProperty property,
-            int index,
-            float value,
-            float startVel,
-            Runnable after) {
-        animateValueForChild(property, getChildAt(index), value, startVel, after);
-    }
-
-    /** Shortcut to animate a value with a callback, but no start velocity. */
-    protected void animateValueForChildAtIndex(
-            DynamicAnimation.ViewProperty property,
-            int index,
-            float value,
-            Runnable after) {
-        animateValueForChildAtIndex(property, index, value, Float.MAX_VALUE, after);
-    }
-
-    /** Shortcut to animate a value with a start velocity, but no callback. */
-    protected void animateValueForChildAtIndex(
-            DynamicAnimation.ViewProperty property,
-            int index,
-            float value,
-            float startVel) {
-        animateValueForChildAtIndex(property, index, value, startVel, /* callback */ null);
-    }
-
-    /** Shortcut to animate a value without changing the velocity or providing a callback. */
-    protected void animateValueForChildAtIndex(
-            DynamicAnimation.ViewProperty property,
-            int index,
-            float value) {
-        animateValueForChildAtIndex(property, index, value, Float.MAX_VALUE, /* callback */ null);
-    }
-
-    /** Shortcut to animate a child view's TRANSLATION_X and TRANSLATION_Y values. */
-    protected void animatePositionForChildAtIndex(int index, float x, float y) {
-        animateValueForChildAtIndex(DynamicAnimation.TRANSLATION_X, index, x);
-        animateValueForChildAtIndex(DynamicAnimation.TRANSLATION_Y, index, y);
     }
 
     /** Whether the first child would be left of center if translated to the given x value. */
@@ -562,40 +562,256 @@ public class PhysicsAnimationLayout extends FrameLayout {
         public void onAnimationEnd(
                 DynamicAnimation anim, boolean canceled, float value, float velocity) {
             if (!arePropertiesAnimating(mProperty)) {
-                if (mEndListenerForProperty.containsKey(mProperty)) {
-                    mEndListenerForProperty.get(mProperty).onAnimationEnd(anim, canceled, value,
-                            velocity);
+                if (mEndActionForProperty.containsKey(mProperty)) {
+                    mEndActionForProperty.get(mProperty).run();
                 }
             }
         }
     }
 
     /**
-     * One time end listener that waits for every animation on every given property to finish. At
-     * that point, it calls {@link #onAllAnimationsForPropertiesEnd} and then removes itself as an
-     * end listener from each property.
+     * Animator class returned by {@link PhysicsAnimationController#animationForChild}, to allow
+     * controllers to animate child views using physics animations.
+     *
+     * See docs/physics-animation-layout.md for documentation and examples.
      */
-    public abstract class OneTimeMultiplePropertyEndListener
-            implements DynamicAnimation.OnAnimationEndListener {
-        final DynamicAnimation.ViewProperty[] mViewProperties;
+    protected class PhysicsPropertyAnimator {
+        /** The view whose properties this animator animates. */
+        private View mView;
 
-        OneTimeMultiplePropertyEndListener(DynamicAnimation.ViewProperty... properties) {
-            mViewProperties = properties;
+        /** Start velocity to use for all property animations. */
+        private float mDefaultStartVelocity = 0f;
+
+        /** Start delay to use when start is called. */
+        private long mStartDelay = 0;
+
+        /** End actions to call when animations for the given property complete. */
+        private Map<DynamicAnimation.ViewProperty, Runnable[]> mEndActionsForProperty =
+                new HashMap<>();
+
+        /**
+         * Start velocities to use for TRANSLATION_X and TRANSLATION_Y, since these are often
+         * provided by VelocityTrackers and differ from each other.
+         */
+        private Map<DynamicAnimation.ViewProperty, Float> mPositionStartVelocities =
+                new HashMap<>();
+
+        /**
+         * End actions to call when both TRANSLATION_X and TRANSLATION_Y animations have completed,
+         * if {@link #position} was used to animate TRANSLATION_X and TRANSLATION_Y simultaneously.
+         */
+        private Runnable[] mPositionEndActions;
+
+        /**
+         * All of the properties that have been set and will animate when {@link #start} is called.
+         */
+        private Map<DynamicAnimation.ViewProperty, Float> mAnimatedProperties = new HashMap<>();
+
+        protected PhysicsPropertyAnimator(View view) {
+            this.mView = view;
         }
 
-        @Override
-        public void onAnimationEnd(DynamicAnimation animation, boolean canceled, float value,
-                float velocity) {
-            if (!arePropertiesAnimating(mViewProperties)) {
-                onAllAnimationsForPropertiesEnd();
+        /** Animate a property to the given value, then call the optional end actions. */
+        public PhysicsPropertyAnimator property(
+                DynamicAnimation.ViewProperty property, float value, Runnable... endActions) {
+            mAnimatedProperties.put(property, value);
+            mEndActionsForProperty.put(property, endActions);
+            return this;
+        }
 
-                for (DynamicAnimation.ViewProperty property : mViewProperties) {
-                    removeEndListenerForProperty(property);
+        /** Animate the view's alpha value to the provided value. */
+        public PhysicsPropertyAnimator alpha(float alpha, Runnable... endActions) {
+            return property(DynamicAnimation.ALPHA, alpha, endActions);
+        }
+
+        /** Set the view's alpha value to 'from', then animate it to the given value. */
+        public PhysicsPropertyAnimator alpha(float from, float to, Runnable... endActions) {
+            mView.setAlpha(from);
+            return alpha(to, endActions);
+        }
+
+        /** Animate the view's translationX value to the provided value. */
+        public PhysicsPropertyAnimator translationX(float translationX, Runnable... endActions) {
+            return property(DynamicAnimation.TRANSLATION_X, translationX, endActions);
+        }
+
+        /** Set the view's translationX value to 'from', then animate it to the given value. */
+        public PhysicsPropertyAnimator translationX(
+                float from, float to, Runnable... endActions) {
+            mView.setTranslationX(from);
+            return translationX(to, endActions);
+        }
+
+        /** Animate the view's translationY value to the provided value. */
+        public PhysicsPropertyAnimator translationY(float translationY, Runnable... endActions) {
+            return property(DynamicAnimation.TRANSLATION_Y, translationY, endActions);
+        }
+
+        /** Set the view's translationY value to 'from', then animate it to the given value. */
+        public PhysicsPropertyAnimator translationY(
+                float from, float to, Runnable... endActions) {
+            mView.setTranslationY(from);
+            return translationY(to, endActions);
+        }
+
+        /**
+         * Animate the view's translationX and translationY values, and call the end actions only
+         * once both TRANSLATION_X and TRANSLATION_Y animations have completed.
+         */
+        public PhysicsPropertyAnimator position(
+                float translationX, float translationY, Runnable... endActions) {
+            mPositionEndActions = endActions;
+            translationX(translationX);
+            return translationY(translationY);
+        }
+
+        /** Animate the view's scaleX value to the provided value. */
+        public PhysicsPropertyAnimator scaleX(float scaleX, Runnable... endActions) {
+            return property(DynamicAnimation.SCALE_X, scaleX, endActions);
+        }
+
+        /** Set the view's scaleX value to 'from', then animate it to the given value. */
+        public PhysicsPropertyAnimator scaleX(float from, float to, Runnable... endActions) {
+            mView.setScaleX(from);
+            return scaleX(to, endActions);
+        }
+
+        /** Animate the view's scaleY value to the provided value. */
+        public PhysicsPropertyAnimator scaleY(float scaleY, Runnable... endActions) {
+            return property(DynamicAnimation.SCALE_Y, scaleY, endActions);
+        }
+
+        /** Set the view's scaleY value to 'from', then animate it to the given value. */
+        public PhysicsPropertyAnimator scaleY(float from, float to, Runnable... endActions) {
+            mView.setScaleY(from);
+            return scaleY(to, endActions);
+        }
+
+        /** Set the start velocity to use for all property animations. */
+        public PhysicsPropertyAnimator withStartVelocity(float startVel) {
+            mDefaultStartVelocity = startVel;
+            return this;
+        }
+
+        /**
+         * Set the start velocities to use for TRANSLATION_X and TRANSLATION_Y animations. This
+         * overrides any value set via {@link #withStartVelocity(float)} for those properties.
+         */
+        public PhysicsPropertyAnimator withPositionStartVelocities(float velX, float velY) {
+            mPositionStartVelocities.put(DynamicAnimation.TRANSLATION_X, velX);
+            mPositionStartVelocities.put(DynamicAnimation.TRANSLATION_Y, velY);
+            return this;
+        }
+
+        /** Set a delay, in milliseconds, before kicking off the animations. */
+        public PhysicsPropertyAnimator withStartDelay(long startDelay) {
+            mStartDelay = startDelay;
+            return this;
+        }
+
+        /**
+         * Start the animations, and call the optional end actions once all animations for every
+         * animated property on every child (including chained animations) have ended.
+         */
+        public void start(Runnable... after) {
+            final Set<DynamicAnimation.ViewProperty> properties = getAnimatedProperties();
+
+            // If there are end actions, set an end listener on the layout for all the properties
+            // we're about to animate.
+            if (after != null) {
+                final DynamicAnimation.ViewProperty[] propertiesArray =
+                        properties.toArray(new DynamicAnimation.ViewProperty[0]);
+                for (Runnable callback : after) {
+                    setEndActionForMultipleProperties(callback, propertiesArray);
+                }
+            }
+
+            // If we used position-specific end actions, we'll need to listen for both TRANSLATION_X
+            // and TRANSLATION_Y animations ending, and call them once both have finished.
+            if (mPositionEndActions != null) {
+                final SpringAnimation translationXAnim =
+                        getAnimationFromView(DynamicAnimation.TRANSLATION_X, mView);
+                final SpringAnimation translationYAnim =
+                        getAnimationFromView(DynamicAnimation.TRANSLATION_Y, mView);
+                final Runnable waitForBothXAndY = () -> {
+                    if (!translationXAnim.isRunning() && !translationYAnim.isRunning()) {
+                        if (mPositionEndActions != null) {
+                            for (Runnable callback : mPositionEndActions) {
+                                callback.run();
+                            }
+                        }
+
+                        mPositionEndActions = null;
+                    }
+                };
+
+                mEndActionsForProperty.put(DynamicAnimation.TRANSLATION_X,
+                        new Runnable[]{waitForBothXAndY});
+                mEndActionsForProperty.put(DynamicAnimation.TRANSLATION_Y,
+                        new Runnable[]{waitForBothXAndY});
+            }
+
+            // Actually start the animations.
+            for (DynamicAnimation.ViewProperty property : properties) {
+                animateValueForChild(
+                        property,
+                        mView,
+                        mAnimatedProperties.get(property),
+                        mPositionStartVelocities.getOrDefault(property, mDefaultStartVelocity),
+                        mStartDelay,
+                        mEndActionsForProperty.get(property));
+            }
+
+            // Clear out the animator.
+            mAnimatedProperties.clear();
+            mPositionStartVelocities.clear();
+            mDefaultStartVelocity = 0;
+            mStartDelay = 0;
+            mEndActionsForProperty.clear();
+        }
+
+        /** Returns the set of properties that will animate once {@link #start} is called. */
+        protected Set<DynamicAnimation.ViewProperty> getAnimatedProperties() {
+            return mAnimatedProperties.keySet();
+        }
+
+        /**
+         * Animates the property of the given child view, then runs the callback provided when the
+         * animation ends.
+         */
+        protected void animateValueForChild(
+                DynamicAnimation.ViewProperty property,
+                View view,
+                float value,
+                float startVel,
+                long startDelay,
+                Runnable[] afterCallbacks) {
+            if (view != null) {
+                final SpringAnimation animation =
+                        (SpringAnimation) view.getTag(getTagIdForProperty(property));
+                if (afterCallbacks != null) {
+                    animation.addEndListener(new OneTimeEndListener() {
+                        @Override
+                        public void onAnimationEnd(DynamicAnimation animation, boolean canceled,
+                                float value, float velocity) {
+                            super.onAnimationEnd(animation, canceled, value, velocity);
+                            for (Runnable runnable : afterCallbacks) {
+                                runnable.run();
+                            }
+                        }
+                    });
+                }
+
+                if (startVel > 0) {
+                    animation.setStartVelocity(startVel);
+                }
+
+                if (startDelay > 0) {
+                    postDelayed(() -> animation.animateToFinalPosition(value), startDelay);
+                } else {
+                    animation.animateToFinalPosition(value);
                 }
             }
         }
-
-        /** Called when every animation for every property has finished. */
-        abstract void onAllAnimationsForPropertiesEnd();
     }
 }

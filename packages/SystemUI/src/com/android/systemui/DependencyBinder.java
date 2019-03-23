@@ -60,6 +60,8 @@ import com.android.systemui.statusbar.policy.RotationLockController;
 import com.android.systemui.statusbar.policy.RotationLockControllerImpl;
 import com.android.systemui.statusbar.policy.SecurityController;
 import com.android.systemui.statusbar.policy.SecurityControllerImpl;
+import com.android.systemui.statusbar.policy.SensorPrivacyController;
+import com.android.systemui.statusbar.policy.SensorPrivacyControllerImpl;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -221,6 +223,12 @@ public abstract class DependencyBinder {
      */
     @Binds
     public abstract PowerUI.WarningsUI provideWarningsUi(PowerNotificationWarnings controllerImpl);
+
+    /**
+     */
+    @Binds
+    public abstract SensorPrivacyController provideSensorPrivacyControllerImpl(
+            SensorPrivacyControllerImpl controllerImpl);
 
     /**
      */

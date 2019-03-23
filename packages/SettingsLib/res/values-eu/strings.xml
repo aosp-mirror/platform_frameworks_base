@@ -33,7 +33,7 @@
     <string name="wifi_check_password_try_again" msgid="516958988102584767">"Egiaztatu pasahitza zuzena dela eta saiatu berriro"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Urrunegi"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"Ez da konektatuko automatikoki"</string>
-    <string name="wifi_no_internet" msgid="4663834955626848401">"Ezin da atzitu Internet"</string>
+    <string name="wifi_no_internet" msgid="4663834955626848401">"Ezin da konektatu Internetera"</string>
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> aplikazioak gorde du"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"%1$s bidez automatikoki konektatuta"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Automatikoki konektatuta sareen balorazioen hornitzailearen bidez"</string>
@@ -42,6 +42,8 @@
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s bidez erabilgarri"</string>
     <string name="tap_to_sign_up" msgid="6449724763052579434">"Sakatu erregistratzeko"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Konektatuta; ezin da atzitu Internet"</string>
+    <!-- no translation found for wifi_limited_connection (7717855024753201527) -->
+    <skip />
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"Ez dago Interneteko konexiorik"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"Saioa hasi behar da"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Sarbide-puntua beteta dago aldi baterako"</string>
@@ -73,13 +75,17 @@
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"Konektatuta (gailuaren audiorik gabe). Bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>."</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"Konektatuta (telefonoaren edo gailuaren audiorik gabe). Bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>."</string>
     <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"Aktibo. Bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <!-- no translation found for bluetooth_active_battery_level_untethered (6662649951391456747) -->
+    <skip />
     <string name="bluetooth_battery_level" msgid="1447164613319663655">"Bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <!-- no translation found for bluetooth_battery_level_untethered (5974406100211667177) -->
+    <skip />
     <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Aktibo"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Euskarriaren audioa"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Telefono-deiak"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Fitxategi-transferentzia"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Sarrerako gailua"</string>
-    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Interneterako sarbidea"</string>
+    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Interneteko konexioa"</string>
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Kontaktuak partekatzea"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Erabili kontaktuak partekatzeko"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Interneteko konexioa partekatzea"</string>
@@ -96,9 +102,9 @@
     <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"SAP sarbide-puntura konektatuta"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"Fitxategi-transferentziako zerbitzarira konektatu gabe"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"Sarrerako gailura konektatuta"</string>
-    <string name="bluetooth_pan_user_profile_summary_connected" msgid="6436258151814414028">"Gailura konektatuta Interneteko sarbiderako"</string>
+    <string name="bluetooth_pan_user_profile_summary_connected" msgid="6436258151814414028">"Gailura konektatuta Internet atzitzeko"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1322694224800769308">"Tokiko Interneteko konexioa gailu batekin partekatzea"</string>
-    <string name="bluetooth_pan_profile_summary_use_for" msgid="5736111170225304239">"Erabili Internet atzitzeko"</string>
+    <string name="bluetooth_pan_profile_summary_use_for" msgid="5736111170225304239">"Erabili Internetera konektatzeko"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"Erabili maparako"</string>
     <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"Erabili SIM txartelerako sarbiderako"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"Erabili euskarriaren audiorako"</string>
@@ -384,6 +390,8 @@
     <string name="power_discharge_by" msgid="6453537733650125582">"Ordu honetara arte iraungo du, gutxi gorabehera: <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="107616694963545745">"Ordu honetara arte iraungo du, gutxi gorabehera: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="1372817269546888804">"<xliff:g id="TIME">%1$s</xliff:g> arte"</string>
+    <!-- no translation found for power_suggestion_extend_battery (4401408879069551485) -->
+    <skip />
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"<xliff:g id="THRESHOLD">%1$s</xliff:g> baino gutxiago gelditzen dira"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"<xliff:g id="THRESHOLD">%1$s</xliff:g> baino gutxiago gelditzen da (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> baino gehiago gelditzen da (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -457,5 +465,6 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Galdetu beti"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"Desaktibatu arte"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"Oraintxe"</string>
-    <string name="media_transfer_phone_device_name" msgid="1003823744105758574">"Telefonoaren bozgorailua"</string>
+    <!-- no translation found for media_transfer_this_device_name (1636276898262571213) -->
+    <skip />
 </resources>

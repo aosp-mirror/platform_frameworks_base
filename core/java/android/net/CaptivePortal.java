@@ -15,6 +15,7 @@
  */
 package android.net;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.IBinder;
@@ -63,9 +64,7 @@ public class CaptivePortal implements Parcelable {
     private final IBinder mBinder;
 
     /** @hide */
-    @SystemApi
-    @TestApi
-    public CaptivePortal(IBinder binder) {
+    public CaptivePortal(@NonNull IBinder binder) {
         mBinder = binder;
     }
 
@@ -142,7 +141,7 @@ public class CaptivePortal implements Parcelable {
      */
     @SystemApi
     @TestApi
-    public void logEvent(int eventId, String packageName) {
+    public void logEvent(int eventId, @NonNull String packageName) {
         try {
             ICaptivePortal.Stub.asInterface(mBinder).logEvent(eventId, packageName);
         } catch (RemoteException e) {

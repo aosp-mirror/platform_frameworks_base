@@ -65,12 +65,13 @@ final class OverlayManagerSettings {
     private final ArrayList<SettingsItem> mItems = new ArrayList<>();
 
     void init(@NonNull final String packageName, final int userId,
-            @NonNull final String targetPackageName, @NonNull final String baseCodePath,
-            boolean isStatic, int priority, String overlayCategory) {
+            @NonNull final String targetPackageName,  @Nullable final String targetOverlayableName,
+            @NonNull final String baseCodePath, boolean isStatic, int priority,
+            @Nullable String overlayCategory) {
         remove(packageName, userId);
         final SettingsItem item =
-                new SettingsItem(packageName, userId, targetPackageName, baseCodePath,
-                        isStatic, priority, overlayCategory);
+                new SettingsItem(packageName, userId, targetPackageName, targetOverlayableName,
+                        baseCodePath, isStatic, priority, overlayCategory);
         if (isStatic) {
             // All static overlays are always enabled.
             item.setEnabled(true);
@@ -302,16 +303,17 @@ final class OverlayManagerSettings {
             pw.println(item.mPackageName + ":" + item.getUserId() + " {");
             pw.increaseIndent();
 
-            pw.println("mPackageName.......: " + item.mPackageName);
-            pw.println("mUserId............: " + item.getUserId());
-            pw.println("mTargetPackageName.: " + item.getTargetPackageName());
-            pw.println("mBaseCodePath......: " + item.getBaseCodePath());
-            pw.println("mState.............: " + OverlayInfo.stateToString(item.getState()));
-            pw.println("mState.............: " + OverlayInfo.stateToString(item.getState()));
-            pw.println("mIsEnabled.........: " + item.isEnabled());
-            pw.println("mIsStatic..........: " + item.isStatic());
-            pw.println("mPriority..........: " + item.mPriority);
-            pw.println("mCategory..........: " + item.mCategory);
+            pw.println("mPackageName...........: " + item.mPackageName);
+            pw.println("mUserId................: " + item.getUserId());
+            pw.println("mTargetPackageName.....: " + item.getTargetPackageName());
+            pw.println("mTargetOverlayableName.: " + item.getTargetOverlayableName());
+            pw.println("mBaseCodePath..........: " + item.getBaseCodePath());
+            pw.println("mState.................: " + OverlayInfo.stateToString(item.getState()));
+            pw.println("mState.................: " + OverlayInfo.stateToString(item.getState()));
+            pw.println("mIsEnabled.............: " + item.isEnabled());
+            pw.println("mIsStatic..............: " + item.isStatic());
+            pw.println("mPriority..............: " + item.mPriority);
+            pw.println("mCategory..............: " + item.mCategory);
 
             pw.decreaseIndent();
             pw.println("}");
@@ -335,6 +337,7 @@ final class OverlayManagerSettings {
         private static final String ATTR_PACKAGE_NAME = "packageName";
         private static final String ATTR_STATE = "state";
         private static final String ATTR_TARGET_PACKAGE_NAME = "targetPackageName";
+        private static final String ATTR_TARGET_OVERLAYABLE_NAME = "targetOverlayableName";
         private static final String ATTR_IS_STATIC = "isStatic";
         private static final String ATTR_PRIORITY = "priority";
         private static final String ATTR_CATEGORY = "category";
@@ -387,6 +390,8 @@ final class OverlayManagerSettings {
             final int userId = XmlUtils.readIntAttribute(parser, ATTR_USER_ID);
             final String targetPackageName = XmlUtils.readStringAttribute(parser,
                     ATTR_TARGET_PACKAGE_NAME);
+            final String targetOverlayableName = XmlUtils.readStringAttribute(parser,
+                    ATTR_TARGET_OVERLAYABLE_NAME);
             final String baseCodePath = XmlUtils.readStringAttribute(parser, ATTR_BASE_CODE_PATH);
             final int state = XmlUtils.readIntAttribute(parser, ATTR_STATE);
             final boolean isEnabled = XmlUtils.readBooleanAttribute(parser, ATTR_IS_ENABLED);
@@ -394,8 +399,8 @@ final class OverlayManagerSettings {
             final int priority = XmlUtils.readIntAttribute(parser, ATTR_PRIORITY);
             final String category = XmlUtils.readStringAttribute(parser, ATTR_CATEGORY);
 
-            return new SettingsItem(packageName, userId, targetPackageName, baseCodePath,
-                    state, isEnabled, isStatic, priority, category);
+            return new SettingsItem(packageName, userId, targetPackageName, targetOverlayableName,
+                    baseCodePath, state, isEnabled, isStatic, priority, category);
         }
 
         public static void persist(@NonNull final ArrayList<SettingsItem> table,
@@ -422,6 +427,8 @@ final class OverlayManagerSettings {
             XmlUtils.writeStringAttribute(xml, ATTR_PACKAGE_NAME, item.mPackageName);
             XmlUtils.writeIntAttribute(xml, ATTR_USER_ID, item.mUserId);
             XmlUtils.writeStringAttribute(xml, ATTR_TARGET_PACKAGE_NAME, item.mTargetPackageName);
+            XmlUtils.writeStringAttribute(xml, ATTR_TARGET_OVERLAYABLE_NAME,
+                    item.mTargetOverlayableName);
             XmlUtils.writeStringAttribute(xml, ATTR_BASE_CODE_PATH, item.mBaseCodePath);
             XmlUtils.writeIntAttribute(xml, ATTR_STATE, item.mState);
             XmlUtils.writeBooleanAttribute(xml, ATTR_IS_ENABLED, item.mIsEnabled);
@@ -436,6 +443,7 @@ final class OverlayManagerSettings {
         private final int mUserId;
         private final String mPackageName;
         private final String mTargetPackageName;
+        private final String mTargetOverlayableName;
         private String mBaseCodePath;
         private @OverlayInfo.State int mState;
         private boolean mIsEnabled;
@@ -445,12 +453,14 @@ final class OverlayManagerSettings {
         private String mCategory;
 
         SettingsItem(@NonNull final String packageName, final int userId,
-                @NonNull final String targetPackageName, @NonNull final String baseCodePath,
+                @NonNull final String targetPackageName,
+                @Nullable final String targetOverlayableName, @NonNull final String baseCodePath,
                 final @OverlayInfo.State int state, final boolean isEnabled, final boolean isStatic,
-                final int priority, String category) {
+                final int priority,  @Nullable String category) {
             mPackageName = packageName;
             mUserId = userId;
             mTargetPackageName = targetPackageName;
+            mTargetOverlayableName = targetOverlayableName;
             mBaseCodePath = baseCodePath;
             mState = state;
             mIsEnabled = isEnabled || isStatic;
@@ -461,14 +471,19 @@ final class OverlayManagerSettings {
         }
 
         SettingsItem(@NonNull final String packageName, final int userId,
-                @NonNull final String targetPackageName, @NonNull final String baseCodePath,
-                final boolean isStatic, final int priority, String category) {
-            this(packageName, userId, targetPackageName, baseCodePath, OverlayInfo.STATE_UNKNOWN,
-                    false, isStatic, priority, category);
+                @NonNull final String targetPackageName,
+                @Nullable final String targetOverlayableName, @NonNull final String baseCodePath,
+                final boolean isStatic, final int priority, @Nullable String category) {
+            this(packageName, userId, targetPackageName, targetOverlayableName, baseCodePath,
+                    OverlayInfo.STATE_UNKNOWN, false, isStatic, priority, category);
         }
 
         private String getTargetPackageName() {
             return mTargetPackageName;
+        }
+
+        private String getTargetOverlayableName() {
+            return mTargetOverlayableName;
         }
 
         private int getUserId() {
@@ -520,7 +535,7 @@ final class OverlayManagerSettings {
 
         private boolean setCategory(String category) {
             if (!Objects.equals(mCategory, category)) {
-                mCategory = category.intern();
+                mCategory = (category == null) ? null : category.intern();
                 invalidateCache();
                 return true;
             }
@@ -529,8 +544,8 @@ final class OverlayManagerSettings {
 
         private OverlayInfo getOverlayInfo() {
             if (mCache == null) {
-                mCache = new OverlayInfo(mPackageName, mTargetPackageName, mCategory, mBaseCodePath,
-                        mState, mUserId, mPriority, mIsStatic);
+                mCache = new OverlayInfo(mPackageName, mTargetPackageName, mTargetOverlayableName,
+                        mCategory, mBaseCodePath, mState, mUserId, mPriority, mIsStatic);
             }
             return mCache;
         }

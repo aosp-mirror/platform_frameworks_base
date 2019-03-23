@@ -829,9 +829,11 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
                 return  9;
             case TYPE_SYSTEM_ALERT:
                 // like the ANR / app crashed dialogs
-                return  canAddInternalSystemWindow ? 11 : 10;
+                // Type is deprecated for non-system apps. For system apps, this type should be
+                // in a higher layer than TYPE_APPLICATION_OVERLAY.
+                return  canAddInternalSystemWindow ? 13 : 10;
             case TYPE_APPLICATION_OVERLAY:
-                return  canAddInternalSystemWindow ? 13 : 12;
+                return  12;
             case TYPE_DREAM:
                 // used for Dreams (screensavers with TYPE_DREAM windows)
                 return  14;

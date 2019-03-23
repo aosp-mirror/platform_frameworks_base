@@ -67,14 +67,14 @@ public final class TetheringInterfaceUtils {
         // because "[t]he 3GPP network allocates each default bearer a unique
         // /64 prefix", per RFC 6459, Section 5.2.
         final boolean canTether =
-                (ns != null) && (ns.network != null) &&
-                (ns.linkProperties != null) && (ns.networkCapabilities != null) &&
+                (ns != null) && (ns.network != null)
+                && (ns.linkProperties != null) && (ns.networkCapabilities != null)
                 // At least one upstream DNS server:
-                ns.linkProperties.hasIPv6DnsServer() &&
+                && ns.linkProperties.hasIpv6DnsServer()
                 // Minimal amount of IPv6 provisioning:
-                ns.linkProperties.hasGlobalIPv6Address() &&
+                && ns.linkProperties.hasGlobalIpv6Address()
                 // Temporary approximation of "dedicated prefix":
-                ns.networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR);
+                && ns.networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR);
 
         return canTether
                 ? getInterfaceForDestination(ns.linkProperties, Inet6Address.ANY)

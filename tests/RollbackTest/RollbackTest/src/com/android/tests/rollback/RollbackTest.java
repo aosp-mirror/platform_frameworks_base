@@ -39,7 +39,6 @@ import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -531,7 +530,6 @@ public class RollbackTest {
     /**
      * Test rollback of apks involving splits.
      */
-    @Ignore("b/127520966 build issues with splits need to be sorted out")
     @Test
     public void testRollbackWithSplits() throws Exception {
         try {
@@ -827,6 +825,7 @@ public class RollbackTest {
             RollbackTestUtils.adoptShellPermissionIdentity(
                     Manifest.permission.INSTALL_PACKAGES,
                     Manifest.permission.DELETE_PACKAGES,
+                    Manifest.permission.MANAGE_ROLLBACKS,
                     Manifest.permission.TEST_MANAGE_ROLLBACKS,
                     Manifest.permission.KILL_BACKGROUND_PROCESSES,
                     Manifest.permission.RESTART_PACKAGES);

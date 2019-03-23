@@ -1713,6 +1713,7 @@
   <java-symbol type="bool" name="config_enableLockScreenRotation" />
   <java-symbol type="bool" name="config_enableLockScreenTranslucentDecor" />
   <java-symbol type="bool" name="config_enableTranslucentDecor" />
+  <java-symbol type="bool" name="config_forceShowSystemBars" />
   <java-symbol type="bool" name="config_lidControlsScreenLock" />
   <java-symbol type="bool" name="config_lidControlsSleep" />
   <java-symbol type="bool" name="config_lockDayNightMode" />
@@ -2114,8 +2115,11 @@
   <java-symbol type="string" name="device_storage_monitor_notification_channel" />
   <java-symbol type="string" name="dlg_ok" />
   <java-symbol type="string" name="dump_heap_notification" />
+  <java-symbol type="string" name="dump_heap_ready_notification" />
   <java-symbol type="string" name="dump_heap_notification_detail" />
   <java-symbol type="string" name="dump_heap_text" />
+  <java-symbol type="string" name="dump_heap_ready_text" />
+  <java-symbol type="string" name="dump_heap_system_text" />
   <java-symbol type="string" name="dump_heap_title" />
   <java-symbol type="string" name="factorytest_failed" />
   <java-symbol type="string" name="factorytest_no_action" />
@@ -2761,6 +2765,7 @@
   <java-symbol type="string" name="chooser_no_direct_share_targets" />
   <java-symbol type="drawable" name="chooser_row_layer_list" />
   <java-symbol type="dimen" name="chooser_view_spacing" />
+  <java-symbol type="dimen" name="chooser_target_width" />
   <java-symbol type="dimen" name="chooser_edge_margin_thin" />
   <java-symbol type="dimen" name="chooser_edge_margin_normal" />
   <java-symbol type="dimen" name="chooser_preview_image_font_size"/>
@@ -2778,7 +2783,6 @@
 
   <java-symbol type="layout" name="chooser_row" />
   <java-symbol type="layout" name="chooser_row_direct_share" />
-  <java-symbol type="id" name="target_badge" />
   <java-symbol type="bool" name="config_supportDoubleTapWake" />
   <java-symbol type="drawable" name="ic_perm_device_info" />
   <java-symbol type="string" name="config_radio_access_family" />
@@ -2831,6 +2835,7 @@
   <java-symbol type="string" name="config_packagedKeyboardName" />
   <java-symbol type="bool" name="config_forceWindowDrawsStatusBarBackground" />
   <java-symbol type="integer" name="config_navBarOpacityMode" />
+  <java-symbol type="integer" name="config_navBarInteractionMode" />
   <java-symbol type="color" name="system_bar_background_semi_transparent" />
 
   <!-- EditText suggestion popup. -->
@@ -2924,6 +2929,7 @@
   <java-symbol type="string" name="status_bar_vpn" />
   <java-symbol type="string" name="status_bar_microphone" />
   <java-symbol type="string" name="status_bar_camera" />
+  <java-symbol type="string" name="status_bar_sensors_off" />
 
   <!-- Locale picker -->
   <java-symbol type="id" name="locale_search_menu" />
@@ -3588,6 +3594,7 @@
   <java-symbol type="dimen" name="car_fullscreen_user_pod_icon_text_size" />
   <java-symbol type="dimen" name="car_fullscreen_user_pod_image_avatar_height" />
   <java-symbol type="dimen" name="car_fullscreen_user_pod_image_avatar_width" />
+  <java-symbol type="dimen" name="car_large_avatar_size" />
   <java-symbol type="layout" name="car_user_switching_dialog" />
   <java-symbol type="id" name="user_loading_avatar" />
   <java-symbol type="id" name="user_loading" />
@@ -3643,6 +3650,12 @@
   <!-- For Secondary Launcher -->
   <java-symbol type="string" name="config_secondaryHomeComponent" />
 
+  <java-symbol type="string" name="battery_saver_notification_channel_name" />
+  <java-symbol type="string" name="battery_saver_sticky_disabled_notification_title" />
+  <java-symbol type="string" name="battery_saver_sticky_disabled_notification_summary" />
+  <java-symbol type="string" name="battery_saver_charged_notification_title" />
+  <java-symbol type="string" name="battery_saver_off_notification_summary" />
+  <java-symbol type="string" name="battery_saver_off_alternative_notification_summary" />
   <java-symbol type="string" name="dynamic_mode_notification_channel_name" />
   <java-symbol type="string" name="dynamic_mode_notification_title" />
   <java-symbol type="string" name="dynamic_mode_notification_summary" />

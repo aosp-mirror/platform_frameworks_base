@@ -24,10 +24,16 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
+import android.app.Instrumentation;
+import android.content.Context;
 import android.graphics.Point;
 import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl.Transaction;
+import android.view.WindowManager.BadTokenException;
+import android.view.WindowManager.LayoutParams;
+import android.widget.TextView;
 
+import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.FlakyTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -47,7 +53,6 @@ public class InsetsSourceConsumerTest {
     private SurfaceSession mSession = new SurfaceSession();
     private SurfaceControl mLeash;
     @Mock Transaction mMockTransaction;
-    @Mock InsetsController mMockController;
 
     @Before
     public void setup() {
@@ -55,8 +60,21 @@ public class InsetsSourceConsumerTest {
         mLeash = new SurfaceControl.Builder(mSession)
                 .setName("testSurface")
                 .build();
-        mConsumer = new InsetsSourceConsumer(TYPE_TOP_BAR, new InsetsState(),
-                () -> mMockTransaction, mMockController);
+        final Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+        instrumentation.runOnMainSync(() -> {
+            final Context context = instrumentation.getTargetContext();
+            // cannot mock ViewRootImpl since it's final.
+            final ViewRootImpl viewRootImpl = new ViewRootImpl(context, context.getDisplay());
+            try {
+                viewRootImpl.setView(new TextView(context), new LayoutParams(), null);
+            } catch (BadTokenException e) {
+                // activity isn't running, lets ignore BadTokenException.
+            }
+            mConsumer = new InsetsSourceConsumer(TYPE_TOP_BAR, new InsetsState(),
+                    () -> mMockTransaction, new InsetsController(viewRootImpl));
+        });
+        instrumentation.waitForIdleSync();
+
         mConsumer.setControl(new InsetsSourceControl(TYPE_TOP_BAR, mLeash, new Point()));
     }
 

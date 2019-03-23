@@ -200,13 +200,21 @@ public abstract class BatteryStats implements Parcelable {
 
     /**
      * Include only the current run in the stats.
+     *
+     * @deprecated As of {@link android.os.Build.VERSION_CODES#Q}, only {@link #STATS_SINCE_CHARGED}
+     * is supported.
      */
     @UnsupportedAppUsage
+    @Deprecated
     public static final int STATS_CURRENT = 1;
 
     /**
      * Include only the run since the last time the device was unplugged in the stats.
+     *
+     * @deprecated As of {@link android.os.Build.VERSION_CODES#Q}, only {@link #STATS_SINCE_CHARGED}
+     * is supported.
      */
+    @Deprecated
     public static final int STATS_SINCE_UNPLUGGED = 2;
 
     // NOTE: Update this list if you add/change any stats above.
@@ -255,8 +263,10 @@ public abstract class BatteryStats implements Parcelable {
      *   - Ambient display properly output in data dump.
      * New in version 33:
      *   - Fixed bug in min learned capacity updating process.
+     * New in version 34:
+     *   - Deprecated STATS_SINCE_UNPLUGGED and STATS_CURRENT.
      */
-    static final int CHECKIN_VERSION = 33;
+    static final int CHECKIN_VERSION = 34;
 
     /**
      * Old version, we hit 9 and ran out of room, need to remove.
@@ -3651,6 +3661,14 @@ public abstract class BatteryStats implements Parcelable {
      */
     public final void dumpCheckinLocked(Context context, PrintWriter pw, int which, int reqUid,
             boolean wifiOnly) {
+
+        if (which != BatteryStats.STATS_SINCE_CHARGED) {
+            dumpLine(pw, 0, STAT_NAMES[which], "err",
+                    "ERROR: BatteryStats.dumpCheckin called for which type " + which
+                    + " but only STATS_SINCE_CHARGED is supported.");
+            return;
+        }
+
         final long rawUptime = SystemClock.uptimeMillis() * 1000;
         final long rawRealtimeMs = SystemClock.elapsedRealtime();
         final long rawRealtime = rawRealtimeMs * 1000;
@@ -3848,28 +3866,13 @@ public abstract class BatteryStats implements Parcelable {
                 multicastWakeLockTimeTotalMicros / 1000,
                 multicastWakeLockCountTotal);
 
-        if (which == STATS_SINCE_UNPLUGGED) {
-            dumpLine(pw, 0 /* uid */, category, BATTERY_LEVEL_DATA, getDischargeStartLevel(),
-                    getDischargeCurrentLevel());
-        }
-
-        if (which == STATS_SINCE_UNPLUGGED) {
-            dumpLine(pw, 0 /* uid */, category, BATTERY_DISCHARGE_DATA,
-                    getDischargeStartLevel()-getDischargeCurrentLevel(),
-                    getDischargeStartLevel()-getDischargeCurrentLevel(),
-                    getDischargeAmountScreenOn(), getDischargeAmountScreenOff(),
-                    dischargeCount / 1000, dischargeScreenOffCount / 1000,
-                    getDischargeAmountScreenDoze(), dischargeScreenDozeCount / 1000,
-                    dischargeLightDozeCount / 1000, dischargeDeepDozeCount / 1000);
-        } else {
-            dumpLine(pw, 0 /* uid */, category, BATTERY_DISCHARGE_DATA,
-                    getLowDischargeAmountSinceCharge(), getHighDischargeAmountSinceCharge(),
-                    getDischargeAmountScreenOnSinceCharge(),
-                    getDischargeAmountScreenOffSinceCharge(),
-                    dischargeCount / 1000, dischargeScreenOffCount / 1000,
-                    getDischargeAmountScreenDozeSinceCharge(), dischargeScreenDozeCount / 1000,
-                    dischargeLightDozeCount / 1000, dischargeDeepDozeCount / 1000);
-        }
+        dumpLine(pw, 0 /* uid */, category, BATTERY_DISCHARGE_DATA,
+                getLowDischargeAmountSinceCharge(), getHighDischargeAmountSinceCharge(),
+                getDischargeAmountScreenOnSinceCharge(),
+                getDischargeAmountScreenOffSinceCharge(),
+                dischargeCount / 1000, dischargeScreenOffCount / 1000,
+                getDischargeAmountScreenDozeSinceCharge(), dischargeScreenDozeCount / 1000,
+                dischargeLightDozeCount / 1000, dischargeDeepDozeCount / 1000);
 
         if (reqUid < 0) {
             final Map<String, ? extends Timer> kernelWakelocks = getKernelWakelockStats();
@@ -4432,6 +4435,13 @@ public abstract class BatteryStats implements Parcelable {
     @SuppressWarnings("unused")
     public final void dumpLocked(Context context, PrintWriter pw, String prefix, final int which,
             int reqUid, boolean wifiOnly) {
+
+        if (which != BatteryStats.STATS_SINCE_CHARGED) {
+            pw.println("ERROR: BatteryStats.dump called for which type " + which
+                    + " but only STATS_SINCE_CHARGED is supported");
+            return;
+        }
+
         final long rawUptime = SystemClock.uptimeMillis() * 1000;
         final long rawRealtime = SystemClock.elapsedRealtime() * 1000;
         final long rawRealtimeMs = (rawRealtime + 500) / 1000;
@@ -5044,41 +5054,18 @@ public abstract class BatteryStats implements Parcelable {
 
         pw.println();
 
-        if (which == STATS_SINCE_UNPLUGGED) {
-            if (getIsOnBattery()) {
-                pw.print(prefix); pw.println("  Device is currently unplugged");
-                pw.print(prefix); pw.print("    Discharge cycle start level: ");
-                        pw.println(getDischargeStartLevel());
-                pw.print(prefix); pw.print("    Discharge cycle current level: ");
-                        pw.println(getDischargeCurrentLevel());
-            } else {
-                pw.print(prefix); pw.println("  Device is currently plugged into power");
-                pw.print(prefix); pw.print("    Last discharge cycle start level: ");
-                        pw.println(getDischargeStartLevel());
-                pw.print(prefix); pw.print("    Last discharge cycle end level: ");
-                        pw.println(getDischargeCurrentLevel());
-            }
-            pw.print(prefix); pw.print("    Amount discharged while screen on: ");
-            pw.println(getDischargeAmountScreenOn());
-            pw.print(prefix); pw.print("    Amount discharged while screen off: ");
-            pw.println(getDischargeAmountScreenOff());
-            pw.print(prefix); pw.print("    Amount discharged while screen doze: ");
-            pw.println(getDischargeAmountScreenDoze());
-            pw.println(" ");
-        } else {
-            pw.print(prefix); pw.println("  Device battery use since last full charge");
-            pw.print(prefix); pw.print("    Amount discharged (lower bound): ");
-            pw.println(getLowDischargeAmountSinceCharge());
-            pw.print(prefix); pw.print("    Amount discharged (upper bound): ");
-            pw.println(getHighDischargeAmountSinceCharge());
-            pw.print(prefix); pw.print("    Amount discharged while screen on: ");
-            pw.println(getDischargeAmountScreenOnSinceCharge());
-            pw.print(prefix); pw.print("    Amount discharged while screen off: ");
-            pw.println(getDischargeAmountScreenOffSinceCharge());
-            pw.print(prefix); pw.print("    Amount discharged while screen doze: ");
-            pw.println(getDischargeAmountScreenDozeSinceCharge());
-            pw.println();
-        }
+        pw.print(prefix); pw.println("  Device battery use since last full charge");
+        pw.print(prefix); pw.print("    Amount discharged (lower bound): ");
+        pw.println(getLowDischargeAmountSinceCharge());
+        pw.print(prefix); pw.print("    Amount discharged (upper bound): ");
+        pw.println(getHighDischargeAmountSinceCharge());
+        pw.print(prefix); pw.print("    Amount discharged while screen on: ");
+        pw.println(getDischargeAmountScreenOnSinceCharge());
+        pw.print(prefix); pw.print("    Amount discharged while screen off: ");
+        pw.println(getDischargeAmountScreenOffSinceCharge());
+        pw.print(prefix); pw.print("    Amount discharged while screen doze: ");
+        pw.println(getDischargeAmountScreenDozeSinceCharge());
+        pw.println();
 
         final BatteryStatsHelper helper = new BatteryStatsHelper(context, false, wifiOnly);
         helper.create(this);

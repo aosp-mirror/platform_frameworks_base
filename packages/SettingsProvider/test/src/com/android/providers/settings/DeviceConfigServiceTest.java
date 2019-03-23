@@ -147,7 +147,7 @@ public class DeviceConfigServiceTest {
         // make sValue the default value
         executeShellCommand(
                 "device_config put " + sNamespace + " " + sKey + " " + sValue + " default");
-        // make newValue the current value (as set by a trusted package)
+        // make newValue the current value (as set by a untrusted package)
         executeShellCommand(
                 "device_config put " + sNamespace + " " + sKey + " " + newValue);
         String result = getFromContentProvider(mContentResolver, sNamespace, sKey);
@@ -156,13 +156,7 @@ public class DeviceConfigServiceTest {
         // reset values that were set by untrusted packages
         executeShellCommand("device_config reset untrusted_defaults " + sNamespace);
         result = getFromContentProvider(mContentResolver, sNamespace, sKey);
-        // the current value was set by a trusted package, so it's not reset
-        assertEquals(newValue, result);
-
-        // reset values that were set by untrusted or trusted packages
-        executeShellCommand("device_config reset trusted_defaults " + sNamespace);
-        result = getFromContentProvider(mContentResolver, sNamespace, sKey);
-        // the default value has been restored
+        // the current value was set by a untrusted package, so it's reset
         assertEquals(sValue, result);
     }
 

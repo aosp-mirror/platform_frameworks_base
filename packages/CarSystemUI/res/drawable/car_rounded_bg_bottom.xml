@@ -19,9 +19,9 @@
        android:shape="rectangle">
     <solid android:color="?android:attr/colorBackgroundFloating" />
     <corners
-        android:bottomLeftRadius="@dimen/car_radius_3"
+        android:bottomLeftRadius="@*android:dimen/car_radius_3"
         android:topLeftRadius="0dp"
-        android:bottomRightRadius="@dimen/car_radius_3"
+        android:bottomRightRadius="@*android:dimen/car_radius_3"
         android:topRightRadius="0dp"
         />
 </shape>

@@ -83,7 +83,7 @@ public final class WindowInsets {
      * changes in this mode, we instead have a flag whether the navigation bar size should always
      * be consumed, so the app is treated like there is no virtual navigation bar at all.
      */
-    private final boolean mAlwaysConsumeNavBar;
+    private final boolean mAlwaysConsumeSystemBars;
 
     private final boolean mSystemWindowInsetsConsumed;
     private final boolean mStableInsetsConsumed;
@@ -111,10 +111,10 @@ public final class WindowInsets {
      * @deprecated Use {@link WindowInsets(SparseArray, SparseArray, boolean, boolean, DisplayCutout)}
      */
     public WindowInsets(Rect systemWindowInsetsRect, Rect stableInsetsRect,
-            boolean isRound, boolean alwaysConsumeNavBar, DisplayCutout displayCutout) {
+            boolean isRound, boolean alwaysConsumeSystemBars, DisplayCutout displayCutout) {
         this(createCompatTypeMap(systemWindowInsetsRect), createCompatTypeMap(stableInsetsRect),
                 createCompatVisibilityMap(createCompatTypeMap(systemWindowInsetsRect)),
-                isRound, alwaysConsumeNavBar, displayCutout);
+                isRound, alwaysConsumeSystemBars, displayCutout);
     }
 
     /**
@@ -133,7 +133,7 @@ public final class WindowInsets {
             @Nullable Insets[] typeMaxInsetsMap,
             boolean[] typeVisibilityMap,
             boolean isRound,
-            boolean alwaysConsumeNavBar, DisplayCutout displayCutout) {
+            boolean alwaysConsumeSystemBars, DisplayCutout displayCutout) {
         mSystemWindowInsetsConsumed = typeInsetsMap == null;
         mTypeInsetsMap = mSystemWindowInsetsConsumed
                 ? new Insets[SIZE]
@@ -146,7 +146,7 @@ public final class WindowInsets {
 
         mTypeVisibilityMap = typeVisibilityMap;
         mIsRound = isRound;
-        mAlwaysConsumeNavBar = alwaysConsumeNavBar;
+        mAlwaysConsumeSystemBars = alwaysConsumeSystemBars;
 
         mDisplayCutoutConsumed = displayCutout == null;
         mDisplayCutout = (mDisplayCutoutConsumed || displayCutout.isEmpty())
@@ -160,7 +160,7 @@ public final class WindowInsets {
      */
     public WindowInsets(WindowInsets src) {
         this(src.mTypeInsetsMap, src.mTypeMaxInsetsMap, src.mTypeVisibilityMap, src.mIsRound,
-                src.mAlwaysConsumeNavBar, displayCutoutCopyConstructorArgument(src));
+                src.mAlwaysConsumeSystemBars, displayCutoutCopyConstructorArgument(src));
     }
 
     private static DisplayCutout displayCutoutCopyConstructorArgument(WindowInsets w) {
@@ -443,7 +443,7 @@ public final class WindowInsets {
         return new WindowInsets(mSystemWindowInsetsConsumed ? null : mTypeInsetsMap,
                 mStableInsetsConsumed ? null : mTypeMaxInsetsMap,
                 mTypeVisibilityMap,
-                mIsRound, mAlwaysConsumeNavBar,
+                mIsRound, mAlwaysConsumeSystemBars,
                 null /* displayCutout */);
     }
 
@@ -489,7 +489,7 @@ public final class WindowInsets {
     public WindowInsets consumeSystemWindowInsets() {
         return new WindowInsets(null, mStableInsetsConsumed ? null : mTypeMaxInsetsMap,
                 mTypeVisibilityMap,
-                mIsRound, mAlwaysConsumeNavBar,
+                mIsRound, mAlwaysConsumeSystemBars,
                 displayCutoutCopyConstructorArgument(this));
     }
 
@@ -729,15 +729,15 @@ public final class WindowInsets {
     @NonNull
     public WindowInsets consumeStableInsets() {
         return new WindowInsets(mSystemWindowInsetsConsumed ? null : mTypeInsetsMap, null,
-                mTypeVisibilityMap, mIsRound, mAlwaysConsumeNavBar,
+                mTypeVisibilityMap, mIsRound, mAlwaysConsumeSystemBars,
                 displayCutoutCopyConstructorArgument(this));
     }
 
     /**
      * @hide
      */
-    public boolean shouldAlwaysConsumeNavBar() {
-        return mAlwaysConsumeNavBar;
+    public boolean shouldAlwaysConsumeSystemBars() {
+        return mAlwaysConsumeSystemBars;
     }
 
     @Override
@@ -809,7 +809,7 @@ public final class WindowInsets {
                         ? null
                         : insetInsets(mTypeMaxInsetsMap, left, top, right, bottom),
                 mTypeVisibilityMap,
-                mIsRound, mAlwaysConsumeNavBar,
+                mIsRound, mAlwaysConsumeSystemBars,
                 mDisplayCutoutConsumed
                         ? null
                         : mDisplayCutout == null
@@ -824,7 +824,7 @@ public final class WindowInsets {
         WindowInsets that = (WindowInsets) o;
 
         return mIsRound == that.mIsRound
-                && mAlwaysConsumeNavBar == that.mAlwaysConsumeNavBar
+                && mAlwaysConsumeSystemBars == that.mAlwaysConsumeSystemBars
                 && mSystemWindowInsetsConsumed == that.mSystemWindowInsetsConsumed
                 && mStableInsetsConsumed == that.mStableInsetsConsumed
                 && mDisplayCutoutConsumed == that.mDisplayCutoutConsumed
@@ -837,8 +837,9 @@ public final class WindowInsets {
     @Override
     public int hashCode() {
         return Objects.hash(Arrays.hashCode(mTypeInsetsMap), Arrays.hashCode(mTypeMaxInsetsMap),
-                Arrays.hashCode(mTypeVisibilityMap), mIsRound, mDisplayCutout, mAlwaysConsumeNavBar,
-                mSystemWindowInsetsConsumed, mStableInsetsConsumed, mDisplayCutoutConsumed);
+                Arrays.hashCode(mTypeVisibilityMap), mIsRound, mDisplayCutout,
+                mAlwaysConsumeSystemBars, mSystemWindowInsetsConsumed, mStableInsetsConsumed,
+                mDisplayCutoutConsumed);
     }
 
 
@@ -900,7 +901,7 @@ public final class WindowInsets {
         private DisplayCutout mDisplayCutout;
 
         private boolean mIsRound;
-        private boolean mAlwaysConsumeNavBar;
+        private boolean mAlwaysConsumeSystemBars;
 
         /**
          * Creates a builder where all insets are initially consumed.
@@ -924,7 +925,7 @@ public final class WindowInsets {
             mStableInsetsConsumed = insets.mStableInsetsConsumed;
             mDisplayCutout = displayCutoutCopyConstructorArgument(insets);
             mIsRound = insets.mIsRound;
-            mAlwaysConsumeNavBar = insets.mAlwaysConsumeNavBar;
+            mAlwaysConsumeSystemBars = insets.mAlwaysConsumeSystemBars;
         }
 
         /**
@@ -1119,8 +1120,8 @@ public final class WindowInsets {
 
         /** @hide */
         @NonNull
-        public Builder setAlwaysConsumeNavBar(boolean alwaysConsumeNavBar) {
-            mAlwaysConsumeNavBar = alwaysConsumeNavBar;
+        public Builder setAlwaysConsumeSystemBars(boolean alwaysConsumeSystemBars) {
+            mAlwaysConsumeSystemBars = alwaysConsumeSystemBars;
             return this;
         }
 
@@ -1133,7 +1134,7 @@ public final class WindowInsets {
         public WindowInsets build() {
             return new WindowInsets(mSystemInsetsConsumed ? null : mTypeInsetsMap,
                     mStableInsetsConsumed ? null : mTypeMaxInsetsMap, mTypeVisibilityMap,
-                    mIsRound, mAlwaysConsumeNavBar, mDisplayCutout);
+                    mIsRound, mAlwaysConsumeSystemBars, mDisplayCutout);
         }
     }
 

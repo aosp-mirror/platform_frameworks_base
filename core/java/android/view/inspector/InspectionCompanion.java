@@ -17,7 +17,6 @@
 package android.view.inspector;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 
 /**
  * An interface for companion objects used to inspect views.
@@ -32,11 +31,6 @@ import android.annotation.Nullable;
  * cleanly inherit through their getters, and the inspector runtime will read the properties of a
  * parent class via the parent's inspection companion, and the child companion will only read
  * properties added or changed since the parent was defined.
- *
- * Only one child traversal is considered for each class. If a descendant class defines a
- * different child traversal than its parent, only the bottom traversal is used. If a class does
- * not define its own child traversal, but one of its ancestors does, the bottom-most ancestor's
- * traversal will be used.
  *
  * @param <T> The type of inspectable this is the companion to
  */
@@ -66,22 +60,6 @@ public interface InspectionCompanion<T> {
      * @param propertyReader An object which receives the property IDs and values.
      */
     void readProperties(@NonNull T inspectable, @NonNull PropertyReader propertyReader);
-
-    /**
-     * Get an optional name to display to developers for inspection nodes of this companion's type.
-     *
-     * The default implementation returns null, which will cause the runtime to use the class's
-     * simple name as defined by {@link Class#getSimpleName()} as the node name.
-     *
-     * If the type of this companion is inflated from XML, this method should be overridden to
-     * return the string used as the tag name for this type in XML.
-     *
-     * @return A string to use as the node name, or null to use the simple class name fallback.
-     */
-    @Nullable
-    default String getNodeName() {
-        return null;
-    }
 
     /**
      * Thrown by {@link #readProperties(Object, PropertyReader)} if called before

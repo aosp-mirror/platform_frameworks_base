@@ -17,7 +17,6 @@
 package com.android.settingslib.widget.apppreference;
 
 import android.content.Context;
-import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -52,8 +51,6 @@ public class AppPreference extends Preference {
     public void onBindViewHolder(PreferenceViewHolder view) {
         super.onBindViewHolder(view);
 
-        view.findViewById(R.id.summary_container)
-                .setVisibility(TextUtils.isEmpty(getSummary()) ? View.GONE : View.VISIBLE);
         final ProgressBar progress = (ProgressBar) view.findViewById(android.R.id.progress);
         if (mProgressVisible) {
             progress.setProgress(mProgress);

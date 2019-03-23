@@ -848,7 +848,7 @@ public final class AccessibilityManager {
         if (mRequestPreparerLists == null) {
             mRequestPreparerLists = new SparseArray<>(1);
         }
-        int id = preparer.getView().getAccessibilityViewId();
+        int id = preparer.getAccessibilityViewId();
         List<AccessibilityRequestPreparer> requestPreparerList = mRequestPreparerLists.get(id);
         if (requestPreparerList == null) {
             requestPreparerList = new ArrayList<>(1);
@@ -864,7 +864,7 @@ public final class AccessibilityManager {
         if (mRequestPreparerLists == null) {
             return;
         }
-        int viewId = preparer.getView().getAccessibilityViewId();
+        int viewId = preparer.getAccessibilityViewId();
         List<AccessibilityRequestPreparer> requestPreparerList = mRequestPreparerLists.get(viewId);
         if (requestPreparerList != null) {
             requestPreparerList.remove(preparer);

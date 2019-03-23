@@ -169,66 +169,13 @@
     <item msgid="2233497913571137419">"Он"</item>
     <item msgid="5621554266768657830">"Он бір"</item>
   </string-array>
-  <string-array name="type_clock_minutes">
-    <item msgid="8322049385467207985"></item>
-    <item msgid="8837126587669001578">"Нөл бір"</item>
-    <item msgid="4294343372940455660">"Нөл екі"</item>
-    <item msgid="7129166637707421536">"Нөл үш"</item>
-    <item msgid="7579404865008788673">"Нөл төрт"</item>
-    <item msgid="3873924689207380586">"Нөл бес"</item>
-    <item msgid="4849565597850069377">"Нөл алты"</item>
-    <item msgid="4404219424523572364">"Нөл жеті"</item>
-    <item msgid="8740481214764087329">"Нөл сегіз"</item>
-    <item msgid="1713216865806811237">"Нөл тоғыз"</item>
-    <item msgid="3508406095411245038">"Он"</item>
-    <item msgid="7161996337755311711">"Он бір"</item>
-    <item msgid="4044549963329624197">"Он екі"</item>
-    <item msgid="333373157917379088">"Он үш"</item>
-    <item msgid="2631202907124819385">"Он төрт"</item>
-    <item msgid="6472396076858033453">"Он бес"</item>
-    <item msgid="8656981856181581643">"Он алты"</item>
-    <item msgid="7289026608562030619">"Он жеті"</item>
-    <item msgid="3881477602692646573">"Он сегіз"</item>
-    <item msgid="3358129827772984226">"Он тоғыз"</item>
-    <item msgid="3308575407402865807">"Жиырма"</item>
-    <item msgid="5346560955382229629">"Жиырма\nбір"</item>
-    <item msgid="226750304761473436">"Жиырма\nекі"</item>
-    <item msgid="616811325336838734">"Жиырма\nүш"</item>
-    <item msgid="616346116869053440">"Жиырма\nтөрт"</item>
-    <item msgid="4642996410384042830">"Жиырма\nбес"</item>
-    <item msgid="7506092849993571465">"Жиырма\nалты"</item>
-    <item msgid="1915078191101042031">"Жиырма\nжеті"</item>
-    <item msgid="4292378641900520252">"Жиырма\nсегіз"</item>
-    <item msgid="5339513901773103696">"Жиырма\nтоғыз"</item>
-    <item msgid="3574673250891657607">"Отыз"</item>
-    <item msgid="5796923836589110940">"Отыз\nбір"</item>
-    <item msgid="5859323597571702052">"Отыз\nекі"</item>
-    <item msgid="5133326723148876507">"Отыз\nүш"</item>
-    <item msgid="2693999494655663096">"Отыз\nтөрт"</item>
-    <item msgid="3316754944962836197">"Отыз\nбес"</item>
-    <item msgid="816891008836796723">"Отыз\nалты"</item>
-    <item msgid="9158890488666520078">"Отыз\nжеті"</item>
-    <item msgid="1894769703213894011">"Отыз\nсегіз"</item>
-    <item msgid="5638820345598572399">"Отыз\nтоғыз"</item>
-    <item msgid="8838304023017895439">"Қырық"</item>
-    <item msgid="1834742948932559597">"Қырық\nбір"</item>
-    <item msgid="6573707308847773944">"Қырық\nекі"</item>
-    <item msgid="2450149950652678001">"Қырық\nүш"</item>
-    <item msgid="2874667401318178036">"Қырық\nтөрт"</item>
-    <item msgid="3391101532763048862">"Қырық\nбес"</item>
-    <item msgid="1671489330863254362">"Қырық\nалты"</item>
-    <item msgid="5916017359554531038">"Қырық\nжеті"</item>
-    <item msgid="8205413177993059967">"Қырық\nсегіз"</item>
-    <item msgid="6607867415142171302">"Қырық\nтоғыз"</item>
-    <item msgid="8358850748472089162">"Елу"</item>
-    <item msgid="3551313125255080234">"Елу\nбір"</item>
-    <item msgid="1559678130725716542">"Елу\nекі"</item>
-    <item msgid="431441994725492377">"Елу\nүш"</item>
-    <item msgid="6345774640539623024">"Елу\nтөрт"</item>
-    <item msgid="8018192990793931120">"Елу\nбес"</item>
-    <item msgid="6187650843754604534">"Елу\nалты"</item>
-    <item msgid="8727240174015993259">"Елу\nжеті"</item>
-    <item msgid="848339003778952950">"Елу\nсегіз"</item>
-    <item msgid="5798985802835423618">"Елу\nтоғыз"</item>
-  </string-array>
+    <!-- no translation found for type_clock_minutes:1 (2091812961809760681) -->
+    <!-- no translation found for type_clock_minutes:2 (1496435384877290709) -->
+    <!-- no translation found for type_clock_minutes:3 (881846472976674129) -->
+    <!-- no translation found for type_clock_minutes:4 (2784477043911540584) -->
+    <!-- no translation found for type_clock_minutes:5 (1610928853656700614) -->
+    <!-- no translation found for type_clock_minutes:6 (2317806244043886658) -->
+    <!-- no translation found for type_clock_minutes:7 (3318687539120971327) -->
+    <!-- no translation found for type_clock_minutes:8 (5701600693712102348) -->
+    <!-- no translation found for type_clock_minutes:9 (3247381605947372495) -->
 </resources>

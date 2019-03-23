@@ -28,7 +28,6 @@
 
     <RelativeLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/user_switcher_container"
         android:clipChildren="false"
         android:layout_width="match_parent"
@@ -37,11 +36,7 @@
         <com.android.systemui.statusbar.car.UserGridRecyclerView
             android:id="@+id/user_grid"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:theme="@style/PagedListTheme"
-            app:showPagedListViewDivider="false"
-            app:gutter="both"
-            app:itemSpacing="@dimen/car_user_switcher_vertical_spacing_between_users"/>
+            android:layout_height="match_parent"/>
 
     </RelativeLayout>
 

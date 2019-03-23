@@ -63,7 +63,10 @@ public class LegacyIntentClassificationFactoryTest {
                         null,
                         null,
                         null,
-                        null);
+                        null,
+                        null,
+                        0,
+                        0);
 
         List<LabeledIntent> intents = mLegacyIntentClassificationFactory.create(
                 InstrumentationRegistry.getContext(),
@@ -96,7 +99,10 @@ public class LegacyIntentClassificationFactoryTest {
                         null,
                         null,
                         null,
-                        null);
+                        null,
+                        null,
+                        0,
+                        0);
 
         List<LabeledIntent> intents = mLegacyIntentClassificationFactory.create(
                 InstrumentationRegistry.getContext(),

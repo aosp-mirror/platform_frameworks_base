@@ -4088,7 +4088,7 @@ public class ConnectivityManager {
     @SystemApi
     @TestApi
     @RequiresPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK)
-    public void startCaptivePortalApp(Network network, Bundle appExtras) {
+    public void startCaptivePortalApp(@NonNull Network network, @NonNull Bundle appExtras) {
         try {
             mService.startCaptivePortalAppInternal(network, appExtras);
         } catch (RemoteException e) {
@@ -4101,9 +4101,12 @@ public class ConnectivityManager {
      * @hide
      */
     @SystemApi
-    public boolean getAvoidBadWifi() {
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_STACK})
+    public boolean shouldAvoidBadWifi() {
         try {
-            return mService.getAvoidBadWifi();
+            return mService.shouldAvoidBadWifi();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

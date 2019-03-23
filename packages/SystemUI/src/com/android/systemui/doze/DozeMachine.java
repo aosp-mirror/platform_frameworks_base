@@ -211,7 +211,7 @@ public class DozeMachine {
         mDozeService.requestWakeUp();
     }
 
-    private boolean isExecutingTransition() {
+    public boolean isExecutingTransition() {
         return !mQueuedRequests.isEmpty();
     }
 

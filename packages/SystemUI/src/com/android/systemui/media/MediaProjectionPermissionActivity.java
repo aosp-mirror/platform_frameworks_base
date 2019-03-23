@@ -38,8 +38,10 @@ import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.style.StyleSpan;
 import android.util.Log;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.TextView;
 
 import com.android.systemui.R;
 
@@ -133,9 +135,12 @@ public class MediaProjectionPermissionActivity extends Activity
 
         String dialogTitle = getString(R.string.media_projection_dialog_title, appName);
 
+        View dialogTitleView = View.inflate(this, R.layout.media_projection_dialog_title, null);
+        TextView titleText = (TextView) dialogTitleView.findViewById(R.id.dialog_title);
+        titleText.setText(dialogTitle);
+
         mDialog = new AlertDialog.Builder(this)
-                .setTitle(dialogTitle)
-                .setIcon(R.drawable.ic_media_projection_permission)
+                .setCustomTitle(dialogTitleView)
                 .setMessage(message)
                 .setPositiveButton(R.string.media_projection_action_text, this)
                 .setNegativeButton(android.R.string.cancel, this)

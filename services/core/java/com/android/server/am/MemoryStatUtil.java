@@ -166,17 +166,11 @@ public final class MemoryStatUtil {
         }
 
         final MemoryStat memoryStat = new MemoryStat();
-        Matcher m;
-        m = PGFAULT.matcher(memoryStatContents);
-        memoryStat.pgfault = m.find() ? Long.parseLong(m.group(1)) : 0;
-        m = PGMAJFAULT.matcher(memoryStatContents);
-        memoryStat.pgmajfault = m.find() ? Long.parseLong(m.group(1)) : 0;
-        m = RSS_IN_BYTES.matcher(memoryStatContents);
-        memoryStat.rssInBytes = m.find() ? Long.parseLong(m.group(1)) : 0;
-        m = CACHE_IN_BYTES.matcher(memoryStatContents);
-        memoryStat.cacheInBytes = m.find() ? Long.parseLong(m.group(1)) : 0;
-        m = SWAP_IN_BYTES.matcher(memoryStatContents);
-        memoryStat.swapInBytes = m.find() ? Long.parseLong(m.group(1)) : 0;
+        memoryStat.pgfault = tryParseLong(PGFAULT, memoryStatContents);
+        memoryStat.pgmajfault = tryParseLong(PGMAJFAULT, memoryStatContents);
+        memoryStat.rssInBytes = tryParseLong(RSS_IN_BYTES, memoryStatContents);
+        memoryStat.cacheInBytes = tryParseLong(CACHE_IN_BYTES, memoryStatContents);
+        memoryStat.swapInBytes = tryParseLong(SWAP_IN_BYTES, memoryStatContents);
         return memoryStat;
     }
 
@@ -217,9 +211,8 @@ public final class MemoryStatUtil {
         if (procStatusContents == null || procStatusContents.isEmpty()) {
             return 0;
         }
-        Matcher m = RSS_HIGH_WATERMARK_IN_BYTES.matcher(procStatusContents);
         // Convert value read from /proc/pid/status from kilobytes to bytes.
-        return m.find() ? Long.parseLong(m.group(1)) * BYTES_IN_KILOBYTE : 0;
+        return tryParseLong(RSS_HIGH_WATERMARK_IN_BYTES, procStatusContents) * BYTES_IN_KILOBYTE;
     }
 
 
@@ -249,8 +242,7 @@ public final class MemoryStatUtil {
         if (contents == null || contents.isEmpty()) {
             return 0;
         }
-        Matcher m = ION_HEAP_SIZE_IN_BYTES.matcher(contents);
-        return m.find() ? Long.parseLong(m.group(1)) : 0;
+        return tryParseLong(ION_HEAP_SIZE_IN_BYTES, contents);
     }
 
     /**
@@ -258,6 +250,20 @@ public final class MemoryStatUtil {
      */
     static boolean hasMemcg() {
         return DEVICE_HAS_PER_APP_MEMCG;
+    }
+
+    /**
+     * Parses a long from the input using the pattern. Returns 0 if the captured value is not
+     * parsable. The pattern must have a single capturing group.
+     */
+    private static long tryParseLong(Pattern pattern, String input) {
+        final Matcher m = pattern.matcher(input);
+        try {
+            return m.find() ? Long.parseLong(m.group(1)) : 0;
+        } catch (NumberFormatException e) {
+            Slog.e(TAG, "Failed to parse value", e);
+            return 0;
+        }
     }
 
     public static final class MemoryStat {

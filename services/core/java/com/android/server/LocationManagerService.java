@@ -64,6 +64,7 @@ import android.location.INetInitiatedListener;
 import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationRequest;
+import android.location.LocationTime;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -1824,12 +1825,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     @GuardedBy("mLock")
     private void removeProviderLocked(LocationProvider provider) {
         if (mProviders.remove(provider)) {
-            long identity = Binder.clearCallingIdentity();
-            try {
-                provider.onUseableChangedLocked(false);
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
+            provider.onUseableChangedLocked(false);
         }
     }
 
@@ -2108,7 +2104,9 @@ public class LocationManagerService extends ILocationManager.Stub {
         WorkSource worksource = new WorkSource();
         ProviderRequest providerRequest = new ProviderRequest();
 
-        if (records != null && !records.isEmpty()) {
+        // if provider is not active, it should not respond to requests
+
+        if (mProviders.contains(provider) && records != null && !records.isEmpty()) {
             long backgroundThrottleInterval;
 
             long identity = Binder.clearCallingIdentity();
@@ -2694,6 +2692,19 @@ public class LocationManagerService extends ILocationManager.Stub {
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
+        }
+    }
+
+    @Override
+    public LocationTime getGnssTimeMillis() {
+        synchronized (mLock) {
+            Location location = mLastLocation.get(LocationManager.GPS_PROVIDER);
+            if (location == null) {
+                return null;
+            }
+            long currentNanos = SystemClock.elapsedRealtimeNanos();
+            long deltaMs = (currentNanos - location.getElapsedRealtimeNanos()) / 1000000L;
+            return new LocationTime(location.getTime() + deltaMs, currentNanos);
         }
     }
 
@@ -3586,10 +3597,18 @@ public class LocationManagerService extends ILocationManager.Stub {
                 pw.println("    " + provider + ": " + location);
             }
 
-            mGeofenceManager.dump(pw);
-
-            pw.append("  ");
-            mBlacklist.dump(pw);
+            if (mGeofenceManager != null) {
+                mGeofenceManager.dump(pw);
+            } else {
+                pw.println("  Geofences: null");
+            }
+          
+            if (mBlacklist != null) {
+                pw.append("  ");
+                mBlacklist.dump(pw);
+            } else {
+                pw.println("  mBlacklist=null");
+            }
 
             if (mLocationControllerExtraPackage != null) {
                 pw.println(" Location controller extra package: " + mLocationControllerExtraPackage
@@ -3603,8 +3622,12 @@ public class LocationManagerService extends ILocationManager.Stub {
                 }
             }
 
-            pw.append("  fudger: ");
-            mLocationFudger.dump(fd, pw, args);
+            if (mLocationFudger != null) {
+                pw.append("  fudger: ");
+                mLocationFudger.dump(fd, pw, args);
+            } else {
+                pw.println("  fudger: null");
+            }
 
             if (args.length > 0 && "short".equals(args[0])) {
                 return;

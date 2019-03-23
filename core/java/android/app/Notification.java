@@ -16,9 +16,12 @@
 
 package android.app;
 
+import static android.graphics.drawable.Icon.TYPE_BITMAP;
+
 import static com.android.internal.util.ContrastColorUtil.satisfiesTextContrast;
 
 import android.annotation.ColorInt;
+import android.annotation.DimenRes;
 import android.annotation.DrawableRes;
 import android.annotation.IdRes;
 import android.annotation.IntDef;
@@ -8519,6 +8522,7 @@ public class Notification implements Parcelable
         private PendingIntent mDeleteIntent;
         private Icon mIcon;
         private int mDesiredHeight;
+        @DimenRes private int mDesiredHeightResId;
         private int mFlags;
 
         /**
@@ -8545,10 +8549,11 @@ public class Notification implements Parcelable
         private static final int FLAG_SUPPRESS_INITIAL_NOTIFICATION = 0x00000002;
 
         private BubbleMetadata(PendingIntent expandIntent, PendingIntent deleteIntent,
-                Icon icon, int height) {
+                Icon icon, int height, @DimenRes int heightResId) {
             mPendingIntent = expandIntent;
             mIcon = icon;
             mDesiredHeight = height;
+            mDesiredHeightResId = heightResId;
             mDeleteIntent = deleteIntent;
         }
 
@@ -8560,6 +8565,7 @@ public class Notification implements Parcelable
             if (in.readInt() != 0) {
                 mDeleteIntent = PendingIntent.CREATOR.createFromParcel(in);
             }
+            mDesiredHeightResId = in.readInt();
         }
 
         /**
@@ -8579,17 +8585,6 @@ public class Notification implements Parcelable
         }
 
         /**
-         * @return the title that will appear along with the app content defined by
-         * {@link #getIntent()} for this bubble.
-         *
-         * @deprecated titles are no longer required or shown.
-         */
-        @Deprecated
-        public CharSequence getTitle() {
-            return "";
-        }
-
-        /**
          * @return the icon that will be displayed for this bubble when it is collapsed.
          */
         @NonNull
@@ -8598,11 +8593,20 @@ public class Notification implements Parcelable
         }
 
         /**
-         * @return the ideal height for the floating window that app content defined by
+         * @return the ideal height, in DPs, for the floating window that app content defined by
          * {@link #getIntent()} for this bubble.
          */
         public int getDesiredHeight() {
             return mDesiredHeight;
+        }
+
+        /**
+         * @return the resId of ideal height for the floating window that app content defined by
+         * {@link #getIntent()} for this bubble.
+         */
+        @DimenRes
+        public int getDesiredHeightResId() {
+            return mDesiredHeightResId;
         }
 
         /**
@@ -8652,6 +8656,7 @@ public class Notification implements Parcelable
             if (mDeleteIntent != null) {
                 mDeleteIntent.writeToParcel(out, 0);
             }
+            out.writeInt(mDesiredHeightResId);
         }
 
         private void setFlags(int flags) {
@@ -8666,6 +8671,7 @@ public class Notification implements Parcelable
             private PendingIntent mPendingIntent;
             private Icon mIcon;
             private int mDesiredHeight;
+            @DimenRes private int mDesiredHeightResId;
             private int mFlags;
             private PendingIntent mDeleteIntent;
 
@@ -8689,23 +8695,18 @@ public class Notification implements Parcelable
             }
 
             /**
-             * Sets the title that will appear along with the app content for this bubble.
-             *
-             * <p>A title is required and should expect to fit on a single line and make sense when
-             * shown with the content defined by {@link #setIntent(PendingIntent)}.</p>
-             *
-             * @deprecated titles are no longer required or shown.
-             */
-            @Deprecated
-            public BubbleMetadata.Builder setTitle(CharSequence title) {
-                return this;
-            }
-
-            /**
              * Sets the icon that will represent the bubble when it is collapsed.
              *
              * <p>An icon is required and should be representative of the content within the bubble.
              * If your app produces multiple bubbles, the image should be unique for each of them.
+             * </p>
+             *
+             * <p>The shape of a bubble icon is adaptive and can match the device theme.
+             *
+             * If your icon is bitmap-based, you should create it using
+             * {@link Icon#createWithAdaptiveBitmap(Bitmap)}, otherwise this method will throw.
+             *
+             * If your icon is not bitmap-based, you should expect that the icon will be tinted.
              * </p>
              */
             @NonNull
@@ -8713,18 +8714,45 @@ public class Notification implements Parcelable
                 if (icon == null) {
                     throw new IllegalArgumentException("Bubbles require non-null icon");
                 }
+                if (icon.getType() == TYPE_BITMAP) {
+                    throw new IllegalArgumentException("When using bitmap based icons, Bubbles "
+                            + "require TYPE_ADAPTIVE_BITMAP, please use"
+                            + " Icon#createWithAdaptiveBitmap instead");
+                }
                 mIcon = icon;
                 return this;
             }
 
             /**
-             * Sets the desired height for the app content defined by
+             * Sets the desired height in DPs for the app content defined by
              * {@link #setIntent(PendingIntent)}, this height may not be respected if there is not
              * enough space on the screen or if the provided height is too small to be useful.
+             * <p>
+             * If {@link #setDesiredHeightResId(int)} was previously called on this builder, the
+             * previous value set will be cleared after calling this method, and this value will
+             * be used instead.
              */
             @NonNull
             public BubbleMetadata.Builder setDesiredHeight(int height) {
                 mDesiredHeight = Math.max(height, 0);
+                mDesiredHeightResId = 0;
+                return this;
+            }
+
+
+            /**
+             * Sets the desired height via resId for the app content defined by
+             * {@link #setIntent(PendingIntent)}, this height may not be respected if there is not
+             * enough space on the screen or if the provided height is too small to be useful.
+             * <p>
+             * If {@link #setDesiredHeight(int)} was previously called on this builder, the
+             * previous value set will be cleared after calling this method, and this value will
+             * be used instead.
+             */
+            @NonNull
+            public BubbleMetadata.Builder setDesiredHeightResId(@DimenRes int heightResId) {
+                mDesiredHeightResId = heightResId;
+                mDesiredHeight = 0;
                 return this;
             }
 
@@ -8786,7 +8814,7 @@ public class Notification implements Parcelable
                     throw new IllegalStateException("Must supply an icon for the bubble");
                 }
                 BubbleMetadata data = new BubbleMetadata(mPendingIntent, mDeleteIntent,
-                        mIcon, mDesiredHeight);
+                        mIcon, mDesiredHeight, mDesiredHeightResId);
                 data.setFlags(mFlags);
                 return data;
             }

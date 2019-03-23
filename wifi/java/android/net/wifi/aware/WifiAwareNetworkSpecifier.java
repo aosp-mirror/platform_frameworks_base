@@ -18,6 +18,7 @@ package android.net.wifi.aware;
 
 import static android.net.wifi.aware.WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_INITIATOR;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.net.NetworkSpecifier;
@@ -302,12 +303,6 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
     /**
      * A builder class for a Wi-Fi Aware network specifier to set up an Aware connection with a
      * peer.
-     * <p>
-     * Note that all Wi-Fi Aware connection specifier objects must call the
-     * {@link Builder#setDiscoverySession(DiscoverySession)} to specify the context
-     * within which the connection is created, and
-     * {@link Builder#setPeerHandle(PeerHandle)} to specify the peer to which the
-     * connection is created.
      */
     public static final class Builder {
         private DiscoverySession mDiscoverySession;
@@ -318,42 +313,27 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
         private int mTransportProtocol = -1; // invalid value
 
         /**
-         * Configure the {@link PublishDiscoverySession} or {@link SubscribeDiscoverySession}
-         * discovery session in whose context the connection is created.
-         * <p>
-         * Note: this method must be called for any connection request!
+         * Create a builder for {@link WifiAwareNetworkSpecifier} used in requests to set up a
+         * Wi-Fi Aware connection with a peer.
          *
-         * @param discoverySession A Wi-Fi Aware discovery session.
-         * @return the current {@link Builder} builder, enabling chaining of builder
-         *         methods.
-         */
-        public @NonNull Builder setDiscoverySession(@NonNull DiscoverySession discoverySession) {
-            if (discoverySession == null) {
-                throw new IllegalArgumentException("Non-null discoverySession required");
-            }
-            mDiscoverySession = discoverySession;
-            return this;
-        }
-
-        /**
-         * Configure the {@link PeerHandle} of the peer to which the Wi-Fi Aware connection is
-         * requested. The peer is discovered through Wi-Fi Aware discovery,
-         * <p>
-         * Note: this method must be called for any connection request!
-         *
-         * @param peerHandle The peer's handle obtained through
+         * @param discoverySession A Wi-Fi Aware discovery session in whose context the connection
+         *                         is created.
+         * @param peerHandle The handle of the peer to which the Wi-Fi Aware connection is
+         *                   requested. The peer is discovered through Wi-Fi Aware discovery. The
+         *                   handle can be obtained through
          * {@link DiscoverySessionCallback#onServiceDiscovered(PeerHandle, byte[], java.util.List)}
          *                   or
          *                   {@link DiscoverySessionCallback#onMessageReceived(PeerHandle, byte[])}.
-         * @return the current {@link Builder} builder, enabling chaining of builder
-         *         methods.
          */
-        public @NonNull Builder setPeerHandle(@NonNull PeerHandle peerHandle) {
+        public Builder(@NonNull DiscoverySession discoverySession, @NonNull PeerHandle peerHandle) {
+            if (discoverySession == null) {
+                throw new IllegalArgumentException("Non-null discoverySession required");
+            }
             if (peerHandle == null) {
                 throw new IllegalArgumentException("Non-null peerHandle required");
             }
+            mDiscoverySession = discoverySession;
             mPeerHandle = peerHandle;
-            return this;
         }
 
         /**
@@ -407,7 +387,7 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
          * @return the current {@link Builder} builder, enabling chaining of builder
          *         methods.
          */
-        public @NonNull Builder setPort(int port) {
+        public @NonNull Builder setPort(@IntRange(from = 0, to = 65535) int port) {
             if (port <= 0 || port > 65535) {
                 throw new IllegalArgumentException("The port must be a positive value (0, 65535]");
             }
@@ -432,7 +412,8 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
          * @return the current {@link Builder} builder, enabling chaining of builder
          *         methods.
          */
-        public @NonNull Builder setTransportProtocol(int transportProtocol) {
+        public @NonNull
+                Builder setTransportProtocol(@IntRange(from = 0, to = 255) int transportProtocol) {
             if (transportProtocol < 0 || transportProtocol > 255) {
                 throw new IllegalArgumentException(
                         "The transport protocol must be in range [0, 255]");
@@ -460,6 +441,9 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
             if (mDiscoverySession == null) {
                 throw new IllegalStateException("Null discovery session!?");
             }
+            if (mPeerHandle == null) {
+                throw new IllegalStateException("Null peerHandle!?");
+            }
             if (mPskPassphrase != null & mPmk != null) {
                 throw new IllegalStateException(
                         "Can only specify a Passphrase or a PMK - not both!");
@@ -479,10 +463,6 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
                     throw new IllegalStateException("Port and transport protocol information can "
                             + "only be specified on a secure link");
                 }
-            }
-
-            if (role == WIFI_AWARE_DATA_PATH_ROLE_INITIATOR && mPeerHandle == null) {
-                throw new IllegalStateException("Null peerHandle!?");
             }
 
             return new WifiAwareNetworkSpecifier(

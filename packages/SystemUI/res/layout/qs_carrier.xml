@@ -24,7 +24,8 @@
     android:background="@android:color/transparent"
     android:clickable="false"
     android:clipChildren="false"
-    android:clipToPadding="false" >
+    android:clipToPadding="false"
+    android:focusable="true" >
 
     <include
         layout="@layout/mobile_signal_group"

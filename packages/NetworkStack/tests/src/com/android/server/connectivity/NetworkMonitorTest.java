@@ -583,7 +583,7 @@ public class NetworkMonitorTest {
         verify(mCallbacks, timeout(HANDLER_TIMEOUT_MS).times(1))
                 .notifyNetworkTested(NETWORK_TEST_RESULT_PARTIAL_CONNECTIVITY, null);
 
-        nm.notifyAcceptPartialConnectivity();
+        nm.setAcceptPartialConnectivity();
         verify(mCallbacks, timeout(HANDLER_TIMEOUT_MS).times(1))
                 .notifyNetworkTested(NETWORK_TEST_RESULT_VALID, null);
     }

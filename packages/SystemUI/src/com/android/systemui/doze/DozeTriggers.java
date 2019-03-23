@@ -164,16 +164,9 @@ public class DozeTriggers implements DozeMachine.Part {
                     if (screenX != -1 && screenY != -1) {
                         mDozeHost.onSlpiTap(screenX, screenY);
                     }
-                    // Logs screen wake up reason of either single or double tap.
-                    mMetricsLogger.write(new LogMaker(MetricsEvent.DOZING)
-                            .setType(MetricsEvent.TYPE_UPDATE).setSubtype(pulseReason));
-                    mMachine.wakeUp();
+                    gentleWakeUp(pulseReason);
                 } else if (isPickup) {
-                    // Logs screen wake up reason of lift.
-                    mMetricsLogger.write(new LogMaker(MetricsEvent.DOZING)
-                            .setType(MetricsEvent.TYPE_UPDATE)
-                            .setSubtype(DozeLog.REASON_SENSOR_PICKUP));
-                    mMachine.wakeUp();
+                    gentleWakeUp(pulseReason);
                 } else {
                     mDozeHost.extendPulse();
                 }
@@ -190,7 +183,29 @@ public class DozeTriggers implements DozeMachine.Part {
         }
     }
 
+    private void gentleWakeUp(int reason) {
+        // Log screen wake up reason (lift/pickup, tap, double-tap)
+        mMetricsLogger.write(new LogMaker(MetricsEvent.DOZING)
+                .setType(MetricsEvent.TYPE_UPDATE)
+                .setSubtype(reason));
+        if (mDozeParameters.getDisplayNeedsBlanking()) {
+            // Let's prepare the display to wake-up by drawing black.
+            // This will cover the hardware wake-up sequence, where the display
+            // becomes black for a few frames.
+            mDozeHost.setAodDimmingScrim(255f);
+        }
+        mMachine.wakeUp();
+    }
+
     private void onProximityFar(boolean far) {
+        // Proximity checks are asynchronous and the user might have interacted with the phone
+        // when a new event is arriving. This means that a state transition might have happened
+        // and the proximity check is now obsolete.
+        if (mMachine.isExecutingTransition()) {
+            Log.w(TAG, "onProximityFar called during transition. Ignoring sensor response.");
+            return;
+        }
+
         final boolean near = !far;
         final DozeMachine.State state = mMachine.getState();
         final boolean paused = (state == DozeMachine.State.DOZE_AOD_PAUSED);

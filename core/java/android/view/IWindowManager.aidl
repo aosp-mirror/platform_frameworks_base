@@ -304,6 +304,16 @@ interface IWindowManager
     oneway void statusBarVisibilityChanged(int displayId, int visibility);
 
     /**
+    * When set to {@code true} the system bars will always be shown. This is true even if an app
+    * requests to be fullscreen by setting the system ui visibility flags. The
+    * functionality was added for the automotive case as a way to guarantee required content stays
+    * on screen at all times.
+    *
+    * @hide
+    */
+    oneway void setForceShowSystemBars(boolean show);
+
+    /**
      * Called by System UI to notify of changes to the visibility of Recents.
      */
     oneway void setRecentsVisibility(boolean visible);

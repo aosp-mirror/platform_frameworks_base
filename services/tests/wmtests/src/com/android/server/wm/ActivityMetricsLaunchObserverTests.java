@@ -37,6 +37,7 @@ import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.util.SparseIntArray;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.wm.ActivityMetricsLaunchObserver.ActivityRecordProto;
@@ -118,6 +119,7 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 129138370)
     public void testOnIntentStarted() throws Exception {
         Intent intent = new Intent("action 1");
 
@@ -128,6 +130,7 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 129138370)
     public void testOnIntentFailed() throws Exception {
         testOnIntentStarted();
 
@@ -143,6 +146,7 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 129138370)
     public void testOnActivityLaunched() throws Exception {
         testOnIntentStarted();
 
@@ -154,6 +158,7 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 129138370)
     public void testOnActivityLaunchFinished() throws Exception {
        testOnActivityLaunched();
 
@@ -168,6 +173,7 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 129138370)
     public void testOnActivityLaunchCancelled() throws Exception {
        testOnActivityLaunched();
 
@@ -181,6 +187,7 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 129138370)
     public void testOnActivityLaunchedTrampoline() throws Exception {
         testOnIntentStarted();
 
@@ -197,6 +204,7 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 129138370)
     public void testOnActivityLaunchFinishedTrampoline() throws Exception {
        testOnActivityLaunchedTrampoline();
 
@@ -211,6 +219,7 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 129138370)
     public void testOnActivityLaunchCancelledTrampoline() throws Exception {
        testOnActivityLaunchedTrampoline();
 

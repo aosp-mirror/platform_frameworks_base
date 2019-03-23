@@ -6492,10 +6492,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public boolean startHomeOnDisplay(int userId, String reason, int displayId,
-                boolean fromHomeKey) {
+                boolean allowInstrumenting, boolean fromHomeKey) {
             synchronized (mGlobalLock) {
                 return mRootActivityContainer.startHomeOnDisplay(userId, reason, displayId,
-                        fromHomeKey);
+                        allowInstrumenting, fromHomeKey);
             }
         }
 

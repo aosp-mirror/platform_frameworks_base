@@ -38,25 +38,18 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
 
-
 /**
  * An annotation processor for the platform inspectable annotations.
  *
- * It mostly delegates to {@link ModelProcessor} and {@link InspectionCompanionGenerator}. This
- * modular architecture allows the core generation code to be reused for comparable annotations
- * outside the platform, such as in AndroidX.
+ * It mostly delegates to {@link InspectablePropertyProcessor} and
+ * {@link InspectionCompanionGenerator}. This modular architecture allows the core generation code
+ * to be reused for comparable annotations outside the platform.
  *
- * @see android.view.inspector.InspectableNodeName
  * @see android.view.inspector.InspectableProperty
  */
-@SupportedAnnotationTypes({
-        PlatformInspectableProcessor.NODE_NAME_QUALIFIED_NAME,
-        PlatformInspectableProcessor.PROPERTY_QUALIFIED_NAME
-})
+@SupportedAnnotationTypes({PlatformInspectableProcessor.ANNOTATION_QUALIFIED_NAME})
 public final class PlatformInspectableProcessor extends AbstractProcessor {
-    static final String NODE_NAME_QUALIFIED_NAME =
-            "android.view.inspector.InspectableNodeName";
-    static final String PROPERTY_QUALIFIED_NAME =
+    static final String ANNOTATION_QUALIFIED_NAME =
             "android.view.inspector.InspectableProperty";
 
     @Override
@@ -71,18 +64,8 @@ public final class PlatformInspectableProcessor extends AbstractProcessor {
         final Map<String, InspectableClassModel> modelMap = new HashMap<>();
 
         for (TypeElement annotation : annotations) {
-            if (annotation.getQualifiedName().contentEquals(NODE_NAME_QUALIFIED_NAME)) {
-                runModelProcessor(
-                        roundEnv.getElementsAnnotatedWith(annotation),
-                        new InspectableNodeNameProcessor(NODE_NAME_QUALIFIED_NAME, processingEnv),
-                        modelMap);
-
-            } else if (annotation.getQualifiedName().contentEquals(PROPERTY_QUALIFIED_NAME)) {
-                runModelProcessor(
-                        roundEnv.getElementsAnnotatedWith(annotation),
-                        new InspectablePropertyProcessor(PROPERTY_QUALIFIED_NAME, processingEnv),
-                        modelMap);
-
+            if (annotation.getQualifiedName().contentEquals(ANNOTATION_QUALIFIED_NAME)) {
+                processProperties(roundEnv.getElementsAnnotatedWith(annotation), modelMap);
             } else {
                 fail("Unexpected annotation type", annotation);
             }
@@ -106,16 +89,17 @@ public final class PlatformInspectableProcessor extends AbstractProcessor {
     }
 
     /**
-     * Run a {@link ModelProcessor} for a set of elements
+     * Runs {@link PlatformInspectableProcessor} on a set of annotated elements.
      *
-     * @param elements Elements to process, should be annotated correctly
-     * @param processor The processor to use
-     * @param modelMap A map of qualified class names to models
+     * @param elements A set of annotated elements to process
+     * @param modelMap A map of qualified class names to class models to update
      */
-    private void runModelProcessor(
+    private void processProperties(
             @NonNull Set<? extends Element> elements,
-            @NonNull ModelProcessor processor,
             @NonNull Map<String, InspectableClassModel> modelMap) {
+        final InspectablePropertyProcessor processor =
+                new InspectablePropertyProcessor(ANNOTATION_QUALIFIED_NAME, processingEnv);
+
         for (Element element : elements) {
             final Optional<TypeElement> classElement = enclosingClassElement(element);
 

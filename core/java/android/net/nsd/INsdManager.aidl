@@ -25,6 +25,7 @@ import android.os.Messenger;
  */
 interface INsdManager
 {
+    @UnsupportedAppUsage
     Messenger getMessenger();
     void setEnabled(boolean enable);
 }

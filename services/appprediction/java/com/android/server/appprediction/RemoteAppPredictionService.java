@@ -85,9 +85,10 @@ public class RemoteAppPredictionService extends
     /**
      * Records when a launch location is shown.
      */
-    public void notifyLocationShown(@NonNull AppPredictionSessionId sessionId,
+    public void notifyLaunchLocationShown(@NonNull AppPredictionSessionId sessionId,
             @NonNull String launchLocation, @NonNull ParceledListSlice targetIds) {
-        scheduleAsyncRequest((s) -> s.notifyLocationShown(sessionId, launchLocation, targetIds));
+        scheduleAsyncRequest((s)
+                -> s.notifyLaunchLocationShown(sessionId, launchLocation, targetIds));
     }
 
     /**

@@ -17,10 +17,7 @@
 package android.media;
 
 import android.annotation.NonNull;
-import android.annotation.SystemApi;
 import android.os.Parcel;
-
-import java.util.Arrays;
 
 /**
  * Class that embodies one timed metadata access unit, including
@@ -52,7 +49,11 @@ public final class TimedMetaData {
     }
 
     /**
-     * @hide
+     * Constructor.
+     *
+     * @param timestampUs the timestamp in microsecond for the timed metadata
+     * @param metaData the metadata array for the timed metadata. No data copying is made.
+     *     It should not be null.
      */
     public TimedMetaData(long timestampUs, @NonNull byte[] metaData) {
         if (metaData == null) {
@@ -89,72 +90,5 @@ public final class TimedMetaData {
         parcel.readByteArray(mMetaData);
 
         return true;
-    }
-
-    /**
-     * Builder class for {@link TimedMetaData} objects.
-     * <p> Here is an example where <code>Builder</code> is used to define the
-     * {@link TimedMetaData}:
-     *
-     * <pre class="prettyprint">
-     * TimedMetaData tmd = new TimedMetaData.Builder()
-     *         .setTimedMetaData(timestamp, metaData)
-     *         .build();
-     * </pre>
-     * @hide
-     */
-    @SystemApi
-    public static final class Builder {
-        private long mTimestampUs;
-        private byte[] mMetaData = new byte[0];
-
-        /**
-         * Constructs a new Builder with the defaults.
-         */
-        public Builder() {
-        }
-
-        /**
-         * Constructs a new Builder from a given {@link TimedMetaData} instance
-         * @param tmd the {@link TimedMetaData} object whose data will be reused
-         * in the new Builder. It should not be null. The metadata array is copied.
-         */
-        public Builder(@NonNull TimedMetaData tmd) {
-            if (tmd == null) {
-                throw new IllegalArgumentException("null TimedMetaData is not allowed");
-            }
-            mTimestampUs = tmd.mTimestampUs;
-            if (tmd.mMetaData != null) {
-                mMetaData = Arrays.copyOf(tmd.mMetaData, tmd.mMetaData.length);
-            }
-        }
-
-        /**
-         * Combines all of the fields that have been set and return a new
-         * {@link TimedMetaData} object. <code>IllegalStateException</code> will be
-         * thrown if there is conflict between fields.
-         *
-         * @return a new {@link TimedMetaData} object
-         */
-        public @NonNull TimedMetaData build() {
-            return new TimedMetaData(mTimestampUs, mMetaData);
-        }
-
-        /**
-         * Sets the info of timed metadata.
-         *
-         * @param timestamp the timestamp in microsecond for the timed metadata
-         * @param metaData the metadata array for the timed metadata. No data copying is made.
-         *     It should not be null.
-         * @return the same Builder instance.
-         */
-        public @NonNull Builder setTimedMetaData(long timestamp, @NonNull byte[] metaData) {
-            if (metaData == null) {
-                throw new IllegalArgumentException("null metaData is not allowed");
-            }
-            mTimestampUs = timestamp;
-            mMetaData = metaData;
-            return this;
-        }
     }
 }
