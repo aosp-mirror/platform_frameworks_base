@@ -49,7 +49,9 @@ AtomDecl::AtomDecl(const AtomDecl& that)
       exclusiveField(that.exclusiveField),
       uidField(that.uidField),
       whitelisted(that.whitelisted),
-      binaryFields(that.binaryFields) {}
+      binaryFields(that.binaryFields),
+      hasModule(that.hasModule),
+      moduleName(that.moduleName) {}
 
 AtomDecl::AtomDecl(int c, const string& n, const string& m)
     :code(c),
@@ -391,7 +393,12 @@ int collate_atoms(const Descriptor *descriptor, Atoms *atoms) {
     AtomDecl atomDecl(atomField->number(), atomField->name(), atom->name());
 
     if (atomField->options().GetExtension(os::statsd::allow_from_any_uid) == true) {
-      atomDecl.whitelisted = true;
+        atomDecl.whitelisted = true;
+    }
+
+    if (atomField->options().HasExtension(os::statsd::log_from_module)) {
+        atomDecl.hasModule = true;
+        atomDecl.moduleName = atomField->options().GetExtension(os::statsd::log_from_module);
     }
 
     vector<java_type_t> signature;
@@ -399,25 +406,49 @@ int collate_atoms(const Descriptor *descriptor, Atoms *atoms) {
     if (atomDecl.primaryFields.size() != 0 && atomDecl.exclusiveField == 0) {
         errorCount++;
     }
-    atoms->signatures.insert(signature);
+
+    // Add the signature if does not already exist.
+    auto signature_to_modules_it = atoms->signatures_to_modules.find(signature);
+    if (signature_to_modules_it == atoms->signatures_to_modules.end()) {
+        set<string> modules;
+        if (atomDecl.hasModule) {
+            modules.insert(atomDecl.moduleName);
+        }
+        atoms->signatures_to_modules[signature] = modules;
+    } else {
+        if (atomDecl.hasModule) {
+            signature_to_modules_it->second.insert(atomDecl.moduleName);
+        }
+    }
     atoms->decls.insert(atomDecl);
 
     AtomDecl nonChainedAtomDecl(atomField->number(), atomField->name(), atom->name());
     vector<java_type_t> nonChainedSignature;
     if (get_non_chained_node(atom, &nonChainedAtomDecl, &nonChainedSignature)) {
-        atoms->non_chained_signatures.insert(nonChainedSignature);
+        auto it = atoms->non_chained_signatures_to_modules.find(signature);
+        if (it == atoms->non_chained_signatures_to_modules.end()) {
+            set<string> modules_non_chained;
+            if (atomDecl.hasModule) {
+                modules_non_chained.insert(atomDecl.moduleName);
+            }
+            atoms->non_chained_signatures_to_modules[nonChainedSignature] = modules_non_chained;
+        } else {
+            if (atomDecl.hasModule) {
+                it->second.insert(atomDecl.moduleName);
+            }
+        }
         atoms->non_chained_decls.insert(nonChainedAtomDecl);
     }
   }
 
   if (dbg) {
     printf("signatures = [\n");
-    for (set<vector<java_type_t>>::const_iterator it =
-             atoms->signatures.begin();
-         it != atoms->signatures.end(); it++) {
+    for (map<vector<java_type_t>, set<string>>::const_iterator it =
+             atoms->signatures_to_modules.begin();
+         it != atoms->signatures_to_modules.end(); it++) {
       printf("   ");
-      for (vector<java_type_t>::const_iterator jt = it->begin();
-           jt != it->end(); jt++) {
+      for (vector<java_type_t>::const_iterator jt = it->first.begin();
+           jt != it->first.end(); jt++) {
         printf(" %d", (int)*jt);
       }
       printf("\n");

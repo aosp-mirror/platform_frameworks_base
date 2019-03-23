@@ -93,6 +93,9 @@ struct AtomDecl {
 
     vector<int> binaryFields;
 
+    bool hasModule = false;
+    string moduleName;
+
     AtomDecl();
     AtomDecl(const AtomDecl& that);
     AtomDecl(int code, const string& name, const string& message);
@@ -104,10 +107,10 @@ struct AtomDecl {
 };
 
 struct Atoms {
-    set<vector<java_type_t>> signatures;
+    map<vector<java_type_t>, set<string>> signatures_to_modules;
     set<AtomDecl> decls;
     set<AtomDecl> non_chained_decls;
-    set<vector<java_type_t>> non_chained_signatures;
+    map<vector<java_type_t>, set<string>> non_chained_signatures_to_modules;
 };
 
 /**

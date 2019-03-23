@@ -32,7 +32,7 @@ using std::vector;
  * Return whether the set contains a vector of the elements provided.
  */
 static bool
-set_contains_vector(const set<vector<java_type_t>>& s, int count, ...)
+set_contains_vector(const map<vector<java_type_t>, set<string>>& s, int count, ...)
 {
     va_list args;
     vector<java_type_t> v;
@@ -86,17 +86,17 @@ TEST(CollationTest, CollateStats) {
     int errorCount = collate_atoms(Event::descriptor(), &atoms);
 
     EXPECT_EQ(0, errorCount);
-    EXPECT_EQ(3ul, atoms.signatures.size());
+    EXPECT_EQ(3ul, atoms.signatures_to_modules.size());
 
     // IntAtom, AnotherIntAtom
-    EXPECT_SET_CONTAINS_SIGNATURE(atoms.signatures, JAVA_TYPE_INT);
+    EXPECT_SET_CONTAINS_SIGNATURE(atoms.signatures_to_modules, JAVA_TYPE_INT);
 
     // OutOfOrderAtom
-    EXPECT_SET_CONTAINS_SIGNATURE(atoms.signatures, JAVA_TYPE_INT, JAVA_TYPE_INT);
+    EXPECT_SET_CONTAINS_SIGNATURE(atoms.signatures_to_modules, JAVA_TYPE_INT, JAVA_TYPE_INT);
 
     // AllTypesAtom
     EXPECT_SET_CONTAINS_SIGNATURE(
-        atoms.signatures,
+        atoms.signatures_to_modules,
         JAVA_TYPE_ATTRIBUTION_CHAIN, // AttributionChain
         JAVA_TYPE_DOUBLE,            // double
         JAVA_TYPE_FLOAT,             // float
@@ -228,8 +228,7 @@ TEST(CollationTest, FailOnBadBinaryFieldAtom) {
 
 TEST(CollationTest, PassOnWhitelistedAtom) {
     Atoms atoms;
-    int errorCount =
-            collate_atoms(ListedAtoms::descriptor(), &atoms);
+    int errorCount = collate_atoms(ListedAtoms::descriptor(), &atoms);
     EXPECT_EQ(errorCount, 0);
     EXPECT_EQ(atoms.decls.size(), 2ul);
 }
@@ -242,6 +241,47 @@ TEST(CollationTest, RecogniseWhitelistedAtom) {
             EXPECT_TRUE(atomDecl.whitelisted);
         } else {
             EXPECT_FALSE(atomDecl.whitelisted);
+        }
+    }
+}
+
+TEST(CollationTest, PassOnLogFromModuleAtom) {
+    Atoms atoms;
+    int errorCount = collate_atoms(ModuleAtoms::descriptor(), &atoms);
+    EXPECT_EQ(errorCount, 0);
+    EXPECT_EQ(atoms.decls.size(), 3ul);
+}
+
+TEST(CollationTest, RecognizeModuleAtom) {
+    Atoms atoms;
+    int errorCount = collate_atoms(ModuleAtoms::descriptor(), &atoms);
+    EXPECT_EQ(errorCount, 0);
+    EXPECT_EQ(atoms.decls.size(), 3ul);
+    for (const auto& atomDecl: atoms.decls) {
+        if (atomDecl.code == 1) {
+            EXPECT_TRUE(atomDecl.hasModule);
+            EXPECT_EQ(atomDecl.moduleName, "module1");
+        } else if (atomDecl.code == 2) {
+            EXPECT_TRUE(atomDecl.hasModule);
+            EXPECT_EQ(atomDecl.moduleName, "module2");
+        } else {
+            EXPECT_FALSE(atomDecl.hasModule);
+        }
+    }
+
+    EXPECT_EQ(atoms.signatures_to_modules.size(), 2u);
+    EXPECT_SET_CONTAINS_SIGNATURE(atoms.signatures_to_modules, JAVA_TYPE_INT);
+    EXPECT_SET_CONTAINS_SIGNATURE(atoms.signatures_to_modules, JAVA_TYPE_STRING);
+    for (auto signature_to_modules_it : atoms.signatures_to_modules) {
+        vector<java_type_t> signature = signature_to_modules_it.first;
+        if (signature[0] == JAVA_TYPE_STRING) {
+            EXPECT_EQ(signature_to_modules_it.second.size(), 0u);
+        } else if (signature[0] == JAVA_TYPE_INT) {
+            set<string> modules = signature_to_modules_it.second;
+            EXPECT_EQ(modules.size(), 2u);
+            // Assert that the set contains "module1" and "module2".
+            EXPECT_NE(modules.find("module1"), modules.end());
+            EXPECT_NE(modules.find("module2"), modules.end());
         }
     }
 }
