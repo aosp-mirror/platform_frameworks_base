@@ -1403,10 +1403,10 @@ write_stats_log_jni(FILE* out, const Atoms& atoms, const AtomDecl &attributionDe
     fprintf(out, "\n");
 
     // Print registration function
-    fprintf(out, "int register_android_util_StatsLog(JNIEnv* env) {\n");
+    fprintf(out, "int register_android_util_StatsLogInternal(JNIEnv* env) {\n");
     fprintf(out, "    return RegisterMethodsOrDie(\n");
     fprintf(out, "            env,\n");
-    fprintf(out, "            \"android/util/StatsLog\",\n");
+    fprintf(out, "            \"android/util/StatsLogInternal\",\n");
     fprintf(out, "            gRegisterMethods, NELEM(gRegisterMethods));\n");
     fprintf(out, "}\n");
 
