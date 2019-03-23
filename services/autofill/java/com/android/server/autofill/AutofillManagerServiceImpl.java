@@ -246,7 +246,8 @@ final class AutofillManagerServiceImpl
         if (isEnabledLocked()) return FLAG_ADD_CLIENT_ENABLED;
 
         // Check if it's enabled for augmented autofill
-        if (isSetupCompletedLocked() && isWhitelistedForAugmentedAutofillLocked(componentName)) {
+        if (isAugmentedAutofillServiceAvailableLocked()
+                && isWhitelistedForAugmentedAutofillLocked(componentName)) {
             return FLAG_ADD_CLIENT_ENABLED_FOR_AUGMENTED_AUTOFILL_ONLY;
         }
 
@@ -1149,10 +1150,28 @@ final class AutofillManagerServiceImpl
                 mRemoteAugmentedAutofillServiceInfo = null;
             }
 
-            if (isEnabledLocked()) {
+            final boolean available = isAugmentedAutofillServiceAvailableLocked();
+            if (sVerbose) Slog.v(TAG, "updateRemoteAugmentedAutofillService(): " + available);
+
+            if (available) {
                 mRemoteAugmentedAutofillService = getRemoteAugmentedAutofillServiceLocked();
             }
         }
+    }
+
+    private boolean isAugmentedAutofillServiceAvailableLocked() {
+        if (mMaster.verbose) {
+            Slog.v(TAG, "isAugmentedAutofillService(): "
+                    + "setupCompleted=" + isSetupCompletedLocked()
+                    + ", disabled=" + isDisabledByUserRestrictionsLocked()
+                    + ", augmentedService="
+                    + mMaster.mAugmentedAutofillResolver.getServiceName(mUserId));
+        }
+        if (!isSetupCompletedLocked() || isDisabledByUserRestrictionsLocked()
+                || mMaster.mAugmentedAutofillResolver.getServiceName(mUserId) == null) {
+            return false;
+        }
+        return true;
     }
 
     /**
