@@ -353,6 +353,8 @@ class ZygoteServer {
             return null;
         }
 
+        Log.i(TAG, "USAP Pool status change: " + (newStatus ? "ENABLED" : "DISABLED"));
+
         mUsapPoolEnabled = newStatus;
 
         if (newStatus) {

@@ -649,11 +649,13 @@ public class ZygoteProcess {
                     Boolean.parseBoolean(USAP_POOL_ENABLED_DEFAULT));
         }
 
-        if (origVal != mUsapPoolEnabled) {
+        boolean valueChanged = origVal != mUsapPoolEnabled;
+
+        if (valueChanged) {
             Log.i(LOG_TAG, "usapPoolEnabled = " + mUsapPoolEnabled);
         }
 
-        return origVal != mUsapPoolEnabled;
+        return valueChanged;
     }
 
     private boolean mIsFirstPropCheck = true;
