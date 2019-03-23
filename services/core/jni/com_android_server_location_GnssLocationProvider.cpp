@@ -998,8 +998,9 @@ struct GnssMeasurementCallback : public IGnssMeasurementCallback_V2_0 {
     template<class T>
     size_t getMeasurementCount(const T& data);
 
-    jobject translateGnssClock(
-            JNIEnv* env, const IGnssMeasurementCallback_V1_0::GnssClock* clock);
+    template<class T>
+    void translateGnssClock(JavaObject& object, const T& data);
+
     void setMeasurementData(JNIEnv* env, jobject clock, jobjectArray measurementArray);
 };
 
@@ -1025,12 +1026,12 @@ template<class T>
 void GnssMeasurementCallback::translateAndSetGnssData(const T& data) {
     JNIEnv* env = getJniEnv();
 
-    jobject clock;
-    jobjectArray measurementArray;
+    JavaObject gnssClockJavaObject(env, "android/location/GnssClock");
+    translateGnssClock(gnssClockJavaObject, data);
+    jobject clock = gnssClockJavaObject.get();
 
-    clock = translateGnssClock(env, &data.clock);
     size_t count = getMeasurementCount(data);
-    measurementArray = translateAllGnssMeasurements(env, data.measurements.data(), count);
+    jobjectArray measurementArray = translateAllGnssMeasurements(env, data.measurements.data(), count);
     setMeasurementData(env, clock, measurementArray);
 
     env->DeleteLocalRef(clock);
@@ -1124,43 +1125,59 @@ void GnssMeasurementCallback::translateSingleGnssMeasurement
     SET(ConstellationType, static_cast<int32_t>(measurement_V2_0->constellation));
 }
 
-jobject GnssMeasurementCallback::translateGnssClock(
-       JNIEnv* env, const IGnssMeasurementCallback_V1_0::GnssClock* clock) {
-    JavaObject object(env, "android/location/GnssClock");
+template<class T>
+void GnssMeasurementCallback::translateGnssClock(JavaObject& object, const T& data) {
+    translateGnssClock(object, data.clock);
+}
 
-    uint32_t flags = static_cast<uint32_t>(clock->gnssClockFlags);
+template<>
+void GnssMeasurementCallback::translateGnssClock(
+       JavaObject& object, const IGnssMeasurementCallback_V1_0::GnssClock& clock) {
+    uint32_t flags = static_cast<uint32_t>(clock.gnssClockFlags);
     if (flags & static_cast<uint32_t>(GnssClockFlags::HAS_LEAP_SECOND)) {
-        SET(LeapSecond, static_cast<int32_t>(clock->leapSecond));
+        SET(LeapSecond, static_cast<int32_t>(clock.leapSecond));
     }
 
     if (flags & static_cast<uint32_t>(GnssClockFlags::HAS_TIME_UNCERTAINTY)) {
-        SET(TimeUncertaintyNanos, clock->timeUncertaintyNs);
+        SET(TimeUncertaintyNanos, clock.timeUncertaintyNs);
     }
 
     if (flags & static_cast<uint32_t>(GnssClockFlags::HAS_FULL_BIAS)) {
-        SET(FullBiasNanos, clock->fullBiasNs);
+        SET(FullBiasNanos, clock.fullBiasNs);
     }
 
     if (flags & static_cast<uint32_t>(GnssClockFlags::HAS_BIAS)) {
-        SET(BiasNanos, clock->biasNs);
+        SET(BiasNanos, clock.biasNs);
     }
 
     if (flags & static_cast<uint32_t>(GnssClockFlags::HAS_BIAS_UNCERTAINTY)) {
-        SET(BiasUncertaintyNanos, clock->biasUncertaintyNs);
+        SET(BiasUncertaintyNanos, clock.biasUncertaintyNs);
     }
 
     if (flags & static_cast<uint32_t>(GnssClockFlags::HAS_DRIFT)) {
-        SET(DriftNanosPerSecond, clock->driftNsps);
+        SET(DriftNanosPerSecond, clock.driftNsps);
     }
 
     if (flags & static_cast<uint32_t>(GnssClockFlags::HAS_DRIFT_UNCERTAINTY)) {
-        SET(DriftUncertaintyNanosPerSecond, clock->driftUncertaintyNsps);
+        SET(DriftUncertaintyNanosPerSecond, clock.driftUncertaintyNsps);
     }
 
-    SET(TimeNanos, clock->timeNs);
-    SET(HardwareClockDiscontinuityCount, clock->hwClockDiscontinuityCount);
+    SET(TimeNanos, clock.timeNs);
+    SET(HardwareClockDiscontinuityCount, clock.hwClockDiscontinuityCount);
+}
 
-    return object.get();
+template<>
+void GnssMeasurementCallback::translateGnssClock(
+       JavaObject& object, const IGnssMeasurementCallback_V2_0::GnssData& data) {
+    auto elapsedRealtime = data.elapsedRealtime;
+    uint16_t flags = static_cast<uint16_t>(elapsedRealtime.flags);
+    if (flags & ElapsedRealtimeFlags::HAS_TIMESTAMP_NS) {
+        SET(ElapsedRealtimeNanos, static_cast<uint64_t>(elapsedRealtime.timestampNs));
+    }
+    if (flags & ElapsedRealtimeFlags::HAS_TIME_UNCERTAINTY_NS) {
+        SET(ElapsedRealtimeUncertaintyNanos, static_cast<uint64_t>(elapsedRealtime.timeUncertaintyNs));
+    }
+    translateGnssClock(object, data.clock);
 }
 
 template<class T>
