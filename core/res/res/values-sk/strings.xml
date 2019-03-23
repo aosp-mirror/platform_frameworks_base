@@ -143,8 +143,10 @@
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Volanie cez Wi‑Fi"</string>
     <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Vypnuté"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Preferovať Wi‑Fi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Preferovať mobilné spojenie"</string>
+    <!-- no translation found for wfc_mode_wifi_preferred_summary (7335489823608689868) -->
+    <skip />
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (7081742743152286290) -->
+    <skip />
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Len Wi‑Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Nepresmerované"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -232,7 +234,8 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"Hlásenie o chybách"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Ukončiť reláciu"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Snímka obrazovky"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"Vytvoriť hlásenie chyby"</string>
+    <!-- no translation found for bugreport_title (5981047024855257269) -->
+    <skip />
     <string name="bugreport_message" msgid="398447048750350456">"Týmto zhromaždíte informácie o aktuálnom stave zariadenia. Informácie je potom možné odoslať e-mailom, chvíľu však potrvá, kým bude hlásenie chyby pripravené na odoslanie. Prosíme vás preto o trpezlivosť."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktívne nahlásenie"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Táto možnosť je vhodná pre väčšinu prípadov. Umožňuje sledovať priebeh nahlásenia, zadávať ďalšie podrobnosti o probléme a vytvárať snímky obrazovky. Môžu byť vynechané niektoré menej používané sekcie, ktorých nahlásenie trvá dlho."</string>
@@ -287,9 +290,12 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Poloha"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"prístup k polohe tohto zariadenia"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"Povoliť aplikácii &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; prístup k polohe tohto zariadenia?"</string>
-    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"Aplikácia bude mať prístup k polohe iba vtedy, keď ju budete používať."</string>
-    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"Chcete vždy povoliť aplikácii &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; prístup k polohe tohto zariadenia?"</string>
-    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"Aplikácia bude mať vždy prístup k polohe, aj keď ju nebudete používať."</string>
+    <!-- no translation found for permgrouprequestdetail_location (1347189607421252902) -->
+    <skip />
+    <!-- no translation found for permgroupbackgroundrequest_location (5039063878675613235) -->
+    <skip />
+    <!-- no translation found for permgroupbackgroundrequestdetail_location (4597006851453417387) -->
+    <skip />
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendár"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"prístup ku kalendáru"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Povoliť aplikácii &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; prístup ku kalendáru?"</string>
@@ -322,7 +328,10 @@
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"Chcete povoliť aplikácii &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; prístup k hudbe?"</string>
     <string name="permgrouplab_visual" msgid="6477382108771145134">"Fotky a videá"</string>
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"prístup k fotkám a videám"</string>
-    <string name="permgrouprequest_visual" msgid="3043752127595243314">"Chcete povoliť aplikácii &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; prístup k vašim fotkám a videám vrátane označených miest?"</string>
+    <!-- no translation found for permgrouprequest_visual (4926581398380334943) -->
+    <skip />
+    <!-- no translation found for permgrouprequestdetail_visual (3827237829805228971) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Načítať obsah okna"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Môžete preskúmať obsah okna, s ktorým pracujete."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Zapnúť funkciu Preskúmanie dotykom"</string>
@@ -515,8 +524,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Umožňuje aplikácii komunikovať so značkami, kartami a čítačkami s podporou technológie NFC."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"deaktivácia zámky obrazovky"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Umožňuje aplikácii zakázať uzamknutie klávesnice a akékoľvek súvisiace zabezpečenie heslom. Príkladom je zakázanie uzamknutia klávesnice pri prichádzajúcom telefonickom hovore a jeho opätovné povolenie po skončení hovoru."</string>
-    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"požadovať zložitosť zámky obrazovky"</string>
-    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"Umožňuje aplikácii zapamätať si úroveň zložitosti zámky obrazovky (vysoká, stredná, nízka alebo žiadna), ktorá udáva pravdepodobný rozsah dĺžky a typu zámky obrazovky. Aplikácia tiež navrhuje používateľom aktualizáciu zámky obrazovky na určitú úroveň, používatelia sa však môžu na základe vlastného uváženia rozhodnúť tento návrh ignorovať a prejsť inam. Upozorňujeme, že zámka obrazovky nie je uložená vo forme obyčajného textu, takže aplikácia nepozná presné heslo."</string>
+    <!-- no translation found for permlab_requestPasswordComplexity (202650535669249674) -->
+    <skip />
+    <!-- no translation found for permdesc_requestPasswordComplexity (4730994229754212347) -->
+    <skip />
     <string name="permlab_useBiometric" msgid="8837753668509919318">"používať biometrický hardvér"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Umožňuje aplikácii používať na overenie totožnosti biometrický hardvér"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"spravovať hardvér na snímanie odtlačkov prstov"</string>
@@ -571,37 +582,59 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Umožňuje aplikácii vyvolať metódy, ktoré pridávajú a odstraňujú šablóny tvárí."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"používanie hardvéru na overenie tváre"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Umožňuje aplikácii používať na overenie totožnosti hardvér na overenie tváre"</string>
-    <string name="face_acquired_insufficient" msgid="5901287247766106330">"Tvár sa nepodarilo spracovať. Skúste to znova."</string>
-    <string name="face_acquired_too_bright" msgid="610606792381297174">"Tvár je príliš svetlá. Skúste to pri nižšom osvetlení."</string>
-    <string name="face_acquired_too_dark" msgid="7229162716976778371">"Tvár je príliš tmavá. Zvýšte osvetlenie."</string>
-    <string name="face_acquired_too_close" msgid="1980310037427755293">"Oddiaľte senzor od tváre."</string>
-    <string name="face_acquired_too_far" msgid="4494571381828850007">"Priblížte senzor k tvári."</string>
-    <string name="face_acquired_too_high" msgid="228411096134808372">"Pohnite senzor vyššie."</string>
-    <string name="face_acquired_too_low" msgid="4539774649296349109">"Pohnite senzor nižšie."</string>
-    <string name="face_acquired_too_right" msgid="1650292067226118760">"Pohnite senzor doprava."</string>
-    <string name="face_acquired_too_left" msgid="2712489669456176505">"Pohnite senzor doľava."</string>
-    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Pozerajte sa na senzor."</string>
-    <string name="face_acquired_not_detected" msgid="5707782294589511391">"Nebola rozpoznaná žiadna tvár."</string>
-    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"Priveľa pohybu."</string>
+    <!-- no translation found for face_acquired_insufficient (2767330364802375742) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_bright (5005650874582450967) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_dark (1966194696381394616) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_close (1401011882624272753) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_far (1210969240069012510) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_high (3362395713403348013) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_low (488983581737550912) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_right (941726879175375970) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_left (5873592047381190672) -->
+    <skip />
+    <!-- no translation found for face_acquired_poor_gaze (8471716624377228327) -->
+    <skip />
+    <!-- no translation found for face_acquired_not_detected (4885504661626728809) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_much_motion (3149332171102108851) -->
+    <skip />
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Znova zaregistrujte svoju tvár."</string>
-    <string name="face_acquired_too_different" msgid="5553210341111255124">"Bola rozpoznaná iná tvár."</string>
+    <!-- no translation found for face_acquired_too_different (7663983770123789694) -->
+    <skip />
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"Príliš rovnaké, zmeňte postoj."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"Pozrite sa priamejšie do fotoaparátu."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"Pozrite sa priamejšie do fotoaparátu."</string>
+    <!-- no translation found for face_acquired_pan_too_extreme (1852495480382773759) -->
+    <skip />
+    <!-- no translation found for face_acquired_tilt_too_extreme (1290820400317982049) -->
+    <skip />
     <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Zvisle vyrovnajte hlavu."</string>
-    <string name="face_acquired_obscured" msgid="3055077697850272097">"Odkryte svoju tvár."</string>
+    <!-- no translation found for face_acquired_obscured (5747521031647744553) -->
+    <skip />
+    <!-- no translation found for face_acquired_sensor_dirty (364493868630891300) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"Hardvér na snímanie tváre nie je k dispozícii"</string>
-    <string name="face_error_timeout" msgid="4014326147867150054">"Limit rozpoznania tváre vypršal. Skúste to znova."</string>
+    <!-- no translation found for face_error_timeout (2605673935810019129) -->
+    <skip />
     <string name="face_error_no_space" msgid="8224993703466381314">"Tvár sa nedá uchovať."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Operácia týkajúca sa tváre bola zrušená"</string>
     <string name="face_error_user_canceled" msgid="8943921120862164539">"Overenie tváre bolo zrušené používateľom."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Príliš veľa pokusov. Skúste to znova neskôr."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Príliš veľa pokusov. Overenie tváre je zakázané."</string>
-    <string name="face_error_unable_to_process" msgid="238761109287767270">"Skúste to znova."</string>
-    <string name="face_error_not_enrolled" msgid="9166792142679691323">"Nemáte zaregistrovanú žiadnu tvár."</string>
-    <string name="face_error_hw_not_present" msgid="916085883581450331">"Toto zariadenie nemá senzor na overenie tváre."</string>
+    <!-- no translation found for face_error_unable_to_process (4940944939691171539) -->
+    <skip />
+    <!-- no translation found for face_error_not_enrolled (4245760276260427472) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (5296043240874659926) -->
+    <skip />
     <string name="face_name_template" msgid="7004562145809595384">"Tvár <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1253,9 +1286,16 @@
     <string name="new_app_action" msgid="6694851182870774403">"Otvoriť <xliff:g id="NEW_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="5894852887817332322">"<xliff:g id="OLD_APP">%1$s</xliff:g> sa zavrie bez uloženia"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"Proces <xliff:g id="PROC">%1$s</xliff:g> prekročil limit pamäte"</string>
+    <!-- no translation found for dump_heap_ready_notification (1162196579925048701) -->
+    <skip />
     <string name="dump_heap_notification_detail" msgid="3993078784053054141">"Boli zhromaždené zálohy dát. Zdieľajte ich klepnutím."</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Chcete zdieľať zálohy údajov?"</string>
-    <string name="dump_heap_text" msgid="4809417337240334941">"Proces <xliff:g id="PROC">%1$s</xliff:g> prekročil limit <xliff:g id="SIZE">%2$s</xliff:g> pre pamäť procesu. Máte k dispozícii zálohy údajov, ktoré môžete zdieľať s vývojárom. Postupujte opatrne: tieto zálohy údajov nesmú obsahovať žiadne osobné informácie, ku ktorým má táto aplikácia prístup."</string>
+    <!-- no translation found for dump_heap_text (8546022920319781701) -->
+    <skip />
+    <!-- no translation found for dump_heap_system_text (1205466256312104134) -->
+    <skip />
+    <!-- no translation found for dump_heap_ready_text (6759394977904051000) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"Zvoľte akciu pre text"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Hlasitosť vyzváňania"</string>
     <string name="volume_music" msgid="5421651157138628171">"Hlasitosť médií"</string>
@@ -1298,8 +1338,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Klepnutím zobrazíte všetky siete"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Pripojiť"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Všetky siete"</string>
-    <string name="wifi_suggestion_title" msgid="8951405130379148709">"K dispozícii je sieť Wi-Fi, ktorú navrhla aplikácia <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_content" msgid="2658317015552324848">"Chcete sa pripájať k sieťam navrhnutým aplikáciou <xliff:g id="NAME">%s</xliff:g>?"</string>
+    <!-- no translation found for wifi_suggestion_title (9099832833531486167) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (5883181205841582873) -->
+    <skip />
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Áno"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Nie"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi sa zapne automaticky"</string>
@@ -1311,9 +1353,14 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Prihlásenie do siete"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Sieť Wi‑Fi nemá prístup k internetu"</string>
+    <!-- no translation found for wifi_no_internet (5198100389964214865) -->
+    <skip />
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Klepnutím získate možnosti"</string>
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Pripojené"</string>
+    <!-- no translation found for network_partial_connectivity (7774883385494762741) -->
+    <skip />
+    <!-- no translation found for network_partial_connectivity_detailed (1959697814165325217) -->
+    <skip />
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Zmeny nastavení hotspotu"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Pásmo vášho hotspotu sa zmenilo."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Toto zariadenie nepodporuje vašu predvoľbu používať iba 5 GHz. Namiesto toho bude pásmo 5 GHz používať vtedy, keď bude k dispozícii."</string>
@@ -1398,6 +1445,10 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Ladenie cez USB pripojené"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"Klepnutím vypnite ladenie cez USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Vyberte, ak chcete zakázať ladenie cez USB."</string>
+    <!-- no translation found for test_harness_mode_notification_title (2216359742631914387) -->
+    <skip />
+    <!-- no translation found for test_harness_mode_notification_message (1343197173054407119) -->
+    <skip />
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Tekutina alebo nečistoty v porte USB"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"Port USB je automaticky deaktivovaný. Ďalšie informácie zobrazíte klepnutím."</string>
     <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"Port USB môžete bezpečne používať"</string>
@@ -1973,8 +2024,6 @@
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Profil odomknete klepnutím"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Pripojené k zariadeniu <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Klepnutím zobrazíte súbory"</string>
-    <string name="pin_target" msgid="3052256031352291362">"Pripnúť"</string>
-    <string name="unpin_target" msgid="3556545602439143442">"Uvoľniť"</string>
     <string name="app_info" msgid="6856026610594615344">"Info o aplikácii"</string>
     <string name="negative_duration" msgid="5688706061127375131">"-<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"Spúšťa sa ukážka…"</string>
@@ -2067,6 +2116,22 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"Upozornenie s informáciami o rutinnom režime"</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Batéria sa môže vybiť pred obvyklým nabitím"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Bol aktivovaný šetrič batérie na predĺženie výdrže batérie"</string>
+    <!-- no translation found for battery_saver_notification_channel_name (2083316159716201806) -->
+    <skip />
+    <!-- no translation found for battery_saver_sticky_disabled_notification_title (6376147579378764641) -->
+    <skip />
+    <!-- no translation found for battery_saver_sticky_disabled_notification_summary (8090192609249817945) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (2960978289873161288) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (7555713825806482451) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (5954873381559605660) -->
+    <skip />
+    <!-- no translation found for battery_saver_off_notification_summary (1374222493681267143) -->
+    <skip />
+    <!-- no translation found for battery_saver_off_alternative_notification_summary (4340727818546508436) -->
+    <skip />
     <string name="mime_type_folder" msgid="7111951698626315204">"Priečinok"</string>
     <string name="mime_type_apk" msgid="5518003630972506900">"Aplikácia pre Android"</string>
     <string name="mime_type_generic" msgid="6833871596845900027">"Súbor"</string>

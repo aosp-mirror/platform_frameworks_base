@@ -145,8 +145,10 @@
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"‏الاتصال عبر WiFi"</string>
     <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"إيقاف"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"‏شبكة Wi-Fi مفضّلة"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"شبكة بيانات الجوال مفضَّلة"</string>
+    <!-- no translation found for wfc_mode_wifi_preferred_summary (7335489823608689868) -->
+    <skip />
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (7081742743152286290) -->
+    <skip />
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"‏Wi-Fi فقط"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: لم تتم إعادة التوجيه"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -236,7 +238,8 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"تقرير الأخطاء"</string>
     <string name="global_action_logout" msgid="935179188218826050">"إنهاء الجلسة"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"لقطة شاشة"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"إعداد تقرير بالأخطاء"</string>
+    <!-- no translation found for bugreport_title (5981047024855257269) -->
+    <skip />
     <string name="bugreport_message" msgid="398447048750350456">"سيجمع هذا معلومات حول حالة جهازك الحالي لإرسالها كرسالة إلكترونية، ولكنه سيستغرق وقتًا قليلاً من بدء عرض تقرير بالأخطاء. وحتى يكون جاهزًا للإرسال، يُرجى الانتظار."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"تقرير تفاعلي"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"يمكنك استخدام هذا الخيار في معظم الأحيان، حيث يتيح لك إمكانية تتبع مستوى تقدم التقرير والحصول على مزيد من المعلومات حول المشكلة وتسجيل لقطات شاشة. وقد يتم إغفال بعض الأقسام الأقل استخدامًا والتي تستغرق وقتًا طويلاً أثناء إعداد التقرير."</string>
@@ -293,9 +296,12 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"الموقع الجغرافي"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"الوصول إلى موقع هذا الجهاز"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالوصول إلى الموقع الجغرافي لهذا الجهاز؟"</string>
-    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"لن يكون بإمكان التطبيق الوصول إلى الموقع الجغرافي إلا عند استخدامك لهذا التطبيق."</string>
-    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"‏هل تريد السماح دائمًا لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالوصول إلى الموقع الجغرافي لهذا الجهاز؟"</string>
-    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"سيكون بإمكان التطبيق دائمًا الوصول إلى الموقع الجغرافي، حتى عند عدم استخدامك لهذا التطبيق."</string>
+    <!-- no translation found for permgrouprequestdetail_location (1347189607421252902) -->
+    <skip />
+    <!-- no translation found for permgroupbackgroundrequest_location (5039063878675613235) -->
+    <skip />
+    <!-- no translation found for permgroupbackgroundrequestdetail_location (4597006851453417387) -->
+    <skip />
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"التقويم"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"الوصول تقويمك"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالدخول إلى التقويم؟"</string>
@@ -328,7 +334,10 @@
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالوصول إلى الموسيقى؟"</string>
     <string name="permgrouplab_visual" msgid="6477382108771145134">"الصور والفيديوهات"</string>
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"الوصول إلى صورك وفيديوهاتك"</string>
-    <string name="permgrouprequest_visual" msgid="3043752127595243314">"‏هل تريد السماح للتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالوصول إلى صورك وفيديوهاتك، بما في ذلك المواقع الجغرافية ذات العلامات؟"</string>
+    <!-- no translation found for permgrouprequest_visual (4926581398380334943) -->
+    <skip />
+    <!-- no translation found for permgrouprequestdetail_visual (3827237829805228971) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"استرداد محتوى النافذة"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"فحص محتوى نافذة يتم التفاعل معها"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"تشغيل الاستكشاف باللمس"</string>
@@ -521,8 +530,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"‏للسماح للتطبيق بالاتصال بعلامات الاتصال قريب المدى (NFC)، والبطاقات وبرامج القراءة."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"إيقاف قفل الشاشة"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"للسماح للتطبيق بإيقاف تأمين المفاتيح وأي أمان لكلمة مرور مرتبطة. على سبيل المثال، يعطل الهاتف تأمين المفاتيح عند استقبال مكالمة هاتفية واردة، ثم يعيد تفعيل تأمين المفاتيح عند انتهاء المكالمة."</string>
-    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"طلب معرفة مستوى صعوبة قفل الشاشة"</string>
-    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"للسماح للتطبيق بمعرفة مستوى صعوبة قفل الشاشة (عالي أو متوسط أو منخفض الصعوبة أو بدون)، والذي يحدّد النطاق المحتمل لطول ونوع قفل الشاشة. ويمكن أن يقترح التطبيق للمستخدمين أيضًا تعديل قفل الشاشة إلى مستوى معيّن، ولهم مطلق الحرية في تجاهل هذا الاقتراح ورفضه. وتجدر الإشارة إلى أنه لا يتم حفظ قفل الشاشة في نص عادي، لذا لا يعرف التطبيق كلمة المرور تحديدًا."</string>
+    <!-- no translation found for permlab_requestPasswordComplexity (202650535669249674) -->
+    <skip />
+    <!-- no translation found for permdesc_requestPasswordComplexity (4730994229754212347) -->
+    <skip />
     <string name="permlab_useBiometric" msgid="8837753668509919318">"استخدام الأجهزة البيومترية"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"للسماح للتطبيق باستخدام الأجهزة البيومترية للمصادقة"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"لإدارة أجهزة بصمة الإصبع"</string>
@@ -577,37 +588,59 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"السماح للتطبيق باستدعاء طرق لإضافة نماذج من الوجوه وحذفها"</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"استخدام أجهزة مصادقة الوجه"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"السماح للتطبيق باستخدام أجهزة مصادقة الوجه"</string>
-    <string name="face_acquired_insufficient" msgid="5901287247766106330">"تعذَّر التعرُّف على الوجه. يُرجى إعادة المحاولة."</string>
-    <string name="face_acquired_too_bright" msgid="610606792381297174">"الوجه ساطع جدًا. يُرجى إعادة المحاولة بإضاءة أقل."</string>
-    <string name="face_acquired_too_dark" msgid="7229162716976778371">"الوجه مظلم جدًا. يُرجى الاستعانة بمصدر إضاءة."</string>
-    <string name="face_acquired_too_close" msgid="1980310037427755293">"يُرجى إبعاد جهاز الاستشعار عن الوجه."</string>
-    <string name="face_acquired_too_far" msgid="4494571381828850007">"يُرجى تقريب جهاز الاستشعار من الوجه."</string>
-    <string name="face_acquired_too_high" msgid="228411096134808372">"يُرجى تحريك جهاز الاستشعار للأعلى."</string>
-    <string name="face_acquired_too_low" msgid="4539774649296349109">"يُرجى تحريك جهاز الاستشعار للأسفل."</string>
-    <string name="face_acquired_too_right" msgid="1650292067226118760">"يُرجى تحريك جهاز الاستشعار جهة اليمين."</string>
-    <string name="face_acquired_too_left" msgid="2712489669456176505">"يُرجى تحريك جهاز الاستشعار جهة اليسار."</string>
-    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"يُرجى النظر إلى جهاز الاستشعار."</string>
-    <string name="face_acquired_not_detected" msgid="5707782294589511391">"لم يتم رصد أي وجه."</string>
-    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"حركة أكثر من اللازم"</string>
+    <!-- no translation found for face_acquired_insufficient (2767330364802375742) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_bright (5005650874582450967) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_dark (1966194696381394616) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_close (1401011882624272753) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_far (1210969240069012510) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_high (3362395713403348013) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_low (488983581737550912) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_right (941726879175375970) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_left (5873592047381190672) -->
+    <skip />
+    <!-- no translation found for face_acquired_poor_gaze (8471716624377228327) -->
+    <skip />
+    <!-- no translation found for face_acquired_not_detected (4885504661626728809) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_much_motion (3149332171102108851) -->
+    <skip />
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"يُرجى إعادة تسجيل وجهك."</string>
-    <string name="face_acquired_too_different" msgid="5553210341111255124">"تم التعرّف على وجه مختلف."</string>
+    <!-- no translation found for face_acquired_too_different (7663983770123789694) -->
+    <skip />
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"الوجه مشابه جدًا، يُرجى تغيير وضعيتك."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"يُرجى النظر إلى الكاميرا مباشرة أكثر."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"يُرجى النظر إلى الكاميرا مباشرة أكثر."</string>
+    <!-- no translation found for face_acquired_pan_too_extreme (1852495480382773759) -->
+    <skip />
+    <!-- no translation found for face_acquired_tilt_too_extreme (1290820400317982049) -->
+    <skip />
     <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"يُرجى تثبيت الرأس في وضع عمودي."</string>
-    <string name="face_acquired_obscured" msgid="3055077697850272097">"يُرجى الكشف عن وجهك."</string>
+    <!-- no translation found for face_acquired_obscured (5747521031647744553) -->
+    <skip />
+    <!-- no translation found for face_acquired_sensor_dirty (364493868630891300) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"أجهزة مصادقة الوجه غير متاحة."</string>
-    <string name="face_error_timeout" msgid="4014326147867150054">"انتهت مهلة التعرُّف على الوجه. أعِد المحاولة."</string>
+    <!-- no translation found for face_error_timeout (2605673935810019129) -->
+    <skip />
     <string name="face_error_no_space" msgid="8224993703466381314">"يتعذَّر حفظ الوجه."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"تمّ إلغاء عملية مصادقة الوجه."</string>
     <string name="face_error_user_canceled" msgid="8943921120862164539">"ألغَى المستخدم مصادقة الوجه."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"تمّ إجراء محاولات كثيرة. أعِد المحاولة لاحقًا."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"تمّ إجراء محاولات كثيرة. ميزة مصادقة الوجه متوقفة."</string>
-    <string name="face_error_unable_to_process" msgid="238761109287767270">"يُرجى إعادة المحاولة."</string>
-    <string name="face_error_not_enrolled" msgid="9166792142679691323">"ليس هناك وجه مسجّل."</string>
-    <string name="face_error_hw_not_present" msgid="916085883581450331">"لا يحتوي هذا الجهاز على مستشعِر مصادقة للوجه."</string>
+    <!-- no translation found for face_error_unable_to_process (4940944939691171539) -->
+    <skip />
+    <!-- no translation found for face_error_not_enrolled (4245760276260427472) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (5296043240874659926) -->
+    <skip />
     <string name="face_name_template" msgid="7004562145809595384">"الوجه <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1293,9 +1326,16 @@
     <string name="new_app_action" msgid="6694851182870774403">"فتح <xliff:g id="NEW_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="5894852887817332322">"سيتم إغلاق <xliff:g id="OLD_APP">%1$s</xliff:g> من دون حفظ"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"لقد تجاوزت <xliff:g id="PROC">%1$s</xliff:g> حد الذاكرة."</string>
+    <!-- no translation found for dump_heap_ready_notification (1162196579925048701) -->
+    <skip />
     <string name="dump_heap_notification_detail" msgid="3993078784053054141">"تم جمع مقدار كبير من بيانات الذاكرة. انقر للمشاركة."</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"هل تريد مشاركة نَسْخ الذاكرة؟"</string>
-    <string name="dump_heap_text" msgid="4809417337240334941">"تجاوزت عملية <xliff:g id="PROC">%1$s</xliff:g> حد الذاكرة المخصص لها وقدره <xliff:g id="SIZE">%2$s</xliff:g>، ويتوفر نَسْخ للذاكرة لمشاركته مع مطور برامج العملية ولكن توخ الحذر حيث قد يحتوي نَسْخ الذاكرة هذا على معلومات شخصية يملك التطبيق حق الوصول إليها."</string>
+    <!-- no translation found for dump_heap_text (8546022920319781701) -->
+    <skip />
+    <!-- no translation found for dump_heap_system_text (1205466256312104134) -->
+    <skip />
+    <!-- no translation found for dump_heap_ready_text (6759394977904051000) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"اختيار إجراء للنص"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"مستوى صوت الرنين"</string>
     <string name="volume_music" msgid="5421651157138628171">"مستوى صوت الوسائط"</string>
@@ -1342,8 +1382,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"انقر للاطلاع على جميع الشبكات"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"اتصال"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"جميع الشبكات"</string>
-    <string name="wifi_suggestion_title" msgid="8951405130379148709">"‏تتوفَّر شبكة Wi‑Fi مقترَحة من قِبَل <xliff:g id="NAME">%s</xliff:g>."</string>
-    <string name="wifi_suggestion_content" msgid="2658317015552324848">"هل ترغب في الاتصال بالشبكات المقترَحة من <xliff:g id="NAME">%s</xliff:g>؟"</string>
+    <!-- no translation found for wifi_suggestion_title (9099832833531486167) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (5883181205841582873) -->
+    <skip />
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"نعم"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"لا"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"‏سيتم تشغيل شبكة Wi-Fi تلقائيًا."</string>
@@ -1355,9 +1397,14 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"تسجيل الدخول إلى الشبكة"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"‏شبكة Wi-Fi غير متصلة بالإنترنت"</string>
+    <!-- no translation found for wifi_no_internet (5198100389964214865) -->
+    <skip />
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"انقر للحصول على الخيارات."</string>
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"تمّ الاتصال."</string>
+    <!-- no translation found for network_partial_connectivity (7774883385494762741) -->
+    <skip />
+    <!-- no translation found for network_partial_connectivity_detailed (1959697814165325217) -->
+    <skip />
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"التغييرات التي طرأت على إعدادات نقطة الاتصال"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"تمّ تغيير نطاق نقطة الاتصال الخاصة بك."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"لا يتوافق هذا الجهاز مع إعدادك المفضّل الخاص باستخدام النطاق 5 غيغاهرتز فقط. وسيستخدم الجهاز بدلاً من ذلك النطاق 5 غيغاهرتز عندما يكون متاحًا."</string>
@@ -1442,6 +1489,10 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"‏تم توصيل تصحيح أخطاء USB"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"‏انقر لإيقاف تصحيح أخطاء USB."</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"‏اختيار إيقاف تصحيح أخطاء USB."</string>
+    <!-- no translation found for test_harness_mode_notification_title (2216359742631914387) -->
+    <skip />
+    <!-- no translation found for test_harness_mode_notification_message (1343197173054407119) -->
+    <skip />
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"‏السوائل والشوائب في منفذ USB"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"‏تمّ إيقاف منفذ USB تلقائيًا. انقُر لمعرفة المزيد من المعلومات."</string>
     <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"‏الأمان في استخدام منفذ USB"</string>
@@ -2041,8 +2092,6 @@
     <string name="profile_encrypted_message" msgid="6964994232310195874">"انقر لإلغاء قفل الملف الشخصي للعمل"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"تم الاتصال بـ <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"انقر لعرض الملفات"</string>
-    <string name="pin_target" msgid="3052256031352291362">"تثبيت"</string>
-    <string name="unpin_target" msgid="3556545602439143442">"إزالة تثبيت"</string>
     <string name="app_info" msgid="6856026610594615344">"معلومات عن التطبيق"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"جارٍ بدء العرض التوضيحي…"</string>
@@ -2137,6 +2186,22 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"إشعار معلومات \"وضع سلسلة الإجراءات\""</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"قد تنفد طاقة البطارية قبل الشحن المعتاد"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"تم تفعيل \"توفير شحن البطارية\" لإطالة عمرها."</string>
+    <!-- no translation found for battery_saver_notification_channel_name (2083316159716201806) -->
+    <skip />
+    <!-- no translation found for battery_saver_sticky_disabled_notification_title (6376147579378764641) -->
+    <skip />
+    <!-- no translation found for battery_saver_sticky_disabled_notification_summary (8090192609249817945) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (2960978289873161288) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (7555713825806482451) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (5954873381559605660) -->
+    <skip />
+    <!-- no translation found for battery_saver_off_notification_summary (1374222493681267143) -->
+    <skip />
+    <!-- no translation found for battery_saver_off_alternative_notification_summary (4340727818546508436) -->
+    <skip />
     <string name="mime_type_folder" msgid="7111951698626315204">"مجلّد"</string>
     <string name="mime_type_apk" msgid="5518003630972506900">"‏تطبيق Android"</string>
     <string name="mime_type_generic" msgid="6833871596845900027">"ملف"</string>
