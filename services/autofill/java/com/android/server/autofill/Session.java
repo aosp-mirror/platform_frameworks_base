@@ -2659,17 +2659,16 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mAugmentedAutofillDestroyer = triggerAugmentedAutofillLocked();
         if (mAugmentedAutofillDestroyer == null) {
             if (sVerbose) {
-                Slog.v(TAG, "canceling session " + id + " when server returned null and there is no"
-                        + " AugmentedAutofill for user. AutofillableIds: " + autofillableIds);
+                Slog.v(TAG, "canceling session " + id + " when service returned null and it cannot "
+                        + "be augmented. AutofillableIds: " + autofillableIds);
             }
             // Nothing to be done, but need to notify client.
             notifyUnavailableToClient(AutofillManager.STATE_FINISHED, autofillableIds);
             removeSelf();
         } else {
             if (sVerbose) {
-                Slog.v(TAG, "keeping session " + id + " when server returned null but "
-                        + "there is an AugmentedAutofill for user. AutofillableIds: "
-                        + autofillableIds);
+                Slog.v(TAG, "keeping session " + id + " when service returned null but "
+                        + "it can be augmented. AutofillableIds: " + autofillableIds);
             }
             mAugmentedAutofillableIds = autofillableIds;
         }
@@ -2687,7 +2686,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         // Check if Smart Suggestions is supported...
         final @SmartSuggestionMode int supportedModes = mService
                 .getSupportedSmartSuggestionModesLocked();
-        if (supportedModes == 0) return null;
+        if (supportedModes == 0) {
+            if (sVerbose) Slog.v(TAG, "triggerAugmentedAutofillLocked(): no supported modes");
+            return null;
+        }
 
         // ...then if the service is set for the user
 
@@ -2712,14 +2714,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return null;
         }
 
-        if (sVerbose) {
-            Slog.v(TAG, "calling Augmented Autofill Service ("
-                    + remoteService.getComponentName().toShortString() + ") on view "
-                    + mCurrentViewId + " using suggestion mode "
-                    + getSmartSuggestionModeToString(mode)
-                    + " when server returned null for session " + this.id);
-        }
-
         final boolean isWhitelisted = mService
                 .isWhitelistedForAugmentedAutofillLocked(mComponentName);
 
@@ -2733,10 +2727,18 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         if (!isWhitelisted) {
             if (sVerbose) {
-                Slog.v(TAG, mComponentName.toShortString() + " is not whitelisted for "
-                        + "augmented autofill");
+                Slog.v(TAG, "triggerAugmentedAutofillLocked(): "
+                        + ComponentName.flattenToShortString(mComponentName) + " not whitelisted ");
             }
             return null;
+        }
+
+        if (sVerbose) {
+            Slog.v(TAG, "calling Augmented Autofill Service ("
+                    + ComponentName.flattenToShortString(remoteService.getComponentName())
+                    + ") on view " + mCurrentViewId + " using suggestion mode "
+                    + getSmartSuggestionModeToString(mode)
+                    + " when server returned null for session " + this.id);
         }
 
         final ViewState viewState = mViewStates.get(mCurrentViewId);
