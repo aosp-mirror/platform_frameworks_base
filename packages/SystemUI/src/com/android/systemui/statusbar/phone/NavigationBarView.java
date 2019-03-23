@@ -367,8 +367,11 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             post(() -> {
                 // When the ime changes visibility, resize the edge panels to not cover the ime
                 final int width = mPrototypeController.getEdgeSensitivityWidth();
-                final int height = mContext.getDisplay().getHeight() - imeHeight
-                        - getResources().getDimensionPixelOffset(R.dimen.status_bar_height);
+                int height = mContext.getDisplay().getHeight() - imeHeight;
+                if (!imeVisible) {
+                    // Hide the navigation bar area at the bottom for gestures
+                    height -= getResources().getDimensionPixelOffset(R.dimen.navigation_bar_height);
+                }
                 if (mLeftEdgePanel != null) {
                     mLeftEdgePanel.setDimensions(width, height);
                 }
