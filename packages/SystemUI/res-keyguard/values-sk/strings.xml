@@ -187,66 +187,13 @@
     <item msgid="2233497913571137419">"Desať"</item>
     <item msgid="5621554266768657830">"Jedenásť"</item>
   </string-array>
-  <string-array name="type_clock_minutes">
-    <item msgid="8322049385467207985">"hod."</item>
-    <item msgid="8837126587669001578">"Jedna hodina"</item>
-    <item msgid="4294343372940455660">"Dve hodiny"</item>
-    <item msgid="7129166637707421536">"Tri hodiny"</item>
-    <item msgid="7579404865008788673">"Štyri hodiny"</item>
-    <item msgid="3873924689207380586">"Päť hodín"</item>
-    <item msgid="4849565597850069377">"Šesť hodín"</item>
-    <item msgid="4404219424523572364">"Sedem hodín"</item>
-    <item msgid="8740481214764087329">"Osem hodín"</item>
-    <item msgid="1713216865806811237">"Deväť hodín"</item>
-    <item msgid="3508406095411245038">"Desať"</item>
-    <item msgid="7161996337755311711">"Jedenásť"</item>
-    <item msgid="4044549963329624197">"Dvanásť"</item>
-    <item msgid="333373157917379088">"Trinásť"</item>
-    <item msgid="2631202907124819385">"Štrnásť"</item>
-    <item msgid="6472396076858033453">"Päťnásť"</item>
-    <item msgid="8656981856181581643">"Šesťnásť"</item>
-    <item msgid="7289026608562030619">"Sedemnásť"</item>
-    <item msgid="3881477602692646573">"Osemnásť"</item>
-    <item msgid="3358129827772984226">"Deväťnásť"</item>
-    <item msgid="3308575407402865807">"Dvadsať"</item>
-    <item msgid="5346560955382229629">"Dvadsaťjeden\n"</item>
-    <item msgid="226750304761473436">"Dvadsaťdva\n"</item>
-    <item msgid="616811325336838734">"Dvadsaťtri\n"</item>
-    <item msgid="616346116869053440">"Dvadsaťštyri\n"</item>
-    <item msgid="4642996410384042830">"Dvadsaťpäť\n"</item>
-    <item msgid="7506092849993571465">"Dvadsaťšesť\n"</item>
-    <item msgid="1915078191101042031">"Dvadsaťsedem\n"</item>
-    <item msgid="4292378641900520252">"Dvadsaťosem\n"</item>
-    <item msgid="5339513901773103696">"Dvadsaťdeväť\n"</item>
-    <item msgid="3574673250891657607">"Tridsať"</item>
-    <item msgid="5796923836589110940">"Tridsaťjeden\n"</item>
-    <item msgid="5859323597571702052">"Tridsaťdva\n"</item>
-    <item msgid="5133326723148876507">"Tridsaťtri\n"</item>
-    <item msgid="2693999494655663096">"Tridsaťštyri\n"</item>
-    <item msgid="3316754944962836197">"Tridsaťpäť\n"</item>
-    <item msgid="816891008836796723">"Tridsaťšesť\n"</item>
-    <item msgid="9158890488666520078">"Tridsaťsedem\n"</item>
-    <item msgid="1894769703213894011">"Tridsaťosem\n"</item>
-    <item msgid="5638820345598572399">"Tridsaťdeväť\n"</item>
-    <item msgid="8838304023017895439">"Štyridsať"</item>
-    <item msgid="1834742948932559597">"Štyridsaťjeden\n"</item>
-    <item msgid="6573707308847773944">"Štyridsaťdva\n"</item>
-    <item msgid="2450149950652678001">"Štyridsaťtri\n"</item>
-    <item msgid="2874667401318178036">"Štyridsaťštyri\n"</item>
-    <item msgid="3391101532763048862">"Štyridsaťpäť\n"</item>
-    <item msgid="1671489330863254362">"Štyridsaťšesť\n"</item>
-    <item msgid="5916017359554531038">"Štyridsaťsedem\n"</item>
-    <item msgid="8205413177993059967">"Štyridsaťosem\n"</item>
-    <item msgid="6607867415142171302">"Štyridsaťdeväť\n"</item>
-    <item msgid="8358850748472089162">"Päťdesiať"</item>
-    <item msgid="3551313125255080234">"Päťdesiatjeden\n"</item>
-    <item msgid="1559678130725716542">"Päťdesiatdva\n"</item>
-    <item msgid="431441994725492377">"Päťdesiattri\n"</item>
-    <item msgid="6345774640539623024">"Päťdesiatštyri\n"</item>
-    <item msgid="8018192990793931120">"Päťdesiaťpäť\n"</item>
-    <item msgid="6187650843754604534">"Päťdesiatšesť\n"</item>
-    <item msgid="8727240174015993259">"Päťdesiatsedem\n"</item>
-    <item msgid="848339003778952950">"Päťdesiatosem\n"</item>
-    <item msgid="5798985802835423618">"Päťdesiatdeväť\n"</item>
-  </string-array>
+    <!-- no translation found for type_clock_minutes:1 (2091812961809760681) -->
+    <!-- no translation found for type_clock_minutes:2 (1496435384877290709) -->
+    <!-- no translation found for type_clock_minutes:3 (881846472976674129) -->
+    <!-- no translation found for type_clock_minutes:4 (2784477043911540584) -->
+    <!-- no translation found for type_clock_minutes:5 (1610928853656700614) -->
+    <!-- no translation found for type_clock_minutes:6 (2317806244043886658) -->
+    <!-- no translation found for type_clock_minutes:7 (3318687539120971327) -->
+    <!-- no translation found for type_clock_minutes:8 (5701600693712102348) -->
+    <!-- no translation found for type_clock_minutes:9 (3247381605947372495) -->
 </resources>

@@ -108,12 +108,13 @@
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Ohne Verwendung des Fingerabdrucks entsperren"</string>
     <string name="accessibility_scanning_face" msgid="769545173211758586">"Gesicht wird gescannt"</string>
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Senden"</string>
+    <!-- no translation found for accessibility_manage_notification (2026361503393549753) -->
+    <skip />
     <string name="unlock_label" msgid="8779712358041029439">"Entsperren"</string>
     <string name="phone_label" msgid="2320074140205331708">"Telefon öffnen"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"Sprachassistent öffnen"</string>
     <string name="camera_label" msgid="7261107956054836961">"Kamera öffnen"</string>
     <string name="cancel" msgid="6442560571259935130">"Abbrechen"</string>
-    <string name="accessibility_biometric_dialog_help_area" msgid="8953787076940186847">"Bereich für die Hilfemeldung"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"Bestätigen"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"Noch einmal versuchen"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Berühre den Fingerabdrucksensor"</string>
@@ -179,6 +180,8 @@
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Mobile Daten"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Mobile Datennutzung aktiviert"</string>
     <string name="cell_data_off_content_description" msgid="4356113230238585072">"Mobile Daten deaktiviert"</string>
+    <!-- no translation found for not_default_data_content_description (9194667237765917844) -->
+    <skip />
     <string name="cell_data_off" msgid="1051264981229902873">"Aus"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth-Tethering"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Flugmodus"</string>
@@ -224,9 +227,12 @@
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Der Flugmodus ist aktiviert."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"lautlos"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"nur Wecker"</string>
-    <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Bitte nicht stören."</string>
-    <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"\"Bitte nicht stören\" deaktiviert"</string>
-    <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"\"Bitte nicht stören\" aktiviert"</string>
+    <!-- no translation found for accessibility_quick_settings_dnd (5555155552520665891) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_dnd_changed_off (2757071272328547807) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_dnd_changed_on (6808220653747701059) -->
+    <skip />
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth."</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"Bluetooth deaktiviert"</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"Bluetooth aktiviert"</string>
@@ -273,7 +279,6 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"Standortanfragen aktiv"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Alle Benachrichtigungen löschen"</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="notification_group_overflow_indicator_ambient" msgid="879560382990377886">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>, +<xliff:g id="OVERFLOW">%2$s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> weitere Benachrichtigungen vorhanden.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> weitere Benachrichtigung vorhanden.</item>
@@ -290,7 +295,8 @@
     <string name="start_dreams" msgid="5640361424498338327">"Bildschirmschoner"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_header_onboarding_text" msgid="8030309023792936283">"Halte die Symbole gedrückt, um weitere Optionen zu sehen"</string>
-    <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Bitte nicht stören"</string>
+    <!-- no translation found for quick_settings_dnd_label (7112342227663678739) -->
+    <skip />
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Nur wichtige Unterbrechungen"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Nur Wecker"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Lautlos"</string>
@@ -441,8 +447,10 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"Energiesparmodus ist aktiviert"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Reduzierung der Leistung und Hintergrunddaten"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Energiesparmodus deaktivieren"</string>
-    <string name="media_projection_dialog_text" msgid="1443042478990422751">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> beginnt damit, alles auf deinem Bildschirm zu erfassen, z. B. Benachrichtigungen, Passwörter, Fotos, Nachrichten und Zahlungsinformationen."</string>
-    <string name="media_projection_dialog_title" msgid="7574971526813630219">"Darf <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> deinen Bildschirm aufzeichnen oder streamen?"</string>
+    <!-- no translation found for media_projection_dialog_text (5751657130671431216) -->
+    <skip />
+    <!-- no translation found for media_projection_dialog_title (8124184308671641248) -->
+    <skip />
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Nicht mehr anzeigen"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Alle löschen"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Verwalten"</string>
@@ -517,6 +525,10 @@
     <string name="accessibility_volume_settings" msgid="4915364006817819212">"Toneinstellungen"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Maximieren"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Minimieren"</string>
+    <!-- no translation found for volume_odi_captions_tip (1193653197906918269) -->
+    <skip />
+    <!-- no translation found for accessibility_volume_close_odi_captions_tip (1163987066404128967) -->
+    <skip />
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"Ausgabegerät wechseln"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Bildschirm ist fixiert"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Der Bildschirm bleibt so lange eingeblendet, bis du die Fixierung aufhebst. Berühre und halte dazu \"Zurück\" und \"Übersicht\"."</string>
@@ -617,6 +629,8 @@
     <string name="notification_channel_unsilenced" msgid="4790904571552394137">"Diese Benachrichtigungen werden als Warnungen angezeigt"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"Normalerweise schließt du diese Benachrichtigungen. \nSollen sie trotzdem weiter angezeigt werden?"</string>
     <string name="inline_done_button" msgid="492513001558716452">"Fertig"</string>
+    <!-- no translation found for inline_ok_button (966006867967928987) -->
+    <skip />
     <string name="inline_keep_showing" msgid="8945102997083836858">"Diese Benachrichtigungen weiterhin anzeigen?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Benachrichtigungen nicht mehr anzeigen"</string>
     <string name="inline_deliver_silently_button" msgid="7756289895745629140">"Ohne Ton zustellen"</string>
@@ -625,9 +639,16 @@
     <string name="inline_minimize_button" msgid="966233327974702195">"Minimieren"</string>
     <string name="inline_silent_button_silent" msgid="4411510650503783646">"Ohne Ton anzeigen"</string>
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"Weiter lautlos bleiben"</string>
-    <string name="inline_silent_button_alert" msgid="7961887853830826523">"Benachrichtigung an mich"</string>
+    <!-- no translation found for inline_silent_button_alert (2273030946176140380) -->
+    <skip />
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"Weiterhin Benachrichtigungen senden"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Benachrichtigungen dieser App weiterhin anzeigen?"</string>
+    <!-- no translation found for hint_text_block (3554459167504485284) -->
+    <skip />
+    <!-- no translation found for hint_text_silent (859468056340177016) -->
+    <skip />
+    <!-- no translation found for hint_text_alert (428122667751463119) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"Diese Benachrichtigungen können nicht deaktiviert werden"</string>
     <string name="notification_delegate_header" msgid="9167022191405284627">"über <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Diese App verwendet die Kamera."</string>
@@ -707,9 +728,11 @@
     <string name="keyboard_shortcut_group_applications_youtube" msgid="6555453761294723317">"YouTube"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="9043614299194991263">"Kalender"</string>
     <string name="tuner_full_zen_title" msgid="4540823317772234308">"Einschließlich Lautstärkeregler anzeigen"</string>
-    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"Bitte nicht stören"</string>
+    <!-- no translation found for volume_and_do_not_disturb (1750270820297253561) -->
+    <skip />
     <string name="volume_dnd_silent" msgid="4363882330723050727">"Tastenkombination für Lautstärketasten"</string>
-    <string name="volume_up_silent" msgid="7141255269783588286">"\"Bitte nicht stören\" bei \"Lauter\" deaktivieren"</string>
+    <!-- no translation found for volume_up_silent (7545869833038212815) -->
+    <skip />
     <string name="battery" msgid="7498329822413202973">"Akku"</string>
     <string name="clock" msgid="7416090374234785905">"Uhr"</string>
     <string name="headset" msgid="4534219457597457353">"Headset"</string>
@@ -879,17 +902,8 @@
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Einstellungen"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"OK"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"Dump SysUI Heap"</string>
-    <plurals name="ongoing_privacy_chip_multiple_apps" formatted="false" msgid="1406406529558080714">
-      <item quantity="other"><xliff:g id="NUM_APPS_2">%d</xliff:g> Apps</item>
-      <item quantity="one"><xliff:g id="NUM_APPS_0">%d</xliff:g> App</item>
-    </plurals>
     <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"<xliff:g id="APP">%1$s</xliff:g> verwendet gerade Folgendes: <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"Apps verwenden gerade Folgendes: <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
-    <string name="ongoing_privacy_chip_in_use" msgid="5174331553211609272">"Im Einsatz:"</string>
-    <plurals name="ongoing_privacy_chip_content_multiple_apps_single_op" formatted="false" msgid="4871926099254314088">
-      <item quantity="other"><xliff:g id="NUM_APPS_4">%1$d</xliff:g> Apps verwenden gerade: <xliff:g id="TYPE_5">%2$s</xliff:g>.</item>
-      <item quantity="one"><xliff:g id="NUM_APPS_0">%1$d</xliff:g> App verwendet gerade: <xliff:g id="TYPE_1">%2$s</xliff:g>.</item>
-    </plurals>
     <string name="ongoing_privacy_dialog_ok" msgid="3273300106348958308">"OK"</string>
     <string name="ongoing_privacy_dialog_open_settings" msgid="6773015940472748876">"Datenschutzeinst."</string>
     <string name="ongoing_privacy_dialog_single_app_title" msgid="6019646962021696632">"App, die <xliff:g id="TYPES_LIST">%s</xliff:g> verwendet"</string>
@@ -899,16 +913,33 @@
     <string name="privacy_type_camera" msgid="1676604631892420333">"Kamera"</string>
     <string name="privacy_type_location" msgid="6435497989657286700">"Standort"</string>
     <string name="privacy_type_microphone" msgid="4153045784928554506">"Mikrofon"</string>
-    <plurals name="ongoing_privacy_dialog_overflow_text" formatted="false" msgid="3441296594927649172">
-      <item quantity="other"><xliff:g id="NUM_APPS_1">%d</xliff:g> weitere Apps</item>
-      <item quantity="one"><xliff:g id="NUM_APPS_0">%d</xliff:g> weitere App</item>
-    </plurals>
     <string name="sensor_privacy_mode" msgid="8982771253020769598">"Sensoren aus"</string>
     <string name="device_services" msgid="1191212554435440592">"Gerätedienste"</string>
     <string name="music_controls_no_title" msgid="5236895307087002011">"Kein Titel"</string>
+    <!-- no translation found for restart_button_description (2035077840254950187) -->
+    <skip />
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"<xliff:g id="APP_NAME">%1$s</xliff:g> öffnen"</string>
-    <string name="bubbles_settings_button_description" msgid="1940331766151865776">"Benachrichtigungseinstellungen für <xliff:g id="APP_NAME">%1$s</xliff:g> öffnen"</string>
-    <string name="bubbles_prompt" msgid="2684301469286150276">"Infofelder von dieser App zulassen?"</string>
-    <string name="no_bubbles" msgid="7173621233904687258">"Blockieren"</string>
+    <!-- no translation found for bubbles_settings_button_description (2970630476657287189) -->
+    <skip />
+    <!-- no translation found for bubbles_prompt (8807968030159469710) -->
+    <skip />
+    <!-- no translation found for no_bubbles (337101288173078247) -->
+    <skip />
     <string name="yes_bubbles" msgid="668809525728633841">"Zulassen"</string>
+    <!-- no translation found for ask_me_later_bubbles (2147688438402939029) -->
+    <skip />
+    <!-- no translation found for bubble_content_description_single (1184462974339387516) -->
+    <skip />
+    <!-- no translation found for bubble_content_description_stack (8666349184095622232) -->
+    <skip />
+    <!-- no translation found for bubble_accessibility_action_move (1794879742234803840) -->
+    <skip />
+    <!-- no translation found for bubble_accessibility_action_move_top_left (104736832249802724) -->
+    <skip />
+    <!-- no translation found for bubble_accessibility_action_move_top_right (1671844272347036806) -->
+    <skip />
+    <!-- no translation found for bubble_accessibility_action_move_bottom_left (206369104473183217) -->
+    <skip />
+    <!-- no translation found for bubble_accessibility_action_move_bottom_right (8705660152384312329) -->
+    <skip />
 </resources>

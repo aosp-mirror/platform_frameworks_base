@@ -169,66 +169,13 @@
     <item msgid="2233497913571137419">"zehn Uhr"</item>
     <item msgid="5621554266768657830">"elf Uhr"</item>
   </string-array>
-  <string-array name="type_clock_minutes">
-    <item msgid="8322049385467207985"></item>
-    <item msgid="8837126587669001578">"eins"</item>
-    <item msgid="4294343372940455660">"zwei"</item>
-    <item msgid="7129166637707421536">"drei"</item>
-    <item msgid="7579404865008788673">"vier"</item>
-    <item msgid="3873924689207380586">"fünf"</item>
-    <item msgid="4849565597850069377">"sechs"</item>
-    <item msgid="4404219424523572364">"sieben"</item>
-    <item msgid="8740481214764087329">"acht"</item>
-    <item msgid="1713216865806811237">"neun"</item>
-    <item msgid="3508406095411245038">"zehn"</item>
-    <item msgid="7161996337755311711">"elf"</item>
-    <item msgid="4044549963329624197">"zwölf"</item>
-    <item msgid="333373157917379088">"dreizehn"</item>
-    <item msgid="2631202907124819385">"vierzehn"</item>
-    <item msgid="6472396076858033453">"fünfzehn"</item>
-    <item msgid="8656981856181581643">"sechzehn"</item>
-    <item msgid="7289026608562030619">"siebzehn"</item>
-    <item msgid="3881477602692646573">"achtzehn"</item>
-    <item msgid="3358129827772984226">"neunzehn"</item>
-    <item msgid="3308575407402865807">"zwanzig"</item>
-    <item msgid="5346560955382229629">"einund-\nzwanzig"</item>
-    <item msgid="226750304761473436">"zweiund-\nzwanzig"</item>
-    <item msgid="616811325336838734">"dreiund-\nzwanzig"</item>
-    <item msgid="616346116869053440">"vierund-\nzwanzig"</item>
-    <item msgid="4642996410384042830">"fünfund-\nzwanzig"</item>
-    <item msgid="7506092849993571465">"sechsund-\nzwanzig"</item>
-    <item msgid="1915078191101042031">"siebenund-\nzwanzig"</item>
-    <item msgid="4292378641900520252">"achtund-\nzwanzig"</item>
-    <item msgid="5339513901773103696">"neunund-\nzwanzig"</item>
-    <item msgid="3574673250891657607">"dreißig"</item>
-    <item msgid="5796923836589110940">"einund-\ndreißig"</item>
-    <item msgid="5859323597571702052">"zweiund-\ndreißig"</item>
-    <item msgid="5133326723148876507">"dreiund-\ndreißig"</item>
-    <item msgid="2693999494655663096">"vierund-\ndreißig"</item>
-    <item msgid="3316754944962836197">"fünfund-\ndreißig"</item>
-    <item msgid="816891008836796723">"sechsund-\ndreißig"</item>
-    <item msgid="9158890488666520078">"siebenund-\ndreißig"</item>
-    <item msgid="1894769703213894011">"achtund-\ndreißig"</item>
-    <item msgid="5638820345598572399">"neunund-\ndreißig"</item>
-    <item msgid="8838304023017895439">"vierzig"</item>
-    <item msgid="1834742948932559597">"einund-\nvierzig"</item>
-    <item msgid="6573707308847773944">"zweiund-\nvierzig"</item>
-    <item msgid="2450149950652678001">"dreiund-\nvierzig"</item>
-    <item msgid="2874667401318178036">"vierund-\nvierzig"</item>
-    <item msgid="3391101532763048862">"fünfund-\nvierzig"</item>
-    <item msgid="1671489330863254362">"sechsund-\nvierzig"</item>
-    <item msgid="5916017359554531038">"siebenund-\nvierzig"</item>
-    <item msgid="8205413177993059967">"achtund-\nvierzig"</item>
-    <item msgid="6607867415142171302">"neunund-\nvierzig"</item>
-    <item msgid="8358850748472089162">"fünfzig"</item>
-    <item msgid="3551313125255080234">"einund-\nfünfzig"</item>
-    <item msgid="1559678130725716542">"zweiund-\nfünfzig"</item>
-    <item msgid="431441994725492377">"dreiund-\nfünfzig"</item>
-    <item msgid="6345774640539623024">"vierund-\nfünfzig"</item>
-    <item msgid="8018192990793931120">"fünfund-\nfünfzig"</item>
-    <item msgid="6187650843754604534">"sechsund-\nfünfzig"</item>
-    <item msgid="8727240174015993259">"siebenund-\nfünfzig"</item>
-    <item msgid="848339003778952950">"achtund-\nfünfzig"</item>
-    <item msgid="5798985802835423618">"neunund-\nfünfzig"</item>
-  </string-array>
+    <!-- no translation found for type_clock_minutes:1 (2091812961809760681) -->
+    <!-- no translation found for type_clock_minutes:2 (1496435384877290709) -->
+    <!-- no translation found for type_clock_minutes:3 (881846472976674129) -->
+    <!-- no translation found for type_clock_minutes:4 (2784477043911540584) -->
+    <!-- no translation found for type_clock_minutes:5 (1610928853656700614) -->
+    <!-- no translation found for type_clock_minutes:6 (2317806244043886658) -->
+    <!-- no translation found for type_clock_minutes:7 (3318687539120971327) -->
+    <!-- no translation found for type_clock_minutes:8 (5701600693712102348) -->
+    <!-- no translation found for type_clock_minutes:9 (3247381605947372495) -->
 </resources>
