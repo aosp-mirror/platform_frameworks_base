@@ -300,7 +300,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123769377)
     protected static final int FLAG_USE_CHILD_DRAWING_ORDER = 0x400;
 
     /**
