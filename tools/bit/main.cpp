@@ -78,6 +78,9 @@ struct Options {
     // For help
     bool runHelp;
 
+    // For refreshing module-info.json
+    bool runRefresh;
+
     // For tab completion
     bool runTab;
     string tabPattern;
@@ -93,6 +96,7 @@ struct Options {
 
 Options::Options()
     :runHelp(false),
+     runRefresh(false),
      runTab(false),
      noRestart(false),
      reboot(false),
@@ -418,6 +422,10 @@ print_usage(FILE* out) {
     fprintf(out, "      com.android.statusbartest/.NotificationBuilderTest activity.\n");
     fprintf(out, "\n");
     fprintf(out, "\n");
+    fprintf(out, "usage: bit --refresh\n");
+    fprintf(out, "\n");
+    fprintf(out, "  Update module-info.json, the cache of make goals that can be built.\n");
+    fprintf(out, "\n");
     fprintf(out, "usage: bit --tab ...\n");
     fprintf(out, "\n");
     fprintf(out, "  Lists the targets in a format for tab completion. To get tab\n");
@@ -447,6 +455,12 @@ parse_args(Options* options, int argc, const char** argv)
     // Help
     if (argc == 2 && (strcmp(argv[1],  "-h") == 0 || strcmp(argv[1], "--help") == 0)) {
         options->runHelp = true;
+        return;
+    }
+
+    // Refresh
+    if (argc == 2 && strcmp(argv[1], "--refresh") == 0) {
+        options->runRefresh = true;
         return;
     }
 
@@ -669,6 +683,9 @@ run_phases(vector<Target*> targets, const Options& options)
             target->module = mod->second;
         } else {
             print_error("Error: Could not find module: %s", target->name.c_str());
+            fprintf(stderr, "Try running %sbit --refresh%s if you recently added %s%s%s.\n",
+                    g_escapeBold, g_escapeEndColor,
+                    g_escapeBold, target->name.c_str(), g_escapeEndColor);
             err = 1;
         }
     }
@@ -1146,6 +1163,34 @@ run_phases(vector<Target*> targets, const Options& options)
 }
 
 /**
+ * Refresh module-info.
+ */
+void
+run_refresh()
+{
+    int err;
+
+    print_status("Initializing");
+    const string buildTop = get_required_env("ANDROID_BUILD_TOP", false);
+    const string buildProduct = get_required_env("TARGET_PRODUCT", false);
+    const string buildVariant = get_required_env("TARGET_BUILD_VARIANT", false);
+    const string buildType = get_required_env("TARGET_BUILD_TYPE", false);
+    const string buildOut = get_out_dir();
+    chdir_or_exit(buildTop.c_str());
+
+    BuildVars buildVars(buildOut, buildProduct, buildVariant, buildType);
+
+    string buildDevice = buildVars.GetBuildVar("TARGET_DEVICE", false);
+
+    vector<string> goals;
+    goals.push_back(buildOut + "/target/product/" + buildDevice + "/module-info.json");
+
+    print_status("Refreshing module-info.json");
+    err = build_goals(goals);
+    check_error(err);
+}
+
+/**
  * Implement tab completion of the target names from the all modules file.
  */
 void
@@ -1187,6 +1232,9 @@ main(int argc, const char** argv)
     if (options.runHelp) {
         // Help
         print_usage(stdout);
+        exit(0);
+    } else if (options.runRefresh) {
+        run_refresh();
         exit(0);
     } else if (options.runTab) {
         run_tab_completion(options.tabPattern);
