@@ -179,12 +179,10 @@ public class WifiNetworkSuggestionTest {
                 .get(WifiConfiguration.GroupCipher.GCMP_256));
         assertTrue(suggestion.wifiConfiguration.allowedGroupManagementCiphers
                 .get(WifiConfiguration.GroupMgmtCipher.BIP_GMAC_256));
-        assertTrue(suggestion.wifiConfiguration.allowedSuiteBCiphers
-                .get(WifiConfiguration.SuiteBCipher.ECDHE_ECDSA));
-        assertTrue(suggestion.wifiConfiguration.allowedSuiteBCiphers
-                .get(WifiConfiguration.SuiteBCipher.ECDHE_RSA));
         assertTrue(suggestion.wifiConfiguration.requirePMF);
         assertNull(suggestion.wifiConfiguration.preSharedKey);
+        // allowedSuiteBCiphers are set according to the loaded certificate and cannot be tested
+        // here.
     }
 
     /**
