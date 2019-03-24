@@ -136,6 +136,7 @@ public final class MediaStore {
      * removing nomedia files
      * @hide
      */
+    @Deprecated
     public static final String UNHIDE_CALL = "unhide";
 
     /**
@@ -3534,6 +3535,19 @@ public final class MediaStore {
             }
         } else {
             throw new IOException("User " + user + " must be unlocked and running");
+        }
+    }
+
+    /** @hide */
+    public static Uri scanFile(Context context, File file) {
+        final ContentResolver resolver = context.getContentResolver();
+        try (ContentProviderClient client = resolver.acquireContentProviderClient(AUTHORITY)) {
+            final Bundle in = new Bundle();
+            in.putParcelable(Intent.EXTRA_STREAM, Uri.fromFile(file));
+            final Bundle out = client.call(SCAN_FILE_CALL, null, in);
+            return out.getParcelable(Intent.EXTRA_STREAM);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
         }
     }
 }
