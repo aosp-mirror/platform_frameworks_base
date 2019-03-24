@@ -42,9 +42,6 @@ struct VkFunctorDrawParams {
   int width;
   int height;
 
-  // Input: is the render target a FBO
-  bool is_layer;
-
   // Input: current transform matrix
   float transform[16];
 
