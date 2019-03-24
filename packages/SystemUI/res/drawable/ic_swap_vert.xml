@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-     Copyright (C) 2018 The Android Open Source Project
-
+     Copyright (C) 2019 Havoc-OS
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
      You may obtain a copy of the License at
-
           http://www.apache.org/licenses/LICENSE-2.0
-
      Unless required by applicable law or agreed to in writing, software
      distributed under the License is distributed on an "AS IS" BASIS,
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,11 +12,14 @@
      limitations under the License.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-        android:width="24dp"
-        android:height="24dp"
-        android:viewportWidth="24"
-        android:viewportHeight="24">
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24" >
+
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M16 17.01V10h-2v7.01h-3L15 21l4-3.99h-3zM9 3L5 6.99h3V14h2V6.99h3L9 3z" />
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="0.5"
+        android:pathData="M 16 3.36 C 15.814 3.137 15.54 3.005 15.25 3 C 14.698 3 14.25 3.448 14.25 4 L 14.25 21 L 15.75 21 L 15.75 9 L 20.75 9 L 16 3.36 Z M 7.95 20.64 C 8.147 20.877 8.442 21.01 8.75 21 C 9.302 21 9.75 20.552 9.75 20 L 9.75 3 L 8.25 3 L 8.25 15 L 3.25 15 L 7.95 20.64 Z" />
 </vector>
