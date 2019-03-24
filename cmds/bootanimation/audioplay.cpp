@@ -39,14 +39,14 @@ namespace {
 using namespace android;
 
 // engine interfaces
-static SLObjectItf engineObject = NULL;
+static SLObjectItf engineObject = nullptr;
 static SLEngineItf engineEngine;
 
 // output mix interfaces
-static SLObjectItf outputMixObject = NULL;
+static SLObjectItf outputMixObject = nullptr;
 
 // buffer queue player interfaces
-static SLObjectItf bqPlayerObject = NULL;
+static SLObjectItf bqPlayerObject = nullptr;
 static SLPlayItf bqPlayerPlay;
 static SLAndroidSimpleBufferQueueItf bqPlayerBufferQueue;
 static SLMuteSoloItf bqPlayerMuteSolo;
@@ -89,7 +89,7 @@ void bqPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void *context) {
 }
 
 bool hasPlayer() {
-    return (engineObject != NULL && bqPlayerObject != NULL);
+    return (engineObject != nullptr && bqPlayerObject != nullptr);
 }
 
 // create the engine and output mix objects
@@ -97,7 +97,7 @@ bool createEngine() {
     SLresult result;
 
     // create engine
-    result = slCreateEngine(&engineObject, 0, NULL, 0, NULL, NULL);
+    result = slCreateEngine(&engineObject, 0, nullptr, 0, nullptr, nullptr);
     if (result != SL_RESULT_SUCCESS) {
         ALOGE("slCreateEngine failed with result %d", result);
         return false;
@@ -121,7 +121,7 @@ bool createEngine() {
     (void)result;
 
     // create output mix
-    result = (*engineEngine)->CreateOutputMix(engineEngine, &outputMixObject, 0, NULL, NULL);
+    result = (*engineEngine)->CreateOutputMix(engineEngine, &outputMixObject, 0, nullptr, nullptr);
     if (result != SL_RESULT_SUCCESS) {
         ALOGE("sl engine CreateOutputMix failed with result %d", result);
         return false;
@@ -173,7 +173,7 @@ bool createBufferQueueAudioPlayer(const ChunkFormat* chunkFormat) {
 
     // configure audio sink
     SLDataLocator_OutputMix loc_outmix = {SL_DATALOCATOR_OUTPUTMIX, outputMixObject};
-    SLDataSink audioSnk = {&loc_outmix, NULL};
+    SLDataSink audioSnk = {&loc_outmix, nullptr};
 
     // create audio player
     const SLInterfaceID ids[3] = {SL_IID_BUFFERQUEUE, SL_IID_VOLUME, SL_IID_ANDROIDCONFIGURATION};
@@ -236,7 +236,7 @@ bool createBufferQueueAudioPlayer(const ChunkFormat* chunkFormat) {
     (void)result;
 
     // register callback on the buffer queue
-    result = (*bqPlayerBufferQueue)->RegisterCallback(bqPlayerBufferQueue, bqPlayerCallback, NULL);
+    result = (*bqPlayerBufferQueue)->RegisterCallback(bqPlayerBufferQueue, bqPlayerCallback, nullptr);
     if (result != SL_RESULT_SUCCESS) {
         ALOGE("sl bqPlayerBufferQueue RegisterCallback failed with result %d", result);
         return false;
@@ -261,7 +261,7 @@ bool parseClipBuf(const uint8_t* clipBuf, int clipBufSize, const ChunkFormat** o
                   const uint8_t** oSoundBuf, unsigned* oSoundBufSize) {
     *oSoundBuf = clipBuf;
     *oSoundBufSize = clipBufSize;
-    *oChunkFormat = NULL;
+    *oChunkFormat = nullptr;
     const RiffWaveHeader* wavHeader = (const RiffWaveHeader*)*oSoundBuf;
     if (*oSoundBufSize < sizeof(*wavHeader) || (wavHeader->riff_id != ID_RIFF) ||
         (wavHeader->wave_id != ID_WAVE)) {
@@ -303,7 +303,7 @@ bool parseClipBuf(const uint8_t* clipBuf, int clipBufSize, const ChunkFormat** o
         }
     }
 
-    if (*oChunkFormat == NULL) {
+    if (*oChunkFormat == nullptr) {
         ALOGE("format not found in WAV file");
         return false;
     }
@@ -435,7 +435,7 @@ void setPlaying(bool isPlaying) {
 
     SLresult result;
 
-    if (NULL != bqPlayerPlay) {
+    if (nullptr != bqPlayerPlay) {
         // set the player's state
         result = (*bqPlayerPlay)->SetPlayState(bqPlayerPlay,
             isPlaying ? SL_PLAYSTATE_PLAYING : SL_PLAYSTATE_STOPPED);
@@ -445,28 +445,28 @@ void setPlaying(bool isPlaying) {
 
 void destroy() {
     // destroy buffer queue audio player object, and invalidate all associated interfaces
-    if (bqPlayerObject != NULL) {
+    if (bqPlayerObject != nullptr) {
         CHATTY("destroying audio player");
         (*bqPlayerObject)->Destroy(bqPlayerObject);
-        bqPlayerObject = NULL;
-        bqPlayerPlay = NULL;
-        bqPlayerBufferQueue = NULL;
-        bqPlayerMuteSolo = NULL;
-        bqPlayerVolume = NULL;
+        bqPlayerObject = nullptr;
+        bqPlayerPlay = nullptr;
+        bqPlayerBufferQueue = nullptr;
+        bqPlayerMuteSolo = nullptr;
+        bqPlayerVolume = nullptr;
     }
 
     // destroy output mix object, and invalidate all associated interfaces
-    if (outputMixObject != NULL) {
+    if (outputMixObject != nullptr) {
         (*outputMixObject)->Destroy(outputMixObject);
-        outputMixObject = NULL;
+        outputMixObject = nullptr;
     }
 
     // destroy engine object, and invalidate all associated interfaces
-    if (engineObject != NULL) {
+    if (engineObject != nullptr) {
         CHATTY("destroying audio engine");
         (*engineObject)->Destroy(engineObject);
-        engineObject = NULL;
-        engineEngine = NULL;
+        engineObject = nullptr;
+        engineEngine = nullptr;
     }
 }
 
