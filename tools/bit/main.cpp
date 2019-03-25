@@ -856,7 +856,7 @@ run_phases(vector<Target*> targets, const Options& options)
             // TODO: if (!apk.file.fileInfo.exists || apk.file.HasChanged())
             err = run_adb("shell", "mkdir", "-p", dir.c_str(), NULL);
             check_error(err);
-            err = run_adb("push", pushed.file.filename.c_str(), pushed.dest.c_str());
+            err = run_adb("push", pushed.file.filename.c_str(), pushed.dest.c_str(), NULL);
             check_error(err);
             // pushed.installed = true;
         }
