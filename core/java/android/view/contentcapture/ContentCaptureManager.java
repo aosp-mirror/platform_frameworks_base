@@ -43,6 +43,7 @@ import com.android.internal.util.SyncResultReceiver;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Set;
 
 /**
  * TODO(b/123577059): add javadocs / mention it can be null
@@ -359,6 +360,20 @@ public final class ContentCaptureManager {
         if (mainSession != null && mainSession.isDisabled()) return false;
 
         return true;
+    }
+
+    /**
+     * Gets the list of conditions for when content capture should be allowed.
+     *
+     * <p>This method is typically used by web browsers so they don't generate unnecessary content
+     * capture events for websites the content capture service is not interested on.
+     *
+     * @return list of conditions, or {@code null} if the service didn't set any restriction
+     * (in which case content capture events should always be generated).
+     */
+    @Nullable
+    public Set<ContentCaptureCondition> getContentCaptureConditions() {
+        return null; // TODO(b/129267994): implement
     }
 
     /**
