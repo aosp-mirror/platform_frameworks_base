@@ -4101,9 +4101,12 @@ public class ConnectivityManager {
      * @hide
      */
     @SystemApi
-    public boolean getAvoidBadWifi() {
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_STACK})
+    public boolean shouldAvoidBadWifi() {
         try {
-            return mService.getAvoidBadWifi();
+            return mService.shouldAvoidBadWifi();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

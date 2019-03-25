@@ -182,7 +182,7 @@ interface IConnectivityManager
     void startCaptivePortalApp(in Network network);
     void startCaptivePortalAppInternal(in Network network, in Bundle appExtras);
 
-    boolean getAvoidBadWifi();
+    boolean shouldAvoidBadWifi();
     int getMultipathPreference(in Network Network);
 
     NetworkRequest getDefaultRequest();
