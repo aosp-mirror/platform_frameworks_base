@@ -126,6 +126,7 @@ final class ContentCapturePerUserService
             if (mMaster.debug) Slog.d(TAG, "updateRemoteService(): destroying old remote service");
             mRemoteService.destroy();
             mRemoteService = null;
+            resetContentCaptureWhitelistLocked();
         }
 
         // Updates the component name
@@ -551,6 +552,17 @@ final class ContentCapturePerUserService
         return null;
     }
 
+    /**
+     * Resets the content capture whitelist.
+     */
+    @GuardedBy("mLock")
+    private void resetContentCaptureWhitelistLocked() {
+        if (mMaster.verbose) {
+            Slog.v(TAG, "resetting content capture whitelist");
+        }
+        mWhitelistHelper.setWhitelist((List) null, null);
+    }
+
     private final class ContentCaptureServiceRemoteCallback extends
             IContentCaptureServiceCallback.Stub {
 
@@ -567,7 +579,6 @@ final class ContentCapturePerUserService
             synchronized (mLock) {
                 mWhitelistHelper.setWhitelist(packages, activities);
             }
-            // TODO(b/119613670): log metrics
         }
 
         @Override
