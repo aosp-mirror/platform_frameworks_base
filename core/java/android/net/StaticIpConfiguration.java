@@ -134,7 +134,7 @@ public final class StaticIpConfiguration implements Parcelable {
      * route to the gateway as well. This configuration is arguably invalid, but it used to work
      * in K and earlier, and other OSes appear to accept it.
      */
-    public @NonNull List<RouteInfo> getRoutes(String iface) {
+    public @NonNull List<RouteInfo> getRoutes(@Nullable String iface) {
         List<RouteInfo> routes = new ArrayList<RouteInfo>(3);
         if (ipAddress != null) {
             RouteInfo connectedRoute = new RouteInfo(ipAddress, null, iface);
