@@ -1810,6 +1810,7 @@ public class InputManagerService extends IInputManager.Stub
 
     // Native callback.
     private void onPointerDownOutsideFocus(IBinder touchedToken) {
+        mWindowManagerCallbacks.onPointerDownOutsideFocus(touchedToken);
     }
 
     // Native callback.
@@ -2024,6 +2025,14 @@ public class InputManagerService extends IInputManager.Stub
         public int getPointerLayer();
 
         public int getPointerDisplayId();
+
+        /**
+         * Notifies window manager that a {@link android.view.MotionEvent#ACTION_DOWN} pointer event
+         * occurred on a window that did not have focus.
+         *
+         * @param touchedToken The token for the window that received the input event.
+         */
+        void onPointerDownOutsideFocus(IBinder touchedToken);
     }
 
     /**
