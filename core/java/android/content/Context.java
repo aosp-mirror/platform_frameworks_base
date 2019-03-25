@@ -1711,7 +1711,8 @@ public abstract class Context {
      */
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
     @SystemApi
-    public void startActivityAsUser(@RequiresPermission Intent intent, UserHandle user) {
+    public void startActivityAsUser(@RequiresPermission @NonNull Intent intent,
+            @NonNull UserHandle user) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
