@@ -83,6 +83,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.RingBufferIndices;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
+import com.android.networkstack.R;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -1710,9 +1711,15 @@ public class NetworkMonitor extends StateMachine {
 
         /**
          * Get the captive portal server HTTP URL that is configured on the device.
+         *
+         * NetworkMonitor does not use {@link ConnectivityManager#getCaptivePortalServerUrl()} as
+         * it has its own updatable strategies to detect captive portals. The framework only advises
+         * on one URL that can be used, while  NetworkMonitor may implement more complex logic.
          */
         public String getCaptivePortalServerHttpUrl(Context context) {
-            return NetworkMonitorUtils.getCaptivePortalServerHttpUrl(context);
+            final String defaultUrl =
+                    context.getResources().getString(R.string.config_captive_portal_http_url);
+            return NetworkMonitorUtils.getCaptivePortalServerHttpUrl(context, defaultUrl);
         }
 
         /**
