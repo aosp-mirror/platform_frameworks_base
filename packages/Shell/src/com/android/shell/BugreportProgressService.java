@@ -1095,6 +1095,7 @@ public class BugreportProgressService extends Service {
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
+                Looper.prepare();
                 zipBugreport(info);
                 sendBugreportNotification(info, takingScreenshot);
                 return null;
