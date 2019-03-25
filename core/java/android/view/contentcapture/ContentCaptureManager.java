@@ -17,6 +17,7 @@ package android.view.contentcapture;
 
 import static android.view.contentcapture.ContentCaptureHelper.sDebug;
 import static android.view.contentcapture.ContentCaptureHelper.sVerbose;
+import static android.view.contentcapture.ContentCaptureHelper.toSet;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -46,6 +47,7 @@ import com.android.internal.util.SyncResultReceiver;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.Set;
 
 /**
@@ -518,7 +520,20 @@ public final class ContentCaptureManager {
      */
     @Nullable
     public Set<ContentCaptureCondition> getContentCaptureConditions() {
-        return null; // TODO(b/129267994): implement
+        // NOTE: we could cache the conditions on ContentCaptureOptions, but then it would be stick
+        // to the lifetime of the app. OTOH, by dynamically calling the server every time, we allow
+        // the service to fine tune how long-lived apps (like browsers) are whitelisted.
+        if (!isContentCaptureEnabled() && !mOptions.lite) return null;
+
+        final SyncResultReceiver resultReceiver = new SyncResultReceiver(SYNC_CALLS_TIMEOUT_MS);
+        try {
+            mService.getContentCaptureConditions(mContext.getPackageName(), resultReceiver);
+            final ArrayList<ContentCaptureCondition> result = resultReceiver
+                    .getParcelableListResult();
+            return toSet(result);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**

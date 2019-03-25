@@ -23,8 +23,13 @@ import static android.view.contentcapture.ContentCaptureManager.LOGGING_LEVEL_VE
 import android.annotation.Nullable;
 import android.os.Build;
 import android.provider.DeviceConfig;
+import android.util.ArraySet;
 import android.util.Log;
 import android.view.contentcapture.ContentCaptureManager.LoggingLevel;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Helper class for this package and server's.
@@ -99,6 +104,22 @@ public final class ContentCaptureHelper {
             default:
                 return "UNKNOWN-" + level;
         }
+    }
+
+    /**
+     * Converts a set to a list.
+     */
+    @Nullable
+    public static <T> ArrayList<T> toList(@Nullable Set<T> set) {
+        return set == null ? null : new ArrayList<T>(set);
+    }
+
+    /**
+     * Converts a list to a set.
+     */
+    @Nullable
+    public static <T> ArraySet<T> toSet(@Nullable List<T> list) {
+        return list == null ? null : new ArraySet<T>(list);
     }
 
     private ContentCaptureHelper() {

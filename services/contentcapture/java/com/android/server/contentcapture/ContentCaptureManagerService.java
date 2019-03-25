@@ -18,6 +18,7 @@ package com.android.server.contentcapture;
 
 import static android.Manifest.permission.MANAGE_CONTENT_CAPTURE;
 import static android.content.Context.CONTENT_CAPTURE_MANAGER_SERVICE;
+import static android.view.contentcapture.ContentCaptureHelper.toList;
 import static android.view.contentcapture.ContentCaptureManager.RESULT_CODE_FALSE;
 import static android.view.contentcapture.ContentCaptureManager.RESULT_CODE_OK;
 import static android.view.contentcapture.ContentCaptureManager.RESULT_CODE_SECURITY_EXCEPTION;
@@ -56,6 +57,7 @@ import android.util.LocalLog;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
+import android.view.contentcapture.ContentCaptureCondition;
 import android.view.contentcapture.ContentCaptureHelper;
 import android.view.contentcapture.ContentCaptureManager;
 import android.view.contentcapture.IContentCaptureManager;
@@ -568,6 +570,8 @@ public final class ContentCaptureManagerService extends
         @Override
         public void removeUserData(@NonNull UserDataRemovalRequest request) {
             Preconditions.checkNotNull(request);
+            // TODO(b/122959591): check caller uid owns the package name
+
             final int userId = UserHandle.getCallingUserId();
             synchronized (mLock) {
                 final ContentCapturePerUserService service = getServiceForUserLocked(userId);
@@ -617,6 +621,25 @@ public final class ContentCaptureManagerService extends
                 result.send(RESULT_CODE_OK, bundleFor(componentName));
             } catch (RemoteException e) {
                 Slog.w(mTag, "Unable to send getServiceSettingsIntent(): " + e);
+            }
+        }
+
+        @Override
+        public void getContentCaptureConditions(@NonNull String packageName,
+                @NonNull IResultReceiver result) {
+            // TODO(b/122959591): check caller uid owns the package name
+
+            final int userId = UserHandle.getCallingUserId();
+            final ArrayList<ContentCaptureCondition> conditions;
+            synchronized (mLock) {
+                final ContentCapturePerUserService service = getServiceForUserLocked(userId);
+                conditions = service == null ? null
+                        : toList(service.getContentCaptureConditionsLocked(packageName));
+            }
+            try {
+                result.send(RESULT_CODE_OK, bundleFor(conditions));
+            } catch (RemoteException e) {
+                Slog.w(mTag, "Unable to send getServiceComponentName(): " + e);
             }
         }
 

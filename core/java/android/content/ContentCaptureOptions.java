@@ -136,13 +136,18 @@ public final class ContentCaptureOptions implements Parcelable {
     @Override
     public String toString() {
         if (lite) {
-            return "ContentCaptureOptions [(lite) loggingLevel=" + loggingLevel + "]";
+            return "ContentCaptureOptions [loggingLevel=" + loggingLevel + " (lite)]";
         }
-        return "ContentCaptureOptions [loggingLevel=" + loggingLevel + ", maxBufferSize="
-                + maxBufferSize + ", idleFlushingFrequencyMs=" + idleFlushingFrequencyMs
-                + ", textChangeFlushingFrequencyMs=" + textChangeFlushingFrequencyMs
-                + ", logHistorySize=" + logHistorySize + ", whitelistedComponents="
-                + whitelistedComponents + "]";
+        final StringBuilder string = new StringBuilder("ContentCaptureOptions [");
+        string.append("loggingLevel=").append(loggingLevel)
+            .append(", maxBufferSize=").append(maxBufferSize)
+            .append(", idleFlushingFrequencyMs=").append(idleFlushingFrequencyMs)
+            .append(", textChangeFlushingFrequencyMs=").append(textChangeFlushingFrequencyMs)
+            .append(", logHistorySize=").append(logHistorySize);
+        if (whitelistedComponents != null) {
+            string.append(", whitelisted=").append(whitelistedComponents);
+        }
+        return string.append(']').toString();
     }
 
     /** @hide */

@@ -17,6 +17,7 @@ package android.service.contentcapture;
 
 import static android.view.contentcapture.ContentCaptureHelper.sDebug;
 import static android.view.contentcapture.ContentCaptureHelper.sVerbose;
+import static android.view.contentcapture.ContentCaptureHelper.toList;
 import static android.view.contentcapture.ContentCaptureSession.NO_SESSION_ID;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
@@ -54,7 +55,6 @@ import com.android.internal.os.IResultReceiver;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -241,11 +241,17 @@ public abstract class ContentCaptureService extends Service {
      */
     public final void setContentCaptureConditions(@NonNull String packageName,
             @Nullable Set<ContentCaptureCondition> conditions) {
-        // TODO(b/129267994): implement
-    }
+        final IContentCaptureServiceCallback callback = mCallback;
+        if (callback == null) {
+            Log.w(TAG, "setContentCaptureConditions(): no server callback");
+            return;
+        }
 
-    private <T> ArrayList<T> toList(@Nullable Set<T> set) {
-        return set == null ? null : new ArrayList<T>(set);
+        try {
+            callback.setContentCaptureConditions(packageName, toList(conditions));
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
     }
 
     /**
