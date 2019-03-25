@@ -150,8 +150,8 @@ public class UsbPortManager {
     private NotificationManager mNotificationManager;
 
     /**
-     * If there currently is a notification about contaminated USB port shown the id of the
-     * notification, or 0 if there is none.
+     * If there currently is a notification related to contaminated USB port management
+     * shown the id of the notification, or 0 if there is none.
      */
     private int mIsPortContaminatedNotificationId;
 
@@ -191,18 +191,24 @@ public class UsbPortManager {
     private void updateContaminantNotification() {
         PortInfo currentPortInfo = null;
         Resources r = mContext.getResources();
+        int contaminantStatus = UsbPortStatus.CONTAMINANT_DETECTION_NOT_DETECTED;
 
         // Not handling multiple ports here. Showing the notification
         // for the first port that returns CONTAMINANT_PRESENCE_DETECTED.
         for (PortInfo portInfo : mPorts.values()) {
-            if (portInfo.mUsbPortStatus.getContaminantDetectionStatus()
-                    == UsbPortStatus.CONTAMINANT_DETECTION_DETECTED) {
+            contaminantStatus = portInfo.mUsbPortStatus.getContaminantDetectionStatus();
+            if (contaminantStatus == UsbPortStatus.CONTAMINANT_DETECTION_DETECTED
+                    || contaminantStatus == UsbPortStatus.CONTAMINANT_DETECTION_DISABLED) {
                 currentPortInfo = portInfo;
                 break;
             }
         }
 
-        if (currentPortInfo != null && mIsPortContaminatedNotificationId
+        // Current contminant status is detected while "safe to use usb port"
+        // notification is displayed. Remove safe to use usb port notification
+        // and push contaminant detected notification.
+        if (contaminantStatus == UsbPortStatus.CONTAMINANT_DETECTION_DETECTED
+                    && mIsPortContaminatedNotificationId
                     != SystemMessage.NOTE_USB_CONTAMINANT_DETECTED) {
             if (mIsPortContaminatedNotificationId
                     == SystemMessage.NOTE_USB_CONTAMINANT_NOT_DETECTED) {
@@ -242,32 +248,41 @@ public class UsbPortManager {
             Notification notification = builder.build();
             mNotificationManager.notifyAsUser(null, mIsPortContaminatedNotificationId, notification,
                     UserHandle.ALL);
-        } else if (currentPortInfo == null && mIsPortContaminatedNotificationId
+        // No contaminant is detected but contaminant detection notification is displayed.
+        // Remove contaminant detection notification and push safe to use USB port notification.
+        } else if (contaminantStatus != UsbPortStatus.CONTAMINANT_DETECTION_DETECTED
+                && mIsPortContaminatedNotificationId
                 == SystemMessage.NOTE_USB_CONTAMINANT_DETECTED) {
             mNotificationManager.cancelAsUser(null, mIsPortContaminatedNotificationId,
                     UserHandle.ALL);
+            mIsPortContaminatedNotificationId = 0;
 
-            mIsPortContaminatedNotificationId = SystemMessage.NOTE_USB_CONTAMINANT_NOT_DETECTED;
-            int titleRes = com.android.internal.R.string.usb_contaminant_not_detected_title;
-            CharSequence title = r.getText(titleRes);
-            String channel = SystemNotificationChannels.ALERTS;
-            CharSequence message = r.getText(
-                    com.android.internal.R.string.usb_contaminant_not_detected_message);
+            // Dont show safe to use notification when contaminant detection is disabled.
+            // Show only when the status is changing from detected to not detected.
+            if (contaminantStatus == UsbPortStatus.CONTAMINANT_DETECTION_NOT_DETECTED) {
+                mIsPortContaminatedNotificationId =
+                        SystemMessage.NOTE_USB_CONTAMINANT_NOT_DETECTED;
+                int titleRes = com.android.internal.R.string.usb_contaminant_not_detected_title;
+                CharSequence title = r.getText(titleRes);
+                String channel = SystemNotificationChannels.ALERTS;
+                CharSequence message = r.getText(
+                        com.android.internal.R.string.usb_contaminant_not_detected_message);
 
-            Notification.Builder builder = new Notification.Builder(mContext, channel)
-                    .setSmallIcon(com.android.internal.R.drawable.ic_usb_48dp)
-                    .setTicker(title)
-                    .setColor(mContext.getColor(
-                           com.android.internal.R.color
-                           .system_notification_accent_color))
-                    .setContentTitle(title)
-                    .setContentText(message)
-                    .setVisibility(Notification.VISIBILITY_PUBLIC)
-                    .setStyle(new Notification.BigTextStyle()
-                    .bigText(message));
-            Notification notification = builder.build();
-            mNotificationManager.notifyAsUser(null, mIsPortContaminatedNotificationId, notification,
-                    UserHandle.ALL);
+                Notification.Builder builder = new Notification.Builder(mContext, channel)
+                        .setSmallIcon(com.android.internal.R.drawable.ic_usb_48dp)
+                        .setTicker(title)
+                        .setColor(mContext.getColor(
+                               com.android.internal.R.color
+                               .system_notification_accent_color))
+                        .setContentTitle(title)
+                        .setContentText(message)
+                        .setVisibility(Notification.VISIBILITY_PUBLIC)
+                        .setStyle(new Notification.BigTextStyle()
+                        .bigText(message));
+                Notification notification = builder.build();
+                mNotificationManager.notifyAsUser(null, mIsPortContaminatedNotificationId,
+                        notification, UserHandle.ALL);
+            }
         }
     }
 
@@ -319,8 +334,8 @@ public class UsbPortManager {
         }
 
         try {
-            // Oneway call into the hal
-            android.hardware.usb.V1_2.IUsb proxy = (android.hardware.usb.V1_2.IUsb) mProxy;
+            // Oneway call into the hal. Use the castFrom method from HIDL.
+            android.hardware.usb.V1_2.IUsb proxy = android.hardware.usb.V1_2.IUsb.castFrom(mProxy);
             proxy.enableContaminantPresenceDetection(portId, enable);
         } catch (RemoteException e) {
             logAndPrintException(pw, "Failed to set contaminant detection", e);
@@ -948,22 +963,26 @@ public class UsbPortManager {
         }
     }
 
+    private void handlePortLocked(PortInfo portInfo, IndentingPrintWriter pw) {
+        sendPortChangedBroadcastLocked(portInfo);
+        enableContaminantDetectionIfNeeded(portInfo, pw);
+        logToStatsd(portInfo, pw);
+        updateContaminantNotification();
+    }
+
     private void handlePortAddedLocked(PortInfo portInfo, IndentingPrintWriter pw) {
         logAndPrint(Log.INFO, pw, "USB port added: " + portInfo);
-        sendPortChangedBroadcastLocked(portInfo);
-        updateContaminantNotification();
+        handlePortLocked(portInfo, pw);
     }
 
     private void handlePortChangedLocked(PortInfo portInfo, IndentingPrintWriter pw) {
         logAndPrint(Log.INFO, pw, "USB port changed: " + portInfo);
-        sendPortChangedBroadcastLocked(portInfo);
-        updateContaminantNotification();
+        handlePortLocked(portInfo, pw);
     }
 
     private void handlePortRemovedLocked(PortInfo portInfo, IndentingPrintWriter pw) {
         logAndPrint(Log.INFO, pw, "USB port removed: " + portInfo);
-        sendPortChangedBroadcastLocked(portInfo);
-        updateContaminantNotification();
+        handlePortLocked(portInfo, pw);
     }
 
     // Constants have to be converted between USB HAL V1.2 ContaminantDetectionStatus
@@ -996,9 +1015,25 @@ public class UsbPortManager {
         // instead of from within the critical section.
         mHandler.post(() -> mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
                 Manifest.permission.MANAGE_USB));
+    }
 
-        // Log to statsd
+    private void enableContaminantDetectionIfNeeded(PortInfo portInfo, IndentingPrintWriter pw) {
+        if (!mConnected.containsKey(portInfo.mUsbPort.getId())) {
+            return;
+        }
 
+        if (mConnected.get(portInfo.mUsbPort.getId())
+                && !portInfo.mUsbPortStatus.isConnected()
+                && portInfo.mUsbPortStatus.getContaminantDetectionStatus()
+                == UsbPortStatus.CONTAMINANT_DETECTION_DISABLED) {
+            // Contaminant detection might have been temporarily disabled by the user
+            // through SystemUI.
+            // Re-enable contaminant detection when the accessory is unplugged.
+            enableContaminantDetection(portInfo.mUsbPort.getId(), true, pw);
+        }
+    }
+
+    private void logToStatsd(PortInfo portInfo, IndentingPrintWriter pw) {
         // Port is removed
         if (portInfo.mUsbPortStatus == null) {
             if (mConnected.containsKey(portInfo.mUsbPort.getId())) {
