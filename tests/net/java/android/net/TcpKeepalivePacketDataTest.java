@@ -48,6 +48,8 @@ public final class TcpKeepalivePacketDataTest {
         final int ack = 0x22222222;
         final int wnd = 8000;
         final int wndScale = 2;
+        final int tos = 4;
+        final int ttl = 64;
         TcpKeepalivePacketData resultData = null;
         final TcpKeepalivePacketDataParcelable testInfo = new TcpKeepalivePacketDataParcelable();
         testInfo.srcAddress = IPV4_KEEPALIVE_SRC_ADDR;
@@ -58,6 +60,8 @@ public final class TcpKeepalivePacketDataTest {
         testInfo.ack = ack;
         testInfo.rcvWnd = wnd;
         testInfo.rcvWndScale = wndScale;
+        testInfo.tos = tos;
+        testInfo.ttl = ttl;
         try {
             resultData = TcpKeepalivePacketData.tcpKeepalivePacket(testInfo);
         } catch (InvalidPacketException e) {
@@ -72,16 +76,21 @@ public final class TcpKeepalivePacketDataTest {
         assertEquals(testInfo.ack, resultData.tcpAck);
         assertEquals(testInfo.rcvWnd, resultData.tcpWnd);
         assertEquals(testInfo.rcvWndScale, resultData.tcpWndScale);
+        assertEquals(testInfo.tos, resultData.ipTos);
+        assertEquals(testInfo.ttl, resultData.ipTtl);
 
         TestUtils.assertParcelingIsLossless(resultData, TcpKeepalivePacketData.CREATOR);
 
         final byte[] packet = resultData.getPacket();
-        // IP version and TOS.
-        ByteBuffer buf = ByteBuffer.wrap(packet);
-        assertEquals(buf.getShort(), 0x4500);
+        // IP version and IHL
+        assertEquals(packet[0], 0x45);
+        // TOS
+        assertEquals(packet[1], tos);
+        // TTL
+        assertEquals(packet[8], ttl);
         // Source IP address.
         byte[] ip = new byte[4];
-        buf = ByteBuffer.wrap(packet, 12, 4);
+        ByteBuffer buf = ByteBuffer.wrap(packet, 12, 4);
         buf.get(ip);
         assertArrayEquals(ip, IPV4_KEEPALIVE_SRC_ADDR);
         // Destination IP address.
@@ -113,6 +122,8 @@ public final class TcpKeepalivePacketDataTest {
         final int ack = 0x22222222;
         final int wnd = 48_000;
         final int wndScale = 2;
+        final int tos = 4;
+        final int ttl = 64;
         final TcpKeepalivePacketDataParcelable testInfo = new TcpKeepalivePacketDataParcelable();
         testInfo.srcAddress = IPV4_KEEPALIVE_SRC_ADDR;
         testInfo.srcPort = srcPort;
@@ -122,6 +133,8 @@ public final class TcpKeepalivePacketDataTest {
         testInfo.ack = ack;
         testInfo.rcvWnd = wnd;
         testInfo.rcvWndScale = wndScale;
+        testInfo.tos = tos;
+        testInfo.ttl = ttl;
         TcpKeepalivePacketData testData = null;
         TcpKeepalivePacketDataParcelable resultData = null;
         testData = TcpKeepalivePacketData.tcpKeepalivePacket(testInfo);
@@ -134,5 +147,7 @@ public final class TcpKeepalivePacketDataTest {
         assertEquals(resultData.ack, ack);
         assertEquals(resultData.rcvWnd, wnd);
         assertEquals(resultData.rcvWndScale, wndScale);
+        assertEquals(resultData.tos, tos);
+        assertEquals(resultData.ttl, ttl);
     }
 }

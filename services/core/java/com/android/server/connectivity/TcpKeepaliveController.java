@@ -23,7 +23,10 @@ import static android.os.MessageQueue.OnFileDescriptorEventListener.EVENT_ERROR;
 import static android.os.MessageQueue.OnFileDescriptorEventListener.EVENT_INPUT;
 import static android.system.OsConstants.ENOPROTOOPT;
 import static android.system.OsConstants.FIONREAD;
+import static android.system.OsConstants.IPPROTO_IP;
 import static android.system.OsConstants.IPPROTO_TCP;
+import static android.system.OsConstants.IP_TOS;
+import static android.system.OsConstants.IP_TTL;
 import static android.system.OsConstants.TIOCOUTQ;
 
 import android.annotation.NonNull;
@@ -193,6 +196,12 @@ public class TcpKeepaliveController {
             trw = NetworkUtils.getTcpRepairWindow(fd);
             tcpDetails.rcvWnd = trw.rcvWnd;
             tcpDetails.rcvWndScale = trw.rcvWndScale;
+            if (tcpDetails.srcAddress.length == 4 /* V4 address length */) {
+                // Query TOS.
+                tcpDetails.tos = Os.getsockoptInt(fd, IPPROTO_IP, IP_TOS);
+                // Query TTL.
+                tcpDetails.ttl = Os.getsockoptInt(fd, IPPROTO_IP, IP_TTL);
+            }
         } catch (ErrnoException e) {
             Log.e(TAG, "Exception reading TCP state from socket", e);
             if (e.errno == ENOPROTOOPT) {
