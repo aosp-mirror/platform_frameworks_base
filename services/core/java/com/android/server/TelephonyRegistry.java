@@ -1888,7 +1888,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 pw.println("mDataConnectionState=" + mDataConnectionState[i]);
                 pw.println("mCellLocation=" + mCellLocation[i]);
                 pw.println("mCellInfo=" + mCellInfo.get(i));
-                pw.println("mImsCallDisconnectCause=" + mImsReasonInfo.get(i).toString());
+                pw.println("mImsCallDisconnectCause=" + mImsReasonInfo.get(i));
                 pw.decreaseIndent();
             }
             pw.println("mCallNetworkType=" + mCallNetworkType);
