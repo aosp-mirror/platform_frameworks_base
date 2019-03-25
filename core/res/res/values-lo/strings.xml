@@ -141,8 +141,10 @@
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"ການໂທ Wi-Fi"</string>
     <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ປິດ"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"ເລືອກໃຊ້ Wi​-Fi ກ່ອນ"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"ຕ້ອງການໃຊ້ມືຖື"</string>
+    <!-- no translation found for wfc_mode_wifi_preferred_summary (7335489823608689868) -->
+    <skip />
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (7081742743152286290) -->
+    <skip />
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi​-Fi ເທົ່າ​ນັ້ນ"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ບໍ່ຖືກສົ່ງຕໍ່"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -228,7 +230,8 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"ລາຍງານຂໍ້ຜິດພາດ"</string>
     <string name="global_action_logout" msgid="935179188218826050">"ສິ້ນສຸດເຊດຊັນ"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"ພາບໜ້າຈໍ"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"ໃຊ້ລາຍງານຂໍ້ບົກພ່ອງ"</string>
+    <!-- no translation found for bugreport_title (5981047024855257269) -->
+    <skip />
     <string name="bugreport_message" msgid="398447048750350456">"ນີ້ຈະເປັນການເກັບກຳຂໍ້ມູນກ່ຽວກັບ ສະຖານະປັດຈຸບັນຂອງອຸປະກອນທ່ານ ເພື່ອສົ່ງເປັນຂໍ້ຄວາມທາງອີເມວ. ມັນຈະໃຊ້ເວລາໜ້ອຍນຶ່ງ ໃນການເລີ່ມຕົ້ນການລາຍງານຂໍ້ຜິດພາດ ຈົນກວ່າຈະພ້ອມທີ່ຈະສົ່ງໄດ້, ກະລຸນາລໍຖ້າ."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"ລາຍງານແບບໂຕ້ຕອບ"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"ໃຊ້ພາຍໃຕ້ສະຖານະການສ່ວນໃຫຍ່. ມັນອະນຸຍາດໃຫ້ທ່ານສາມາດຕິດຕາມສະຖານະລາຍງານ, ປ້ອນລາຍລະອຽດເພີ່ມເຕີມກ່ຽວກັບບັນຫາ ແລະ ຖ່າຍຮູບໜ້າຈໍໄດ້. ມັນອາດລະເລີຍພາກສ່ວນທີ່ບໍ່ຄ່ອຍໃຊ້ທີ່ໃຊ້ເວລາລາຍງານດົນອອກໄປ."</string>
@@ -281,9 +284,12 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"ສະ​ຖານ​ທີ່"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"ເຂົ້າເຖິງຂໍ້ມູນສະຖານທີ່ຂອງອຸປະກອນນີ້"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"ອະນຸຍາດ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ໃຫ້ເຂົ້າເຖິງສະຖານທີ່ຂອງອຸປະກອນບໍ?"</string>
-    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"ແອັບຈະມີສິດເຂົ້າເຖິງສະຖານທີ່ໃນເວລາທີ່ທ່ານກຳລັງໃຊ້ແອັບຢູ່ເທົ່ານັ້ນ."</string>
-    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"ອະນຸຍາດໃຫ້ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ເຂົ້າເຖິງສະຖານທີ່ຂອງອຸປະກອນນີ້ບໍ?"</string>
-    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"ແອັບຈະມີສິດເຂົ້າເຖິງສະຖານທີ່ທຸກເທື່ອ ເຖິງແມ່ນໃນເວລາທ່ານບໍ່ໃຊ້ແອັບຢູ່ກໍຕາມ."</string>
+    <!-- no translation found for permgrouprequestdetail_location (1347189607421252902) -->
+    <skip />
+    <!-- no translation found for permgroupbackgroundrequest_location (5039063878675613235) -->
+    <skip />
+    <!-- no translation found for permgroupbackgroundrequestdetail_location (4597006851453417387) -->
+    <skip />
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ປະຕິທິນ"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"ເຂົ້າ​ຫາ​ປະ​ຕິ​ທິນ​ຂອງ​ທ່ານ"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"ອະນຸຍາດ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ໃຫ້ເຂົ້າເຖິງປະຕິທິນຂອງທ່ານບໍ?"</string>
@@ -316,7 +322,10 @@
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"ອະນຸຍາດ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ໃຫ້ເຂົ້າເຖິງເພງຂອງທ່ານບໍ?"</string>
     <string name="permgrouplab_visual" msgid="6477382108771145134">"ຮູບພາບ ແລະ ວິດີໂອ"</string>
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"ເຂົ້າເຖິງຮູບພາບ ແລະ ວິດີໂອຂອງທ່ານ"</string>
-    <string name="permgrouprequest_visual" msgid="3043752127595243314">"ອະນຸຍາດໃຫ້ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ເຂົ້າເຖິງຮູບພາບ ແລະ ວິດີໂອຂອງທ່ານ, ຮວມທັງສະຖານທີ່ທີ່ຖືກແທັກນຳບໍ?"</string>
+    <!-- no translation found for permgrouprequest_visual (4926581398380334943) -->
+    <skip />
+    <!-- no translation found for permgrouprequestdetail_visual (3827237829805228971) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ດຶງຂໍ້ມູນເນື້ອຫາໃນໜ້າຈໍ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ກວດກາເນື້ອຫາຂອງໜ້າຈໍທີ່ທ່ານກຳລັງມີປະຕິສຳພັນນຳ."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ເປີດໃຊ້ \"ການສຳຫຼວດໂດຍສຳຜັດ\""</string>
@@ -509,8 +518,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"ອະນຸຍາດໃຫ້ແອັບຯຕິດຕໍ່ສື່ສານກັບປ້າຍກຳກັບ, ບັດ ແລະໂຕອ່ານຂອງການສື່ສານໄລຍະສັ້ນ (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"ປິດການລັອກໜ້າຈໍ"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"ອະນຸຍາດໃຫ້ແອັບຯປິດການເຮັດວຽກຂອງປຸ່ມລັອກ ແລະລະບົບຄວາມປອດໄພຂອງລະຫັດຜ່ານທີ່ເຊື່ອມໂຍງກັນ. ໂຕຢ່າງ: ໂທລະສັບຈະປິດການເຮັດວຽກຂອງປຸ່ມລັອກເມື່ອມີສາຍໂທເຂົ້າ ຈາກນັ້ນຈຶ່ງເປີດໃຊ້ໄດ້ອີກເມື່ອວາງສາຍແລ້ວ."</string>
-    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"ຮ້ອງຂໍຄວາມຊັບຊ້ອນການລັອກໜ້າຈໍ"</string>
-    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"ອະນຸຍາດໃຫ້ແອັບສຶກສາລະດັບຄວາມຊັບຊ້ອນຂອງໜ້າຈໍລັອກ (ສູງ, ກາງ, ຕ່ຳ ຫຼື ບໍ່ມີ), ເຊິ່ງລະບຸຂອບເຂດຄວາມເປັນໄປໄດ້ຂອງຄວາມຍາວ ແລະ ປະເພດຂອງການລັອກໜ້າຈໍ. ແອັບນີ້ສາມາດແນະນຳຜູ້ໃຊ້ວ່າເຂົາເຈົ້າສາມາດອັບເດດໜ້າຈໍລັອກເປັນລະດັບໃດໜຶ່ງເປັນການສະເພາະໄດ້, ແຕ່ຜູ້ໃຊ້ສາມາດທີ່ຈະບໍ່ສົນໃຈ ຫຼື ເປີດໄປອັນອື່ນໄດ້. ກະລຸນາຮັບຊາບວ່າການລັອກໜ້າຈໍບໍ່ໄດ້ບັນທຶກໃນແບບຂໍ້ຄວາມທຳມະດາ, ດັ່ງນັ້ນແອັບຈະບໍ່ຮູ້ລະຫັດຜ່ານທີ່ແນ່ນອນ."</string>
+    <!-- no translation found for permlab_requestPasswordComplexity (202650535669249674) -->
+    <skip />
+    <!-- no translation found for permdesc_requestPasswordComplexity (4730994229754212347) -->
+    <skip />
     <string name="permlab_useBiometric" msgid="8837753668509919318">"ໃຊ້ຮາດແວຊີວະມິຕິ"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"ອະນຸຍາດໃຫ້ແອັບນຳໃຊ້ຮາດແວຊີວະມິຕິສຳລັບການພິສູດຢືນຢັນ"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"ຈັດ​ການ​ຮາດ​ແວ​ລາຍ​ນີ້ວ​ມື"</string>
@@ -565,37 +576,59 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"ອະນຸຍາດໃຫ້ແອັບເປີດວິທີການຕ່າງໆເພື່ອເພີ່ມ ແລະ ລຶບແມ່ແບບໃບໜ້າສຳລັບການນຳໃຊ້."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"ໃຊ້ຮາດແວການກວດສອບຄວາມຖືກຕ້ອງດ້ວຍໃບໜ້າ"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"ອະນຸຍາດໃຫ້ແອັບໃຊ້ຮາດແວການກວດສອບຄວາມຖືກຕ້ອງດ້ວຍໃບໜ້າສຳລັບການກວດສອບຄວາມຖືກຕ້ອງ"</string>
-    <string name="face_acquired_insufficient" msgid="5901287247766106330">"ບໍ່ສາມາດປະມວນຜົນຂໍ້ມູນໃບໜ້າໄດ້. ກະລຸນາລອງອີກຄັ້ງ."</string>
-    <string name="face_acquired_too_bright" msgid="610606792381297174">"ໃບໜ້າສະຫວ່າງເກີນໄປ. ກະລຸນາລອງໃນບ່ອນທີ່ແສງໜ້ອຍກວ່າ."</string>
-    <string name="face_acquired_too_dark" msgid="7229162716976778371">"ໃບໜ້າມືດເກີນໄປ. ກະລຸນາເປີດແຫຼ່ງກຳເນີດແສງ."</string>
-    <string name="face_acquired_too_close" msgid="1980310037427755293">"ກະລຸນາຍ້າຍເຊັນເຊີອອກຫ່າງຈາກໃບໜ້າຕື່ມອີກ."</string>
-    <string name="face_acquired_too_far" msgid="4494571381828850007">"ກະລຸນາຍ້າຍເຊັນເຊີເຂົ້າໃກ້ໃບໜ້າຕື່ມອີກ."</string>
-    <string name="face_acquired_too_high" msgid="228411096134808372">"ກະລຸນາຍ້າຍເຊັນເຊີໃຫ້ສູງຂຶ້ນອີກ."</string>
-    <string name="face_acquired_too_low" msgid="4539774649296349109">"ກະລຸນາຍ້າຍເຊັນເຊີໃຫ້ຕໍ່າລົງອີກ."</string>
-    <string name="face_acquired_too_right" msgid="1650292067226118760">"ກະລຸນາຍ້າຍເຊັນເຊີໄປເບື້ອງຂວາ."</string>
-    <string name="face_acquired_too_left" msgid="2712489669456176505">"ກະລຸນາຍ້າຍເຊັນເຊີໄປເບື້ອງຊ້າຍ."</string>
-    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"ກະລຸນາແນມເບິ່ງເຊັນເຊີ."</string>
-    <string name="face_acquired_not_detected" msgid="5707782294589511391">"ກວດບໍ່ພົບໃບໜ້າ."</string>
-    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"ເຄື່ອນໄຫວຫຼາຍເກີນໄປ."</string>
+    <!-- no translation found for face_acquired_insufficient (2767330364802375742) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_bright (5005650874582450967) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_dark (1966194696381394616) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_close (1401011882624272753) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_far (1210969240069012510) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_high (3362395713403348013) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_low (488983581737550912) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_right (941726879175375970) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_left (5873592047381190672) -->
+    <skip />
+    <!-- no translation found for face_acquired_poor_gaze (8471716624377228327) -->
+    <skip />
+    <!-- no translation found for face_acquired_not_detected (4885504661626728809) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_much_motion (3149332171102108851) -->
+    <skip />
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"ກະລຸນາລົງທະບຽນອຸປະກອນຂອງທ່ານອີກເທື່ອໜຶ່ງ."</string>
-    <string name="face_acquired_too_different" msgid="5553210341111255124">"ກວດພົບໃບໜ້າຕ່າງກັນ."</string>
+    <!-- no translation found for face_acquired_too_different (7663983770123789694) -->
+    <skip />
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"ຄ້າຍກັນເກີນໄປ, ກະລຸນາປ່ຽນທ່າຂອງທ່ານ."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"ກະລຸນາເບິ່ງຊື່ໆໄປທາງກ້ອງຫຼາຍຂຶ້ນ."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"ກະລຸນາເບິ່ງຊື່ໆໄປທາງກ້ອງຫຼາຍຂຶ້ນ."</string>
+    <!-- no translation found for face_acquired_pan_too_extreme (1852495480382773759) -->
+    <skip />
+    <!-- no translation found for face_acquired_tilt_too_extreme (1290820400317982049) -->
+    <skip />
     <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"ກະລຸນາຍັບຫົວຂອງທ່ານໃຫ້ຊື່ຕາມລວງຕັ້ງ."</string>
-    <string name="face_acquired_obscured" msgid="3055077697850272097">"ກະລຸນາຢ່າປິດບັງໃບໜ້າຂອງທ່ານ."</string>
+    <!-- no translation found for face_acquired_obscured (5747521031647744553) -->
+    <skip />
+    <!-- no translation found for face_acquired_sensor_dirty (364493868630891300) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"ຮາດແວກວດໃບໜ້າບໍ່ສາມາດໃຊ້ໄດ້."</string>
-    <string name="face_error_timeout" msgid="4014326147867150054">"ໝົດເວລາກວດໃບໜ້າແລ້ວ. ກະລຸນາລອງອີກຄັ້ງ."</string>
+    <!-- no translation found for face_error_timeout (2605673935810019129) -->
+    <skip />
     <string name="face_error_no_space" msgid="8224993703466381314">"ບໍ່ສາມາດເກັບຮັກສາໃບໜ້າໄວ້ໄດ້."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"ຍົກເລີກການດຳເນີນການກັບໃບໜ້າແລ້ວ."</string>
     <string name="face_error_user_canceled" msgid="8943921120862164539">"ຜູ້ໃຊ້ຍົກເລີກການພິສູດຢືນຢັນໃບໜ້າແລ້ວ."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"ມີຄວາມພະຍາຍາມຫຼາຍຄັ້ງເກີນໄປ. ກະລຸນາລອງໃໝ່ໃນພາຍຫຼັງ."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"ມີຄວາມພະຍາຍາມຫຼາຍຄັ້ງເກີນໄປ. ປິດນຳໃຊ້ການກວດສອບຄວາມຖືກຕ້ອງດ້ວຍໃບໜ້າແລ້ວ."</string>
-    <string name="face_error_unable_to_process" msgid="238761109287767270">"ລອງອີກຄັ້ງ."</string>
-    <string name="face_error_not_enrolled" msgid="9166792142679691323">"ບໍ່ໄດ້ລົງທະບຽນໃບໜ້າໃດ."</string>
-    <string name="face_error_hw_not_present" msgid="916085883581450331">"ອຸປະກອນນີ້ບໍ່ມີເຊັນເຊີກວດສອບຄວາມຖືກຕ້ອງດ້ວຍໃບໜ້າ."</string>
+    <!-- no translation found for face_error_unable_to_process (4940944939691171539) -->
+    <skip />
+    <!-- no translation found for face_error_not_enrolled (4245760276260427472) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (5296043240874659926) -->
+    <skip />
     <string name="face_name_template" msgid="7004562145809595384">"ໃບໜ້າ <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1213,9 +1246,16 @@
     <string name="new_app_action" msgid="6694851182870774403">"Open <xliff:g id="NEW_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="5894852887817332322">"<xliff:g id="OLD_APP">%1$s</xliff:g> will close without saving"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> ເກີນ​ຂີດ​ຄວາມ​ຈຳ​ແລ້ວ"</string>
+    <!-- no translation found for dump_heap_ready_notification (1162196579925048701) -->
+    <skip />
     <string name="dump_heap_notification_detail" msgid="3993078784053054141">"ກວດພົບ Heap dump. ແຕະເພື່ອແບ່ງປັນ."</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"ແບ່ງ​ປັນ​ການ​ເທກອງ​ບໍ?"</string>
-    <string name="dump_heap_text" msgid="4809417337240334941">"ຂະ​ບວນ​ການ <xliff:g id="PROC">%1$s</xliff:g> ເກີນ​ຂີດ​ຈຳ​ກັດ​ຄວາມ​ຈຳ​ຂະ​ບວນ​ການ​ຂອງ​ມັນ​ຂອງ <xliff:g id="SIZE">%2$s</xliff:g> ແລ້ວ. ການ​ເທກອງ​ມີ​ໃຫ້​ສຳ​ລັບ​ທ່ານ ເພື່ອ​ແບ່ງ​ປັນ​ກັບ​ຜູ້​ພ​ັດ​ທະ​ນາ​ຂອງ​ມັນ. ລະ​ວັງ: ການ​ເທກອງ​ນີ້​ສາ​ມາດ​ມີ​ຂໍ້​ມູນ​ສ່ວນ​ຕົວ​ໃດ​ໜຶ່ງ​ຂອງ​ທ່ານ ທີ່​ແອັບ​ພ​ລິ​ເຄ​ຊັນ​ມີ​ການ​ເຂົ້າ​ຫາ."</string>
+    <!-- no translation found for dump_heap_text (8546022920319781701) -->
+    <skip />
+    <!-- no translation found for dump_heap_system_text (1205466256312104134) -->
+    <skip />
+    <!-- no translation found for dump_heap_ready_text (6759394977904051000) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"ເລືອກການເຮັດວຽກຂອງຂໍ້ຄວາມ"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"ລະດັບສຽງເອີ້ນເຂົ້າ"</string>
     <string name="volume_music" msgid="5421651157138628171">"ລະດັບສຽງຂອງສື່"</string>
@@ -1254,8 +1294,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"ແຕະເພື່ອເບິ່ງເຄືອຂ່າຍທັງໝົດ"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"ເຊື່ອມ​ຕໍ່"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"ເຄືອຂ່າຍທັງໝົດ"</string>
-    <string name="wifi_suggestion_title" msgid="8951405130379148709">"ສາມາດໃຊ້ເຄືອຂ່າຍ Wi‑Fi ທີ່ <xliff:g id="NAME">%s</xliff:g> ສະເໜີໄດ້"</string>
-    <string name="wifi_suggestion_content" msgid="2658317015552324848">"ທ່ານຕ້ອງການເຊື່ອມຕໍ່ຫາເຄືອຂ່າຍທີ່ສະເໜີໂດຍ <xliff:g id="NAME">%s</xliff:g> ຫຼືບໍ່?"</string>
+    <!-- no translation found for wifi_suggestion_title (9099832833531486167) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (5883181205841582873) -->
+    <skip />
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"ແມ່ນ"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"ບໍ່ແມ່ນ"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"ຈະມີການເປີດໃຊ້ Wi‑Fi ອັດຕະໂນມັດ"</string>
@@ -1267,9 +1309,14 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"ລົງຊື່ເຂົ້າເຄືອຂ່າຍ"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi ບໍ່ມີສັນຍານອິນເຕີເນັດ"</string>
+    <!-- no translation found for wifi_no_internet (5198100389964214865) -->
+    <skip />
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"ແຕະເພື່ອເບິ່ງຕົວເລືອກ"</string>
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"ເຊື່ອມຕໍ່ແລ້ວ"</string>
+    <!-- no translation found for network_partial_connectivity (7774883385494762741) -->
+    <skip />
+    <!-- no translation found for network_partial_connectivity_detailed (1959697814165325217) -->
+    <skip />
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"ການປ່ຽນແປງການຕັ້ງຄ່າຮັອດສະປອດຂອງທ່ານ"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"ຄື້ນຄວາມຖີ່ຮັອດສະປອດຂອງທ່ານປ່ຽນແປງແລ້ວ."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"ອຸປະກອນນີ້ບໍ່ຮອງຮັບການຕັ້ງຄ່າຂອງທ່ານສຳລັບ 5GHz ເທົ່ານັ້ນ. ແຕ່ວ່າອຸປະກອນນີ້ຈະໃຊ້ຄື້ນຄວາມຖີ່ 5GHz ເມື່ອສາມາດໃຊ້ໄດ້."</string>
@@ -1354,6 +1401,10 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"ເຊື່ອມຕໍ່ການດີບັກຜ່ານ USB ແລ້ວ"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"ແຕະເພື່ອປິດການດີບັກ USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"ເລືອກເພື່ອປິດການດີບັ໊ກຜ່ານ USB."</string>
+    <!-- no translation found for test_harness_mode_notification_title (2216359742631914387) -->
+    <skip />
+    <!-- no translation found for test_harness_mode_notification_message (1343197173054407119) -->
+    <skip />
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"ມີຂອງແຫລວ ຫຼື ເສດດິນໃນຜອດ USB"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"ປິດຜອດ USB ໂດຍອັດຕະໂນມັດແລ້ວ. ແຕະເພື່ອສຶກສາເພີ່ມເຕີມ."</string>
     <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"ປອດໄພທີ່ຈະໃຊ້ຜອດ USB ແລ້ວ"</string>
@@ -1905,8 +1956,6 @@
     <string name="profile_encrypted_message" msgid="6964994232310195874">"ແຕະເພື່ອປົດລັອກໂປຣໄຟລ໌ບ່ອນເຮັດວຽກ"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"ເຊື່ອມຕໍ່ກັບ <xliff:g id="PRODUCT_NAME">%1$s</xliff:g> ແລ້ວ"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"ແຕະເພື່ອເບິ່ງໄຟລ໌"</string>
-    <string name="pin_target" msgid="3052256031352291362">"ປັກໝຸດ"</string>
-    <string name="unpin_target" msgid="3556545602439143442">"ຖອນປັກໝຸດ"</string>
     <string name="app_info" msgid="6856026610594615344">"ຂໍ້ມູນແອັບ"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"ກຳລັງເລີ່ມເດໂມ…"</string>
@@ -1997,6 +2046,22 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"ການແຈ້ງເຕືອນຂໍ້ມູນໂໝດກິດຈະວັດປະຈຳວັນ"</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"ແບັດເຕີຣີອາດໝົດກ່ອນການສາກຕາມປົກກະຕິ"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"ເປີດຕົວປະຢັດແບັດເຕີຣີເພື່ອຂະຫຍາຍອາຍຸແບັດເຕີຣີ"</string>
+    <!-- no translation found for battery_saver_notification_channel_name (2083316159716201806) -->
+    <skip />
+    <!-- no translation found for battery_saver_sticky_disabled_notification_title (6376147579378764641) -->
+    <skip />
+    <!-- no translation found for battery_saver_sticky_disabled_notification_summary (8090192609249817945) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (2960978289873161288) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (7555713825806482451) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (5954873381559605660) -->
+    <skip />
+    <!-- no translation found for battery_saver_off_notification_summary (1374222493681267143) -->
+    <skip />
+    <!-- no translation found for battery_saver_off_alternative_notification_summary (4340727818546508436) -->
+    <skip />
     <string name="mime_type_folder" msgid="7111951698626315204">"ໂຟນເດີ"</string>
     <string name="mime_type_apk" msgid="5518003630972506900">"ແອັບພລິເຄຊັນ Android"</string>
     <string name="mime_type_generic" msgid="6833871596845900027">"ໄຟລ໌"</string>

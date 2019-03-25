@@ -141,8 +141,10 @@
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"WiFi कलिङ"</string>
     <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"निष्क्रिय"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi मनपराइयो"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"रूचाइएको मोबाइल"</string>
+    <!-- no translation found for wfc_mode_wifi_preferred_summary (7335489823608689868) -->
+    <skip />
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (7081742743152286290) -->
+    <skip />
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi-Fi मात्र"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: अगाडि पठाइएको छैन"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -228,7 +230,8 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"बग रिपोर्ट"</string>
     <string name="global_action_logout" msgid="935179188218826050">"सत्रको अन्त्य गर्नुहोस्"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"स्क्रिनसट"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"बग रिपोर्ट लिनुहोस्"</string>
+    <!-- no translation found for bugreport_title (5981047024855257269) -->
+    <skip />
     <string name="bugreport_message" msgid="398447048750350456">"एउटा इमेल सन्देशको रूपमा पठाउनलाई यसले तपाईँको हालैको उपकरणको अवस्थाको बारेमा सूचना जम्मा गर्ने छ। बग रिपोर्ट सुरु गरेदेखि पठाउन तयार नभएसम्म यसले केही समय लिन्छ; कृपया धैर्य गर्नुहोस्।"</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"अन्तरक्रियामूलक रिपोर्ट"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"बढी भन्दा बढी परिस्थितिहरूमा यसको प्रयोग गर्नुहोस्। यसले तपाईँलाई रिपोर्टको प्रगति ट्र्याक गर्न, समस्याका बारे थप विवरणहरू प्रविष्ट गर्न र स्क्रिनसटहरू लिन अनुमति दिन्छ। यसले रिपोर्ट गर्न लामो समय लिने केही कम प्रयोग हुने खण्डहरूलाई समावेश नगर्न सक्छ।"</string>
@@ -281,9 +284,12 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"स्थान"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"यस यन्त्रको स्थानमाथि पहुँच"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; लाई यो यन्त्रको स्थानमाथि पहुँच राख्न दिने हो?"</string>
-    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"तपाईं उक्त अनुप्रयोग प्रयोग गरिरहेका बेलामा त्यससँग स्थानमाथिको पहुँच रहने छ।"</string>
-    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; लाई यो यन्त्रको स्थानमाथि पहुँच राख्न दिने हो?"</string>
-    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"तपाईं उक्त अनुप्रयोग प्रयोग नगरिरहेका बेलामा पनि त्यससँग स्थानमाथिको पहुँच रहने छ।"</string>
+    <!-- no translation found for permgrouprequestdetail_location (1347189607421252902) -->
+    <skip />
+    <!-- no translation found for permgroupbackgroundrequest_location (5039063878675613235) -->
+    <skip />
+    <!-- no translation found for permgroupbackgroundrequestdetail_location (4597006851453417387) -->
+    <skip />
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"पात्रो"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"तपाईंको पात्रोमाथि पहुँच गर्नुहोस्"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; लाई आफ्नो पात्रोमाथि पहुँच राख्न दिने हो?"</string>
@@ -316,7 +322,10 @@
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; लाई तपाईंको सङ्गीतमाथि पहुँच राख्न दिने हो?"</string>
     <string name="permgrouplab_visual" msgid="6477382108771145134">"तस्बिर तथा भिडियोहरू"</string>
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"आफ्नो तस्बिर &amp; भिडियोहरूमाथि पहुँच राख्नुहोस्‌"</string>
-    <string name="permgrouprequest_visual" msgid="3043752127595243314">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; लाई ट्याग गरिएका स्थानहरूलगायत तपाईंका तस्बिर तथा भिडियोहरूमाथि पहुँच गर्न दिने हो?"</string>
+    <!-- no translation found for permgrouprequest_visual (4926581398380334943) -->
+    <skip />
+    <!-- no translation found for permgrouprequestdetail_visual (3827237829805228971) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"विन्डो सामग्रीको पुनःबहाली गर्नुहोस्।"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"तपाईँको अन्तरक्रिया भइरहेको विन्डोको सामग्रीको निरीक्षण गर्नुहोस्।"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"छोएर गरिने खोजलाई सुचारु गर्नुहोस्"</string>
@@ -509,8 +518,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"अनुप्रयोगलाई नयाँ क्षेत्र संचार (NFC) ट्यागहरू, कार्डहरू र पाठकहरूसँग अन्तर्क्रिया गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"स्क्रिन लक असक्षम पार्नुहोस्"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"कुनै सम्बन्धित पासवर्ड सुरक्षा र किलकलाई असक्षम पार्न अनुप्रयोगलाई अनुमति दिन्छ। उदाहरणको लागि, अन्तर्गमन फोन कल प्राप्त गर्दा फोनले किलकलाई असक्षम पार्छ, त्यसपछि कल सकिएको बेला किलक पुनःसक्षम पार्छ।"</string>
-    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"स्क्रिन लकको जटिलतासम्बन्धी जानकारी प्राप्त गर्ने अनुरोध गर्नुहोस्"</string>
-    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"यसले अनुप्रयोगलाई स्क्रिन लकको जटिलताको स्तर (उच्च, मध्यम, न्यून वा कुनै पनि होइन) थाहा पाउने अनुमति दिन्छ जसले स्क्रिन लकको लम्बाइको सम्भावित दायरा र त्यसको प्रकारलाई जनाउँछ। यसै गरी, यो अनुप्रयोगले प्रयोगकर्ताहरूलाई स्क्रिन लक अद्यावधिक गर्ने सुझाव पनि दिन सक्छ तर प्रयोगकर्ताहरू उक्त सुझावको बेवास्ता गरी बाहिर निस्कन सक्छन्। स्क्रिन लकलाई सादा पाठको ढाँचामा भण्डारण नगरिने हुँदा यो अनुप्रयोगले वास्तविक पासवर्ड थाहा पाउँदैन भन्ने कुरा याद राख्नुहोस्।"</string>
+    <!-- no translation found for permlab_requestPasswordComplexity (202650535669249674) -->
+    <skip />
+    <!-- no translation found for permdesc_requestPasswordComplexity (4730994229754212347) -->
+    <skip />
     <string name="permlab_useBiometric" msgid="8837753668509919318">"बायोमेट्रिक हार्डवेयर प्रयोग गर्नुहोस्‌"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"अनुप्रयोगलाई प्रमाणीकरणका लागि बायोमेट्रिक हार्डवेयर प्रयोग गर्न अनुमति दिन्छ"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"औठाछाप हार्डवेयर व्यवस्थापन गर्नुहोस्"</string>
@@ -565,37 +576,59 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"अनुप्रयोगलाई प्रयोगका लागि अनुहार टेम्प्लेट थप्न र मेटाउने तरिका आह्वान गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"अनुहार प्रमाणिकरण हार्डवेयर प्रयोग गर्नुहोस्"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"अनुप्रयोगलाई प्रमाणीकरणका लागि अनुहार प्रमाणीकरण हार्डवेयर प्रयोग गर्न अनुमति दिन्छ"</string>
-    <string name="face_acquired_insufficient" msgid="5901287247766106330">"अनुहार प्रशोधन गर्न सकिएन। कृपया फेरि प्रयास गर्नुहोस्।"</string>
-    <string name="face_acquired_too_bright" msgid="610606792381297174">"अनुहारमा धेरै उज्यालो छ। कृपया कम प्रकाशमा प्रयास गर्नुहोस्।"</string>
-    <string name="face_acquired_too_dark" msgid="7229162716976778371">"अनुहार धेरै गाढा छ। कृपया प्रकाशको स्रोतको थप्नुहोस्‌।"</string>
-    <string name="face_acquired_too_close" msgid="1980310037427755293">"कृपया अनुहारबाट सेन्सरलाई अलिक टाढा सार्नुहोस्।"</string>
-    <string name="face_acquired_too_far" msgid="4494571381828850007">"कृपया अनुहारलाई सेन्सरको नजिक ल्याउनुहोस्।"</string>
-    <string name="face_acquired_too_high" msgid="228411096134808372">"कृपया सेन्सरलाई माथि सार्नुहोस्।"</string>
-    <string name="face_acquired_too_low" msgid="4539774649296349109">"कृपया सेन्सरलाई तल सार्नुहोस्।"</string>
-    <string name="face_acquired_too_right" msgid="1650292067226118760">"कृपया सेन्सरलाई दायाँतिर सार्नुहोस्।"</string>
-    <string name="face_acquired_too_left" msgid="2712489669456176505">"कृपया सेन्सरलाई बायाँतिर सार्नुहोस्।"</string>
-    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"कृपया सेन्सरमा हेर्नुहोस्।"</string>
-    <string name="face_acquired_not_detected" msgid="5707782294589511391">"अनुहार पत्ता लागेन।"</string>
-    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"अत्यधिक हल्लियो।"</string>
+    <!-- no translation found for face_acquired_insufficient (2767330364802375742) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_bright (5005650874582450967) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_dark (1966194696381394616) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_close (1401011882624272753) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_far (1210969240069012510) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_high (3362395713403348013) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_low (488983581737550912) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_right (941726879175375970) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_left (5873592047381190672) -->
+    <skip />
+    <!-- no translation found for face_acquired_poor_gaze (8471716624377228327) -->
+    <skip />
+    <!-- no translation found for face_acquired_not_detected (4885504661626728809) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_much_motion (3149332171102108851) -->
+    <skip />
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"कृपया आफ्नो अनुहार पुनः दर्ता गर्नुहोस्।"</string>
-    <string name="face_acquired_too_different" msgid="5553210341111255124">"अर्कै अनुहार पत्ता लाग्यो।"</string>
+    <!-- no translation found for face_acquired_too_different (7663983770123789694) -->
+    <skip />
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"अनुहार उस्तै भयो, कृपया आफ्नो पोज बदल्नुहोस्।"</string>
-    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"कृपया आफ्नो अनुहार अझ सीधा पारेर क्यामेरामा हेर्नु"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"कृपया आफ्नो अनुहार अझ सीधा पारेर क्यामेरामा हेर्नु"</string>
+    <!-- no translation found for face_acquired_pan_too_extreme (1852495480382773759) -->
+    <skip />
+    <!-- no translation found for face_acquired_tilt_too_extreme (1290820400317982049) -->
+    <skip />
     <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"कृपया आफ्नो अनुहार ठाडो रूपमा सीधा पार्नुहोस्।"</string>
-    <string name="face_acquired_obscured" msgid="3055077697850272097">"कृपया आफ्नो अनुहार नढाक्नुहोस्।"</string>
+    <!-- no translation found for face_acquired_obscured (5747521031647744553) -->
+    <skip />
+    <!-- no translation found for face_acquired_sensor_dirty (364493868630891300) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"अनुहार पहिचान गर्ने हार्डवेयर उपलब्ध छैन।"</string>
-    <string name="face_error_timeout" msgid="4014326147867150054">"अनुहारको समय सकिएको छ। फेरि प्रयास गर्नुहोस्‌।"</string>
+    <!-- no translation found for face_error_timeout (2605673935810019129) -->
+    <skip />
     <string name="face_error_no_space" msgid="8224993703466381314">"अनुहार भण्डारण गर्न सकिँदैन।"</string>
     <string name="face_error_canceled" msgid="283945501061931023">"अनुहार पहिचान रद्द गरियो।"</string>
     <string name="face_error_user_canceled" msgid="8943921120862164539">"प्रयोगकर्ताले अनुहार प्रमाणीकरण रद्द गर्नु भयो।"</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"धेरैपटक प्रयासहरू भए। पछि फेरि प्रयास गर्नुहोस्‌।"</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"अत्यधिक धेरैपटक गलत प्रयासहरू भए। अनुहार प्रमाणिकरणलाई असक्षम पारियो।"</string>
-    <string name="face_error_unable_to_process" msgid="238761109287767270">"फेरि प्रयास गर्नुहोस्।"</string>
-    <string name="face_error_not_enrolled" msgid="9166792142679691323">"कुनै पनि अनुहार दर्ता गरिएन।"</string>
-    <string name="face_error_hw_not_present" msgid="916085883581450331">"यो यन्त्रमा अनुहार प्रमाणीकरण गर्ने कुनै पनि सेन्सर छैन।"</string>
+    <!-- no translation found for face_error_unable_to_process (4940944939691171539) -->
+    <skip />
+    <!-- no translation found for face_error_not_enrolled (4245760276260427472) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (5296043240874659926) -->
+    <skip />
     <string name="face_name_template" msgid="7004562145809595384">"अनुहार <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1219,9 +1252,16 @@
     <string name="new_app_action" msgid="6694851182870774403">"<xliff:g id="NEW_APP">%1$s</xliff:g> खोल्नुहोस्"</string>
     <string name="new_app_description" msgid="5894852887817332322">"<xliff:g id="OLD_APP">%1$s</xliff:g> सुरक्षित नगरिकनै बन्द हुने छ"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> ले मेमोरी सीमा नाघ्यो"</string>
+    <!-- no translation found for dump_heap_ready_notification (1162196579925048701) -->
+    <skip />
     <string name="dump_heap_notification_detail" msgid="3993078784053054141">"हिप डम्प सङ्‍कलन गरियो, ट्याप गरेर आदान प्रदान गर्नुहोस्।"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"हिप डम्प साझेदारी गर्नुहुन्छ?"</string>
-    <string name="dump_heap_text" msgid="4809417337240334941">"प्रक्रिया <xliff:g id="PROC">%1$s</xliff:g>ले यसको प्रक्रिया मेमोरी सीमा <xliff:g id="SIZE">%2$s</xliff:g> नाघेको छ। तपाईँको लागि विकासकर्तासँग साझेदारी गर्न एउटा हिप डम्प उपलब्ध छ। होसियार हुनुहोस्: यो हिप डम्पमा अनुप्रयोगको पहुँच भएको तपाईँको कुनै पनि व्यक्तिगत जानकारी हुन सक्छ।"</string>
+    <!-- no translation found for dump_heap_text (8546022920319781701) -->
+    <skip />
+    <!-- no translation found for dump_heap_system_text (1205466256312104134) -->
+    <skip />
+    <!-- no translation found for dump_heap_ready_text (6759394977904051000) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"पाठको लागि एउटा प्रकार्य छान्नुहोस्"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"बजाउने मात्रा"</string>
     <string name="volume_music" msgid="5421651157138628171">"मिडियाको आवाजको मात्रा"</string>
@@ -1260,8 +1300,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"सबै नेटवर्कहरू हेर्न ट्याप गर्नुहोस्"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"जडान गर्नुहोस्"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"सबै नेटवर्कहरू"</string>
-    <string name="wifi_suggestion_title" msgid="8951405130379148709">"<xliff:g id="NAME">%s</xliff:g> ले प्रस्ताव गरेको Wi‑Fi नेटवर्क उपलब्ध छ"</string>
-    <string name="wifi_suggestion_content" msgid="2658317015552324848">"तपाईं <xliff:g id="NAME">%s</xliff:g> ले प्रस्ताव गरेका नेटवर्कहरूमा जोडिन चाहनुहुन्छ?"</string>
+    <!-- no translation found for wifi_suggestion_title (9099832833531486167) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (5883181205841582873) -->
+    <skip />
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"हो"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"होइन"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi स्वतः सक्रिय हुनेछ"</string>
@@ -1273,9 +1315,14 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"सञ्जालमा साइन इन गर्नुहोस्"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi मार्फत इन्टरनेटमाथि पहुँच राख्न सकिँदैन"</string>
+    <!-- no translation found for wifi_no_internet (5198100389964214865) -->
+    <skip />
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"विकल्पहरूका लागि ट्याप गर्नुहोस्"</string>
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"जोडियो"</string>
+    <!-- no translation found for network_partial_connectivity (7774883385494762741) -->
+    <skip />
+    <!-- no translation found for network_partial_connectivity_detailed (1959697814165325217) -->
+    <skip />
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"तपाईंको हटस्पट सेटिङहरूमा परिवर्तन हुन्छ"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"तपाईंको हटस्पट ब्यान्ड परिवर्तन भएको छ।"</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"यो यन्त्रले तपाईंको 5GHz मात्रको प्राथमिकतालाई समर्थन गर्दैन। बरु, उपलब्ध भएको खण्डमा यो यन्त्रले 5GHz ब्यान्ड प्रयोग गर्छ।"</string>
@@ -1360,6 +1407,10 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB डिबग गर्ने सुविधा सुचारू छ"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"USB डिबग प्रक्रिया निष्क्रिय पार्न ट्याप गर्नुहोस्‌"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB डिबगिङलाई असक्षम पार्न ट्याप गर्नुहोस्।"</string>
+    <!-- no translation found for test_harness_mode_notification_title (2216359742631914387) -->
+    <skip />
+    <!-- no translation found for test_harness_mode_notification_message (1343197173054407119) -->
+    <skip />
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB पोर्टमा तरल पदार्थ वा धुलो भएको कुरा पत्ता लाग्यो"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB पोर्ट स्वतः असक्षम पारियो। थप जान्न ट्याप गर्नुहोस्।"</string>
     <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"USB पोर्ट प्रयोग गर्न सुरक्षित छ"</string>
@@ -1911,8 +1962,6 @@
     <string name="profile_encrypted_message" msgid="6964994232310195874">"कार्य प्रोफाइल अनलक गर्न ट्याप गर्नुहोस्"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> मा जडान गरिएको छ"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"फाइलहरू हेर्न ट्याप गर्नुहोस्"</string>
-    <string name="pin_target" msgid="3052256031352291362">"पिन गर्नुहोस्"</string>
-    <string name="unpin_target" msgid="3556545602439143442">"अनपिन गर्नुहोस्"</string>
     <string name="app_info" msgid="6856026610594615344">"अनुप्रयोगका बारे जानकारी"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"डेमो सुरु गर्दै…"</string>
@@ -2003,6 +2052,22 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"दिनचर्या मोडको जानकारीमूलक सूचना"</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"प्रायः चार्ज गर्ने समय हुनुभन्दा पहिले नै ब्याट्री सकिन सक्छ"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"ब्याट्रीको आयु बढाउन ब्याट्री सेभर सक्रिय गरियो"</string>
+    <!-- no translation found for battery_saver_notification_channel_name (2083316159716201806) -->
+    <skip />
+    <!-- no translation found for battery_saver_sticky_disabled_notification_title (6376147579378764641) -->
+    <skip />
+    <!-- no translation found for battery_saver_sticky_disabled_notification_summary (8090192609249817945) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (2960978289873161288) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (7555713825806482451) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (5954873381559605660) -->
+    <skip />
+    <!-- no translation found for battery_saver_off_notification_summary (1374222493681267143) -->
+    <skip />
+    <!-- no translation found for battery_saver_off_alternative_notification_summary (4340727818546508436) -->
+    <skip />
     <string name="mime_type_folder" msgid="7111951698626315204">"फोल्डर"</string>
     <string name="mime_type_apk" msgid="5518003630972506900">"Android अनुप्रयोग"</string>
     <string name="mime_type_generic" msgid="6833871596845900027">"फाइल"</string>

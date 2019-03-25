@@ -141,8 +141,10 @@
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Panggilan Wi-Fi"</string>
     <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Mati"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi diutamakan"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Mudah alih diutamakan"</string>
+    <!-- no translation found for wfc_mode_wifi_preferred_summary (7335489823608689868) -->
+    <skip />
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (7081742743152286290) -->
+    <skip />
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi-Fi sahaja"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Tidak dimajukan"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -228,7 +230,8 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"Laporan pepijat"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Tamatkan sesi"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Tangkapan skrin"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"Ambil laporan pepijat"</string>
+    <!-- no translation found for bugreport_title (5981047024855257269) -->
+    <skip />
     <string name="bugreport_message" msgid="398447048750350456">"Ini akan mengumpul maklumat tentang keadaan peranti semasa anda untuk dihantarkan sebagai mesej e-mel. Harap bersabar, mungkin perlu sedikit masa untuk memulakan laporan sehingga siap untuk dihantar."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Laporan interaktif"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Gunakan laporan ini dalam kebanyakan keadaan. Anda boleh menjejak kemajuan laporan, memasukkan butiran lanjut tentang masalah tersebut dan mengambil tangkapan skrin. Laporan ini mungkin meninggalkan beberapa bahagian yang kurang digunakan, yang mengambil masa lama untuk dilaporkan."</string>
@@ -281,9 +284,12 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Lokasi"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"mengakses lokasi peranti ini"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"Benarkan &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; mengakses lokasi peranti ini?"</string>
-    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"Apl ini hanya dapat mengakses lokasi semasa anda menggunakan apl tersebut."</string>
-    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"Sentiasa benarkan &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; mengakses lokasi peranti ini?"</string>
-    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"Apl ini akan dapat mengakses lokasi pada sepanjang masa, meskipun apabila anda tidak menggunakan apl tersebut."</string>
+    <!-- no translation found for permgrouprequestdetail_location (1347189607421252902) -->
+    <skip />
+    <!-- no translation found for permgroupbackgroundrequest_location (5039063878675613235) -->
+    <skip />
+    <!-- no translation found for permgroupbackgroundrequestdetail_location (4597006851453417387) -->
+    <skip />
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendar"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"mengakses kalendar"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Benarkan &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; mengakses kalendar anda?"</string>
@@ -316,7 +322,10 @@
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"Benarkan &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; mengakses muzik anda?"</string>
     <string name="permgrouplab_visual" msgid="6477382108771145134">"Foto &amp; video"</string>
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"akses foto &amp; video anda"</string>
-    <string name="permgrouprequest_visual" msgid="3043752127595243314">"Benarkan &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; mengakses foto dan video anda, termasuk lokasi yang ditandai?"</string>
+    <!-- no translation found for permgrouprequest_visual (4926581398380334943) -->
+    <skip />
+    <!-- no translation found for permgrouprequestdetail_visual (3827237829805228971) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Dapatkan kembali kandungan tetingkap"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Periksa kandungan tetingkap yang berinteraksi dengan anda."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Hidupkan Jelajah melalui Sentuhan"</string>
@@ -509,8 +518,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Membenarkan apl berkomunikasi dengan teg, kad dan pembaca Komunikasi Medan Dekat (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"lumpuhkan kunci skrin anda"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Membenarkan apl melumpuhkan kunci kekunci dan sebarang keselamatan kata laluan yang berkaitan. Sebagai contoh, telefon melumpuhkan kunci kekunci apabila menerima panggilan telefon masuk kemudian mendayakan semula kunci kekunci apabila panggilan selesai."</string>
-    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"minta kerumitan kunci skrin"</string>
-    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"Membenarkan apl mengetahui tahap kerumitan kunci skrin (tinggi, sederhana, rendah atau tiada) yang menunjukkan julat panjang dan jenis kunci skrin yang berkemungkinan. Apl juga boleh mencadangkan kepada pengguna supaya mengemas kini kunci skrin pada tahap tertentu namun pengguna boleh mengabaikan dan menavigasi keluar dengan bebas. Sila ambil perhatian bahawa kunci skrin tidak disimpan dalam teks biasa, maka apl tidak mengetahui kata laluan yang tepat."</string>
+    <!-- no translation found for permlab_requestPasswordComplexity (202650535669249674) -->
+    <skip />
+    <!-- no translation found for permdesc_requestPasswordComplexity (4730994229754212347) -->
+    <skip />
     <string name="permlab_useBiometric" msgid="8837753668509919318">"gunakan perkakasan biometrik"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Membenarkan apl menggunakan perkakasan biometrik untuk pengesahan"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"urus perkakasan cap jari"</string>
@@ -565,37 +576,59 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Membenarkan apl menggunakan kaedah untuk menambahkan dan memadamkan templat wajah untuk digunakan."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"gunakan perkakasan pengesahan wajah"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Membenarkan apl menggunakan perkakasan pengesahan wajah untuk pengesahan"</string>
-    <string name="face_acquired_insufficient" msgid="5901287247766106330">"Tidak dapat memproses wajah. Sila cuba lagi."</string>
-    <string name="face_acquired_too_bright" msgid="610606792381297174">"Wajah terlalu cerah. Cuba dlm cahaya lebih rendah."</string>
-    <string name="face_acquired_too_dark" msgid="7229162716976778371">"Wajah terlalu gelap. Sila buka sumber cahaya."</string>
-    <string name="face_acquired_too_close" msgid="1980310037427755293">"Sila alihkan penderia lebih jauh dari wajah."</string>
-    <string name="face_acquired_too_far" msgid="4494571381828850007">"Sila dekatkan penderia ke wajah."</string>
-    <string name="face_acquired_too_high" msgid="228411096134808372">"Sila alihkan penderia ke kedudukan lebih tinggi."</string>
-    <string name="face_acquired_too_low" msgid="4539774649296349109">"Sila alihkan penderia ke kedudukan lebih rendah."</string>
-    <string name="face_acquired_too_right" msgid="1650292067226118760">"Sila alihkan penderia ke kanan."</string>
-    <string name="face_acquired_too_left" msgid="2712489669456176505">"Sila alihkan penderia ke kiri."</string>
-    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Sila lihat penderia."</string>
-    <string name="face_acquired_not_detected" msgid="5707782294589511391">"Tiada wajah dikesan."</string>
-    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"Terlalu banyak gerakan."</string>
+    <!-- no translation found for face_acquired_insufficient (2767330364802375742) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_bright (5005650874582450967) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_dark (1966194696381394616) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_close (1401011882624272753) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_far (1210969240069012510) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_high (3362395713403348013) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_low (488983581737550912) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_right (941726879175375970) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_left (5873592047381190672) -->
+    <skip />
+    <!-- no translation found for face_acquired_poor_gaze (8471716624377228327) -->
+    <skip />
+    <!-- no translation found for face_acquired_not_detected (4885504661626728809) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_much_motion (3149332171102108851) -->
+    <skip />
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Sila daftarkan semula wajah anda."</string>
-    <string name="face_acquired_too_different" msgid="5553210341111255124">"Wajah yang berbeza dikesan."</string>
+    <!-- no translation found for face_acquired_too_different (7663983770123789694) -->
+    <skip />
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"Terlalu serupa, sila ubah lagak gaya anda."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"Sila lihat terus pada kamera."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"Sila lihat terus pada kamera."</string>
+    <!-- no translation found for face_acquired_pan_too_extreme (1852495480382773759) -->
+    <skip />
+    <!-- no translation found for face_acquired_tilt_too_extreme (1290820400317982049) -->
+    <skip />
     <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Sila tegakkan kepala anda."</string>
-    <string name="face_acquired_obscured" msgid="3055077697850272097">"Sila dedahkan wajah anda."</string>
+    <!-- no translation found for face_acquired_obscured (5747521031647744553) -->
+    <skip />
+    <!-- no translation found for face_acquired_sensor_dirty (364493868630891300) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"Perkakasan wajah tidak tersedia."</string>
-    <string name="face_error_timeout" msgid="4014326147867150054">"Tamat masa wajah dicapai. Cuba lagi."</string>
+    <!-- no translation found for face_error_timeout (2605673935810019129) -->
+    <skip />
     <string name="face_error_no_space" msgid="8224993703466381314">"Wajah tidak dapat disimpan."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Pengendalian wajah dibatalkan."</string>
     <string name="face_error_user_canceled" msgid="8943921120862164539">"Pengesahan wajah dibatalkan oleh pengguna."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Terlalu banyak percubaan. Cuba sebentar lagi."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Terlalu banyak percubaan. Pengesahan wajah dilumpuhkan."</string>
-    <string name="face_error_unable_to_process" msgid="238761109287767270">"Cuba lagi."</string>
-    <string name="face_error_not_enrolled" msgid="9166792142679691323">"Tiada wajah didaftarkan."</string>
-    <string name="face_error_hw_not_present" msgid="916085883581450331">"Peranti ini tiada penderia pengesahan wajah."</string>
+    <!-- no translation found for face_error_unable_to_process (4940944939691171539) -->
+    <skip />
+    <!-- no translation found for face_error_not_enrolled (4245760276260427472) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (5296043240874659926) -->
+    <skip />
     <string name="face_name_template" msgid="7004562145809595384">"Wajah <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1213,9 +1246,16 @@
     <string name="new_app_action" msgid="6694851182870774403">"Buka <xliff:g id="NEW_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="5894852887817332322">"<xliff:g id="OLD_APP">%1$s</xliff:g> akan ditutup tanpa menyimpan"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> melebihi had memori"</string>
+    <!-- no translation found for dump_heap_ready_notification (1162196579925048701) -->
+    <skip />
     <string name="dump_heap_notification_detail" msgid="3993078784053054141">"Longgokan timbunan dikumpulkan. Ketik untuk berkongsi."</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Kongsikan longgokan timbunan?"</string>
-    <string name="dump_heap_text" msgid="4809417337240334941">"Proses <xliff:g id="PROC">%1$s</xliff:g> telah melebihi had memori proses sebanyak <xliff:g id="SIZE">%2$s</xliff:g>. Longgokan timbunan tersedia untuk anda kongsikan dengan pembangun aplikasi. Sila berhati-hati: longgokan timbunan ini boleh mengandungi sebarang maklumat peribadi anda yang boleh diakses oleh aplikasi itu."</string>
+    <!-- no translation found for dump_heap_text (8546022920319781701) -->
+    <skip />
+    <!-- no translation found for dump_heap_system_text (1205466256312104134) -->
+    <skip />
+    <!-- no translation found for dump_heap_ready_text (6759394977904051000) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"Pilih tindakan untuk teks"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Kelantangan pendering"</string>
     <string name="volume_music" msgid="5421651157138628171">"Kelantangan media"</string>
@@ -1254,8 +1294,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Ketik untuk melihat semua rangkaian"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Sambung"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Semua rangkaian"</string>
-    <string name="wifi_suggestion_title" msgid="8951405130379148709">"Rangkaian Wi‑Fi yang dicadangkan oleh <xliff:g id="NAME">%s</xliff:g> tersedia"</string>
-    <string name="wifi_suggestion_content" msgid="2658317015552324848">"Adakah anda mahu menyambung ke rangkaian yang dicadangkan oleh <xliff:g id="NAME">%s</xliff:g>?"</string>
+    <!-- no translation found for wifi_suggestion_title (9099832833531486167) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (5883181205841582873) -->
+    <skip />
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Ya"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Tidak"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi akan dihidupkan secara automatik"</string>
@@ -1267,9 +1309,14 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Log masuk ke rangkaian"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi tiada akses Internet"</string>
+    <!-- no translation found for wifi_no_internet (5198100389964214865) -->
+    <skip />
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Ketik untuk mendapatkan pilihan"</string>
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Disambungkan"</string>
+    <!-- no translation found for network_partial_connectivity (7774883385494762741) -->
+    <skip />
+    <!-- no translation found for network_partial_connectivity_detailed (1959697814165325217) -->
+    <skip />
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Perubahan kepada tetapan tempat liputan anda"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Jalur tempat liputan anda telah berubah."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Peranti ini tidak menyokong pilihan anda untuk 5GHz sahaja. Sebaliknya, peranti ini akan menggunakan jalur 5GHz apabila tersedia."</string>
@@ -1354,6 +1401,10 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Penyahpepijatan USB disambungkan"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"Ketik untuk mematikan penyahpepijatan USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Pilih untuk melumpuhkan penyahpepijatan USB."</string>
+    <!-- no translation found for test_harness_mode_notification_title (2216359742631914387) -->
+    <skip />
+    <!-- no translation found for test_harness_mode_notification_message (1343197173054407119) -->
+    <skip />
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Cecair atau serpihan dalam port USB"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"Port USB dilumpuhkan secara automatik. Ketik untuk mengetahui lebih lanjut."</string>
     <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"Selamat untuk menggunakan port USB"</string>
@@ -1396,8 +1447,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"Sediakan"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Tanggalkan"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Teroka"</string>
-    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
-    <skip />
+    <string name="ext_media_seamless_action" msgid="6575980560886881233">"Tukar output"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> tiada"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"Masukkan peranti sekali lagi"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"Mengalihkan <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1906,8 +1956,6 @@
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Ketik utk membuka profil kerja"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Disambungkan ke <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Ketik untuk melihat fail"</string>
-    <string name="pin_target" msgid="3052256031352291362">"Semat"</string>
-    <string name="unpin_target" msgid="3556545602439143442">"Nyahsemat"</string>
     <string name="app_info" msgid="6856026610594615344">"Maklumat apl"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"Memulakan tunjuk cara…"</string>
@@ -1998,6 +2046,22 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"Pemberitahuan maklumat Mod Rutin"</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Bateri mungkin habis sebelum pengecasan biasa"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Penjimat Bateri diaktifkan untuk memanjangkan hayat bateri"</string>
+    <!-- no translation found for battery_saver_notification_channel_name (2083316159716201806) -->
+    <skip />
+    <!-- no translation found for battery_saver_sticky_disabled_notification_title (6376147579378764641) -->
+    <skip />
+    <!-- no translation found for battery_saver_sticky_disabled_notification_summary (8090192609249817945) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (2960978289873161288) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (7555713825806482451) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (5954873381559605660) -->
+    <skip />
+    <!-- no translation found for battery_saver_off_notification_summary (1374222493681267143) -->
+    <skip />
+    <!-- no translation found for battery_saver_off_alternative_notification_summary (4340727818546508436) -->
+    <skip />
     <string name="mime_type_folder" msgid="7111951698626315204">"Folder"</string>
     <string name="mime_type_apk" msgid="5518003630972506900">"Aplikasi Android"</string>
     <string name="mime_type_generic" msgid="6833871596845900027">"Fail"</string>
