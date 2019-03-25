@@ -16,6 +16,8 @@
 
 package android.app;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.Intent;
@@ -61,8 +63,8 @@ public abstract class InstantAppResolverService extends Service {
      *             String, InstantAppResolutionCallback)}.
      */
     @Deprecated
-    public void onGetInstantAppResolveInfo(
-            int digestPrefix[], String token, InstantAppResolutionCallback callback) {
+    public void onGetInstantAppResolveInfo(@Nullable int[] digestPrefix, @NonNull String token,
+            @NonNull InstantAppResolutionCallback callback) {
         throw new IllegalStateException("Must define onGetInstantAppResolveInfo");
     }
 
@@ -75,8 +77,8 @@ public abstract class InstantAppResolverService extends Service {
      *             String, InstantAppResolutionCallback)}.
      */
     @Deprecated
-    public void onGetInstantAppIntentFilter(
-            int digestPrefix[], String token, InstantAppResolutionCallback callback) {
+    public void onGetInstantAppIntentFilter(@Nullable int[] digestPrefix, @NonNull String token,
+            @NonNull InstantAppResolutionCallback callback) {
         throw new IllegalStateException("Must define onGetInstantAppIntentFilter");
     }
 
@@ -105,8 +107,9 @@ public abstract class InstantAppResolverService extends Service {
      *             String, InstantAppResolutionCallback)}.
      */
     @Deprecated
-    public void onGetInstantAppResolveInfo(Intent sanitizedIntent, int[] hostDigestPrefix,
-            String token, InstantAppResolutionCallback callback) {
+    public void onGetInstantAppResolveInfo(@NonNull Intent sanitizedIntent,
+            @Nullable int[] hostDigestPrefix, @NonNull String token,
+            @NonNull InstantAppResolutionCallback callback) {
         // if not overridden, forward to old methods and filter out non-web intents
         if (sanitizedIntent.isWebIntent()) {
             onGetInstantAppResolveInfo(hostDigestPrefix, token, callback);
@@ -135,8 +138,9 @@ public abstract class InstantAppResolverService extends Service {
      *             String, InstantAppResolutionCallback)}.
      */
     @Deprecated
-    public void onGetInstantAppIntentFilter(Intent sanitizedIntent, int[] hostDigestPrefix,
-            String token, InstantAppResolutionCallback callback) {
+    public void onGetInstantAppIntentFilter(@NonNull Intent sanitizedIntent,
+            @Nullable int[] hostDigestPrefix,
+            @NonNull String token, @NonNull InstantAppResolutionCallback callback) {
         Log.e(TAG, "New onGetInstantAppIntentFilter is not overridden");
         // if not overridden, forward to old methods and filter out non-web intents
         if (sanitizedIntent.isWebIntent()) {
@@ -167,8 +171,9 @@ public abstract class InstantAppResolverService extends Service {
      *
      * @see InstantAppResolveInfo
      */
-    public void onGetInstantAppResolveInfo(Intent sanitizedIntent, int[] hostDigestPrefix,
-            UserHandle userHandle, String token, InstantAppResolutionCallback callback) {
+    public void onGetInstantAppResolveInfo(@NonNull Intent sanitizedIntent,
+            @Nullable int[] hostDigestPrefix, @NonNull UserHandle userHandle,
+            @NonNull String token, @NonNull InstantAppResolutionCallback callback) {
         // If not overridden, forward to the old method.
         onGetInstantAppResolveInfo(sanitizedIntent, hostDigestPrefix, token, callback);
     }
@@ -189,8 +194,9 @@ public abstract class InstantAppResolverService extends Service {
      *              to the currently visible installer via {@link Intent#EXTRA_INSTANT_APP_TOKEN}.
      * @param callback The {@link InstantAppResolutionCallback} to provide results to.
      */
-    public void onGetInstantAppIntentFilter(Intent sanitizedIntent, int[] hostDigestPrefix,
-            UserHandle userHandle, String token, InstantAppResolutionCallback callback) {
+    public void onGetInstantAppIntentFilter(@NonNull Intent sanitizedIntent,
+            @Nullable int[] hostDigestPrefix, @NonNull UserHandle userHandle,
+            @NonNull String token, @NonNull InstantAppResolutionCallback callback) {
         // If not overridden, forward to the old method.
         onGetInstantAppIntentFilter(sanitizedIntent, hostDigestPrefix, token, callback);
     }
