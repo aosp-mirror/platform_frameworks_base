@@ -696,7 +696,7 @@ package android.net {
     method @Nullable public String getDomains();
     method @Nullable public java.net.InetAddress getGateway();
     method @Nullable public android.net.LinkAddress getIpAddress();
-    method @NonNull public java.util.List<android.net.RouteInfo> getRoutes(String);
+    method @NonNull public java.util.List<android.net.RouteInfo> getRoutes(@Nullable String);
     method public void setDomains(@Nullable String);
     method public void setGateway(@Nullable java.net.InetAddress);
     method public void setIpAddress(@Nullable android.net.LinkAddress);
@@ -915,7 +915,7 @@ package android.net.metrics {
   }
 
   public final class ValidationProbeEvent implements android.net.metrics.IpConnectivityLog.Event {
-    method public static String getProbeName(int);
+    method @NonNull public static String getProbeName(int);
     field public static final int DNS_FAILURE = 0; // 0x0
     field public static final int DNS_SUCCESS = 1; // 0x1
     field public static final int PROBE_DNS = 0; // 0x0

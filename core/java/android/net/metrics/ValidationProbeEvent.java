@@ -153,11 +153,14 @@ public final class ValidationProbeEvent implements IpConnectivityLog.Event {
         return (probeType & 0xff) | (firstValidation ? FIRST_VALIDATION : REVALIDATION);
     }
 
-    public static String getProbeName(int probeType) {
+    /**
+     * Get the name of a probe specified by its probe type.
+     */
+    public static @NonNull String getProbeName(int probeType) {
         return Decoder.constants.get(probeType & 0xff, "PROBE_???");
     }
 
-    private static String getValidationStage(int probeType) {
+    private static @NonNull String getValidationStage(int probeType) {
         return Decoder.constants.get(probeType & 0xff00, "UNKNOWN");
     }
 
