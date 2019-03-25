@@ -84,7 +84,6 @@ public class BubbleView extends FrameLayout {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        updateViews();
     }
 
     @Override
