@@ -437,7 +437,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     }
 
     boolean performBackPressIfNeeded() {
-        if (mActivityView == null || !usingActivityView()) {
+        if (!usingActivityView()) {
             return false;
         }
         mActivityView.performBackPress();
@@ -593,7 +593,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     }
 
     private boolean usingActivityView() {
-        return mBubbleIntent != null;
+        return mBubbleIntent != null && mActivityView != null;
     }
 
     private void applyRowState(ExpandableNotificationRow view) {
