@@ -3871,6 +3871,7 @@ class StorageManagerService extends IStorageManager.Stub
                         case "com.jrtstudio.AnotherMusicPlayer": // b/129084562
                         case "ak.alizandro.smartaudiobookplayer": // b/129084042
                         case "com.campmobile.snow": // b/128803870
+                        case "com.qnap.qfile": // b/126374406
                             return Zygote.MOUNT_EXTERNAL_LEGACY;
                     }
                 }
