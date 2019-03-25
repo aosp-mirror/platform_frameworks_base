@@ -2150,9 +2150,9 @@ package android.provider {
     method @RequiresPermission(android.Manifest.permission.CLEAR_APP_USER_DATA) public static long getContributedMediaSize(android.content.Context, String, android.os.UserHandle) throws java.io.IOException;
     method @NonNull public static java.io.File getVolumePath(@NonNull String) throws java.io.FileNotFoundException;
     method @NonNull public static java.util.Collection<java.io.File> getVolumeScanPaths(@NonNull String) throws java.io.FileNotFoundException;
-    field public static final String EXTRA_ORIGINATED_FROM_SHELL = "android.intent.extra.originated_from_shell";
-    field public static final String SCAN_FILE_CALL = "scan_file";
-    field public static final String SCAN_VOLUME_CALL = "scan_volume";
+    method public static android.net.Uri scanFile(android.content.Context, java.io.File);
+    method public static android.net.Uri scanFileFromShell(android.content.Context, java.io.File);
+    method public static void scanVolume(android.content.Context, java.io.File);
   }
 
   public final class Settings {
