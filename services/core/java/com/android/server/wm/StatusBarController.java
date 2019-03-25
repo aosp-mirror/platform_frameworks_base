@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 import static android.view.WindowManager.LayoutParams.MATCH_PARENT;
 
@@ -36,22 +37,25 @@ public class StatusBarController extends BarController {
 
         private Runnable mAppTransitionPending = () -> {
             StatusBarManagerInternal statusBar = getStatusBarInternal();
-            if (statusBar != null && mWin != null) {
-                statusBar.appTransitionPending(mWin.getDisplayId());
+            int displayId = getDisplayId();
+            if (statusBar != null && displayId != INVALID_DISPLAY) {
+                statusBar.appTransitionPending(displayId);
             }
         };
 
         private Runnable mAppTransitionCancelled = () -> {
             StatusBarManagerInternal statusBar = getStatusBarInternal();
-            if (statusBar != null && mWin != null) {
-                statusBar.appTransitionCancelled(mWin.getDisplayId());
+            int displayId = getDisplayId();
+            if (statusBar != null && displayId != INVALID_DISPLAY) {
+                statusBar.appTransitionCancelled(displayId);
             }
         };
 
         private Runnable mAppTransitionFinished = () -> {
             StatusBarManagerInternal statusBar = getStatusBarInternal();
-            if (statusBar != null && mWin != null) {
-                statusBar.appTransitionFinished(mWin.getDisplayId());
+            int displayId = getDisplayId();
+            if (statusBar != null && displayId != INVALID_DISPLAY) {
+                statusBar.appTransitionFinished(displayId);
             }
         };
 
@@ -65,8 +69,9 @@ public class StatusBarController extends BarController {
                 long statusBarAnimationStartTime, long statusBarAnimationDuration) {
             mHandler.post(() -> {
                 StatusBarManagerInternal statusBar = getStatusBarInternal();
-                if (statusBar != null && mWin != null) {
-                    statusBar.appTransitionStarting(mWin.getDisplayId(),
+                int displayId = getDisplayId();
+                if (statusBar != null && displayId != INVALID_DISPLAY) {
+                    statusBar.appTransitionStarting(displayId,
                             statusBarAnimationStartTime, statusBarAnimationDuration);
                 }
             });
