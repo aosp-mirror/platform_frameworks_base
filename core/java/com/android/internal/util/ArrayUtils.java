@@ -18,6 +18,7 @@ package com.android.internal.util;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.util.ArraySet;
 
 import dalvik.system.VMRuntime;
@@ -55,6 +56,7 @@ public class ArrayUtils {
         return (char[])VMRuntime.getRuntime().newUnpaddedArray(char.class, minLen);
     }
 
+    @UnsupportedAppUsage
     public static int[] newUnpaddedIntArray(int minLen) {
         return (int[])VMRuntime.getRuntime().newUnpaddedArray(int.class, minLen);
     }
@@ -75,6 +77,7 @@ public class ArrayUtils {
         return (Object[])VMRuntime.getRuntime().newUnpaddedArray(Object.class, minLen);
     }
 
+    @UnsupportedAppUsage
     @SuppressWarnings("unchecked")
     public static <T> T[] newUnpaddedArray(Class<T> clazz, int minLen) {
         return (T[])VMRuntime.getRuntime().newUnpaddedArray(clazz, minLen);
@@ -112,6 +115,7 @@ public class ArrayUtils {
      * it will return the same empty array every time to avoid reallocation,
      * although this is not guaranteed.
      */
+    @UnsupportedAppUsage
     @SuppressWarnings("unchecked")
     public static <T> T[] emptyArray(Class<T> kind) {
         if (kind == Object.class) {
@@ -148,6 +152,7 @@ public class ArrayUtils {
     /**
      * Checks if given array is null or has zero elements.
      */
+    @UnsupportedAppUsage
     public static <T> boolean isEmpty(@Nullable T[] array) {
         return array == null || array.length == 0;
     }
@@ -200,6 +205,7 @@ public class ArrayUtils {
      * @param value the value to check for
      * @return true if the value is present in the array
      */
+    @UnsupportedAppUsage
     public static <T> boolean contains(@Nullable T[] array, T value) {
         return indexOf(array, value) != -1;
     }
@@ -208,6 +214,7 @@ public class ArrayUtils {
      * Return first index of {@code value} in {@code array}, or {@code -1} if
      * not found.
      */
+    @UnsupportedAppUsage
     public static <T> int indexOf(@Nullable T[] array, T value) {
         if (array == null) return -1;
         for (int i = 0; i < array.length; i++) {
@@ -242,6 +249,7 @@ public class ArrayUtils {
         return false;
     }
 
+    @UnsupportedAppUsage
     public static boolean contains(@Nullable int[] array, int value) {
         if (array == null) return false;
         for (int element : array) {
@@ -333,6 +341,7 @@ public class ArrayUtils {
      * Adds value to given array if not already present, providing set-like
      * behavior.
      */
+    @UnsupportedAppUsage
     @SuppressWarnings("unchecked")
     public static @NonNull <T> T[] appendElement(Class<T> kind, @Nullable T[] array, T element) {
         return appendElement(kind, array, element, false);
@@ -362,6 +371,7 @@ public class ArrayUtils {
     /**
      * Removes value from given array if present, providing set-like behavior.
      */
+    @UnsupportedAppUsage
     @SuppressWarnings("unchecked")
     public static @Nullable <T> T[] removeElement(Class<T> kind, @Nullable T[] array, T element) {
         if (array != null) {
@@ -408,6 +418,7 @@ public class ArrayUtils {
      * Adds value to given array if not already present, providing set-like
      * behavior.
      */
+    @UnsupportedAppUsage
     public static @NonNull int[] appendInt(@Nullable int[] cur, int val) {
         return appendInt(cur, val, false);
     }

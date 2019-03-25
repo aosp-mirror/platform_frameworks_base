@@ -16,6 +16,7 @@
 
 package com.android.internal.widget;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.method.KeyListener;
@@ -39,6 +40,7 @@ public class EditableInputConnection extends BaseInputConnection {
     // A negative value means that this connection has been finished by the InputMethodManager.
     private int mBatchEditNesting;
 
+    @UnsupportedAppUsage
     public EditableInputConnection(TextView textview) {
         super(textview, true);
         mTextView = textview;

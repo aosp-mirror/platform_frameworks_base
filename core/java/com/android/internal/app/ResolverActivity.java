@@ -21,6 +21,7 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.annotation.UiThread;
+import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
@@ -99,6 +100,7 @@ public class ResolverActivity extends Activity {
     // Temporary flag for new chooser delegate behavior.
     boolean mEnableChooserDelegate = true;
 
+    @UnsupportedAppUsage
     protected ResolveListAdapter mAdapter;
     private boolean mSafeForwardingMode;
     protected AbsListView mAdapterView;
@@ -121,6 +123,7 @@ public class ResolverActivity extends Activity {
     // Whether or not this activity supports choosing a default handler for the intent.
     private boolean mSupportsAlwaysUseOption;
     protected ResolverDrawerLayout mResolverDrawerLayout;
+    @UnsupportedAppUsage
     protected PackageManager mPm;
     protected int mLaunchedFromUid;
 
@@ -257,6 +260,7 @@ public class ResolverActivity extends Activity {
      * Compatibility version for other bundled services that use this overload without
      * a default title resource
      */
+    @UnsupportedAppUsage
     protected void onCreate(Bundle savedInstanceState, Intent intent,
             CharSequence title, Intent[] initialIntents,
             List<ResolveInfo> rList, boolean supportsAlwaysUseOption) {

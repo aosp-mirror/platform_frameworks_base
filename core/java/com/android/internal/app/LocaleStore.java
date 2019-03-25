@@ -16,6 +16,7 @@
 
 package com.android.internal.app;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.LocaleList;
 import android.provider.Settings;
@@ -81,14 +82,17 @@ public class LocaleStore {
             return mId;
         }
 
+        @UnsupportedAppUsage
         public Locale getLocale() {
             return mLocale;
         }
 
+        @UnsupportedAppUsage
         public Locale getParent() {
             return mParent;
         }
 
+        @UnsupportedAppUsage
         public String getId() {
             return mId;
         }
@@ -115,6 +119,7 @@ public class LocaleStore {
             return (mSuggestionFlags & suggestionMask) == suggestionMask;
         }
 
+        @UnsupportedAppUsage
         public String getFullNameNative() {
             if (mFullNameNative == null) {
                 mFullNameNative =
@@ -140,6 +145,7 @@ public class LocaleStore {
          * For instance German will show as "Deutsch" in the list, but we will also search for
          * "allemand" if the system UI is in French.
          */
+        @UnsupportedAppUsage
         public String getFullNameInUiLanguage() {
             // We don't cache the UI name because the default locale keeps changing
             return LocaleHelper.getDisplayName(mLocale, true /* sentence case */);
@@ -254,6 +260,7 @@ public class LocaleStore {
         }
     }
 
+    @UnsupportedAppUsage
     public static void fillCache(Context context) {
         if (sFullyInitialized) {
             return;
@@ -340,6 +347,7 @@ public class LocaleStore {
      * Example: if the parent is "ar", then the region list will contain all Arabic locales.
      * (this is not language based, but language-script, so that it works for zh-Hant and so on.
      */
+    @UnsupportedAppUsage
     public static Set<LocaleInfo> getLevelLocales(Context context, Set<String> ignorables,
             LocaleInfo parent, boolean translatedOnly) {
         fillCache(context);
@@ -365,6 +373,7 @@ public class LocaleStore {
         return result;
     }
 
+    @UnsupportedAppUsage
     public static LocaleInfo getLocaleInfo(Locale locale) {
         String id = locale.toLanguageTag();
         LocaleInfo result;

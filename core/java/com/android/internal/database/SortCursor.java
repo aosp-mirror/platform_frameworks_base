@@ -16,6 +16,7 @@
 
 package com.android.internal.database;
 
+import android.annotation.UnsupportedAppUsage;
 import android.database.AbstractCursor;
 import android.database.Cursor;
 import android.database.DataSetObserver;
@@ -28,7 +29,9 @@ import android.util.Log;
 public class SortCursor extends AbstractCursor
 {
     private static final String TAG = "SortCursor";
+    @UnsupportedAppUsage
     private Cursor mCursor; // updated in onMove
+    @UnsupportedAppUsage
     private Cursor[] mCursors;
     private int [] mSortColumns;
     private final int ROWCACHESIZE = 64;
@@ -52,6 +55,7 @@ public class SortCursor extends AbstractCursor
         }
     };
     
+    @UnsupportedAppUsage
     public SortCursor(Cursor[] cursors, String sortcolumn)
     {
         mCursors = cursors;

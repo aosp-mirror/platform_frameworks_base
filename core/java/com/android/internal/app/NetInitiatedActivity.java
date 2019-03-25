@@ -16,6 +16,7 @@
 
 package com.android.internal.app;
 
+import android.annotation.UnsupportedAppUsage;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -141,6 +142,7 @@ public class NetInitiatedActivity extends AlertActivity implements DialogInterfa
         locationManager.sendNiResponse(notificationId, response);
     }
 
+    @UnsupportedAppUsage
     private void handleNIVerify(Intent intent) {
         int notifId = intent.getIntExtra(GpsNetInitiatedHandler.NI_INTENT_KEY_NOTIF_ID, -1);
         notificationId = notifId;

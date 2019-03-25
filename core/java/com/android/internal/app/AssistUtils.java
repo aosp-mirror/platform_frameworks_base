@@ -17,6 +17,7 @@
 package com.android.internal.app;
 
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -42,6 +43,7 @@ public class AssistUtils {
     private final Context mContext;
     private final IVoiceInteractionManagerService mVoiceInteractionManagerService;
 
+    @UnsupportedAppUsage
     public AssistUtils(Context context) {
         mContext = context;
         mVoiceInteractionManagerService = IVoiceInteractionManagerService.Stub.asInterface(
@@ -168,6 +170,7 @@ public class AssistUtils {
         }
     }
 
+    @UnsupportedAppUsage
     public ComponentName getAssistComponentForUser(int userId) {
         final String setting = Settings.Secure.getStringForUser(mContext.getContentResolver(),
                 Settings.Secure.ASSISTANT, userId);

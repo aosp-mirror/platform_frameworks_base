@@ -16,6 +16,7 @@
 
 package com.android.internal.widget;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -83,7 +84,9 @@ public class SlidingTab extends ViewGroup {
      */
     private final int mOrientation;
 
+    @UnsupportedAppUsage
     private final Slider mLeftSlider;
+    @UnsupportedAppUsage
     private final Slider mRightSlider;
     private Slider mCurrentSlider;
     private boolean mTracking;
@@ -95,6 +98,7 @@ public class SlidingTab extends ViewGroup {
     /**
      * Listener used to reset the view when the current animation completes.
      */
+    @UnsupportedAppUsage
     private final AnimationListener mAnimationDoneListener = new AnimationListener() {
         public void onAnimationStart(Animation animation) {
 
@@ -178,7 +182,9 @@ public class SlidingTab extends ViewGroup {
         private static final int STATE_PRESSED = 1;
         private static final int STATE_ACTIVE = 2;
 
+        @UnsupportedAppUsage
         private final ImageView tab;
+        @UnsupportedAppUsage
         private final TextView text;
         private final ImageView target;
         private int currentState = STATE_NORMAL;
@@ -708,6 +714,7 @@ public class SlidingTab extends ViewGroup {
         slider.startAnimation(trans1, trans2);
     }
 
+    @UnsupportedAppUsage
     private void onAnimationDone() {
         resetView();
         mAnimating = false;
@@ -722,6 +729,7 @@ public class SlidingTab extends ViewGroup {
         return mOrientation == HORIZONTAL;
     }
 
+    @UnsupportedAppUsage
     private void resetView() {
         mLeftSlider.reset(false);
         mRightSlider.reset(false);
@@ -763,6 +771,7 @@ public class SlidingTab extends ViewGroup {
      * @param barId the resource of the bar drawable (stateful)
      * @param tabId the resource of the
      */
+    @UnsupportedAppUsage
     public void setLeftTabResources(int iconId, int targetId, int barId, int tabId) {
         mLeftSlider.setIcon(iconId);
         mLeftSlider.setTarget(targetId);
@@ -776,6 +785,7 @@ public class SlidingTab extends ViewGroup {
      *
      * @param resId
      */
+    @UnsupportedAppUsage
     public void setLeftHintText(int resId) {
         if (isHorizontal()) {
             mLeftSlider.setHintText(resId);
@@ -793,6 +803,7 @@ public class SlidingTab extends ViewGroup {
      * @param barId the resource of the bar drawable (stateful)
      * @param tabId the resource of the
      */
+    @UnsupportedAppUsage
     public void setRightTabResources(int iconId, int targetId, int barId, int tabId) {
         mRightSlider.setIcon(iconId);
         mRightSlider.setTarget(targetId);
@@ -806,12 +817,14 @@ public class SlidingTab extends ViewGroup {
      *
      * @param resId
      */
+    @UnsupportedAppUsage
     public void setRightHintText(int resId) {
         if (isHorizontal()) {
             mRightSlider.setHintText(resId);
         }
     }
 
+    @UnsupportedAppUsage
     public void setHoldAfterTrigger(boolean holdLeft, boolean holdRight) {
         mHoldLeftOnTransition = holdLeft;
         mHoldRightOnTransition = holdRight;
@@ -838,6 +851,7 @@ public class SlidingTab extends ViewGroup {
      *
      * @param listener the OnDialTriggerListener to attach to this view
      */
+    @UnsupportedAppUsage
     public void setOnTriggerListener(OnTriggerListener listener) {
         mOnTriggerListener = listener;
     }

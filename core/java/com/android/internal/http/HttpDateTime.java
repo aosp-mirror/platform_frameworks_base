@@ -16,6 +16,7 @@
 
 package com.android.internal.http;
 
+import android.annotation.UnsupportedAppUsage;
 import android.text.format.Time;
 
 import java.util.Calendar;
@@ -82,6 +83,7 @@ public final class HttpDateTime {
         int second;
     }
 
+    @UnsupportedAppUsage
     public static long parse(String timeString)
             throws IllegalArgumentException {
 
