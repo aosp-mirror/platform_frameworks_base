@@ -88,7 +88,7 @@
         android:id="@android:id/widget_frame"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:gravity="center"
+        android:gravity="center_vertical|end"
         android:minWidth="64dp"
         android:orientation="vertical"/>
 
