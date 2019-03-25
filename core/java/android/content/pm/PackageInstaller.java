@@ -497,6 +497,36 @@ public class PackageInstaller {
     }
 
     /**
+     * Returns an active staged session, or {@code null} if there is none.
+     *
+     * <p>Staged session is active iff:
+     * <ul>
+     *     <li>It is committed.
+     *     <li>It is not applied.
+     *     <li>It is not failed.
+     * </ul>
+     *
+     * <p>In case of a multi-apk session, parent session will be returned.
+     */
+    public @Nullable SessionInfo getActiveStagedSession() {
+        final List<SessionInfo> stagedSessions = getStagedSessions();
+        for (SessionInfo s : stagedSessions) {
+            if (s.isStagedSessionApplied() || s.isStagedSessionFailed()) {
+                // Finalized session.
+                continue;
+            }
+            if (s.getParentSessionId() != SessionInfo.INVALID_ID) {
+                // Child session.
+                continue;
+            }
+            if (s.isCommitted()) {
+                return s;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Uninstall the given package, removing it completely from the device. This
      * method is available to:
      * <ul>
@@ -1770,6 +1800,9 @@ public class PackageInstaller {
         private String mStagedSessionErrorMessage;
 
         /** {@hide} */
+        public boolean isCommitted;
+
+        /** {@hide} */
         @UnsupportedAppUsage
         public SessionInfo() {
         }
@@ -1809,6 +1842,7 @@ public class PackageInstaller {
             isStagedSessionFailed = source.readBoolean();
             mStagedSessionErrorCode = source.readInt();
             mStagedSessionErrorMessage = source.readString();
+            isCommitted = source.readBoolean();
         }
 
         /**
@@ -2181,6 +2215,13 @@ public class PackageInstaller {
             mStagedSessionErrorMessage = errorMessage;
         }
 
+        /**
+         * Whenever this session was committed.
+         */
+        public boolean isCommitted() {
+            return isCommitted;
+        }
+
         @Override
         public int describeContents() {
             return 0;
@@ -2218,6 +2259,7 @@ public class PackageInstaller {
             dest.writeBoolean(isStagedSessionFailed);
             dest.writeInt(mStagedSessionErrorCode);
             dest.writeString(mStagedSessionErrorMessage);
+            dest.writeBoolean(isCommitted);
         }
 
         public static final Parcelable.Creator<SessionInfo>

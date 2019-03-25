@@ -476,6 +476,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     mResolvedBaseFile.getAbsolutePath() : null;
             info.progress = mProgress;
             info.sealed = mSealed;
+            info.isCommitted = mCommitted;
             info.active = mActiveCount.get() > 0;
 
             info.mode = params.mode;
