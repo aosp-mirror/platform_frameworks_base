@@ -42,6 +42,8 @@
     <string name="available_via_passpoint" msgid="1617440946846329613">"Мрежата е достъпна през „%1$s“"</string>
     <string name="tap_to_sign_up" msgid="6449724763052579434">"Докоснете, за да се регистрирате"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Установена е връзка – няма достъп до интернет"</string>
+    <!-- no translation found for wifi_limited_connection (7717855024753201527) -->
+    <skip />
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"Няма връзка с интернет"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"Изисква се вход в профила"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Точката за достъп временно е пълна"</string>
@@ -73,7 +75,11 @@
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"Свързано (без мултимедия), батерия: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"Свързано (без телефон или мултимедия), батерия: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"Активно. Батерия: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <!-- no translation found for bluetooth_active_battery_level_untethered (6662649951391456747) -->
+    <skip />
     <string name="bluetooth_battery_level" msgid="1447164613319663655">"Батерия: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <!-- no translation found for bluetooth_battery_level_untethered (5974406100211667177) -->
+    <skip />
     <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Активно"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Мултимедийно аудио"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Телефонни обаждания"</string>
@@ -384,6 +390,8 @@
     <string name="power_discharge_by" msgid="6453537733650125582">"Следва да издържи приблизително до <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="107616694963545745">"Следва да издържи до около <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="1372817269546888804">"До <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for power_suggestion_extend_battery (4401408879069551485) -->
+    <skip />
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Остава/т по-малко от <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"Остава/т по-малко от <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"Остава/т повече от <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -457,5 +465,6 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Да се пита винаги"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"До изключване"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"Току-що"</string>
-    <string name="media_transfer_phone_device_name" msgid="1003823744105758574">"Високоговорител на телефона"</string>
+    <!-- no translation found for media_transfer_this_device_name (1636276898262571213) -->
+    <skip />
 </resources>
