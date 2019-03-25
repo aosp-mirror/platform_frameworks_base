@@ -86,7 +86,6 @@ public class DisplayPolicyTestsBase extends WindowTestsBase {
                 Math.min(DISPLAY_WIDTH, DISPLAY_HEIGHT) * DENSITY_DEFAULT / DISPLAY_DENSITY;
         mDisplayContent.getDisplayRotation().configure(
                 DISPLAY_WIDTH, DISPLAY_HEIGHT, shortSizeDp, longSizeDp);
-        mDisplayPolicy.configure(DISPLAY_WIDTH, DISPLAY_HEIGHT, shortSizeDp);
         mDisplayPolicy.onConfigurationChanged();
 
         mStatusBarWindow.mAttrs.gravity = Gravity.TOP;

@@ -1525,7 +1525,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final int shortSizeDp = shortSize * DisplayMetrics.DENSITY_DEFAULT / mBaseDisplayDensity;
         final int longSizeDp = longSize * DisplayMetrics.DENSITY_DEFAULT / mBaseDisplayDensity;
 
-        mDisplayPolicy.configure(width, height, shortSizeDp);
+        mDisplayPolicy.updateConfigurationAndScreenSizeDependentBehaviors();
         mDisplayRotation.configure(width, height, shortSizeDp, longSizeDp);
 
         mDisplayFrames.onDisplayInfoUpdated(mDisplayInfo,
@@ -1734,7 +1734,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mWmService.mH.sendEmptyMessage(REPORT_HARD_KEYBOARD_STATUS_CHANGE);
         }
 
-        mDisplayPolicy.updateConfigurationDependentBehaviors();
+        mDisplayPolicy.updateConfigurationAndScreenSizeDependentBehaviors();
 
         // Let the policy update hidden states.
         config.keyboardHidden = Configuration.KEYBOARDHIDDEN_NO;

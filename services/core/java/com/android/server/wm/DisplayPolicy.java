@@ -415,7 +415,6 @@ public class DisplayPolicy {
         mDeskDockEnablesAccelerometer = r.getBoolean(R.bool.config_deskDockEnablesAccelerometer);
         mTranslucentDecorEnabled = r.getBoolean(R.bool.config_enableTranslucentDecor);
         mForceShowSystemBarsFromExternal = r.getBoolean(R.bool.config_forceShowSystemBars);
-        updateConfigurationDependentBehaviors();
 
         mAccessibilityManager = (AccessibilityManager) mContext.getSystemService(
                 Context.ACCESSIBILITY_SERVICE);
@@ -565,15 +564,6 @@ public class DisplayPolicy {
 
     private int getDisplayId() {
         return mDisplayContent.getDisplayId();
-    }
-
-    void configure(int width, int height, int shortSizeDp) {
-        // Allow the navigation bar to move on non-square small devices (phones).
-        mNavigationBarCanMove = width != height && shortSizeDp < 600;
-    }
-
-    void updateConfigurationDependentBehaviors() {
-        mNavBarOpacityMode = mContext.getResources().getInteger(R.integer.config_navBarOpacityMode);
     }
 
     public void setHdmiPlugged(boolean plugged) {
@@ -2602,9 +2592,21 @@ public class DisplayPolicy {
                     res.getDimensionPixelSize(R.dimen.navigation_bar_width_car_mode);
         }
 
+        mNavBarOpacityMode = res.getInteger(R.integer.config_navBarOpacityMode);
+
         // EXPERIMENT TODO(b/113952590): Remove once experiment in bug is completed
         mExperiments.onConfigurationChanged(uiContext);
         // EXPERIMENT END
+
+        updateConfigurationAndScreenSizeDependentBehaviors();
+    }
+
+    void updateConfigurationAndScreenSizeDependentBehaviors() {
+        final Context uiContext = getSystemUiContext();
+        final Resources res = uiContext.getResources();
+        mNavigationBarCanMove =
+                mDisplayContent.mBaseDisplayWidth != mDisplayContent.mBaseDisplayHeight
+                        && res.getBoolean(R.bool.config_navBarCanMove);
     }
 
     @VisibleForTesting
@@ -3411,6 +3413,10 @@ public class DisplayPolicy {
         }
         if (mNavigationBar != null) {
             pw.print(prefix); pw.print("mNavigationBar="); pw.println(mNavigationBar);
+            pw.print(prefix); pw.print("mNavBarOpacityMode="); pw.println(mNavBarOpacityMode);
+            pw.print(prefix); pw.print("mNavigationBarCanMove="); pw.println(mNavigationBarCanMove);
+            pw.print(prefix); pw.print("mNavigationBarPosition=");
+            pw.println(mNavigationBarPosition);
         }
         if (mFocusedWindow != null) {
             pw.print(prefix); pw.print("mFocusedWindow="); pw.println(mFocusedWindow);
