@@ -40,6 +40,8 @@ import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Build.VERSION_CODES.O_MR1;
 import static android.os.Build.VERSION_CODES.P;
+import static android.service.notification.Adjustment.KEY_IMPORTANCE;
+import static android.service.notification.Adjustment.KEY_USER_SENTIMENT;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL;
 
@@ -492,6 +494,19 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         return answers;
     }
 
+    private void clearDeviceConfig() {
+        DeviceConfig.resetToDefaults(
+                Settings.RESET_MODE_PACKAGE_DEFAULTS, DeviceConfig.NAMESPACE_SYSTEMUI);
+    }
+
+    private void setDefaultAssistantInDeviceConfig(String componentName) {
+        DeviceConfig.setProperty(
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.NAS_DEFAULT_SERVICE,
+                componentName,
+                false);
+    }
+
     @Test
     public void testCreateNotificationChannels_SingleChannel() throws Exception {
         final NotificationChannel channel =
@@ -831,7 +846,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.addEnqueuedNotification(r);
 
         Bundle bundle = new Bundle();
-        bundle.putInt(Adjustment.KEY_IMPORTANCE, IMPORTANCE_NONE);
+        bundle.putInt(KEY_IMPORTANCE, IMPORTANCE_NONE);
         Adjustment adjustment = new Adjustment(
                 r.sbn.getPackageName(), r.getKey(), bundle, "", r.getUser().getIdentifier());
         mBinderService.applyEnqueuedAdjustmentFromAssistant(null, adjustment);
@@ -2826,7 +2841,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.setHandler(handler);
 
         Bundle signals = new Bundle();
-        signals.putInt(Adjustment.KEY_IMPORTANCE, IMPORTANCE_NONE);
+        signals.putInt(KEY_IMPORTANCE, IMPORTANCE_NONE);
         Adjustment adjustment = new Adjustment(
                 r.sbn.getPackageName(), r.getKey(), signals, "", r.getUser().getIdentifier());
         when(mAssistants.isSameUser(any(), anyInt())).thenReturn(true);
@@ -2867,7 +2882,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mAssistants.isSameUser(eq(null), anyInt())).thenReturn(true);
 
         Bundle signals = new Bundle();
-        signals.putInt(Adjustment.KEY_IMPORTANCE, IMPORTANCE_LOW);
+        signals.putInt(KEY_IMPORTANCE, IMPORTANCE_LOW);
         Adjustment adjustment = new Adjustment(
                 r.sbn.getPackageName(), r.getKey(), signals, "", r.getUser().getIdentifier());
         mBinderService.applyEnqueuedAdjustmentFromAssistant(null, adjustment);
@@ -2885,13 +2900,13 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mAssistants.isSameUser(eq(null), anyInt())).thenReturn(true);
 
         Bundle signals = new Bundle();
-        signals.putInt(Adjustment.KEY_IMPORTANCE, IMPORTANCE_LOW);
+        signals.putInt(KEY_IMPORTANCE, IMPORTANCE_LOW);
         Adjustment adjustment = new Adjustment(
                 r.sbn.getPackageName(), r.getKey(), signals, "", r.getUser().getIdentifier());
         mBinderService.applyEnqueuedAdjustmentFromAssistant(null, adjustment);
 
         assertEquals(IMPORTANCE_DEFAULT, r.getImportance());
-        assertFalse(r.hasAdjustment(Adjustment.KEY_IMPORTANCE));
+        assertFalse(r.hasAdjustment(KEY_IMPORTANCE));
     }
 
     @Test
@@ -4275,18 +4290,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .onGranted(eq(xmlConfig), eq(0), eq(true));
     }
 
-    private void clearDeviceConfig() {
-        DeviceConfig.resetToDefaults(
-                Settings.RESET_MODE_PACKAGE_DEFAULTS, DeviceConfig.NAMESPACE_SYSTEMUI);
-    }
 
-    private void setDefaultAssistantInDeviceConfig(String componentName) {
-        DeviceConfig.setProperty(
-                DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.NAS_DEFAULT_SERVICE,
-                componentName,
-                false);
-    }
 
     public void testGetAllowedAssistantCapabilities() throws Exception {
         List<String> capabilities = mBinderService.getAllowedAssistantCapabilities(null);
@@ -4300,5 +4304,24 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             assertNotNull(currentCapabilities);
             assertFalse(currentCapabilities.contains(capability));
         }
+    }
+
+    public void testAdjustRestrictedKey() throws Exception {
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+
+        when(mAssistants.isAdjustmentAllowed(KEY_IMPORTANCE)).thenReturn(true);
+        when(mAssistants.isAdjustmentAllowed(KEY_USER_SENTIMENT)).thenReturn(false);
+
+        Bundle signals = new Bundle();
+        signals.putInt(KEY_IMPORTANCE, IMPORTANCE_LOW);
+        signals.putInt(KEY_USER_SENTIMENT, USER_SENTIMENT_NEGATIVE);
+        Adjustment adjustment = new Adjustment(r.sbn.getPackageName(), r.getKey(), signals,
+               "", r.getUser().getIdentifier());
+
+        mBinderService.applyAdjustmentFromAssistant(null, adjustment);
+        r.applyAdjustments();
+
+        assertEquals(IMPORTANCE_LOW, r.getAssistantImportance());
+        assertEquals(USER_SENTIMENT_NEUTRAL, r.getUserSentiment());
     }
 }

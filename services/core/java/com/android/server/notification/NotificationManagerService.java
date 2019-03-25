@@ -4106,11 +4106,19 @@ public class NotificationManagerService extends SystemService {
         if (r == null) {
             return;
         }
-        if (mAssistants.isAdjustmentAllowed(adjustment.getKey())) {
-            if (adjustment.getSignals() != null) {
-                Bundle.setDefusable(adjustment.getSignals(), true);
-                r.addAdjustment(adjustment);
+        if (adjustment.getSignals() != null) {
+            final Bundle adjustments = adjustment.getSignals();
+            Bundle.setDefusable(adjustments, true);
+            List<String> toRemove = new ArrayList<>();
+            for (String potentialKey : adjustments.keySet()) {
+                if (!mAssistants.isAdjustmentAllowed(potentialKey)) {
+                    toRemove.add(potentialKey);
+                }
             }
+            for (String removeKey : toRemove) {
+                adjustments.remove(removeKey);
+            }
+            r.addAdjustment(adjustment);
         }
     }
 
