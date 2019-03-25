@@ -35,6 +35,7 @@ import android.widget.FrameLayout;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
@@ -89,6 +90,8 @@ public class BubbleControllerTest extends SysuiTestCase {
     private BubbleController.BubbleStateChangeListener mBubbleStateChangeListener;
     @Mock
     private BubbleController.BubbleExpandListener mBubbleExpandListener;
+    @Mock
+    NotificationVisibility mNotificationVisibility;
 
     @Mock
     private PendingIntent mDeleteIntent;
