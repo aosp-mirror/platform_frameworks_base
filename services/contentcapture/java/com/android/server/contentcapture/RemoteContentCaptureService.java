@@ -47,7 +47,8 @@ final class RemoteContentCaptureService
             ContentCapturePerUserService perUserService, boolean bindInstantServiceAllowed,
             boolean verbose, int idleUnbindTimeoutMs) {
         super(context, serviceInterface, serviceComponentName, userId, perUserService,
-                context.getMainThreadHandler(), bindInstantServiceAllowed, verbose,
+                context.getMainThreadHandler(),
+                bindInstantServiceAllowed ? Context.BIND_ALLOW_INSTANT : 0, verbose,
                 /* initialCapacity= */ 2);
         mPerUserService = perUserService;
         mServerCallback = callback.asBinder();

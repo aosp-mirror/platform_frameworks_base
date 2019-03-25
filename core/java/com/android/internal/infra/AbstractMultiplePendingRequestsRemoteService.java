@@ -45,9 +45,9 @@ public abstract class AbstractMultiplePendingRequestsRemoteService<S
     public AbstractMultiplePendingRequestsRemoteService(@NonNull Context context,
             @NonNull String serviceInterface, @NonNull ComponentName componentName, int userId,
             @NonNull VultureCallback<S> callback, @NonNull Handler handler,
-            boolean bindInstantServiceAllowed, boolean verbose, int initialCapacity) {
-        super(context, serviceInterface, componentName, userId, callback, handler,
-                bindInstantServiceAllowed, verbose);
+            int bindingFlags, boolean verbose, int initialCapacity) {
+        super(context, serviceInterface, componentName, userId, callback, handler, bindingFlags,
+                verbose);
         mInitialCapacity = initialCapacity;
     }
 
