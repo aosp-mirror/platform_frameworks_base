@@ -193,4 +193,6 @@ interface IStorageManager {
     void commitChanges() = 83;
     boolean supportsCheckpoint() = 84;
     void startCheckpoint(int numTries) = 85;
+    boolean needsCheckpoint() = 86;
+    void abortChanges(in String message, boolean retry) = 87;
 }

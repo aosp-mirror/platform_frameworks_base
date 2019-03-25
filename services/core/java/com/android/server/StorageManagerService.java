@@ -2881,6 +2881,32 @@ class StorageManagerService extends IStorageManager.Stub
         mVold.commitChanges();
     }
 
+    /**
+     * Check if we should be mounting with checkpointing or are checkpointing now
+     */
+    @Override
+    public boolean needsCheckpoint() throws RemoteException {
+        // Only the system process is permitted to commit checkpoints
+        if (Binder.getCallingUid() != android.os.Process.SYSTEM_UID) {
+            throw new SecurityException("no permission to commit checkpoint changes");
+        }
+
+        return mVold.needsCheckpoint();
+    }
+
+    /**
+     * Abort the current set of changes and either try again, or abort entirely
+     */
+    @Override
+    public void abortChanges(String message, boolean retry) throws RemoteException {
+        // Only the system process is permitted to abort checkpoints
+        if (Binder.getCallingUid() != android.os.Process.SYSTEM_UID) {
+            throw new SecurityException("no permission to commit checkpoint changes");
+        }
+
+        mVold.abortChanges(message, retry);
+    }
+
     @Override
     public String getPassword() throws RemoteException {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
