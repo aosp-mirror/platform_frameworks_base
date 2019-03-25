@@ -77,15 +77,14 @@ public final class GnssCapabilities {
     })
     public @interface Capability {}
 
-    /**
-     * @hide
-     */
+    /** @hide */
     public static final long INVALID_CAPABILITIES = -1;
 
     /** A bitmask of supported GNSS capabilities. */
     private final long mGnssCapabilities;
 
-    static GnssCapabilities of(long gnssCapabilities) {
+    /** @hide */
+    public static GnssCapabilities of(long gnssCapabilities) {
         return new GnssCapabilities(gnssCapabilities);
     }
 
