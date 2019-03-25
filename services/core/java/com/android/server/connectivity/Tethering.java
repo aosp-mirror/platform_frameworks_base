@@ -247,7 +247,14 @@ public class Tethering extends BaseNetworkObserver {
                 (Intent ignored) -> {
                     mLog.log("OBSERVED default data subscription change");
                     updateConfiguration();
-                    mEntitlementMgr.reevaluateSimCardProvisioning();
+                    // To avoid launch unexpected provisioning checks, ignore re-provisioning when
+                    // no CarrierConfig loaded yet. Assume reevaluateSimCardProvisioning() will be
+                    // triggered again when CarrierConfig is loaded.
+                    if (mEntitlementMgr.getCarrierConfig() != null) {
+                        mEntitlementMgr.reevaluateSimCardProvisioning();
+                    } else {
+                        mLog.log("IGNORED reevaluate provisioning due to no carrier config loaded");
+                    }
                 });
         mStateReceiver = new StateReceiver();
 
