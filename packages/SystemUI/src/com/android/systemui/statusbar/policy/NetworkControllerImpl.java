@@ -376,6 +376,11 @@ public class NetworkControllerImpl extends BroadcastReceiver
         return controller != null ? controller.getState().networkNameData : "";
     }
 
+    @Override
+    public int getNumberSubscriptions() {
+        return mMobileSignalControllers.size();
+    }
+
     public boolean isEmergencyOnly() {
         if (mMobileSignalControllers.size() == 0) {
             // When there are no active subscriptions, determine emengency state from last

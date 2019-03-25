@@ -2234,6 +2234,9 @@
     <!-- Quick settings tile secondary label format combining roaming with the mobile data type. [CHAR LIMIT=NONE] -->
     <string name="mobile_data_text_format"><xliff:g name="roaming_status" example="Roaming">%1$s</xliff:g> \u2014 <xliff:g name="mobile_data_type" example="LTE">%2$s</xliff:g></string>
 
+    <!-- Quick settings tile secondary label format combining carrier name with the mobile data tye. [CHAR LIMIT=NONE] -->
+    <string name="mobile_carrier_text_format"><xliff:g id="carrier_name" example="Test">%1$s</xliff:g>, <xliff:g id="mobile_data_type" example="LTE">%2$s</xliff:g></string>
+
     <!-- Label for when wifi is off in QS detail panel [CHAR LIMIT=NONE] -->
     <string name="wifi_is_off">Wi-Fi is off</string>
 
