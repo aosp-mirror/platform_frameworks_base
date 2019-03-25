@@ -34,6 +34,8 @@ import com.android.test.filters.SelectTest;
 public final class FrameworksTestsFilter extends SelectTest {
 
     private static final String[] SELECTED_TESTS = {
+            // Test specifications for FrameworksMockingCoreTests.
+            "android.app.activity.ActivityThreadClientTest",
             // Test specifications for FrameworksCoreTests.
             "android.app.servertransaction.", // all tests under the package.
             "android.view.DisplayCutoutTest",
