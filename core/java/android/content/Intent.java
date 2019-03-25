@@ -3115,20 +3115,13 @@ public class Intent implements Parcelable, Cloneable {
      * <p>
      * The path to the file is contained in {@link Intent#getData()}.
      *
-     * @deprecated Starting in the {@link android.os.Build.VERSION_CODES#Q}
-     *             release, shared storage paths are sandboxed per application,
-     *             and this broadcast cannot correctly translate those sandboxed
-     *             paths. Callers will need to instead migrate to using
-     *             {@link MediaScannerConnection}.
+     * @deprecated Callers should migrate to inserting items directly into
+     *             {@link MediaStore}, where they will be automatically scanned
+     *             after each mutation.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     @Deprecated
     public static final String ACTION_MEDIA_SCANNER_SCAN_FILE = "android.intent.action.MEDIA_SCANNER_SCAN_FILE";
-
-    /** @hide */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    @Deprecated
-    public static final String ACTION_MEDIA_SCANNER_SCAN_VOLUME = "android.intent.action.MEDIA_SCANNER_SCAN_VOLUME";
 
    /**
      * Broadcast Action:  The "Media Button" was pressed.  Includes a single
