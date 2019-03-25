@@ -260,6 +260,10 @@ class LockSettingsShellCommand extends ShellCommand {
                 return false;
             }
         } else {
+            if (!mOld.isEmpty()) {
+                getOutPrintWriter().println("Old password provided but user has no password");
+                return false;
+            }
             return true;
         }
     }
