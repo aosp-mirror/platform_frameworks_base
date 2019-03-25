@@ -265,7 +265,9 @@ public class BubbleStackView extends FrameLayout {
      * Handle config changes.
      */
     public void onConfigChanged() {
-        mExpandedBubble.expandedView.updateHeaderColor();
+        if (mExpandedBubble != null) {
+            mExpandedBubble.expandedView.updateHeaderColor();
+        }
     }
 
     @Override
