@@ -218,6 +218,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
         final Rect fixedBounds = mToken.getRequestedOverrideConfiguration().windowConfiguration
                 .getBounds();
         fixedBounds.set(0, 0, 1200, 1600);
+        mToken.getRequestedOverrideConfiguration().windowConfiguration.setAppBounds(fixedBounds);
         final Configuration newParentConfig = mTask.getConfiguration();
 
         // Change the size of the container to two times smaller with insets.

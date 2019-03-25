@@ -1627,7 +1627,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 // If the changes come from change-listener, the incoming parent configuration is
                 // still the old one. Make sure their orientations are the same to reduce computing
                 // the compatibility bounds for the intermediate state.
-                && getResolvedOverrideConfiguration().orientation == newParentConfig.orientation) {
+                && (task.mTaskRecord == null || task.mTaskRecord
+                        .getConfiguration().orientation == newParentConfig.orientation)) {
             final Rect taskBounds = task.getBounds();
             // Since we only center the activity horizontally, if only the fixed height is smaller
             // than its container, the override bounds don't need to take effect.
@@ -1763,7 +1764,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         final Rect parentAppBounds = newParentConfig.windowConfiguration.getAppBounds();
         final Rect viewportBounds = parentAppBounds != null
                 ? parentAppBounds : newParentConfig.windowConfiguration.getBounds();
-        final Rect contentBounds = getResolvedOverrideBounds();
+        final Rect appBounds = getWindowConfiguration().getAppBounds();
+        final Rect contentBounds = appBounds != null ? appBounds : getResolvedOverrideBounds();
         final float contentW = contentBounds.width();
         final float contentH = contentBounds.height();
         final float viewportW = viewportBounds.width();
@@ -1780,6 +1782,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         mSizeCompatBounds.set(contentBounds);
         mSizeCompatBounds.offsetTo(0, 0);
         mSizeCompatBounds.scale(mSizeCompatScale);
+        // The decor inset is included in height.
+        mSizeCompatBounds.bottom += viewportBounds.top;
         mSizeCompatBounds.left += offsetX;
         mSizeCompatBounds.right += offsetX;
     }
