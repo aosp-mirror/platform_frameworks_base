@@ -26,6 +26,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.res.Configuration.UI_MODE_TYPE_CAR;
 import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
 import static android.view.InsetsState.TYPE_TOP_BAR;
+import static android.view.InsetsState.TYPE_TOP_GESTURES;
+import static android.view.InsetsState.TYPE_TOP_TAPPABLE_ELEMENT;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_NONE;
 import static android.view.WindowManager.INPUT_CONSUMER_NAVIGATION;
@@ -40,6 +42,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_OVERSCAN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
+import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION;
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
@@ -152,6 +155,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ScreenShapeHelper;
 import com.android.internal.util.ScreenshotHelper;
+import com.android.internal.util.function.TriConsumer;
 import com.android.internal.widget.PointerLocationView;
 import com.android.server.LocalServices;
 import com.android.server.UiThread;
@@ -214,6 +218,12 @@ public class DisplayPolicy {
 
     private final Object mServiceAcquireLock = new Object();
     private StatusBarManagerInternal mStatusBarManagerInternal;
+
+    @Px
+    private int mBottomGestureAdditionalInset;
+    @Px
+    private int mSideGestureInset;
+    private boolean mNavigationBarLetsThroughTaps;
 
     private StatusBarManagerInternal getStatusBarManagerInternal() {
         synchronized (mServiceAcquireLock) {
@@ -857,11 +867,14 @@ public class DisplayPolicy {
                 if (mDisplayContent.isDefaultDisplay) {
                     mService.mPolicy.setKeyguardCandidateLw(win);
                 }
-                mDisplayContent.setInsetProvider(TYPE_TOP_BAR, win,
+                final TriConsumer<DisplayFrames, WindowState, Rect> frameProvider =
                         (displayFrames, windowState, rect) -> {
                             rect.top = 0;
                             rect.bottom = getStatusBarHeight(displayFrames);
-                        });
+                        };
+                mDisplayContent.setInsetProvider(TYPE_TOP_BAR, win, frameProvider);
+                mDisplayContent.setInsetProvider(TYPE_TOP_GESTURES, win, frameProvider);
+                mDisplayContent.setInsetProvider(TYPE_TOP_TAPPABLE_ELEMENT, win, frameProvider);
                 break;
             case TYPE_NAVIGATION_BAR:
                 mContext.enforceCallingOrSelfPermission(
@@ -878,6 +891,31 @@ public class DisplayPolicy {
                         mNavBarVisibilityListener, true);
                 mDisplayContent.setInsetProvider(InsetsState.TYPE_NAVIGATION_BAR,
                         win, null /* frameProvider */);
+                mDisplayContent.setInsetProvider(InsetsState.TYPE_BOTTOM_GESTURES, win,
+                        (displayFrames, windowState, inOutFrame) -> {
+                            inOutFrame.top -= mBottomGestureAdditionalInset;
+                        });
+                mDisplayContent.setInsetProvider(InsetsState.TYPE_LEFT_GESTURES, win,
+                        (displayFrames, windowState, inOutFrame) -> {
+                            inOutFrame.left = 0;
+                            inOutFrame.top = 0;
+                            inOutFrame.bottom = displayFrames.mDisplayHeight;
+                            inOutFrame.right = displayFrames.mUnrestricted.left + mSideGestureInset;
+                        });
+                mDisplayContent.setInsetProvider(InsetsState.TYPE_RIGHT_GESTURES, win,
+                        (displayFrames, windowState, inOutFrame) -> {
+                            inOutFrame.left = displayFrames.mUnrestricted.right - mSideGestureInset;
+                            inOutFrame.top = 0;
+                            inOutFrame.bottom = displayFrames.mDisplayHeight;
+                            inOutFrame.right = displayFrames.mDisplayWidth;
+                        });
+                mDisplayContent.setInsetProvider(InsetsState.TYPE_BOTTOM_TAPPABLE_ELEMENT, win,
+                        (displayFrames, windowState, inOutFrame) -> {
+                            if ((windowState.getAttrs().flags & FLAG_NOT_TOUCHABLE) != 0
+                                    || mNavigationBarLetsThroughTaps) {
+                                inOutFrame.setEmpty();
+                            }
+                        });
                 if (DEBUG_LAYOUT) Slog.i(TAG, "NAVIGATION BAR: " + mNavigationBar);
                 break;
             case TYPE_NAVIGATION_BAR_PANEL:
@@ -2607,9 +2645,18 @@ public class DisplayPolicy {
         }
 
         mNavBarOpacityMode = res.getInteger(R.integer.config_navBarOpacityMode);
+        mSideGestureInset = res.getDimensionPixelSize(R.dimen.config_backGestureInset);
+        mNavigationBarLetsThroughTaps = res.getBoolean(R.bool.config_navBarTapThrough);
 
         // EXPERIMENT TODO(b/113952590): Remove once experiment in bug is completed
         mExperiments.onConfigurationChanged(uiContext);
+        // EXPERIMENT END
+
+        // EXPERIMENT: TODO(b/113952590): Replace with real code after experiment.
+        // This should calculate how much above the frame we accept gestures. Currently,
+        // we extend the frame to capture the gestures, so this is 0.
+        mBottomGestureAdditionalInset = mExperiments.getNavigationBarFrameHeight()
+                - mExperiments.getNavigationBarFrameHeight();
         // EXPERIMENT END
 
         updateConfigurationAndScreenSizeDependentBehaviors();

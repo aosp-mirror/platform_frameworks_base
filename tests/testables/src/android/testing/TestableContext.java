@@ -296,13 +296,13 @@ public class TestableContext extends ContextWrapper implements TestRule {
     @Override
     public void registerComponentCallbacks(ComponentCallbacks callback) {
         if (mComponent != null) mComponent.getLeakInfo(callback).addAllocation(new Throwable());
-        super.registerComponentCallbacks(callback);
+        getBaseContext().registerComponentCallbacks(callback);
     }
 
     @Override
     public void unregisterComponentCallbacks(ComponentCallbacks callback) {
         if (mComponent != null) mComponent.getLeakInfo(callback).clearAllocations();
-        super.unregisterComponentCallbacks(callback);
+        getBaseContext().unregisterComponentCallbacks(callback);
     }
 
     public TestablePermissions getTestablePermissions() {

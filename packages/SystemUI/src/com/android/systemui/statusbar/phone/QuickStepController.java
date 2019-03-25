@@ -29,7 +29,6 @@ import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_
 import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_NONE;
 import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_OVERVIEW;
 import static com.android.systemui.statusbar.phone.NavigationBarView.WINDOW_TARGET_BOTTOM;
-import static com.android.systemui.statusbar.phone.NavigationPrototypeController.EDGE_SENSITIVITY_WIDTH_SETTING;
 
 import android.annotation.Nullable;
 import android.content.Context;
@@ -264,10 +263,7 @@ public class QuickStepController implements GestureHelper {
                 mNavigationBarView.transformMatrixToLocal(mTransformLocalMatrix);
                 mAllowGestureDetection = true;
                 mNotificationsVisibleOnDown = !mNavigationBarView.isNotificationsFullyCollapsed();
-                final int defaultRegionThreshold = mContext.getResources()
-                        .getDimensionPixelOffset(R.dimen.navigation_bar_default_edge_width);
-                mGestureRegionThreshold = convertDpToPixel(getIntGlobalSetting(mContext,
-                        EDGE_SENSITIVITY_WIDTH_SETTING, defaultRegionThreshold));
+                mGestureRegionThreshold = QuickStepContract.getEdgeSensitivityWidth(mContext);
                 break;
             }
             case MotionEvent.ACTION_MOVE: {
@@ -357,7 +353,7 @@ public class QuickStepController implements GestureHelper {
                         if (mCurrentAction != null) {
                             mCurrentAction.endGesture();
                         }
-                    } else if (QuickStepContract.isGesturalMode(mContext)
+                    } else if (QuickStepContract.isNavBarClickThrough(mContext)
                             && !mClickThroughPressed) {
                         // Enable click through functionality where no gesture has been detected and
                         // not passed the drag slop so inject a touch event at the same location
