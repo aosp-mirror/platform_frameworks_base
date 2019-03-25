@@ -166,6 +166,7 @@ public final class EntitlementManagerTest {
                 .thenReturn(mCarrierConfigManager);
         when(mCarrierConfigManager.getConfig()).thenReturn(mCarrierConfig);
         mCarrierConfig.putBoolean(CarrierConfigManager.KEY_REQUIRE_ENTITLEMENT_CHECKS_BOOL, true);
+        mCarrierConfig.putBoolean(CarrierConfigManager.KEY_CARRIER_CONFIG_APPLIED_BOOL, true);
     }
 
     @Test
@@ -192,6 +193,16 @@ public final class EntitlementManagerTest {
     public void toleratesCarrierConfigMissing() {
         setupForRequiredProvisioning();
         when(mCarrierConfigManager.getConfig()).thenReturn(null);
+        mEnMgr.updateConfiguration(
+                new TetheringConfiguration(mMockContext, mLog, INVALID_SUBSCRIPTION_ID));
+        // We still have a provisioning app configured, so still require provisioning.
+        assertTrue(mEnMgr.isTetherProvisioningRequired());
+    }
+
+    @Test
+    public void toleratesCarrierConfigNotLoaded() {
+        setupForRequiredProvisioning();
+        mCarrierConfig.putBoolean(CarrierConfigManager.KEY_CARRIER_CONFIG_APPLIED_BOOL, false);
         mEnMgr.updateConfiguration(
                 new TetheringConfiguration(mMockContext, mLog, INVALID_SUBSCRIPTION_ID));
         // We still have a provisioning app configured, so still require provisioning.
