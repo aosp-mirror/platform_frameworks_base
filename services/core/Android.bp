@@ -21,6 +21,7 @@ java_library_static {
         ":gsiservice_aidl",
         "java/com/android/server/EventLogTags.logtags",
         "java/com/android/server/am/EventLogTags.logtags",
+        "java/com/android/server/policy/EventLogTags.logtags",
     ],
 
     libs: [
