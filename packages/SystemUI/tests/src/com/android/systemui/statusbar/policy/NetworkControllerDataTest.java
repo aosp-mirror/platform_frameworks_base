@@ -285,6 +285,15 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         testDataActivity(TelephonyManager.DATA_ACTIVITY_INOUT, true, true);
     }
 
+    @Test
+    public void testUpdateDataNetworkName() {
+        setupDefaultSignal();
+        String newDataName = "TestDataName";
+        when(mServiceState.getDataOperatorAlphaShort()).thenReturn(newDataName);
+        updateServiceState();
+        assertDataNetworkNameEquals(newDataName);
+    }
+
     private void testDataActivity(int direction, boolean in, boolean out) {
         updateDataActivity(direction);
 
