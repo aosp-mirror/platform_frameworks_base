@@ -23,7 +23,10 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
+import android.content.res.Resources;
 import android.os.Binder;
+import android.os.Build;
+import android.os.IBinder;
 import android.os.IIncidentAuthListener;
 import android.os.IIncidentCompanion;
 import android.os.IIncidentManager;
@@ -47,6 +50,12 @@ import java.util.List;
  */
 public class IncidentCompanionService extends SystemService {
     static final String TAG = "IncidentCompanionService";
+
+    /**
+     * Dump argument for proxying restricted image dumps to the services
+     * listed in the config.
+     */
+    private static String[] RESTRICTED_IMAGE_DUMP_ARGS = new String[] { "--restricted_image" };
 
     /**
      * The two permissions, for sendBroadcastAsUserMultiplePermissions.
@@ -260,7 +269,42 @@ public class IncidentCompanionService extends SystemService {
             if (!DumpUtils.checkDumpPermission(getContext(), TAG, writer)) {
                 return;
             }
-            mPendingReports.dump(fd, writer, args);
+
+            if (args.length == 1 && "--restricted_image".equals(args[0])) {
+                // Does NOT clearCallingIdentity
+                dumpRestrictedImages(fd);
+            } else {
+                // Regular dump
+                mPendingReports.dump(fd, writer, args);
+            }
+        }
+
+        /**
+         * Proxy for the restricted images section.
+         */
+        private void dumpRestrictedImages(FileDescriptor fd) {
+            // Only supported on eng or userdebug.
+            if (!(Build.IS_ENG || Build.IS_USERDEBUG)) {
+                return;
+            }
+
+            final Resources res = getContext().getResources();
+            final String[] services = res.getStringArray(
+                    com.android.internal.R.array.config_restrictedImagesServices);
+            final int servicesCount = services.length;
+            for (int i = 0; i < servicesCount; i++) {
+                final String name = services[i];
+                Log.d(TAG, "Looking up service " + name);
+                final IBinder service = ServiceManager.getService(name);
+                if (service != null) {
+                    Log.d(TAG, "Calling dump on service: " + name);
+                    try {
+                        service.dump(fd, RESTRICTED_IMAGE_DUMP_ARGS);
+                    } catch (RemoteException ex) {
+                        Log.w(TAG, "dump --restricted_image of " + name + " threw", ex);
+                    }
+                }
+            }
         }
 
         /**

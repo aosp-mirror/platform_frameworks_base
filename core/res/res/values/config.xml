@@ -3997,4 +3997,6 @@
         <item>system_server_strictmode</item>
     </string-array>
 
+    <!-- Which binder services to include in incident reports containing restricted images. -->
+    <string-array name="config_restrictedImagesServices" translatable="false"/>
 </resources>

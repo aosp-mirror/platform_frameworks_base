@@ -3681,6 +3681,7 @@
   <java-symbol type="integer" name="config_attentionApiTimeout" />
 
   <java-symbol type="string" name="config_incidentReportApproverPackage" />
+  <java-symbol type="array" name="config_restrictedImagesServices" />
 
   <!-- Display White-Balance -->
   <java-symbol type="integer" name="config_displayWhiteBalanceBrightnessSensorRate" />
