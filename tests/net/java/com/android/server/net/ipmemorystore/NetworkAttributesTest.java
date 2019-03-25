@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.connectivity.ipmemorystore;
+package com.android.server.net.ipmemorystore;
 
 import static org.junit.Assert.assertEquals;
 

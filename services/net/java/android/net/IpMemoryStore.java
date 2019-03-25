@@ -18,11 +18,14 @@ package android.net;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 /**
  * Manager class used to communicate with the ip memory store service in the network stack,
@@ -30,15 +33,18 @@ import java.util.concurrent.ExecutionException;
  * @hide
 */
 public class IpMemoryStore extends IpMemoryStoreClient {
-    private final CompletableFuture<IIpMemoryStore> mService;
+    private static final String TAG = IpMemoryStore.class.getSimpleName();
+    @NonNull private final CompletableFuture<IIpMemoryStore> mService;
+    @NonNull private final AtomicReference<CompletableFuture<IIpMemoryStore>> mTailNode;
 
     public IpMemoryStore(@NonNull final Context context) {
         super(context);
         mService = new CompletableFuture<>();
+        mTailNode = new AtomicReference<CompletableFuture<IIpMemoryStore>>(mService);
         getNetworkStackClient().fetchIpMemoryStore(
                 new IIpMemoryStoreCallbacks.Stub() {
                     @Override
-                    public void onIpMemoryStoreFetched(final IIpMemoryStore memoryStore) {
+                    public void onIpMemoryStoreFetched(@NonNull final IIpMemoryStore memoryStore) {
                         mService.complete(memoryStore);
                     }
 
@@ -49,9 +55,28 @@ public class IpMemoryStore extends IpMemoryStoreClient {
                 });
     }
 
+    /*
+     *  If the IpMemoryStore is ready, this function will run the request synchronously.
+     *  Otherwise, it will enqueue the requests for execution immediately after the
+     *  service becomes ready. The requests are guaranteed to be executed in the order
+     *  they are sumbitted.
+     */
     @Override
-    protected IIpMemoryStore getService() throws InterruptedException, ExecutionException {
-        return mService.get();
+    protected void runWhenServiceReady(Consumer<IIpMemoryStore> cb) throws ExecutionException {
+        mTailNode.getAndUpdate(future -> future.handle((store, exception) -> {
+            if (exception != null) {
+                // this should never happens since we also catch the exception below
+                Log.wtf(TAG, "Error fetching IpMemoryStore", exception);
+                return store;
+            }
+
+            try {
+                cb.accept(store);
+            } catch (Exception e) {
+                Log.wtf(TAG, "Exception occured: " + e.getMessage());
+            }
+            return store;
+        }));
     }
 
     @VisibleForTesting
