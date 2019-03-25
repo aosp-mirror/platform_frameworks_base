@@ -302,6 +302,15 @@
          Settings.Global.NETWORK_AVOID_BAD_WIFI. This is the default value of that setting. -->
     <integer translatable="false" name="config_networkAvoidBadWifi">1</integer>
 
+    <!-- The URL returned by ConnectivityManager#getCaptivePortalServerUrl. The actual returned
+         value is controlled by Settings.Global.CAPTIVE_PORTAL_HTTP_URL. This is the default value
+         used if that setting is unset.
+         This is *NOT* a URL that will always be used by the system network validation to detect
+         captive portals: NetworkMonitor may use different strategies and will not necessarily use
+         this URL. NetworkMonitor behaviour should be configured with NetworkStack resource overlays
+         instead. -->
+    <string translatable="false" name="config_networkDefaultCaptivePortalServerUrl">http://connectivitycheck.gstatic.com/generate_204</string>
+
     <!-- If the hardware supports specially marking packets that caused a wakeup of the
          main CPU, set this value to the mark used. -->
     <integer name="config_networkWakeupPacketMark">0</integer>
