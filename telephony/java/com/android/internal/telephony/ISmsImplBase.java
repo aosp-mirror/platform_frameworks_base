@@ -202,4 +202,10 @@ public class ISmsImplBase extends ISms.Stub {
             int subId, String callingPkg, Bundle params, IFinancialSmsCallback callback) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public int checkSmsShortCodeDestination(
+            int subid, String callingApk, String destAddress, String countryIso) {
+        throw new UnsupportedOperationException();
+    }
 }

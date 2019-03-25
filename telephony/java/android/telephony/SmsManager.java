@@ -17,11 +17,13 @@
 package android.telephony;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressAutoDoc;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
 import android.app.PendingIntent;
@@ -50,6 +52,8 @@ import com.android.internal.telephony.IMms;
 import com.android.internal.telephony.ISms;
 import com.android.internal.telephony.SmsRawData;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -2327,4 +2331,84 @@ public final class SmsManager {
         return filtered;
     }
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"SMS_CATEGORY_"},
+            value = {
+                    SmsManager.SMS_CATEGORY_NOT_SHORT_CODE,
+                    SmsManager.SMS_CATEGORY_FREE_SHORT_CODE,
+                    SmsManager.SMS_CATEGORY_STANDARD_SHORT_CODE,
+                    SmsManager.SMS_CATEGORY_POSSIBLE_PREMIUM_SHORT_CODE,
+                    SmsManager.SMS_CATEGORY_PREMIUM_SHORT_CODE})
+    public @interface SmsShortCodeCategory {}
+
+    /**
+     * Return value from {@link #checkSmsShortCodeDestination(String, String)} ()} for regular
+     * phone numbers.
+     * @hide
+     */
+    @TestApi
+    public static final int SMS_CATEGORY_NOT_SHORT_CODE = 0;
+    /**
+     * Return value from {@link #checkSmsShortCodeDestination(String, String)} ()} for free
+     * (no cost) short codes.
+     * @hide
+     */
+    @TestApi
+    public static final int SMS_CATEGORY_FREE_SHORT_CODE = 1;
+    /**
+     * Return value from {@link #checkSmsShortCodeDestination(String, String)} ()} for
+     * standard rate (non-premium)
+     * short codes.
+     * @hide
+     */
+    @TestApi
+    public static final int SMS_CATEGORY_STANDARD_SHORT_CODE = 2;
+    /**
+     * Return value from {@link #checkSmsShortCodeDestination(String, String)} ()} for possible
+     * premium short codes.
+     * @hide
+     */
+    @TestApi
+    public static final int SMS_CATEGORY_POSSIBLE_PREMIUM_SHORT_CODE = 3;
+    /**
+     * Return value from {@link #checkSmsShortCodeDestination(String, String)} ()} for
+     * premium short codes.
+     * @hide
+     */
+    @TestApi
+    public static final int SMS_CATEGORY_PREMIUM_SHORT_CODE = 4;
+
+    /**
+     * Check if the destination address is a possible premium short code.
+     * NOTE: the caller is expected to strip non-digits from the destination number with
+     * {@link PhoneNumberUtils#extractNetworkPortion} before calling this method.
+     *
+     * @param destAddress the destination address to test for possible short code
+     * @param countryIso the ISO country code
+     *
+     * @return
+     * {@link SmsManager#SMS_CATEGORY_NOT_SHORT_CODE},
+     * {@link SmsManager#SMS_CATEGORY_FREE_SHORT_CODE},
+     * {@link SmsManager#SMS_CATEGORY_POSSIBLE_PREMIUM_SHORT_CODE},
+     * {@link SmsManager#SMS_CATEGORY_PREMIUM_SHORT_CODE}, or
+     * {@link SmsManager#SMS_CATEGORY_STANDARD_SHORT_CODE}
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @TestApi
+    public @SmsShortCodeCategory int checkSmsShortCodeDestination(
+            String destAddress, String countryIso) {
+        try {
+            ISms iccISms = getISmsServiceOrThrow();
+            if (iccISms != null) {
+                return iccISms.checkSmsShortCodeDestination(getSubscriptionId(),
+                        ActivityThread.currentPackageName(), destAddress, countryIso);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "checkSmsShortCodeDestination() RemoteException", e);
+        }
+        return SmsManager.SMS_CATEGORY_NOT_SHORT_CODE;
+    }
 }
