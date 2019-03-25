@@ -19,7 +19,11 @@ package com.android.test.filters;
 import static com.android.test.filters.SelectTest.OPTION_SELECT_TEST;
 import static com.android.test.filters.SelectTest.OPTION_SELECT_TEST_VERBOSE;
 
+import static org.hamcrest.collection.IsArrayContaining.hasItemInArray;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import android.os.Bundle;
@@ -143,6 +147,45 @@ public class SelectTestTests {
                 assertFalse("reject " + test, filter.shouldRun(test));
             }
         }
+    }
+
+    @Test
+    public void testAddSelectTest() {
+        final Bundle testArgs = new Bundle();
+
+        final Bundle modifiedTestArgs =
+                SelectTest.addSelectTest(testArgs, PACKAGE_A, CLASS_B3, METHOD_C5X);
+        assertSame(testArgs, modifiedTestArgs);
+
+        final String selectTestArgs = modifiedTestArgs.getString(OPTION_SELECT_TEST);
+        assertNotNull(selectTestArgs);
+        final String[] selectedTests = selectTestArgs.split(",");
+        assertThat(selectedTests, hasItemInArray(PACKAGE_A));
+        assertThat(selectedTests, hasItemInArray(CLASS_B3));
+        assertThat(selectedTests, hasItemInArray(METHOD_C5X));
+    }
+
+    @Test
+    public void testAddSelectTest_prependExistingTestArg() {
+        final Bundle testArgs = new Bundle();
+        testArgs.putString(OPTION_SELECT_TEST, new StringJoiner(",")
+                .add(PACKAGE_A)
+                .add(CLASS_B3)
+                .add(METHOD_C5X)
+                .toString());
+
+        final Bundle modifiedTestArgs =
+                SelectTest.addSelectTest(testArgs, PACKAGE_B, CLASS_B4, METHOD_C6Y);
+
+        final String selectTestArgs = modifiedTestArgs.getString(OPTION_SELECT_TEST);
+        assertNotNull(selectTestArgs);
+        final String[] selectedTests = selectTestArgs.split(",");
+        assertThat(selectedTests, hasItemInArray(PACKAGE_A));
+        assertThat(selectedTests, hasItemInArray(CLASS_B3));
+        assertThat(selectedTests, hasItemInArray(METHOD_C5X));
+        assertThat(selectedTests, hasItemInArray(PACKAGE_B));
+        assertThat(selectedTests, hasItemInArray(CLASS_B4));
+        assertThat(selectedTests, hasItemInArray(METHOD_C6Y));
     }
 
     @Test
