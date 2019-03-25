@@ -36,22 +36,22 @@ public class StatusBarController extends BarController {
 
         private Runnable mAppTransitionPending = () -> {
             StatusBarManagerInternal statusBar = getStatusBarInternal();
-            if (statusBar != null && mWin != null) {
-                statusBar.appTransitionPending(mWin.getDisplayId());
+            if (statusBar != null) {
+                statusBar.appTransitionPending(mDisplayId);
             }
         };
 
         private Runnable mAppTransitionCancelled = () -> {
             StatusBarManagerInternal statusBar = getStatusBarInternal();
-            if (statusBar != null && mWin != null) {
-                statusBar.appTransitionCancelled(mWin.getDisplayId());
+            if (statusBar != null) {
+                statusBar.appTransitionCancelled(mDisplayId);
             }
         };
 
         private Runnable mAppTransitionFinished = () -> {
             StatusBarManagerInternal statusBar = getStatusBarInternal();
-            if (statusBar != null && mWin != null) {
-                statusBar.appTransitionFinished(mWin.getDisplayId());
+            if (statusBar != null) {
+                statusBar.appTransitionFinished(mDisplayId);
             }
         };
 
@@ -65,8 +65,8 @@ public class StatusBarController extends BarController {
                 long statusBarAnimationStartTime, long statusBarAnimationDuration) {
             mHandler.post(() -> {
                 StatusBarManagerInternal statusBar = getStatusBarInternal();
-                if (statusBar != null && mWin != null) {
-                    statusBar.appTransitionStarting(mWin.getDisplayId(),
+                if (statusBar != null) {
+                    statusBar.appTransitionStarting(mDisplayId,
                             statusBarAnimationStartTime, statusBarAnimationDuration);
                 }
             });
@@ -84,8 +84,9 @@ public class StatusBarController extends BarController {
         }
     };
 
-    StatusBarController() {
+    StatusBarController(int displayId) {
         super("StatusBar",
+                displayId,
                 View.STATUS_BAR_TRANSIENT,
                 View.STATUS_BAR_UNHIDE,
                 View.STATUS_BAR_TRANSLUCENT,
