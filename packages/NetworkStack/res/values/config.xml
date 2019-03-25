@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Captive portal http url -->
+    <string name="config_captive_portal_http_url" translatable="false">http://connectivitycheck.gstatic.com/generate_204</string>
+</resources>

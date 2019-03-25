@@ -1345,12 +1345,15 @@ public class ConnectivityManager {
     }
 
     /**
-     * Gets the URL that should be used for resolving whether a captive portal is present.
+     * Gets a URL that can be used for resolving whether a captive portal is present.
      * 1. This URL should respond with a 204 response to a GET request to indicate no captive
      *    portal is present.
      * 2. This URL must be HTTP as redirect responses are used to find captive portal
      *    sign-in pages. Captive portals cannot respond to HTTPS requests with redirects.
      *
+     * The system network validation may be using different strategies to detect captive portals,
+     * so this method does not necessarily return a URL used by the system. It only returns a URL
+     * that may be relevant for other components trying to detect captive portals.
      * @hide
      */
     @SystemApi
