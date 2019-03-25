@@ -1690,7 +1690,8 @@ public class ServiceState implements Parcelable {
                 || radioTechnology == RIL_RADIO_TECHNOLOGY_GSM
                 || radioTechnology == RIL_RADIO_TECHNOLOGY_TD_SCDMA
                 || radioTechnology == RIL_RADIO_TECHNOLOGY_IWLAN
-                || radioTechnology == RIL_RADIO_TECHNOLOGY_LTE_CA;
+                || radioTechnology == RIL_RADIO_TECHNOLOGY_LTE_CA
+                || radioTechnology == RIL_RADIO_TECHNOLOGY_NR;
 
     }
 
@@ -1710,6 +1711,13 @@ public class ServiceState implements Parcelable {
     public static boolean isLte(int radioTechnology) {
         return radioTechnology == RIL_RADIO_TECHNOLOGY_LTE ||
                 radioTechnology == RIL_RADIO_TECHNOLOGY_LTE_CA;
+    }
+
+    /** @hide */
+    public static boolean isPsTech(int radioTechnology) {
+        return radioTechnology == RIL_RADIO_TECHNOLOGY_LTE ||
+                radioTechnology == RIL_RADIO_TECHNOLOGY_LTE_CA ||
+                radioTechnology == RIL_RADIO_TECHNOLOGY_NR;
     }
 
     /** @hide */
