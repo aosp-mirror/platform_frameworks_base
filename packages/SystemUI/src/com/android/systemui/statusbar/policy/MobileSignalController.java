@@ -470,9 +470,15 @@ public class MobileSignalController extends SignalController<
             mNetworkController.recalculateEmergency();
         }
         // Fill in the network name if we think we have it.
-        if (mCurrentState.networkName == mNetworkNameDefault && mServiceState != null
+        if (mCurrentState.networkName.equals(mNetworkNameDefault) && mServiceState != null
                 && !TextUtils.isEmpty(mServiceState.getOperatorAlphaShort())) {
             mCurrentState.networkName = mServiceState.getOperatorAlphaShort();
+        }
+        // If this is the data subscription, update the currentState data name
+        if (mCurrentState.networkNameData.equals(mNetworkNameDefault) && mServiceState != null
+                && mCurrentState.dataSim
+                && !TextUtils.isEmpty(mServiceState.getDataOperatorAlphaShort())) {
+            mCurrentState.networkNameData = mServiceState.getDataOperatorAlphaShort();
         }
 
         notifyListenersIfNecessary();
