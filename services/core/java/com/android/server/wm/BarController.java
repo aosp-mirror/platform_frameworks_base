@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.view.Display.INVALID_DISPLAY;
+
 import static com.android.server.wm.BarControllerProto.STATE;
 import static com.android.server.wm.BarControllerProto.TRANSIENT_STATE;
 
@@ -88,6 +90,12 @@ public class BarController {
 
     void setWindow(WindowState win) {
         mWin = win;
+    }
+
+    /** @return The display id of {@link #mWin}. It is used to be called from {@link #mHandler}. */
+    int getDisplayId() {
+        final WindowState win = mWin;
+        return win != null ? win.getDisplayId() : INVALID_DISPLAY;
     }
 
     /**
@@ -228,8 +236,9 @@ public class BarController {
                 @Override
                 public void run() {
                     StatusBarManagerInternal statusbar = getStatusBarInternal();
-                    if (statusbar != null) {
-                        statusbar.setWindowState(mWin.getDisplayId(), mStatusBarManagerId, state);
+                    int displayId = getDisplayId();
+                    if (statusbar != null && displayId != INVALID_DISPLAY) {
+                        statusbar.setWindowState(displayId, mStatusBarManagerId, state);
                     }
                 }
             });
