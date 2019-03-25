@@ -8045,17 +8045,6 @@ public final class Settings {
                 BOOLEAN_VALIDATOR;
 
         /**
-         * Whether the swipe up gesture to switch apps should be enabled.
-         *
-         * @hide
-         */
-        public static final String SWIPE_UP_TO_SWITCH_APPS_ENABLED =
-                "swipe_up_to_switch_apps_enabled";
-
-        private static final Validator SWIPE_UP_TO_SWITCH_APPS_ENABLED_VALIDATOR =
-                BOOLEAN_VALIDATOR;
-
-        /**
          * Whether or not the smart camera lift trigger that launches the camera when the user moves
          * the phone into a position for taking photos should be enabled.
          *
@@ -8739,7 +8728,6 @@ public final class Settings {
             DISPLAY_WHITE_BALANCE_ENABLED,
             SYNC_PARENT_SOUNDS,
             CAMERA_DOUBLE_TWIST_TO_FLIP_ENABLED,
-            SWIPE_UP_TO_SWITCH_APPS_ENABLED,
             CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED,
             SYSTEM_NAVIGATION_KEYS_ENABLED,
             QS_TILES,
@@ -8902,8 +8890,6 @@ public final class Settings {
             VALIDATORS.put(SYNC_PARENT_SOUNDS, SYNC_PARENT_SOUNDS_VALIDATOR);
             VALIDATORS.put(CAMERA_DOUBLE_TWIST_TO_FLIP_ENABLED,
                     CAMERA_DOUBLE_TWIST_TO_FLIP_ENABLED_VALIDATOR);
-            VALIDATORS.put(SWIPE_UP_TO_SWITCH_APPS_ENABLED,
-                    SWIPE_UP_TO_SWITCH_APPS_ENABLED_VALIDATOR);
             VALIDATORS.put(CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED,
                     CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED_VALIDATOR);
             VALIDATORS.put(SYSTEM_NAVIGATION_KEYS_ENABLED,

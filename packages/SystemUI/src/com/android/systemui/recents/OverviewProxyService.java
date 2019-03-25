@@ -46,7 +46,6 @@ import android.os.Looper;
 import android.os.PatternMatcher;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.InputChannel;
 import android.view.MotionEvent;
@@ -60,6 +59,7 @@ import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.recents.ISystemUiProxy;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.InputChannelCompat.InputEventDispatcher;
+import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.CallbackController;
@@ -589,11 +589,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     private int getDefaultInteractionFlags() {
         // If there is no settings available use device default or get it from settings
-        final boolean defaultState = getSwipeUpDefaultValue();
-        final boolean swipeUpEnabled = getSwipeUpSettingAvailable()
-                ? getSwipeUpEnabledFromSettings(defaultState)
-                : defaultState;
-        return swipeUpEnabled ? 0 : DEFAULT_DISABLE_SWIPE_UP_STATE;
+        return QuickStepContract.isLegacyMode(mContext)
+                ? DEFAULT_DISABLE_SWIPE_UP_STATE
+                : 0;
     }
 
     private void notifyBackButtonAlphaChanged(float alpha, boolean animate) {
@@ -638,21 +636,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 ActivityManagerWrapper.getInstance().getCurrentUserId()) != null;
     }
 
-    private boolean getSwipeUpDefaultValue() {
-        return mContext.getResources()
-                .getBoolean(com.android.internal.R.bool.config_swipe_up_gesture_default);
-    }
-
-    private boolean getSwipeUpSettingAvailable() {
-        return mContext.getResources()
-                .getBoolean(com.android.internal.R.bool.config_swipe_up_gesture_setting_available);
-    }
-
-    private boolean getSwipeUpEnabledFromSettings(boolean defaultValue) {
-        return Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.SWIPE_UP_TO_SWITCH_APPS_ENABLED, defaultValue ? 1 : 0) == 1;
-    }
-
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println(TAG_OPS + " state:");
@@ -665,11 +648,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
         pw.print("  quickStepIntent="); pw.println(mQuickStepIntent);
         pw.print("  quickStepIntentResolved="); pw.println(isEnabled());
-
-        final boolean swipeUpDefaultValue = getSwipeUpDefaultValue();
-        final boolean swipeUpEnabled = getSwipeUpEnabledFromSettings(swipeUpDefaultValue);
-        pw.print("  swipeUpSetting="); pw.println(swipeUpEnabled);
-        pw.print("  swipeUpSettingDefault="); pw.println(swipeUpDefaultValue);
+        pw.print("  navBarMode=");
+        pw.println(QuickStepContract.getCurrentInteractionMode(mContext));
     }
 
     public interface OverviewProxyListener {

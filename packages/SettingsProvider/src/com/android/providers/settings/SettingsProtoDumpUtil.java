@@ -2410,12 +2410,6 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.WAKE_GESTURE_ENABLED,
                 SecureSettingsProto.WAKE_GESTURE_ENABLED);
 
-        final long launcherToken = p.start(SecureSettingsProto.LAUNCHER);
-        dumpSetting(s, p,
-                Settings.Secure.SWIPE_UP_TO_SWITCH_APPS_ENABLED,
-                SecureSettingsProto.Launcher.SWIPE_UP_TO_SWITCH_APPS_ENABLED);
-        p.end(launcherToken);
-
         final long zenToken = p.start(SecureSettingsProto.ZEN);
         dumpSetting(s, p,
                 Settings.Secure.ZEN_DURATION,

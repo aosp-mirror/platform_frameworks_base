@@ -130,7 +130,8 @@ public class NavigationPrototypeController extends ContentObserver {
      * @return the width for edge swipe
      */
     public int getEdgeSensitivityWidth() {
-        return convertDpToPixel(getGlobalInt(EDGE_SENSITIVITY_WIDTH_SETTING, 0));
+        // TODO: Move into resource
+        return convertDpToPixel(getGlobalInt(EDGE_SENSITIVITY_WIDTH_SETTING, 48));
     }
 
     /**

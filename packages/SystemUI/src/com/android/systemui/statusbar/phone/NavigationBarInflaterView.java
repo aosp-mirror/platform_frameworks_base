@@ -38,6 +38,7 @@ import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.statusbar.phone.NavBarButtonProvider;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.phone.ReverseLinearLayout.ReverseRelativeLayout;
 import com.android.systemui.statusbar.policy.KeyButtonView;
 import com.android.systemui.tuner.TunerService;
@@ -136,10 +137,12 @@ public class NavigationBarInflaterView extends FrameLayout
     }
 
     protected String getDefaultLayout() {
-        final int defaultResource = mOverviewProxyService.shouldShowSwipeUpUI()
-                ? R.string.config_navBarLayoutQuickstep
-                : R.string.config_navBarLayout;
-        return mContext.getString(defaultResource);
+        final int defaultResource = QuickStepContract.isGesturalMode(getContext())
+                ? R.string.config_navBarLayoutHandle
+                : mOverviewProxyService.shouldShowSwipeUpUI()
+                        ? R.string.config_navBarLayoutQuickstep
+                        : R.string.config_navBarLayout;
+        return getContext().getString(defaultResource);
     }
 
     @Override
