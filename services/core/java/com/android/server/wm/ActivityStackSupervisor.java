@@ -553,18 +553,10 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         // down to the max limit while they are still waiting to finish.
         mFinishingActivities.remove(r);
 
-        for (int i = mWaitingForActivityVisible.size() - 1; i >= 0; --i) {
-            if (mWaitingForActivityVisible.get(i).matches(r.mActivityComponent)) {
-                mWaitingForActivityVisible.remove(i);
-            }
-        }
+        stopWaitingForActivityVisible(r);
     }
 
-    void reportActivityVisibleLocked(ActivityRecord r) {
-        sendWaitingVisibleReportLocked(r);
-    }
-
-    void sendWaitingVisibleReportLocked(ActivityRecord r) {
+    void stopWaitingForActivityVisible(ActivityRecord r) {
         boolean changed = false;
         for (int i = mWaitingForActivityVisible.size() - 1; i >= 0; --i) {
             final WaitInfo w = mWaitingForActivityVisible.get(i);
