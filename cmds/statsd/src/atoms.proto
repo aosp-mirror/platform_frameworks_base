@@ -2433,6 +2433,8 @@ message TouchEventReported {
     optional float latency_mean_micros = 3;
     // Standard deviation
     optional float latency_stdev_micros = 4;
+    // Number of touch events (input_event) in this report
+    optional int32 count = 5;
 }
 
 /**
