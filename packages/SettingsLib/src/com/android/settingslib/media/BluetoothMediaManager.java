@@ -277,12 +277,37 @@ public class BluetoothMediaManager extends MediaManager implements BluetoothCall
     public void onActiveDeviceChanged(CachedBluetoothDevice activeDevice, int bluetoothProfile) {
         Log.d(TAG, "onActiveDeviceChanged : device : "
                 + activeDevice + ", profile : " + bluetoothProfile);
-        if (BluetoothProfile.HEARING_AID == bluetoothProfile
-                || BluetoothProfile.A2DP == bluetoothProfile) {
+
+        if (BluetoothProfile.HEARING_AID == bluetoothProfile) {
+            if (activeDevice != null) {
+                dispatchConnectedDeviceChanged(MediaDeviceUtils.getId(activeDevice));
+            }
+        } else if (BluetoothProfile.A2DP == bluetoothProfile) {
+            // When active device change to Hearing Aid,
+            // BluetoothEventManager also send onActiveDeviceChanged() to notify that active device
+            // of A2DP profile is null. To handle this case, check hearing aid device
+            // is active device or not
+            final MediaDevice activeHearingAidDevice = findActiveHearingAidDevice();
             final String id = activeDevice == null
-                    ? PhoneMediaDevice.ID : MediaDeviceUtils.getId(activeDevice);
+                    ? activeHearingAidDevice == null
+                    ? PhoneMediaDevice.ID : activeHearingAidDevice.getId()
+                    : MediaDeviceUtils.getId(activeDevice);
             dispatchConnectedDeviceChanged(id);
         }
+    }
+
+    private MediaDevice findActiveHearingAidDevice() {
+        final HearingAidProfile hearingAidProfile = mProfileManager.getHearingAidProfile();
+
+        if (hearingAidProfile != null) {
+            final List<BluetoothDevice> activeDevices = hearingAidProfile.getActiveDevices();
+            for (BluetoothDevice btDevice : activeDevices) {
+                if (btDevice != null) {
+                    return findMediaDevice(MediaDeviceUtils.getId(btDevice));
+                }
+            }
+        }
+        return null;
     }
 
     @Override
