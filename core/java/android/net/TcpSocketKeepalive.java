@@ -17,25 +17,22 @@
 package android.net;
 
 import android.annotation.NonNull;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Log;
 
 import java.io.FileDescriptor;
-import java.net.Socket;
 import java.util.concurrent.Executor;
 
 /** @hide */
 final class TcpSocketKeepalive extends SocketKeepalive {
 
-    private final Socket mSocket;
-
     TcpSocketKeepalive(@NonNull IConnectivityManager service,
             @NonNull Network network,
-            @NonNull Socket socket,
+            @NonNull ParcelFileDescriptor pfd,
             @NonNull Executor executor,
             @NonNull Callback callback) {
-        super(service, network, executor, callback);
-        mSocket = socket;
+        super(service, network, pfd, executor, callback);
     }
 
     /**
@@ -57,7 +54,7 @@ final class TcpSocketKeepalive extends SocketKeepalive {
     void startImpl(int intervalSec) {
         mExecutor.execute(() -> {
             try {
-                final FileDescriptor fd = mSocket.getFileDescriptor$();
+                final FileDescriptor fd = mPfd.getFileDescriptor();
                 mService.startTcpKeepalive(mNetwork, fd, intervalSec, mCallback);
             } catch (RemoteException e) {
                 Log.e(TAG, "Error starting packet keepalive: ", e);
