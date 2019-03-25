@@ -26,7 +26,6 @@
 #include "section_list.h"
 
 #include <android-base/file.h>
-#include <android-base/properties.h>
 #include <android/os/DropBoxManager.h>
 #include <android/util/protobuf.h>
 #include <android/util/ProtoOutputStream.h>
@@ -467,8 +466,6 @@ void Reporter::runReport(size_t* reportByteSize) {
 
     IncidentMetadata metadata;
     int persistedPrivacyPolicy = PRIVACY_POLICY_UNSET;
-    std::string buildType = android::base::GetProperty("ro.build.type", "");
-    const bool isUserdebugOrEng = buildType == "userdebug" || buildType == "eng";
 
     (*reportByteSize) = 0;
 
@@ -566,13 +563,6 @@ void Reporter::runReport(size_t* reportByteSize) {
     // and report to those that care that we're doing it.
     for (const Section** section = SECTION_LIST; *section; section++) {
         const int sectionId = (*section)->id;
-
-        // If this section is too private for user builds, skip it.
-        if ((*section)->userdebugAndEngOnly && !isUserdebugOrEng) {
-            VLOG("Skipping incident report section %d '%s' because it's limited to userdebug/eng",
-                  sectionId, (*section)->name.string());
-            continue;
-        }
 
         // If nobody wants this section, skip it.
         if (!mBatch->containsSection(sectionId)) {
