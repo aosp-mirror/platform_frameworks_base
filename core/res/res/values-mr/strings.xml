@@ -1075,7 +1075,7 @@
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> थांबतो"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> थांबते"</string>
     <string name="aerr_restart" msgid="7581308074153624475">"अ‍ॅप पुन्हा उघडा"</string>
-    <string name="aerr_report" msgid="5371800241488400617">"अभिप्राय पाठवा"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"फीडबॅक पाठवा"</string>
     <string name="aerr_close" msgid="2991640326563991340">"बंद करा"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"डिव्हाइस रीस्टार्ट होईपर्यंत म्यूट करा"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"प्रतीक्षा करा"</string>

@@ -1775,7 +1775,7 @@
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Suzi"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Ne ometaj"</string>
-    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Prestanak rada"</string>
+    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Neaktivnost"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Radni dan uvečer"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Vikend"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Događaj"</string>

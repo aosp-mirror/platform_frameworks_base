@@ -1223,7 +1223,7 @@
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Utzi"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Gogoratu aukera"</string>
     <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"Hori geroago alda dezakezu Ezarpenak &gt; Aplikazioak atalean"</string>
-    <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Onartu beti"</string>
+    <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Eman baimena beti"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Ez onartu inoiz"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM txartela kendu da"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"Sare mugikorra ez da erabilgarri egongo baliozko SIM txartel bat sartuta berrabiarazten ez duzun arte."</string>

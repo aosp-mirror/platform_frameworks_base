@@ -269,7 +269,7 @@
     <string name="safeMode" msgid="2788228061547930246">"Mode sécurisé"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Système Android"</string>
     <string name="user_owner_label" msgid="8836124313744349203">"Passer au profil personnel"</string>
-    <string name="managed_profile_label" msgid="8947929265267690522">"Passer au profil professionnel"</string>
+    <string name="managed_profile_label" msgid="8947929265267690522">"Passer au profil pro"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Contacts"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"accéder à vos contacts"</string>
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Permettre à &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; d\'accéder à vos contacts ?"</string>

@@ -135,7 +135,7 @@
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Desactivado"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Dar preferencia a Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Preferir datos móviles"</string>
-    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Solo conexión Wi-Fi"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Solo Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: No desviada"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> transcurridos <xliff:g id="TIME_DELAY">{2}</xliff:g> segundos"</string>
