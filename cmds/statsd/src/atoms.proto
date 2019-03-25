@@ -5554,6 +5554,9 @@ message BubbleUIChanged {
     // Normalized screen position of the bubble stack. The range is between 0 and 1.
     optional float normalized_x_position = 7;
     optional float normalized_y_position = 8;
+
+    // Whether the bubble is unread. If it is unread, a dot is shown in the bubble stack icon.
+    optional bool is_unread = 9;
 }
 
 /**

@@ -954,7 +954,8 @@ public class BubbleStackView extends FrameLayout {
                     getBubbleCount(),
                     action,
                     getNormalizedXPosition(),
-                    getNormalizedYPosition());
+                    getNormalizedYPosition(),
+                    false /* unread notification */);
         } else {
             StatusBarNotification notification = bubble.entry.notification;
             StatsLog.write(StatsLog.BUBBLE_UI_CHANGED,
@@ -965,7 +966,8 @@ public class BubbleStackView extends FrameLayout {
                     getBubbleCount(),
                     action,
                     getNormalizedXPosition(),
-                    getNormalizedYPosition());
+                    getNormalizedYPosition(),
+                    bubble.entry.showInShadeWhenBubble());
         }
     }
 

@@ -413,7 +413,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
             ((TextView) mPermissionView.findViewById(R.id.pkgname)).setText(mAppName);
             ((TextView) mPermissionView.findViewById(R.id.prompt)).setText(
                     getResources().getString(R.string.bubbles_prompt, mAppName));
-            logBubbleClickEvent(mEntry.notification,
+            logBubbleClickEvent(mEntry,
                     StatsLog.BUBBLE_UICHANGED__ACTION__PERMISSION_DIALOG_SHOWN);
         }
     }
@@ -509,7 +509,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
             mStackView.collapseStack(() -> {
                 try {
                     n.contentIntent.send();
-                    logBubbleClickEvent(mEntry.notification,
+                    logBubbleClickEvent(mEntry,
                             StatsLog.BUBBLE_UICHANGED__ACTION__HEADER_GO_TO_APP);
                 } catch (PendingIntent.CanceledException e) {
                     Log.w(TAG, "Failed to send intent for bubble with key: "
@@ -521,7 +521,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                     mEntry.notification.getUid());
             mStackView.collapseStack(() -> {
                 mContext.startActivity(intent);
-                logBubbleClickEvent(mEntry.notification,
+                logBubbleClickEvent(mEntry,
                         StatsLog.BUBBLE_UICHANGED__ACTION__HEADER_GO_TO_SETTINGS);
             });
         } else if (id == R.id.no_bubbles_button) {
@@ -544,7 +544,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                 mOnBubbleBlockedListener.onBubbleBlocked(mEntry);
             }
             mStackView.onExpandedHeightChanged();
-            logBubbleClickEvent(mEntry.notification,
+            logBubbleClickEvent(mEntry,
                     allowed ? StatsLog.BUBBLE_UICHANGED__ACTION__PERMISSION_OPT_IN :
                             StatsLog.BUBBLE_UICHANGED__ACTION__PERMISSION_OPT_OUT);
         } catch (RemoteException e) {
@@ -707,10 +707,11 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     /**
      * Logs bubble UI click event.
      *
-     * @param notification the bubble notification that user is interacting with.
+     * @param entry the bubble notification entry that user is interacting with.
      * @param action the user interaction enum.
      */
-    private void logBubbleClickEvent(StatusBarNotification notification, int action) {
+    private void logBubbleClickEvent(NotificationEntry entry, int action) {
+        StatusBarNotification notification = entry.notification;
         StatsLog.write(StatsLog.BUBBLE_UI_CHANGED,
                 notification.getPackageName(),
                 notification.getNotification().getChannelId(),
@@ -719,7 +720,8 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                 mStackView.getBubbleCount(),
                 action,
                 mStackView.getNormalizedXPosition(),
-                mStackView.getNormalizedYPosition());
+                mStackView.getNormalizedYPosition(),
+                entry.showInShadeWhenBubble());
     }
 
     private int getDimenForPackageUser(int resId, String pkg, int userId) {
