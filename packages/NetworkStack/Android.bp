@@ -29,6 +29,7 @@ android_library {
         "netd_aidl_interface-java",
         "networkstack-aidl-interfaces-java",
         "datastallprotosnano",
+        "networkstackprotosnano",
     ],
     manifest: "AndroidManifestBase.xml",
 }
