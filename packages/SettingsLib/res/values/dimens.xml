@@ -91,6 +91,7 @@
     <!-- How far to inset the rounded edges -->
     <dimen name="stat_sys_mobile_signal_circle_inset">0.9dp</dimen>
 
-
+    <!-- Size of nearby icon -->
+    <dimen name="bt_nearby_icon_size">24dp</dimen>
 
 </resources>
