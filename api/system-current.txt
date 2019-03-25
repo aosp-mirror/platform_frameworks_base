@@ -6895,6 +6895,22 @@ package android.service.wallpaper {
 
 }
 
+package android.service.watchdog {
+
+  public abstract class ExplicitHealthCheckService extends android.app.Service {
+    ctor public ExplicitHealthCheckService();
+    method public final void notifyHealthCheckPassed(@NonNull String);
+    method @NonNull public final android.os.IBinder onBind(@NonNull android.content.Intent);
+    method public abstract void onCancelHealthCheck(@NonNull String);
+    method @NonNull public abstract java.util.List<java.lang.String> onGetRequestedPackages();
+    method @NonNull public abstract java.util.List<java.lang.String> onGetSupportedPackages();
+    method public abstract void onRequestHealthCheck(@NonNull String);
+    field public static final String BIND_PERMISSION = "android.permission.BIND_EXPLICIT_HEALTH_CHECK_SERVICE";
+    field public static final String SERVICE_INTERFACE = "android.service.watchdog.ExplicitHealthCheckService";
+  }
+
+}
+
 package android.telecom {
 
   @Deprecated public class AudioState implements android.os.Parcelable {
