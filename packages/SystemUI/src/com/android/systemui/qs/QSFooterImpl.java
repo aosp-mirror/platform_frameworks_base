@@ -22,7 +22,6 @@ import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEX
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.graphics.PorterDuff.Mode;
@@ -320,29 +319,13 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
         mSettingsContainer.findViewById(R.id.tuner_icon).setVisibility(
                 TunerService.isTunerEnabled(mContext) ? View.VISIBLE : View.INVISIBLE);
         final boolean isDemo = UserManager.isDeviceInDemoMode(mContext);
-        mMultiUserSwitch.setVisibility(showUserSwitcher(isDemo) ? View.VISIBLE : View.INVISIBLE);
+        mMultiUserSwitch.setVisibility(showUserSwitcher() ? View.VISIBLE : View.INVISIBLE);
         mEditContainer.setVisibility(isDemo || !mExpanded ? View.INVISIBLE : View.VISIBLE);
         mSettingsButton.setVisibility(isDemo || !mExpanded ? View.INVISIBLE : View.VISIBLE);
     }
 
-    private boolean showUserSwitcher(boolean isDemo) {
-        if (!mExpanded || isDemo || !UserManager.supportsMultipleUsers()) {
-            return false;
-        }
-        UserManager userManager = UserManager.get(mContext);
-        if (userManager.hasUserRestriction(UserManager.DISALLOW_USER_SWITCH)) {
-            return false;
-        }
-        int switchableUserCount = 0;
-        for (UserInfo user : userManager.getUsers(true)) {
-            if (user.supportsSwitchToByUser()) {
-                ++switchableUserCount;
-                if (switchableUserCount > 1) {
-                    return true;
-                }
-            }
-        }
-        return getResources().getBoolean(R.bool.qs_show_user_switcher_for_single_user);
+    private boolean showUserSwitcher() {
+        return mExpanded && mMultiUserSwitch.isMultiUserEnabled();
     }
 
     private void updateListeners() {
