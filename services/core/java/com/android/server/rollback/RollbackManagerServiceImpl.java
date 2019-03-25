@@ -1015,6 +1015,9 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
     @Override
     public boolean notifyStagedSession(int sessionId) {
+        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+            throw new SecurityException("notifyStagedSession may only be called by the system.");
+        }
         final LinkedBlockingQueue<Boolean> result = new LinkedBlockingQueue<>();
 
         // NOTE: We post this runnable on the RollbackManager's binder thread because we'd prefer
@@ -1066,6 +1069,9 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
     @Override
     public void notifyStagedApkSession(int originalSessionId, int apkSessionId) {
+        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+            throw new SecurityException("notifyStagedApkSession may only be called by the system.");
+        }
         getHandler().post(() -> {
             RollbackData rd = null;
             synchronized (mLock) {
