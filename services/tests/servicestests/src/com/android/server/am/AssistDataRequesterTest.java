@@ -64,7 +64,11 @@ import java.util.concurrent.TimeUnit;
  * Note: Currently, we only support fetching the screenshot for the current application, so the
  * screenshot checks are hardcoded accordingly.
  *
- * runtest --path frameworks/base/services/tests/servicestests/src/com/android/server/am/AssistDataRequesterTest.java
+ * <p>Build/Install/Run:
+ *  atest FrameworksServicesTests:AssistDataRequesterTest
+ *
+ * <p>This test class is a part of Window Manager Service tests and specified in
+ * {@link com.android.server.wm.test.filters.FrameworksTestsFilter}.
  */
 @MediumTest
 @FlakyTest(bugId = 113616538)

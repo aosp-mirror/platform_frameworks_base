@@ -52,6 +52,15 @@ import org.junit.runner.RunWith;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Tests for {@link TaskStackListener}.
+ *
+ * <p>Build/Install/Run:
+ *  atest FrameworksServicesTests:TaskStackChangedListenerTest
+ *
+ * <p>This test class is a part of Window Manager Service tests and specified in
+ * {@link com.android.server.wm.test.filters.FrameworksTestsFilter}.
+ */
 @MediumTest
 @RunWith(AndroidJUnit4.class)
 public class TaskStackChangedListenerTest {

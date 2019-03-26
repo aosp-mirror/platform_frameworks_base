@@ -30,7 +30,13 @@ import java.io.File;
 import java.util.Random;
 
 /**
- * atest FrameworksServicesTests:TaskPersisterTest
+ * Tests for {@link TaskPersister}.
+ *
+ * <p>Build/Install/Run:
+ *  atest FrameworksServicesTests:TaskPersisterTest
+ *
+ * <p>This test class is a part of Window Manager Service tests and specified in
+ * {@link com.android.server.wm.test.filters.FrameworksTestsFilter}.
  */
 public class TaskPersisterTest extends AndroidTestCase {
     private static final String TEST_USER_NAME = "AM-Test-User";

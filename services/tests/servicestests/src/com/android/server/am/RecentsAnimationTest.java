@@ -22,9 +22,9 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
 import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
 
-import static org.mockito.Mockito.any;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -46,7 +46,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
- * atest FrameworksServicesTests:RecentsAnimationTest
+ * Tests for recent tasks animation.
+ *
+ * <p>Build/Install/Run:
+ *  atest FrameworksServicesTests:RecentsAnimationTest
+ *
+ * <p>This test class is a part of Window Manager Service tests and specified in
+ * {@link com.android.server.wm.test.filters.FrameworksTestsFilter}.
  */
 @MediumTest
 @Presubmit

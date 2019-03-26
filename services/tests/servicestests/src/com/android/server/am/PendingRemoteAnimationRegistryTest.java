@@ -38,7 +38,13 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * atest PendingRemoteAnimationRegistryTest
+ * Tests for {@link PendingRemoteAnimationRegistry}.
+ *
+ * <p>Build/Install/Run:
+ *  atest PendingRemoteAnimationRegistryTest
+ *
+ * <p>This test class is a part of Window Manager Service tests and specified in
+ * {@link com.android.server.wm.test.filters.FrameworksTestsFilter}.
  */
 @SmallTest
 @Presubmit
