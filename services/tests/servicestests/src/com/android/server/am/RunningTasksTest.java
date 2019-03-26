@@ -43,7 +43,13 @@ import org.junit.runner.RunWith;
 import java.util.ArrayList;
 
 /**
- * runtest --path frameworks/base/services/tests/servicestests/src/com/android/server/am/RunningTasksTest.java
+ * Tests for {@link RunningTasks}.
+ *
+ * <p>Build/Install/Run:
+ *  atest FrameworksServicesTests:RunningTasksTest
+ *
+ * <p>This test class is a part of Window Manager Service tests and specified in
+ * {@link com.android.server.wm.test.filters.FrameworksTestsFilter}.
  */
 @MediumTest
 @Presubmit

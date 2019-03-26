@@ -28,6 +28,15 @@ import androidx.test.runner.AndroidJUnit4;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+/**
+ * Tests for {@link SafeActivityOptions}.
+ *
+ * <p>Build/Install/Run:
+ *  atest FrameworksServicesTests:SafeActivityOptionsTest
+ *
+ * <p>This test class is a part of Window Manager Service tests and specified in
+ * {@link com.android.server.wm.test.filters.FrameworksTestsFilter}.
+ */
 @MediumTest
 @Presubmit
 @FlakyTest

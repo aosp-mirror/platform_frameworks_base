@@ -59,8 +59,11 @@ import java.util.ArrayList;
 /**
  * Tests for exercising {@link TaskRecord}.
  *
- * Build/Install/Run:
+ * <p>Build/Install/Run:
  *  atest FrameworksServicesTests:com.android.server.am.TaskRecordTests
+ *
+ * <p>This test class is a part of Window Manager Service tests and specified in
+ * {@link com.android.server.wm.test.filters.FrameworksTestsFilter}.
  */
 @MediumTest
 @Presubmit

@@ -76,7 +76,13 @@ import java.util.Random;
 import java.util.Set;
 
 /**
- * atest FrameworksServicesTests:RecentTasksTest
+ * Tests for {@link RecentTasks}.
+ *
+ * <p>Build/Install/Run:
+ *  atest FrameworksServicesTests:RecentTasksTest
+ *
+ * <p>This test class is a part of Window Manager Service tests and specified in
+ * {@link com.android.server.wm.test.filters.FrameworksTestsFilter}.
  */
 @MediumTest
 @Presubmit
