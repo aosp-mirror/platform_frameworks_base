@@ -73,12 +73,12 @@ static void nativeClosePage(JNIEnv* env, jclass thiz, jlong pagePtr) {
 }
 
 static void nativeRenderPage(JNIEnv* env, jclass thiz, jlong documentPtr, jlong pagePtr,
-        jobject jbitmap, jint clipLeft, jint clipTop, jint clipRight, jint clipBottom,
+        jlong bitmapPtr, jint clipLeft, jint clipTop, jint clipRight, jint clipBottom,
         jlong transformPtr, jint renderMode) {
     FPDF_PAGE page = reinterpret_cast<FPDF_PAGE>(pagePtr);
 
     SkBitmap skBitmap;
-    GraphicsJNI::getSkBitmap(env, jbitmap, &skBitmap);
+    bitmap::toBitmap(bitmapPtr).getSkBitmap(&skBitmap);
 
     const int stride = skBitmap.width() * 4;
 
@@ -117,7 +117,7 @@ static const JNINativeMethod gPdfRenderer_Methods[] = {
     {"nativeClose", "(J)V", (void*) nativeClose},
     {"nativeGetPageCount", "(J)I", (void*) nativeGetPageCount},
     {"nativeScaleForPrinting", "(J)Z", (void*) nativeScaleForPrinting},
-    {"nativeRenderPage", "(JJLandroid/graphics/Bitmap;IIIIJI)V", (void*) nativeRenderPage},
+    {"nativeRenderPage", "(JJJIIIIJI)V", (void*) nativeRenderPage},
     {"nativeOpenPageAndGetSize", "(JILandroid/graphics/Point;)J", (void*) nativeOpenPageAndGetSize},
     {"nativeClosePage", "(J)V", (void*) nativeClosePage}
 };

@@ -736,11 +736,11 @@ static void android_view_ThreadedRenderer_buildLayer(JNIEnv* env, jobject clazz,
 }
 
 static jboolean android_view_ThreadedRenderer_copyLayerInto(JNIEnv* env, jobject clazz,
-        jlong proxyPtr, jlong layerPtr, jobject jbitmap) {
+        jlong proxyPtr, jlong layerPtr, jlong bitmapPtr) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
     DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerPtr);
     SkBitmap bitmap;
-    GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
+    bitmap::toBitmap(bitmapPtr).getSkBitmap(&bitmap);
     return proxy->copyLayerInto(layer, bitmap);
 }
 
@@ -911,9 +911,9 @@ static void android_view_ThreadedRenderer_setFrameCompleteCallback(JNIEnv* env,
 
 static jint android_view_ThreadedRenderer_copySurfaceInto(JNIEnv* env,
         jobject clazz, jobject jsurface, jint left, jint top,
-        jint right, jint bottom, jobject jbitmap) {
+        jint right, jint bottom, jlong bitmapPtr) {
     SkBitmap bitmap;
-    GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
+    bitmap::toBitmap(bitmapPtr).getSkBitmap(&bitmap);
     sp<Surface> surface = android_view_Surface_getSurface(env, jsurface);
     return RenderProxy::copySurfaceInto(surface, left, top, right, bottom, &bitmap);
 }
@@ -1106,7 +1106,7 @@ static const JNINativeMethod gMethods[] = {
     { "nInvokeFunctor", "(JZ)V", (void*) android_view_ThreadedRenderer_invokeFunctor },
     { "nCreateTextureLayer", "(J)J", (void*) android_view_ThreadedRenderer_createTextureLayer },
     { "nBuildLayer", "(JJ)V", (void*) android_view_ThreadedRenderer_buildLayer },
-    { "nCopyLayerInto", "(JJLandroid/graphics/Bitmap;)Z", (void*) android_view_ThreadedRenderer_copyLayerInto },
+    { "nCopyLayerInto", "(JJJ)Z", (void*) android_view_ThreadedRenderer_copyLayerInto },
     { "nPushLayerUpdate", "(JJ)V", (void*) android_view_ThreadedRenderer_pushLayerUpdate },
     { "nCancelLayerUpdate", "(JJ)V", (void*) android_view_ThreadedRenderer_cancelLayerUpdate },
     { "nDetachSurfaceTexture", "(JJ)V", (void*) android_view_ThreadedRenderer_detachSurfaceTexture },
@@ -1135,7 +1135,7 @@ static const JNINativeMethod gMethods[] = {
     { "nRemoveFrameMetricsObserver",
             "(JJ)V",
             (void*)android_view_ThreadedRenderer_removeFrameMetricsObserver },
-    { "nCopySurfaceInto", "(Landroid/view/Surface;IIIILandroid/graphics/Bitmap;)I",
+    { "nCopySurfaceInto", "(Landroid/view/Surface;IIIIJ)I",
                 (void*)android_view_ThreadedRenderer_copySurfaceInto },
     { "nCreateHardwareBitmap", "(JII)Landroid/graphics/Bitmap;",
             (void*)android_view_ThreadedRenderer_createHardwareBitmapFromRenderNode },
