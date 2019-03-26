@@ -472,7 +472,7 @@ public final class PermissionControllerManager {
                 @NonNull UserHandle user) {
             super(context, SERVICE_INTERFACE, componentName, user.getIdentifier(),
                     service -> Log.e(TAG, "RemoteService " + service + " died"),
-                    context.getMainThreadHandler(), false, false, 1);
+                    context.getMainThreadHandler(), 0, false, 1);
         }
 
         /**

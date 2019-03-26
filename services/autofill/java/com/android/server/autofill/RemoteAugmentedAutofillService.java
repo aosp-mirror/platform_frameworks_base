@@ -58,7 +58,8 @@ final class RemoteAugmentedAutofillService
             boolean bindInstantServiceAllowed, boolean verbose, int idleUnbindTimeoutMs,
             int requestTimeoutMs) {
         super(context, AugmentedAutofillService.SERVICE_INTERFACE, serviceName, userId, callbacks,
-                context.getMainThreadHandler(), bindInstantServiceAllowed, verbose);
+                context.getMainThreadHandler(),
+                bindInstantServiceAllowed ? Context.BIND_ALLOW_INSTANT : 0, verbose);
         mIdleUnbindTimeoutMs = idleUnbindTimeoutMs;
         mRequestTimeoutMs = requestTimeoutMs;
 
