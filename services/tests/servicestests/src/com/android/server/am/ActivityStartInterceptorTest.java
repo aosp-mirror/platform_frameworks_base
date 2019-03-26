@@ -55,8 +55,11 @@ import org.mockito.MockitoAnnotations;
 /**
  * Unit tests for {@link ActivityStartInterceptorTest}.
  *
- * Build/Install/Run:
- *  bit FrameworksServicesTests:com.android.server.am.ActivityStartInterceptorTest
+ * <p>Build/Install/Run:
+ *  atest FrameworksServicesTests:ActivityStartInterceptorTest
+ *
+ * <p>This test class is a part of Window Manager Service tests and specified in
+ * {@link com.android.server.wm.test.filters.FrameworksTestsFilter}.
  */
 @SmallTest
 public class ActivityStartInterceptorTest {

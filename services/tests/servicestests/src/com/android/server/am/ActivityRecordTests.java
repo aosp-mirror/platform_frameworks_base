@@ -30,16 +30,15 @@ import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_BOTTOM;
 import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_LEFT;
 import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_RIGHT;
 
-import static junit.framework.TestCase.assertNotNull;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyInt;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -62,8 +61,11 @@ import org.mockito.invocation.InvocationOnMock;
 /**
  * Tests for the {@link ActivityRecord} class.
  *
- * Build/Install/Run:
+ * <p>Build/Install/Run:
  *  atest FrameworksServicesTests:com.android.server.am.ActivityRecordTests
+ *
+ * <p>This test class is a part of Window Manager Service tests and specified in
+ * {@link com.android.server.wm.test.filters.FrameworksTestsFilter}.
  */
 @MediumTest
 @Presubmit

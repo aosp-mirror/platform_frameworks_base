@@ -24,10 +24,10 @@ import static com.android.server.am.LaunchParamsController.LaunchParamsModifier.
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyInt;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -51,8 +51,11 @@ import org.junit.runner.RunWith;
 /**
  * Tests for exercising {@link LaunchParamsController}.
  *
- * Build/Install/Run:
+ * <p>Build/Install/Run:
  *  atest FrameworksServicesTests:LaunchParamsControllerTests
+ *
+ * <p>This test class is a part of Window Manager Service tests and specified in
+ * {@link com.android.server.wm.test.filters.FrameworksTestsFilter}.
  */
 @MediumTest
 @Presubmit

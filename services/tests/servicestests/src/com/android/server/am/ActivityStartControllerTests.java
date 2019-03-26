@@ -19,8 +19,8 @@ package com.android.server.am;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -43,8 +43,11 @@ import java.util.Random;
 /**
  * Tests for the {@link ActivityStartController} class.
  *
- * Build/Install/Run:
+ * <p>Build/Install/Run:
  *  atest FrameworksServicesTests:ActivityStartControllerTests
+ *
+ * <p>This test class is a part of Window Manager Service tests and specified in
+ * {@link com.android.server.wm.test.filters.FrameworksTestsFilter}.
  */
 @SmallTest
 @Presubmit

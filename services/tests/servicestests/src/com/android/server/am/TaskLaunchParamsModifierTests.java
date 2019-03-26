@@ -38,8 +38,11 @@ import org.junit.runner.RunWith;
 /**
  * Tests for exercising resizing task bounds.
  *
- * Build/Install/Run:
+ * <p>Build/Install/Run:
  *  atest FrameworksServicesTests:TaskLaunchParamsModifierTests
+ *
+ * <p>This test class is a part of Window Manager Service tests and specified in
+ * {@link com.android.server.wm.test.filters.FrameworksTestsFilter}.
  */
 @MediumTest
 @Presubmit
