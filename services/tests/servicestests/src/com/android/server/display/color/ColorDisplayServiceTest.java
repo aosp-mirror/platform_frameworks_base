@@ -124,7 +124,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void customSchedule_whenStartedAfterNight_ifOffAfterNight_turnsOff() {
         setAutoModeCustom(-120 /* startTimeOffset */, -60 /* endTimeOffset */);
-        setActivated(false /* activated */, -30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(false /* activated */, -30 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(false /* activated */);
@@ -133,7 +133,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void customSchedule_whenStartedAfterNight_ifOffBeforeNight_turnsOff() {
         setAutoModeCustom(-120 /* startTimeOffset */, -60 /* endTimeOffset */);
-        setActivated(false /* activated */, -180 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(false /* activated */, -180 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(false /* activated */);
@@ -142,7 +142,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void customSchedule_whenStartedAfterNight_ifOffDuringNight_turnsOff() {
         setAutoModeCustom(-120 /* startTimeOffset */, -60 /* endTimeOffset */);
-        setActivated(false /* activated */, -90 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(false /* activated */, -90 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(false /* activated */);
@@ -151,7 +151,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void customSchedule_whenStartedAfterNight_ifOffInFuture_turnsOff() {
         setAutoModeCustom(-120 /* startTimeOffset */, -60 /* endTimeOffset */);
-        setActivated(false /* activated */, 30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(false /* activated */, 30 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(false /* activated */);
@@ -160,7 +160,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void customSchedule_whenStartedAfterNight_ifOnAfterNight_turnsOn() {
         setAutoModeCustom(-120 /* startTimeOffset */, -60 /* endTimeOffset */);
-        setActivated(true /* activated */, -30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(true /* activated */, -30 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(true /* activated */);
@@ -169,7 +169,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void customSchedule_whenStartedAfterNight_ifOnBeforeNight_turnsOff() {
         setAutoModeCustom(-120 /* startTimeOffset */, -60 /* endTimeOffset */);
-        setActivated(true /* activated */, -180 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(true /* activated */, -180 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(false /* activated */);
@@ -178,7 +178,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void customSchedule_whenStartedAfterNight_ifOnDuringNight_turnsOff() {
         setAutoModeCustom(-120 /* startTimeOffset */, -60 /* endTimeOffset */);
-        setActivated(true /* activated */, -90 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(true /* activated */, -90 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(false /* activated */);
@@ -187,7 +187,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void customSchedule_whenStartedAfterNight_ifOnInFuture_turnsOff() {
         setAutoModeCustom(-120 /* startTimeOffset */, -60 /* endTimeOffset */);
-        setActivated(true /* activated */, 30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(true /* activated */, 30 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(false /* activated */);
@@ -196,7 +196,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void customSchedule_whenStartedBeforeNight_ifOffAfterNight_turnsOff() {
         setAutoModeCustom(60 /* startTimeOffset */, 120 /* endTimeOffset */);
-        setActivated(false /* activated */, 180 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(false /* activated */, 180 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(false /* activated */);
@@ -205,7 +205,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void customSchedule_whenStartedBeforeNight_ifOffBeforeNight_turnsOff() {
         setAutoModeCustom(60 /* startTimeOffset */, 120 /* endTimeOffset */);
-        setActivated(false /* activated */, 30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(false /* activated */, 30 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(false /* activated */);
@@ -214,7 +214,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void customSchedule_whenStartedBeforeNight_ifOffDuringNight_turnsOff() {
         setAutoModeCustom(60 /* startTimeOffset */, 120 /* endTimeOffset */);
-        setActivated(false /* activated */, 90 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(false /* activated */, 90 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(false /* activated */);
@@ -223,7 +223,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void customSchedule_whenStartedBeforeNight_ifOffInPast_turnsOff() {
         setAutoModeCustom(60 /* startTimeOffset */, 120 /* endTimeOffset */);
-        setActivated(false /* activated */, -30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(false /* activated */, -30 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(false /* activated */);
@@ -232,7 +232,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void customSchedule_whenStartedBeforeNight_ifOnAfterNight_turnsOff() {
         setAutoModeCustom(60 /* startTimeOffset */, 120 /* endTimeOffset */);
-        setActivated(true /* activated */, 180 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(true /* activated */, 180 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(false /* activated */);
@@ -241,7 +241,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void customSchedule_whenStartedBeforeNight_ifOnBeforeNight_turnsOff() {
         setAutoModeCustom(60 /* startTimeOffset */, 120 /* endTimeOffset */);
-        setActivated(true /* activated */, 30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(true /* activated */, 30 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(false /* activated */);
@@ -250,7 +250,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void customSchedule_whenStartedBeforeNight_ifOnDuringNight_turnsOff() {
         setAutoModeCustom(60 /* startTimeOffset */, 120 /* endTimeOffset */);
-        setActivated(true /* activated */, 90 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(true /* activated */, 90 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(false /* activated */);
@@ -259,7 +259,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void customSchedule_whenStartedBeforeNight_ifOnInPast_turnsOn() {
         setAutoModeCustom(60 /* startTimeOffset */, 120 /* endTimeOffset */);
-        setActivated(true /* activated */, -30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(true /* activated */, -30 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(true /* activated */);
@@ -268,7 +268,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void customSchedule_whenStartedDuringNight_ifOffAfterNight_turnsOn() {
         setAutoModeCustom(-60 /* startTimeOffset */, 60 /* endTimeOffset */);
-        setActivated(false /* activated */, 90 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(false /* activated */, 90 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(true /* activated */);
@@ -277,7 +277,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void customSchedule_whenStartedDuringNight_ifOffBeforeNight_turnsOn() {
         setAutoModeCustom(-60 /* startTimeOffset */, 60 /* endTimeOffset */);
-        setActivated(false /* activated */, -90 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(false /* activated */, -90 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(true /* activated */);
@@ -286,7 +286,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void customSchedule_whenStartedDuringNight_ifOffDuringNightInFuture_turnsOn() {
         setAutoModeCustom(-60 /* startTimeOffset */, 60 /* endTimeOffset */);
-        setActivated(false /* activated */, 30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(false /* activated */, 30 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(true /* activated */);
@@ -295,7 +295,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void customSchedule_whenStartedDuringNight_ifOffDuringNightInPast_turnsOff() {
         setAutoModeCustom(-60 /* startTimeOffset */, 60 /* endTimeOffset */);
-        setActivated(false /* activated */, -30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(false /* activated */, -30 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(false /* activated */);
@@ -304,7 +304,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void customSchedule_whenStartedDuringNight_ifOnAfterNight_turnsOn() {
         setAutoModeCustom(-60 /* startTimeOffset */, 60 /* endTimeOffset */);
-        setActivated(true /* activated */, 90 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(true /* activated */, 90 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(true /* activated */);
@@ -313,7 +313,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void customSchedule_whenStartedDuringNight_ifOnBeforeNight_turnsOn() {
         setAutoModeCustom(-60 /* startTimeOffset */, 60 /* endTimeOffset */);
-        setActivated(true /* activated */, -90 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(true /* activated */, -90 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(true /* activated */);
@@ -322,7 +322,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void customSchedule_whenStartedDuringNight_ifOnDuringNightInFuture_turnsOn() {
         setAutoModeCustom(-60 /* startTimeOffset */, 60 /* endTimeOffset */);
-        setActivated(true /* activated */, 30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(true /* activated */, 30 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(true /* activated */);
@@ -331,7 +331,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void customSchedule_whenStartedDuringNight_ifOnDuringNightInPast_turnsOn() {
         setAutoModeCustom(-60 /* startTimeOffset */, 60 /* endTimeOffset */);
-        setActivated(true /* activated */, -30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(true /* activated */, -30 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(true /* activated */);
@@ -340,7 +340,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenStartedAfterNight_ifOffAfterNight_turnsOff() {
         setAutoModeTwilight(-120 /* sunsetOffset */, -60 /* sunriseOffset */);
-        setActivated(false /* activated */, -30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(false /* activated */, -30 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(false /* activated */);
@@ -349,7 +349,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenStartedAfterNight_ifOffBeforeNight_turnsOff() {
         setAutoModeTwilight(-120 /* sunsetOffset */, -60 /* sunriseOffset */);
-        setActivated(false /* activated */, -180 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(false /* activated */, -180 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(false /* activated */);
@@ -358,7 +358,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenStartedAfterNight_ifOffDuringNight_turnsOff() {
         setAutoModeTwilight(-120 /* sunsetOffset */, -60 /* sunriseOffset */);
-        setActivated(false /* activated */, -90 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(false /* activated */, -90 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(false /* activated */);
@@ -367,7 +367,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenStartedAfterNight_ifOffInFuture_turnsOff() {
         setAutoModeTwilight(-120 /* sunsetOffset */, -60 /* sunriseOffset */);
-        setActivated(false /* activated */, 30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(false /* activated */, 30 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(false /* activated */);
@@ -376,7 +376,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenStartedAfterNight_ifOnAfterNight_turnsOn() {
         setAutoModeTwilight(-120 /* sunsetOffset */, -60 /* sunriseOffset */);
-        setActivated(true /* activated */, -30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(true /* activated */, -30 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(true /* activated */);
@@ -385,7 +385,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenStartedAfterNight_ifOnBeforeNight_turnsOff() {
         setAutoModeTwilight(-120 /* sunsetOffset */, -60 /* sunriseOffset */);
-        setActivated(true /* activated */, -180 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(true /* activated */, -180 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(false /* activated */);
@@ -394,7 +394,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenStartedAfterNight_ifOnDuringNight_turnsOff() {
         setAutoModeTwilight(-120 /* sunsetOffset */, -60 /* sunriseOffset */);
-        setActivated(true /* activated */, -90 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(true /* activated */, -90 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(false /* activated */);
@@ -403,7 +403,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenStartedAfterNight_ifOnInFuture_turnsOff() {
         setAutoModeTwilight(-120 /* sunsetOffset */, -60 /* sunriseOffset */);
-        setActivated(true /* activated */, 30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(true /* activated */, 30 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(false /* activated */);
@@ -412,7 +412,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenStartedBeforeNight_ifOffAfterNight_turnsOff() {
         setAutoModeTwilight(60 /* sunsetOffset */, 120 /* sunriseOffset */);
-        setActivated(false /* activated */, 180 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(false /* activated */, 180 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(false /* activated */);
@@ -421,7 +421,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenStartedBeforeNight_ifOffBeforeNight_turnsOff() {
         setAutoModeTwilight(60 /* sunsetOffset */, 120 /* sunriseOffset */);
-        setActivated(false /* activated */, 30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(false /* activated */, 30 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(false /* activated */);
@@ -430,7 +430,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenStartedBeforeNight_ifOffDuringNight_turnsOff() {
         setAutoModeTwilight(60 /* sunsetOffset */, 120 /* sunriseOffset */);
-        setActivated(false /* activated */, 90 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(false /* activated */, 90 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(false /* activated */);
@@ -439,7 +439,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenStartedBeforeNight_ifOffInPast_turnsOff() {
         setAutoModeTwilight(60 /* sunsetOffset */, 120 /* sunriseOffset */);
-        setActivated(false /* activated */, -30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(false /* activated */, -30 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(false /* activated */);
@@ -448,7 +448,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenStartedBeforeNight_ifOnAfterNight_turnsOff() {
         setAutoModeTwilight(60 /* sunsetOffset */, 120 /* sunriseOffset */);
-        setActivated(true /* activated */, 180 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(true /* activated */, 180 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(false /* activated */);
@@ -457,7 +457,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenStartedBeforeNight_ifOnBeforeNight_turnsOff() {
         setAutoModeTwilight(60 /* sunsetOffset */, 120 /* sunriseOffset */);
-        setActivated(true /* activated */, 30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(true /* activated */, 30 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(false /* activated */);
@@ -466,7 +466,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenStartedBeforeNight_ifOnDuringNight_turnsOff() {
         setAutoModeTwilight(60 /* sunsetOffset */, 120 /* sunriseOffset */);
-        setActivated(true /* activated */, 90 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(true /* activated */, 90 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(false /* activated */);
@@ -475,7 +475,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenStartedBeforeNight_ifOnInPast_turnsOn() {
         setAutoModeTwilight(60 /* sunsetOffset */, 120 /* sunriseOffset */);
-        setActivated(true /* activated */, -30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(true /* activated */, -30 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(true /* activated */);
@@ -484,7 +484,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenStartedDuringNight_ifOffAfterNight_turnsOn() {
         setAutoModeTwilight(-60 /* sunsetOffset */, 60 /* sunriseOffset */);
-        setActivated(false /* activated */, 90 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(false /* activated */, 90 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(true /* activated */);
@@ -493,7 +493,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenStartedDuringNight_ifOffBeforeNight_turnsOn() {
         setAutoModeTwilight(-60 /* sunsetOffset */, 60 /* sunriseOffset */);
-        setActivated(false /* activated */, -90 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(false /* activated */, -90 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(true /* activated */);
@@ -502,7 +502,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenStartedDuringNight_ifOffDuringNightInFuture_turnsOn() {
         setAutoModeTwilight(-60 /* sunsetOffset */, 60 /* sunriseOffset */);
-        setActivated(false /* activated */, 30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(false /* activated */, 30 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(true /* activated */);
@@ -511,7 +511,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenStartedDuringNight_ifOffDuringNightInPast_turnsOff() {
         setAutoModeTwilight(-60 /* sunsetOffset */, 60 /* sunriseOffset */);
-        setActivated(false /* activated */, -30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(false /* activated */, -30 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(false /* activated */);
@@ -520,7 +520,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenStartedDuringNight_ifOnAfterNight_turnsOn() {
         setAutoModeTwilight(-60 /* sunsetOffset */, 60 /* sunriseOffset */);
-        setActivated(true /* activated */, 90 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(true /* activated */, 90 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(true /* activated */);
@@ -529,7 +529,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenStartedDuringNight_ifOnBeforeNight_turnsOn() {
         setAutoModeTwilight(-60 /* sunsetOffset */, 60 /* sunriseOffset */);
-        setActivated(true /* activated */, -90 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(true /* activated */, -90 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(true /* activated */);
@@ -538,7 +538,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenStartedDuringNight_ifOnDuringNightInFuture_turnsOn() {
         setAutoModeTwilight(-60 /* sunsetOffset */, 60 /* sunriseOffset */);
-        setActivated(true /* activated */, 30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(true /* activated */, 30 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(true /* activated */);
@@ -547,7 +547,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenStartedDuringNight_ifOnDuringNightInPast_turnsOn() {
         setAutoModeTwilight(-60 /* sunsetOffset */, 60 /* sunriseOffset */);
-        setActivated(true /* activated */, -30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(true /* activated */, -30 /* lastActivatedTimeOffset */);
 
         startService();
         assertActivated(true /* activated */);
@@ -556,7 +556,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenRebootedAfterNight_ifOffAfterNight_turnsOff() {
         setAutoModeTwilight(-120 /* sunsetOffset */, -60 /* sunriseOffset */);
-        setActivated(false /* activated */, -30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(false /* activated */, -30 /* lastActivatedTimeOffset */);
 
         final TwilightState state = mTwilightManager.getLastTwilightState();
         mTwilightManager.setTwilightState(null);
@@ -571,7 +571,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenRebootedAfterNight_ifOffBeforeNight_turnsOff() {
         setAutoModeTwilight(-120 /* sunsetOffset */, -60 /* sunriseOffset */);
-        setActivated(false /* activated */, -180 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(false /* activated */, -180 /* lastActivatedTimeOffset */);
 
         final TwilightState state = mTwilightManager.getLastTwilightState();
         mTwilightManager.setTwilightState(null);
@@ -586,7 +586,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenRebootedAfterNight_ifOffDuringNight_turnsOff() {
         setAutoModeTwilight(-120 /* sunsetOffset */, -60 /* sunriseOffset */);
-        setActivated(false /* activated */, -90 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(false /* activated */, -90 /* lastActivatedTimeOffset */);
 
         final TwilightState state = mTwilightManager.getLastTwilightState();
         mTwilightManager.setTwilightState(null);
@@ -601,7 +601,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenRebootedAfterNight_ifOffInFuture_turnsOff() {
         setAutoModeTwilight(-120 /* sunsetOffset */, -60 /* sunriseOffset */);
-        setActivated(false /* activated */, 30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(false /* activated */, 30 /* lastActivatedTimeOffset */);
 
         final TwilightState state = mTwilightManager.getLastTwilightState();
         mTwilightManager.setTwilightState(null);
@@ -616,7 +616,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenRebootedAfterNight_ifOnAfterNight_turnsOn() {
         setAutoModeTwilight(-120 /* sunsetOffset */, -60 /* sunriseOffset */);
-        setActivated(true /* activated */, -30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(true /* activated */, -30 /* lastActivatedTimeOffset */);
 
         final TwilightState state = mTwilightManager.getLastTwilightState();
         mTwilightManager.setTwilightState(null);
@@ -631,7 +631,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenRebootedAfterNight_ifOnBeforeNight_turnsOff() {
         setAutoModeTwilight(-120 /* sunsetOffset */, -60 /* sunriseOffset */);
-        setActivated(true /* activated */, -180 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(true /* activated */, -180 /* lastActivatedTimeOffset */);
 
         final TwilightState state = mTwilightManager.getLastTwilightState();
         mTwilightManager.setTwilightState(null);
@@ -646,7 +646,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenRebootedAfterNight_ifOnDuringNight_turnsOff() {
         setAutoModeTwilight(-120 /* sunsetOffset */, -60 /* sunriseOffset */);
-        setActivated(true /* activated */, -90 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(true /* activated */, -90 /* lastActivatedTimeOffset */);
 
         final TwilightState state = mTwilightManager.getLastTwilightState();
         mTwilightManager.setTwilightState(null);
@@ -661,7 +661,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenRebootedAfterNight_ifOnInFuture_turnsOff() {
         setAutoModeTwilight(-120 /* sunsetOffset */, -60 /* sunriseOffset */);
-        setActivated(true /* activated */, 30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(true /* activated */, 30 /* lastActivatedTimeOffset */);
 
         final TwilightState state = mTwilightManager.getLastTwilightState();
         mTwilightManager.setTwilightState(null);
@@ -676,7 +676,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenRebootedBeforeNight_ifOffAfterNight_turnsOff() {
         setAutoModeTwilight(60 /* sunsetOffset */, 120 /* sunriseOffset */);
-        setActivated(false /* activated */, 180 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(false /* activated */, 180 /* lastActivatedTimeOffset */);
 
         final TwilightState state = mTwilightManager.getLastTwilightState();
         mTwilightManager.setTwilightState(null);
@@ -691,7 +691,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenRebootedBeforeNight_ifOffBeforeNight_turnsOff() {
         setAutoModeTwilight(60 /* sunsetOffset */, 120 /* sunriseOffset */);
-        setActivated(false /* activated */, 30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(false /* activated */, 30 /* lastActivatedTimeOffset */);
 
         final TwilightState state = mTwilightManager.getLastTwilightState();
         mTwilightManager.setTwilightState(null);
@@ -706,7 +706,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenRebootedBeforeNight_ifOffDuringNight_turnsOff() {
         setAutoModeTwilight(60 /* sunsetOffset */, 120 /* sunriseOffset */);
-        setActivated(false /* activated */, 90 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(false /* activated */, 90 /* lastActivatedTimeOffset */);
 
         final TwilightState state = mTwilightManager.getLastTwilightState();
         mTwilightManager.setTwilightState(null);
@@ -721,7 +721,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenRebootedBeforeNight_ifOffInPast_turnsOff() {
         setAutoModeTwilight(60 /* sunsetOffset */, 120 /* sunriseOffset */);
-        setActivated(false /* activated */, -30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(false /* activated */, -30 /* lastActivatedTimeOffset */);
 
         final TwilightState state = mTwilightManager.getLastTwilightState();
         mTwilightManager.setTwilightState(null);
@@ -736,7 +736,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenRebootedBeforeNight_ifOnAfterNight_turnsOff() {
         setAutoModeTwilight(60 /* sunsetOffset */, 120 /* sunriseOffset */);
-        setActivated(true /* activated */, 180 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(true /* activated */, 180 /* lastActivatedTimeOffset */);
 
         final TwilightState state = mTwilightManager.getLastTwilightState();
         mTwilightManager.setTwilightState(null);
@@ -751,7 +751,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenRebootedBeforeNight_ifOnBeforeNight_turnsOff() {
         setAutoModeTwilight(60 /* sunsetOffset */, 120 /* sunriseOffset */);
-        setActivated(true /* activated */, 30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(true /* activated */, 30 /* lastActivatedTimeOffset */);
 
         final TwilightState state = mTwilightManager.getLastTwilightState();
         mTwilightManager.setTwilightState(null);
@@ -766,7 +766,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenRebootedBeforeNight_ifOnDuringNight_turnsOff() {
         setAutoModeTwilight(60 /* sunsetOffset */, 120 /* sunriseOffset */);
-        setActivated(true /* activated */, 90 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(true /* activated */, 90 /* lastActivatedTimeOffset */);
 
         final TwilightState state = mTwilightManager.getLastTwilightState();
         mTwilightManager.setTwilightState(null);
@@ -781,7 +781,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenRebootedBeforeNight_ifOnInPast_turnsOn() {
         setAutoModeTwilight(60 /* sunsetOffset */, 120 /* sunriseOffset */);
-        setActivated(true /* activated */, -30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(true /* activated */, -30 /* lastActivatedTimeOffset */);
 
         final TwilightState state = mTwilightManager.getLastTwilightState();
         mTwilightManager.setTwilightState(null);
@@ -796,7 +796,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenRebootedDuringNight_ifOffAfterNight_turnsOn() {
         setAutoModeTwilight(-60 /* sunsetOffset */, 60 /* sunriseOffset */);
-        setActivated(false /* activated */, 90 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(false /* activated */, 90 /* lastActivatedTimeOffset */);
 
         final TwilightState state = mTwilightManager.getLastTwilightState();
         mTwilightManager.setTwilightState(null);
@@ -811,7 +811,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenRebootedDuringNight_ifOffBeforeNight_turnsOn() {
         setAutoModeTwilight(-60 /* sunsetOffset */, 60 /* sunriseOffset */);
-        setActivated(false /* activated */, -90 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(false /* activated */, -90 /* lastActivatedTimeOffset */);
 
         final TwilightState state = mTwilightManager.getLastTwilightState();
         mTwilightManager.setTwilightState(null);
@@ -826,7 +826,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenRebootedDuringNight_ifOffDuringNightInFuture_turnsOn() {
         setAutoModeTwilight(-60 /* sunsetOffset */, 60 /* sunriseOffset */);
-        setActivated(false /* activated */, 30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(false /* activated */, 30 /* lastActivatedTimeOffset */);
 
         final TwilightState state = mTwilightManager.getLastTwilightState();
         mTwilightManager.setTwilightState(null);
@@ -841,7 +841,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenRebootedDuringNight_ifOffDuringNightInPast_turnsOff() {
         setAutoModeTwilight(-60 /* sunsetOffset */, 60 /* sunriseOffset */);
-        setActivated(false /* activated */, -30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(false /* activated */, -30 /* lastActivatedTimeOffset */);
 
         final TwilightState state = mTwilightManager.getLastTwilightState();
         mTwilightManager.setTwilightState(null);
@@ -856,7 +856,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenRebootedDuringNight_ifOnAfterNight_turnsOn() {
         setAutoModeTwilight(-60 /* sunsetOffset */, 60 /* sunriseOffset */);
-        setActivated(true /* activated */, 90 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(true /* activated */, 90 /* lastActivatedTimeOffset */);
 
         final TwilightState state = mTwilightManager.getLastTwilightState();
         mTwilightManager.setTwilightState(null);
@@ -871,7 +871,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenRebootedDuringNight_ifOnBeforeNight_turnsOn() {
         setAutoModeTwilight(-60 /* sunsetOffset */, 60 /* sunriseOffset */);
-        setActivated(true /* activated */, -90 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(true /* activated */, -90 /* lastActivatedTimeOffset */);
 
         final TwilightState state = mTwilightManager.getLastTwilightState();
         mTwilightManager.setTwilightState(null);
@@ -886,7 +886,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenRebootedDuringNight_ifOnDuringNightInFuture_turnsOn() {
         setAutoModeTwilight(-60 /* sunsetOffset */, 60 /* sunriseOffset */);
-        setActivated(true /* activated */, 30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(true /* activated */, 30 /* lastActivatedTimeOffset */);
 
         final TwilightState state = mTwilightManager.getLastTwilightState();
         mTwilightManager.setTwilightState(null);
@@ -901,7 +901,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void twilightSchedule_whenRebootedDuringNight_ifOnDuringNightInPast_turnsOn() {
         setAutoModeTwilight(-60 /* sunsetOffset */, 60 /* sunriseOffset */);
-        setActivated(true /* activated */, -30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(true /* activated */, -30 /* lastActivatedTimeOffset */);
 
         final TwilightState state = mTwilightManager.getLastTwilightState();
         mTwilightManager.setTwilightState(null);
@@ -984,22 +984,19 @@ public class ColorDisplayServiceTest {
     }
 
     @Test
-    public void displayWhiteBalance_enable() {
-        setWhiteBalance(true /* Enable DWB Setting */);
-        setActivated(false /* activated */, -30 /* lastActivatedTimeOffset */);
+    public void displayWhiteBalance_enabled() {
+        setDisplayWhiteBalanceEnabled(true);
+        setNightDisplayActivated(false /* activated */, -30 /* lastActivatedTimeOffset */);
         mBinderService.setColorMode(ColorDisplayManager.COLOR_MODE_NATURAL);
         startService();
         assertDwbActive(true);
     }
 
     @Test
-    public void displayWhiteBalance_disableAfterNightDisplayEnable() {
-        setWhiteBalance(true /* Enable DWB Setting */);
-
+    public void displayWhiteBalance_disabledAfterNightDisplayEnabled() {
+        setDisplayWhiteBalanceEnabled(true);
         startService();
-        /* Enable nightlight */
-        setAutoModeTwilight(-120 /* sunsetOffset */, -60 /* sunriseOffset */);
-        setActivated(true /* activated */, -30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(true /* activated */, -30 /* lastActivatedTimeOffset */);
 
         /* Since we are using FakeSettingsProvider which could not trigger observer change,
          * force an update here.*/
@@ -1008,72 +1005,28 @@ public class ColorDisplayServiceTest {
     }
 
     @Test
-    public void displayWhiteBalance_enableAfterNightDisplayDisable() {
-        setWhiteBalance(true /* Enable DWB Setting */);
+    public void displayWhiteBalance_enabledAfterNightDisplayDisabled() {
+        setDisplayWhiteBalanceEnabled(true);
         startService();
-        /* Enable nightlight */
-        setAutoModeTwilight(-120 /* sunsetOffset */, -60 /* sunriseOffset */);
-        setActivated(true /* activated */, -30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(true /* activated */, -30 /* lastActivatedTimeOffset */);
 
         mCds.updateDisplayWhiteBalanceStatus();
         assertDwbActive(false);
 
-        /* Disable nightlight */
-        setActivated(false /* activated */, -30 /* lastActivatedTimeOffset */);
+        setNightDisplayActivated(false /* activated */, -30 /* lastActivatedTimeOffset */);
         mCds.updateDisplayWhiteBalanceStatus();
         assertDwbActive(true);
     }
 
     @Test
-    public void displayWhiteBalance_enableAfterLinearColorMode() {
-        setWhiteBalance(true /* Enable DWB Setting */);
-        setActivated(false /* activated */, -30 /* lastActivatedTimeOffset */);
+    public void displayWhiteBalance_enabledAfterLinearColorModeSelected() {
+        setDisplayWhiteBalanceEnabled(true);
+        setNightDisplayActivated(false /* activated */, -30 /* lastActivatedTimeOffset */);
         startService();
         mBinderService.setColorMode(ColorDisplayManager.COLOR_MODE_NATURAL);
 
         mCds.updateDisplayWhiteBalanceStatus();
         assertDwbActive(true);
-    }
-
-    @Test
-    public void displayWhiteBalance_setTemperatureOverMax() {
-        int max = mCds.mDisplayWhiteBalanceTintController.mTemperatureMax;
-
-        ColorDisplayService.ColorDisplayServiceInternal cdsInternal = LocalServices.getService(
-                ColorDisplayService.ColorDisplayServiceInternal.class);
-        cdsInternal.setDisplayWhiteBalanceColorTemperature(max + 1);
-
-        assertWithMessage("Unexpected temperature set")
-                .that(mCds.mDisplayWhiteBalanceTintController.mCurrentColorTemperature)
-                .isEqualTo(max);
-    }
-
-    @Test
-    public void displayWhiteBalance_setTemperatureBelowMin() {
-        int min = mCds.mDisplayWhiteBalanceTintController.mTemperatureMin;
-
-        ColorDisplayService.ColorDisplayServiceInternal cdsInternal = LocalServices.getService(
-                ColorDisplayService.ColorDisplayServiceInternal.class);
-        cdsInternal.setDisplayWhiteBalanceColorTemperature(min - 1);
-
-        assertWithMessage("Unexpected temperature set")
-                .that(mCds.mDisplayWhiteBalanceTintController.mCurrentColorTemperature)
-                .isEqualTo(min);
-    }
-
-    @Test
-    public void displayWhiteBalance_setValidTemperature() {
-        int min = mCds.mDisplayWhiteBalanceTintController.mTemperatureMin;
-        int max = mCds.mDisplayWhiteBalanceTintController.mTemperatureMax;
-        int valToSet = (min + max) / 2;
-
-        ColorDisplayService.ColorDisplayServiceInternal cdsInternal = LocalServices.getService(
-                ColorDisplayService.ColorDisplayServiceInternal.class);
-        cdsInternal.setDisplayWhiteBalanceColorTemperature(valToSet);
-
-        assertWithMessage("Unexpected temperature set")
-                .that(mCds.mDisplayWhiteBalanceTintController.mCurrentColorTemperature)
-                .isEqualTo(valToSet);
     }
 
     /**
@@ -1109,7 +1062,7 @@ public class ColorDisplayServiceTest {
      * @param lastActivatedTimeOffset the offset relative to now to record that Night display was
      * activated (in minutes)
      */
-    private void setActivated(boolean activated, int lastActivatedTimeOffset) {
+    private void setNightDisplayActivated(boolean activated, int lastActivatedTimeOffset) {
         mBinderService.setNightDisplayActivated(activated);
         Secure.putStringForUser(mContext.getContentResolver(),
                 Secure.NIGHT_DISPLAY_LAST_ACTIVATED_TIME,
@@ -1140,11 +1093,11 @@ public class ColorDisplayServiceTest {
     /**
      * Configures the Display White Balance setting state.
      *
-     * @param state {@code true} if display white balance should be enabled
+     * @param enabled {@code true} if display white balance should be enabled
      */
-    private void setWhiteBalance(boolean state) {
+    private void setDisplayWhiteBalanceEnabled(boolean enabled) {
         Secure.putIntForUser(mContext.getContentResolver(),
-                Secure.DISPLAY_WHITE_BALANCE_ENABLED, state ? 1 : 0, mUserId);
+                Secure.DISPLAY_WHITE_BALANCE_ENABLED, enabled ? 1 : 0, mUserId);
     }
 
     /**
