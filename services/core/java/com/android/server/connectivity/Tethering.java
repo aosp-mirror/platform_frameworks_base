@@ -233,6 +233,10 @@ public class Tethering extends BaseNetworkObserver {
         // permission is changed according to entitlement check result.
         mEntitlementMgr = mDeps.getEntitlementManager(mContext, mTetherMasterSM, mLog,
                 TetherMasterSM.EVENT_UPSTREAM_PERMISSION_CHANGED, systemProperties);
+        mEntitlementMgr.setOnUiEntitlementFailedListener((int downstream) -> {
+            mLog.log("OBSERVED UiEnitlementFailed");
+            stopTethering(downstream);
+        });
 
         mCarrierConfigChange = new VersionedBroadcastListener(
                 "CarrierConfigChangeListener", mContext, mHandler, filter,
