@@ -21,7 +21,8 @@ import static android.content.om.OverlayInfo.STATE_ENABLED;
 import static android.content.om.OverlayInfo.STATE_ENABLED_STATIC;
 import static android.content.om.OverlayInfo.STATE_MISSING_TARGET;
 import static android.content.om.OverlayInfo.STATE_NO_IDMAP;
-import static android.content.om.OverlayInfo.STATE_OVERLAY_UPGRADING;
+import static android.content.om.OverlayInfo.STATE_OVERLAY_IS_BEING_REPLACED;
+import static android.content.om.OverlayInfo.STATE_TARGET_IS_BEING_REPLACED;
 
 import static com.android.server.om.OverlayManagerService.DEBUG;
 import static com.android.server.om.OverlayManagerService.TAG;
@@ -56,15 +57,14 @@ import java.util.Set;
  * @see OverlayManagerService
  */
 final class OverlayManagerServiceImpl {
-
     /**
      * @deprecated Not used. See {@link android.content.om.OverlayInfo#STATE_TARGET_UPGRADING}.
      */
     @Deprecated
-    private static final int FLAG_TARGET_IS_UPGRADING = 1 << 0;
+    private static final int FLAG_TARGET_IS_BEING_REPLACED = 1 << 0;
 
     // Flags to use in conjunction with updateState.
-    private static final int FLAG_OVERLAY_IS_UPGRADING = 1 << 1;
+    private static final int FLAG_OVERLAY_IS_BEING_REPLACED = 1 << 1;
 
     private final PackageManagerHelper mPackageManager;
     private final IdmapManager mIdmapManager;
@@ -266,9 +266,18 @@ final class OverlayManagerServiceImpl {
         updateAndRefreshOverlaysForTarget(packageName, userId, 0);
     }
 
-    void onTargetPackageUpgraded(@NonNull final String packageName, final int userId) {
+    void onTargetPackageReplacing(@NonNull final String packageName, final int userId) {
         if (DEBUG) {
-            Slog.d(TAG, "onTargetPackageUpgraded packageName=" + packageName + " userId=" + userId);
+            Slog.d(TAG, "onTargetPackageReplacing packageName=" + packageName + " userId="
+                    + userId);
+        }
+
+        updateAndRefreshOverlaysForTarget(packageName, userId, 0);
+    }
+
+    void onTargetPackageReplaced(@NonNull final String packageName, final int userId) {
+        if (DEBUG) {
+            Slog.d(TAG, "onTargetPackageReplaced packageName=" + packageName + " userId=" + userId);
         }
 
         updateAndRefreshOverlaysForTarget(packageName, userId, 0);
@@ -388,15 +397,16 @@ final class OverlayManagerServiceImpl {
         }
     }
 
-    void onOverlayPackageUpgrading(@NonNull final String packageName, final int userId) {
+    void onOverlayPackageReplacing(@NonNull final String packageName, final int userId) {
         if (DEBUG) {
-            Slog.d(TAG, "onOverlayPackageUpgrading packageName=" + packageName + " userId="
+            Slog.d(TAG, "onOverlayPackageReplacing packageName=" + packageName + " userId="
                     + userId);
         }
 
         try {
             final OverlayInfo oi = mSettings.getOverlayInfo(packageName, userId);
-            if (updateState(oi.targetPackageName, packageName, userId, FLAG_OVERLAY_IS_UPGRADING)) {
+            if (updateState(oi.targetPackageName, packageName, userId,
+                        FLAG_OVERLAY_IS_BEING_REPLACED)) {
                 removeIdmapIfPossible(oi);
                 mListener.onOverlaysChanged(oi.targetPackageName, userId);
             }
@@ -405,15 +415,15 @@ final class OverlayManagerServiceImpl {
         }
     }
 
-    void onOverlayPackageUpgraded(@NonNull final String packageName, final int userId) {
+    void onOverlayPackageReplaced(@NonNull final String packageName, final int userId) {
         if (DEBUG) {
-            Slog.d(TAG, "onOverlayPackageUpgraded packageName=" + packageName + " userId="
+            Slog.d(TAG, "onOverlayPackageReplaced packageName=" + packageName + " userId="
                     + userId);
         }
 
         final PackageInfo pkg = mPackageManager.getPackageInfo(packageName, userId);
         if (pkg == null) {
-            Slog.w(TAG, "overlay package " + packageName + " was upgraded, but couldn't be found");
+            Slog.w(TAG, "overlay package " + packageName + " was replaced, but couldn't be found");
             onOverlayPackageRemoved(packageName, userId);
             return;
         }
@@ -694,8 +704,12 @@ final class OverlayManagerServiceImpl {
             @Nullable final PackageInfo overlayPackage, final int userId, final int flags)
             throws OverlayManagerSettings.BadKeyException {
 
-        if ((flags & FLAG_OVERLAY_IS_UPGRADING) != 0) {
-            return STATE_OVERLAY_UPGRADING;
+        if ((flags & FLAG_TARGET_IS_BEING_REPLACED) != 0) {
+            return STATE_TARGET_IS_BEING_REPLACED;
+        }
+
+        if ((flags & FLAG_OVERLAY_IS_BEING_REPLACED) != 0) {
+            return STATE_OVERLAY_IS_BEING_REPLACED;
         }
 
         // assert expectation on overlay package: can only be null if the flags are used

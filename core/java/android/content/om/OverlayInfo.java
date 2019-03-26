@@ -46,7 +46,8 @@ public final class OverlayInfo implements Parcelable {
             STATE_ENABLED,
             STATE_ENABLED_STATIC,
             // @Deprecated STATE_TARGET_UPGRADING,
-            STATE_OVERLAY_UPGRADING,
+            STATE_TARGET_IS_BEING_REPLACED,
+            STATE_OVERLAY_IS_BEING_REPLACED,
     })
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -94,8 +95,8 @@ public final class OverlayInfo implements Parcelable {
     public static final int STATE_ENABLED = 3;
 
     /**
-     * The target package is currently being upgraded; the state will change
-     * once the package installation has finished.
+     * The target package is currently being upgraded or downgraded; the state
+     * will change once the package installation has finished.
      * @hide
      *
      * @deprecated No longer used. Caused invalid transitions from enabled -> upgrading -> enabled,
@@ -105,14 +106,14 @@ public final class OverlayInfo implements Parcelable {
      * irrelevant.
      */
     @Deprecated
-    public static final int STATE_TARGET_UPGRADING = 4;
+    public static final int STATE_TARGET_IS_BEING_REPLACED = 4;
 
     /**
-     * The overlay package is currently being upgraded; the state will change
-     * once the package installation has finished.
+     * The overlay package is currently being upgraded or downgraded; the state
+     * will change once the package installation has finished.
      * @hide
      */
-    public static final int STATE_OVERLAY_UPGRADING = 5;
+    public static final int STATE_OVERLAY_IS_BEING_REPLACED = 5;
 
     /**
      * The overlay package is currently enabled because it is marked as
@@ -306,8 +307,8 @@ public final class OverlayInfo implements Parcelable {
             case STATE_DISABLED:
             case STATE_ENABLED:
             case STATE_ENABLED_STATIC:
-            case STATE_TARGET_UPGRADING:
-            case STATE_OVERLAY_UPGRADING:
+            case STATE_TARGET_IS_BEING_REPLACED:
+            case STATE_OVERLAY_IS_BEING_REPLACED:
                 break;
             default:
                 throw new IllegalArgumentException("State " + state + " is not a valid state");
@@ -386,10 +387,10 @@ public final class OverlayInfo implements Parcelable {
                 return "STATE_ENABLED";
             case STATE_ENABLED_STATIC:
                 return "STATE_ENABLED_STATIC";
-            case STATE_TARGET_UPGRADING:
-                return "STATE_TARGET_UPGRADING";
-            case STATE_OVERLAY_UPGRADING:
-                return "STATE_OVERLAY_UPGRADING";
+            case STATE_TARGET_IS_BEING_REPLACED:
+                return "STATE_TARGET_IS_BEING_REPLACED";
+            case STATE_OVERLAY_IS_BEING_REPLACED:
+                return "STATE_OVERLAY_IS_BEING_REPLACED";
             default:
                 return "<unknown state>";
         }
