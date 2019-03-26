@@ -19,9 +19,7 @@ import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_M
 
 import android.app.Dialog;
 import android.app.KeyguardManager;
-import android.app.WallpaperManager;
 import android.content.Context;
-import android.graphics.Point;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -31,7 +29,7 @@ import android.widget.TextView;
 
 import com.android.internal.R;
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
-import com.android.internal.colorextraction.drawable.GradientDrawable;
+import com.android.internal.colorextraction.drawable.ScrimDrawable;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.SysUiServiceProvider;
@@ -87,7 +85,7 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
 
     @Override
     public void showShutdownUi(boolean isReboot, String reason) {
-        GradientDrawable background = new GradientDrawable(mContext);
+        ScrimDrawable background = new ScrimDrawable();
         background.setAlpha((int) (SHUTDOWN_SCRIM_ALPHA * 255));
 
         Dialog d = new Dialog(mContext,
@@ -129,12 +127,8 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
         message.setTextColor(color);
         if (isReboot) message.setText(R.string.reboot_to_reset_message);
 
-        Point displaySize = new Point();
-        mContext.getDisplay().getRealSize(displaySize);
-        GradientColors colors = Dependency.get(SysuiColorExtractor.class).getColors(
-                onKeyguard ? WallpaperManager.FLAG_LOCK : WallpaperManager.FLAG_SYSTEM);
-        background.setColors(colors, false);
-        background.setScreenSize(displaySize.x, displaySize.y);
+        GradientColors colors = Dependency.get(SysuiColorExtractor.class).getNeutralColors();
+        background.setColor(colors.getMainColor(), false);
 
         d.show();
     }

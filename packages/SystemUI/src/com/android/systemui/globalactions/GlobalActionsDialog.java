@@ -35,7 +35,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
-import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
@@ -73,7 +72,7 @@ import android.widget.TextView;
 import com.android.internal.R;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
-import com.android.internal.colorextraction.drawable.GradientDrawable;
+import com.android.internal.colorextraction.drawable.ScrimDrawable;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.telephony.TelephonyIntents;
@@ -1503,7 +1502,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         private final MyAdapter mAdapter;
         private MultiListLayout mGlobalActionsLayout;
         private Drawable mBackgroundDrawable;
-        private final ColorExtractor mColorExtractor;
+        private final SysuiColorExtractor mColorExtractor;
         private final GlobalActionsPanelPlugin.PanelViewController mPanelController;
         private boolean mKeyguardShowing;
         private boolean mShowing;
@@ -1582,7 +1581,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
             if (!shouldUsePanel()) {
                 if (mBackgroundDrawable == null) {
-                    mBackgroundDrawable = new GradientDrawable(mContext);
+                    mBackgroundDrawable = new ScrimDrawable();
                 }
                 mScrimAlpha = ScrimController.GRADIENT_SCRIM_ALPHA;
             } else {
@@ -1610,16 +1609,9 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             super.onStart();
             mGlobalActionsLayout.updateList();
 
-            if (mBackgroundDrawable instanceof GradientDrawable) {
-                Point displaySize = new Point();
-                mContext.getDisplay().getRealSize(displaySize);
+            if (mBackgroundDrawable instanceof ScrimDrawable) {
                 mColorExtractor.addOnColorsChangedListener(this);
-                ((GradientDrawable) mBackgroundDrawable)
-                        .setScreenSize(displaySize.x, displaySize.y);
-                GradientColors colors = mColorExtractor.getColors(
-                        mKeyguardShowing
-                                ? WallpaperManager.FLAG_LOCK
-                                : WallpaperManager.FLAG_SYSTEM);
+                GradientColors colors = mColorExtractor.getNeutralColors();
                 updateColors(colors, false /* animate */);
             }
         }
@@ -1630,10 +1622,10 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
          * @param animate Interpolates gradient if true, just sets otherwise.
          */
         private void updateColors(GradientColors colors, boolean animate) {
-            if (!(mBackgroundDrawable instanceof GradientDrawable)) {
+            if (!(mBackgroundDrawable instanceof ScrimDrawable)) {
                 return;
             }
-            ((GradientDrawable) mBackgroundDrawable).setColors(colors, animate);
+            ((ScrimDrawable) mBackgroundDrawable).setColor(colors.getMainColor(), animate);
             View decorView = getWindow().getDecorView();
             if (colors.supportsDarkText()) {
                 decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR |
