@@ -114,9 +114,7 @@ public abstract class CarrierService extends Service {
      * this UX, so a carrier app must be sure to call with active set to false
      * sometime after calling with it set to true.
      * <p>
-     * Requires Permission:
-     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
-     * or the calling app has carrier privileges.
+     * Requires Permission: calling app has carrier privileges.
      *
      * @param active Whether the carrier network change is or shortly will be
      *               active. Set this value to true to begin showing
