@@ -101,7 +101,7 @@ static constexpr size_t TEXT_POS_LEN_MAX = 16;
 
 BootAnimation::BootAnimation(sp<Callbacks> callbacks)
         : Thread(false), mClockEnabled(true), mTimeIsAccurate(false),
-        mTimeFormat12Hour(false), mTimeCheckThread(NULL), mCallbacks(callbacks) {
+        mTimeFormat12Hour(false), mTimeCheckThread(nullptr), mCallbacks(callbacks) {
     mSession = new SurfaceComposerClient();
 
     std::string powerCtl = android::base::GetProperty("sys.powerctl", "");
@@ -156,7 +156,7 @@ void BootAnimation::binderDied(const wp<IBinder>&)
 status_t BootAnimation::initTexture(Texture* texture, AssetManager& assets,
         const char* name) {
     Asset* asset = assets.open(name, Asset::ACCESS_BUFFER);
-    if (asset == NULL)
+    if (asset == nullptr)
         return NO_INIT;
     SkBitmap bitmap;
     sk_sp<SkData> data = SkData::MakeWithoutCopy(asset->getBuffer(false),
@@ -234,7 +234,7 @@ status_t BootAnimation::initTexture(FileMap* map, int* width, int* height)
         case kN32_SkColorType:
             if (!mUseNpotTextures && (tw != w || th != h)) {
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tw, th, 0, GL_RGBA,
-                        GL_UNSIGNED_BYTE, 0);
+                        GL_UNSIGNED_BYTE, nullptr);
                 glTexSubImage2D(GL_TEXTURE_2D, 0,
                         0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, p);
             } else {
@@ -246,7 +246,7 @@ status_t BootAnimation::initTexture(FileMap* map, int* width, int* height)
         case kRGB_565_SkColorType:
             if (!mUseNpotTextures && (tw != w || th != h)) {
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tw, th, 0, GL_RGB,
-                        GL_UNSIGNED_SHORT_5_6_5, 0);
+                        GL_UNSIGNED_SHORT_5_6_5, nullptr);
                 glTexSubImage2D(GL_TEXTURE_2D, 0,
                         0, 0, w, h, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, p);
             } else {
@@ -304,10 +304,10 @@ status_t BootAnimation::readyToRun() {
 
     EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
 
-    eglInitialize(display, 0, 0);
+    eglInitialize(display, nullptr, nullptr);
     eglChooseConfig(display, attribs, &config, 1, &numConfigs);
-    surface = eglCreateWindowSurface(display, config, s.get(), NULL);
-    context = eglCreateContext(display, config, NULL, NULL);
+    surface = eglCreateWindowSurface(display, config, s.get(), nullptr);
+    context = eglCreateContext(display, config, nullptr, nullptr);
     eglQuerySurface(display, surface, EGL_WIDTH, &w);
     eglQuerySurface(display, surface, EGL_HEIGHT, &h);
 
@@ -671,7 +671,7 @@ bool BootAnimation::parseAnimationDesc(Animation& animation)
     // Parse the description file
     for (;;) {
         const char* endl = strstr(s, "\n");
-        if (endl == NULL) break;
+        if (endl == nullptr) break;
         String8 line(s, endl - s);
         const char* l = line.string();
         int fps = 0;
@@ -699,8 +699,8 @@ bool BootAnimation::parseAnimationDesc(Animation& animation)
             part.count = count;
             part.pause = pause;
             part.path = path;
-            part.audioData = NULL;
-            part.animation = NULL;
+            part.audioData = nullptr;
+            part.animation = nullptr;
             if (!parseColor(color, part.backgroundColor)) {
                 SLOGE("> invalid color '#%s'", color);
                 part.backgroundColor[0] = 0.0f;
@@ -716,9 +716,9 @@ bool BootAnimation::parseAnimationDesc(Animation& animation)
             part.playUntilComplete = false;
             part.count = 1;
             part.pause = 0;
-            part.audioData = NULL;
+            part.audioData = nullptr;
             part.animation = loadAnimation(String8(SYSTEM_BOOTANIMATION_FILE));
-            if (part.animation != NULL)
+            if (part.animation != nullptr)
                 animation.parts.add(part);
         }
         s = ++endl;
@@ -731,7 +731,7 @@ bool BootAnimation::preloadZip(Animation& animation)
 {
     // read all the data structures
     const size_t pcount = animation.parts.size();
-    void *cookie = NULL;
+    void *cookie = nullptr;
     ZipFileRO* zip = animation.zip;
     if (!zip->startIteration(&cookie)) {
         return false;
@@ -739,7 +739,7 @@ bool BootAnimation::preloadZip(Animation& animation)
 
     ZipEntryRO entry;
     char name[ANIM_ENTRY_NAME_MAX];
-    while ((entry = zip->nextEntry(cookie)) != NULL) {
+    while ((entry = zip->nextEntry(cookie)) != nullptr) {
         const int foundEntryName = zip->getEntryFileName(entry, name, ANIM_ENTRY_NAME_MAX);
         if (foundEntryName > ANIM_ENTRY_NAME_MAX || foundEntryName == -1) {
             SLOGE("Error fetching entry file name");
@@ -762,7 +762,7 @@ bool BootAnimation::preloadZip(Animation& animation)
                 if (path == animation.parts[j].path) {
                     uint16_t method;
                     // supports only stored png files
-                    if (zip->getEntryInfo(entry, &method, NULL, NULL, NULL, NULL, NULL)) {
+                    if (zip->getEntryInfo(entry, &method, nullptr, nullptr, nullptr, nullptr, nullptr)) {
                         if (method == ZipFileRO::kCompressStored) {
                             FileMap* map = zip->createEntryFileMap(entry);
                             if (map) {
@@ -800,7 +800,7 @@ bool BootAnimation::preloadZip(Animation& animation)
         for (size_t frameIdx = 0; frameIdx < part.frames.size(); frameIdx++) {
             const char* endl = strstr(trimDataStr, "\n");
             // No more trimData for this part.
-            if (endl == NULL) {
+            if (endl == nullptr) {
                 break;
             }
             String8 line(trimDataStr, endl - trimDataStr);
@@ -927,7 +927,7 @@ bool BootAnimation::playAnimation(const Animation& animation)
         glBindTexture(GL_TEXTURE_2D, 0);
 
         // Handle animation package
-        if (part.animation != NULL) {
+        if (part.animation != nullptr) {
             playAnimation(*part.animation);
             if (exitPending())
                 break;
@@ -1001,7 +1001,7 @@ bool BootAnimation::playAnimation(const Animation& animation)
                     spec.tv_nsec = (now + delay) % 1000000000;
                     int err;
                     do {
-                        err = clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &spec, NULL);
+                        err = clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &spec, nullptr);
                     } while (err<0 && errno == EINTR);
                 }
 
@@ -1090,13 +1090,13 @@ BootAnimation::Animation* BootAnimation::loadAnimation(const String8& fn)
     if (mLoadedFiles.indexOf(fn) >= 0) {
         SLOGE("File \"%s\" is already loaded. Cyclic ref is not allowed",
             fn.string());
-        return NULL;
+        return nullptr;
     }
     ZipFileRO *zip = ZipFileRO::open(fn);
-    if (zip == NULL) {
+    if (zip == nullptr) {
         SLOGE("Failed to open animation zip \"%s\": %s",
             fn.string(), strerror(errno));
-        return NULL;
+        return nullptr;
     }
 
     Animation *animation =  new Animation;
@@ -1107,7 +1107,7 @@ BootAnimation::Animation* BootAnimation::loadAnimation(const String8& fn)
 
     parseAnimationDesc(*animation);
     if (!preloadZip(*animation)) {
-        return NULL;
+        return nullptr;
     }
 
 
@@ -1135,7 +1135,7 @@ bool BootAnimation::updateIsTimeAccurate() {
     }
 
     FILE* file = fopen(LAST_TIME_CHANGED_FILE_PATH, "r");
-    if (file != NULL) {
+    if (file != nullptr) {
       long long lastChangedTime = 0;
       fscanf(file, "%lld", &lastChangedTime);
       fclose(file);
