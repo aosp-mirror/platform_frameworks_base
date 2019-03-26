@@ -126,6 +126,7 @@ public class DhcpClient extends StateMachine {
     // DhcpClient uses IpClient's handler.
     private static final int PUBLIC_BASE = IpClient.DHCPCLIENT_CMD_BASE;
 
+    // Below constants are picked up by MessageUtils and exempt from ProGuard optimization.
     /* Commands from controller to start/stop DHCP */
     public static final int CMD_START_DHCP                  = PUBLIC_BASE + 1;
     public static final int CMD_STOP_DHCP                   = PUBLIC_BASE + 2;

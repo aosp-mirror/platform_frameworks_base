@@ -1,0 +1,9 @@
+-keepclassmembers class android.net.ip.IpClient {
+    static final int CMD_*;
+    static final int EVENT_*;
+}
+
+-keepclassmembers class android.net.dhcp.DhcpClient {
+    static final int CMD_*;
+    static final int EVENT_*;
+}
