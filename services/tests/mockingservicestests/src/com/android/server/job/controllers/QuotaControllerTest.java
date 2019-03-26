@@ -722,6 +722,147 @@ public class QuotaControllerTest {
         assertEquals(expectedStats, newStatsRare);
     }
 
+    /**
+     * Test getTimeUntilQuotaConsumedLocked when the determination is based within the bucket
+     * window.
+     */
+    @Test
+    public void testGetTimeUntilQuotaConsumedLocked_BucketWindow() {
+        final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
+        // Close to RARE boundary.
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - (24 * HOUR_IN_MILLIS - 30 * SECOND_IN_MILLIS),
+                        30 * SECOND_IN_MILLIS, 5));
+        // Far away from FREQUENT boundary.
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - (7 * HOUR_IN_MILLIS), 3 * MINUTE_IN_MILLIS, 5));
+        // Overlap WORKING_SET boundary.
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - (2 * HOUR_IN_MILLIS + MINUTE_IN_MILLIS),
+                        3 * MINUTE_IN_MILLIS, 5));
+        // Close to ACTIVE boundary.
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - (9 * MINUTE_IN_MILLIS), 3 * MINUTE_IN_MILLIS, 5));
+
+        setStandbyBucket(RARE_INDEX);
+        assertEquals(30 * SECOND_IN_MILLIS,
+                mQuotaController.getRemainingExecutionTimeLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+        assertEquals(MINUTE_IN_MILLIS,
+                mQuotaController.getTimeUntilQuotaConsumedLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+
+        setStandbyBucket(FREQUENT_INDEX);
+        assertEquals(MINUTE_IN_MILLIS,
+                mQuotaController.getRemainingExecutionTimeLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+        assertEquals(MINUTE_IN_MILLIS,
+                mQuotaController.getTimeUntilQuotaConsumedLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+
+        setStandbyBucket(WORKING_INDEX);
+        assertEquals(5 * MINUTE_IN_MILLIS,
+                mQuotaController.getRemainingExecutionTimeLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+        assertEquals(7 * MINUTE_IN_MILLIS,
+                mQuotaController.getTimeUntilQuotaConsumedLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+
+        // ACTIVE window = allowed time, so jobs can essentially run non-stop until they reach the
+        // max execution time.
+        setStandbyBucket(ACTIVE_INDEX);
+        assertEquals(7 * MINUTE_IN_MILLIS,
+                mQuotaController.getRemainingExecutionTimeLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+        assertEquals(mConstants.QUOTA_CONTROLLER_MAX_EXECUTION_TIME_MS - 9 * MINUTE_IN_MILLIS,
+                mQuotaController.getTimeUntilQuotaConsumedLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+    }
+
+    /**
+     * Test getTimeUntilQuotaConsumedLocked when the app is close to the max execution limit.
+     */
+    @Test
+    public void testGetTimeUntilQuotaConsumedLocked_MaxExecution() {
+        final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
+        // Overlap boundary.
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(
+                        now - (24 * HOUR_IN_MILLIS + 8 * MINUTE_IN_MILLIS), 4 * HOUR_IN_MILLIS, 5));
+
+        setStandbyBucket(WORKING_INDEX);
+        assertEquals(8 * MINUTE_IN_MILLIS,
+                mQuotaController.getRemainingExecutionTimeLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+        // Max time will phase out, so should use bucket limit.
+        assertEquals(10 * MINUTE_IN_MILLIS,
+                mQuotaController.getTimeUntilQuotaConsumedLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+
+        mQuotaController.getTimingSessions(SOURCE_USER_ID, SOURCE_PACKAGE).clear();
+        // Close to boundary.
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - (24 * HOUR_IN_MILLIS - MINUTE_IN_MILLIS),
+                        4 * HOUR_IN_MILLIS - 5 * MINUTE_IN_MILLIS, 5));
+
+        setStandbyBucket(WORKING_INDEX);
+        assertEquals(5 * MINUTE_IN_MILLIS,
+                mQuotaController.getRemainingExecutionTimeLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+        assertEquals(10 * MINUTE_IN_MILLIS,
+                mQuotaController.getTimeUntilQuotaConsumedLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+
+        mQuotaController.getTimingSessions(SOURCE_USER_ID, SOURCE_PACKAGE).clear();
+        // Far from boundary.
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(
+                        now - (20 * HOUR_IN_MILLIS), 4 * HOUR_IN_MILLIS - 3 * MINUTE_IN_MILLIS, 5));
+
+        setStandbyBucket(WORKING_INDEX);
+        assertEquals(3 * MINUTE_IN_MILLIS,
+                mQuotaController.getRemainingExecutionTimeLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+        assertEquals(3 * MINUTE_IN_MILLIS,
+                mQuotaController.getTimeUntilQuotaConsumedLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+    }
+
+    /**
+     * Test getTimeUntilQuotaConsumedLocked when the max execution time and bucket window time
+     * remaining are equal.
+     */
+    @Test
+    public void testGetTimeUntilQuotaConsumedLocked_EqualTimeRemaining() {
+        final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
+        setStandbyBucket(FREQUENT_INDEX);
+
+        // Overlap boundary.
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(
+                        now - (24 * HOUR_IN_MILLIS + 11 * MINUTE_IN_MILLIS),
+                        4 * HOUR_IN_MILLIS,
+                        5));
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(
+                        now - (8 * HOUR_IN_MILLIS + MINUTE_IN_MILLIS), 3 * MINUTE_IN_MILLIS, 5));
+
+        // Both max and bucket time have 8 minutes left.
+        assertEquals(8 * MINUTE_IN_MILLIS,
+                mQuotaController.getRemainingExecutionTimeLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+        // Max time essentially free. Bucket time has 2 min phase out plus original 8 minute
+        // window time.
+        assertEquals(10 * MINUTE_IN_MILLIS,
+                mQuotaController.getTimeUntilQuotaConsumedLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+
+        mQuotaController.getTimingSessions(SOURCE_USER_ID, SOURCE_PACKAGE).clear();
+        // Overlap boundary.
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(
+                        now - (24 * HOUR_IN_MILLIS + MINUTE_IN_MILLIS), 2 * MINUTE_IN_MILLIS, 5));
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(
+                        now - (20 * HOUR_IN_MILLIS),
+                        3 * HOUR_IN_MILLIS + 48 * MINUTE_IN_MILLIS,
+                        5));
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(
+                        now - (8 * HOUR_IN_MILLIS + MINUTE_IN_MILLIS), 3 * MINUTE_IN_MILLIS, 5));
+
+        // Both max and bucket time have 8 minutes left.
+        assertEquals(8 * MINUTE_IN_MILLIS,
+                mQuotaController.getRemainingExecutionTimeLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+        // Max time only has one minute phase out. Bucket time has 2 minute phase out.
+        assertEquals(9 * MINUTE_IN_MILLIS,
+                mQuotaController.getTimeUntilQuotaConsumedLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+    }
+
     @Test
     public void testIsWithinQuotaLocked_NeverApp() {
         assertFalse(mQuotaController.isWithinQuotaLocked(0, "com.android.test.never", NEVER_INDEX));
@@ -1902,7 +2043,10 @@ public class QuotaControllerTest {
         // window, so as the package "reaches its quota" it will have more to keep running.
         mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
                 createTimingSession(now - 2 * HOUR_IN_MILLIS,
-                        10 * MINUTE_IN_MILLIS - remainingTimeMs, 1));
+                        10 * SECOND_IN_MILLIS - remainingTimeMs, 1));
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - HOUR_IN_MILLIS,
+                        9 * MINUTE_IN_MILLIS + 50 * SECOND_IN_MILLIS, 1));
 
         assertEquals(remainingTimeMs, mQuotaController.getRemainingExecutionTimeLocked(jobStatus));
         // Start the job.
@@ -1919,6 +2063,18 @@ public class QuotaControllerTest {
         // amount of remaining time left its quota.
         assertEquals(remainingTimeMs,
                 mQuotaController.getRemainingExecutionTimeLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
-        verify(handler, atLeast(1)).sendMessageDelayed(any(), eq(remainingTimeMs));
+        // Handler is told to check when the quota will be consumed, not when the initial
+        // remaining time is over.
+        verify(handler, atLeast(1)).sendMessageDelayed(any(), eq(10 * SECOND_IN_MILLIS));
+        verify(handler, never()).sendMessageDelayed(any(), eq(remainingTimeMs));
+
+        // After 10 seconds, the job should finally be out of quota.
+        advanceElapsedClock(10 * SECOND_IN_MILLIS - remainingTimeMs);
+        // Wait for some extra time to allow for job processing.
+        verify(mJobSchedulerService,
+                timeout(12 * SECOND_IN_MILLIS).times(1))
+                .onControllerStateChanged();
+        assertFalse(jobStatus.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
+        verify(handler, never()).sendMessageDelayed(any(), anyInt());
     }
 }
