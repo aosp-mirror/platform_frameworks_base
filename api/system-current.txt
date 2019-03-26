@@ -4233,6 +4233,10 @@ package android.net {
     field public static final int TAG_SYSTEM_PROBE = -190; // 0xffffff42
   }
 
+  public abstract class Uri implements java.lang.Comparable<android.net.Uri> android.os.Parcelable {
+    method @NonNull public String toSafeString();
+  }
+
   public class VpnService extends android.app.Service {
     method @RequiresPermission(android.Manifest.permission.CONTROL_VPN) public static void prepareAndAuthorize(android.content.Context);
   }
