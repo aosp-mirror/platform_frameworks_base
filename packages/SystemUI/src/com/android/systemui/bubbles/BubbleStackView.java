@@ -873,7 +873,8 @@ public class BubbleStackView extends FrameLayout {
         for (int i = 0; i < bubbsCount; i++) {
             BubbleView bv = (BubbleView) mBubbleContainer.getChildAt(i);
             bv.updateDotVisibility();
-            bv.setZ(bubbsCount - i);
+            bv.setZ((BubbleController.MAX_BUBBLES
+                    * getResources().getDimensionPixelSize(R.dimen.bubble_elevation)) - i);
 
             // Draw the shadow around the circle inscribed within the bubble's bounds. This
             // (intentionally) does not draw a shadow behind the update dot, which should be drawing

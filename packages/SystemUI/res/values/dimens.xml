@@ -1023,8 +1023,8 @@
     <dimen name="ongoing_appops_chip_bg_corner_radius">16dp</dimen>
 
 
-    <!-- How much a bubble is elevated -->
-    <dimen name="bubble_elevation">8dp</dimen>
+    <!-- How much each bubble is elevated. -->
+    <dimen name="bubble_elevation">1dp</dimen>
     <!-- Padding around a collapsed bubble -->
     <dimen name="bubble_view_padding">0dp</dimen>
     <!-- Padding between bubbles when displayed in expanded state -->

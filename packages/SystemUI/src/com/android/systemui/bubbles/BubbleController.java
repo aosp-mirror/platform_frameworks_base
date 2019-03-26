@@ -80,8 +80,6 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
 
     private static final String TAG = "BubbleController";
 
-    private static final int MAX_BUBBLES = 5; // TODO: actually enforce this
-
     @Retention(SOURCE)
     @IntDef({DISMISS_USER_GESTURE, DISMISS_AGED, DISMISS_TASK_FINISHED, DISMISS_BLOCKED,
             DISMISS_NOTIF_CANCEL, DISMISS_ACCESSIBILITY_ACTION})
@@ -93,6 +91,8 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
     static final int DISMISS_BLOCKED = 4;
     static final int DISMISS_NOTIF_CANCEL = 5;
     static final int DISMISS_ACCESSIBILITY_ACTION = 6;
+
+    static final int MAX_BUBBLES = 5; // TODO: actually enforce this
 
     // Enables some subset of notifs to automatically become bubbles
     private static final boolean DEBUG_ENABLE_AUTO_BUBBLE = false;
