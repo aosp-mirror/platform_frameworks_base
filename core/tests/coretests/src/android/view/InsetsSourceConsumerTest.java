@@ -43,6 +43,15 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+/**
+ * Tests for {@link InsetsSourceConsumer}.
+ *
+ * <p>Build/Install/Run:
+ *  atest FrameworksCoreTests:InsetsSourceConsumerTest
+ *
+ * <p>This test class is a part of Window Manager Service tests and specified in
+ * {@link com.android.server.wm.test.filters.FrameworksTestsFilter}.
+ */
 @Presubmit
 @FlakyTest(detail = "Promote once confirmed non-flaky")
 @RunWith(AndroidJUnit4.class)

@@ -26,23 +26,25 @@ import com.android.test.filters.SelectTest;
  * <p>Use this filter when running FrameworksCoreTests as
  * <pre>
  * adb shell am instrument -w \
- *     -e filter com.android.server.wm.test.filters.CoreTestsFilter  \
+ *     -e filter com.android.server.wm.test.filters.FrameworksTestsFilter  \
  *     -e selectTest_verbose true \
  *     com.android.frameworks.coretests/androidx.test.runner.AndroidJUnitRunner
  * </pre>
  */
-public final class CoreTestsFilter extends SelectTest {
+public final class FrameworksTestsFilter extends SelectTest {
 
-    private static final String[] SELECTED_CORE_TESTS = {
+    private static final String[] SELECTED_TESTS = {
+            // Test specifications for FrameworksCoreTests.
             "android.app.servertransaction.", // all tests under the package.
             "android.view.DisplayCutoutTest",
+            "android.view.InsetsAnimationControlImplTest",
             "android.view.InsetsControllerTest",
             "android.view.InsetsSourceTest",
             "android.view.InsetsSourceConsumerTest",
             "android.view.InsetsStateTest",
     };
 
-    public CoreTestsFilter(Bundle testArgs) {
-        super(addSelectTest(testArgs, SELECTED_CORE_TESTS));
+    public FrameworksTestsFilter(Bundle testArgs) {
+        super(addSelectTest(testArgs, SELECTED_TESTS));
     }
 }
