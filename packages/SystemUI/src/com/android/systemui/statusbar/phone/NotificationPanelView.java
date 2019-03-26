@@ -3063,7 +3063,7 @@ public class NotificationPanelView extends PanelView implements
     private static float getCommonTop(View view) {
         float y = view.getTop();
         ViewGroup parent = (ViewGroup) view.getParent();
-        while (!(parent instanceof StatusBarWindowView)) {
+        while (!(parent instanceof StatusBarWindowView) && parent != null) {
             y += parent.getY();
             parent = (ViewGroup) parent.getParent();
         }
