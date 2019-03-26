@@ -997,6 +997,10 @@ class ActivityStarter {
             if (callerApp.areBackgroundActivityStartsAllowed()) {
                 return false;
             }
+            // don't abort if the caller has an activity in any foreground task
+            if (callerApp.hasActivityInVisibleTask()) {
+                return false;
+            }
         }
         // don't abort if the callingUid has START_ACTIVITIES_FROM_BACKGROUND permission
         if (mService.checkPermission(START_ACTIVITIES_FROM_BACKGROUND, callingPid, callingUid)

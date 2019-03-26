@@ -471,6 +471,20 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
     }
 
+    boolean hasActivityInVisibleTask() {
+        for (int i = mActivities.size() - 1; i >= 0; --i) {
+            TaskRecord task = mActivities.get(i).getTaskRecord();
+            if (task == null) {
+                continue;
+            }
+            ActivityRecord topActivity = task.getTopActivity();
+            if (topActivity != null && topActivity.visible) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Update the top resuming activity in process for pre-Q apps, only the top-most visible
      * activities are allowed to be resumed per process.
