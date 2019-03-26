@@ -4688,6 +4688,11 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (ps == null || now - ps.lastUpdateTime < maxCachePeriod) {
                         continue;
                     }
+
+                    if (ps.pkg.isSystem()) {
+                        continue;
+                    }
+
                     if (packagesToDelete == null) {
                         packagesToDelete = new ArrayList<>();
                     }
@@ -5137,7 +5142,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 continue;
             }
 
-            if (!ps.getUserState().get(userId).isAvailable(flags)) {
+            if (!ps.readUserState(userId).isAvailable(flags)) {
                 continue;
             }
 
@@ -6968,8 +6973,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         final PackageSetting ps = mSettings.mPackages.get(mInstantAppInstallerActivity.packageName);
         if (ps == null
-                || ps.getUserState().get(userId) == null
-                || !ps.getUserState().get(userId).isEnabled(mInstantAppInstallerActivity, 0)) {
+                || !ps.readUserState(userId).isEnabled(mInstantAppInstallerActivity, 0)) {
             return result;
         }
         final ResolveInfo ephemeralInstaller = new ResolveInfo(mInstantAppInstallerInfo);
