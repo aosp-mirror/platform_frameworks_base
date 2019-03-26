@@ -32,15 +32,18 @@ import java.util.ArrayList;
 import java.util.function.Predicate;
 
 /**
- * Given a process, will iterate over the child threads of the process, and return the CPU usage
- * statistics for each child thread. The CPU usage statistics contain the amount of time spent in a
- * frequency band.
+ * Iterates over processes, and all threads owned by those processes, and return the CPU usage for
+ * each thread. The CPU usage statistics contain the amount of time spent in a frequency band. CPU
+ * usage is collected using {@link ProcTimeInStateReader}.
+ *
+ * <p>We only collect CPU data for processes and threads that are owned by certain UIDs. These UIDs
+ * are configured via {@link #setUidPredicate}.
  *
  * <p>Frequencies are bucketed together to reduce the amount of data created. This means that we
- * return less frequencies than provided by {@link ProcTimeInStateReader}. The number of
- * frequencies is configurable by {@link #setNumBuckets}. Frequencies are reported as the lowest
- * frequency in that range. Frequencies are spread as evenly as possible across the buckets. The
- * buckets do not cross over the little/big frequencies reported.
+ * return less frequencies than provided by {@link ProcTimeInStateReader}. The number of frequencies
+ * is configurable by {@link #setNumBuckets}. Frequencies are reported as the lowest frequency in
+ * that range. Frequencies are spread as evenly as possible across the buckets. The buckets do not
+ * cross over the little/big frequencies reported.
  *
  * <p>N.B.: In order to bucket across little/big frequencies correctly, we assume that the {@code
  * time_in_state} file contains every little core frequency in ascending order, followed by every
@@ -60,56 +63,39 @@ public class KernelCpuThreadReader {
     private static final String CPU_STATISTICS_FILENAME = "time_in_state";
 
     /**
-     * The name of the file to read process command line invocation from, must be found in
-     * {@code /proc/$PID/}
+     * The name of the file to read process command line invocation from, must be found in {@code
+     * /proc/$PID/}
      */
     private static final String PROCESS_NAME_FILENAME = "cmdline";
 
     /**
-     * The name of the file to read thread name from, must be found in
-     * {@code /proc/$PID/task/$TID}
+     * The name of the file to read thread name from, must be found in {@code /proc/$PID/task/$TID}
      */
     private static final String THREAD_NAME_FILENAME = "comm";
 
-    /**
-     * Glob pattern for the process directory names under {@code proc}
-     */
+    /** Glob pattern for the process directory names under {@code proc} */
     private static final String PROCESS_DIRECTORY_FILTER = "[0-9]*";
 
-    /**
-     * Default process name when the name can't be read
-     */
+    /** Default process name when the name can't be read */
     private static final String DEFAULT_PROCESS_NAME = "unknown_process";
 
-    /**
-     * Default thread name when the name can't be read
-     */
+    /** Default thread name when the name can't be read */
     private static final String DEFAULT_THREAD_NAME = "unknown_thread";
 
-    /**
-     * Default mount location of the {@code proc} filesystem
-     */
+    /** Default mount location of the {@code proc} filesystem */
     private static final Path DEFAULT_PROC_PATH = Paths.get("/proc");
 
-    /**
-     * The initial {@code time_in_state} file for {@link ProcTimeInStateReader}
-     */
+    /** The initial {@code time_in_state} file for {@link ProcTimeInStateReader} */
     private static final Path DEFAULT_INITIAL_TIME_IN_STATE_PATH =
             DEFAULT_PROC_PATH.resolve("self/time_in_state");
 
-    /**
-     * Value returned when there was an error getting an integer ID value (e.g. PID, UID)
-     */
+    /** Value returned when there was an error getting an integer ID value (e.g. PID, UID) */
     private static final int ID_ERROR = -1;
 
-    /**
-     * Thread ID used when reporting CPU used by other threads
-     */
+    /** Thread ID used when reporting CPU used by other threads */
     private static final int OTHER_THREADS_ID = -1;
 
-    /**
-     * Thread name used when reporting CPU used by other threads
-     */
+    /** Thread name used when reporting CPU used by other threads */
     private static final String OTHER_THREADS_NAME = "__OTHER_THREADS";
 
     /**
@@ -124,9 +110,7 @@ public class KernelCpuThreadReader {
      */
     private int mMinimumTotalCpuUsageMillis;
 
-    /**
-     * Where the proc filesystem is mounted
-     */
+    /** Where the proc filesystem is mounted */
     private final Path mProcPath;
 
     /**
@@ -135,14 +119,10 @@ public class KernelCpuThreadReader {
      */
     private int[] mFrequenciesKhz;
 
-    /**
-     * Used to read and parse {@code time_in_state} files
-     */
+    /** Used to read and parse {@code time_in_state} files */
     private final ProcTimeInStateReader mProcTimeInStateReader;
 
-    /**
-     * Used to sort frequencies and usage times into buckets
-     */
+    /** Used to sort frequencies and usage times into buckets */
     private FrequencyBucketCreator mFrequencyBucketCreator;
 
     private final Injector mInjector;
@@ -150,10 +130,9 @@ public class KernelCpuThreadReader {
     /**
      * Create with a path where `proc` is mounted. Used primarily for testing
      *
-     * @param procPath               where `proc` is mounted (to find, see {@code mount | grep
-     *                               ^proc})
+     * @param procPath where `proc` is mounted (to find, see {@code mount | grep ^proc})
      * @param initialTimeInStatePath where the initial {@code time_in_state} file exists to define
-     *                               format
+     *     format
      */
     @VisibleForTesting
     public KernelCpuThreadReader(
@@ -162,7 +141,8 @@ public class KernelCpuThreadReader {
             int minimumTotalCpuUsageMillis,
             Path procPath,
             Path initialTimeInStatePath,
-            Injector injector) throws IOException {
+            Injector injector)
+            throws IOException {
         mUidPredicate = uidPredicate;
         mMinimumTotalCpuUsageMillis = minimumTotalCpuUsageMillis;
         mProcPath = procPath;
@@ -205,7 +185,7 @@ public class KernelCpuThreadReader {
      * #setUidPredicate}.
      */
     @Nullable
-    public ArrayList<ProcessCpuUsage> getProcessCpuUsageByUids() {
+    public ArrayList<ProcessCpuUsage> getProcessCpuUsage() {
         if (DEBUG) {
             Slog.d(TAG, "Reading CPU thread usages for processes owned by UIDs");
         }
@@ -213,7 +193,7 @@ public class KernelCpuThreadReader {
         final ArrayList<ProcessCpuUsage> processCpuUsages = new ArrayList<>();
 
         try (DirectoryStream<Path> processPaths =
-                     Files.newDirectoryStream(mProcPath, PROCESS_DIRECTORY_FILTER)) {
+                Files.newDirectoryStream(mProcPath, PROCESS_DIRECTORY_FILTER)) {
             for (Path processPath : processPaths) {
                 final int processId = getProcessId(processPath);
                 final int uid = mInjector.getUidForPid(processId);
@@ -231,7 +211,7 @@ public class KernelCpuThreadReader {
                 }
             }
         } catch (IOException e) {
-            Slog.w("Failed to iterate over process paths", e);
+            Slog.w(TAG, "Failed to iterate over process paths", e);
             return null;
         }
 
@@ -248,30 +228,68 @@ public class KernelCpuThreadReader {
     }
 
     /**
-     * Read all of the CPU usage statistics for each child thread of the current process
-     *
-     * @return process CPU usage containing usage of all child threads
+     * Get the CPU frequencies that correspond to the times reported in {@link
+     * ThreadCpuUsage#usageTimesMillis}
      */
     @Nullable
-    public ProcessCpuUsage getCurrentProcessCpuUsage() {
-        return getProcessCpuUsage(mProcPath.resolve("self"), mInjector.myPid(), mInjector.myUid());
+    public int[] getCpuFrequenciesKhz() {
+        return mFrequenciesKhz;
+    }
+
+    /** Set the number of frequency buckets to use */
+    void setNumBuckets(int numBuckets) {
+        if (numBuckets < 1) {
+            Slog.w(TAG, "Number of buckets must be at least 1, but was " + numBuckets);
+            return;
+        }
+        // If `numBuckets` hasn't changed since the last set, do nothing
+        if (mFrequenciesKhz != null && mFrequenciesKhz.length == numBuckets) {
+            return;
+        }
+        mFrequencyBucketCreator =
+                new FrequencyBucketCreator(mProcTimeInStateReader.getFrequenciesKhz(), numBuckets);
+        mFrequenciesKhz =
+                mFrequencyBucketCreator.getBucketMinFrequencies(
+                        mProcTimeInStateReader.getFrequenciesKhz());
+    }
+
+    /** Set the UID predicate for {@link #getProcessCpuUsage} */
+    void setUidPredicate(Predicate<Integer> uidPredicate) {
+        mUidPredicate = uidPredicate;
+    }
+
+    /**
+     * If a thread has strictly less than {@code minimumTotalCpuUsageMillis} total CPU usage, it
+     * will not be reported
+     */
+    void setMinimumTotalCpuUsageMillis(int minimumTotalCpuUsageMillis) {
+        if (minimumTotalCpuUsageMillis < 0) {
+            Slog.w(TAG, "Negative minimumTotalCpuUsageMillis: " + minimumTotalCpuUsageMillis);
+            return;
+        }
+        mMinimumTotalCpuUsageMillis = minimumTotalCpuUsageMillis;
     }
 
     /**
      * Read all of the CPU usage statistics for each child thread of a process
      *
      * @param processPath the {@code /proc} path of the thread
-     * @param processId   the ID of the process
-     * @param uid         the ID of the user who owns the process
+     * @param processId the ID of the process
+     * @param uid the ID of the user who owns the process
      * @return process CPU usage containing usage of all child threads. Null if the process exited
-     * and its {@code proc} directory was removed while collecting information
+     *     and its {@code proc} directory was removed while collecting information
      */
     @Nullable
     private ProcessCpuUsage getProcessCpuUsage(Path processPath, int processId, int uid) {
         if (DEBUG) {
-            Slog.d(TAG, "Reading CPU thread usages with directory " + processPath
-                    + " process ID " + processId
-                    + " and user ID " + uid);
+            Slog.d(
+                    TAG,
+                    "Reading CPU thread usages with directory "
+                            + processPath
+                            + " process ID "
+                            + processId
+                            + " and user ID "
+                            + uid);
         }
 
         int[] filteredThreadsCpuUsage = null;
@@ -305,64 +323,15 @@ public class KernelCpuThreadReader {
 
         // Add the filtered out thread CPU usage under an "other threads" ThreadCpuUsage
         if (filteredThreadsCpuUsage != null) {
-            threadCpuUsages.add(new ThreadCpuUsage(
-                    OTHER_THREADS_ID, OTHER_THREADS_NAME, filteredThreadsCpuUsage));
+            threadCpuUsages.add(
+                    new ThreadCpuUsage(
+                            OTHER_THREADS_ID, OTHER_THREADS_NAME, filteredThreadsCpuUsage));
         }
 
         if (DEBUG) {
             Slog.d(TAG, "Read CPU usage of " + threadCpuUsages.size() + " threads");
         }
-        return new ProcessCpuUsage(
-                processId,
-                getProcessName(processPath),
-                uid,
-                threadCpuUsages);
-    }
-
-    /**
-     * Set the number of frequency buckets to use
-     */
-    void setNumBuckets(int numBuckets) {
-        if (numBuckets < 1) {
-            Slog.w(TAG, "Number of buckets must be at least 1, but was " + numBuckets);
-            return;
-        }
-        // If `numBuckets` hasn't changed since the last set, do nothing
-        if (mFrequenciesKhz != null && mFrequenciesKhz.length == numBuckets) {
-            return;
-        }
-        mFrequencyBucketCreator = new FrequencyBucketCreator(
-                mProcTimeInStateReader.getFrequenciesKhz(), numBuckets);
-        mFrequenciesKhz = mFrequencyBucketCreator.getBucketMinFrequencies(
-                mProcTimeInStateReader.getFrequenciesKhz());
-    }
-
-    /**
-     * Set the UID predicate for {@link #getProcessCpuUsageByUids}
-     */
-    void setUidPredicate(Predicate<Integer> uidPredicate) {
-        mUidPredicate = uidPredicate;
-    }
-
-    /**
-     * If a thread has strictly less than {@code minimumTotalCpuUsageMillis} total CPU usage, it
-     * will not be reported
-     */
-    void setMinimumTotalCpuUsageMillis(int minimumTotalCpuUsageMillis) {
-        if (minimumTotalCpuUsageMillis < 0) {
-            Slog.w(TAG, "Negative minimumTotalCpuUsageMillis: " + minimumTotalCpuUsageMillis);
-            return;
-        }
-        mMinimumTotalCpuUsageMillis = minimumTotalCpuUsageMillis;
-    }
-
-    /**
-     * Get the CPU frequencies that correspond to the times reported in
-     * {@link ThreadCpuUsage#usageTimesMillis}
-     */
-    @Nullable
-    public int[] getCpuFrequenciesKhz() {
-        return mFrequenciesKhz;
+        return new ProcessCpuUsage(processId, getProcessName(processPath), uid, threadCpuUsages);
     }
 
     /**
@@ -370,7 +339,7 @@ public class KernelCpuThreadReader {
      *
      * @param threadDirectory the {@code /proc} directory of the thread
      * @return thread CPU usage. Null if the thread exited and its {@code proc} directory was
-     * removed while collecting information
+     *     removed while collecting information
      */
     @Nullable
     private ThreadCpuUsage getThreadCpuUsage(Path threadDirectory) {
@@ -398,27 +367,21 @@ public class KernelCpuThreadReader {
         return new ThreadCpuUsage(threadId, threadName, cpuUsages);
     }
 
-    /**
-     * Get the command used to start a process
-     */
+    /** Get the command used to start a process */
     private String getProcessName(Path processPath) {
         final Path processNamePath = processPath.resolve(PROCESS_NAME_FILENAME);
 
-        final String processName =
-                ProcStatsUtil.readSingleLineProcFile(processNamePath.toString());
+        final String processName = ProcStatsUtil.readSingleLineProcFile(processNamePath.toString());
         if (processName != null) {
             return processName;
         }
         return DEFAULT_PROCESS_NAME;
     }
 
-    /**
-     * Get the name of a thread, given the {@code /proc} path of the thread
-     */
+    /** Get the name of a thread, given the {@code /proc} path of the thread */
     private String getThreadName(Path threadPath) {
         final Path threadNamePath = threadPath.resolve(THREAD_NAME_FILENAME);
-        final String threadName =
-                ProcStatsUtil.readNullSeparatedFile(threadNamePath.toString());
+        final String threadName = ProcStatsUtil.readNullSeparatedFile(threadNamePath.toString());
         if (threadName == null) {
             return DEFAULT_THREAD_NAME;
         }
@@ -441,9 +404,8 @@ public class KernelCpuThreadReader {
         }
     }
 
-    /**
-     * Get the sum of all CPU usage across all frequencies
-     */
+    /** Get the sum of all CPU usage across all frequencies */
+    @SuppressWarnings("ForLoopReplaceableByForEach")
     private static int totalCpuUsage(int[] cpuUsage) {
         int total = 0;
         for (int i = 0; i < cpuUsage.length; i++) {
@@ -452,9 +414,7 @@ public class KernelCpuThreadReader {
         return total;
     }
 
-    /**
-     * Add two CPU frequency usages together
-     */
+    /** Add two CPU frequency usages together */
     private static int[] sumCpuUsage(int[] a, int[] b) {
         int[] summed = new int[a.length];
         for (int i = 0; i < a.length; i++) {
@@ -463,9 +423,7 @@ public class KernelCpuThreadReader {
         return summed;
     }
 
-    /**
-     * Puts frequencies and usage times into buckets
-     */
+    /** Puts frequencies and usage times into buckets */
     @VisibleForTesting
     public static class FrequencyBucketCreator {
         private final int mNumBuckets;
@@ -480,7 +438,7 @@ public class KernelCpuThreadReader {
          * Buckets based of a list of frequencies
          *
          * @param frequencies the frequencies to base buckets off
-         * @param numBuckets  how many buckets to create
+         * @param numBuckets how many buckets to create
          */
         @VisibleForTesting
         public FrequencyBucketCreator(long[] frequencies, int numBuckets) {
@@ -502,20 +460,20 @@ public class KernelCpuThreadReader {
 
             // Ensure that we don't have more buckets than frequencies
             mLittleNumBuckets = Math.min(littleNumBuckets, mBigFrequenciesStartIndex);
-            mBigNumBuckets = Math.min(
-                    bigNumBuckets, frequencies.length - mBigFrequenciesStartIndex);
+            mBigNumBuckets =
+                    Math.min(bigNumBuckets, frequencies.length - mBigFrequenciesStartIndex);
             mNumBuckets = mLittleNumBuckets + mBigNumBuckets;
 
             // Set the size of each little and big bucket. If they have no buckets, the size is zero
-            mLittleBucketSize = mLittleNumBuckets == 0 ? 0 :
-                    mBigFrequenciesStartIndex / mLittleNumBuckets;
-            mBigBucketSize = mBigNumBuckets == 0 ? 0 :
-                    (frequencies.length - mBigFrequenciesStartIndex) / mBigNumBuckets;
+            mLittleBucketSize =
+                    mLittleNumBuckets == 0 ? 0 : mBigFrequenciesStartIndex / mLittleNumBuckets;
+            mBigBucketSize =
+                    mBigNumBuckets == 0
+                            ? 0
+                            : (frequencies.length - mBigFrequenciesStartIndex) / mBigNumBuckets;
         }
 
-        /**
-         * Find the index where frequencies change from little core to big core
-         */
+        /** Find the index where frequencies change from little core to big core */
         @VisibleForTesting
         public static int getBigFrequenciesStartIndex(long[] frequenciesKhz) {
             for (int i = 0; i < frequenciesKhz.length - 1; i++) {
@@ -527,16 +485,14 @@ public class KernelCpuThreadReader {
             return frequenciesKhz.length;
         }
 
-        /**
-         * Get the minimum frequency in each bucket
-         */
+        /** Get the minimum frequency in each bucket */
         @VisibleForTesting
         public int[] getBucketMinFrequencies(long[] frequenciesKhz) {
             Preconditions.checkArgument(frequenciesKhz.length == mNumFrequencies);
             // If there's only one bucket, we bucket everything together so the first bucket is the
             // min frequency
             if (mNumBuckets == 1) {
-                return new int[]{(int) frequenciesKhz[0]};
+                return new int[] {(int) frequenciesKhz[0]};
             }
 
             final int[] bucketMinFrequencies = new int[mNumBuckets];
@@ -561,6 +517,7 @@ public class KernelCpuThreadReader {
          * @return the bucketed usage times
          */
         @VisibleForTesting
+        @SuppressWarnings("ForLoopReplaceableByForEach")
         public int[] getBucketedValues(long[] values) {
             Preconditions.checkArgument(values.length == mNumFrequencies);
             final int[] bucketed = new int[mNumBuckets];
@@ -580,18 +537,18 @@ public class KernelCpuThreadReader {
             }
             // Initialize the big buckets
             for (int i = mBigFrequenciesStartIndex; i < values.length; i++) {
-                final int bucketIndex = Math.min(
-                        mLittleNumBuckets + (i - mBigFrequenciesStartIndex) / mBigBucketSize,
-                        mNumBuckets - 1);
+                final int bucketIndex =
+                        Math.min(
+                                mLittleNumBuckets
+                                        + (i - mBigFrequenciesStartIndex) / mBigBucketSize,
+                                mNumBuckets - 1);
                 bucketed[bucketIndex] += values[i];
             }
             return bucketed;
         }
     }
 
-    /**
-     * CPU usage of a process
-     */
+    /** CPU usage of a process */
     public static class ProcessCpuUsage {
         public final int processId;
         public final String processName;
@@ -610,46 +567,23 @@ public class KernelCpuThreadReader {
         }
     }
 
-    /**
-     * CPU usage of a thread
-     */
+    /** CPU usage of a thread */
     public static class ThreadCpuUsage {
         public final int threadId;
         public final String threadName;
         public final int[] usageTimesMillis;
 
-        ThreadCpuUsage(
-                int threadId,
-                String threadName,
-                int[] usageTimesMillis) {
+        ThreadCpuUsage(int threadId, String threadName, int[] usageTimesMillis) {
             this.threadId = threadId;
             this.threadName = threadName;
             this.usageTimesMillis = usageTimesMillis;
         }
     }
 
-    /**
-     * Used to inject static methods from {@link Process}
-     */
+    /** Used to inject static methods from {@link Process} */
     @VisibleForTesting
     public static class Injector {
-        /**
-         * Get the PID of the current process
-         */
-        public int myPid() {
-            return Process.myPid();
-        }
-
-        /**
-         * Get the UID that owns the current process
-         */
-        public int myUid() {
-            return Process.myUid();
-        }
-
-        /**
-         * Get the UID for the process with ID {@code pid}
-         */
+        /** Get the UID for the process with ID {@code pid} */
         public int getUidForPid(int pid) {
             return Process.getUidForPid(pid);
         }
