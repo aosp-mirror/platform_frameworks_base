@@ -44,7 +44,7 @@ import java.util.concurrent.TimeUnit;
  * Tests for {@link AppCompactor}.
  *
  * Build/Install/Run:
- * atest FrameworksServicesTests:AppCompactorTest
+ * atest FrameworksMockingServicesTests:AppCompactorTest
  */
 @RunWith(MockitoJUnitRunner.class)
 public final class AppCompactorTest {
