@@ -212,7 +212,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
@@ -4022,8 +4021,13 @@ public class ConnectivityServiceTest {
         callback3.expectStopped();
     }
 
+    @FunctionalInterface
+    private interface ThrowingConsumer<T> {
+        void accept(T t) throws Exception;
+    }
+
     // Helper method to prepare the executor and run test
-    private void runTestWithSerialExecutors(Consumer<Executor> functor) {
+    private void runTestWithSerialExecutors(ThrowingConsumer<Executor> functor) throws Exception {
         final ExecutorService executorSingleThread = Executors.newSingleThreadExecutor();
         final Executor executorInline = (Runnable r) -> r.run();
         functor.accept(executorSingleThread);
@@ -4032,15 +4036,9 @@ public class ConnectivityServiceTest {
     }
 
     @Test
-    public void testNattSocketKeepalives() {
-        runTestWithSerialExecutors(executor -> {
-            try {
-                doTestNattSocketKeepalivesWithExecutor(executor);
-                doTestNattSocketKeepalivesFdWithExecutor(executor);
-            } catch (Exception e) {
-                fail(e.getMessage());
-            }
-        });
+    public void testNattSocketKeepalives() throws Exception {
+        runTestWithSerialExecutors(executor -> doTestNattSocketKeepalivesWithExecutor(executor));
+        runTestWithSerialExecutors(executor -> doTestNattSocketKeepalivesFdWithExecutor(executor));
     }
 
     private void doTestNattSocketKeepalivesWithExecutor(Executor executor) throws Exception {
@@ -4210,14 +4208,8 @@ public class ConnectivityServiceTest {
     }
 
     @Test
-    public void testTcpSocketKeepalives() {
-        runTestWithSerialExecutors(executor -> {
-            try {
-                doTestTcpSocketKeepalivesWithExecutor(executor);
-            } catch (Exception e) {
-                fail(e.getMessage());
-            }
-        });
+    public void testTcpSocketKeepalives() throws Exception {
+        runTestWithSerialExecutors(executor -> doTestTcpSocketKeepalivesWithExecutor(executor));
     }
 
     private void doTestTcpSocketKeepalivesWithExecutor(Executor executor) throws Exception {
