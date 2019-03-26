@@ -77,6 +77,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.storage.StorageManager;
 import android.service.wallpaper.IWallpaperConnection;
 import android.service.wallpaper.IWallpaperEngine;
 import android.service.wallpaper.IWallpaperService;
@@ -2089,28 +2090,14 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
     }
 
-    private void enforceCallingOrSelfPermissionAndAppOp(String permission, final String callingPkg,
-            final int callingUid, String message) {
-        mContext.enforceCallingOrSelfPermission(permission, message);
-
-        final String opName = AppOpsManager.permissionToOp(permission);
-        if (opName != null) {
-            final int appOpMode = mAppOpsManager.noteOp(opName, callingUid, callingPkg);
-            if (appOpMode != AppOpsManager.MODE_ALLOWED) {
-                throw new SecurityException(
-                        message + ": " + callingPkg + " is not allowed to " + permission);
-            }
-        }
-    }
-
     @Override
     public ParcelFileDescriptor getWallpaper(String callingPkg, IWallpaperManagerCallback cb,
             final int which, Bundle outParams, int wallpaperUserId) {
         final int hasPrivilege = mContext.checkCallingOrSelfPermission(
                 android.Manifest.permission.READ_WALLPAPER_INTERNAL);
         if (hasPrivilege != PackageManager.PERMISSION_GRANTED) {
-            enforceCallingOrSelfPermissionAndAppOp(android.Manifest.permission.READ_EXTERNAL_STORAGE,
-                    callingPkg, Binder.getCallingUid(), "read wallpaper");
+            mContext.getSystemService(StorageManager.class).checkPermissionReadImages(true,
+                    Binder.getCallingPid(), Binder.getCallingUid(), callingPkg);
         }
 
         wallpaperUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),

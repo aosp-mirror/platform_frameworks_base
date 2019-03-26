@@ -16,7 +16,21 @@
 
 package android.os.storage;
 
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.Manifest.permission.READ_MEDIA_AUDIO;
+import static android.Manifest.permission.READ_MEDIA_IMAGES;
+import static android.Manifest.permission.READ_MEDIA_VIDEO;
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+import static android.app.AppOpsManager.OP_READ_EXTERNAL_STORAGE;
+import static android.app.AppOpsManager.OP_READ_MEDIA_AUDIO;
+import static android.app.AppOpsManager.OP_READ_MEDIA_IMAGES;
+import static android.app.AppOpsManager.OP_READ_MEDIA_VIDEO;
+import static android.app.AppOpsManager.OP_WRITE_EXTERNAL_STORAGE;
+import static android.app.AppOpsManager.OP_WRITE_MEDIA_AUDIO;
+import static android.app.AppOpsManager.OP_WRITE_MEDIA_IMAGES;
+import static android.app.AppOpsManager.OP_WRITE_MEDIA_VIDEO;
 import static android.content.ContentResolver.DEPRECATE_DATA_PREFIX;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import android.annotation.BytesLong;
 import android.annotation.IntDef;
@@ -33,6 +47,7 @@ import android.annotation.WorkerThread;
 import android.app.Activity;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
+import android.app.AppOpsManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -1633,6 +1648,108 @@ public class StorageManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Check that given app holds both permission and appop.
+     *
+     * @return {@code null} if the permission and appop are held, otherwise
+     *         returns a string indicating why access was denied.
+     */
+    private boolean checkPermissionAndAppOp(boolean enforce, int pid, int uid, String packageName,
+            String permission, int op) {
+        if (mContext.checkPermission(permission, pid, uid) != PERMISSION_GRANTED) {
+            if (enforce) {
+                throw new SecurityException(
+                        "Permission " + permission + " denied for package " + packageName);
+            } else {
+                return false;
+            }
+        }
+
+        final AppOpsManager appOps = mContext.getSystemService(AppOpsManager.class);
+        final int mode = appOps.noteOpNoThrow(op, uid, packageName);
+        switch (mode) {
+            case AppOpsManager.MODE_ALLOWED:
+                return true;
+            case AppOpsManager.MODE_DEFAULT:
+            case AppOpsManager.MODE_IGNORED:
+            case AppOpsManager.MODE_ERRORED:
+                if (enforce) {
+                    throw new SecurityException("Op " + AppOpsManager.opToName(op) + " "
+                            + AppOpsManager.modeToName(mode) + " for package " + packageName);
+                } else {
+                    return false;
+                }
+            default:
+                throw new IllegalStateException(
+                        AppOpsManager.opToName(op) + " has unknown mode "
+                                + AppOpsManager.modeToName(mode));
+        }
+    }
+
+    // Callers must hold both the old and new permissions, so that we can
+    // handle obscure cases like when an app targets Q but was installed on
+    // a device that was originally running on P before being upgraded to Q.
+
+    /** {@hide} */
+    public boolean checkPermissionReadAudio(boolean enforce,
+            int pid, int uid, String packageName) {
+        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName,
+                READ_EXTERNAL_STORAGE, OP_READ_EXTERNAL_STORAGE)) return false;
+        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName,
+                READ_MEDIA_AUDIO, OP_READ_MEDIA_AUDIO)) return false;
+        return true;
+    }
+
+    /** {@hide} */
+    public boolean checkPermissionWriteAudio(boolean enforce,
+            int pid, int uid, String packageName) {
+        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName,
+                WRITE_EXTERNAL_STORAGE, OP_WRITE_EXTERNAL_STORAGE)) return false;
+        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName,
+                READ_MEDIA_AUDIO, OP_WRITE_MEDIA_AUDIO)) return false;
+        return true;
+    }
+
+    /** {@hide} */
+    public boolean checkPermissionReadVideo(boolean enforce,
+            int pid, int uid, String packageName) {
+        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName,
+                READ_EXTERNAL_STORAGE, OP_READ_EXTERNAL_STORAGE)) return false;
+        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName,
+                READ_MEDIA_VIDEO, OP_READ_MEDIA_VIDEO)) return false;
+        return true;
+    }
+
+    /** {@hide} */
+    public boolean checkPermissionWriteVideo(boolean enforce,
+            int pid, int uid, String packageName) {
+        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName,
+                WRITE_EXTERNAL_STORAGE, OP_WRITE_EXTERNAL_STORAGE)) return false;
+        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName,
+                READ_MEDIA_VIDEO, OP_WRITE_MEDIA_VIDEO)) return false;
+        return true;
+    }
+
+    /** {@hide} */
+    public boolean checkPermissionReadImages(boolean enforce,
+            int pid, int uid, String packageName) {
+        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName,
+                READ_EXTERNAL_STORAGE, OP_READ_EXTERNAL_STORAGE)) return false;
+        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName,
+                READ_MEDIA_IMAGES, OP_READ_MEDIA_IMAGES)) return false;
+        return true;
+    }
+
+    /** {@hide} */
+    public boolean checkPermissionWriteImages(boolean enforce,
+            int pid, int uid, String packageName) {
+        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName,
+                WRITE_EXTERNAL_STORAGE, OP_WRITE_EXTERNAL_STORAGE)) return false;
+        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName,
+                READ_MEDIA_IMAGES, OP_WRITE_MEDIA_IMAGES)) return false;
+        return true;
     }
 
     /** {@hide} */
