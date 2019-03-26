@@ -63,7 +63,7 @@
     <string name="CfMmi" msgid="5123218989141573515">"Rufweiterleitung"</string>
     <string name="CwMmi" msgid="9129678056795016867">"Anklopfen"</string>
     <string name="BaMmi" msgid="455193067926770581">"Anrufsperre"</string>
-    <string name="PwdMmi" msgid="7043715687905254199">"Passwort-Änderung"</string>
+    <string name="PwdMmi" msgid="7043715687905254199">"Passwortänderung"</string>
     <string name="PinMmi" msgid="3113117780361190304">"PIN-Änderung"</string>
     <string name="CnipMmi" msgid="3110534680557857162">"Rufnummer vorhanden"</string>
     <string name="CnirMmi" msgid="3062102121430548731">"Rufnummer begrenzt"</string>
