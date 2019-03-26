@@ -26,6 +26,7 @@
 
     <uses-permission android:name="android.permission.MONITOR_DEFAULT_SMS_PACKAGE" />
     <uses-permission android:name="android.permission.REQUEST_NOTIFICATION_ASSISTANT_SERVICE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <uses-sdk
         android:targetSdkVersion="28"
@@ -75,6 +76,13 @@
                  android:permission="android.permission.BIND_FINANCIAL_SMS_SERVICE">
             <intent-filter>
                 <action android:name="android.service.sms.action.FINANCIAL_SERVICE_INTENT" />
+            </intent-filter>
+        </service>
+
+        <service android:name=".watchdog.ExplicitHealthCheckServiceImpl"
+                 android:permission="android.permission.BIND_EXPLICIT_HEALTH_CHECK_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.watchdog.ExplicitHealthCheckService" />
             </intent-filter>
         </service>
 
