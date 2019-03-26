@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (C) 2018 The Android Open Source Project
+  ~ Copyright (C) 2019 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -14,17 +13,21 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<com.android.systemui.bubbles.BubbleView
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/bubble_flyout"
     android:layout_height="wrap_content"
     android:layout_width="wrap_content"
-    android:id="@+id/bubble_view">
+    android:background="@drawable/bubble_flyout"
+    android:padding="@dimen/bubble_flyout_padding"
+    android:translationZ="@dimen/bubble_flyout_elevation">
 
-    <com.android.systemui.bubbles.BadgedImageView
-        android:id="@+id/bubble_image"
-        android:layout_width="@dimen/individual_bubble_size"
-        android:layout_height="@dimen/individual_bubble_size"
-        android:padding="@dimen/bubble_view_padding"
-        android:clipToPadding="false"/>
+    <TextView
+        android:id="@+id/bubble_flyout_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxLines="2"
+        android:maxWidth="@dimen/bubble_flyout_maxwidth"
+        android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Notification.Title" />
 
-</com.android.systemui.bubbles.BubbleView>
+</FrameLayout>

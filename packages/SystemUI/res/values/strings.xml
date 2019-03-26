@@ -670,6 +670,9 @@
         <item quantity="other"><xliff:g id="number" example="3">%s</xliff:g> more notifications inside.</item>
     </plurals>
 
+    <!-- Format to use to summarize a message from a contact in a single line of text. For example: "Julia: How's it going?". [CHAR LIMIT=NONE] -->
+    <string name="notification_summary_message_format"><xliff:g id="contact_name" example="Julia">%1$s</xliff:g>: <xliff:g id="message_content" example="How is it going?">%2$s</xliff:g></string>
+
     <!-- Content description of button in notification inspector for system settings relating to
          notifications from this application [CHAR LIMIT=NONE] -->
     <string name="status_bar_notification_inspect_item_title">Notification settings</string>
@@ -2401,5 +2404,4 @@
     <string name="bubble_accessibility_action_move_bottom_left">Move bottom left</string>
     <!-- Action in accessibility menu to move the stack of bubbles to the bottom right of the screen. [CHAR LIMIT=30]-->
     <string name="bubble_accessibility_action_move_bottom_right">Move bottom right</string>
-
 </resources>
