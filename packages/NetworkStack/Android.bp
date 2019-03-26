@@ -50,7 +50,7 @@ java_defaults {
     resource_dirs: [],
     jarjar_rules: "jarjar-rules-shared.txt",
     // The permission configuration *must* be included to ensure security of the device
-    required: ["NetworkStackPermissionStub"],
+    required: ["NetworkPermissionConfig"],
 }
 
 // Non-updatable network stack running in the system server process for devices not using the module
