@@ -654,6 +654,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     private static final int VIRTUAL_DESCENDANT_ID_SHIFT = 32;
 
+    // TODO(b/129300068): Remove sNumInstancesInUse.
     private static AtomicInteger sNumInstancesInUse;
 
     /**
@@ -764,6 +765,11 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     private AccessibilityNodeInfo() {
         /* do nothing */
+    }
+
+    /** @hide */
+    AccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        init(info);
     }
 
     /**
