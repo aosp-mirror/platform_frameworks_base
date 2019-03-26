@@ -38,6 +38,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Matrix;
 import android.graphics.RectF;
+import android.os.Binder;
 import android.os.IBinder;
 import android.testing.TestableResources;
 import android.util.Pair;
@@ -98,7 +99,8 @@ public class DisplayPolicyTestsBase extends WindowTestsBase {
     }
 
     void addWindow(WindowState win) {
-        mDisplayPolicy.adjustWindowParamsLw(win, win.mAttrs, true /* hasStatusBarPermission */);
+        mDisplayPolicy.adjustWindowParamsLw(win, win.mAttrs, Binder.getCallingPid(),
+                Binder.getCallingUid());
         assertEquals(WindowManagerGlobal.ADD_OKAY,
                 mDisplayPolicy.prepareAddWindowLw(win, win.mAttrs));
         win.mHasSurface = true;

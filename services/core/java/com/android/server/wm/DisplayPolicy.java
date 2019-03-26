@@ -103,13 +103,16 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.localLOGV;
 
+import android.Manifest.permission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.Px;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.StatusBarManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Insets;
 import android.graphics.PixelFormat;
@@ -254,6 +257,9 @@ public class DisplayPolicy {
     private int[] mNavigationBarWidthForRotationDefault = new int[4];
     private int[] mNavigationBarHeightForRotationInCarMode = new int[4];
     private int[] mNavigationBarWidthForRotationInCarMode = new int[4];
+
+    /** Cached value of {@link ScreenShapeHelper#getWindowOutsetBottomPx} */
+    @Px private int mWindowOutsetBottom;
 
     private final StatusBarController mStatusBarController = new StatusBarController();
 
@@ -731,6 +737,11 @@ public class DisplayPolicy {
         return true;
     }
 
+    private boolean hasStatusBarServicePermission(int pid, int uid) {
+        return mContext.checkPermission(permission.STATUS_BAR_SERVICE, pid, uid)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
     /**
      * Sanitize the layout parameters coming from a client.  Allows the policy
      * to do things like ensure that windows of a specific type can't take
@@ -740,7 +751,7 @@ public class DisplayPolicy {
      * are modified in-place.
      */
     public void adjustWindowParamsLw(WindowState win, WindowManager.LayoutParams attrs,
-            boolean hasStatusBarServicePermission) {
+            int callingPid, int callingUid) {
 
         final boolean isScreenDecor = (attrs.privateFlags & PRIVATE_FLAG_IS_SCREEN_DECOR) != 0;
         if (mScreenDecorWindows.contains(win)) {
@@ -748,7 +759,7 @@ public class DisplayPolicy {
                 // No longer has the flag set, so remove from the set.
                 mScreenDecorWindows.remove(win);
             }
-        } else if (isScreenDecor && hasStatusBarServicePermission) {
+        } else if (isScreenDecor && hasStatusBarServicePermission(callingPid, callingUid)) {
             mScreenDecorWindows.add(win);
         }
 
@@ -1159,7 +1170,7 @@ public class DisplayPolicy {
 
         final boolean useOutsets = outOutsets != null && shouldUseOutsets(attrs, fl);
         if (useOutsets) {
-            int outset = ScreenShapeHelper.getWindowOutsetBottomPx(mContext.getResources());
+            int outset = mWindowOutsetBottom;
             if (outset > 0) {
                 if (displayRotation == Surface.ROTATION_0) {
                     outOutsets.bottom += outset;
@@ -1479,12 +1490,13 @@ public class DisplayPolicy {
         }
         // apply any navigation bar insets
         sTmpRect.setEmpty();
-        mStatusBar.getWindowFrames().setFrames(displayFrames.mUnrestricted /* parentFrame */,
+        final WindowFrames windowFrames = mStatusBar.getWindowFrames();
+        windowFrames.setFrames(displayFrames.mUnrestricted /* parentFrame */,
                 displayFrames.mUnrestricted /* displayFrame */,
                 displayFrames.mStable /* overscanFrame */, displayFrames.mStable /* contentFrame */,
                 displayFrames.mStable /* visibleFrame */, sTmpRect /* decorFrame */,
                 displayFrames.mStable /* stableFrame */, displayFrames.mStable /* outsetFrame */);
-        mStatusBar.getWindowFrames().setDisplayCutout(displayFrames.mDisplayCutout);
+        windowFrames.setDisplayCutout(displayFrames.mDisplayCutout);
 
         // Let the status bar determine its size.
         mStatusBar.computeFrameLw();
@@ -1524,8 +1536,9 @@ public class DisplayPolicy {
                     "dock=%s content=%s cur=%s", dockFrame.toString(),
                     displayFrames.mContent.toString(), displayFrames.mCurrent.toString()));
 
-            if (!mStatusBar.isAnimatingLw() && !statusBarTranslucent
-                    && !mStatusBarController.wasRecentlyTranslucent()) {
+            if (!statusBarTranslucent && !mStatusBarController.wasRecentlyTranslucent()
+                    && !mStatusBar.isAnimatingLw()) {
+
                 // If the opaque status bar is currently requested to be visible, and not in the
                 // process of animating on or off, then we can tell the app that it is covered by
                 // it.
@@ -2180,7 +2193,7 @@ public class DisplayPolicy {
             final Rect osf = windowFrames.mOutsetFrame;
             osf.set(cf.left, cf.top, cf.right, cf.bottom);
             windowFrames.setHasOutsets(true);
-            int outset = ScreenShapeHelper.getWindowOutsetBottomPx(mContext.getResources());
+            int outset = mWindowOutsetBottom;
             if (outset > 0) {
                 int rotation = displayFrames.mRotation;
                 if (rotation == Surface.ROTATION_0) {
@@ -2599,6 +2612,7 @@ public class DisplayPolicy {
         // EXPERIMENT END
 
         updateConfigurationAndScreenSizeDependentBehaviors();
+        mWindowOutsetBottom = ScreenShapeHelper.getWindowOutsetBottomPx(mContext.getResources());
     }
 
     void updateConfigurationAndScreenSizeDependentBehaviors() {

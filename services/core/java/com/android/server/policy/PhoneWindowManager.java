@@ -2263,7 +2263,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         boolean hideDockDivider = attrs.type == TYPE_DOCK_DIVIDER
-                && !mWindowManagerInternal.isStackVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+                && !mWindowManagerInternal.isStackVisibleLw(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
         // If AOD is showing, the IME should be hidden. However, sometimes the AOD is considered
         // hidden because it's in the process of hiding, but it's still being shown on screen.
         // In that case, we want to continue hiding the IME until the windows have completed
