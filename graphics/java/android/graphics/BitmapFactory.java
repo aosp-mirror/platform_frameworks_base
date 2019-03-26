@@ -436,9 +436,15 @@ public class BitmapFactory {
         static void validate(Options opts) {
             if (opts == null) return;
 
-            if (opts.inBitmap != null && opts.inBitmap.getConfig() == Bitmap.Config.HARDWARE) {
-                throw new IllegalArgumentException(
-                        "Bitmaps with Config.HARDWARE are always immutable");
+            if (opts.inBitmap != null) {
+                if (opts.inBitmap.getConfig() == Bitmap.Config.HARDWARE) {
+                    throw new IllegalArgumentException(
+                            "Bitmaps with Config.HARDWARE are always immutable");
+                }
+                if (opts.inBitmap.isRecycled()) {
+                    throw new IllegalArgumentException(
+                            "Cannot reuse a recycled Bitmap");
+                }
             }
 
             if (opts.inMutable && opts.inPreferredConfig == Bitmap.Config.HARDWARE) {
