@@ -48,7 +48,10 @@ public class AmbientDisplayConfiguration {
         return pulseOnNotificationEnabled(user)
                 || pulseOnLongPressEnabled(user)
                 || alwaysOnEnabled(user)
-                || wakeScreenGestureEnabled(user);
+                || wakeScreenGestureEnabled(user)
+                || pickupGestureEnabled(user)
+                || tapGestureEnabled(user)
+                || doubleTapGestureEnabled(user);
     }
 
     /** {@hide} */
