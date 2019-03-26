@@ -181,15 +181,10 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
     public void testDeferFinish() {
 
         // Start animation
-        mDeferFinishAnimatable.mSurfaceAnimator.startAnimation(mTransaction, mSpec,
-                true /* hidden */);
-        final ArgumentCaptor<OnAnimationFinishedCallback> callbackCaptor = ArgumentCaptor.forClass(
-                OnAnimationFinishedCallback.class);
-        assertAnimating(mDeferFinishAnimatable);
-        verify(mSpec).startAnimation(any(), any(), callbackCaptor.capture());
+        final OnAnimationFinishedCallback onFinishedCallback = startDeferFinishAnimatable(mSpec);
 
         // Finish the animation but then make sure we are deferring.
-        callbackCaptor.getValue().onAnimationFinished(mSpec);
+        onFinishedCallback.onAnimationFinished(mSpec);
         assertAnimating(mDeferFinishAnimatable);
 
         // Now end defer finishing.
@@ -197,6 +192,36 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         assertNotAnimating(mAnimatable2);
         assertTrue(mDeferFinishAnimatable.mFinishedCallbackCalled);
         verify(mTransaction).remove(eq(mDeferFinishAnimatable.mLeash));
+    }
+
+    @Test
+    public void testDeferFinishDoNotFinishNextAnimation() {
+        // Start the first animation.
+        final OnAnimationFinishedCallback onFinishedCallback = startDeferFinishAnimatable(mSpec);
+        onFinishedCallback.onAnimationFinished(mSpec);
+        // The callback is the resetAndInvokeFinish in {@link SurfaceAnimator#getFinishedCallback}.
+        final Runnable firstDeferFinishCallback = mDeferFinishAnimatable.mEndDeferFinishCallback;
+
+        // Start the second animation.
+        mDeferFinishAnimatable.mSurfaceAnimator.cancelAnimation();
+        startDeferFinishAnimatable(mSpec2);
+        mDeferFinishAnimatable.mFinishedCallbackCalled = false;
+
+        // Simulate the first deferred callback is executed from
+        // {@link AnimatingAppWindowTokenRegistry#endDeferringFinished}.
+        firstDeferFinishCallback.run();
+        // The second animation should not be finished.
+        assertFalse(mDeferFinishAnimatable.mFinishedCallbackCalled);
+    }
+
+    private OnAnimationFinishedCallback startDeferFinishAnimatable(AnimationAdapter anim) {
+        mDeferFinishAnimatable.mSurfaceAnimator.startAnimation(mTransaction, anim,
+                true /* hidden */);
+        final ArgumentCaptor<OnAnimationFinishedCallback> callbackCaptor = ArgumentCaptor.forClass(
+                OnAnimationFinishedCallback.class);
+        assertAnimating(mDeferFinishAnimatable);
+        verify(anim).startAnimation(any(), any(), callbackCaptor.capture());
+        return callbackCaptor.getValue();
     }
 
     private void assertAnimating(MyAnimatable animatable) {
