@@ -161,6 +161,7 @@ java_defaults {
         ":libcamera_client_framework_aidl",
         "core/java/android/hardware/IConsumerIrService.aidl",
         "core/java/android/hardware/ISerialManager.aidl",
+        "core/java/android/hardware/biometrics/IBiometricConfirmDeviceCredentialCallback.aidl",
         "core/java/android/hardware/biometrics/IBiometricEnabledOnKeyguardCallback.aidl",
         "core/java/android/hardware/biometrics/IBiometricService.aidl",
         "core/java/android/hardware/biometrics/IBiometricServiceReceiver.aidl",
