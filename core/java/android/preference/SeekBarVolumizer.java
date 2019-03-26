@@ -111,7 +111,7 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
 
     @UnsupportedAppUsage
     public SeekBarVolumizer(Context context, int streamType, Uri defaultUri, Callback callback) {
-        this(context, streamType, defaultUri, callback, false /* playSample */);
+        this(context, streamType, defaultUri, callback, true /* playSample */);
     }
 
     public SeekBarVolumizer(
