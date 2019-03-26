@@ -41,6 +41,15 @@ import android.support.test.runner.AndroidJUnit4;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+/**
+ * Tests for {@link ObjectPool}.
+ *
+ * <p>Build/Install/Run:
+ *  atest FrameworksCoreTests:ObjectPoolTests
+ *
+ * <p>This test class is a part of Window Manager Service tests and specified in
+ * {@link com.android.server.wm.test.filters.FrameworksTestsFilter}.
+ */
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 @Presubmit
