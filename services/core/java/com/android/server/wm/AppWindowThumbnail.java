@@ -49,7 +49,7 @@ class AppWindowThumbnail implements Animatable {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "AppWindowThumbnail" : TAG_WM;
 
     private final AppWindowToken mAppToken;
-    private final SurfaceControl mSurfaceControl;
+    private SurfaceControl mSurfaceControl;
     private final SurfaceAnimator mSurfaceAnimator;
     private final int mWidth;
     private final int mHeight;
@@ -68,10 +68,21 @@ class AppWindowThumbnail implements Animatable {
      */
     AppWindowThumbnail(Transaction t, AppWindowToken appToken, GraphicBuffer thumbnailHeader,
             boolean relative) {
+        this(t, appToken, thumbnailHeader, relative, new Surface(), null);
+    }
+
+    AppWindowThumbnail(Transaction t, AppWindowToken appToken, GraphicBuffer thumbnailHeader,
+            boolean relative, Surface drawSurface, SurfaceAnimator animator) {
         mAppToken = appToken;
         mRelative = relative;
-        mSurfaceAnimator =
+        if (animator != null) {
+            mSurfaceAnimator = animator;
+        } else {
+            // We can't use a delegating constructor since we need to
+            // reference this::onAnimationFinished
+            mSurfaceAnimator =
                 new SurfaceAnimator(this, this::onAnimationFinished, appToken.mWmService);
+        }
         mWidth = thumbnailHeader.getWidth();
         mHeight = thumbnailHeader.getHeight();
 
@@ -95,7 +106,6 @@ class AppWindowThumbnail implements Animatable {
         }
 
         // Transfer the thumbnail to the surface
-        Surface drawSurface = new Surface();
         drawSurface.copyFrom(mSurfaceControl);
         drawSurface.attachAndQueueBuffer(thumbnailHeader);
         drawSurface.release();
@@ -145,6 +155,7 @@ class AppWindowThumbnail implements Animatable {
     void destroy() {
         mSurfaceAnimator.cancelAnimation();
         getPendingTransaction().remove(mSurfaceControl);
+        mSurfaceControl = null;
     }
 
     /**
