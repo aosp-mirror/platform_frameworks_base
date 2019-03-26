@@ -33,7 +33,7 @@
     <string name="wifi_check_password_try_again" msgid="516958988102584767">"Egiaztatu pasahitza zuzena dela eta saiatu berriro"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Urrunegi"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"Ez da konektatuko automatikoki"</string>
-    <string name="wifi_no_internet" msgid="4663834955626848401">"Ezin da atzitu Internet"</string>
+    <string name="wifi_no_internet" msgid="4663834955626848401">"Ezin da konektatu Internetera"</string>
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> aplikazioak gorde du"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"%1$s bidez automatikoki konektatuta"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Automatikoki konektatuta sareen balorazioen hornitzailearen bidez"</string>
@@ -72,7 +72,7 @@
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Telefono-deiak"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Fitxategi-transferentzia"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Sarrerako gailua"</string>
-    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Interneterako sarbidea"</string>
+    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Interneteko konexioa"</string>
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Kontaktuak partekatzea"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Erabili kontaktuak partekatzeko"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Interneteko konexioa partekatzea"</string>
@@ -89,9 +89,9 @@
     <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"SAP sarbide-puntura konektatuta"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"Fitxategi-transferentziako zerbitzarira konektatu gabe"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"Sarrerako gailura konektatuta"</string>
-    <string name="bluetooth_pan_user_profile_summary_connected" msgid="6436258151814414028">"Gailura konektatuta Interneteko sarbiderako"</string>
+    <string name="bluetooth_pan_user_profile_summary_connected" msgid="6436258151814414028">"Gailura konektatuta Internet atzitzeko"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1322694224800769308">"Tokiko Interneteko konexioa gailu batekin partekatzea"</string>
-    <string name="bluetooth_pan_profile_summary_use_for" msgid="5736111170225304239">"Erabili Internet atzitzeko"</string>
+    <string name="bluetooth_pan_profile_summary_use_for" msgid="5736111170225304239">"Erabili Internetera konektatzeko"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"Erabili maparako"</string>
     <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"Erabili SIM txartelerako sarbiderako"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"Erabili euskarriaren audiorako"</string>
