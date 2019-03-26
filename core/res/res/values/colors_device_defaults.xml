@@ -35,6 +35,7 @@
 
     <color name="accent_device_default_light">@color/accent_material_light</color>
     <color name="accent_device_default_dark">@color/accent_material_dark</color>
+    <color name="accent_device_default">@color/accent_device_default_light</color>
 
     <color name="background_device_default_dark">@color/background_material_dark</color>
     <color name="background_device_default_light">@color/background_material_light</color>
