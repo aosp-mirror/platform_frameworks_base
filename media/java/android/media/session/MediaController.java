@@ -73,7 +73,7 @@ public final class MediaController {
 
     private final MediaSession.Token mToken;
     private final Context mContext;
-    private final ControllerCallbackLink mCbStub;
+    private final CallbackStub mCbStub = new CallbackStub(this);
     private final ArrayList<MessageHandler> mCallbacks = new ArrayList<MessageHandler>();
     private final Object mLock = new Object();
 
@@ -104,7 +104,6 @@ public final class MediaController {
         mTransportControls = new TransportControls();
         mToken = token;
         mContext = context;
-        mCbStub = new ControllerCallbackLink(context, new CallbackStub(this));
     }
 
     /**
@@ -1065,7 +1064,7 @@ public final class MediaController {
         };
     }
 
-    private static final class CallbackStub extends ControllerCallbackLink.CallbackStub {
+    private static final class CallbackStub extends ISessionControllerCallback.Stub {
         private final WeakReference<MediaController> mController;
 
         CallbackStub(MediaController controller) {
@@ -1105,7 +1104,7 @@ public final class MediaController {
         }
 
         @Override
-        public void onQueueChanged(List<QueueItem> queue) {
+        public void onQueueChanged(MediaParceledListSlice queue) {
             MediaController controller = mController.get();
             if (controller != null) {
                 controller.postMessage(MSG_UPDATE_QUEUE, queue, null);
@@ -1162,7 +1161,8 @@ public final class MediaController {
                     mCallback.onMetadataChanged((MediaMetadata) msg.obj);
                     break;
                 case MSG_UPDATE_QUEUE:
-                    mCallback.onQueueChanged((List<MediaSession.QueueItem>) msg.obj);
+                    mCallback.onQueueChanged(msg.obj == null ? null :
+                            (List<QueueItem>) ((MediaParceledListSlice) msg.obj).getList());
                     break;
                 case MSG_UPDATE_QUEUE_TITLE:
                     mCallback.onQueueTitleChanged((CharSequence) msg.obj);

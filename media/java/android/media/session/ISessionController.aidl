@@ -20,7 +20,7 @@ import android.content.Intent;
 import android.media.MediaMetadata;
 import android.media.MediaParceledListSlice;
 import android.media.Rating;
-import android.media.session.ControllerCallbackLink;
+import android.media.session.ISessionControllerCallback;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
@@ -36,12 +36,12 @@ import java.util.List;
  * @hide
  */
 interface ISessionController {
-    void sendCommand(String packageName, in ControllerCallbackLink caller,
+    void sendCommand(String packageName, in ISessionControllerCallback caller,
             String command, in Bundle args, in ResultReceiver cb);
-    boolean sendMediaButton(String packageName, in ControllerCallbackLink caller,
+    boolean sendMediaButton(String packageName, in ISessionControllerCallback caller,
             in KeyEvent mediaButton);
-    void registerCallback(String packageName, in ControllerCallbackLink cb);
-    void unregisterCallback(in ControllerCallbackLink cb);
+    void registerCallback(String packageName, in ISessionControllerCallback cb);
+    void unregisterCallback(in ISessionControllerCallback cb);
     String getPackageName();
     String getTag();
     Bundle getSessionInfo();
@@ -49,36 +49,36 @@ interface ISessionController {
     long getFlags();
     MediaController.PlaybackInfo getVolumeAttributes();
     void adjustVolume(String packageName, String opPackageName,
-            in ControllerCallbackLink caller, int direction, int flags);
-    void setVolumeTo(String packageName, String opPackageName, in ControllerCallbackLink caller,
+            in ISessionControllerCallback caller, int direction, int flags);
+    void setVolumeTo(String packageName, String opPackageName, in ISessionControllerCallback caller,
             int value, int flags);
 
     // These commands are for the TransportControls
-    void prepare(String packageName, in ControllerCallbackLink caller);
-    void prepareFromMediaId(String packageName, in ControllerCallbackLink caller,
+    void prepare(String packageName, in ISessionControllerCallback caller);
+    void prepareFromMediaId(String packageName, in ISessionControllerCallback caller,
             String mediaId, in Bundle extras);
-    void prepareFromSearch(String packageName, in ControllerCallbackLink caller,
+    void prepareFromSearch(String packageName, in ISessionControllerCallback caller,
             String string, in Bundle extras);
-    void prepareFromUri(String packageName, in ControllerCallbackLink caller,
+    void prepareFromUri(String packageName, in ISessionControllerCallback caller,
             in Uri uri, in Bundle extras);
-    void play(String packageName, in ControllerCallbackLink caller);
-    void playFromMediaId(String packageName, in ControllerCallbackLink caller,
+    void play(String packageName, in ISessionControllerCallback caller);
+    void playFromMediaId(String packageName, in ISessionControllerCallback caller,
             String mediaId, in Bundle extras);
-    void playFromSearch(String packageName, in ControllerCallbackLink caller,
+    void playFromSearch(String packageName, in ISessionControllerCallback caller,
             String string, in Bundle extras);
-    void playFromUri(String packageName, in ControllerCallbackLink caller,
+    void playFromUri(String packageName, in ISessionControllerCallback caller,
             in Uri uri, in Bundle extras);
-    void skipToQueueItem(String packageName, in ControllerCallbackLink caller, long id);
-    void pause(String packageName, in ControllerCallbackLink caller);
-    void stop(String packageName, in ControllerCallbackLink caller);
-    void next(String packageName, in ControllerCallbackLink caller);
-    void previous(String packageName, in ControllerCallbackLink caller);
-    void fastForward(String packageName, in ControllerCallbackLink caller);
-    void rewind(String packageName, in ControllerCallbackLink caller);
-    void seekTo(String packageName, in ControllerCallbackLink caller, long pos);
-    void rate(String packageName, in ControllerCallbackLink caller, in Rating rating);
-    void setPlaybackSpeed(String packageName, in ControllerCallbackLink caller, float speed);
-    void sendCustomAction(String packageName, in ControllerCallbackLink caller,
+    void skipToQueueItem(String packageName, in ISessionControllerCallback caller, long id);
+    void pause(String packageName, in ISessionControllerCallback caller);
+    void stop(String packageName, in ISessionControllerCallback caller);
+    void next(String packageName, in ISessionControllerCallback caller);
+    void previous(String packageName, in ISessionControllerCallback caller);
+    void fastForward(String packageName, in ISessionControllerCallback caller);
+    void rewind(String packageName, in ISessionControllerCallback caller);
+    void seekTo(String packageName, in ISessionControllerCallback caller, long pos);
+    void rate(String packageName, in ISessionControllerCallback caller, in Rating rating);
+    void setPlaybackSpeed(String packageName, in ISessionControllerCallback caller, float speed);
+    void sendCustomAction(String packageName, in ISessionControllerCallback caller,
             String action, in Bundle args);
     MediaMetadata getMetadata();
     PlaybackState getPlaybackState();

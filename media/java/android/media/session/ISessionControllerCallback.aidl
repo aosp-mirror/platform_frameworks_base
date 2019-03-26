@@ -25,14 +25,14 @@ import android.os.Bundle;
  * @hide
  */
 oneway interface ISessionControllerCallback {
-    void notifyEvent(String event, in Bundle extras);
-    void notifySessionDestroyed();
+    void onEvent(String event, in Bundle extras);
+    void onSessionDestroyed();
 
     // These callbacks are for the TransportController
-    void notifyPlaybackStateChanged(in PlaybackState state);
-    void notifyMetadataChanged(in MediaMetadata metadata);
-    void notifyQueueChanged(in MediaParceledListSlice queue);
-    void notifyQueueTitleChanged(CharSequence title);
-    void notifyExtrasChanged(in Bundle extras);
-    void notifyVolumeInfoChanged(in MediaController.PlaybackInfo info);
+    void onPlaybackStateChanged(in PlaybackState state);
+    void onMetadataChanged(in MediaMetadata metadata);
+    void onQueueChanged(in MediaParceledListSlice queue);
+    void onQueueTitleChanged(CharSequence title);
+    void onExtrasChanged(in Bundle extras);
+    void onVolumeInfoChanged(in MediaController.PlaybackInfo info);
 }
