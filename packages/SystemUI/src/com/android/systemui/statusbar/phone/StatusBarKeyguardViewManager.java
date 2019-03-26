@@ -86,6 +86,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         public void onFullyShown() {
             updateStates();
             mStatusBar.wakeUpIfDozing(SystemClock.uptimeMillis(), mContainer, "BOUNCER_VISIBLE");
+            mNotificationPanelView.updateLockIcon();
         }
 
         @Override
@@ -96,6 +97,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         @Override
         public void onFullyHidden() {
             updateStates();
+            mNotificationPanelView.updateLockIcon();
         }
 
         @Override
@@ -759,7 +761,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     public boolean bouncerNeedsScrimming() {
         return mOccluded || mBouncer.willDismissWithAction()  || mBouncer.needsFullscreenBouncer()
-                || mStatusBar.isFullScreenUserSwitcherState() || mBouncer.isShowingScrimmed();
+                || mStatusBar.isFullScreenUserSwitcherState()
+                || (mBouncer.isShowing() && mBouncer.isScrimmed());
     }
 
     public void dump(PrintWriter pw) {
