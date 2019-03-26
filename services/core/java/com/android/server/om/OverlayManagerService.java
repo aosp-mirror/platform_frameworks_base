@@ -374,7 +374,7 @@ public final class OverlayManagerService extends SystemService {
                     synchronized (mLock) {
                         final PackageInfo pi = mPackageManager.getPackageInfo(packageName, userId,
                                 false);
-                        if (pi != null) {
+                        if (pi != null && !pi.applicationInfo.isInstantApp()) {
                             mPackageManager.cachePackageInfo(packageName, userId, pi);
                             if (pi.isOverlayPackage()) {
                                 mImpl.onOverlayPackageAdded(packageName, userId);
@@ -397,7 +397,7 @@ public final class OverlayManagerService extends SystemService {
                     synchronized (mLock) {
                         final PackageInfo pi = mPackageManager.getPackageInfo(packageName, userId,
                                 false);
-                        if (pi != null) {
+                        if (pi != null && pi.applicationInfo.isInstantApp()) {
                             mPackageManager.cachePackageInfo(packageName, userId, pi);
                             if (pi.isOverlayPackage()) {
                                 mImpl.onOverlayPackageChanged(packageName, userId);
@@ -438,7 +438,7 @@ public final class OverlayManagerService extends SystemService {
                     synchronized (mLock) {
                         final PackageInfo pi = mPackageManager.getPackageInfo(packageName, userId,
                                 false);
-                        if (pi != null) {
+                        if (pi != null && !pi.applicationInfo.isInstantApp()) {
                             mPackageManager.cachePackageInfo(packageName, userId, pi);
                             if (pi.isOverlayPackage()) {
                                 mImpl.onOverlayPackageUpgraded(packageName, userId);
