@@ -450,23 +450,16 @@ public final class ContentCaptureManagerService extends
     }
 
     @GuardedBy("mLock")
-    private boolean assertCalledByServiceLocked(@NonNull String methodName, @UserIdInt int userId,
-            int callingUid, @NonNull IResultReceiver result) {
-        final boolean isService = isCalledByServiceLocked(methodName, userId, callingUid);
-        if (isService) return true;
-
-        try {
-            result.send(RESULT_CODE_SECURITY_EXCEPTION, /* resultData= */ null);
-        } catch (RemoteException e) {
-            Slog.w(mTag, "Unable to send isContentCaptureFeatureEnabled(): " + e);
+    private void assertCalledByServiceLocked(@NonNull String methodName) {
+        if (!isCalledByServiceLocked(methodName)) {
+            throw new SecurityException("caller is not user's ContentCapture service");
         }
-        return false;
     }
 
     @GuardedBy("mLock")
-    private boolean isCalledByServiceLocked(@NonNull String methodName, @UserIdInt int userId,
-            int callingUid) {
-
+    private boolean isCalledByServiceLocked(@NonNull String methodName) {
+        final int userId = UserHandle.getCallingUserId();
+        final int callingUid = Binder.getCallingUid();
         final String serviceName = mServiceNameResolver.getServiceName(userId);
         if (serviceName == null) {
             Slog.e(mTag, methodName + ": called by UID " + callingUid
@@ -496,6 +489,27 @@ public final class ContentCaptureManagerService extends
             return false;
         }
 
+        return true;
+    }
+
+    /**
+     * Executes the given {@code runnable} and if it throws a {@link SecurityException},
+     * send it back to the receiver.
+     *
+     * @return whether the exception was thrown or not.
+     */
+    private boolean throwsSecurityException(@NonNull IResultReceiver result,
+            @NonNull Runnable runable) {
+        try {
+            runable.run();
+            return false;
+        } catch (SecurityException e) {
+            try {
+                result.send(RESULT_CODE_SECURITY_EXCEPTION, bundleFor(e.getMessage()));
+            } catch (RemoteException e2) {
+                Slog.w(mTag, "Unable to send security exception (" + e + "): ", e2);
+            }
+        }
         return true;
     }
 
@@ -570,7 +584,7 @@ public final class ContentCaptureManagerService extends
         @Override
         public void removeUserData(@NonNull UserDataRemovalRequest request) {
             Preconditions.checkNotNull(request);
-            // TODO(b/122959591): check caller uid owns the package name
+            assertCalledByPackageOwner(request.getPackageName());
 
             final int userId = UserHandle.getCallingUserId();
             synchronized (mLock) {
@@ -581,13 +595,14 @@ public final class ContentCaptureManagerService extends
 
         @Override
         public void isContentCaptureFeatureEnabled(@NonNull IResultReceiver result) {
-            final int userId = UserHandle.getCallingUserId();
             boolean enabled;
             synchronized (mLock) {
-                final boolean isService = assertCalledByServiceLocked(
-                        "isContentCaptureFeatureEnabled()", userId, Binder.getCallingUid(), result);
-                if (!isService) return;
+                if (throwsSecurityException(result,
+                        () -> assertCalledByServiceLocked("isContentCaptureFeatureEnabled()"))) {
+                    return;
+                }
 
+                final int userId = UserHandle.getCallingUserId();
                 enabled = !mDisabledByDeviceConfig && !isDisabledBySettingsLocked(userId);
             }
             try {
@@ -599,15 +614,8 @@ public final class ContentCaptureManagerService extends
 
         @Override
         public void getServiceSettingsActivity(@NonNull IResultReceiver result) {
-            try {
-                enforceCallingPermissionForManagement();
-            } catch (SecurityException e) {
-                try {
-                    result.send(RESULT_CODE_SECURITY_EXCEPTION, bundleFor(e.getMessage()));
-                } catch (RemoteException e2) {
-                    Slog.w(mTag, "Unable to send getServiceSettingsIntent() exception: " + e2);
-                    return;
-                }
+            if (throwsSecurityException(result, () -> enforceCallingPermissionForManagement())) {
+                return;
             }
 
             final int userId = UserHandle.getCallingUserId();
@@ -627,7 +635,9 @@ public final class ContentCaptureManagerService extends
         @Override
         public void getContentCaptureConditions(@NonNull String packageName,
                 @NonNull IResultReceiver result) {
-            // TODO(b/122959591): check caller uid owns the package name
+            if (throwsSecurityException(result, () -> assertCalledByPackageOwner(packageName))) {
+                return;
+            }
 
             final int userId = UserHandle.getCallingUserId();
             final ArrayList<ContentCaptureCondition> conditions;

@@ -616,6 +616,23 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
         mServicesCache.clear();
     }
 
+    /**
+     * Asserts that the given package name is owned by the UID making this call.
+     *
+     * @throws SecurityException when it's not...
+     */
+    protected final void assertCalledByPackageOwner(@NonNull String packageName) {
+        Preconditions.checkNotNull(packageName);
+        final int uid = Binder.getCallingUid();
+        final String[] packages = getContext().getPackageManager().getPackagesForUid(uid);
+        if (packages != null) {
+            for (String candidate : packages) {
+                if (packageName.equals(candidate)) return; // Found it
+            }
+        }
+        throw new SecurityException("UID " + uid + " does not own " + packageName);
+    }
+
     // TODO(b/117779333): support proto
     protected void dumpLocked(@NonNull String prefix, @NonNull PrintWriter pw) {
         boolean realDebug = debug;

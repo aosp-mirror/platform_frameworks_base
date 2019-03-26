@@ -525,15 +525,12 @@ public final class ContentCaptureManager {
         // the service to fine tune how long-lived apps (like browsers) are whitelisted.
         if (!isContentCaptureEnabled() && !mOptions.lite) return null;
 
-        final SyncResultReceiver resultReceiver = new SyncResultReceiver(SYNC_CALLS_TIMEOUT_MS);
-        try {
-            mService.getContentCaptureConditions(mContext.getPackageName(), resultReceiver);
-            final ArrayList<ContentCaptureCondition> result = resultReceiver
-                    .getParcelableListResult();
-            return toSet(result);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        final SyncResultReceiver resultReceiver = syncRun(
+                (r) -> mService.getContentCaptureConditions(mContext.getPackageName(), r));
+
+        final ArrayList<ContentCaptureCondition> result = resultReceiver
+                .getParcelableListResult();
+        return toSet(result);
     }
 
     /**
@@ -566,21 +563,14 @@ public final class ContentCaptureManager {
     @SystemApi
     @TestApi
     public boolean isContentCaptureFeatureEnabled() {
-        final SyncResultReceiver resultReceiver = new SyncResultReceiver(SYNC_CALLS_TIMEOUT_MS);
-        final int resultCode;
-        try {
-            mService.isContentCaptureFeatureEnabled(resultReceiver);
-            resultCode = resultReceiver.getIntResult();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        final SyncResultReceiver resultReceiver = syncRun(
+                (r) -> mService.isContentCaptureFeatureEnabled(r));
+        final int resultCode = resultReceiver.getIntResult();
         switch (resultCode) {
             case RESULT_CODE_TRUE:
                 return true;
             case RESULT_CODE_FALSE:
                 return false;
-            case RESULT_CODE_SECURITY_EXCEPTION:
-                throw new SecurityException("caller is not user's ContentCapture service");
             default:
                 Log.wtf(TAG, "received invalid result: " + resultCode);
                 return false;
@@ -600,6 +590,26 @@ public final class ContentCaptureManager {
             mService.removeUserData(request);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Runs a sync method in the service, properly handling exceptions.
+     *
+     * @throws SecurityException if caller is not allowed to execute the method.
+     */
+    @NonNull
+    private SyncResultReceiver syncRun(@NonNull MyRunnable r) {
+        final SyncResultReceiver resultReceiver = new SyncResultReceiver(SYNC_CALLS_TIMEOUT_MS);
+        try {
+            r.run(resultReceiver);
+            final int resultCode = resultReceiver.getIntResult();
+            if (resultCode == RESULT_CODE_SECURITY_EXCEPTION) {
+                throw new SecurityException(resultReceiver.getStringResult());
+            }
+            return resultReceiver;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -625,5 +635,9 @@ public final class ContentCaptureManager {
                 pw.print(prefix2); pw.println("No sessions");
             }
         }
+    }
+
+    private interface MyRunnable {
+        void run(@NonNull SyncResultReceiver receiver) throws RemoteException;
     }
 }
