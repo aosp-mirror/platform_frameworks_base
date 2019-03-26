@@ -17,6 +17,7 @@
 package com.android.internal.util;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 
 public class HexDump
 {
@@ -100,16 +101,19 @@ public class HexDump
         return toHexString(toByteArray(b));
     }
 
+    @UnsupportedAppUsage
     public static String toHexString(byte[] array)
     {
         return toHexString(array, 0, array.length, true);
     }
 
+    @UnsupportedAppUsage
     public static String toHexString(byte[] array, boolean upperCase)
     {
         return toHexString(array, 0, array.length, upperCase);
     }
 
+    @UnsupportedAppUsage
     public static String toHexString(byte[] array, int offset, int length)
     {
         return toHexString(array, offset, length, true);
@@ -131,6 +135,7 @@ public class HexDump
         return new String(buf);
     }
 
+    @UnsupportedAppUsage
     public static String toHexString(int i)
     {
         return toHexString(toByteArray(i));
@@ -164,6 +169,7 @@ public class HexDump
         throw new RuntimeException ("Invalid hex char '" + c + "'");
     }
 
+    @UnsupportedAppUsage
     public static byte[] hexStringToByteArray(String hexString)
     {
         int length = hexString.length();

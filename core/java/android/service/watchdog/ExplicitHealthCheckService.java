@@ -1,0 +1,208 @@
+/*
+ * Copyright (C) 2019 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package android.service.watchdog;
+
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.SdkConstant;
+import android.annotation.SystemApi;
+import android.app.Service;
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Looper;
+import android.os.RemoteCallback;
+import android.os.RemoteException;
+import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * A service to provide packages supporting explicit health checks and route checks to these
+ * packages on behalf of the package watchdog.
+ *
+ * <p>To extend this class, you must declare the service in your manifest file with the
+ * {@link android.Manifest.permission#BIND_EXPLICIT_HEALTH_CHECK_SERVICE} permission,
+ * and include an intent filter with the {@link #SERVICE_INTERFACE} action. In adddition,
+ * your implementation must live in {@link PackageManger#SYSTEM_SHARED_LIBRARY_SERVICES}.
+ * For example:</p>
+ * <pre>
+ *     &lt;service android:name=".FooExplicitHealthCheckService"
+ *             android:exported="true"
+ *             android:priority="100"
+ *             android:permission="android.permission.BIND_EXPLICIT_HEALTH_CHECK_SERVICE"&gt;
+ *         &lt;intent-filter&gt;
+ *             &lt;action android:name="android.service.watchdog.ExplicitHealthCheckService" /&gt;
+ *         &lt;/intent-filter&gt;
+ *     &lt;/service&gt;
+ * </pre>
+ * @hide
+ */
+@SystemApi
+public abstract class ExplicitHealthCheckService extends Service {
+
+    private static final String TAG = "ExplicitHealthCheckService";
+
+    /**
+     * {@link Bundle} key for a {@link List} of {@link String} value.
+     *
+     * {@hide}
+     */
+    public static final String EXTRA_SUPPORTED_PACKAGES =
+            "android.service.watchdog.extra.supported_packages";
+
+    /**
+     * {@link Bundle} key for a {@link List} of {@link String} value.
+     *
+     * {@hide}
+     */
+    public static final String EXTRA_REQUESTED_PACKAGES =
+            "android.service.watchdog.extra.requested_packages";
+
+    /**
+     * {@link Bundle} key for a {@link String} value.
+     *
+     * {@hide}
+     */
+    public static final String EXTRA_HEALTH_CHECK_PASSED_PACKAGE =
+            "android.service.watchdog.extra.health_check_passed_package";
+
+    /**
+     * The Intent action that a service must respond to. Add it to the intent filter of the service
+     * in its manifest.
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
+    public static final String SERVICE_INTERFACE =
+            "android.service.watchdog.ExplicitHealthCheckService";
+
+    /**
+     * The permission that a service must require to ensure that only Android system can bind to it.
+     * If this permission is not enforced in the AndroidManifest of the service, the system will
+     * skip that service.
+     */
+    public static final String BIND_PERMISSION =
+            "android.permission.BIND_EXPLICIT_HEALTH_CHECK_SERVICE";
+
+    private final ExplicitHealthCheckServiceWrapper mWrapper =
+            new ExplicitHealthCheckServiceWrapper();
+
+    /**
+     * Called when the system requests an explicit health check for {@code packageName}.
+     *
+     * <p> When {@code packageName} passes the check, implementors should call
+     * {@link #notifyHealthCheckPassed} to inform the system.
+     *
+     * <p> It could take many hours before a {@code packageName} passes a check and implementors
+     * should never drop requests unless {@link onCancel} is called or the service dies.
+     *
+     * <p> Requests should not be queued and additional calls while expecting a result for
+     * {@code packageName} should have no effect.
+     */
+    public abstract void onRequestHealthCheck(@NonNull String packageName);
+
+    /**
+     * Called when the system cancels the explicit health check request for {@code packageName}.
+     * Should do nothing if there are is no active request for {@code packageName}.
+     */
+    public abstract void onCancelHealthCheck(@NonNull String packageName);
+
+    /**
+     * Called when the system requests for all the packages supporting explicit health checks. The
+     * system may request an explicit health check for any of these packages with
+     * {@link #onRequestHealthCheck}.
+     *
+     * @return all packages supporting explicit health checks
+     */
+    @NonNull public abstract List<String> onGetSupportedPackages();
+
+    /**
+     * Called when the system requests for all the packages that it has currently requested
+     * an explicit health check for.
+     *
+     * @return all packages expecting an explicit health check result
+     */
+    @NonNull public abstract List<String> onGetRequestedPackages();
+
+    private final Handler mHandler = new Handler(Looper.getMainLooper(), null, true);
+    @Nullable private RemoteCallback mCallback;
+
+    @Override
+    @NonNull
+    public final IBinder onBind(@NonNull Intent intent) {
+        return mWrapper;
+    }
+
+    /**
+     * Implementors should call this to notify the system when explicit health check passes
+     * for {@code packageName};
+     */
+    public final void notifyHealthCheckPassed(@NonNull String packageName) {
+        mHandler.post(() -> {
+            if (mCallback != null) {
+                Objects.requireNonNull(packageName,
+                        "Package passing explicit health check must be non-null");
+                Bundle bundle = new Bundle();
+                bundle.putString(EXTRA_HEALTH_CHECK_PASSED_PACKAGE, packageName);
+                mCallback.sendResult(bundle);
+            } else {
+                Log.wtf(TAG, "System missed explicit health check result for " + packageName);
+            }
+        });
+    }
+
+    private class ExplicitHealthCheckServiceWrapper extends IExplicitHealthCheckService.Stub {
+        @Override
+        public void setCallback(RemoteCallback callback) throws RemoteException {
+            mHandler.post(() -> {
+                mCallback = callback;
+            });
+        }
+
+        @Override
+        public void request(String packageName) throws RemoteException {
+            mHandler.post(() -> ExplicitHealthCheckService.this.onRequestHealthCheck(packageName));
+        }
+
+        @Override
+        public void cancel(String packageName) throws RemoteException {
+            mHandler.post(() -> ExplicitHealthCheckService.this.onCancelHealthCheck(packageName));
+        }
+
+        @Override
+        public void getSupportedPackages(RemoteCallback callback) throws RemoteException {
+            mHandler.post(() -> sendPackages(callback, EXTRA_SUPPORTED_PACKAGES,
+                    ExplicitHealthCheckService.this.onGetSupportedPackages()));
+        }
+
+        @Override
+        public void getRequestedPackages(RemoteCallback callback) throws RemoteException {
+            mHandler.post(() -> sendPackages(callback, EXTRA_REQUESTED_PACKAGES,
+                    ExplicitHealthCheckService.this.onGetRequestedPackages()));
+        }
+
+        private void sendPackages(RemoteCallback callback, String key, List<String> packages) {
+            Objects.requireNonNull(packages,
+                    "Supported and requested package list must be non-null");
+            Bundle bundle = new Bundle();
+            bundle.putStringArrayList(key, new ArrayList<>(packages));
+            callback.sendResult(bundle);
+        }
+    }
+}

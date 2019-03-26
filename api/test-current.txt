@@ -1316,7 +1316,7 @@ package android.net {
     method @Nullable public String getDomains();
     method @Nullable public java.net.InetAddress getGateway();
     method @Nullable public android.net.LinkAddress getIpAddress();
-    method @NonNull public java.util.List<android.net.RouteInfo> getRoutes(String);
+    method @NonNull public java.util.List<android.net.RouteInfo> getRoutes(@Nullable String);
     method public void setDomains(@Nullable String);
     method public void setGateway(@Nullable java.net.InetAddress);
     method public void setIpAddress(@Nullable android.net.LinkAddress);
@@ -1535,7 +1535,7 @@ package android.net.metrics {
   }
 
   public final class ValidationProbeEvent implements android.net.metrics.IpConnectivityLog.Event {
-    method public static String getProbeName(int);
+    method @NonNull public static String getProbeName(int);
     field public static final int DNS_FAILURE = 0; // 0x0
     field public static final int DNS_SUCCESS = 1; // 0x1
     field public static final int PROBE_DNS = 0; // 0x0
@@ -2150,9 +2150,9 @@ package android.provider {
     method @RequiresPermission(android.Manifest.permission.CLEAR_APP_USER_DATA) public static long getContributedMediaSize(android.content.Context, String, android.os.UserHandle) throws java.io.IOException;
     method @NonNull public static java.io.File getVolumePath(@NonNull String) throws java.io.FileNotFoundException;
     method @NonNull public static java.util.Collection<java.io.File> getVolumeScanPaths(@NonNull String) throws java.io.FileNotFoundException;
-    field public static final String EXTRA_ORIGINATED_FROM_SHELL = "android.intent.extra.originated_from_shell";
-    field public static final String SCAN_FILE_CALL = "scan_file";
-    field public static final String SCAN_VOLUME_CALL = "scan_volume";
+    method public static android.net.Uri scanFile(android.content.Context, java.io.File);
+    method public static android.net.Uri scanFileFromShell(android.content.Context, java.io.File);
+    method public static void scanVolume(android.content.Context, java.io.File);
   }
 
   public final class Settings {

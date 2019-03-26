@@ -988,7 +988,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
 
-        mKeepaliveTracker = new KeepaliveTracker(mHandler);
+        mKeepaliveTracker = new KeepaliveTracker(mContext, mHandler);
         mNotifier = new NetworkNotificationManager(mContext, mTelephonyManager,
                 mContext.getSystemService(NotificationManager.class));
 
@@ -6692,7 +6692,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @Override
     public String getCaptivePortalServerUrl() {
         enforceConnectivityInternalPermission();
-        return NetworkMonitorUtils.getCaptivePortalServerHttpUrl(mContext);
+        final String defaultUrl = mContext.getResources().getString(
+                R.string.config_networkDefaultCaptivePortalServerUrl);
+        return NetworkMonitorUtils.getCaptivePortalServerHttpUrl(mContext, defaultUrl);
     }
 
     @Override
@@ -6700,7 +6702,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             ISocketKeepaliveCallback cb, String srcAddr, int srcPort, String dstAddr) {
         enforceKeepalivePermission();
         mKeepaliveTracker.startNattKeepalive(
-                getNetworkAgentInfoForNetwork(network),
+                getNetworkAgentInfoForNetwork(network), null /* fd */,
                 intervalSeconds, cb,
                 srcAddr, srcPort, dstAddr, NattSocketKeepalive.NATT_PORT);
     }
@@ -6709,7 +6711,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     public void startNattKeepaliveWithFd(Network network, FileDescriptor fd, int resourceId,
             int intervalSeconds, ISocketKeepaliveCallback cb, String srcAddr,
             String dstAddr) {
-        enforceKeepalivePermission();
         mKeepaliveTracker.startNattKeepalive(
                 getNetworkAgentInfoForNetwork(network), fd, resourceId,
                 intervalSeconds, cb,

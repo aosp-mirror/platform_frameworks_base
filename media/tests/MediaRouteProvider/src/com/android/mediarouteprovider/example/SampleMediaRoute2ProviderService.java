@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,15 +11,23 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
-package com.android.systemui.shared.system;
+package com.android.mediarouteprovider.example;
 
-import android.provider.Settings;
+import android.content.Intent;
+import android.media.MediaRoute2ProviderService;
+import android.os.IBinder;
 
-public class SettingsCompat {
+public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService {
+    @Override
+    public IBinder onBind(Intent intent) {
+        return super.onBind(intent);
+    }
 
-    public static final String SWIPE_UP_SETTING_NAME
-            = Settings.Secure.SWIPE_UP_TO_SWITCH_APPS_ENABLED;
+    @Override
+    public void onSelect(int uid, String routeId) {
+        updateProvider(uid, routeId);
+    }
 }

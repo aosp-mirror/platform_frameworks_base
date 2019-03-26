@@ -16,6 +16,7 @@
 
 package com.android.internal.view;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Looper;
 
 /**
@@ -35,6 +36,7 @@ public class WindowManagerPolicyThread {
         return mThread;
     }
 
+    @UnsupportedAppUsage
     public static Looper getLooper() {
         return mLooper;
     }

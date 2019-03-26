@@ -115,9 +115,9 @@ public final class MediaStore {
      */
     public static final String VOLUME_EXTERNAL = "external";
 
-    /** {@hide} */ @TestApi
+    /** {@hide} */
     public static final String SCAN_FILE_CALL = "scan_file";
-    /** {@hide} */ @TestApi
+    /** {@hide} */
     public static final String SCAN_VOLUME_CALL = "scan_volume";
 
     /**
@@ -126,7 +126,6 @@ public final class MediaStore {
      *
      * {@hide}
      */
-    @TestApi
     public static final String EXTRA_ORIGINATED_FROM_SHELL =
             "android.intent.extra.originated_from_shell";
 
@@ -136,6 +135,7 @@ public final class MediaStore {
      * removing nomedia files
      * @hide
      */
+    @Deprecated
     public static final String UNHIDE_CALL = "unhide";
 
     /**
@@ -3534,6 +3534,39 @@ public final class MediaStore {
             }
         } else {
             throw new IOException("User " + user + " must be unlocked and running");
+        }
+    }
+
+    /** @hide */
+    @TestApi
+    public static Uri scanFile(Context context, File file) {
+        return scan(context, SCAN_FILE_CALL, file, false);
+    }
+
+    /** @hide */
+    @TestApi
+    public static Uri scanFileFromShell(Context context, File file) {
+        return scan(context, SCAN_FILE_CALL, file, true);
+    }
+
+    /** @hide */
+    @TestApi
+    public static void scanVolume(Context context, File file) {
+        scan(context, SCAN_VOLUME_CALL, file, false);
+    }
+
+    /** @hide */
+    private static Uri scan(Context context, String method, File file,
+            boolean originatedFromShell) {
+        final ContentResolver resolver = context.getContentResolver();
+        try (ContentProviderClient client = resolver.acquireContentProviderClient(AUTHORITY)) {
+            final Bundle in = new Bundle();
+            in.putParcelable(Intent.EXTRA_STREAM, Uri.fromFile(file));
+            in.putBoolean(EXTRA_ORIGINATED_FROM_SHELL, originatedFromShell);
+            final Bundle out = client.call(method, null, in);
+            return out.getParcelable(Intent.EXTRA_STREAM);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
         }
     }
 }

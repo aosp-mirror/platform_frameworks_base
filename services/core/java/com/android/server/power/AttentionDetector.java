@@ -34,6 +34,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 
 import java.io.PrintWriter;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -65,6 +66,11 @@ public class AttentionDetector {
     private final Object mLock;
 
     /**
+     * If we're currently waiting for an attention callback
+     */
+    private final AtomicBoolean mRequested;
+
+    /**
      * {@link android.service.attention.AttentionService} API timeout.
      */
     private long mMaxAttentionApiTimeoutMillis;
@@ -78,11 +84,6 @@ public class AttentionDetector {
     protected AttentionManagerInternal mAttentionManager;
 
     /**
-     * If we're currently waiting for an attention callback
-     */
-    private boolean mRequested;
-
-    /**
      * Current wakefulness of the device. {@see PowerManagerInternal}
      */
     private int mWakefulness;
@@ -94,14 +95,11 @@ public class AttentionDetector {
 
     @VisibleForTesting
     final AttentionCallbackInternal mCallback = new AttentionCallbackInternal() {
-
         @Override
-        public void onSuccess(int requestCode, int result, long timestamp) {
-            Slog.v(TAG, "onSuccess: " + requestCode + ", " + result
-                    + " - current requestCode: " + getRequestCode());
-            synchronized (mLock) {
-                if (requestCode == getRequestCode() && mRequested) {
-                    mRequested = false;
+        public void onSuccess(int result, long timestamp) {
+            Slog.v(TAG, "onSuccess: " + result);
+            if (mRequested.getAndSet(false)) {
+                synchronized (mLock) {
                     if (mWakefulness != PowerManagerInternal.WAKEFULNESS_AWAKE) {
                         if (DEBUG) Slog.d(TAG, "Device slept before receiving callback.");
                         return;
@@ -116,19 +114,16 @@ public class AttentionDetector {
         }
 
         @Override
-        public void onFailure(int requestCode, int error) {
+        public void onFailure(int error) {
             Slog.i(TAG, "Failed to check attention: " + error);
-            synchronized (mLock) {
-                if (requestCode == getRequestCode()) {
-                    mRequested = false;
-                }
-            }
+            mRequested.set(false);
         }
     };
 
     public AttentionDetector(Runnable onUserAttention, Object lock) {
         mOnUserAttention = onUserAttention;
         mLock = lock;
+        mRequested = new AtomicBoolean(false);
 
         // Device starts with an awake state upon boot.
         mWakefulness = PowerManagerInternal.WAKEFULNESS_AWAKE;
@@ -181,9 +176,11 @@ public class AttentionDetector {
                         + (whenToCheck - whenToStopExtending));
             }
             return nextScreenDimming;
-        } else if (mRequested) {
+        } else if (mRequested.get()) {
             if (DEBUG) {
-                Slog.d(TAG, "Pending attention callback, wait. " + getRequestCode());
+                // TODO(b/128134941): consider adding a member ID increasing counter in
+                //  AttentionCallbackInternal to track this better.
+                Slog.d(TAG, "Pending attention callback, wait.");
             }
             return whenToCheck;
         }
@@ -192,14 +189,13 @@ public class AttentionDetector {
         // callback might arrive before #checkAttention returns (if there are cached results.)
         // This means that we must assume that the request was successful, and then cancel it
         // afterwards if AttentionManager couldn't deliver it.
-        mRequested = true;
-        final boolean sent = mAttentionManager.checkAttention(getRequestCode(),
-                getAttentionTimeout(), mCallback);
+        mRequested.set(true);
+        final boolean sent = mAttentionManager.checkAttention(getAttentionTimeout(), mCallback);
         if (!sent) {
-            mRequested = false;
+            mRequested.set(false);
         }
 
-        Slog.v(TAG, "Checking user attention with request code: " + getRequestCode());
+        Slog.v(TAG, "Checking user attention");
         return whenToCheck;
     }
 
@@ -241,9 +237,9 @@ public class AttentionDetector {
     }
 
     private void cancelCurrentRequestIfAny() {
-        if (mRequested) {
-            mAttentionManager.cancelAttentionCheck(getRequestCode());
-            mRequested = false;
+        if (mRequested.get()) {
+            mAttentionManager.cancelAttentionCheck(mCallback);
+            mRequested.set(false);
         }
     }
 
@@ -252,11 +248,6 @@ public class AttentionDetector {
         if (previousCount > 0) {
             StatsLog.write(StatsLog.SCREEN_TIMEOUT_EXTENSION_REPORTED, previousCount);
         }
-    }
-
-    @VisibleForTesting
-    int getRequestCode() {
-        return (int) (mLastUserActivityTime % Integer.MAX_VALUE);
     }
 
     @VisibleForTesting

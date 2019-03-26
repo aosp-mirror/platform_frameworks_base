@@ -65,7 +65,6 @@ void VkFunctorDrawHandler::draw(const GrBackendDrawableInfo& info) {
     VkFunctorDrawParams params{
       .width = mImageInfo.width(),
       .height = mImageInfo.height(),
-      .is_layer = false,  // TODO(boliu): Populate is_layer.
       .color_space_ptr = mImageInfo.colorSpace(),
       .clip_left = mClip.fLeft,
       .clip_top = mClip.fTop,

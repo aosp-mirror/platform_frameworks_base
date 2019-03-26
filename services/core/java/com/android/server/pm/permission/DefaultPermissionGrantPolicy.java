@@ -189,11 +189,8 @@ public final class DefaultPermissionGrantPolicy {
     @Deprecated
     private static final Set<String> STORAGE_PERMISSIONS = new ArraySet<>();
     static {
-        // STOPSHIP(b/112545973): remove once feature enabled by default
-        if (!StorageManager.hasIsolatedStorage()) {
-            STORAGE_PERMISSIONS.add(Manifest.permission.READ_EXTERNAL_STORAGE);
-            STORAGE_PERMISSIONS.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        }
+        STORAGE_PERMISSIONS.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+        STORAGE_PERMISSIONS.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
     }
 
     private static final Set<String> MEDIA_AURAL_PERMISSIONS = new ArraySet<>();

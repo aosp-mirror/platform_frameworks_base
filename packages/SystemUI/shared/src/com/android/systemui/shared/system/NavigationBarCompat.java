@@ -21,11 +21,7 @@ import android.annotation.IntDef;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-/**
- * TODO: Remove this class
- */
 public class NavigationBarCompat extends QuickStepContract {
-
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({HIT_TARGET_NONE, HIT_TARGET_BACK, HIT_TARGET_HOME, HIT_TARGET_OVERVIEW})
@@ -59,4 +55,6 @@ public class NavigationBarCompat extends QuickStepContract {
      * Interaction type: show/hide the overview button while this service is connected to launcher
      */
     public static final int FLAG_SHOW_OVERVIEW_BUTTON = 0x4;
+
+
 }

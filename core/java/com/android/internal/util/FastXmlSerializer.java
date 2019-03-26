@@ -18,6 +18,7 @@ package com.android.internal.util;
 
 import org.xmlpull.v1.XmlSerializer;
 
+import android.annotation.UnsupportedAppUsage;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -69,6 +70,7 @@ public class FastXmlSerializer implements XmlSerializer {
     private int mNesting = 0;
     private boolean mLineStart = true;
 
+    @UnsupportedAppUsage
     public FastXmlSerializer() {
         this(DEFAULT_BUFFER_LEN);
     }

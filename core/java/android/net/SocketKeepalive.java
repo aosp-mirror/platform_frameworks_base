@@ -21,8 +21,10 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Binder;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 
+import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.Executor;
@@ -73,10 +75,15 @@ public abstract class SocketKeepalive implements AutoCloseable {
     /** The target socket is not idle. */
     public static final int ERROR_SOCKET_NOT_IDLE = -26;
 
-    /** The hardware does not support this request. */
-    public static final int ERROR_HARDWARE_UNSUPPORTED = -30;
+    /** The device does not support this request. */
+    public static final int ERROR_UNSUPPORTED = -30;
+    /** @hide TODO: delete when telephony code has been updated. */
+    public static final int ERROR_HARDWARE_UNSUPPORTED = ERROR_UNSUPPORTED;
     /** The hardware returned an error. */
     public static final int ERROR_HARDWARE_ERROR = -31;
+    /** The limitation of resource is reached. */
+    public static final int ERROR_INSUFFICIENT_RESOURCES = -32;
+
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -147,15 +154,18 @@ public abstract class SocketKeepalive implements AutoCloseable {
 
     @NonNull final IConnectivityManager mService;
     @NonNull final Network mNetwork;
+    @NonNull final ParcelFileDescriptor mPfd;
     @NonNull final Executor mExecutor;
     @NonNull final ISocketKeepaliveCallback mCallback;
     // TODO: remove slot since mCallback could be used to identify which keepalive to stop.
     @Nullable Integer mSlot;
 
     SocketKeepalive(@NonNull IConnectivityManager service, @NonNull Network network,
+            @NonNull ParcelFileDescriptor pfd,
             @NonNull Executor executor, @NonNull Callback callback) {
         mService = service;
         mNetwork = network;
+        mPfd = pfd;
         mExecutor = executor;
         mCallback = new ISocketKeepaliveCallback.Stub() {
             @Override
@@ -233,6 +243,11 @@ public abstract class SocketKeepalive implements AutoCloseable {
     @Override
     public final void close() {
         stop();
+        try {
+            mPfd.close();
+        } catch (IOException e) {
+            // Nothing much can be done.
+        }
     }
 
     /**

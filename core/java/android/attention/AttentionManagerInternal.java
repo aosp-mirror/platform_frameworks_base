@@ -30,25 +30,21 @@ public abstract class AttentionManagerInternal {
     /**
      * Checks whether user attention is at the screen and calls in the provided callback.
      *
-     * @param requestCode   a code associated with the attention check request; this code would be
-     *                      used to call back in {@link AttentionCallbackInternal#onSuccess} and
-     *                      {@link AttentionCallbackInternal#onFailure}
      * @param timeoutMillis a budget for the attention check; if it takes longer - {@link
      *                      AttentionCallbackInternal#onFailure} would be called with the {@link
      *                      android.service.attention.AttentionService#ATTENTION_FAILURE_TIMED_OUT}
      *                      code
      * @param callback      a callback for when the attention check has completed
-     * @return {@code true} if the attention check should succeed; {@false} otherwise.
+     * @return {@code true} if the attention check should succeed.
      */
-    public abstract boolean checkAttention(int requestCode,
-            long timeoutMillis, AttentionCallbackInternal callback);
+    public abstract boolean checkAttention(long timeoutMillis, AttentionCallbackInternal callback);
 
     /**
      * Cancels the specified attention check in case it's no longer needed.
      *
-     * @param requestCode a code provided during {@link #checkAttention}
+     * @param callback a callback that was used in {@link #checkAttention}
      */
-    public abstract void cancelAttentionCheck(int requestCode);
+    public abstract void cancelAttentionCheck(AttentionCallbackInternal callback);
 
     /**
      * Disables the dependants.
@@ -62,19 +58,17 @@ public abstract class AttentionManagerInternal {
         /**
          * Provides the result of the attention check, if the check was successful.
          *
-         * @param requestCode a code provided in {@link #checkAttention}
          * @param result      an int with the result of the check
          * @param timestamp   a {@code SystemClock.uptimeMillis()} timestamp associated with the
          *                    attention check
          */
-        public abstract void onSuccess(int requestCode, int result, long timestamp);
+        public abstract void onSuccess(int result, long timestamp);
 
         /**
          * Provides the explanation for why the attention check had failed.
          *
-         * @param requestCode a code provided in {@link #checkAttention}
          * @param error       an int with the reason for failure
          */
-        public abstract void onFailure(int requestCode, int error);
+        public abstract void onFailure(int error);
     }
 }

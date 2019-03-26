@@ -234,7 +234,7 @@ public abstract class NotificationAssistantService extends NotificationListenerS
     public final void adjustNotification(@NonNull Adjustment adjustment) {
         if (!isBound()) return;
         try {
-            getNotificationInterface().applyAdjustmentFromAssistant(mWrapper, adjustment);
+            getNotificationInterface().applyEnqueuedAdjustmentFromAssistant(mWrapper, adjustment);
         } catch (android.os.RemoteException ex) {
             Log.v(TAG, "Unable to contact notification manager", ex);
             throw ex.rethrowFromSystemServer();

@@ -1740,7 +1740,7 @@ package android.content.pm {
   }
 
   public class ShortcutManager {
-    method @NonNull public java.util.List<android.content.pm.ShortcutManager.ShareShortcutInfo> getShareTargets(@NonNull android.content.IntentFilter);
+    method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_APP_PREDICTIONS) public java.util.List<android.content.pm.ShortcutManager.ShareShortcutInfo> getShareTargets(@NonNull android.content.IntentFilter);
     method public boolean hasShareTargets(@NonNull String);
   }
 
@@ -4019,8 +4019,8 @@ package android.net {
   }
 
   public class ConnectivityManager {
-    method @RequiresPermission(android.Manifest.permission.PACKET_KEEPALIVE_OFFLOAD) public android.net.SocketKeepalive createNattKeepalive(@NonNull android.net.Network, @NonNull java.io.FileDescriptor, @NonNull java.net.InetAddress, @NonNull java.net.InetAddress, @NonNull java.util.concurrent.Executor, @NonNull android.net.SocketKeepalive.Callback);
-    method @RequiresPermission(android.Manifest.permission.PACKET_KEEPALIVE_OFFLOAD) public android.net.SocketKeepalive createSocketKeepalive(@NonNull android.net.Network, @NonNull java.net.Socket, @NonNull java.util.concurrent.Executor, @NonNull android.net.SocketKeepalive.Callback);
+    method @NonNull @RequiresPermission(android.Manifest.permission.PACKET_KEEPALIVE_OFFLOAD) public android.net.SocketKeepalive createNattKeepalive(@NonNull android.net.Network, @NonNull android.os.ParcelFileDescriptor, @NonNull java.net.InetAddress, @NonNull java.net.InetAddress, @NonNull java.util.concurrent.Executor, @NonNull android.net.SocketKeepalive.Callback);
+    method @NonNull @RequiresPermission(android.Manifest.permission.PACKET_KEEPALIVE_OFFLOAD) public android.net.SocketKeepalive createSocketKeepalive(@NonNull android.net.Network, @NonNull java.net.Socket, @NonNull java.util.concurrent.Executor, @NonNull android.net.SocketKeepalive.Callback);
     method @RequiresPermission(android.Manifest.permission.LOCAL_MAC_ADDRESS) public String getCaptivePortalServerUrl();
     method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void getLatestTetheringEntitlementResult(int, boolean, @NonNull java.util.concurrent.Executor, @NonNull android.net.ConnectivityManager.OnTetheringEntitlementResultListener);
     method @RequiresPermission(anyOf={android.Manifest.permission.TETHER_PRIVILEGED, android.Manifest.permission.WRITE_SETTINGS}) public boolean isTetheringSupported();
@@ -4216,7 +4216,7 @@ package android.net {
     method @Nullable public String getDomains();
     method @Nullable public java.net.InetAddress getGateway();
     method @Nullable public android.net.LinkAddress getIpAddress();
-    method @NonNull public java.util.List<android.net.RouteInfo> getRoutes(String);
+    method @NonNull public java.util.List<android.net.RouteInfo> getRoutes(@Nullable String);
     method public void setDomains(@Nullable String);
     method public void setGateway(@Nullable java.net.InetAddress);
     method public void setIpAddress(@Nullable android.net.LinkAddress);
@@ -4436,7 +4436,7 @@ package android.net.metrics {
   }
 
   public final class ValidationProbeEvent implements android.net.metrics.IpConnectivityLog.Event {
-    method public static String getProbeName(int);
+    method @NonNull public static String getProbeName(int);
     field public static final int DNS_FAILURE = 0; // 0x0
     field public static final int DNS_SUCCESS = 1; // 0x1
     field public static final int PROBE_DNS = 0; // 0x0
@@ -6322,8 +6322,8 @@ package android.service.attention {
     ctor public AttentionService();
     method public final void disableSelf();
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
-    method public abstract void onCancelAttentionCheck(int);
-    method public abstract void onCheckAttention(int, @NonNull android.service.attention.AttentionService.AttentionCallback);
+    method public abstract void onCancelAttentionCheck(@NonNull android.service.attention.AttentionService.AttentionCallback);
+    method public abstract void onCheckAttention(@NonNull android.service.attention.AttentionService.AttentionCallback);
     field public static final int ATTENTION_FAILURE_CAMERA_PERMISSION_ABSENT = 6; // 0x6
     field public static final int ATTENTION_FAILURE_CANCELLED = 3; // 0x3
     field public static final int ATTENTION_FAILURE_PREEMPTED = 4; // 0x4
@@ -6335,8 +6335,8 @@ package android.service.attention {
   }
 
   public static final class AttentionService.AttentionCallback {
-    method public void onFailure(int, int);
-    method public void onSuccess(int, int, long);
+    method public void onFailure(int);
+    method public void onSuccess(int, long);
   }
 
 }
@@ -6891,6 +6891,22 @@ package android.service.wallpaper {
   public class WallpaperService.Engine {
     method public boolean isInAmbientMode();
     method public void onAmbientModeChanged(boolean, long);
+  }
+
+}
+
+package android.service.watchdog {
+
+  public abstract class ExplicitHealthCheckService extends android.app.Service {
+    ctor public ExplicitHealthCheckService();
+    method public final void notifyHealthCheckPassed(@NonNull String);
+    method @NonNull public final android.os.IBinder onBind(@NonNull android.content.Intent);
+    method public abstract void onCancelHealthCheck(@NonNull String);
+    method @NonNull public abstract java.util.List<java.lang.String> onGetRequestedPackages();
+    method @NonNull public abstract java.util.List<java.lang.String> onGetSupportedPackages();
+    method public abstract void onRequestHealthCheck(@NonNull String);
+    field public static final String BIND_PERMISSION = "android.permission.BIND_EXPLICIT_HEALTH_CHECK_SERVICE";
+    field public static final String SERVICE_INTERFACE = "android.service.watchdog.ExplicitHealthCheckService";
   }
 
 }

@@ -38,7 +38,7 @@ import java.util.Objects;
 public class TcpKeepalivePacketData extends KeepalivePacketData implements Parcelable {
     private static final String TAG = "TcpKeepalivePacketData";
 
-     /** TCP sequence number. */
+    /** TCP sequence number. */
     public final int tcpSeq;
 
     /** TCP ACK number. */
@@ -49,6 +49,12 @@ public class TcpKeepalivePacketData extends KeepalivePacketData implements Parce
 
     /** TCP RCV window scale. */
     public final int tcpWndScale;
+
+    /** IP TOS. */
+    public final int ipTos;
+
+    /** IP TTL. */
+    public final int ipTtl;
 
     private static final int IPV4_HEADER_LENGTH = 20;
     private static final int IPV6_HEADER_LENGTH = 40;
@@ -65,6 +71,8 @@ public class TcpKeepalivePacketData extends KeepalivePacketData implements Parce
         // In the packet, the window is shifted right by the window scale.
         tcpWnd = tcpDetails.rcvWnd;
         tcpWndScale = tcpDetails.rcvWndScale;
+        ipTos = tcpDetails.tos;
+        ipTtl = tcpDetails.ttl;
     }
 
     /**
@@ -98,12 +106,11 @@ public class TcpKeepalivePacketData extends KeepalivePacketData implements Parce
         final int length = IPV4_HEADER_LENGTH + TCP_HEADER_LENGTH;
         ByteBuffer buf = ByteBuffer.allocate(length);
         buf.order(ByteOrder.BIG_ENDIAN);
-        // IP version and TOS. TODO : fetch this from getsockopt(SOL_IP, IP_TOS)
-        buf.putShort((short) 0x4500);
+        buf.put((byte) 0x45);                       // IP version and IHL
+        buf.put((byte) tcpDetails.tos);             // TOS
         buf.putShort((short) length);
-        buf.putInt(0x4000);                         // ID, flags=DF, offset
-        // TODO : fetch TTL from getsockopt(SOL_IP, IP_TTL)
-        buf.put((byte) 64);
+        buf.putInt(0x00004000);                     // ID, flags=DF, offset
+        buf.put((byte) tcpDetails.ttl);             // TTL
         buf.put((byte) OsConstants.IPPROTO_TCP);
         final int ipChecksumOffset = buf.position();
         buf.putShort((short) 0);                    // IP checksum
@@ -117,7 +124,9 @@ public class TcpKeepalivePacketData extends KeepalivePacketData implements Parce
         buf.putShort((short) (tcpDetails.rcvWnd >> tcpDetails.rcvWndScale));   // Window size
         final int tcpChecksumOffset = buf.position();
         buf.putShort((short) 0);                    // TCP checksum
-        // URG is not set therefore the urgent pointer is not included
+        // URG is not set therefore the urgent pointer is zero.
+        buf.putShort((short) 0);                    // Urgent pointer
+
         buf.putShort(ipChecksumOffset, IpUtils.ipChecksum(buf, 0));
         buf.putShort(tcpChecksumOffset, IpUtils.tcpChecksum(
                 buf, 0, IPV4_HEADER_LENGTH, TCP_HEADER_LENGTH));
@@ -138,13 +147,15 @@ public class TcpKeepalivePacketData extends KeepalivePacketData implements Parce
                 && this.tcpAck == other.tcpAck
                 && this.tcpSeq == other.tcpSeq
                 && this.tcpWnd == other.tcpWnd
-                && this.tcpWndScale == other.tcpWndScale;
+                && this.tcpWndScale == other.tcpWndScale
+                && this.ipTos == other.ipTos
+                && this.ipTtl == other.ipTtl;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(srcAddress, dstAddress, srcPort, dstPort, tcpAck, tcpSeq, tcpWnd,
-                tcpWndScale);
+                tcpWndScale, ipTos, ipTtl);
     }
 
     /**
@@ -164,6 +175,8 @@ public class TcpKeepalivePacketData extends KeepalivePacketData implements Parce
         out.writeInt(tcpAck);
         out.writeInt(tcpWnd);
         out.writeInt(tcpWndScale);
+        out.writeInt(ipTos);
+        out.writeInt(ipTtl);
     }
 
     private TcpKeepalivePacketData(Parcel in) {
@@ -172,6 +185,8 @@ public class TcpKeepalivePacketData extends KeepalivePacketData implements Parce
         tcpAck = in.readInt();
         tcpWnd = in.readInt();
         tcpWndScale = in.readInt();
+        ipTos = in.readInt();
+        ipTtl = in.readInt();
     }
 
     /** Parcelable Creator. */
@@ -200,6 +215,8 @@ public class TcpKeepalivePacketData extends KeepalivePacketData implements Parce
         parcel.ack = tcpAck;
         parcel.rcvWnd = tcpWnd;
         parcel.rcvWndScale = tcpWndScale;
+        parcel.tos = ipTos;
+        parcel.ttl = ipTtl;
         return parcel;
     }
 
@@ -212,6 +229,8 @@ public class TcpKeepalivePacketData extends KeepalivePacketData implements Parce
                 + " seq: " + tcpSeq
                 + " ack: " + tcpAck
                 + " wnd: " + tcpWnd
-                + " wndScale: " + tcpWndScale;
+                + " wndScale: " + tcpWndScale
+                + " tos: " + ipTos
+                + " ttl: " + ipTtl;
     }
 }

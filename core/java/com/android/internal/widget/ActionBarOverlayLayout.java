@@ -18,6 +18,7 @@ package com.android.internal.widget;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -168,6 +169,7 @@ public class ActionBarOverlayLayout extends ViewGroup implements DecorContentPar
         init(context);
     }
 
+    @UnsupportedAppUsage
     public ActionBarOverlayLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
         init(context);
@@ -671,6 +673,7 @@ public class ActionBarOverlayLayout extends ViewGroup implements DecorContentPar
         return finalY > mActionBarTop.getHeight();
     }
 
+    @UnsupportedAppUsage
     @Override
     public void setWindowCallback(Window.Callback cb) {
         pullChildren();

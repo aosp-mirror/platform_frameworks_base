@@ -5209,7 +5209,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 // the ATMS lock held.
                 final Message msg = PooledLambda.obtainMessage(
                         ActivityManagerInternal::killAllBackgroundProcessesExcept, mAmInternal,
-                        N, ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE);
+                        N, ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND);
                 mH.sendMessage(msg);
             }
         }

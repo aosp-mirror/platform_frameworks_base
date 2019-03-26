@@ -18,6 +18,7 @@ package com.android.internal.view.menu;
 
 import com.android.internal.view.menu.MenuBuilder.ItemInvoker;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
@@ -213,6 +214,7 @@ public final class IconMenuItemView extends TextView implements MenuView.ItemVie
         }
     }
 
+    @UnsupportedAppUsage
     public void setItemInvoker(ItemInvoker itemInvoker) {
         mItemInvoker = itemInvoker;
     }
@@ -232,6 +234,7 @@ public final class IconMenuItemView extends TextView implements MenuView.ItemVie
         }
     }
     
+    @UnsupportedAppUsage
     void setIconMenuView(IconMenuView iconMenuView) {
         mIconMenuView = iconMenuView;
     }
@@ -267,6 +270,7 @@ public final class IconMenuItemView extends TextView implements MenuView.ItemVie
      * @return layout params appropriate for this view.  If layout params already exist, it will
      *         augment them to be appropriate to the current text size.
      */
+    @UnsupportedAppUsage
     IconMenuView.LayoutParams getTextAppropriateLayoutParams() {
         IconMenuView.LayoutParams lp = (IconMenuView.LayoutParams) getLayoutParams();
         if (lp == null) {
