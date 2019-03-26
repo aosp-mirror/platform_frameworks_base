@@ -25,8 +25,6 @@ import static org.junit.Assert.assertEquals;
 
 import android.net.DhcpResults;
 import android.net.LinkAddress;
-import android.net.StaticIpConfiguration;
-import android.net.apf.ApfCapabilities;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -43,21 +41,16 @@ import java.net.Inet4Address;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class IpConfigurationParcelableUtilTest {
-    private StaticIpConfiguration mStaticIpConfiguration;
     private DhcpResults mDhcpResults;
 
     @Before
     public void setUp() {
-        mStaticIpConfiguration = new StaticIpConfiguration();
-        mStaticIpConfiguration.ipAddress = new LinkAddress(parseNumericAddress("2001:db8::42"), 64);
-        mStaticIpConfiguration.gateway = parseNumericAddress("192.168.42.42");
-        mStaticIpConfiguration.dnsServers.add(parseNumericAddress("2001:db8::43"));
-        mStaticIpConfiguration.dnsServers.add(parseNumericAddress("192.168.43.43"));
-        mStaticIpConfiguration.domains = "example.com";
-        // Any added StaticIpConfiguration field must be included in equals() to be tested properly
-        assertFieldCountEquals(4, StaticIpConfiguration.class);
-
-        mDhcpResults = new DhcpResults(mStaticIpConfiguration);
+        mDhcpResults = new DhcpResults();
+        mDhcpResults.ipAddress = new LinkAddress(parseNumericAddress("2001:db8::42"), 64);
+        mDhcpResults.gateway = parseNumericAddress("192.168.42.42");
+        mDhcpResults.dnsServers.add(parseNumericAddress("2001:db8::43"));
+        mDhcpResults.dnsServers.add(parseNumericAddress("192.168.43.43"));
+        mDhcpResults.domains = "example.com";
         mDhcpResults.serverAddress = (Inet4Address) parseNumericAddress("192.168.44.44");
         mDhcpResults.vendorInfo = "TEST_VENDOR_INFO";
         mDhcpResults.leaseDuration = 3600;
@@ -67,42 +60,31 @@ public class IpConfigurationParcelableUtilTest {
     }
 
     @Test
-    public void testParcelUnparcelStaticConfiguration() {
-        doStaticConfigurationParcelUnparcelTest();
-    }
-
-    @Test
-    public void testParcelUnparcelStaticConfiguration_NullIpAddress() {
-        mStaticIpConfiguration.ipAddress = null;
-        doStaticConfigurationParcelUnparcelTest();
-    }
-
-    @Test
-    public void testParcelUnparcelStaticConfiguration_NullGateway() {
-        mStaticIpConfiguration.gateway = null;
-        doStaticConfigurationParcelUnparcelTest();
-    }
-
-    @Test
-    public void testParcelUnparcelStaticConfiguration_NullDomains() {
-        mStaticIpConfiguration.domains = null;
-        doStaticConfigurationParcelUnparcelTest();
-    }
-
-    @Test
-    public void testParcelUnparcelStaticConfiguration_EmptyDomains() {
-        mStaticIpConfiguration.domains = "";
-        doStaticConfigurationParcelUnparcelTest();
-    }
-
-    private void doStaticConfigurationParcelUnparcelTest() {
-        final StaticIpConfiguration unparceled =
-                fromStableParcelable(toStableParcelable(mStaticIpConfiguration));
-        assertEquals(mStaticIpConfiguration, unparceled);
-    }
-
-    @Test
     public void testParcelUnparcelDhcpResults() {
+        doDhcpResultsParcelUnparcelTest();
+    }
+
+    @Test
+    public void testParcelUnparcelDhcpResults_NullIpAddress() {
+        mDhcpResults.ipAddress = null;
+        doDhcpResultsParcelUnparcelTest();
+    }
+
+    @Test
+    public void testParcelUnparcelDhcpResults_NullGateway() {
+        mDhcpResults.gateway = null;
+        doDhcpResultsParcelUnparcelTest();
+    }
+
+    @Test
+    public void testParcelUnparcelDhcpResults_NullDomains() {
+        mDhcpResults.domains = null;
+        doDhcpResultsParcelUnparcelTest();
+    }
+
+    @Test
+    public void testParcelUnparcelDhcpResults_EmptyDomains() {
+        mDhcpResults.domains = "";
         doDhcpResultsParcelUnparcelTest();
     }
 
@@ -121,11 +103,5 @@ public class IpConfigurationParcelableUtilTest {
     private void doDhcpResultsParcelUnparcelTest() {
         final DhcpResults unparceled = fromStableParcelable(toStableParcelable(mDhcpResults));
         assertEquals(mDhcpResults, unparceled);
-    }
-
-    @Test
-    public void testParcelUnparcelApfCapabilities() {
-        final ApfCapabilities caps = new ApfCapabilities(123, 456, 789);
-        assertEquals(caps, fromStableParcelable(toStableParcelable(caps)));
     }
 }

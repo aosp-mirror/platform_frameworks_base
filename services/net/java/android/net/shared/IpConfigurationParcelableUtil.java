@@ -16,17 +16,10 @@
 
 package android.net.shared;
 
-import static android.net.shared.ParcelableUtil.fromParcelableArray;
-import static android.net.shared.ParcelableUtil.toParcelableArray;
-
 import android.annotation.Nullable;
-import android.net.ApfCapabilitiesParcelable;
 import android.net.DhcpResults;
 import android.net.DhcpResultsParcelable;
 import android.net.InetAddresses;
-import android.net.StaticIpConfiguration;
-import android.net.StaticIpConfigurationParcelable;
-import android.net.apf.ApfCapabilities;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -38,44 +31,12 @@ import java.net.InetAddress;
  */
 public final class IpConfigurationParcelableUtil {
     /**
-     * Convert a StaticIpConfiguration to a StaticIpConfigurationParcelable.
-     */
-    public static StaticIpConfigurationParcelable toStableParcelable(
-            @Nullable StaticIpConfiguration config) {
-        if (config == null) return null;
-        final StaticIpConfigurationParcelable p = new StaticIpConfigurationParcelable();
-        p.ipAddress = config.getIpAddress();
-        p.gateway = parcelAddress(config.getGateway());
-        p.dnsServers = toParcelableArray(
-                config.getDnsServers(), IpConfigurationParcelableUtil::parcelAddress, String.class);
-        p.domains = config.getDomains();
-        return p;
-    }
-
-    /**
-     * Convert a StaticIpConfigurationParcelable to a StaticIpConfiguration.
-     */
-    public static StaticIpConfiguration fromStableParcelable(
-            @Nullable StaticIpConfigurationParcelable p) {
-        if (p == null) return null;
-        final StaticIpConfiguration config = new StaticIpConfiguration();
-        config.setIpAddress(p.ipAddress);
-        config.setGateway(unparcelAddress(p.gateway));
-        for (InetAddress addr : fromParcelableArray(
-                p.dnsServers, IpConfigurationParcelableUtil::unparcelAddress)) {
-            config.addDnsServer(addr);
-        }
-        config.setDomains(p.domains);
-        return config;
-    }
-
-    /**
      * Convert DhcpResults to a DhcpResultsParcelable.
      */
     public static DhcpResultsParcelable toStableParcelable(@Nullable DhcpResults results) {
         if (results == null) return null;
         final DhcpResultsParcelable p = new DhcpResultsParcelable();
-        p.baseConfiguration = toStableParcelable(results.toStaticIpConfiguration());
+        p.baseConfiguration = results.toStaticIpConfiguration();
         p.leaseDuration = results.leaseDuration;
         p.mtu = results.mtu;
         p.serverAddress = parcelAddress(results.serverAddress);
@@ -88,33 +49,12 @@ public final class IpConfigurationParcelableUtil {
      */
     public static DhcpResults fromStableParcelable(@Nullable DhcpResultsParcelable p) {
         if (p == null) return null;
-        final DhcpResults results = new DhcpResults(fromStableParcelable(p.baseConfiguration));
+        final DhcpResults results = new DhcpResults(p.baseConfiguration);
         results.leaseDuration = p.leaseDuration;
         results.mtu = p.mtu;
         results.serverAddress = (Inet4Address) unparcelAddress(p.serverAddress);
         results.vendorInfo = p.vendorInfo;
         return results;
-    }
-
-    /**
-     * Convert ApfCapabilities to ApfCapabilitiesParcelable.
-     */
-    public static ApfCapabilitiesParcelable toStableParcelable(@Nullable ApfCapabilities caps) {
-        if (caps == null) return null;
-        final ApfCapabilitiesParcelable p = new ApfCapabilitiesParcelable();
-        p.apfVersionSupported = caps.apfVersionSupported;
-        p.maximumApfProgramSize = caps.maximumApfProgramSize;
-        p.apfPacketFormat = caps.apfPacketFormat;
-        return p;
-    }
-
-    /**
-     * Convert ApfCapabilitiesParcelable toApfCapabilities.
-     */
-    public static ApfCapabilities fromStableParcelable(@Nullable ApfCapabilitiesParcelable p) {
-        if (p == null) return null;
-        return new ApfCapabilities(
-                p.apfVersionSupported, p.maximumApfProgramSize, p.apfPacketFormat);
     }
 
     /**
