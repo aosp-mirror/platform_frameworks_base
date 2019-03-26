@@ -336,7 +336,8 @@ public:
     /**
      * Records statsd skipped an event.
      */
-    void noteLogLost(int32_t wallClockTimeSec, int32_t count, int lastError);
+    void noteLogLost(int32_t wallClockTimeSec, int32_t count, int32_t lastError,
+                     int32_t lastAtomTag, int32_t uid, int32_t pid);
 
     /**
      * Records that the pull of an atom has failed
@@ -503,13 +504,22 @@ private:
     std::map<int64_t, AtomMetricStats> mAtomMetricStats;
 
     struct LogLossStats {
-        LogLossStats(int32_t sec, int32_t count, int32_t error)
-            : mWallClockSec(sec), mCount(count), mLastError(error) {
+        LogLossStats(int32_t sec, int32_t count, int32_t error, int32_t tag, int32_t uid,
+                     int32_t pid)
+            : mWallClockSec(sec),
+              mCount(count),
+              mLastError(error),
+              mLastTag(tag),
+              mUid(uid),
+              mPid(pid) {
         }
         int32_t mWallClockSec;
         int32_t mCount;
         // error code defined in linux/errno.h
         int32_t mLastError;
+        int32_t mLastTag;
+        int32_t mUid;
+        int32_t mPid;
     };
 
     // Timestamps when we detect log loss, and the number of logs lost.

@@ -455,6 +455,9 @@ message StatsdStatsReport {
         optional int32 detected_time_sec = 1;
         optional int32 count = 2;
         optional int32 last_error = 3;
+        optional int32 last_tag = 4;
+        optional int32 uid = 5;
+        optional int32 pid = 6;
     }
     repeated LogLossStats detected_log_loss = 16;
 }
