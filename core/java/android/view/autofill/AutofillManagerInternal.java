@@ -33,7 +33,10 @@ public abstract class AutofillManagerInternal {
     public abstract void onBackKeyPressed();
 
     /**
-     * Gets autofill options for a package
+     * Gets autofill options for a package.
+     *
+     * <p><b>NOTE: </b>this method is called by the {@code ActivityManager} service and hence cannot
+     * hold the main service lock.
      *
      * @param packageName The package for which to query.
      * @param versionCode The package version code.
