@@ -18,15 +18,22 @@ package com.android.server;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.gsi.GsiInstallParams;
 import android.gsi.GsiProgress;
 import android.gsi.IGsiService;
+import android.os.Environment;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.os.image.IDynamicSystemService;
+import android.os.storage.StorageManager;
+import android.os.storage.StorageVolume;
 import android.util.Slog;
+
+import java.io.File;
 
 /**
  * DynamicSystemService implements IDynamicSystemService. It provides permission check before
@@ -36,7 +43,7 @@ public class DynamicSystemService extends IDynamicSystemService.Stub implements 
     private static final String TAG = "DynamicSystemService";
     private static final String NO_SERVICE_ERROR = "no gsiservice";
     private static final int GSID_ROUGH_TIMEOUT_MS = 8192;
-
+    private static final String PATH_DEFAULT = "/data/gsi";
     private Context mContext;
     private volatile IGsiService mGsiService;
 
@@ -100,7 +107,32 @@ public class DynamicSystemService extends IDynamicSystemService.Stub implements 
 
     @Override
     public boolean startInstallation(long systemSize, long userdataSize) throws RemoteException {
-        return getGsiService().startGsiInstall(systemSize, userdataSize, true) == 0;
+        // priority from high to low: sysprop -> sdcard -> /data
+        String path = SystemProperties.get("os.aot.path");
+        if (path.isEmpty()) {
+            final int userId = UserHandle.myUserId();
+            final StorageVolume[] volumes =
+                    StorageManager.getVolumeList(userId, StorageManager.FLAG_FOR_WRITE);
+            for (StorageVolume volume : volumes) {
+                if (volume.isEmulated()) continue;
+                if (!volume.isRemovable()) continue;
+                if (!Environment.MEDIA_MOUNTED.equals(volume.getState())) continue;
+                File sdCard = volume.getPathFile();
+                if (sdCard.isDirectory()) {
+                    path = sdCard.getPath();
+                    break;
+                }
+            }
+            if (path.isEmpty()) {
+                path = PATH_DEFAULT;
+            }
+            Slog.i(TAG, "startInstallation -> " + path);
+        }
+        GsiInstallParams installParams = new GsiInstallParams();
+        installParams.installDir = path;
+        installParams.gsiSize = systemSize;
+        installParams.userdataSize = userdataSize;
+        return getGsiService().beginGsiInstall(installParams) == 0;
     }
 
     @Override
