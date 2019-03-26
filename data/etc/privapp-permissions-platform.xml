@@ -48,12 +48,6 @@ applications that come with the platform
         <permission name="android.permission.WRITE_MEDIA_STORAGE"/>
     </privapp-permissions>
 
-    <privapp-permissions package="com.android.emergency">
-        <!-- Required to place emergency calls from emergency info screen. -->
-        <permission name="android.permission.CALL_PRIVILEGED"/>
-        <permission name="android.permission.MANAGE_USERS"/>
-    </privapp-permissions>
-
     <privapp-permissions package="com.android.externalstorage">
         <permission name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
         <permission name="android.permission.WRITE_MEDIA_STORAGE"/>

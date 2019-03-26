@@ -66,6 +66,14 @@ prebuilt_etc {
 }
 
 prebuilt_etc {
+    name: "privapp_whitelist_com.android.emergency",
+    product_specific: true,
+    sub_dir: "permissions",
+    src: "com.android.emergency.xml",
+    filename_from_src: true,
+}
+
+prebuilt_etc {
     name: "privapp_whitelist_com.android.launcher3",
     product_specific: true,
     sub_dir: "permissions",
