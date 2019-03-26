@@ -18,7 +18,7 @@ package android.view;
 
 import static android.view.InsetsState.TYPE_NAVIGATION_BAR;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 import android.graphics.Insets;
 import android.graphics.Rect;
@@ -31,6 +31,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+/**
+ * Tests for {@link InsetsSource}.
+ *
+ * <p>Build/Install/Run:
+ *  atest FrameworksCoreTests:InsetsSourceTest
+ *
+ * <p>This test class is a part of Window Manager Service tests and specified in
+ * {@link com.android.server.wm.test.filters.FrameworksTestsFilter}.
+ */
 @Presubmit
 @FlakyTest(detail = "Promote once confirmed non-flaky")
 @RunWith(AndroidJUnit4.class)

@@ -16,9 +16,8 @@
 
 package com.android.server.wm;
 
-import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertTrue;
 
-import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
