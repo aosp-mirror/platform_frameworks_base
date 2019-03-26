@@ -786,7 +786,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 | (location.hasElapsedRealtimeUncertaintyNanos()
                         ? ELAPSED_REALTIME_HAS_TIME_UNCERTAINTY_NS : 0);
         long elapsedRealtimeNanos = location.getElapsedRealtimeNanos();
-        long elapsedRealtimeUncertaintyNanos = location.getElapsedRealtimeUncertaintyNanos();
+        double elapsedRealtimeUncertaintyNanos = location.getElapsedRealtimeUncertaintyNanos();
 
         native_inject_best_location(
                 gnssLocationFlags, latitudeDegrees, longitudeDegrees,
@@ -2215,7 +2215,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             float horizontalAccuracyMeters, float verticalAccuracyMeters,
             float speedAccuracyMetersPerSecond, float bearingAccuracyDegrees,
             long timestamp, int elapsedRealtimeFlags, long elapsedRealtimeNanos,
-            long elapsedRealtimeUncertaintyNanos);
+            double elapsedRealtimeUncertaintyNanos);
 
     private native void native_inject_location(double latitude, double longitude, float accuracy);
 

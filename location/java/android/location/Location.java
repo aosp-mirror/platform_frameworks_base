@@ -136,7 +136,7 @@ public class Location implements Parcelable {
     private long mElapsedRealtimeNanos = 0;
     // Estimate of the relative precision of the alignment of this SystemClock
     // timestamp, with the reported measurements in nanoseconds (68% confidence).
-    private long mElapsedRealtimeUncertaintyNanos = 0;
+    private double mElapsedRealtimeUncertaintyNanos = 0.0f;
     private double mLatitude = 0.0;
     private double mLongitude = 0.0;
     private double mAltitude = 0.0f;
@@ -199,7 +199,7 @@ public class Location implements Parcelable {
         mProvider = null;
         mTime = 0;
         mElapsedRealtimeNanos = 0;
-        mElapsedRealtimeUncertaintyNanos = 0;
+        mElapsedRealtimeUncertaintyNanos = 0.0;
         mFieldsMask = 0;
         mLatitude = 0;
         mLongitude = 0;
@@ -601,7 +601,7 @@ public class Location implements Parcelable {
      *
      * @return uncertainty of elapsed real-time of fix, in nanoseconds.
      */
-    public long getElapsedRealtimeUncertaintyNanos() {
+    public double getElapsedRealtimeUncertaintyNanos() {
         return mElapsedRealtimeUncertaintyNanos;
     }
 
@@ -612,7 +612,7 @@ public class Location implements Parcelable {
      *
      * @param time uncertainty of the elapsed real-time of fix, in nanoseconds.
      */
-    public void setElapsedRealtimeUncertaintyNanos(long time) {
+    public void setElapsedRealtimeUncertaintyNanos(double time) {
         mElapsedRealtimeUncertaintyNanos = time;
         mFieldsMask |= HAS_ELAPSED_REALTIME_UNCERTAINTY_MASK;
     }
@@ -1104,7 +1104,7 @@ public class Location implements Parcelable {
         }
         if (hasElapsedRealtimeUncertaintyNanos()) {
             s.append(" etAcc=");
-            TimeUtils.formatDuration(mElapsedRealtimeUncertaintyNanos / 1000000L, s);
+            TimeUtils.formatDuration((long) (mElapsedRealtimeUncertaintyNanos / 1000000), s);
         }
         if (hasAltitude()) s.append(" alt=").append(mAltitude);
         if (hasSpeed()) s.append(" vel=").append(mSpeed);
@@ -1136,7 +1136,7 @@ public class Location implements Parcelable {
             Location l = new Location(provider);
             l.mTime = in.readLong();
             l.mElapsedRealtimeNanos = in.readLong();
-            l.mElapsedRealtimeUncertaintyNanos = in.readLong();
+            l.mElapsedRealtimeUncertaintyNanos = in.readDouble();
             l.mFieldsMask = in.readInt();
             l.mLatitude = in.readDouble();
             l.mLongitude = in.readDouble();
@@ -1167,7 +1167,7 @@ public class Location implements Parcelable {
         parcel.writeString(mProvider);
         parcel.writeLong(mTime);
         parcel.writeLong(mElapsedRealtimeNanos);
-        parcel.writeLong(mElapsedRealtimeUncertaintyNanos);
+        parcel.writeDouble(mElapsedRealtimeUncertaintyNanos);
         parcel.writeInt(mFieldsMask);
         parcel.writeDouble(mLatitude);
         parcel.writeDouble(mLongitude);
