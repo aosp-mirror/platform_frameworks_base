@@ -297,6 +297,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         return mPendingUiClean;
     }
 
+    /** @return {@code true} if the process registered to a display as a config listener. */
+    boolean registeredForDisplayConfigChanges() {
+        return mDisplayId != INVALID_DISPLAY;
+    }
+
     void postPendingUiCleanMsg(boolean pendingUiClean) {
         if (mListener == null) return;
         // Posting on handler so WM lock isn't held when we call into AM.
