@@ -31,6 +31,7 @@ import java.util.List;
 /**
  * Helper class for keeping track of whitelisted packages/activities.
  *
+ * <p><b>NOTE: </b>this class is not thread safe.
  * @hide
  */
 public final class WhitelistHelper {

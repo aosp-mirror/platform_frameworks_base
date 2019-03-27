@@ -181,9 +181,8 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
 
         mServiceNameResolver = serviceNameResolver;
         if (mServiceNameResolver != null) {
-            mServiceNameResolver
-                    .setOnTemporaryServiceNameChangedCallback(
-                            (u, s) -> updateCachedServiceLocked(u));
+            mServiceNameResolver.setOnTemporaryServiceNameChangedCallback(
+                    (u, s, t) -> onServiceNameChanged(u, s, t));
 
         }
         if (disallowProperty == null) {
@@ -579,6 +578,23 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
      */
     @SuppressWarnings("unused")
     protected void onServiceRemoved(@NonNull S service, @UserIdInt int userId) {
+    }
+
+    /**
+     * Called when the service name changed (typically when using temporary services).
+     *
+     * <p>By default, it calls {@link #updateCachedServiceLocked(int)}; subclasses must either call
+     * that same method, or {@code super.onServiceNameChanged()}.
+     *
+     * @param userId user handle.
+     * @param serviceName the new service name.
+     * @param isTemporary whether the new service is temporary.
+     */
+    protected void onServiceNameChanged(@UserIdInt int userId, @Nullable String serviceName,
+            boolean isTemporary) {
+        synchronized (mLock) {
+            updateCachedServiceLocked(userId);
+        }
     }
 
     /**
