@@ -552,6 +552,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mEntry.mIsSystemNotification = isSystemNotification(mContext, mStatusBarNotification);
         }
 
+        isNonblockable |= mEntry.channel.isImportanceLockedByOEM();
+        isNonblockable |= mEntry.channel.isImportanceLockedByCriticalDeviceFunction();
+
         if (!isNonblockable && mEntry != null && mEntry.mIsSystemNotification != null) {
             if (mEntry.mIsSystemNotification) {
                 if (mEntry.channel != null

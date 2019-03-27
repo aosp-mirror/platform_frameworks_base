@@ -783,7 +783,8 @@ public final class NotificationRecord {
         // Consider Notification Assistant and system overrides to importance. If both, system wins.
         if (!getChannel().hasUserSetImportance()
                 && mAssistantImportance != IMPORTANCE_UNSPECIFIED
-                && !getChannel().isImportanceLockedByOEM()) {
+                && !getChannel().isImportanceLockedByOEM()
+                && !getChannel().isImportanceLockedByCriticalDeviceFunction()) {
             mImportance = mAssistantImportance;
             mImportanceExplanationCode = MetricsEvent.IMPORTANCE_EXPLANATION_ASST;
         }

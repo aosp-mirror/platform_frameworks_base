@@ -101,6 +101,7 @@ import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.provider.MediaStore;
 import android.provider.Settings;
@@ -119,9 +120,6 @@ import android.text.Html;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
-
-import androidx.annotation.Nullable;
-import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.R;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
@@ -149,7 +147,6 @@ import org.mockito.stubbing.Answer;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -159,6 +156,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+
+import androidx.annotation.Nullable;
+import androidx.test.InstrumentationRegistry;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -226,23 +226,21 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Mock
     AppOpsManager mAppOpsManager;
     @Mock
-    private UserManagerService mUserMangerService;
-    @Mock
     private TestableNotificationManagerService.NotificationAssistantAccessGrantedCallback
             mNotificationAssistantAccessGrantedCallback;
+    @Mock
+    UserManager mUm;
 
     // Use a Testable subclass so we can simulate calls from the system without failing.
     private static class TestableNotificationManagerService extends NotificationManagerService {
         int countSystemChecks = 0;
         boolean isSystemUid = true;
         int countLogSmartSuggestionsVisible = 0;
-        UserManagerService mUserManagerService;
         @Nullable
         NotificationAssistantAccessGrantedCallback mNotificationAssistantAccessGrantedCallback;
 
-        TestableNotificationManagerService(Context context, UserManagerService userManagerService) {
+        TestableNotificationManagerService(Context context) {
             super(context);
-            mUserManagerService = userManagerService;
         }
 
         @Override
@@ -276,11 +274,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         void logSmartSuggestionsVisible(NotificationRecord r, int notificationLocation) {
             super.logSmartSuggestionsVisible(r, notificationLocation);
             countLogSmartSuggestionsVisible++;
-        }
-
-        @Override
-        UserManagerService getUserManagerService() {
-            return mUserManagerService;
         }
 
         @Override
@@ -326,7 +319,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         LocalServices.removeServiceForTest(WindowManagerInternal.class);
         LocalServices.addService(WindowManagerInternal.class, mWindowManagerInternal);
 
-        mService = new TestableNotificationManagerService(mContext, mUserMangerService);
+        mService = new TestableNotificationManagerService(mContext);
 
         // Use this testable looper.
         mTestableLooper = TestableLooper.get(this);
@@ -379,7 +372,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                     mCompanionMgr, mSnoozeHelper, mUsageStats, mPolicyFile, mActivityManager,
                     mGroupHelper, mAm, mAppUsageStats,
                     mock(DevicePolicyManagerInternal.class), mUgm, mUgmInternal,
-                    mAppOpsManager);
+                    mAppOpsManager, mUm);
             mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
         } catch (SecurityException e) {
             if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
@@ -1920,8 +1913,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testHasCompanionDevice_noService() throws Exception {
-        mService = new TestableNotificationManagerService(mContext, mUserMangerService);
+    public void testHasCompanionDevice_noService() {
+        mService = new TestableNotificationManagerService(mContext);
 
         assertFalse(mService.hasCompanionDevice(mListener));
     }
@@ -2623,7 +2616,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 + "<service_listing approved=\"test\" user=\"10\" primary=\"true\" />"
                 + "</dnd_apps>"
                 + "</notification-policy>";
-        when(mUserMangerService.isManagedProfile(10)).thenReturn(true);
+        when(mUm.isManagedProfile(10)).thenReturn(true);
         mService.readPolicyXml(
                 new BufferedInputStream(new ByteArrayInputStream(policyXml.getBytes())),
                 true,
@@ -2647,7 +2640,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 + "<service_listing approved=\"test\" user=\"10\" primary=\"true\" />"
                 + "</dnd_apps>"
                 + "</notification-policy>";
-        when(mUserMangerService.isManagedProfile(10)).thenReturn(false);
+        when(mUm.isManagedProfile(10)).thenReturn(false);
         mService.readPolicyXml(
                 new BufferedInputStream(new ByteArrayInputStream(policyXml.getBytes())),
                 true,
