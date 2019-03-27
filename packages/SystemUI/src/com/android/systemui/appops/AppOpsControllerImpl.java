@@ -204,21 +204,56 @@ public class AppOpsControllerImpl implements AppOpsController,
     }
 
     /**
-     * Does the app-op item refer to a user sensitive permission. Only user sensitive permission
-     * should be shown to the user by default.
+     * Does the app-op code refer to a user sensitive permission for the specified user id
+     * and package. Only user sensitive permission should be shown to the user by default.
      *
-     * @param item The item
+     * @param appOpCode The code of the app-op.
+     * @param uid The uid of the user.
+     * @param packageName The name of the package.
      *
      * @return {@code true} iff the app-op item is user sensitive
      */
-    private boolean isUserSensitive(AppOpItem item) {
-        String permission = AppOpsManager.opToPermission(item.getCode());
+    private boolean isUserSensitive(int appOpCode, int uid, String packageName) {
+        String permission = AppOpsManager.opToPermission(appOpCode);
         if (permission == null) {
             return false;
         }
         int permFlags = mContext.getPackageManager().getPermissionFlags(permission,
-                item.getPackageName(), UserHandle.getUserHandleForUid(item.getUid()));
+                packageName, UserHandle.getUserHandleForUid(uid));
         return (permFlags & PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED) != 0;
+    }
+
+    /**
+     * Does the app-op item refer to an operation that should be shown to the user.
+     * Only specficic ops (like SYSTEM_ALERT_WINDOW) or ops that refer to user sensitive
+     * permission should be shown to the user by default.
+     *
+     * @param item The item
+     *
+     * @return {@code true} iff the app-op item should be shown to the user
+     */
+    private boolean isUserVisible(AppOpItem item) {
+        return isUserVisible(item.getCode(), item.getUid(), item.getPackageName());
+    }
+
+
+    /**
+     * Does the app-op, uid and package name, refer to an operation that should be shown to the
+     * user. Only specficic ops (like {@link AppOpsManager.OP_SYSTEM_ALERT_WINDOW}) or
+     * ops that refer to user sensitive permission should be shown to the user by default.
+     *
+     * @param item The item
+     *
+     * @return {@code true} iff the app-op for should be shown to the user
+     */
+    private boolean isUserVisible(int appOpCode, int uid, String packageName) {
+        // currently OP_SYSTEM_ALERT_WINDOW does not correspond to a platform permission
+        // which may be user senstive, so for now always show it to the user.
+        if (appOpCode == AppOpsManager.OP_SYSTEM_ALERT_WINDOW) {
+            return true;
+        }
+
+        return isUserSensitive(appOpCode, uid, packageName);
     }
 
     /**
@@ -245,7 +280,7 @@ public class AppOpsControllerImpl implements AppOpsController,
             for (int i = 0; i < numActiveItems; i++) {
                 AppOpItem item = mActiveItems.get(i);
                 if ((userId == UserHandle.USER_ALL || UserHandle.getUserId(item.getUid()) == userId)
-                        && isUserSensitive(item)) {
+                        && isUserVisible(item)) {
                     list.add(item);
                 }
             }
@@ -255,7 +290,7 @@ public class AppOpsControllerImpl implements AppOpsController,
             for (int i = 0; i < numNotedItems; i++) {
                 AppOpItem item = mNotedItems.get(i);
                 if ((userId == UserHandle.USER_ALL || UserHandle.getUserId(item.getUid()) == userId)
-                        && isUserSensitive(item)) {
+                        && isUserVisible(item)) {
                     list.add(item);
                 }
             }
@@ -281,7 +316,8 @@ public class AppOpsControllerImpl implements AppOpsController,
     }
 
     private void notifySuscribers(int code, int uid, String packageName, boolean active) {
-        if (mCallbacksByCode.containsKey(code)) {
+        if (mCallbacksByCode.containsKey(code)
+                && isUserVisible(code, uid, packageName)) {
             for (Callback cb: mCallbacksByCode.get(code)) {
                 cb.onActiveStateChanged(code, uid, packageName, active);
             }
