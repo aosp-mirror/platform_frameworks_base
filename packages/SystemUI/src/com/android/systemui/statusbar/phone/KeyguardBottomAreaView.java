@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.phone;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 import static android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 
+import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
 import static com.android.systemui.tuner.LockscreenFragment.LOCKSCREEN_LEFT_BUTTON;
 import static com.android.systemui.tuner.LockscreenFragment.LOCKSCREEN_LEFT_UNLOCK;
 import static com.android.systemui.tuner.LockscreenFragment.LOCKSCREEN_RIGHT_BUTTON;
@@ -172,6 +173,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private boolean mDozing;
     private int mIndicationBottomMargin;
     private float mDarkAmount;
+    private int mBurnInXOffset;
+    private int mBurnInYOffset;
     private ActivityIntentHelper mActivityIntentHelper;
 
     public KeyguardBottomAreaView(Context context) {
@@ -252,6 +255,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mIndicationText = findViewById(R.id.keyguard_indication_text);
         mIndicationBottomMargin = getResources().getDimensionPixelSize(
                 R.dimen.keyguard_indication_margin_bottom);
+        mBurnInYOffset = getResources().getDimensionPixelSize(
+                R.dimen.default_burn_in_prevention_offset);
         updateCameraVisibility();
         mUnlockMethodCache = UnlockMethodCache.getInstance(getContext());
         mUnlockMethodCache.addListener(this);
@@ -321,6 +326,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         super.onConfigurationChanged(newConfig);
         mIndicationBottomMargin = getResources().getDimensionPixelSize(
                 R.dimen.keyguard_indication_margin_bottom);
+        mBurnInYOffset = getResources().getDimensionPixelSize(
+                R.dimen.default_burn_in_prevention_offset);
         MarginLayoutParams mlp = (MarginLayoutParams) mIndicationArea.getLayoutParams();
         if (mlp.bottomMargin != mIndicationBottomMargin) {
             mlp.bottomMargin = mIndicationBottomMargin;
@@ -564,8 +571,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             return;
         }
         mDarkAmount = darkAmount;
-        mIndicationController.setDarkAmount(darkAmount);
         mLockIcon.setDarkAmount(darkAmount);
+        dozeTimeTick();
     }
 
     /**
@@ -839,6 +846,20 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                 startFinishDozeAnimation();
             }
         }
+    }
+
+    public void dozeTimeTick() {
+        int burnInYOffset = getBurnInOffset(mBurnInYOffset * 2, false /* xAxis */)
+                - mBurnInYOffset;
+        mIndicationArea.setTranslationY(burnInYOffset * mDarkAmount);
+    }
+
+    public void setAntiBurnInOffsetX(int burnInXOffset) {
+        if (mBurnInXOffset == burnInXOffset) {
+            return;
+        }
+        mBurnInXOffset = burnInXOffset;
+        mIndicationArea.setTranslationX(burnInXOffset);
     }
 
     /**
