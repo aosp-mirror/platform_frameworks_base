@@ -17,12 +17,14 @@
 
 package com.android.internal.os;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.ShellCommand;
 
 import java.io.PrintStream;
 
 public abstract class BaseCommand {
 
+    @UnsupportedAppUsage
     final protected ShellCommand mArgs = new ShellCommand() {
         @Override public int onCommand(String cmd) {
             return 0;

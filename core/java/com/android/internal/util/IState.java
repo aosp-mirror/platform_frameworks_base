@@ -16,6 +16,7 @@
 
 package com.android.internal.util;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Message;
 
 /**
@@ -67,5 +68,6 @@ public interface IState {
      *
      * @return name of state.
      */
+    @UnsupportedAppUsage
     String getName();
 }

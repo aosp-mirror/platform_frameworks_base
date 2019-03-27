@@ -16,6 +16,7 @@
 
 package com.android.internal.policy;
 
+import android.annotation.UnsupportedAppUsage;
 import android.app.KeyguardManager;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
@@ -41,7 +42,9 @@ public class PhoneFallbackEventHandler implements FallbackEventHandler {
     private static String TAG = "PhoneFallbackEventHandler";
     private static final boolean DEBUG = false;
 
+    @UnsupportedAppUsage
     Context mContext;
+    @UnsupportedAppUsage
     View mView;
 
     AudioManager mAudioManager;
@@ -50,6 +53,7 @@ public class PhoneFallbackEventHandler implements FallbackEventHandler {
     TelephonyManager mTelephonyManager;
     MediaSessionManager mMediaSessionManager;
 
+    @UnsupportedAppUsage
     public PhoneFallbackEventHandler(Context context) {
         mContext = context;
     }
@@ -74,6 +78,7 @@ public class PhoneFallbackEventHandler implements FallbackEventHandler {
         }
     }
 
+    @UnsupportedAppUsage
     boolean onKeyDown(int keyCode, KeyEvent event) {
         /* ****************************************************************************
          * HOW TO DECIDE WHERE YOUR KEY HANDLING GOES.
@@ -207,6 +212,7 @@ public class PhoneFallbackEventHandler implements FallbackEventHandler {
                 && (getKeyguardManager().inKeyguardRestrictedInputMode() || dispatcher == null);
     }
 
+    @UnsupportedAppUsage
     boolean onKeyUp(int keyCode, KeyEvent event) {
         if (DEBUG) {
             Log.d(TAG, "up " + keyCode);
@@ -270,6 +276,7 @@ public class PhoneFallbackEventHandler implements FallbackEventHandler {
         return false;
     }
 
+    @UnsupportedAppUsage
     void startCallActivity() {
         sendCloseSystemWindows();
         Intent intent = new Intent(Intent.ACTION_CALL_BUTTON);
