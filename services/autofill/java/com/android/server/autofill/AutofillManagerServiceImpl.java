@@ -1149,6 +1149,7 @@ final class AutofillManagerServiceImpl
                 mRemoteAugmentedAutofillService.destroy();
                 mRemoteAugmentedAutofillService = null;
                 mRemoteAugmentedAutofillServiceInfo = null;
+                resetAugmentedAutofillWhitelistLocked();
             }
 
             final boolean available = isAugmentedAutofillServiceAvailableLocked();
@@ -1180,6 +1181,7 @@ final class AutofillManagerServiceImpl
      *
      * @return whether caller UID is the augmented autofill service for the user
      */
+    @GuardedBy("mLock")
     boolean setAugmentedAutofillWhitelistLocked(List<String> packages,
             List<ComponentName> activities, int callingUid) {
 
@@ -1267,8 +1269,18 @@ final class AutofillManagerServiceImpl
                 Slog.v(TAG, "whitelisting packages: " + packages + "and activities: " + components);
             }
             mAugmentedWhitelistHelper.setWhitelist(packages, components);
-            mRemoteAugmentedAutofillService = getRemoteAugmentedAutofillServiceLocked();
         }
+    }
+
+    /**
+     * Resets the augmented autofill whitelist.
+     */
+    @GuardedBy("mLock")
+    void resetAugmentedAutofillWhitelistLocked() {
+        if (mMaster.verbose) {
+            Slog.v(TAG, "resetting augmented autofill whitelist");
+        }
+        whitelistForAugmentedAutofillPackages(null, null);
     }
 
     private void sendStateToClients(boolean resetClient) {
