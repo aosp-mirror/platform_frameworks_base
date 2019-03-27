@@ -141,8 +141,10 @@
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Bellen via wifi"</string>
     <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Uit"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Voorkeur voor wifi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Voorkeur voor mobiel"</string>
+    <!-- no translation found for wfc_mode_wifi_preferred_summary (7335489823608689868) -->
+    <skip />
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (7081742743152286290) -->
+    <skip />
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Alleen wifi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: niet doorgeschakeld"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -228,7 +230,8 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"Bugrapport"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Sessie beëindigen"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Screenshot"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"Bugrapport genereren"</string>
+    <!-- no translation found for bugreport_title (5981047024855257269) -->
+    <skip />
     <string name="bugreport_message" msgid="398447048750350456">"Hiermee worden gegevens over de huidige status van je apparaat verzameld en als e-mail verzonden. Wanneer u een bugrapport start, duurt het even voordat het kan worden verzonden. Even geduld alstublieft."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interactief rapport"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Gebruik deze optie in de meeste situaties. Hiermee kun je de voortgang van het rapport bijhouden, meer gegevens over het probleem opgeven en screenshots maken. Mogelijk worden bepaalde minder vaak gebruikte gedeelten weggelaten (waarvoor het lang zou duren om een rapport te genereren)."</string>
@@ -281,9 +284,12 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Locatie"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"de locatie van dit apparaat openen"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toegang geven tot de locatie van dit apparaat?"</string>
-    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"De app heeft alleen toegang tot de locatie wanneer je de app gebruikt."</string>
-    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; altijd toegang geven tot de locatie van dit apparaat?"</string>
-    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"De app heeft altijd toegang tot de locatie, ook wanneer je de app niet gebruikt."</string>
+    <!-- no translation found for permgrouprequestdetail_location (1347189607421252902) -->
+    <skip />
+    <!-- no translation found for permgroupbackgroundrequest_location (5039063878675613235) -->
+    <skip />
+    <!-- no translation found for permgroupbackgroundrequestdetail_location (4597006851453417387) -->
+    <skip />
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Agenda"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"toegang krijgen tot je agenda"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toegang geven tot je agenda?"</string>
@@ -316,7 +322,10 @@
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toegang geven tot je muziek?"</string>
     <string name="permgrouplab_visual" msgid="6477382108771145134">"Foto\'s en video\'s"</string>
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"toegang tot je foto\'s en video\'s"</string>
-    <string name="permgrouprequest_visual" msgid="3043752127595243314">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toegang geven tot je foto\'s en video\'s, waaronder getagde locaties?"</string>
+    <!-- no translation found for permgrouprequest_visual (4926581398380334943) -->
+    <skip />
+    <!-- no translation found for permgrouprequestdetail_visual (3827237829805228971) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Content van vensters ophalen"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"De content inspecteren van een venster waarmee je interactie hebt."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"\'Verkennen via aanraking\' inschakelen"</string>
@@ -509,8 +518,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Hiermee kan de app communiceren met NFC-tags (Near Field Communication), kaarten en lezers."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"je schermvergrendeling uitschakelen"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Hiermee kan de app de toetsenblokkering en bijbehorende wachtwoordbeveiliging uitschakelen. Zo kan de telefoon de toetsenblokkering uitschakelen wanneer je wordt gebeld en de toetsenblokkering weer inschakelen als het gesprek is beëindigd."</string>
-    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"complexiteit van schermvergrendeling opvragen"</string>
-    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"Hiermee krijgt de app toestemming om het complexiteitsniveau van de schermvergrendeling te achterhalen (hoog, midden, laag of geen). Dat geeft een indicatie van het mogelijke lengtebereik en type van de schermvergrendeling. De app kan gebruikers ook voorstellen de schermvergrendeling naar een bepaald niveau te updaten, maar gebruikers kunnen dit altijd negeren en de app verlaten. De schermvergrendeling wordt niet opgeslagen in platte tekst, zodat de app het precieze wachtwoord niet weet."</string>
+    <!-- no translation found for permlab_requestPasswordComplexity (202650535669249674) -->
+    <skip />
+    <!-- no translation found for permdesc_requestPasswordComplexity (4730994229754212347) -->
+    <skip />
     <string name="permlab_useBiometric" msgid="8837753668509919318">"biometrische hardware gebruiken"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Hiermee kan de app biometrische hardware gebruiken voor verificatie"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"Vingerafdrukhardware beheren"</string>
@@ -565,37 +576,59 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Hiermee kan de app methoden aanroepen om gezichtstemplates toe te voegen en te verwijderen voor gebruik."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"hardware voor gezichtsherkenning gebruiken"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Hiermee kan de app hardware voor gezichtsherkenning gebruiken voor verificatie"</string>
-    <string name="face_acquired_insufficient" msgid="5901287247766106330">"Kan gezicht niet verwerken. Probeer het opnieuw."</string>
-    <string name="face_acquired_too_bright" msgid="610606792381297174">"Gezicht is te helder. Probeer bij minder licht."</string>
-    <string name="face_acquired_too_dark" msgid="7229162716976778371">"Gezicht is te donker. Laat meer licht toe."</string>
-    <string name="face_acquired_too_close" msgid="1980310037427755293">"Houd de sensor verder weg van je gezicht."</string>
-    <string name="face_acquired_too_far" msgid="4494571381828850007">"Houd de sensor dichter bij je gezicht."</string>
-    <string name="face_acquired_too_high" msgid="228411096134808372">"Beweeg de sensor omhoog."</string>
-    <string name="face_acquired_too_low" msgid="4539774649296349109">"Beweeg de sensor omlaag."</string>
-    <string name="face_acquired_too_right" msgid="1650292067226118760">"Beweeg de sensor naar rechts."</string>
-    <string name="face_acquired_too_left" msgid="2712489669456176505">"Beweeg de sensor naar links."</string>
-    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Kijk naar de sensor."</string>
-    <string name="face_acquired_not_detected" msgid="5707782294589511391">"Geen gezicht gedetecteerd."</string>
-    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"Te veel beweging."</string>
+    <!-- no translation found for face_acquired_insufficient (2767330364802375742) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_bright (5005650874582450967) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_dark (1966194696381394616) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_close (1401011882624272753) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_far (1210969240069012510) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_high (3362395713403348013) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_low (488983581737550912) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_right (941726879175375970) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_left (5873592047381190672) -->
+    <skip />
+    <!-- no translation found for face_acquired_poor_gaze (8471716624377228327) -->
+    <skip />
+    <!-- no translation found for face_acquired_not_detected (4885504661626728809) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_much_motion (3149332171102108851) -->
+    <skip />
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Registreer je gezicht opnieuw."</string>
-    <string name="face_acquired_too_different" msgid="5553210341111255124">"Ander gezicht gedetecteerd."</string>
+    <!-- no translation found for face_acquired_too_different (7663983770123789694) -->
+    <skip />
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"Lijkt te veel op elkaar. Verander je pose."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"Kijk rechter in de camera."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"Kijk rechter in de camera."</string>
+    <!-- no translation found for face_acquired_pan_too_extreme (1852495480382773759) -->
+    <skip />
+    <!-- no translation found for face_acquired_tilt_too_extreme (1290820400317982049) -->
+    <skip />
     <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Houd je hoofd verticaal recht."</string>
-    <string name="face_acquired_obscured" msgid="3055077697850272097">"Laat je gezicht zien."</string>
+    <!-- no translation found for face_acquired_obscured (5747521031647744553) -->
+    <skip />
+    <!-- no translation found for face_acquired_sensor_dirty (364493868630891300) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"Hardware voor gezichtsherkenning niet beschikbaar."</string>
-    <string name="face_error_timeout" msgid="4014326147867150054">"Time-out voor gezicht bereikt. Probeer opnieuw."</string>
+    <!-- no translation found for face_error_timeout (2605673935810019129) -->
+    <skip />
     <string name="face_error_no_space" msgid="8224993703466381314">"Gezicht kan niet worden opgeslagen."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Bewerking voor gezichtsherkenning geannuleerd."</string>
     <string name="face_error_user_canceled" msgid="8943921120862164539">"Gezichtsverificatie geannuleerd door gebruiker."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Te veel pogingen. Probeer het later opnieuw."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Te veel pogingen. Gezichtsherkenning inactief."</string>
-    <string name="face_error_unable_to_process" msgid="238761109287767270">"Probeer het opnieuw."</string>
-    <string name="face_error_not_enrolled" msgid="9166792142679691323">"Geen gezicht geregistreerd."</string>
-    <string name="face_error_hw_not_present" msgid="916085883581450331">"Dit apparaat heeft geen sensor voor gezichtsherkenning."</string>
+    <!-- no translation found for face_error_unable_to_process (4940944939691171539) -->
+    <skip />
+    <!-- no translation found for face_error_not_enrolled (4245760276260427472) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (5296043240874659926) -->
+    <skip />
     <string name="face_name_template" msgid="7004562145809595384">"Gezicht <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1213,9 +1246,16 @@
     <string name="new_app_action" msgid="6694851182870774403">"<xliff:g id="NEW_APP">%1$s</xliff:g> openen"</string>
     <string name="new_app_description" msgid="5894852887817332322">"<xliff:g id="OLD_APP">%1$s</xliff:g> wordt gesloten zonder op te slaan"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> heeft geheugenlimiet overschreden"</string>
+    <!-- no translation found for dump_heap_ready_notification (1162196579925048701) -->
+    <skip />
     <string name="dump_heap_notification_detail" msgid="3993078784053054141">"Heap dump verzameld. Tik om te delen."</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Heap dump delen?"</string>
-    <string name="dump_heap_text" msgid="4809417337240334941">"Het proces <xliff:g id="PROC">%1$s</xliff:g> heeft de procesgeheugenlimiet overschreden met <xliff:g id="SIZE">%2$s</xliff:g>. Een heap dump is voor u beschikbaar om te delen met de betreffende ontwikkelaar. Let op: Deze heap dump kan persoonsgegevens bevatten waartoe de app toegang heeft."</string>
+    <!-- no translation found for dump_heap_text (8546022920319781701) -->
+    <skip />
+    <!-- no translation found for dump_heap_system_text (1205466256312104134) -->
+    <skip />
+    <!-- no translation found for dump_heap_ready_text (6759394977904051000) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"Een actie voor tekst selecteren"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Belvolume"</string>
     <string name="volume_music" msgid="5421651157138628171">"Mediavolume"</string>
@@ -1254,8 +1294,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Tik om alle netwerken te bekijken"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Verbinding maken"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Alle netwerken"</string>
-    <string name="wifi_suggestion_title" msgid="8951405130379148709">"Er is een wifi-netwerk beschikbaar dat is voorgesteld door <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_content" msgid="2658317015552324848">"Wil je verbinding maken met netwerken die worden voorgesteld door <xliff:g id="NAME">%s</xliff:g>?"</string>
+    <!-- no translation found for wifi_suggestion_title (9099832833531486167) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (5883181205841582873) -->
+    <skip />
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Ja"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Nee"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wifi wordt automatisch ingeschakeld"</string>
@@ -1267,9 +1309,14 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Inloggen bij netwerk"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Wifi-netwerk heeft geen internettoegang"</string>
+    <!-- no translation found for wifi_no_internet (5198100389964214865) -->
+    <skip />
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Tik voor opties"</string>
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Verbonden"</string>
+    <!-- no translation found for network_partial_connectivity (7774883385494762741) -->
+    <skip />
+    <!-- no translation found for network_partial_connectivity_detailed (1959697814165325217) -->
+    <skip />
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Wijzigingen in je hotspot-instellingen"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Je hotspot-band is gewijzigd."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Dit apparaat biedt geen ondersteuning voor je voorkeur voor alleen 5 GHz. In plaats daarvan gebruikt dit apparaat de 5-GHz-band wanneer deze beschikbaar is."</string>
@@ -1354,6 +1401,10 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-foutopsporing verbonden"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"Tik om USB-foutopsporing uit te schakelen"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Selecteer deze optie om USB-foutopsporing uit te schakelen."</string>
+    <!-- no translation found for test_harness_mode_notification_title (2216359742631914387) -->
+    <skip />
+    <!-- no translation found for test_harness_mode_notification_message (1343197173054407119) -->
+    <skip />
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Vloeistof of vuil in USB-poort"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB-poort is automatisch uitgeschakeld. Tik voor meer informatie."</string>
     <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"Veilig om USB-poort te gebruiken"</string>
@@ -1905,8 +1956,6 @@
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Ontgrendel werkprofiel met tik"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Verbonden met <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Tik om bestanden te bekijken"</string>
-    <string name="pin_target" msgid="3052256031352291362">"Vastzetten"</string>
-    <string name="unpin_target" msgid="3556545602439143442">"Losmaken"</string>
     <string name="app_info" msgid="6856026610594615344">"App-info"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"Demo starten…"</string>
@@ -1997,6 +2046,22 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"Informatiemelding voor routinemodus"</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"De batterij raakt mogelijk leeg voordat deze normaal gesproken wordt opgeladen"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Batterijbesparing is geactiveerd om de batterijduur te verlengen"</string>
+    <!-- no translation found for battery_saver_notification_channel_name (2083316159716201806) -->
+    <skip />
+    <!-- no translation found for battery_saver_sticky_disabled_notification_title (6376147579378764641) -->
+    <skip />
+    <!-- no translation found for battery_saver_sticky_disabled_notification_summary (8090192609249817945) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (2960978289873161288) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (7555713825806482451) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (5954873381559605660) -->
+    <skip />
+    <!-- no translation found for battery_saver_off_notification_summary (1374222493681267143) -->
+    <skip />
+    <!-- no translation found for battery_saver_off_alternative_notification_summary (4340727818546508436) -->
+    <skip />
     <string name="mime_type_folder" msgid="7111951698626315204">"Map"</string>
     <string name="mime_type_apk" msgid="5518003630972506900">"Android-app"</string>
     <string name="mime_type_generic" msgid="6833871596845900027">"Bestand"</string>

@@ -141,8 +141,10 @@
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Wi-Fi дуудлага"</string>
     <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Идэвхгүй"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi давуу эрхтэй"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Мобайл давуу эрхтэй"</string>
+    <!-- no translation found for wfc_mode_wifi_preferred_summary (7335489823608689868) -->
+    <skip />
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (7081742743152286290) -->
+    <skip />
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Зөвхөн Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: дамжуулагдаагүй"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -228,7 +230,8 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"Алдаа мэдээлэх"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Гаргах харилцан үйлдэл"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Дэлгэцийн зураг дарах"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"Алдааны тайлан авах"</string>
+    <!-- no translation found for bugreport_title (5981047024855257269) -->
+    <skip />
     <string name="bugreport_message" msgid="398447048750350456">"Энэ таны төхөөрөмжийн одоогийн статусын талаарх мэдээллийг цуглуулах ба имэйл мессеж болгон илгээнэ. Алдааны мэдэгдлээс эхэлж илгээхэд бэлэн болоход хэсэг хугацаа зарцуулагдана тэвчээртэй байна уу."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Интерактив тайлан"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Үүнийг ихэнх тохиолдолд ашиглана уу. Энэ нь танд тайлангийн явцыг хянах, асуудлын талаар дэлгэрэнгүй мэдээлэл оруулах болон дэлгэцийн агшин авахыг зөвшөөрнө. Мөн тайлагнахад урт хугацаа шаарддаг таны бага ашигладаг зарим хэсгийг алгасах болно."</string>
@@ -281,9 +284,12 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Байршил"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"энэ төхөөрөмжийн байршилд хандалт хийх"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-д энэ төхөөрөмжийн байршилд хандахыг зөвшөөрөх үү?"</string>
-    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"Та аппыг зөвхөн хэрэглэж байгаа үед апп нь байршилд хандах болно."</string>
-    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-д энэ төхөөрөмжийн байршилд хандахыг байнга зөвшөөрөх үү?"</string>
-    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"Та энэ аппыг хэрэглээгүй байсан ч апп нь байршилд үргэлж хандах болно."</string>
+    <!-- no translation found for permgrouprequestdetail_location (1347189607421252902) -->
+    <skip />
+    <!-- no translation found for permgroupbackgroundrequest_location (5039063878675613235) -->
+    <skip />
+    <!-- no translation found for permgroupbackgroundrequestdetail_location (4597006851453417387) -->
+    <skip />
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Хуанли"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"Хуанли руу хандах"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-д таны календарьт хандахыг зөвшөөрөх үү?"</string>
@@ -316,7 +322,10 @@
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-д таны хөгжимд хандахыг зөвшөөрөх үү?"</string>
     <string name="permgrouplab_visual" msgid="6477382108771145134">"Зураг &amp; видео"</string>
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"зураг &amp; видеондоо хандах"</string>
-    <string name="permgrouprequest_visual" msgid="3043752127595243314">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-д таны зураг, видео болон шошголсон байршилд хандахыг зөвшөөрөх үү?"</string>
+    <!-- no translation found for permgrouprequest_visual (4926581398380334943) -->
+    <skip />
+    <!-- no translation found for permgrouprequestdetail_visual (3827237829805228971) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Цонхны агуулгыг авах"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Таны харилцан үйлчлэх цонхны контентоос шалгах."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Хүрч танихыг асаах"</string>
@@ -509,8 +518,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Апп нь Ойролцоо Талбарын Холболт(NFC) таг, карт, болон уншигчтай холбогдох боломжтой."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"дэлгэцний түгжээг идэвхгүй болгох"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Апп нь түгжээ болон бусад холбоотой нууц үгийн аюулгүй байдлыг идэвхгүй болгох боломжтой. Жишээ нь бол утас нь дуудлага ирэх үед түгжээг идэвхгүй болгох ба дуудлага дуусахад буцаан идэвхтэй болгодог."</string>
-    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"дэлгэцийн түгжээний төвөгтэй байдлын хүсэлт тавих"</string>
-    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"Аппад дэлгэцийн түгжээний боломжтой уртын хэмжээ болон төрлийг заадаг дэлгэцийн түгжээний төвөгтэй байдлын түвшнийг (өндөр, дундаж, бага эсвэл байхгүй) мэдэж авахыг зөвшөөрдөг. Түүнчлэн, апп хэрэглэгчдэд дэлгэцийн түгжээг тодорхой түвшинд шинэчлэхийг санал болгодог хэдий ч хэрэглэгч үүнийг чөлөөтэй үл хэрэгсэж, орхих боломжтой. Дэлгэцийн түгжээг ил бичвэрээр хадгалдаггүй тул апп тодорхой нууц үгийг мэддэггүй болохыг анхаарна уу."</string>
+    <!-- no translation found for permlab_requestPasswordComplexity (202650535669249674) -->
+    <skip />
+    <!-- no translation found for permdesc_requestPasswordComplexity (4730994229754212347) -->
+    <skip />
     <string name="permlab_useBiometric" msgid="8837753668509919318">"биометрийн техник хангамжийг ашиглах"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Aппад биометрийн техник хангамжийг баталгаажуулалтад ашиглахыг зөвшөөрдөг"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"хурууны хээний програм хангамжийг удирдах"</string>
@@ -565,37 +576,59 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Аппад царайны загварыг ашиглахын тулд нэмэх эсвэл устгах аргыг идэвхжүүлэхийг зөвшөөрдөг."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"царай танилтын техник хангамжийг ашиглах"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Аппад царай танилтын техник хангамжийг баталгаажуулалтад ашиглахыг зөвшөөрдөг"</string>
-    <string name="face_acquired_insufficient" msgid="5901287247766106330">"Царайг таньж чадсангүй. Дахин оролдоно уу."</string>
-    <string name="face_acquired_too_bright" msgid="610606792381297174">"Царай хэт цайвар байна. Гэрэл багатай газар оролдож үзнэ үү."</string>
-    <string name="face_acquired_too_dark" msgid="7229162716976778371">"Царай хэт бараан байна. Гэрэлтэй газар туршиж үзнэ үү."</string>
-    <string name="face_acquired_too_close" msgid="1980310037427755293">"Мэдрэгчийг царайнаас холдуулна уу."</string>
-    <string name="face_acquired_too_far" msgid="4494571381828850007">"Mэдрэгчийг царайтай ойртуулна уу."</string>
-    <string name="face_acquired_too_high" msgid="228411096134808372">"Мэдрэгчийг дээшлүүлнэ үү."</string>
-    <string name="face_acquired_too_low" msgid="4539774649296349109">"Mэдрэгчийг доошлуулна уу."</string>
-    <string name="face_acquired_too_right" msgid="1650292067226118760">"Мэдрэгчийг баруун тийш болгоно уу."</string>
-    <string name="face_acquired_too_left" msgid="2712489669456176505">"Мэдрэгчийг зүүн тийш болгоно уу."</string>
-    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Мэдрэгч рүү харна уу."</string>
-    <string name="face_acquired_not_detected" msgid="5707782294589511391">"Царай олдсонгүй."</string>
-    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"Хэт их хөдөлгөөнтэй байна."</string>
+    <!-- no translation found for face_acquired_insufficient (2767330364802375742) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_bright (5005650874582450967) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_dark (1966194696381394616) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_close (1401011882624272753) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_far (1210969240069012510) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_high (3362395713403348013) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_low (488983581737550912) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_right (941726879175375970) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_left (5873592047381190672) -->
+    <skip />
+    <!-- no translation found for face_acquired_poor_gaze (8471716624377228327) -->
+    <skip />
+    <!-- no translation found for face_acquired_not_detected (4885504661626728809) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_much_motion (3149332171102108851) -->
+    <skip />
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Нүүрээ дахин бүртгүүлнэ үү."</string>
-    <string name="face_acquired_too_different" msgid="5553210341111255124">"Өөр нүүр илрүүллээ."</string>
+    <!-- no translation found for face_acquired_too_different (7663983770123789694) -->
+    <skip />
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"Хэт адилхан байгаа тул байрлалаа өөрчилнө үү."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"Камер луу аль болох эгц харна уу."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"Камер луу аль болох эгц харна уу."</string>
+    <!-- no translation found for face_acquired_pan_too_extreme (1852495480382773759) -->
+    <skip />
+    <!-- no translation found for face_acquired_tilt_too_extreme (1290820400317982049) -->
+    <skip />
     <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Толгойгоо босоо чиглэлд тэгшилнэ үү."</string>
-    <string name="face_acquired_obscured" msgid="3055077697850272097">"Нүүрээ ил гаргана уу."</string>
+    <!-- no translation found for face_acquired_obscured (5747521031647744553) -->
+    <skip />
+    <!-- no translation found for face_acquired_sensor_dirty (364493868630891300) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"Царайны техник хангамж боломжгүй байна."</string>
-    <string name="face_error_timeout" msgid="4014326147867150054">"Царай таниулах хугацаа дууслаа. Дахин оролдоно уу."</string>
+    <!-- no translation found for face_error_timeout (2605673935810019129) -->
+    <skip />
     <string name="face_error_no_space" msgid="8224993703466381314">"Царайг хадгалах боломжгүй байна."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Царайны үйл ажиллагааг цуцаллаа."</string>
     <string name="face_error_user_canceled" msgid="8943921120862164539">"Хэрэглэгч царайгаар баталгаажуулахыг цуцалсан байна."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Хэт олон удаа оролдлоо. Дараа дахин оролдоно уу."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Хэт олон удаа оролдлоо. Царай танилтыг идэвхгүй болголоо."</string>
-    <string name="face_error_unable_to_process" msgid="238761109287767270">"Дахин оролдоно уу."</string>
-    <string name="face_error_not_enrolled" msgid="9166792142679691323">"Бүртгүүлсэн царай алга."</string>
-    <string name="face_error_hw_not_present" msgid="916085883581450331">"Энэ төхөөрөмжид нүүр баталгаажуулах мэдрэгч алга."</string>
+    <!-- no translation found for face_error_unable_to_process (4940944939691171539) -->
+    <skip />
+    <!-- no translation found for face_error_not_enrolled (4245760276260427472) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (5296043240874659926) -->
+    <skip />
     <string name="face_name_template" msgid="7004562145809595384">"Царай <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1213,9 +1246,16 @@
     <string name="new_app_action" msgid="6694851182870774403">"<xliff:g id="NEW_APP">%1$s</xliff:g>-г нээх"</string>
     <string name="new_app_description" msgid="5894852887817332322">"<xliff:g id="OLD_APP">%1$s</xliff:g>-г хадгалахгүйгээр хаана"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> санах ойн хязгаараас давсан"</string>
+    <!-- no translation found for dump_heap_ready_notification (1162196579925048701) -->
+    <skip />
     <string name="dump_heap_notification_detail" msgid="3993078784053054141">"Багтаамж хэтэрсэн байна. Хуваалцахын тулд товшино уу."</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Хэт их хуримтлагдсан мэдээллийг хуваалцах уу?"</string>
-    <string name="dump_heap_text" msgid="4809417337240334941">"Энэ үйл явц <xliff:g id="PROC">%1$s</xliff:g> нь үйл ажиллагааны санах ойн хязгаар болох <xliff:g id="SIZE">%2$s</xliff:g> хэмжээг давсан байна. Та хэт их хуримтлагдсан мэдээллийг тэдгээрийн өөрсдийнх нь хөгжүүлэгчтэй хуваалцах боломжтой. Болгоомжтой байгаарай: энэхүү хэт их хуримтлагдсан мэдээлэлд аппликейшнаас нэвтрэх боломжтой таны хувийн мэдээлэл агуулагдсан байж болно."</string>
+    <!-- no translation found for dump_heap_text (8546022920319781701) -->
+    <skip />
+    <!-- no translation found for dump_heap_system_text (1205466256312104134) -->
+    <skip />
+    <!-- no translation found for dump_heap_ready_text (6759394977904051000) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"Текст илгээх үйлдлийг сонгох"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Хонхны аяны хэмжээ"</string>
     <string name="volume_music" msgid="5421651157138628171">"Медиа дууны түвшин"</string>
@@ -1254,8 +1294,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Бүх сүлжээг харахын тулд товшино уу"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Холбогдох"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Бүх сүлжээ"</string>
-    <string name="wifi_suggestion_title" msgid="8951405130379148709">"<xliff:g id="NAME">%s</xliff:g>-н санал болгож буй Wi-Fi сүлжээ боломжтой байна"</string>
-    <string name="wifi_suggestion_content" msgid="2658317015552324848">"Та <xliff:g id="NAME">%s</xliff:g>-н санал болгож буй сүлжээнд холбогдох уу?"</string>
+    <!-- no translation found for wifi_suggestion_title (9099832833531486167) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (5883181205841582873) -->
+    <skip />
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Тийм"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Үгүй"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi автоматаар асна"</string>
@@ -1267,9 +1309,14 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Сүлжээнд нэвтэрнэ үү"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi-д интернет хандалт алга"</string>
+    <!-- no translation found for wifi_no_internet (5198100389964214865) -->
+    <skip />
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Сонголт хийхийн тулд товшино уу"</string>
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Холбогдсон"</string>
+    <!-- no translation found for network_partial_connectivity (7774883385494762741) -->
+    <skip />
+    <!-- no translation found for network_partial_connectivity_detailed (1959697814165325217) -->
+    <skip />
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Таны сүлжээний цэгийн тохиргооны өөрчлөлт"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Таны сүлжээний цэгийн зурвасыг өөрчилсөн."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Энэ төхөөрөмж таны \"зөвхөн 5Гц\" гэсэн давуу сонголтыг дэмждэггүй. Үүний оронд энэ төхөөрөмж 5Гц зурвасыг боломжтой үед нь ашиглах болно."</string>
@@ -1354,6 +1401,10 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB дебаг холбогдсон"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"USB дебаг хийхийг унтраахын тулд товшино уу"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB дебаг хийхийг идэвхгүй болгох бол сонгоно уу."</string>
+    <!-- no translation found for test_harness_mode_notification_title (2216359742631914387) -->
+    <skip />
+    <!-- no translation found for test_harness_mode_notification_message (1343197173054407119) -->
+    <skip />
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB порт дээрх шингэн зүйл эсвэл бохирдол"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB портыг автоматаар идэвхгүй болгосон байна. Дэлгэрэнгүй мэдээлэл авахын тулд товшино уу."</string>
     <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"USB портыг ашиглахад аюулгүй байна"</string>
@@ -1905,8 +1956,6 @@
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Ажлын профайлын түгжээг тайлахын тулд дарна уу"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g>-д холбогдсон"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Файлыг үзэхийн тулд дарна уу"</string>
-    <string name="pin_target" msgid="3052256031352291362">"PIN"</string>
-    <string name="unpin_target" msgid="3556545602439143442">"Unpin"</string>
     <string name="app_info" msgid="6856026610594615344">"Апп-н мэдээлэл"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"Жишээг эхлүүлж байна…"</string>
@@ -1997,6 +2046,22 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"Хэвшлийн горимын мэдээллийн мэдэгдэл"</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Батарей ихэвчлэн цэнэглэдэг хугацаанаас өмнө дуусаж болзошгүй"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Батарейны ажиллах хугацааг уртасгахын тулд Батарей хэмнэгчийг идэвхжүүллээ"</string>
+    <!-- no translation found for battery_saver_notification_channel_name (2083316159716201806) -->
+    <skip />
+    <!-- no translation found for battery_saver_sticky_disabled_notification_title (6376147579378764641) -->
+    <skip />
+    <!-- no translation found for battery_saver_sticky_disabled_notification_summary (8090192609249817945) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (2960978289873161288) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (7555713825806482451) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (5954873381559605660) -->
+    <skip />
+    <!-- no translation found for battery_saver_off_notification_summary (1374222493681267143) -->
+    <skip />
+    <!-- no translation found for battery_saver_off_alternative_notification_summary (4340727818546508436) -->
+    <skip />
     <string name="mime_type_folder" msgid="7111951698626315204">"Фолдер"</string>
     <string name="mime_type_apk" msgid="5518003630972506900">"Андройд апп"</string>
     <string name="mime_type_generic" msgid="6833871596845900027">"Файл"</string>
