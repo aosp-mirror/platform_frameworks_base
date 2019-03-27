@@ -266,6 +266,7 @@
     <protected-broadcast android:name="android.intent.action.HEADSET_PLUG" />
     <protected-broadcast android:name="android.media.action.HDMI_AUDIO_PLUG" />
     <protected-broadcast android:name="android.media.action.MICROPHONE_MUTE_CHANGED" />
+    <protected-broadcast android:name="android.media.action.SPEAKERPHONE_STATE_CHANGED" />
 
     <protected-broadcast android:name="android.media.AUDIO_BECOMING_NOISY" />
     <protected-broadcast android:name="android.media.RINGER_MODE_CHANGED" />
