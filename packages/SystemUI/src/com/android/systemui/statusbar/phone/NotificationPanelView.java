@@ -3040,6 +3040,7 @@ public class NotificationPanelView extends PanelView implements
         }
 
         ViewGroup bouncerContainer = mBouncer.getLockIconContainer();
+        ViewGroup bottomContainer = mKeyguardBottomArea.getLockIconContainer();
         LockIcon lockIcon = mKeyguardBottomArea.getLockIcon();
 
         if (mBouncer.isAnimatingAway()) {
@@ -3051,9 +3052,21 @@ public class NotificationPanelView extends PanelView implements
             return;
         }
 
+        // Lock icon needs to be re-parented in case of a scrimmed bouncer,
+        // otherwise it would be under the scrim.
+        if (mBouncer.isScrimmed() && bouncerContainer != null
+                && lockIcon.getParent() != bouncerContainer) {
+            ((ViewGroup) lockIcon.getParent()).removeView(lockIcon);
+            bouncerContainer.addView(lockIcon);
+        } else if (!mBouncer.isScrimmed() && bottomContainer != null
+                && lockIcon.getParent() != bottomContainer) {
+            ((ViewGroup) lockIcon.getParent()).removeView(lockIcon);
+            bottomContainer.addView(lockIcon);
+        }
+
         float translation = 0;
-        if (bouncerContainer != null) {
-            float bottomAreaContainerY = getCommonTop(lockIcon);
+        if (bouncerContainer != null && bottomContainer != null && !mBouncer.isScrimmed()) {
+            float bottomAreaContainerY = getCommonTop(bottomContainer);
             float bouncerLockY = getCommonTop(bouncerContainer);
             if (bouncerLockY < bottomAreaContainerY) {
                 translation = bouncerLockY - bottomAreaContainerY;

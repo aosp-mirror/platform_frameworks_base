@@ -120,7 +120,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
 
     @Test
     public void onPanelExpansionChanged_neverHidesScrimmedBouncer() {
-        when(mBouncer.isShowingScrimmed()).thenReturn(true);
+        when(mBouncer.isShowing()).thenReturn(true);
+        when(mBouncer.isScrimmed()).thenReturn(true);
         mStatusBarKeyguardViewManager.onPanelExpansionChanged(0.5f /* expansion */,
                 true /* tracking */);
         verify(mBouncer).setExpansion(eq(KeyguardBouncer.EXPANSION_VISIBLE));

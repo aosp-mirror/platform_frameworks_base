@@ -122,6 +122,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private KeyguardAffordanceView mRightAffordanceView;
     private KeyguardAffordanceView mLeftAffordanceView;
     private LockIcon mLockIcon;
+    private ViewGroup mLockIconContainer;
     private ViewGroup mIndicationArea;
     private TextView mEnterpriseDisclosure;
     private TextView mIndicationText;
@@ -244,6 +245,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mRightAffordanceView = findViewById(R.id.camera_button);
         mLeftAffordanceView = findViewById(R.id.left_button);
         mLockIcon = findViewById(R.id.lock_icon);
+        mLockIconContainer = findViewById(R.id.lock_icon_container);
         mIndicationArea = findViewById(R.id.keyguard_indication_area);
         mEnterpriseDisclosure = findViewById(
                 R.id.keyguard_indication_enterprise_disclosure);
@@ -655,6 +657,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
     public LockIcon getLockIcon() {
         return mLockIcon;
+    }
+
+    public ViewGroup getLockIconContainer() {
+        return mLockIconContainer;
     }
 
     public View getIndicationArea() {
