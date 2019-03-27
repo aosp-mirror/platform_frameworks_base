@@ -384,9 +384,11 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
             }
             if (shouldAutoBubbleForFlags(mContext, entry) || shouldBubble(entry)) {
                 // TODO: handle group summaries
-                // It's a new notif, it shows in the shade and as a bubble
                 entry.setIsBubble(true);
-                entry.setShowInShadeWhenBubble(true);
+                boolean suppressNotification = entry.getBubbleMetadata() != null
+                        && entry.getBubbleMetadata().getSuppressInitialNotification()
+                        && isForegroundApp(entry.notification.getPackageName());
+                entry.setShowInShadeWhenBubble(!suppressNotification);
             }
         }
 
