@@ -2012,6 +2012,10 @@ message WifiUsabilityStatsEntry {
 
   // Whether the primary registered cell of current entry is same as that of previous entry
   optional bool is_same_registered_cell = 33;
+
+  // The device mobility state
+  optional DeviceMobilityStatePnoScanStats.DeviceMobilityState
+          device_mobility_state = 34;
 }
 
 message WifiUsabilityStats {
