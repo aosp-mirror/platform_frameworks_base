@@ -200,8 +200,8 @@ public class LocationManagerService extends ILocationManager.Stub {
     private GnssMeasurementCorrectionsProvider mGnssMeasurementCorrectionsProvider;
     private GnssNavigationMessageProvider mGnssNavigationMessageProvider;
     @GuardedBy("mLock")
-    private String mLocationControllerExtraPackage;
-    private boolean mLocationControllerExtraPackageEnabled;
+    private String mExtraLocationControllerPackage;
+    private boolean mExtraLocationControllerPackageEnabled;
     private IGpsGeofenceHardware mGpsGeofenceProxy;
 
     // list of currently active providers
@@ -3045,35 +3045,35 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public void setLocationControllerExtraPackage(String packageName) {
+    public void setExtraLocationControllerPackage(String packageName) {
         mContext.enforceCallingPermission(Manifest.permission.LOCATION_HARDWARE,
                 Manifest.permission.LOCATION_HARDWARE + " permission required");
         synchronized (mLock) {
-            mLocationControllerExtraPackage = packageName;
+            mExtraLocationControllerPackage = packageName;
         }
     }
 
     @Override
-    public String getLocationControllerExtraPackage() {
+    public String getExtraLocationControllerPackage() {
         synchronized (mLock) {
-            return mLocationControllerExtraPackage;
+            return mExtraLocationControllerPackage;
         }
     }
 
     @Override
-    public void setLocationControllerExtraPackageEnabled(boolean enabled) {
+    public void setExtraLocationControllerPackageEnabled(boolean enabled) {
         mContext.enforceCallingPermission(Manifest.permission.LOCATION_HARDWARE,
                 Manifest.permission.LOCATION_HARDWARE + " permission required");
         synchronized (mLock) {
-            mLocationControllerExtraPackageEnabled = enabled;
+            mExtraLocationControllerPackageEnabled = enabled;
         }
     }
 
     @Override
-    public boolean isLocationControllerExtraPackageEnabled() {
+    public boolean isExtraLocationControllerPackageEnabled() {
         synchronized (mLock) {
-            return mLocationControllerExtraPackageEnabled
-                    && (mLocationControllerExtraPackage != null);
+            return mExtraLocationControllerPackageEnabled
+                    && (mExtraLocationControllerPackage != null);
         }
     }
 
@@ -3610,9 +3610,9 @@ public class LocationManagerService extends ILocationManager.Stub {
                 pw.println("  mBlacklist=null");
             }
 
-            if (mLocationControllerExtraPackage != null) {
-                pw.println(" Location controller extra package: " + mLocationControllerExtraPackage
-                        + " enabled: " + mLocationControllerExtraPackageEnabled);
+            if (mExtraLocationControllerPackage != null) {
+                pw.println(" Location controller extra package: " + mExtraLocationControllerPackage
+                        + " enabled: " + mExtraLocationControllerPackageEnabled);
             }
 
             if (!mBackgroundThrottlePackageWhitelist.isEmpty()) {
