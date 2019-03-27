@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.AccessNetworkConstants.TransportType;
@@ -38,6 +39,7 @@ import java.util.stream.Collectors;
  * @hide
  */
 @SystemApi
+@TestApi
 public final class NetworkRegistrationInfo implements Parcelable {
     /**
      * Network domain
@@ -174,10 +176,10 @@ public final class NetworkRegistrationInfo implements Parcelable {
     private CellIdentity mCellIdentity;
 
     @Nullable
-    private VoiceSpecificRegistrationStates mVoiceSpecificStates;
+    private VoiceSpecificRegistrationInfo mVoiceSpecificInfo;
 
     @Nullable
-    private DataSpecificRegistrationStates mDataSpecificStates;
+    private DataSpecificRegistrationInfo mDataSpecificInfo;
 
     /**
      * @param domain Network domain. Must be a {@link Domain}. For transport type
@@ -234,7 +236,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
         this(domain, transportType, registrationState, accessNetworkTechnology, rejectCause,
                 emergencyOnly, availableServices, cellIdentity);
 
-        mVoiceSpecificStates = new VoiceSpecificRegistrationStates(cssSupported, roamingIndicator,
+        mVoiceSpecificInfo = new VoiceSpecificRegistrationInfo(cssSupported, roamingIndicator,
                 systemIsInPrl, defaultRoamingIndicator);
     }
 
@@ -253,9 +255,9 @@ public final class NetworkRegistrationInfo implements Parcelable {
         this(domain, transportType, registrationState, accessNetworkTechnology, rejectCause,
                 emergencyOnly, availableServices, cellIdentity);
 
-        mDataSpecificStates = new DataSpecificRegistrationStates(
+        mDataSpecificInfo = new DataSpecificRegistrationInfo(
                 maxDataCalls, isDcNrRestricted, isNrAvailable, isEndcAvailable, lteVopsSupportInfo);
-        updateNrState(mDataSpecificStates);
+        updateNrState(mDataSpecificInfo);
     }
 
     private NetworkRegistrationInfo(Parcel source) {
@@ -269,10 +271,10 @@ public final class NetworkRegistrationInfo implements Parcelable {
         mAvailableServices = new ArrayList<>();
         source.readList(mAvailableServices, Integer.class.getClassLoader());
         mCellIdentity = source.readParcelable(CellIdentity.class.getClassLoader());
-        mVoiceSpecificStates = source.readParcelable(
-                VoiceSpecificRegistrationStates.class.getClassLoader());
-        mDataSpecificStates = source.readParcelable(
-                DataSpecificRegistrationStates.class.getClassLoader());
+        mVoiceSpecificInfo = source.readParcelable(
+                VoiceSpecificRegistrationInfo.class.getClassLoader());
+        mDataSpecificInfo = source.readParcelable(
+                DataSpecificRegistrationInfo.class.getClassLoader());
         mNrState = source.readInt();
     }
 
@@ -389,16 +391,16 @@ public final class NetworkRegistrationInfo implements Parcelable {
      * @hide
      */
     @Nullable
-    public VoiceSpecificRegistrationStates getVoiceSpecificStates() {
-        return mVoiceSpecificStates;
+    public VoiceSpecificRegistrationInfo getVoiceSpecificInfo() {
+        return mVoiceSpecificInfo;
     }
 
     /**
      * @return Data registration related info
      */
     @Nullable
-    public DataSpecificRegistrationStates getDataSpecificStates() {
-        return mDataSpecificStates;
+    public DataSpecificRegistrationInfo getDataSpecificInfo() {
+        return mDataSpecificInfo;
     }
 
     @Override
@@ -474,8 +476,8 @@ public final class NetworkRegistrationInfo implements Parcelable {
                         ? mAvailableServices.stream().map(type -> serviceTypeToString(type))
                         .collect(Collectors.joining(",")) : null) + "]")
                 .append(" cellIdentity=").append(mCellIdentity)
-                .append(" voiceSpecificStates=").append(mVoiceSpecificStates)
-                .append(" dataSpecificStates=").append(mDataSpecificStates)
+                .append(" voiceSpecificInfo=").append(mVoiceSpecificInfo)
+                .append(" dataSpecificInfo=").append(mDataSpecificInfo)
                 .append(" nrState=").append(nrStateToString(mNrState))
                 .append("}").toString();
     }
@@ -484,7 +486,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
     public int hashCode() {
         return Objects.hash(mDomain, mTransportType, mRegistrationState, mRoamingType,
                 mAccessNetworkTechnology, mRejectCause, mEmergencyOnly, mAvailableServices,
-                mCellIdentity, mVoiceSpecificStates, mDataSpecificStates, mNrState);
+                mCellIdentity, mVoiceSpecificInfo, mDataSpecificInfo, mNrState);
     }
 
     @Override
@@ -505,8 +507,8 @@ public final class NetworkRegistrationInfo implements Parcelable {
                 && mEmergencyOnly == other.mEmergencyOnly
                 && mAvailableServices.equals(other.mAvailableServices)
                 && Objects.equals(mCellIdentity, other.mCellIdentity)
-                && Objects.equals(mVoiceSpecificStates, other.mVoiceSpecificStates)
-                && Objects.equals(mDataSpecificStates, other.mDataSpecificStates)
+                && Objects.equals(mVoiceSpecificInfo, other.mVoiceSpecificInfo)
+                && Objects.equals(mDataSpecificInfo, other.mDataSpecificInfo)
                 && mNrState == other.mNrState;
     }
 
@@ -521,8 +523,8 @@ public final class NetworkRegistrationInfo implements Parcelable {
         dest.writeBoolean(mEmergencyOnly);
         dest.writeList(mAvailableServices);
         dest.writeParcelable(mCellIdentity, 0);
-        dest.writeParcelable(mVoiceSpecificStates, 0);
-        dest.writeParcelable(mDataSpecificStates, 0);
+        dest.writeParcelable(mVoiceSpecificInfo, 0);
+        dest.writeParcelable(mDataSpecificInfo, 0);
         dest.writeInt(mNrState);
     }
 
@@ -543,7 +545,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
      *
      * @param state data specific registration state contains the 5G NR indicators.
      */
-    private void updateNrState(DataSpecificRegistrationStates state) {
+    private void updateNrState(DataSpecificRegistrationInfo state) {
         mNrState = NR_STATE_NONE;
         if (state.isEnDcAvailable) {
             if (!state.isDcNrRestricted && state.isNrAvailable) {

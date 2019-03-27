@@ -18,6 +18,7 @@ package android.telephony;
 
 import android.annotation.IntDef;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -51,6 +52,7 @@ public final class AccessNetworkConstants {
      * @hide
      */
     @SystemApi
+    @TestApi
     public static final int TRANSPORT_TYPE_WWAN = 1;
 
     /**
@@ -58,6 +60,7 @@ public final class AccessNetworkConstants {
      * @hide
      */
     @SystemApi
+    @TestApi
     public static final int TRANSPORT_TYPE_WLAN = 2;
 
     /** @hide */
