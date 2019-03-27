@@ -262,6 +262,7 @@ public class CarStatusBar extends StatusBar implements
         topBar.setStatusBar(this);
         CarNavigationBarView qsTopBar = mStatusBarWindow.findViewById(R.id.qs_car_top_bar);
         qsTopBar.setStatusBar(this);
+        getComponent(NotificationsUI.class).setStatusBar(this);
     }
 
     @Override
@@ -612,6 +613,11 @@ public class CarStatusBar extends StatusBar implements
      */
     private Drawable getDefaultWallpaper() {
         return mContext.getDrawable(com.android.internal.R.drawable.default_wallpaper);
+    }
+
+    /** Returns true if the current user makes it through the setup wizard, false otherwise. */
+    public boolean getIsUserSetup(){
+        return mUserSetup;
     }
 
     public void toggleCarNotifications() {

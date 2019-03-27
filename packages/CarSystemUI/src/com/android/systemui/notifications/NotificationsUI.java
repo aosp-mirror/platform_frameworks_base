@@ -54,6 +54,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.statusbar.FlingAnimationUtils;
+import com.android.systemui.statusbar.car.CarStatusBar;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 
 /**
@@ -90,6 +91,7 @@ public class NotificationsUI extends SystemUI
     private FlingAnimationUtils mFlingAnimationUtils;
     private static int sSettleOpenPercentage;
     private static int sSettleClosePercentage;
+    private CarStatusBar mCarStatusBar;
 
     /**
      * Inits the window that hosts the notifications and establishes the connections
@@ -230,6 +232,10 @@ public class NotificationsUI extends SystemUI
         inflateNotificationContent();
     }
 
+    public void setStatusBar(CarStatusBar carStatusBar) {
+        mCarStatusBar = carStatusBar;
+    }
+
     public View.OnTouchListener getDragDownListener() {
         return mOnTouchListener;
     }
@@ -328,6 +334,9 @@ public class NotificationsUI extends SystemUI
         @Override
         public boolean onScroll(MotionEvent event1, MotionEvent event2, float distanceX,
                 float distanceY) {
+            if (mCarStatusBar == null || !mCarStatusBar.getIsUserSetup()) {
+                return true;
+            }
             boolean isDown = event1.getY() - event2.getY() < 0;
             // CarStatusBar and NavigationBar are identical so avoid the touch if it
             // starts from NavigationBar to open.
@@ -442,6 +451,9 @@ public class NotificationsUI extends SystemUI
      * Sets the notifications to visible
      */
     public void openCarNotifications(float velocityY) {
+        if (mCarStatusBar == null || !mCarStatusBar.getIsUserSetup()) {
+            return;
+        }
         mCarNotificationWindow.setVisibility(View.VISIBLE);
 
         ValueAnimator animator = ValueAnimator.ofFloat(mContent.getTranslationY(), 0);
