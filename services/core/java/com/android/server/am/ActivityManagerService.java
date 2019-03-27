@@ -8840,6 +8840,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mAtmInternal.updateTopComponentForFactoryTest();
 
         retrieveSettings();
+        final int currentUserId = mUserController.getCurrentUserId();
         mUgmInternal.onSystemReady();
 
         final PowerManagerInternal pmi = LocalServices.getService(PowerManagerInternal.class);
@@ -8853,16 +8854,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         if (goingCallback != null) goingCallback.run();
-        // Check the current user here as a user can be started inside goingCallback.run() from
-        // other system services.
-        final int currentUserId = mUserController.getCurrentUserId();
-        Slog.i(TAG, "Current user:" + currentUserId);
-        if (currentUserId != UserHandle.USER_SYSTEM && !mUserController.isSystemUserStarted()) {
-            // User other than system user has started. Make sure that system user is already
-            // started before switching user.
-            throw new RuntimeException("System user not started while current user is:"
-                    + currentUserId);
-        }
         traceLog.traceBegin("ActivityManagerStartApps");
         mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_USER_RUNNING_START,
                 Integer.toString(currentUserId), currentUserId);
