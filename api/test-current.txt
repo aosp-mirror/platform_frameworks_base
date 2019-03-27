@@ -616,7 +616,7 @@ package android.net {
   }
 
   public final class IpPrefix implements android.os.Parcelable {
-    ctor public IpPrefix(@NonNull java.net.InetAddress, int);
+    ctor public IpPrefix(@NonNull java.net.InetAddress, @IntRange(from=0, to=128) int);
     ctor public IpPrefix(@NonNull String);
   }
 
@@ -625,8 +625,8 @@ package android.net {
   }
 
   public class LinkAddress implements android.os.Parcelable {
-    ctor public LinkAddress(java.net.InetAddress, int, int, int);
-    ctor public LinkAddress(@NonNull java.net.InetAddress, int);
+    ctor public LinkAddress(@NonNull java.net.InetAddress, @IntRange(from=0, to=128) int, int, int);
+    ctor public LinkAddress(@NonNull java.net.InetAddress, @IntRange(from=0, to=128) int);
     ctor public LinkAddress(@NonNull String);
     ctor public LinkAddress(@NonNull String, int, int);
     method public boolean isGlobalPreferred();
@@ -735,8 +735,8 @@ package android.net.apf {
   public final class ApfCapabilities implements android.os.Parcelable {
     ctor public ApfCapabilities(int, int, int);
     method public int describeContents();
-    method public static boolean getApfDrop8023Frames(@NonNull android.content.Context);
-    method @NonNull public static int[] getApfEthTypeBlackList(@NonNull android.content.Context);
+    method public static boolean getApfDrop8023Frames();
+    method @NonNull public static int[] getApfEtherTypeBlackList();
     method public boolean hasDataAccess();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.net.apf.ApfCapabilities> CREATOR;
