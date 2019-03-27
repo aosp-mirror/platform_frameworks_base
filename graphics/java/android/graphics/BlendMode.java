@@ -454,6 +454,64 @@ public enum BlendMode {
         return null;
     }
 
+    /**
+     * @hide
+     */
+    public static int toValue(BlendMode mode) {
+        return mode.getXfermode().porterDuffMode;
+    }
+
+    /**
+     * @hide
+     */
+    public static @Nullable PorterDuff.Mode blendModeToPorterDuffMode(@Nullable BlendMode mode) {
+        if (mode != null) {
+            switch (mode) {
+                case CLEAR:
+                    return PorterDuff.Mode.CLEAR;
+                case SRC:
+                    return PorterDuff.Mode.SRC;
+                case DST:
+                    return PorterDuff.Mode.DST;
+                case SRC_OVER:
+                    return PorterDuff.Mode.SRC_OVER;
+                case DST_OVER:
+                    return PorterDuff.Mode.DST_OVER;
+                case SRC_IN:
+                    return PorterDuff.Mode.SRC_IN;
+                case DST_IN:
+                    return PorterDuff.Mode.DST_IN;
+                case SRC_OUT:
+                    return PorterDuff.Mode.SRC_OUT;
+                case DST_OUT:
+                    return PorterDuff.Mode.DST_OUT;
+                case SRC_ATOP:
+                    return PorterDuff.Mode.SRC_ATOP;
+                case DST_ATOP:
+                    return PorterDuff.Mode.DST_ATOP;
+                case XOR:
+                    return PorterDuff.Mode.XOR;
+                case DARKEN:
+                    return PorterDuff.Mode.DARKEN;
+                case LIGHTEN:
+                    return PorterDuff.Mode.LIGHTEN;
+                // b/73224934 PorterDuff Multiply maps to Skia Modulate
+                case MODULATE:
+                    return PorterDuff.Mode.MULTIPLY;
+                case SCREEN:
+                    return PorterDuff.Mode.SCREEN;
+                case PLUS:
+                    return PorterDuff.Mode.ADD;
+                case OVERLAY:
+                    return PorterDuff.Mode.OVERLAY;
+                default:
+                    return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
     @NonNull
     private final Xfermode mXfermode;
 

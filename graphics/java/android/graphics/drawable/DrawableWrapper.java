@@ -24,12 +24,12 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
+import android.graphics.BlendMode;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Insets;
 import android.graphics.Outline;
 import android.graphics.PixelFormat;
-import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Xfermode;
 import android.util.AttributeSet;
@@ -324,9 +324,9 @@ public abstract class DrawableWrapper extends Drawable implements Drawable.Callb
     }
 
     @Override
-    public void setTintMode(@Nullable PorterDuff.Mode tintMode) {
+    public void setTintMode(@NonNull BlendMode blendMode) {
         if (mDrawable != null) {
-            mDrawable.setTintMode(tintMode);
+            mDrawable.setTintMode(blendMode);
         }
     }
 

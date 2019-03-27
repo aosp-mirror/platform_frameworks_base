@@ -240,7 +240,7 @@ public abstract class BaseCanvas {
     }
 
     public void drawColor(@ColorInt int color) {
-        nDrawColor(mNativeCanvasWrapper, color, PorterDuff.Mode.SRC_OVER.nativeInt);
+        nDrawColor(mNativeCanvasWrapper, color, BlendMode.SRC_OVER.getXfermode().porterDuffMode);
     }
 
     /**
