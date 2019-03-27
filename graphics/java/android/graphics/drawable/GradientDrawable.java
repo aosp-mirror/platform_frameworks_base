@@ -1312,6 +1312,10 @@ public class GradientDrawable extends Drawable {
                     y0 = r.top + (r.bottom - r.top) * st.mCenterY;
 
                     float radius = st.mGradientRadius;
+                    if (Float.compare(radius, 0.0f) == -1 || Float.isNaN(radius)) {
+                        throw new IllegalArgumentException("Gradient radius must be a valid "
+                                + "number greater than or equal to 0");
+                    }
                     if (st.mGradientRadiusType == RADIUS_TYPE_FRACTION) {
                         // Fall back to parent width or height if intrinsic
                         // size is not specified.
@@ -1759,75 +1763,68 @@ public class GradientDrawable extends Drawable {
             st.mGradientColors[1] = endColor;
         }
 
-        if (st.mGradient == LINEAR_GRADIENT) {
-            int angle = (int) a.getFloat(R.styleable.GradientDrawableGradient_angle, st.mAngle);
-            angle %= 360;
+        int angle = (int) a.getFloat(R.styleable.GradientDrawableGradient_angle, st.mAngle);
+        angle %= 360;
 
-            if (angle % 45 != 0) {
-                throw new XmlPullParserException(a.getPositionDescription()
-                        + "<gradient> tag requires 'angle' attribute to "
-                        + "be a multiple of 45");
-            }
+        if (angle % 45 != 0) {
+            throw new XmlPullParserException(a.getPositionDescription()
+                    + "<gradient> tag requires 'angle' attribute to "
+                    + "be a multiple of 45");
+        }
 
-            st.mAngle = angle;
+        st.mAngle = angle;
 
-            switch (angle) {
-                case 0:
-                    st.mOrientation = Orientation.LEFT_RIGHT;
-                    break;
-                case 45:
-                    st.mOrientation = Orientation.BL_TR;
-                    break;
-                case 90:
-                    st.mOrientation = Orientation.BOTTOM_TOP;
-                    break;
-                case 135:
-                    st.mOrientation = Orientation.BR_TL;
-                    break;
-                case 180:
-                    st.mOrientation = Orientation.RIGHT_LEFT;
-                    break;
-                case 225:
-                    st.mOrientation = Orientation.TR_BL;
-                    break;
-                case 270:
-                    st.mOrientation = Orientation.TOP_BOTTOM;
-                    break;
-                case 315:
-                    st.mOrientation = Orientation.TL_BR;
-                    break;
-            }
-        } else {
-            final TypedValue tv = a.peekValue(R.styleable.GradientDrawableGradient_gradientRadius);
-            if (tv != null) {
-                final float radius;
-                final @RadiusType int radiusType;
-                if (tv.type == TypedValue.TYPE_FRACTION) {
-                    radius = tv.getFraction(1.0f, 1.0f);
+        switch (angle) {
+            case 0:
+                st.mOrientation = Orientation.LEFT_RIGHT;
+                break;
+            case 45:
+                st.mOrientation = Orientation.BL_TR;
+                break;
+            case 90:
+                st.mOrientation = Orientation.BOTTOM_TOP;
+                break;
+            case 135:
+                st.mOrientation = Orientation.BR_TL;
+                break;
+            case 180:
+                st.mOrientation = Orientation.RIGHT_LEFT;
+                break;
+            case 225:
+                st.mOrientation = Orientation.TR_BL;
+                break;
+            case 270:
+                st.mOrientation = Orientation.TOP_BOTTOM;
+                break;
+            case 315:
+                st.mOrientation = Orientation.TL_BR;
+                break;
+        }
 
-                    final int unit = (tv.data >> TypedValue.COMPLEX_UNIT_SHIFT)
-                            & TypedValue.COMPLEX_UNIT_MASK;
-                    if (unit == TypedValue.COMPLEX_UNIT_FRACTION_PARENT) {
-                        radiusType = RADIUS_TYPE_FRACTION_PARENT;
-                    } else {
-                        radiusType = RADIUS_TYPE_FRACTION;
-                    }
-                } else if (tv.type == TypedValue.TYPE_DIMENSION) {
-                    radius = tv.getDimension(r.getDisplayMetrics());
-                    radiusType = RADIUS_TYPE_PIXELS;
+        final TypedValue tv = a.peekValue(R.styleable.GradientDrawableGradient_gradientRadius);
+        if (tv != null) {
+            final float radius;
+            final @RadiusType int radiusType;
+            if (tv.type == TypedValue.TYPE_FRACTION) {
+                radius = tv.getFraction(1.0f, 1.0f);
+
+                final int unit = (tv.data >> TypedValue.COMPLEX_UNIT_SHIFT)
+                        & TypedValue.COMPLEX_UNIT_MASK;
+                if (unit == TypedValue.COMPLEX_UNIT_FRACTION_PARENT) {
+                    radiusType = RADIUS_TYPE_FRACTION_PARENT;
                 } else {
-                    radius = tv.getFloat();
-                    radiusType = RADIUS_TYPE_PIXELS;
+                    radiusType = RADIUS_TYPE_FRACTION;
                 }
-
-                st.mGradientRadius = radius;
-                st.mGradientRadiusType = radiusType;
-            } else if (st.mGradient == RADIAL_GRADIENT) {
-                throw new XmlPullParserException(
-                        a.getPositionDescription()
-                        + "<gradient> tag requires 'gradientRadius' "
-                        + "attribute with radial type");
+            } else if (tv.type == TypedValue.TYPE_DIMENSION) {
+                radius = tv.getDimension(r.getDisplayMetrics());
+                radiusType = RADIUS_TYPE_PIXELS;
+            } else {
+                radius = tv.getFloat();
+                radiusType = RADIUS_TYPE_PIXELS;
             }
+
+            st.mGradientRadius = radius;
+            st.mGradientRadiusType = radiusType;
         }
     }
 
