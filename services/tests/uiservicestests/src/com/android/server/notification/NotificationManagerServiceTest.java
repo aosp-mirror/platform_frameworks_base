@@ -4324,4 +4324,20 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals(IMPORTANCE_LOW, r.getAssistantImportance());
         assertEquals(USER_SENTIMENT_NEUTRAL, r.getUserSentiment());
     }
+
+    public void testAreNotificationsEnabledForPackage_crossUser() throws Exception {
+        try {
+            mBinderService.areNotificationsEnabledForPackage(mContext.getPackageName(),
+                    mUid + UserHandle.PER_USER_RANGE);
+            fail("Cannot call cross user without permission");
+        } catch (SecurityException e) {
+            // pass
+        }
+
+        // cross user, with permission, no problem
+        TestablePermissions perms = mContext.getTestablePermissions();
+        perms.setPermission(android.Manifest.permission.INTERACT_ACROSS_USERS, PERMISSION_GRANTED);
+        mBinderService.areNotificationsEnabledForPackage(mContext.getPackageName(),
+                mUid + UserHandle.PER_USER_RANGE);
+    }
 }
