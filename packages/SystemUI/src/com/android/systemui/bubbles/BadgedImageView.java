@@ -18,8 +18,6 @@ package com.android.systemui.bubbles;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.AttributeSet;
@@ -36,11 +34,9 @@ public class BadgedImageView extends ImageView {
     private int mIconSize;
     private Rect mTempBounds = new Rect();
     private Point mTempPoint = new Point();
-    private Path mClipPath = new Path();
 
     private float mDotScale = 0f;
     private int mUpdateDotColor;
-    private int mBubbleDefaultBgColor;
     private boolean mShowUpdateDot;
     private boolean mOnLeft;
 
@@ -59,32 +55,17 @@ public class BadgedImageView extends ImageView {
     public BadgedImageView(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        setScaleType(ScaleType.CENTER_CROP);
         mIconSize = getResources().getDimensionPixelSize(R.dimen.individual_bubble_size);
         mDotRenderer = new BadgeRenderer(mIconSize);
 
         TypedArray ta = context.obtainStyledAttributes(
                 new int[] {android.R.attr.colorBackgroundFloating});
-        mBubbleDefaultBgColor = ta.getColor(0, Color.WHITE);
         ta.recycle();
     }
 
-    // TODO: Clipping oval path isn't great: rerender image into a separate, rounded bitmap and
-    // then draw would be better
     @Override
     public void onDraw(Canvas canvas) {
-        canvas.save();
-        // Circle crop
-        mClipPath.addOval(getPaddingStart(), getPaddingTop(),
-                getWidth() - getPaddingEnd(), getHeight() - getPaddingBottom(), Path.Direction.CW);
-        canvas.clipPath(mClipPath);
-        canvas.drawColor(mBubbleDefaultBgColor);
         super.onDraw(canvas);
-
-        // After we've circle cropped what we're showing, restore so we don't clip the badge
-        canvas.restore();
-
-        // Draw the badge
         if (mShowUpdateDot) {
             getDrawingRect(mTempBounds);
             mTempPoint.set((getWidth() - mIconSize) / 2, getPaddingTop());
