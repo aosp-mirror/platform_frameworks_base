@@ -87,6 +87,10 @@ public class TileService extends Service {
      * This intent may also define a {@link Intent#EXTRA_COMPONENT_NAME} value
      * to indicate the {@link ComponentName} that caused the preferences to be
      * opened.
+     * <p>
+     * To ensure that the activity can only be launched through quick settings
+     * UI provided by this service, apps can protect it with the
+     * BIND_QUICK_SETTINGS_TILE permission.
      */
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
     public static final String ACTION_QS_TILE_PREFERENCES
