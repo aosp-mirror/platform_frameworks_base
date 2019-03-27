@@ -460,10 +460,9 @@ public final class BroadcastQueue {
                 // that request - we don't want the token to be swept from under our feet...
                 mHandler.removeCallbacksAndMessages(msgToken);
                 // ...then schedule the removal of the token after the extended timeout
+                final ProcessRecord app = r.curApp;
                 mHandler.postAtTime(() -> {
-                    if (r.curApp != null) {
-                        r.curApp.removeAllowBackgroundActivityStartsToken(r);
-                    }
+                    app.removeAllowBackgroundActivityStartsToken(r);
                 }, msgToken, (r.receiverTime + mConstants.ALLOW_BG_ACTIVITY_START_TIMEOUT));
             }
         }
