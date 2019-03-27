@@ -60,6 +60,9 @@ const int FIELD_ID_PERIODIC_ALARMS_REGISTERED = 1;
 const int FIELD_ID_LOG_LOSS_STATS_TIME = 1;
 const int FIELD_ID_LOG_LOSS_STATS_COUNT = 2;
 const int FIELD_ID_LOG_LOSS_STATS_ERROR = 3;
+const int FIELD_ID_LOG_LOSS_STATS_TAG = 4;
+const int FIELD_ID_LOG_LOSS_STATS_UID = 5;
+const int FIELD_ID_LOG_LOSS_STATS_PID = 6;
 
 const int FIELD_ID_CONFIG_STATS_UID = 1;
 const int FIELD_ID_CONFIG_STATS_ID = 2;
@@ -183,12 +186,13 @@ void StatsdStats::noteConfigReset(const ConfigKey& key) {
     noteConfigResetInternalLocked(key);
 }
 
-void StatsdStats::noteLogLost(int32_t wallClockTimeSec, int32_t count, int32_t lastError) {
+void StatsdStats::noteLogLost(int32_t wallClockTimeSec, int32_t count, int32_t lastError,
+                              int32_t lastTag, int32_t uid, int32_t pid) {
     lock_guard<std::mutex> lock(mLock);
     if (mLogLossStats.size() == kMaxLoggerErrors) {
         mLogLossStats.pop_front();
     }
-    mLogLossStats.emplace_back(wallClockTimeSec, count, lastError);
+    mLogLossStats.emplace_back(wallClockTimeSec, count, lastError, lastTag, uid, pid);
 }
 
 void StatsdStats::noteBroadcastSent(const ConfigKey& key) {
@@ -716,8 +720,11 @@ void StatsdStats::dumpStats(int out) const {
     }
 
     for (const auto& loss : mLogLossStats) {
-        dprintf(out, "Log loss: %lld (wall clock sec) - %d (count) %d (last error)\n",
-                (long long)loss.mWallClockSec, loss.mCount, loss.mLastError);
+        dprintf(out,
+                "Log loss: %lld (wall clock sec) - %d (count), %d (last error), %d (last tag), %d "
+                "(uid), %d (pid)\n",
+                (long long)loss.mWallClockSec, loss.mCount, loss.mLastError, loss.mLastTag,
+                loss.mUid, loss.mPid);
     }
 }
 
@@ -891,6 +898,9 @@ void StatsdStats::dumpStats(std::vector<uint8_t>* output, bool reset) {
         proto.write(FIELD_TYPE_INT32 | FIELD_ID_LOG_LOSS_STATS_TIME, error.mWallClockSec);
         proto.write(FIELD_TYPE_INT32 | FIELD_ID_LOG_LOSS_STATS_COUNT, error.mCount);
         proto.write(FIELD_TYPE_INT32 | FIELD_ID_LOG_LOSS_STATS_ERROR, error.mLastError);
+        proto.write(FIELD_TYPE_INT32 | FIELD_ID_LOG_LOSS_STATS_TAG, error.mLastTag);
+        proto.write(FIELD_TYPE_INT32 | FIELD_ID_LOG_LOSS_STATS_UID, error.mUid);
+        proto.write(FIELD_TYPE_INT32 | FIELD_ID_LOG_LOSS_STATS_PID, error.mPid);
         proto.end(token);
     }
 
