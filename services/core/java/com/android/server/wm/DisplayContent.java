@@ -656,7 +656,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (DEBUG_LAYOUT && !w.mLayoutAttached) {
             Slog.v(TAG, "1ST PASS " + w + ": gone=" + gone + " mHaveFrame=" + w.mHaveFrame
                     + " mLayoutAttached=" + w.mLayoutAttached
-                    + " screen changed=" + w.isConfigChanged());
+                    + " config reported=" + w.isLastConfigReportedToClient());
             final AppWindowToken atoken = w.mAppToken;
             if (gone) Slog.v(TAG, "  GONE: mViewVisibility=" + w.mViewVisibility
                     + " mRelayoutCalled=" + w.mRelayoutCalled + " hidden=" + w.mToken.isHidden()

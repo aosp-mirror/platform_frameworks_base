@@ -307,6 +307,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     private final MergedConfiguration mLastReportedConfiguration = new MergedConfiguration();
 
+    /** @see #isLastConfigReportedToClient() */
+    private boolean mLastConfigReportedToClient;
+
     private final Configuration mTempConfiguration = new Configuration();
 
     /**
@@ -1200,7 +1203,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         boolean didFrameInsetsChange = setReportResizeHints();
-        boolean configChanged = isConfigChanged();
+        boolean configChanged = !isLastConfigReportedToClient();
         if (DEBUG_CONFIGURATION && configChanged) {
             Slog.v(TAG_WM, "Win " + this + " config changed: " + getConfiguration());
         }
@@ -1780,9 +1783,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return getDisplayContent().getBounds().equals(getBounds());
     }
 
-    /** Returns true if last applied config was not yet requested by client. */
-    boolean isConfigChanged() {
-        return !getLastReportedConfiguration().equals(getConfiguration());
+    /**
+     * @return {@code true} if last applied config was reported to the client already, {@code false}
+     *         otherwise.
+     */
+    boolean isLastConfigReportedToClient() {
+        return mLastConfigReportedToClient;
+    }
+
+    @Override
+    void onMergedOverrideConfigurationChanged() {
+        super.onMergedOverrideConfigurationChanged();
+        mLastConfigReportedToClient = false;
     }
 
     void onWindowReplacementTimeout() {
@@ -2365,6 +2377,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void setLastReportedMergedConfiguration(MergedConfiguration config) {
         mLastReportedConfiguration.setTo(config);
+        mLastConfigReportedToClient = true;
     }
 
     void getLastReportedMergedConfiguration(MergedConfiguration config) {
