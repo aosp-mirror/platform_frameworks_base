@@ -16,10 +16,10 @@
 
 package android.net;
 
-import android.net.StaticIpConfigurationParcelable;
+import android.net.StaticIpConfiguration;
 
 parcelable DhcpResultsParcelable {
-    StaticIpConfigurationParcelable baseConfiguration;
+    StaticIpConfiguration baseConfiguration;
     int leaseDuration;
     int mtu;
     String serverAddress;
