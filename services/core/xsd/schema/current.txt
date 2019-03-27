@@ -4,11 +4,10 @@ package com.android.server.pm.permission {
   public class Exception {
     ctor public Exception();
     method public String getBrand();
-    method public com.android.server.pm.permission.Permission getPermission();
+    method public java.util.List<com.android.server.pm.permission.Permission> getPermission();
     method public String getSha256CertDigest();
     method public String get_package();
     method public void setBrand(String);
-    method public void setPermission(com.android.server.pm.permission.Permission);
     method public void setSha256CertDigest(String);
     method public void set_package(String);
   }
