@@ -63,6 +63,7 @@ import com.android.internal.view.menu.MenuView;
 import com.android.internal.widget.DecorContentParent;
 import com.android.internal.widget.SwipeDismissLayout;
 
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.app.KeyguardManager;
 import android.content.Context;
@@ -237,6 +238,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private boolean mForcedStatusBarColor = false;
     private boolean mForcedNavigationBarColor = false;
 
+    @UnsupportedAppUsage
     private CharSequence mTitle = null;
 
     private int mTitleColor = 0;
@@ -300,6 +302,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     static final RotationWatcher sRotationWatcher = new RotationWatcher();
 
+    @UnsupportedAppUsage
     public PhoneWindow(Context context) {
         super(context);
         mLayoutInflater = LayoutInflater.from(context);

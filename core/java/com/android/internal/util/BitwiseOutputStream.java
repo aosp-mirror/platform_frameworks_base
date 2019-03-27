@@ -16,6 +16,8 @@
 
 package com.android.internal.util;
 
+import android.annotation.UnsupportedAppUsage;
+
 /**
  * An object that provides bitwise incremental write access to a byte array.
  *
@@ -49,6 +51,7 @@ public class BitwiseOutputStream {
      *
      * @param startingLength initial internal byte array length in bytes
      */
+    @UnsupportedAppUsage
     public BitwiseOutputStream(int startingLength) {
         mBuf = new byte[startingLength];
         mEnd = startingLength << 3;
@@ -60,6 +63,7 @@ public class BitwiseOutputStream {
      *
      * @return newly allocated byte array
      */
+    @UnsupportedAppUsage
     public byte[] toByteArray() {
         int len = (mPos >>> 3) + ((mPos & 0x07) > 0 ? 1 : 0);  // &7==%8
         byte[] newBuf = new byte[len];
@@ -89,6 +93,7 @@ public class BitwiseOutputStream {
      * @param bits the amount of data to write (gte 0, lte 8)
      * @param data to write, will be masked to expose only bits param from lsb
      */
+    @UnsupportedAppUsage
     public void write(int bits, int data) throws AccessException {
         if ((bits < 0) || (bits > 8)) {
             throw new AccessException("illegal write (" + bits + " bits)");
@@ -109,6 +114,7 @@ public class BitwiseOutputStream {
      * @param bits the amount of data to write
      * @param arr the byte array containing data to be written
      */
+    @UnsupportedAppUsage
     public void writeByteArray(int bits, byte[] arr) throws AccessException {
         for (int i = 0; i < arr.length; i++) {
             int increment = Math.min(8, bits - (i << 3));
