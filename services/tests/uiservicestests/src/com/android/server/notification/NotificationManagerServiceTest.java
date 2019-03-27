@@ -34,6 +34,7 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_ON
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BAR;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Build.VERSION_CODES.O_MR1;
 import static android.os.Build.VERSION_CODES.P;
 
@@ -106,6 +107,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
+import android.testing.TestablePermissions;
 import android.text.Html;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
@@ -3087,5 +3089,64 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         verify(mAppUsageStats, times(1)).reportInterruptiveNotification(
                 anyString(), anyString(), anyInt());
+    }
+
+    @Test
+    public void testRemoveForegroundServiceFlagFromNotification_enqueued() {
+        Notification n = new Notification.Builder(mContext, "").build();
+        n.flags |= FLAG_FOREGROUND_SERVICE;
+
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 9, null, mUid, 0,
+                n, new UserHandle(mUid), null, 0);
+        NotificationRecord r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        mService.addEnqueuedNotification(r);
+
+        mInternalService.removeForegroundServiceFlagFromNotification(
+                PKG, r.sbn.getId(), r.sbn.getUserId());
+
+        waitForIdle();
+
+        verify(mListeners, timeout(200).times(0)).notifyPostedLocked(any(), any());
+    }
+
+    @Test
+    public void testRemoveForegroundServiceFlagFromNotification_posted() {
+        Notification n = new Notification.Builder(mContext, "").build();
+        n.flags |= FLAG_FOREGROUND_SERVICE;
+
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 9, null, mUid, 0,
+                n, new UserHandle(mUid), null, 0);
+        NotificationRecord r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        mService.addNotification(r);
+
+        mInternalService.removeForegroundServiceFlagFromNotification(
+                PKG, r.sbn.getId(), r.sbn.getUserId());
+
+        waitForIdle();
+
+        ArgumentCaptor<NotificationRecord> captor =
+                ArgumentCaptor.forClass(NotificationRecord.class);
+        verify(mListeners, times(1)).notifyPostedLocked(captor.capture(), any());
+
+        assertEquals(0, captor.getValue().getNotification().flags);
+    }
+
+    @Test
+    public void testAreNotificationsEnabledForPackage_crossUser() throws Exception {
+        try {
+            mBinderService.areNotificationsEnabledForPackage(mContext.getPackageName(),
+                    mUid + UserHandle.PER_USER_RANGE);
+            fail("Cannot call cross user without permission");
+        } catch (SecurityException e) {
+            // pass
+        }
+
+        // cross user, with permission, no problem
+        TestablePermissions perms = mContext.getTestablePermissions();
+        perms.setPermission(android.Manifest.permission.INTERACT_ACROSS_USERS, PERMISSION_GRANTED);
+        mBinderService.areNotificationsEnabledForPackage(mContext.getPackageName(),
+                mUid + UserHandle.PER_USER_RANGE);
     }
 }
