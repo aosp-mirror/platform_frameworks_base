@@ -339,6 +339,8 @@ public final class ComponentName implements Parcelable, Cloneable, Comparable<Co
     }
 
     public void writeToParcel(Parcel out, int flags) {
+        // WARNING: If you modify this function, also update
+        // frameworks/base/libs/services/src/content/ComponentName.cpp.
         out.writeString(mPackage);
         out.writeString(mClass);
     }

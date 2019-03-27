@@ -68,7 +68,6 @@ pid_t fork_execute_cmd(char* const argv[], Fpipe* input, Fpipe* output) {
     // fork used in multithreaded environment, avoid adding unnecessary code in child process
     pid_t pid = fork();
     if (pid == 0) {
-        VLOG("[In child]cmd %s", argv[0]);
         if (input != NULL && (TEMP_FAILURE_RETRY(dup2(input->readFd().get(), STDIN_FILENO)) < 0 ||
                               !input->close())) {
             ALOGW("Failed to dup2 stdin.");

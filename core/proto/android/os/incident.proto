@@ -22,7 +22,9 @@ import "frameworks/base/core/proto/android/os/batterytype.proto";
 import "frameworks/base/core/proto/android/os/cpufreq.proto";
 import "frameworks/base/core/proto/android/os/cpuinfo.proto";
 import "frameworks/base/core/proto/android/os/data.proto";
+import "frameworks/base/core/proto/android/os/header.proto";
 import "frameworks/base/core/proto/android/os/kernelwake.proto";
+import "frameworks/base/core/proto/android/os/metadata.proto";
 import "frameworks/base/core/proto/android/os/pagetypeinfo.proto";
 import "frameworks/base/core/proto/android/os/procrank.proto";
 import "frameworks/base/core/proto/android/os/ps.proto";
@@ -49,10 +51,8 @@ import "frameworks/base/core/proto/android/service/procstats.proto";
 import "frameworks/base/core/proto/android/service/usb.proto";
 import "frameworks/base/core/proto/android/util/event_log_tags.proto";
 import "frameworks/base/core/proto/android/util/log.proto";
-import "frameworks/base/libs/incident/proto/android/os/header.proto";
-import "frameworks/base/libs/incident/proto/android/os/metadata.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
-import "frameworks/base/libs/incident/proto/android/section.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/section.proto";
 
 package android.os;
 

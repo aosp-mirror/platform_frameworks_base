@@ -16,10 +16,23 @@
 
 package com.android.server.incident;
 
+import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.UserInfo;
 import android.os.Binder;
 import android.os.IIncidentAuthListener;
 import android.os.IIncidentCompanion;
+import android.os.IIncidentManager;
+import android.os.IncidentManager;
+import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.os.UserHandle;
+import android.os.UserManager;
+import android.util.Log;
 
 import com.android.internal.util.DumpUtils;
 import com.android.server.SystemService;
@@ -36,6 +49,14 @@ public class IncidentCompanionService extends SystemService {
     static final String TAG = "IncidentCompanionService";
 
     /**
+     * The two permissions, for sendBroadcastAsUserMultiplePermissions.
+     */
+    private static final String[] DUMP_AND_USAGE_STATS_PERMISSIONS = new String[] {
+        android.Manifest.permission.DUMP,
+        android.Manifest.permission.PACKAGE_USAGE_STATS
+    };
+
+    /**
      * Tracker for reports pending approval.
      */
     private PendingReports mPendingReports;
@@ -45,16 +66,21 @@ public class IncidentCompanionService extends SystemService {
      */
     private final class BinderService extends IIncidentCompanion.Stub {
         /**
-         * ONEWAY binder call to initiate authorizing the report.
+         * ONEWAY binder call to initiate authorizing the report. If you don't need
+         * IncidentCompanionService to check whether the calling UID matches then
+         * pass 0 for callingUid.  Either way, the caller must have DUMP and USAGE_STATS
+         * permissions to retrieve the data, so it ends up being about the same.
          */
         @Override
-        public void authorizeReport(int callingUid, final String callingPackage, int flags,
-                final IIncidentAuthListener listener) {
+        public void authorizeReport(int callingUid, final String callingPackage,
+                final String receiverClass, final String reportId,
+                final int flags, final IIncidentAuthListener listener) {
             enforceRequestAuthorizationPermission();
 
             final long ident = Binder.clearCallingIdentity();
             try {
-                mPendingReports.authorizeReport(callingUid, callingPackage, flags, listener);
+                mPendingReports.authorizeReport(callingUid, callingPackage,
+                        receiverClass, reportId, flags, listener);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -76,6 +102,38 @@ public class IncidentCompanionService extends SystemService {
             final long ident = Binder.clearCallingIdentity();
             try {
                 mPendingReports.cancelAuthorization(listener);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        /**
+         * ONEWAY implementation to send broadcast from incidentd, which is native.
+         */
+        @Override
+        public void sendReportReadyBroadcast(String pkg, String cls) {
+            enforceRequestAuthorizationPermission();
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                final Context context = getContext();
+
+                final int primaryUser = getAndValidateUser(context);
+                if (primaryUser == UserHandle.USER_NULL) {
+                    return;
+                }
+
+                final Intent intent = new Intent(Intent.ACTION_INCIDENT_REPORT_READY);
+                intent.setComponent(new ComponentName(pkg, cls));
+
+                Log.d(TAG, "sendReportReadyBroadcast sending primaryUser=" + primaryUser
+                        + " userHandle=" + UserHandle.getUserHandleForUid(primaryUser)
+                        + " intent=" + intent);
+
+                // Send it to the primary user.  Only they can do incident reports.
+                context.sendBroadcastAsUserMultiplePermissions(intent,
+                        UserHandle.getUserHandleForUid(primaryUser),
+                        DUMP_AND_USAGE_STATS_PERMISSIONS);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -122,7 +180,80 @@ public class IncidentCompanionService extends SystemService {
         }
 
         /**
-         * Implementation of adb shell dumpsys debugreportcompanion.
+         * SYNCHRONOUS binder call to get the list of incident reports waiting for a receiver.
+         */
+        @Override
+        public List<String> getIncidentReportList(String pkg, String cls) throws RemoteException {
+            enforceAccessReportsPermissions(null);
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return getIIncidentManager().getIncidentReportList(pkg, cls);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        /**
+         * SYNCHRONOUS binder call to commit an incident report
+         */
+        @Override
+        public void deleteIncidentReports(String pkg, String cls, String id)
+                throws RemoteException {
+            if (pkg == null || cls == null || id == null
+                    || pkg.length() == 0 || cls.length() == 0 || id.length() == 0) {
+                throw new RuntimeException("Invalid pkg, cls or id");
+            }
+            enforceAccessReportsPermissions(pkg);
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                getIIncidentManager().deleteIncidentReports(pkg, cls, id);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        /**
+         * SYNCHRONOUS binder call to delete all incident reports for a package.
+         */
+        @Override
+        public void deleteAllIncidentReports(String pkg) throws RemoteException {
+            if (pkg == null || pkg.length() == 0) {
+                throw new RuntimeException("Invalid pkg");
+            }
+            enforceAccessReportsPermissions(pkg);
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                getIIncidentManager().deleteAllIncidentReports(pkg);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        /**
+         * SYNCHRONOUS binder call to get the IncidentReport object.
+         */
+        @Override
+        public IncidentManager.IncidentReport getIncidentReport(String pkg, String cls, String id)
+                throws RemoteException {
+            if (pkg == null || cls == null || id == null
+                    || pkg.length() == 0 || cls.length() == 0 || id.length() == 0) {
+                throw new RuntimeException("Invalid pkg, cls or id");
+            }
+            enforceAccessReportsPermissions(pkg);
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return getIIncidentManager().getIncidentReport(pkg, cls, id);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        /**
+         * SYNCHRONOUS implementation of adb shell dumpsys debugreportcompanion.
          */
         @Override
         protected void dump(FileDescriptor fd, final PrintWriter writer, String[] args) {
@@ -150,6 +281,51 @@ public class IncidentCompanionService extends SystemService {
                     android.Manifest.permission.APPROVE_INCIDENT_REPORTS, null);
         }
 
+        /**
+         * Enforce that the calling process either has APPROVE_INCIDENT_REPORTS or
+         * (DUMP and PACKAGE_USAGE_STATS). This lets the approver get, because showing
+         * information about the report is a prerequisite for letting the user decide.
+         *
+         * If pkg is null, it is not checked, so make sure that you check it for null first
+         * if you do need the packages to match.
+         *
+         * Inside the binder interface class because we want to do all of the authorization
+         * here, before calling out to the helper objects.
+         */
+        private void enforceAccessReportsPermissions(String pkg) {
+            if (getContext().checkCallingPermission(
+                        android.Manifest.permission.APPROVE_INCIDENT_REPORTS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                getContext().enforceCallingOrSelfPermission(
+                        android.Manifest.permission.DUMP, null);
+                getContext().enforceCallingOrSelfPermission(
+                        android.Manifest.permission.PACKAGE_USAGE_STATS, null);
+                if (pkg == null) {
+                    enforceCallerIsSameApp(pkg);
+                }
+            }
+        }
+
+        /**
+         * Throw a SecurityException if the incoming binder call is not from pkg.
+         */
+        private void enforceCallerIsSameApp(String pkg) throws SecurityException {
+            try {
+                final int uid = Binder.getCallingUid();
+                final int userId = UserHandle.getCallingUserId();
+                final ApplicationInfo ai = getContext().getPackageManager()
+                        .getApplicationInfoAsUser(pkg, 0, userId);
+                if (ai == null) {
+                    throw new SecurityException("Unknown package " + pkg);
+                }
+                if (!UserHandle.isSameApp(ai.uid, uid)) {
+                    throw new SecurityException("Calling uid " + uid + " gave package "
+                            + pkg + " which is owned by uid " + ai.uid);
+                }
+            } catch (PackageManager.NameNotFoundException re) {
+                throw new SecurityException("Unknown package " + pkg + "\n" + re);
+            }
+        }
     }
 
     /**
@@ -181,6 +357,53 @@ public class IncidentCompanionService extends SystemService {
                 mPendingReports.onBootCompleted();
                 break;
         }
+    }
+
+    /**
+     * Looks up incidentd every time, so we don't need a complex handshake between
+     * incidentd and IncidentCompanionService.
+     */
+    private IIncidentManager getIIncidentManager() throws RemoteException {
+        return IIncidentManager.Stub.asInterface(
+                ServiceManager.getService(Context.INCIDENT_SERVICE));
+    }
+
+    /**
+     * Check whether the current user is the primary user, and return the user id if they are.
+     * Returns UserHandle.USER_NULL if not valid.
+     */
+    public static int getAndValidateUser(Context context) {
+        // Current user
+        UserInfo currentUser;
+        try {
+            currentUser = ActivityManager.getService().getCurrentUser();
+        } catch (RemoteException ex) {
+            // We're already inside the system process.
+            throw new RuntimeException(ex);
+        }
+
+        // Primary user
+        final UserManager um = UserManager.get(context);
+        final UserInfo primaryUser = um.getPrimaryUser();
+
+        // Check that we're using the right user.
+        if (currentUser == null) {
+            Log.w(TAG, "No current user.  Nobody to approve the report."
+                    + " The report will be denied.");
+            return UserHandle.USER_NULL;
+        }
+        if (primaryUser == null) {
+            Log.w(TAG, "No primary user.  Nobody to approve the report."
+                    + " The report will be denied.");
+            return UserHandle.USER_NULL;
+        }
+        if (primaryUser.id != currentUser.id) {
+            Log.w(TAG, "Only the primary user can approve bugreports, but they are not"
+                    + " the current user. The report will be denied.");
+            return UserHandle.USER_NULL;
+        }
+
+        return primaryUser.id;
     }
 }
 

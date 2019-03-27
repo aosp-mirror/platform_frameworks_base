@@ -19,7 +19,7 @@ package android.view;
 
 option java_multiple_files = true;
 
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 /**
  * Represents a {@link android.view.SurfaceControl} object.

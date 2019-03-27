@@ -121,7 +121,7 @@ public:
      * it is not able to write to ProtoOutputStream any more since the data is compact.
      */
     size_t size(); // Get the size of the serialized protobuf.
-    EncodedBuffer::iterator data(); // Get the reader apis of the data.
+    sp<ProtoReader> data(); // Get the reader apis of the data.
     bool flush(int fd); // Flush data directly to a file descriptor.
 
     /**
@@ -135,7 +135,7 @@ public:
     void writeRawByte(uint8_t byte);
 
 private:
-    EncodedBuffer mBuffer;
+    sp<EncodedBuffer> mBuffer;
     size_t mCopyBegin;
     bool mCompact;
     uint32_t mDepth;

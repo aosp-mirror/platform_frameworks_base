@@ -21,6 +21,7 @@ cc_binary {
 
     srcs: [
         "src/**/*.cpp",
+        "src/**/*.proto",
         ":incidentd_section_list",
     ],
 
@@ -43,6 +44,10 @@ cc_binary {
     local_include_dirs: ["src"],
     generated_headers: ["gen-platform-proto-constants"],
 
+    proto: {
+        type: "lite",
+    },
+
     shared_libs: [
         "libbase",
         "libbinder",
@@ -54,6 +59,11 @@ cc_binary {
         "libservices",
         "libutils",
         "libprotobuf-cpp-lite",
+    ],
+
+    static_libs: [
+        "libincidentcompanion",
+        "libplatformprotos",
     ],
 
     init_rc: ["incidentd.rc"],
@@ -72,6 +82,7 @@ cc_test {
         "-Wall",
         "-Wno-unused-variable",
         "-Wunused-parameter",
+        "-g",
 
         // Allow implicit fallthrough in IncidentService.cpp:85 until it is fixed.
         "-Wno-error=implicit-fallthrough",
@@ -82,21 +93,26 @@ cc_test {
 
     srcs: [
         "tests/**/*.cpp",
-        "src/PrivacyBuffer.cpp",
+        "tests/**/*.proto",
         "src/FdBuffer.cpp",
         "src/Privacy.cpp",
+        "src/PrivacyFilter.cpp",
         "src/Reporter.cpp",
         "src/Section.cpp",
         "src/Throttler.cpp",
+        "src/WorkDirectory.cpp",
         "src/incidentd_util.cpp",
+        "src/proto_util.cpp",
         "src/report_directory.cpp",
+        "src/**/*.proto",
     ],
 
     data: ["testdata/**/*"],
 
     static_libs: [
         "libgmock",
-        "libplatformprotos",
+        "libincidentcompanion",
+        "libplatformprotos-test",
     ],
     shared_libs: [
         "libbase",
@@ -105,11 +121,19 @@ cc_test {
         "libdumputils",
         "libincident",
         "liblog",
-        "libprotobuf-cpp-lite",
+        "libprotobuf-cpp-full",
         "libprotoutil",
         "libservices",
         "libutils",
     ],
+
+    target: {
+        android: {
+            proto: {
+                type: "full",
+            },
+        },
+    },
 }
 
 genrule {

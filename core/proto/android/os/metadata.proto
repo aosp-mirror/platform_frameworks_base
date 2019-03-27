@@ -27,7 +27,7 @@ message IncidentMetadata {
     // The id of the incident report.
     optional int64 report_id = 1;
 
-    // The sequence number of the report.
+    // No longer filled in as of Qt.
     optional int32 sequence_number = 2;
 
     // privacy level of the incident report.
@@ -38,8 +38,10 @@ message IncidentMetadata {
     }
     optional Destination dest = 3;
 
+    // No longer filled in as of Qt.
     optional int32 request_size = 4;
 
+    // No longer filled in as of Qt.
     optional bool use_dropbox = 5;
 
     // stats of each section taken in this incident report.

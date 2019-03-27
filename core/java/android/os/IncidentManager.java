@@ -75,6 +75,13 @@ public class IncidentManager {
     public static final String URI_PARAM_ID = "id";
 
     /**
+     * Query parameter for the uris for the incident report id.
+     *
+     * @hide
+     */
+    public static final String URI_PARAM_REPORT_ID = "r";
+
+    /**
      * Query parameter for the uris for the pending report id.
      *
      * @hide
@@ -95,6 +102,13 @@ public class IncidentManager {
      * @hide
      */
     public static final String URI_PARAM_FLAGS = "flags";
+
+    /**
+     * Query parameter for the uris for the pending report id.
+     *
+     * @hide
+     */
+    public static final String URI_PARAM_RECEIVER_CLASS = "receiver";
 
     /**
      * Do the confirmation with a dialog instead of the default, which is a notification.
@@ -243,12 +257,12 @@ public class IncidentManager {
     @SystemApi
     @TestApi
     public static class IncidentReport implements Parcelable, Closeable {
-        private final long mTimestampMs;
+        private final long mTimestampNs;
         private final int mPrivacyPolicy;
         private ParcelFileDescriptor mFileDescriptor;
 
         public IncidentReport(Parcel in) {
-            mTimestampMs = in.readLong();
+            mTimestampNs = in.readLong();
             mPrivacyPolicy = in.readInt();
             if (in.readInt() != 0) {
                 mFileDescriptor = ParcelFileDescriptor.CREATOR.createFromParcel(in);
@@ -272,10 +286,10 @@ public class IncidentManager {
 
         /**
          * Get the time at which this incident report was taken, in wall clock time
-         * ({@link System#uptimeMillis System.uptimeMillis()} time base).
+         * ({@link System#currenttimeMillis System.currenttimeMillis()} time base).
          */
         public long getTimestamp() {
-            return mTimestampMs;
+            return mTimestampNs / 1000000;
         }
 
         /**
@@ -310,7 +324,7 @@ public class IncidentManager {
          * @inheritDoc
          */
         public void writeToParcel(Parcel out, int flags) {
-            out.writeLong(mTimestampMs);
+            out.writeLong(mTimestampNs);
             out.writeInt(mPrivacyPolicy);
             if (mFileDescriptor != null) {
                 out.writeInt(1);
@@ -397,8 +411,8 @@ public class IncidentManager {
     public void requestAuthorization(int callingUid, String callingPackage, int flags,
             AuthListener listener) {
         try {
-            getCompanionServiceLocked().authorizeReport(callingUid, callingPackage, flags,
-                    listener.mBinder);
+            getCompanionServiceLocked().authorizeReport(callingUid, callingPackage, null, null,
+                    flags, listener.mBinder);
         } catch (RemoteException ex) {
             // System process going down
             throw new RuntimeException(ex);
@@ -477,7 +491,19 @@ public class IncidentManager {
             android.Manifest.permission.PACKAGE_USAGE_STATS
     })
     public @NonNull List<Uri> getIncidentReportList(String receiverClass) {
-        throw new RuntimeException("implement me");
+        List<String> strings;
+        try {
+            strings = getCompanionServiceLocked().getIncidentReportList(
+                    mContext.getPackageName(), receiverClass);
+        } catch (RemoteException ex) {
+            throw new RuntimeException("System server or incidentd going down", ex);
+        }
+        final int size = strings.size();
+        ArrayList<Uri> result = new ArrayList(size);
+        for (int i = 0; i < size; i++) {
+            result.add(Uri.parse(strings.get(i)));
+        }
+        return result;
     }
 
     /**
@@ -493,20 +519,74 @@ public class IncidentManager {
             android.Manifest.permission.PACKAGE_USAGE_STATS
     })
     public @Nullable IncidentReport getIncidentReport(Uri uri) {
-        throw new RuntimeException("implement me");
+        final String pkg = uri.getQueryParameter(URI_PARAM_CALLING_PACKAGE);
+        if (pkg == null) {
+            throw new RuntimeException("Invalid URI: No "
+                    + URI_PARAM_CALLING_PACKAGE + " parameter. " + uri);
+        }
+
+        final String cls = uri.getQueryParameter(URI_PARAM_RECEIVER_CLASS);
+        if (cls == null) {
+            throw new RuntimeException("Invalid URI: No "
+                    + URI_PARAM_RECEIVER_CLASS + " parameter. " + uri);
+        }
+
+        final String id = uri.getQueryParameter(URI_PARAM_REPORT_ID);
+        if (cls == null) {
+            // If there's no report id, it's a bug report, so we can't return the incident
+            // report.
+            return null;
+        }
+    
+        try {
+            return getCompanionServiceLocked().getIncidentReport(pkg, cls, id);
+        } catch (RemoteException ex) {
+            throw new RuntimeException("System server or incidentd going down", ex);
+        }
     }
 
     /**
      * Delete the incident report with the given URI id.
      *
-     * @param uri Identifier of the incident report.
+     * @param uri Identifier of the incident report. Pass null to delete all
+     *              incident reports owned by this application.
      */
     @RequiresPermission(allOf = {
             android.Manifest.permission.DUMP,
             android.Manifest.permission.PACKAGE_USAGE_STATS
     })
     public void deleteIncidentReports(Uri uri) {
-        throw new RuntimeException("implement me");
+        if (uri == null) {
+            try {
+                getCompanionServiceLocked().deleteAllIncidentReports(mContext.getPackageName());
+            } catch (RemoteException ex) {
+                throw new RuntimeException("System server or incidentd going down", ex);
+            }
+        } else {
+            final String pkg = uri.getQueryParameter(URI_PARAM_CALLING_PACKAGE);
+            if (pkg == null) {
+                throw new RuntimeException("Invalid URI: No "
+                        + URI_PARAM_CALLING_PACKAGE + " parameter. " + uri);
+            }
+
+            final String cls = uri.getQueryParameter(URI_PARAM_RECEIVER_CLASS);
+            if (cls == null) {
+                throw new RuntimeException("Invalid URI: No "
+                        + URI_PARAM_RECEIVER_CLASS + " parameter. " + uri);
+            }
+
+            final String id = uri.getQueryParameter(URI_PARAM_REPORT_ID);
+            if (cls == null) {
+                throw new RuntimeException("Invalid URI: No "
+                        + URI_PARAM_REPORT_ID + " parameter. " + uri);
+            }
+        
+            try {
+                getCompanionServiceLocked().deleteIncidentReports(pkg, cls, id);
+            } catch (RemoteException ex) {
+                throw new RuntimeException("System server or incidentd going down", ex);
+            }
+        }
     }
 
     private void reportIncidentInternal(IncidentReportArgs args) {

@@ -21,7 +21,7 @@ option java_multiple_files = true;
 option java_outer_classname = "BatteryStatsServiceProto";
 
 import "frameworks/base/core/proto/android/os/batterystats.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 // Dump of batterystats aggregate data (dumpsys batterystats --proto).
 message BatteryStatsServiceDumpProto {
