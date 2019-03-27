@@ -113,11 +113,23 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
 
     public void saveSpecs(QSTileHost host) {
         List<String> newSpecs = new ArrayList<>();
+        clearAccessibilityState();
         for (int i = 1; i < mTiles.size() && mTiles.get(i) != null; i++) {
             newSpecs.add(mTiles.get(i).spec);
         }
         host.changeTiles(mCurrentSpecs, newSpecs);
         mCurrentSpecs = newSpecs;
+    }
+
+    private void clearAccessibilityState() {
+        if (mAccessibilityAction == ACTION_ADD) {
+            // Remove blank tile from last spot
+            mTiles.remove(--mEditIndex);
+            // Update the tile divider position
+            mTileDividerIndex--;
+            notifyDataSetChanged();
+        }
+        mAccessibilityAction = ACTION_NONE;
     }
 
     public void resetTileSpecs(QSTileHost host, List<String> specs) {
@@ -333,8 +345,6 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
             // Remove the placeholder.
             mTiles.remove(mEditIndex--);
             notifyItemRemoved(mEditIndex);
-            // Don't remove items when the last position is selected.
-            if (position == mEditIndex - 1) position--;
         }
         mAccessibilityAction = ACTION_NONE;
         move(mAccessibilityFromIndex, position, v);
@@ -372,6 +382,8 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         mAccessibilityAction = ACTION_ADD;
         // Add placeholder for last slot.
         mTiles.add(mEditIndex++, null);
+        // Update the tile divider position
+        mTileDividerIndex++;
         mNeedsFocus = true;
         notifyDataSetChanged();
     }
