@@ -71,8 +71,7 @@ public class BarView extends LinearLayout {
         //Set height of bar view
         mBarView.getLayoutParams().height = barViewInfo.getNormalizedHeight();
         mIcon.setImageDrawable(barViewInfo.getIcon());
-        // For now, we use the bar number as title.
-        mBarTitle.setText(Integer.toString(barViewInfo.getHeight()));
+        mBarTitle.setText(barViewInfo.getTitle());
         mBarSummary.setText(barViewInfo.getSummary());
         mIcon.setContentDescription(barViewInfo.getContentDescription());
     }
