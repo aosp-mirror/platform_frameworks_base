@@ -270,8 +270,8 @@ public class BubbleStackView extends FrameLayout {
      * Handle config changes.
      */
     public void onConfigChanged() {
-        if (mExpandedBubble != null) {
-            mExpandedBubble.expandedView.updateHeaderColor();
+        for (Bubble b: mBubbleData.getBubbles()) {
+            b.expandedView.updateHeaderColor();
         }
     }
 
@@ -856,7 +856,6 @@ public class BubbleStackView extends FrameLayout {
 
     private void applyCurrentState() {
         Log.d(TAG, "applyCurrentState: mIsExpanded=" + mIsExpanded);
-
         mExpandedViewContainer.setVisibility(mIsExpanded ? VISIBLE : GONE);
         if (mIsExpanded) {
             // First update the view so that it calculates a new height (ensuring the y position
