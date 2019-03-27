@@ -44,6 +44,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PermissionInfo;
@@ -149,6 +150,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -2010,6 +2012,40 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
+    private void pullAppsOnExternalStorageInfo(int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        PackageManager pm = mContext.getPackageManager();
+        StorageManager storage = mContext.getSystemService(StorageManager.class);
+        List<ApplicationInfo> apps = pm.getInstalledApplications(/* flags = */ 0);
+        for (ApplicationInfo appInfo : apps) {
+            UUID storageUuid = appInfo.storageUuid;
+            if (storageUuid != null) {
+                VolumeInfo volumeInfo = storage.findVolumeByUuid(appInfo.storageUuid.toString());
+                if (volumeInfo != null) {
+                    DiskInfo diskInfo = volumeInfo.getDisk();
+                    if (diskInfo != null) {
+                        int externalStorageType = -1;
+                        if (diskInfo.isSd()) {
+                            externalStorageType = StorageEnums.SD_CARD;
+                        } else if (diskInfo.isUsb()) {
+                            externalStorageType = StorageEnums.USB;
+                        } else if (appInfo.isExternal()) {
+                            externalStorageType = StorageEnums.OTHER;
+                        }
+                        // App is installed on external storage.
+                        if (externalStorageType != -1) {
+                            StatsLogEventWrapper e =
+                                    new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+                            e.writeInt(externalStorageType);
+                            e.writeString(appInfo.packageName);
+                            pulledData.add(e);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     /**
      * Pulls various data.
      */
@@ -2208,6 +2244,10 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             case StatsLog.EXTERNAL_STORAGE_INFO: {
                 pullExternalStorageInfo(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.APPS_ON_EXTERNAL_STORAGE_INFO: {
+                pullAppsOnExternalStorageInfo(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
             default:
