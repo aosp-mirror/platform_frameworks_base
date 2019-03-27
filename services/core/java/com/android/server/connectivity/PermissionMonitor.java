@@ -43,12 +43,15 @@ import android.os.INetworkManagementService;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.util.ArraySet;
 import android.util.Log;
+import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
+import com.android.server.SystemConfig;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -170,6 +173,23 @@ public class PermissionMonitor {
             }
         }
 
+        final SparseArray<ArraySet<String>> systemPermission =
+                SystemConfig.getInstance().getSystemPermissions();
+        for (int i = 0; i < systemPermission.size(); i++) {
+            ArraySet<String> perms = systemPermission.valueAt(i);
+            int uid = systemPermission.keyAt(i);
+            int netdPermission = 0;
+            // Get the uids of native services that have UPDATE_DEVICE_STATS permission.
+            if (perms != null) {
+                netdPermission |= perms.contains(UPDATE_DEVICE_STATS)
+                        ? INetd.PERMISSION_UPDATE_DEVICE_STATS : 0;
+            }
+            // For internet permission, the native services have their own selinux domains and
+            // sepolicy will control the socket creation during run time. netd cannot block the
+            // socket creation based on the permission information here.
+            netdPermission |= INetd.PERMISSION_INTERNET;
+            netdPermsUids.put(uid, netdPermsUids.get(uid) | netdPermission);
+        }
         log("Users: " + mUsers.size() + ", Apps: " + mApps.size());
         update(mUsers, mApps, true);
         sendPackagePermissionsToNetd(netdPermsUids);
