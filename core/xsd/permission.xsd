@@ -78,6 +78,7 @@
     <xs:complexType name="feature">
         <xs:attribute name="name" type="xs:string"/>
         <xs:attribute name="notLowRam" type="xs:string"/>
+        <xs:attribute name="version" type="xs:int"/>
     </xs:complexType>
     <xs:complexType name="unavailable-feature">
         <xs:attribute name="name" type="xs:string"/>

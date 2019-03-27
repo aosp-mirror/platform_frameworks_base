@@ -97,8 +97,10 @@ package com.android.xml.permission {
     ctor public Feature();
     method public String getName();
     method public String getNotLowRam();
+    method public int getVersion();
     method public void setName(String);
     method public void setNotLowRam(String);
+    method public void setVersion(int);
   }
 
   public class Group {
