@@ -26,6 +26,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -207,12 +208,6 @@ public class DynamicSystemClient {
      * Intent Keys
      */
     /**
-     * Intent key: URL to system image.
-     * @hide
-     */
-    public static final String KEY_SYSTEM_URL = "KEY_SYSTEM_URL";
-
-    /**
      * Intent key: Size of system image, in bytes.
      * @hide
      */
@@ -366,7 +361,7 @@ public class DynamicSystemClient {
      * @param systemSize size of system image.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
-    public void start(@NonNull String systemUrl, @BytesLong long systemSize) {
+    public void start(@NonNull Uri systemUrl, @BytesLong long systemSize) {
         start(systemUrl, systemSize, DEFAULT_USERDATA_SIZE);
     }
 
@@ -383,16 +378,16 @@ public class DynamicSystemClient {
      * @param userdataSize bytes reserved for userdata.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
-    public void start(@NonNull String systemUrl, @BytesLong long systemSize,
+    public void start(@NonNull Uri systemUrl, @BytesLong long systemSize,
             @BytesLong long userdataSize) {
         Intent intent = new Intent();
 
         intent.setClassName("com.android.dynsystem",
                 "com.android.dynsystem.VerificationActivity");
 
+        intent.setData(systemUrl);
         intent.setAction(ACTION_START_INSTALL);
 
-        intent.putExtra(KEY_SYSTEM_URL, systemUrl);
         intent.putExtra(KEY_SYSTEM_SIZE, systemSize);
         intent.putExtra(KEY_USERDATA_SIZE, userdataSize);
 
