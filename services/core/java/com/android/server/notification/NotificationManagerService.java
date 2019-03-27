@@ -2406,6 +2406,11 @@ public class NotificationManagerService extends SystemService {
         @Override
         public boolean areNotificationsEnabledForPackage(String pkg, int uid) {
             checkCallerIsSystemOrSameApp(pkg);
+            if (UserHandle.getCallingUserId() != UserHandle.getUserId(uid)) {
+                getContext().enforceCallingPermission(
+                        android.Manifest.permission.INTERACT_ACROSS_USERS,
+                        "canNotifyAsPackage for uid " + uid);
+            }
 
             return mPreferencesHelper.getImportance(pkg, uid) != IMPORTANCE_NONE;
         }
@@ -2419,6 +2424,13 @@ public class NotificationManagerService extends SystemService {
         public boolean areBubblesAllowedForPackage(String pkg, int uid) {
             enforceSystemOrSystemUIOrSamePackage(pkg,
                     "Caller not system or systemui or same package");
+
+            if (UserHandle.getCallingUserId() != UserHandle.getUserId(uid)) {
+                getContext().enforceCallingPermission(
+                        android.Manifest.permission.INTERACT_ACROSS_USERS,
+                        "canNotifyAsPackage for uid " + uid);
+            }
+
             return mPreferencesHelper.areBubblesAllowed(pkg, uid);
         }
 
