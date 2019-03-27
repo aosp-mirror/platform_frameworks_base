@@ -95,7 +95,7 @@ public class Canvas extends BaseCanvas {
     public Canvas() {
         if (!isHardwareAccelerated()) {
             // 0 means no native bitmap
-            mNativeCanvasWrapper = nInitRaster(null);
+            mNativeCanvasWrapper = nInitRaster(0);
             mFinalizer = NoImagePreloadHolder.sRegistry.registerNativeAllocation(
                     this, mNativeCanvasWrapper);
         } else {
@@ -117,7 +117,7 @@ public class Canvas extends BaseCanvas {
             throw new IllegalStateException("Immutable bitmap passed to Canvas constructor");
         }
         throwIfCannotDraw(bitmap);
-        mNativeCanvasWrapper = nInitRaster(bitmap);
+        mNativeCanvasWrapper = nInitRaster(bitmap.getNativeInstance());
         mFinalizer = NoImagePreloadHolder.sRegistry.registerNativeAllocation(
                 this, mNativeCanvasWrapper);
         mBitmap = bitmap;
@@ -185,7 +185,7 @@ public class Canvas extends BaseCanvas {
         }
 
         if (bitmap == null) {
-            nSetBitmap(mNativeCanvasWrapper, null);
+            nSetBitmap(mNativeCanvasWrapper, 0);
             mDensity = Bitmap.DENSITY_NONE;
         } else {
             if (!bitmap.isMutable()) {
@@ -193,7 +193,7 @@ public class Canvas extends BaseCanvas {
             }
             throwIfCannotDraw(bitmap);
 
-            nSetBitmap(mNativeCanvasWrapper, bitmap);
+            nSetBitmap(mNativeCanvasWrapper, bitmap.getNativeInstance());
             mDensity = bitmap.mDensity;
         }
 
@@ -1364,14 +1364,16 @@ public class Canvas extends BaseCanvas {
 
     private static native void nFreeCaches();
     private static native void nFreeTextLayoutCaches();
-    private static native long nInitRaster(Bitmap bitmap);
     private static native long nGetNativeFinalizer();
     private static native void nSetCompatibilityVersion(int apiLevel);
 
     // ---------------- @FastNative -------------------
 
     @FastNative
-    private static native void nSetBitmap(long canvasHandle, Bitmap bitmap);
+    private static native long nInitRaster(long bitmapHandle);
+
+    @FastNative
+    private static native void nSetBitmap(long canvasHandle, long bitmapHandle);
 
     @FastNative
     private static native boolean nGetClipBounds(long nativeCanvas, Rect bounds);

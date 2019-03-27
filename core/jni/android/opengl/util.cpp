@@ -703,27 +703,27 @@ static int getType(SkColorType colorType)
 }
 
 static jint util_getInternalFormat(JNIEnv *env, jclass clazz,
-        jobject jbitmap)
+        jlong bitmapPtr)
 {
     SkBitmap nativeBitmap;
-    GraphicsJNI::getSkBitmap(env, jbitmap, &nativeBitmap);
+    bitmap::toBitmap(bitmapPtr).getSkBitmap(&nativeBitmap);
     return getInternalFormat(nativeBitmap.colorType());
 }
 
 static jint util_getType(JNIEnv *env, jclass clazz,
-        jobject jbitmap)
+        jlong bitmapPtr)
 {
     SkBitmap nativeBitmap;
-    GraphicsJNI::getSkBitmap(env, jbitmap, &nativeBitmap);
+    bitmap::toBitmap(bitmapPtr).getSkBitmap(&nativeBitmap);
     return getType(nativeBitmap.colorType());
 }
 
 static jint util_texImage2D(JNIEnv *env, jclass clazz,
         jint target, jint level, jint internalformat,
-        jobject jbitmap, jint type, jint border)
+        jlong bitmapPtr, jint type, jint border)
 {
     SkBitmap bitmap;
-    GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
+    bitmap::toBitmap(bitmapPtr).getSkBitmap(&bitmap);
     SkColorType colorType = bitmap.colorType();
     if (internalformat < 0) {
         internalformat = getInternalFormat(colorType);
@@ -748,10 +748,10 @@ static jint util_texImage2D(JNIEnv *env, jclass clazz,
 
 static jint util_texSubImage2D(JNIEnv *env, jclass clazz,
         jint target, jint level, jint xoffset, jint yoffset,
-        jobject jbitmap, jint format, jint type)
+        jlong bitmapPtr, jint format, jint type)
 {
     SkBitmap bitmap;
-    GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
+    bitmap::toBitmap(bitmapPtr).getSkBitmap(&bitmap);
     SkColorType colorType = bitmap.colorType();
     int internalFormat = getInternalFormat(colorType);
     if (format < 0) {
@@ -1068,10 +1068,10 @@ static const JNINativeMethod gVisibilityMethods[] = {
 };
 
 static const JNINativeMethod gUtilsMethods[] = {
-    { "native_getInternalFormat", "(Landroid/graphics/Bitmap;)I", (void*) util_getInternalFormat },
-    { "native_getType", "(Landroid/graphics/Bitmap;)I", (void*) util_getType },
-    { "native_texImage2D", "(IIILandroid/graphics/Bitmap;II)I", (void*)util_texImage2D },
-    { "native_texSubImage2D", "(IIIILandroid/graphics/Bitmap;II)I", (void*)util_texSubImage2D },
+    { "native_getInternalFormat", "(J)I", (void*) util_getInternalFormat },
+    { "native_getType", "(J)I", (void*) util_getType },
+    { "native_texImage2D", "(IIIJII)I", (void*)util_texImage2D },
+    { "native_texSubImage2D", "(IIIIJII)I", (void*)util_texSubImage2D },
 };
 
 static const JNINativeMethod gEtc1Methods[] = {
