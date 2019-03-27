@@ -308,11 +308,23 @@ public class KeyguardIndicationController implements StateListener {
             // Walk down a precedence-ordered list of what indication
             // should be shown based on user or device state
             if (mDozing) {
+                // When dozing we ignore any text color and use white instead, because
+                // colors can be hard to read in low brightness.
+                mTextView.setTextColor(Color.WHITE);
                 if (!TextUtils.isEmpty(mTransientIndication)) {
-                    mTextView.setTextColor(Color.WHITE);
                     mTextView.switchIndication(mTransientIndication);
+                } else if (mPowerPluggedIn) {
+                    String indication = computePowerIndication();
+                    if (animate) {
+                        animateText(mTextView, indication);
+                    } else {
+                        mTextView.switchIndication(indication);
+                    }
+                } else {
+                    String percentage = NumberFormat.getPercentInstance()
+                            .format(mBatteryLevel / 100f);
+                    mTextView.switchIndication(percentage);
                 }
-                updateAlphas();
                 return;
             }
 
@@ -350,14 +362,6 @@ public class KeyguardIndicationController implements StateListener {
                 mTextView.switchIndication(mRestingIndication);
                 mTextView.setTextColor(mInitialTextColorState);
             }
-        }
-    }
-
-    private void updateAlphas() {
-        if (!TextUtils.isEmpty(mTransientIndication)) {
-            mTextView.setAlpha(1f);
-        } else {
-            mTextView.setAlpha(1f - mDarkAmount);
         }
     }
 
@@ -521,14 +525,6 @@ public class KeyguardIndicationController implements StateListener {
         pw.println("  mBatteryLevel: " + mBatteryLevel);
         pw.println("  mTextView.getText(): " + (mTextView == null ? null : mTextView.getText()));
         pw.println("  computePowerIndication(): " + computePowerIndication());
-    }
-
-    public void setDarkAmount(float darkAmount) {
-        if (mDarkAmount == darkAmount) {
-            return;
-        }
-        mDarkAmount = darkAmount;
-        updateAlphas();
     }
 
     @Override
