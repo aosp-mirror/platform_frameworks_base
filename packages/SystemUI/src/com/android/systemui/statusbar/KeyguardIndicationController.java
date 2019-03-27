@@ -675,6 +675,7 @@ public class KeyguardIndicationController implements StateListener {
         public void onBiometricAuthenticated(int userId, BiometricSourceType biometricSourceType) {
             super.onBiometricAuthenticated(userId, biometricSourceType);
             mLastSuccessiveErrorMessage = -1;
+            mHandler.sendEmptyMessage(MSG_HIDE_TRANSIENT);
         }
 
         @Override
