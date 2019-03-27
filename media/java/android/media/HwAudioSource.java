@@ -224,14 +224,4 @@ public class HwAudioSource extends PlayerBase {
             return new HwAudioSource(mAudioDeviceInfo, mAudioAttributes);
         }
     }
-
-    /**
-     * Eliminate {@link #deprecateStreamTypeForPlayback(int, String, String)} in API list.
-     * TODO: remove this pseudo-override function
-     * @hide
-     */
-    public static void deprecateStreamTypeForPlayback(int streamType, String className,
-            String opName) throws IllegalArgumentException {
-        // Do nothing.
-    }
 }
