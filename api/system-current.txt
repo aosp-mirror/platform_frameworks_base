@@ -76,6 +76,7 @@ package android {
     field public static final String HDMI_CEC = "android.permission.HDMI_CEC";
     field public static final String HIDE_NON_SYSTEM_OVERLAY_WINDOWS = "android.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS";
     field public static final String INJECT_EVENTS = "android.permission.INJECT_EVENTS";
+    field public static final String INSTALL_DYNAMIC_SYSTEM = "android.permission.INSTALL_DYNAMIC_SYSTEM";
     field public static final String INSTALL_GRANT_RUNTIME_PERMISSIONS = "android.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS";
     field public static final String INSTALL_PACKAGE_UPDATES = "android.permission.INSTALL_PACKAGE_UPDATES";
     field public static final String INSTALL_SELF_UPDATES = "android.permission.INSTALL_SELF_UPDATES";
@@ -5647,12 +5648,12 @@ package android.os.image {
 
   public class DynamicSystemClient {
     ctor public DynamicSystemClient(@NonNull android.content.Context);
-    method @RequiresPermission("android.permission.MANAGE_DYNAMIC_SYSTEM") public void bind();
+    method @RequiresPermission(android.Manifest.permission.INSTALL_DYNAMIC_SYSTEM) public void bind();
     method public void setOnStatusChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.os.image.DynamicSystemClient.OnStatusChangedListener);
     method public void setOnStatusChangedListener(@NonNull android.os.image.DynamicSystemClient.OnStatusChangedListener);
-    method @RequiresPermission("android.permission.MANAGE_DYNAMIC_SYSTEM") public void start(@NonNull android.net.Uri, long);
-    method @RequiresPermission("android.permission.MANAGE_DYNAMIC_SYSTEM") public void start(@NonNull android.net.Uri, long, long);
-    method @RequiresPermission("android.permission.MANAGE_DYNAMIC_SYSTEM") public void unbind();
+    method @RequiresPermission(android.Manifest.permission.INSTALL_DYNAMIC_SYSTEM) public void start(@NonNull android.net.Uri, long);
+    method @RequiresPermission(android.Manifest.permission.INSTALL_DYNAMIC_SYSTEM) public void start(@NonNull android.net.Uri, long, long);
+    method @RequiresPermission(android.Manifest.permission.INSTALL_DYNAMIC_SYSTEM) public void unbind();
     field public static final int CAUSE_ERROR_EXCEPTION = 6; // 0x6
     field public static final int CAUSE_ERROR_INVALID_URL = 4; // 0x4
     field public static final int CAUSE_ERROR_IO = 3; // 0x3
