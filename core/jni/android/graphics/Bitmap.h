@@ -56,8 +56,6 @@ bool unlockPixels(JNIEnv* env, jobject bitmap);
 void reinitBitmap(JNIEnv* env, jobject javaBitmap, const SkImageInfo& info,
         bool isPremultiplied);
 
-int getBitmapAllocationByteCount(JNIEnv* env, jobject javaBitmap);
-
 } // namespace bitmap
 
 } // namespace android

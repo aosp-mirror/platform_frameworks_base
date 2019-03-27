@@ -162,7 +162,7 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
         if (recycledBitmap->isImmutable()) {
             ALOGW("Warning: Reusing an immutable bitmap as an image decoder target.");
         }
-        recycledBytes = bitmap::getBitmapAllocationByteCount(env, javaBitmap);
+        recycledBytes = recycledBitmap->getAllocationByteCount();
     }
 
     SkBitmapRegionDecoder* brd = reinterpret_cast<SkBitmapRegionDecoder*>(brdHandle);

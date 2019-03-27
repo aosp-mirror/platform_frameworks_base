@@ -327,10 +327,10 @@ static jobject doDecode(JNIEnv* env, std::unique_ptr<SkStreamRewindable> stream,
         reuseBitmap = &bitmap::toBitmap(env, javaBitmap);
         if (reuseBitmap->isImmutable()) {
             ALOGW("Unable to reuse an immutable bitmap as an image decoder target.");
-            javaBitmap = NULL;
+            javaBitmap = nullptr;
             reuseBitmap = nullptr;
         } else {
-            existingBufferSize = bitmap::getBitmapAllocationByteCount(env, javaBitmap);
+            existingBufferSize = reuseBitmap->getAllocationByteCount();
         }
     }
 

@@ -39,7 +39,6 @@ static jclass   gBitmap_class;
 static jfieldID gBitmap_nativePtr;
 static jmethodID gBitmap_constructorMethodID;
 static jmethodID gBitmap_reinitMethodID;
-static jmethodID gBitmap_getAllocationByteCountMethodID;
 
 namespace android {
 
@@ -191,11 +190,6 @@ void reinitBitmap(JNIEnv* env, jobject javaBitmap, const SkImageInfo& info,
 
     env->CallVoidMethod(javaBitmap, gBitmap_reinitMethodID,
             info.width(), info.height(), isPremultiplied);
-}
-
-int getBitmapAllocationByteCount(JNIEnv* env, jobject javaBitmap)
-{
-    return env->CallIntMethod(javaBitmap, gBitmap_getAllocationByteCountMethodID);
 }
 
 jobject createBitmap(JNIEnv* env, Bitmap* bitmap,
@@ -1227,7 +1221,6 @@ int register_android_graphics_Bitmap(JNIEnv* env)
     gBitmap_nativePtr = GetFieldIDOrDie(env, gBitmap_class, "mNativePtr", "J");
     gBitmap_constructorMethodID = GetMethodIDOrDie(env, gBitmap_class, "<init>", "(JIIIZ[BLandroid/graphics/NinePatch$InsetStruct;Z)V");
     gBitmap_reinitMethodID = GetMethodIDOrDie(env, gBitmap_class, "reinit", "(IIZ)V");
-    gBitmap_getAllocationByteCountMethodID = GetMethodIDOrDie(env, gBitmap_class, "getAllocationByteCount", "()I");
     return android::RegisterMethodsOrDie(env, "android/graphics/Bitmap", gBitmapMethods,
                                          NELEM(gBitmapMethods));
 }
