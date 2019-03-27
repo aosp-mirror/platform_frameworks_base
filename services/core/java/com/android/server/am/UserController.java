@@ -1743,6 +1743,24 @@ class UserController implements Handler.Callback {
         return state.state != UserState.STATE_STOPPING && state.state != UserState.STATE_SHUTDOWN;
     }
 
+    /**
+     * Check if system user is already started. Unlike other user, system user is in STATE_BOOTING
+     * even if it is not explicitly started. So isUserRunning cannot give the right state
+     * to check if system user is started or not.
+     * @return true if system user is started.
+     */
+    boolean isSystemUserStarted() {
+        synchronized (mLock) {
+            UserState uss = mStartedUsers.get(UserHandle.USER_SYSTEM);
+            if (uss == null) {
+                return false;
+            }
+            return uss.state == UserState.STATE_RUNNING_LOCKED
+                || uss.state == UserState.STATE_RUNNING_UNLOCKING
+                || uss.state == UserState.STATE_RUNNING_UNLOCKED;
+        }
+    }
+
     UserInfo getCurrentUser() {
         if ((mInjector.checkCallingPermission(INTERACT_ACROSS_USERS)
                 != PackageManager.PERMISSION_GRANTED) && (
