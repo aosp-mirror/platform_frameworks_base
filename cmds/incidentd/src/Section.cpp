@@ -25,6 +25,7 @@
 #include <set>
 
 #include <android-base/file.h>
+#include <android-base/properties.h>
 #include <android-base/stringprintf.h>
 #include <android/util/protobuf.h>
 #include <android/util/ProtoOutputStream.h>
@@ -63,10 +64,10 @@ static pid_t fork_execute_incident_helper(const int id, Fpipe* p2cPipe, Fpipe* c
 }
 
 // ================================================================================
-Section::Section(int i, int64_t timeoutMs, bool userdebugAndEngOnly)
+Section::Section(int i, int64_t timeoutMs)
     : id(i),
-      timeoutMs(timeoutMs),
-      userdebugAndEngOnly(userdebugAndEngOnly) {}
+      timeoutMs(timeoutMs) {
+}
 
 Section::~Section() {}
 
@@ -74,7 +75,7 @@ Section::~Section() {}
 static inline bool isSysfs(const char* filename) { return strncmp(filename, "/sys/", 5) == 0; }
 
 FileSection::FileSection(int id, const char* filename, const int64_t timeoutMs)
-    : Section(id, timeoutMs, false), mFilename(filename) {
+    : Section(id, timeoutMs), mFilename(filename) {
     name = "file ";
     name += filename;
     mIsSysfs = isSysfs(filename);
@@ -236,8 +237,8 @@ WorkerThreadData::WorkerThreadData(const WorkerThreadSection* sec)
 WorkerThreadData::~WorkerThreadData() {}
 
 // ================================================================================
-WorkerThreadSection::WorkerThreadSection(int id, const int64_t timeoutMs, bool userdebugAndEngOnly)
-    : Section(id, timeoutMs, userdebugAndEngOnly) {}
+WorkerThreadSection::WorkerThreadSection(int id, const int64_t timeoutMs)
+    : Section(id, timeoutMs) {}
 
 WorkerThreadSection::~WorkerThreadSection() {}
 
@@ -425,8 +426,8 @@ status_t CommandSection::Execute(ReportWriter* writer) const {
 }
 
 // ================================================================================
-DumpsysSection::DumpsysSection(int id, bool userdebugAndEngOnly, const char* service, ...)
-    : WorkerThreadSection(id, REMOTE_CALL_TIMEOUT_MS, userdebugAndEngOnly), mService(service) {
+DumpsysSection::DumpsysSection(int id, const char* service, ...)
+    : WorkerThreadSection(id, REMOTE_CALL_TIMEOUT_MS), mService(service) {
     name = "dumpsys ";
     name += service;
 

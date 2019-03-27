@@ -40,10 +40,9 @@ class Section {
 public:
     const int id;
     const int64_t timeoutMs;  // each section must have a timeout
-    const bool userdebugAndEngOnly;
     String8 name;
 
-    Section(int id, int64_t timeoutMs = REMOTE_CALL_TIMEOUT_MS, bool userdebugAndEngOnly = false);
+    Section(int id, int64_t timeoutMs = REMOTE_CALL_TIMEOUT_MS);
     virtual ~Section();
 
     virtual status_t Execute(ReportWriter* writer) const = 0;
@@ -85,8 +84,7 @@ private:
  */
 class WorkerThreadSection : public Section {
 public:
-    WorkerThreadSection(int id, int64_t timeoutMs = REMOTE_CALL_TIMEOUT_MS,
-                        bool userdebugAndEngOnly = false);
+    WorkerThreadSection(int id, int64_t timeoutMs = REMOTE_CALL_TIMEOUT_MS);
     virtual ~WorkerThreadSection();
 
     virtual status_t Execute(ReportWriter* writer) const;
@@ -116,8 +114,23 @@ private:
  */
 class DumpsysSection : public WorkerThreadSection {
 public:
-    DumpsysSection(int id, bool userdebugAndEngOnly, const char* service, ...);
+    DumpsysSection(int id, const char* service, ...);
     virtual ~DumpsysSection();
+
+    virtual status_t BlockingCall(int pipeWriteFd) const;
+
+private:
+    String16 mService;
+    Vector<String16> mArgs;
+};
+
+/**
+ * Section that calls dumpsys on a system service.
+ */
+class SystemPropertyDumpsysSection : public WorkerThreadSection {
+public:
+    SystemPropertyDumpsysSection(int id, const char* service, ...);
+    virtual ~SystemPropertyDumpsysSection();
 
     virtual status_t BlockingCall(int pipeWriteFd) const;
 

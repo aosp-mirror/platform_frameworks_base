@@ -66,6 +66,13 @@ cc_binary {
         "libplatformprotos",
     ],
 
+    product_variables: {
+        debuggable: {
+            cflags: ["-DALLOW_RESTRICTED_SECTIONS=1"],
+        },
+    },
+
+
     init_rc: ["incidentd.rc"],
 }
 
