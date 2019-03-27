@@ -33,6 +33,9 @@ import static org.mockito.Mockito.verify;
 import android.app.admin.PasswordMetrics;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.platform.test.annotations.Presubmit;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.VerifyCredentialResponse;
@@ -48,6 +51,8 @@ import java.util.ArrayList;
 /**
  * runtest frameworks-services -c com.android.server.locksettings.SyntheticPasswordTests
  */
+@SmallTest
+@Presubmit
 public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
 
     public static final byte[] PAYLOAD = new byte[] {1, 2, -1, -2, 55};

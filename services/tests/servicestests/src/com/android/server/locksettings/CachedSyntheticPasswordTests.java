@@ -26,6 +26,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.os.RemoteException;
+import android.platform.test.annotations.Presubmit;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.VerifyCredentialResponse;
@@ -40,6 +43,8 @@ import java.util.ArrayList;
  * By default, those tests run without caching. Untrusted credential reset depends on caching so
  * this class included those tests.
  */
+@SmallTest
+@Presubmit
 public class CachedSyntheticPasswordTests extends SyntheticPasswordTests {
 
     @Override
