@@ -467,7 +467,7 @@ public class SubscriptionInfo implements Parcelable {
      * @return group UUID a String of group UUID if it belongs to a group. Otherwise
      * it will return null.
      */
-    public String getGroupUuid() {
+    public @Nullable String getGroupUuid() {
         return mGroupUUID;
     }
 
