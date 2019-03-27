@@ -1,0 +1,8 @@
+# See system/core/logcat/event.logtags for a description of the format of this file.
+
+option java_package com.android.server.policy
+
+
+# 0 for screen off, 1 for screen on
+70000 screen_toggled (screen_state|1|5)
+70001 intercept_power (action|3),(mPowerKeyHandled|1),(mPowerKeyPressCounter|1)
