@@ -323,16 +323,24 @@ public class LocationManagerService extends ILocationManager.Stub {
                 });
         mPackageManager.addOnPermissionsChangeListener(
                 uid -> {
-                    synchronized (mLock) {
-                        onPermissionsChangedLocked();
-                    }
+                    // listener invoked on ui thread, move to our thread to reduce risk of blocking
+                    // ui thread
+                    mHandler.post(() -> {
+                        synchronized (mLock) {
+                            onPermissionsChangedLocked();
+                        }
+                    });
                 });
 
         mActivityManager.addOnUidImportanceListener(
                 (uid, importance) -> {
-                    synchronized (mLock) {
-                        onUidImportanceChangedLocked(uid, importance);
-                    }
+                    // listener invoked on ui thread, move to our thread to reduce risk of blocking
+                    // ui thread
+                    mHandler.post(() -> {
+                        synchronized (mLock) {
+                            onUidImportanceChangedLocked(uid, importance);
+                        }
+                    });
                 },
                 FOREGROUND_IMPORTANCE_CUTOFF);
         mContext.getContentResolver().registerContentObserver(
@@ -394,9 +402,13 @@ public class LocationManagerService extends ILocationManager.Stub {
                 LocalServices.getService(PowerManagerInternal.class);
         localPowerManager.registerLowPowerModeObserver(ServiceType.LOCATION,
                 state -> {
-                    synchronized (mLock) {
-                        onBatterySaverModeChangedLocked(state.locationMode);
-                    }
+                    // listener invoked on ui thread, move to our thread to reduce risk of blocking
+                    // ui thread
+                    mHandler.post(() -> {
+                        synchronized (mLock) {
+                            onBatterySaverModeChangedLocked(state.locationMode);
+                        }
+                    });
                 });
 
         new PackageMonitor() {
