@@ -5382,7 +5382,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 mContext, mTrackerHandler, new NetworkMisc(networkMisc), this, mNetd, mNMS,
                 factorySerialNumber);
         // Make sure the network capabilities reflect what the agent info says.
-        nai.networkCapabilities = mixInCapabilities(nai, nc);
+        nai.setNetworkCapabilities(mixInCapabilities(nai, nc));
         final String extraInfo = networkInfo.getExtraInfo();
         final String name = TextUtils.isEmpty(extraInfo)
                 ? nai.networkCapabilities.getSSID() : extraInfo;
@@ -5475,12 +5475,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // Start or stop DNS64 detection and 464xlat according to network state.
             networkAgent.clatd.update();
             notifyIfacesChangedForNetworkStats();
+            try {
+                networkAgent.networkMonitor().notifyLinkPropertiesChanged(newLp);
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
             if (networkAgent.everConnected) {
-                try {
-                    networkAgent.networkMonitor().notifyLinkPropertiesChanged();
-                } catch (RemoteException e) {
-                    e.rethrowFromSystemServer();
-                }
                 notifyNetworkCallbacks(networkAgent, ConnectivityManager.CALLBACK_IP_CHANGED);
             }
         }
@@ -5708,7 +5708,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final NetworkCapabilities prevNc;
         synchronized (nai) {
             prevNc = nai.networkCapabilities;
-            nai.networkCapabilities = newNc;
+            nai.setNetworkCapabilities(newNc);
         }
 
         updateUids(nai, prevNc, newNc);
@@ -5723,11 +5723,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // If the requestable capabilities have changed or the score changed, we can't have been
             // called by rematchNetworkAndRequests, so it's safe to start a rematch.
             rematchAllNetworksAndRequests(nai, oldScore);
-            try {
-                nai.networkMonitor().notifyNetworkCapabilitiesChanged();
-            } catch (RemoteException e) {
-                e.rethrowFromSystemServer();
-            }
             notifyNetworkCallbacks(nai, ConnectivityManager.CALLBACK_CAP_CHANGED);
         }
 
@@ -5986,11 +5981,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         if (capabilitiesChanged) {
-            try {
-                nai.networkMonitor().notifyNetworkCapabilitiesChanged();
-            } catch (RemoteException e) {
-                e.rethrowFromSystemServer();
-            }
             notifyNetworkCallbacks(nai, ConnectivityManager.CALLBACK_CAP_CHANGED);
         }
 
@@ -6399,7 +6389,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 if (networkAgent.networkMisc.acceptPartialConnectivity) {
                     networkAgent.networkMonitor().setAcceptPartialConnectivity();
                 }
-                networkAgent.networkMonitor().notifyNetworkConnected();
+                networkAgent.networkMonitor().notifyNetworkConnected(
+                        networkAgent.linkProperties, networkAgent.networkCapabilities);
             } catch (RemoteException e) {
                 e.rethrowFromSystemServer();
             }

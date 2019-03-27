@@ -29,6 +29,7 @@ import android.net.NetworkState;
 import android.os.Handler;
 import android.os.INetworkManagementService;
 import android.os.Messenger;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.SparseArray;
@@ -120,7 +121,8 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     // This Network object is always valid.
     public final Network network;
     public LinkProperties linkProperties;
-    // This should only be modified via ConnectivityService.updateCapabilities().
+    // This should only be modified by ConnectivityService, via setNetworkCapabilities().
+    // TODO: make this private with a getter.
     public NetworkCapabilities networkCapabilities;
     public final NetworkMisc networkMisc;
     // Indicates if netd has been told to create this Network. From this point on the appropriate
@@ -276,6 +278,25 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
      */
     public void onNetworkMonitorCreated(INetworkMonitor networkMonitor) {
         mNetworkMonitor = networkMonitor;
+    }
+
+    /**
+     * Set the NetworkCapabilities on this NetworkAgentInfo. Also attempts to notify NetworkMonitor
+     * of the new capabilities, if NetworkMonitor has been created.
+     *
+     * <p>If {@link NetworkMonitor#notifyNetworkCapabilitiesChanged(NetworkCapabilities)} fails,
+     * the exception is logged but not reported to callers.
+     */
+    public void setNetworkCapabilities(NetworkCapabilities nc) {
+        networkCapabilities = nc;
+        final INetworkMonitor nm = mNetworkMonitor;
+        if (nm != null) {
+            try {
+                nm.notifyNetworkCapabilitiesChanged(nc);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error notifying NetworkMonitor of updated NetworkCapabilities", e);
+            }
+        }
     }
 
     public ConnectivityService connService() {
