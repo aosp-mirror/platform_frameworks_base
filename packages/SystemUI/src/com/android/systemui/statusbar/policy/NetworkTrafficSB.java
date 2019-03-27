@@ -64,6 +64,7 @@ public class NetworkTrafficSB extends TextView implements StatusIconDisplayable 
 
     private boolean mIsEnabled;
     private boolean mAttached;
+    private boolean mTrafficInHeaderView;
     private long totalRxBytes;
     private long totalTxBytes;
     private long lastUpdateTime;
@@ -192,6 +193,9 @@ public class NetworkTrafficSB extends TextView implements StatusIconDisplayable 
             resolver.registerContentObserver(Settings.System
                     .getUriFor(Settings.System.NETWORK_TRAFFIC_ARROW), false,
                     this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System
+                    .getUriFor(Settings.System.NETWORK_TRAFFIC_VIEW_LOCATION), false,
+                    this, UserHandle.USER_ALL);
         }
 
         /*
@@ -284,6 +288,10 @@ public class NetworkTrafficSB extends TextView implements StatusIconDisplayable 
     }
 
     private void updateSettings() {
+        final ContentResolver resolver = getContext().getContentResolver();
+        mTrafficInHeaderView = Settings.System.getIntForUser(resolver,
+                Settings.System.NETWORK_TRAFFIC_VIEW_LOCATION, 0,
+                UserHandle.USER_CURRENT) == 1;
         updateVisibility();
         updateTextSize();
         if (mIsEnabled) {
@@ -312,6 +320,9 @@ public class NetworkTrafficSB extends TextView implements StatusIconDisplayable 
                 UserHandle.USER_CURRENT);
         mShowArrow = Settings.System.getIntForUser(resolver,
                 Settings.System.NETWORK_TRAFFIC_ARROW, 1,
+                UserHandle.USER_CURRENT) == 1;
+        mTrafficInHeaderView = Settings.System.getIntForUser(resolver,
+                Settings.System.NETWORK_TRAFFIC_VIEW_LOCATION, 0,
                 UserHandle.USER_CURRENT) == 1;
     }
 
@@ -410,7 +421,7 @@ public class NetworkTrafficSB extends TextView implements StatusIconDisplayable 
     }
 
     private void updateVisibility() {
-        if (mIsEnabled && mTrafficVisible && mSystemIconVisible) {
+        if (mIsEnabled && mTrafficVisible && mSystemIconVisible && !mTrafficInHeaderView) {
             setVisibility(View.VISIBLE);
         } else {
             setVisibility(View.GONE);
