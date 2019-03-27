@@ -25,8 +25,6 @@ import static android.app.AppOpsManager.OP_LEGACY_STORAGE;
 import static android.app.AppOpsManager.OP_READ_EXTERNAL_STORAGE;
 import static android.app.AppOpsManager.OP_REQUEST_INSTALL_PACKAGES;
 import static android.app.AppOpsManager.OP_WRITE_EXTERNAL_STORAGE;
-import static android.content.pm.PackageManager.FLAG_PERMISSION_HIDDEN;
-import static android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
@@ -81,7 +79,6 @@ import android.content.res.ObbInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Binder;
-import android.os.Build;
 import android.os.DropBoxManager;
 import android.os.Environment;
 import android.os.Environment.UserEnvironment;
@@ -310,17 +307,9 @@ class StorageManagerService extends IStorageManager.Stub
     private static final String ATTR_LAST_TRIM_MILLIS = "lastTrimMillis";
     private static final String ATTR_LAST_BENCH_MILLIS = "lastBenchMillis";
 
-    private static final String[] LEGACY_STORAGE_PERMISSIONS = {
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-    };
-
     private static final String[] ALL_STORAGE_PERMISSIONS = {
             Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.READ_MEDIA_AUDIO,
-            Manifest.permission.READ_MEDIA_VIDEO,
-            Manifest.permission.READ_MEDIA_IMAGES
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
 
     private final AtomicFile mSettingsFile;
@@ -1735,7 +1724,7 @@ class StorageManagerService extends IStorageManager.Stub
             }
 
             final List<PackageInfo> pkgs = pm.getPackagesHoldingPermissions(
-                    LEGACY_STORAGE_PERMISSIONS,
+                    ALL_STORAGE_PERMISSIONS,
                     MATCH_UNINSTALLED_PACKAGES | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE
                             | GET_PERMISSIONS);
             for (PackageInfo pkg : pkgs) {
@@ -1744,7 +1733,7 @@ class StorageManagerService extends IStorageManager.Stub
 
                 final long lastAccess = getLastAccessTime(appOps, uid, packageName, new int[] {
                         AppOpsManager.OP_READ_EXTERNAL_STORAGE,
-                        AppOpsManager.OP_WRITE_EXTERNAL_STORAGE,
+                        OP_WRITE_EXTERNAL_STORAGE,
                 });
 
                 Log.d(TAG, "Found " + uid + " " + packageName
@@ -1752,26 +1741,6 @@ class StorageManagerService extends IStorageManager.Stub
                 if (lastAccess > 0) {
                     appOps.setUidMode(AppOpsManager.OP_LEGACY_STORAGE, uid,
                             AppOpsManager.MODE_ALLOWED);
-
-                    // Grandfather pre-Q app by granting all permissions and fixing them. The user
-                    // needs to uninstall the app to revoke the permissions.
-                    // TODO: Deal with shard Uids
-                    if (pkg.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.Q) {
-                        for (String perm : ALL_STORAGE_PERMISSIONS) {
-                            if (ArrayUtils.contains(pkg.requestedPermissions, perm)) {
-                                pm.grantRuntimePermission(packageName, perm, user);
-
-                                int flags = FLAG_PERMISSION_SYSTEM_FIXED;
-                                if (!ArrayUtils.contains(LEGACY_STORAGE_PERMISSIONS, perm)) {
-                                    flags |= FLAG_PERMISSION_HIDDEN;
-                                }
-
-                                pm.updatePermissionFlags(perm, packageName,
-                                        FLAG_PERMISSION_SYSTEM_FIXED | FLAG_PERMISSION_HIDDEN,
-                                        flags, user);
-                            }
-                        }
-                    }
                 }
             }
         }
