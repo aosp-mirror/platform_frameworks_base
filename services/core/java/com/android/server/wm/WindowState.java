@@ -2525,6 +2525,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     boolean showLw(boolean doAnimation, boolean requestAnim) {
+        if (mPolicyVisibility && mPolicyVisibilityAfterAnim) {
+            // Already showing.
+            return false;
+        }
         if (isHiddenFromUserLocked()) {
             return false;
         }
@@ -2543,10 +2547,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         if (mForceHideNonSystemOverlayWindow) {
             // This is an alert window that is currently force hidden.
-            return false;
-        }
-        if (mPolicyVisibility && mPolicyVisibilityAfterAnim) {
-            // Already showing.
             return false;
         }
         if (DEBUG_VISIBILITY) Slog.v(TAG, "Policy visibility true: " + this);
