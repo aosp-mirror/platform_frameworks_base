@@ -1,5 +1,6 @@
 package com.android.internal.widget;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.AsyncTask;
 
 import com.android.internal.widget.LockPatternUtils.RequestThrottledException;
@@ -223,6 +224,7 @@ public final class LockPatternChecker {
      * @param userId The user to check against the pattern.
      * @param callback The callback to be invoked with the check result.
      */
+    @UnsupportedAppUsage
     public static AsyncTask<?, ?, ?> checkPassword(final LockPatternUtils utils,
             final String password,
             final int userId,
