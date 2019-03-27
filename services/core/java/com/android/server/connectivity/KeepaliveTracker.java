@@ -154,12 +154,19 @@ public class KeepaliveTracker {
             // keepalives are sent cannot be reused by another app even if the fd gets closed by
             // the user. A null is acceptable here for backward compatibility of PacketKeepalive
             // API.
-            // TODO: don't accept null fd after legacy packetKeepalive API is removed.
             try {
                 if (fd != null) {
                     mFd = Os.dup(fd);
                 }  else {
-                    Log.d(TAG, "uid/pid " + mUid + "/" + mPid + " calls with null fd");
+                    Log.d(TAG, toString() + " calls with null fd");
+                    if (!mPrivileged) {
+                        throw new SecurityException(
+                                "null fd is not allowed for unprivileged access.");
+                    }
+                    if (mType == TYPE_TCP) {
+                        throw new IllegalArgumentException(
+                                "null fd is not allowed for tcp socket keepalives.");
+                    }
                     mFd = null;
                 }
             } catch (ErrnoException e) {
@@ -531,7 +538,8 @@ public class KeepaliveTracker {
         try {
             ki = new KeepaliveInfo(cb, nai, packet, intervalSeconds,
                     KeepaliveInfo.TYPE_NATT, fd);
-        } catch (InvalidSocketException e) {
+        } catch (InvalidSocketException | IllegalArgumentException | SecurityException e) {
+            Log.e(TAG, "Fail to construct keepalive", e);
             notifyErrorCallback(cb, ERROR_INVALID_SOCKET);
             return;
         }
@@ -570,7 +578,8 @@ public class KeepaliveTracker {
         try {
             ki = new KeepaliveInfo(cb, nai, packet, intervalSeconds,
                     KeepaliveInfo.TYPE_TCP, fd);
-        } catch (InvalidSocketException e) {
+        } catch (InvalidSocketException | IllegalArgumentException | SecurityException e) {
+            Log.e(TAG, "Fail to construct keepalive e=" + e);
             notifyErrorCallback(cb, ERROR_INVALID_SOCKET);
             return;
         }
