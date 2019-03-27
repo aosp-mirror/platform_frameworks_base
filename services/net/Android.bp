@@ -25,7 +25,6 @@ aidl_interface {
     local_include_dir: "java",
     include_dirs: ["frameworks/base/core/java"],  // For framework parcelables.
     srcs: [
-        "java/android/net/ApfCapabilitiesParcelable.aidl",
         "java/android/net/DhcpResultsParcelable.aidl",
         "java/android/net/IIpMemoryStore.aidl",
         "java/android/net/IIpMemoryStoreCallbacks.aidl",
@@ -36,7 +35,6 @@ aidl_interface {
         "java/android/net/InitialConfigurationParcelable.aidl",
         "java/android/net/PrivateDnsConfigParcel.aidl",
         "java/android/net/ProvisioningConfigurationParcelable.aidl",
-        "java/android/net/StaticIpConfigurationParcelable.aidl",
         "java/android/net/TcpKeepalivePacketDataParcelable.aidl",
         "java/android/net/dhcp/DhcpServingParamsParcel.aidl",
         "java/android/net/dhcp/IDhcpServer.aidl",

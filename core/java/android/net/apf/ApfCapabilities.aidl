@@ -15,13 +15,6 @@
 ** limitations under the License.
 */
 
-package android.net;
+package android.net.apf;
 
-import android.net.LinkAddress;
-
-parcelable StaticIpConfigurationParcelable {
-    LinkAddress ipAddress;
-    String gateway;
-    String[] dnsServers;
-    String domains;
-}
+@JavaOnlyStableParcelable parcelable ApfCapabilities;

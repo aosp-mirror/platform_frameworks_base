@@ -17,22 +17,4 @@
 
 package android.net;
 
-import android.net.InitialConfigurationParcelable;
-import android.net.Network;
-import android.net.StaticIpConfiguration;
-import android.net.apf.ApfCapabilities;
-
-parcelable ProvisioningConfigurationParcelable {
-    boolean enableIPv4;
-    boolean enableIPv6;
-    boolean usingMultinetworkPolicyTracker;
-    boolean usingIpReachabilityMonitor;
-    int requestedPreDhcpActionMs;
-    InitialConfigurationParcelable initialConfig;
-    StaticIpConfiguration staticIpConfig;
-    ApfCapabilities apfCapabilities;
-    int provisioningTimeoutMs;
-    int ipv6AddrGenMode;
-    Network network;
-    String displayName;
-}
+@JavaOnlyStableParcelable parcelable StaticIpConfiguration;
