@@ -18,6 +18,7 @@ package com.android.internal.app;
 
 import com.android.internal.R;
 
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.app.IActivityManager;
 import android.app.ListFragment;
@@ -70,6 +71,7 @@ public class LocalePicker extends ListFragment {
             return label;
         }
 
+        @UnsupportedAppUsage
         public Locale getLocale() {
             return locale;
         }
@@ -251,6 +253,7 @@ public class LocalePicker extends ListFragment {
      *
      * @see #updateLocales(LocaleList)
      */
+    @UnsupportedAppUsage
     public static void updateLocale(Locale locale) {
         updateLocales(new LocaleList(locale));
     }
@@ -260,6 +263,7 @@ public class LocalePicker extends ListFragment {
      * Note that the system looks halted for a while during the Locale migration,
      * so the caller need to take care of it.
      */
+    @UnsupportedAppUsage
     public static void updateLocales(LocaleList locales) {
         try {
             final IActivityManager am = ActivityManager.getService();
@@ -281,6 +285,7 @@ public class LocalePicker extends ListFragment {
      *
      * @return The locale list.
      */
+    @UnsupportedAppUsage
     public static LocaleList getLocales() {
         try {
             return ActivityManager.getService()

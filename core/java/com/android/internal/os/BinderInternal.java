@@ -17,6 +17,7 @@
 package com.android.internal.os;
 
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.SystemClock;
@@ -94,6 +95,7 @@ public class BinderInternal {
      * an implementation of IServiceManager, which you can use to find
      * other services.
      */
+    @UnsupportedAppUsage
     public static final native IBinder getContextObject();
     
     /**
@@ -105,6 +107,7 @@ public class BinderInternal {
 
     public static final native void setMaxThreads(int numThreads);
     
+    @UnsupportedAppUsage
     static native final void handleGc();
     
     public static void forceGc(String reason) {

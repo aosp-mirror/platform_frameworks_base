@@ -19,6 +19,7 @@ package com.android.internal.view.menu;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -39,6 +40,7 @@ public class ActionMenu implements Menu {
     
     private ArrayList<ActionMenuItem> mItems;
 
+    @UnsupportedAppUsage
     public ActionMenu(Context context) {
         mContext = context;
         mItems = new ArrayList<ActionMenuItem>();
