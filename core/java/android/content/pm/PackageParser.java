@@ -4796,7 +4796,7 @@ public class PackageParser {
             // except for watches which always supported 1:1.
             minAspectRatio = owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.Q
                     ? 0
-                    : mCallback.hasFeature(FEATURE_WATCH)
+                    : (mCallback != null && mCallback.hasFeature(FEATURE_WATCH))
                             ? DEFAULT_PRE_Q_MIN_ASPECT_RATIO_WATCH
                             : DEFAULT_PRE_Q_MIN_ASPECT_RATIO;
         }
@@ -8373,71 +8373,36 @@ public class PackageParser {
     }
 
     // TODO(b/129261524): Clean up API
-    public static PackageInfo generatePackageInfoFromApex(File apexFile, boolean collectCerts)
+    /**
+     * PackageInfo parser specifically for apex files.
+     * NOTE: It will collect certificates
+     *
+     * @param apexFile
+     * @return PackageInfo
+     * @throws PackageParserException
+     */
+    public static PackageInfo generatePackageInfoFromApex(File apexFile, int flags)
             throws PackageParserException {
-        PackageInfo pi = new PackageInfo();
-        int parseFlags = 0;
-        if (collectCerts) {
-            parseFlags |= PARSE_COLLECT_CERTIFICATES;
-            try {
-                if (apexFile.getCanonicalPath().startsWith("/system")) {
-                    // Don't need verify the APK integrity of APEXes on /system, just like
-                    // we don't do that for APKs.
-                    // TODO(b/126514108): we may be able to do this for APEXes on /data as well.
-                    parseFlags |= PARSE_IS_SYSTEM_DIR;
-                }
-            } catch (IOException e) {
-                throw new PackageParserException(INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION,
-                        "Failed to get path for " + apexFile.getPath(), e);
-            }
-        }
+        PackageParser pp = new PackageParser();
+        final Package p = pp.parsePackage(apexFile, flags, false);
+        PackageUserState state = new PackageUserState();
+        PackageInfo pi = generatePackageInfo(p, EmptyArray.INT, flags, 0, 0,
+                Collections.emptySet(), state);
 
-        PackageParser.ApkLite apk = PackageParser.parseApkLite(apexFile, parseFlags);
+        pi.applicationInfo.sourceDir = apexFile.getPath();
+        pi.applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM | ApplicationInfo.FLAG_INSTALLED;
+        pi.isApex = true;
 
-        // Properly fill in the ApplicationInfo with data from AndroidManifest
-        // Add ApplicationInfo to the PackageInfo.
-        // TODO(b/129267599)
-        ApplicationInfo ai = new ApplicationInfo();
-        ai.packageName = apk.packageName;
-        ai.sourceDir = apexFile.getPath();
-        ai.flags = ApplicationInfo.FLAG_SYSTEM | ApplicationInfo.FLAG_INSTALLED;
-        ai.enabled = true;
-        ai.minSdkVersion = apk.minSdkVersion;
-        ai.targetSdkVersion = apk.targetSdkVersion;
-        ai.targetSandboxVersion = PARSE_DEFAULT_TARGET_SANDBOX;
-        ai.setVersionCode(apk.getLongVersionCode());
-
-        pi.packageName = apk.packageName;
-        pi.splitNames = new String[]{apk.splitName};
-        pi.setLongVersionCode(apk.getLongVersionCode());
-        pi.applicationInfo = ai;
-        pi.coreApp = apk.coreApp;
-
-
-        if (collectCerts) {
-            if (apk.signingDetails.hasPastSigningCertificates()) {
-                // Package has included signing certificate rotation information.  Return
-                // the oldest cert so that programmatic checks keep working even if unaware
-                // of key rotation.
-                pi.signatures = new Signature[1];
-                pi.signatures[0] = apk.signingDetails.pastSigningCertificates[0];
-            } else if (apk.signingDetails.hasSignatures()) {
-                // otherwise keep old behavior
-                int numberOfSigs = apk.signingDetails.signatures.length;
-                pi.signatures = new Signature[numberOfSigs];
-                System.arraycopy(apk.signingDetails.signatures, 0, pi.signatures, 0,
-                    numberOfSigs);
-            }
-
-            if (apk.signingDetails != SigningDetails.UNKNOWN) {
+        // Collect certificates
+        if ((flags & PackageManager.GET_SIGNING_CERTIFICATES) != 0) {
+            collectCertificates(p, apexFile, false);
+            if (p.mSigningDetails != SigningDetails.UNKNOWN) {
                 // only return a valid SigningInfo if there is signing information to report
-                pi.signingInfo = new SigningInfo(apk.signingDetails);
+                pi.signingInfo = new SigningInfo(p.mSigningDetails);
             } else {
                 pi.signingInfo = null;
             }
         }
-
-        pi.isApex = true;
         return pi;
     }
 }
