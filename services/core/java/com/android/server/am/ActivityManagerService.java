@@ -1751,7 +1751,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                         ? R.string.dump_heap_ready_notification : R.string.dump_heap_notification;
                 String text = mContext.getString(titleId, procName);
 
-
                 Intent deleteIntent = new Intent();
                 deleteIntent.setAction(DumpHeapActivity.ACTION_DELETE_DUMPHEAP);
                 Intent intent = new Intent();
@@ -1767,8 +1766,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Notification notification =
                         new Notification.Builder(mContext, SystemNotificationChannels.DEVELOPER)
                         .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
-                        .setWhen(0)
-                        .setOngoing(true)
                         .setAutoCancel(true)
                         .setTicker(text)
                         .setColor(mContext.getColor(
@@ -5093,11 +5090,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         mContext.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                if (intent.getBooleanExtra(DumpHeapActivity.EXTRA_DELAY_DELETE, false)) {
-                    mHandler.sendEmptyMessageDelayed(POST_DUMP_HEAP_NOTIFICATION_MSG, 5*60*1000);
-                } else {
-                    mHandler.sendEmptyMessage(POST_DUMP_HEAP_NOTIFICATION_MSG);
-                }
+                final long delay = intent.getBooleanExtra(
+                        DumpHeapActivity.EXTRA_DELAY_DELETE, false) ? 5 * 60 * 1000 : 0;
+                mHandler.sendEmptyMessageDelayed(DELETE_DUMPHEAP_MSG, delay);
             }
         }, dumpheapFilter);
 
