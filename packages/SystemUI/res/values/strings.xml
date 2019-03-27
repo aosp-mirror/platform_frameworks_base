@@ -79,6 +79,9 @@
     <!-- Battery saver confirmation dialog title [CHAR LIMIT=NONE]-->
     <string name="battery_saver_confirmation_title">Turn on Battery Saver?</string>
 
+    <!-- The more generic version of the battery saver confirmation dialog title [CHAR LIMIT=NONE] -->
+    <string name="battery_saver_confirmation_title_generic">About Battery Saver</string>
+
     <!-- Battery saver confirmation dialog ok text [CHAR LIMIT=40]-->
     <string name="battery_saver_confirmation_ok">Turn on</string>
 
