@@ -1266,6 +1266,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     String mMemWatchDumpFile;
     int mMemWatchDumpPid;
     int mMemWatchDumpUid;
+    private boolean mMemWatchIsUserInitiated;
     String mTrackAllocationApp = null;
     String mNativeDebuggingApp = null;
 
@@ -1712,9 +1713,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                 final int uid;
                 final long memLimit;
                 final String reportPackage;
+                final boolean isUserInitiated;
                 synchronized (ActivityManagerService.this) {
-                    procName = mMemWatchDumpProcName;
                     uid = mMemWatchDumpUid;
+                    if (uid == SYSTEM_UID) {
+                        procName = mContext.getString(R.string.android_system_label);
+                    } else {
+                        procName = mMemWatchDumpProcName;
+                    }
                     Pair<Long, String> val = mMemWatchProcesses.get(procName, uid);
                     if (val == null) {
                         val = mMemWatchProcesses.get(procName, 0);
@@ -1726,6 +1732,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         memLimit = 0;
                         reportPackage = null;
                     }
+                    isUserInitiated = mMemWatchIsUserInitiated;
                 }
                 if (procName == null) {
                     return;
@@ -1739,7 +1746,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                     return;
                 }
 
-                String text = mContext.getString(R.string.dump_heap_notification, procName);
+                final int titleId = isUserInitiated
+                        ? R.string.dump_heap_ready_notification : R.string.dump_heap_notification;
+                String text = mContext.getString(titleId, procName);
 
 
                 Intent deleteIntent = new Intent();
@@ -1748,6 +1757,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 intent.setClassName("android", DumpHeapActivity.class.getName());
                 intent.putExtra(DumpHeapActivity.KEY_PROCESS, procName);
                 intent.putExtra(DumpHeapActivity.KEY_SIZE, memLimit);
+                intent.putExtra(DumpHeapActivity.KEY_IS_USER_INITIATED, isUserInitiated);
+                intent.putExtra(DumpHeapActivity.KEY_IS_SYSTEM_PROCESS, uid == SYSTEM_UID);
                 if (reportPackage != null) {
                     intent.putExtra(DumpHeapActivity.KEY_DIRECT_LAUNCH, reportPackage);
                 }
@@ -7940,6 +7951,30 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @Override
+    public void requestSystemServerHeapDump() {
+        if (!Build.IS_DEBUGGABLE) {
+            Slog.wtf(TAG, "requestSystemServerHeapDump called on a user build");
+            return;
+        }
+        if (Binder.getCallingUid() != SYSTEM_UID) {
+            // This also intentionally excludes secondary profiles from calling this.
+            throw new SecurityException(
+                    "Only the system process is allowed to request a system heap dump");
+        }
+        ProcessRecord pr;
+        synchronized (mPidsSelfLocked) {
+            pr = mPidsSelfLocked.get(myPid());
+        }
+        if (pr == null) {
+            Slog.w(TAG, "system process not in mPidsSelfLocked: " + myPid());
+            return;
+        }
+        synchronized (this) {
+            startHeapDumpLocked(pr, true);
+        }
+    }
+
     /**
      * @deprecated This method is only used by a few internal components and it will soon be
      * replaced by a proper bug report API (which will be restricted to a few, pre-defined apps).
@@ -10533,8 +10568,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             pw.print("  mMemWatchDumpProcName="); pw.println(mMemWatchDumpProcName);
             pw.print("  mMemWatchDumpFile="); pw.println(mMemWatchDumpFile);
-            pw.print("  mMemWatchDumpPid="); pw.print(mMemWatchDumpPid);
-                    pw.print(" mMemWatchDumpUid="); pw.println(mMemWatchDumpUid);
+            pw.print("  mMemWatchDumpPid="); pw.println(mMemWatchDumpPid);
+            pw.print("  mMemWatchDumpUid="); pw.println(mMemWatchDumpUid);
+            pw.print("  mMemWatchIsUserInitiated="); pw.println(mMemWatchIsUserInitiated);
         }
         if (mTrackAllocationApp != null) {
             if (dumpPackage == null || dumpPackage.equals(mTrackAllocationApp)) {
@@ -10832,6 +10868,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             proto.write(ActivityManagerServiceDumpProcessesProto.MemWatchProcess.Dump.FILE, mMemWatchDumpFile);
             proto.write(ActivityManagerServiceDumpProcessesProto.MemWatchProcess.Dump.PID, mMemWatchDumpPid);
             proto.write(ActivityManagerServiceDumpProcessesProto.MemWatchProcess.Dump.UID, mMemWatchDumpUid);
+            proto.write(
+                    ActivityManagerServiceDumpProcessesProto.MemWatchProcess.Dump.IS_USER_INITIATED,
+                    mMemWatchIsUserInitiated);
             proto.end(dtoken);
 
             proto.end(token);
@@ -15929,20 +15968,23 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
                 if (isDebuggable) {
                     Slog.w(TAG, "Process " + proc + " exceeded pss limit " + check + "; reporting");
-                    final ProcessRecord myProc = proc;
-                    final File heapdumpFile = DumpHeapProvider.getJavaFile();
-                    mMemWatchDumpProcName = proc.processName;
-                    mMemWatchDumpFile = heapdumpFile.toString();
-                    mMemWatchDumpPid = proc.pid;
-                    mMemWatchDumpUid = proc.uid;
-                    BackgroundThread.getHandler().post(
-                            new RecordPssRunnable(this, myProc, DumpHeapProvider.getJavaFile()));
+                    startHeapDumpLocked(proc, false);
                 } else {
                     Slog.w(TAG, "Process " + proc + " exceeded pss limit " + check
                             + ", but debugging not enabled");
                 }
             }
         }
+    }
+
+    private void startHeapDumpLocked(ProcessRecord proc, boolean isUserInitiated) {
+        final File heapdumpFile = DumpHeapProvider.getJavaFile();
+        mMemWatchDumpProcName = proc.processName;
+        mMemWatchDumpFile = heapdumpFile.toString();
+        mMemWatchDumpPid = proc.pid;
+        mMemWatchDumpUid = proc.uid;
+        mMemWatchIsUserInitiated = isUserInitiated;
+        BackgroundThread.getHandler().post(new RecordPssRunnable(this, proc, heapdumpFile));
     }
 
     /**
