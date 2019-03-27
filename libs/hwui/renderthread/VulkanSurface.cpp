@@ -420,9 +420,10 @@ void VulkanSurface::releaseBuffers() {
 }
 
 VulkanSurface::NativeBufferInfo* VulkanSurface::dequeueNativeBuffer() {
-    // Set the dequeue index to invalid in case of error and only reset it to the correct
+    // Set the mCurrentBufferInfo to invalid in case of error and only reset it to the correct
     // value at the end of the function if everything dequeued correctly.
-    mDequeuedIndex = -1;
+    mCurrentBufferInfo = nullptr;
+
 
     //check if the native window has been resized or rotated and update accordingly
     SkISize newSize = SkISize::MakeEmpty();
@@ -511,7 +512,7 @@ VulkanSurface::NativeBufferInfo* VulkanSurface::dequeueNativeBuffer() {
         }
     }
 
-    mDequeuedIndex = idx;
+    mCurrentBufferInfo = bufferInfo;
     return bufferInfo;
 }
 
@@ -535,7 +536,8 @@ bool VulkanSurface::presentCurrentBuffer(const SkRect& dirtyRect, int semaphoreF
         ALOGE_IF(err != 0, "native_window_set_surface_damage failed: %s (%d)", strerror(-err), err);
     }
 
-    VulkanSurface::NativeBufferInfo& currentBuffer = mNativeBuffers[mDequeuedIndex];
+    LOG_ALWAYS_FATAL_IF(!mCurrentBufferInfo);
+    VulkanSurface::NativeBufferInfo& currentBuffer = *mCurrentBufferInfo;
     int queuedFd = (semaphoreFd != -1) ? semaphoreFd : currentBuffer.dequeue_fence;
     int err = mNativeWindow->queueBuffer(mNativeWindow.get(), currentBuffer.buffer.get(), queuedFd);
 
@@ -560,7 +562,8 @@ bool VulkanSurface::presentCurrentBuffer(const SkRect& dirtyRect, int semaphoreF
 }
 
 int VulkanSurface::getCurrentBuffersAge() {
-    VulkanSurface::NativeBufferInfo& currentBuffer = mNativeBuffers[mDequeuedIndex];
+    LOG_ALWAYS_FATAL_IF(!mCurrentBufferInfo);
+    VulkanSurface::NativeBufferInfo& currentBuffer = *mCurrentBufferInfo;
     return currentBuffer.hasValidContents ? (mPresentCount - currentBuffer.lastPresentedCount) : 0;
 }
 
