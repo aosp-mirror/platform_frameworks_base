@@ -588,4 +588,11 @@ interface ISms {
      */
     void getSmsMessagesForFinancialApp(
         int subId, String callingPkg, in Bundle params, in IFinancialSmsCallback callback);
+
+    /**
+     * Check if the destination is a possible premium short code.
+     *
+     * @param destAddress the destination address to test for possible short code
+     */
+    int checkSmsShortCodeDestination(int subId, String callingApk, String destAddress, String countryIso);
 }

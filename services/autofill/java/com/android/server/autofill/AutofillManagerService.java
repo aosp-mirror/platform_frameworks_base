@@ -198,6 +198,11 @@ public final class AutofillManagerService
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         context.registerReceiver(mBroadcastReceiver, filter, null, FgThread.getHandler());
 
+        mAugmentedAutofillResolver = new FrameworkResourcesServiceNameResolver(getContext(),
+                com.android.internal.R.string.config_defaultAugmentedAutofillService);
+        mAugmentedAutofillResolver.setOnTemporaryServiceNameChangedCallback(
+                (u, s) -> getServiceForUserLocked(u).updateRemoteAugmentedAutofillService());
+
         if (mSupportedSmartSuggestionModes != AutofillManager.FLAG_SMART_SUGGESTION_OFF) {
             // Must eager load the services so they bind to the augmented autofill service
             final UserManager um = getContext().getSystemService(UserManager.class);
@@ -207,11 +212,6 @@ public final class AutofillManagerService
                 getServiceForUserLocked(userId);
             }
         }
-
-        mAugmentedAutofillResolver = new FrameworkResourcesServiceNameResolver(getContext(),
-                com.android.internal.R.string.config_defaultAugmentedAutofillService);
-        mAugmentedAutofillResolver.setOnTemporaryServiceNameChangedCallback(
-                (u, s) -> getServiceForUserLocked(u).updateRemoteAugmentedAutofillService());
     }
 
     @Override // from AbstractMasterSystemService

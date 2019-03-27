@@ -39,6 +39,7 @@ import android.service.autofill.AutofillService;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
+import android.view.contentcapture.ContentCaptureCondition;
 import android.view.contentcapture.ContentCaptureContext;
 import android.view.contentcapture.ContentCaptureEvent;
 import android.view.contentcapture.ContentCaptureManager;
@@ -214,6 +215,32 @@ public abstract class ContentCaptureService extends Service {
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Explicitly sets the conditions for which content capture should be available by an app.
+     *
+     * <p>Typically used to restrict content capture to a few websites on browser apps. Example:
+     *
+     * <code>
+     *   ArraySet<ContentCaptureCondition> conditions = new ArraySet<>(1);
+     *   conditions.add(new ContentCaptureCondition(new LocusId("^https://.*\\.example\\.com$"),
+     *       ContentCaptureCondition.FLAG_IS_REGEX));
+     *   service.setContentCaptureConditions("com.example.browser_app", conditions);
+     *
+     * </code>
+     *
+     * <p>NOTE: </p> this method doesn't automatically disable content capture for the given
+     * conditions; it's up to the {@code packageName} implementation to call
+     * {@link ContentCaptureManager#getContentCaptureConditions()} and disable it accordingly.
+     *
+     * @param packageName name of the packages where the restrictions are set.
+     * @param conditions list of conditions, or {@code null} to reset the conditions for the
+     * package.
+     */
+    public final void setContentCaptureConditions(@NonNull String packageName,
+            @Nullable Set<ContentCaptureCondition> conditions) {
+        // TODO(b/129267994): implement
     }
 
     private <T> ArrayList<T> toList(@Nullable Set<T> set) {

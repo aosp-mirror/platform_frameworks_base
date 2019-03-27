@@ -777,6 +777,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             final int removedWindowId = removeAccessibilityInteractionConnectionInternalLocked(
                     token, mGlobalWindowTokens, mGlobalInteractionConnections);
             if (removedWindowId >= 0) {
+                mSecurityPolicy.onAccessibilityClientRemovedLocked(removedWindowId);
                 if (DEBUG) {
                     Slog.i(LOG_TAG, "Removed global connection for pid:" + Binder.getCallingPid()
                             + " with windowId: " + removedWindowId + " and token: " + window.asBinder());
@@ -790,6 +791,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         removeAccessibilityInteractionConnectionInternalLocked(
                         token, userState.mWindowTokens, userState.mInteractionConnections);
                 if (removedWindowIdForUser >= 0) {
+                    mSecurityPolicy.onAccessibilityClientRemovedLocked(removedWindowIdForUser);
                     if (DEBUG) {
                         Slog.i(LOG_TAG, "Removed user connection for pid:" + Binder.getCallingPid()
                                 + " with windowId: " + removedWindowIdForUser + " and userId:"
@@ -1332,6 +1334,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             userState.mWindowTokens.remove(windowId);
             userState.mInteractionConnections.remove(windowId);
         }
+        mSecurityPolicy.onAccessibilityClientRemovedLocked(windowId);
         if (DEBUG) {
             Slog.i(LOG_TAG, "Removing interaction connection to windowId: " + windowId);
         }
@@ -3264,6 +3267,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             updateWindowsLocked(windows);
             mActiveWindowId = activeWindowId;
             mWindows = null;
+        }
+
+        /**
+         * A callback when accessibility interaction client is removed.
+         */
+        public void onAccessibilityClientRemovedLocked(int windowId) {
+            // Active window cannot update immediately, if windows callback is unregistered.
+            // Update active window to invalid, when its a11y interaction client is removed.
+            if (mWindowsForAccessibilityCallback == null && windowId >= 0
+                    && mActiveWindowId == windowId) {
+                mActiveWindowId = INVALID_WINDOW_ID;
+            }
         }
 
         public void updateWindowsLocked(List<WindowInfo> windows) {

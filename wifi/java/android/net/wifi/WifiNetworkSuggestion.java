@@ -283,10 +283,10 @@ public final class WifiNetworkSuggestion implements Parcelable {
 
         /**
          * Specify the priority of this network among other network suggestions provided by the same
-         * app (priorities have no impact on suggestions by different apps). The lower the number,
-         * the higher the priority (i.e value of 0 = highest priority).
+         * app (priorities have no impact on suggestions by different apps). The higher the number,
+         * the higher the priority (i.e value of 0 = lowest priority).
          * <p>
-         * <li>If not set, defaults to -1 (i.e unassigned priority).</li>
+         * <li>If not set, defaults a lower priority than any assigned priority.</li>
          *
          * @param priority Integer number representing the priority among suggestions by the app.
          * @return Instance of {@link Builder} to enable chaining of the builder method.

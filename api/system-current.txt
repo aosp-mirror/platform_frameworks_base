@@ -491,12 +491,12 @@ package android.app {
     ctor public InstantAppResolverService();
     method public final void attachBaseContext(android.content.Context);
     method public final android.os.IBinder onBind(android.content.Intent);
-    method @Deprecated public void onGetInstantAppIntentFilter(int[], String, android.app.InstantAppResolverService.InstantAppResolutionCallback);
-    method @Deprecated public void onGetInstantAppIntentFilter(android.content.Intent, int[], String, android.app.InstantAppResolverService.InstantAppResolutionCallback);
-    method public void onGetInstantAppIntentFilter(android.content.Intent, int[], android.os.UserHandle, String, android.app.InstantAppResolverService.InstantAppResolutionCallback);
-    method @Deprecated public void onGetInstantAppResolveInfo(int[], String, android.app.InstantAppResolverService.InstantAppResolutionCallback);
-    method @Deprecated public void onGetInstantAppResolveInfo(android.content.Intent, int[], String, android.app.InstantAppResolverService.InstantAppResolutionCallback);
-    method public void onGetInstantAppResolveInfo(android.content.Intent, int[], android.os.UserHandle, String, android.app.InstantAppResolverService.InstantAppResolutionCallback);
+    method @Deprecated public void onGetInstantAppIntentFilter(@Nullable int[], @NonNull String, @NonNull android.app.InstantAppResolverService.InstantAppResolutionCallback);
+    method @Deprecated public void onGetInstantAppIntentFilter(@NonNull android.content.Intent, @Nullable int[], @NonNull String, @NonNull android.app.InstantAppResolverService.InstantAppResolutionCallback);
+    method public void onGetInstantAppIntentFilter(@NonNull android.content.Intent, @Nullable int[], @NonNull android.os.UserHandle, @NonNull String, @NonNull android.app.InstantAppResolverService.InstantAppResolutionCallback);
+    method @Deprecated public void onGetInstantAppResolveInfo(@Nullable int[], @NonNull String, @NonNull android.app.InstantAppResolverService.InstantAppResolutionCallback);
+    method @Deprecated public void onGetInstantAppResolveInfo(@NonNull android.content.Intent, @Nullable int[], @NonNull String, @NonNull android.app.InstantAppResolverService.InstantAppResolutionCallback);
+    method public void onGetInstantAppResolveInfo(@NonNull android.content.Intent, @Nullable int[], @NonNull android.os.UserHandle, @NonNull String, @NonNull android.app.InstantAppResolverService.InstantAppResolutionCallback);
   }
 
   public static final class InstantAppResolverService.InstantAppResolutionCallback {
@@ -4233,6 +4233,10 @@ package android.net {
     field public static final int TAG_SYSTEM_PROBE = -190; // 0xffffff42
   }
 
+  public abstract class Uri implements java.lang.Comparable<android.net.Uri> android.os.Parcelable {
+    method @NonNull public String toSafeString();
+  }
+
   public class VpnService extends android.app.Service {
     method @RequiresPermission(android.Manifest.permission.CONTROL_VPN) public static void prepareAndAuthorize(android.content.Context);
   }
@@ -5664,7 +5668,7 @@ package android.os.image {
   }
 
   public static interface DynamicSystemClient.OnStatusChangedListener {
-    method public void onStatusChanged(int, int, long);
+    method public void onStatusChanged(int, int, long, @Nullable Throwable);
   }
 
 }
@@ -6444,6 +6448,7 @@ package android.service.contentcapture {
     method public void onDestroyContentCaptureSession(@NonNull android.view.contentcapture.ContentCaptureSessionId);
     method public void onDisconnected();
     method public void onUserDataRemovalRequest(@NonNull android.view.contentcapture.UserDataRemovalRequest);
+    method public final void setContentCaptureConditions(@NonNull String, @Nullable java.util.Set<android.view.contentcapture.ContentCaptureCondition>);
     method public final void setContentCaptureWhitelist(@Nullable java.util.Set<java.lang.String>, @Nullable java.util.Set<android.content.ComponentName>);
     field public static final String SERVICE_INTERFACE = "android.service.contentcapture.ContentCaptureService";
     field public static final String SERVICE_META_DATA = "android.content_capture";

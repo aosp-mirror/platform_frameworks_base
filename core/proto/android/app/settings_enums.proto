@@ -2319,4 +2319,10 @@ enum PageId {
 
     // Settings > Display > Theme
     DARK_UI_SETTINGS = 1698;
+
+    // Settings > global bubble settings
+    BUBBLE_SETTINGS = 1699;
+
+    // Settings > app > bubble settings
+    APP_BUBBLE_SETTINGS = 1700;
 }

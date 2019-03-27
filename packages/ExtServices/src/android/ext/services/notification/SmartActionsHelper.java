@@ -53,6 +53,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * Generates suggestions from incoming notifications.
+ *
+ * Methods in this class should be called in a single worker thread.
+ */
 public class SmartActionsHelper {
     static final String ENTITIES_EXTRAS = "entities-extras";
     static final String KEY_ACTION_TYPE = "action_type";
@@ -287,8 +292,7 @@ public class SmartActionsHelper {
         return conversationActions;
     }
 
-    void onNotificationExpansionChanged(NotificationEntry entry, boolean isUserAction,
-            boolean isExpanded) {
+    void onNotificationExpansionChanged(NotificationEntry entry, boolean isExpanded) {
         if (!isExpanded) {
             return;
         }

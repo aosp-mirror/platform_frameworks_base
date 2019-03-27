@@ -80,7 +80,7 @@ public class SQLiteQueryBuilder {
      * Get if the query is marked as {@code DISTINCT}, as last configured by
      * {@link #setDistinct(boolean)}.
      */
-    public boolean getDistinct() {
+    public boolean isDistinct() {
         return mDistinct;
     }
 
@@ -215,7 +215,7 @@ public class SQLiteQueryBuilder {
     }
 
     /**
-     * Sets the cursor factory to be used for the query, as last configured by
+     * Gets the cursor factory to be used for the query, as last configured by
      * {@link #setCursorFactory(android.database.sqlite.SQLiteDatabase.CursorFactory)}.
      */
     public @Nullable SQLiteDatabase.CursorFactory getCursorFactory() {
@@ -251,7 +251,7 @@ public class SQLiteQueryBuilder {
      * Get if the query is marked as strict, as last configured by
      * {@link #setStrict(boolean)}.
      */
-    public boolean getStrict() {
+    public boolean isStrict() {
         return mStrict;
     }
 

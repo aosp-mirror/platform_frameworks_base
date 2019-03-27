@@ -25,6 +25,7 @@ import static org.testng.Assert.assertThrows;
 
 import android.content.Context;
 import android.os.FileUtils;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -44,27 +45,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.function.Predicate;
 
+@Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class KernelCpuThreadReaderTest {
-
-    private static final int UID = 1000;
-    private static final int PROCESS_ID = 1234;
-    private static final int[] THREAD_IDS = {0, 1000, 1235, 4321};
-    private static final String PROCESS_NAME = "test_process";
-    private static final String[] THREAD_NAMES = {
-            "test_thread_1", "test_thread_2", "test_thread_3", "test_thread_4"
-    };
-    private static final int[] THREAD_CPU_FREQUENCIES = {
-            1000, 2000, 3000, 4000,
-    };
-    private static final int[][] THREAD_CPU_TIMES = {
-            {1, 0, 0, 1},
-            {0, 0, 0, 0},
-            {1000, 1000, 1000, 1000},
-            {0, 1, 2, 3},
-    };
-
     private File mProcDirectory;
 
     @Before
@@ -79,57 +63,12 @@ public class KernelCpuThreadReaderTest {
     }
 
     @Test
-    public void testReader_currentProcess() throws IOException {
-        KernelCpuThreadReader.Injector processUtils =
-                new KernelCpuThreadReader.Injector() {
-                    @Override
-                    public int myPid() {
-                        return PROCESS_ID;
-                    }
-
-                    @Override
-                    public int myUid() {
-                        return UID;
-                    }
-
-                    @Override
-                    public int getUidForPid(int pid) {
-                        return 0;
-                    }
-                };
-        setupDirectory(mProcDirectory.toPath().resolve("self"), THREAD_IDS, PROCESS_NAME,
-                THREAD_NAMES, THREAD_CPU_FREQUENCIES, THREAD_CPU_TIMES);
-
-        final KernelCpuThreadReader kernelCpuThreadReader = new KernelCpuThreadReader(
-                8,
-                uid -> 1000 <= uid && uid < 2000,
-                0,
-                mProcDirectory.toPath(),
-                mProcDirectory.toPath().resolve("self/task/" + THREAD_IDS[0] + "/time_in_state"),
-                processUtils);
-        final KernelCpuThreadReader.ProcessCpuUsage processCpuUsage =
-                kernelCpuThreadReader.getCurrentProcessCpuUsage();
-        checkResults(processCpuUsage, kernelCpuThreadReader.getCpuFrequenciesKhz(), UID, PROCESS_ID,
-                THREAD_IDS, PROCESS_NAME, THREAD_NAMES, THREAD_CPU_FREQUENCIES, THREAD_CPU_TIMES);
-    }
-
-    @Test
     public void testReader_byUids() throws IOException {
         int[] uids = new int[]{0, 2, 3, 4, 5, 6000};
         Predicate<Integer> uidPredicate = uid -> uid == 0 || uid >= 4;
         int[] expectedUids = new int[]{0, 4, 5, 6000};
         KernelCpuThreadReader.Injector processUtils =
                 new KernelCpuThreadReader.Injector() {
-                    @Override
-                    public int myPid() {
-                        return 0;
-                    }
-
-                    @Override
-                    public int myUid() {
-                        return 0;
-                    }
-
                     @Override
                     public int getUidForPid(int pid) {
                         return pid;
@@ -150,7 +89,7 @@ public class KernelCpuThreadReaderTest {
                 mProcDirectory.toPath().resolve(uids[0] + "/task/" + uids[0] + "/time_in_state"),
                 processUtils);
         ArrayList<KernelCpuThreadReader.ProcessCpuUsage> processCpuUsageByUids =
-                kernelCpuThreadReader.getProcessCpuUsageByUids();
+                kernelCpuThreadReader.getProcessCpuUsage();
         processCpuUsageByUids.sort(Comparator.comparing(usage -> usage.processId));
 
         assertEquals(expectedUids.length, processCpuUsageByUids.size());
@@ -172,16 +111,6 @@ public class KernelCpuThreadReaderTest {
         Predicate<Integer> uidPredicate = uid -> true;
         KernelCpuThreadReader.Injector processUtils =
                 new KernelCpuThreadReader.Injector() {
-                    @Override
-                    public int myPid() {
-                        return 0;
-                    }
-
-                    @Override
-                    public int myUid() {
-                        return 0;
-                    }
-
                     @Override
                     public int getUidForPid(int pid) {
                         return pid;
@@ -206,7 +135,7 @@ public class KernelCpuThreadReaderTest {
                 mProcDirectory.toPath().resolve(uids[0] + "/task/" + uids[0] + "/time_in_state"),
                 processUtils);
         ArrayList<KernelCpuThreadReader.ProcessCpuUsage> processCpuUsageByUids =
-                kernelCpuThreadReader.getProcessCpuUsageByUids();
+                kernelCpuThreadReader.getProcessCpuUsage();
         processCpuUsageByUids.sort(Comparator.comparing(usage -> usage.uid));
 
         assertEquals(expectedUids.length, processCpuUsageByUids.size());
@@ -220,7 +149,7 @@ public class KernelCpuThreadReaderTest {
 
     @Test
     public void testReader_otherThreads() throws IOException {
-        final Path processPath = mProcDirectory.toPath().resolve("self");
+        final Path processPath = mProcDirectory.toPath().resolve("1000");
         setupDirectory(
                 processPath,
                 new int[]{1, 2, 3},
@@ -228,39 +157,34 @@ public class KernelCpuThreadReaderTest {
                 new String[]{"thread1", "thread2", "thread3"},
                 new int[]{1000, 2000},
                 new int[][]{{0, 100}, {10, 0}, {0, 300}});
-        final KernelCpuThreadReader kernelCpuThreadReader = new KernelCpuThreadReader(
-                8,
-                i -> true,
-                2000,
-                mProcDirectory.toPath(),
-                processPath.resolve("task/1/time_in_state"),
+        KernelCpuThreadReader.Injector injector =
                 new KernelCpuThreadReader.Injector() {
-                    @Override
-                    public int myPid() {
-                        return 1000;
-                    }
-
-                    @Override
-                    public int myUid() {
-                        return 0;
-                    }
-
                     @Override
                     public int getUidForPid(int pid) {
                         return 0;
                     }
-                });
+                };
+        final KernelCpuThreadReader kernelCpuThreadReader =
+                new KernelCpuThreadReader(
+                        8,
+                        uid -> true,
+                        2000,
+                        mProcDirectory.toPath(),
+                        processPath.resolve("task/1/time_in_state"),
+                        injector);
+        ArrayList<KernelCpuThreadReader.ProcessCpuUsage> processCpuUsages =
+                kernelCpuThreadReader.getProcessCpuUsage();
+        assertEquals(1, processCpuUsages.size());
         checkResults(
-                kernelCpuThreadReader.getCurrentProcessCpuUsage(),
+                processCpuUsages.get(0),
                 kernelCpuThreadReader.getCpuFrequenciesKhz(),
                 0,
                 1000,
-                new int[]{-1, 3},
+                new int[] {-1, 3},
                 "process",
-                new String[]{"__OTHER_THREADS", "thread3"},
-                new int[]{1000, 2000},
-                new int[][]{{100, 1000}, {0, 3000}}
-        );
+                new String[] {"__OTHER_THREADS", "thread3"},
+                new int[] {1000, 2000},
+                new int[][] {{10, 100}, {0, 300}});
     }
 
     private void setupDirectory(Path processPath, int[] threadIds, String processName,
@@ -289,8 +213,7 @@ public class KernelCpuThreadReaderTest {
             final OutputStream timeInStateStream =
                     Files.newOutputStream(threadPath.resolve("time_in_state"));
             for (int j = 0; j < cpuFrequencies.length; j++) {
-                final String line = String.valueOf(cpuFrequencies[j]) + " "
-                        + String.valueOf(cpuTimes[i][j]) + "\n";
+                final String line = cpuFrequencies[j] + " " + cpuTimes[i][j] + "\n";
                 timeInStateStream.write(line.getBytes());
             }
             timeInStateStream.close();

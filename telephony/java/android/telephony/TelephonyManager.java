@@ -1321,7 +1321,7 @@ public class TelephonyManager {
 
     /**
      * An int extra used with {@link #ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED} to indicate the
-     * subscription which has changed.
+     * subscription which has changed; or in general whenever a subscription ID needs specified.
      */
     public static final String EXTRA_SUBSCRIPTION_ID = "android.telephony.extra.SUBSCRIPTION_ID";
 
@@ -1439,12 +1439,23 @@ public class TelephonyManager {
 
     /**
      * Integer intent extra to be used with {@link #ACTION_PRIMARY_SUBSCRIPTION_LIST_CHANGED}
-     * to indicate whether a SIM selection is needed to choose default subscription.
+     * to indicate what type of SIM selection is needed.
      *
      * @hide
      */
     public static final String EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE =
             "android.telephony.extra.DEFAULT_SUBSCRIPTION_SELECT_TYPE";
+
+    /** @hide */
+    @IntDef({
+            EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_NONE,
+            EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_DATA,
+            EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_VOICE,
+            EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_SMS,
+            EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_ALL
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DefaultSubscriptionSelectType{}
 
     /**
      * Used as an int value for {@link #EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE}
@@ -1477,20 +1488,11 @@ public class TelephonyManager {
     /**
      * Used as an int value for {@link #EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE}
      * to indicate user to decide whether current SIM should be preferred for all
-     * data / voice / sms.
+     * data / voice / sms. {@link #EXTRA_SUBSCRIPTION_ID} will specified to indicate
+     * which subscription should be the default subscription.
      * @hide
      */
-    public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_FOR_ALL_TYPES = 4;
-
-    /**
-     * Integer intent extra to be used with
-     * {@link #EXTRA_DEFAULT_SUBSCRIPTION_SELECT_FOR_ALL_TYPES}
-     * to indicate which SIM is being selected.
-     *
-     * @hide
-     */
-    public static final String EXTRA_DEFAULT_SUBSCRIPTION_ID =
-            "android.telephony.extra.DEFAULT_SUBSCRIPTION_ID";
+    public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_ALL = 4;
 
     //
     //
@@ -7195,10 +7197,21 @@ public class TelephonyManager {
      * @hide
      */
     public boolean getTetherApnRequired() {
+        return getTetherApnRequired(getSubId(SubscriptionManager.getDefaultDataSubscriptionId()));
+    }
+
+    /**
+     * Check whether DUN APN is required for tethering with subId.
+     *
+     * @param subId the id of the subscription to require tethering.
+     * @return {@code true} if DUN APN is required for tethering.
+     * @hide
+     */
+    public boolean getTetherApnRequired(int subId) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.getTetherApnRequired();
+                return telephony.getTetherApnRequiredForSubscriber(subId);
         } catch (RemoteException ex) {
             Rlog.e(TAG, "hasMatchedTetherApnSetting RemoteException", ex);
         } catch (NullPointerException ex) {

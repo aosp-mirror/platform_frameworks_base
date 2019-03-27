@@ -26,7 +26,7 @@ import android.util.Slog;
 import java.util.Arrays;
 
 /** Control the color transform for global device saturation. */
-public class GlobalSaturationTintController extends TintController {
+final class GlobalSaturationTintController extends TintController {
 
     private final float[] mMatrixGlobalSaturation = new float[16];
 

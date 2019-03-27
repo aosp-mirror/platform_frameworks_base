@@ -516,6 +516,7 @@ public final class Zygote {
     private static Runnable usapMain(LocalServerSocket usapPoolSocket,
                                      FileDescriptor writePipe) {
         final int pid = Process.myPid();
+        Process.setArgV0(Process.is64Bit() ? "usap64" : "usap32");
 
         LocalSocket sessionSocket = null;
         DataOutputStream usapOutputStream = null;

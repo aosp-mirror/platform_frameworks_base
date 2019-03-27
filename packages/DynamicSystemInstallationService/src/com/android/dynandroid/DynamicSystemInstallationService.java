@@ -49,6 +49,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.ParcelableException;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.image.DynamicSystemClient;
@@ -170,13 +171,13 @@ public class DynamicSystemInstallationService extends Service
     @Override
     public void onProgressUpdate(long installedSize) {
         mInstalledSize = installedSize;
-        postStatus(STATUS_IN_PROGRESS, CAUSE_NOT_SPECIFIED);
+        postStatus(STATUS_IN_PROGRESS, CAUSE_NOT_SPECIFIED, null);
     }
 
     @Override
-    public void onResult(int result) {
+    public void onResult(int result, Throwable detail) {
         if (result == RESULT_OK) {
-            postStatus(STATUS_READY, CAUSE_INSTALL_COMPLETED);
+            postStatus(STATUS_READY, CAUSE_INSTALL_COMPLETED, null);
             return;
         }
 
@@ -185,15 +186,15 @@ public class DynamicSystemInstallationService extends Service
 
         switch (result) {
             case RESULT_ERROR_IO:
-                postStatus(STATUS_NOT_STARTED, CAUSE_ERROR_IO);
+                postStatus(STATUS_NOT_STARTED, CAUSE_ERROR_IO, detail);
                 break;
 
             case RESULT_ERROR_INVALID_URL:
-                postStatus(STATUS_NOT_STARTED, CAUSE_ERROR_INVALID_URL);
+                postStatus(STATUS_NOT_STARTED, CAUSE_ERROR_INVALID_URL, detail);
                 break;
 
             case RESULT_ERROR_EXCEPTION:
-                postStatus(STATUS_NOT_STARTED, CAUSE_ERROR_EXCEPTION);
+                postStatus(STATUS_NOT_STARTED, CAUSE_ERROR_EXCEPTION, detail);
                 break;
         }
     }
@@ -201,7 +202,7 @@ public class DynamicSystemInstallationService extends Service
     @Override
     public void onCancelled() {
         resetTaskAndStop();
-        postStatus(STATUS_NOT_STARTED, CAUSE_INSTALL_CANCELLED);
+        postStatus(STATUS_NOT_STARTED, CAUSE_INSTALL_CANCELLED, null);
     }
 
     private void executeInstallCommand(Intent intent) {
@@ -266,7 +267,7 @@ public class DynamicSystemInstallationService extends Service
                 Toast.LENGTH_LONG).show();
 
         resetTaskAndStop();
-        postStatus(STATUS_NOT_STARTED, CAUSE_INSTALL_CANCELLED);
+        postStatus(STATUS_NOT_STARTED, CAUSE_INSTALL_CANCELLED, null);
 
         mDynSystem.remove();
     }
@@ -414,7 +415,7 @@ public class DynamicSystemInstallationService extends Service
         return VerificationActivity.isVerified(url);
     }
 
-    private void postStatus(int status, int cause) {
+    private void postStatus(int status, int cause, Throwable detail) {
         Log.d(TAG, "postStatus(): statusCode=" + status + ", causeCode=" + cause);
 
         boolean notifyOnNotificationBar = true;
@@ -433,17 +434,23 @@ public class DynamicSystemInstallationService extends Service
 
         for (int i = mClients.size() - 1; i >= 0; i--) {
             try {
-                notifyOneClient(mClients.get(i), status, cause);
+                notifyOneClient(mClients.get(i), status, cause, detail);
             } catch (RemoteException e) {
                 mClients.remove(i);
             }
         }
     }
 
-    private void notifyOneClient(Messenger client, int status, int cause) throws RemoteException {
+    private void notifyOneClient(Messenger client, int status, int cause, Throwable detail)
+            throws RemoteException {
         Bundle bundle = new Bundle();
 
         bundle.putLong(DynamicSystemClient.KEY_INSTALLED_SIZE, mInstalledSize);
+
+        if (detail != null) {
+            bundle.putSerializable(DynamicSystemClient.KEY_EXCEPTION_DETAIL,
+                    new ParcelableException(detail));
+        }
 
         client.send(Message.obtain(null,
                   DynamicSystemClient.MSG_POST_STATUS, status, cause, bundle));
@@ -496,7 +503,7 @@ public class DynamicSystemInstallationService extends Service
                     int status = getStatus();
 
                     // tell just registered client my status, but do not specify cause
-                    notifyOneClient(client, status, CAUSE_NOT_SPECIFIED);
+                    notifyOneClient(client, status, CAUSE_NOT_SPECIFIED, null);
 
                     mClients.add(client);
                 } catch (RemoteException e) {
