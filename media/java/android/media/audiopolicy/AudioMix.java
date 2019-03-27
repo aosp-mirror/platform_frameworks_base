@@ -142,7 +142,8 @@ public class AudioMix {
         return mFormat;
     }
 
-    AudioMixingRule getRule() {
+    /** @hide */
+    public AudioMixingRule getRule() {
         return mRule;
     }
 

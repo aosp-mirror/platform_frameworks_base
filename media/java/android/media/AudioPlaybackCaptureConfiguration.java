@@ -28,7 +28,7 @@ import com.android.internal.util.Preconditions;
 /**
  * Configuration for capturing audio played by other apps.
  *
- * For privacy and copyright reason, only the following audio can be captured:
+ * Only the following audio can be captured:
  *  - usage MUST be UNKNOWN or GAME or MEDIA. All other usages CAN NOT be capturable.
  *  - audio attributes MUST NOT have the FLAG_NO_CAPTURE
  *  - played by apps that MUST be in the same user profile as the capturing app
