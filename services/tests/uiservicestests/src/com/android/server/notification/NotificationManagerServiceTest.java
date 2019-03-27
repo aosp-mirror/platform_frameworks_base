@@ -4340,4 +4340,20 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.areNotificationsEnabledForPackage(mContext.getPackageName(),
                 mUid + UserHandle.PER_USER_RANGE);
     }
+
+    public void testAreBubblesAllowedForPackage_crossUser() throws Exception {
+        try {
+            mBinderService.areBubblesAllowedForPackage(mContext.getPackageName(),
+                    mUid + UserHandle.PER_USER_RANGE);
+            fail("Cannot call cross user without permission");
+        } catch (SecurityException e) {
+            // pass
+        }
+
+        // cross user, with permission, no problem
+        TestablePermissions perms = mContext.getTestablePermissions();
+        perms.setPermission(android.Manifest.permission.INTERACT_ACROSS_USERS, PERMISSION_GRANTED);
+        mBinderService.areBubblesAllowedForPackage(mContext.getPackageName(),
+                mUid + UserHandle.PER_USER_RANGE);
+    }
 }
