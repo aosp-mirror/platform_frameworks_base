@@ -288,8 +288,8 @@ public final class TelephonyPermissions {
         // Allow access to a device / profile owner app.
         DevicePolicyManager devicePolicyManager = (DevicePolicyManager) context.getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
-        if (devicePolicyManager != null && devicePolicyManager.checkDeviceIdentifierAccessAsUser(
-                callingPackage, Binder.getCallingUserHandle().getIdentifier())) {
+        if (devicePolicyManager != null && devicePolicyManager.checkDeviceIdentifierAccess(
+                callingPackage, pid, uid)) {
             return true;
         }
         return false;
