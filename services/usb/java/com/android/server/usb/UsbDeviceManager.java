@@ -855,7 +855,7 @@ public class UsbDeviceManager implements ActivityManagerInternal.ScreenObserver 
                             && status.isRoleCombinationSupported(UsbPort.POWER_ROLE_SOURCE,
                             UsbPort.DATA_ROLE_DEVICE)
                             && status.isRoleCombinationSupported(UsbPort.POWER_ROLE_SINK,
-                            UsbPort.DATA_ROLE_HOST);
+                            UsbPort.DATA_ROLE_DEVICE);
 
                     args.recycle();
                     updateUsbNotification(false);
