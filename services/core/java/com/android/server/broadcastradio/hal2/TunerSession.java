@@ -17,6 +17,7 @@
 package com.android.server.broadcastradio.hal2;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.Bitmap;
 import android.hardware.broadcastradio.V2_0.ConfigFlag;
 import android.hardware.broadcastradio.V2_0.ITunerSession;
@@ -58,8 +59,22 @@ class TunerSession extends ITuner.Stub {
 
     @Override
     public void close() {
+        close(null);
+    }
+
+    /**
+     * Closes the TunerSession. If error is non-null, the client's onError() callback is invoked
+     * first with the specified error, see {@link
+     * android.hardware.radio.RadioTuner.Callback#onError}.
+     *
+     * @param error Optional error to send to client before session is closed.
+     */
+    public void close(@Nullable Integer error) {
         synchronized (mLock) {
             if (mIsClosed) return;
+            if (error != null) {
+                TunerCallback.dispatch(() -> mCallback.mClientCb.onError(error));
+            }
             mIsClosed = true;
         }
     }

@@ -24,6 +24,7 @@ import android.hardware.radio.ICloseHandle;
 import android.hardware.radio.ITuner;
 import android.hardware.radio.ITunerCallback;
 import android.hardware.radio.RadioManager;
+import android.hardware.radio.RadioTuner;
 import android.hidl.manager.V1_0.IServiceManager;
 import android.hidl.manager.V1_0.IServiceNotification;
 import android.os.IHwBinder.DeathRecipient;
@@ -49,8 +50,16 @@ public class BroadcastRadioService {
     @GuardedBy("mLock")
     private final Map<String, Integer> mServiceNameToModuleIdMap = new HashMap<>();
 
+    // Map from module ID to RadioModule created by mServiceListener.onRegistration().
     @GuardedBy("mLock")
     private final Map<Integer, RadioModule> mModules = new HashMap<>();
+
+    // Map from module ID to TunerSession created by openSession().
+    //
+    // Because this service currently implements a 1 AIDL to 1 HAL policy, mTunerSessions is used to
+    // enforce the "aggresive open" policy mandated for IBroadcastRadio.openSession(). In the
+    // future, this solution will be replaced with a multiple-AIDL to 1 HAL implementation.
+    private final Map<Integer, TunerSession> mTunerSessions = new HashMap<>();
 
     private IServiceNotification.Stub mServiceListener = new IServiceNotification.Stub() {
         @Override
@@ -72,6 +81,7 @@ public class BroadcastRadioService {
                 }
                 Slog.v(TAG, "loaded broadcast radio module " + moduleId + ": " + serviceName
                         + " (HAL 2.0)");
+                closeTunerSessionLocked(moduleId);
                 mModules.put(moduleId, module);
 
                 if (newService) {
@@ -96,6 +106,7 @@ public class BroadcastRadioService {
             synchronized (mLock) {
                 int moduleId = (int) cookie;
                 mModules.remove(moduleId);
+                closeTunerSessionLocked(moduleId);
 
                 for (Map.Entry<String, Integer> entry : mServiceNameToModuleIdMap.entrySet()) {
                     if (entry.getValue() == moduleId) {
@@ -152,16 +163,20 @@ public class BroadcastRadioService {
         RadioModule module = null;
         synchronized (mLock) {
             module = mModules.get(moduleId);
-        }
-        if (module == null) {
-            throw new IllegalArgumentException("Invalid module ID");
+            if (module == null) {
+                throw new IllegalArgumentException("Invalid module ID");
+            }
+            closeTunerSessionLocked(moduleId);
         }
 
-        TunerSession session = module.openSession(callback);
-        if (legacyConfig != null) {
-            session.setConfiguration(legacyConfig);
+        TunerSession tunerSession = module.openSession(callback);
+        synchronized (mLock) {
+            mTunerSessions.put(moduleId, tunerSession);
         }
-        return session;
+        if (legacyConfig != null) {
+            tunerSession.setConfiguration(legacyConfig);
+        }
+        return tunerSession;
     }
 
     public ICloseHandle addAnnouncementListener(@NonNull int[] enabledTypes,
@@ -182,5 +197,13 @@ public class BroadcastRadioService {
             Slog.i(TAG, "There are no HAL modules that support announcements");
         }
         return aggregator;
+    }
+
+    private void closeTunerSessionLocked(int moduleId) {
+        TunerSession tunerSession = mTunerSessions.remove(moduleId);
+        if (tunerSession != null) {
+            Slog.d(TAG, "Closing previous TunerSession");
+            tunerSession.close(RadioTuner.ERROR_HARDWARE_FAILURE);
+        }
     }
 }
