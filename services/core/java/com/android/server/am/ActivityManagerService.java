@@ -16389,12 +16389,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     @GuardedBy("this")
     final void updateProcessForegroundLocked(ProcessRecord proc, boolean isForeground,
             int fgServiceTypes, boolean oomAdj) {
-        proc.setHasForegroundServices(isForeground, fgServiceTypes);
 
-        final boolean hasFgServiceLocationType =
-                (fgServiceTypes & ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION) != 0;
         if (isForeground != proc.hasForegroundServices()
-                || proc.hasLocationForegroundServices() != hasFgServiceLocationType) {
+                || proc.getForegroundServiceTypes() != fgServiceTypes) {
+            proc.setHasForegroundServices(isForeground, fgServiceTypes);
             ArrayList<ProcessRecord> curProcs = mForegroundPackages.get(proc.info.packageName,
                     proc.info.uid);
             if (isForeground) {
@@ -16419,16 +16417,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
             }
-            if (oomAdj) {
-                updateOomAdjLocked();
-            }
-        }
 
-        if (proc.getForegroundServiceTypes() != fgServiceTypes) {
             proc.setReportedForegroundServiceTypes(fgServiceTypes);
             ProcessChangeItem item = enqueueProcessChangeItemLocked(proc.info.uid, proc.pid);
             item.changes = ProcessChangeItem.CHANGE_FOREGROUND_SERVICES;
             item.foregroundServiceTypes = fgServiceTypes;
+
+            if (oomAdj) {
+                updateOomAdjLocked();
+            }
         }
     }
 
