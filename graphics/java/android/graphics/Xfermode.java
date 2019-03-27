@@ -31,7 +31,7 @@ import android.annotation.UnsupportedAppUsage;
  * objects drawn with that paint have the xfermode applied.
  */
 public class Xfermode {
-    static final int DEFAULT = BlendMode.SRC_OVER.getXfermode().porterDuffMode;
+    static final int DEFAULT = PorterDuff.Mode.SRC_OVER.nativeInt;
     @UnsupportedAppUsage
     int porterDuffMode = DEFAULT;
 }
