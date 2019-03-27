@@ -1315,8 +1315,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
     static final int WRITE_SETTINGS_DELAY = 10*1000;  // 10 seconds
 
-    // Delay time in millisecs
-    static final int BROADCAST_DELAY = 10 * 1000;
+    private static final long BROADCAST_DELAY_DURING_STARTUP = 10 * 1000L; // 10 seconds (in millis)
+    private static final long BROADCAST_DELAY = 1 * 1000L; // 1 second (in millis)
+
+    // When the service constructor finished plus a delay (used for broadcast delay computation)
+    private long mServiceStartWithDelay;
 
     private static final long DEFAULT_UNUSED_STATIC_SHARED_LIB_MIN_CACHE_PERIOD =
             2 * 60 * 60 * 1000L; /* two hours */
@@ -3216,6 +3219,8 @@ public class PackageManagerService extends IPackageManager.Stub
         // holding the mPackages lock, but we're mostly interested in yelling
         // once we have a booted system.
         mInstaller.setWarnIfHeld(mPackages);
+
+        mServiceStartWithDelay = SystemClock.uptimeMillis() + (60 * 1000L);
 
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
     }
@@ -20603,8 +20608,14 @@ public class PackageManagerService extends IPackageManager.Stub
                     mPendingBroadcasts.put(userId, packageName, components);
                 }
                 if (!mHandler.hasMessages(SEND_PENDING_BROADCAST)) {
-                    // Schedule a message
-                    mHandler.sendEmptyMessageDelayed(SEND_PENDING_BROADCAST, BROADCAST_DELAY);
+                    // Schedule a message - if it has been a "reasonably long time" since the
+                    // service started, send the broadcast with a delay of one second to avoid
+                    // delayed reactions from the receiver, else keep the default ten second delay
+                    // to avoid extreme thrashing on service startup.
+                    final long broadcastDelay = SystemClock.uptimeMillis() > mServiceStartWithDelay
+                                                ? BROADCAST_DELAY
+                                                : BROADCAST_DELAY_DURING_STARTUP;
+                    mHandler.sendEmptyMessageDelayed(SEND_PENDING_BROADCAST, broadcastDelay);
                 }
             }
         }
