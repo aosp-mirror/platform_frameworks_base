@@ -167,7 +167,6 @@ import android.service.dreams.IDreamManager;
 import android.service.vr.IPersistentVrStateCallbacks;
 import android.speech.RecognizerIntent;
 import android.telecom.TelecomManager;
-import android.util.EventLog;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.MutableBoolean;
@@ -3807,9 +3806,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
 
             case KeyEvent.KEYCODE_POWER: {
-                Slog.d(TAG, "interceptKeyBeforeQueueing: KEYCODE_POWER "
-                        + KeyEvent.actionToString(event.getAction())
-                        + " mPowerKeyHandled=" + mPowerKeyHandled + " b/128933363");
+                EventLogTags.writeInterceptPower(
+                        KeyEvent.actionToString(event.getAction()),
+                        mPowerKeyHandled ? 1 : 0, mPowerKeyPressCounter);
                 // Any activity on the power button stops the accessibility shortcut
                 cancelPendingAccessibilityShortcutAction();
                 result &= ~ACTION_PASS_TO_USER;
@@ -4359,7 +4358,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // Called on the PowerManager's Notifier thread.
     @Override
     public void finishedGoingToSleep(int why) {
-        EventLog.writeEvent(70000, 0);
+        EventLogTags.writeScreenToggled(0);
         if (DEBUG_WAKEUP) {
             Slog.i(TAG, "Finished going to sleep... (why="
                     + WindowManagerPolicyConstants.offReasonToString(why) + ")");
@@ -4391,7 +4390,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // Called on the PowerManager's Notifier thread.
     @Override
     public void startedWakingUp(@OnReason int why) {
-        EventLog.writeEvent(70000, 1);
+        EventLogTags.writeScreenToggled(1);
         if (DEBUG_WAKEUP) {
             Slog.i(TAG, "Started waking up... (why="
                     + WindowManagerPolicyConstants.onReasonToString(why) + ")");
