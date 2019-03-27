@@ -671,42 +671,34 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         // If this view is GONE, then skip it -- keep the current frame, and let the caller know
         // so they can ignore it if they want.  (We do the normal layout for INVISIBLE windows,
         // since that means "perform layout as normal, just don't display").
-        if (!gone || !w.mHaveFrame || w.mLayoutNeeded
-                || ((w.isConfigChanged() || w.setReportResizeHints())
-                && !w.isGoneForLayoutLw() &&
-                ((w.mAttrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0 ||
-                        (w.mHasSurface && w.mAppToken != null &&
-                                w.mAppToken.layoutConfigChanges)))) {
-            if (!w.mLayoutAttached) {
-                if (mTmpInitial) {
-                    //Slog.i(TAG, "Window " + this + " clearing mContentChanged - initial");
-                    w.resetContentChanged();
-                }
-                if (w.mAttrs.type == TYPE_DREAM) {
-                    // Don't layout windows behind a dream, so that if it does stuff like hide
-                    // the status bar we won't get a bad transition when it goes away.
-                    mTmpWindow = w;
-                }
-                w.mLayoutNeeded = false;
-                w.prelayout();
-                final boolean firstLayout = !w.isLaidOut();
-                getDisplayPolicy().layoutWindowLw(w, null, mDisplayFrames);
-                w.mLayoutSeq = mLayoutSeq;
-
-                // If this is the first layout, we need to initialize the last inset values as
-                // otherwise we'd immediately cause an unnecessary resize.
-                if (firstLayout) {
-                    w.updateLastInsetValues();
-                }
-
-                if (w.mAppToken != null) {
-                    w.mAppToken.layoutLetterbox(w);
-                }
-
-                if (DEBUG_LAYOUT) Slog.v(TAG, "  LAYOUT: mFrame=" + w.getFrameLw()
-                        + " mContainingFrame=" + w.getContainingFrame()
-                        + " mDisplayFrame=" + w.getDisplayFrameLw());
+        if ((!gone || !w.mHaveFrame || w.mLayoutNeeded) && !w.mLayoutAttached) {
+            if (mTmpInitial) {
+                w.resetContentChanged();
             }
+            if (w.mAttrs.type == TYPE_DREAM) {
+                // Don't layout windows behind a dream, so that if it does stuff like hide
+                // the status bar we won't get a bad transition when it goes away.
+                mTmpWindow = w;
+            }
+            w.mLayoutNeeded = false;
+            w.prelayout();
+            final boolean firstLayout = !w.isLaidOut();
+            getDisplayPolicy().layoutWindowLw(w, null, mDisplayFrames);
+            w.mLayoutSeq = mLayoutSeq;
+
+            // If this is the first layout, we need to initialize the last inset values as
+            // otherwise we'd immediately cause an unnecessary resize.
+            if (firstLayout) {
+                w.updateLastInsetValues();
+            }
+
+            if (w.mAppToken != null) {
+                w.mAppToken.layoutLetterbox(w);
+            }
+
+            if (DEBUG_LAYOUT) Slog.v(TAG, "  LAYOUT: mFrame=" + w.getFrameLw()
+                    + " mContainingFrame=" + w.getContainingFrame()
+                    + " mDisplayFrame=" + w.getDisplayFrameLw());
         }
     };
 
