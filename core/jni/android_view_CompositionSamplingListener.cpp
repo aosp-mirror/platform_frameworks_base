@@ -17,6 +17,7 @@
 #define LOG_TAG "CompositionSamplingListener"
 
 #include "android_util_Binder.h"
+#include "core_jni_helpers.h"
 
 #include <nativehelper/JNIHelp.h>
 
@@ -122,6 +123,7 @@ int register_android_view_CompositionSamplingListener(JNIEnv* env) {
     LOG_ALWAYS_FATAL_IF(res < 0, "Unable to register native methods.");
 
     jclass clazz = env->FindClass("android/view/CompositionSamplingListener");
+    gListenerClassInfo.mClass = MakeGlobalRefOrDie(env, clazz);
     gListenerClassInfo.mDispatchOnSampleCollected = env->GetStaticMethodID(
             clazz, "dispatchOnSampleCollected", "(Landroid/view/CompositionSamplingListener;F)V");
     return 0;
