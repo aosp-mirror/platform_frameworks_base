@@ -480,7 +480,6 @@ public class KeepaliveTracker {
             }
         } else {
             // Keepalive successfully stopped, or error.
-            ki.mStartedState = KeepaliveInfo.NOT_STARTED;
             if (reason == SUCCESS) {
                 // The message indicated success stopping : don't call handleStopKeepalive.
                 if (DBG) Log.d(TAG, "Successfully stopped keepalive " + slot + " on " + nai.name());
@@ -490,6 +489,7 @@ public class KeepaliveTracker {
                 handleStopKeepalive(nai, slot, reason);
                 if (DBG) Log.d(TAG, "Keepalive " + slot + " on " + nai.name() + " error " + reason);
             }
+            ki.mStartedState = KeepaliveInfo.NOT_STARTED;
         }
     }
 
