@@ -956,15 +956,26 @@ class UserController implements Handler.Callback {
             final int oldUserId = getCurrentUserId();
             if (oldUserId == userId) {
                 final UserState state = getStartedUserState(userId);
-                if (state != null && state.state == STATE_RUNNING_UNLOCKED) {
-                    // We'll skip all later code, so we must tell listener it's already unlocked.
-                    try {
-                        unlockListener.onFinished(userId, null);
-                    } catch (RemoteException ignore) {
-                        // Ignore.
+                if (state == null) {
+                    Slog.wtf(TAG, "Current user has no UserState");
+                    // continue starting.
+                } else {
+                    if (userId == UserHandle.USER_SYSTEM && state.state == STATE_BOOTING) {
+                        // system user start explicitly requested. should continue starting as it
+                        // is not in running state.
+                    } else {
+                        if (state.state == STATE_RUNNING_UNLOCKED) {
+                            // We'll skip all later code, so we must tell listener it's already
+                            // unlocked.
+                            try {
+                                unlockListener.onFinished(userId, null);
+                            } catch (RemoteException ignore) {
+                                // Ignore.
+                            }
+                        }
+                        return true;
                     }
                 }
-                return true;
             }
 
             if (foreground) {
