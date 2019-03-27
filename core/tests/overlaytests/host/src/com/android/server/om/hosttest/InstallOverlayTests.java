@@ -163,6 +163,20 @@ public class InstallOverlayTests extends BaseHostJUnit4Test {
         assertTrue(overlayManagerContainsPackage(APP_OVERLAY_PACKAGE_NAME));
     }
 
+    @Test
+    public void changesPersistedWhenUninstallingDisabledOverlay() throws Exception {
+        getDevice().enableAdbRoot();
+        assertFalse(getDevice().executeShellCommand("cat /data/system/overlays.xml")
+                .contains(APP_OVERLAY_PACKAGE_NAME));
+        installPackage("OverlayHostTests_AppOverlayV1.apk");
+        assertTrue(getDevice().executeShellCommand("cat /data/system/overlays.xml")
+                .contains(APP_OVERLAY_PACKAGE_NAME));
+        uninstallPackage(APP_OVERLAY_PACKAGE_NAME);
+        delay();
+        assertFalse(getDevice().executeShellCommand("cat /data/system/overlays.xml")
+                .contains(APP_OVERLAY_PACKAGE_NAME));
+    }
+
     private void delay() {
         try {
             Thread.sleep(1000);
