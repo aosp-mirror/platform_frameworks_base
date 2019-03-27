@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
+import android.graphics.Rect;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -105,6 +106,10 @@ public final class NavigationBarTransitions extends BarTransitions {
         applyLightsOut(true, false);
     }
 
+    void setBackgroundFrame(Rect frame) {
+        mBarBackground.setFrame(frame);
+    }
+
     @Override
     protected boolean isLightsOut(int mode) {
         return super.isLightsOut(mode) || (mAllowAutoDimWallpaperNotVisible && mAutoDim
@@ -119,6 +124,7 @@ public final class NavigationBarTransitions extends BarTransitions {
     protected void onTransition(int oldMode, int newMode, boolean animate) {
         super.onTransition(oldMode, newMode, animate);
         applyLightsOut(animate, false /*force*/);
+        mView.onBarTransition(newMode);
     }
 
     private void applyLightsOut(boolean animate, boolean force) {
