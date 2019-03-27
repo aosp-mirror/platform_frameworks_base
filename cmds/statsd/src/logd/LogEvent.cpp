@@ -118,6 +118,7 @@ void LogEvent::createLogEvents(const StatsLogEventWrapper& statsLogEventWrapper,
 
 LogEvent::LogEvent(int32_t tagId, int64_t wallClockTimestampNs, int64_t elapsedTimestampNs) {
     mLogdTimestampNs = wallClockTimestampNs;
+    mElapsedTimestampNs = elapsedTimestampNs;
     mTagId = tagId;
     mLogUid = 0;
     mContext = create_android_logger(1937006964); // the event tag shared by all stats logs
@@ -246,7 +247,8 @@ LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
     mValues.push_back(FieldValue(Field(mTagId, getSimpleField(4)), Value(trainInfo.status)));
 }
 
-LogEvent::LogEvent(int32_t tagId, int64_t timestampNs) : LogEvent(tagId, timestampNs, 0) {}
+LogEvent::LogEvent(int32_t tagId, int64_t timestampNs) : LogEvent(tagId, timestampNs, timestampNs) {
+}
 
 LogEvent::LogEvent(int32_t tagId, int64_t timestampNs, int32_t uid) {
     mLogdTimestampNs = timestampNs;

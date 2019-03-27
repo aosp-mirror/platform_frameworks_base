@@ -22,7 +22,7 @@
 #include "anomaly/AlarmMonitor.h"
 #include "config/ConfigManager.h"
 #include "external/StatsPullerManager.h"
-#include "logd/LogListener.h"
+#include "logd/LogEventQueue.h"
 #include "packages/UidMap.h"
 #include "shell/ShellSubscriber.h"
 #include "statscompanion_util.h"
@@ -52,11 +52,10 @@ namespace statsd {
 using android::hardware::Return;
 
 class StatsService : public BnStatsManager,
-                     public LogListener,
                      public IStats,
                      public IBinder::DeathRecipient {
 public:
-    StatsService(const sp<Looper>& handlerLooper);
+    StatsService(const sp<Looper>& handlerLooper, std::shared_ptr<LogEventQueue> queue);
     virtual ~StatsService();
 
     /** The anomaly alarm registered with AlarmManager won't be updated by less than this. */
@@ -92,7 +91,7 @@ public:
     void Terminate();
 
     /**
-     * Called by LogReader when there's a log event to process.
+     * Test ONLY interface. In real world, StatsService reads from LogEventQueue.
      */
     virtual void OnLogEvent(LogEvent* event);
 
@@ -278,6 +277,9 @@ private:
      */
     void print_cmd_help(int out);
 
+    /* Runs on its dedicated thread to process pushed stats event from socket. */
+    void readLogs();
+
     /**
      * Trigger a broadcast.
      */
@@ -409,6 +411,8 @@ private:
     bool mEngBuild;
 
     sp<ShellSubscriber> mShellSubscriber;
+
+    std::shared_ptr<LogEventQueue> mEventQueue;
 
     FRIEND_TEST(StatsServiceTest, TestAddConfig_simple);
     FRIEND_TEST(StatsServiceTest, TestAddConfig_empty);
