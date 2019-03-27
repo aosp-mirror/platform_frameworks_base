@@ -1009,6 +1009,18 @@
                 android:description="@string/permdesc_manageOwnCalls"
                 android:protectionLevel="normal" />
 
+    <!--Allows an app which implements the
+        {@link android.telecom.InCallService} API to be eligible to be enabled as a calling companion app. This
+        means that the Telecom framework will bind to the app's InCallService implementation when
+        there are calls active. The app can use the InCallService API to view information about
+        calls on the system and control these calls.
+        <p>Protection level: normal
+    -->
+    <permission android:name="android.permission.CALL_COMPANION_APP"
+                android:label="@string/permlab_callCompanionApp"
+                android:description="@string/permdesc_callCompanionApp"
+                android:protectionLevel="normal" />
+
     <!-- Allows a calling app to continue a call which was started in another app.  An example is a
          video calling app that wants to continue a voice call on the user's mobile network.<p>
          When the handover of a call from one app to another takes place, there are two devices
