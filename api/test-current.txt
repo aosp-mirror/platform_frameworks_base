@@ -662,7 +662,7 @@ package android.content.pm {
   public abstract class PackageManager {
     method public abstract boolean arePermissionsIndividuallyControlled();
     method @RequiresPermission("android.permission.INTERACT_ACROSS_USERS_FULL") public abstract String getDefaultBrowserPackageNameAsUser(int);
-    method public String getIncidentReportApproverPackageName();
+    method @Nullable public String getIncidentReportApproverPackageName();
     method public abstract int getInstallReason(String, @NonNull android.os.UserHandle);
     method public abstract java.util.List<android.content.pm.ApplicationInfo> getInstalledApplicationsAsUser(int, int);
     method @RequiresPermission("android.permission.INTERACT_ACROSS_USERS_FULL") public abstract java.util.List<android.content.pm.PackageInfo> getInstalledPackagesAsUser(int, int);
