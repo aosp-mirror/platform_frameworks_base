@@ -85,9 +85,10 @@ import android.security.keystore.AttestationUtils;
 import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
 import android.test.MoreAsserts;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.util.ArraySet;
 import android.util.Pair;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
 import com.android.internal.widget.LockPatternUtils;

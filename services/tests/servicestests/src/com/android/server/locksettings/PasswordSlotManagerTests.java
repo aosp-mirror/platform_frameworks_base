@@ -16,7 +16,10 @@
 
 package com.android.server.locksettings;
 
+import android.platform.test.annotations.Presubmit;
 import android.test.AndroidTestCase;
+
+import androidx.test.filters.SmallTest;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +28,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+@SmallTest
+@Presubmit
 public class PasswordSlotManagerTests extends AndroidTestCase {
 
     PasswordSlotManagerTestable mManager;
