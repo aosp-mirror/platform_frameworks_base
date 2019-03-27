@@ -498,7 +498,6 @@ public class ConnectivityServiceTest {
             try {
                 doAnswer(validateAnswer).when(mNetworkMonitor).notifyNetworkConnected();
                 doAnswer(validateAnswer).when(mNetworkMonitor).forceReevaluation(anyInt());
-                doAnswer(validateAnswer).when(mNetworkMonitor).setAcceptPartialConnectivity();
             } catch (RemoteException e) {
                 fail(e.getMessage());
             }
@@ -2553,8 +2552,7 @@ public class ConnectivityServiceTest {
         verifyActiveNetwork(TRANSPORT_CELLULAR);
     }
 
-    // TODO(b/128426024): deflake and re-enable
-    // @Test
+    @Test
     public void testPartialConnectivity() {
         // Register network callback.
         NetworkRequest request = new NetworkRequest.Builder()
@@ -2578,20 +2576,24 @@ public class ConnectivityServiceTest {
         assertEquals(mCellNetworkAgent.getNetwork(), mCm.getActiveNetwork());
         callback.assertNoCallback();
 
+        // With HTTPS probe disabled, NetworkMonitor should pass the network validation with http
+        // probe.
+        mWiFiNetworkAgent.setNetworkValid();
         // If the user chooses yes to use this partial connectivity wifi, switch the default
         // network to wifi and check if wifi becomes valid or not.
         mCm.setAcceptPartialConnectivity(mWiFiNetworkAgent.getNetwork(), true /* accept */,
                 false /* always */);
-        // With https probe disabled, NetworkMonitor should pass the network validation with http
-        // probe.
-        mWiFiNetworkAgent.setNetworkValid();
+        // If user accepts partial connectivity network,
+        // NetworkMonitor#setAcceptPartialConnectivity() should be called too.
         waitForIdle();
         try {
-            verify(mWiFiNetworkAgent.mNetworkMonitor,
-                    timeout(TIMEOUT_MS).times(1)).setAcceptPartialConnectivity();
+            verify(mWiFiNetworkAgent.mNetworkMonitor, times(1)).setAcceptPartialConnectivity();
         } catch (RemoteException e) {
             fail(e.getMessage());
         }
+        // Need a trigger point to let NetworkMonitor tell ConnectivityService that network is
+        // validated.
+        mCm.reportNetworkConnectivity(mWiFiNetworkAgent.getNetwork(), true);
         callback.expectCallback(CallbackState.LOSING, mCellNetworkAgent);
         NetworkCapabilities nc = callback.expectCapabilitiesWith(NET_CAPABILITY_VALIDATED,
                 mWiFiNetworkAgent);
@@ -2621,6 +2623,15 @@ public class ConnectivityServiceTest {
         // acceptUnvalidated is also used as setting for accepting partial networks.
         mWiFiNetworkAgent.explicitlySelected(true /* acceptUnvalidated */);
         mWiFiNetworkAgent.connect(true);
+        // If user accepted partial connectivity network before,
+        // NetworkMonitor#setAcceptPartialConnectivity() will be called in
+        // ConnectivityService#updateNetworkInfo().
+        waitForIdle();
+        try {
+            verify(mWiFiNetworkAgent.mNetworkMonitor, times(1)).setAcceptPartialConnectivity();
+        } catch (RemoteException e) {
+            fail(e.getMessage());
+        }
         callback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
         callback.expectCallback(CallbackState.LOSING, mCellNetworkAgent);
         nc = callback.expectCapabilitiesWith(NET_CAPABILITY_VALIDATED, mWiFiNetworkAgent);
@@ -2635,23 +2646,33 @@ public class ConnectivityServiceTest {
         // NET_CAPABILITY_PARTIAL_CONNECTIVITY.
         mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
         mWiFiNetworkAgent.explicitlySelected(true /* acceptUnvalidated */);
+        // Current design cannot send multi-testResult from NetworkMonitor to ConnectivityService.
+        // So, if user accepts partial connectivity, NetworkMonitor will send PARTIAL_CONNECTIVITY
+        // to ConnectivityService first then send VALID. Once NetworkMonitor support
+        // multi-testResult, this test case also need to be changed to meet the new design.
         mWiFiNetworkAgent.connectWithPartialConnectivity();
-        callback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
-        // TODO: If the user accepted partial connectivity, we shouldn't switch to wifi until
-        // NetworkMonitor detects partial connectivity
-        assertEquals(mWiFiNetworkAgent.getNetwork(), mCm.getActiveNetwork());
-        mWiFiNetworkAgent.setNetworkValid();
+        // If user accepted partial connectivity network before,
+        // NetworkMonitor#setAcceptPartialConnectivity() will be called in
+        // ConnectivityService#updateNetworkInfo().
         waitForIdle();
         try {
-            verify(mWiFiNetworkAgent.mNetworkMonitor,
-                    timeout(TIMEOUT_MS).times(1)).setAcceptPartialConnectivity();
+            verify(mWiFiNetworkAgent.mNetworkMonitor, times(1)).setAcceptPartialConnectivity();
         } catch (RemoteException e) {
             fail(e.getMessage());
         }
+        callback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
         callback.expectCallback(CallbackState.LOSING, mCellNetworkAgent);
-        callback.expectCapabilitiesWith(NET_CAPABILITY_PARTIAL_CONNECTIVITY, mWiFiNetworkAgent);
-        // Wifi should be the default network.
+        // TODO: If the user accepted partial connectivity, we shouldn't switch to wifi until
+        // NetworkMonitor detects partial connectivity
         assertEquals(mWiFiNetworkAgent.getNetwork(), mCm.getActiveNetwork());
+        callback.expectCapabilitiesWith(NET_CAPABILITY_PARTIAL_CONNECTIVITY, mWiFiNetworkAgent);
+        mWiFiNetworkAgent.setNetworkValid();
+        // Need a trigger point to let NetworkMonitor tell ConnectivityService that network is
+        // validated.
+        mCm.reportNetworkConnectivity(mWiFiNetworkAgent.getNetwork(), true);
+        callback.expectCapabilitiesWith(NET_CAPABILITY_VALIDATED, mWiFiNetworkAgent);
+        mWiFiNetworkAgent.disconnect();
+        callback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
     }
 
     @Test
