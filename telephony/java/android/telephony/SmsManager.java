@@ -22,10 +22,6 @@ import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
 import android.app.PendingIntent;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothMapClient;
-import android.bluetooth.BluetoothProfile;
 import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.Context;
@@ -36,7 +32,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.telecom.PhoneAccount;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -66,7 +61,6 @@ import java.util.Map;
  */
 public final class SmsManager {
     private static final String TAG = "SmsManager";
-    private static final boolean DBG = false;
 
     /**
      * A psuedo-subId that represents the default subId at any given time. The actual subId it
@@ -347,123 +341,16 @@ public final class SmsManager {
             throw new IllegalArgumentException("Invalid message body");
         }
 
-        // A Manager code accessing another manager is *not* acceptable, in Android.
-        // In this particular case, it is unavoidable because of the following:
-        // If the subscription for this SmsManager instance belongs to a remote SIM
-        // then a listener to get BluetoothMapClient proxy needs to be started up.
-        // Doing that is possible only in a foreground thread or as a system user.
-        // i.e., Can't be done in ISms service.
-        // For that reason, SubscriptionManager needs to be accessed here to determine
-        // if the subscription belongs to a remote SIM.
-        // Ideally, there should be another API in ISms to service messages going thru
-        // remote SIM subscriptions (and ISms should be tweaked to be able to access
-        // BluetoothMapClient proxy)
-        Context context = ActivityThread.currentApplication().getApplicationContext();
-        SubscriptionManager manager = (SubscriptionManager) context
-                .getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE);
-        int subId = getSubscriptionId();
-        SubscriptionInfo info = manager.getActiveSubscriptionInfo(subId);
-        if (DBG) {
-            Log.d(TAG, "for subId: " + subId + ", subscription-info: " + info);
-        }
-
-        /* If the Subscription associated with this SmsManager instance belongs to a remote-sim,
-         * then send the message thru the remote-sim subscription.
-         */
-        if (info != null
-                && info.getSubscriptionType() == SubscriptionManager.SUBSCRIPTION_TYPE_REMOTE_SIM) {
-            if (DBG) Log.d(TAG, "sending message thru bluetooth");
-            sendTextMessageBluetooth(destinationAddress, scAddress, text, sentIntent,
-                    deliveryIntent, info);
-            return;
-        }
-
         try {
             // If the subscription is invalid or default, we will use the default phone to send the
             // SMS and possibly fail later in the SMS sending process.
-            ISms iccISms = getISmsServiceOrThrow();
-            iccISms.sendTextForSubscriber(subId, ActivityThread.currentPackageName(),
+            ISms iSms = getISmsServiceOrThrow();
+            iSms.sendTextForSubscriber(getSubscriptionId(), ActivityThread.currentPackageName(),
                     destinationAddress,
                     scAddress, text, sentIntent, deliveryIntent,
                     persistMessage);
         } catch (RemoteException ex) {
             // ignore it
-        }
-    }
-
-    private void sendTextMessageBluetooth(String destAddr, String scAddress,
-            String text, PendingIntent sentIntent, PendingIntent deliveryIntent,
-            SubscriptionInfo info) {
-        BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (btAdapter == null) {
-            // No bluetooth service on this platform?
-            sendErrorInPendingIntent(sentIntent, SmsManager.RESULT_ERROR_NO_SERVICE);
-            return;
-        }
-        BluetoothDevice device = btAdapter.getRemoteDevice(info.getIccId());
-        if (device == null) {
-            if (DBG) Log.d(TAG, "Bluetooth device addr invalid: " + info.getIccId());
-            sendErrorInPendingIntent(sentIntent, SmsManager.RESULT_ERROR_NO_SERVICE);
-            return;
-        }
-        btAdapter.getProfileProxy(ActivityThread.currentApplication().getApplicationContext(),
-                new MapMessageSender(destAddr, text, device, sentIntent, deliveryIntent),
-                BluetoothProfile.MAP_CLIENT);
-    }
-
-    private class MapMessageSender implements BluetoothProfile.ServiceListener {
-        final Uri[] mDestAddr;
-        private String mMessage;
-        final BluetoothDevice mDevice;
-        final PendingIntent mSentIntent;
-        final PendingIntent mDeliveryIntent;
-        MapMessageSender(final String destAddr, final String message, final BluetoothDevice device,
-                final PendingIntent sentIntent, final PendingIntent deliveryIntent) {
-            super();
-            mDestAddr = new Uri[] {new Uri.Builder()
-                    .appendPath(destAddr)
-                    .scheme(PhoneAccount.SCHEME_TEL)
-                    .build()};
-            mMessage = message;
-            mDevice = device;
-            mSentIntent = sentIntent;
-            mDeliveryIntent = deliveryIntent;
-        }
-
-        @Override
-        public void onServiceConnected(int profile, BluetoothProfile proxy) {
-            if (DBG) Log.d(TAG, "Service connected");
-            if (profile != BluetoothProfile.MAP_CLIENT) return;
-            BluetoothMapClient mapProfile = (BluetoothMapClient) proxy;
-            if (mMessage != null) {
-                if (DBG) Log.d(TAG, "Sending message thru bluetooth");
-                mapProfile.sendMessage(mDevice, mDestAddr, mMessage, mSentIntent, mDeliveryIntent);
-                mMessage = null;
-            }
-            BluetoothAdapter.getDefaultAdapter()
-                    .closeProfileProxy(BluetoothProfile.MAP_CLIENT, mapProfile);
-        }
-
-        @Override
-        public void onServiceDisconnected(int profile) {
-            if (mMessage != null) {
-                if (DBG) Log.d(TAG, "Bluetooth disconnected before sending the message");
-                sendErrorInPendingIntent(mSentIntent, SmsManager.RESULT_ERROR_NO_SERVICE);
-                mMessage = null;
-            }
-        }
-    }
-
-    private void sendErrorInPendingIntent(PendingIntent intent, int errorCode) {
-        if (intent == null) {
-            return;
-        }
-        try {
-            intent.send(errorCode);
-        } catch (PendingIntent.CanceledException e) {
-            // PendingIntent is cancelled. ignore sending this error code back to
-            // caller.
-            if (DBG) Log.d(TAG, "PendingIntent.CanceledException: " + e.getMessage());
         }
     }
 
@@ -516,8 +403,8 @@ public final class SmsManager {
         }
 
         try {
-            ISms iccISms = getISmsServiceOrThrow();
-            iccISms.sendTextForSubscriberWithSelfPermissions(getSubscriptionId(),
+            ISms iSms = getISmsServiceOrThrow();
+            iSms.sendTextForSubscriberWithSelfPermissions(getSubscriptionId(),
                     ActivityThread.currentPackageName(),
                     destinationAddress,
                     scAddress, text, sentIntent, deliveryIntent, persistMessage);
@@ -600,9 +487,9 @@ public final class SmsManager {
         }
 
         try {
-             ISms iccISms = getISmsServiceOrThrow();
-            if (iccISms != null) {
-                iccISms.sendTextForSubscriberWithOptions(getSubscriptionId(),
+            ISms iSms = getISmsServiceOrThrow();
+            if (iSms != null) {
+                iSms.sendTextForSubscriberWithOptions(getSubscriptionId(),
                         ActivityThread.currentPackageName(), destinationAddress, scAddress, text,
                         sentIntent, deliveryIntent, persistMessage,  priority, expectMore,
                         validityPeriod);
@@ -661,9 +548,9 @@ public final class SmsManager {
                     "Invalid pdu format. format must be either 3gpp or 3gpp2");
         }
         try {
-            ISms iccISms = ISms.Stub.asInterface(ServiceManager.getService("isms"));
-            if (iccISms != null) {
-                iccISms.injectSmsPduForSubscriber(
+            ISms iSms = ISms.Stub.asInterface(ServiceManager.getService("isms"));
+            if (iSms != null) {
+                iSms.injectSmsPduForSubscriber(
                         getSubscriptionId(), pdu, format, receivedIntent);
             }
         } catch (RemoteException ex) {
@@ -749,8 +636,8 @@ public final class SmsManager {
 
         if (parts.size() > 1) {
             try {
-                ISms iccISms = getISmsServiceOrThrow();
-                iccISms.sendMultipartTextForSubscriber(getSubscriptionId(),
+                ISms iSms = getISmsServiceOrThrow();
+                iSms.sendMultipartTextForSubscriber(getSubscriptionId(),
                         ActivityThread.currentPackageName(),
                         destinationAddress, scAddress, parts,
                         sentIntents, deliveryIntents, persistMessage);
@@ -881,9 +768,9 @@ public final class SmsManager {
 
         if (parts.size() > 1) {
             try {
-                 ISms iccISms = getISmsServiceOrThrow();
-                if (iccISms != null) {
-                    iccISms.sendMultipartTextForSubscriberWithOptions(getSubscriptionId(),
+                ISms iSms = getISmsServiceOrThrow();
+                if (iSms != null) {
+                    iSms.sendMultipartTextForSubscriberWithOptions(getSubscriptionId(),
                             ActivityThread.currentPackageName(), destinationAddress, scAddress,
                             parts, sentIntents, deliveryIntents, persistMessage, priority,
                             expectMore, validityPeriod);
@@ -969,8 +856,8 @@ public final class SmsManager {
         }
 
         try {
-            ISms iccISms = getISmsServiceOrThrow();
-            iccISms.sendDataForSubscriber(getSubscriptionId(), ActivityThread.currentPackageName(),
+            ISms iSms = getISmsServiceOrThrow();
+            iSms.sendDataForSubscriber(getSubscriptionId(), ActivityThread.currentPackageName(),
                     destinationAddress, scAddress, destinationPort & 0xFFFF,
                     data, sentIntent, deliveryIntent);
         } catch (RemoteException ex) {
@@ -996,8 +883,8 @@ public final class SmsManager {
         }
 
         try {
-            ISms iccISms = getISmsServiceOrThrow();
-            iccISms.sendDataForSubscriberWithSelfPermissions(getSubscriptionId(),
+            ISms iSms = getISmsServiceOrThrow();
+            iSms.sendDataForSubscriberWithSelfPermissions(getSubscriptionId(),
                     ActivityThread.currentPackageName(), destinationAddress, scAddress,
                     destinationPort & 0xFFFF, data, sentIntent, deliveryIntent);
         } catch (RemoteException ex) {
@@ -1059,9 +946,9 @@ public final class SmsManager {
         boolean isSmsSimPickActivityNeeded = false;
         final Context context = ActivityThread.currentApplication().getApplicationContext();
         try {
-            ISms iccISms = getISmsService();
-            if (iccISms != null) {
-                isSmsSimPickActivityNeeded = iccISms.isSmsSimPickActivityNeeded(subId);
+            ISms iSms = getISmsService();
+            if (iSms != null) {
+                isSmsSimPickActivityNeeded = iSms.isSmsSimPickActivityNeeded(subId);
             }
         } catch (RemoteException ex) {
             Log.e(TAG, "Exception in getSubscriptionId");
@@ -1092,11 +979,11 @@ public final class SmsManager {
      * the service does not exist.
      */
     private static ISms getISmsServiceOrThrow() {
-        ISms iccISms = getISmsService();
-        if (iccISms == null) {
+        ISms iSms = getISmsService();
+        if (iSms == null) {
             throw new UnsupportedOperationException("Sms is not supported");
         }
-        return iccISms;
+        return iSms;
     }
 
     private static ISms getISmsService() {
@@ -1125,9 +1012,9 @@ public final class SmsManager {
             throw new IllegalArgumentException("pdu is NULL");
         }
         try {
-            ISms iccISms = getISmsService();
-            if (iccISms != null) {
-                success = iccISms.copyMessageToIccEfForSubscriber(getSubscriptionId(),
+            ISms iSms = getISmsService();
+            if (iSms != null) {
+                success = iSms.copyMessageToIccEfForSubscriber(getSubscriptionId(),
                         ActivityThread.currentPackageName(),
                         status, pdu, smsc);
             }
@@ -1156,9 +1043,9 @@ public final class SmsManager {
         Arrays.fill(pdu, (byte)0xff);
 
         try {
-            ISms iccISms = getISmsService();
-            if (iccISms != null) {
-                success = iccISms.updateMessageOnIccEfForSubscriber(getSubscriptionId(),
+            ISms iSms = getISmsService();
+            if (iSms != null) {
+                success = iSms.updateMessageOnIccEfForSubscriber(getSubscriptionId(),
                         ActivityThread.currentPackageName(),
                         messageIndex, STATUS_ON_ICC_FREE, pdu);
             }
@@ -1188,9 +1075,9 @@ public final class SmsManager {
         boolean success = false;
 
         try {
-            ISms iccISms = getISmsService();
-            if (iccISms != null) {
-                success = iccISms.updateMessageOnIccEfForSubscriber(getSubscriptionId(),
+            ISms iSms = getISmsService();
+            if (iSms != null) {
+                success = iSms.updateMessageOnIccEfForSubscriber(getSubscriptionId(),
                         ActivityThread.currentPackageName(),
                         messageIndex, newStatus, pdu);
             }
@@ -1215,9 +1102,9 @@ public final class SmsManager {
         List<SmsRawData> records = null;
 
         try {
-            ISms iccISms = getISmsService();
-            if (iccISms != null) {
-                records = iccISms.getAllMessagesFromIccEfForSubscriber(
+            ISms iSms = getISmsService();
+            if (iSms != null) {
+                records = iSms.getAllMessagesFromIccEfForSubscriber(
                         getSubscriptionId(),
                         ActivityThread.currentPackageName());
             }
@@ -1252,9 +1139,9 @@ public final class SmsManager {
         boolean success = false;
 
         try {
-            ISms iccISms = getISmsService();
-            if (iccISms != null) {
-                success = iccISms.enableCellBroadcastForSubscriber(
+            ISms iSms = getISmsService();
+            if (iSms != null) {
+                success = iSms.enableCellBroadcastForSubscriber(
                         getSubscriptionId(), messageIdentifier, ranType);
             }
         } catch (RemoteException ex) {
@@ -1288,9 +1175,9 @@ public final class SmsManager {
         boolean success = false;
 
         try {
-            ISms iccISms = getISmsService();
-            if (iccISms != null) {
-                success = iccISms.disableCellBroadcastForSubscriber(
+            ISms iSms = getISmsService();
+            if (iSms != null) {
+                success = iSms.disableCellBroadcastForSubscriber(
                         getSubscriptionId(), messageIdentifier, ranType);
             }
         } catch (RemoteException ex) {
@@ -1331,9 +1218,9 @@ public final class SmsManager {
             throw new IllegalArgumentException("endMessageId < startMessageId");
         }
         try {
-            ISms iccISms = getISmsService();
-            if (iccISms != null) {
-                success = iccISms.enableCellBroadcastRangeForSubscriber(getSubscriptionId(),
+            ISms iSms = getISmsService();
+            if (iSms != null) {
+                success = iSms.enableCellBroadcastRangeForSubscriber(getSubscriptionId(),
                         startMessageId, endMessageId, ranType);
             }
         } catch (RemoteException ex) {
@@ -1374,9 +1261,9 @@ public final class SmsManager {
             throw new IllegalArgumentException("endMessageId < startMessageId");
         }
         try {
-            ISms iccISms = getISmsService();
-            if (iccISms != null) {
-                success = iccISms.disableCellBroadcastRangeForSubscriber(getSubscriptionId(),
+            ISms iSms = getISmsService();
+            if (iSms != null) {
+                success = iSms.disableCellBroadcastRangeForSubscriber(getSubscriptionId(),
                         startMessageId, endMessageId, ranType);
             }
         } catch (RemoteException ex) {
@@ -1426,9 +1313,9 @@ public final class SmsManager {
     public boolean isImsSmsSupported() {
         boolean boSupported = false;
         try {
-            ISms iccISms = getISmsService();
-            if (iccISms != null) {
-                boSupported = iccISms.isImsSmsSupportedForSubscriber(getSubscriptionId());
+            ISms iSms = getISmsService();
+            if (iSms != null) {
+                boSupported = iSms.isImsSmsSupportedForSubscriber(getSubscriptionId());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -1451,9 +1338,9 @@ public final class SmsManager {
     public String getImsSmsFormat() {
         String format = com.android.internal.telephony.SmsConstants.FORMAT_UNKNOWN;
         try {
-            ISms iccISms = getISmsService();
-            if (iccISms != null) {
-                format = iccISms.getImsSmsFormatForSubscriber(getSubscriptionId());
+            ISms iSms = getISmsService();
+            if (iSms != null) {
+                format = iSms.getImsSmsFormatForSubscriber(getSubscriptionId());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -1467,10 +1354,10 @@ public final class SmsManager {
      * @return the default SMS subscription id
      */
     public static int getDefaultSmsSubscriptionId() {
-        ISms iccISms = null;
+        ISms iSms = null;
         try {
-            iccISms = ISms.Stub.asInterface(ServiceManager.getService("isms"));
-            return iccISms.getPreferredSmsSubscription();
+            iSms = ISms.Stub.asInterface(ServiceManager.getService("isms"));
+            return iSms.getPreferredSmsSubscription();
         } catch (RemoteException ex) {
             return -1;
         } catch (NullPointerException ex) {
@@ -1486,10 +1373,10 @@ public final class SmsManager {
      */
     @UnsupportedAppUsage
     public boolean isSMSPromptEnabled() {
-        ISms iccISms = null;
+        ISms iSms = null;
         try {
-            iccISms = ISms.Stub.asInterface(ServiceManager.getService("isms"));
-            return iccISms.isSMSPromptEnabled();
+            iSms = ISms.Stub.asInterface(ServiceManager.getService("isms"));
+            return iSms.isSMSPromptEnabled();
         } catch (RemoteException ex) {
             return false;
         } catch (NullPointerException ex) {
@@ -1966,8 +1853,8 @@ public final class SmsManager {
             throw new IllegalArgumentException("Empty message URI");
         }
         try {
-            ISms iccISms = getISmsServiceOrThrow();
-            iccISms.sendStoredText(
+            ISms iSms = getISmsServiceOrThrow();
+            iSms.sendStoredText(
                     getSubscriptionId(), ActivityThread.currentPackageName(), messageUri,
                     scAddress, sentIntent, deliveryIntent);
         } catch (RemoteException ex) {
@@ -2014,8 +1901,8 @@ public final class SmsManager {
             throw new IllegalArgumentException("Empty message URI");
         }
         try {
-            ISms iccISms = getISmsServiceOrThrow();
-            iccISms.sendStoredMultipartText(
+            ISms iSms = getISmsServiceOrThrow();
+            iSms.sendStoredMultipartText(
                     getSubscriptionId(), ActivityThread.currentPackageName(), messageUri,
                     scAddress, sentIntents, deliveryIntents);
         } catch (RemoteException ex) {
