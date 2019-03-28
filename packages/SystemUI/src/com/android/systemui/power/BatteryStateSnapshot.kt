@@ -17,7 +17,8 @@ data class BatteryStateSnapshot(
     val timeRemainingMillis: Long,
     val severeThresholdMillis: Long,
     val lowThresholdMillis: Long,
-    val isBasedOnUsage: Boolean
+    val isBasedOnUsage: Boolean,
+    val isLowWarningEnabled: Boolean
 ) {
     /**
      * Returns whether hybrid warning logic/copy should be used for this snapshot
@@ -48,7 +49,8 @@ data class BatteryStateSnapshot(
         NO_ESTIMATE_AVAILABLE.toLong(),
         NO_ESTIMATE_AVAILABLE.toLong(),
         NO_ESTIMATE_AVAILABLE.toLong(),
-        false
+        false,
+        true
     ) {
         this.isHybrid = false
     }

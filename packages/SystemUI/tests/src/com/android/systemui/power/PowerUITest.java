@@ -265,6 +265,12 @@ public class PowerUITest extends SysuiTestCase {
         state.mIsPowerSaver = true;
         shouldShow = mPowerUI.shouldShowHybridWarning(state.get());
         assertThat(shouldShow).isFalse();
+
+        state.mIsPowerSaver = false;
+        // if disabled we should not show the low warning.
+        state.mIsLowLevelWarningEnabled = false;
+        shouldShow = mPowerUI.shouldShowHybridWarning(state.get());
+        assertThat(shouldShow).isFalse();
     }
 
     @Test
@@ -365,7 +371,7 @@ public class PowerUITest extends SysuiTestCase {
         assertThat(refreshedEstimate.getEstimateMillis()).isEqualTo(BELOW_HYBRID_THRESHOLD);
         BatteryStateSnapshot snapshot = new BatteryStateSnapshot(
                 BATTERY_LEVEL_10, false, false, 0, BatteryManager.BATTERY_HEALTH_GOOD,
-                0, 0, -1, 0, 0, false);
+                0, 0, -1, 0, 0, false, true);
         mPowerUI.mLastBatteryStateSnapshot = snapshot;
 
         // query again since the estimate was -1
@@ -375,7 +381,7 @@ public class PowerUITest extends SysuiTestCase {
         assertThat(refreshedEstimate.getEstimateMillis()).isEqualTo(BELOW_SEVERE_HYBRID_THRESHOLD);
         snapshot = new BatteryStateSnapshot(
                 BATTERY_LEVEL_10, false, false, 0, BatteryManager.BATTERY_HEALTH_GOOD, 0,
-                0, BELOW_SEVERE_HYBRID_THRESHOLD, 0, 0, false);
+                0, BELOW_SEVERE_HYBRID_THRESHOLD, 0, 0, false, true);
         mPowerUI.mLastBatteryStateSnapshot = snapshot;
 
         // Battery level hasn't changed, so we don't query again
@@ -536,13 +542,14 @@ public class PowerUITest extends SysuiTestCase {
         public long mTimeRemainingMillis = Duration.ofHours(24).toMillis();
         public boolean mIsBasedOnUsage = true;
         public boolean mIsHybrid = true;
+        public boolean mIsLowLevelWarningEnabled = true;
 
         public BatteryStateSnapshot get() {
             if (mIsHybrid) {
                 return new BatteryStateSnapshot(mBatteryLevel, mIsPowerSaver, mPlugged, mBucket,
                         mBatteryStatus, mSevereLevelThreshold, mLowLevelThreshold,
                         mTimeRemainingMillis, mSevereThresholdMillis, mLowThresholdMillis,
-                        mIsBasedOnUsage);
+                        mIsBasedOnUsage, mIsLowLevelWarningEnabled);
             } else {
                 return new BatteryStateSnapshot(mBatteryLevel, mIsPowerSaver, mPlugged, mBucket,
                         mBatteryStatus, mSevereLevelThreshold, mLowLevelThreshold);
