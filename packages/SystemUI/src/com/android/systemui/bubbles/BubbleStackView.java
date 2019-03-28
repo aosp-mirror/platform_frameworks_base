@@ -52,6 +52,7 @@ import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.ViewClippingUtil;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.bubbles.BubbleController.DismissReason;
 import com.android.systemui.bubbles.animation.ExpandedAnimationController;
@@ -316,7 +317,8 @@ public class BubbleStackView extends FrameLayout {
         }
         switch (action) {
             case AccessibilityNodeInfo.ACTION_DISMISS:
-                stackDismissed(BubbleController.DISMISS_ACCESSIBILITY_ACTION);
+                Dependency.get(BubbleController.class).dismissStack(
+                        BubbleController.DISMISS_ACCESSIBILITY_ACTION);
                 return true;
             case AccessibilityNodeInfo.ACTION_COLLAPSE:
                 collapseStack();
@@ -422,7 +424,7 @@ public class BubbleStackView extends FrameLayout {
      * Sets the entry that should be expanded and expands if needed.
      */
     @VisibleForTesting
-    public void setExpandedBubble(NotificationEntry entry) {
+    void setExpandedBubble(NotificationEntry entry) {
         for (int i = 0; i < mBubbleContainer.getChildCount(); i++) {
             BubbleView bv = (BubbleView) mBubbleContainer.getChildAt(i);
             if (entry.equals(bv.getEntry())) {
@@ -436,7 +438,7 @@ public class BubbleStackView extends FrameLayout {
      *
      * @param entry the notification to add to the stack of bubbles.
      */
-    public void addBubble(NotificationEntry entry) {
+    void addBubble(NotificationEntry entry) {
         Bubble b = new Bubble(entry, mInflater, this /* stackView */, mBlockedListener);
         mBubbleData.addBubble(b);
 
@@ -451,12 +453,17 @@ public class BubbleStackView extends FrameLayout {
     /**
      * Remove a bubble from the stack.
      */
-    public void removeBubble(String key, int reason) {
+    void removeBubble(String key, int reason) {
         Bubble b = mBubbleData.removeBubble(key);
         if (b == null) {
             return;
         }
-        int removedIndex = dismissBubble(b, reason);
+        setBubbleDismissed(b, reason);
+
+        // Remove it from the views
+        int removedIndex = mBubbleContainer.indexOfChild(b.iconView);
+        mBubbleContainer.removeViewAt(removedIndex);
+
         int bubbleCount = mBubbleContainer.getChildCount();
         if (bubbleCount == 0) {
             // If no bubbles remain, collapse the entire stack.
@@ -481,9 +488,9 @@ public class BubbleStackView extends FrameLayout {
     /**
      * Dismiss the stack of bubbles.
      */
-    public void stackDismissed(int reason) {
+    void stackDismissed(int reason) {
         for (Bubble bubble : mBubbleData.getBubbles()) {
-            dismissBubble(bubble, reason);
+            setBubbleDismissed(bubble, reason);
         }
         mBubbleData.clear();
         collapseStack();
@@ -495,8 +502,7 @@ public class BubbleStackView extends FrameLayout {
     }
 
     /**
-     * Marks the notification entry as dismissed, cleans up Bubble icon and expanded view UI
-     * elements and calls deleteIntent if necessary.
+     * Marks the notification entry as dismissed & calls any delete intents for the bubble.
      *
      * <p>Note: This does not remove the Bubble from BubbleData.
      *
@@ -504,16 +510,12 @@ public class BubbleStackView extends FrameLayout {
      * @param reason code for the reason the dismiss was triggered
      * @see BubbleController.DismissReason
      */
-    private int dismissBubble(Bubble bubble, @DismissReason int reason) {
+    private void setBubbleDismissed(Bubble bubble, @DismissReason int reason) {
         if (DEBUG) {
             Log.d(TAG, "dismissBubble: " + bubble + " reason=" + reason);
         }
         bubble.entry.setBubbleDismissed(true);
         bubble.expandedView.cleanUpExpandedState();
-
-        // Remove it from the views
-        int removedIndex = mBubbleContainer.indexOfChild(bubble.iconView);
-        mBubbleContainer.removeViewAt(removedIndex);
 
         if (reason == BubbleController.DISMISS_USER_GESTURE) {
             Notification.BubbleMetadata bubbleMetadata = bubble.entry.getBubbleMetadata();
@@ -529,7 +531,6 @@ public class BubbleStackView extends FrameLayout {
                 }
             }
         }
-        return removedIndex;
     }
 
     /**
