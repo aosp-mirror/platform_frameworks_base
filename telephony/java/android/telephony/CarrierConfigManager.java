@@ -2490,6 +2490,18 @@ public class CarrierConfigManager {
             "emergency_number_prefix_string_array";
 
     /**
+     * Indicates when a carrier has a primary subscription and an opportunistic subscription active,
+     * and when Internet data is switched to opportunistic network, whether to still show
+     * signal bar of primary network. By default it will be false, meaning whenever data
+     * is going over opportunistic network, signal bar will reflect signal strength and rat
+     * icon of that network.
+     *
+     * @hide
+     */
+    public static final String KEY_ALWAYS_SHOW_PRIMARY_SIGNAL_BAR_IN_OPPORTUNISTIC_NETWORK_BOOLEAN =
+            "always_show_primary_signal_bar_in_opportunistic_network_boolean";
+
+    /**
      * Determines whether the carrier wants to cancel the cs reject notification automatically
      * when the voice registration state changes.
      * If true, the notification will be automatically removed
@@ -2930,6 +2942,8 @@ public class CarrierConfigManager {
                 "connected_mmwave:None,connected:5G,not_restricted:None,restricted:None");
         sDefaults.putBoolean(KEY_USE_USIM_BOOL, false);
         sDefaults.putBoolean(KEY_AUTO_CANCEL_CS_REJECT_NOTIFICATION, false);
+        sDefaults.putBoolean(KEY_ALWAYS_SHOW_PRIMARY_SIGNAL_BAR_IN_OPPORTUNISTIC_NETWORK_BOOLEAN,
+                false);
     }
 
     /**
