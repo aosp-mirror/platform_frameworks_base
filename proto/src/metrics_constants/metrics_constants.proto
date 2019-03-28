@@ -7162,6 +7162,11 @@ message MetricsEvent {
     // Open: Settings > app > bubble settings > confirmation dialog
     DIALOG_APP_BUBBLE_SETTINGS = 1702;
 
+    // ACTION: Display white balance setting enabled or disabled.
+    // CATEGORY: SETTINGS
+    // OS: Q
+    ACTION_DISPLAY_WHITE_BALANCE_SETTING_CHANGED = 1703;
+
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
