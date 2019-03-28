@@ -187,7 +187,7 @@ message Atom {
         WifiEnabledStateChanged wifi_enabled_state_changed = 113;
         WifiRunningStateChanged wifi_running_state_changed = 114;
         AppCompacted app_compacted = 115;
-        NetworkDnsEventReported network_dns_event_reported = 116;
+        NetworkDnsEventReported network_dns_event_reported = 116 [(log_from_module) = "resolv"];
         DocsUIPickerLaunchedFromReported docs_ui_picker_launched_from_reported = 117;
         DocsUIPickResultReported docs_ui_pick_result_reported = 118;
         DocsUISearchModeReported docs_ui_search_mode_reported = 119;
