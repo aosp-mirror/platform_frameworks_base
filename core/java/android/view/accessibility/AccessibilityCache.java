@@ -35,7 +35,10 @@ public class AccessibilityCache {
 
     private static final String LOG_TAG = "AccessibilityCache";
 
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = Log.isLoggable(LOG_TAG, Log.DEBUG) && Build.IS_DEBUGGABLE;
+
+    private static final boolean VERBOSE =
+            Log.isLoggable(LOG_TAG, Log.VERBOSE) && Build.IS_DEBUGGABLE;
 
     private static final boolean CHECK_INTEGRITY = Build.IS_ENG;
 
@@ -120,6 +123,9 @@ public class AccessibilityCache {
      */
     public void onAccessibilityEvent(AccessibilityEvent event) {
         synchronized (mLock) {
+            if (DEBUG) {
+                Log.i(LOG_TAG, "onAccessibilityEvent(" + event + ")");
+            }
             final int eventType = event.getEventType();
             switch (eventType) {
                 case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED: {
@@ -223,8 +229,8 @@ public class AccessibilityCache {
                 // will wipe the data of the cached info.
                 info = new AccessibilityNodeInfo(info);
             }
-            if (DEBUG) {
-                Log.i(LOG_TAG, "get(" + accessibilityNodeId + ") = " + info);
+            if (VERBOSE) {
+                Log.i(LOG_TAG, "get(0x" + Long.toHexString(accessibilityNodeId) + ") = " + info);
             }
             return info;
         }
@@ -280,7 +286,7 @@ public class AccessibilityCache {
      */
     public void add(AccessibilityNodeInfo info) {
         synchronized(mLock) {
-            if (DEBUG) {
+            if (VERBOSE) {
                 Log.i(LOG_TAG, "add(" + info + ")");
             }
 
