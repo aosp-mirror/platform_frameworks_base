@@ -21,13 +21,25 @@ import android.content.ComponentName;
 /**
  * This class describes various information required to start a process.
  *
- * The {@link #mHostingType} parameter describes the reason why we started a process, and
+ * The {@code mHostingType} field describes the reason why we started a process, and
  * is only used for logging and stats.
  *
- * The {@link #mHostingName} parameter describes the Component for which we are starting the
+ * The {@code mHostingName} field describes the Component for which we are starting the
  * process, and is only used for logging and stats.
  *
- * The {@link #mHostingZygote} describes from which Zygote the new process should be spawned.
+ * The {@code mHostingZygote} field describes from which Zygote the new process should be spawned.
+ *
+ * {@code mDefiningPackageName} contains the packageName of the package that defines the
+ * component we want to start; this can be different from the packageName and uid in the
+ * ApplicationInfo that we're creating the process with, in case the service is a
+ * {@link android.content.Context#BIND_EXTERNAL_SERVICE} service. In that case, the packageName
+ * and uid in the ApplicationInfo will be set to those of the caller, not of the defining package.
+ *
+ * {@code mDefiningUid} contains the uid of the application that defines the component we want to
+ * start; this can be different from the packageName and uid in the ApplicationInfo that we're
+ * creating the process with, in case the service is a
+ * {@link android.content.Context#BIND_EXTERNAL_SERVICE} service. In that case, the packageName
+ * and uid in the ApplicationInfo will be set to those of the caller, not of the defining package.
  *
  */
 
@@ -39,23 +51,36 @@ public final class HostingRecord {
     private final String mHostingType;
     private final String mHostingName;
     private final int mHostingZygote;
+    private final String mDefiningPackageName;
+    private final int mDefiningUid;
 
     public HostingRecord(String hostingType) {
-        this(hostingType, null, REGULAR_ZYGOTE);
+        this(hostingType, null, REGULAR_ZYGOTE, null, -1);
     }
 
     public HostingRecord(String hostingType, ComponentName hostingName) {
-        this(hostingType, hostingName.toShortString(), REGULAR_ZYGOTE);
+        this(hostingType, hostingName, REGULAR_ZYGOTE);
     }
 
     public HostingRecord(String hostingType, String hostingName) {
         this(hostingType, hostingName, REGULAR_ZYGOTE);
     }
 
+    private HostingRecord(String hostingType, ComponentName hostingName, int hostingZygote) {
+        this(hostingType, hostingName.toShortString(), hostingZygote);
+    }
+
     private HostingRecord(String hostingType, String hostingName, int hostingZygote) {
+        this(hostingType, hostingName, hostingZygote, null, -1);
+    }
+
+    private HostingRecord(String hostingType, String hostingName, int hostingZygote,
+            String definingPackageName, int definingUid) {
         mHostingType = hostingType;
         mHostingName = hostingName;
         mHostingZygote = hostingZygote;
+        mDefiningPackageName = definingPackageName;
+        mDefiningUid = definingUid;
     }
 
     public String getType() {
@@ -64,6 +89,26 @@ public final class HostingRecord {
 
     public String getName() {
         return mHostingName;
+    }
+
+    /**
+     * Returns the UID of the package defining the component we want to start. Only valid
+     * when {@link #usesAppZygote()} returns true.
+     *
+     * @return the UID of the hosting application
+     */
+    public int getDefiningUid() {
+        return mDefiningUid;
+    }
+
+    /**
+     * Returns the packageName of the package defining the component we want to start. Only valid
+     * when {@link #usesAppZygote()} returns true.
+     *
+     * @return the packageName of the hosting application
+     */
+    public String getDefiningPackageName() {
+        return mDefiningPackageName;
     }
 
     /**
@@ -78,10 +123,14 @@ public final class HostingRecord {
     /**
      * Creates a HostingRecord for a process that must spawn from the application zygote
      * @param hostingName name of the component to be hosted in this process
+     * @param definingPackageName name of the package defining the service
+     * @param definingUid uid of the package defining the service
      * @return The constructed HostingRecord
      */
-    public static HostingRecord byAppZygote(ComponentName hostingName) {
-        return new HostingRecord("", hostingName.toShortString(), APP_ZYGOTE);
+    public static HostingRecord byAppZygote(ComponentName hostingName, String definingPackageName,
+            int definingUid) {
+        return new HostingRecord("", hostingName.toShortString(), APP_ZYGOTE,
+                definingPackageName, definingUid);
     }
 
     /**

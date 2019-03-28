@@ -2117,6 +2117,12 @@ public final class ActiveServices {
                     Slog.w(TAG, "Service lookup failed: " + msg);
                     return new ServiceLookupResult(null, msg);
                 }
+
+                // Store the defining packageName and uid, as they might be changed in
+                // the ApplicationInfo for external services (which run with the package name
+                // and uid of the caller).
+                String definingPackageName = sInfo.applicationInfo.packageName;
+                int definingUid = sInfo.applicationInfo.uid;
                 if ((sInfo.flags & ServiceInfo.FLAG_EXTERNAL_SERVICE) != 0) {
                     if (isBindExternal) {
                         if (!sInfo.exported) {
@@ -2175,8 +2181,8 @@ public final class ActiveServices {
                                 sInfo.applicationInfo.uid, name.getPackageName(),
                                 name.getClassName());
                     }
-                    r = new ServiceRecord(mAm, ss, className, name, filter, sInfo,
-                            callingFromFg, res);
+                    r = new ServiceRecord(mAm, ss, className, name, definingPackageName,
+                            definingUid, filter, sInfo, callingFromFg, res);
                     res.setService(r);
                     smap.mServicesByInstanceName.put(name, r);
                     smap.mServicesByIntent.put(filter, r);
@@ -2591,7 +2597,8 @@ public final class ActiveServices {
                 hostingRecord = HostingRecord.byWebviewZygote(r.instanceName);
             }
             if ((r.serviceInfo.flags & ServiceInfo.FLAG_USE_APP_ZYGOTE) != 0) {
-                hostingRecord = HostingRecord.byAppZygote(r.instanceName);
+                hostingRecord = HostingRecord.byAppZygote(r.instanceName, r.definingPackageName,
+                        r.definingUid);
             }
         }
 
