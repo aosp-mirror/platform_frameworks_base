@@ -1,11 +1,11 @@
-/**
- * Copyright (C) 2015 The Android Open Source Project
+/*
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.settingslib.drawer;
 
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
@@ -26,6 +25,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * The category for handle {@link Tile}
+ */
 public class DashboardCategory implements Parcelable {
 
     /**
@@ -67,18 +69,30 @@ public class DashboardCategory implements Parcelable {
         return result;
     }
 
+    /**
+     * Add tile
+     */
     public synchronized void addTile(Tile tile) {
         mTiles.add(tile);
     }
 
+    /**
+     * Remove tile
+     */
     public synchronized void removeTile(int n) {
         mTiles.remove(n);
     }
 
+    /**
+     * Get size of tile
+     */
     public int getTilesCount() {
         return mTiles.size();
     }
 
+    /**
+     * Get tile
+     */
     public Tile getTile(int n) {
         return mTiles.get(n);
     }
