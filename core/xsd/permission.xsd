@@ -60,8 +60,6 @@
         <xs:attribute name="uid" type="xs:int"/>
     </xs:complexType>
     <xs:complexType name="split-permission">
-        <xs:attribute name="name" type="xs:string"/>
-        <xs:attribute name="targetSdk" type="xs:int"/>
         <xs:sequence>
             <xs:element name="library" maxOccurs="unbounded">
                 <xs:complexType>
@@ -69,6 +67,8 @@
                 </xs:complexType>
             </xs:element>
         </xs:sequence>
+        <xs:attribute name="name" type="xs:string"/>
+        <xs:attribute name="targetSdk" type="xs:int"/>
     </xs:complexType>
     <xs:complexType name="library">
         <xs:attribute name="name" type="xs:string"/>
@@ -124,7 +124,6 @@
         <xs:attribute name="package" type="xs:string"/>
     </xs:complexType>
     <xs:complexType name="privapp-permissions">
-        <xs:attribute name="package" type="xs:string"/>
         <xs:sequence>
             <xs:element name="permission" maxOccurs="unbounded">
                 <xs:complexType>
@@ -137,9 +136,9 @@
                 </xs:complexType>
             </xs:element>
         </xs:sequence>
+        <xs:attribute name="package" type="xs:string"/>
     </xs:complexType>
     <xs:complexType name="oem-permissions">
-        <xs:attribute name="package" type="xs:string"/>
         <xs:sequence>
             <xs:element name="permission" maxOccurs="unbounded">
                 <xs:complexType>
@@ -152,6 +151,7 @@
                 </xs:complexType>
             </xs:element>
         </xs:sequence>
+        <xs:attribute name="package" type="xs:string"/>
     </xs:complexType>
     <xs:complexType name="hidden-api-whitelisted-app">
         <xs:attribute name="package" type="xs:string"/>
