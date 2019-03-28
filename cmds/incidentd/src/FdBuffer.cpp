@@ -31,7 +31,7 @@ namespace os {
 namespace incidentd {
 
 const ssize_t BUFFER_SIZE = 16 * 1024;  // 16 KB
-const ssize_t MAX_BUFFER_COUNT = 256;   // 4 MB max
+const ssize_t MAX_BUFFER_COUNT = 1536;   // 24 MB max
 
 FdBuffer::FdBuffer()
         :mBuffer(new EncodedBuffer(BUFFER_SIZE)),
