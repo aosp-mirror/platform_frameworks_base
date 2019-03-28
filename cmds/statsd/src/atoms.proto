@@ -254,6 +254,7 @@ message Atom {
         PrivacyIndicatorsInteracted privacy_indicators_interacted = 180;
         AppInstallOnExternalStorageReported app_install_on_external_storage_reported = 181;
         NetworkStackReported network_stack_reported = 182;
+        AppMovedStorageReported app_moved_storage_reported = 183;
     }
 
     // Pulled events will start at field 10000.
@@ -3444,6 +3445,30 @@ message PrivacyIndicatorsInteracted {
 
     // Used if the type is LINE_ITEM
     optional string package_name = 2;
+}
+
+/**
+ * Logs information about a package that is moved from the internal to external storage and vice
+ * versa.
+ * It logs the package name, the type of the external storage where the package is installed
+ * (if moved to external storage, or UNKNOWN if moved to internal storage),
+ * and the move type: if it's from internal to external or the other way around.
+ *
+ * Logged from:
+        frameworks/base/services/core/java/com/android/server/pm/PackageManagerService.java
+ */
+message AppMovedStorageReported {
+    enum MoveType {
+        UNKNOWN = 0;
+        TO_EXTERNAL = 1;
+        TO_INTERNAL = 2;
+    }
+    // The type of the external storage.
+    optional android.stats.storage.ExternalStorageType external_storage_type = 1;
+    // The type of move.
+    optional MoveType move_type = 2;
+    // The name of the package that was moved.
+    optional string package_name = 3;
 }
 
 //////////////////////////////////////////////////////////////////////
