@@ -434,6 +434,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         public void onUserSetupChanged() {
             final boolean userSetup = mDeviceProvisionedController.isUserSetup(
                     mDeviceProvisionedController.getCurrentUser());
+            // STOPSHIP(kozynski, b/129405675) Remove log
+            Log.d(TAG, "mUserSetupObserver - DeviceProvisionedListener called for user "
+                    + mDeviceProvisionedController.getCurrentUser());
             if (MULTIUSER_DEBUG) {
                 Log.d(TAG, String.format("User setup changed: userSetup=%s mUserSetup=%s",
                         userSetup, mUserSetup));
@@ -1297,13 +1300,16 @@ public class StatusBar extends SystemUI implements DemoMode,
      * the user intends to use the lock screen user switcher, QS in not needed.
      */
     private void updateQsExpansionEnabled() {
-        mNotificationPanel.setQsExpansionEnabled(mDeviceProvisionedController.isDeviceProvisioned()
+        final boolean expandEnabled = mDeviceProvisionedController.isDeviceProvisioned()
                 && (mUserSetup || mUserSwitcherController == null
                         || !mUserSwitcherController.isSimpleUserSwitcher())
                 && ((mDisabled2 & StatusBarManager.DISABLE2_NOTIFICATION_SHADE) == 0)
                 && ((mDisabled2 & StatusBarManager.DISABLE2_QUICK_SETTINGS) == 0)
                 && !mDozing
-                && !ONLY_CORE_APPS);
+                && !ONLY_CORE_APPS;
+        mNotificationPanel.setQsExpansionEnabled(expandEnabled);
+        // STOPSHIP(kozynski, b/129405675) Remove log
+        Log.d(TAG, "updateQsExpansionEnabled - QS Expand enabled: " + expandEnabled);
     }
 
     public void addQsTile(ComponentName tile) {
