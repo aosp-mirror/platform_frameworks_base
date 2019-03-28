@@ -3730,4 +3730,7 @@
   <java-symbol type="dimen" name="resolver_icon_size"/>
   <java-symbol type="dimen" name="resolver_badge_size"/>
 
+  <!-- For DropBox -->
+  <java-symbol type="integer" name="config_dropboxLowPriorityBroadcastRateLimitPeriod" />
+  <java-symbol type="array" name="config_dropboxLowPriorityTags" />
 </resources>
