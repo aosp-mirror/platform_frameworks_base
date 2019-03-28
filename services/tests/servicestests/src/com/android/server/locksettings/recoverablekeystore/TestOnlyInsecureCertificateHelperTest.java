@@ -24,30 +24,30 @@ public class TestOnlyInsecureCertificateHelperTest {
     @Test
     public void testDoesCredentailSupportInsecureMode_forNonWhitelistedPassword() throws Exception {
         assertThat(mHelper.doesCredentialSupportInsecureMode(
-                LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, "secret12345")).isFalse();
+                LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, "secret12345".getBytes())).isFalse();
         assertThat(mHelper.doesCredentialSupportInsecureMode(
-                LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, "1234")).isFalse();
+                LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, "1234".getBytes())).isFalse();
     }
 
     @Test
     public void testDoesCredentailSupportInsecureMode_forWhitelistedPassword() throws Exception {
         assertThat(mHelper.doesCredentialSupportInsecureMode(
                 LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
-                TrustedRootCertificates.INSECURE_PASSWORD_PREFIX)).isTrue();
+                TrustedRootCertificates.INSECURE_PASSWORD_PREFIX.getBytes())).isTrue();
 
         assertThat(mHelper.doesCredentialSupportInsecureMode(
                 LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
-                TrustedRootCertificates.INSECURE_PASSWORD_PREFIX + "12")).isTrue();
+                (TrustedRootCertificates.INSECURE_PASSWORD_PREFIX + "12").getBytes())).isTrue();
     }
 
     @Test
     public void testDoesCredentailSupportInsecureMode_Pattern() throws Exception {
         assertThat(mHelper.doesCredentialSupportInsecureMode(
                 LockPatternUtils.CREDENTIAL_TYPE_PATTERN,
-                TrustedRootCertificates.INSECURE_PASSWORD_PREFIX)).isFalse();
+                TrustedRootCertificates.INSECURE_PASSWORD_PREFIX.getBytes())).isFalse();
         assertThat(mHelper.doesCredentialSupportInsecureMode(
                 LockPatternUtils.CREDENTIAL_TYPE_NONE,
-                TrustedRootCertificates.INSECURE_PASSWORD_PREFIX)).isFalse();
+                TrustedRootCertificates.INSECURE_PASSWORD_PREFIX.getBytes())).isFalse();
     }
 
     @Test

@@ -851,13 +851,13 @@ public class RecoverableKeyStoreManager {
      * This function can only be used inside LockSettingsService.
      *
      * @param storedHashType from {@code CredentialHash}
-     * @param credential - unencrypted String. Password length should be at most 16 symbols {@code
-     *     mPasswordMaxLength}
+     * @param credential - unencrypted byte array. Password length should be at most 16 symbols
+     *     {@code mPasswordMaxLength}
      * @param userId for user who just unlocked the device.
      * @hide
      */
     public void lockScreenSecretAvailable(
-            int storedHashType, @NonNull String credential, int userId) {
+            int storedHashType, @NonNull byte[] credential, int userId) {
         // So as not to block the critical path unlocking the phone, defer to another thread.
         try {
             mExecutorService.execute(KeySyncTask.newInstance(
@@ -882,13 +882,13 @@ public class RecoverableKeyStoreManager {
      * This function can only be used inside LockSettingsService.
      *
      * @param storedHashType from {@code CredentialHash}
-     * @param credential - unencrypted String
+     * @param credential - unencrypted byte array
      * @param userId for the user whose lock screen credentials were changed.
      * @hide
      */
     public void lockScreenSecretChanged(
             int storedHashType,
-            @Nullable String credential,
+            @Nullable byte[] credential,
             int userId) {
         // So as not to block the critical path unlocking the phone, defer to another thread.
         try {

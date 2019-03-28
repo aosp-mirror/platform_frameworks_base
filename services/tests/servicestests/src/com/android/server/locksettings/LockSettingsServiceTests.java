@@ -75,8 +75,8 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         initializeStorageWithCredential(PRIMARY_USER_ID, "password", CREDENTIAL_TYPE_PASSWORD, sid);
 
         try {
-            mService.setLockCredential("newpwd", CREDENTIAL_TYPE_PASSWORD, "badpwd",
-                    PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID);
+            mService.setLockCredential("newpwd".getBytes(), CREDENTIAL_TYPE_PASSWORD,
+                    "badpwd".getBytes(), PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID);
             fail("Did not fail when enrolling using incorrect credential");
         } catch (RemoteException expected) {
             assertTrue(expected.getMessage().equals(FAILED_MESSAGE));
@@ -87,7 +87,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
     public void testClearPasswordPrimaryUser() throws RemoteException {
         final String PASSWORD = "password";
         initializeStorageWithCredential(PRIMARY_USER_ID, PASSWORD, CREDENTIAL_TYPE_PASSWORD, 1234);
-        mService.setLockCredential(null, CREDENTIAL_TYPE_NONE, PASSWORD,
+        mService.setLockCredential(null, CREDENTIAL_TYPE_NONE, PASSWORD.getBytes(),
                 PASSWORD_QUALITY_UNSPECIFIED, PRIMARY_USER_ID);
         assertFalse(mService.havePassword(PRIMARY_USER_ID));
         assertFalse(mService.havePattern(PRIMARY_USER_ID));
@@ -97,7 +97,8 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
     public void testManagedProfileUnifiedChallenge() throws RemoteException {
         final String firstUnifiedPassword = "testManagedProfileUnifiedChallenge-pwd-1";
         final String secondUnifiedPassword = "testManagedProfileUnifiedChallenge-pwd-2";
-        mService.setLockCredential(firstUnifiedPassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
+        mService.setLockCredential(firstUnifiedPassword.getBytes(),
+                LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
                 null, PASSWORD_QUALITY_COMPLEX, PRIMARY_USER_ID);
         mService.setSeparateProfileChallengeEnabled(MANAGED_PROFILE_USER_ID, false, null);
         final long primarySid = mGateKeeperService.getSecureUserId(PRIMARY_USER_ID);
@@ -116,8 +117,8 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         mGateKeeperService.clearAuthToken(TURNED_OFF_PROFILE_USER_ID);
         // verify credential
         assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
-                firstUnifiedPassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID)
-                .getResponseCode());
+                firstUnifiedPassword.getBytes(), LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0,
+                PRIMARY_USER_ID).getResponseCode());
 
         // Verify that we have a new auth token for the profile
         assertNotNull(mGateKeeperService.getAuthToken(MANAGED_PROFILE_USER_ID));
@@ -132,15 +133,16 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
          */
         mStorageManager.setIgnoreBadUnlock(true);
         // Change primary password and verify that profile SID remains
-        mService.setLockCredential(secondUnifiedPassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
-                firstUnifiedPassword, PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID);
+        mService.setLockCredential(secondUnifiedPassword.getBytes(),
+                LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
+                firstUnifiedPassword.getBytes(), PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID);
         mStorageManager.setIgnoreBadUnlock(false);
         assertEquals(profileSid, mGateKeeperService.getSecureUserId(MANAGED_PROFILE_USER_ID));
         assertNull(mGateKeeperService.getAuthToken(TURNED_OFF_PROFILE_USER_ID));
 
         // Clear unified challenge
         mService.setLockCredential(null, LockPatternUtils.CREDENTIAL_TYPE_NONE,
-                secondUnifiedPassword, PASSWORD_QUALITY_UNSPECIFIED, PRIMARY_USER_ID);
+                secondUnifiedPassword.getBytes(), PASSWORD_QUALITY_UNSPECIFIED, PRIMARY_USER_ID);
         assertEquals(0, mGateKeeperService.getSecureUserId(PRIMARY_USER_ID));
         assertEquals(0, mGateKeeperService.getSecureUserId(MANAGED_PROFILE_USER_ID));
         assertEquals(0, mGateKeeperService.getSecureUserId(TURNED_OFF_PROFILE_USER_ID));
@@ -149,14 +151,16 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
     public void testManagedProfileSeparateChallenge() throws RemoteException {
         final String primaryPassword = "testManagedProfileSeparateChallenge-primary";
         final String profilePassword = "testManagedProfileSeparateChallenge-profile";
-        mService.setLockCredential(primaryPassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, null,
+        mService.setLockCredential(primaryPassword.getBytes(),
+                LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, null,
                 PASSWORD_QUALITY_COMPLEX, PRIMARY_USER_ID);
         /* Currently in LockSettingsService.setLockCredential, unlockUser() is called with the new
          * credential as part of verifyCredential() before the new credential is committed in
          * StorageManager. So we relax the check in our mock StorageManager to allow that.
          */
         mStorageManager.setIgnoreBadUnlock(true);
-        mService.setLockCredential(profilePassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, null,
+        mService.setLockCredential(profilePassword.getBytes(),
+                LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, null,
                 PASSWORD_QUALITY_COMPLEX, MANAGED_PROFILE_USER_ID);
         mStorageManager.setIgnoreBadUnlock(false);
 
@@ -170,31 +174,32 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         mGateKeeperService.clearAuthToken(MANAGED_PROFILE_USER_ID);
         // verify primary credential
         assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
-                primaryPassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID)
-                .getResponseCode());
+                primaryPassword.getBytes(), LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0,
+                PRIMARY_USER_ID).getResponseCode());
         assertNull(mGateKeeperService.getAuthToken(MANAGED_PROFILE_USER_ID));
 
         // verify profile credential
         assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
-                profilePassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0,
+                profilePassword.getBytes(), LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0,
                 MANAGED_PROFILE_USER_ID).getResponseCode());
         assertNotNull(mGateKeeperService.getAuthToken(MANAGED_PROFILE_USER_ID));
         assertEquals(profileSid, mGateKeeperService.getSecureUserId(MANAGED_PROFILE_USER_ID));
 
         // Change primary credential and make sure we don't affect profile
         mStorageManager.setIgnoreBadUnlock(true);
-        mService.setLockCredential("pwd", LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
-                primaryPassword, PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID);
+        mService.setLockCredential("pwd".getBytes(), LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
+                primaryPassword.getBytes(), PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID);
         mStorageManager.setIgnoreBadUnlock(false);
         assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
-                profilePassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0,
+                profilePassword.getBytes(), LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0,
                 MANAGED_PROFILE_USER_ID).getResponseCode());
         assertEquals(profileSid, mGateKeeperService.getSecureUserId(MANAGED_PROFILE_USER_ID));
     }
 
     private void testCreateCredential(int userId, String credential, int type, int quality)
             throws RemoteException {
-        mService.setLockCredential(credential, type, null, quality, userId);
+        mService.setLockCredential(credential.getBytes(), type, null, quality,
+                userId);
         assertVerifyCredentials(userId, credential, type, -1);
     }
 
@@ -202,15 +207,16 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
             String oldCredential, int oldType, int quality) throws RemoteException {
         final long sid = 1234;
         initializeStorageWithCredential(userId, oldCredential, oldType, sid);
-        mService.setLockCredential(newCredential, newType, oldCredential, quality, userId);
+        mService.setLockCredential(newCredential.getBytes(), newType, oldCredential.getBytes(),
+                quality, userId);
         assertVerifyCredentials(userId, newCredential, newType, sid);
     }
 
     private void assertVerifyCredentials(int userId, String credential, int type, long sid)
             throws RemoteException{
         final long challenge = 54321;
-        VerifyCredentialResponse response = mService.verifyCredential(credential, type, challenge,
-                userId);
+        VerifyCredentialResponse response = mService.verifyCredential(credential.getBytes(),
+                type, challenge, userId);
 
         assertEquals(GateKeeperResponse.RESPONSE_OK, response.getResponseCode());
         if (sid != -1) assertEquals(sid, mGateKeeperService.getSecureUserId(userId));
@@ -229,18 +235,19 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
             incorrectType = LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
         }
         // check for bad type
-        assertEquals(GateKeeperResponse.RESPONSE_ERROR, mService.verifyCredential(credential,
-                incorrectType, challenge, userId).getResponseCode());
+        assertEquals(GateKeeperResponse.RESPONSE_ERROR, mService.verifyCredential(
+                credential.getBytes(), incorrectType, challenge, userId).getResponseCode());
         // check for bad credential
-        assertEquals(GateKeeperResponse.RESPONSE_ERROR, mService.verifyCredential("0" + credential,
-                type, challenge, userId).getResponseCode());
+        assertEquals(GateKeeperResponse.RESPONSE_ERROR, mService.verifyCredential(
+                ("0" + credential).getBytes(), type, challenge, userId).getResponseCode());
     }
 
     private void initializeStorageWithCredential(int userId, String credential, int type, long sid)
             throws RemoteException {
+        byte[] credentialBytes = credential == null ? null : credential.getBytes();
         byte[] oldHash = new VerifyHandle(credential.getBytes(), sid).toBytes();
         if (mService.shouldMigrateToSyntheticPasswordLocked(userId)) {
-            mService.initializeSyntheticPasswordLocked(oldHash, credential, type,
+            mService.initializeSyntheticPasswordLocked(oldHash, credentialBytes, type,
                     type == LockPatternUtils.CREDENTIAL_TYPE_PASSWORD ? PASSWORD_QUALITY_ALPHABETIC
                             : PASSWORD_QUALITY_SOMETHING, userId);
         } else {

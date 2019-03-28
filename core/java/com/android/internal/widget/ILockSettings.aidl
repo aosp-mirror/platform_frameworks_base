@@ -36,17 +36,17 @@ interface ILockSettings {
     boolean getBoolean(in String key, in boolean defaultValue, in int userId);
     long getLong(in String key, in long defaultValue, in int userId);
     String getString(in String key, in String defaultValue, in int userId);
-    void setLockCredential(in String credential, int type, in String savedCredential, int requestedQuality, int userId);
+    void setLockCredential(in byte[] credential, int type, in byte[] savedCredential, int requestedQuality, int userId);
     void resetKeyStore(int userId);
-    VerifyCredentialResponse checkCredential(in String credential, int type, int userId,
+    VerifyCredentialResponse checkCredential(in byte[] credential, int type, int userId,
             in ICheckCredentialProgressCallback progressCallback);
-    VerifyCredentialResponse verifyCredential(in String credential, int type, long challenge, int userId);
-    VerifyCredentialResponse verifyTiedProfileChallenge(String credential, int type, long challenge, int userId);
+    VerifyCredentialResponse verifyCredential(in byte[] credential, int type, long challenge, int userId);
+    VerifyCredentialResponse verifyTiedProfileChallenge(in byte[] credential, int type, long challenge, int userId);
     boolean checkVoldPassword(int userId);
     boolean havePattern(int userId);
     boolean havePassword(int userId);
-    byte[] getHashFactor(String currentCredential, int userId);
-    void setSeparateProfileChallengeEnabled(int userId, boolean enabled, String managedUserPassword);
+    byte[] getHashFactor(in byte[] currentCredential, int userId);
+    void setSeparateProfileChallengeEnabled(int userId, boolean enabled, in byte[] managedUserPassword);
     boolean getSeparateProfileChallengeEnabled(int userId);
     void registerStrongAuthTracker(in IStrongAuthTracker tracker);
     void unregisterStrongAuthTracker(in IStrongAuthTracker tracker);

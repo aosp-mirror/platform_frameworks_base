@@ -33,6 +33,8 @@ import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternChecker;
 import com.android.internal.widget.LockPatternUtils;
 
+import java.util.Arrays;
+
 /**
  * Base class for PIN and password unlock screens.
  */
@@ -122,18 +124,19 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
     protected void verifyPasswordAndUnlock() {
         if (mDismissing) return; // already verified but haven't been dismissed; don't do it again.
 
-        final String entry = getPasswordText();
+        final byte[] entry = getPasswordText();
         setPasswordEntryInputEnabled(false);
         if (mPendingLockCheck != null) {
             mPendingLockCheck.cancel(false);
         }
 
         final int userId = KeyguardUpdateMonitor.getCurrentUser();
-        if (entry.length() <= MINIMUM_PASSWORD_LENGTH_BEFORE_REPORT) {
+        if (entry.length <= MINIMUM_PASSWORD_LENGTH_BEFORE_REPORT) {
             // to avoid accidental lockout, only count attempts that are long enough to be a
             // real password. This may require some tweaking.
             setPasswordEntryInputEnabled(true);
             onPasswordChecked(userId, false /* matched */, 0, false /* not valid - too short */);
+            Arrays.fill(entry, (byte) 0);
             return;
         }
 
@@ -155,6 +158,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
                         }
                         onPasswordChecked(userId, true /* matched */, 0 /* timeoutMs */,
                                 true /* isValidPassword */);
+                        Arrays.fill(entry, (byte) 0);
                     }
 
                     @Override
@@ -169,6 +173,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
                             onPasswordChecked(userId, false /* matched */, timeoutMs,
                                     true /* isValidPassword */);
                         }
+                        Arrays.fill(entry, (byte) 0);
                     }
 
                     @Override
@@ -179,6 +184,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
                             LatencyTracker.getInstance(mContext).onActionEnd(
                                     ACTION_CHECK_CREDENTIAL_UNLOCKED);
                         }
+                        Arrays.fill(entry, (byte) 0);
                     }
                 });
     }
@@ -209,7 +215,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
     }
 
     protected abstract void resetPasswordText(boolean animate, boolean announce);
-    protected abstract String getPasswordText();
+    protected abstract byte[] getPasswordText();
     protected abstract void setPasswordEntryEnabled(boolean enabled);
     protected abstract void setPasswordEntryInputEnabled(boolean enabled);
 
