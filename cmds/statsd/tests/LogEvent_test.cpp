@@ -645,6 +645,22 @@ TEST(LogEventTest, TestBinaryFieldAtom_empty) {
     EXPECT_EQ(orig_str, result_str);
 }
 
+TEST(LogEventTest, TestWriteExperimentIdsToProto) {
+    std::vector<int64_t> expIds;
+    expIds.push_back(5038);
+    std::vector<uint8_t> proto;
+
+    writeExperimentIdsToProto(expIds, &proto);
+
+    EXPECT_EQ(proto.size(), 3);
+    // Proto wire format for field ID 1, varint
+    EXPECT_EQ(proto[0], 0x08);
+    // varint of 5038, 2 bytes long
+    EXPECT_EQ(proto[1], 0xae);
+    EXPECT_EQ(proto[2], 0x27);
+}
+
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
