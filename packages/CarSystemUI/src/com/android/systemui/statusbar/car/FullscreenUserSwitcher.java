@@ -38,7 +38,9 @@ public class FullscreenUserSwitcher {
     public FullscreenUserSwitcher(CarStatusBar statusBar, ViewStub containerStub, Context context) {
         mStatusBar = statusBar;
         mParent = containerStub.inflate();
-        mParent.setVisibility(View.VISIBLE);
+        // Hide the user grid by default. It will only be made visible by clicking on a cancel
+        // button in a bouncer.
+        hide();
         View container = mParent.findViewById(R.id.container);
 
         // Initialize user grid.
@@ -49,10 +51,6 @@ public class FullscreenUserSwitcher {
         mUserGridView.buildAdapter();
         mUserGridView.setUserSelectionListener(this::onUserSelected);
 
-        // Hide the user grid by default. It will only be made visible by clicking on a cancel
-        // button in a bouncer.
-        hide();
-
         mShortAnimDuration = container.getResources()
                 .getInteger(android.R.integer.config_shortAnimTime);
     }
@@ -61,21 +59,21 @@ public class FullscreenUserSwitcher {
      * Makes user grid visible.
      */
     public void show() {
-        mUserGridView.setVisibility(View.VISIBLE);
+        mParent.setVisibility(View.VISIBLE);
     }
 
     /**
      * Hides the user grid.
      */
     public void hide() {
-        mUserGridView.setVisibility(View.INVISIBLE);
+        mParent.setVisibility(View.INVISIBLE);
     }
 
     /**
      * @return {@code true} if user grid is visible, {@code false} otherwise.
      */
     public boolean isVisible() {
-        return mUserGridView.getVisibility() == View.VISIBLE;
+        return mParent.getVisibility() == View.VISIBLE;
     }
 
     /**
