@@ -46,6 +46,7 @@ import android.os.StrictMode;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.sysprop.ProductProperties;
 import android.text.TextUtils;
 import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
@@ -761,10 +762,13 @@ public final class LoadedApk {
         }
 
         // Similar to vendor apks, we should add /product/lib for apks from product partition
-        // and not having /product/lib in the default search path
-        final boolean treatProductApkAsUnbundled = !defaultSearchPaths.contains("/product/lib");
+        // when product apps are marked as unbundled. We cannot use the same way from vendor
+        // to check if lib path exists because there is possibility that /product/lib would not
+        // exist from legacy device while product apks are bundled. To make this clear, new
+        // property ("ro.product.apps.unbundled") is defined which should be true only when
+        // product apks are unbundled.
         if (mApplicationInfo.getCodePath() != null
-                && mApplicationInfo.isProduct() && treatProductApkAsUnbundled
+                && mApplicationInfo.isProduct() && ProductProperties.unbundled_apps().orElse(false)
                 // TODO(b/128557860): Change target SDK version when version code R is available.
                 && getTargetSdkVersion() == Build.VERSION_CODES.CUR_DEVELOPMENT) {
             isBundledApp = false;
