@@ -69,6 +69,9 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
                                                 AudioEffect.Descriptor[] effects,
                                                 int activeSource, String packName) {
         if (MediaRecorder.isSystemOnlyAudioSource(source)) {
+            // still want to log event, it just won't appear in recording configurations
+            sEventLogger.log(new RecordingEvent(event, uid, session, source, packName)
+                    .printLog(TAG));
             return;
         }
         String clientEffectName =  clientEffects.length == 0 ? "None" : clientEffects[0].name;
