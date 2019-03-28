@@ -42,4 +42,7 @@ interface IColorDisplayManager {
 
     int getColorMode();
     void setColorMode(int colorMode);
+
+    boolean isDisplayWhiteBalanceEnabled();
+    boolean setDisplayWhiteBalanceEnabled(boolean enabled);
 }
