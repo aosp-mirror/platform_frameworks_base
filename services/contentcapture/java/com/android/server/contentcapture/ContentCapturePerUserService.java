@@ -34,13 +34,11 @@ import android.app.ActivityManagerInternal;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.content.ComponentName;
-import android.content.ContentCaptureOptions;
 import android.content.pm.ActivityPresentationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ServiceInfo;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.UserHandle;
@@ -52,7 +50,6 @@ import android.service.contentcapture.ContentCaptureServiceInfo;
 import android.service.contentcapture.IContentCaptureServiceCallback;
 import android.service.contentcapture.SnapshotData;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.Slog;
 import android.view.contentcapture.UserDataRemovalRequest;
 
@@ -238,7 +235,8 @@ final class ContentCapturePerUserService
         final int taskId = activityPresentationInfo.taskId;
         final int displayId = activityPresentationInfo.displayId;
         final ComponentName componentName = activityPresentationInfo.componentName;
-        final boolean whiteListed = isWhitelistedLocked(componentName);
+        final boolean whiteListed = mMaster.mGlobalContentCaptureOptions.isWhitelisted(mUserId,
+                componentName);
         final ComponentName serviceComponentName = getServiceComponentName();
         final boolean enabled = isEnabledLocked();
         if (mMaster.mRequestsHistory != null) {
@@ -313,11 +311,6 @@ final class ContentCapturePerUserService
         }
         mSessions.put(sessionId, newSession);
         newSession.notifySessionStartedLocked(clientReceiver);
-    }
-
-    @GuardedBy("mLock")
-    private boolean isWhitelistedLocked(@NonNull ComponentName componentName) {
-        return mWhitelistHelper.isWhitelisted(componentName);
     }
 
     // TODO(b/119613670): log metrics
@@ -457,40 +450,6 @@ final class ContentCapturePerUserService
     }
 
     @GuardedBy("mLock")
-    @Nullable
-    ContentCaptureOptions getOptionsForPackageLocked(@NonNull String packageName) {
-        if (!mWhitelistHelper.isWhitelisted(packageName)) {
-            if (packageName.equals(getServicePackageName())) {
-                if (mMaster.verbose) Slog.v(mTag, "getOptionsForPackage() lite for " + packageName);
-                return new ContentCaptureOptions(mMaster.mDevCfgLoggingLevel);
-            }
-            if (mMaster.verbose) {
-                Slog.v(mTag, "getOptionsForPackage(" + packageName + "): not whitelisted");
-            }
-            return null;
-        }
-
-        final ArraySet<ComponentName> whitelistedComponents = mWhitelistHelper
-                .getWhitelistedComponents(packageName);
-        if (Build.IS_USER && isTemporaryServiceSetLocked()) {
-            final String servicePackageName = getServicePackageName();
-            if (!packageName.equals(servicePackageName)) {
-                Slog.w(mTag, "Ignoring package " + packageName
-                        + " while using temporary service " + servicePackageName);
-                return null;
-            }
-        }
-        ContentCaptureOptions options = new ContentCaptureOptions(mMaster.mDevCfgLoggingLevel,
-                mMaster.mDevCfgMaxBufferSize, mMaster.mDevCfgIdleFlushingFrequencyMs,
-                mMaster.mDevCfgTextChangeFlushingFrequencyMs, mMaster.mDevCfgLogHistorySize,
-                whitelistedComponents);
-        if (mMaster.verbose) {
-            Slog.v(mTag, "getOptionsForPackage(" + packageName + "): " + options);
-        }
-        return options;
-    }
-
-    @GuardedBy("mLock")
     void onActivityEventLocked(@NonNull ComponentName componentName, @ActivityEventType int type) {
         if (mRemoteService == null) {
             if (mMaster.debug) Slog.d(mTag, "onActivityEvent(): no remote service");
@@ -521,8 +480,6 @@ final class ContentCapturePerUserService
             pw.print(prefix); pw.println("remote service:");
             mRemoteService.dump(prefix2, pw);
         }
-
-        mWhitelistHelper.dump(prefix, "Whitelist", pw);
 
         if (mSessions.isEmpty()) {
             pw.print(prefix); pw.println("no sessions");
@@ -560,7 +517,7 @@ final class ContentCapturePerUserService
         if (mMaster.verbose) {
             Slog.v(TAG, "resetting content capture whitelist");
         }
-        mWhitelistHelper.setWhitelist((List) null, null);
+        mMaster.mGlobalContentCaptureOptions.resetWhitelist(mUserId);
     }
 
     private final class ContentCaptureServiceRemoteCallback extends
@@ -576,9 +533,7 @@ final class ContentCapturePerUserService
                         + ", " + (activities == null
                         ? "null_activities" : activities.size() + " activities") + ")");
             }
-            synchronized (mLock) {
-                mWhitelistHelper.setWhitelist(packages, activities);
-            }
+            mMaster.mGlobalContentCaptureOptions.setWhitelist(mUserId, packages, activities);
         }
 
         @Override
