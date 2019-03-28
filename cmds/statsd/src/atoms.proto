@@ -3061,7 +3061,9 @@ message ProcessStartTime {
  *     frameworks/base/packages/NetworkStack/
  */
 message NetworkStackReported {
-    optional int32 eventId = 1;
+    // The id that indicates the event reported from NetworkStack.
+    optional int32 event_id = 1;
+    // The data for the reported events.
     optional android.stats.connectivity.NetworkStackEventData network_stack_event = 2 [(log_mode) = MODE_BYTES];
 }
 
