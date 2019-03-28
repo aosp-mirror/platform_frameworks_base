@@ -3604,6 +3604,7 @@
   <java-symbol type="style" name="Theme.DeviceDefault.Light.Dialog.Alert.UserSwitchingDialog" />
 
   <java-symbol type="string" name="battery_saver_description_with_learn_more" />
+  <java-symbol type="string" name="confirm_battery_saver" />
 
   <java-symbol type="attr" name="opticalInsetLeft" />
   <java-symbol type="attr" name="opticalInsetTop" />

@@ -31,7 +31,9 @@ import android.util.Slog;
  * Utilities related to battery saver.
  */
 public class BatterySaverUtils {
+
     private static final String TAG = "BatterySaverUtils";
+    public static final String EXTRA_CONFIRM_ONLY = "extra_confirm_only";
 
     private BatterySaverUtils() {
     }
@@ -96,7 +98,7 @@ public class BatterySaverUtils {
         }
         final ContentResolver cr = context.getContentResolver();
 
-        if (enable && needFirstTimeWarning && maybeShowBatterySaverConfirmation(context)) {
+        if (enable && needFirstTimeWarning && maybeShowBatterySaverConfirmation(context, false)) {
             return false;
         }
         if (enable && !needFirstTimeWarning) {
@@ -116,7 +118,7 @@ public class BatterySaverUtils {
                         && Global.getInt(cr, Global.LOW_POWER_MODE_TRIGGER_LEVEL, 0) == 0
                         && Secure.getInt(cr,
                         Secure.SUPPRESS_AUTO_BATTERY_SAVER_SUGGESTION, 0) == 0) {
-                    showAutoBatterySaverSuggestion(context);
+                    showAutoBatterySaverSuggestion(context, false);
                 }
             }
 
@@ -125,23 +127,36 @@ public class BatterySaverUtils {
         return false;
     }
 
-    private static boolean maybeShowBatterySaverConfirmation(Context context) {
+    /**
+     * Shows the battery saver confirmation warning if it hasn't been acknowledged by the user in
+     * the past before. When confirmOnly is true, the dialog will have generic info about battery
+     * saver but will only update that the user has been shown the notification and take no
+     * further action. if confirmOnly is false it will show a more specific version of the dialog
+     * that toggles battery saver when acknowledged
+     * @param context A valid context
+     * @param confirmOnly Whether to show the actionless generic dialog (true) or the specific one
+     * that toggles battery saver (false)
+     * @return True if it showed the notification because it has not been previously acknowledged.
+     */
+    public static boolean maybeShowBatterySaverConfirmation(Context context, boolean confirmOnly) {
         if (Secure.getInt(context.getContentResolver(),
                 Secure.LOW_POWER_WARNING_ACKNOWLEDGED, 0) != 0) {
             return false; // Already shown.
         }
-        context.sendBroadcast(getSystemUiBroadcast(ACTION_SHOW_START_SAVER_CONFIRMATION));
+        context.sendBroadcast(
+                getSystemUiBroadcast(ACTION_SHOW_START_SAVER_CONFIRMATION, confirmOnly));
         return true;
     }
 
-    private static void showAutoBatterySaverSuggestion(Context context) {
-        context.sendBroadcast(getSystemUiBroadcast(ACTION_SHOW_AUTO_SAVER_SUGGESTION));
+    private static void showAutoBatterySaverSuggestion(Context context, boolean confirmOnly) {
+        context.sendBroadcast(getSystemUiBroadcast(ACTION_SHOW_AUTO_SAVER_SUGGESTION, confirmOnly));
     }
 
-    private static Intent getSystemUiBroadcast(String action) {
+    private static Intent getSystemUiBroadcast(String action, boolean confirmOnly) {
         final Intent i = new Intent(action);
         i.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         i.setPackage(SYSUI_PACKAGE);
+        i.putExtra(EXTRA_CONFIRM_ONLY, confirmOnly);
         return i;
     }
 

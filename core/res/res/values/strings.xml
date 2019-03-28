@@ -4835,7 +4835,7 @@
     <string name="package_deleted_device_owner">Deleted by your admin</string>
 
     <!-- [CHAR LIMIT=25] String for confirmation button to enable a feature gated by the battery saver warning-->
-    <string name="confirm_battery_saver">Confirm</string>
+    <string name="confirm_battery_saver">OK</string>
 
     <!-- [CHAR_LIMIT=NONE] Battery saver: Feature description, with a "learn more" link. -->
     <string name="battery_saver_description_with_learn_more">Battery Saver turns off or restricts background activity, some visual effects \u0026 other high-power features to extend battery life. <annotation id="url">Learn More</annotation></string>
