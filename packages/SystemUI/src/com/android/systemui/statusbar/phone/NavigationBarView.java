@@ -1195,7 +1195,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         if (DEBUG) Log.d(TAG, String.format(
                 "onMeasure: (%dx%d) old: (%dx%d)", w, h, getMeasuredWidth(), getMeasuredHeight()));
 
-        final boolean newVertical = w > 0 && h > w;
+        final boolean newVertical = w > 0 && h > w
+                && !QuickStepContract.isGesturalMode(getContext());
         if (newVertical != mIsVertical) {
             mIsVertical = newVertical;
             if (DEBUG) {
