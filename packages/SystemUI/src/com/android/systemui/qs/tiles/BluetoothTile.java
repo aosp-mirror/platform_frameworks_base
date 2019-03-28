@@ -147,14 +147,15 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
                 state.icon = ResourceIcon.get(R.drawable.ic_bluetooth_transient_animation);
                 state.contentDescription = state.secondaryLabel;
             } else {
-                state.icon = ResourceIcon.get(R.drawable.ic_qs_bluetooth_on);
+                state.icon =
+                        ResourceIcon.get(com.android.internal.R.drawable.ic_qs_bluetooth);
                 state.contentDescription = mContext.getString(
                         R.string.accessibility_quick_settings_bluetooth) + ","
                         + mContext.getString(R.string.accessibility_not_connected);
             }
             state.state = Tile.STATE_ACTIVE;
         } else {
-            state.icon = ResourceIcon.get(R.drawable.ic_qs_bluetooth_on);
+            state.icon = ResourceIcon.get(com.android.internal.R.drawable.ic_qs_bluetooth);
             state.contentDescription = mContext.getString(
                     R.string.accessibility_quick_settings_bluetooth);
             state.state = Tile.STATE_INACTIVE;
@@ -383,7 +384,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
                 for (CachedBluetoothDevice device : devices) {
                     if (mController.getBondState(device) == BluetoothDevice.BOND_NONE) continue;
                     final Item item = new Item();
-                    item.iconResId = R.drawable.ic_qs_bluetooth_on;
+                    item.iconResId = com.android.internal.R.drawable.ic_qs_bluetooth;
                     item.line1 = device.getName();
                     item.tag = device;
                     int state = device.getMaxConnectionState();

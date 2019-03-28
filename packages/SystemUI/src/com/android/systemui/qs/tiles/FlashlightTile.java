@@ -35,7 +35,7 @@ import javax.inject.Inject;
 public class FlashlightTile extends QSTileImpl<BooleanState> implements
         FlashlightController.FlashlightListener {
 
-    private final Icon mIcon = ResourceIcon.get(R.drawable.ic_signal_flashlight);
+    private final Icon mIcon = ResourceIcon.get(com.android.internal.R.drawable.ic_qs_flashlight);
     private final FlashlightController mFlashlightController;
 
     @Inject

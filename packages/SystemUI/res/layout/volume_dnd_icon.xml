@@ -24,6 +24,6 @@
         android:layout_width="14dp"
         android:layout_height="14dp"
         android:layout_gravity="right|top"
-        android:src="@drawable/ic_dnd"
+        android:src="@*android:drawable/ic_qs_dnd"
         android:tint="?android:attr/textColorTertiary"/>
 </FrameLayout>

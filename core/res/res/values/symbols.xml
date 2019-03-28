@@ -1443,6 +1443,11 @@
   <java-symbol type="drawable" name="ic_instant_icon_badge_bolt" />
   <java-symbol type="drawable" name="emulator_circular_window_overlay" />
   <java-symbol type="drawable" name="ic_qs_battery_saver" />
+  <java-symbol type="drawable" name="ic_qs_bluetooth" />
+  <java-symbol type="drawable" name="ic_qs_airplane" />
+  <java-symbol type="drawable" name="ic_qs_flashlight" />
+  <java-symbol type="drawable" name="ic_qs_auto_rotate" />
+  <java-symbol type="drawable" name="ic_qs_dnd" />
 
   <java-symbol type="drawable" name="sim_light_blue" />
   <java-symbol type="drawable" name="sim_light_green" />
