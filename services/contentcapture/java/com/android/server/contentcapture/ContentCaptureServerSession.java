@@ -16,6 +16,7 @@
 package com.android.server.contentcapture;
 
 import static android.service.contentcapture.ContentCaptureService.setClientState;
+import static android.view.contentcapture.ContentCaptureSession.NO_SESSION_ID;
 import static android.view.contentcapture.ContentCaptureSession.STATE_ACTIVE;
 import static android.view.contentcapture.ContentCaptureSession.STATE_DISABLED;
 import static android.view.contentcapture.ContentCaptureSession.STATE_SERVICE_RESURRECTED;
@@ -57,7 +58,7 @@ final class ContentCaptureServerSession {
     /**
      * Canonical session id.
      */
-    private final String mId;
+    private final int mId;
 
     /**
      * UID of the app whose contents is being captured.
@@ -66,11 +67,12 @@ final class ContentCaptureServerSession {
 
     ContentCaptureServerSession(@NonNull IBinder activityToken,
             @NonNull ContentCapturePerUserService service, @NonNull ComponentName appComponentName,
-            @NonNull IResultReceiver sessionStateReceiver,
-            int taskId, int displayId, @NonNull String sessionId, int uid, int flags) {
+            @NonNull IResultReceiver sessionStateReceiver, int taskId, int displayId, int sessionId,
+            int uid, int flags) {
+        Preconditions.checkArgument(sessionId != NO_SESSION_ID);
         mActivityToken = activityToken;
         mService = service;
-        mId = Preconditions.checkNotNull(sessionId);
+        mId = sessionId;
         mUid = uid;
         mContentCaptureContext = new ContentCaptureContext(/* clientContext= */ null,
                 appComponentName, taskId, displayId, flags);

@@ -15,6 +15,8 @@
  */
 package android.view.contentcapture;
 
+import static android.view.contentcapture.ContentCaptureSession.NO_SESSION_ID;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -35,7 +37,6 @@ import com.android.internal.util.Preconditions;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-
 /**
  * Context associated with a {@link ContentCaptureSession}.
  */
@@ -107,7 +108,7 @@ public final class ContentCaptureContext implements Parcelable {
     private final int mDisplayId;
 
     // Fields below are set by the service upon "delivery" and are not marshalled in the parcel
-    private @Nullable String mParentSessionId;
+    private int mParentSessionId = NO_SESSION_ID;
 
     /** @hide */
     public ContentCaptureContext(@Nullable ContentCaptureContext clientContext,
@@ -198,11 +199,12 @@ public final class ContentCaptureContext implements Parcelable {
     @SystemApi
     @TestApi
     public @Nullable ContentCaptureSessionId getParentSessionId() {
-        return mParentSessionId == null ?  null : new ContentCaptureSessionId(mParentSessionId);
+        return mParentSessionId == NO_SESSION_ID ? null
+                : new ContentCaptureSessionId(mParentSessionId);
     }
 
     /** @hide */
-    public void setParentSessionId(@NonNull String parentSessionId) {
+    public void setParentSessionId(int parentSessionId) {
         mParentSessionId = parentSessionId;
     }
 
@@ -316,7 +318,7 @@ public final class ContentCaptureContext implements Parcelable {
         }
         pw.print(", taskId="); pw.print(mTaskId);
         pw.print(", displayId="); pw.print(mDisplayId);
-        if (mParentSessionId != null) {
+        if (mParentSessionId != NO_SESSION_ID) {
             pw.print(", parentId="); pw.print(mParentSessionId);
         }
         if (mFlags > 0) {
@@ -348,7 +350,7 @@ public final class ContentCaptureContext implements Parcelable {
                 builder.append(", hasExtras");
             }
         }
-        if (mParentSessionId != null) {
+        if (mParentSessionId != NO_SESSION_ID) {
             builder.append(", parentId=").append(mParentSessionId);
         }
         return builder.append(']').toString();

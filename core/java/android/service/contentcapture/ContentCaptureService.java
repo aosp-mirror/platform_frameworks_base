@@ -17,6 +17,7 @@ package android.service.contentcapture;
 
 import static android.view.contentcapture.ContentCaptureHelper.sDebug;
 import static android.view.contentcapture.ContentCaptureHelper.sVerbose;
+import static android.view.contentcapture.ContentCaptureSession.NO_SESSION_ID;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
@@ -36,9 +37,9 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.service.autofill.AutofillService;
-import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
+import android.util.SparseIntArray;
 import android.view.contentcapture.ContentCaptureCondition;
 import android.view.contentcapture.ContentCaptureContext;
 import android.view.contentcapture.ContentCaptureEvent;
@@ -117,7 +118,7 @@ public abstract class ContentCaptureService extends Service {
         }
 
         @Override
-        public void onSessionStarted(ContentCaptureContext context, String sessionId, int uid,
+        public void onSessionStarted(ContentCaptureContext context, int sessionId, int uid,
                 IResultReceiver clientReceiver, int initialState) {
             mHandler.sendMessage(obtainMessage(ContentCaptureService::handleOnCreateSession,
                     ContentCaptureService.this, context, sessionId, uid, clientReceiver,
@@ -125,14 +126,14 @@ public abstract class ContentCaptureService extends Service {
         }
 
         @Override
-        public void onActivitySnapshot(String sessionId, SnapshotData snapshotData) {
+        public void onActivitySnapshot(int sessionId, SnapshotData snapshotData) {
             mHandler.sendMessage(
                     obtainMessage(ContentCaptureService::handleOnActivitySnapshot,
                             ContentCaptureService.this, sessionId, snapshotData));
         }
 
         @Override
-        public void onSessionFinished(String sessionId) {
+        public void onSessionFinished(int sessionId) {
             mHandler.sendMessage(obtainMessage(ContentCaptureService::handleFinishSession,
                     ContentCaptureService.this, sessionId));
         }
@@ -171,7 +172,7 @@ public abstract class ContentCaptureService extends Service {
      * <p>This map is populated when an session is started, which is called by the system server
      * and can be trusted. Then subsequent calls made by the app are verified against this map.
      */
-    private final ArrayMap<String, Integer> mSessionUids = new ArrayMap<>();
+    private final SparseIntArray mSessionUids = new SparseIntArray();
 
     @CallSuper
     @Override
@@ -378,7 +379,7 @@ public abstract class ContentCaptureService extends Service {
     // so we don't need to create a temporary InteractionSessionId for each event.
 
     private void handleOnCreateSession(@NonNull ContentCaptureContext context,
-            @NonNull String sessionId, int uid, IResultReceiver clientReceiver, int initialState) {
+            int sessionId, int uid, IResultReceiver clientReceiver, int initialState) {
         mSessionUids.put(sessionId, uid);
         onCreateContentCaptureSession(context, new ContentCaptureSessionId(sessionId));
 
@@ -403,27 +404,27 @@ public abstract class ContentCaptureService extends Service {
 
         // Most events belong to the same session, so we can keep a reference to the last one
         // to avoid creating too many ContentCaptureSessionId objects
-        String lastSessionId = null;
+        int lastSessionId = NO_SESSION_ID;
         ContentCaptureSessionId sessionId = null;
 
         final List<ContentCaptureEvent> events = parceledEvents.getList();
         for (int i = 0; i < events.size(); i++) {
             final ContentCaptureEvent event = events.get(i);
             if (!handleIsRightCallerFor(event, uid)) continue;
-            String sessionIdString = event.getSessionId();
-            if (!sessionIdString.equals(lastSessionId)) {
-                sessionId = new ContentCaptureSessionId(sessionIdString);
-                lastSessionId = sessionIdString;
+            int sessionIdInt = event.getSessionId();
+            if (sessionIdInt != lastSessionId) {
+                sessionId = new ContentCaptureSessionId(sessionIdInt);
+                lastSessionId = sessionIdInt;
             }
             switch (event.getType()) {
                 case ContentCaptureEvent.TYPE_SESSION_STARTED:
                     final ContentCaptureContext clientContext = event.getContentCaptureContext();
                     clientContext.setParentSessionId(event.getParentSessionId());
-                    mSessionUids.put(sessionIdString, uid);
+                    mSessionUids.put(sessionIdInt, uid);
                     onCreateContentCaptureSession(clientContext, sessionId);
                     break;
                 case ContentCaptureEvent.TYPE_SESSION_FINISHED:
-                    mSessionUids.remove(sessionIdString);
+                    mSessionUids.delete(sessionIdInt);
                     onDestroyContentCaptureSession(sessionId);
                     break;
                 default:
@@ -432,13 +433,12 @@ public abstract class ContentCaptureService extends Service {
         }
     }
 
-    private void handleOnActivitySnapshot(@NonNull String sessionId,
-            @NonNull SnapshotData snapshotData) {
+    private void handleOnActivitySnapshot(int sessionId, @NonNull SnapshotData snapshotData) {
         onActivitySnapshot(new ContentCaptureSessionId(sessionId), snapshotData);
     }
 
-    private void handleFinishSession(@NonNull String sessionId) {
-        mSessionUids.remove(sessionId);
+    private void handleFinishSession(int sessionId) {
+        mSessionUids.delete(sessionId);
         onDestroyContentCaptureSession(new ContentCaptureSessionId(sessionId));
     }
 
@@ -454,7 +454,7 @@ public abstract class ContentCaptureService extends Service {
      * Checks if the given {@code uid} owns the session associated with the event.
      */
     private boolean handleIsRightCallerFor(@NonNull ContentCaptureEvent event, int uid) {
-        final String sessionId;
+        final int sessionId;
         switch (event.getType()) {
             case ContentCaptureEvent.TYPE_SESSION_STARTED:
             case ContentCaptureEvent.TYPE_SESSION_FINISHED:
@@ -463,8 +463,7 @@ public abstract class ContentCaptureService extends Service {
             default:
                 sessionId = event.getSessionId();
         }
-        final Integer rightUid = mSessionUids.get(sessionId);
-        if (rightUid == null) {
+        if (mSessionUids.indexOfKey(sessionId) < 0) {
             if (sVerbose) {
                 Log.v(TAG, "handleIsRightCallerFor(" + event + "): no session for " + sessionId
                         + ": " + mSessionUids);
@@ -472,6 +471,7 @@ public abstract class ContentCaptureService extends Service {
             // Just ignore, as the session could have been finished already
             return false;
         }
+        final int rightUid = mSessionUids.get(sessionId);
         if (rightUid != uid) {
             Log.e(TAG, "invalid call from UID " + uid + ": session " + sessionId + " belongs to "
                     + rightUid);

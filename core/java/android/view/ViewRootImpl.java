@@ -2811,8 +2811,7 @@ public final class ViewRootImpl implements ViewParent,
             MainContentCaptureSession mainSession = mAttachInfo.mContentCaptureManager
                     .getMainContentCaptureSession();
             for (int i = 0; i < mAttachInfo.mContentCaptureEvents.size(); i++) {
-                String sessionId = mAttachInfo.mContentCaptureEvents
-                        .keyAt(i);
+                int sessionId = mAttachInfo.mContentCaptureEvents.keyAt(i);
                 mainSession.notifyViewTreeEvent(sessionId, /* started= */ true);
                 ArrayList<Object> events = mAttachInfo.mContentCaptureEvents
                         .valueAt(i);
@@ -2827,8 +2826,8 @@ public final class ViewRootImpl implements ViewParent,
                             Log.w(mTag, "no content capture session on view: " + view);
                             continue for_each_event;
                         }
-                        String actualId = session.getId().toString();
-                        if (!actualId.equals(sessionId)) {
+                        int actualId = session.getId();
+                        if (actualId != sessionId) {
                             Log.w(mTag, "content capture session mismatch for view (" + view
                                     + "): was " + sessionId + " before, it's " + actualId + " now");
                             continue for_each_event;

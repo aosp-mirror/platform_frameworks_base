@@ -127,7 +127,7 @@ public final class ContentCaptureManagerService extends
     public ContentCaptureManagerService(@NonNull Context context) {
         super(context, new FrameworkResourcesServiceNameResolver(context,
                 com.android.internal.R.string.config_defaultContentCaptureService),
-                UserManager.DISALLOW_CONTENT_CAPTURE, /* refreshServiceOnPackageUpdate=*/ false);
+                UserManager.DISALLOW_CONTENT_CAPTURE, /* refreshServiceOnPackageUpdate= */ false);
         DeviceConfig.addOnPropertyChangedListener(DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
                 ActivityThread.currentApplication().getMainExecutor(),
                 (namespace, key, value) -> onDeviceConfigChange(key, value));
@@ -472,7 +472,7 @@ public final class ContentCaptureManagerService extends
             return false;
         }
 
-        final ComponentName serviceComponent  = ComponentName.unflattenFromString(serviceName);
+        final ComponentName serviceComponent = ComponentName.unflattenFromString(serviceName);
         if (serviceComponent == null) {
             Slog.w(mTag, methodName + ": invalid service name: " + serviceName);
             return false;
@@ -523,7 +523,7 @@ public final class ContentCaptureManagerService extends
 
         @Override
         public void startSession(@NonNull IBinder activityToken,
-                @NonNull ComponentName componentName, @NonNull String sessionId, int flags,
+                @NonNull ComponentName componentName, int sessionId, int flags,
                 @NonNull IResultReceiver result) {
             Preconditions.checkNotNull(activityToken);
             Preconditions.checkNotNull(sessionId);
@@ -540,7 +540,7 @@ public final class ContentCaptureManagerService extends
         }
 
         @Override
-        public void finishSession(@NonNull String sessionId) {
+        public void finishSession(int sessionId) {
             Preconditions.checkNotNull(sessionId);
             final int userId = UserHandle.getCallingUserId();
 
@@ -627,7 +627,7 @@ public final class ContentCaptureManagerService extends
             boolean showHistory = true;
             if (args != null) {
                 for (String arg : args) {
-                    switch(arg) {
+                    switch (arg) {
                         case "--no-history":
                             showHistory = false;
                             break;

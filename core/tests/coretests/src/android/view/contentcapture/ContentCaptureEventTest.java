@@ -49,13 +49,15 @@ public class ContentCaptureEventTest {
 
     private static final LocusId ID = new LocusId("WHATEVER");
 
+    private static final int NO_SESSION_ID = 0;
+
     // Not using @Mock because it's final - no need to be fancy here....
     private final ContentCaptureContext mClientContext =
             new ContentCaptureContext.Builder(ID).build();
 
     @Test
     public void testSetAutofillId_null() {
-        final ContentCaptureEvent event = new ContentCaptureEvent("42", TYPE_VIEW_DISAPPEARED);
+        final ContentCaptureEvent event = new ContentCaptureEvent(42, TYPE_VIEW_DISAPPEARED);
 
         assertThrows(NullPointerException.class, () -> event.setAutofillId(null));
         assertThat(event.getId()).isNull();
@@ -64,7 +66,7 @@ public class ContentCaptureEventTest {
 
     @Test
     public void testSetAutofillIds_null() {
-        final ContentCaptureEvent event = new ContentCaptureEvent("42", TYPE_VIEW_DISAPPEARED);
+        final ContentCaptureEvent event = new ContentCaptureEvent(42, TYPE_VIEW_DISAPPEARED);
 
         assertThrows(NullPointerException.class, () -> event.setAutofillIds(null));
         assertThat(event.getId()).isNull();
@@ -73,7 +75,7 @@ public class ContentCaptureEventTest {
 
     @Test
     public void testAddAutofillId_null() {
-        final ContentCaptureEvent event = new ContentCaptureEvent("42", TYPE_VIEW_DISAPPEARED);
+        final ContentCaptureEvent event = new ContentCaptureEvent(42, TYPE_VIEW_DISAPPEARED);
 
         assertThrows(NullPointerException.class, () -> event.addAutofillId(null));
         assertThat(event.getId()).isNull();
@@ -82,7 +84,7 @@ public class ContentCaptureEventTest {
 
     @Test
     public void testSetAutofillId() {
-        final ContentCaptureEvent event = new ContentCaptureEvent("42", TYPE_VIEW_DISAPPEARED);
+        final ContentCaptureEvent event = new ContentCaptureEvent(42, TYPE_VIEW_DISAPPEARED);
 
         final AutofillId id = new AutofillId(108);
         event.setAutofillId(id);
@@ -92,7 +94,7 @@ public class ContentCaptureEventTest {
 
     @Test
     public void testSetAutofillIds() {
-        final ContentCaptureEvent event = new ContentCaptureEvent("42", TYPE_VIEW_DISAPPEARED);
+        final ContentCaptureEvent event = new ContentCaptureEvent(42, TYPE_VIEW_DISAPPEARED);
 
         final AutofillId id = new AutofillId(108);
         final ArrayList<AutofillId> ids = new ArrayList<>(1);
@@ -104,7 +106,7 @@ public class ContentCaptureEventTest {
 
     @Test
     public void testAddAutofillId() {
-        final ContentCaptureEvent event = new ContentCaptureEvent("42", TYPE_VIEW_DISAPPEARED);
+        final ContentCaptureEvent event = new ContentCaptureEvent(42, TYPE_VIEW_DISAPPEARED);
 
         final AutofillId id1 = new AutofillId(108);
         event.addAutofillId(id1);
@@ -119,7 +121,7 @@ public class ContentCaptureEventTest {
 
     @Test
     public void testAddAutofillId_afterSetId() {
-        final ContentCaptureEvent event = new ContentCaptureEvent("42", TYPE_VIEW_DISAPPEARED);
+        final ContentCaptureEvent event = new ContentCaptureEvent(42, TYPE_VIEW_DISAPPEARED);
 
         final AutofillId id1 = new AutofillId(108);
         event.setAutofillId(id1);
@@ -134,7 +136,7 @@ public class ContentCaptureEventTest {
 
     @Test
     public void testAddAutofillId_afterSetIds() {
-        final ContentCaptureEvent event = new ContentCaptureEvent("42", TYPE_VIEW_DISAPPEARED);
+        final ContentCaptureEvent event = new ContentCaptureEvent(42, TYPE_VIEW_DISAPPEARED);
 
         final AutofillId id1 = new AutofillId(108);
         final ArrayList<AutofillId> ids = new ArrayList<>(1);
@@ -163,9 +165,9 @@ public class ContentCaptureEventTest {
     }
 
     private ContentCaptureEvent newEventForSessionStarted() {
-        final ContentCaptureEvent event = new ContentCaptureEvent("42", TYPE_SESSION_STARTED)
+        final ContentCaptureEvent event = new ContentCaptureEvent(42, TYPE_SESSION_STARTED)
                 .setClientContext(mClientContext)
-                .setParentSessionId("108");
+                .setParentSessionId(108);
         assertThat(event).isNotNull();
         return event;
     }
@@ -173,8 +175,8 @@ public class ContentCaptureEventTest {
     private void assertSessionStartedEvent(ContentCaptureEvent event) {
         assertThat(event.getType()).isEqualTo(TYPE_SESSION_STARTED);
         assertThat(event.getEventTime()).isAtLeast(MY_EPOCH);
-        assertThat(event.getSessionId()).isEqualTo("42");
-        assertThat(event.getParentSessionId()).isEqualTo("108");
+        assertThat(event.getSessionId()).isEqualTo(42);
+        assertThat(event.getParentSessionId()).isEqualTo(108);
         assertThat(event.getId()).isNull();
         assertThat(event.getIds()).isNull();
         assertThat(event.getText()).isNull();
@@ -186,17 +188,17 @@ public class ContentCaptureEventTest {
 
     @Test
     public void testSessionFinished_directly() {
-        final ContentCaptureEvent event = new ContentCaptureEvent("42", TYPE_SESSION_FINISHED)
-                .setParentSessionId("108");
+        final ContentCaptureEvent event = new ContentCaptureEvent(42, TYPE_SESSION_FINISHED)
+                .setParentSessionId(108);
         assertThat(event).isNotNull();
         assertSessionFinishedEvent(event);
     }
 
     @Test
     public void testSessionFinished_throughParcel() {
-        final ContentCaptureEvent event = new ContentCaptureEvent("42", TYPE_SESSION_FINISHED)
+        final ContentCaptureEvent event = new ContentCaptureEvent(42, TYPE_SESSION_FINISHED)
                 .setClientContext(mClientContext) // should not be writting to parcel
-                .setParentSessionId("108");
+                .setParentSessionId(108);
         assertThat(event).isNotNull();
         final ContentCaptureEvent clone = cloneThroughParcel(event);
         assertSessionFinishedEvent(clone);
@@ -205,8 +207,8 @@ public class ContentCaptureEventTest {
     private void assertSessionFinishedEvent(ContentCaptureEvent event) {
         assertThat(event.getType()).isEqualTo(TYPE_SESSION_FINISHED);
         assertThat(event.getEventTime()).isAtLeast(MY_EPOCH);
-        assertThat(event.getSessionId()).isEqualTo("42");
-        assertThat(event.getParentSessionId()).isEqualTo("108");
+        assertThat(event.getSessionId()).isEqualTo(42);
+        assertThat(event.getParentSessionId()).isEqualTo(108);
         assertThat(event.getId()).isNull();
         assertThat(event.getIds()).isNull();
         assertThat(event.getText()).isNull();
@@ -216,7 +218,7 @@ public class ContentCaptureEventTest {
 
     @Test
     public void testContextUpdated_directly() {
-        final ContentCaptureEvent event = new ContentCaptureEvent("42", TYPE_CONTEXT_UPDATED)
+        final ContentCaptureEvent event = new ContentCaptureEvent(42, TYPE_CONTEXT_UPDATED)
                 .setClientContext(mClientContext);
         assertThat(event).isNotNull();
         assertContextUpdatedEvent(event);
@@ -224,7 +226,7 @@ public class ContentCaptureEventTest {
 
     @Test
     public void testContextUpdated_throughParcel() {
-        final ContentCaptureEvent event = new ContentCaptureEvent("42", TYPE_CONTEXT_UPDATED)
+        final ContentCaptureEvent event = new ContentCaptureEvent(42, TYPE_CONTEXT_UPDATED)
                 .setClientContext(mClientContext);
         assertThat(event).isNotNull();
         final ContentCaptureEvent clone = cloneThroughParcel(event);
@@ -233,9 +235,9 @@ public class ContentCaptureEventTest {
 
     @Test
     public void testMergeEvent_typeViewTextChanged() {
-        final ContentCaptureEvent event = new ContentCaptureEvent("42", TYPE_VIEW_TEXT_CHANGED)
+        final ContentCaptureEvent event = new ContentCaptureEvent(42, TYPE_VIEW_TEXT_CHANGED)
                 .setText("test");
-        final ContentCaptureEvent event2 = new ContentCaptureEvent("43", TYPE_VIEW_TEXT_CHANGED)
+        final ContentCaptureEvent event2 = new ContentCaptureEvent(43, TYPE_VIEW_TEXT_CHANGED)
                 .setText("empty");
 
         event.mergeEvent(event2);
@@ -244,14 +246,14 @@ public class ContentCaptureEventTest {
 
     @Test
     public void testMergeEvent_typeViewDisappeared() {
-        final ContentCaptureEvent event = new ContentCaptureEvent("42", TYPE_VIEW_DISAPPEARED)
+        final ContentCaptureEvent event = new ContentCaptureEvent(42, TYPE_VIEW_DISAPPEARED)
                 .setAutofillId(new AutofillId(1));
-        final ContentCaptureEvent event2 = new ContentCaptureEvent("43", TYPE_VIEW_DISAPPEARED)
+        final ContentCaptureEvent event2 = new ContentCaptureEvent(43, TYPE_VIEW_DISAPPEARED)
                 .setAutofillId(new AutofillId(2));
         final ArrayList<AutofillId> autofillIds = new ArrayList<>();
         autofillIds.add(new AutofillId(3));
         autofillIds.add(new AutofillId(4));
-        final ContentCaptureEvent event3 = new ContentCaptureEvent("17", TYPE_VIEW_DISAPPEARED)
+        final ContentCaptureEvent event3 = new ContentCaptureEvent(17, TYPE_VIEW_DISAPPEARED)
                 .setAutofillIds(autofillIds);
 
         event.mergeEvent(event2);
@@ -264,24 +266,24 @@ public class ContentCaptureEventTest {
 
     @Test
     public void testMergeEvent_typeViewDisappeared_noIds() {
-        final ContentCaptureEvent event = new ContentCaptureEvent("42", TYPE_VIEW_DISAPPEARED)
+        final ContentCaptureEvent event = new ContentCaptureEvent(42, TYPE_VIEW_DISAPPEARED)
                 .setAutofillId(new AutofillId(1));
-        final ContentCaptureEvent event2 = new ContentCaptureEvent("43", TYPE_VIEW_DISAPPEARED);
+        final ContentCaptureEvent event2 = new ContentCaptureEvent(43, TYPE_VIEW_DISAPPEARED);
 
         assertThrows(IllegalArgumentException.class, () -> event.mergeEvent(event2));
     }
 
     @Test
     public void testMergeEvent_nullArgument() {
-        final ContentCaptureEvent event = new ContentCaptureEvent("42", TYPE_VIEW_DISAPPEARED);
+        final ContentCaptureEvent event = new ContentCaptureEvent(42, TYPE_VIEW_DISAPPEARED);
         assertThrows(NullPointerException.class, () -> event.mergeEvent(null));
     }
 
     @Test
     public void testMergeEvent_differentEventTypes() {
-        final ContentCaptureEvent event = new ContentCaptureEvent("42", TYPE_VIEW_DISAPPEARED)
+        final ContentCaptureEvent event = new ContentCaptureEvent(42, TYPE_VIEW_DISAPPEARED)
                 .setText("test").setAutofillId(new AutofillId(1));
-        final ContentCaptureEvent event2 = new ContentCaptureEvent("17", TYPE_VIEW_TEXT_CHANGED)
+        final ContentCaptureEvent event2 = new ContentCaptureEvent(17, TYPE_VIEW_TEXT_CHANGED)
                 .setText("empty").setAutofillId(new AutofillId(2));
 
         event.mergeEvent(event2);
@@ -296,8 +298,8 @@ public class ContentCaptureEventTest {
     private void assertContextUpdatedEvent(ContentCaptureEvent event) {
         assertThat(event.getType()).isEqualTo(TYPE_CONTEXT_UPDATED);
         assertThat(event.getEventTime()).isAtLeast(MY_EPOCH);
-        assertThat(event.getSessionId()).isEqualTo("42");
-        assertThat(event.getParentSessionId()).isNull();
+        assertThat(event.getSessionId()).isEqualTo(42);
+        assertThat(event.getParentSessionId()).isEqualTo(NO_SESSION_ID);
         assertThat(event.getId()).isNull();
         assertThat(event.getIds()).isNull();
         assertThat(event.getText()).isNull();
