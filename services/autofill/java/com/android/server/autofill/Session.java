@@ -2540,13 +2540,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         boolean saveOnFinish = true;
         final SaveInfo saveInfo = response.getSaveInfo();
         final AutofillId saveTriggerId;
+        final int flags;
         if (saveInfo != null) {
             saveTriggerId = saveInfo.getTriggerId();
             if (saveTriggerId != null) {
                 writeLog(MetricsEvent.AUTOFILL_EXPLICIT_SAVE_TRIGGER_DEFINITION);
             }
-            mSaveOnAllViewsInvisible =
-                    (saveInfo.getFlags() & SaveInfo.FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE) != 0;
+            flags = saveInfo.getFlags();
+            mSaveOnAllViewsInvisible = (flags & SaveInfo.FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE) != 0;
 
             // We only need to track views if we want to save once they become invisible.
             if (mSaveOnAllViewsInvisible) {
@@ -2561,11 +2562,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     Collections.addAll(trackedViews, saveInfo.getOptionalIds());
                 }
             }
-            if ((saveInfo.getFlags() & SaveInfo.FLAG_DONT_SAVE_ON_FINISH) != 0) {
+            if ((flags & SaveInfo.FLAG_DONT_SAVE_ON_FINISH) != 0) {
                 saveOnFinish = false;
             }
 
         } else {
+            flags = 0;
             saveTriggerId = null;
         }
 
@@ -2592,7 +2594,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         try {
             if (sVerbose) {
                 Slog.v(TAG, "updateTrackedIdsLocked(): " + trackedViews + " => " + fillableIds
-                        + " triggerId: " + saveTriggerId + " saveOnFinish:" + saveOnFinish);
+                        + " triggerId: " + saveTriggerId + " saveOnFinish:" + saveOnFinish
+                        + " flags: " + flags + " hasSaveInfo: " + (saveInfo != null));
             }
             mClient.setTrackedViews(id, toArray(trackedViews), mSaveOnAllViewsInvisible,
                     saveOnFinish, toArray(fillableIds), saveTriggerId);
