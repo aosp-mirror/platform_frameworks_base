@@ -109,6 +109,7 @@ public class EntitlementManager {
     private boolean mCellularUpstreamPermitted = true;
     private boolean mUsingCellularAsUpstream = false;
     private boolean mNeedReRunProvisioningUi = false;
+    private OnUiEntitlementFailedListener mListener;
 
     public EntitlementManager(Context ctx, StateMachine tetherMasterSM, SharedLog log,
             int permissionChangeMessageCode, MockableSystemProperties systemProperties) {
@@ -127,6 +128,20 @@ public class EntitlementManager {
         mHandler = new EntitlementHandler(masterHandler.getLooper());
         mContext.registerReceiver(mReceiver, new IntentFilter(ACTION_PROVISIONING_ALARM),
                 null, mHandler);
+    }
+
+    public void setOnUiEntitlementFailedListener(final OnUiEntitlementFailedListener listener) {
+        mListener = listener;
+    }
+
+    /** Callback fired when UI entitlement failed. */
+    public interface OnUiEntitlementFailedListener {
+        /**
+         * Ui entitlement check fails in |downstream|.
+         *
+         * @param downstream  tethering type from ConnectivityManager.TETHERING_{@code *}.
+         */
+        void onUiEntitlementFailed(int downstream);
     }
 
     /**
@@ -337,7 +352,9 @@ public class EntitlementManager {
      */
     protected void runSilentTetherProvisioning(int type) {
         if (DBG) Log.d(TAG, "runSilentTetherProvisioning: " + type);
-        ResultReceiver receiver = buildProxyReceiver(type, null);
+        // For silent provisioning, settings would stop tethering when entitlement fail.
+        ResultReceiver receiver = buildProxyReceiver(type,
+                false/* notifyFail */, null);
 
         Intent intent = new Intent();
         intent.putExtra(EXTRA_ADD_TETHER_TYPE, type);
@@ -358,7 +375,8 @@ public class EntitlementManager {
      */
     @VisibleForTesting
     protected void runUiTetherProvisioning(int type) {
-        ResultReceiver receiver = buildProxyReceiver(type, null);
+        ResultReceiver receiver = buildProxyReceiver(type,
+                true/* notifyFail */, null);
         runUiTetherProvisioning(type, receiver);
     }
 
@@ -555,12 +573,16 @@ public class EntitlementManager {
         }
     }
 
-    private ResultReceiver buildProxyReceiver(int type, final ResultReceiver receiver) {
+    private ResultReceiver buildProxyReceiver(int type, boolean notifyFail,
+            final ResultReceiver receiver) {
         ResultReceiver rr = new ResultReceiver(mHandler) {
             @Override
             protected void onReceiveResult(int resultCode, Bundle resultData) {
                 int updatedCacheValue = updateEntitlementCacheValue(type, resultCode);
                 addDownstreamMapping(type, updatedCacheValue);
+                if (updatedCacheValue == TETHER_ERROR_PROVISION_FAILED && notifyFail) {
+                    mListener.onUiEntitlementFailed(type);
+                }
                 if (receiver != null) receiver.send(updatedCacheValue, null);
             }
         };
@@ -627,7 +649,7 @@ public class EntitlementManager {
         if (cacheValue == TETHER_ERROR_NO_ERROR || !showEntitlementUi) {
             receiver.send(cacheValue, null);
         } else {
-            ResultReceiver proxy = buildProxyReceiver(downstream, receiver);
+            ResultReceiver proxy = buildProxyReceiver(downstream, false/* notifyFail */, receiver);
             runUiTetherProvisioning(downstream, proxy);
         }
     }
