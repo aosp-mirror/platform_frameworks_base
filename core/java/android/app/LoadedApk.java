@@ -675,7 +675,7 @@ public final class LoadedApk {
 
         // Shared libraries get a null parent: this has the side effect of having canonicalized
         // shared libraries using ApplicationLoaders cache, which is the behavior we want.
-        return ApplicationLoaders.getDefault().getSharedLibraryClassLoaderWithSharedLibraries(jars,
+        return ApplicationLoaders.getDefault().getClassLoaderWithSharedLibraries(jars,
                     mApplicationInfo.targetSdkVersion, isBundledApp, librarySearchPath,
                     libraryPermittedPath, /* parent */ null,
                     /* classLoaderName */ null, sharedLibraries);
