@@ -22,6 +22,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.os.CancellationSignal;
+import android.util.ArraySet;
 
 import com.android.internal.util.ArrayUtils;
 
@@ -59,7 +60,7 @@ public class TranslatingCursor extends CrossProcessCursorWrapper {
     private final boolean mDropLast;
 
     private final int mAuxiliaryColumnIndex;
-    private final int[] mTranslateColumnIndices;
+    private final ArraySet<Integer> mTranslateColumnIndices;
 
     public TranslatingCursor(@NonNull Cursor cursor, @NonNull Config config,
             @NonNull Translator translator, boolean dropLast) {
@@ -70,9 +71,12 @@ public class TranslatingCursor extends CrossProcessCursorWrapper {
         mDropLast = dropLast;
 
         mAuxiliaryColumnIndex = cursor.getColumnIndexOrThrow(config.auxiliaryColumn);
-        mTranslateColumnIndices = new int[config.translateColumns.length];
-        for (int i = 0; i < mTranslateColumnIndices.length; ++i) {
-            mTranslateColumnIndices[i] = cursor.getColumnIndex(config.translateColumns[i]);
+        mTranslateColumnIndices = new ArraySet<>();
+        for (int i = 0; i < cursor.getColumnCount(); ++i) {
+            String columnName = cursor.getColumnName(i);
+            if (ArrayUtils.contains(config.translateColumns, columnName)) {
+                mTranslateColumnIndices.add(i);
+            }
         }
     }
 
