@@ -78,11 +78,6 @@ interface IWebViewUpdateService {
     boolean isFallbackPackage(String packageName);
 
     /**
-     * Enable or disable the WebView package fallback mechanism.
-     */
-    void enableFallbackLogic(boolean enable);
-
-    /**
      * Used by Settings to determine whether multiprocess is enabled.
      */
     boolean isMultiProcessEnabled();

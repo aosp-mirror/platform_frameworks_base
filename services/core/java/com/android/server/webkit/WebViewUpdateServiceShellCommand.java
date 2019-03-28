@@ -37,10 +37,6 @@ class WebViewUpdateServiceShellCommand extends ShellCommand {
         final PrintWriter pw = getOutPrintWriter();
         try {
             switch(cmd) {
-                case "enable-redundant-packages":
-                    return enableFallbackLogic(false);
-                case "disable-redundant-packages":
-                    return enableFallbackLogic(true);
                 case "set-webview-implementation":
                     return setWebViewImplementation();
                 case "enable-multiprocess":
@@ -54,13 +50,6 @@ class WebViewUpdateServiceShellCommand extends ShellCommand {
             pw.println("Remote exception: " + e);
         }
         return -1;
-    }
-
-    private int enableFallbackLogic(boolean enable) throws RemoteException {
-        final PrintWriter pw = getOutPrintWriter();
-        mInterface.enableFallbackLogic(enable);
-        pw.println("Success");
-        return 0;
     }
 
     private int setWebViewImplementation() throws RemoteException {
@@ -104,13 +93,6 @@ class WebViewUpdateServiceShellCommand extends ShellCommand {
         pw.println("  help");
         pw.println("    Print this help text.");
         pw.println("");
-        pw.println("  enable-redundant-packages");
-        pw.println("    Allow a fallback package to be installed and enabled even when a");
-        pw.println("    more-preferred package is available. This command is useful when testing");
-        pw.println("    fallback packages.");
-        pw.println("  disable-redundant-packages");
-        pw.println("    Disallow installing and enabling fallback packages when a more-preferred");
-        pw.println("    package is available.");
         helpSetWebViewImplementation();
         pw.println("  enable-multiprocess");
         pw.println("    Enable multi-process mode for WebView");
