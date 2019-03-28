@@ -3128,7 +3128,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @GuardedBy("this")
-    ProcessChangeItem enqueueProcessChangeItemLocked(int uid, int pid) {
+    ProcessChangeItem enqueueProcessChangeItemLocked(int pid, int uid) {
         int i = mPendingProcessChanges.size()-1;
         ActivityManagerService.ProcessChangeItem item = null;
         while (i >= 0) {
@@ -16414,7 +16414,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             proc.setReportedForegroundServiceTypes(fgServiceTypes);
-            ProcessChangeItem item = enqueueProcessChangeItemLocked(proc.info.uid, proc.pid);
+            ProcessChangeItem item = enqueueProcessChangeItemLocked(proc.pid, proc.info.uid);
             item.changes = ProcessChangeItem.CHANGE_FOREGROUND_SERVICES;
             item.foregroundServiceTypes = fgServiceTypes;
 
