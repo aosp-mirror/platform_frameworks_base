@@ -561,6 +561,13 @@ class ProcessRecord implements WindowProcessListener {
                 pw.print(prefix); pw.print("  - "); pw.println(receivers.valueAt(i));
             }
         }
+        if (mAllowBackgroundActivityStartsTokens.size() > 0) {
+            pw.print(prefix); pw.println("Background activity start whitelist tokens:");
+            for (int i = 0; i < mAllowBackgroundActivityStartsTokens.size(); i++) {
+                pw.print(prefix); pw.print("  - ");
+                pw.println(mAllowBackgroundActivityStartsTokens.valueAt(i));
+            }
+        }
     }
 
     ProcessRecord(ActivityManagerService _service, ApplicationInfo _info, String _processName,
