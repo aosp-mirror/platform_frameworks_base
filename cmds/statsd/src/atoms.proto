@@ -41,6 +41,7 @@ import "frameworks/base/core/proto/android/server/location/enums.proto";
 import "frameworks/base/core/proto/android/service/procstats_enum.proto";
 import "frameworks/base/core/proto/android/service/usb.proto";
 import "frameworks/base/core/proto/android/stats/connectivity/network_stack.proto";
+import "frameworks/base/core/proto/android/stats/connectivity/resolv_stats.proto";
 import "frameworks/base/core/proto/android/stats/enums.proto";
 import "frameworks/base/core/proto/android/stats/docsui/docsui_enums.proto";
 import "frameworks/base/core/proto/android/stats/devicepolicy/device_policy.proto";
@@ -4950,52 +4951,38 @@ message AppCompacted {
 }
 
 /**
- * Logs the latency period(in microseconds) and the return code of
- * the DNS(Domain Name System) lookups.
- * These 4 methods(GETADDRINFO,GETHOSTBYNAME,GETHOSTBYADDR,RES_NSEND)
- * to get info(address or hostname) from DNS server(or DNS cache).
- * Logged from:
- *   /system/netd/server/DnsProxyListener.cpp
+ * Logs a DNS lookup operation initiated by the system resolver on behalf of an application
+ * invoking native APIs such as getaddrinfo() or Java APIs such as Network#getAllByName().
+ *
+ * The top-level message represents the entire lookup operation, which may result one or more
+ * queries to the recursive DNS resolvers. Those are individually logged in DnsQueryEvent to
+ * enable computing error rates and network latency and timeouts broken up by query type,
+ * transport, network interface, etc.
  */
 message NetworkDnsEventReported {
-    // The types of the DNS lookups, as defined in
-    //system/netd/server/binder/android/net/metrics/INetdEventListener.aidl
-    enum EventType {
-        EVENT_UNKNOWN = 0;
-        EVENT_GETADDRINFO = 1;
-        EVENT_GETHOSTBYNAME = 2;
-        EVENT_GETHOSTBYADDR = 3;
-        EVENT_RES_NSEND = 4;
-    }
-    optional EventType event_type = 1;
 
-    // The return value of the DNS resolver for each DNS lookups.
-    //bionic/libc/include/netdb.h
-    //system/netd/resolv/include/netd_resolv/resolv.h
-    enum ReturnCode {
-        EAI_NO_ERROR = 0;
-        EAI_ADDRFAMILY = 1;
-        EAI_AGAIN = 2;
-        EAI_BADFLAGS = 3;
-        EAI_FAIL = 4;
-        EAI_FAMILY = 5;
-        EAI_MEMORY = 6;
-        EAI_NODATA = 7;
-        EAI_NONAME = 8;
-        EAI_SERVICE = 9;
-        EAI_SOCKTYPE = 10;
-        EAI_SYSTEM = 11;
-        EAI_BADHINTS = 12;
-        EAI_PROTOCOL = 13;
-        EAI_OVERFLOW = 14;
-        RESOLV_TIMEOUT = 255;
-        EAI_MAX = 256;
-    }
-    optional ReturnCode return_code = 2;
+    optional android.stats.connectivity.EventType event_type = 1;
 
-    // The latency period(in microseconds) it took for this DNS lookup to complete.
+    optional android.stats.connectivity.ReturnCode return_code = 2;
+
+    // The latency in microseconds of the entire DNS lookup operation.
     optional int32 latency_micros = 3;
+
+    optional android.stats.connectivity.DnsQueryEventRe dns_query_event_re = 4 [(log_mode) = MODE_BYTES];
+
+    // ResNSend flags defined in android/multinetwork.h
+    optional int32 flags = 5;
+
+    optional android.net.NetworkCapabilitiesProto.Transport network_type = 6;
+
+    // The DNS over TLS mode on a specific netId.
+    optional android.stats.connectivity.PrivateDnsModes private_dns_modes = 7;
+
+    // Additional pass-through fields opaque to statsd.
+    // The DNS resolver Mainline module can add new fields here without requiring an OS update.
+    optional android.stats.connectivity.DnsCallEvent dns_call_event = 8 [(log_mode) = MODE_BYTES];
 }
+
 
 /**
  * Logs when a data stall event occurs.
