@@ -3908,12 +3908,15 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         @Override
         public void pulseWhileDozing(@NonNull PulseCallback callback, int reason) {
-            mScrimController.setPulseReason(reason);
             if (reason == DozeLog.PULSE_REASON_SENSOR_LONG_PRESS) {
                 mPowerManager.wakeUp(SystemClock.uptimeMillis(), PowerManager.WAKE_REASON_GESTURE,
                         "com.android.systemui:LONG_PRESS");
                 startAssist(new Bundle());
                 return;
+            }
+
+            if (reason == DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN) {
+                mScrimController.setWakeLockScreenSensorActive(true);
             }
 
             boolean passiveAuthInterrupt = reason == DozeLog.PULSE_REASON_NOTIFICATION;
@@ -3934,6 +3937,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     mPulsing = false;
                     callback.onPulseFinished();
                     updateNotificationPanelTouchState();
+                    mScrimController.setWakeLockScreenSensorActive(false);
                     setPulsing(false);
                 }
 
@@ -4010,7 +4014,10 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         @Override
-        public void extendPulse() {
+        public void extendPulse(int reason) {
+            if (reason == DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN) {
+                mScrimController.setWakeLockScreenSensorActive(true);
+            }
             if (mDozeScrimController.isPulsing() && mAmbientPulseManager.hasNotifications()) {
                 mAmbientPulseManager.extendPulse();
             } else {
