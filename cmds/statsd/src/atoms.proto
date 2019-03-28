@@ -257,7 +257,7 @@ message Atom {
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10057
+    // Next: 10058
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000;
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001;
@@ -316,6 +316,7 @@ message Atom {
         GpuStatsGlobalInfo gpu_stats_global_info = 10054;
         GpuStatsAppInfo gpu_stats_app_info = 10055;
         SystemIonHeapSize system_ion_heap_size = 10056;
+        AppsOnExternalStorageInfo apps_on_external_storage_info = 10057;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -5556,6 +5557,9 @@ message BubbleUIChanged {
     // Normalized screen position of the bubble stack. The range is between 0 and 1.
     optional float normalized_x_position = 7;
     optional float normalized_y_position = 8;
+
+    // Whether the bubble is unread. If it is unread, a dot is shown in the bubble stack icon.
+    optional bool is_unread = 9;
 }
 
 /**
@@ -5865,4 +5869,16 @@ message SystemIonHeapSize {
 message NetworkStackReported {
     optional int32 eventId = 1;
     optional android.stats.connectivity.NetworkStackEventData network_stack_event = 2 [(log_mode) = MODE_BYTES];
+}
+
+/**
+ * Logs the apps that are installed on the external storage.
+ * Pulled from:
+ *   StatsCompanionService
+ */
+message AppsOnExternalStorageInfo {
+    // The type of the external storage.
+    optional android.stats.storage.ExternalStorageType external_storage_type = 1;
+    // The name of the package that is installed on the external storage.
+    optional string package_name = 2;
 }

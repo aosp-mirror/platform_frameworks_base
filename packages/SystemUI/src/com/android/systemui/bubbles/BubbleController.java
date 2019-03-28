@@ -26,6 +26,7 @@ import static com.android.systemui.statusbar.notification.NotificationAlertingMa
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
@@ -64,6 +65,7 @@ import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import java.lang.annotation.Retention;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -340,6 +342,9 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
             // It's new
             mStackView.addBubble(notif);
         }
+        if (shouldAutoExpand(notif)) {
+            mStackView.setExpandedBubble(notif);
+        }
         updateVisibility();
     }
 
@@ -379,9 +384,11 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
             }
             if (shouldAutoBubbleForFlags(mContext, entry) || shouldBubble(entry)) {
                 // TODO: handle group summaries
-                // It's a new notif, it shows in the shade and as a bubble
                 entry.setIsBubble(true);
-                entry.setShowInShadeWhenBubble(true);
+                boolean suppressNotification = entry.getBubbleMetadata() != null
+                        && entry.getBubbleMetadata().getSuppressInitialNotification()
+                        && isForegroundApp(entry.notification.getPackageName());
+                entry.setShowInShadeWhenBubble(!suppressNotification);
             }
         }
 
@@ -520,6 +527,23 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
         return (((isMessageType && hasRemoteInput) || isMessageStyle) && autoBubbleMessages)
                 || (isImportantOngoing && autoBubbleOngoing)
                 || autoBubbleAll;
+    }
+
+    private boolean shouldAutoExpand(NotificationEntry entry) {
+        Notification.BubbleMetadata metadata = entry.getBubbleMetadata();
+        return metadata != null && metadata.getAutoExpandBubble()
+                && isForegroundApp(entry.notification.getPackageName());
+    }
+
+    /**
+     * Return true if the applications with the package name is running in foreground.
+     *
+     * @param pkgName application package name.
+     */
+    private boolean isForegroundApp(String pkgName) {
+        ActivityManager am = mContext.getSystemService(ActivityManager.class);
+        List<RunningTaskInfo> tasks = am.getRunningTasks(1 /* maxNum */);
+        return !tasks.isEmpty() && pkgName.equals(tasks.get(0).topActivity.getPackageName());
     }
 
     /**

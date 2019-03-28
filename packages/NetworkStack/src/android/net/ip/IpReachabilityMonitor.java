@@ -129,8 +129,8 @@ import java.util.Map;
  */
 public class IpReachabilityMonitor {
     private static final String TAG = "IpReachabilityMonitor";
-    private static final boolean DBG = false;
-    private static final boolean VDBG = false;
+    private static final boolean DBG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean VDBG = Log.isLoggable(TAG, Log.VERBOSE);
 
     public interface Callback {
         // This callback function must execute as quickly as possible as it is

@@ -6360,9 +6360,20 @@ public class AudioService extends IAudioService.Stub
         boolean isLoopbackRenderPolicy = policyConfig.getMixes().stream().allMatch(
                 mix -> mix.getRouteFlags() == (mix.ROUTE_FLAG_RENDER | mix.ROUTE_FLAG_LOOP_BACK));
 
-        // Policy that do not modify the audio routing only need an audio projection
-        if (isLoopbackRenderPolicy && canProjectAudio(projection)) {
-            return true;
+        if (isLoopbackRenderPolicy) {
+            boolean allowPrivilegedPlaybackCapture = policyConfig.getMixes().stream().anyMatch(
+                    mix -> mix.getRule().allowPrivilegedPlaybackCapture());
+            if (allowPrivilegedPlaybackCapture
+                    && !(hasPermission(android.Manifest.permission.CAPTURE_AUDIO_OUTPUT)
+                    || hasPermission(android.Manifest.permission.CAPTURE_MEDIA_OUTPUT))) {
+                // Opt-out can not be bypassed without a system permission
+                return false;
+            }
+
+            if (canProjectAudio(projection)) {
+                // Policy that do not modify the audio routing only need an audio projection
+                return true;
+            }
         }
 
         boolean hasPermissionModifyAudioRouting =
@@ -6372,6 +6383,9 @@ public class AudioService extends IAudioService.Stub
             return true;
         }
         return false;
+    }
+    private boolean hasPermission(String permission) {
+        return PackageManager.PERMISSION_GRANTED == mContext.checkCallingPermission(permission);
     }
 
     /** @return true if projection is a valid MediaProjection that can project audio. */

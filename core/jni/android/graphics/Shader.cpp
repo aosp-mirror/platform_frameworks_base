@@ -62,14 +62,14 @@ static jlong Shader_getNativeFinalizer(JNIEnv*, jobject) {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-static jlong BitmapShader_constructor(JNIEnv* env, jobject o, jlong matrixPtr, jobject jbitmap,
+static jlong BitmapShader_constructor(JNIEnv* env, jobject o, jlong matrixPtr, jlong bitmapHandle,
         jint tileModeX, jint tileModeY) {
     const SkMatrix* matrix = reinterpret_cast<const SkMatrix*>(matrixPtr);
     sk_sp<SkImage> image;
-    if (jbitmap) {
+    if (bitmapHandle) {
         // Only pass a valid SkBitmap object to the constructor if the Bitmap exists. Otherwise,
         // we'll pass an empty SkBitmap to avoid crashing/excepting for compatibility.
-        image = android::bitmap::toBitmap(env, jbitmap).makeImage();
+        image = android::bitmap::toBitmap(bitmapHandle).makeImage();
     }
 
     if (!image.get()) {
@@ -222,7 +222,7 @@ static const JNINativeMethod gShaderMethods[] = {
 };
 
 static const JNINativeMethod gBitmapShaderMethods[] = {
-    { "nativeCreate",      "(JLandroid/graphics/Bitmap;II)J",  (void*)BitmapShader_constructor },
+    { "nativeCreate",      "(JJII)J",  (void*)BitmapShader_constructor },
 };
 
 static const JNINativeMethod gLinearGradientMethods[] = {

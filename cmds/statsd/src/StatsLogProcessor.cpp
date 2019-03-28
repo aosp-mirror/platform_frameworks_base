@@ -407,12 +407,12 @@ void StatsLogProcessor::onDumpReport(const ConfigKey& key, const int64_t dumpTim
         outData->clear();
         outData->resize(proto.size());
         size_t pos = 0;
-        auto iter = proto.data();
-        while (iter.readBuffer() != NULL) {
-            size_t toRead = iter.currentToRead();
-            std::memcpy(&((*outData)[pos]), iter.readBuffer(), toRead);
+        sp<android::util::ProtoReader> reader = proto.data();
+        while (reader->readBuffer() != NULL) {
+            size_t toRead = reader->currentToRead();
+            std::memcpy(&((*outData)[pos]), reader->readBuffer(), toRead);
             pos += toRead;
-            iter.rp()->move(toRead);
+            reader->move(toRead);
         }
     }
 

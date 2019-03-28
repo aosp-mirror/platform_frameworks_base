@@ -6916,6 +6916,7 @@ public abstract class PackageManager {
      */
     @SystemApi
     @TestApi
+    @Nullable
     public String getIncidentReportApproverPackageName() {
         throw new UnsupportedOperationException(
                 "getIncidentReportApproverPackageName not implemented in subclass");

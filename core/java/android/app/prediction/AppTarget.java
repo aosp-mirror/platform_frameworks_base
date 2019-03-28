@@ -223,7 +223,7 @@ public final class AppTarget implements Parcelable {
          */
         @NonNull
         public Builder setTarget(@NonNull String packageName, @NonNull UserHandle user) {
-            if (mPackageName == null) {
+            if (mPackageName != null) {
                 throw new IllegalArgumentException("Target is already set");
             }
             mPackageName = Preconditions.checkNotNull(packageName);

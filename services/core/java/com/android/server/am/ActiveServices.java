@@ -1478,7 +1478,6 @@ public final class ActiveServices {
             if (sr.isForeground || sr.fgRequired) {
                 anyForeground = true;
                 fgServiceTypes |= sr.foregroundServiceType;
-                break;
             }
         }
         mAm.updateProcessForegroundLocked(proc, anyForeground, fgServiceTypes, oomAdj);

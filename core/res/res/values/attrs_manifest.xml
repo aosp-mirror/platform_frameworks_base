@@ -1673,8 +1673,19 @@
              This flag is turned on by default. <em>This attribute is usable only by system apps.
              </em> -->
         <attr name="allowClearUserDataOnFailedRestore"/>
-        <!-- If {@code true} the app's non sensitive audio can be capture by other apps.
-             The default value is true. -->
+        <!-- If {@code true} the app's non sensitive audio can be capture by other apps with
+             {@code AudioPlaybackCaptureConfiguration} and a {@code MediaProjection}.
+
+             <p>
+             Non sensitive audio is defined as audio whose {@code AttributeUsage} is
+             {@code USAGE_UNKNOWN}), {@code USAGE_MEDIA}) or {@code USAGE_GAME}).
+             All other usages (eg. {@code USAGE_VOICE_COMMUNICATION}) will not be captured.
+
+             <p>
+             The default value is:
+                 - {@code true} for apps with targetSdkVersion >= 29 (Q).
+                 - {@code false} for apps with targetSdkVersion < 29.
+             -->
         <attr name="allowAudioPlaybackCapture" format="boolean" />
     </declare-styleable>
     <!-- The <code>permission</code> tag declares a security permission that can be

@@ -2325,4 +2325,7 @@ enum PageId {
 
     // Settings > app > bubble settings
     APP_BUBBLE_SETTINGS = 1700;
+
+    // OPEN: Settings > System > Aware > Info dialog
+    DIALOG_AWARE_STATUS = 1701;
 }

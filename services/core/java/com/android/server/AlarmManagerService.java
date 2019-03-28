@@ -3825,6 +3825,7 @@ class AlarmManagerService extends SystemService {
                 Slog.w(TAG, "Failure sending alarm.", e);
             }
             Trace.traceEnd(Trace.TRACE_TAG_POWER);
+            decrementAlarmCount(alarm.uid);
         }
     }
 
@@ -4148,6 +4149,10 @@ class AlarmManagerService extends SystemService {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case ALARM_EVENT: {
+                    // This code is used when the kernel timer driver is not available, which
+                    // shouldn't happen. Here, we try our best to simulate it, which may be useful
+                    // when porting Android to a new device. Note that we can't wake up a device
+                    // this way, so WAKE_UP alarms will be delivered only when the device is awake.
                     ArrayList<Alarm> triggerList = new ArrayList<Alarm>();
                     synchronized (mLock) {
                         final long nowELAPSED = mInjector.getElapsedRealtime();
@@ -4167,6 +4172,7 @@ class AlarmManagerService extends SystemService {
                                 removeImpl(alarm.operation, null);
                             }
                         }
+                        decrementAlarmCount(alarm.uid);
                     }
                     break;
                 }
@@ -4760,7 +4766,6 @@ class AlarmManagerService extends SystemService {
                 mAppWakeupHistory.recordAlarmForPackage(alarm.sourcePackage,
                         UserHandle.getUserId(alarm.creatorUid), nowELAPSED);
             }
-            decrementAlarmCount(alarm.uid);
             final BroadcastStats bs = inflight.mBroadcastStats;
             bs.count++;
             if (bs.nesting == 0) {

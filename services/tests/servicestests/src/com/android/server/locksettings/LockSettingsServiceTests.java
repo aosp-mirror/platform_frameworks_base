@@ -26,7 +26,10 @@ import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSW
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
 
 import android.os.RemoteException;
+import android.platform.test.annotations.Presubmit;
 import android.service.gatekeeper.GateKeeperResponse;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.VerifyCredentialResponse;
@@ -36,6 +39,8 @@ import com.android.server.locksettings.LockSettingsStorage.CredentialHash;
 /**
  * runtest frameworks-services -c com.android.server.locksettings.LockSettingsServiceTests
  */
+@SmallTest
+@Presubmit
 public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
 
     @Override

@@ -102,9 +102,9 @@ public class DhcpClient extends StateMachine {
 
     private static final String TAG = "DhcpClient";
     private static final boolean DBG = true;
-    private static final boolean STATE_DBG = false;
-    private static final boolean MSG_DBG = false;
-    private static final boolean PACKET_DBG = false;
+    private static final boolean STATE_DBG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean MSG_DBG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean PACKET_DBG = Log.isLoggable(TAG, Log.DEBUG);
 
     // Metrics events: must be kept in sync with server-side aggregation code.
     /** Represents transitions from DhcpInitState to DhcpBoundState */

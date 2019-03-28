@@ -135,6 +135,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @SystemService(Context.STORAGE_SERVICE)
 public class StorageManager {
     private static final String TAG = "StorageManager";
+    private static final boolean LOCAL_LOGV = Log.isLoggable(TAG, Log.VERBOSE);
 
     /** {@hide} */
     public static final String PROP_PRIMARY_PHYSICAL = "ro.vold.primary_physical";
@@ -1652,13 +1653,11 @@ public class StorageManager {
 
     /**
      * Check that given app holds both permission and appop.
-     *
-     * @return {@code null} if the permission and appop are held, otherwise
-     *         returns a string indicating why access was denied.
+     * @hide
      */
-    private boolean checkPermissionAndAppOp(boolean enforce, int pid, int uid, String packageName,
-            String permission, int op) {
-        if (mContext.checkPermission(permission, pid, uid) != PERMISSION_GRANTED) {
+    public static boolean checkPermissionAndAppOp(Context context, boolean enforce,
+            int pid, int uid, String packageName, String permission, int op) {
+        if (context.checkPermission(permission, pid, uid) != PERMISSION_GRANTED) {
             if (enforce) {
                 throw new SecurityException(
                         "Permission " + permission + " denied for package " + packageName);
@@ -1667,7 +1666,7 @@ public class StorageManager {
             }
         }
 
-        final AppOpsManager appOps = mContext.getSystemService(AppOpsManager.class);
+        final AppOpsManager appOps = context.getSystemService(AppOpsManager.class);
         final int mode = appOps.noteOpNoThrow(op, uid, packageName);
         switch (mode) {
             case AppOpsManager.MODE_ALLOWED:
@@ -1686,6 +1685,11 @@ public class StorageManager {
                         AppOpsManager.opToName(op) + " has unknown mode "
                                 + AppOpsManager.modeToName(mode));
         }
+    }
+
+    private boolean checkPermissionAndAppOp(boolean enforce,
+            int pid, int uid, String packageName, String permission, int op) {
+        return checkPermissionAndAppOp(mContext, enforce, pid, uid, packageName, permission, op);
     }
 
     // Callers must hold both the old and new permissions, so that we can

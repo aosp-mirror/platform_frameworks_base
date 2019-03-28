@@ -26,6 +26,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -45,20 +46,21 @@ import java.util.concurrent.Executor;
  * <p>This class contains methods and constants used to start a {@code DynamicSystem} installation,
  * and a listener for status updates.</p>
  *
- * <p>{@code DynamicSystem} allows user to run certified system images in a non destructive manner
- * without needing to prior OEM unlock. While running in {@code DynamicSystem}, persitent storage
- * for factory reset protection (FRP) remains unchanged. The new system is installed in a
- * temporarily allocated partition. After the installation is completed, the device will be running
- * in the new system on next reboot. Then, when the user reboots the device again, it will leave
- * {@code DynamicSystem} and go back into the original system. Since the userdata for
- * {@code DynamicSystem} is also newly created during the installation, running in
- * {@code DynamicSystem} doesn't change user's app data.</p>
+ * <p>{@code DynamicSystem} allows users to run certified system images in a non destructive manner
+ * without needing to prior OEM unlock. It creates a temporary system partition to install the new
+ * system image, and a temporary data partition for the newly installed system to run with.</p>
+ *
+ * After the installation is completed, the device will be running in the new system on next the
+ * reboot. Then, when the user reboots the device again, it will leave {@code DynamicSystem} and go
+ * back to the original system. While running in {@code DynamicSystem}, persitent storage for
+ * factory reset protection (FRP) remains unchanged. Since the user is running the new system with
+ * a temporarily created data partition, their original user data are kept unchanged.</p>
  *
  * <p>With {@link #setOnStatusChangedListener}, API users can register an
- * {@link #OnStatusChangedListener} and get status updates and cause when the installation is
+ * {@link #OnStatusChangedListener} to get status updates and their causes when the installation is
  * started, stopped, or cancelled. It also sends progress updates during the installation. With
- * {@link #start}, API users can start an installation with the {@link Uri} to a gzipped system
- * image. The {@link Uri} can be a web URL or a content Uri to a local path.</p>
+ * {@link #start}, API users can start an installation with the {@link Uri} to a unsparsed and
+ * gzipped system image. The {@link Uri} can be a web URL or a content Uri to a local path.</p>
  *
  * @hide
  */
@@ -207,12 +209,6 @@ public class DynamicSystemClient {
      * Intent Keys
      */
     /**
-     * Intent key: URL to system image.
-     * @hide
-     */
-    public static final String KEY_SYSTEM_URL = "KEY_SYSTEM_URL";
-
-    /**
      * Intent key: Size of system image, in bytes.
      * @hide
      */
@@ -317,7 +313,7 @@ public class DynamicSystemClient {
      * allows it to send status updates to {@link #OnStatusChangedListener}. It is recommanded
      * to bind before calling {@link #start} and get status updates.
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
+    @RequiresPermission(android.Manifest.permission.INSTALL_DYNAMIC_SYSTEM)
     public void bind() {
         Intent intent = new Intent();
         intent.setClassName("com.android.dynsystem",
@@ -332,7 +328,7 @@ public class DynamicSystemClient {
      * Unbind from {@code DynamicSystem} installation service. Unbinding from the installation
      * service stops it from sending following status updates.
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
+    @RequiresPermission(android.Manifest.permission.INSTALL_DYNAMIC_SYSTEM)
     public void unbind() {
         if (!mBound) {
             return;
@@ -365,8 +361,8 @@ public class DynamicSystemClient {
      * @param systemUrl A network URL or a file URL to system image.
      * @param systemSize size of system image.
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
-    public void start(@NonNull String systemUrl, @BytesLong long systemSize) {
+    @RequiresPermission(android.Manifest.permission.INSTALL_DYNAMIC_SYSTEM)
+    public void start(@NonNull Uri systemUrl, @BytesLong long systemSize) {
         start(systemUrl, systemSize, DEFAULT_USERDATA_SIZE);
     }
 
@@ -382,17 +378,17 @@ public class DynamicSystemClient {
      * @param systemSize size of system image.
      * @param userdataSize bytes reserved for userdata.
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
-    public void start(@NonNull String systemUrl, @BytesLong long systemSize,
+    @RequiresPermission(android.Manifest.permission.INSTALL_DYNAMIC_SYSTEM)
+    public void start(@NonNull Uri systemUrl, @BytesLong long systemSize,
             @BytesLong long userdataSize) {
         Intent intent = new Intent();
 
         intent.setClassName("com.android.dynsystem",
                 "com.android.dynsystem.VerificationActivity");
 
+        intent.setData(systemUrl);
         intent.setAction(ACTION_START_INSTALL);
 
-        intent.putExtra(KEY_SYSTEM_URL, systemUrl);
         intent.putExtra(KEY_SYSTEM_SIZE, systemSize);
         intent.putExtra(KEY_USERDATA_SIZE, userdataSize);
 

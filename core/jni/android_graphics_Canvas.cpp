@@ -54,20 +54,20 @@ static jlong getNativeFinalizer(JNIEnv* env, jobject clazz) {
 }
 
 // Native wrapper constructor used by Canvas(Bitmap)
-static jlong initRaster(JNIEnv* env, jobject, jobject jbitmap) {
+static jlong initRaster(JNIEnv* env, jobject, jlong bitmapHandle) {
     SkBitmap bitmap;
-    if (jbitmap != NULL) {
-        GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
+    if (bitmapHandle != 0) {
+        bitmap::toBitmap(bitmapHandle).getSkBitmap(&bitmap);
     }
     return reinterpret_cast<jlong>(Canvas::create_canvas(bitmap));
 }
 
 // Set the given bitmap as the new draw target (wrapped in a new SkCanvas),
 // optionally copying canvas matrix & clip state.
-static void setBitmap(JNIEnv* env, jobject, jlong canvasHandle, jobject jbitmap) {
+static void setBitmap(JNIEnv* env, jobject, jlong canvasHandle, jlong bitmapHandle) {
     SkBitmap bitmap;
-    if (jbitmap != NULL) {
-        GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
+    if (bitmapHandle != 0) {
+        bitmap::toBitmap(bitmapHandle).getSkBitmap(&bitmap);
     }
     get_canvas(canvasHandle)->setBitmap(bitmap);
 }
@@ -397,7 +397,7 @@ static void drawNinePatch(JNIEnv* env, jobject, jlong canvasHandle, jlong bitmap
         jlong paintHandle, jint dstDensity, jint srcDensity) {
 
     Canvas* canvas = get_canvas(canvasHandle);
-    Bitmap& bitmap = android::bitmap::toBitmap(env, bitmapHandle);
+    Bitmap& bitmap = android::bitmap::toBitmap(bitmapHandle);
     const android::Res_png_9patch* chunk = reinterpret_cast<android::Res_png_9patch*>(chunkHandle);
     const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
 
@@ -423,11 +423,11 @@ static void drawNinePatch(JNIEnv* env, jobject, jlong canvasHandle, jlong bitmap
     }
 }
 
-static void drawBitmap(JNIEnv* env, jobject, jlong canvasHandle, jobject jbitmap,
+static void drawBitmap(JNIEnv* env, jobject, jlong canvasHandle, jlong bitmapHandle,
                        jfloat left, jfloat top, jlong paintHandle, jint canvasDensity,
                        jint screenDensity, jint bitmapDensity) {
     Canvas* canvas = get_canvas(canvasHandle);
-    Bitmap& bitmap = android::bitmap::toBitmap(env, jbitmap);
+    Bitmap& bitmap = android::bitmap::toBitmap(bitmapHandle);
     const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
 
     if (canvasDensity == bitmapDensity || canvasDensity == 0 || bitmapDensity == 0) {
@@ -458,22 +458,22 @@ static void drawBitmap(JNIEnv* env, jobject, jlong canvasHandle, jobject jbitmap
     }
 }
 
-static void drawBitmapMatrix(JNIEnv* env, jobject, jlong canvasHandle, jobject jbitmap,
+static void drawBitmapMatrix(JNIEnv* env, jobject, jlong canvasHandle, jlong bitmapHandle,
                              jlong matrixHandle, jlong paintHandle) {
     const SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
     const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-    Bitmap& bitmap = android::bitmap::toBitmap(env, jbitmap);
+    Bitmap& bitmap = android::bitmap::toBitmap(bitmapHandle);
     get_canvas(canvasHandle)->drawBitmap(bitmap, *matrix, paint);
 }
 
-static void drawBitmapRect(JNIEnv* env, jobject, jlong canvasHandle, jobject jbitmap,
+static void drawBitmapRect(JNIEnv* env, jobject, jlong canvasHandle, jlong bitmapHandle,
                            float srcLeft, float srcTop, float srcRight, float srcBottom,
                            float dstLeft, float dstTop, float dstRight, float dstBottom,
                            jlong paintHandle, jint screenDensity, jint bitmapDensity) {
     Canvas* canvas = get_canvas(canvasHandle);
     const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
 
-    Bitmap& bitmap = android::bitmap::toBitmap(env, jbitmap);
+    Bitmap& bitmap = android::bitmap::toBitmap(bitmapHandle);
     if (screenDensity != 0 && screenDensity != bitmapDensity) {
         Paint filteredPaint;
         if (paint) {
@@ -512,7 +512,7 @@ static void drawBitmapArray(JNIEnv* env, jobject, jlong canvasHandle,
     get_canvas(canvasHandle)->drawBitmap(*androidBitmap, x, y, paint);
 }
 
-static void drawBitmapMesh(JNIEnv* env, jobject, jlong canvasHandle, jobject jbitmap,
+static void drawBitmapMesh(JNIEnv* env, jobject, jlong canvasHandle, jlong bitmapHandle,
                            jint meshWidth, jint meshHeight, jfloatArray jverts,
                            jint vertIndex, jintArray jcolors, jint colorIndex, jlong paintHandle) {
     if (Canvas::GetApiLevel() < __ANDROID_API_P__) {
@@ -527,7 +527,7 @@ static void drawBitmapMesh(JNIEnv* env, jobject, jlong canvasHandle, jobject jbi
     AutoJavaIntArray colorA(env, jcolors, colorIndex + ptCount);
 
     const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-    Bitmap& bitmap = android::bitmap::toBitmap(env, jbitmap);
+    Bitmap& bitmap = android::bitmap::toBitmap(bitmapHandle);
     get_canvas(canvasHandle)->drawBitmapMesh(bitmap, meshWidth, meshHeight,
                                              vertA.ptr() + vertIndex*2,
                                              colorA.ptr() + colorIndex, paint);
@@ -651,13 +651,13 @@ static void setCompatibilityVersion(JNIEnv* env, jobject, jint apiLevel) {
 
 static const JNINativeMethod gMethods[] = {
     {"nGetNativeFinalizer", "()J", (void*) CanvasJNI::getNativeFinalizer},
-    {"nInitRaster", "(Landroid/graphics/Bitmap;)J", (void*) CanvasJNI::initRaster},
     {"nFreeCaches", "()V", (void*) CanvasJNI::freeCaches},
     {"nFreeTextLayoutCaches", "()V", (void*) CanvasJNI::freeTextLayoutCaches},
     {"nSetCompatibilityVersion", "(I)V", (void*) CanvasJNI::setCompatibilityVersion},
 
     // ------------ @FastNative ----------------
-    {"nSetBitmap", "(JLandroid/graphics/Bitmap;)V", (void*) CanvasJNI::setBitmap},
+    {"nInitRaster", "(J)J", (void*) CanvasJNI::initRaster},
+    {"nSetBitmap", "(JJ)V", (void*) CanvasJNI::setBitmap},
     {"nGetClipBounds","(JLandroid/graphics/Rect;)Z", (void*) CanvasJNI::getClipBounds},
 
     // ------------ @CriticalNative ----------------
@@ -706,10 +706,10 @@ static const JNINativeMethod gDrawMethods[] = {
     {"nDrawPath","(JJJ)V", (void*) CanvasJNI::drawPath},
     {"nDrawVertices", "(JII[FI[FI[II[SIIJ)V", (void*)CanvasJNI::drawVertices},
     {"nDrawNinePatch", "(JJJFFFFJII)V", (void*)CanvasJNI::drawNinePatch},
-    {"nDrawBitmapMatrix", "(JLandroid/graphics/Bitmap;JJ)V", (void*)CanvasJNI::drawBitmapMatrix},
-    {"nDrawBitmapMesh", "(JLandroid/graphics/Bitmap;II[FI[IIJ)V", (void*)CanvasJNI::drawBitmapMesh},
-    {"nDrawBitmap","(JLandroid/graphics/Bitmap;FFJIII)V", (void*) CanvasJNI::drawBitmap},
-    {"nDrawBitmap","(JLandroid/graphics/Bitmap;FFFFFFFFJII)V", (void*) CanvasJNI::drawBitmapRect},
+    {"nDrawBitmapMatrix", "(JJJJ)V", (void*)CanvasJNI::drawBitmapMatrix},
+    {"nDrawBitmapMesh", "(JJII[FI[IIJ)V", (void*)CanvasJNI::drawBitmapMesh},
+    {"nDrawBitmap","(JJFFJIII)V", (void*) CanvasJNI::drawBitmap},
+    {"nDrawBitmap","(JJFFFFFFFFJII)V", (void*) CanvasJNI::drawBitmapRect},
     {"nDrawBitmap", "(J[IIIFFIIZJ)V", (void*)CanvasJNI::drawBitmapArray},
     {"nDrawText","(J[CIIFFIJ)V", (void*) CanvasJNI::drawTextChars},
     {"nDrawText","(JLjava/lang/String;IIFFIJ)V", (void*) CanvasJNI::drawTextString},

@@ -20,7 +20,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:maxCollapsedHeight="288dp"
+    android:maxCollapsedHeight="0dp"
     android:maxCollapsedHeightSmall="56dp"
     android:id="@id/contentPanel">
 
@@ -32,12 +32,12 @@
 
         <ImageView
             android:id="@+id/drag"
-            android:layout_width="48dp"
-            android:layout_height="wrap_content"
+            android:layout_width="32dp"
+            android:layout_height="4dp"
             android:src="@drawable/ic_drag_handle"
             android:clickable="true"
-            android:paddingTop="@dimen/chooser_edge_margin_normal"
-            android:tint="?android:attr/textColorSecondary"
+            android:layout_marginTop="@dimen/chooser_view_spacing"
+            android:tint="@color/lighter_gray"
             android:layout_centerHorizontal="true"
             android:layout_alignParentTop="true" />
 
@@ -62,8 +62,8 @@
                   android:textAppearance="?attr/textAppearanceMedium"
                   android:textSize="20sp"
                   android:gravity="center"
-                  android:paddingTop="18dp"
-                  android:paddingBottom="18dp"
+                  android:paddingTop="@dimen/chooser_view_spacing"
+                  android:paddingBottom="@dimen/chooser_view_spacing"
                   android:paddingLeft="24dp"
                   android:paddingRight="24dp"
                   android:layout_below="@id/profile_button"

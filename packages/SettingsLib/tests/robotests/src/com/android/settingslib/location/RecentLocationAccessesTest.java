@@ -16,9 +16,10 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
-
 import android.util.LongSparseLongArray;
+
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -83,6 +84,7 @@ public class RecentLocationAccessesTest {
     }
 
     @Test
+    @Ignore
     public void testGetAppList_shouldFilterRecentAccesses() {
         List<RecentLocationAccesses.Access> requests = mRecentLocationAccesses.getAppList();
         // Only two of the apps have requested location within 15 min.
@@ -95,6 +97,7 @@ public class RecentLocationAccessesTest {
     }
 
     @Test
+    @Ignore
     public void testGetAppList_shouldNotShowAndroidOS() throws NameNotFoundException {
         // Add android OS to the list of apps.
         PackageOps androidSystemPackageOps =

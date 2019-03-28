@@ -21,7 +21,6 @@ import android.view.View;
 
 import androidx.annotation.IntRange;
 import androidx.annotation.Nullable;
-import androidx.annotation.StringRes;
 
 import java.util.Comparator;
 
@@ -32,8 +31,8 @@ public class BarViewInfo implements Comparable<BarViewInfo> {
 
     private final Drawable mIcon;
     private View.OnClickListener mClickListener;
-    @StringRes
-    private int mSummary;
+    private CharSequence mTitle;
+    private CharSequence mSummary;
     private @Nullable CharSequence mContentDescription;
     // A number indicates this bar's height. The larger number shows a higher bar view.
     private int mHeight;
@@ -45,13 +44,16 @@ public class BarViewInfo implements Comparable<BarViewInfo> {
      *
      * @param icon      The icon of bar view.
      * @param barHeight The height of bar view. Larger number shows a higher bar view.
-     * @param summary   The string resource id for summary.
+     * @param title     The string for title.  If this is null, use the height of the bar.
+     * @param summary   The string for summary.
      * @param contentDescription Optional text that briefly describes the contents of the icon.
      */
-    public BarViewInfo(Drawable icon, @IntRange(from = 0) int barHeight, @StringRes int summary,
+    public BarViewInfo(Drawable icon, @IntRange(from = 0) int barHeight,
+            @Nullable CharSequence title, CharSequence summary,
             @Nullable CharSequence contentDescription) {
         mIcon = icon;
         mHeight = barHeight;
+        mTitle = title;
         mSummary = summary;
         mContentDescription = contentDescription;
     }
@@ -74,8 +76,12 @@ public class BarViewInfo implements Comparable<BarViewInfo> {
         mHeight = height;
     }
 
-    void setSummary(@StringRes int resId) {
-        mSummary = resId;
+    void setTitle(CharSequence title) {
+        mTitle = title;
+    }
+
+    void setSummary(CharSequence summary) {
+        mSummary = summary;
     }
 
     Drawable getIcon() {
@@ -90,8 +96,12 @@ public class BarViewInfo implements Comparable<BarViewInfo> {
         return mClickListener;
     }
 
-    @StringRes
-    int getSummary() {
+    @Nullable
+    CharSequence getTitle() {
+        return mTitle;
+    }
+
+    CharSequence getSummary() {
         return mSummary;
     }
 

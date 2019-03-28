@@ -68,7 +68,7 @@ public class NavigationHandle extends View implements ButtonInterface {
         int height = mRadius * 2;
         int width = getWidth();
         int y = (navHeight - mBottom - height);
-        canvas.drawRoundRect(mRadius, y, width - mRadius, y + height, mRadius, mRadius, mPaint);
+        canvas.drawRoundRect(0, y, width, y + height, mRadius, mRadius, mPaint);
     }
 
     @Override

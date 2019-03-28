@@ -17,7 +17,7 @@
 syntax = "proto2";
 package android.service.runtime;
 
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 option java_multiple_files = true;
 option java_outer_classname = "RuntimeServiceProto";

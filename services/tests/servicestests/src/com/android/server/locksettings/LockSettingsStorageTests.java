@@ -29,10 +29,13 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.FileUtils;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
+import android.platform.test.annotations.Presubmit;
 import android.test.AndroidTestCase;
 import android.util.Log;
 import android.util.Log.TerribleFailure;
 import android.util.Log.TerribleFailureHandler;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.PersistentDataBlockManagerInternal;
@@ -48,6 +51,8 @@ import java.util.concurrent.CountDownLatch;
 /**
  * runtest frameworks-services -c com.android.server.locksettings.LockSettingsStorageTests
  */
+@SmallTest
+@Presubmit
 public class LockSettingsStorageTests extends AndroidTestCase {
     private static final int SOME_USER_ID = 1034;
     private final byte[] PASSWORD_0 = "thepassword0".getBytes();

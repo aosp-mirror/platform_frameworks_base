@@ -42,7 +42,9 @@ public:
                                   const VulkanManager& vkManager);
     ~VulkanSurface();
 
-    sk_sp<SkSurface> getCurrentSkSurface() { return mNativeBuffers[mDequeuedIndex].skSurface; }
+    sk_sp<SkSurface> getCurrentSkSurface() {
+        return mCurrentBufferInfo ? mCurrentBufferInfo->skSurface : nullptr;
+    }
     const SkMatrix& getCurrentPreTransform() { return mWindowInfo.preTransform; }
 
 private:
@@ -65,7 +67,7 @@ private:
     };
 
     NativeBufferInfo* dequeueNativeBuffer();
-    NativeBufferInfo* getCurrentBufferInfo() { return &mNativeBuffers[mDequeuedIndex]; }
+    NativeBufferInfo* getCurrentBufferInfo() { return mCurrentBufferInfo; }
     bool presentCurrentBuffer(const SkRect& dirtyRect, int semaphoreFd);
 
     // The width and height are are the logical width and height for when submitting draws to the
@@ -115,8 +117,8 @@ private:
     WindowInfo mWindowInfo;
     GrContext* mGrContext;
 
-    int mDequeuedIndex = -1;
     uint32_t mPresentCount = 0;
+    NativeBufferInfo* mCurrentBufferInfo = nullptr;
 
     const SkISize mMinWindowSize;
     const SkISize mMaxWindowSize;

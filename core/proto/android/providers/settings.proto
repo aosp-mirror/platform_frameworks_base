@@ -23,7 +23,7 @@ option java_outer_classname = "SettingsServiceProto";
 import "frameworks/base/core/proto/android/providers/settings/global.proto";
 import "frameworks/base/core/proto/android/providers/settings/secure.proto";
 import "frameworks/base/core/proto/android/providers/settings/system.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 message SettingsServiceDumpProto {
     option (android.msg_privacy).dest = DEST_EXPLICIT;

@@ -25,8 +25,10 @@
 #include <set>
 
 #include <android-base/file.h>
+#include <android-base/properties.h>
 #include <android-base/stringprintf.h>
 #include <android/util/protobuf.h>
+#include <android/util/ProtoOutputStream.h>
 #include <binder/IServiceManager.h>
 #include <debuggerd/client.h>
 #include <dumputils/dump_utils.h>
@@ -37,7 +39,6 @@
 
 #include "FdBuffer.h"
 #include "Privacy.h"
-#include "PrivacyBuffer.h"
 #include "frameworks/base/core/proto/android/os/backtrace.proto.h"
 #include "frameworks/base/core/proto/android/os/data.proto.h"
 #include "frameworks/base/core/proto/android/util/log.proto.h"
@@ -51,7 +52,6 @@ using namespace android::base;
 using namespace android::util;
 
 // special section ids
-const int FIELD_ID_INCIDENT_HEADER = 1;
 const int FIELD_ID_INCIDENT_METADATA = 2;
 
 // incident section parameters
@@ -64,206 +64,18 @@ static pid_t fork_execute_incident_helper(const int id, Fpipe* p2cPipe, Fpipe* c
 }
 
 // ================================================================================
-static status_t write_section_header(int fd, int sectionId, size_t size) {
-    uint8_t buf[20];
-    uint8_t* p = write_length_delimited_tag_header(buf, sectionId, size);
-    return WriteFully(fd, buf, p - buf) ? NO_ERROR : -errno;
-}
-
-static void write_section_stats(IncidentMetadata::SectionStats* stats, const FdBuffer& buffer) {
-    stats->set_dump_size_bytes(buffer.data().size());
-    stats->set_dump_duration_ms(buffer.durationMs());
-    stats->set_timed_out(buffer.timedOut());
-    stats->set_is_truncated(buffer.truncated());
-    stats->set_success(!buffer.timedOut() && !buffer.truncated());
-}
-
-// Reads data from FdBuffer and writes it to the requests file descriptor.
-static status_t write_report_requests(const int id, const FdBuffer& buffer,
-                                      ReportRequestSet* requests) {
-    status_t err = -EBADF;
-    EncodedBuffer::iterator data = buffer.data();
-    PrivacyBuffer privacyBuffer(get_privacy_of_section(id), data);
-    IncidentMetadata::SectionStats* stats = requests->sectionStats(id);
-    int nPassed = 0;
-
-    // The streaming ones, group requests by spec in order to save unnecessary strip operations
-    map<PrivacySpec, vector<sp<ReportRequest>>> requestsBySpec;
-    for (auto it = requests->begin(); it != requests->end(); it++) {
-        sp<ReportRequest> request = *it;
-        if (!request->ok() || !request->args.containsSection(id)) {
-            continue;  // skip invalid request
-        }
-        PrivacySpec spec = PrivacySpec::new_spec(request->args.dest());
-        requestsBySpec[spec].push_back(request);
-    }
-
-    for (auto mit = requestsBySpec.begin(); mit != requestsBySpec.end(); mit++) {
-        PrivacySpec spec = mit->first;
-        err = privacyBuffer.strip(spec);
-        if (err != NO_ERROR) {
-            // Privacy Buffer is corrupted, probably due to an ill-formatted proto. This is a
-            // non-fatal error. The whole report is still valid. So just log the failure.
-            ALOGW("Failed to strip section %d with spec %d: %s",
-                id, spec.dest, strerror(-err));
-            stats->set_success(false);
-            stats->set_error_msg("Failed to strip section: privacy buffer corrupted, probably "
-                "due to an ill-formatted proto");
-            nPassed++;
-            continue;
-        }
-
-        if (privacyBuffer.size() == 0) continue;
-
-        for (auto it = mit->second.begin(); it != mit->second.end(); it++) {
-            sp<ReportRequest> request = *it;
-            err = write_section_header(request->fd, id, privacyBuffer.size());
-            if (err != NO_ERROR) {
-                request->err = err;
-                continue;
-            }
-            err = privacyBuffer.flush(request->fd);
-            if (err != NO_ERROR) {
-                request->err = err;
-                continue;
-            }
-            nPassed++;
-            VLOG("Section %d flushed %zu bytes to fd %d with spec %d", id, privacyBuffer.size(),
-                 request->fd, spec.dest);
-        }
-        privacyBuffer.clear();
-    }
-
-    // The dropbox file
-    if (requests->mainFd() >= 0) {
-        PrivacySpec spec = PrivacySpec::new_spec(requests->mainDest());
-        err = privacyBuffer.strip(spec);
-        if (err != NO_ERROR) {
-            ALOGW("Failed to strip section %d with spec %d for dropbox: %s",
-                id, spec.dest, strerror(-err));
-            stats->set_success(false);
-            stats->set_error_msg("Failed to strip section: privacy buffer corrupted, probably "
-                "due to an ill-formatted proto");
-            nPassed++;
-            goto DONE;
-        }
-        if (privacyBuffer.size() == 0) goto DONE;
-
-        err = write_section_header(requests->mainFd(), id, privacyBuffer.size());
-        if (err != NO_ERROR) {
-            requests->setMainFd(-1);
-            goto DONE;
-        }
-        err = privacyBuffer.flush(requests->mainFd());
-        if (err != NO_ERROR) {
-            requests->setMainFd(-1);
-            goto DONE;
-        }
-        nPassed++;
-        VLOG("Section %d flushed %zu bytes to dropbox %d with spec %d", id, privacyBuffer.size(),
-             requests->mainFd(), spec.dest);
-        // Reports bytes of the section uploaded via dropbox after filtering.
-        requests->sectionStats(id)->set_report_size_bytes(privacyBuffer.size());
-    }
-
-DONE:
-    // only returns error if there is no fd to write to.
-    return nPassed > 0 ? NO_ERROR : err;
-}
-
-// ================================================================================
-Section::Section(int i, int64_t timeoutMs, bool userdebugAndEngOnly)
+Section::Section(int i, int64_t timeoutMs)
     : id(i),
-      timeoutMs(timeoutMs),
-      userdebugAndEngOnly(userdebugAndEngOnly) {}
+      timeoutMs(timeoutMs) {
+}
 
 Section::~Section() {}
 
 // ================================================================================
-HeaderSection::HeaderSection() : Section(FIELD_ID_INCIDENT_HEADER, 0) {}
-
-HeaderSection::~HeaderSection() {}
-
-status_t HeaderSection::Execute(ReportRequestSet* requests) const {
-    for (ReportRequestSet::iterator it = requests->begin(); it != requests->end(); it++) {
-        const sp<ReportRequest> request = *it;
-        const vector<vector<uint8_t>>& headers = request->args.headers();
-
-        for (vector<vector<uint8_t>>::const_iterator buf = headers.begin(); buf != headers.end();
-             buf++) {
-            if (buf->empty()) continue;
-
-            // So the idea is only requests with negative fd are written to dropbox file.
-            int fd = request->fd >= 0 ? request->fd : requests->mainFd();
-            write_section_header(fd, id, buf->size());
-            WriteFully(fd, (uint8_t const*)buf->data(), buf->size());
-            // If there was an error now, there will be an error later and we will remove
-            // it from the list then.
-        }
-    }
-    return NO_ERROR;
-}
-// ================================================================================
-MetadataSection::MetadataSection() : Section(FIELD_ID_INCIDENT_METADATA, 0) {}
-
-MetadataSection::~MetadataSection() {}
-
-status_t MetadataSection::Execute(ReportRequestSet* requests) const {
-    ProtoOutputStream proto;
-    IncidentMetadata metadata = requests->metadata();
-    proto.write(FIELD_TYPE_ENUM | IncidentMetadata::kDestFieldNumber, metadata.dest());
-    proto.write(FIELD_TYPE_INT32 | IncidentMetadata::kRequestSizeFieldNumber,
-                metadata.request_size());
-    proto.write(FIELD_TYPE_BOOL | IncidentMetadata::kUseDropboxFieldNumber, metadata.use_dropbox());
-    for (auto iter = requests->allSectionStats().begin(); iter != requests->allSectionStats().end();
-         iter++) {
-        IncidentMetadata::SectionStats stats = iter->second;
-        uint64_t token = proto.start(FIELD_TYPE_MESSAGE | IncidentMetadata::kSectionsFieldNumber);
-        proto.write(FIELD_TYPE_INT32 | IncidentMetadata::SectionStats::kIdFieldNumber, stats.id());
-        proto.write(FIELD_TYPE_BOOL | IncidentMetadata::SectionStats::kSuccessFieldNumber,
-                    stats.success());
-        proto.write(FIELD_TYPE_INT32 | IncidentMetadata::SectionStats::kReportSizeBytesFieldNumber,
-                    stats.report_size_bytes());
-        proto.write(FIELD_TYPE_INT64 | IncidentMetadata::SectionStats::kExecDurationMsFieldNumber,
-                    stats.exec_duration_ms());
-        proto.write(FIELD_TYPE_INT32 | IncidentMetadata::SectionStats::kDumpSizeBytesFieldNumber,
-                    stats.dump_size_bytes());
-        proto.write(FIELD_TYPE_INT64 | IncidentMetadata::SectionStats::kDumpDurationMsFieldNumber,
-                    stats.dump_duration_ms());
-        proto.write(FIELD_TYPE_BOOL | IncidentMetadata::SectionStats::kTimedOutFieldNumber,
-                    stats.timed_out());
-        proto.write(FIELD_TYPE_BOOL | IncidentMetadata::SectionStats::kIsTruncatedFieldNumber,
-                    stats.is_truncated());
-        proto.write(FIELD_TYPE_STRING | IncidentMetadata::SectionStats::kErrorMsgFieldNumber,
-                    stats.error_msg());
-        proto.end(token);
-    }
-
-    for (ReportRequestSet::iterator it = requests->begin(); it != requests->end(); it++) {
-        const sp<ReportRequest> request = *it;
-        if (request->fd < 0 || request->err != NO_ERROR) {
-            continue;
-        }
-        write_section_header(request->fd, id, proto.size());
-        if (!proto.flush(request->fd)) {
-            ALOGW("Failed to write metadata to fd %d", request->fd);
-            // we don't fail if we can't write to a single request's fd.
-        }
-    }
-    if (requests->mainFd() >= 0) {
-        write_section_header(requests->mainFd(), id, proto.size());
-        if (!proto.flush(requests->mainFd())) {
-            ALOGW("Failed to write metadata to dropbox fd %d", requests->mainFd());
-            return -1;
-        }
-    }
-    return NO_ERROR;
-}
-// ================================================================================
 static inline bool isSysfs(const char* filename) { return strncmp(filename, "/sys/", 5) == 0; }
 
 FileSection::FileSection(int id, const char* filename, const int64_t timeoutMs)
-    : Section(id, timeoutMs, false), mFilename(filename) {
+    : Section(id, timeoutMs), mFilename(filename) {
     name = "file ";
     name += filename;
     mIsSysfs = isSysfs(filename);
@@ -271,7 +83,7 @@ FileSection::FileSection(int id, const char* filename, const int64_t timeoutMs)
 
 FileSection::~FileSection() {}
 
-status_t FileSection::Execute(ReportRequestSet* requests) const {
+status_t FileSection::Execute(ReportWriter* writer) const {
     // read from mFilename first, make sure the file is available
     // add O_CLOEXEC to make sure it is closed when exec incident helper
     unique_fd fd(open(mFilename, O_RDONLY | O_CLOEXEC));
@@ -301,7 +113,7 @@ status_t FileSection::Execute(ReportRequestSet* requests) const {
     status_t readStatus = buffer.readProcessedDataInStream(fd.get(), std::move(p2cPipe.writeFd()),
                                                            std::move(c2pPipe.readFd()),
                                                            this->timeoutMs, mIsSysfs);
-    write_section_stats(requests->sectionStats(this->id), buffer);
+    writer->setSectionStats(buffer);
     if (readStatus != NO_ERROR || buffer.timedOut()) {
         ALOGW("[%s] failed to read data from incident helper: %s, timedout: %s",
               this->name.string(), strerror(-readStatus), buffer.timedOut() ? "true" : "false");
@@ -315,7 +127,7 @@ status_t FileSection::Execute(ReportRequestSet* requests) const {
         return ihStatus;
     }
 
-    return write_report_requests(this->id, buffer, requests);
+    return writer->writeSection(buffer);
 }
 // ================================================================================
 GZipSection::GZipSection(int id, const char* filename, ...) : Section(id) {
@@ -332,7 +144,7 @@ GZipSection::GZipSection(int id, const char* filename, ...) : Section(id) {
 
 GZipSection::~GZipSection() { free(mFilenames); }
 
-status_t GZipSection::Execute(ReportRequestSet* requests) const {
+status_t GZipSection::Execute(ReportWriter* writer) const {
     // Reads the files in order, use the first available one.
     int index = 0;
     unique_fd fd;
@@ -366,7 +178,7 @@ status_t GZipSection::Execute(ReportRequestSet* requests) const {
 
     // construct Fdbuffer to output GZippedfileProto, the reason to do this instead of using
     // ProtoOutputStream is to avoid allocation of another buffer inside ProtoOutputStream.
-    EncodedBuffer* internalBuffer = buffer.getInternalBuffer();
+    sp<EncodedBuffer> internalBuffer = buffer.data();
     internalBuffer->writeHeader((uint32_t)GZippedFileProto::FILENAME, WIRE_TYPE_LENGTH_DELIMITED);
     size_t fileLen = strlen(mFilenames[index]);
     internalBuffer->writeRawVarint32(fileLen);
@@ -383,7 +195,7 @@ status_t GZipSection::Execute(ReportRequestSet* requests) const {
     status_t readStatus = buffer.readProcessedDataInStream(
             fd.get(), std::move(p2cPipe.writeFd()), std::move(c2pPipe.readFd()), this->timeoutMs,
             isSysfs(mFilenames[index]));
-    write_section_stats(requests->sectionStats(this->id), buffer);
+    writer->setSectionStats(buffer);
     if (readStatus != NO_ERROR || buffer.timedOut()) {
         ALOGW("[%s] failed to read data from gzip: %s, timedout: %s", this->name.string(),
               strerror(-readStatus), buffer.timedOut() ? "true" : "false");
@@ -402,7 +214,7 @@ status_t GZipSection::Execute(ReportRequestSet* requests) const {
     internalBuffer->writeRawVarint32(dataSize);
     internalBuffer->copy(dataBeginAt, dataSize);
 
-    return write_report_requests(this->id, buffer, requests);
+    return writer->writeSection(buffer);
 }
 
 // ================================================================================
@@ -425,8 +237,8 @@ WorkerThreadData::WorkerThreadData(const WorkerThreadSection* sec)
 WorkerThreadData::~WorkerThreadData() {}
 
 // ================================================================================
-WorkerThreadSection::WorkerThreadSection(int id, const int64_t timeoutMs, bool userdebugAndEngOnly)
-    : Section(id, timeoutMs, userdebugAndEngOnly) {}
+WorkerThreadSection::WorkerThreadSection(int id, const int64_t timeoutMs)
+    : Section(id, timeoutMs) {}
 
 WorkerThreadSection::~WorkerThreadSection() {}
 
@@ -458,13 +270,12 @@ static void* worker_thread_func(void* cookie) {
     return NULL;
 }
 
-status_t WorkerThreadSection::Execute(ReportRequestSet* requests) const {
+status_t WorkerThreadSection::Execute(ReportWriter* writer) const {
     status_t err = NO_ERROR;
     pthread_t thread;
     pthread_attr_t attr;
     bool workerDone = false;
     FdBuffer buffer;
-    IncidentMetadata::SectionStats* stats = requests->sectionStats(this->id);
 
     // Data shared between this thread and the worker thread.
     sp<WorkerThreadData> data = new WorkerThreadData(this);
@@ -473,10 +284,6 @@ status_t WorkerThreadSection::Execute(ReportRequestSet* requests) const {
     if (!data->pipe.init()) {
         return -errno;
     }
-
-    // The worker thread needs a reference and we can't let the count go to zero
-    // if that thread is slow to start.
-    data->incStrong(this);
 
     // Create the thread
     err = pthread_attr_init(&attr);
@@ -489,12 +296,17 @@ status_t WorkerThreadSection::Execute(ReportRequestSet* requests) const {
         pthread_attr_destroy(&attr);
         return -err;
     }
+
+    // The worker thread needs a reference and we can't let the count go to zero
+    // if that thread is slow to start.
+    data->incStrong(this);
+
     err = pthread_create(&thread, &attr, worker_thread_func, (void*)data.get());
+    pthread_attr_destroy(&attr);
     if (err != 0) {
-        pthread_attr_destroy(&attr);
+        data->decStrong(this);
         return -err;
     }
-    pthread_attr_destroy(&attr);
 
     // Loop reading until either the timeout or the worker side is done (i.e. eof).
     err = buffer.read(data->pipe.readFd().get(), this->timeoutMs);
@@ -517,18 +329,17 @@ status_t WorkerThreadSection::Execute(ReportRequestSet* requests) const {
         workerDone = data->workerDone;
     }
 
-    write_section_stats(stats, buffer);
+    writer->setSectionStats(buffer);
     if (err != NO_ERROR) {
         char errMsg[128];
         snprintf(errMsg, 128, "[%s] failed with error '%s'",
             this->name.string(), strerror(-err));
-        stats->set_success(false);
-        stats->set_error_msg(errMsg);
+        writer->error(this, err, "WorkerThreadSection failed.");
         return NO_ERROR;
     }
     if (buffer.truncated()) {
         ALOGW("[%s] too large, truncating", this->name.string());
-        // Do not write a truncated section. It won't pass through the PrivacyBuffer.
+        // Do not write a truncated section. It won't pass through the PrivacyFilter.
         return NO_ERROR;
     }
     if (!workerDone || buffer.timedOut()) {
@@ -537,7 +348,7 @@ status_t WorkerThreadSection::Execute(ReportRequestSet* requests) const {
     }
 
     // Write the data that was collected
-    return write_report_requests(this->id, buffer, requests);
+    return writer->writeSection(buffer);
 }
 
 // ================================================================================
@@ -568,7 +379,7 @@ CommandSection::CommandSection(int id, const char* command, ...) : Section(id) {
 
 CommandSection::~CommandSection() { free(mCommand); }
 
-status_t CommandSection::Execute(ReportRequestSet* requests) const {
+status_t CommandSection::Execute(ReportWriter* writer) const {
     FdBuffer buffer;
     Fpipe cmdPipe;
     Fpipe ihPipe;
@@ -591,7 +402,7 @@ status_t CommandSection::Execute(ReportRequestSet* requests) const {
 
     cmdPipe.writeFd().reset();
     status_t readStatus = buffer.read(ihPipe.readFd().get(), this->timeoutMs);
-    write_section_stats(requests->sectionStats(this->id), buffer);
+    writer->setSectionStats(buffer);
     if (readStatus != NO_ERROR || buffer.timedOut()) {
         ALOGW("[%s] failed to read data from incident helper: %s, timedout: %s",
               this->name.string(), strerror(-readStatus), buffer.timedOut() ? "true" : "false");
@@ -605,18 +416,18 @@ status_t CommandSection::Execute(ReportRequestSet* requests) const {
     status_t cmdStatus = wait_child(cmdPid);
     status_t ihStatus = wait_child(ihPid);
     if (cmdStatus != NO_ERROR || ihStatus != NO_ERROR) {
-        ALOGW("[%s] abnormal child processes, return status: command: %s, incident "
-              "helper: %s",
+        ALOGW("[%s] abnormal child processes, return status: command: %s, incident helper: %s",
               this->name.string(), strerror(-cmdStatus), strerror(-ihStatus));
-        return cmdStatus != NO_ERROR ? cmdStatus : ihStatus;
+        // Not a fatal error.
+        return NO_ERROR;
     }
 
-    return write_report_requests(this->id, buffer, requests);
+    return writer->writeSection(buffer);
 }
 
 // ================================================================================
-DumpsysSection::DumpsysSection(int id, bool userdebugAndEngOnly, const char* service, ...)
-    : WorkerThreadSection(id, REMOTE_CALL_TIMEOUT_MS, userdebugAndEngOnly), mService(service) {
+DumpsysSection::DumpsysSection(int id, const char* service, ...)
+    : WorkerThreadSection(id, REMOTE_CALL_TIMEOUT_MS), mService(service) {
     name = "dumpsys ";
     name += service;
 
@@ -842,7 +653,8 @@ status_t TombstoneSection::BlockingCall(int pipeWriteFd) const {
         const std::string link_name = android::base::StringPrintf("/proc/%d/exe", pid);
         std::string exe;
         if (!android::base::Readlink(link_name, &exe)) {
-            ALOGE("Can't read '%s': %s\n", link_name.c_str(), strerror(errno));
+            ALOGE("Section %s: Can't read '%s': %s\n", name.string(),
+                    link_name.c_str(), strerror(errno));
             continue;
         }
 
@@ -913,10 +725,10 @@ status_t TombstoneSection::BlockingCall(int pipeWriteFd) const {
         }
 
         auto dump = std::make_unique<char[]>(buffer.size());
-        auto iterator = buffer.data();
+        sp<ProtoReader> reader = buffer.data()->read();
         int i = 0;
-        while (iterator.hasNext()) {
-            dump[i] = iterator.next();
+        while (reader->hasNext()) {
+            dump[i] = reader->next();
             i++;
         }
         uint64_t token = proto.start(android::os::BackTraceProto::TRACES);

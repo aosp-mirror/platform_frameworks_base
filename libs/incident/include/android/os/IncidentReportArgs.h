@@ -29,10 +29,11 @@ namespace os {
 
 using namespace std;
 
-// DESTINATION enum value, sync with proto/android/privacy.proto
-const uint8_t DEST_LOCAL = 0;
-const uint8_t DEST_EXPLICIT = 100;
-const uint8_t DEST_AUTOMATIC = 200;
+// DESTINATION enum value, sync with frameworks/base/core/proto/android/privacy.proto
+const uint8_t PRIVACY_POLICY_LOCAL = 0;
+const uint8_t PRIVACY_POLICY_EXPLICIT = 100;
+const uint8_t PRIVACY_POLICY_AUTOMATIC = 200;
+const uint8_t PRIVACY_POLICY_UNSET = 255;
 
 
 class IncidentReportArgs : public Parcelable {
@@ -45,7 +46,7 @@ public:
     virtual status_t readFromParcel(const Parcel* in);
 
     void setAll(bool all);
-    void setDest(int dest);
+    void setPrivacyPolicy(int privacyPolicy);
     void addSection(int section);
     void setReceiverPkg(const string& pkg);
     void setReceiverCls(const string& cls);
@@ -53,10 +54,10 @@ public:
 
     inline bool all() const { return mAll; }
     bool containsSection(int section) const;
-    inline int dest() const { return mDest; }
+    inline int getPrivacyPolicy() const { return mPrivacyPolicy; }
     inline const set<int>& sections() const { return mSections; }
-    inline const String16& receiverPkg() const { return mReceiverPkg; }
-    inline const String16& receiverCls() const { return mReceiverCls; }
+    inline const string& receiverPkg() const { return mReceiverPkg; }
+    inline const string& receiverCls() const { return mReceiverCls; }
     inline const vector<vector<uint8_t>>& headers() const { return mHeaders; }
 
     void merge(const IncidentReportArgs& that);
@@ -65,9 +66,9 @@ private:
     set<int> mSections;
     vector<vector<uint8_t>> mHeaders;
     bool mAll;
-    int mDest;
-    String16 mReceiverPkg;
-    String16 mReceiverCls;
+    int mPrivacyPolicy;
+    string mReceiverPkg;
+    string mReceiverCls;
 };
 
 }

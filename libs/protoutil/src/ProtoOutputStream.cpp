@@ -27,7 +27,7 @@ namespace android {
 namespace util {
 
 ProtoOutputStream::ProtoOutputStream()
-        :mBuffer(),
+        :mBuffer(new EncodedBuffer()),
          mCopyBegin(0),
          mCompact(false),
          mDepth(0),
@@ -44,7 +44,7 @@ ProtoOutputStream::~ProtoOutputStream()
 void
 ProtoOutputStream::clear()
 {
-    mBuffer.clear();
+    mBuffer->clear();
     mCopyBegin = 0;
     mCompact = false;
     mDepth = 0;
@@ -226,13 +226,13 @@ ProtoOutputStream::start(uint64_t fieldId)
     }
 
     uint32_t id = (uint32_t)fieldId;
-    size_t prevPos = mBuffer.wp()->pos();
-    mBuffer.writeHeader(id, WIRE_TYPE_LENGTH_DELIMITED);
-    size_t sizePos = mBuffer.wp()->pos();
+    size_t prevPos = mBuffer->wp()->pos();
+    mBuffer->writeHeader(id, WIRE_TYPE_LENGTH_DELIMITED);
+    size_t sizePos = mBuffer->wp()->pos();
 
     mDepth++;
     mObjectId++;
-    mBuffer.writeRawFixed64(mExpectedObjectToken); // push previous token into stack.
+    mBuffer->writeRawFixed64(mExpectedObjectToken); // push previous token into stack.
 
     mExpectedObjectToken = makeToken(sizePos - prevPos,
         (bool)(fieldId & FIELD_COUNT_REPEATED), mDepth, mObjectId, sizePos);
@@ -258,26 +258,26 @@ ProtoOutputStream::end(uint64_t token)
 
     uint32_t sizePos = getSizePosFromToken(token);
     // number of bytes written in this start-end session.
-    int childRawSize = mBuffer.wp()->pos() - sizePos - 8;
+    int childRawSize = mBuffer->wp()->pos() - sizePos - 8;
 
     // retrieve the old token from stack.
-    mBuffer.ep()->rewind()->move(sizePos);
-    mExpectedObjectToken = mBuffer.readRawFixed64();
+    mBuffer->ep()->rewind()->move(sizePos);
+    mExpectedObjectToken = mBuffer->readRawFixed64();
 
     // If raw size is larger than 0, write the negative value here to indicate a compact is needed.
     if (childRawSize > 0) {
-        mBuffer.editRawFixed32(sizePos, -childRawSize);
-        mBuffer.editRawFixed32(sizePos+4, -1);
+        mBuffer->editRawFixed32(sizePos, -childRawSize);
+        mBuffer->editRawFixed32(sizePos+4, -1);
     } else {
         // reset wp which erase the header tag of the message when its size is 0.
-        mBuffer.wp()->rewind()->move(sizePos - getTagSizeFromToken(token));
+        mBuffer->wp()->rewind()->move(sizePos - getTagSizeFromToken(token));
     }
 }
 
 size_t
 ProtoOutputStream::bytesWritten()
 {
-    return mBuffer.size();
+    return mBuffer->size();
 }
 
 bool
@@ -288,26 +288,26 @@ ProtoOutputStream::compact() {
         return false;
     }
     // record the size of the original buffer.
-    size_t rawBufferSize = mBuffer.size();
+    size_t rawBufferSize = mBuffer->size();
     if (rawBufferSize == 0) return true; // nothing to do if the buffer is empty;
 
     // reset edit pointer and recursively compute encoded size of messages.
-    mBuffer.ep()->rewind();
+    mBuffer->ep()->rewind();
     if (editEncodedSize(rawBufferSize) == 0) {
         ALOGE("Failed to editEncodedSize.");
         return false;
     }
 
     // reset both edit pointer and write pointer, and compact recursively.
-    mBuffer.ep()->rewind();
-    mBuffer.wp()->rewind();
+    mBuffer->ep()->rewind();
+    mBuffer->wp()->rewind();
     if (!compactSize(rawBufferSize)) {
         ALOGE("Failed to compactSize.");
         return false;
     }
     // copy the reset to the buffer.
     if (mCopyBegin < rawBufferSize) {
-        mBuffer.copy(mCopyBegin, rawBufferSize - mCopyBegin);
+        mBuffer->copy(mCopyBegin, rawBufferSize - mCopyBegin);
     }
 
     // mark true means it is not legal to write to this ProtoOutputStream anymore
@@ -322,34 +322,34 @@ ProtoOutputStream::compact() {
 size_t
 ProtoOutputStream::editEncodedSize(size_t rawSize)
 {
-    size_t objectStart = mBuffer.ep()->pos();
+    size_t objectStart = mBuffer->ep()->pos();
     size_t objectEnd = objectStart + rawSize;
     size_t encodedSize = 0;
     int childRawSize, childEncodedSize;
     size_t childEncodedSizePos;
 
-    while (mBuffer.ep()->pos() < objectEnd) {
-        uint32_t tag = (uint32_t)mBuffer.readRawVarint();
+    while (mBuffer->ep()->pos() < objectEnd) {
+        uint32_t tag = (uint32_t)mBuffer->readRawVarint();
         encodedSize += get_varint_size(tag);
         switch (read_wire_type(tag)) {
             case WIRE_TYPE_VARINT:
                 do {
                     encodedSize++;
-                } while ((mBuffer.readRawByte() & 0x80) != 0);
+                } while ((mBuffer->readRawByte() & 0x80) != 0);
                 break;
             case WIRE_TYPE_FIXED64:
                 encodedSize += 8;
-                mBuffer.ep()->move(8);
+                mBuffer->ep()->move(8);
                 break;
             case WIRE_TYPE_LENGTH_DELIMITED:
-                childRawSize = (int)mBuffer.readRawFixed32();
-                childEncodedSizePos = mBuffer.ep()->pos();
-                childEncodedSize = (int)mBuffer.readRawFixed32();
+                childRawSize = (int)mBuffer->readRawFixed32();
+                childEncodedSizePos = mBuffer->ep()->pos();
+                childEncodedSize = (int)mBuffer->readRawFixed32();
                 if (childRawSize >= 0 && childRawSize == childEncodedSize) {
-                    mBuffer.ep()->move(childRawSize);
+                    mBuffer->ep()->move(childRawSize);
                 } else if (childRawSize < 0 && childEncodedSize == -1){
                     childEncodedSize = editEncodedSize(-childRawSize);
-                    mBuffer.editRawFixed32(childEncodedSizePos, childEncodedSize);
+                    mBuffer->editRawFixed32(childEncodedSizePos, childEncodedSize);
                 } else {
                     ALOGE("Bad raw or encoded values: raw=%d, encoded=%d at %zu",
                             childRawSize, childEncodedSize, childEncodedSizePos);
@@ -359,7 +359,7 @@ ProtoOutputStream::editEncodedSize(size_t rawSize)
                 break;
             case WIRE_TYPE_FIXED32:
                 encodedSize += 4;
-                mBuffer.ep()->move(4);
+                mBuffer->ep()->move(4);
                 break;
             default:
                 ALOGE("Unexpected wire type %d in editEncodedSize at [%zu, %zu]",
@@ -378,30 +378,30 @@ ProtoOutputStream::editEncodedSize(size_t rawSize)
 bool
 ProtoOutputStream::compactSize(size_t rawSize)
 {
-    size_t objectStart = mBuffer.ep()->pos();
+    size_t objectStart = mBuffer->ep()->pos();
     size_t objectEnd = objectStart + rawSize;
     int childRawSize, childEncodedSize;
 
-    while (mBuffer.ep()->pos() < objectEnd) {
-        uint32_t tag = (uint32_t)mBuffer.readRawVarint();
+    while (mBuffer->ep()->pos() < objectEnd) {
+        uint32_t tag = (uint32_t)mBuffer->readRawVarint();
         switch (read_wire_type(tag)) {
             case WIRE_TYPE_VARINT:
-                while ((mBuffer.readRawByte() & 0x80) != 0) {}
+                while ((mBuffer->readRawByte() & 0x80) != 0) {}
                 break;
             case WIRE_TYPE_FIXED64:
-                mBuffer.ep()->move(8);
+                mBuffer->ep()->move(8);
                 break;
             case WIRE_TYPE_LENGTH_DELIMITED:
-                mBuffer.copy(mCopyBegin, mBuffer.ep()->pos() - mCopyBegin);
+                mBuffer->copy(mCopyBegin, mBuffer->ep()->pos() - mCopyBegin);
 
-                childRawSize = (int)mBuffer.readRawFixed32();
-                childEncodedSize = (int)mBuffer.readRawFixed32();
-                mCopyBegin = mBuffer.ep()->pos();
+                childRawSize = (int)mBuffer->readRawFixed32();
+                childEncodedSize = (int)mBuffer->readRawFixed32();
+                mCopyBegin = mBuffer->ep()->pos();
 
                 // write encoded size to buffer.
-                mBuffer.writeRawVarint32(childEncodedSize);
+                mBuffer->writeRawVarint32(childEncodedSize);
                 if (childRawSize >= 0 && childRawSize == childEncodedSize) {
-                    mBuffer.ep()->move(childEncodedSize);
+                    mBuffer->ep()->move(childEncodedSize);
                 } else if (childRawSize < 0){
                     if (!compactSize(-childRawSize)) return false;
                 } else {
@@ -411,7 +411,7 @@ ProtoOutputStream::compactSize(size_t rawSize)
                 }
                 break;
             case WIRE_TYPE_FIXED32:
-                mBuffer.ep()->move(4);
+                mBuffer->ep()->move(4);
                 break;
             default:
                 ALOGE("Unexpected wire type %d in compactSize at [%zu, %zu]",
@@ -429,7 +429,7 @@ ProtoOutputStream::size()
         ALOGE("compact failed, the ProtoOutputStream data is corrupted!");
         return 0;
     }
-    return mBuffer.size();
+    return mBuffer->size();
 }
 
 bool
@@ -438,43 +438,45 @@ ProtoOutputStream::flush(int fd)
     if (fd < 0) return false;
     if (!compact()) return false;
 
-    EncodedBuffer::iterator it = mBuffer.begin();
-    while (it.readBuffer() != NULL) {
-        if (!android::base::WriteFully(fd, it.readBuffer(), it.currentToRead())) return false;
-        it.rp()->move(it.currentToRead());
+    sp<ProtoReader> reader = mBuffer->read();
+    while (reader->readBuffer() != NULL) {
+        if (!android::base::WriteFully(fd, reader->readBuffer(), reader->currentToRead())) {
+            return false;
+        }
+        reader->move(reader->currentToRead());
     }
     return true;
 }
 
-EncodedBuffer::iterator
+sp<ProtoReader>
 ProtoOutputStream::data()
 {
     if (!compact()) {
         ALOGE("compact failed, the ProtoOutputStream data is corrupted!");
-        mBuffer.clear();
+        mBuffer->clear();
     }
-    return mBuffer.begin();
+    return mBuffer->read();
 }
 
 void
 ProtoOutputStream::writeRawVarint(uint64_t varint)
 {
-    mBuffer.writeRawVarint64(varint);
+    mBuffer->writeRawVarint64(varint);
 }
 
 void
 ProtoOutputStream::writeLengthDelimitedHeader(uint32_t id, size_t size)
 {
-    mBuffer.writeHeader(id, WIRE_TYPE_LENGTH_DELIMITED);
+    mBuffer->writeHeader(id, WIRE_TYPE_LENGTH_DELIMITED);
     // reserves 64 bits for length delimited fields, if first field is negative, compact it.
-    mBuffer.writeRawFixed32(size);
-    mBuffer.writeRawFixed32(size);
+    mBuffer->writeRawFixed32(size);
+    mBuffer->writeRawFixed32(size);
 }
 
 void
 ProtoOutputStream::writeRawByte(uint8_t byte)
 {
-    mBuffer.writeRawByte(byte);
+    mBuffer->writeRawByte(byte);
 }
 
 
@@ -494,99 +496,99 @@ inline To bit_cast(From const &from) {
 inline void
 ProtoOutputStream::writeDoubleImpl(uint32_t id, double val)
 {
-    mBuffer.writeHeader(id, WIRE_TYPE_FIXED64);
-    mBuffer.writeRawFixed64(bit_cast<double, uint64_t>(val));
+    mBuffer->writeHeader(id, WIRE_TYPE_FIXED64);
+    mBuffer->writeRawFixed64(bit_cast<double, uint64_t>(val));
 }
 
 inline void
 ProtoOutputStream::writeFloatImpl(uint32_t id, float val)
 {
-    mBuffer.writeHeader(id, WIRE_TYPE_FIXED32);
-    mBuffer.writeRawFixed32(bit_cast<float, uint32_t>(val));
+    mBuffer->writeHeader(id, WIRE_TYPE_FIXED32);
+    mBuffer->writeRawFixed32(bit_cast<float, uint32_t>(val));
 }
 
 inline void
 ProtoOutputStream::writeInt64Impl(uint32_t id, int64_t val)
 {
-    mBuffer.writeHeader(id, WIRE_TYPE_VARINT);
-    mBuffer.writeRawVarint64(val);
+    mBuffer->writeHeader(id, WIRE_TYPE_VARINT);
+    mBuffer->writeRawVarint64(val);
 }
 
 inline void
 ProtoOutputStream::writeInt32Impl(uint32_t id, int32_t val)
 {
-    mBuffer.writeHeader(id, WIRE_TYPE_VARINT);
-    mBuffer.writeRawVarint32(val);
+    mBuffer->writeHeader(id, WIRE_TYPE_VARINT);
+    mBuffer->writeRawVarint32(val);
 }
 
 inline void
 ProtoOutputStream::writeUint64Impl(uint32_t id, uint64_t val)
 {
-    mBuffer.writeHeader(id, WIRE_TYPE_VARINT);
-    mBuffer.writeRawVarint64(val);
+    mBuffer->writeHeader(id, WIRE_TYPE_VARINT);
+    mBuffer->writeRawVarint64(val);
 }
 
 inline void
 ProtoOutputStream::writeUint32Impl(uint32_t id, uint32_t val)
 {
-    mBuffer.writeHeader(id, WIRE_TYPE_VARINT);
-    mBuffer.writeRawVarint32(val);
+    mBuffer->writeHeader(id, WIRE_TYPE_VARINT);
+    mBuffer->writeRawVarint32(val);
 }
 
 inline void
 ProtoOutputStream::writeFixed64Impl(uint32_t id, uint64_t val)
 {
-    mBuffer.writeHeader(id, WIRE_TYPE_FIXED64);
-    mBuffer.writeRawFixed64(val);
+    mBuffer->writeHeader(id, WIRE_TYPE_FIXED64);
+    mBuffer->writeRawFixed64(val);
 }
 
 inline void
 ProtoOutputStream::writeFixed32Impl(uint32_t id, uint32_t val)
 {
-    mBuffer.writeHeader(id, WIRE_TYPE_FIXED32);
-    mBuffer.writeRawFixed32(val);
+    mBuffer->writeHeader(id, WIRE_TYPE_FIXED32);
+    mBuffer->writeRawFixed32(val);
 }
 
 inline void
 ProtoOutputStream::writeSFixed64Impl(uint32_t id, int64_t val)
 {
-    mBuffer.writeHeader(id, WIRE_TYPE_FIXED64);
-    mBuffer.writeRawFixed64(val);
+    mBuffer->writeHeader(id, WIRE_TYPE_FIXED64);
+    mBuffer->writeRawFixed64(val);
 }
 
 inline void
 ProtoOutputStream::writeSFixed32Impl(uint32_t id, int32_t val)
 {
-    mBuffer.writeHeader(id, WIRE_TYPE_FIXED32);
-    mBuffer.writeRawFixed32(val);
+    mBuffer->writeHeader(id, WIRE_TYPE_FIXED32);
+    mBuffer->writeRawFixed32(val);
 }
 
 inline void
 ProtoOutputStream::writeZigzagInt64Impl(uint32_t id, int64_t val)
 {
-    mBuffer.writeHeader(id, WIRE_TYPE_VARINT);
-    mBuffer.writeRawVarint64((val << 1) ^ (val >> 63));
+    mBuffer->writeHeader(id, WIRE_TYPE_VARINT);
+    mBuffer->writeRawVarint64((val << 1) ^ (val >> 63));
 }
 
 inline void
 ProtoOutputStream::writeZigzagInt32Impl(uint32_t id, int32_t val)
 {
-    mBuffer.writeHeader(id, WIRE_TYPE_VARINT);
-    mBuffer.writeRawVarint32((val << 1) ^ (val >> 31));
+    mBuffer->writeHeader(id, WIRE_TYPE_VARINT);
+    mBuffer->writeRawVarint32((val << 1) ^ (val >> 31));
 }
 
 inline void
 ProtoOutputStream::writeEnumImpl(uint32_t id, int val)
 {
-    mBuffer.writeHeader(id, WIRE_TYPE_VARINT);
-    mBuffer.writeRawVarint32((uint32_t) val);
+    mBuffer->writeHeader(id, WIRE_TYPE_VARINT);
+    mBuffer->writeRawVarint32((uint32_t) val);
 }
 
 inline void
 ProtoOutputStream::writeBoolImpl(uint32_t id, bool val)
 {
-    mBuffer.writeHeader(id, WIRE_TYPE_VARINT);
-    mBuffer.writeRawVarint32(val ? 1 : 0);
+    mBuffer->writeHeader(id, WIRE_TYPE_VARINT);
+    mBuffer->writeRawVarint32(val ? 1 : 0);
 }
 
 inline void
@@ -595,7 +597,7 @@ ProtoOutputStream::writeUtf8StringImpl(uint32_t id, const char* val, size_t size
     if (val == NULL) return;
     writeLengthDelimitedHeader(id, size);
     for (size_t i=0; i<size; i++) {
-        mBuffer.writeRawByte((uint8_t)val[i]);
+        mBuffer->writeRawByte((uint8_t)val[i]);
     }
 }
 
@@ -605,7 +607,7 @@ ProtoOutputStream::writeMessageBytesImpl(uint32_t id, const char* val, size_t si
     if (val == NULL) return;
     writeLengthDelimitedHeader(id, size);
     for (size_t i=0; i<size; i++) {
-        mBuffer.writeRawByte(val[i]);
+        mBuffer->writeRawByte(val[i]);
     }
 }
 

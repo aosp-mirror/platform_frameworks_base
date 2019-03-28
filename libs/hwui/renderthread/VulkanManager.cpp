@@ -493,6 +493,12 @@ void VulkanManager::swapBuffers(VulkanSurface* surface, const SkRect& dirtyRect)
         mDeviceWaitIdle(mDevice);
     }
 
+    VulkanSurface::NativeBufferInfo* bufferInfo = surface->getCurrentBufferInfo();
+    if (!bufferInfo) {
+        // If VulkanSurface::dequeueNativeBuffer failed earlier, then swapBuffers is a no-op.
+        return;
+    }
+
     VkExportSemaphoreCreateInfo exportInfo;
     exportInfo.sType = VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO;
     exportInfo.pNext = nullptr;
@@ -508,8 +514,6 @@ void VulkanManager::swapBuffers(VulkanSurface* surface, const SkRect& dirtyRect)
 
     GrBackendSemaphore backendSemaphore;
     backendSemaphore.initVulkan(semaphore);
-
-    VulkanSurface::NativeBufferInfo* bufferInfo = surface->getCurrentBufferInfo();
 
     int fenceFd = -1;
     GrSemaphoresSubmitted submitted =

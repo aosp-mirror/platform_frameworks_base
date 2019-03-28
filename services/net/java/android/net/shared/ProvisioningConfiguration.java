@@ -235,8 +235,10 @@ public class ProvisioningConfiguration {
         p.usingIpReachabilityMonitor = mUsingIpReachabilityMonitor;
         p.requestedPreDhcpActionMs = mRequestedPreDhcpActionMs;
         p.initialConfig = mInitialConfig == null ? null : mInitialConfig.toStableParcelable();
-        p.staticIpConfig = IpConfigurationParcelableUtil.toStableParcelable(mStaticIpConfig);
-        p.apfCapabilities = IpConfigurationParcelableUtil.toStableParcelable(mApfCapabilities);
+        p.staticIpConfig = mStaticIpConfig == null
+                ? null
+                : new StaticIpConfiguration(mStaticIpConfig);
+        p.apfCapabilities = mApfCapabilities; // ApfCapabilities is immutable
         p.provisioningTimeoutMs = mProvisioningTimeoutMs;
         p.ipv6AddrGenMode = mIPv6AddrGenMode;
         p.network = mNetwork;
@@ -257,10 +259,10 @@ public class ProvisioningConfiguration {
         config.mUsingIpReachabilityMonitor = p.usingIpReachabilityMonitor;
         config.mRequestedPreDhcpActionMs = p.requestedPreDhcpActionMs;
         config.mInitialConfig = InitialConfiguration.fromStableParcelable(p.initialConfig);
-        config.mStaticIpConfig = IpConfigurationParcelableUtil.fromStableParcelable(
-                p.staticIpConfig);
-        config.mApfCapabilities = IpConfigurationParcelableUtil.fromStableParcelable(
-                p.apfCapabilities);
+        config.mStaticIpConfig = p.staticIpConfig == null
+                ? null
+                : new StaticIpConfiguration(p.staticIpConfig);
+        config.mApfCapabilities = p.apfCapabilities; // ApfCapabilities is immutable
         config.mProvisioningTimeoutMs = p.provisioningTimeoutMs;
         config.mIPv6AddrGenMode = p.ipv6AddrGenMode;
         config.mNetwork = p.network;

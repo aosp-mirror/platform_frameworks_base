@@ -23,6 +23,8 @@ namespace android {
 namespace os {
 namespace incidentd {
 
+using namespace android::os;
+
 uint64_t encode_field_id(const Privacy* p) { return (uint64_t)p->type << 32 | p->field_id; }
 
 const Privacy* lookup(const Privacy* p, uint32_t fieldId) {
@@ -35,39 +37,48 @@ const Privacy* lookup(const Privacy* p, uint32_t fieldId) {
     return NULL;
 }
 
-static bool allowDest(const uint8_t dest, const uint8_t policy) {
-    switch (policy) {
-        case android::os::DEST_LOCAL:
-            return dest == android::os::DEST_LOCAL;
-        case android::os::DEST_EXPLICIT:
-        case DEST_UNSET:
-            return dest == android::os::DEST_LOCAL || dest == android::os::DEST_EXPLICIT ||
-                   dest == DEST_UNSET;
-        case android::os::DEST_AUTOMATIC:
+static bool isAllowed(const uint8_t policy, const uint8_t check) {
+    switch (check) {
+        case PRIVACY_POLICY_LOCAL:
+            return policy == PRIVACY_POLICY_LOCAL;
+        case PRIVACY_POLICY_EXPLICIT:
+        case PRIVACY_POLICY_UNSET:
+            return policy == PRIVACY_POLICY_LOCAL
+                    || policy == PRIVACY_POLICY_EXPLICIT
+                    || policy == PRIVACY_POLICY_UNSET;
+        case PRIVACY_POLICY_AUTOMATIC:
             return true;
         default:
             return false;
     }
 }
 
-bool PrivacySpec::operator<(const PrivacySpec& other) const { return dest < other.dest; }
-
-bool PrivacySpec::CheckPremission(const Privacy* privacy, const uint8_t defaultDest) const {
-    uint8_t policy = privacy != NULL ? privacy->dest : defaultDest;
-    return allowDest(dest, policy);
+PrivacySpec::PrivacySpec(uint8_t argPolicy) {
+    // TODO: Why on earth do we have two definitions of policy.  Maybe
+    // it's not too late to clean this up.
+    switch (argPolicy) {
+        case android::os::PRIVACY_POLICY_AUTOMATIC:
+        case android::os::PRIVACY_POLICY_EXPLICIT:
+        case android::os::PRIVACY_POLICY_LOCAL:
+            mPolicy = argPolicy;
+            break;
+        default:
+            mPolicy = android::os::PRIVACY_POLICY_AUTOMATIC;
+            break;
+    }
 }
 
-bool PrivacySpec::RequireAll() const { return dest == android::os::DEST_LOCAL; }
+bool PrivacySpec::operator<(const PrivacySpec& that) const {
+    return mPolicy < that.mPolicy;
+}
 
-PrivacySpec PrivacySpec::new_spec(int dest) {
-    switch (dest) {
-        case android::os::DEST_AUTOMATIC:
-        case android::os::DEST_EXPLICIT:
-        case android::os::DEST_LOCAL:
-            return PrivacySpec(dest);
-        default:
-            return PrivacySpec(android::os::DEST_AUTOMATIC);
-    }
+bool PrivacySpec::CheckPremission(const Privacy* privacy, const uint8_t defaultDest) const {
+    uint8_t check = privacy != NULL ? privacy->policy : defaultDest;
+    return isAllowed(mPolicy, check);
+}
+
+bool PrivacySpec::RequireAll() const {
+    return mPolicy == android::os::PRIVACY_POLICY_LOCAL;
 }
 
 }  // namespace incidentd

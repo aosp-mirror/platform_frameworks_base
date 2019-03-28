@@ -512,7 +512,7 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms, const AtomDecl &at
        fprintf(out, "      std::this_thread::sleep_for(std::chrono::milliseconds(10));\n");
        fprintf(out, "  }\n");
        fprintf(out, "  if (ret < 0) {\n");
-       fprintf(out, "      note_log_drop(ret);\n");
+       fprintf(out, "      note_log_drop(ret, code);\n");
        fprintf(out, "  }\n");
        fprintf(out, "  return ret;\n");
        fprintf(out, "}\n");
@@ -620,7 +620,7 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms, const AtomDecl &at
        fprintf(out, "      std::this_thread::sleep_for(std::chrono::milliseconds(10));\n");
        fprintf(out, "  }\n");
        fprintf(out, "  if (ret < 0) {\n");
-       fprintf(out, "      note_log_drop(ret);\n");
+       fprintf(out, "      note_log_drop(ret, code);\n");
        fprintf(out, "  }\n");
        fprintf(out, "  return ret;\n\n");
        fprintf(out, "}\n");

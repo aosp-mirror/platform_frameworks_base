@@ -17,10 +17,14 @@
 package com.android.server;
 
 import static android.Manifest.permission.INSTALL_PACKAGES;
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_MEDIA_STORAGE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.OP_LEGACY_STORAGE;
+import static android.app.AppOpsManager.OP_READ_EXTERNAL_STORAGE;
 import static android.app.AppOpsManager.OP_REQUEST_INSTALL_PACKAGES;
+import static android.app.AppOpsManager.OP_WRITE_EXTERNAL_STORAGE;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_HIDDEN;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
@@ -280,6 +284,7 @@ class StorageManagerService extends IStorageManager.Stub
     private static final boolean EMULATE_FBE_SUPPORTED = true;
 
     private static final String TAG = "StorageManagerService";
+    private static final boolean LOCAL_LOGV = Log.isLoggable(TAG, Log.VERBOSE);
 
     private static final String TAG_STORAGE_BENCHMARK = "storage_benchmark";
     private static final String TAG_STORAGE_TRIM = "storage_trim";
@@ -3863,50 +3868,89 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     private int getMountMode(int uid, String packageName) {
+        final int mode = getMountModeInternal(uid, packageName);
+        if (LOCAL_LOGV) {
+            Slog.v(TAG, "Resolved mode " + mode + " for " + packageName + "/"
+                    + UserHandle.formatUid(uid));
+        }
+        return mode;
+    }
+
+    private int getMountModeInternal(int uid, String packageName) {
         try {
+            // Get some easy cases out of the way first
             if (Process.isIsolated(uid)) {
                 return Zygote.MOUNT_EXTERNAL_NONE;
             }
-            if (mIPackageManager.checkUidPermission(WRITE_MEDIA_STORAGE, uid)
-                    == PERMISSION_GRANTED) {
-                return Zygote.MOUNT_EXTERNAL_FULL;
-            } else if (mIAppOpsService.checkOperation(OP_LEGACY_STORAGE, uid,
-                    packageName) == MODE_ALLOWED) {
-                return Zygote.MOUNT_EXTERNAL_LEGACY;
-            } else if (mIPackageManager.checkUidPermission(INSTALL_PACKAGES, uid)
-                    == PERMISSION_GRANTED || mIAppOpsService.checkOperation(
-                            OP_REQUEST_INSTALL_PACKAGES, uid, packageName) == MODE_ALLOWED) {
-                return Zygote.MOUNT_EXTERNAL_INSTALLER;
-            } else if (mPmInternal.isInstantApp(packageName, UserHandle.getUserId(uid))) {
+            if (mPmInternal.isInstantApp(packageName, UserHandle.getUserId(uid))) {
                 return Zygote.MOUNT_EXTERNAL_NONE;
+            }
+
+            // Determine if caller is holding runtime permission
+            final boolean hasRead = StorageManager.checkPermissionAndAppOp(mContext, false, 0,
+                    uid, packageName, READ_EXTERNAL_STORAGE, OP_READ_EXTERNAL_STORAGE);
+            final boolean hasWrite = StorageManager.checkPermissionAndAppOp(mContext, false, 0,
+                    uid, packageName, WRITE_EXTERNAL_STORAGE, OP_WRITE_EXTERNAL_STORAGE);
+            final boolean hasStorage = hasRead || hasWrite;
+
+            // We're only willing to give out broad access if they also hold
+            // runtime permission; this is a firm CDD requirement
+            final boolean hasFull = mIPackageManager.checkUidPermission(WRITE_MEDIA_STORAGE,
+                    uid) == PERMISSION_GRANTED;
+            if (hasFull && hasStorage) {
+                return Zygote.MOUNT_EXTERNAL_FULL;
+            }
+
+            // We're only willing to give out installer access if they also hold
+            // runtime permission; this is a firm CDD requirement
+            final boolean hasInstall = mIPackageManager.checkUidPermission(INSTALL_PACKAGES,
+                    uid) == PERMISSION_GRANTED;
+            final boolean hasInstallOp = mIAppOpsService.checkOperation(OP_REQUEST_INSTALL_PACKAGES,
+                    uid, packageName) == MODE_ALLOWED;
+            if ((hasInstall || hasInstallOp) && hasStorage) {
+                return Zygote.MOUNT_EXTERNAL_INSTALLER;
+            }
+
+            // Otherwise we're willing to give out sandboxed or non-sandboxed if
+            // they hold the runtime permission
+            final boolean hasLegacy = mIAppOpsService.checkOperation(OP_LEGACY_STORAGE,
+                    uid, packageName) == MODE_ALLOWED;
+            final boolean hasGreylist = isLegacyGreylisted(packageName);
+            if ((hasLegacy || hasGreylist) && hasStorage) {
+                return Zygote.MOUNT_EXTERNAL_LEGACY;
             } else {
-                if (ENABLE_LEGACY_GREYLIST) {
-                    // STOPSHIP: remove this temporary workaround once developers
-                    // fix bugs where they're opening _data paths in native code
-                    switch (packageName) {
-                        case "com.facebook.katana": // b/123996076
-                        case "jp.naver.line.android": // b/124767356
-                        case "com.mxtech.videoplayer.ad": // b/124531483
-                        case "com.whatsapp": // b/124766614
-                        case "com.maxmpz.audioplayer": // b/127886230
-                        case "com.estrongs.android.pop": // b/127926473
-                        case "com.roidapp.photogrid": // b/128269119
-                        case "com.cleanmaster.mguard": // b/128384413
-                        case "com.skype.raider": // b/128487044
-                        case "org.telegram.messenger": // b/128652960
-                        case "com.jrtstudio.AnotherMusicPlayer": // b/129084562
-                        case "ak.alizandro.smartaudiobookplayer": // b/129084042
-                        case "com.campmobile.snow": // b/128803870
-                        case "com.qnap.qfile": // b/126374406
-                            return Zygote.MOUNT_EXTERNAL_LEGACY;
-                    }
-                }
                 return Zygote.MOUNT_EXTERNAL_WRITE;
             }
         } catch (RemoteException e) {
             // Should not happen
         }
         return Zygote.MOUNT_EXTERNAL_NONE;
+    }
+
+    private boolean isLegacyGreylisted(String packageName) {
+        // TODO: decide legacy defaults at install time based on signals
+        if (ENABLE_LEGACY_GREYLIST) {
+            // STOPSHIP: remove this temporary workaround once developers
+            // fix bugs where they're opening _data paths in native code
+            switch (packageName) {
+                case "com.facebook.katana": // b/123996076
+                case "jp.naver.line.android": // b/124767356
+                case "com.mxtech.videoplayer.ad": // b/124531483
+                case "com.whatsapp": // b/124766614
+                case "com.maxmpz.audioplayer": // b/127886230
+                case "com.estrongs.android.pop": // b/127926473
+                case "com.roidapp.photogrid": // b/128269119
+                case "com.cleanmaster.mguard": // b/128384413
+                case "com.skype.raider": // b/128487044
+                case "org.telegram.messenger": // b/128652960
+                case "com.jrtstudio.AnotherMusicPlayer": // b/129084562
+                case "ak.alizandro.smartaudiobookplayer": // b/129084042
+                case "com.campmobile.snow": // b/128803870
+                case "com.qnap.qfile": // b/126374406
+                    return true;
+            }
+        }
+        return false;
     }
 
     private static class Callbacks extends Handler {

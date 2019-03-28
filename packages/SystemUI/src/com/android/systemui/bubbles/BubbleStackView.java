@@ -135,7 +135,7 @@ public class BubbleStackView extends FrameLayout {
     private BubbleExpandedView.OnBubbleBlockedListener mBlockedListener;
 
     private boolean mViewUpdatedRequested = false;
-    private boolean mIsAnimating = false;
+    private boolean mIsExpansionAnimating = false;
 
     private LayoutInflater mInflater;
 
@@ -233,6 +233,11 @@ public class BubbleStackView extends FrameLayout {
                 new SpringForce()
                         .setStiffness(SpringForce.STIFFNESS_LOW)
                         .setDampingRatio(SpringForce.DAMPING_RATIO_LOW_BOUNCY));
+        mExpandedViewYAnim.addEndListener((anim, cancelled, value, velocity) -> {
+            if (mIsExpanded && mExpandedBubble != null) {
+                mExpandedBubble.expandedView.updateView();
+            }
+        });
 
         setClipChildren(false);
         setFocusable(true);
@@ -241,7 +246,7 @@ public class BubbleStackView extends FrameLayout {
         setOnApplyWindowInsetsListener((View view, WindowInsets insets) -> {
             final int keyboardHeight = insets.getSystemWindowInsetBottom()
                     - insets.getStableInsetBottom();
-            if (!mIsExpanded) {
+            if (!mIsExpanded || mIsExpansionAnimating) {
                 return view.onApplyWindowInsets(insets);
             }
             mImeVisible = keyboardHeight != 0;
@@ -620,24 +625,23 @@ public class BubbleStackView extends FrameLayout {
             updateExpandedBubble();
             applyCurrentState();
 
-            mIsAnimating = true;
+            mIsExpansionAnimating = true;
 
             Runnable updateAfter = () -> {
                 applyCurrentState();
-                mIsAnimating = false;
+                mIsExpansionAnimating = false;
                 requestUpdate();
             };
 
             if (shouldExpand) {
                 mBubbleContainer.setController(mExpandedAnimationController);
                 mExpandedAnimationController.expandFromStack(
-                        /* collapseTo */
-                        mStackAnimationController.getStackPositionAlongNearestHorizontalEdge(),
-                        /* after */
+                        mStackAnimationController.getStackPositionAlongNearestHorizontalEdge()
+                        /* collapseTo */,
                         () -> {
                             updatePointerPosition();
                             updateAfter.run();
-                        });
+                        } /* after */);
             } else {
                 mBubbleContainer.cancelAllAnimations();
                 mExpandedAnimationController.collapseBackToStack(
@@ -702,7 +706,7 @@ public class BubbleStackView extends FrameLayout {
 
     /** Called with the coordinates to which an individual bubble has been dragged. */
     public void onBubbleDragged(View bubble, float x, float y) {
-        if (!mIsExpanded || mIsAnimating) {
+        if (!mIsExpanded || mIsExpansionAnimating) {
             return;
         }
 
@@ -712,7 +716,7 @@ public class BubbleStackView extends FrameLayout {
     /** Called when a drag operation on an individual bubble has finished. */
     public void onBubbleDragFinish(
             View bubble, float x, float y, float velX, float velY, boolean dismissed) {
-        if (!mIsExpanded || mIsAnimating) {
+        if (!mIsExpanded || mIsExpansionAnimating) {
             return;
         }
 
@@ -724,7 +728,7 @@ public class BubbleStackView extends FrameLayout {
     }
 
     void onDragStart() {
-        if (mIsExpanded || mIsAnimating) {
+        if (mIsExpanded || mIsExpansionAnimating) {
             return;
         }
 
@@ -733,7 +737,7 @@ public class BubbleStackView extends FrameLayout {
     }
 
     void onDragged(float x, float y) {
-        if (mIsExpanded || mIsAnimating) {
+        if (mIsExpanded || mIsExpansionAnimating) {
             return;
         }
 
@@ -743,7 +747,7 @@ public class BubbleStackView extends FrameLayout {
     void onDragFinish(float x, float y, float velX, float velY) {
         // TODO: Add fling to bottom to dismiss.
 
-        if (mIsExpanded || mIsAnimating) {
+        if (mIsExpanded || mIsExpansionAnimating) {
             return;
         }
 
@@ -832,7 +836,7 @@ public class BubbleStackView extends FrameLayout {
     }
 
     private void requestUpdate() {
-        if (mViewUpdatedRequested || mIsAnimating) {
+        if (mViewUpdatedRequested || mIsExpansionAnimating) {
             return;
         }
         mViewUpdatedRequested = true;
@@ -862,11 +866,12 @@ public class BubbleStackView extends FrameLayout {
             if (!mExpandedViewYAnim.isRunning()) {
                 // We're not animating so set the value
                 mExpandedViewContainer.setTranslationY(y);
+                mExpandedBubble.expandedView.updateView();
             } else {
-                // We are animating so update the value
+                // We are animating so update the value; there is an end listener on the animator
+                // that will ensure expandedeView.updateView gets called.
                 mExpandedViewYAnim.animateToFinalPosition(y);
             }
-            mExpandedBubble.expandedView.updateView();
         }
 
         int bubbsCount = mBubbleContainer.getChildCount();
@@ -957,7 +962,8 @@ public class BubbleStackView extends FrameLayout {
                     getBubbleCount(),
                     action,
                     getNormalizedXPosition(),
-                    getNormalizedYPosition());
+                    getNormalizedYPosition(),
+                    false /* unread notification */);
         } else {
             StatusBarNotification notification = bubble.entry.notification;
             StatsLog.write(StatsLog.BUBBLE_UI_CHANGED,
@@ -968,7 +974,8 @@ public class BubbleStackView extends FrameLayout {
                     getBubbleCount(),
                     action,
                     getNormalizedXPosition(),
-                    getNormalizedYPosition());
+                    getNormalizedYPosition(),
+                    bubble.entry.showInShadeWhenBubble());
         }
     }
 

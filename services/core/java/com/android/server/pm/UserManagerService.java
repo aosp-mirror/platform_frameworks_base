@@ -3372,15 +3372,15 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public int getUserSerialNumber(int userHandle) {
         synchronized (mUsersLock) {
-            if (!exists(userHandle)) return -1;
-            return getUserInfoLU(userHandle).serialNumber;
+            final UserInfo userInfo = getUserInfoLU(userHandle);
+            return userInfo != null ? userInfo.serialNumber : -1;
         }
     }
 
     @Override
     public boolean isUserNameSet(int userHandle) {
         synchronized (mUsersLock) {
-            UserInfo userInfo = getUserInfoLU(userHandle);
+            final UserInfo userInfo = getUserInfoLU(userHandle);
             return userInfo != null && userInfo.name != null;
         }
     }

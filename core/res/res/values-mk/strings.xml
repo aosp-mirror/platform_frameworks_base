@@ -141,8 +141,10 @@
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Повикување преку Wi-Fi"</string>
     <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"Глас преку Wi-Fi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Исклучено"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Се претпочита Wi-Fi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Претпочитам мобилен интернет"</string>
+    <!-- no translation found for wfc_mode_wifi_preferred_summary (7335489823608689868) -->
+    <skip />
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (7081742743152286290) -->
+    <skip />
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Само Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: не е препратено"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -228,7 +230,8 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"Извештај за грешка"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Завршете ја сесијата"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Слика од екранот"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"Направи извештај за грешки"</string>
+    <!-- no translation found for bugreport_title (5981047024855257269) -->
+    <skip />
     <string name="bugreport_message" msgid="398447048750350456">"Ова ќе собира информации за моменталната состојба на вашиот уред, за да ги испрати како порака по е-пошта. Тоа ќе одземе малку време почнувајќи од извештајот за грешки додека не се подготви за праќање; бидете трпеливи."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Интерактивен извештај"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Користете го ова во повеќето ситуации. Ви дозволува да го следите напредокот на извештајот, да внесете повеќе детали во врска со проблемот и да сликате слики од екранот. Може да испушти некои помалку користени делови за коишто е потребно долго време за да се пријават."</string>
@@ -281,9 +284,12 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Локација"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"пристапува до локацијата на овој уред"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"Дали да се дозволи &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да пристапува до локацијата на уредот?"</string>
-    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"Апликацијата ќе има пристап до локацијата само додека ја користите."</string>
-    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"Дозволете &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; секогаш да пристапува до локацијата?"</string>
-    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"Апликацијата секогаш ќе има пристап до локацијата, дури и кога не ја користите."</string>
+    <!-- no translation found for permgrouprequestdetail_location (1347189607421252902) -->
+    <skip />
+    <!-- no translation found for permgroupbackgroundrequest_location (5039063878675613235) -->
+    <skip />
+    <!-- no translation found for permgroupbackgroundrequestdetail_location (4597006851453417387) -->
+    <skip />
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Календар"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"пристапува до календарот"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Дали да се дозволи &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да пристапува до календарот?"</string>
@@ -316,7 +322,10 @@
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"Дали да се дозволи &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да пристапува до музиката?"</string>
     <string name="permgrouplab_visual" msgid="6477382108771145134">"Фотографии и видеа"</string>
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"пристапува до фотографиите и видеата"</string>
-    <string name="permgrouprequest_visual" msgid="3043752127595243314">"Дали да се дозволи &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да пристапува до фотографиите и видеата, вклучувајќи означени локации?"</string>
+    <!-- no translation found for permgrouprequest_visual (4926581398380334943) -->
+    <skip />
+    <!-- no translation found for permgrouprequestdetail_visual (3827237829805228971) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Преземе содржина на прозорец"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Ја следи содржината на прозорецот со кој се комуницира."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Вклучи „Истражувај со допир“"</string>
@@ -509,8 +518,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Дозволува апликацијата да комуницира со ознаки, картички и читачи за Комуникација при непосредна близина (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"оневозможи заклучување на екран"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Овозможува апликацијата да го оневозможи заклучувањето и каква било безбедност поврзана со лозинка. На пример, телефонот го оневозможува заклучувањето при прием на телефонски повик, а потоа повторно го овозможува заклучувањето кога повикот ќе заврши."</string>
-    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"побарува сложеност за заклучувањето на екранот"</string>
-    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"Дозволува апликацијата да го научи нивото на сложеност за заклучувањето на екранот (високо, средно, ниско или нема), коешто ги означува можниот опсег на должината и типот на заклучувањето на екранот. Апликацијата може и да им предлага на корисниците да го ажурираат заклучувањето на екранот на одредено ниво, но корисниците може слободно да го игнорираат тоа и да продолжат понатаму. Имајте предвид дека заклучувањето на екранот не се складира како обичен текст, па така апликацијата не ја знае точната лозинка."</string>
+    <!-- no translation found for permlab_requestPasswordComplexity (202650535669249674) -->
+    <skip />
+    <!-- no translation found for permdesc_requestPasswordComplexity (4730994229754212347) -->
+    <skip />
     <string name="permlab_useBiometric" msgid="8837753668509919318">"користи биометриски хардвер"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Дозволува апликацијата да користи биометриски хардвер за проверка"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"управувај хардвер за отпечатоци"</string>
@@ -565,37 +576,59 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Дозволува апликац. да повика начини за додавање и бришење шаблони на лице за користење."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"користи хардвер за проверка на лице"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Дозволува апликацијата да користи хардвер за лице за проверка"</string>
-    <string name="face_acquired_insufficient" msgid="5901287247766106330">"Лицето не можеше да се обработи. Обидете се пак."</string>
-    <string name="face_acquired_too_bright" msgid="610606792381297174">"Лицето е пресветло. Пробајте на послаба светлина."</string>
-    <string name="face_acquired_too_dark" msgid="7229162716976778371">"Лицето е претемно. Пробајте со поголема светлина."</string>
-    <string name="face_acquired_too_close" msgid="1980310037427755293">"Оддалечете го сензорот од лицето."</string>
-    <string name="face_acquired_too_far" msgid="4494571381828850007">"Доближете го сензорот до лицето."</string>
-    <string name="face_acquired_too_high" msgid="228411096134808372">"Подигнете го сензорот."</string>
-    <string name="face_acquired_too_low" msgid="4539774649296349109">"Спуштете го сензорот."</string>
-    <string name="face_acquired_too_right" msgid="1650292067226118760">"Поместете го сензорот надесно."</string>
-    <string name="face_acquired_too_left" msgid="2712489669456176505">"Поместете го сензорот налево."</string>
-    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Погледнете во сензорот."</string>
-    <string name="face_acquired_not_detected" msgid="5707782294589511391">"Не е откриено лице."</string>
-    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"Премногу движење."</string>
+    <!-- no translation found for face_acquired_insufficient (2767330364802375742) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_bright (5005650874582450967) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_dark (1966194696381394616) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_close (1401011882624272753) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_far (1210969240069012510) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_high (3362395713403348013) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_low (488983581737550912) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_right (941726879175375970) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_left (5873592047381190672) -->
+    <skip />
+    <!-- no translation found for face_acquired_poor_gaze (8471716624377228327) -->
+    <skip />
+    <!-- no translation found for face_acquired_not_detected (4885504661626728809) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_much_motion (3149332171102108851) -->
+    <skip />
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Повторно регистрирајте го лицето."</string>
-    <string name="face_acquired_too_different" msgid="5553210341111255124">"Откриено е друго лице."</string>
+    <!-- no translation found for face_acquired_too_different (7663983770123789694) -->
+    <skip />
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"Премногу слично, сменете ја позата."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"Гледајте подиректно во камерата."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"Гледајте подиректно во камерата."</string>
+    <!-- no translation found for face_acquired_pan_too_extreme (1852495480382773759) -->
+    <skip />
+    <!-- no translation found for face_acquired_tilt_too_extreme (1290820400317982049) -->
+    <skip />
     <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Исправете ја главата вертикално."</string>
-    <string name="face_acquired_obscured" msgid="3055077697850272097">"Откријте го вашето лице."</string>
+    <!-- no translation found for face_acquired_obscured (5747521031647744553) -->
+    <skip />
+    <!-- no translation found for face_acquired_sensor_dirty (364493868630891300) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"Хардверот за лице не е достапен."</string>
-    <string name="face_error_timeout" msgid="4014326147867150054">"Истече времето за проверка на лице. Повторен обид."</string>
+    <!-- no translation found for face_error_timeout (2605673935810019129) -->
+    <skip />
     <string name="face_error_no_space" msgid="8224993703466381314">"Лицето не може да се чува."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Операцијата со лице се откажа."</string>
     <string name="face_error_user_canceled" msgid="8943921120862164539">"Проверката на лицето е откажана од корисникот."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Премногу обиди. Обидете се повторно подоцна."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Премногу обиди. Проверката на лице е оневозможена."</string>
-    <string name="face_error_unable_to_process" msgid="238761109287767270">"Обидете се повторно."</string>
-    <string name="face_error_not_enrolled" msgid="9166792142679691323">"Нема регистрирано лице."</string>
-    <string name="face_error_hw_not_present" msgid="916085883581450331">"Уредов нема сензор за проверка на лице."</string>
+    <!-- no translation found for face_error_unable_to_process (4940944939691171539) -->
+    <skip />
+    <!-- no translation found for face_error_not_enrolled (4245760276260427472) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (5296043240874659926) -->
+    <skip />
     <string name="face_name_template" msgid="7004562145809595384">"Лице <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1213,9 +1246,16 @@
     <string name="new_app_action" msgid="6694851182870774403">"Отвори ја <xliff:g id="NEW_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="5894852887817332322">"<xliff:g id="OLD_APP">%1$s</xliff:g> ќе се затвори без да се зачува"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> го надмина ограничувањето на меморијата"</string>
+    <!-- no translation found for dump_heap_ready_notification (1162196579925048701) -->
+    <skip />
     <string name="dump_heap_notification_detail" msgid="3993078784053054141">"Сликата од меморијата е собрана. Допрете за споделување."</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Сподели слика од меморија?"</string>
-    <string name="dump_heap_text" msgid="4809417337240334941">"Процесот <xliff:g id="PROC">%1$s</xliff:g> го надмина ограничувањето на меморијата на својот процес од <xliff:g id="SIZE">%2$s</xliff:g>. Достапна ви е слика од меморијата да ја споделите со неговиот програмер. Бидете внимателни: сликата од меморијата може да содржи кои било од вашите лични информации до кои апликацијата има пристап."</string>
+    <!-- no translation found for dump_heap_text (8546022920319781701) -->
+    <skip />
+    <!-- no translation found for dump_heap_system_text (1205466256312104134) -->
+    <skip />
+    <!-- no translation found for dump_heap_ready_text (6759394977904051000) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"Избери дејство за текст"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Јачина на звук на ѕвонче"</string>
     <string name="volume_music" msgid="5421651157138628171">"Јачина на аудио/видео звук"</string>
@@ -1254,8 +1294,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Допрете за да ги видите сите мрежи"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Поврзете се"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Сите мрежи"</string>
-    <string name="wifi_suggestion_title" msgid="8951405130379148709">"Wi‑Fi мрежата предложена од <xliff:g id="NAME">%s</xliff:g> е достапна"</string>
-    <string name="wifi_suggestion_content" msgid="2658317015552324848">"Дали сакате да се поврзувате на мрежите што ги предлага <xliff:g id="NAME">%s</xliff:g>?"</string>
+    <!-- no translation found for wifi_suggestion_title (9099832833531486167) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (5883181205841582873) -->
+    <skip />
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Да"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Не"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi ќе се вклучи автоматски"</string>
@@ -1267,9 +1309,14 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Најавете се на мрежа"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi нема пристап до интернет"</string>
+    <!-- no translation found for wifi_no_internet (5198100389964214865) -->
+    <skip />
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Допрете за опции"</string>
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Поврзано"</string>
+    <!-- no translation found for network_partial_connectivity (7774883385494762741) -->
+    <skip />
+    <!-- no translation found for network_partial_connectivity_detailed (1959697814165325217) -->
+    <skip />
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Промени на поставките за точка на пристап"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Појасот за точка на пристап е променет."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Уредов не ги поддржува вашите поставки за само 5 GHz. Наместо тоа, ќе го користи појасот од 5 GHz кога е достапен."</string>
@@ -1355,6 +1402,10 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Поврзано е отстранување грешки преку USB"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"Допрете за да го исклучите отстранувањето грешки преку USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Изберете за да се оневозможи отстранување грешки на USB."</string>
+    <!-- no translation found for test_harness_mode_notification_title (2216359742631914387) -->
+    <skip />
+    <!-- no translation found for test_harness_mode_notification_message (1343197173054407119) -->
+    <skip />
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Течност или нечистотија во USB-портата"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB-портата е автоматски оневозможена. Допрете за да дознаете повеќе."</string>
     <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"Безбедно е да се користи USB-портата"</string>
@@ -1908,8 +1959,6 @@
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Допрете за да го отклучите"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Поврзан на <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Допрете за да ги погледнете датотеките"</string>
-    <string name="pin_target" msgid="3052256031352291362">"Прикачете"</string>
-    <string name="unpin_target" msgid="3556545602439143442">"Откачете"</string>
     <string name="app_info" msgid="6856026610594615344">"Информации за апликација"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"Се вклучува демонстрацијата…"</string>
@@ -2000,6 +2049,22 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"Известување за информации за режимот за рутини"</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Батеријата може да се потроши пред вообичаеното време за полнење"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Активиран е „Штедачот на батерија“ за да се продолжи траењето на батеријата"</string>
+    <!-- no translation found for battery_saver_notification_channel_name (2083316159716201806) -->
+    <skip />
+    <!-- no translation found for battery_saver_sticky_disabled_notification_title (6376147579378764641) -->
+    <skip />
+    <!-- no translation found for battery_saver_sticky_disabled_notification_summary (8090192609249817945) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (2960978289873161288) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (7555713825806482451) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (5954873381559605660) -->
+    <skip />
+    <!-- no translation found for battery_saver_off_notification_summary (1374222493681267143) -->
+    <skip />
+    <!-- no translation found for battery_saver_off_alternative_notification_summary (4340727818546508436) -->
+    <skip />
     <string name="mime_type_folder" msgid="7111951698626315204">"Папка"</string>
     <string name="mime_type_apk" msgid="5518003630972506900">"Апликација за Android"</string>
     <string name="mime_type_generic" msgid="6833871596845900027">"Датотека"</string>

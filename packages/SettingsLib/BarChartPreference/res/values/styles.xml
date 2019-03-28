@@ -35,12 +35,12 @@
     </style>
 
     <style name="BarChart.Text.Title">
-        <item name="android:textSize">22sp</item>
+        <item name="android:textSize">14sp</item>
     </style>
 
     <style name="BarChart.Text.Summary"
-           parent="@android:style/TextAppearance.Material.Body1">
+           parent="@*android:style/TextAppearance.DeviceDefault.Body1">
         <item name="android:textColor">?android:attr/textColorSecondary</item>
-        <item name="android:textSize">14sp</item>
+        <item name="android:textSize">12sp</item>
     </style>
 </resources>

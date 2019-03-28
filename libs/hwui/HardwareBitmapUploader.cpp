@@ -349,8 +349,7 @@ static SkBitmap makeHwCompatible(const FormatInfo& format, const SkBitmap& sourc
     } else {
         SkBitmap bitmap;
         const SkImageInfo& info = source.info();
-        bitmap.allocPixels(
-                SkImageInfo::MakeN32(info.width(), info.height(), info.alphaType(), nullptr));
+        bitmap.allocPixels(info.makeColorType(kN32_SkColorType));
 
         SkCanvas canvas(bitmap);
         canvas.drawColor(0);
@@ -416,7 +415,9 @@ void HardwareBitmapUploader::initialize() {
 }
 
 void HardwareBitmapUploader::terminate() {
-    sUploader->destroy();
+    if (sUploader) {
+        sUploader->destroy();
+    }
 }
 
 }  // namespace android::uirenderer

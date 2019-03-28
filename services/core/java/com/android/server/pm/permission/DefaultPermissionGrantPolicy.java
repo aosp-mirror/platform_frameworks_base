@@ -1089,6 +1089,8 @@ public final class DefaultPermissionGrantPolicy {
     private void grantRuntimePermissions(PackageInfo pkg,
             Set<String> permissionsWithoutSplits, boolean systemFixed, boolean ignoreSystemPackage,
             int userId) {
+        UserHandle user = UserHandle.of(userId);
+
         if (pkg == null) {
             return;
         }
@@ -1109,7 +1111,14 @@ public final class DefaultPermissionGrantPolicy {
         }
         requestedPermissions = ArrayUtils.filterNotNull(requestedPermissions, String[]::new);
 
-        PackageManager pm = mContext.getPackageManager();
+        PackageManager pm;
+        try {
+            pm = mContext.createPackageContextAsUser(mContext.getPackageName(), 0,
+                    user).getPackageManager();
+        } catch (NameNotFoundException doesNotHappen) {
+            throw new IllegalStateException(doesNotHappen);
+        }
+
         final ArraySet<String> permissions = new ArraySet<>(permissionsWithoutSplits);
         ApplicationInfo applicationInfo = pkg.applicationInfo;
 
@@ -1187,7 +1196,6 @@ public final class DefaultPermissionGrantPolicy {
             }
 
             if (permissions.contains(permission)) {
-                UserHandle user = UserHandle.of(userId);
                 final int flags = mContext.getPackageManager().getPermissionFlags(
                         permission, pkg.packageName, user);
 
@@ -1210,8 +1218,11 @@ public final class DefaultPermissionGrantPolicy {
                             UserHandle.getAppId(pkg.applicationInfo.uid));
                     String op = AppOpsManager.permissionToOp(permission);
 
-                    mContext.getPackageManager()
-                            .grantRuntimePermission(pkg.packageName, permission, user);
+                    if (pm.checkPermission(permission, pkg.packageName)
+                            != PackageManager.PERMISSION_GRANTED) {
+                        mContext.getPackageManager()
+                                .grantRuntimePermission(pkg.packageName, permission, user);
+                    }
 
                     mContext.getPackageManager().updatePermissionFlags(permission, pkg.packageName,
                             newFlags, newFlags, user);

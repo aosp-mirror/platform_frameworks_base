@@ -123,6 +123,7 @@ public class KeyguardBouncer {
             return;
         }
         ensureView();
+        mIsScrimmed = isScrimmed;
 
         // On the keyguard, we want to show the bouncer when the user drags up, but it's
         // not correct to end the falsing session. We still need to verify if those touches
@@ -132,13 +133,13 @@ public class KeyguardBouncer {
         if (isScrimmed) {
             setExpansion(EXPANSION_VISIBLE);
         }
-        mIsScrimmed = isScrimmed;
 
         if (resetSecuritySelection) {
             // showPrimarySecurityScreen() updates the current security method. This is needed in
             // case we are already showing and the current security method changed.
             showPrimarySecurityScreen();
         }
+
         if (mRoot.getVisibility() == View.VISIBLE || mShowingSoon) {
             return;
         }
@@ -168,8 +169,8 @@ public class KeyguardBouncer {
         mCallback.onBouncerVisiblityChanged(true /* shown */);
     }
 
-    public boolean isShowingScrimmed() {
-        return isShowing() && mIsScrimmed;
+    public boolean isScrimmed() {
+        return mIsScrimmed;
     }
 
     public ViewGroup getLockIconContainer() {
@@ -281,6 +282,7 @@ public class KeyguardBouncer {
                 StatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__HIDDEN);
             mDismissCallbackRegistry.notifyDismissCancelled();
         }
+        mIsScrimmed = false;
         mFalsingManager.onBouncerHidden();
         mCallback.onBouncerVisiblityChanged(false /* shown */);
         cancelShowRunnable();

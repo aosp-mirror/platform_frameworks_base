@@ -3059,7 +3059,11 @@ class ActivityStack extends ConfigurationContainer {
             // activity in home stack.
             // See {@link #mInResumeTopActivity}.
             mService.mH.post(
-                    () -> mRootActivityContainer.resumeHomeActivity(prev, reason, mDisplayId));
+                    () -> {
+                        synchronized (mService.mGlobalLock) {
+                            mRootActivityContainer.resumeHomeActivity(prev, reason, mDisplayId);
+                        }
+                    });
             return true;
         } else {
             return mRootActivityContainer.resumeHomeActivity(prev, reason, mDisplayId);

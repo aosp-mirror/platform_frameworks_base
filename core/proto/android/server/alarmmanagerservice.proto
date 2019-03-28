@@ -21,7 +21,7 @@ import "frameworks/base/core/proto/android/app/pendingintent.proto";
 import "frameworks/base/core/proto/android/internal/locallog.proto";
 import "frameworks/base/core/proto/android/os/worksource.proto";
 import "frameworks/base/core/proto/android/server/forceappstandbytracker.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 package com.android.server;
 

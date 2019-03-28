@@ -447,27 +447,33 @@ public class RenderScript {
         validate();
         return rsnAllocationCreateTyped(mContext, type, mip, usage, pointer);
     }
-    native long rsnAllocationCreateFromBitmap(long con, long type, int mip, Bitmap bmp, int usage);
+    native long rsnAllocationCreateFromBitmap(long con, long type, int mip, long bitmapHandle,
+                int usage);
     synchronized long nAllocationCreateFromBitmap(long type, int mip, Bitmap bmp, int usage) {
         validate();
-        return rsnAllocationCreateFromBitmap(mContext, type, mip, bmp, usage);
+        return rsnAllocationCreateFromBitmap(mContext, type, mip, bmp.getNativeInstance(), usage);
     }
 
-    native long rsnAllocationCreateBitmapBackedAllocation(long con, long type, int mip, Bitmap bmp, int usage);
-    synchronized long nAllocationCreateBitmapBackedAllocation(long type, int mip, Bitmap bmp, int usage) {
+    native long rsnAllocationCreateBitmapBackedAllocation(long con, long type, int mip, long bitmapHandle,
+                int usage);
+    synchronized long nAllocationCreateBitmapBackedAllocation(long type, int mip, Bitmap bmp,
+                int usage) {
         validate();
-        return rsnAllocationCreateBitmapBackedAllocation(mContext, type, mip, bmp, usage);
+        return rsnAllocationCreateBitmapBackedAllocation(mContext, type, mip, bmp.getNativeInstance(),
+                usage);
     }
 
-    native long rsnAllocationCubeCreateFromBitmap(long con, long type, int mip, Bitmap bmp, int usage);
+    native long rsnAllocationCubeCreateFromBitmap(long con, long type, int mip, long bitmapHandle,
+                int usage);
     synchronized long nAllocationCubeCreateFromBitmap(long type, int mip, Bitmap bmp, int usage) {
         validate();
-        return rsnAllocationCubeCreateFromBitmap(mContext, type, mip, bmp, usage);
+        return rsnAllocationCubeCreateFromBitmap(mContext, type, mip, bmp.getNativeInstance(),
+                usage);
     }
-    native long  rsnAllocationCreateBitmapRef(long con, long type, Bitmap bmp);
+    native long  rsnAllocationCreateBitmapRef(long con, long type, long bitmapHandle);
     synchronized long nAllocationCreateBitmapRef(long type, Bitmap bmp) {
         validate();
-        return rsnAllocationCreateBitmapRef(mContext, type, bmp);
+        return rsnAllocationCreateBitmapRef(mContext, type, bmp.getNativeInstance());
     }
     native long  rsnAllocationCreateFromAssetStream(long con, int mips, int assetStream, int usage);
     synchronized long nAllocationCreateFromAssetStream(int mips, int assetStream, int usage) {
@@ -475,10 +481,10 @@ public class RenderScript {
         return rsnAllocationCreateFromAssetStream(mContext, mips, assetStream, usage);
     }
 
-    native void  rsnAllocationCopyToBitmap(long con, long alloc, Bitmap bmp);
+    native void  rsnAllocationCopyToBitmap(long con, long alloc, long bitmapHandle);
     synchronized void nAllocationCopyToBitmap(long alloc, Bitmap bmp) {
         validate();
-        rsnAllocationCopyToBitmap(mContext, alloc, bmp);
+        rsnAllocationCopyToBitmap(mContext, alloc, bmp.getNativeInstance());
     }
 
     native void rsnAllocationSyncAll(long con, long alloc, int src);
@@ -487,8 +493,10 @@ public class RenderScript {
         rsnAllocationSyncAll(mContext, alloc, src);
     }
 
-    native ByteBuffer rsnAllocationGetByteBuffer(long con, long alloc, long[] stride, int xBytesSize, int dimY, int dimZ);
-    synchronized ByteBuffer nAllocationGetByteBuffer(long alloc, long[] stride, int xBytesSize, int dimY, int dimZ) {
+    native ByteBuffer rsnAllocationGetByteBuffer(long con, long alloc, long[] stride,
+                int xBytesSize, int dimY, int dimZ);
+    synchronized ByteBuffer nAllocationGetByteBuffer(long alloc, long[] stride, int xBytesSize,
+                int dimY, int dimZ) {
         validate();
         return rsnAllocationGetByteBuffer(mContext, alloc, stride, xBytesSize, dimY, dimZ);
     }
@@ -529,10 +537,10 @@ public class RenderScript {
         validate();
         rsnAllocationGenerateMipmaps(mContext, alloc);
     }
-    native void  rsnAllocationCopyFromBitmap(long con, long alloc, Bitmap bmp);
+    native void  rsnAllocationCopyFromBitmap(long con, long alloc, long bitmapHandle);
     synchronized void nAllocationCopyFromBitmap(long alloc, Bitmap bmp) {
         validate();
-        rsnAllocationCopyFromBitmap(mContext, alloc, bmp);
+        rsnAllocationCopyFromBitmap(mContext, alloc, bmp.getNativeInstance());
     }
 
 

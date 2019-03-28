@@ -16,7 +16,9 @@
 
 package com.android.dynsystem;
 
+import android.content.Context;
 import android.gsi.GsiProgress;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.image.DynamicSystemManager;
 import android.util.Log;
@@ -59,6 +61,7 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
     private final String mUrl;
     private final long mSystemSize;
     private final long mUserdataSize;
+    private final Context mContext;
     private final DynamicSystemManager mDynSystem;
     private final InstallStatusListener mListener;
     private DynamicSystemManager.Session mInstallationSession;
@@ -68,11 +71,12 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
     private InputStream mStream;
 
 
-    InstallationAsyncTask(String url, long systemSize, long userdataSize,
+    InstallationAsyncTask(String url, long systemSize, long userdataSize, Context context,
             DynamicSystemManager dynSystem, InstallStatusListener listener) {
         mUrl = url;
         mSystemSize = systemSize;
         mUserdataSize = userdataSize;
+        mContext = context;
         mDynSystem = dynSystem;
         mListener = listener;
     }
@@ -197,6 +201,10 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
     private void initInputStream() throws IOException, InvalidImageUrlException {
         if (URLUtil.isNetworkUrl(mUrl) || URLUtil.isFileUrl(mUrl)) {
             mStream = new BufferedInputStream(new GZIPInputStream(new URL(mUrl).openStream()));
+        } else if (URLUtil.isContentUrl(mUrl)) {
+            Uri uri = Uri.parse(mUrl);
+            mStream = new BufferedInputStream(new GZIPInputStream(
+                    mContext.getContentResolver().openInputStream(uri)));
         } else {
             throw new InvalidImageUrlException(
                     String.format(Locale.US, "Unsupported file source: %s", mUrl));

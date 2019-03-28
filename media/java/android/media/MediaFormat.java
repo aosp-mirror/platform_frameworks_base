@@ -1060,7 +1060,7 @@ public final class MediaFormat {
      * that no B frames are allowed. Note that non-zero value does not guarantee
      * B frames; it's up to the encoder to decide.
      */
-    public static final String KEY_MAX_BFRAMES = "max-bframes";
+    public static final String KEY_MAX_B_FRAMES = "max-bframes";
 
     /* package private */ MediaFormat(@NonNull Map<String, Object> map) {
         mMap = map;

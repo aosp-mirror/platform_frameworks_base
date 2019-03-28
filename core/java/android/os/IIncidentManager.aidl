@@ -17,32 +17,57 @@
 package android.os;
 
 import android.os.IIncidentReportStatusListener;
+import android.os.IncidentManager;
 import android.os.IncidentReportArgs;
 
 /**
   * Binder interface to report system health incidents.
   * {@hide}
   */
-oneway interface IIncidentManager {
+interface IIncidentManager {
 
     /**
      * Takes a report with the given args, reporting status to the optional listener.
      *
      * When the report is completed, the system report listener will be notified.
      */
-    void reportIncident(in IncidentReportArgs args);
+    oneway void reportIncident(in IncidentReportArgs args);
 
     /**
      * Takes a report with the given args, reporting status to the optional listener.
      *
      * When the report is completed, the system report listener will be notified.
      */
-    void reportIncidentToStream(in IncidentReportArgs args,
+    oneway void reportIncidentToStream(in IncidentReportArgs args,
             @nullable IIncidentReportStatusListener listener,
             FileDescriptor stream);
 
     /**
      * Tell the incident daemon that the android system server is up and running.
      */
-    void systemRunning();
+    oneway void systemRunning();
+
+    /**
+     * List the incident reports for the given ComponentName.  This is called
+     * via IncidentCompanion, which validates that the package name matches
+     * the caller.
+     */
+    List<String> getIncidentReportList(String pkg, String cls);
+
+    /**
+     * Get the IncidentReport object.
+     */
+    IncidentManager.IncidentReport getIncidentReport(String pkg, String cls, String id);
+
+    /**
+     * Reduce the refcount on this receiver. This is called
+     * via IncidentCompanion, which validates that the package name matches
+     * the caller.
+     */
+    void deleteIncidentReports(String pkg, String cls, String id);
+
+    /**
+     * Delete all incident reports for this package.
+     */
+    void deleteAllIncidentReports(String pkg);
 }

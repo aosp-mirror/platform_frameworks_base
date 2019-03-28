@@ -408,10 +408,16 @@ static bool generateSectionListCpp(Descriptor const* descriptor) {
     for (int i=0; i<descriptor->field_count(); i++) {
         const FieldDescriptor* field = descriptor->field(i);
 
-        if (field->type() != FieldDescriptor::TYPE_MESSAGE && field->type() != FieldDescriptor::TYPE_STRING) {
+        if (field->type() != FieldDescriptor::TYPE_MESSAGE
+                && field->type() != FieldDescriptor::TYPE_STRING) {
             continue;
         }
+
         const SectionFlags s = getSectionFlags(field);
+        if (s.userdebug_and_eng_only()) {
+            printf("#if ALLOW_RESTRICTED_SECTIONS\n");
+        }
+
         switch (s.type()) {
             case SECTION_NONE:
                 continue;
@@ -424,8 +430,7 @@ static bool generateSectionListCpp(Descriptor const* descriptor) {
                 printf(" NULL),\n");
                 break;
             case SECTION_DUMPSYS:
-                printf("    new DumpsysSection(%d, %s,", field->number(),
-                       s.userdebug_and_eng_only() ? "true" : "false");
+                printf("    new DumpsysSection(%d, ", field->number());
                 splitAndPrint(s.args());
                 printf(" NULL),\n");
                 break;
@@ -438,8 +443,12 @@ static bool generateSectionListCpp(Descriptor const* descriptor) {
                 printf(" NULL),\n");
                 break;
             case SECTION_TOMBSTONE:
-                printf("    new TombstoneSection(%d, \"%s\"),\n", field->number(), s.args().c_str());
+                printf("    new TombstoneSection(%d, \"%s\"),\n", field->number(),
+                        s.args().c_str());
                 break;
+        }
+        if (s.userdebug_and_eng_only()) {
+            printf("#endif\n");
         }
     }
     printf("    NULL };\n");

@@ -17,10 +17,10 @@
 
 package android.net;
 
-import android.net.ApfCapabilitiesParcelable;
 import android.net.InitialConfigurationParcelable;
 import android.net.Network;
-import android.net.StaticIpConfigurationParcelable;
+import android.net.StaticIpConfiguration;
+import android.net.apf.ApfCapabilities;
 
 parcelable ProvisioningConfigurationParcelable {
     boolean enableIPv4;
@@ -29,8 +29,8 @@ parcelable ProvisioningConfigurationParcelable {
     boolean usingIpReachabilityMonitor;
     int requestedPreDhcpActionMs;
     InitialConfigurationParcelable initialConfig;
-    StaticIpConfigurationParcelable staticIpConfig;
-    ApfCapabilitiesParcelable apfCapabilities;
+    StaticIpConfiguration staticIpConfig;
+    ApfCapabilities apfCapabilities;
     int provisioningTimeoutMs;
     int ipv6AddrGenMode;
     Network network;
