@@ -10692,6 +10692,25 @@ public class TelephonyManager {
     }
 
     /**
+     * It indicates whether modem is enabled or not per slot.
+     * It's the corresponding status of {@link #enableModemForSlot}.
+     *
+     * @param slotIndex which slot it's checking.
+     * @hide
+     */
+    public boolean isModemEnabledForSlot(int slotIndex) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.isModemEnabledForSlot(slotIndex, mContext.getOpPackageName());
+            }
+        } catch (RemoteException ex) {
+            Log.e(TAG, "enableModem RemoteException", ex);
+        }
+        return false;
+    }
+
+    /**
      * Broadcast intent action for network country code changes.
      *
      * <p>
