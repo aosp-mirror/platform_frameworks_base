@@ -439,6 +439,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         mSupportsRoundedCornersOnWindows = ScreenDecorationsUtils
                 .supportsRoundedCornersOnWindows(mContext.getResources());
 
+        // Assumes device always starts with back button until launcher tells it that it does not
+        mBackButtonAlpha = 1.0f;
+
         // Listen for the package update changes.
         if (mDeviceProvisionedController.getCurrentUser() == UserHandle.USER_SYSTEM) {
             updateEnabledState();
