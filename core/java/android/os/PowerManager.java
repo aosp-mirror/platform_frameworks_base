@@ -773,8 +773,10 @@ public final class PowerManager {
      */
     public static final int LOCATION_MODE_THROTTLE_REQUESTS_WHEN_SCREEN_OFF = 4;
 
-    static final int MIN_LOCATION_MODE = LOCATION_MODE_NO_CHANGE;
-    static final int MAX_LOCATION_MODE = LOCATION_MODE_THROTTLE_REQUESTS_WHEN_SCREEN_OFF;
+    /** @hide */
+    public static final int MIN_LOCATION_MODE = LOCATION_MODE_NO_CHANGE;
+    /** @hide */
+    public static final int MAX_LOCATION_MODE = LOCATION_MODE_THROTTLE_REQUESTS_WHEN_SCREEN_OFF;
 
     /**
      * @hide
