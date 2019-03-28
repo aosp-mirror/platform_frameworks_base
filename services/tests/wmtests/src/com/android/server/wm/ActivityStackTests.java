@@ -31,6 +31,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.ActivityStack.ActivityState.DESTROYING;
+import static com.android.server.wm.ActivityStack.ActivityState.FINISHING;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
@@ -926,6 +927,16 @@ public class ActivityStackTests extends ActivityTestsBase {
 
         assertThat(mTask.mActivities).isEmpty();
         assertThat(mStack.getAllTasks()).isEmpty();
+    }
+
+    @Test
+    public void testWontFinishHomeStackImmediately() {
+        final ActivityStack homeStack = createStackForShouldBeVisibleTest(mDefaultDisplay,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, true /* onTop */);
+
+        // Home stack should not be destroyed immediately.
+        final ActivityRecord activity1 = finishCurrentActivity(homeStack);
+        assertEquals(FINISHING, activity1.getState());
     }
 
     @Test
