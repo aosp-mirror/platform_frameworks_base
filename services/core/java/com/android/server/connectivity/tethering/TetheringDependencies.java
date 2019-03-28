@@ -83,8 +83,8 @@ public class TetheringDependencies {
      * Get a reference to the EntitlementManager to be used by tethering.
      */
     public EntitlementManager getEntitlementManager(Context ctx, StateMachine target,
-            SharedLog log, MockableSystemProperties systemProperties) {
-        return new EntitlementManager(ctx, target, log, systemProperties);
+            SharedLog log, int what, MockableSystemProperties systemProperties) {
+        return new EntitlementManager(ctx, target, log, what, systemProperties);
     }
 
     /**
