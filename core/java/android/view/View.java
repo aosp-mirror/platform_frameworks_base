@@ -8525,11 +8525,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Populates a {@link ViewStructure} for Content Capture.
+     * Populates a {@link ViewStructure} for content capture.
      *
-     * <p>This method is called after a view is that is eligible for Content Capture
+     * <p>This method is called after a view is that is eligible for content capture
      * (for example, if it {@link #isImportantForAutofill()}, an intelligence service is enabled for
-     * the user, and the activity rendering the view is enabled for Content Capture) is laid out and
+     * the user, and the activity rendering the view is enabled for content capture) is laid out and
      * is visible.
      *
      * <p>The populated structure is then passed to the service through
@@ -8547,6 +8547,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@code autofillId} for a child can be obtained either through
      * {@code childStructure.getAutofillId()} or
      * {@link ContentCaptureSession#newAutofillId(AutofillId, long)}.
+     *
+     * <p>When the virtual view hierarchy represents a web page, you should also:
+     *
+     * <ul>
+     *   <li>Call {@link ContentCaptureManager#getContentCaptureConditions()} to infer content
+     *   capture events should be generate for that URL.
+     *   <li>Create a new {@link ContentCaptureSession} child for every HTML element that
+     *   renders a new URL (like an {@code IFRAME}) and use that session to notify events from
+     *   that subtree.
+     * </ul>
      *
      * <p><b>Note: </b>the following methods of the {@code structure} will be ignored:
      * <ul>
@@ -9264,11 +9274,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Hints the Android System whether this view is considered important for Content Capture, based
+     * Hints the Android System whether this view is considered important for content capture, based
      * on the value explicitly set by {@link #setImportantForContentCapture(int)} and heuristics
      * when it's {@link #IMPORTANT_FOR_CONTENT_CAPTURE_AUTO}.
      *
-     * @return whether the view is considered important for autofill.
+     * <p>See {@link ContentCaptureManager} for more info about content capture.
+     *
+     * @return whether the view is considered important for content capture.
      *
      * @see #setImportantForContentCapture(int)
      * @see #IMPORTANT_FOR_CONTENT_CAPTURE_AUTO
@@ -9467,7 +9479,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Sets the (optional) {@link ContentCaptureSession} associated with this view.
      *
      * <p>This method should be called when you need to associate a {@link ContentCaptureContext} to
-     * the Content Capture events associated with this view or its view hierarchy (if it's a
+     * the content capture events associated with this view or its view hierarchy (if it's a
      * {@link ViewGroup}).
      *
      * <p>For example, if your activity is associated with a web domain, first you would need to
@@ -9498,7 +9510,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Gets the session used to notify Content Capture events.
+     * Gets the session used to notify content capture events.
      *
      * @return session explicitly set by {@link #setContentCaptureSession(ContentCaptureSession)},
      * inherited by ancestors, default session or {@code null} if content capture is disabled for
@@ -9719,7 +9731,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Dispatches the initial Content Capture events for a view structure.
+     * Dispatches the initial content capture events for a view structure.
      *
      * @hide
      */

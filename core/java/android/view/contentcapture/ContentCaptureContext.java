@@ -37,7 +37,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Context associated with a {@link ContentCaptureSession}.
+ * Context associated with a {@link ContentCaptureSession} - see {@link ContentCaptureManager} for
+ * more info.
  */
 public final class ContentCaptureContext implements Parcelable {
 
@@ -50,8 +51,7 @@ public final class ContentCaptureContext implements Parcelable {
 
     /**
      * Flag used to indicate that the app explicitly disabled content capture for the activity
-     * (using
-     * {@link android.view.contentcapture.ContentCaptureManager#setContentCaptureEnabled(boolean)}),
+     * (using {@link ContentCaptureManager#setContentCaptureEnabled(boolean)}),
      * in which case the service will just receive activity-level events.
      *
      * @hide
@@ -260,9 +260,10 @@ public final class ContentCaptureContext implements Parcelable {
          *   <li>A unique identifier of the application state (for example, a conversation between
          *   2 users in a chat app).
          *
+         * <p>See {@link ContentCaptureManager} for more info about the content capture context.
+         *
          * @param id id associated with this context.
          */
-        // TODO(b/123577059): make sure this is well documented and understandable
         public Builder(@NonNull LocusId id) {
             mId = Preconditions.checkNotNull(id);
         }
