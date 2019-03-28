@@ -443,6 +443,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     // VoiceInteractionManagerService
     ComponentName mActiveVoiceInteractionServiceComponent;
 
+    // A map userId and all its companion app packages
+    private final Map<Integer, Set<String>> mCompanionAppPackageMap = new ArrayMap<>();
+
     VrController mVrController;
     KeyguardController mKeyguardController;
     private final ClientLifecycleManager mLifecycleManager;
@@ -5909,6 +5912,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
+    boolean isAssociatedCompanionApp(int userId, String packageName) {
+        final Set<String> allPackages = mCompanionAppPackageMap.get(userId);
+        if (allPackages == null) {
+            return false;
+        }
+        return allPackages.contains(packageName);
+    }
+
     final class H extends Handler {
         static final int REPORT_TIME_TRACKER_MSG = 1;
 
@@ -7280,6 +7291,18 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public void setDeviceOwnerPackageName(String deviceOwnerPkg) {
             synchronized (mGlobalLock) {
                 ActivityTaskManagerService.this.setDeviceOwnerPackageName(deviceOwnerPkg);
+            }
+        }
+
+        @Override
+        public void setCompanionAppPackages(int userId, Set<String> companionAppPackages) {
+            // Deep copy all content to make sure we do not rely on the source
+            final Set<String> result = new HashSet<>();
+            for (String pkg : companionAppPackages) {
+                result.add(pkg);
+            }
+            synchronized (mGlobalLock) {
+                mCompanionAppPackageMap.put(userId, result);
             }
         }
     }
