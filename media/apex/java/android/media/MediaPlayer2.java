@@ -1546,7 +1546,7 @@ public class MediaPlayer2 implements AutoCloseable, AudioRouting {
      * Returns the size of the video.
      *
      * @return the size of the video. The width and height of size could be 0 if there is no video,
-     * no display surface was set, or the size has not been determined yet.
+     * or the size has not been determined yet.
      * The {@code EventCallback} can be registered via
      * {@link #registerEventCallback(Executor, EventCallback)} to provide a
      * notification {@code EventCallback.onVideoSizeChanged} when the size
@@ -2870,7 +2870,7 @@ public class MediaPlayer2 implements AutoCloseable, AudioRouting {
          * Called to indicate the video size
          *
          * The video size (width and height) could be 0 if there was no video,
-         * no display surface was set, or the value was not determined yet.
+         * or the value was not determined yet.
          *
          * @param mp the MediaPlayer2 associated with this callback
          * @param dsd the DataSourceDesc of this data source
