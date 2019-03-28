@@ -4066,8 +4066,6 @@ public class ConnectivityServiceTest {
         // TODO: 1. Move this outside of ConnectivityServiceTest.
         //       2. Make test to verify that Nat-T keepalive socket is created by IpSecService.
         //       3. Mock ipsec service.
-        //       4. Find a free port instead of a fixed port.
-        final int srcPort = 12345;
         final InetAddress myIPv4 = InetAddress.getByName("192.0.2.129");
         final InetAddress notMyIPv4 = InetAddress.getByName("192.0.2.35");
         final InetAddress myIPv6 = InetAddress.getByName("2001:db8::1");
@@ -4078,7 +4076,8 @@ public class ConnectivityServiceTest {
         final int invalidKaInterval = 9;
 
         final IpSecManager mIpSec = (IpSecManager) mContext.getSystemService(Context.IPSEC_SERVICE);
-        final UdpEncapsulationSocket testSocket = mIpSec.openUdpEncapsulationSocket(srcPort);
+        final UdpEncapsulationSocket testSocket = mIpSec.openUdpEncapsulationSocket();
+        final int srcPort = testSocket.getPort();
 
         LinkProperties lp = new LinkProperties();
         lp.setInterfaceName("wlan12");
@@ -4198,6 +4197,7 @@ public class ConnectivityServiceTest {
 
         // Check that keepalive slots start from 1 and increment. The first one gets slot 1.
         mWiFiNetworkAgent.setExpectedKeepaliveSlot(1);
+        int srcPort2 = 0;
         try (SocketKeepalive ka = mCm.createSocketKeepalive(
                 myNet, testSocket, myIPv4, dstIPv4, executor, callback)) {
             ka.start(validKaInterval);
@@ -4205,7 +4205,8 @@ public class ConnectivityServiceTest {
 
             // The second one gets slot 2.
             mWiFiNetworkAgent.setExpectedKeepaliveSlot(2);
-            final UdpEncapsulationSocket testSocket2 = mIpSec.openUdpEncapsulationSocket(6789);
+            final UdpEncapsulationSocket testSocket2 = mIpSec.openUdpEncapsulationSocket();
+            srcPort2 = testSocket2.getPort();
             TestSocketKeepaliveCallback callback2 = new TestSocketKeepaliveCallback(executor);
             try (SocketKeepalive ka2 = mCm.createSocketKeepalive(
                     myNet, testSocket2, myIPv4, dstIPv4, executor, callback2)) {
@@ -4222,6 +4223,10 @@ public class ConnectivityServiceTest {
                 testSocket2.close();
             }
         }
+
+        // Check that there is no port leaked after all keepalives and sockets are closed.
+        assertFalse(isUdpPortInUse(srcPort));
+        assertFalse(isUdpPortInUse(srcPort2));
 
         mWiFiNetworkAgent.disconnect();
         waitFor(mWiFiNetworkAgent.getDisconnectedCV());
@@ -4305,7 +4310,6 @@ public class ConnectivityServiceTest {
     }
 
     private void doTestNattSocketKeepalivesFdWithExecutor(Executor executor) throws Exception {
-        final int srcPort = 12345;
         final InetAddress myIPv4 = InetAddress.getByName("192.0.2.129");
         final InetAddress anyIPv4 = InetAddress.getByName("0.0.0.0");
         final InetAddress dstIPv4 = InetAddress.getByName("8.8.8.8");
@@ -4324,7 +4328,8 @@ public class ConnectivityServiceTest {
 
         // Prepare the target file descriptor, keep only one instance.
         final IpSecManager mIpSec = (IpSecManager) mContext.getSystemService(Context.IPSEC_SERVICE);
-        final UdpEncapsulationSocket testSocket = mIpSec.openUdpEncapsulationSocket(srcPort);
+        final UdpEncapsulationSocket testSocket = mIpSec.openUdpEncapsulationSocket();
+        final int srcPort = testSocket.getPort();
         final ParcelFileDescriptor testPfd =
                 ParcelFileDescriptor.dup(testSocket.getFileDescriptor());
         testSocket.close();
