@@ -617,6 +617,13 @@ public class Notification implements Parcelable
      */
     public static final int FLAG_CAN_COLORIZE = 0x00000800;
 
+    /**
+     * Bit to be bitswised-ored into the {@link #flags} field that should be
+     * set if this notification can be shown as a bubble.
+     * @hide
+     */
+    public static final int FLAG_BUBBLE = 0x00001000;
+
     public int flags;
 
     /** @hide */
@@ -6241,6 +6248,15 @@ public class Notification implements Parcelable
             return true;
         }
         return false;
+    }
+
+    /**
+     * @return true if this is a notification that can show as a bubble.
+     *
+     * @hide
+     */
+    public boolean isBubbleNotification() {
+        return (flags & Notification.FLAG_BUBBLE) != 0;
     }
 
     private boolean hasLargeIcon() {

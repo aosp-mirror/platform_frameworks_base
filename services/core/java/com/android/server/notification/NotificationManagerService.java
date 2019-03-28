@@ -4740,6 +4740,20 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
+    /**
+     * Updates the flags for this notification to reflect whether it is a bubble or not.
+     */
+    private void flagNotificationForBubbles(NotificationRecord r, String pkg, int userId) {
+        Notification notification = r.getNotification();
+        boolean canBubble = mPreferencesHelper.areBubblesAllowed(pkg, userId)
+                && r.getChannel().canBubble();
+        if (notification.getBubbleMetadata() != null && canBubble) {
+            notification.flags |= Notification.FLAG_BUBBLE;
+        } else {
+            notification.flags &= ~Notification.FLAG_BUBBLE;
+        }
+    }
+
     private void doChannelWarningToast(CharSequence toastText) {
         Binder.withCleanCallingIdentity(() -> {
             final int defaultWarningEnabled = Build.IS_DEBUGGABLE ? 1 : 0;
@@ -5094,6 +5108,9 @@ public class NotificationManagerService extends SystemService {
                 final String pkg = n.getPackageName();
                 final int id = n.getId();
                 final String tag = n.getTag();
+
+                // We need to fix the notification up a little for bubbles
+                flagNotificationForBubbles(r, pkg, callingUid);
 
                 // Handle grouped notifications and bail out early if we
                 // can to avoid extracting signals.
