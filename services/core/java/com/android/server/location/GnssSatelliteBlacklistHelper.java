@@ -20,7 +20,6 @@ import java.util.List;
 class GnssSatelliteBlacklistHelper {
 
     private static final String TAG = "GnssBlacklistHelper";
-    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final String BLACKLIST_DELIMITER = ",";
 
     private final Context mContext;
@@ -55,9 +54,7 @@ class GnssSatelliteBlacklistHelper {
         if (blacklist == null) {
             blacklist = "";
         }
-        if (DEBUG) {
-            Log.d(TAG, String.format("Update GNSS satellite blacklist: %s", blacklist));
-        }
+        Log.i(TAG, String.format("Update GNSS satellite blacklist: %s", blacklist));
 
         List<Integer> blacklistValues;
         try {
