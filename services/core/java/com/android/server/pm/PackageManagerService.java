@@ -2962,7 +2962,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             // Now that we know all of the shared libraries, update all clients to have
             // the correct library paths.
-            updateAllSharedLibrariesLPw(null);
+            updateAllSharedLibrariesLocked(null, Collections.unmodifiableMap(mPackages));
 
             for (SharedUserSetting setting : mSettings.getAllSharedUsersLPw()) {
                 // NOTE: We ignore potential failures here during a system scan (like
@@ -10011,11 +10011,11 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @GuardedBy("mPackages")
-    private void updateSharedLibrariesLPr(PackageParser.Package pkg,
-            PackageParser.Package changingLib) throws PackageManagerException {
+    private void updateSharedLibrariesLocked(PackageParser.Package pkg,
+            PackageParser.Package changingLib, Map<String, PackageParser.Package> availablePackages)
+                    throws PackageManagerException {
         final ArrayList<SharedLibraryInfo> sharedLibraryInfos =
-                collectSharedLibraryInfos(pkg, Collections.unmodifiableMap(mPackages),
-                        mSharedLibraries, null);
+                collectSharedLibraryInfos(pkg, availablePackages, mSharedLibraries, null);
         executeSharedLibrariesUpdateLPr(pkg, changingLib, sharedLibraryInfos);
     }
 
@@ -10107,7 +10107,6 @@ public class PackageManagerService extends IPackageManager.Stub
                                     + " library " + libName + " version "
                                     + libraryInfo.getLongVersion() + "; failing!");
                     }
-
                     PackageParser.Package libPkg =
                             availablePackages.get(libraryInfo.getPackageName());
                     if (libPkg == null) {
@@ -10115,12 +10114,8 @@ public class PackageManagerService extends IPackageManager.Stub
                                 "Package " + packageName + " requires unavailable static shared"
                                         + " library; failing!");
                     }
-
                     final String[] expectedCertDigests = requiredCertDigests[i];
-
-
                     if (expectedCertDigests.length > 1) {
-
                         // For apps targeting O MR1 we require explicit enumeration of all certs.
                         final String[] libCertDigests = (targetSdk >= Build.VERSION_CODES.O_MR1)
                                 ? PackageUtils.computeSignaturesSha256Digests(
@@ -10152,7 +10147,6 @@ public class PackageManagerService extends IPackageManager.Stub
                             }
                         }
                     } else {
-
                         // lib signing cert could have rotated beyond the one expected, check to see
                         // if the new one has been blessed by the old
                         if (!libPkg.mSigningDetails.hasSha256Certificate(
@@ -10164,7 +10158,6 @@ public class PackageManagerService extends IPackageManager.Stub
                         }
                     }
                 }
-
                 if (outUsedLibraries == null) {
                     outUsedLibraries = new ArrayList<>();
                 }
@@ -10175,7 +10168,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private static boolean hasString(List<String> list, List<String> which) {
-        if (list == null) {
+        if (list == null || which == null) {
             return false;
         }
         for (int i=list.size()-1; i>=0; i--) {
@@ -10189,39 +10182,63 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @GuardedBy("mPackages")
-    private ArrayList<PackageParser.Package> updateAllSharedLibrariesLPw(
-            PackageParser.Package changingPkg) {
-        ArrayList<PackageParser.Package> res = null;
-        for (PackageParser.Package pkg : mPackages.values()) {
-            if (changingPkg != null
-                    && !hasString(pkg.usesLibraries, changingPkg.libraryNames)
-                    && !hasString(pkg.usesOptionalLibraries, changingPkg.libraryNames)
-                    && !ArrayUtils.contains(pkg.usesStaticLibraries,
-                            changingPkg.staticSharedLibName)) {
-                return null;
-            }
-            if (res == null) {
-                res = new ArrayList<>();
-            }
-            res.add(pkg);
-            try {
-                updateSharedLibrariesLPr(pkg, changingPkg);
-            } catch (PackageManagerException e) {
-                // If a system app update or an app and a required lib missing we
-                // delete the package and for updated system apps keep the data as
-                // it is better for the user to reinstall than to be in an limbo
-                // state. Also libs disappearing under an app should never happen
-                // - just in case.
-                if (!pkg.isSystem() || pkg.isUpdatedSystemApp()) {
-                    final int flags = pkg.isUpdatedSystemApp()
-                            ? PackageManager.DELETE_KEEP_DATA : 0;
-                    deletePackageLIF(pkg.packageName, null, true, sUserManager.getUserIds(),
-                            flags , null, true, null);
-                }
-                Slog.e(TAG, "updateAllSharedLibrariesLPw failed: " + e.getMessage());
-            }
+    private ArrayList<PackageParser.Package> updateAllSharedLibrariesLocked(
+            PackageParser.Package updatedPkg,
+            Map<String, PackageParser.Package> availablePackages) {
+        ArrayList<PackageParser.Package> resultList = null;
+        // Set of all descendants of a library; used to eliminate cycles
+        ArraySet<String> descendants = null;
+        // The current list of packages that need updating
+        ArrayList<PackageParser.Package> needsUpdating = null;
+        if (updatedPkg != null) {
+            needsUpdating = new ArrayList<>(1);
+            needsUpdating.add(updatedPkg);
         }
-        return res;
+        do {
+            final PackageParser.Package changingPkg =
+                    (needsUpdating == null) ? null : needsUpdating.remove(0);
+            for (int i = mPackages.size() - 1; i >= 0; --i) {
+                final PackageParser.Package pkg = mPackages.valueAt(i);
+                if (changingPkg != null
+                        && !hasString(pkg.usesLibraries, changingPkg.libraryNames)
+                        && !hasString(pkg.usesOptionalLibraries, changingPkg.libraryNames)
+                        && !ArrayUtils.contains(pkg.usesStaticLibraries,
+                                changingPkg.staticSharedLibName)) {
+                    continue;
+                }
+                if (resultList == null) {
+                    resultList = new ArrayList<>();
+                }
+                resultList.add(pkg);
+                // if we're updating a shared library, all of its descendants must be updated
+                if (changingPkg != null) {
+                    if (descendants == null) {
+                        descendants = new ArraySet<>();
+                    }
+                    if (!descendants.contains(pkg.packageName)) {
+                        descendants.add(pkg.packageName);
+                        needsUpdating.add(pkg);
+                    }
+                }
+                try {
+                    updateSharedLibrariesLocked(pkg, changingPkg, availablePackages);
+                } catch (PackageManagerException e) {
+                    // If a system app update or an app and a required lib missing we
+                    // delete the package and for updated system apps keep the data as
+                    // it is better for the user to reinstall than to be in an limbo
+                    // state. Also libs disappearing under an app should never happen
+                    // - just in case.
+                    if (!pkg.isSystem() || pkg.isUpdatedSystemApp()) {
+                        final int flags = pkg.isUpdatedSystemApp()
+                                ? PackageManager.DELETE_KEEP_DATA : 0;
+                        deletePackageLIF(pkg.packageName, null, true, sUserManager.getUserIds(),
+                                flags , null, true, null);
+                    }
+                    Slog.e(TAG, "updateAllSharedLibrariesLPw failed: " + e.getMessage());
+                }
+            }
+        } while (needsUpdating != null && needsUpdating.size() > 0);
+        return resultList;
     }
 
     @GuardedBy({"mInstallLock", "mPackages"})
@@ -11643,19 +11660,19 @@ public class PackageManagerService extends IPackageManager.Stub
                 for (SharedLibraryInfo info : reconciledPkg.allowedSharedLibraryInfos) {
                     commitSharedLibraryInfoLocked(info);
                 }
+                final Map<String, PackageParser.Package> combinedPackages =
+                        reconciledPkg.getCombinedPackages();
                 try {
                     // Shared libraries for the package need to be updated.
-                    updateSharedLibrariesLPr(pkg, null);
+                    updateSharedLibrariesLocked(pkg, null, combinedPackages);
                 } catch (PackageManagerException e) {
                     Slog.e(TAG, "updateSharedLibrariesLPr failed: ", e);
                 }
-            }
-
-            if (reconciledPkg.hasDynamicSharedLibraries() && (scanFlags & SCAN_BOOTING) == 0) {
-                // If we are not booting, we need to update any applications
-                // that are clients of our shared library.  If we are booting,
-                // this will all be done once the scan is complete.
-                clientLibPkgs = updateAllSharedLibrariesLPw(pkg);
+                // Update all applications that use this library. Skip when booting
+                // since this will be done after all packages are scaned.
+                if ((scanFlags & SCAN_BOOTING) == 0) {
+                    clientLibPkgs = updateAllSharedLibrariesLocked(pkg, combinedPackages);
+                }
             }
         }
 
@@ -15744,6 +15761,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * TODO: move most of the data contained her into a PackageSetting for commit.
      */
     private static class ReconciledPackage {
+        public final ReconcileRequest request;
         public final PackageSetting pkgSetting;
         public final ScanResult scanResult;
         // TODO: Remove install-specific details from the reconcile result
@@ -15757,14 +15775,18 @@ public class PackageManagerService extends IPackageManager.Stub
         public ArrayList<SharedLibraryInfo> collectedSharedLibraryInfos;
         public final boolean removeAppKeySetData;
 
-        private ReconciledPackage(InstallArgs installArgs, PackageSetting pkgSetting,
+        private ReconciledPackage(ReconcileRequest request,
+                InstallArgs installArgs,
+                PackageSetting pkgSetting,
                 PackageInstalledInfo installResult,
-                PrepareResult prepareResult, ScanResult scanResult,
+                PrepareResult prepareResult,
+                ScanResult scanResult,
                 DeletePackageAction deletePackageAction,
                 List<SharedLibraryInfo> allowedSharedLibraryInfos,
                 SigningDetails signingDetails,
                 boolean sharedUserSignaturesChanged,
                 boolean removeAppKeySetData) {
+            this.request = request;
             this.installArgs = installArgs;
             this.pkgSetting = pkgSetting;
             this.installResult = installResult;
@@ -15777,9 +15799,20 @@ public class PackageManagerService extends IPackageManager.Stub
             this.removeAppKeySetData = removeAppKeySetData;
         }
 
-        public boolean hasDynamicSharedLibraries() {
-            return !ArrayUtils.isEmpty(allowedSharedLibraryInfos)
-                    && allowedSharedLibraryInfos.get(0).getType() != SharedLibraryInfo.TYPE_STATIC;
+        /**
+         * Returns a combined set of packages containing the packages already installed combined
+         * with the package(s) currently being installed. The to-be installed packages take
+         * precedence and may shadow already installed packages.
+         */
+        private Map<String, PackageParser.Package> getCombinedPackages() {
+            final ArrayMap<String, PackageParser.Package> combinedPackages =
+                    new ArrayMap<>(request.allPackages.size() + request.scannedPackages.size());
+
+            combinedPackages.putAll(request.allPackages);
+            for (ScanResult scanResult : request.scannedPackages.values()) {
+                combinedPackages.put(scanResult.pkgSetting.name, scanResult.request.pkg);
+            }
+            return combinedPackages;
         }
     }
 
@@ -15969,7 +16002,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             result.put(installPackageName,
-                    new ReconciledPackage(installArgs, scanResult.pkgSetting,
+                    new ReconciledPackage(request, installArgs, scanResult.pkgSetting,
                             res, request.preparedPackages.get(installPackageName), scanResult,
                             deletePackageAction, allowedSharedLibInfos, signingDetails,
                             sharedUserSignaturesChanged, removeAppKeySetData));
@@ -18404,7 +18437,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         try {
             // update shared libraries for the newly re-installed system package
-            updateSharedLibrariesLPr(pkg, null);
+            updateSharedLibrariesLocked(pkg, null, Collections.unmodifiableMap(mPackages));
         } catch (PackageManagerException e) {
             Slog.e(TAG, "updateAllSharedLibrariesLPw failed: " + e.getMessage());
         }
@@ -20478,7 +20511,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         prepareAppDataAfterInstallLIF(pkg);
                         synchronized (mPackages) {
                             try {
-                                updateSharedLibrariesLPr(pkg, null);
+                                updateSharedLibrariesLocked(pkg, null, mPackages);
                             } catch (PackageManagerException e) {
                                 Slog.e(TAG, "updateAllSharedLibrariesLPw failed: ", e);
                             }
