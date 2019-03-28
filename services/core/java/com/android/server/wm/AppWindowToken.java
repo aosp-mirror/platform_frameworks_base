@@ -666,7 +666,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             }
         }
 
-        if (isSelfAnimating()) {
+        if (isReallyAnimating()) {
             delayed = true;
         } else {
 
