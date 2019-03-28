@@ -21,8 +21,6 @@ import static android.system.OsConstants.S_IRWXO;
 
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.app.ApplicationLoaders;
-import android.content.pm.SharedLibraryInfo;
 import android.os.Build;
 import android.os.Environment;
 import android.os.IInstalld;
@@ -141,9 +139,6 @@ public class ZygoteInit {
         bootTimingsTraceLog.traceBegin("PreloadClasses");
         preloadClasses();
         bootTimingsTraceLog.traceEnd(); // PreloadClasses
-        bootTimingsTraceLog.traceBegin("CacheNonBootClasspathClassLoaders");
-        cacheNonBootClasspathClassLoaders();
-        bootTimingsTraceLog.traceEnd(); // CacheNonBootClasspathClassLoaders
         bootTimingsTraceLog.traceBegin("PreloadResources");
         preloadResources();
         bootTimingsTraceLog.traceEnd(); // PreloadResources
@@ -347,32 +342,6 @@ public class ZygoteInit {
                 }
             }
         }
-    }
-
-    /**
-     * Load in things which are used by many apps but which cannot be put in the boot
-     * classpath.
-     */
-    private static void cacheNonBootClasspathClassLoaders() {
-        // These libraries used to be part of the bootclasspath, but had to be removed.
-        // Old system applications still get them for backwards compatibility reasons,
-        // so they are cached here in order to preserve performance characteristics.
-        SharedLibraryInfo hidlBase = new SharedLibraryInfo(
-                "/system/framework/android.hidl.base-V1.0-java.jar", null /*packageName*/,
-                null /*codePaths*/, null /*name*/, 0 /*version*/, SharedLibraryInfo.TYPE_BUILTIN,
-                null /*declaringPackage*/, null /*dependentPackages*/, null /*dependencies*/);
-        SharedLibraryInfo hidlManager = new SharedLibraryInfo(
-                "/system/framework/android.hidl.manager-V1.0-java.jar", null /*packageName*/,
-                null /*codePaths*/, null /*name*/, 0 /*version*/, SharedLibraryInfo.TYPE_BUILTIN,
-                null /*declaringPackage*/, null /*dependentPackages*/, null /*dependencies*/);
-        hidlManager.addDependency(hidlBase);
-
-        ApplicationLoaders.getDefault().createAndCacheNonBootclasspathSystemClassLoaders(
-                new SharedLibraryInfo[]{
-                    // ordered dependencies first
-                    hidlBase,
-                    hidlManager,
-                });
     }
 
     /**
