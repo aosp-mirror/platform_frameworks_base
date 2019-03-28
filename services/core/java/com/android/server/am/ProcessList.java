@@ -1427,14 +1427,13 @@ public final class ProcessList {
     /**
      * @return {@code true} if process start is successful, false otherwise.
      * @param app
-     * @param hostingType
-     * @param hostingNameStr
+     * @param hostingRecord
      * @param disableHiddenApiChecks
      * @param abiOverride
      */
     @GuardedBy("mService")
-    boolean startProcessLocked(ProcessRecord app, String hostingType,
-            String hostingNameStr, boolean disableHiddenApiChecks, boolean mountExtStorageFull,
+    boolean startProcessLocked(ProcessRecord app, HostingRecord hostingRecord,
+            boolean disableHiddenApiChecks, boolean mountExtStorageFull,
             String abiOverride) {
         if (app.pendingStart) {
             return true;
@@ -1625,7 +1624,7 @@ public final class ProcessList {
             // the PID of the new process, or else throw a RuntimeException.
             final String entryPoint = "android.app.ActivityThread";
 
-            return startProcessLocked(hostingType, hostingNameStr, entryPoint, app, uid, gids,
+            return startProcessLocked(hostingRecord, entryPoint, app, uid, gids,
                     runtimeFlags, mountExternal, seInfo, requiredAbi, instructionSet, invokeWith,
                     startTime);
         } catch (RuntimeException e) {
@@ -1644,7 +1643,7 @@ public final class ProcessList {
     }
 
     @GuardedBy("mService")
-    boolean startProcessLocked(String hostingType, String hostingNameStr,
+    boolean startProcessLocked(HostingRecord hostingRecord,
             String entryPoint,
             ProcessRecord app, int uid, int[] gids, int runtimeFlags, int mountExternal,
             String seInfo, String requiredAbi, String instructionSet, String invokeWith,
@@ -1654,7 +1653,7 @@ public final class ProcessList {
         app.removed = false;
         app.killed = false;
         final long startSeq = app.startSeq = ++mProcStartSeqCounter;
-        app.setStartParams(uid, hostingType, hostingNameStr, seInfo, startTime);
+        app.setStartParams(uid, hostingRecord, seInfo, startTime);
         if (mService.mConstants.FLAG_PROCESS_START_ASYNC) {
             if (DEBUG_PROCESSES) Slog.i(TAG_PROCESSES,
                     "Posting procStart msg for " + app.toShortString());
@@ -1672,7 +1671,7 @@ public final class ProcessList {
                                 || SystemProperties.get("wrap." + app.processName) != null);
                         mPendingStarts.put(startSeq, app);
                     }
-                    final Process.ProcessStartResult startResult = startProcess(app.hostingType,
+                    final Process.ProcessStartResult startResult = startProcess(app.hostingRecord,
                             entryPoint, app, app.startUid, gids, runtimeFlags, mountExternal,
                             app.seInfo, requiredAbi, instructionSet, invokeWith, app.startTime);
                     synchronized (mService) {
@@ -1693,7 +1692,7 @@ public final class ProcessList {
             return true;
         } else {
             try {
-                final Process.ProcessStartResult startResult = startProcess(hostingType,
+                final Process.ProcessStartResult startResult = startProcess(hostingRecord,
                         entryPoint, app,
                         uid, gids, runtimeFlags, mountExternal, seInfo, requiredAbi, instructionSet,
                         invokeWith, startTime);
@@ -1781,7 +1780,7 @@ public final class ProcessList {
         }
     }
 
-    private Process.ProcessStartResult startProcess(String hostingType, String entryPoint,
+    private Process.ProcessStartResult startProcess(HostingRecord hostingRecord, String entryPoint,
             ProcessRecord app, int uid, int[] gids, int runtimeFlags, int mountExternal,
             String seInfo, String requiredAbi, String instructionSet, String invokeWith,
             long startTime) {
@@ -1797,7 +1796,7 @@ public final class ProcessList {
                     app.processName);
             checkSlow(startTime, "startProcess: asking zygote to start proc");
             final Process.ProcessStartResult startResult;
-            if (hostingType.equals("webview_service")) {
+            if (hostingRecord.usesWebviewZygote()) {
                 startResult = startWebView(entryPoint,
                         app.processName, uid, uid, gids, runtimeFlags, mountExternal,
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
@@ -1805,7 +1804,7 @@ public final class ProcessList {
                         packageNames, sandboxId,
                         new String[] {PROC_START_SEQ_IDENT + app.startSeq},
                         useSystemGraphicsDriver);
-            } else if (hostingType.equals("app_zygote")) {
+            } else if (hostingRecord.usesAppZygote()) {
                 final AppZygote appZygote = createAppZygoteForProcessIfNeeded(app);
 
                 startResult = appZygote.getProcess().start(entryPoint,
@@ -1832,21 +1831,20 @@ public final class ProcessList {
     }
 
     @GuardedBy("mService")
-    final void startProcessLocked(ProcessRecord app,
-            String hostingType, String hostingNameStr) {
-        startProcessLocked(app, hostingType, hostingNameStr, null /* abiOverride */);
+    final void startProcessLocked(ProcessRecord app, HostingRecord hostingRecord) {
+        startProcessLocked(app, hostingRecord, null /* abiOverride */);
     }
 
     @GuardedBy("mService")
-    final boolean startProcessLocked(ProcessRecord app,
-            String hostingType, String hostingNameStr, String abiOverride) {
-        return startProcessLocked(app, hostingType, hostingNameStr,
+    final boolean startProcessLocked(ProcessRecord app, HostingRecord hostingRecord,
+            String abiOverride) {
+        return startProcessLocked(app, hostingRecord,
                 false /* disableHiddenApiChecks */, false /* mountExtStorageFull */, abiOverride);
     }
 
     @GuardedBy("mService")
     final ProcessRecord startProcessLocked(String processName, ApplicationInfo info,
-            boolean knownToBeDead, int intentFlags, String hostingType, ComponentName hostingName,
+            boolean knownToBeDead, int intentFlags, HostingRecord hostingRecord,
             boolean allowWhileBooting, boolean isolated, int isolatedUid, boolean keepIfLarge,
             String abiOverride, String entryPoint, String[] entryPointArgs, Runnable crashHandler) {
         long startTime = SystemClock.elapsedRealtime();
@@ -1916,11 +1914,8 @@ public final class ProcessList {
             checkSlow(startTime, "startProcess: done killing old proc");
         }
 
-        String hostingNameStr = hostingName != null
-                ? hostingName.flattenToShortString() : null;
-
         if (app == null) {
-            final boolean fromAppZygote = "app_zygote".equals(hostingType);
+            final boolean fromAppZygote = hostingRecord.usesAppZygote();
             checkSlow(startTime, "startProcess: creating new process record");
             app = newProcessRecordLocked(info, processName, isolated, isolatedUid, fromAppZygote);
             if (app == null) {
@@ -1953,8 +1948,7 @@ public final class ProcessList {
         }
 
         checkSlow(startTime, "startProcess: stepping in to startProcess");
-        final boolean success = startProcessLocked(app, hostingType, hostingNameStr,
-                abiOverride);
+        final boolean success = startProcessLocked(app, hostingRecord, abiOverride);
         checkSlow(startTime, "startProcess: done starting proc!");
         return success ? app : null;
     }
@@ -2015,8 +2009,8 @@ public final class ProcessList {
 
         EventLog.writeEvent(EventLogTags.AM_PROC_START,
                 UserHandle.getUserId(app.startUid), pid, app.startUid,
-                app.processName, app.hostingType,
-                app.hostingNameStr != null ? app.hostingNameStr : "");
+                app.processName, app.hostingRecord.getType(),
+                app.hostingRecord.getName() != null ? app.hostingRecord.getName() : "");
 
         try {
             AppGlobals.getPackageManager().logAppProcessStartIfNeeded(app.processName, app.uid,
@@ -2044,10 +2038,10 @@ public final class ProcessList {
             buf.append("]");
         }
         buf.append(" for ");
-        buf.append(app.hostingType);
-        if (app.hostingNameStr != null) {
+        buf.append(app.hostingRecord.getType());
+        if (app.hostingRecord.getName() != null) {
             buf.append(" ");
-            buf.append(app.hostingNameStr);
+            buf.append(app.hostingRecord.getName());
         }
         mService.reportUidInfoMessageLocked(TAG, buf.toString(), app.startUid);
         app.setPid(pid);
