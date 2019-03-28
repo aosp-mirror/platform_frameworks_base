@@ -201,7 +201,7 @@ public class PhoneStatusBarPolicy
         mIconController.setIconVisibility(mSlotAlarmClock, false);
 
         // zen
-        mIconController.setIcon(mSlotZen, R.drawable.stat_sys_zen_important, null);
+        mIconController.setIcon(mSlotZen, R.drawable.stat_sys_dnd, null);
         mIconController.setIconVisibility(mSlotZen, false);
 
         // volume
@@ -339,11 +339,11 @@ public class PhoneStatusBarPolicy
             zenDescription = mContext.getString(R.string.quick_settings_dnd_label);
         } else if (zen == Global.ZEN_MODE_NO_INTERRUPTIONS) {
             zenVisible = true;
-            zenIconId = R.drawable.stat_sys_zen_none;
+            zenIconId = R.drawable.stat_sys_dnd;
             zenDescription = mContext.getString(R.string.interruption_level_none);
         } else if (zen == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS) {
             zenVisible = true;
-            zenIconId = R.drawable.stat_sys_zen_important;
+            zenIconId = R.drawable.stat_sys_dnd;
             zenDescription = mContext.getString(R.string.interruption_level_priority);
         }
 
