@@ -38,6 +38,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
@@ -141,6 +142,7 @@ public class OsuLoginActivity extends Activity {
                     Log.d(TAG, "Lost for the current Network, close the browser");
                 }
                 mForceDisconnect = false; // It is already disconnected.
+                showSignUpFailedToast();
                 if (mNetwork.equals(network)) {
                     finishAndRemoveTask();
                 }
@@ -227,6 +229,11 @@ public class OsuLoginActivity extends Activity {
             Log.e(TAG, "Invalid URL " + urlString);
         }
         return "";
+    }
+
+    private void showSignUpFailedToast() {
+        Toast.makeText(getApplicationContext(), R.string.sign_up_failed,
+                Toast.LENGTH_SHORT).show();
     }
 
     private class OsuWebViewClient extends WebViewClient {
