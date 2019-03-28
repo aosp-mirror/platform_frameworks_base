@@ -151,6 +151,8 @@ cc_library_shared {
 
         "libutils",  // Have to use shared lib to make libandroid_runtime behave correctly.
                      // Otherwise, AndroidRuntime::getJNIEnv() will return NULL.
+
+        "libcgrouprc", // LL-NDK
     ],
 
     header_libs: ["libhardware_headers"],
