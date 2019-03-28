@@ -610,26 +610,26 @@ TEST(StatsLogProcessorTest, TestActiveConfigMetricDiskWriteRead) {
     // Assert that all 3 metrics with activation are inactive and that the ttls were properly set.
     EXPECT_FALSE(metricProducer1003->isActive());
     const auto& activation1003 = metricProducer1003->mEventActivationMap.begin()->second;
-    EXPECT_EQ(100 * NS_PER_SEC, activation1003.ttl_ns);
-    EXPECT_EQ(0, activation1003.activation_ns);
+    EXPECT_EQ(100 * NS_PER_SEC, activation1003->ttl_ns);
+    EXPECT_EQ(0, activation1003->activation_ns);
     EXPECT_FALSE(metricProducer1005->isActive());
     const auto& activation1005 = metricProducer1005->mEventActivationMap.begin()->second;
-    EXPECT_EQ(100 * NS_PER_SEC, activation1005.ttl_ns);
-    EXPECT_EQ(0, activation1005.activation_ns);
+    EXPECT_EQ(100 * NS_PER_SEC, activation1005->ttl_ns);
+    EXPECT_EQ(0, activation1005->activation_ns);
     EXPECT_FALSE(metricProducer1006->isActive());
     const auto& activation1006 = metricProducer1006->mEventActivationMap.begin()->second;
-    EXPECT_EQ(200 * NS_PER_SEC, activation1006.ttl_ns);
-    EXPECT_EQ(0, activation1006.activation_ns);
+    EXPECT_EQ(200 * NS_PER_SEC, activation1006->ttl_ns);
+    EXPECT_EQ(0, activation1006->activation_ns);
 
     processor2->LoadMetricsActivationFromDisk();
 
     // After loading activations from disk, assert that all 3 metrics are active.
     EXPECT_TRUE(metricProducer1003->isActive());
-    EXPECT_EQ(timeBase2 + ttl3 - activation1003.ttl_ns, activation1003.activation_ns);
+    EXPECT_EQ(timeBase2 + ttl3 - activation1003->ttl_ns, activation1003->activation_ns);
     EXPECT_TRUE(metricProducer1005->isActive());
-    EXPECT_EQ(timeBase2 + ttl5 - activation1005.ttl_ns, activation1005.activation_ns);
+    EXPECT_EQ(timeBase2 + ttl5 - activation1005->ttl_ns, activation1005->activation_ns);
     EXPECT_TRUE(metricProducer1006->isActive());
-    EXPECT_EQ(timeBase2 + ttl6 - activation1006.ttl_ns, activation1003.activation_ns);
+    EXPECT_EQ(timeBase2 + ttl6 - activation1006->ttl_ns, activation1003->activation_ns);
 
     // Make sure no more broadcasts have happened.
     EXPECT_EQ(broadcastCount, 1);
@@ -696,17 +696,17 @@ TEST(StatsLogProcessorTest, TestActivationOnBoot) {
     EXPECT_TRUE(metricProducer2->isActive());
 
     const auto& activation1 = metricProducer1->mEventActivationMap.begin()->second;
-    EXPECT_EQ(100 * NS_PER_SEC, activation1.ttl_ns);
-    EXPECT_EQ(0, activation1.activation_ns);
-    EXPECT_EQ(kNotActive, activation1.state);
+    EXPECT_EQ(100 * NS_PER_SEC, activation1->ttl_ns);
+    EXPECT_EQ(0, activation1->activation_ns);
+    EXPECT_EQ(kNotActive, activation1->state);
 
     std::vector<AttributionNodeInternal> attributions1 = {CreateAttribution(111, "App1")};
     auto event = CreateAcquireWakelockEvent(attributions1, "wl1", 100 + timeBase1);
     processor->OnLogEvent(event.get());
 
     EXPECT_FALSE(metricProducer1->isActive());
-    EXPECT_EQ(0, activation1.activation_ns);
-    EXPECT_EQ(kActiveOnBoot, activation1.state);
+    EXPECT_EQ(0, activation1->activation_ns);
+    EXPECT_EQ(kActiveOnBoot, activation1->state);
 
     int64_t shutDownTime = timeBase1 + 100 * NS_PER_SEC;
 
@@ -746,14 +746,14 @@ TEST(StatsLogProcessorTest, TestActivationOnBoot) {
     EXPECT_TRUE(metricProducer1002->isActive());
 
     const auto& activation1001 = metricProducer1001->mEventActivationMap.begin()->second;
-    EXPECT_EQ(100 * NS_PER_SEC, activation1001.ttl_ns);
-    EXPECT_EQ(0, activation1001.activation_ns);
-    EXPECT_EQ(kNotActive, activation1001.state);
+    EXPECT_EQ(100 * NS_PER_SEC, activation1001->ttl_ns);
+    EXPECT_EQ(0, activation1001->activation_ns);
+    EXPECT_EQ(kNotActive, activation1001->state);
 
     processor2->LoadMetricsActivationFromDisk();
 
     EXPECT_TRUE(metricProducer1001->isActive());
-    EXPECT_EQ(timeBase2 + ttl1 - activation1001.ttl_ns, activation1001.activation_ns);
+    EXPECT_EQ(timeBase2 + ttl1 - activation1001->ttl_ns, activation1001->activation_ns);
 }
 
 #else

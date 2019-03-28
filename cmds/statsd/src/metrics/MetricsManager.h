@@ -225,17 +225,20 @@ private:
 
     // The following map is initialized from the statsd_config.
 
-    // maps from the index of the LogMatchingTracker to index of MetricProducer.
+    // Maps from the index of the LogMatchingTracker to index of MetricProducer.
     std::unordered_map<int, std::vector<int>> mTrackerToMetricMap;
 
-    // maps from LogMatchingTracker to ConditionTracker
+    // Maps from LogMatchingTracker to ConditionTracker
     std::unordered_map<int, std::vector<int>> mTrackerToConditionMap;
 
-    // maps from ConditionTracker to MetricProducer
+    // Maps from ConditionTracker to MetricProducer
     std::unordered_map<int, std::vector<int>> mConditionToMetricMap;
 
-    // maps from life span triggering event to MetricProducers.
+    // Maps from life span triggering event to MetricProducers.
     std::unordered_map<int, std::vector<int>> mActivationAtomTrackerToMetricMap;
+
+    // Maps deactivation triggering event to MetricProducers.
+    std::unordered_map<int, std::vector<int>> mDeactivationAtomTrackerToMetricMap;
 
     std::vector<int> mMetricIndexesWithActivation;
 
@@ -281,6 +284,9 @@ private:
     FRIEND_TEST(AlarmE2eTest, TestMultipleAlarms);
     FRIEND_TEST(ConfigTtlE2eTest, TestCountMetric);
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetric);
+    FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation);
+    FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations);
+    FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations);
 
     FRIEND_TEST(StatsLogProcessorTest, TestActiveConfigMetricDiskWriteRead);
     FRIEND_TEST(StatsLogProcessorTest, TestActivationOnBoot);

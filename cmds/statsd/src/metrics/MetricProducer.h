@@ -228,6 +228,11 @@ public:
         activateLocked(activationTrackerIndex, elapsedTimestampNs);
     }
 
+    void cancelEventActivation(int deactivationTrackerIndex) {
+        std::lock_guard<std::mutex> lock(mMutex);
+        cancelEventActivationLocked(deactivationTrackerIndex);
+    }
+
     bool isActive() const {
         std::lock_guard<std::mutex> lock(mMutex);
         return isActiveLocked();
@@ -238,7 +243,8 @@ public:
         prepActiveForBootIfNecessaryLocked(currentTimeNs);
     }
 
-    void addActivation(int activationTrackerIndex, int64_t ttl_seconds);
+    void addActivation(int activationTrackerIndex, int64_t ttl_seconds,
+                       int deactivationTrackerIndex = -1);
 
     inline void setActivationType(const MetricActivation::ActivationType& activationType) {
         mActivationType = activationType;
@@ -263,6 +269,7 @@ protected:
     bool evaluateActiveStateLocked(int64_t elapsedTimestampNs);
 
     void activateLocked(int activationTrackerIndex, int64_t elapsedTimestampNs);
+    void cancelEventActivationLocked(int deactivationTrackerIndex);
 
     inline bool isActiveLocked() const {
         return mIsActive;
@@ -391,13 +398,19 @@ protected:
     };
     // When the metric producer has multiple activations, these activations are ORed to determine
     // whether the metric producer is ready to generate metrics.
-    std::unordered_map<int, Activation> mEventActivationMap;
+    std::unordered_map<int, std::shared_ptr<Activation>> mEventActivationMap;
+
+    // Maps index of atom matcher for deactivation to Activation struct.
+    std::unordered_map<int, std::shared_ptr<Activation>> mEventDeactivationMap;
 
     bool mIsActive;
 
     MetricActivation::ActivationType mActivationType;
 
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetric);
+    FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation);
+    FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations);
+    FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations);
 
     FRIEND_TEST(StatsLogProcessorTest, TestActiveConfigMetricDiskWriteRead);
     FRIEND_TEST(StatsLogProcessorTest, TestActivationOnBoot);

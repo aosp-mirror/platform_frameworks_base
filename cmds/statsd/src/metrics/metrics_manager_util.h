@@ -108,8 +108,9 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, UidMap& 
                       std::unordered_map<int, std::vector<int>>& conditionToMetricMap,
                       std::unordered_map<int, std::vector<int>>& trackerToMetricMap,
                       std::unordered_map<int, std::vector<int>>& trackerToConditionMap,
-                      unordered_map<int, std::vector<int>>& lifeSpanEventTrackerToMetricMap,
-                      vector<int>& metricsWithLifeSpan,
+                      unordered_map<int, std::vector<int>>& activationAtomTrackerToMetricMap,
+                      unordered_map<int, std::vector<int>>& deactivationAtomTrackerToMetricMap,
+                      vector<int>& metricsWithActivation,
                       std::set<int64_t>& noReportMetricIds);
 
 bool isStateTracker(const SimplePredicate& simplePredicate, std::vector<Matcher>* primaryKeys);
