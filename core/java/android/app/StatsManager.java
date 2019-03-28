@@ -18,6 +18,7 @@ package android.app;
 import static android.Manifest.permission.DUMP;
 import static android.Manifest.permission.PACKAGE_USAGE_STATS;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
@@ -295,7 +296,7 @@ public final class StatsManager {
      * @throws StatsUnavailableException if unsuccessful due to failing to connect to stats service
      */
     @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
-    public long[] setActiveConfigsChangedOperation(@Nullable PendingIntent pendingIntent)
+    public @NonNull long[] setActiveConfigsChangedOperation(@Nullable PendingIntent pendingIntent)
             throws StatsUnavailableException {
         synchronized (this) {
             try {
