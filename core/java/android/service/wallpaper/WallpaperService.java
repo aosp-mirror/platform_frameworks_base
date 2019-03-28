@@ -72,6 +72,7 @@ import com.android.internal.view.BaseSurfaceHolder;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 /**
@@ -1309,6 +1310,7 @@ public abstract class WallpaperService extends Service {
         final int mDisplayId;
         final DisplayManager mDisplayManager;
         final Display mDisplay;
+        private final AtomicBoolean mDetached = new AtomicBoolean();
 
         Engine mEngine;
 
@@ -1399,8 +1401,23 @@ public abstract class WallpaperService extends Service {
             mCaller.sendMessage(msg);
         }
 
+        public void detach() {
+            mDetached.set(true);
+        }
+
+        private void doDetachEngine() {
+            mActiveEngines.remove(mEngine);
+            mEngine.detach();
+        }
+
         @Override
         public void executeMessage(Message message) {
+            if (mDetached.get()) {
+                if (mActiveEngines.contains(mEngine)) {
+                    doDetachEngine();
+                }
+                return;
+            }
             switch (message.what) {
                 case DO_ATTACH: {
                     try {
@@ -1416,8 +1433,7 @@ public abstract class WallpaperService extends Service {
                     return;
                 }
                 case DO_DETACH: {
-                    mActiveEngines.remove(mEngine);
-                    mEngine.detach();
+                    doDetachEngine();
                     return;
                 }
                 case DO_SET_DESIRED_SIZE: {
@@ -1497,6 +1513,7 @@ public abstract class WallpaperService extends Service {
      */
     class IWallpaperServiceWrapper extends IWallpaperService.Stub {
         private final WallpaperService mTarget;
+        private IWallpaperEngineWrapper mEngineWrapper;
 
         public IWallpaperServiceWrapper(WallpaperService context) {
             mTarget = context;
@@ -1506,8 +1523,13 @@ public abstract class WallpaperService extends Service {
         public void attach(IWallpaperConnection conn, IBinder windowToken,
                 int windowType, boolean isPreview, int reqWidth, int reqHeight, Rect padding,
                 int displayId) {
-            new IWallpaperEngineWrapper(mTarget, conn, windowToken,
+            mEngineWrapper = new IWallpaperEngineWrapper(mTarget, conn, windowToken,
                     windowType, isPreview, reqWidth, reqHeight, padding, displayId);
+        }
+
+        @Override
+        public void detach() {
+            mEngineWrapper.detach();
         }
     }
 
