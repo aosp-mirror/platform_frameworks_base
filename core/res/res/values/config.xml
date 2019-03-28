@@ -3993,8 +3993,14 @@
          rated limited to a period defined by config_dropboxLowPriorityBroadcastRateLimitPeriod
          (high frequency broadcasts for the tag will be dropped) -->
     <string-array name="config_dropboxLowPriorityTags" translatable="false">
+        <item>data_app_strictmode</item>
+        <item>data_app_wtf</item>
         <item>keymaster</item>
+        <item>netstats</item>
+        <item>system_app_strictmode</item>
+        <item>system_app_wtf</item>
         <item>system_server_strictmode</item>
+        <item>system_server_wtf</item>
     </string-array>
 
 </resources>
