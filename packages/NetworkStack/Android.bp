@@ -49,6 +49,9 @@ java_defaults {
     // Resources already included in NetworkStackBase
     resource_dirs: [],
     jarjar_rules: "jarjar-rules-shared.txt",
+    optimize: {
+        proguard_flags_files: ["proguard.flags"],
+    },
     // The permission configuration *must* be included to ensure security of the device
     required: ["NetworkStackPermissionStub"],
 }
