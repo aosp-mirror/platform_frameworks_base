@@ -314,7 +314,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         super.disableDevice(initiatedByCec, callback);
         assertRunOnServiceThread();
         mService.unregisterTvInputCallback(mTvInputCallback);
-        // TODO(amyjojo): check disableDevice and onStandby behaviors per spec
+        // TODO(b/129088603): check disableDevice and onStandby behaviors per spec
     }
 
     @Override
@@ -460,15 +460,6 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         updateCecDevice(new HdmiDeviceInfo(deviceInfo.getLogicalAddress(),
                 deviceInfo.getPhysicalAddress(), deviceInfo.getPortId(),
                 deviceInfo.getDeviceType(), deviceInfo.getVendorId(), osdName));
-        return true;
-    }
-
-    @Override
-    @ServiceThreadOnly
-    protected boolean handleReportAudioStatus(HdmiCecMessage message) {
-        assertRunOnServiceThread();
-        // TODO(amyjojo): implement report audio status handler
-        HdmiLogger.debug(TAG + "Stub handleReportAudioStatus");
         return true;
     }
 
