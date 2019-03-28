@@ -1934,6 +1934,8 @@ public class ConnectivityManager {
             @NonNull Callback callback) {
         ParcelFileDescriptor dup;
         try {
+            // Dup is needed here as the pfd inside the socket is owned by the IpSecService,
+            // which cannot be obtained by the app process.
             dup = ParcelFileDescriptor.dup(socket.getFileDescriptor());
         } catch (IOException ignored) {
             // Construct an invalid fd, so that if the user later calls start(), it will fail with
@@ -1975,6 +1977,7 @@ public class ConnectivityManager {
             @NonNull Callback callback) {
         ParcelFileDescriptor dup;
         try {
+            // TODO: Consider remove unnecessary dup.
             dup = pfd.dup();
         } catch (IOException ignored) {
             // Construct an invalid fd, so that if the user later calls start(), it will fail with
