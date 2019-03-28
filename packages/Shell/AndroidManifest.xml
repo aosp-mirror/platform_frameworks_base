@@ -181,6 +181,7 @@
     <uses-permission android:name="android.permission.READ_CLIPBOARD_IN_BACKGROUND" />
     <!-- Permission needed to wipe the device for Test Harness Mode -->
     <uses-permission android:name="android.permission.ENABLE_TEST_HARNESS_MODE" />
+    <uses-permission android:name="android.permission.MANAGE_COMPANION_DEVICES" />
 
     <uses-permission android:name="android.permission.MANAGE_APPOPS" />
 
