@@ -572,9 +572,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     public void onSwitchUser(@UserIdInt int newUserId) {
         handleSettingsChange(true /* userSwitch */);
         mBrightnessTracker.onSwitchUser(newUserId);
-        if (mDisplayWhiteBalanceSettings != null) {
-            mDisplayWhiteBalanceSettings.onSwitchUser();
-        }
     }
 
     public ParceledListSlice<AmbientBrightnessDayStats> getAmbientBrightnessStats(
