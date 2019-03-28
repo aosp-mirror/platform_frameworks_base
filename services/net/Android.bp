@@ -69,7 +69,7 @@ java_library_static {
     srcs: [
         ":framework-annotations",
         "java/android/net/IpMemoryStoreClient.java",
-        "java/android/net/ipmemorystore/**.java",
+        "java/android/net/ipmemorystore/**/*.java",
     ],
     static_libs: [
         "ipmemorystore-aidl-interfaces-java",
