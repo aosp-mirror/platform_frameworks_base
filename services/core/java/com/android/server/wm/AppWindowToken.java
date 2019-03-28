@@ -3132,8 +3132,17 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
     }
 
+    /** Gets the inner bounds of letterbox. The bounds will be empty if there is no letterbox. */
+    void getLetterboxInnerBounds(Rect outBounds) {
+        if (mLetterbox != null) {
+            outBounds.set(mLetterbox.getInnerFrame());
+        } else {
+            outBounds.setEmpty();
+        }
+    }
+
     /**
-     * @eturn true if there is a letterbox and any part of that letterbox overlaps with
+     * @return {@code true} if there is a letterbox and any part of that letterbox overlaps with
      * the given {@code rect}.
      */
     boolean isLetterboxOverlappingWith(Rect rect) {
