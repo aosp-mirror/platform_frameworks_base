@@ -2962,6 +2962,8 @@ public class DisplayPolicy {
         mLastDockedStackSysUiFlags = dockedVisibility;
         mLastFocusNeedsMenu = needsMenu;
         mFocusedApp = win.getAppToken();
+        mLastNonDockedStackBounds.set(mNonDockedStackBounds);
+        mLastDockedStackBounds.set(mDockedStackBounds);
         final Rect fullscreenStackBounds = new Rect(mNonDockedStackBounds);
         final Rect dockedStackBounds = new Rect(mDockedStackBounds);
         mHandler.post(() -> {
