@@ -27,10 +27,13 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.colorextraction.SysuiColorExtractor;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -38,12 +41,15 @@ import org.junit.runner.RunWith;
 public final class BubbleClockControllerTest extends SysuiTestCase {
 
     private BubbleClockController mClockController;
+    @Mock SysuiColorExtractor mMockColorExtractor;
 
     @Before
     public void setUp() {
+        MockitoAnnotations.initMocks(this);
+
         Resources res = getContext().getResources();
         LayoutInflater layoutInflater = LayoutInflater.from(getContext());
-        mClockController = new BubbleClockController(res, layoutInflater);
+        mClockController = new BubbleClockController(res, layoutInflater, mMockColorExtractor);
     }
 
     @Test
