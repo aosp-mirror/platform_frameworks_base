@@ -1401,11 +1401,14 @@ public class RankingHelper implements RankingConfig {
                 }
                 // Package upgrade
                 try {
-                    Record fullRecord = getRecord(pkg,
-                            mPm.getPackageUidAsUser(pkg, changeUserId));
-                    if (fullRecord != null) {
-                        createDefaultChannelIfNeeded(fullRecord);
-                        deleteDefaultChannelIfNeeded(fullRecord);
+                    synchronized (mRecords) {
+                        final String key = recordKey(pkg,
+                                mPm.getPackageUidAsUser(pkg, changeUserId));
+                        Record fullRecord = mRecords.get(key);
+                        if (fullRecord != null) {
+                            createDefaultChannelIfNeeded(fullRecord);
+                            deleteDefaultChannelIfNeeded(fullRecord);
+                        }
                     }
                 } catch (NameNotFoundException e) {}
             }
