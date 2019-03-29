@@ -2596,7 +2596,9 @@ public class SubscriptionManager {
      *              {@link SubscriptionManager#DEFAULT_SUBSCRIPTION_ID}, it means
      *              it's unset and {@link SubscriptionManager#getDefaultDataSubscriptionId()}
      *              is used to determine which modem is preferred.
-     * @param needValidation whether validation is needed before switch happens.
+     * @param needValidation whether Telephony will wait until the network is validated by
+     *              connectivity service before switching data to it. More details see
+     *              {@link NetworkCapabilities#NET_CAPABILITY_VALIDATED}.
      * @param executor The executor of where the callback will execute.
      * @param callback Callback will be triggered once it succeeds or failed.
      *                 See {@link TelephonyManager.SetOpportunisticSubscriptionResult}
@@ -2851,29 +2853,6 @@ public class SubscriptionManager {
         }
 
         return result;
-    }
-
-    /**
-     * Set if a subscription is metered or not. Similar to Wi-Fi, metered means
-     * user may be charged more if more data is used.
-     *
-     * By default all Cellular networks are considered metered. System or carrier privileged apps
-     * can set a subscription un-metered which will be considered when system switches data between
-     * primary subscription and opportunistic subscription.
-     *
-     * Caller will either have {@link android.Manifest.permission#MODIFY_PHONE_STATE} or carrier
-     * privilege permission of the subscription.
-     *
-     * @param isMetered whether it’s a metered subscription.
-     * @param subId the unique SubscriptionInfo index in database
-     * @return {@code true} if the operation is succeed, {@code false} otherwise.
-     */
-    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
-    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    public boolean setMetered(boolean isMetered, int subId) {
-        if (VDBG) logd("[setIsMetered]+ isMetered:" + isMetered + " subId:" + subId);
-        return setSubscriptionPropertyHelper(subId, "setIsMetered",
-                (iSub)-> iSub.setMetered(isMetered, subId, mContext.getOpPackageName())) == 1;
     }
 
     /**
