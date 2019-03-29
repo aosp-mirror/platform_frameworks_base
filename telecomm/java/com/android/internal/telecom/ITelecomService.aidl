@@ -286,8 +286,6 @@ interface ITelecomService {
      */
     boolean isInEmergencyCall();
 
-    oneway void reportNuisanceCallStatus(in Uri address, boolean isNuisance, String callingPackage);
-
     /**
      * @see TelecomServiceImpl#handleCallIntent
      */
