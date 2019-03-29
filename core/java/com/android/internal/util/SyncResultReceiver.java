@@ -19,7 +19,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.os.RemoteException;
 
 import com.android.internal.os.IResultReceiver;
 
@@ -183,7 +182,7 @@ public final class SyncResultReceiver extends IResultReceiver.Stub {
     }
 
     /** @hide */
-    public static final class TimeoutException extends RemoteException {
+    public static final class TimeoutException extends RuntimeException {
         private TimeoutException(String msg) {
             super(msg);
         }
