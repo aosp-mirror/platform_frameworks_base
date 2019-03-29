@@ -2011,7 +2011,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             for (int i = childrenCount - 1; i >= 0; i--) {
                 final int childIndex = getAndVerifyPreorderedIndex(childrenCount, i, customOrder);
                 final View child = getAndVerifyPreorderedView(preorderedList, children, childIndex);
-                if (!canViewReceivePointerEvents(child)
+                if (!child.canReceivePointerEvents()
                         || !isTransformedTouchPointInView(x, y, child, null)) {
                     continue;
                 }
@@ -2094,7 +2094,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                             childrenCount, i, customOrder);
                     final View child = getAndVerifyPreorderedView(
                             preorderedList, children, childIndex);
-                    if (!canViewReceivePointerEvents(child)
+                    if (!child.canReceivePointerEvents()
                             || !isTransformedTouchPointInView(x, y, child, null)) {
                         continue;
                     }
@@ -2314,7 +2314,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                                 getAndVerifyPreorderedIndex(childrenCount, i, customOrder);
                         final View child =
                                 getAndVerifyPreorderedView(preorderedList, children, childIndex);
-                        if (!canViewReceivePointerEvents(child)
+                        if (!child.canReceivePointerEvents()
                                 || !isTransformedTouchPointInView(x, y, child, null)) {
                             continue;
                         }
@@ -2500,7 +2500,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             for (int i = childrenCount - 1; i >= 0; i--) {
                 final int childIndex = getAndVerifyPreorderedIndex(childrenCount, i, customOrder);
                 final View child = getAndVerifyPreorderedView(preorderedList, children, childIndex);
-                if (!canViewReceivePointerEvents(child)
+                if (!child.canReceivePointerEvents()
                         || !isTransformedTouchPointInView(x, y, child, null)) {
                     continue;
                 }
@@ -2680,7 +2680,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                                 i = childrenCount - 1;
                             }
 
-                            if (!canViewReceivePointerEvents(child)
+                            if (!child.canReceivePointerEvents()
                                     || !isTransformedTouchPointInView(x, y, child, null)) {
                                 ev.setTargetAccessibilityFocus(false);
                                 continue;
@@ -2968,15 +2968,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             predecessor = target;
             target = next;
         }
-    }
-
-    /**
-     * Returns true if a child view can receive pointer events.
-     * @hide
-     */
-    private static boolean canViewReceivePointerEvents(@NonNull View child) {
-        return (child.mViewFlags & VISIBILITY_MASK) == VISIBLE
-                || child.getAnimation() != null;
     }
 
     private float[] getTempPoint() {
@@ -7197,6 +7188,46 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 mParent.requestTransparentRegion(this);
             }
         }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void subtractObscuredTouchableRegion(Region touchableRegion, View view) {
+        final int childrenCount = mChildrenCount;
+        final ArrayList<View> preorderedList = buildTouchDispatchChildList();
+        final boolean customOrder = preorderedList == null && isChildrenDrawingOrderEnabled();
+        final View[] children = mChildren;
+        for (int i = childrenCount - 1; i >= 0; i--) {
+            final int childIndex = getAndVerifyPreorderedIndex(childrenCount, i, customOrder);
+            final View child = getAndVerifyPreorderedView(preorderedList, children, childIndex);
+            if (child == view) {
+                // We've reached the target view.
+                break;
+            }
+            if (!child.canReceivePointerEvents()) {
+                // This child cannot be touched. Skip it.
+                continue;
+            }
+            applyOpToRegionByBounds(touchableRegion, child, Region.Op.DIFFERENCE);
+        }
+
+        // The touchable region should not exceed the bounds of its container.
+        applyOpToRegionByBounds(touchableRegion, this, Region.Op.INTERSECT);
+
+        final ViewParent parent = getParent();
+        if (parent != null) {
+            parent.subtractObscuredTouchableRegion(touchableRegion, this);
+        }
+    }
+
+    private static void applyOpToRegionByBounds(Region region, View view, Region.Op op) {
+        final int[] locationInWindow = new int[2];
+        view.getLocationInWindow(locationInWindow);
+        final int x = locationInWindow[0];
+        final int y = locationInWindow[1];
+        region.op(x, y, x + view.getWidth(), y + view.getHeight(), op);
     }
 
     @Override

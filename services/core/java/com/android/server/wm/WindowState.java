@@ -4837,10 +4837,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     /**
-     * Update a tap exclude region with a rectangular area identified by provided id. The requested
-     * area will be clipped to the window bounds.
+     * Update a tap exclude region identified by provided id. The requested area will be clipped to
+     * the window bounds.
      */
-    void updateTapExcludeRegion(int regionId, int left, int top, int width, int height) {
+    void updateTapExcludeRegion(int regionId, Region region) {
         final DisplayContent currentDisplay = getDisplayContent();
         if (currentDisplay == null) {
             throw new IllegalStateException("Trying to update window not attached to any display.");
@@ -4854,7 +4854,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             currentDisplay.mTapExcludeProvidingWindows.add(this);
         }
 
-        mTapExcludeRegionHolder.updateRegion(regionId, left, top, width, height);
+        mTapExcludeRegionHolder.updateRegion(regionId, region);
         // Trigger touch exclude region update on current display.
         currentDisplay.updateTouchExcludeRegion();
         // Trigger touchable region update for this window.

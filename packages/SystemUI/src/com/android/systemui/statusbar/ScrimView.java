@@ -289,4 +289,9 @@ public class ScrimView extends View implements ConfigurationController.Configura
             }
         }
     }
+
+    @Override
+    protected boolean canReceivePointerEvents() {
+        return false;
+    }
 }
