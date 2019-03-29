@@ -14726,7 +14726,6 @@ public final class Settings {
          *
          * @hide
          */
-        // TODO(b/117663715): require a new write permission restricted to a single source
         @RequiresPermission(Manifest.permission.WRITE_DEVICE_CONFIG)
         static void resetToDefaults(@NonNull ContentResolver resolver, @ResetMode int resetMode,
                 @Nullable String prefix) {
