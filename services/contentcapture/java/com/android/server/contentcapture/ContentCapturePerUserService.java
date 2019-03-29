@@ -35,11 +35,13 @@ import android.app.ActivityManagerInternal;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.content.ComponentName;
+import android.content.ContentCaptureOptions;
 import android.content.pm.ActivityPresentationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ServiceInfo;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.UserHandle;
@@ -50,8 +52,11 @@ import android.service.contentcapture.ContentCaptureService;
 import android.service.contentcapture.ContentCaptureServiceInfo;
 import android.service.contentcapture.IContentCaptureServiceCallback;
 import android.service.contentcapture.SnapshotData;
+import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.contentcapture.ContentCaptureCondition;
 import android.view.contentcapture.UserDataRemovalRequest;
 
 import com.android.internal.annotations.GuardedBy;
@@ -96,6 +101,13 @@ final class ContentCapturePerUserService
      */
     @GuardedBy("mLock")
     private final WhitelistHelper mWhitelistHelper = new WhitelistHelper();
+
+    /**
+     * List of conditions keyed by package.
+     */
+    @GuardedBy("mLock")
+    private final ArrayMap<String, ArraySet<ContentCaptureCondition>> mConditionsByPkg =
+            new ArrayMap<>();
 
     /**
      * When {@code true}, remote service died but service state is kept so it's restored after
@@ -449,6 +461,47 @@ final class ContentCapturePerUserService
     }
 
     @GuardedBy("mLock")
+    @Nullable
+    ContentCaptureOptions getOptionsForPackageLocked(@NonNull String packageName) {
+        if (!mWhitelistHelper.isWhitelisted(packageName)) {
+            if (packageName.equals(getServicePackageName())) {
+                if (mMaster.verbose) Slog.v(mTag, "getOptionsForPackage() lite for " + packageName);
+                return new ContentCaptureOptions(mMaster.mDevCfgLoggingLevel);
+            }
+            if (mMaster.verbose) {
+                Slog.v(mTag, "getOptionsForPackage(" + packageName + "): not whitelisted");
+            }
+            return null;
+        }
+
+        final ArraySet<ComponentName> whitelistedComponents = mWhitelistHelper
+                .getWhitelistedComponents(packageName);
+        if (Build.IS_USER && isTemporaryServiceSetLocked()) {
+            final String servicePackageName = getServicePackageName();
+            if (!packageName.equals(servicePackageName)) {
+                Slog.w(mTag, "Ignoring package " + packageName
+                        + " while using temporary service " + servicePackageName);
+                return null;
+            }
+        }
+        final ContentCaptureOptions options = new ContentCaptureOptions(mMaster.mDevCfgLoggingLevel,
+                mMaster.mDevCfgMaxBufferSize, mMaster.mDevCfgIdleFlushingFrequencyMs,
+                mMaster.mDevCfgTextChangeFlushingFrequencyMs, mMaster.mDevCfgLogHistorySize,
+                whitelistedComponents);
+        if (mMaster.verbose) {
+            Slog.v(mTag, "getOptionsForPackage(" + packageName + "): " + options);
+        }
+        return options;
+    }
+
+    @GuardedBy("mLock")
+    @Nullable
+    ArraySet<ContentCaptureCondition> getContentCaptureConditionsLocked(
+            @NonNull String packageName) {
+        return mConditionsByPkg.get(packageName);
+    }
+
+    @GuardedBy("mLock")
     void onActivityEventLocked(@NonNull ComponentName componentName, @ActivityEventType int type) {
         if (mRemoteService == null) {
             if (mMaster.debug) Slog.d(mTag, "onActivityEvent(): no remote service");
@@ -533,6 +586,23 @@ final class ContentCapturePerUserService
                         ? "null_activities" : activities.size() + " activities") + ")");
             }
             mMaster.mGlobalContentCaptureOptions.setWhitelist(mUserId, packages, activities);
+        }
+
+        @Override
+        public void setContentCaptureConditions(String packageName,
+                List<ContentCaptureCondition> conditions) {
+            if (mMaster.verbose) {
+                Slog.v(TAG, "setContentCaptureConditions(" + packageName + "): "
+                        + (conditions == null ? "null" : conditions.size() + " conditions"));
+            }
+            synchronized (mLock) {
+                if (conditions == null) {
+                    mConditionsByPkg.remove(packageName);
+                } else {
+                    mConditionsByPkg.put(packageName, new ArraySet<>(conditions));
+                }
+            }
+            // TODO(b/119613670): log metrics
         }
 
         @Override

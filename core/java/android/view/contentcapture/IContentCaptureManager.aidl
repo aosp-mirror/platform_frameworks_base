@@ -72,4 +72,9 @@ oneway interface IContentCaptureManager {
      * Returns a ComponentName with the name of custom service activity, if defined.
      */
     void getServiceSettingsActivity(in IResultReceiver result);
+
+    /**
+     * Returns a list with the ContentCaptureConditions for the package (or null if not defined).
+     */
+    void getContentCaptureConditions(String packageName, in IResultReceiver result);
 }
