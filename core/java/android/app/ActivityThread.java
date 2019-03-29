@@ -2100,6 +2100,16 @@ public final class ActivityThread extends ClientTransactionHandler {
     public final LoadedApk getPackageInfo(String packageName, CompatibilityInfo compatInfo,
             int flags, int userId) {
         final boolean differentUser = (UserHandle.myUserId() != userId);
+        ApplicationInfo ai;
+        try {
+            ai = getPackageManager().getApplicationInfo(packageName,
+                    PackageManager.GET_SHARED_LIBRARY_FILES
+                            | PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
+                    (userId < 0) ? UserHandle.myUserId() : userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+
         synchronized (mResourcesManager) {
             WeakReference<LoadedApk> ref;
             if (differentUser) {
@@ -2112,11 +2122,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             }
 
             LoadedApk packageInfo = ref != null ? ref.get() : null;
-            //Slog.i(TAG, "getPackageInfo " + packageName + ": " + packageInfo);
-            //if (packageInfo != null) Slog.i(TAG, "isUptoDate " + packageInfo.mResDir
-            //        + ": " + packageInfo.mResources.getAssets().isUpToDate());
-            if (packageInfo != null && (packageInfo.mResources == null
-                    || packageInfo.mResources.getAssets().isUpToDate())) {
+            if (ai != null && packageInfo != null && isLoadedApkUpToDate(packageInfo, ai)) {
                 if (packageInfo.isSecurityViolation()
                         && (flags&Context.CONTEXT_IGNORE_SECURITY) == 0) {
                     throw new SecurityException(
@@ -2127,16 +2133,6 @@ public final class ActivityThread extends ClientTransactionHandler {
                 }
                 return packageInfo;
             }
-        }
-
-        ApplicationInfo ai = null;
-        try {
-            ai = getPackageManager().getApplicationInfo(packageName,
-                    PackageManager.GET_SHARED_LIBRARY_FILES
-                            | PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
-                    (userId < 0) ? UserHandle.myUserId() : userId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
         }
 
         if (ai != null) {
@@ -2209,35 +2205,57 @@ public final class ActivityThread extends ClientTransactionHandler {
             }
 
             LoadedApk packageInfo = ref != null ? ref.get() : null;
-            if (packageInfo == null || (packageInfo.mResources != null
-                    && !packageInfo.mResources.getAssets().isUpToDate())) {
-                if (localLOGV) Slog.v(TAG, (includeCode ? "Loading code package "
+
+            boolean isUpToDate = packageInfo != null && isLoadedApkUpToDate(packageInfo, aInfo);
+
+            if (isUpToDate) {
+                return packageInfo;
+            }
+
+            if (localLOGV) {
+                Slog.v(TAG, (includeCode ? "Loading code package "
                         : "Loading resource-only package ") + aInfo.packageName
                         + " (in " + (mBoundApplication != null
-                                ? mBoundApplication.processName : null)
+                        ? mBoundApplication.processName : null)
                         + ")");
-                packageInfo =
-                    new LoadedApk(this, aInfo, compatInfo, baseLoader,
-                            securityViolation, includeCode &&
-                            (aInfo.flags&ApplicationInfo.FLAG_HAS_CODE) != 0, registerPackage);
-
-                if (mSystemThread && "android".equals(aInfo.packageName)) {
-                    packageInfo.installSystemApplicationInfo(aInfo,
-                            getSystemContext().mPackageInfo.getClassLoader());
-                }
-
-                if (differentUser) {
-                    // Caching not supported across users
-                } else if (includeCode) {
-                    mPackages.put(aInfo.packageName,
-                            new WeakReference<LoadedApk>(packageInfo));
-                } else {
-                    mResourcePackages.put(aInfo.packageName,
-                            new WeakReference<LoadedApk>(packageInfo));
-                }
             }
+
+            packageInfo =
+                    new LoadedApk(this, aInfo, compatInfo, baseLoader,
+                            securityViolation, includeCode
+                            && (aInfo.flags & ApplicationInfo.FLAG_HAS_CODE) != 0, registerPackage);
+
+            if (mSystemThread && "android".equals(aInfo.packageName)) {
+                packageInfo.installSystemApplicationInfo(aInfo,
+                        getSystemContext().mPackageInfo.getClassLoader());
+            }
+
+            if (differentUser) {
+                // Caching not supported across users
+            } else if (includeCode) {
+                mPackages.put(aInfo.packageName,
+                        new WeakReference<LoadedApk>(packageInfo));
+            } else {
+                mResourcePackages.put(aInfo.packageName,
+                        new WeakReference<LoadedApk>(packageInfo));
+            }
+
             return packageInfo;
         }
+    }
+
+    /**
+     * Compares overlay/resource directories for a LoadedApk to determine if it's up to date
+     * with the given ApplicationInfo.
+     */
+    private boolean isLoadedApkUpToDate(LoadedApk loadedApk, ApplicationInfo appInfo) {
+        Resources packageResources = loadedApk.mResources;
+        String[] overlayDirs = ArrayUtils.defeatNullable(loadedApk.getOverlayDirs());
+        String[] resourceDirs = ArrayUtils.defeatNullable(appInfo.resourceDirs);
+
+        return (packageResources == null || packageResources.getAssets().isUpToDate())
+                && overlayDirs.length == resourceDirs.length
+                && ArrayUtils.containsAll(overlayDirs, resourceDirs);
     }
 
     @UnsupportedAppUsage
@@ -5434,19 +5452,25 @@ public final class ActivityThread extends ClientTransactionHandler {
             ref = mResourcePackages.get(ai.packageName);
             resApk = ref != null ? ref.get() : null;
         }
+
+        final String[] oldResDirs = new String[2];
+
         if (apk != null) {
+            oldResDirs[0] = apk.getResDir();
             final ArrayList<String> oldPaths = new ArrayList<>();
             LoadedApk.makePaths(this, apk.getApplicationInfo(), oldPaths);
             apk.updateApplicationInfo(ai, oldPaths);
         }
         if (resApk != null) {
+            oldResDirs[1] = resApk.getResDir();
             final ArrayList<String> oldPaths = new ArrayList<>();
             LoadedApk.makePaths(this, resApk.getApplicationInfo(), oldPaths);
             resApk.updateApplicationInfo(ai, oldPaths);
         }
+
         synchronized (mResourcesManager) {
             // Update all affected Resources objects to use new ResourcesImpl
-            mResourcesManager.applyNewResourceDirsLocked(ai.sourceDir, ai.resourceDirs);
+            mResourcesManager.applyNewResourceDirsLocked(ai, oldResDirs);
         }
 
         ApplicationPackageManager.configurationChanged();
@@ -5699,9 +5723,17 @@ public final class ActivityThread extends ClientTransactionHandler {
                                         }
                                     }
                                 }
+
+                                final String[] oldResDirs = { pkgInfo.getResDir() };
+
                                 final ArrayList<String> oldPaths = new ArrayList<>();
                                 LoadedApk.makePaths(this, pkgInfo.getApplicationInfo(), oldPaths);
                                 pkgInfo.updateApplicationInfo(aInfo, oldPaths);
+
+                                synchronized (mResourcesManager) {
+                                    // Update affected Resources objects to use new ResourcesImpl
+                                    mResourcesManager.applyNewResourceDirsLocked(aInfo, oldResDirs);
+                                }
                             } catch (RemoteException e) {
                             }
                         }

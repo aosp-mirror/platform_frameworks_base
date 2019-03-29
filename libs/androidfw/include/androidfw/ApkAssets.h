@@ -84,6 +84,8 @@ class ApkAssets {
     return idmap_asset_.get() != nullptr;
   }
 
+  bool IsUpToDate() const;
+
  private:
   DISALLOW_COPY_AND_ASSIGN(ApkAssets);
 
@@ -95,12 +97,13 @@ class ApkAssets {
   // Creates an Asset from any file on the file system.
   static std::unique_ptr<Asset> CreateAssetFromFile(const std::string& path);
 
-  ApkAssets(ZipArchiveHandle unmanaged_handle, const std::string& path);
+  ApkAssets(ZipArchiveHandle unmanaged_handle, const std::string& path, time_t last_mod_time);
 
   using ZipArchivePtr = std::unique_ptr<ZipArchive, void(*)(ZipArchiveHandle)>;
 
   ZipArchivePtr zip_handle_;
   const std::string path_;
+  time_t last_mod_time_;
   std::unique_ptr<Asset> resources_asset_;
   std::unique_ptr<Asset> idmap_asset_;
   std::unique_ptr<const LoadedArsc> loaded_arsc_;
