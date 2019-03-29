@@ -41,9 +41,9 @@ import com.android.internal.net.VpnInfo;
 import com.android.internal.util.FileRotator;
 import com.android.internal.util.IndentingPrintWriter;
 
-import libcore.io.IoUtils;
-
 import com.google.android.collect.Sets;
+
+import libcore.io.IoUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -234,7 +234,7 @@ public class NetworkStatsRecorder {
 
         if (vpnArray != null) {
             for (VpnInfo info : vpnArray) {
-                delta.migrateTun(info.ownerUid, info.vpnIface, info.primaryUnderlyingIface);
+                delta.migrateTun(info.ownerUid, info.vpnIface, info.underlyingIfaces);
             }
         }
 
