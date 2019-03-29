@@ -149,6 +149,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     // Set to true if this process is currently temporarily whitelisted to start activities even if
     // it's not in the foreground
     private volatile boolean mAllowBackgroundActivityStarts;
+    // Set of UIDs of clients currently bound to this process
+    private volatile ArraySet<Integer> mBoundClientUids = new ArraySet<Integer>();
 
     // Thread currently set for VR scheduling
     int mVrThreadTid;
@@ -366,6 +368,14 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     public boolean areBackgroundActivityStartsAllowed() {
         return mAllowBackgroundActivityStarts;
+    }
+
+    public void setBoundClientUids(ArraySet<Integer> boundClientUids) {
+        mBoundClientUids = boundClientUids;
+    }
+
+    public ArraySet<Integer> getBoundClientUids() {
+        return mBoundClientUids;
     }
 
     public void setInstrumenting(boolean instrumenting,
