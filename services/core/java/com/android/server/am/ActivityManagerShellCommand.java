@@ -16,7 +16,6 @@
 
 package com.android.server.am;
 
-import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ActivityTaskManager.RESIZE_MODE_SYSTEM;
 import static android.app.ActivityTaskManager.RESIZE_MODE_USER;
@@ -306,9 +305,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         mSamplingInterval = 0;
         mAutoStop = false;
         mStreaming = false;
-        mUserId = mInternal.mUserController.handleIncomingUser(Binder.getCallingPid(),
-            Binder.getCallingUid(), defUser, false, ALLOW_FULL_ONLY,
-            "ActivityManagerShellCommand", null);
+        mUserId = defUser;
         mDisplayId = INVALID_DISPLAY;
         mWindowingMode = WINDOWING_MODE_UNDEFINED;
         mActivityType = ACTIVITY_TYPE_UNDEFINED;
