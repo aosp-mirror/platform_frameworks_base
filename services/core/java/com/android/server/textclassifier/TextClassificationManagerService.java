@@ -425,9 +425,12 @@ public final class TextClassificationManagerService extends ITextClassifierServi
         if (packageName == null) return;
 
         try {
-            final int uid = context.getPackageManager()
+            final int packageUid = context.getPackageManager()
                     .getPackageUidAsUser(packageName, UserHandle.getCallingUserId());
-            Preconditions.checkArgument(Binder.getCallingUid() == uid);
+            final int callingUid = Binder.getCallingUid();
+            Preconditions.checkArgument(callingUid == packageUid
+                    // Trust the system process:
+                    || callingUid == android.os.Process.SYSTEM_UID);
         } catch (Exception e) {
             throw new RemoteException(
                     String.format("Invalid package: name=%s, error=%s", packageName, e));
