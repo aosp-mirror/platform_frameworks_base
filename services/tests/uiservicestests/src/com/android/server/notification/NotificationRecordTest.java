@@ -477,8 +477,9 @@ public class NotificationRecordTest extends UiServiceTestCase {
         assertEquals(MetricsEvent.IMPORTANCE_EXPLANATION_APP,
                 logMaker.getTaggedData(
                         MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_INITIAL_EXPLANATION));
-        // This field is only populated if the assistant was itself overridden by the system.
-        assertNull(logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_ASST));
+        // This field is populated whenever mImportanceExplanationCode is.
+        assertEquals(IMPORTANCE_LOW,
+                logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_ASST));
     }
 
     @Test
