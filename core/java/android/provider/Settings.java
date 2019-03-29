@@ -7751,15 +7751,6 @@ public final class Settings {
                 "call_screening_default_component";
 
         /**
-         * Specifies the component name currently configured to be the default application to
-         * perform the user-defined call redirection service with Telecom.
-         * @hide
-         */
-        @UnsupportedAppUsage
-        public static final String CALL_REDIRECTION_DEFAULT_APPLICATION =
-                "call_redirection_default_application";
-
-        /**
          * Specifies the package name currently configured to be the emergency assistance application
          *
          * @see android.telephony.TelephonyManager#ACTION_EMERGENCY_ASSISTANCE

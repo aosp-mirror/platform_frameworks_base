@@ -610,7 +610,6 @@ public class SettingsBackupTest {
                  Settings.Secure.BACKUP_ENABLED,
                  Settings.Secure.BACKUP_PROVISIONED,
                  Settings.Secure.BACKUP_TRANSPORT,
-                 Settings.Secure.CALL_REDIRECTION_DEFAULT_APPLICATION,
                  Settings.Secure.CALL_SCREENING_DEFAULT_COMPONENT,
                  Settings.Secure.CAMERA_LIFT_TRIGGER_ENABLED, // Candidate for backup?
                  Settings.Secure.CARRIER_APPS_HANDLED,
