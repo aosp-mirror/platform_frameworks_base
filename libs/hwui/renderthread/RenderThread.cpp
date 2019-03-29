@@ -408,12 +408,13 @@ bool RenderThread::isCurrent() {
 }
 
 void RenderThread::preload() {
-    std::thread eglInitThread([]() {
-        //TODO: don't load EGL drivers for Vulkan, when HW bitmap uploader is refactored.
-        eglGetDisplay(EGL_DEFAULT_DISPLAY);
-    });
-    eglInitThread.detach();
-    if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
+    // EGL driver is always preloaded only if HWUI renders with GL.
+    if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaGL) {
+        std::thread eglInitThread([]() {
+            eglGetDisplay(EGL_DEFAULT_DISPLAY);
+        });
+        eglInitThread.detach();
+    } else {
         requireVkContext();
     }
     HardwareBitmapUploader::initialize();
