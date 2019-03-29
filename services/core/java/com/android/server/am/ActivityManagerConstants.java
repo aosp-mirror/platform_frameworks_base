@@ -116,6 +116,22 @@ final class ActivityManagerConstants extends ContentObserver {
      */
     private static final String KEY_MAX_CACHED_PROCESSES = "max_cached_processes";
 
+    /**
+     * Default value for mFlagBackgroundActivityStartsEnabled if not explicitly set in
+     * Settings.Global. This allows it to be set experimentally unless it has been
+     * enabled/disabled in developer options. Defaults to true.
+     */
+    private static final String KEY_DEFAULT_BACKGROUND_ACTIVITY_STARTS_ENABLED =
+            "default_background_activity_starts_enabled";
+
+    /**
+     * The packages temporarily whitelisted to be able to start activities from background.
+     * The list of packages is {@code ":"} colon delimited.
+     */
+    private static final String KEY_BACKGROUND_ACTIVITY_STARTS_PACKAGE_NAMES_WHITELIST =
+            "background_activity_starts_package_names_whitelist";
+
+
     // Maximum number of cached processes we will allow.
     public int MAX_CACHED_PROCESSES = DEFAULT_MAX_CACHED_PROCESSES;
 
@@ -242,7 +258,8 @@ final class ActivityManagerConstants extends ContentObserver {
     volatile boolean mFlagActivityStartsLoggingEnabled;
 
     // Indicates whether the background activity starts is enabled.
-    // Controlled by Settings.Global.BACKGROUND_ACTIVITY_STARTS_ENABLED
+    // Controlled by Settings.Global.BACKGROUND_ACTIVITY_STARTS_ENABLED.
+    // If not set explicitly the default is controlled by DeviceConfig.
     volatile boolean mFlagBackgroundActivityStartsEnabled;
 
     volatile ArraySet<String> mPackageNamesWhitelistedForBgActivityStarts = new ArraySet<>();
@@ -295,10 +312,6 @@ final class ActivityManagerConstants extends ContentObserver {
                 Settings.Global.getUriFor(
                         Settings.Global.BACKGROUND_ACTIVITY_STARTS_ENABLED);
 
-    private static final Uri BACKGROUND_ACTIVITY_STARTS_PACKAGE_NAMES_WHITELIST_URI =
-                Settings.Global.getUriFor(
-                        Settings.Global.BACKGROUND_ACTIVITY_STARTS_PACKAGE_NAMES_WHITELIST);
-
     private static final Uri ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS_URI =
             Settings.Global.getUriFor(Settings.Global.ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS);
 
@@ -306,8 +319,19 @@ final class ActivityManagerConstants extends ContentObserver {
             new OnPropertyChangedListener() {
                 @Override
                 public void onPropertyChanged(String namespace, String name, String value) {
-                    if (KEY_MAX_CACHED_PROCESSES.equals(name)) {
-                        updateMaxCachedProcesses();
+                    if (name == null) {
+                        return;
+                    }
+                    switch (name) {
+                        case KEY_MAX_CACHED_PROCESSES:
+                            updateMaxCachedProcesses();
+                            break;
+                        case KEY_DEFAULT_BACKGROUND_ACTIVITY_STARTS_ENABLED:
+                        case KEY_BACKGROUND_ACTIVITY_STARTS_PACKAGE_NAMES_WHITELIST:
+                            updateBackgroundActivityStarts();
+                            break;
+                        default:
+                            break;
                     }
                 }
             };
@@ -330,16 +354,11 @@ final class ActivityManagerConstants extends ContentObserver {
         mResolver.registerContentObserver(ACTIVITY_MANAGER_CONSTANTS_URI, false, this);
         mResolver.registerContentObserver(ACTIVITY_STARTS_LOGGING_ENABLED_URI, false, this);
         mResolver.registerContentObserver(BACKGROUND_ACTIVITY_STARTS_ENABLED_URI, false, this);
-        mResolver.registerContentObserver(BACKGROUND_ACTIVITY_STARTS_PACKAGE_NAMES_WHITELIST_URI,
-                false, this);
         if (mSystemServerAutomaticHeapDumpEnabled) {
             mResolver.registerContentObserver(ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS_URI,
                     false, this);
         }
         updateConstants();
-        updateActivityStartsLoggingEnabled();
-        updateBackgroundActivityStartsEnabled();
-        updateBackgroundActivityStartsPackageNamesWhitelist();
         if (mSystemServerAutomaticHeapDumpEnabled) {
             updateEnableAutomaticSystemServerHeapDumps();
         }
@@ -347,7 +366,8 @@ final class ActivityManagerConstants extends ContentObserver {
                 ActivityThread.currentApplication().getMainExecutor(),
                 mOnDeviceConfigChangedListener);
         updateMaxCachedProcesses();
-
+        updateActivityStartsLoggingEnabled();
+        updateBackgroundActivityStarts();
     }
 
     public void setOverrideMaxCachedProcesses(int value) {
@@ -371,9 +391,7 @@ final class ActivityManagerConstants extends ContentObserver {
         } else if (ACTIVITY_STARTS_LOGGING_ENABLED_URI.equals(uri)) {
             updateActivityStartsLoggingEnabled();
         } else if (BACKGROUND_ACTIVITY_STARTS_ENABLED_URI.equals(uri)) {
-            updateBackgroundActivityStartsEnabled();
-        } else if (BACKGROUND_ACTIVITY_STARTS_PACKAGE_NAMES_WHITELIST_URI.equals(uri)) {
-            updateBackgroundActivityStartsPackageNamesWhitelist();
+            updateBackgroundActivityStarts();
         } else if (ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS_URI.equals(uri)) {
             updateEnableAutomaticSystemServerHeapDumps();
         }
@@ -463,24 +481,40 @@ final class ActivityManagerConstants extends ContentObserver {
                 Settings.Global.ACTIVITY_STARTS_LOGGING_ENABLED, 1) == 1;
     }
 
-    private void updateBackgroundActivityStartsEnabled() {
-        mFlagBackgroundActivityStartsEnabled = Settings.Global.getInt(mResolver,
-                Settings.Global.BACKGROUND_ACTIVITY_STARTS_ENABLED, 1) == 1;
-    }
+    private void updateBackgroundActivityStarts() {
+        String whitelistedPackageNames = null;
+        int settingsValue = Settings.Global.getInt(mResolver,
+                Settings.Global.BACKGROUND_ACTIVITY_STARTS_ENABLED, -1);
 
-    private void updateBackgroundActivityStartsPackageNamesWhitelist() {
-        final String setting = Settings.Global.getString(mResolver,
-                Settings.Global.BACKGROUND_ACTIVITY_STARTS_PACKAGE_NAMES_WHITELIST);
-        if (TextUtils.isEmpty(setting)) {
-            return;
+        // If the user has explicitly enabled or disabled, that affects all apps.
+        // Otherwise we take the default state and whitelist from DeviceConfig.
+        if (settingsValue >= 0) {
+            mFlagBackgroundActivityStartsEnabled = settingsValue != 0;
+        } else {
+            boolean enabledInDeviceConfig = DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    KEY_DEFAULT_BACKGROUND_ACTIVITY_STARTS_ENABLED,
+                    /*defaultValue*/ true);
+            mFlagBackgroundActivityStartsEnabled = enabledInDeviceConfig;
+            if (!enabledInDeviceConfig) {
+                whitelistedPackageNames = DeviceConfig.getProperty(
+                        DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                        KEY_BACKGROUND_ACTIVITY_STARTS_PACKAGE_NAMES_WHITELIST);
+            }
         }
-        ArraySet<String> newSet = new ArraySet<>();
-        SimpleStringSplitter splitter = new SimpleStringSplitter(':');
-        splitter.setString(setting);
-        while (splitter.hasNext()) {
-            newSet.add(splitter.next());
+        if (TextUtils.isEmpty(whitelistedPackageNames)) {
+            if (!mPackageNamesWhitelistedForBgActivityStarts.isEmpty()) {
+                mPackageNamesWhitelistedForBgActivityStarts = new ArraySet<>();
+            }
+        } else {
+            ArraySet<String> newSet = new ArraySet<>();
+            SimpleStringSplitter splitter = new SimpleStringSplitter(':');
+            splitter.setString(whitelistedPackageNames);
+            while (splitter.hasNext()) {
+                newSet.add(splitter.next());
+            }
+            mPackageNamesWhitelistedForBgActivityStarts = newSet;
         }
-        mPackageNamesWhitelistedForBgActivityStarts = newSet;
     }
 
     private void updateEnableAutomaticSystemServerHeapDumps() {
