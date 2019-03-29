@@ -70,7 +70,7 @@ public class BarTransitions {
 
     private final String mTag;
     private final View mView;
-    private final BarBackgroundDrawable mBarBackground;
+    protected final BarBackgroundDrawable mBarBackground;
 
     private int mMode;
     private boolean mAlwaysOpaque = false;
@@ -152,7 +152,7 @@ public class BarTransitions {
         return mode == MODE_LIGHTS_OUT || mode == MODE_LIGHTS_OUT_TRANSPARENT;
     }
 
-    private static class BarBackgroundDrawable extends Drawable {
+    protected static class BarBackgroundDrawable extends Drawable {
         private final int mOpaque;
         private final int mSemiTransparent;
         private final int mTransparent;
@@ -171,6 +171,7 @@ public class BarTransitions {
 
         private int mGradientAlphaStart;
         private int mColorStart;
+        private Rect mFrame;
 
 
         public BarBackgroundDrawable(Context context, int gradientResourceId) {
@@ -188,6 +189,10 @@ public class BarTransitions {
                 mWarning = Utils.getColorAttrDefaultColor(context, android.R.attr.colorError);
             }
             mGradient = context.getDrawable(gradientResourceId);
+        }
+
+        public void setFrame(Rect frame) {
+            mFrame = frame;
         }
 
         @Override
@@ -296,7 +301,11 @@ public class BarTransitions {
                 if (mTintFilter != null) {
                     mPaint.setColorFilter(mTintFilter);
                 }
-                canvas.drawPaint(mPaint);
+                if (mFrame != null) {
+                    canvas.drawRect(mFrame, mPaint);
+                } else {
+                    canvas.drawPaint(mPaint);
+                }
             }
             if (mAnimating) {
                 invalidateSelf();  // keep going

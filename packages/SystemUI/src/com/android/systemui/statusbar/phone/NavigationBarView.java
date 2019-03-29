@@ -30,6 +30,7 @@ import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_
 import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_NONE;
 import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_OVERVIEW;
 import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_ROTATION;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
 import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.NAV_BAR_VIEWS;
 
 import android.animation.LayoutTransition;
@@ -172,7 +173,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private RecentsOnboarding mRecentsOnboarding;
     private NotificationPanelView mPanelView;
 
-    private NavBarTintController mColorAdaptionController;
+    private NavBarTintController mTintController;
     private boolean mAssistantAvailable;
     private NavigationPrototypeController mPrototypeController;
     private NavigationGestureAction[] mDefaultGestureMap;
@@ -309,9 +310,9 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         @Override
         public void onColorAdaptChanged(boolean enabled) {
             if (enabled) {
-                mColorAdaptionController.start();
+                mTintController.start();
             } else {
-                mColorAdaptionController.stop();
+                mTintController.stop();
             }
         }
 
@@ -442,15 +443,15 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         mPrototypeController = new NavigationPrototypeController(context);
         mPrototypeController.register();
         mPrototypeController.setOnPrototypeChangedListener(mPrototypeListener);
-        mColorAdaptionController = new NavBarTintController(this, getLightTransitionsController());
+        mTintController = new NavBarTintController(this, getLightTransitionsController());
 
         IntentFilter filter = new IntentFilter(ACTION_OVERLAY_CHANGED);
         filter.addDataScheme("package");
         context.registerReceiver(mOverlaysChangedReceiver, filter);
     }
 
-    public NavBarTintController getColorAdaptionController() {
-        return mColorAdaptionController;
+    public NavBarTintController getTintController() {
+        return mTintController;
     }
 
     public BarTransitions getBarTransitions() {
@@ -476,7 +477,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     @Override
     protected void dispatchDraw(Canvas canvas) {
         super.dispatchDraw(canvas);
-        mColorAdaptionController.onDraw();
+        mTintController.onDraw();
     }
 
     private void updateNavigationGestures() {
@@ -555,6 +556,17 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             return true;
         }
         return super.onTouchEvent(event);
+    }
+
+    void onBarTransition(int newMode) {
+        if (newMode == MODE_OPAQUE) {
+            // If the nav bar background is opaque, stop auto tinting since we know the icons are
+            // showing over a dark background
+            mTintController.stop();
+            getLightTransitionsController().setIconsDark(false /* dark */, true /* animate */);
+        } else {
+            mTintController.start();
+        }
     }
 
     private boolean shouldDeadZoneConsumeTouchEvents(MotionEvent event) {
@@ -978,9 +990,9 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
         // Color adaption is tied with showing home handle, only avaliable if visible
         if (visible) {
-            mColorAdaptionController.start();
+            mTintController.start();
         } else {
-            mColorAdaptionController.stop();
+            mTintController.stop();
         }
     }
 
@@ -1206,6 +1218,19 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             reorient();
             notifyVerticalChangedListener(newVertical);
         }
+
+        if (QuickStepContract.isGesturalMode(getContext())) {
+            // Update the nav bar background to match the height of the visible nav bar
+            int height = mIsVertical
+                    ? getResources().getDimensionPixelSize(
+                            com.android.internal.R.dimen.navigation_bar_height_landscape)
+                    : getResources().getDimensionPixelSize(
+                            com.android.internal.R.dimen.navigation_bar_height);
+            int frameHeight = getResources().getDimensionPixelSize(
+                    com.android.internal.R.dimen.navigation_bar_frame_height);
+            mBarTransitions.setBackgroundFrame(new Rect(0, frameHeight - height, w, h));
+        }
+
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
@@ -1232,9 +1257,9 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         }
 
         if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            mColorAdaptionController.start();
+            mTintController.start();
         } else {
-            mColorAdaptionController.stop();
+            mTintController.stop();
         }
     }
 
@@ -1417,7 +1442,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             mGestureHelper.dump(pw);
         }
         mRecentsOnboarding.dump(pw);
-        mColorAdaptionController.dump(pw);
+        mTintController.dump(pw);
     }
 
     @Override
