@@ -86,7 +86,6 @@ import android.os.Trace;
 import android.sysprop.DisplayProperties;
 import android.text.InputType;
 import android.text.TextUtils;
-import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
 import android.util.LayoutDirection;
@@ -28590,8 +28589,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * hierarchy is traversed: value is either the view itself for appearead events, or its
          * autofill id for disappeared.
          */
-        // TODO(b/121197119): use SparseArray once session id becomes integer
-        ArrayMap<String, ArrayList<Object>> mContentCaptureEvents;
+        SparseArray<ArrayList<Object>> mContentCaptureEvents;
 
         /**
          * Cached reference to the {@link ContentCaptureManager}.
@@ -28621,9 +28619,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 @NonNull View view, boolean appeared) {
             if (mContentCaptureEvents == null) {
                 // Most of the time there will be just one session, so intial capacity is 1
-                mContentCaptureEvents = new ArrayMap<>(1);
+                mContentCaptureEvents = new SparseArray<>(1);
             }
-            String sessionId = session.getId();
+            int sessionId = session.getId();
             // TODO: life would be much easier if we provided a MultiMap implementation somwhere...
             ArrayList<Object> events = mContentCaptureEvents.get(sessionId);
             if (events == null) {
