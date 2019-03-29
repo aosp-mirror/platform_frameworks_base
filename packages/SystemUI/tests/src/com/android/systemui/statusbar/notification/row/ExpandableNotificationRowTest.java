@@ -37,7 +37,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.AppOpsManager;
+import android.app.Notification;
 import android.app.NotificationChannel;
+import android.os.UserHandle;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -354,5 +356,31 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         Assert.assertFalse(mGroupRow.isExpanded());
         mGroupRow.setUserExpanded(true);
         Assert.assertTrue(mGroupRow.isExpanded());
+    }
+
+    @Test
+    public void testGetIsNonblockable() throws Exception {
+        ExpandableNotificationRow row =
+                mNotificationTestHelper.createRow(mNotificationTestHelper.createNotification());
+
+        assertFalse(row.getIsNonblockable());
+    }
+
+    @Test
+    public void testGetIsNonblockable_oemLocked() throws Exception {
+        ExpandableNotificationRow row =
+                mNotificationTestHelper.createRow(mNotificationTestHelper.createNotification());
+        row.getEntry().channel.setImportanceLockedByOEM(true);
+
+        assertTrue(row.getIsNonblockable());
+    }
+
+    @Test
+    public void testGetIsNonblockable_criticalDeviceFunction() throws Exception {
+        ExpandableNotificationRow row =
+                mNotificationTestHelper.createRow(mNotificationTestHelper.createNotification());
+        row.getEntry().channel.setImportanceLockedByCriticalDeviceFunction(true);
+
+        assertTrue(row.getIsNonblockable());
     }
 }

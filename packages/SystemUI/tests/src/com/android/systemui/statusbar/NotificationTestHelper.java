@@ -212,7 +212,7 @@ public class NotificationTestHelper {
      *
      * @return a notification with no special properties
      */
-    private Notification createNotification() {
+    public Notification createNotification() {
         return createNotification(false /* isGroupSummary */, null /* groupKey */);
     }
 
