@@ -297,8 +297,11 @@ public class PhoneStateListener {
      *  it could be the current active opportunistic subscription in use, or the
      *  subscription user selected as default data subscription in DSDS mode.
      *
-     *  Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE
-     *  READ_PHONE_STATE}
+     *  Requires Permission: No permission is required to listen, but notification requires
+     *  {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE} or the calling
+     *  app has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges})
+     *  on any active subscription.
+     *
      *  @see #onActiveDataSubscriptionIdChanged
      */
     public static final int LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE = 0x00400000;
