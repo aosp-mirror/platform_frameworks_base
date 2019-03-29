@@ -267,6 +267,7 @@ public class BootReceiver extends BroadcastReceiver {
                     if (file.isFile() && file.getName().startsWith("tombstone_")) {
                         addFileToDropBox(db, timestamps, headers, file.getPath(), LOG_SIZE,
                                 TAG_TOMBSTONE);
+                        StatsLog.write(StatsLog.TOMB_STONE_OCCURRED);
                     }
                 } catch (IOException e) {
                     Slog.e(TAG, "Can't log tombstone", e);
