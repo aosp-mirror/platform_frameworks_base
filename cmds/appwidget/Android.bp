@@ -1,0 +1,7 @@
+// Copyright 2014 The Android Open Source Project
+
+java_binary {
+    name: "appwidget",
+    wrapper: "appwidget",
+    srcs: ["**/*.java"],
+}
