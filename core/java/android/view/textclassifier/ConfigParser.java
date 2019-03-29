@@ -33,6 +33,10 @@ public final class ConfigParser {
 
     private final KeyValueListParser mParser;
 
+    // TODO: Re-enable DeviceConfig when it has reasonable performance or just delete the
+    // option of using DeviceConfig entirely.
+    static final boolean ENABLE_DEVICE_CONFIG = false;
+
     public ConfigParser(@Nullable String textClassifierConstants) {
         final KeyValueListParser parser = new KeyValueListParser(',');
         try {
@@ -48,39 +52,55 @@ public final class ConfigParser {
      * Reads a boolean flag.
      */
     public boolean getBoolean(String key, boolean defaultValue) {
-        return DeviceConfig.getBoolean(
-                DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
-                key,
-                mParser.getBoolean(key, defaultValue));
+        if (ENABLE_DEVICE_CONFIG) {
+            return DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
+                    key,
+                    mParser.getBoolean(key, defaultValue));
+        } else {
+            return mParser.getBoolean(key, defaultValue);
+        }
     }
 
     /**
      * Reads an integer flag.
      */
     public int getInt(String key, int defaultValue) {
-        return DeviceConfig.getInt(
-                DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
-                key,
-                mParser.getInt(key, defaultValue));
+        if (ENABLE_DEVICE_CONFIG) {
+            return DeviceConfig.getInt(
+                    DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
+                    key,
+                    mParser.getInt(key, defaultValue));
+        } else {
+            return mParser.getInt(key, defaultValue);
+        }
     }
 
     /**
      * Reads a float flag.
      */
     public float getFloat(String key, float defaultValue) {
-        return DeviceConfig.getFloat(
-                DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
-                key,
-                mParser.getFloat(key, defaultValue));
+        if (ENABLE_DEVICE_CONFIG) {
+            return DeviceConfig.getFloat(
+                    DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
+                    key,
+                    mParser.getFloat(key, defaultValue));
+        } else {
+            return mParser.getFloat(key, defaultValue);
+        }
     }
 
     /**
      * Reads a string flag.
      */
     public String getString(String key, String defaultValue) {
-        return DeviceConfig.getString(
-                DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
-                key,
-                mParser.getString(key, defaultValue));
+        if (ENABLE_DEVICE_CONFIG) {
+            return DeviceConfig.getString(
+                    DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
+                    key,
+                    mParser.getString(key, defaultValue));
+        } else {
+            return mParser.getString(key, defaultValue);
+        }
     }
 }
