@@ -7158,6 +7158,10 @@ message MetricsEvent {
 
     // OPEN: Settings > System > Aware > Info dialog
     DIALOG_AWARE_STATUS = 1701;
+
+    // Open: Settings > app > bubble settings > confirmation dialog
+    DIALOG_APP_BUBBLE_SETTINGS = 1702;
+
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
