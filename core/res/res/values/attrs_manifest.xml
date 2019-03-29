@@ -1687,6 +1687,17 @@
                  - {@code false} for apps with targetSdkVersion < 29.
              -->
         <attr name="allowAudioPlaybackCapture" format="boolean" />
+        <!-- If {@code true} this app allows shared/external storage media to be
+             a sandboxed view that only contains files owned by the app.
+             <p>
+             Sandboxed apps can continue to discover and read media belonging to other
+             apps via {@code MediaStore}.
+             <p>
+             The default value is:
+                 - {@code true} for apps with targetSdkVersion >= 29 (Q).
+                 - {@code false} for apps with targetSdkVersion < 29.
+             -->
+        <attr name="allowExternalStorageSandbox" format="boolean" />
     </declare-styleable>
     <!-- The <code>permission</code> tag declares a security permission that can be
          used to control access from other packages to specific components or
