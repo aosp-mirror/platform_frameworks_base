@@ -3305,13 +3305,13 @@
         <xliff:g id="proc" example="Android System">%1$s</xliff:g> process has exceeded
         its memory limit of <xliff:g id="size" example="350MB">%2$s</xliff:g>. A heap dump is available
         for you to share. Be careful: this heap dump can contain any sensitive personal information
-        that the process has access to.</string>
+        that the process has access to, which may include things you\u2019ve typed.</string>
 
     <!-- Text of dialog prompting the user to share a heap dump that they initiated [CHAR LIMIT=NONE] -->
     <string name="dump_heap_ready_text">A heap dump of
         <xliff:g id="proc" example="com.android.example">%1$s</xliff:g>\u2019s process is available
         for you to share. Be careful: this heap dump may contain any sensitive personal information
-        that the process has access to.</string>
+        that the process has access to, which may include things you\u2019ve typed.</string>
 
     <!-- Displayed in the title of the chooser for things to do with text that
          is to be sent to another application. For example, I can send
