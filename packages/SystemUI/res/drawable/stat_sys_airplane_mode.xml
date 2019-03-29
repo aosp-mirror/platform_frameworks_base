@@ -17,4 +17,4 @@
 */
 -->
 <inset xmlns:android="http://schemas.android.com/apk/res/android"
-    android:drawable="@drawable/ic_airplane" />
+    android:drawable="@*android:drawable/ic_qs_airplane" />
