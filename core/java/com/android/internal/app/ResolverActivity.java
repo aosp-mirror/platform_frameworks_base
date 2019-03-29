@@ -83,7 +83,6 @@ import com.android.internal.widget.ResolverDrawerLayout;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -499,33 +498,40 @@ public class ResolverActivity extends Activity {
 
 
     /**
-     * Loads the icon for the provided ApplicationInfo. Defaults to using the application icon over
-     * any IntentFilter or Activity icon to increase user understanding, with an exception for
-     * applications that hold the right permission. Always attempts to use icon resources over
-     * PackageManager loading mechanisms so badging can be done by iconloader.
+     * Loads the icon and label for the provided ApplicationInfo. Defaults to using the application
+     * icon and label over any IntentFilter or Activity icon to increase user understanding, with an
+     * exception for applications that hold the right permission. Always attempts to use available
+     * resources over PackageManager loading mechanisms so badging can be done by iconloader. Uses
+     * Strings to strip creative formatting.
      */
-    private abstract class TargetPresentationGetter {
-        @Nullable abstract Drawable getIconSubstitute();
-        @Nullable abstract String getAppSubLabel();
+    private abstract static class TargetPresentationGetter {
+        @Nullable abstract Drawable getIconSubstituteInternal();
+        @Nullable abstract String getAppSubLabelInternal();
 
+        private Context mCtx;
+        protected PackageManager mPm;
         private final ApplicationInfo mAi;
+        private final int mIconDpi;
         private final boolean mHasSubstitutePermission;
 
-        TargetPresentationGetter(ApplicationInfo ai) {
+        TargetPresentationGetter(Context ctx, int iconDpi, ApplicationInfo ai) {
+            mCtx = ctx;
+            mPm = ctx.getPackageManager();
             mAi = ai;
+            mIconDpi = iconDpi;
             mHasSubstitutePermission = PackageManager.PERMISSION_GRANTED == mPm.checkPermission(
                     android.Manifest.permission.SUBSTITUTE_SHARE_TARGET_APP_NAME_AND_ICON,
                     mAi.packageName);
         }
 
-        Drawable getIcon() {
-            return new BitmapDrawable(getResources(), getIconBitmap());
+        public Drawable getIcon() {
+            return new BitmapDrawable(mCtx.getResources(), getIconBitmap());
         }
 
-        Bitmap getIconBitmap() {
+        public Bitmap getIconBitmap() {
             Drawable dr = null;
             if (mHasSubstitutePermission) {
-                dr = getIconSubstitute();
+                dr = getIconSubstituteInternal();
             }
 
             if (dr == null) {
@@ -542,18 +548,18 @@ public class ResolverActivity extends Activity {
                 dr = mAi.loadIcon(mPm);
             }
 
-            SimpleIconFactory sif = SimpleIconFactory.obtain(ResolverActivity.this);
+            SimpleIconFactory sif = SimpleIconFactory.obtain(mCtx);
             Bitmap icon = sif.createUserBadgedIconBitmap(dr, Process.myUserHandle());
             sif.recycle();
 
             return icon;
         }
 
-        String getLabel() {
+        public String getLabel() {
             String label = null;
             // Apps with the substitute permission will always show the sublabel as their label
             if (mHasSubstitutePermission) {
-                label = getAppSubLabel();
+                label = getAppSubLabelInternal();
             }
 
             if (label == null) {
@@ -563,10 +569,14 @@ public class ResolverActivity extends Activity {
             return label;
         }
 
-        String getSubLabel() {
+        public String getSubLabel() {
             // Apps with the substitute permission will never have a sublabel
             if (mHasSubstitutePermission) return null;
-            return getAppSubLabel();
+            return getAppSubLabelInternal();
+        }
+
+        protected String loadLabelFromResource(Resources res, int resId) {
+            return res.getString(resId);
         }
 
         @Nullable
@@ -576,17 +586,19 @@ public class ResolverActivity extends Activity {
 
     }
 
-    protected class ResolveInfoPresentationGetter extends TargetPresentationGetter {
-
+    /**
+     * Loads the icon and label for the provided ResolveInfo.
+     */
+    @VisibleForTesting
+    public static class ResolveInfoPresentationGetter extends TargetPresentationGetter {
         private final ResolveInfo mRi;
-
-        ResolveInfoPresentationGetter(ResolveInfo ri) {
-            super(ri.activityInfo.applicationInfo);
+        public ResolveInfoPresentationGetter(Context ctx, int iconDpi, ResolveInfo ri) {
+            super(ctx, iconDpi, ri.activityInfo.applicationInfo);
             mRi = ri;
         }
 
         @Override
-        Drawable getIconSubstitute() {
+        Drawable getIconSubstituteInternal() {
             Drawable dr = null;
             try {
                 // Do not use ResolveInfo#getIconResource() as it defaults to the app
@@ -603,20 +615,31 @@ public class ResolverActivity extends Activity {
         }
 
         @Override
-        String getAppSubLabel() {
+        String getAppSubLabelInternal() {
+            // Will default to app name if no intent filter or activity label set, make sure to
+            // check if subLabel matches label before final display
             return (String) mRi.loadLabel(mPm);
         }
     }
 
-    protected class ActivityInfoPresentationGetter extends TargetPresentationGetter {
+    ResolveInfoPresentationGetter makePresentationGetter(ResolveInfo ri) {
+        return new ResolveInfoPresentationGetter(this, mIconDpi, ri);
+    }
+
+    /**
+     * Loads the icon and label for the provided ActivityInfo.
+     */
+    @VisibleForTesting
+    public static class ActivityInfoPresentationGetter extends TargetPresentationGetter {
         private final ActivityInfo mActivityInfo;
-        protected ActivityInfoPresentationGetter(ActivityInfo activityInfo) {
-            super(activityInfo.applicationInfo);
+        public ActivityInfoPresentationGetter(Context ctx, int iconDpi,
+                ActivityInfo activityInfo) {
+            super(ctx, iconDpi, activityInfo.applicationInfo);
             mActivityInfo = activityInfo;
         }
 
         @Override
-        Drawable getIconSubstitute() {
+        Drawable getIconSubstituteInternal() {
             Drawable dr = null;
             try {
                 // Do not use ActivityInfo#getIconResource() as it defaults to the app
@@ -634,13 +657,19 @@ public class ResolverActivity extends Activity {
         }
 
         @Override
-        String getAppSubLabel() {
+        String getAppSubLabelInternal() {
+            // Will default to app name if no activity label set, make sure to check if subLabel
+            // matches label before final display
             return (String) mActivityInfo.loadLabel(mPm);
         }
     }
 
+    protected ActivityInfoPresentationGetter makePresentationGetter(ActivityInfo ai) {
+        return new ActivityInfoPresentationGetter(this, mIconDpi, ai);
+    }
+
     Drawable loadIconForResolveInfo(ResolveInfo ri) {
-        return (new ResolveInfoPresentationGetter(ri)).getIcon();
+        return makePresentationGetter(ri).getIcon();
     }
 
     @Override
@@ -1713,34 +1742,13 @@ public class ResolverActivity extends Activity {
                     }
                 }
 
-                // Check for applications with same name and use application name or
-                // package name if necessary
-                ResolvedComponentInfo rci0 = sortedComponents.get(0);
-                ResolveInfo r0 = rci0.getResolveInfoAt(0);
-                int start = 0;
-                CharSequence r0Label = r0.loadLabel(mPm);
-                mHasExtendedInfo = false;
-                for (int i = 1; i < N; i++) {
-                    if (r0Label == null) {
-                        r0Label = r0.activityInfo.packageName;
+                for (ResolvedComponentInfo rci : sortedComponents) {
+                    final ResolveInfo ri = rci.getResolveInfoAt(0);
+                    if (ri != null) {
+                        ResolveInfoPresentationGetter pg = makePresentationGetter(ri);
+                        addResolveInfoWithAlternates(rci, pg.getSubLabel(), pg.getLabel());
                     }
-                    ResolvedComponentInfo rci = sortedComponents.get(i);
-                    ResolveInfo ri = rci.getResolveInfoAt(0);
-                    CharSequence riLabel = ri.loadLabel(mPm);
-                    if (riLabel == null) {
-                        riLabel = ri.activityInfo.packageName;
-                    }
-                    if (riLabel.equals(r0Label)) {
-                        continue;
-                    }
-                    processGroup(sortedComponents, start, (i - 1), rci0, r0Label);
-                    rci0 = rci;
-                    r0 = ri;
-                    r0Label = riLabel;
-                    start = i;
                 }
-                // Process last group
-                processGroup(sortedComponents, start, (N - 1), rci0, r0Label);
             }
 
             postListReadyRunnable();
@@ -1780,55 +1788,6 @@ public class ResolverActivity extends Activity {
 
         public boolean shouldGetResolvedFilter() {
             return mFilterLastUsed;
-        }
-
-        private void processGroup(List<ResolvedComponentInfo> rList, int start, int end,
-                ResolvedComponentInfo ro, CharSequence roLabel) {
-            // Process labels from start to i
-            int num = end - start+1;
-            if (num == 1) {
-                // No duplicate labels. Use label for entry at start
-                addResolveInfoWithAlternates(ro, null, roLabel);
-            } else {
-                mHasExtendedInfo = true;
-                boolean usePkg = false;
-                final ApplicationInfo ai = ro.getResolveInfoAt(0).activityInfo.applicationInfo;
-                final CharSequence startApp = ai.loadLabel(mPm);
-                if (startApp == null) {
-                    usePkg = true;
-                }
-                if (!usePkg) {
-                    // Use HashSet to track duplicates
-                    HashSet<CharSequence> duplicates =
-                        new HashSet<CharSequence>();
-                    duplicates.add(startApp);
-                    for (int j = start+1; j <= end ; j++) {
-                        ResolveInfo jRi = rList.get(j).getResolveInfoAt(0);
-                        CharSequence jApp = jRi.activityInfo.applicationInfo.loadLabel(mPm);
-                        if ( (jApp == null) || (duplicates.contains(jApp))) {
-                            usePkg = true;
-                            break;
-                        } else {
-                            duplicates.add(jApp);
-                        }
-                    }
-                    // Clear HashSet for later use
-                    duplicates.clear();
-                }
-                for (int k = start; k <= end; k++) {
-                    final ResolvedComponentInfo rci = rList.get(k);
-                    final ResolveInfo add = rci.getResolveInfoAt(0);
-                    final CharSequence extraInfo;
-                    if (usePkg) {
-                        // Use package name for all entries from start to end-1
-                        extraInfo = add.activityInfo.packageName;
-                    } else {
-                        // Use application name for all entries from start to end-1
-                        extraInfo = add.activityInfo.applicationInfo.loadLabel(mPm);
-                    }
-                    addResolveInfoWithAlternates(rci, extraInfo, roLabel);
-                }
-            }
         }
 
         private void addResolveInfoWithAlternates(ResolvedComponentInfo rci,
@@ -1979,31 +1938,32 @@ public class ResolverActivity extends Activity {
                     com.android.internal.R.layout.resolve_list_item, parent, false);
         }
 
-        public boolean showsExtendedInfo(TargetInfo info) {
-            return !TextUtils.isEmpty(info.getExtendedInfo());
-        }
-
         public final void bindView(int position, View view) {
             onBindView(view, getItem(position));
         }
 
-        private void onBindView(View view, TargetInfo info) {
+        protected void onBindView(View view, TargetInfo info) {
             final ViewHolder holder = (ViewHolder) view.getTag();
             if (info == null) {
                 holder.icon.setImageDrawable(
                         getDrawable(R.drawable.resolver_icon_placeholder));
                 return;
             }
+
             final CharSequence label = info.getDisplayLabel();
             if (!TextUtils.equals(holder.text.getText(), label)) {
                 holder.text.setText(info.getDisplayLabel());
             }
-            if (showsExtendedInfo(info)) {
-                holder.text2.setVisibility(View.VISIBLE);
-                holder.text2.setText(info.getExtendedInfo());
-            } else {
-                holder.text2.setVisibility(View.GONE);
+
+            // Always show a subLabel for visual consistency across list items. Show an empty
+            // subLabel if the subLabel is the same as the label
+            CharSequence subLabel = info.getExtendedInfo();
+            if (TextUtils.equals(label, subLabel)) subLabel = null;
+
+            if (!TextUtils.equals(holder.text2.getText(), subLabel)) {
+                holder.text2.setText(subLabel);
             }
+
             if (info instanceof DisplayResolveInfo
                     && !((DisplayResolveInfo) info).hasDisplayIcon()) {
                 new LoadAdapterIconTask((DisplayResolveInfo) info).execute();
