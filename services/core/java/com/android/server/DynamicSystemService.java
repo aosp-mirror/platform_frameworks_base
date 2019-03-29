@@ -70,25 +70,24 @@ public class DynamicSystemService extends IDynamicSystemService.Stub implements 
         checkPermission();
         if (!"running".equals(SystemProperties.get("init.svc.gsid"))) {
             SystemProperties.set("ctl.start", "gsid");
-        }
-        for (int sleepMs = 64; sleepMs <= (GSID_ROUGH_TIMEOUT_MS << 1); sleepMs <<= 1) {
-            try {
-                Thread.sleep(sleepMs);
-            } catch (InterruptedException e) {
-                Slog.e(TAG, "Interrupted when waiting for GSID");
-                break;
-            }
-            if ("running".equals(SystemProperties.get("init.svc.gsid"))) {
-                synchronized (this) {
-                    if (mGsiService == null) {
-                        mGsiService = connect(this);
-                    }
-                    return mGsiService;
+            for (int sleepMs = 64; sleepMs <= (GSID_ROUGH_TIMEOUT_MS << 1); sleepMs <<= 1) {
+                try {
+                    Thread.sleep(sleepMs);
+                } catch (InterruptedException e) {
+                    Slog.e(TAG, "Interrupted when waiting for GSID");
+                    break;
+                }
+                if ("running".equals(SystemProperties.get("init.svc.gsid"))) {
+                    break;
                 }
             }
         }
-        Slog.e(TAG, "Unable to start gsid");
-        return null;
+        synchronized (this) {
+            if (mGsiService == null) {
+                mGsiService = connect(this);
+            }
+            return mGsiService;
+        }
     }
 
     private void checkPermission() {
@@ -125,19 +124,24 @@ public class DynamicSystemService extends IDynamicSystemService.Stub implements 
     }
 
     @Override
+    public boolean isEnabled() throws RemoteException {
+        return getGsiService().isGsiEnabled();
+    }
+
+    @Override
     public boolean remove() throws RemoteException {
         return getGsiService().removeGsiInstall();
     }
 
     @Override
-    public boolean toggle() throws RemoteException {
+    public boolean setEnable(boolean enable) throws RemoteException {
         IGsiService gsiService = getGsiService();
-        if (gsiService.isGsiRunning()) {
-            return gsiService.disableGsiInstall();
-        } else {
+        if (enable) {
             final int status = gsiService.getGsiBootStatus();
             final boolean singleBoot = (status == IGsiService.BOOT_STATUS_SINGLE_BOOT);
             return gsiService.setGsiBootable(singleBoot) == 0;
+        } else {
+            return gsiService.disableGsiInstall();
         }
     }
 
