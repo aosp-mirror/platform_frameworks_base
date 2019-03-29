@@ -1550,6 +1550,18 @@ package android.content.pm {
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.IntentFilterVerificationInfo> CREATOR;
   }
 
+  public class LauncherApps {
+    method @Nullable public android.content.pm.LauncherApps.AppUsageLimit getAppUsageLimit(@NonNull String, @NonNull android.os.UserHandle);
+  }
+
+  public static final class LauncherApps.AppUsageLimit implements android.os.Parcelable {
+    method public int describeContents();
+    method public long getTotalUsageLimit();
+    method public long getUsageRemaining();
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.LauncherApps.AppUsageLimit> CREATOR;
+  }
+
   public class PackageInstaller {
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setPermissionsResult(int, boolean);
   }
