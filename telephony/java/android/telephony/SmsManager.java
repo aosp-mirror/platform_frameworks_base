@@ -941,8 +941,7 @@ public final class SmsManager {
      * @return associated subscription id
      */
     public int getSubscriptionId() {
-        final int subId = (mSubId == DEFAULT_SUBSCRIPTION_ID)
-                ? getDefaultSmsSubscriptionId() : mSubId;
+        final int subId = getSubIdOrDefault();
         boolean isSmsSimPickActivityNeeded = false;
         final Context context = ActivityThread.currentApplication().getApplicationContext();
         try {
@@ -972,6 +971,17 @@ public final class SmsManager {
         }
 
         return subId;
+    }
+
+    /**
+     * @return the subscription ID associated with this {@link SmsManager} or the default set by the
+     * user if this instance was created using {@link SmsManager#getDefault}.
+     *
+     * If there is no default set by the user, this method returns
+     * {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID}.
+     */
+    private int getSubIdOrDefault() {
+        return (mSubId == DEFAULT_SUBSCRIPTION_ID) ? getDefaultSmsSubscriptionId() : mSubId;
     }
 
     /**
@@ -1141,8 +1151,9 @@ public final class SmsManager {
         try {
             ISms iSms = getISmsService();
             if (iSms != null) {
-                success = iSms.enableCellBroadcastForSubscriber(
-                        getSubscriptionId(), messageIdentifier, ranType);
+                // If getSubIdOrDefault() returns INVALID, we will use the default phone internally.
+                success = iSms.enableCellBroadcastForSubscriber(getSubIdOrDefault(),
+                        messageIdentifier, ranType);
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -1177,8 +1188,9 @@ public final class SmsManager {
         try {
             ISms iSms = getISmsService();
             if (iSms != null) {
-                success = iSms.disableCellBroadcastForSubscriber(
-                        getSubscriptionId(), messageIdentifier, ranType);
+                // If getSubIdOrDefault() returns INVALID, we will use the default phone internally.
+                success = iSms.disableCellBroadcastForSubscriber(getSubIdOrDefault(),
+                        messageIdentifier, ranType);
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -1220,7 +1232,8 @@ public final class SmsManager {
         try {
             ISms iSms = getISmsService();
             if (iSms != null) {
-                success = iSms.enableCellBroadcastRangeForSubscriber(getSubscriptionId(),
+                // If getSubIdOrDefault() returns INVALID, we will use the default phone internally.
+                success = iSms.enableCellBroadcastRangeForSubscriber(getSubIdOrDefault(),
                         startMessageId, endMessageId, ranType);
             }
         } catch (RemoteException ex) {
@@ -1263,7 +1276,8 @@ public final class SmsManager {
         try {
             ISms iSms = getISmsService();
             if (iSms != null) {
-                success = iSms.disableCellBroadcastRangeForSubscriber(getSubscriptionId(),
+                // If getSubIdOrDefault() returns INVALID, we will use the default phone internally.
+                success = iSms.disableCellBroadcastRangeForSubscriber(getSubIdOrDefault(),
                         startMessageId, endMessageId, ranType);
             }
         } catch (RemoteException ex) {
