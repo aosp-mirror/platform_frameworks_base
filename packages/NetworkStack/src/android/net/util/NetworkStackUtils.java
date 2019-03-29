@@ -17,10 +17,13 @@
 package android.net.util;
 
 import android.annotation.NonNull;
+import android.util.SparseArray;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.util.List;
+import java.util.function.Predicate;
+
 
 /**
  * Collection of utilities for the network stack.
@@ -64,5 +67,18 @@ public class NetworkStackUtils {
             array[i] = list.get(i);
         }
         return array;
+    }
+
+    /**
+     * @return True if there exists at least one element in the sparse array for which
+     * condition {@code predicate}
+     */
+    public static <T> boolean any(SparseArray<T> array, Predicate<T> predicate) {
+        for (int i = 0; i < array.size(); ++i) {
+            if (predicate.test(array.valueAt(i))) {
+                return true;
+            }
+        }
+        return false;
     }
 }
