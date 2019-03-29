@@ -27,8 +27,8 @@ import java.util.Objects;
 
 /**
  * Defines available network information which includes corresponding subscription id,
- * network plmns and corresponding priority to be used for network selection by Alternative Network
- * Service.
+ * network plmns and corresponding priority to be used for network selection by Opportunistic
+ * Network Service when passed through {@link TelephonyManager#updateAvailableNetworks}
  */
 public final class AvailableNetworkInfo implements Parcelable {
 
@@ -55,15 +55,19 @@ public final class AvailableNetworkInfo implements Parcelable {
 
     /**
      * Priority for the subscription id.
-     * Priorities are in the range of 1 to 3 where 1
-     * has the highest priority.
+     * Priorities are in the range of {@link AvailableNetworkInfo#PRIORITY_LOW} to
+     * {@link AvailableNetworkInfo#PRIORITY_HIGH}
+     * Among all networks available after network scan, subId with highest priority is chosen
+     * for network selection. If there are more than one subId with highest priority then the
+     * network with highest RSRP is chosen.
      */
     private int mPriority;
 
     /**
      * Describes the List of PLMN ids (MCC-MNC) associated with mSubId.
-     * If this entry is left empty, then the platform software will not scan the network
-     * to revalidate the input else platform will scan and verify specified PLMNs are available.
+     * Opportunistic Network Service will scan and verify specified PLMNs are available.
+     * If this entry is left empty, then the Opportunistic Network Service will not scan the network
+     * to validate the network availability.
      */
     private ArrayList<String> mMccMncs;
 
@@ -71,8 +75,8 @@ public final class AvailableNetworkInfo implements Parcelable {
      * Returns the frequency bands associated with the {@link #getMccMncs() MCC/MNCs}.
      * Opportunistic network service will use these bands to scan.
      *
-     * When no specific bands are specified (empty array or null) CBRS band (B48) will be
-     * used for network scan.
+     * When no specific bands are specified (empty array or null) CBRS band
+     * {@link AccessNetworkConstants.EutranBand.BAND_48} will be used for network scan.
      *
      * See {@link AccessNetworkConstants} for details.
      */
@@ -89,8 +93,12 @@ public final class AvailableNetworkInfo implements Parcelable {
     }
 
     /**
-     * Return priority for the subscription id. Valid value will be within
-     * [{@link AvailableNetworkInfo#PRIORITY_HIGH}, {@link AvailableNetworkInfo#PRIORITY_LOW}]
+     * Return priority for the subscription id.
+     * Priorities are in the range of {@link AvailableNetworkInfo#PRIORITY_LOW} to
+     * {@link AvailableNetworkInfo#PRIORITY_HIGH}
+     * Among all networks available after network scan, subId with highest priority is chosen
+     * for network selection. If there are more than one subId with highest priority then the
+     * network with highest RSRP is chosen.
      * @return priority level
      */
     public int getPriority() {
@@ -99,8 +107,9 @@ public final class AvailableNetworkInfo implements Parcelable {
 
     /**
      * Return List of PLMN ids (MCC-MNC) associated with the sub ID.
-     * If this entry is left empty, then the platform software will not scan the network
-     * to revalidate the input.
+     * Opportunistic Network Service will scan and verify specified PLMNs are available.
+     * If this entry is left empty, then the Opportunistic Network Service will not scan the network
+     * to validate the network availability.
      * @return list of PLMN ids
      */
     public @NonNull List<String> getMccMncs() {
@@ -112,6 +121,9 @@ public final class AvailableNetworkInfo implements Parcelable {
      *
      * The returned value is defined in either of {@link AccessNetworkConstants.GeranBand},
      * {@link AccessNetworkConstants.UtranBand} and {@link AccessNetworkConstants.EutranBand}
+     * See {@link AccessNetworkConstants.AccessNetworkType} for details regarding different network
+     * types. When no specific bands are specified (empty array or null) CBRS band
+     * {@link AccessNetworkConstants.EutranBand#BAND_48} will be used for network scan.
      */
     public @NonNull List<Integer> getBands() {
         return (List<Integer>) mBands.clone();
