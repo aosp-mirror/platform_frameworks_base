@@ -13,7 +13,14 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<inset xmlns:android="http://schemas.android.com/apk/res/android"
-    android:insetLeft="2.5dp"
-    android:insetRight="2.5dp"
-    android:drawable="@drawable/ic_volume_ringer_vibrate" />
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:height="17dp"
+    android:width="17dp"
+    android:viewportHeight="24"
+    android:viewportWidth="24">
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.3"
+        android:pathData="M13,8h-2v5.41l3.79,3.8 1.42,-1.42 -3.21,-3.2zM12,4c-4.97,0 -9,4.03 -9,9s4.03,9 9,9 9,-4.03 9,-9 -4.03,-9 -9,-9zM12,20c-3.86,0 -7,-3.14 -7,-7s3.14,-7 7,-7 7,3.14 7,7 -3.14,7 -7,7zM16.056,3.346l1.282,-1.535 4.607,3.85 -1.28,1.54zM2.056,5.654L6.663,1.81l1.28,1.536L3.338,7.19z"/>
+
+</vector>

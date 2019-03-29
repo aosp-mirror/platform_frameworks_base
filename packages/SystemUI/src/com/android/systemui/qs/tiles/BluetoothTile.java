@@ -288,7 +288,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
             // This method returns Pair<Drawable, String> while first value is the drawable
             return BluetoothDeviceLayerDrawable.createLayerDrawable(
                     context,
-                    R.drawable.ic_qs_bluetooth_connected,
+                    R.drawable.ic_bluetooth_connected,
                     mBatteryLevel,
                     mIconScale);
         }
@@ -309,7 +309,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
         @Override
         public Drawable getDrawable(Context context) {
             // This method returns Pair<Drawable, String> - the first value is the drawable.
-            return context.getDrawable(R.drawable.ic_qs_bluetooth_connected);
+            return context.getDrawable(R.drawable.ic_bluetooth_connected);
         }
     }
 
@@ -388,7 +388,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
                     item.tag = device;
                     int state = device.getMaxConnectionState();
                     if (state == BluetoothProfile.STATE_CONNECTED) {
-                        item.iconResId = R.drawable.ic_qs_bluetooth_connected;
+                        item.iconResId = R.drawable.ic_bluetooth_connected;
                         int batteryLevel = device.getBatteryLevel();
                         if (batteryLevel != BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
                             item.icon = new BluetoothBatteryTileIcon(batteryLevel,1 /* iconScale */);

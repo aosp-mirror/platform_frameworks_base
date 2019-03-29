@@ -43,8 +43,7 @@ import javax.inject.Inject;
 
 /** Quick settings tile: Airplane mode **/
 public class AirplaneModeTile extends QSTileImpl<BooleanState> {
-    private final Icon mIcon =
-            ResourceIcon.get(R.drawable.ic_signal_airplane);
+    private final Icon mIcon = ResourceIcon.get(R.drawable.ic_airplane);
     private final GlobalSetting mSetting;
     private final ActivityStarter mActivityStarter;
 

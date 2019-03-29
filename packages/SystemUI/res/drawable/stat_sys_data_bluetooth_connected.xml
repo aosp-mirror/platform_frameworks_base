@@ -1,31 +1,17 @@
-<?xml version="1.0" encoding="utf-8"?>
 <!--
-**
-** Copyright 2017, The Android Open Source Project
-**
-** Licensed under the Apache License, Version 2.0 (the "License");
-** you may not use this file except in compliance with the License.
-** You may obtain a copy of the License at
-**
-**     http://www.apache.org/licenses/LICENSE-2.0
-**
-** Unless required by applicable law or agreed to in writing, software
-** distributed under the License is distributed on an "AS IS" BASIS,
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-** See the License for the specific language governing permissions and
-** limitations under the License.
-*/
+Copyright (C) 2017 The Android Open Source Project
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-        android:width="17dp"
-        android:height="17dp"
-        android:viewportWidth="18.0"
-        android:viewportHeight="18.0">
-    <group
-        android:translateY="0.5"
-        android:translateX="0.5" >
-        <path
-            android:pathData="M9.57,8.5l2.79,-2.78c0.3,-0.3 0.3,-0.8 0,-1.1L9.04,1.29L9.02,1.27C8.7,0.98 8.21,1 7.91,1.31C7.78,1.45 7.71,1.64 7.71,1.84v4.79L4.69,3.61c-0.3,-0.3 -0.79,-0.3 -1.09,0s-0.3,0.79 0,1.09L7.39,8.5L3.6,12.29c-0.3,0.3 -0.3,0.79 0,1.09s0.79,0.3 1.09,0l3.01,-3.01v4.8c0,0.42 0.35,0.77 0.77,0.77c0.19,0 0.39,-0.07 0.53,-0.21l0.04,-0.04l3.32,-3.32c0.3,-0.3 0.3,-0.8 0,-1.1L9.57,8.5zM9.19,6.77v-3.2l1.6,1.6L9.19,6.77zM9.19,13.42v-3.2l1.6,1.6L9.19,13.42zM4.03,9.29c-0.44,0.44 -1.15,0.44 -1.58,0C2.02,8.86 2.02,8.16 2.45,7.72l0.01,-0.01C2.89,7.27 3.59,7.27 4.02,7.7l0.01,0.01C4.47,8.15 4.47,8.85 4.03,9.29zM14.44,7.71c0.44,0.44 0.44,1.15 0,1.58c-0.44,0.44 -1.15,0.44 -1.58,0c-0.44,-0.43 -0.44,-1.13 -0.01,-1.57l0.01,-0.01C13.3,7.28 14,7.27 14.43,7.7C14.44,7.7 14.44,7.71 14.44,7.71z"
-            android:fillColor="#FFFFFF"/>
-    </group>
-</vector>
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/ic_bluetooth_connected" />
