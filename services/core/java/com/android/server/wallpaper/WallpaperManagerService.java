@@ -1719,6 +1719,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     final WallpaperData systemWallpaper =
                             getWallpaperSafeLocked(userId, FLAG_SYSTEM);
                     switchWallpaper(systemWallpaper, null);
+                    notifyCallbacksLocked(systemWallpaper);
                 }
 
                 // Make sure that the SELinux labeling of all the relevant files is correct.
