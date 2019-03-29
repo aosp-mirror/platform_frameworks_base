@@ -62,7 +62,7 @@ public final class DnsResolver {
     private static final String TAG = "DnsResolver";
     private static final int FD_EVENTS = EVENT_INPUT | EVENT_ERROR;
     private static final int MAXPACKET = 8 * 1024;
-    private static final int SLEEP_TIME = 2;
+    private static final int SLEEP_TIME_MS = 2;
 
     @IntDef(prefix = { "CLASS_" }, value = {
             CLASS_IN
@@ -228,8 +228,11 @@ public final class DnsResolver {
             return;
         }
 
-        registerFDListener(executor, queryfd, callback, cancellationSignal, lock);
-        maybeAddCancellationSignal(cancellationSignal, queryfd, lock);
+        synchronized (lock)  {
+            registerFDListener(executor, queryfd, callback, cancellationSignal, lock);
+            if (cancellationSignal == null) return;
+            addCancellationSignal(cancellationSignal, queryfd, lock);
+        }
     }
 
     /**
@@ -267,9 +270,11 @@ public final class DnsResolver {
             });
             return;
         }
-
-        registerFDListener(executor, queryfd, callback, cancellationSignal, lock);
-        maybeAddCancellationSignal(cancellationSignal, queryfd, lock);
+        synchronized (lock)  {
+            registerFDListener(executor, queryfd, callback, cancellationSignal, lock);
+            if (cancellationSignal == null) return;
+            addCancellationSignal(cancellationSignal, queryfd, lock);
+        }
     }
 
     private class InetAddressAnswerAccumulator extends InetAddressAnswerCallback {
@@ -368,10 +373,10 @@ public final class DnsResolver {
             queryCount++;
         } else v6fd = null;
 
-        // TODO: Use device flag to controll the sleep time.
+        // TODO: Use device flag to control the sleep time.
         // Avoiding gateways drop packets if queries are sent too close together
         try {
-            Thread.sleep(SLEEP_TIME);
+            Thread.sleep(SLEEP_TIME_MS);
         } catch (InterruptedException ex) { }
 
         if (queryIpv4) {
@@ -391,16 +396,21 @@ public final class DnsResolver {
         final InetAddressAnswerAccumulator accumulator =
                 new InetAddressAnswerAccumulator(queryCount, callback);
 
-        if (queryIpv6) registerFDListener(executor, v6fd, accumulator, cancellationSignal, lock);
-        if (queryIpv4) registerFDListener(executor, v4fd, accumulator, cancellationSignal, lock);
-
-        if (cancellationSignal == null) return;
-        cancellationSignal.setOnCancelListener(() -> {
-            synchronized (lock)  {
-                if (queryIpv4) cancelQuery(v4fd);
-                if (queryIpv6) cancelQuery(v6fd);
+        synchronized (lock)  {
+            if (queryIpv6) {
+                registerFDListener(executor, v6fd, accumulator, cancellationSignal, lock);
             }
-        });
+            if (queryIpv4) {
+                registerFDListener(executor, v4fd, accumulator, cancellationSignal, lock);
+            }
+            if (cancellationSignal == null) return;
+            cancellationSignal.setOnCancelListener(() -> {
+                synchronized (lock)  {
+                    if (queryIpv4) cancelQuery(v4fd);
+                    if (queryIpv6) cancelQuery(v6fd);
+                }
+            });
+        }
     }
 
     private <T> void registerFDListener(@NonNull Executor executor,
@@ -443,9 +453,8 @@ public final class DnsResolver {
         resNetworkCancel(queryfd);  // Closes fd, marks it invalid.
     }
 
-    private void maybeAddCancellationSignal(@Nullable CancellationSignal cancellationSignal,
+    private void addCancellationSignal(@NonNull CancellationSignal cancellationSignal,
             @NonNull FileDescriptor queryfd, @NonNull Object lock) {
-        if (cancellationSignal == null) return;
         cancellationSignal.setOnCancelListener(() -> {
             synchronized (lock)  {
                 cancelQuery(queryfd);
