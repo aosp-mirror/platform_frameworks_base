@@ -205,6 +205,7 @@ public final class DnsResolver {
         if (cancellationSignal != null && cancellationSignal.isCanceled()) {
             return;
         }
+        final Object lock = new Object();
         final FileDescriptor queryfd;
         try {
             queryfd = resNetworkSend((network != null
@@ -214,8 +215,8 @@ public final class DnsResolver {
             return;
         }
 
-        maybeAddCancellationSignal(cancellationSignal, queryfd);
-        registerFDListener(executor, queryfd, callback);
+        maybeAddCancellationSignal(cancellationSignal, queryfd, lock);
+        registerFDListener(executor, queryfd, callback, cancellationSignal, lock);
     }
 
     /**
@@ -242,6 +243,7 @@ public final class DnsResolver {
         if (cancellationSignal != null && cancellationSignal.isCanceled()) {
             return;
         }
+        final Object lock = new Object();
         final FileDescriptor queryfd;
         try {
             queryfd = resNetworkQuery((network != null
@@ -251,31 +253,37 @@ public final class DnsResolver {
             return;
         }
 
-        maybeAddCancellationSignal(cancellationSignal, queryfd);
-        registerFDListener(executor, queryfd, callback);
+        maybeAddCancellationSignal(cancellationSignal, queryfd, lock);
+        registerFDListener(executor, queryfd, callback, cancellationSignal, lock);
     }
 
     private <T> void registerFDListener(@NonNull Executor executor,
-            @NonNull FileDescriptor queryfd, @NonNull AnswerCallback<T> answerCallback) {
+            @NonNull FileDescriptor queryfd, @NonNull AnswerCallback<T> answerCallback,
+            @Nullable CancellationSignal cancellationSignal, @NonNull Object lock) {
         Looper.getMainLooper().getQueue().addOnFileDescriptorEventListener(
                 queryfd,
                 FD_EVENTS,
                 (fd, events) -> {
                     executor.execute(() -> {
-                        byte[] answerbuf = null;
-                        try {
-                            answerbuf = resNetworkResult(fd);
-                        } catch (ErrnoException e) {
-                            Log.e(TAG, "resNetworkResult:" + e.toString());
-                            answerCallback.onQueryException(e);
-                            return;
-                        }
+                        synchronized (lock) {
+                            if (cancellationSignal != null && cancellationSignal.isCanceled()) {
+                                return;
+                            }
+                            byte[] answerbuf = null;
+                            try {
+                                answerbuf = resNetworkResult(fd);
+                            } catch (ErrnoException e) {
+                                Log.e(TAG, "resNetworkResult:" + e.toString());
+                                answerCallback.onQueryException(e);
+                                return;
+                            }
 
-                        try {
-                            answerCallback.onAnswer(
-                                    answerCallback.parser.parse(answerbuf));
-                        } catch (ParseException e) {
-                            answerCallback.onParseException(e);
+                            try {
+                                answerCallback.onAnswer(
+                                        answerCallback.parser.parse(answerbuf));
+                            } catch (ParseException e) {
+                                answerCallback.onParseException(e);
+                            }
                         }
                     });
                     // Unregister this fd listener
@@ -284,14 +292,16 @@ public final class DnsResolver {
     }
 
     private void maybeAddCancellationSignal(@Nullable CancellationSignal cancellationSignal,
-            @NonNull FileDescriptor queryfd) {
+            @NonNull FileDescriptor queryfd, @NonNull Object lock) {
         if (cancellationSignal == null) return;
-        cancellationSignal.setOnCancelListener(
-                () -> {
-                    Looper.getMainLooper().getQueue()
-                            .removeOnFileDescriptorEventListener(queryfd);
-                    resNetworkCancel(queryfd);
-            });
+        cancellationSignal.setOnCancelListener(() -> {
+            synchronized (lock)  {
+                if (!queryfd.valid()) return;
+                Looper.getMainLooper().getQueue()
+                        .removeOnFileDescriptorEventListener(queryfd);
+                resNetworkCancel(queryfd);
+            }
+        });
     }
 
     private static class DnsAddressAnswer extends DnsPacket {
