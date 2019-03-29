@@ -17,6 +17,7 @@
 package com.android.server.accessibility;
 
 import static android.view.MotionEvent.ACTION_DOWN;
+import static android.view.MotionEvent.ACTION_HOVER_MOVE;
 import static android.view.MotionEvent.ACTION_UP;
 import static android.view.WindowManagerPolicyConstants.FLAG_PASS_TO_USER;
 
@@ -116,6 +117,7 @@ public class MotionEventInjectorTest {
 
     MotionEvent mClickDownEvent;
     MotionEvent mClickUpEvent;
+    MotionEvent mHoverMoveEvent;
 
     ArgumentCaptor<MotionEvent> mCaptor1 = ArgumentCaptor.forClass(MotionEvent.class);
     ArgumentCaptor<MotionEvent> mCaptor2 = ArgumentCaptor.forClass(MotionEvent.class);
@@ -151,6 +153,10 @@ public class MotionEventInjectorTest {
         mClickUpEvent = MotionEvent.obtain(0, CLICK_DURATION, ACTION_UP, CLICK_POINT.x,
                 CLICK_POINT.y, 0);
         mClickUpEvent.setSource(InputDevice.SOURCE_TOUCHSCREEN);
+
+        mHoverMoveEvent = MotionEvent.obtain(0, 0, ACTION_HOVER_MOVE, CLICK_POINT.x, CLICK_POINT.y,
+                0);
+        mHoverMoveEvent.setSource(InputDevice.SOURCE_MOUSE);
 
         mIsLineStart = allOf(IS_ACTION_DOWN, isAtPoint(LINE_START), hasStandardInitialization(),
                 hasTimeFromDown(0));
@@ -298,6 +304,23 @@ public class MotionEventInjectorTest {
         assertThat(mCaptor1.getAllValues().get(1), IS_ACTION_CANCEL);
         assertThat(mCaptor1.getAllValues().get(2), mIsClickDown);
         verify(mServiceInterface).onPerformGestureResult(LINE_SEQUENCE, false);
+    }
+
+    @Test
+    public void
+            testOnMotionEvents_fromMouseWithInjectedGestureInProgress_shouldNotCancelAndPassReal()
+            throws RemoteException {
+        EventStreamTransformation next = attachMockNext(mMotionEventInjector);
+        injectEventsSync(mLineList, mServiceInterface, LINE_SEQUENCE);
+        mMessageCapturingHandler.sendOneMessage(); // Send a motion event
+        mMotionEventInjector.onMotionEvent(mHoverMoveEvent, mHoverMoveEvent, 0);
+        mMessageCapturingHandler.sendAllMessages();
+
+        verify(next, times(3)).onMotionEvent(mCaptor1.capture(), mCaptor2.capture(), anyInt());
+        assertThat(mCaptor1.getAllValues().get(0), mIsLineStart);
+        assertThat(mCaptor1.getAllValues().get(1), mIsLineMiddle);
+        assertThat(mCaptor1.getAllValues().get(2), mIsLineEnd);
+        verify(mServiceInterface).onPerformGestureResult(LINE_SEQUENCE, true);
     }
 
     @Test
