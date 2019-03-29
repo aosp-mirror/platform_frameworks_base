@@ -72,6 +72,7 @@ import static android.view.WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_FREEFO
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
 
+import static com.android.server.am.ActivityManagerService.MY_PID;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.policy.WindowManagerPolicy.TRANSIT_ENTER;
 import static com.android.server.policy.WindowManagerPolicy.TRANSIT_EXIT;
@@ -2349,12 +2350,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private Configuration getProcessGlobalConfiguration() {
         // For child windows we want to use the pid for the parent window in case the the child
         // window was added from another process.
-        final int pid = getParentWindow() != null ? getParentWindow().mSession.mPid : mSession.mPid;
+        final WindowState parentWindow = getParentWindow();
+        final int pid = parentWindow != null ? parentWindow.mSession.mPid : mSession.mPid;
         final Configuration processConfig =
                 mWmService.mAtmService.getGlobalConfigurationForPid(pid);
-        mTempConfiguration.setTo(processConfig == null
-                ? mWmService.mRoot.getConfiguration() : processConfig);
-        return mTempConfiguration;
+        return processConfig;
     }
 
     void getMergedConfiguration(MergedConfiguration outConfiguration) {
@@ -2989,11 +2989,29 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return mAppToken.mFrozenMergedConfig.peek();
         }
 
+        // If the process has not registered to any display to listen to the configuration change,
+        // we can simply return the mFullConfiguration as default.
+        if (!registeredForDisplayConfigChanges()) {
+            return super.getConfiguration();
+        }
+
         // We use the process config this window is associated with as the based global config since
-        // the process can override it config, but isn't part of the window hierarchy.
-        final Configuration config = getProcessGlobalConfiguration();
-        config.updateFrom(getMergedOverrideConfiguration());
-        return config;
+        // the process can override its config, but isn't part of the window hierarchy.
+        mTempConfiguration.setTo(getProcessGlobalConfiguration());
+        mTempConfiguration.updateFrom(getMergedOverrideConfiguration());
+        return mTempConfiguration;
+    }
+
+    /** @return {@code true} if the process registered to a display as a config listener. */
+    private boolean registeredForDisplayConfigChanges() {
+        final WindowState parentWindow = getParentWindow();
+        final Session session = parentWindow != null ? parentWindow.mSession : mSession;
+        // System process or invalid process cannot register to display config change.
+        if (session.mPid == MY_PID || session.mPid < 0) return false;
+        WindowProcessController app =
+                mWmService.mAtmService.getProcessController(session.mPid, session.mUid);
+        if (app == null || !app.registeredForDisplayConfigChanges()) return false;
+        return true;
     }
 
     void reportResized() {
