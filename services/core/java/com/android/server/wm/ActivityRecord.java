@@ -1102,7 +1102,7 @@ final class ActivityRecord extends ConfigurationContainer {
                     ActivityTaskManagerService.getInputDispatchingTimeoutLocked(this)
                             * 1000000L, fullscreen,
                     (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0, appInfo.targetSdkVersion,
-                    info.screenOrientation, mRotationAnimationHint, info.configChanges,
+                    info.screenOrientation, mRotationAnimationHint,
                     mLaunchTaskBehind, isAlwaysFocusable());
             if (DEBUG_TOKEN_MOVEMENT || DEBUG_ADD_REMOVE) {
                 Slog.v(TAG, "addAppToken: "
@@ -1151,11 +1151,11 @@ final class ActivityRecord extends ConfigurationContainer {
     AppWindowToken createAppWindow(WindowManagerService service, IApplicationToken token,
             boolean voiceInteraction, DisplayContent dc, long inputDispatchingTimeoutNanos,
             boolean fullscreen, boolean showForAllUsers, int targetSdk, int orientation,
-            int rotationAnimationHint, int configChanges, boolean launchTaskBehind,
+            int rotationAnimationHint, boolean launchTaskBehind,
             boolean alwaysFocusable) {
         return new AppWindowToken(service, token, mActivityComponent, voiceInteraction, dc,
                 inputDispatchingTimeoutNanos, fullscreen, showForAllUsers, targetSdk, orientation,
-                rotationAnimationHint, configChanges, launchTaskBehind, alwaysFocusable,
+                rotationAnimationHint, launchTaskBehind, alwaysFocusable,
                 this);
     }
 

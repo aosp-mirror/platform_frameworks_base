@@ -1392,11 +1392,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 return WindowManagerGlobal.ADD_INVALID_DISPLAY;
             }
 
-            final boolean hasStatusBarServicePermission =
-                    mContext.checkCallingOrSelfPermission(permission.STATUS_BAR_SERVICE)
-                            == PackageManager.PERMISSION_GRANTED;
             final DisplayPolicy displayPolicy = displayContent.getDisplayPolicy();
-            displayPolicy.adjustWindowParamsLw(win, win.mAttrs, hasStatusBarServicePermission);
+            displayPolicy.adjustWindowParamsLw(win, win.mAttrs, Binder.getCallingPid(),
+                    Binder.getCallingUid());
             win.setShowToOwnerOnlyLocked(mPolicy.checkShowToOwnerOnly(attrs));
 
             res = displayPolicy.prepareAddWindowLw(win, attrs);
@@ -1932,6 +1930,11 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    private boolean hasStatusBarPermission(int pid, int uid) {
+        return mContext.checkPermission(permission.STATUS_BAR, pid, uid)
+                        == PackageManager.PERMISSION_GRANTED;
+    }
+
     public int relayoutWindow(Session session, IWindow client, int seq, LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewVisibility, int flags,
             long frameNumber, Rect outFrame, Rect outOverscanInsets, Rect outContentInsets,
@@ -1940,13 +1943,8 @@ public class WindowManagerService extends IWindowManager.Stub
             SurfaceControl outSurfaceControl, InsetsState outInsetsState) {
         int result = 0;
         boolean configChanged;
-        final boolean hasStatusBarPermission =
-                mContext.checkCallingOrSelfPermission(permission.STATUS_BAR)
-                        == PackageManager.PERMISSION_GRANTED;
-        final boolean hasStatusBarServicePermission =
-                mContext.checkCallingOrSelfPermission(permission.STATUS_BAR_SERVICE)
-                        == PackageManager.PERMISSION_GRANTED;
-
+        final int pid = Binder.getCallingPid();
+        final int uid = Binder.getCallingUid();
         long origId = Binder.clearCallingIdentity();
         final int displayId;
         synchronized (mGlobalLock) {
@@ -1973,13 +1971,13 @@ public class WindowManagerService extends IWindowManager.Stub
             int attrChanges = 0;
             int flagChanges = 0;
             if (attrs != null) {
-                displayPolicy.adjustWindowParamsLw(win, attrs, hasStatusBarServicePermission);
+                displayPolicy.adjustWindowParamsLw(win, attrs, pid, uid);
                 // if they don't have the permission, mask out the status bar bits
                 if (seq == win.mSeq) {
                     int systemUiVisibility = attrs.systemUiVisibility
                             | attrs.subtreeSystemUiVisibility;
                     if ((systemUiVisibility & DISABLE_MASK) != 0) {
-                        if (!hasStatusBarPermission) {
+                        if (!hasStatusBarPermission(pid, uid)) {
                             systemUiVisibility &= ~DISABLE_MASK;
                         }
                     }
@@ -2050,7 +2048,6 @@ public class WindowManagerService extends IWindowManager.Stub
                             && viewVisibility == View.VISIBLE;
             boolean imMayMove = (flagChanges & (FLAG_ALT_FOCUSABLE_IM | FLAG_NOT_FOCUSABLE)) != 0
                     || becameVisible;
-            final boolean isDefaultDisplay = win.isDefaultDisplay();
             boolean focusMayChange = win.mViewVisibility != viewVisibility
                     || ((flagChanges & FLAG_NOT_FOCUSABLE) != 0)
                     || (!win.mRelayoutCalled);
@@ -7215,11 +7212,9 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public boolean isStackVisible(int windowingMode) {
-            synchronized (mGlobalLock) {
-                final DisplayContent dc = getDefaultDisplayContentLocked();
-                return dc.isStackVisible(windowingMode);
-            }
+        public boolean isStackVisibleLw(int windowingMode) {
+            final DisplayContent dc = getDefaultDisplayContentLocked();
+            return dc.isStackVisible(windowingMode);
         }
 
         @Override

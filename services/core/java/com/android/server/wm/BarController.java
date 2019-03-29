@@ -173,8 +173,9 @@ public class BarController {
         }
         final boolean wasVis = mWin.isVisibleLw();
         final boolean wasAnim = mWin.isAnimatingLw();
-        final boolean change = show ? mWin.showLw(!mNoAnimationOnNextShow && !skipAnimation())
-                : mWin.hideLw(!mNoAnimationOnNextShow && !skipAnimation());
+        final boolean skipAnim = skipAnimation();
+        final boolean change = show ? mWin.showLw(!mNoAnimationOnNextShow && !skipAnim)
+                : mWin.hideLw(!mNoAnimationOnNextShow && !skipAnim);
         mNoAnimationOnNextShow = false;
         final int state = computeStateLw(wasVis, wasAnim, mWin, change);
         final boolean stateChanged = updateStateLw(state);

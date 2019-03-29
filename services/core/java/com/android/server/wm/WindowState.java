@@ -308,6 +308,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     private final MergedConfiguration mLastReportedConfiguration = new MergedConfiguration();
 
+    /** @see #isLastConfigReportedToClient() */
+    private boolean mLastConfigReportedToClient;
+
     private final Configuration mTempConfiguration = new Configuration();
 
     /**
@@ -1201,7 +1204,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         boolean didFrameInsetsChange = setReportResizeHints();
-        boolean configChanged = isConfigChanged();
+        boolean configChanged = !isLastConfigReportedToClient();
         if (DEBUG_CONFIGURATION && configChanged) {
             Slog.v(TAG_WM, "Win " + this + " config changed: " + getConfiguration());
         }
@@ -1781,9 +1784,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return getDisplayContent().getBounds().equals(getBounds());
     }
 
-    /** Returns true if last applied config was not yet requested by client. */
-    boolean isConfigChanged() {
-        return !getLastReportedConfiguration().equals(getConfiguration());
+    /**
+     * @return {@code true} if last applied config was reported to the client already, {@code false}
+     *         otherwise.
+     */
+    boolean isLastConfigReportedToClient() {
+        return mLastConfigReportedToClient;
+    }
+
+    @Override
+    void onMergedOverrideConfigurationChanged() {
+        super.onMergedOverrideConfigurationChanged();
+        mLastConfigReportedToClient = false;
     }
 
     void onWindowReplacementTimeout() {
@@ -2299,11 +2311,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void prepareWindowToDisplayDuringRelayout(boolean wasVisible) {
         // We need to turn on screen regardless of visibility.
         boolean hasTurnScreenOnFlag = (mAttrs.flags & FLAG_TURN_SCREEN_ON) != 0;
-        boolean allowTheaterMode =
-                mWmService.mAllowTheaterModeWakeFromLayout || Settings.Global.getInt(
-                        mWmService.mContext.getContentResolver(), Settings.Global.THEATER_MODE_ON, 0)
-                        == 0;
-        boolean canTurnScreenOn = mAppToken == null || mAppToken.canTurnScreenOn();
 
         // The screen will turn on if the following conditions are met
         // 1. The window has the flag FLAG_TURN_SCREEN_ON
@@ -2317,6 +2324,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // be occurring while turning off the screen. This would lead to the screen incorrectly
         // turning back on.
         if (hasTurnScreenOnFlag) {
+            boolean allowTheaterMode = mWmService.mAllowTheaterModeWakeFromLayout
+                    || Settings.Global.getInt(mWmService.mContext.getContentResolver(),
+                            Settings.Global.THEATER_MODE_ON, 0) == 0;
+            boolean canTurnScreenOn = mAppToken == null || mAppToken.canTurnScreenOn();
+
             if (allowTheaterMode && canTurnScreenOn && !mPowerManagerWrapper.isInteractive()) {
                 if (DEBUG_VISIBILITY || DEBUG_POWER) {
                     Slog.v(TAG, "Relayout window turning screen on: " + this);
@@ -2365,6 +2377,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void setLastReportedMergedConfiguration(MergedConfiguration config) {
         mLastReportedConfiguration.setTo(config);
+        mLastConfigReportedToClient = true;
     }
 
     void getLastReportedMergedConfiguration(MergedConfiguration config) {
@@ -2512,6 +2525,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     boolean showLw(boolean doAnimation, boolean requestAnim) {
+        if (mPolicyVisibility && mPolicyVisibilityAfterAnim) {
+            // Already showing.
+            return false;
+        }
         if (isHiddenFromUserLocked()) {
             return false;
         }
@@ -2530,10 +2547,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         if (mForceHideNonSystemOverlayWindow) {
             // This is an alert window that is currently force hidden.
-            return false;
-        }
-        if (mPolicyVisibility && mPolicyVisibilityAfterAnim) {
-            // Already showing.
             return false;
         }
         if (DEBUG_VISIBILITY) Slog.v(TAG, "Policy visibility true: " + this);
@@ -3529,7 +3542,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     void transformClipRectFromScreenToSurfaceSpace(Rect clipRect) {
-         if (mHScale >= 0) {
+        if (mHScale == 1 && mVScale == 1) {
+            return;
+        }
+        if (mHScale >= 0) {
             clipRect.left = (int) (clipRect.left / mHScale);
             clipRect.right = (int) Math.ceil(clipRect.right / mHScale);
         }
@@ -4385,7 +4401,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // scale function because we want to round things to make the crop
         // always round to a larger rect to ensure we don't crop too
         // much and hide part of the window that should be seen.
-        if (inSizeCompatMode() && mInvGlobalScale != 1.0f) {
+        if (mInvGlobalScale != 1.0f && inSizeCompatMode()) {
             final float scale = mInvGlobalScale;
             systemDecorRect.left = (int) (systemDecorRect.left * scale - 0.5f);
             systemDecorRect.top = (int) (systemDecorRect.top * scale - 0.5f);
@@ -4440,7 +4456,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         mWinAnimator.mEnteringAnimation = true;
 
-        prepareWindowToDisplayDuringRelayout(wasVisible);
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "prepareToDisplay");
+        try {
+            prepareWindowToDisplayDuringRelayout(wasVisible);
+        } finally {
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+        }
 
         if ((attrChanges & FORMAT_CHANGED) != 0) {
             // If the format can't be changed in place, preserve the old surface until the app draws

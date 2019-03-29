@@ -153,7 +153,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     /** @see WindowContainer#fillsParent() */
     private boolean mFillsParent;
-    boolean layoutConfigChanges;
     boolean mShowForAllUsers;
     int mTargetSdk;
 
@@ -337,7 +336,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     AppWindowToken(WindowManagerService service, IApplicationToken token,
             ComponentName activityComponent, boolean voiceInteraction, DisplayContent dc,
             long inputDispatchingTimeoutNanos, boolean fullscreen, boolean showForAllUsers,
-            int targetSdk, int orientation, int rotationAnimationHint, int configChanges,
+            int targetSdk, int orientation, int rotationAnimationHint,
             boolean launchTaskBehind, boolean alwaysFocusable,
             ActivityRecord activityRecord) {
         this(service, token, activityComponent, voiceInteraction, dc, fullscreen);
@@ -348,7 +347,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         mShowForAllUsers = showForAllUsers;
         mTargetSdk = targetSdk;
         mOrientation = orientation;
-        layoutConfigChanges = (configChanges & (CONFIG_SCREEN_SIZE | CONFIG_ORIENTATION)) != 0;
         mLaunchTaskBehind = launchTaskBehind;
         mAlwaysFocusable = alwaysFocusable;
         mRotationAnimationHint = rotationAnimationHint;
@@ -1976,7 +1974,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         final boolean surfaceReady = w.isDrawnLw()  // Regular case
                 || w.mWinAnimator.mSurfaceDestroyDeferred  // The preserved surface is still ready.
                 || w.isDragResizeChanged();  // Waiting for relayoutWindow to call preserveSurface.
-        final boolean needsLetterbox = w.isLetterboxedAppWindow() && fillsParent() && surfaceReady;
+        final boolean needsLetterbox = surfaceReady && w.isLetterboxedAppWindow() && fillsParent();
         if (needsLetterbox) {
             if (mLetterbox == null) {
                 mLetterbox = new Letterbox(() -> makeChildSurface(null));

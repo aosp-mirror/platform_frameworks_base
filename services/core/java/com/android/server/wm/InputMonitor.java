@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.WindowManager.INPUT_CONSUMER_NAVIGATION;
 import static android.view.WindowManager.INPUT_CONSUMER_PIP;
 import static android.view.WindowManager.INPUT_CONSUMER_RECENTS_ANIMATION;
@@ -190,8 +191,13 @@ final class InputMonitor {
     }
 
     void layoutInputConsumers(int dw, int dh) {
-        for (int i = mInputConsumers.size() - 1; i >= 0; i--) {
-            mInputConsumers.valueAt(i).layout(mInputTransaction, dw, dh);
+        try {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "layoutInputConsumer");
+            for (int i = mInputConsumers.size() - 1; i >= 0; i--) {
+                mInputConsumers.valueAt(i).layout(mInputTransaction, dw, dh);
+            }
+        } finally {
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
     }
 
@@ -401,7 +407,7 @@ final class InputMonitor {
         final InputWindowHandle mInvalidInputWindow = new InputWindowHandle(null, null, mDisplayId);
 
         private void updateInputWindows(boolean inDrag) {
-            Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "updateInputWindows");
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "updateInputWindows");
 
             navInputConsumer = getInputConsumer(INPUT_CONSUMER_NAVIGATION);
             pipInputConsumer = getInputConsumer(INPUT_CONSUMER_PIP);
@@ -429,7 +435,7 @@ final class InputMonitor {
 
             mDisplayContent.scheduleAnimation();
 
-            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
 
         @Override

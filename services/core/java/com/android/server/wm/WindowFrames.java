@@ -244,8 +244,6 @@ public class WindowFrames {
     void calculateOutsets() {
         if (mHasOutsets) {
             InsetUtils.insetsBetweenFrames(mOutsetFrame, mContentFrame, mOutsets);
-        } else {
-            mOutsets.setEmpty();
         }
     }
 
@@ -373,7 +371,13 @@ public class WindowFrames {
      * Sets whether the frame has outsets.
      */
     public void setHasOutsets(boolean hasOutsets) {
+        if (mHasOutsets == hasOutsets) {
+            return;
+        }
         mHasOutsets = hasOutsets;
+        if (!hasOutsets) {
+            mOutsets.setEmpty();
+        }
     }
 
     /**
