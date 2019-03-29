@@ -23333,6 +23333,23 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             return results;
         }
+
+        @Override
+        public int getLocationFlags(String packageName) throws RemoteException {
+            int callingUser = UserHandle.getUserId(Binder.getCallingUid());
+            ApplicationInfo appInfo = getApplicationInfo(packageName,
+                    /*flags*/ 0,
+                    /*userId*/ callingUser);
+            if (appInfo == null) {
+                throw new RemoteException(
+                        "Couldn't get ApplicationInfo for package " + packageName);
+            }
+            return ((appInfo.isSystemApp() ? IPackageManagerNative.LOCATION_SYSTEM : 0)
+                    | (appInfo.isVendor() ? IPackageManagerNative.LOCATION_VENDOR : 0)
+                    | (appInfo.isProduct() ? IPackageManagerNative.LOCATION_PRODUCT : 0)
+                    | (appInfo.isProductServices()
+                            ? IPackageManagerNative.LOCATION_PRODUCT_SERVICES : 0));
+        }
     }
 
     private class PackageManagerInternalImpl extends PackageManagerInternal {
