@@ -237,6 +237,18 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
     }
 
     @Test
+    public void screenOff_softBlanks() throws Exception {
+        mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
+        mScreen.transitionTo(INITIALIZED, DOZE_AOD);
+        mScreen.transitionTo(DOZE_AOD, DOZE);
+        assertEquals(1f, mHostFake.aodDimmingScrimOpacity, 0.001f /* delta */);
+
+        mScreen.transitionTo(DOZE, DOZE_AOD);
+        mSensor.sendSensorEvent(2);
+        assertEquals(0f, mHostFake.aodDimmingScrimOpacity, 0.001f /* delta */);
+    }
+
+    @Test
     public void pausingAod_unblanksAfterSensor() throws Exception {
         mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
         mScreen.transitionTo(INITIALIZED, DOZE_AOD);
