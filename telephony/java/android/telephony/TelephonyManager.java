@@ -10402,6 +10402,9 @@ public class TelephonyManager {
     /**
      * Set preferred opportunistic data subscription id.
      *
+     * Switch internet data to preferred opportunistic data subscription id. This api
+     * can result in lose of internet connectivity for short period of time while internet data
+     * is handed over.
      * <p>Requires that the calling app has carrier privileges on both primary and
      * secondary subscriptions (see
      * {@link #hasCarrierPrivileges}), or has permission
@@ -10480,9 +10483,11 @@ public class TelephonyManager {
      *
      * This api should be called to inform OpportunisticNetwork Service about the availability
      * of a network at the current location. This information will be used by OpportunisticNetwork
-     * service to decide to attach to the network opportunistically. If an empty list is passed,
+     * service to enable modem stack and to attach to the network. If an empty list is passed,
      * it is assumed that no network is available and will result in disabling the modem stack
-     * to save power.
+     * to save power. This api do not switch internet data once network attach is completed.
+     * Use {@link TelephonyManager#setPreferredOpportunisticDataSubscription}
+     * to switch internet data after network attach is complete.
      * Requires that the calling app has carrier privileges on both primary and
      * secondary subscriptions (see {@link #hasCarrierPrivileges}), or has permission
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
