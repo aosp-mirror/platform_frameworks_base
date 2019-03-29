@@ -747,37 +747,6 @@ package android.net.apf {
 
 }
 
-package android.net.captiveportal {
-
-  public final class CaptivePortalProbeResult {
-    ctor public CaptivePortalProbeResult(int);
-    ctor public CaptivePortalProbeResult(int, @Nullable String, @Nullable String);
-    ctor public CaptivePortalProbeResult(int, @Nullable String, @Nullable String, @Nullable android.net.captiveportal.CaptivePortalProbeSpec);
-    method public boolean isFailed();
-    method public boolean isPartialConnectivity();
-    method public boolean isPortal();
-    method public boolean isSuccessful();
-    field @NonNull public static final android.net.captiveportal.CaptivePortalProbeResult FAILED;
-    field public static final int FAILED_CODE = 599; // 0x257
-    field public static final android.net.captiveportal.CaptivePortalProbeResult PARTIAL;
-    field public static final int PORTAL_CODE = 302; // 0x12e
-    field @NonNull public static final android.net.captiveportal.CaptivePortalProbeResult SUCCESS;
-    field public static final int SUCCESS_CODE = 204; // 0xcc
-    field @Nullable public final String detectUrl;
-    field @Nullable public final android.net.captiveportal.CaptivePortalProbeSpec probeSpec;
-    field @Nullable public final String redirectUrl;
-  }
-
-  public abstract class CaptivePortalProbeSpec {
-    method @NonNull public String getEncodedSpec();
-    method @NonNull public abstract android.net.captiveportal.CaptivePortalProbeResult getResult(int, @Nullable String);
-    method @NonNull public java.net.URL getUrl();
-    method @NonNull public static java.util.Collection<android.net.captiveportal.CaptivePortalProbeSpec> parseCaptivePortalProbeSpecs(@NonNull String);
-    method @Nullable public static android.net.captiveportal.CaptivePortalProbeSpec parseSpecOrNull(@Nullable String);
-  }
-
-}
-
 package android.net.metrics {
 
   public final class ApfProgramEvent implements android.net.metrics.IpConnectivityLog.Event {
