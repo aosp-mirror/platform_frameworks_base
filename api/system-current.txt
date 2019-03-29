@@ -6895,10 +6895,19 @@ package android.service.watchdog {
     method @NonNull public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method public abstract void onCancelHealthCheck(@NonNull String);
     method @NonNull public abstract java.util.List<java.lang.String> onGetRequestedPackages();
-    method @NonNull public abstract java.util.List<java.lang.String> onGetSupportedPackages();
+    method @NonNull public abstract java.util.List<android.service.watchdog.PackageInfo> onGetSupportedPackages();
     method public abstract void onRequestHealthCheck(@NonNull String);
     field public static final String BIND_PERMISSION = "android.permission.BIND_EXPLICIT_HEALTH_CHECK_SERVICE";
     field public static final String SERVICE_INTERFACE = "android.service.watchdog.ExplicitHealthCheckService";
+  }
+
+  public final class PackageInfo implements android.os.Parcelable {
+    ctor public PackageInfo(@NonNull String, long);
+    method public int describeContents();
+    method public long getHealthCheckTimeoutMillis();
+    method @NonNull public String getPackageName();
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.watchdog.PackageInfo> CREATOR;
   }
 
 }
