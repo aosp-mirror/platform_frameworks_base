@@ -20,15 +20,6 @@
           package="com.android.networkstack"
           android:versionCode="11"
           android:versionName="Q-initial">
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.CONNECTIVITY_INTERNAL" />
-    <!-- Send latency broadcast as current user -->
-    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE" />
     <application
         android:label="NetworkStack"
         android:defaultToDeviceProtectedStorage="true"
