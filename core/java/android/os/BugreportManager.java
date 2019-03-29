@@ -26,12 +26,14 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.content.Context;
+import android.util.Log;
 
 import com.android.internal.util.Preconditions;
 
 import libcore.io.IoUtils;
 
-import java.io.FileDescriptor;
+import java.io.File;
+import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.Executor;
@@ -45,6 +47,9 @@ import java.util.concurrent.Executor;
 @TestApi
 @SystemService(Context.BUGREPORT_SERVICE)
 public final class BugreportManager {
+
+    private static final String TAG = "BugreportManager";
+
     private final Context mContext;
     private final IDumpstate mBinder;
 
@@ -143,22 +148,35 @@ public final class BugreportManager {
             @NonNull BugreportParams params,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull BugreportCallback callback) {
+        File tmpScreenshotFile = null;
         try {
             Preconditions.checkNotNull(bugreportFd);
             Preconditions.checkNotNull(params);
             Preconditions.checkNotNull(executor);
             Preconditions.checkNotNull(callback);
 
-            DumpstateListener dsListener = new DumpstateListener(executor, callback);
+            if (screenshotFd == null) {
+                // Binder needs a valid File Descriptor to be passed
+                tmpScreenshotFile = File.createTempFile("tmp", ".png");
+                screenshotFd = ParcelFileDescriptor.open(tmpScreenshotFile,
+                        ParcelFileDescriptor.MODE_READ_ONLY);
+            }
+            DumpstateListener dsListener = new DumpstateListener(executor,
+                    callback, tmpScreenshotFile);
+
             // Note: mBinder can get callingUid from the binder transaction.
             mBinder.startBugreport(-1 /* callingUid */,
                     mContext.getOpPackageName(),
                     bugreportFd.getFileDescriptor(),
-                    (screenshotFd != null
-                            ? screenshotFd.getFileDescriptor() : new FileDescriptor()),
+                    screenshotFd.getFileDescriptor(),
                     params.getMode(), dsListener);
         } catch (RemoteException e) {
+            deleteFile(tmpScreenshotFile);
             throw e.rethrowFromSystemServer();
+        } catch (IOException e) {
+            // Need to delete the file if it was created but failed while trying to get fd
+            deleteFile(tmpScreenshotFile);
+            Log.e(TAG, "Not able to create/open temporary screenshot file ", e);
         } finally {
             // We can close the file descriptors here because binder would have duped them.
             IoUtils.closeQuietly(bugreportFd);
@@ -180,13 +198,26 @@ public final class BugreportManager {
         }
     }
 
+    private void deleteFile(@Nullable File tmpScreenshotFile) {
+        try {
+            if (tmpScreenshotFile != null && tmpScreenshotFile.exists()) {
+                tmpScreenshotFile.delete();
+            }
+        } catch (SecurityException e) {
+            Log.e(TAG, "Not able to delete temporary screenshot file ", e);
+        }
+    }
+
     private final class DumpstateListener extends IDumpstateListener.Stub {
         private final Executor mExecutor;
         private final BugreportCallback mCallback;
+        private final File mTmpScreenshotFile;
 
-        DumpstateListener(Executor executor, BugreportCallback callback) {
+        DumpstateListener(Executor executor, BugreportCallback callback,
+                @Nullable File tmpScreenshotFile) {
             mExecutor = executor;
             mCallback = callback;
+            mTmpScreenshotFile = tmpScreenshotFile;
         }
 
         @Override
@@ -210,6 +241,7 @@ public final class BugreportManager {
                 });
             } finally {
                 Binder.restoreCallingIdentity(identity);
+                deleteFile(mTmpScreenshotFile);
             }
         }
 
@@ -222,6 +254,7 @@ public final class BugreportManager {
                 });
             } finally {
                 Binder.restoreCallingIdentity(identity);
+                deleteFile(mTmpScreenshotFile);
             }
         }
 
