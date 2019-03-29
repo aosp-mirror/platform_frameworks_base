@@ -82,6 +82,8 @@ public:
 
     sk_sp<GrContext> createContext(const GrContextOptions& options);
 
+    uint32_t getDriverVersion() const { return mDriverVersion; }
+
 private:
     friend class VulkanSurface;
     // Sets up the VkInstance and VkDevice objects. Also fills out the passed in
@@ -178,6 +180,7 @@ private:
     };
     SwapBehavior mSwapBehavior = SwapBehavior::Discard;
     GrVkExtensions mExtensions;
+    uint32_t mDriverVersion = 0;
 };
 
 } /* namespace renderthread */
