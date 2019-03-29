@@ -1752,6 +1752,9 @@ message WifiIsUnusableEvent {
 
     // Firmware generated an alert
     TYPE_FIRMWARE_ALERT = 4;
+
+    // IP Manager lost reachability to network neighbors
+    TYPE_IP_REACHABILITY_LOST = 5;
   }
 
   // What event triggered WifiIsUnusableEvent.
@@ -2045,6 +2048,9 @@ message WifiUsabilityStats {
 
     // Firmware generated an alert
     TYPE_FIRMWARE_ALERT = 4;
+
+    // IP Manager lost reachability to network neighbors
+    TYPE_IP_REACHABILITY_LOST = 5;
   }
 
   // The current wifi usability state
