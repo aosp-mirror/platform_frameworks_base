@@ -16,6 +16,7 @@
 
 package com.android.systemui.doze;
 
+import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.app.UiModeManager;
 import android.content.BroadcastReceiver;
@@ -147,7 +148,7 @@ public class DozeTriggers implements DozeMachine.Part {
         boolean wakeEvent = rawValues != null && rawValues.length > 0 && rawValues[0] != 0;
 
         if (isWakeDisplay) {
-            onWakeScreen(wakeEvent, mMachine.getState());
+            onWakeScreen(wakeEvent, mMachine.isExecutingTransition() ? null : mMachine.getState());
         } else if (isLongPress) {
             requestPulse(pulseReason, sensorPerformedProxCheck);
         } else if (isWakeLockScreen) {
@@ -228,10 +229,14 @@ public class DozeTriggers implements DozeMachine.Part {
         }
     }
 
-    private void onWakeScreen(boolean wake, DozeMachine.State state) {
+    /**
+     * When a wake screen event is received from a sensor
+     * @param wake {@code true} when it's time to wake up, {@code false} when we should sleep.
+     * @param state The current state, or null if the state could not be determined due to enqueued
+     *              transitions.
+     */
+    private void onWakeScreen(boolean wake, @Nullable DozeMachine.State state) {
         DozeLog.traceWakeDisplay(wake);
-        boolean paused = (state == DozeMachine.State.DOZE_AOD_PAUSED);
-        boolean pausing = (state == DozeMachine.State.DOZE_AOD_PAUSING);
         sWakeDisplaySensorState = wake;
 
         if (wake) {
@@ -245,6 +250,8 @@ public class DozeTriggers implements DozeMachine.Part {
                 }
             }, false /* alreadyPerformedProxCheck */, DozeLog.REASON_SENSOR_WAKE_UP);
         } else {
+            boolean paused = (state == DozeMachine.State.DOZE_AOD_PAUSED);
+            boolean pausing = (state == DozeMachine.State.DOZE_AOD_PAUSING);
             if (!pausing && !paused) {
                 mMachine.requestState(DozeMachine.State.DOZE);
             }

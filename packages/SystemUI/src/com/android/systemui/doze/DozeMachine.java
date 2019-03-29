@@ -192,7 +192,10 @@ public class DozeMachine {
     @MainThread
     public State getState() {
         Assert.isMainThread();
-        Preconditions.checkState(!isExecutingTransition());
+        if (isExecutingTransition()) {
+            throw new IllegalStateException("Cannot get state because there were pending "
+                    + "transitions: " + mQueuedRequests.toString());
+        }
         return mState;
     }
 
