@@ -20,8 +20,8 @@
     android:id="@+id/app_entities_header"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingStart="24dp"
-    android:paddingEnd="8dp"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
     android:gravity="center"
     android:orientation="vertical">
 
