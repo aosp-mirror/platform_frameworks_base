@@ -292,6 +292,22 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     /** Data layer operation counters for splicing into other structures. */
     private NetworkStats mUidOperations = new NetworkStats(0L, 10);
 
+    /**
+     * Snapshot containing most recent network stats for all UIDs across all interfaces and tags
+     * since boot.
+     *
+     * <p>Maintains migrated VPN stats which are result of performing TUN migration on {@link
+     * #mLastUidDetailSnapshot}.
+     */
+    @GuardedBy("mStatsLock")
+    private NetworkStats mTunAdjustedStats;
+    /**
+     * Used by {@link #mTunAdjustedStats} to migrate VPN traffic over delta between this snapshot
+     * and latest snapshot.
+     */
+    @GuardedBy("mStatsLock")
+    private NetworkStats mLastUidDetailSnapshot;
+
     /** Must be set in factory by calling #setHandler. */
     private Handler mHandler;
     private Handler.Callback mHandlerCallback;
@@ -805,12 +821,36 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     @Override
     public NetworkStats getDetailedUidStats(String[] requiredIfaces) {
         try {
+            // Get the latest snapshot from NetworkStatsFactory.
+            // TODO: Querying for INTERFACES_ALL may incur performance penalty. Consider restricting
+            // this to limited set of ifaces.
+            NetworkStats uidDetailStats = getNetworkStatsUidDetail(INTERFACES_ALL);
+
+            // Migrate traffic from VPN UID over delta and update mTunAdjustedStats.
+            NetworkStats result;
+            synchronized (mStatsLock) {
+                migrateTunTraffic(uidDetailStats, mVpnInfos);
+                result = mTunAdjustedStats.clone();
+            }
+
+            // Apply filter based on ifacesToQuery.
             final String[] ifacesToQuery =
                     NetworkStatsFactory.augmentWithStackedInterfaces(requiredIfaces);
-            return getNetworkStatsUidDetail(ifacesToQuery);
+            result.filter(UID_ALL, ifacesToQuery, TAG_ALL);
+            return result;
         } catch (RemoteException e) {
             Log.wtf(TAG, "Error compiling UID stats", e);
             return new NetworkStats(0L, 0);
+        }
+    }
+
+    @VisibleForTesting
+    NetworkStats getTunAdjustedStats() {
+        synchronized (mStatsLock) {
+            if (mTunAdjustedStats == null) {
+                return null;
+            }
+            return mTunAdjustedStats.clone();
         }
     }
 
@@ -1288,6 +1328,34 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // a race condition between the service handler thread and the observer's
         mStatsObservers.updateStats(xtSnapshot, uidSnapshot, new ArrayMap<>(mActiveIfaces),
                 new ArrayMap<>(mActiveUidIfaces), vpnArray, currentTime);
+
+        migrateTunTraffic(uidSnapshot, vpnArray);
+    }
+
+    /**
+     * Updates {@link #mTunAdjustedStats} with the delta containing traffic migrated off of VPNs.
+     */
+    @GuardedBy("mStatsLock")
+    private void migrateTunTraffic(NetworkStats uidDetailStats, VpnInfo[] vpnInfoArray) {
+        if (mTunAdjustedStats == null) {
+            // Either device booted or system server restarted, hence traffic cannot be migrated
+            // correctly without knowing the past state of VPN's underlying networks.
+            mTunAdjustedStats = uidDetailStats;
+            mLastUidDetailSnapshot = uidDetailStats;
+            return;
+        }
+        // Migrate delta traffic from VPN to other apps.
+        NetworkStats delta = uidDetailStats.subtract(mLastUidDetailSnapshot);
+        for (VpnInfo info : vpnInfoArray) {
+            delta.migrateTun(info.ownerUid, info.vpnIface, info.underlyingIfaces);
+        }
+        // Filter out debug entries as that may lead to over counting.
+        delta.filterDebugEntries();
+        // Update #mTunAdjustedStats with migrated delta.
+        mTunAdjustedStats.combineAllValues(delta);
+        mTunAdjustedStats.setElapsedRealtime(uidDetailStats.getElapsedRealtime());
+        // Update last snapshot.
+        mLastUidDetailSnapshot = uidDetailStats;
     }
 
     /**
