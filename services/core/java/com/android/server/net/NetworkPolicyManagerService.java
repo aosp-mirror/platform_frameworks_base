@@ -1335,7 +1335,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             case TYPE_WARNING: {
                 title = res.getText(R.string.data_usage_warning_title);
                 body = res.getString(R.string.data_usage_warning_body,
-                        Formatter.formatFileSize(mContext, totalBytes));
+                        Formatter.formatFileSize(mContext, totalBytes, Formatter.FLAG_IEC_UNITS));
 
                 builder.setSmallIcon(R.drawable.stat_notify_error);
 
@@ -1383,7 +1383,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 }
                 final long overBytes = totalBytes - policy.limitBytes;
                 body = res.getString(R.string.data_usage_limit_snoozed_body,
-                        Formatter.formatFileSize(mContext, overBytes));
+                        Formatter.formatFileSize(mContext, overBytes, Formatter.FLAG_IEC_UNITS));
 
                 builder.setOngoing(true);
                 builder.setSmallIcon(R.drawable.stat_notify_error);
