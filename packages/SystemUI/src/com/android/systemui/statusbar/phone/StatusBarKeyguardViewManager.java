@@ -419,6 +419,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         } else if (finishRunnable != null) {
             finishRunnable.run();
         }
+        mNotificationPanelView.blockExpansionForCurrentTouch();
     }
 
     /**
@@ -570,6 +571,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     public boolean isBouncerShowing() {
         return mBouncer.isShowing();
+    }
+
+    public boolean isBouncerPartiallyVisible() {
+        return mBouncer.isPartiallyVisible();
     }
 
     public boolean isFullscreenBouncer() {

@@ -152,9 +152,11 @@ public class NotificationPanelView extends PanelView implements
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
     @VisibleForTesting
     protected KeyguardStatusBarView mKeyguardStatusBar;
-    private ViewGroup mBigClockContainer;
+    @VisibleForTesting
+    protected ViewGroup mBigClockContainer;
     private QS mQs;
-    private FrameLayout mQsFrame;
+    @VisibleForTesting
+    protected FrameLayout mQsFrame;
     @VisibleForTesting
     protected KeyguardStatusView mKeyguardStatusView;
     private View mQsNavbarScrim;
@@ -266,6 +268,7 @@ public class NotificationPanelView extends PanelView implements
     private int mIndicationBottomPadding;
     private int mAmbientIndicationBottomPadding;
     private boolean mIsFullWidth;
+    private boolean mBlockingExpansionForCurrentTouch;
 
     /**
      * Current dark amount that follows regular interpolation curve of animation.
@@ -983,6 +986,11 @@ public class NotificationPanelView extends PanelView implements
             return false;
         }
         initDownStates(event);
+        // Make sure the next touch won't the blocked after the current ends.
+        if (event.getAction() == MotionEvent.ACTION_UP
+                || event.getAction() == MotionEvent.ACTION_CANCEL) {
+            mBlockingExpansionForCurrentTouch = false;
+        }
         if (!mIsExpanding && mPulseExpansionHandler.onTouchEvent(event)) {
             // We're expanding all the other ones shouldn't get this anymore
             return true;
@@ -1662,7 +1670,7 @@ public class NotificationPanelView extends PanelView implements
         if (!mQsExpansionEnabled || mCollapsedOnDown) {
             return false;
         }
-        View header = mKeyguardShowing ? mKeyguardStatusBar : mQs.getHeader();
+        View header = mKeyguardShowing || mQs == null ? mKeyguardStatusBar : mQs.getHeader();
         final boolean onHeader = x >= mQsFrame.getX()
                 && x <= mQsFrame.getX() + mQsFrame.getWidth()
                 && y >= header.getTop() && y <= header.getBottom();
@@ -2337,7 +2345,7 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     protected boolean isTrackingBlocked() {
-        return mConflictingQsExpansionGesture && mQsExpanded;
+        return mConflictingQsExpansionGesture && mQsExpanded || mBlockingExpansionForCurrentTouch;
     }
 
     public boolean isQsExpanded() {
@@ -2935,6 +2943,14 @@ public class NotificationPanelView extends PanelView implements
         setKeyguardStatusViewVisibility(mBarState, true /* keyguardFadingAway */,
                 false /* goingToFullShade */);
         updateLockIcon();
+    }
+
+    /**
+     * Do not let the user drag the shade up and down for the current touch session.
+     * This is necessary to avoid shade expansion while/after the bouncer is dismissed.
+     */
+    public void blockExpansionForCurrentTouch() {
+        mBlockingExpansionForCurrentTouch = mTracking;
     }
 
     @Override
