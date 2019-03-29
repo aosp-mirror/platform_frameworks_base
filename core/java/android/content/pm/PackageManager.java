@@ -6997,6 +6997,16 @@ public abstract class PackageManager {
     }
 
     /**
+     * @return  attention service package name, or null if there's none.
+     *
+     * @hide
+     */
+    public String getAttentionServicePackageName() {
+        throw new UnsupportedOperationException(
+                "getAttentionServicePackageName not implemented in subclass");
+    }
+
+    /**
      * @return the wellbeing app package name, or null if it's not defined by the OEM.
      *
      * @hide

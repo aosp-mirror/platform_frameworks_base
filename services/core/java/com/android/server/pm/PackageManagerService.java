@@ -20272,6 +20272,11 @@ public class PackageManagerService extends IPackageManager.Stub
         return mContext.getString(R.string.config_defaultTextClassifierPackage);
     }
 
+    @Override
+    public String getAttentionServicePackageName() {
+        return mContext.getString(R.string.config_defaultAttentionService);
+    }
+
     private @Nullable String getDocumenterPackageName() {
         final Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);

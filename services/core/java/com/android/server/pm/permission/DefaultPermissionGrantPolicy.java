@@ -740,6 +740,14 @@ public final class DefaultPermissionGrantPolicy {
                     LOCATION_PERMISSIONS, CONTACTS_PERMISSIONS);
         }
 
+        // Atthention Service
+        String attentionServicePackageName =
+                mContext.getPackageManager().getAttentionServicePackageName();
+        if (!TextUtils.isEmpty(attentionServicePackageName)) {
+            grantPermissionsToSystemPackage(attentionServicePackageName, userId,
+                    CAMERA_PERMISSIONS);
+        }
+
         // There is no real "marker" interface to identify the shared storage backup, it is
         // hardcoded in BackupManagerService.SHARED_BACKUP_AGENT_PACKAGE.
         grantSystemFixedPermissionsToSystemPackage("com.android.sharedstoragebackup", userId,
