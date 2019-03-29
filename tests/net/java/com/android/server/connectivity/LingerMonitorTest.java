@@ -32,6 +32,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
+import android.net.IDnsResolver;
 import android.net.INetd;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -69,6 +70,7 @@ public class LingerMonitorTest {
     LingerMonitor mMonitor;
 
     @Mock ConnectivityService mConnService;
+    @Mock IDnsResolver mDnsResolver;
     @Mock INetd mNetd;
     @Mock INetworkManagementService mNMS;
     @Mock Context mCtx;
@@ -353,7 +355,7 @@ public class LingerMonitorTest {
         caps.addCapability(0);
         caps.addTransportType(transport);
         NetworkAgentInfo nai = new NetworkAgentInfo(null, null, new Network(netId), info, null,
-                caps, 50, mCtx, null, mMisc, mConnService, mNetd, mNMS,
+                caps, 50, mCtx, null, mMisc, mConnService, mNetd, mDnsResolver, mNMS,
                 NetworkFactory.SerialNumber.NONE);
         nai.everValidated = true;
         return nai;
