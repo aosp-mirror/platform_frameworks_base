@@ -340,7 +340,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         int evalMode(int op, int mode) {
             if (mode == AppOpsManager.MODE_FOREGROUND) {
-                return state <= AppOpsManager.resolveLastRestrictedUidState(op)
+                return state <= AppOpsManager.resolveFirstUnrestrictedUidState(op)
                         ? AppOpsManager.MODE_ALLOWED : AppOpsManager.MODE_IGNORED;
             }
             return mode;
@@ -914,9 +914,12 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (uidState != null && uidState.pendingState != newState) {
                 final int oldPendingState = uidState.pendingState;
                 uidState.pendingState = newState;
-                if (newState < uidState.state || newState <= UID_STATE_MAX_LAST_NON_RESTRICTED) {
-                    // We are moving to a more important state, or the new state is in the
-                    // foreground, then always do it immediately.
+                if (newState < uidState.state
+                        || (newState <= UID_STATE_MAX_LAST_NON_RESTRICTED
+                                && uidState.state > UID_STATE_MAX_LAST_NON_RESTRICTED)) {
+                    // We are moving to a more important state, or the new state may be in the
+                    // foreground and the old state is in the background, then always do it
+                    // immediately.
                     commitUidPendingStateLocked(uidState);
                 } else if (uidState.pendingStateCommitTime == 0) {
                     // We are moving to a less important state for the first time,
@@ -2413,9 +2416,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     private void commitUidPendingStateLocked(UidState uidState) {
-        final boolean lastForeground = uidState.state <= UID_STATE_MAX_LAST_NON_RESTRICTED;
-        final boolean nowForeground = uidState.pendingState <= UID_STATE_MAX_LAST_NON_RESTRICTED;
-        if (uidState.hasForegroundWatchers && lastForeground != nowForeground) {
+        if (uidState.hasForegroundWatchers) {
             for (int fgi = uidState.foregroundOps.size() - 1; fgi >= 0; fgi--) {
                 if (!uidState.foregroundOps.valueAt(fgi)) {
                     continue;
