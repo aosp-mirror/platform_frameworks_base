@@ -7955,6 +7955,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *                               View is not a pane.
      *
      * {@see AccessibilityNodeInfo#setPaneTitle(CharSequence)}
+     *
+     * @attr ref android.R.styleable#View_accessibilityPaneTitle
      */
     public void setAccessibilityPaneTitle(@Nullable CharSequence accessibilityPaneTitle) {
         if (!TextUtils.equals(accessibilityPaneTitle, mAccessibilityPaneTitle)) {
@@ -7970,6 +7972,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return The current pane title.
      *
      * {@see #setAccessibilityPaneTitle}.
+     *
+     * @attr ref android.R.styleable#View_accessibilityPaneTitle
      */
     @InspectableProperty
     @Nullable
@@ -12112,6 +12116,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #setScreenReaderFocusable(boolean)
      *
      * @return Whether the view should be treated as a focusable unit by screen reader.
+     *
+     * @attr ref android.R.styleable#View_screenReaderFocusable
      */
     @InspectableProperty
     public boolean isScreenReaderFocusable() {
@@ -12130,6 +12136,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @param screenReaderFocusable Whether the view should be treated as a unit by screen reader
      *                              accessibility tools.
+     *
+     * @attr ref android.R.styleable#View_screenReaderFocusable
      */
     public void setScreenReaderFocusable(boolean screenReaderFocusable) {
         updatePflags3AndNotifyA11yIfChanged(PFLAG3_SCREEN_READER_FOCUSABLE, screenReaderFocusable);
