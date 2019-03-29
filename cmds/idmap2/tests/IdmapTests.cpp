@@ -20,6 +20,7 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "gmock/gmock.h"
@@ -127,9 +128,9 @@ TEST(IdmapTests, CreateIdmapFromBinaryStream) {
   std::string raw(reinterpret_cast<const char*>(idmap_raw_data), idmap_raw_data_len);
   std::istringstream stream(raw);
 
-  std::stringstream error;
-  std::unique_ptr<const Idmap> idmap = Idmap::FromBinaryStream(stream, error);
-  ASSERT_THAT(idmap, NotNull());
+  auto result = Idmap::FromBinaryStream(stream);
+  ASSERT_TRUE(result);
+  const auto idmap = std::move(*result);
 
   ASSERT_THAT(idmap->GetHeader(), NotNull());
   ASSERT_EQ(idmap->GetHeader()->GetMagic(), 0x504d4449U);
@@ -168,9 +169,8 @@ TEST(IdmapTests, GracefullyFailToCreateIdmapFromCorruptBinaryStream) {
                   10);  // data too small
   std::istringstream stream(raw);
 
-  std::stringstream error;
-  std::unique_ptr<const Idmap> idmap = Idmap::FromBinaryStream(stream, error);
-  ASSERT_THAT(idmap, IsNull());
+  const auto result = Idmap::FromBinaryStream(stream);
+  ASSERT_FALSE(result);
 }
 
 void CreateIdmap(const StringPiece& target_apk_path, const StringPiece& overlay_apk_path,
@@ -182,10 +182,10 @@ void CreateIdmap(const StringPiece& target_apk_path, const StringPiece& overlay_
   std::unique_ptr<const ApkAssets> overlay_apk = ApkAssets::Load(overlay_apk_path.to_string());
   ASSERT_THAT(overlay_apk, NotNull());
 
-  std::stringstream error;
-  *out_idmap =
+  auto result =
       Idmap::FromApkAssets(target_apk_path.to_string(), *target_apk, overlay_apk_path.to_string(),
-                           *overlay_apk, fulfilled_policies, enforce_overlayable, error);
+                           *overlay_apk, fulfilled_policies, enforce_overlayable);
+  *out_idmap = result ? std::move(*result) : nullptr;
 }
 
 TEST(IdmapTests, CreateIdmapFromApkAssets) {
@@ -471,11 +471,10 @@ TEST(IdmapTests, FailToCreateIdmapFromApkAssetsIfPathTooLong) {
   std::unique_ptr<const ApkAssets> overlay_apk = ApkAssets::Load(overlay_apk_path);
   ASSERT_THAT(overlay_apk, NotNull());
 
-  std::stringstream error;
-  std::unique_ptr<const Idmap> idmap =
+  const auto result =
       Idmap::FromApkAssets(target_apk_path, *target_apk, overlay_apk_path, *overlay_apk,
-                           PolicyFlags::POLICY_PUBLIC, /* enforce_overlayable */ true, error);
-  ASSERT_THAT(idmap, IsNull());
+                           PolicyFlags::POLICY_PUBLIC, /* enforce_overlayable */ true);
+  ASSERT_FALSE(result);
 }
 
 TEST(IdmapTests, IdmapHeaderIsUpToDate) {
@@ -489,11 +488,11 @@ TEST(IdmapTests, IdmapHeaderIsUpToDate) {
   std::unique_ptr<const ApkAssets> overlay_apk = ApkAssets::Load(overlay_apk_path);
   ASSERT_THAT(overlay_apk, NotNull());
 
-  std::stringstream error;
-  std::unique_ptr<const Idmap> idmap = Idmap::FromApkAssets(
-      target_apk_path, *target_apk, overlay_apk_path, *overlay_apk, PolicyFlags::POLICY_PUBLIC,
-      /* enforce_overlayable */ true, error);
-  ASSERT_THAT(idmap, NotNull());
+  auto result = Idmap::FromApkAssets(target_apk_path, *target_apk, overlay_apk_path, *overlay_apk,
+                                     PolicyFlags::POLICY_PUBLIC,
+                                     /* enforce_overlayable */ true);
+  ASSERT_TRUE(result);
+  const auto idmap = std::move(*result);
 
   std::stringstream stream;
   BinaryStreamVisitor visitor(stream);
@@ -609,13 +608,12 @@ TEST(IdmapTests, TestVisitor) {
   std::string raw(reinterpret_cast<const char*>(idmap_raw_data), idmap_raw_data_len);
   std::istringstream stream(raw);
 
-  std::stringstream error;
-  std::unique_ptr<const Idmap> idmap = Idmap::FromBinaryStream(stream, error);
-  ASSERT_THAT(idmap, NotNull());
+  const auto idmap = Idmap::FromBinaryStream(stream);
+  ASSERT_TRUE(idmap);
 
   std::stringstream test_stream;
   TestVisitor visitor(test_stream);
-  idmap->accept(&visitor);
+  (*idmap)->accept(&visitor);
 
   ASSERT_EQ(test_stream.str(),
             "TestVisitor::visit(Idmap)\n"

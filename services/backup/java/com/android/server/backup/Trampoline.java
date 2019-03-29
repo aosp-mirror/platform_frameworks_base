@@ -630,8 +630,7 @@ public class Trampoline extends IBackupManager.Stub {
             @Nullable Intent configurationIntent,
             String currentDestinationString,
             @Nullable Intent dataManagementIntent,
-            String dataManagementLabel) {
-
+            CharSequence dataManagementLabel) {
         if (isUserReadyForBackup(userId)) {
             mService.updateTransportAttributes(
                     userId,
@@ -710,16 +709,10 @@ public class Trampoline extends IBackupManager.Stub {
     }
 
     @Override
-    public String getDataManagementLabelForUser(int userId, String transport)
+    public CharSequence getDataManagementLabelForUser(int userId, String transport)
             throws RemoteException {
         return isUserReadyForBackup(userId) ? mService.getDataManagementLabel(userId, transport)
                 : null;
-    }
-
-    @Override
-    public String getDataManagementLabel(String transport)
-            throws RemoteException {
-        return getDataManagementLabelForUser(binderGetCallingUserId(), transport);
     }
 
     @Override

@@ -102,7 +102,7 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="8476407539834855">"Դուք կատարել եք հեռախոսն ապակողպելու <xliff:g id="NUMBER">%d</xliff:g> անհաջող փորձ: Աշխատանքային պրոֆիլը կհեռացվի և պրոֆիլի բոլոր տվյալները կջնջվեն:"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="956706236554092172">"Դուք կատարել եք ապակողպման նախշը մուտքագրելու <xliff:g id="NUMBER_0">%1$d</xliff:g> անհաջող փորձ: Եվս <xliff:g id="NUMBER_1">%2$d</xliff:g> անհաջող փորձից հետո ձեզանից կպահանջվի ապակողպել պլանշետը էլփոստի հաշվի միջոցով։\n\n Խնդրում ենք փորձել կրկին <xliff:g id="NUMBER_2">%3$d</xliff:g> վայրկյանից:"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="8364140853305528449">"Դուք կատարել եք ապակողպման նախշը մուտքագրելու <xliff:g id="NUMBER_0">%1$d</xliff:g> անհաջող փորձ: Եվս <xliff:g id="NUMBER_1">%2$d</xliff:g> անհաջող փորձից հետո ձեզանից կպահանջվի ապակողպել հեռախոսը էլփոստի հաշվի միջոցով։\n\n Խնդրում ենք փորձել կրկին <xliff:g id="NUMBER_2">%3$d</xliff:g> վայրկյանից:"</string>
-    <string name="kg_password_wrong_pin_code_pukked" msgid="3389829202093674267">"SIM PIN կոդը սխալ է։ Այժմ պետք է դիմեք ձեր օպերատորին՝ սարքն արգելաբացելու համար:"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="3389829202093674267">"SIM PIN կոդը սխալ է։ Այժմ պետք է դիմեք ձեր օպերատորին՝ սարքն արգելահանելու համար:"</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="4314341367727055967">
       <item quantity="one">Incorrect SIM PIN code, you have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts.</item>
       <item quantity="other">SIM PIN կոդը սխալ է: Մնաց <xliff:g id="NUMBER_1">%d</xliff:g> փորձ:</item>
@@ -117,7 +117,7 @@
     <string name="kg_pin_accepted" msgid="7637293533973802143">"Կոդն ընդունվեց:"</string>
     <string name="keyguard_carrier_default" msgid="4274828292998453695">"Ծառայությունն անհասանելի է։"</string>
     <string name="accessibility_ime_switch_button" msgid="2695096475319405612">"Փոխել ներածման եղանակը"</string>
-    <string name="airplane_mode" msgid="3807209033737676010">"Ինքնաթիռի ռեժիմ"</string>
+    <string name="airplane_mode" msgid="3807209033737676010">"Ավիառեժիմ"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="7246972020562621506">"Սարքը վերագործարկելուց հետո անհրաժեշտ է մուտքագրել նախշը"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="6303592361322290145">"Սարքը վերագործարկելուց հետո անհրաժեշտ է մուտքագրել PIN կոդը"</string>
     <string name="kg_prompt_reason_restart_password" msgid="6984641181515902406">"Սարքը վերագործարկելուց հետո անհրաժեշտ է մուտքագրել գաղտնաբառը"</string>
@@ -169,66 +169,13 @@
     <item msgid="2233497913571137419">"տասը"</item>
     <item msgid="5621554266768657830">"տասնմեկ"</item>
   </string-array>
-  <string-array name="type_clock_minutes">
-    <item msgid="8322049385467207985">"ուղիղ"</item>
-    <item msgid="8837126587669001578">"զրո մեկ"</item>
-    <item msgid="4294343372940455660">"զրո երկու"</item>
-    <item msgid="7129166637707421536">"զրո երեք"</item>
-    <item msgid="7579404865008788673">"զրո չորս"</item>
-    <item msgid="3873924689207380586">"զրո հինգ"</item>
-    <item msgid="4849565597850069377">"զրո վեց"</item>
-    <item msgid="4404219424523572364">"զրո յոթ"</item>
-    <item msgid="8740481214764087329">"ութ"</item>
-    <item msgid="1713216865806811237">"զրո ինը"</item>
-    <item msgid="3508406095411245038">"տասը"</item>
-    <item msgid="7161996337755311711">"տասնմեկ"</item>
-    <item msgid="4044549963329624197">"տասներկու"</item>
-    <item msgid="333373157917379088">"տասներեք"</item>
-    <item msgid="2631202907124819385">"տասնչորս"</item>
-    <item msgid="6472396076858033453">"տասնհինգ"</item>
-    <item msgid="8656981856181581643">"տասնվեց"</item>
-    <item msgid="7289026608562030619">"տասնյոթ"</item>
-    <item msgid="3881477602692646573">"տասնութ"</item>
-    <item msgid="3358129827772984226">"տասնինը"</item>
-    <item msgid="3308575407402865807">"քսան"</item>
-    <item msgid="5346560955382229629">"քսան\nմեկ"</item>
-    <item msgid="226750304761473436">"քսան\nերկու"</item>
-    <item msgid="616811325336838734">"քսան\nերեք"</item>
-    <item msgid="616346116869053440">"քսան\nչորս"</item>
-    <item msgid="4642996410384042830">"քսան\nհինգ"</item>
-    <item msgid="7506092849993571465">"քսան\nվեց"</item>
-    <item msgid="1915078191101042031">"քսան\nյոթ"</item>
-    <item msgid="4292378641900520252">"քսան\nութ"</item>
-    <item msgid="5339513901773103696">"քսան\nինը"</item>
-    <item msgid="3574673250891657607">"երեսուն"</item>
-    <item msgid="5796923836589110940">"երեսուն\nմեկ"</item>
-    <item msgid="5859323597571702052">"երեսուն\nերկու"</item>
-    <item msgid="5133326723148876507">"երեսուն\nերեք"</item>
-    <item msgid="2693999494655663096">"երեսուն\nչորս"</item>
-    <item msgid="3316754944962836197">"երեսուն\nհինգ"</item>
-    <item msgid="816891008836796723">"երեսուն\nվեց"</item>
-    <item msgid="9158890488666520078">"երեսուն\nյոթ"</item>
-    <item msgid="1894769703213894011">"երեսուն\nութ"</item>
-    <item msgid="5638820345598572399">"երեսուն\nինը"</item>
-    <item msgid="8838304023017895439">"քառասուն"</item>
-    <item msgid="1834742948932559597">"քառասուն\nմեկ"</item>
-    <item msgid="6573707308847773944">"քառասուն\nերկու"</item>
-    <item msgid="2450149950652678001">"քառասուն\nերեք"</item>
-    <item msgid="2874667401318178036">"քառասուն\nչորս"</item>
-    <item msgid="3391101532763048862">"քառասուն\nհինգ"</item>
-    <item msgid="1671489330863254362">"քառասուն\nվեց"</item>
-    <item msgid="5916017359554531038">"քառասուն\nյոթ"</item>
-    <item msgid="8205413177993059967">"քառասուն\nութ"</item>
-    <item msgid="6607867415142171302">"քառասուն\nինը"</item>
-    <item msgid="8358850748472089162">"հիսուն"</item>
-    <item msgid="3551313125255080234">"հիսուն\nմեկ"</item>
-    <item msgid="1559678130725716542">"հիսուն\nերկու"</item>
-    <item msgid="431441994725492377">"հիսուն\nերեք"</item>
-    <item msgid="6345774640539623024">"հիսուն\nչորս"</item>
-    <item msgid="8018192990793931120">"հիսուն\nհինգ"</item>
-    <item msgid="6187650843754604534">"հիսուն\nվեց"</item>
-    <item msgid="8727240174015993259">"հիսուն\nյոթ"</item>
-    <item msgid="848339003778952950">"հիսուն\nութ"</item>
-    <item msgid="5798985802835423618">"հիսուն\nինը"</item>
-  </string-array>
+    <!-- no translation found for type_clock_minutes:1 (2091812961809760681) -->
+    <!-- no translation found for type_clock_minutes:2 (1496435384877290709) -->
+    <!-- no translation found for type_clock_minutes:3 (881846472976674129) -->
+    <!-- no translation found for type_clock_minutes:4 (2784477043911540584) -->
+    <!-- no translation found for type_clock_minutes:5 (1610928853656700614) -->
+    <!-- no translation found for type_clock_minutes:6 (2317806244043886658) -->
+    <!-- no translation found for type_clock_minutes:7 (3318687539120971327) -->
+    <!-- no translation found for type_clock_minutes:8 (5701600693712102348) -->
+    <!-- no translation found for type_clock_minutes:9 (3247381605947372495) -->
 </resources>

@@ -141,6 +141,8 @@ public class BubbleClockController implements ClockPlugin {
     @Override
     public void onTimeTick() {
         mAnalogClock.onTimeChanged();
+        mDigitalClock.refresh();
+        mLockClock.refresh();
     }
 
     @Override

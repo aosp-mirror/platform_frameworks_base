@@ -67,4 +67,9 @@ oneway interface IContentCaptureManager {
      * Returns whether the content capture feature is enabled for the calling user.
      */
     void isContentCaptureFeatureEnabled(in IResultReceiver result);
+
+    /**
+     * Returns a ComponentName with the name of custom service activity, if defined.
+     */
+    void getServiceSettingsActivity(in IResultReceiver result);
 }

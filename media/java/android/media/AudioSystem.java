@@ -1022,13 +1022,14 @@ public class AudioSystem
 
     public static native float getStreamVolumeDB(int stream, int index, int device);
 
-    static boolean isOffloadSupported(@NonNull AudioFormat format) {
+    static boolean isOffloadSupported(@NonNull AudioFormat format, @NonNull AudioAttributes attr) {
         return native_is_offload_supported(format.getEncoding(), format.getSampleRate(),
-                format.getChannelMask(), format.getChannelIndexMask());
+                format.getChannelMask(), format.getChannelIndexMask(),
+                attr.getVolumeControlStream());
     }
 
     private static native boolean native_is_offload_supported(int encoding, int sampleRate,
-            int channelMask, int channelIndexMask);
+            int channelMask, int channelIndexMask, int streamType);
 
     public static native int getMicrophones(ArrayList<MicrophoneInfo> microphonesInfo);
 

@@ -16,6 +16,7 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.server.om.hosttest.app_overlay">
+    <application android:hasCode="false" />
     <overlay android:targetPackage="com.android.server.om.hosttest.update_overlay_test"
         android:category="android.theme" />
 </manifest>

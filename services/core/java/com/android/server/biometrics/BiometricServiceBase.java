@@ -1251,8 +1251,6 @@ public abstract class BiometricServiceBase extends SystemService
         if (getCurrentClient() instanceof InternalRemovalClient
                 || getCurrentClient() instanceof InternalEnumerateClient) {
             Slog.w(getTag(), "User switched while performing cleanup");
-            removeClient(getCurrentClient());
-            clearEnumerateState();
         }
         updateActiveGroup(userId, null);
         doTemplateCleanupForUser(userId);

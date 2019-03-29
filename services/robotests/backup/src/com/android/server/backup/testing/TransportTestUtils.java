@@ -188,7 +188,8 @@ public class TransportTestUtils {
             when(transportBinder.currentDestinationString())
                     .thenReturn(transport.currentDestinationString);
             when(transportBinder.dataManagementIntent()).thenReturn(transport.dataManagementIntent);
-            when(transportBinder.dataManagementLabel()).thenReturn(transport.dataManagementLabel);
+            when(transportBinder.dataManagementIntentLabel())
+                    .thenReturn(transport.dataManagementLabel);
         } catch (RemoteException e) {
             fail("RemoteException?");
         }

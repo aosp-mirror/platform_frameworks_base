@@ -16,6 +16,8 @@
 
 package android.net;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
@@ -53,22 +55,26 @@ import java.util.Objects;
 public final class StaticIpConfiguration implements Parcelable {
     /** @hide */
     @UnsupportedAppUsage
+    @Nullable
     public LinkAddress ipAddress;
     /** @hide */
     @UnsupportedAppUsage
+    @Nullable
     public InetAddress gateway;
     /** @hide */
     @UnsupportedAppUsage
+    @NonNull
     public final ArrayList<InetAddress> dnsServers;
     /** @hide */
     @UnsupportedAppUsage
+    @Nullable
     public String domains;
 
     public StaticIpConfiguration() {
         dnsServers = new ArrayList<InetAddress>();
     }
 
-    public StaticIpConfiguration(StaticIpConfiguration source) {
+    public StaticIpConfiguration(@Nullable StaticIpConfiguration source) {
         this();
         if (source != null) {
             // All of these except dnsServers are immutable, so no need to make copies.
@@ -86,38 +92,38 @@ public final class StaticIpConfiguration implements Parcelable {
         domains = null;
     }
 
-    public LinkAddress getIpAddress() {
+    public @Nullable LinkAddress getIpAddress() {
         return ipAddress;
     }
 
-    public void setIpAddress(LinkAddress ipAddress) {
+    public void setIpAddress(@Nullable LinkAddress ipAddress) {
         this.ipAddress = ipAddress;
     }
 
-    public InetAddress getGateway() {
+    public @Nullable InetAddress getGateway() {
         return gateway;
     }
 
-    public void setGateway(InetAddress gateway) {
+    public void setGateway(@Nullable InetAddress gateway) {
         this.gateway = gateway;
     }
 
-    public List<InetAddress> getDnsServers() {
+    public @NonNull List<InetAddress> getDnsServers() {
         return dnsServers;
     }
 
-    public String getDomains() {
+    public @Nullable String getDomains() {
         return domains;
     }
 
-    public void setDomains(String newDomains) {
+    public void setDomains(@Nullable String newDomains) {
         domains = newDomains;
     }
 
     /**
      * Add a DNS server to this configuration.
      */
-    public void addDnsServer(InetAddress server) {
+    public void addDnsServer(@NonNull InetAddress server) {
         dnsServers.add(server);
     }
 
@@ -128,7 +134,7 @@ public final class StaticIpConfiguration implements Parcelable {
      * route to the gateway as well. This configuration is arguably invalid, but it used to work
      * in K and earlier, and other OSes appear to accept it.
      */
-    public List<RouteInfo> getRoutes(String iface) {
+    public @NonNull List<RouteInfo> getRoutes(@Nullable String iface) {
         List<RouteInfo> routes = new ArrayList<RouteInfo>(3);
         if (ipAddress != null) {
             RouteInfo connectedRoute = new RouteInfo(ipAddress, null, iface);
@@ -150,7 +156,7 @@ public final class StaticIpConfiguration implements Parcelable {
      * IPv6 configuration) will not be included.
      * @hide
      */
-    public LinkProperties toLinkProperties(String iface) {
+    public @NonNull LinkProperties toLinkProperties(String iface) {
         LinkProperties lp = new LinkProperties();
         lp.setInterfaceName(iface);
         if (ipAddress != null) {

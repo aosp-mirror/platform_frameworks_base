@@ -298,12 +298,12 @@ public abstract class ContentCaptureService extends Service {
     /**
      * Disables the Content Capture service for the given user.
      */
-    public final void disableContentCaptureServices() {
-        if (sDebug) Log.d(TAG, "disableContentCaptureServices()");
+    public final void disableSelf() {
+        if (sDebug) Log.d(TAG, "disableSelf()");
 
         final IContentCaptureServiceCallback callback = mCallback;
         if (callback == null) {
-            Log.w(TAG, "disableContentCaptureServices(): no server callback");
+            Log.w(TAG, "disableSelf(): no server callback");
             return;
         }
         try {
@@ -367,7 +367,6 @@ public abstract class ContentCaptureService extends Service {
             stateFlags = initialState;
         } else {
             stateFlags |= ContentCaptureSession.STATE_DISABLED;
-
         }
         setClientState(clientReceiver, stateFlags, mClientInterface.asBinder());
     }

@@ -17,7 +17,7 @@
 package com.android.server.am;
 
 import android.os.BatteryStats;
-import static android.os.BatteryStats.STATS_SINCE_UNPLUGGED;
+import static android.os.BatteryStats.STATS_SINCE_CHARGED;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.health.HealthKeys;
@@ -63,20 +63,20 @@ public class HealthStatsBatteryStatsWriter {
 
         // MEASUREMENT_REALTIME_BATTERY_MS
         uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_REALTIME_BATTERY_MS,
-                bs.computeBatteryRealtime(mNowRealtimeMs*1000, STATS_SINCE_UNPLUGGED)/1000);
+                bs.computeBatteryRealtime(mNowRealtimeMs*1000, STATS_SINCE_CHARGED)/1000);
 
         // MEASUREMENT_UPTIME_BATTERY_MS
         uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_UPTIME_BATTERY_MS,
-                bs.computeBatteryUptime(mNowUptimeMs*1000, STATS_SINCE_UNPLUGGED)/1000);
+                bs.computeBatteryUptime(mNowUptimeMs*1000, STATS_SINCE_CHARGED)/1000);
 
         // MEASUREMENT_REALTIME_SCREEN_OFF_BATTERY_MS
         uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_REALTIME_SCREEN_OFF_BATTERY_MS,
                 bs.computeBatteryScreenOffRealtime(
-                    mNowRealtimeMs*1000, STATS_SINCE_UNPLUGGED)/1000);
+                    mNowRealtimeMs*1000, STATS_SINCE_CHARGED)/1000);
 
         // MEASUREMENT_UPTIME_SCREEN_OFF_BATTERY_MS
         uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_UPTIME_SCREEN_OFF_BATTERY_MS,
-                bs.computeBatteryScreenOffUptime(mNowUptimeMs*1000, STATS_SINCE_UNPLUGGED)/1000);
+                bs.computeBatteryScreenOffUptime(mNowUptimeMs*1000, STATS_SINCE_CHARGED)/1000);
 
         //
         // Now on to the real per-uid stats...
@@ -161,75 +161,75 @@ public class HealthStatsBatteryStatsWriter {
         if (controller != null) {
             // MEASUREMENT_WIFI_IDLE_MS
             uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_WIFI_IDLE_MS,
-                    controller.getIdleTimeCounter().getCountLocked(STATS_SINCE_UNPLUGGED));
+                    controller.getIdleTimeCounter().getCountLocked(STATS_SINCE_CHARGED));
             // MEASUREMENT_WIFI_RX_MS
             uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_WIFI_RX_MS,
-                    controller.getRxTimeCounter().getCountLocked(STATS_SINCE_UNPLUGGED));
+                    controller.getRxTimeCounter().getCountLocked(STATS_SINCE_CHARGED));
             // MEASUREMENT_WIFI_TX_MS
             sum = 0;
             for (final BatteryStats.LongCounter counter: controller.getTxTimeCounters()) {
-                sum += counter.getCountLocked(STATS_SINCE_UNPLUGGED);
+                sum += counter.getCountLocked(STATS_SINCE_CHARGED);
             }
             uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_WIFI_TX_MS, sum);
             // MEASUREMENT_WIFI_POWER_MAMS
             uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_WIFI_POWER_MAMS,
-                    controller.getPowerCounter().getCountLocked(STATS_SINCE_UNPLUGGED));
+                    controller.getPowerCounter().getCountLocked(STATS_SINCE_CHARGED));
         }
 
         controller = uid.getBluetoothControllerActivity();
         if (controller != null) {
             // MEASUREMENT_BLUETOOTH_IDLE_MS
             uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_BLUETOOTH_IDLE_MS,
-                    controller.getIdleTimeCounter().getCountLocked(STATS_SINCE_UNPLUGGED));
+                    controller.getIdleTimeCounter().getCountLocked(STATS_SINCE_CHARGED));
             // MEASUREMENT_BLUETOOTH_RX_MS
             uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_BLUETOOTH_RX_MS,
-                    controller.getRxTimeCounter().getCountLocked(STATS_SINCE_UNPLUGGED));
+                    controller.getRxTimeCounter().getCountLocked(STATS_SINCE_CHARGED));
             // MEASUREMENT_BLUETOOTH_TX_MS
             sum = 0;
             for (final BatteryStats.LongCounter counter: controller.getTxTimeCounters()) {
-                sum += counter.getCountLocked(STATS_SINCE_UNPLUGGED);
+                sum += counter.getCountLocked(STATS_SINCE_CHARGED);
             }
             uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_BLUETOOTH_TX_MS, sum);
             // MEASUREMENT_BLUETOOTH_POWER_MAMS
             uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_BLUETOOTH_POWER_MAMS,
-                    controller.getPowerCounter().getCountLocked(STATS_SINCE_UNPLUGGED));
+                    controller.getPowerCounter().getCountLocked(STATS_SINCE_CHARGED));
         }
 
         controller = uid.getModemControllerActivity();
         if (controller != null) {
             // MEASUREMENT_MOBILE_IDLE_MS
             uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_MOBILE_IDLE_MS,
-                    controller.getIdleTimeCounter().getCountLocked(STATS_SINCE_UNPLUGGED));
+                    controller.getIdleTimeCounter().getCountLocked(STATS_SINCE_CHARGED));
             // MEASUREMENT_MOBILE_RX_MS
             uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_MOBILE_RX_MS,
-                    controller.getRxTimeCounter().getCountLocked(STATS_SINCE_UNPLUGGED));
+                    controller.getRxTimeCounter().getCountLocked(STATS_SINCE_CHARGED));
             // MEASUREMENT_MOBILE_TX_MS
             sum = 0;
             for (final BatteryStats.LongCounter counter: controller.getTxTimeCounters()) {
-                sum += counter.getCountLocked(STATS_SINCE_UNPLUGGED);
+                sum += counter.getCountLocked(STATS_SINCE_CHARGED);
             }
             uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_MOBILE_TX_MS, sum);
             // MEASUREMENT_MOBILE_POWER_MAMS
             uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_MOBILE_POWER_MAMS,
-                    controller.getPowerCounter().getCountLocked(STATS_SINCE_UNPLUGGED));
+                    controller.getPowerCounter().getCountLocked(STATS_SINCE_CHARGED));
         }
 
         // MEASUREMENT_WIFI_RUNNING_MS
         uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_WIFI_RUNNING_MS,
-                uid.getWifiRunningTime(mNowRealtimeMs*1000, STATS_SINCE_UNPLUGGED)/1000);
+                uid.getWifiRunningTime(mNowRealtimeMs*1000, STATS_SINCE_CHARGED)/1000);
 
         // MEASUREMENT_WIFI_FULL_LOCK_MS
         uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_WIFI_FULL_LOCK_MS,
-                uid.getFullWifiLockTime(mNowRealtimeMs*1000, STATS_SINCE_UNPLUGGED)/1000);
+                uid.getFullWifiLockTime(mNowRealtimeMs*1000, STATS_SINCE_CHARGED)/1000);
 
         // TIMER_WIFI_SCAN
         uidWriter.addTimer(UidHealthStats.TIMER_WIFI_SCAN,
-                uid.getWifiScanCount(STATS_SINCE_UNPLUGGED),
-                uid.getWifiScanTime(mNowRealtimeMs*1000, STATS_SINCE_UNPLUGGED)/1000);
+                uid.getWifiScanCount(STATS_SINCE_CHARGED),
+                uid.getWifiScanTime(mNowRealtimeMs*1000, STATS_SINCE_CHARGED)/1000);
 
         // MEASUREMENT_WIFI_MULTICAST_MS
         uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_WIFI_MULTICAST_MS,
-                uid.getWifiMulticastTime(mNowRealtimeMs*1000, STATS_SINCE_UNPLUGGED)/1000);
+                uid.getWifiMulticastTime(mNowRealtimeMs*1000, STATS_SINCE_CHARGED)/1000);
 
         // TIMER_AUDIO
         addTimer(uidWriter, UidHealthStats.TIMER_AUDIO, uid.getAudioTurnedOnTimer());
@@ -280,90 +280,90 @@ public class HealthStatsBatteryStatsWriter {
         // MEASUREMENT_OTHER_USER_ACTIVITY_COUNT
         uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_OTHER_USER_ACTIVITY_COUNT,
                 uid.getUserActivityCount(PowerManager.USER_ACTIVITY_EVENT_OTHER,
-                    STATS_SINCE_UNPLUGGED));
+                    STATS_SINCE_CHARGED));
 
         // MEASUREMENT_BUTTON_USER_ACTIVITY_COUNT
         uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_BUTTON_USER_ACTIVITY_COUNT,
                 uid.getUserActivityCount(PowerManager.USER_ACTIVITY_EVENT_BUTTON,
-                    STATS_SINCE_UNPLUGGED));
+                    STATS_SINCE_CHARGED));
 
         // MEASUREMENT_TOUCH_USER_ACTIVITY_COUNT
         uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_TOUCH_USER_ACTIVITY_COUNT,
                 uid.getUserActivityCount(PowerManager.USER_ACTIVITY_EVENT_TOUCH,
-                    STATS_SINCE_UNPLUGGED));
+                    STATS_SINCE_CHARGED));
 
         // MEASUREMENT_MOBILE_RX_BYTES
         uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_MOBILE_RX_BYTES,
                 uid.getNetworkActivityBytes(BatteryStats.NETWORK_MOBILE_RX_DATA,
-                    STATS_SINCE_UNPLUGGED));
+                    STATS_SINCE_CHARGED));
 
         // MEASUREMENT_MOBILE_TX_BYTES
         uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_MOBILE_TX_BYTES,
                 uid.getNetworkActivityBytes(BatteryStats.NETWORK_MOBILE_TX_DATA,
-                    STATS_SINCE_UNPLUGGED));
+                    STATS_SINCE_CHARGED));
 
         // MEASUREMENT_WIFI_RX_BYTES
         uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_WIFI_RX_BYTES,
                 uid.getNetworkActivityBytes(BatteryStats.NETWORK_WIFI_RX_DATA,
-                    STATS_SINCE_UNPLUGGED));
+                    STATS_SINCE_CHARGED));
 
         // MEASUREMENT_WIFI_TX_BYTES
         uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_WIFI_TX_BYTES,
                 uid.getNetworkActivityBytes(BatteryStats.NETWORK_WIFI_TX_DATA,
-                    STATS_SINCE_UNPLUGGED));
+                    STATS_SINCE_CHARGED));
 
         // MEASUREMENT_BLUETOOTH_RX_BYTES
         uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_BLUETOOTH_RX_BYTES,
                 uid.getNetworkActivityBytes(BatteryStats.NETWORK_BT_RX_DATA,
-                    STATS_SINCE_UNPLUGGED));
+                    STATS_SINCE_CHARGED));
 
         // MEASUREMENT_BLUETOOTH_TX_BYTES
         uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_BLUETOOTH_TX_BYTES,
                 uid.getNetworkActivityBytes(BatteryStats.NETWORK_BT_TX_DATA,
-                    STATS_SINCE_UNPLUGGED));
+                    STATS_SINCE_CHARGED));
 
         // MEASUREMENT_MOBILE_RX_PACKETS
         uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_MOBILE_RX_PACKETS,
                 uid.getNetworkActivityPackets(BatteryStats.NETWORK_MOBILE_RX_DATA,
-                    STATS_SINCE_UNPLUGGED));
+                    STATS_SINCE_CHARGED));
 
         // MEASUREMENT_MOBILE_TX_PACKETS
         uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_MOBILE_TX_PACKETS,
                 uid.getNetworkActivityPackets(BatteryStats.NETWORK_MOBILE_TX_DATA,
-                    STATS_SINCE_UNPLUGGED));
+                    STATS_SINCE_CHARGED));
 
         // MEASUREMENT_WIFI_RX_PACKETS
         uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_WIFI_RX_PACKETS,
                 uid.getNetworkActivityPackets(BatteryStats.NETWORK_WIFI_RX_DATA,
-                    STATS_SINCE_UNPLUGGED));
+                    STATS_SINCE_CHARGED));
 
         // MEASUREMENT_WIFI_TX_PACKETS
         uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_WIFI_TX_PACKETS,
                 uid.getNetworkActivityPackets(BatteryStats.NETWORK_WIFI_TX_DATA,
-                    STATS_SINCE_UNPLUGGED));
+                    STATS_SINCE_CHARGED));
 
         // MEASUREMENT_BLUETOOTH_RX_PACKETS
         uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_BLUETOOTH_RX_PACKETS,
                 uid.getNetworkActivityPackets(BatteryStats.NETWORK_BT_RX_DATA,
-                    STATS_SINCE_UNPLUGGED));
+                    STATS_SINCE_CHARGED));
 
         // MEASUREMENT_BLUETOOTH_TX_PACKETS
         uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_BLUETOOTH_TX_PACKETS,
                 uid.getNetworkActivityPackets(BatteryStats.NETWORK_BT_TX_DATA,
-                    STATS_SINCE_UNPLUGGED));
+                    STATS_SINCE_CHARGED));
 
         // TIMER_MOBILE_RADIO_ACTIVE
         uidWriter.addTimer(UidHealthStats.TIMER_MOBILE_RADIO_ACTIVE,
-                uid.getMobileRadioActiveCount(STATS_SINCE_UNPLUGGED),
-                uid.getMobileRadioActiveTime(STATS_SINCE_UNPLUGGED));
+                uid.getMobileRadioActiveCount(STATS_SINCE_CHARGED),
+                uid.getMobileRadioActiveTime(STATS_SINCE_CHARGED));
 
         // MEASUREMENT_USER_CPU_TIME_MS
         uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_USER_CPU_TIME_MS,
-                uid.getUserCpuTimeUs(STATS_SINCE_UNPLUGGED)/1000);
+                uid.getUserCpuTimeUs(STATS_SINCE_CHARGED)/1000);
 
         // MEASUREMENT_SYSTEM_CPU_TIME_MS
         uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_SYSTEM_CPU_TIME_MS,
-                uid.getSystemCpuTimeUs(STATS_SINCE_UNPLUGGED)/1000);
+                uid.getSystemCpuTimeUs(STATS_SINCE_CHARGED)/1000);
 
         // MEASUREMENT_CPU_POWER_MAMS
         uidWriter.addMeasurement(UidHealthStats.MEASUREMENT_CPU_POWER_MAMS, 0);
@@ -393,27 +393,27 @@ public class HealthStatsBatteryStatsWriter {
     public void writeProc(HealthStatsWriter procWriter, BatteryStats.Uid.Proc proc) {
         // MEASUREMENT_USER_TIME_MS
         procWriter.addMeasurement(ProcessHealthStats.MEASUREMENT_USER_TIME_MS,
-                proc.getUserTime(STATS_SINCE_UNPLUGGED));
+                proc.getUserTime(STATS_SINCE_CHARGED));
 
         // MEASUREMENT_SYSTEM_TIME_MS
         procWriter.addMeasurement(ProcessHealthStats.MEASUREMENT_SYSTEM_TIME_MS,
-                proc.getSystemTime(STATS_SINCE_UNPLUGGED));
+                proc.getSystemTime(STATS_SINCE_CHARGED));
 
         // MEASUREMENT_STARTS_COUNT
         procWriter.addMeasurement(ProcessHealthStats.MEASUREMENT_STARTS_COUNT,
-                proc.getStarts(STATS_SINCE_UNPLUGGED));
+                proc.getStarts(STATS_SINCE_CHARGED));
 
         // MEASUREMENT_CRASHES_COUNT
         procWriter.addMeasurement(ProcessHealthStats.MEASUREMENT_CRASHES_COUNT,
-                proc.getNumCrashes(STATS_SINCE_UNPLUGGED));
+                proc.getNumCrashes(STATS_SINCE_CHARGED));
 
         // MEASUREMENT_ANR_COUNT
         procWriter.addMeasurement(ProcessHealthStats.MEASUREMENT_ANR_COUNT,
-                proc.getNumAnrs(STATS_SINCE_UNPLUGGED));
+                proc.getNumAnrs(STATS_SINCE_CHARGED));
 
         // MEASUREMENT_FOREGROUND_MS
         procWriter.addMeasurement(ProcessHealthStats.MEASUREMENT_FOREGROUND_MS,
-                proc.getForegroundTime(STATS_SINCE_UNPLUGGED));
+                proc.getForegroundTime(STATS_SINCE_CHARGED));
     }
 
     /**
@@ -434,7 +434,7 @@ public class HealthStatsBatteryStatsWriter {
             final BatteryStats.Counter counter = entry.getValue();
             if (counter != null) {
                 pkgWriter.addMeasurements(PackageHealthStats.MEASUREMENTS_WAKEUP_ALARMS_COUNT,
-                        entry.getKey(), counter.getCountLocked(STATS_SINCE_UNPLUGGED));
+                        entry.getKey(), counter.getCountLocked(STATS_SINCE_CHARGED));
             }
         }
     }
@@ -445,11 +445,11 @@ public class HealthStatsBatteryStatsWriter {
     public void writeServ(HealthStatsWriter servWriter, BatteryStats.Uid.Pkg.Serv serv) {
         // MEASUREMENT_START_SERVICE_COUNT
         servWriter.addMeasurement(ServiceHealthStats.MEASUREMENT_START_SERVICE_COUNT,
-                serv.getStarts(STATS_SINCE_UNPLUGGED));
+                serv.getStarts(STATS_SINCE_CHARGED));
 
         // MEASUREMENT_LAUNCH_COUNT
         servWriter.addMeasurement(ServiceHealthStats.MEASUREMENT_LAUNCH_COUNT,
-                serv.getLaunches(STATS_SINCE_UNPLUGGED));
+                serv.getLaunches(STATS_SINCE_CHARGED));
     }
 
     /**
@@ -457,8 +457,8 @@ public class HealthStatsBatteryStatsWriter {
      */
     private void addTimer(HealthStatsWriter writer, int key, BatteryStats.Timer timer) {
         if (timer != null) {
-            writer.addTimer(key, timer.getCountLocked(STATS_SINCE_UNPLUGGED),
-                    timer.getTotalTimeLocked(mNowRealtimeMs*1000, STATS_SINCE_UNPLUGGED) / 1000);
+            writer.addTimer(key, timer.getCountLocked(STATS_SINCE_CHARGED),
+                    timer.getTotalTimeLocked(mNowRealtimeMs*1000, STATS_SINCE_CHARGED) / 1000);
         }
     }
 
@@ -468,8 +468,8 @@ public class HealthStatsBatteryStatsWriter {
     private void addTimers(HealthStatsWriter writer, int key, String name,
             BatteryStats.Timer timer) {
         if (timer != null) {
-            writer.addTimers(key, name, new TimerStat(timer.getCountLocked(STATS_SINCE_UNPLUGGED),
-                    timer.getTotalTimeLocked(mNowRealtimeMs*1000, STATS_SINCE_UNPLUGGED) / 1000));
+            writer.addTimers(key, name, new TimerStat(timer.getCountLocked(STATS_SINCE_CHARGED),
+                    timer.getTotalTimeLocked(mNowRealtimeMs*1000, STATS_SINCE_CHARGED) / 1000));
         }
     }
 }

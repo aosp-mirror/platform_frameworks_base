@@ -1686,9 +1686,10 @@ public final class OomAdjuster {
 
         int changes = 0;
 
-        if (app.curAdj != app.setAdj) {
-            // don't compact during bootup
-            if (mAppCompact.useCompaction() && mService.mBooted) {
+        // don't compact during bootup
+        if (mAppCompact.useCompaction() && mService.mBooted) {
+            // Cached and prev/home compaction
+            if (app.curAdj != app.setAdj) {
                 // Perform a minor compaction when a perceptible app becomes the prev/home app
                 // Perform a major compaction when any app enters cached
                 // reminder: here, setAdj is previous state, curAdj is upcoming state
@@ -1702,7 +1703,23 @@ public final class OomAdjuster {
                         && app.curAdj <= ProcessList.CACHED_APP_MAX_ADJ) {
                     mAppCompact.compactAppFull(app);
                 }
+            } else if (mService.mWakefulness != PowerManagerInternal.WAKEFULNESS_AWAKE
+                    && app.setAdj < ProcessList.FOREGROUND_APP_ADJ
+                    // Because these can fire independent of oom_adj/procstate changes, we need
+                    // to throttle the actual dispatch of these requests in addition to the
+                    // processing of the requests. As a result, there is throttling both here
+                    // and in AppCompactor.
+                    && mAppCompact.shouldCompactPersistent(app, now)) {
+                mAppCompact.compactAppPersistent(app);
+            } else if (mService.mWakefulness != PowerManagerInternal.WAKEFULNESS_AWAKE
+                    && app.getCurProcState()
+                        == ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
+                    && mAppCompact.shouldCompactBFGS(app, now)) {
+                mAppCompact.compactAppBfgs(app);
             }
+        }
+
+        if (app.curAdj != app.setAdj) {
             ProcessList.setOomAdj(app.pid, app.uid, app.curAdj);
             if (DEBUG_SWITCH || DEBUG_OOM_ADJ || mService.mCurOomAdjUid == app.info.uid) {
                 String msg = "Set " + app.pid + " " + app.processName + " adj "

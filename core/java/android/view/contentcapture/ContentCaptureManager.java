@@ -32,6 +32,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.util.Log;
 import android.view.contentcapture.ContentCaptureSession.FlushReason;
 
@@ -52,11 +53,13 @@ public final class ContentCaptureManager {
     private static final String TAG = ContentCaptureManager.class.getSimpleName();
 
     /** @hide */
+    public static final int RESULT_CODE_OK = 0;
+    /** @hide */
     public static final int RESULT_CODE_TRUE = 1;
     /** @hide */
     public static final int RESULT_CODE_FALSE = 2;
     /** @hide */
-    public static final int RESULT_CODE_NOT_SERVICE = -1;
+    public static final int RESULT_CODE_SECURITY_EXCEPTION = -1;
 
     /**
      * Timeout for calls to system_server.
@@ -243,6 +246,7 @@ public final class ContentCaptureManager {
     @UiThread
     public void onActivityCreated(@NonNull IBinder applicationToken,
             @NonNull ComponentName activityComponent, int flags) {
+        if (mOptions.lite) return;
         synchronized (mLock) {
             mFlags |= flags;
             getMainContentCaptureSession().start(applicationToken, activityComponent, mFlags);
@@ -252,18 +256,21 @@ public final class ContentCaptureManager {
     /** @hide */
     @UiThread
     public void onActivityResumed() {
+        if (mOptions.lite) return;
         getMainContentCaptureSession().notifySessionLifecycle(/* started= */ true);
     }
 
     /** @hide */
     @UiThread
     public void onActivityPaused() {
+        if (mOptions.lite) return;
         getMainContentCaptureSession().notifySessionLifecycle(/* started= */ false);
     }
 
     /** @hide */
     @UiThread
     public void onActivityDestroyed() {
+        if (mOptions.lite) return;
         getMainContentCaptureSession().destroy();
     }
 
@@ -276,6 +283,7 @@ public final class ContentCaptureManager {
      */
     @UiThread
     public void flush(@FlushReason int reason) {
+        if (mOptions.lite) return;
         getMainContentCaptureSession().flush(reason);
     }
 
@@ -285,11 +293,40 @@ public final class ContentCaptureManager {
      */
     @Nullable
     public ComponentName getServiceComponentName() {
-        if (!isContentCaptureEnabled()) return null;
+        if (!isContentCaptureEnabled() && !mOptions.lite) return null;
 
         final SyncResultReceiver resultReceiver = new SyncResultReceiver(SYNC_CALLS_TIMEOUT_MS);
         try {
             mService.getServiceComponentName(resultReceiver);
+            return resultReceiver.getParcelableResult();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the (optional) intent used to launch the service-specific settings.
+     *
+     * <p>This method is static because it's called by Settings, which might not be whitelisted
+     * for content capture (in which case the ContentCaptureManager on its context would be null).
+     *
+     * @hide
+     */
+    // TODO: use "lite" options as it's done by activities from the content capture service
+    @Nullable
+    public static ComponentName getServiceSettingsComponentName() {
+        final IBinder binder = ServiceManager
+                .checkService(Context.CONTENT_CAPTURE_MANAGER_SERVICE);
+        if (binder == null) return null;
+
+        final IContentCaptureManager service = IContentCaptureManager.Stub.asInterface(binder);
+        final SyncResultReceiver resultReceiver = new SyncResultReceiver(SYNC_CALLS_TIMEOUT_MS);
+        try {
+            service.getServiceSettingsActivity(resultReceiver);
+            final int resultCode = resultReceiver.getIntResult();
+            if (resultCode == RESULT_CODE_SECURITY_EXCEPTION) {
+                throw new SecurityException(resultReceiver.getStringResult());
+            }
             return resultReceiver.getParcelableResult();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -311,6 +348,8 @@ public final class ContentCaptureManager {
      * </ul>
      */
     public boolean isContentCaptureEnabled() {
+        if (mOptions.lite) return false;
+
         final MainContentCaptureSession mainSession;
         synchronized (mLock) {
             mainSession = mMainSession;
@@ -365,7 +404,7 @@ public final class ContentCaptureManager {
                 return true;
             case RESULT_CODE_FALSE:
                 return false;
-            case RESULT_CODE_NOT_SERVICE:
+            case RESULT_CODE_SECURITY_EXCEPTION:
                 throw new SecurityException("caller is not user's ContentCapture service");
             default:
                 Log.wtf(TAG, "received invalid result: " + resultCode);

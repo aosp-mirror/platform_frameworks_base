@@ -16,9 +16,11 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.content.Context;
 
+import com.android.internal.util.Preconditions;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.settings.CurrentUserTracker;
@@ -69,7 +71,8 @@ public class KeyguardMonitorImpl extends KeyguardUpdateMonitorCallback
     }
 
     @Override
-    public void addCallback(Callback callback) {
+    public void addCallback(@NonNull Callback callback) {
+        Preconditions.checkNotNull(callback, "Callback must not be null. b/128895449");
         mCallbacks.add(callback);
         if (mCallbacks.size() != 0 && !mListening) {
             mListening = true;
@@ -81,7 +84,8 @@ public class KeyguardMonitorImpl extends KeyguardUpdateMonitorCallback
     }
 
     @Override
-    public void removeCallback(Callback callback) {
+    public void removeCallback(@NonNull Callback callback) {
+        Preconditions.checkNotNull(callback, "Callback must not be null. b/128895449");
         if (mCallbacks.remove(callback) && mCallbacks.size() == 0 && mListening) {
             mListening = false;
             mKeyguardUpdateMonitor.removeCallback(this);

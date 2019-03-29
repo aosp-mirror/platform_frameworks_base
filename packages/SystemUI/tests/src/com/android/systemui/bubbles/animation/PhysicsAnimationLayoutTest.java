@@ -20,12 +20,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 
 import android.os.SystemClock;
 import android.testing.AndroidTestingRunner;
@@ -68,7 +67,8 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
         // offset, and don't actually remove views immediately (since most implementations will wait
         // to animate child views out before actually removing them).
         mTestableController.setAnimatedProperties(Sets.newHashSet(
-                DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y));
+                DynamicAnimation.TRANSLATION_X,
+                DynamicAnimation.TRANSLATION_Y));
         mTestableController.setChainedProperties(Sets.newHashSet(DynamicAnimation.TRANSLATION_X));
         mTestableController.setOffsetForProperty(
                 DynamicAnimation.TRANSLATION_X, TEST_TRANSLATION_X_OFFSET);
@@ -126,11 +126,11 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
 
         // Animate the first child's translation X.
         final CountDownLatch animLatch = new CountDownLatch(1);
-        mLayout.animateValueForChildAtIndex(
-                DynamicAnimation.TRANSLATION_X,
-                0,
-                100,
-                animLatch::countDown);
+
+        mTestableController
+                .animationForChildAtIndex(0)
+                .translationX(100)
+                .start(animLatch::countDown);
         animLatch.await(1, TimeUnit.SECONDS);
 
         // Ensure that the first view has been translated, but not the second one.
@@ -140,60 +140,50 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
 
     @Test
     public void testUpdateValueXChained() throws InterruptedException {
-        mLayout.setController(mTestableController);
-        addOneMoreThanRenderLimitBubbles();
         testChainedTranslationAnimations();
     }
 
     @Test
-    public void testSetEndListeners() throws InterruptedException {
+    public void testSetEndActions() throws InterruptedException {
         mLayout.setController(mTestableController);
         addOneMoreThanRenderLimitBubbles();
         mTestableController.setChainedProperties(Sets.newHashSet());
 
         final CountDownLatch xLatch = new CountDownLatch(1);
-        OneTimeEndListener xEndListener = Mockito.spy(new OneTimeEndListener() {
+        Runnable xEndAction = Mockito.spy(new Runnable() {
+
             @Override
-            public void onAnimationEnd(DynamicAnimation animation, boolean canceled, float value,
-                    float velocity) {
-                super.onAnimationEnd(animation, canceled, value, velocity);
+            public void run() {
                 xLatch.countDown();
             }
         });
 
         final CountDownLatch yLatch = new CountDownLatch(1);
-        final OneTimeEndListener yEndListener = Mockito.spy(new OneTimeEndListener() {
+        Runnable yEndAction = Mockito.spy(new Runnable() {
+
             @Override
-            public void onAnimationEnd(DynamicAnimation animation, boolean canceled, float value,
-                    float velocity) {
-                super.onAnimationEnd(animation, canceled, value, velocity);
+            public void run() {
                 yLatch.countDown();
             }
         });
 
         // Set end listeners for both x and y.
-        mLayout.setEndListenerForProperty(xEndListener, DynamicAnimation.TRANSLATION_X);
-        mLayout.setEndListenerForProperty(yEndListener, DynamicAnimation.TRANSLATION_Y);
+        mLayout.setEndActionForProperty(xEndAction, DynamicAnimation.TRANSLATION_X);
+        mLayout.setEndActionForProperty(yEndAction, DynamicAnimation.TRANSLATION_Y);
 
         // Animate x, and wait for it to finish.
-        mLayout.animateValueForChildAtIndex(
-                DynamicAnimation.TRANSLATION_X,
-                0,
-                100);
+        mTestableController.animationForChildAtIndex(0)
+                .translationX(100)
+                .start();
+
         xLatch.await();
         yLatch.await(1, TimeUnit.SECONDS);
 
         // Make sure the x end listener was called only one time, and the y listener was never
         // called since we didn't animate y. Wait 1 second after the original animation end trigger
         // to make sure it doesn't get called again.
-        Mockito.verify(xEndListener, Mockito.after(1000).times(1))
-                .onAnimationEnd(
-                        any(),
-                        eq(false),
-                        eq(100f),
-                        anyFloat());
-        Mockito.verify(yEndListener, Mockito.after(1000).never())
-                .onAnimationEnd(any(), anyBoolean(), anyFloat(), anyFloat());
+        Mockito.verify(xEndAction, Mockito.after(1000).times(1)).run();
+        Mockito.verify(yEndAction, Mockito.after(1000).never()).run();
     }
 
     @Test
@@ -203,39 +193,31 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
         mTestableController.setChainedProperties(Sets.newHashSet());
 
         final CountDownLatch xLatch = new CountDownLatch(1);
-        OneTimeEndListener xEndListener = Mockito.spy(new OneTimeEndListener() {
+        Runnable xEndListener = Mockito.spy(new Runnable() {
+
             @Override
-            public void onAnimationEnd(DynamicAnimation animation, boolean canceled, float value,
-                    float velocity) {
-                super.onAnimationEnd(animation, canceled, value, velocity);
+            public void run() {
                 xLatch.countDown();
             }
         });
 
         // Set the end listener.
-        mLayout.setEndListenerForProperty(xEndListener, DynamicAnimation.TRANSLATION_X);
+        mLayout.setEndActionForProperty(xEndListener, DynamicAnimation.TRANSLATION_X);
 
         // Animate x, and wait for it to finish.
-        mLayout.animateValueForChildAtIndex(
-                DynamicAnimation.TRANSLATION_X,
-                0,
-                100);
+        mTestableController.animationForChildAtIndex(0)
+                .translationX(100)
+                .start();
         xLatch.await();
 
         InOrder endListenerCalls = inOrder(xEndListener);
-        endListenerCalls.verify(xEndListener, Mockito.times(1))
-                .onAnimationEnd(
-                        any(),
-                        eq(false),
-                        eq(100f),
-                        anyFloat());
+        endListenerCalls.verify(xEndListener, Mockito.times(1)).run();
 
         // Animate X again, remove the end listener.
-        mLayout.animateValueForChildAtIndex(
-                DynamicAnimation.TRANSLATION_X,
-                0,
-                1000);
-        mLayout.removeEndListenerForProperty(DynamicAnimation.TRANSLATION_X);
+        mTestableController.animationForChildAtIndex(0)
+                .translationX(1000)
+                .start();
+        mLayout.removeEndActionForProperty(DynamicAnimation.TRANSLATION_X);
         xLatch.await(1, TimeUnit.SECONDS);
 
         // Make sure the end listener was not called.
@@ -261,10 +243,9 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
         secondController.setRemoveImmediately(true);
 
         mLayout.setController(secondController);
-        mLayout.animateValueForChildAtIndex(
-                DynamicAnimation.SCALE_X,
-                0,
-                1.5f);
+        mTestableController.animationForChildAtIndex(0)
+                .scaleX(1.5f)
+                .start();
 
         waitForPropertyAnimations(DynamicAnimation.SCALE_X);
 
@@ -285,10 +266,9 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
                 .getOffsetForChainedPropertyAnimation(eq(DynamicAnimation.SCALE_X));
 
         mLayout.setController(mTestableController);
-        mLayout.animateValueForChildAtIndex(
-                DynamicAnimation.TRANSLATION_X,
-                0,
-                100f);
+        mTestableController.animationForChildAtIndex(0)
+                .translationX(100f)
+                .start();
 
         waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X);
 
@@ -308,10 +288,9 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
         assertFalse(mLayout.arePropertiesAnimating(
                 DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y));
 
-        mLayout.animateValueForChildAtIndex(
-                DynamicAnimation.TRANSLATION_X,
-                0,
-                100);
+        mTestableController.animationForChildAtIndex(0)
+                .translationX(100f)
+                .start();
 
         // Wait for the animations to get underway.
         SystemClock.sleep(50);
@@ -330,14 +309,9 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
         mLayout.setController(mTestableController);
         addOneMoreThanRenderLimitBubbles();
 
-        mLayout.animateValueForChildAtIndex(
-                DynamicAnimation.TRANSLATION_X,
-                0,
-                1000);
-        mLayout.animateValueForChildAtIndex(
-                DynamicAnimation.TRANSLATION_Y,
-                0,
-                1000);
+        mTestableController.animationForChildAtIndex(0)
+                .position(1000, 1000)
+                .start();
 
         mLayout.cancelAllAnimations();
 
@@ -367,13 +341,15 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
 
     /** Standard test of chained translation animations. */
     private void testChainedTranslationAnimations() throws InterruptedException {
+        mLayout.setController(mTestableController);
+        addOneMoreThanRenderLimitBubbles();
+
         assertEquals(0, mLayout.getChildAt(0).getTranslationX(), .1f);
         assertEquals(0, mLayout.getChildAt(1).getTranslationX(), .1f);
 
-        mLayout.animateValueForChildAtIndex(
-                DynamicAnimation.TRANSLATION_X,
-                0,
-                100);
+        mTestableController.animationForChildAtIndex(0)
+                .translationX(100f)
+                .start();
 
         waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X);
 
@@ -392,10 +368,9 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
         assertEquals(0, mLayout.getChildAt(1).getTranslationY(), .1f);
 
         // Animate the first child's Y translation.
-        mLayout.animateValueForChildAtIndex(
-                DynamicAnimation.TRANSLATION_Y,
-                0,
-                100);
+        mTestableController.animationForChildAtIndex(0)
+                .translationY(100f)
+                .start();
 
         waitForPropertyAnimations(DynamicAnimation.TRANSLATION_Y);
 
@@ -403,6 +378,75 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
         // translations.
         assertEquals(100, mLayout.getChildAt(0).getTranslationY(), .1f);
         assertEquals(0, mLayout.getChildAt(1).getTranslationY(), .1f);
+    }
+
+    @Test
+    public void testPhysicsAnimator() throws InterruptedException {
+        mLayout.setController(mTestableController);
+        addOneMoreThanRenderLimitBubbles();
+
+        Runnable afterAll = Mockito.mock(Runnable.class);
+        Runnable after = Mockito.spy(new Runnable() {
+            int mCallCount = 0;
+
+            @Override
+            public void run() {
+                // Make sure that if only one of the animations has finished, we didn't already call
+                // afterAll.
+                if (mCallCount == 1) {
+                    Mockito.verifyNoMoreInteractions(afterAll);
+                }
+            }
+        });
+
+        // Animate from x = 7 to x = 100, and from y = 100 to 7 = 200, calling 'after' after each
+        // property's animation completes, then call afterAll when they're all complete.
+        mTestableController.animationForChildAtIndex(0)
+                .translationX(7, 100, after)
+                .translationY(100, 200, after)
+                .start(afterAll);
+
+        // We should have immediately set the 'from' values.
+        assertEquals(7, mViews.get(0).getTranslationX(), .01f);
+        assertEquals(100, mViews.get(0).getTranslationY(), .01f);
+
+        waitForPropertyAnimations(
+                DynamicAnimation.TRANSLATION_X,
+                DynamicAnimation.TRANSLATION_Y);
+
+        // We should have called the after callback twice, and afterAll once. We verify in the
+        // mocked callback that afterAll isn't called before both finish.
+        Mockito.verify(after, times(2)).run();
+        Mockito.verify(afterAll).run();
+
+        // Make sure we actually animated the views.
+        assertEquals(100, mViews.get(0).getTranslationX(), .01f);
+        assertEquals(200, mViews.get(0).getTranslationY(), .01f);
+    }
+
+    @Test
+    public void testAnimationsForChildrenFromIndex() throws InterruptedException {
+        // Don't chain since we're going to invoke each animation independently.
+        mTestableController.setChainedProperties(new HashSet<>());
+
+        mLayout.setController(mTestableController);
+
+        addOneMoreThanRenderLimitBubbles();
+
+        Runnable allEnd = Mockito.mock(Runnable.class);
+
+        mTestableController.animationsForChildrenFromIndex(
+                1, (index, animation) -> animation.translationX((index - 1) * 50))
+            .startAll(allEnd);
+
+        waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X);
+
+        assertEquals(0, mViews.get(0).getTranslationX(), .1f);
+        assertEquals(0, mViews.get(1).getTranslationX(), .1f);
+        assertEquals(50, mViews.get(2).getTranslationX(), .1f);
+        assertEquals(100, mViews.get(3).getTranslationX(), .1f);
+
+        Mockito.verify(allEnd, times(1)).run();
     }
 
     /**

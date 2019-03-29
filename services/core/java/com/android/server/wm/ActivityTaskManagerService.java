@@ -5209,7 +5209,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 // the ATMS lock held.
                 final Message msg = PooledLambda.obtainMessage(
                         ActivityManagerInternal::killAllBackgroundProcessesExcept, mAmInternal,
-                        N, ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE);
+                        N, ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND);
                 mH.sendMessage(msg);
             }
         }
@@ -6492,9 +6492,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public boolean startHomeOnDisplay(int userId, String reason, int displayId,
-                boolean fromHomeKey) {
-            return mRootActivityContainer.startHomeOnDisplay(userId, reason, displayId,
-                    fromHomeKey);
+                boolean allowInstrumenting, boolean fromHomeKey) {
+            synchronized (mGlobalLock) {
+                return mRootActivityContainer.startHomeOnDisplay(userId, reason, displayId,
+                        allowInstrumenting, fromHomeKey);
+            }
         }
 
         @Override

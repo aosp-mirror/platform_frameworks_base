@@ -491,7 +491,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
         if (mBackgroundControl == null) {
             return;
         }
-        if ((mSurfaceFlags & SurfaceControl.OPAQUE) != 0) {
+        if ((mSubLayer > 0) && ((mSurfaceFlags & SurfaceControl.OPAQUE) != 0)) {
             mBackgroundControl.show();
             mBackgroundControl.setLayer(Integer.MIN_VALUE);
         } else {

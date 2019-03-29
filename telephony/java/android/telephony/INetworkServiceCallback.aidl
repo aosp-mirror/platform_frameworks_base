@@ -24,6 +24,6 @@ import android.telephony.NetworkRegistrationInfo;
  */
 oneway interface INetworkServiceCallback
 {
-    void onGetNetworkRegistrationInfoComplete(int result, in NetworkRegistrationInfo state);
+    void onRequestNetworkRegistrationInfoComplete(int result, in NetworkRegistrationInfo state);
     void onNetworkStateChanged();
 }

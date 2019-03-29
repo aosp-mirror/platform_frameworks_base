@@ -578,7 +578,6 @@
     <dimen name="default_magnifier_horizontal_offset">0dp</dimen>
     <item type="dimen" format="float" name="default_magnifier_zoom">1.25</item>
 
-    <dimen name="chooser_grid_padding">0dp</dimen>
     <!-- Spacing around the background change frome service to non-service -->
     <dimen name="chooser_service_spacing">8dp</dimen>
 
@@ -725,4 +724,5 @@
     <dimen name="chooser_preview_width">-1px</dimen>
     <dimen name="resolver_icon_size">42dp</dimen>
     <dimen name="resolver_badge_size">18dp</dimen>
+    <dimen name="chooser_target_width">76dp</dimen>
 </resources>

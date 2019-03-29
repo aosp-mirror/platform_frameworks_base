@@ -22,8 +22,8 @@ import static android.media.MediaConstants.KEY_PID;
 import static android.media.MediaConstants.KEY_PLAYBACK_ACTIVE;
 import static android.media.MediaConstants.KEY_SESSION2LINK;
 import static android.media.MediaConstants.KEY_TOKEN_EXTRAS;
-import static android.media.Session2Command.RESULT_ERROR_UNKNOWN_ERROR;
-import static android.media.Session2Command.RESULT_INFO_SKIPPED;
+import static android.media.Session2Command.Result.RESULT_ERROR_UNKNOWN_ERROR;
+import static android.media.Session2Command.Result.RESULT_INFO_SKIPPED;
 import static android.media.Session2Token.TYPE_SESSION;
 
 import android.annotation.NonNull;
@@ -415,7 +415,7 @@ public class MediaSession2 implements AutoCloseable {
                     MediaSession2.this, controllerInfo, command, args);
             if (resultReceiver != null) {
                 if (result == null) {
-                    resultReceiver.send(Session2Command.RESULT_INFO_SKIPPED, null);
+                    resultReceiver.send(RESULT_INFO_SKIPPED, null);
                 } else {
                     resultReceiver.send(result.getResultCode(), result.getResultData());
                 }

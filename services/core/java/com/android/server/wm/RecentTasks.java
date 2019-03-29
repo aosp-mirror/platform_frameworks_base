@@ -845,6 +845,11 @@ class RecentTasks {
         return mService.mAmInternal.getCurrentProfileIds();
     }
 
+    @VisibleForTesting
+    boolean isUserRunning(int userId, int flags) {
+        return mService.mAmInternal.isUserRunning(userId, flags);
+    }
+
     /**
      * @return the list of recent tasks for presentation.
      */
@@ -861,7 +866,7 @@ class RecentTasks {
             boolean getTasksAllowed, boolean getDetailedTasks, int userId, int callingUid) {
         final boolean withExcluded = (flags & RECENT_WITH_EXCLUDED) != 0;
 
-        if (!mService.mAmInternal.isUserRunning(userId, FLAG_AND_UNLOCKED)) {
+        if (!isUserRunning(userId, FLAG_AND_UNLOCKED)) {
             Slog.i(TAG, "user " + userId + " is still locked. Cannot load recents");
             return new ArrayList<>();
         }
@@ -881,7 +886,7 @@ class RecentTasks {
 
             if (isVisibleRecentTask(tr)) {
                 numVisibleTasks++;
-                if (isInVisibleRange(tr, numVisibleTasks)) {
+                if (isInVisibleRange(tr, numVisibleTasks, withExcluded)) {
                     // Fall through
                 } else {
                     // Not in visible range
@@ -908,51 +913,43 @@ class RecentTasks {
                 continue;
             }
 
-            // Return the entry if desired by the caller.  We always return
-            // the first entry, because callers always expect this to be the
-            // foreground app.  We may filter others if the caller has
-            // not supplied RECENT_WITH_EXCLUDED and there is some reason
-            // we should exclude the entry.
-
-            if (i == 0
-                    || withExcluded
-                    || (tr.intent == null)
-                    || ((tr.intent.getFlags() & FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
-                    == 0)) {
-                if (!getTasksAllowed) {
-                    // If the caller doesn't have the GET_TASKS permission, then only
-                    // allow them to see a small subset of tasks -- their own and home.
-                    if (!tr.isActivityTypeHome() && tr.effectiveUid != callingUid) {
-                        if (DEBUG_RECENTS) Slog.d(TAG_RECENTS, "Skipping, not allowed: " + tr);
-                        continue;
-                    }
-                }
-                if (tr.autoRemoveRecents && tr.getTopActivity() == null) {
-                    // Don't include auto remove tasks that are finished or finishing.
-                    if (DEBUG_RECENTS) Slog.d(TAG_RECENTS,
-                            "Skipping, auto-remove without activity: " + tr);
+            if (!getTasksAllowed) {
+                // If the caller doesn't have the GET_TASKS permission, then only
+                // allow them to see a small subset of tasks -- their own and home.
+                if (!tr.isActivityTypeHome() && tr.effectiveUid != callingUid) {
+                    if (DEBUG_RECENTS) Slog.d(TAG_RECENTS, "Skipping, not allowed: " + tr);
                     continue;
                 }
-                if ((flags & RECENT_IGNORE_UNAVAILABLE) != 0 && !tr.isAvailable) {
-                    if (DEBUG_RECENTS) Slog.d(TAG_RECENTS,
-                            "Skipping, unavail real act: " + tr);
-                    continue;
-                }
-
-                if (!tr.mUserSetupComplete) {
-                    // Don't include task launched while user is not done setting-up.
-                    if (DEBUG_RECENTS) Slog.d(TAG_RECENTS,
-                            "Skipping, user setup not complete: " + tr);
-                    continue;
-                }
-
-                final ActivityManager.RecentTaskInfo rti = createRecentTaskInfo(tr);
-                if (!getDetailedTasks) {
-                    rti.baseIntent.replaceExtras((Bundle)null);
-                }
-
-                res.add(rti);
             }
+
+            if (tr.autoRemoveRecents && tr.getTopActivity() == null) {
+                // Don't include auto remove tasks that are finished or finishing.
+                if (DEBUG_RECENTS) {
+                    Slog.d(TAG_RECENTS, "Skipping, auto-remove without activity: " + tr);
+                }
+                continue;
+            }
+            if ((flags & RECENT_IGNORE_UNAVAILABLE) != 0 && !tr.isAvailable) {
+                if (DEBUG_RECENTS) {
+                    Slog.d(TAG_RECENTS, "Skipping, unavail real act: " + tr);
+                }
+                continue;
+            }
+
+            if (!tr.mUserSetupComplete) {
+                // Don't include task launched while user is not done setting-up.
+                if (DEBUG_RECENTS) {
+                    Slog.d(TAG_RECENTS, "Skipping, user setup not complete: " + tr);
+                }
+                continue;
+            }
+
+            final ActivityManager.RecentTaskInfo rti = createRecentTaskInfo(tr);
+            if (!getDetailedTasks) {
+                rti.baseIntent.replaceExtras((Bundle) null);
+            }
+
+            res.add(rti);
         }
         return res;
     }
@@ -994,7 +991,7 @@ class RecentTasks {
             final TaskRecord tr = mTasks.get(i);
             if (isVisibleRecentTask(tr)) {
                 numVisibleTasks++;
-                if (isInVisibleRange(tr, numVisibleTasks)) {
+                if (isInVisibleRange(tr, numVisibleTasks, false /* skipExcludedCheck */)) {
                     res.put(tr.taskId, true);
                 }
             }
@@ -1215,7 +1212,8 @@ class RecentTasks {
                     continue;
                 } else {
                     numVisibleTasks++;
-                    if (isInVisibleRange(task, numVisibleTasks) || !isTrimmable(task)) {
+                    if (isInVisibleRange(task, numVisibleTasks, false /* skipExcludedCheck */)
+                            || !isTrimmable(task)) {
                         // Keep visible tasks in range
                         i++;
                         continue;
@@ -1329,14 +1327,17 @@ class RecentTasks {
     /**
      * @return whether the given visible task is within the policy range.
      */
-    private boolean isInVisibleRange(TaskRecord task, int numVisibleTasks) {
-        // Keep the last most task even if it is excluded from recents
-        final boolean isExcludeFromRecents =
-                (task.getBaseIntent().getFlags() & FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
-                        == FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
-        if (isExcludeFromRecents) {
-            if (DEBUG_RECENTS_TRIM_TASKS) Slog.d(TAG, "\texcludeFromRecents=true");
-            return numVisibleTasks == 1;
+    private boolean isInVisibleRange(TaskRecord task, int numVisibleTasks,
+            boolean skipExcludedCheck) {
+        if (!skipExcludedCheck) {
+            // Keep the most recent task even if it is excluded from recents
+            final boolean isExcludeFromRecents =
+                    (task.getBaseIntent().getFlags() & FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                            == FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
+            if (isExcludeFromRecents) {
+                if (DEBUG_RECENTS_TRIM_TASKS) Slog.d(TAG, "\texcludeFromRecents=true");
+                return numVisibleTasks == 1;
+            }
         }
 
         if (mMinNumVisibleTasks >= 0 && numVisibleTasks <= mMinNumVisibleTasks) {

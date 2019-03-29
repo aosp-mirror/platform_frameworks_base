@@ -129,7 +129,7 @@ public class NotificationListenerTest extends SysuiTestCase {
                 mock(NotificationListener.NotificationSettingsListener.class);
         mListener.addNotificationSettingsListener(settingsListener);
 
-        mListener.onStatusBarIconsBehaviorChanged(true);
+        mListener.onSilentStatusBarIconsVisibilityChanged(true);
 
         verify(settingsListener).onStatusBarIconsBehaviorChanged(true);
     }

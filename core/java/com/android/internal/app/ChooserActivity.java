@@ -24,6 +24,7 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
+import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.prediction.AppPredictionContext;
@@ -58,6 +59,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.metrics.LogMaker;
@@ -236,7 +238,7 @@ public class ChooserActivity extends ResolverActivity {
                     if (DEBUG) {
                         Log.d(TAG, "CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT; unbinding services");
                     }
-                    if (isDestroyed()) {
+                    if (mChooserListAdapter == null || isDestroyed()) {
                         break;
                     }
                     unbindRemainingServices();
@@ -821,6 +823,7 @@ public class ChooserActivity extends ResolverActivity {
             mRefinementResultReceiver = null;
         }
         unbindRemainingServices();
+        mChooserHandler.removeMessages(CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT);
         mChooserHandler.removeMessages(CHOOSER_TARGET_SERVICE_RESULT);
         if (USE_PREDICTION_MANAGER_FOR_DIRECT_TARGETS) {
             mAppPredictor.unregisterPredictionUpdates(mAppPredictorCallback);
@@ -876,10 +879,17 @@ public class ChooserActivity extends ResolverActivity {
         }
         mChooserRowAdapter = new ChooserRowAdapter(mChooserListAdapter);
         mChooserRowAdapter.registerDataSetObserver(new OffsetDataSetObserver(adapterView));
-        adapterView.setAdapter(mChooserRowAdapter);
         if (listView != null) {
             listView.setItemsCanFocus(true);
+            listView.addOnLayoutChangeListener(
+                    (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+                        if (mChooserRowAdapter.calculateMaxTargetsPerRow(right - left)) {
+                            adapterView.setAdapter(mChooserRowAdapter);
+                        }
+                    });
         }
+
+        adapterView.setAdapter(mChooserRowAdapter);
     }
 
     @Override
@@ -1269,11 +1279,10 @@ public class ChooserActivity extends ResolverActivity {
         }
         mAppPredictor.notifyAppTargetEvent(
                 new AppTargetEvent.Builder(
-                    new AppTarget(
-                        new AppTargetId(shortcutId),
-                        componentName.getPackageName(),
-                        componentName.getClassName(),
-                        getUser()),
+                    new AppTarget.Builder(new AppTargetId(shortcutId))
+                        .setTarget(componentName.getPackageName(), getUser())
+                        .setClassName(componentName.getClassName())
+                        .build(),
                     AppTargetEvent.ACTION_LAUNCH
                 ).setLaunchLocation(LAUNCH_LOCATON_DIRECT_SHARE)
                 .build());
@@ -1465,14 +1474,6 @@ public class ChooserActivity extends ResolverActivity {
             return null;
         }
 
-        public Drawable getBadgeIcon() {
-            return null;
-        }
-
-        public CharSequence getBadgeContentDescription() {
-            return null;
-        }
-
         public TargetInfo cloneFilledIn(Intent fillInIntent, int flags) {
             return null;
         }
@@ -1561,31 +1562,49 @@ public class ChooserActivity extends ResolverActivity {
          */
         // TODO(121287224): Refactor code to apply the suggestion above
         private Drawable getChooserTargetIconDrawable(ChooserTarget target) {
+            Drawable directShareIcon = null;
+
+            // First get the target drawable and associated activity info
             final Icon icon = target.getIcon();
             if (icon != null) {
-                return icon.loadDrawable(ChooserActivity.this);
-            }
-            if (!USE_SHORTCUT_MANAGER_FOR_DIRECT_TARGETS) {
-                return null;
-            }
-
-            Bundle extras = target.getIntentExtras();
-            if (extras == null || !extras.containsKey(Intent.EXTRA_SHORTCUT_ID)) {
-                return null;
-            }
-            CharSequence shortcutId = extras.getCharSequence(Intent.EXTRA_SHORTCUT_ID);
-            LauncherApps launcherApps = (LauncherApps) getSystemService(
-                    Context.LAUNCHER_APPS_SERVICE);
-            final LauncherApps.ShortcutQuery q = new LauncherApps.ShortcutQuery();
-            q.setPackage(target.getComponentName().getPackageName());
-            q.setShortcutIds(Arrays.asList(shortcutId.toString()));
-            q.setQueryFlags(LauncherApps.ShortcutQuery.FLAG_MATCH_DYNAMIC);
-            final List<ShortcutInfo> shortcuts = launcherApps.getShortcuts(q, getUser());
-            if (shortcuts != null && shortcuts.size() > 0) {
-                return launcherApps.getShortcutIconDrawable(shortcuts.get(0), 0);
+                directShareIcon = icon.loadDrawable(ChooserActivity.this);
+            } else if (USE_SHORTCUT_MANAGER_FOR_DIRECT_TARGETS) {
+                Bundle extras = target.getIntentExtras();
+                if (extras != null && extras.containsKey(Intent.EXTRA_SHORTCUT_ID)) {
+                    CharSequence shortcutId = extras.getCharSequence(Intent.EXTRA_SHORTCUT_ID);
+                    LauncherApps launcherApps = (LauncherApps) getSystemService(
+                            Context.LAUNCHER_APPS_SERVICE);
+                    final LauncherApps.ShortcutQuery q = new LauncherApps.ShortcutQuery();
+                    q.setPackage(target.getComponentName().getPackageName());
+                    q.setShortcutIds(Arrays.asList(shortcutId.toString()));
+                    q.setQueryFlags(LauncherApps.ShortcutQuery.FLAG_MATCH_DYNAMIC);
+                    final List<ShortcutInfo> shortcuts = launcherApps.getShortcuts(q, getUser());
+                    if (shortcuts != null && shortcuts.size() > 0) {
+                        directShareIcon = launcherApps.getShortcutIconDrawable(shortcuts.get(0), 0);
+                    }
+                }
             }
 
-            return null;
+            if (directShareIcon == null) return null;
+
+            ActivityInfo info = null;
+            try {
+                info = mPm.getActivityInfo(target.getComponentName(), 0);
+            } catch (NameNotFoundException error) {
+                Log.e(TAG, "Could not find activity associated with ChooserTarget");
+            }
+
+            if (info == null) return null;
+
+            // Now fetch app icon and raster with no badging even in work profile
+            Bitmap appIcon = (new ActivityInfoPresentationGetter(info)).getIconBitmap();
+
+            // Raster target drawable with appIcon as a badge
+            SimpleIconFactory sif = SimpleIconFactory.obtain(ChooserActivity.this);
+            Bitmap directShareBadgedIcon = sif.createAppBadgedIconBitmap(directShareIcon, appIcon);
+            sif.recycle();
+
+            return new BitmapDrawable(getResources(), directShareBadgedIcon);
         }
 
         public float getModifiedScore() {
@@ -1681,16 +1700,6 @@ public class ChooserActivity extends ResolverActivity {
         @Override
         public Drawable getDisplayIcon() {
             return mDisplayIcon;
-        }
-
-        @Override
-        public Drawable getBadgeIcon() {
-            return mBadgeIcon;
-        }
-
-        @Override
-        public CharSequence getBadgeContentDescription() {
-            return mBadgeContentDescription;
         }
 
         public ChooserTarget getChooserTarget() {
@@ -2062,13 +2071,16 @@ public class ChooserActivity extends ResolverActivity {
     class ChooserRowAdapter extends BaseAdapter {
         private ChooserListAdapter mChooserListAdapter;
         private final LayoutInflater mLayoutInflater;
-        private int mAnimationCount = 0;
+        private int mCalculatedMaxTargetsPerRow = MAX_TARGETS_PER_ROW_LANDSCAPE;
 
         private DirectShareViewHolder mDirectShareViewHolder;
 
         private static final int VIEW_TYPE_DIRECT_SHARE = 0;
         private static final int VIEW_TYPE_NORMAL = 1;
         private static final int VIEW_TYPE_CONTENT_PREVIEW = 2;
+
+        private static final int MAX_TARGETS_PER_ROW_PORTRAIT = 4;
+        private static final int MAX_TARGETS_PER_ROW_LANDSCAPE = 8;
 
         public ChooserRowAdapter(ChooserListAdapter wrappedAdapter) {
             mChooserListAdapter = wrappedAdapter;
@@ -2089,9 +2101,40 @@ public class ChooserActivity extends ResolverActivity {
             });
         }
 
+        /**
+         * Determine how many targets can comfortably fit in a single row.
+         *
+         * @param width The new row width to use for recalculation
+         * @return true if the numbers of targets per row has changed
+         */
+        public boolean calculateMaxTargetsPerRow(int width) {
+            int targetWidth = getResources().getDimensionPixelSize(
+                    R.dimen.chooser_target_width);
+
+            if (targetWidth == 0 || width == 0) {
+                return false;
+            }
+
+            int margin = getResources().getDimensionPixelSize(
+                    R.dimen.chooser_edge_margin_normal);
+
+            int newCount =  (width - margin * 2) / targetWidth;
+            if (newCount != mCalculatedMaxTargetsPerRow) {
+                mCalculatedMaxTargetsPerRow = newCount;
+                return true;
+            }
+
+            return false;
+        }
+
         private int getMaxTargetsPerRow() {
-            // this will soon hold logic for portrait/landscape
-            return 4;
+            int maxTargets = MAX_TARGETS_PER_ROW_PORTRAIT;
+            if (getResources().getConfiguration().orientation
+                    == Configuration.ORIENTATION_LANDSCAPE) {
+                maxTargets = MAX_TARGETS_PER_ROW_LANDSCAPE;
+            }
+
+            return Math.min(maxTargets, mCalculatedMaxTargetsPerRow);
         }
 
         @Override
@@ -2158,9 +2201,7 @@ public class ChooserActivity extends ResolverActivity {
                 holder = (RowViewHolder) convertView.getTag();
             }
 
-            bindViewHolder(position, holder,
-                    viewType == VIEW_TYPE_DIRECT_SHARE
-                            ? ChooserListAdapter.MAX_SERVICE_TARGETS : getMaxTargetsPerRow());
+            bindViewHolder(position, holder);
 
             return holder.getViewGroup();
         }
@@ -2277,7 +2318,7 @@ public class ChooserActivity extends ResolverActivity {
             }
         }
 
-        void bindViewHolder(int rowPosition, RowViewHolder holder, int columnCount) {
+        void bindViewHolder(int rowPosition, RowViewHolder holder) {
             final int start = getFirstRowPosition(rowPosition);
             final int startType = mChooserListAdapter.getPositionTargetType(start);
 
@@ -2294,6 +2335,7 @@ public class ChooserActivity extends ResolverActivity {
                 setVertPadding(row, 0, 0);
             }
 
+            int columnCount = holder.getColumnCount();
             int end = start + columnCount - 1;
             while (mChooserListAdapter.getPositionTargetType(end) != startType && end >= start) {
                 end--;
@@ -2328,33 +2370,12 @@ public class ChooserActivity extends ResolverActivity {
             for (int i = 0; i < columnCount; i++) {
                 final View v = holder.getView(i);
                 if (start + i <= end) {
-                    setCellVisibility(holder, i, View.VISIBLE);
+                    holder.setViewVisibility(i, View.VISIBLE);
                     holder.setItemIndex(i, start + i);
                     mChooserListAdapter.bindView(holder.getItemIndex(i), v);
                 } else {
-                    setCellVisibility(holder, i, View.INVISIBLE);
+                    holder.setViewVisibility(i, View.INVISIBLE);
                 }
-            }
-        }
-
-        private void setCellVisibility(RowViewHolder holder, int i, int visibility) {
-            final View v = holder.getView(i);
-            if (visibility == View.VISIBLE) {
-                holder.setViewVisibility(i, true);
-                v.setVisibility(visibility);
-                v.setAlpha(1.0f);
-            } else if (visibility == View.INVISIBLE && holder.getViewVisibility(i)) {
-                holder.setViewVisibility(i, false);
-
-                ValueAnimator fadeAnim = ObjectAnimator.ofFloat(v, "alpha", 1.0f, 0f);
-                fadeAnim.setDuration(NO_DIRECT_SHARE_ANIM_IN_MILLIS);
-                fadeAnim.setInterpolator(new AccelerateInterpolator(1.0f));
-                fadeAnim.addListener(new AnimatorListenerAdapter() {
-                    public void onAnimationEnd(Animator animation) {
-                        v.setVisibility(View.INVISIBLE);
-                    }
-                });
-                fadeAnim.start();
             }
         }
 
@@ -2393,13 +2414,11 @@ public class ChooserActivity extends ResolverActivity {
         protected int mMeasuredRowHeight;
         private int[] mItemIndices;
         protected final View[] mCells;
-        private final boolean[] mCellVisibility;
         private final int mColumnCount;
 
         RowViewHolder(int cellCount) {
             this.mCells = new View[cellCount];
             this.mItemIndices = new int[cellCount];
-            this.mCellVisibility = new boolean[cellCount];
             this.mColumnCount = cellCount;
         }
 
@@ -2409,16 +2428,10 @@ public class ChooserActivity extends ResolverActivity {
 
         abstract ViewGroup getRow(int index);
 
+        abstract void setViewVisibility(int i, int visibility);
+
         public int getColumnCount() {
             return mColumnCount;
-        }
-
-        public void setViewVisibility(int index, boolean visibility) {
-            mCellVisibility[index] = visibility;
-        }
-
-        public boolean getViewVisibility(int index) {
-            return mCellVisibility[index];
         }
 
         public void measure() {
@@ -2476,6 +2489,10 @@ public class ChooserActivity extends ResolverActivity {
 
             return mRow;
         }
+
+        public void setViewVisibility(int i, int visibility) {
+            getView(i).setVisibility(visibility);
+        }
     }
 
     class DirectShareViewHolder extends RowViewHolder {
@@ -2488,12 +2505,15 @@ public class ChooserActivity extends ResolverActivity {
         private int mDirectShareCurrHeight = 0;
         private int mDirectShareMaxHeight = 0;
 
+        private final boolean[] mCellVisibility;
+
         DirectShareViewHolder(ViewGroup parent, List<ViewGroup> rows, int cellCountPerRow) {
             super(rows.size() * cellCountPerRow);
 
             this.mParent = parent;
             this.mRows = rows;
             this.mCellCountPerRow = cellCountPerRow;
+            this.mCellVisibility = new boolean[rows.size() * cellCountPerRow];
         }
 
         public ViewGroup addView(int index, View v) {
@@ -2530,6 +2550,27 @@ public class ChooserActivity extends ResolverActivity {
 
         public int getMeasuredRowHeight() {
             return mDirectShareCurrHeight;
+        }
+
+        public void setViewVisibility(int i, int visibility) {
+            final View v = getView(i);
+            if (visibility == View.VISIBLE) {
+                mCellVisibility[i] = true;
+                v.setVisibility(visibility);
+                v.setAlpha(1.0f);
+            } else if (visibility == View.INVISIBLE && mCellVisibility[i]) {
+                mCellVisibility[i] = false;
+
+                ValueAnimator fadeAnim = ObjectAnimator.ofFloat(v, "alpha", 1.0f, 0f);
+                fadeAnim.setDuration(NO_DIRECT_SHARE_ANIM_IN_MILLIS);
+                fadeAnim.setInterpolator(new AccelerateInterpolator(1.0f));
+                fadeAnim.addListener(new AnimatorListenerAdapter() {
+                    public void onAnimationEnd(Animator animation) {
+                        v.setVisibility(View.INVISIBLE);
+                    }
+                });
+                fadeAnim.start();
+            }
         }
 
         public void handleScroll(AbsListView view, int y, int oldy, int maxTargetsPerRow) {

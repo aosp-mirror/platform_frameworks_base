@@ -1,3 +1,61 @@
+// AIDL interfaces between the core system and the networking mainline module.
+aidl_interface {
+    name: "ipmemorystore-aidl-interfaces",
+    local_include_dir: "java",
+    srcs: [
+        // TODO: Define and use a filegroup for these files, since they're also used in
+        // networkstack-aidl-interfaces. This does not appear to work at the moment.
+        "java/android/net/IIpMemoryStore.aidl",
+        "java/android/net/IIpMemoryStoreCallbacks.aidl",
+        "java/android/net/ipmemorystore/**/*.aidl",
+    ],
+    backend: {
+        ndk: {
+            enabled: false,
+        },
+        cpp: {
+            enabled: false,
+        },
+    },
+    api_dir: "aidl/networkstack",
+}
+
+aidl_interface {
+    name: "networkstack-aidl-interfaces",
+    local_include_dir: "java",
+    include_dirs: ["frameworks/base/core/java"],  // For framework parcelables.
+    srcs: [
+        "java/android/net/ApfCapabilitiesParcelable.aidl",
+        "java/android/net/DhcpResultsParcelable.aidl",
+        "java/android/net/IIpMemoryStore.aidl",
+        "java/android/net/IIpMemoryStoreCallbacks.aidl",
+        "java/android/net/INetworkMonitor.aidl",
+        "java/android/net/INetworkMonitorCallbacks.aidl",
+        "java/android/net/INetworkStackConnector.aidl",
+        "java/android/net/INetworkStackStatusCallback.aidl",
+        "java/android/net/InitialConfigurationParcelable.aidl",
+        "java/android/net/PrivateDnsConfigParcel.aidl",
+        "java/android/net/ProvisioningConfigurationParcelable.aidl",
+        "java/android/net/StaticIpConfigurationParcelable.aidl",
+        "java/android/net/TcpKeepalivePacketDataParcelable.aidl",
+        "java/android/net/dhcp/DhcpServingParamsParcel.aidl",
+        "java/android/net/dhcp/IDhcpServer.aidl",
+        "java/android/net/dhcp/IDhcpServerCallbacks.aidl",
+        "java/android/net/ip/IIpClient.aidl",
+        "java/android/net/ip/IIpClientCallbacks.aidl",
+        "java/android/net/ipmemorystore/**/*.aidl",
+    ],
+    backend: {
+        ndk: {
+            enabled: false,
+        },
+        cpp: {
+            enabled: false,
+        },
+    },
+    api_dir: "aidl/networkstack",
+}
+
 java_library_static {
     name: "services.net",
     srcs: ["java/**/*.java"],

@@ -16,6 +16,7 @@
 
 package android.app.backup;
 
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -164,16 +165,33 @@ public class BackupTransport {
     }
 
     /**
-     * On demand, supply a short string that can be shown to the user as the label
-     * on an overflow menu item used to invoked the data management UI.
+     * On demand, supply a short string that can be shown to the user as the label on an overflow
+     * menu item used to invoke the data management UI.
      *
-     * @return A string to be used as the label for the transport's data management
-     *         affordance.  If the transport supplies a data management intent, this
-     *         method must not return {@code null}.
+     * @return A string to be used as the label for the transport's data management affordance. If
+     *     the transport supplies a data management intent, this method must not return {@code
+     *     null}.
+     * @deprecated Since Android Q, please use the variant {@link #dataManagementIntentLabel()}
+     *     instead.
      */
+    @Deprecated
+    @Nullable
     public String dataManagementLabel() {
         throw new UnsupportedOperationException(
                 "Transport dataManagementLabel() not implemented");
+    }
+
+    /**
+     * On demand, supply a short CharSequence that can be shown to the user as the label on an
+     * overflow menu item used to invoke the data management UI.
+     *
+     * @return A CharSequence to be used as the label for the transport's data management
+     *     affordance. If the transport supplies a data management intent, this method must not
+     *     return {@code null}.
+     */
+    @Nullable
+    public CharSequence dataManagementIntentLabel() {
+        return dataManagementLabel();
     }
 
     /**
@@ -651,8 +669,8 @@ public class BackupTransport {
         }
 
         @Override
-        public String dataManagementLabel() {
-            return BackupTransport.this.dataManagementLabel();
+        public CharSequence dataManagementIntentLabel() {
+            return BackupTransport.this.dataManagementIntentLabel();
         }
 
         @Override

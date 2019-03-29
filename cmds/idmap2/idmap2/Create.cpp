@@ -98,12 +98,10 @@ Result<Unit> Create(const std::vector<std::string>& args) {
     return Error("failed to load apk %s", overlay_apk_path.c_str());
   }
 
-  std::stringstream stream;
-  const std::unique_ptr<const Idmap> idmap =
-      Idmap::FromApkAssets(target_apk_path, *target_apk, overlay_apk_path, *overlay_apk,
-                           fulfilled_policies, !ignore_overlayable, stream);
+  const auto idmap = Idmap::FromApkAssets(target_apk_path, *target_apk, overlay_apk_path,
+                                          *overlay_apk, fulfilled_policies, !ignore_overlayable);
   if (!idmap) {
-    return Error("failed to create idmap: %s", stream.str().c_str());
+    return Error(idmap.GetError(), "failed to create idmap");
   }
 
   umask(kIdmapFilePermissionMask);
@@ -112,7 +110,7 @@ Result<Unit> Create(const std::vector<std::string>& args) {
     return Error("failed to open idmap path %s", idmap_path.c_str());
   }
   BinaryStreamVisitor visitor(fout);
-  idmap->accept(&visitor);
+  (*idmap)->accept(&visitor);
   fout.close();
   if (fout.fail()) {
     return Error("failed to write to idmap path %s", idmap_path.c_str());

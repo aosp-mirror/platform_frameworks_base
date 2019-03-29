@@ -27,6 +27,8 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.ActivityThread;
 import android.content.ContentResolver;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.provider.Settings.ResetMode;
@@ -37,6 +39,7 @@ import android.util.Pair;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -241,6 +244,14 @@ public final class DeviceConfig {
     public static final String NAMESPACE_SYSTEMUI = "systemui";
 
     /**
+     * Telephony related properties.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_TELEPHONY = "telephony";
+
+    /**
      * Namespace for TextClassifier related features.
      *
      * @hide
@@ -248,6 +259,14 @@ public final class DeviceConfig {
     @SystemApi
     public static final String NAMESPACE_TEXTCLASSIFIER = "textclassifier";
 
+    /**
+     * List of namespaces which can be read without READ_DEVICE_CONFIG permission
+     *
+     * @hide
+     */
+    @NonNull
+    private static final List<String> PUBLIC_NAMESPACES =
+            Arrays.asList(NAMESPACE_TEXTCLASSIFIER, NAMESPACE_RUNTIME);
     /**
      * Privacy related properties definitions.
      *
@@ -285,7 +304,6 @@ public final class DeviceConfig {
      *
      * @hide
      */
-    @SystemApi
     public interface Telephony {
         String NAMESPACE = "telephony";
         /**
@@ -520,6 +538,8 @@ public final class DeviceConfig {
             @NonNull String namespace,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull OnPropertyChangedListener onPropertyChangedListener) {
+        enforceReadPermission(ActivityThread.currentApplication().getApplicationContext(),
+                namespace);
         synchronized (sLock) {
             Pair<String, Executor> oldNamespace = sSingleListeners.get(onPropertyChangedListener);
             if (oldNamespace == null) {
@@ -559,6 +579,8 @@ public final class DeviceConfig {
             @NonNull String namespace,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull OnPropertiesChangedListener onPropertiesChangedListener) {
+        enforceReadPermission(ActivityThread.currentApplication().getApplicationContext(),
+                namespace);
         synchronized (sLock) {
             Pair<String, Executor> oldNamespace = sListeners.get(onPropertiesChangedListener);
             if (oldNamespace == null) {
@@ -660,7 +682,7 @@ public final class DeviceConfig {
     }
 
     /**
-     * Decrement the count used to represent th enumber of listeners subscribed to the given
+     * Decrement the count used to represent the number of listeners subscribed to the given
      * namespace. If this is the final decrement call (i.e. decrementing from 1 to 0) for the given
      * namespace, the ContentObserver that had been tracking it will be removed.
      *
@@ -689,7 +711,14 @@ public final class DeviceConfig {
         // pathSegments(0) is "config"
         final String namespace = pathSegments.get(1);
         final String name = pathSegments.get(2);
-        final String value = getProperty(namespace, name);
+        final String value;
+        try {
+            value = getProperty(namespace, name);
+        } catch (SecurityException e) {
+            // Silently failing to not crash binder or listener threads.
+            Log.e(TAG, "OnPropertyChangedListener update failed: permission violation.");
+            return;
+        }
         synchronized (sLock) {
             // OnPropertiesChangedListeners
             for (int i = 0; i < sListeners.size(); i++) {
@@ -722,6 +751,22 @@ public final class DeviceConfig {
             }
         }
     }
+
+
+    /**
+     * Enforces READ_DEVICE_CONFIG permission if namespace is not one of public namespaces.
+     * @hide
+     */
+    public static void enforceReadPermission(Context context, String namespace) {
+        if (context.checkCallingOrSelfPermission(READ_DEVICE_CONFIG)
+                != PackageManager.PERMISSION_GRANTED) {
+            if (!PUBLIC_NAMESPACES.contains(namespace)) {
+                throw new SecurityException("Permission denial: reading from settings requires:"
+                        + READ_DEVICE_CONFIG);
+            }
+        }
+    }
+
 
     /**
      * Interface for monitoring single property changes.

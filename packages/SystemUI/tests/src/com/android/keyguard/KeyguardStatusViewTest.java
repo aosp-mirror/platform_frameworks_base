@@ -24,8 +24,10 @@ import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.LayoutInflater;
 
+import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.util.Assert;
+import com.android.systemui.util.InjectionInflationController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -48,7 +50,10 @@ public class KeyguardStatusViewTest extends SysuiTestCase {
     @Before
     public void setUp() {
         Assert.sMainLooper = TestableLooper.get(this).getLooper();
-        LayoutInflater layoutInflater = LayoutInflater.from(getContext());
+        InjectionInflationController inflationController = new InjectionInflationController(
+                SystemUIFactory.getInstance().getRootComponent());
+        LayoutInflater layoutInflater = inflationController
+                .injectable(LayoutInflater.from(getContext()));
         mKeyguardStatusView =
                 (KeyguardStatusView) layoutInflater.inflate(R.layout.keyguard_status_view, null);
         org.mockito.MockitoAnnotations.initMocks(this);

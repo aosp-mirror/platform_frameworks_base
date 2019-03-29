@@ -182,7 +182,7 @@ public class AssistantTest extends ServiceTestCase<Assistant> {
         mAssistant.setFakeRanking(generateRanking(sbn, P1C1));
         mAssistant.onNotificationPosted(sbn, mock(RankingMap.class));
 
-        verify(mNoMan, never()).applyAdjustmentFromAssistant(any(), any());
+        verify(mNoMan, never()).applyEnqueuedAdjustmentFromAssistant(any(), any());
     }
 
     @Test
@@ -195,7 +195,7 @@ public class AssistantTest extends ServiceTestCase<Assistant> {
         mAssistant.onNotificationPosted(sbn, mock(RankingMap.class));
 
         ArgumentCaptor<Adjustment> captor = ArgumentCaptor.forClass(Adjustment.class);
-        verify(mNoMan, times(1)).applyAdjustmentFromAssistant(any(), captor.capture());
+        verify(mNoMan, times(1)).applyEnqueuedAdjustmentFromAssistant(any(), captor.capture());
         assertEquals(sbn.getKey(), captor.getValue().getKey());
         assertEquals(Ranking.USER_SENTIMENT_NEGATIVE,
                 captor.getValue().getSignals().getInt(Adjustment.KEY_USER_SENTIMENT));
@@ -210,7 +210,7 @@ public class AssistantTest extends ServiceTestCase<Assistant> {
         mAssistant.setFakeRanking(generateRanking(sbn, P1C3));
         mAssistant.onNotificationPosted(sbn, mock(RankingMap.class));
 
-        verify(mNoMan, never()).applyAdjustmentFromAssistant(any(), any());
+        verify(mNoMan, never()).applyEnqueuedAdjustmentFromAssistant(any(), any());
     }
 
     @Test
@@ -230,7 +230,7 @@ public class AssistantTest extends ServiceTestCase<Assistant> {
         mAssistant.onNotificationPosted(sbn, mock(RankingMap.class));
 
         ArgumentCaptor<Adjustment> captor = ArgumentCaptor.forClass(Adjustment.class);
-        verify(mNoMan, times(1)).applyAdjustmentFromAssistant(any(), captor.capture());
+        verify(mNoMan, times(1)).applyEnqueuedAdjustmentFromAssistant(any(), captor.capture());
         assertEquals(sbn.getKey(), captor.getValue().getKey());
         assertEquals(Ranking.USER_SENTIMENT_NEGATIVE,
                 captor.getValue().getSignals().getInt(Adjustment.KEY_USER_SENTIMENT));
@@ -253,7 +253,7 @@ public class AssistantTest extends ServiceTestCase<Assistant> {
         sbn = generateSbn(PKG1, UID1, P1C1, "new one!", "group");
         mAssistant.onNotificationPosted(sbn, mock(RankingMap.class));
 
-        verify(mNoMan, never()).applyAdjustmentFromAssistant(any(), any());
+        verify(mNoMan, never()).applyEnqueuedAdjustmentFromAssistant(any(), any());
     }
 
     @Test
@@ -272,7 +272,7 @@ public class AssistantTest extends ServiceTestCase<Assistant> {
         sbn = generateSbn(PKG1, UID1, P1C1, "new one!", null);
         mAssistant.onNotificationPosted(sbn, mock(RankingMap.class));
 
-        verify(mNoMan, never()).applyAdjustmentFromAssistant(any(), any());
+        verify(mNoMan, never()).applyEnqueuedAdjustmentFromAssistant(any(), any());
     }
 
     @Test
@@ -291,7 +291,7 @@ public class AssistantTest extends ServiceTestCase<Assistant> {
         sbn = generateSbn(PKG1, UID1, P1C1, "new one!", null);
         mAssistant.onNotificationPosted(sbn, mock(RankingMap.class));
 
-        verify(mNoMan, never()).applyAdjustmentFromAssistant(any(), any());
+        verify(mNoMan, never()).applyEnqueuedAdjustmentFromAssistant(any(), any());
     }
 
     @Test
@@ -310,7 +310,7 @@ public class AssistantTest extends ServiceTestCase<Assistant> {
         sbn = generateSbn(PKG1, UID1, P1C1, "new one!", null);
         mAssistant.onNotificationPosted(sbn, mock(RankingMap.class));
 
-        verify(mNoMan, never()).applyAdjustmentFromAssistant(any(), any());
+        verify(mNoMan, never()).applyEnqueuedAdjustmentFromAssistant(any(), any());
     }
 
     @Test
@@ -322,7 +322,7 @@ public class AssistantTest extends ServiceTestCase<Assistant> {
         mAssistant.setFakeRanking(generateRanking(sbn, P2C1));
         mAssistant.onNotificationPosted(sbn, mock(RankingMap.class));
 
-        verify(mNoMan, never()).applyAdjustmentFromAssistant(any(), any());
+        verify(mNoMan, never()).applyEnqueuedAdjustmentFromAssistant(any(), any());
     }
 
     @Test
@@ -334,7 +334,7 @@ public class AssistantTest extends ServiceTestCase<Assistant> {
         mAssistant.setFakeRanking(generateRanking(sbn, P1C2));
         mAssistant.onNotificationPosted(sbn, mock(RankingMap.class));
 
-        verify(mNoMan, never()).applyAdjustmentFromAssistant(any(), any());
+        verify(mNoMan, never()).applyEnqueuedAdjustmentFromAssistant(any(), any());
     }
 
     @Test

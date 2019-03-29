@@ -25,6 +25,7 @@ import static android.app.StatusBarManager.WindowVisibleState;
 import static android.app.StatusBarManager.windowStateToString;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
 
+import static com.android.systemui.Dependency.MAIN_HANDLER;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_ASLEEP;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_WAKING;
@@ -126,6 +127,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.ViewMediatorCallback;
+import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.ActivityStarterDelegate;
 import com.android.systemui.AutoReinflateContainer;
 import com.android.systemui.DemoMode;
@@ -219,7 +221,6 @@ import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
-import com.android.systemui.statusbar.policy.PreviewInflater;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
@@ -586,11 +587,12 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mEntryManager.updateNotifications();
                 updateScrimController();
             };
+    private ActivityIntentHelper mActivityIntentHelper;
 
     @Override
     public void onActiveStateChanged(int code, int uid, String packageName, boolean active) {
         mForegroundServiceController.onAppOpChanged(code, uid, packageName, active);
-        Dependency.get(Dependency.MAIN_HANDLER).post(() -> {
+        Dependency.get(MAIN_HANDLER).post(() -> {
             mNotificationListController.updateNotificationsForAppOp(code, uid, packageName, active);
         });
     }
@@ -635,6 +637,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNavigationBarController = Dependency.get(NavigationBarController.class);
         mBubbleController = Dependency.get(BubbleController.class);
         mBubbleController.setExpandListener(mBubbleExpandListener);
+        mActivityIntentHelper = new ActivityIntentHelper(mContext);
         KeyguardSliceProvider sliceProvider = KeyguardSliceProvider.getAttachedInstance();
         if (sliceProvider != null) {
             sliceProvider.initDependencies(mMediaManager, mStatusBarStateController);
@@ -1069,7 +1072,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mRemoteInputManager, mStatusBarRemoteInputCallback, mGroupManager,
                 mLockscreenUserManager, shadeController, mKeyguardMonitor,
                 mNotificationInterruptionStateProvider, mMetricsLogger,
-                new LockPatternUtils(mContext));
+                new LockPatternUtils(mContext), Dependency.get(MAIN_HANDLER),
+                mActivityIntentHelper);
 
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);
 
@@ -1109,7 +1113,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             where.getLocationInWindow(mTmpInt2);
             mWakeUpTouchLocation = new PointF(mTmpInt2[0] + where.getWidth() / 2,
                     mTmpInt2[1] + where.getHeight() / 2);
-            mStatusBarKeyguardViewManager.notifyDeviceWakeUpRequested();
             mFalsingManager.onScreenOnFromTouch();
         }
     }
@@ -2450,8 +2453,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             final Callback callback, int flags) {
         if (onlyProvisioned && !mDeviceProvisionedController.isDeviceProvisioned()) return;
 
-        final boolean afterKeyguardGone = PreviewInflater.wouldLaunchResolverActivity(
-                mContext, intent, mLockscreenUserManager.getCurrentUserId());
+        final boolean afterKeyguardGone = mActivityIntentHelper.wouldLaunchResolverActivity(
+                intent, mLockscreenUserManager.getCurrentUserId());
         Runnable runnable = () -> {
             mAssistManager.hideAssist();
             intent.setFlags(
@@ -3005,7 +3008,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private void updatePanelExpansionForKeyguard() {
         if (mState == StatusBarState.KEYGUARD && mBiometricUnlockController.getMode()
-                != BiometricUnlockController.MODE_WAKE_AND_UNLOCK) {
+                != BiometricUnlockController.MODE_WAKE_AND_UNLOCK && !mBouncerShowing) {
             instantExpandNotificationsPanel();
         } else if (mState == StatusBarState.FULLSCREEN_USER_SWITCHER) {
             instantCollapseNotificationPanel();
@@ -3563,6 +3566,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
+    /**
+     * Propagation of the bouncer state, indicating that it's fully visible.
+     */
     public void setBouncerShowing(boolean bouncerShowing) {
         mBouncerShowing = bouncerShowing;
         if (mStatusBarView != null) mStatusBarView.setBouncerShowing(bouncerShowing);
@@ -3620,10 +3626,13 @@ public class StatusBar extends SystemUI implements DemoMode,
             mWakeUpCoordinator.setWakingUp(true);
             mAmbientPulseManager.releaseAllImmediately();
             mVisualStabilityManager.setScreenOn(true);
-            updateNotificationPanelTouchState();
             updateVisibleToUser();
             updateIsKeyguard();
             mDozeServiceHost.stopDozing();
+            // This is intentionally below the stopDozing call above, since it avoids that we're
+            // unnecessarily animating the wakeUp transition. Animations should only be enabled
+            // once we fully woke up.
+            updateNotificationPanelTouchState();
             mPulseExpansionHandler.onStartedWakingUp();
         }
 
@@ -3736,7 +3745,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             PowerManager pm = mContext.getSystemService(PowerManager.class);
             pm.wakeUp(SystemClock.uptimeMillis(), PowerManager.WAKE_REASON_CAMERA_LAUNCH,
                     "com.android.systemui:CAMERA_GESTURE");
-            mStatusBarKeyguardViewManager.notifyDeviceWakeUpRequested();
         }
         vibrateForCameraGesture();
         if (!mStatusBarKeyguardViewManager.isShowing()) {
@@ -4311,7 +4319,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void startPendingIntentDismissingKeyguard(
             final PendingIntent intent, @Nullable final Runnable intentSentUiThreadCallback) {
         final boolean afterKeyguardGone = intent.isActivity()
-                && PreviewInflater.wouldLaunchResolverActivity(mContext, intent.getIntent(),
+                && mActivityIntentHelper.wouldLaunchResolverActivity(intent.getIntent(),
                 mLockscreenUserManager.getCurrentUserId());
 
         executeActionDismissingKeyguard(() -> {

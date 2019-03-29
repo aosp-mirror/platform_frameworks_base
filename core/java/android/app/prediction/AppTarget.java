@@ -43,20 +43,13 @@ public final class AppTarget implements Parcelable {
 
     private final ShortcutInfo mShortcutInfo;
 
-    private int mRank;
+    private final int mRank;
 
     /**
-     * Creates an instance of AppTarget that represent a launchable component.
-     *
-     * @param id A unique id for this launchable target.
-     * @param packageName Package name of the target.
-     * @param className Class name of the target.
-     * @param user The UserHandle of the user which this target belongs to.
-     *
+     * @deprecated use the Builder class
      * @hide
      */
-    @SystemApi
-    @TestApi
+    @Deprecated
     public AppTarget(@NonNull AppTargetId id, @NonNull String packageName,
             @Nullable String className, @NonNull UserHandle user) {
         mId = id;
@@ -65,18 +58,14 @@ public final class AppTarget implements Parcelable {
         mPackageName = Preconditions.checkNotNull(packageName);
         mClassName = className;
         mUser = Preconditions.checkNotNull(user);
+        mRank = 0;
     }
 
     /**
-     * Creates an instance of AppTarget that represent a launchable shortcut.
-     *
-     * @param id A unique id for this launchable target.
-     * @param shortcutInfo The {@link ShortcutInfo} that is represented with this target.
-     * @param className Class name fo the target.
-     *
+     * @deprecated use the Builder class
      * @hide
      */
-    @SystemApi
+    @Deprecated
     public AppTarget(@NonNull AppTargetId id, @NonNull ShortcutInfo shortcutInfo,
             @Nullable String className) {
         mId = id;
@@ -85,6 +74,17 @@ public final class AppTarget implements Parcelable {
         mPackageName = mShortcutInfo.getPackage();
         mUser = mShortcutInfo.getUserHandle();
         mClassName = className;
+        mRank = 0;
+    }
+
+    private AppTarget(AppTargetId id, String packageName, UserHandle user,
+            ShortcutInfo shortcutInfo, String className, int rank) {
+        mId = id;
+        mShortcutInfo = shortcutInfo;
+        mPackageName = packageName;
+        mClassName = className;
+        mUser = user;
+        mRank = rank;
     }
 
     private AppTarget(Parcel parcel) {
@@ -142,17 +142,6 @@ public final class AppTarget implements Parcelable {
     }
 
     /**
-     * Sets the rank of the for the target.
-     * @hide
-     */
-    public void setRank(@IntRange(from = 0) int rank) {
-        if (rank < 0) {
-            throw new IllegalArgumentException("rank cannot be a negative value");
-        }
-        mRank = rank;
-    }
-
-    /**
      * Returns the rank for the target. Rank of an AppTarget is a non-negative integer that
      * represents the importance of this target compared to other candidate targets. A smaller value
      * means higher importance in the list.
@@ -194,6 +183,101 @@ public final class AppTarget implements Parcelable {
         }
         dest.writeString(mClassName);
         dest.writeInt(mRank);
+    }
+
+    /**
+     * A builder for app targets.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static final class Builder {
+
+        @NonNull
+        private final AppTargetId mId;
+
+        private String mPackageName;
+        private UserHandle mUser;
+        private ShortcutInfo mShortcutInfo;
+
+        private String mClassName;
+        private int mRank;
+
+        /**
+         * @param id A unique id for this launchable target.
+         * @hide
+         */
+        @SystemApi
+        @TestApi
+        public Builder(@NonNull AppTargetId id) {
+            mId = id;
+        }
+
+        /**
+         * Sets the target to be an app.
+         *
+         * @param packageName PackageName of the app
+         * @param user The UserHandle of the user which this target belongs to.
+         *
+         * @throws IllegalArgumentException is the target is already set
+         */
+        @NonNull
+        public Builder setTarget(@NonNull String packageName, @NonNull UserHandle user) {
+            if (mPackageName == null) {
+                throw new IllegalArgumentException("Target is already set");
+            }
+            mPackageName = Preconditions.checkNotNull(packageName);
+            mUser = Preconditions.checkNotNull(user);
+            return this;
+        }
+
+        /**
+         * Sets the target to be a ShortcutInfo.
+         *
+         * @throws IllegalArgumentException is the target is already set
+         */
+        @NonNull
+        public Builder setTarget(@NonNull ShortcutInfo info) {
+            setTarget(info.getPackage(), info.getUserHandle());
+            mShortcutInfo = Preconditions.checkNotNull(info);
+            return this;
+        }
+
+        /**
+         * Sets the className for the target
+         */
+        @NonNull
+        public Builder setClassName(@NonNull String className) {
+            mClassName = Preconditions.checkNotNull(className);
+            return this;
+        }
+
+        /**
+         * Sets the rank of the for the target.
+         */
+        @NonNull
+        public Builder setRank(@IntRange(from = 0) int rank) {
+            if (rank < 0) {
+                throw new IllegalArgumentException("rank cannot be a negative value");
+            }
+            mRank = rank;
+            return this;
+        }
+
+        /**
+         * Builds a new AppTarget instance.
+         *
+         * @throws IllegalStateException if no target is set
+         * @see #setTarget(ShortcutInfo)
+         * @see #setTarget(String, UserHandle)
+         */
+        @NonNull
+        public AppTarget build() {
+            if (mPackageName == null) {
+                throw new IllegalStateException("No target set");
+            }
+            return new AppTarget(mId, mPackageName, mUser, mShortcutInfo, mClassName, mRank);
+        }
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<AppTarget> CREATOR =

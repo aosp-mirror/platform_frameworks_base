@@ -141,8 +141,10 @@
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"वायफाय कॉलिंग"</string>
     <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"बंद"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"वाय-फाय अग्रमानांकित"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"प्राधान्य दिलेला मोबाइल"</string>
+    <!-- no translation found for wfc_mode_wifi_preferred_summary (7335489823608689868) -->
+    <skip />
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (7081742743152286290) -->
+    <skip />
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"केवळ वाय-फाय"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: अग्रेषित केला नाही"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -228,7 +230,8 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"बग रीपोर्ट"</string>
     <string name="global_action_logout" msgid="935179188218826050">"सेशन समाप्त करा"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"स्क्रीनशॉट"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"बग रीपोर्ट घ्या"</string>
+    <!-- no translation found for bugreport_title (5981047024855257269) -->
+    <skip />
     <string name="bugreport_message" msgid="398447048750350456">"ई-मेल मेसेज म्हणून पाठविण्यासाठी, हे तुमच्या सद्य डिव्हाइस स्थितीविषयी माहिती संकलित करेल. बग रीपोर्ट सुरू करण्यापासून तो पाठविण्यापर्यंत थोडा वेळ लागेल; कृपया धीर धरा."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"परस्परसंवादी अहवाल"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"बहुतांश प्रसंगांमध्ये याचा वापर करा. ते तुम्हाला अहवालाच्या प्रगतीचा मागोवा घेण्याची, समस्येविषयी आणखी तपाशील एंटर करण्याची आणि स्क्रीनशॉट घेण्याची अनुमती देते. ते कदाचित अहवाल देण्यासाठी बराच वेळ घेणारे कमी-वापरलेले विभाग वगळू शकते."</string>
@@ -281,9 +284,12 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"स्थान"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"या डिव्हाइसच्या स्थानावर प्रवेश"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला या डिव्हाइसचे स्थान अॅक्सेस करू द्यायचे?"</string>
-    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"तुम्ही अ‍ॅप वापरत असताना, अ‍ॅपला फक्त स्थानाचा अॅक्सेस असेल."</string>
-    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"या डिव्हाइसचे स्थान अॅक्सेस करण्याची &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला नेहेमी अनुमती द्यायची का?"</string>
-    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"तुम्ही अ‍ॅप वापरत नसलात तरीही, अ‍ॅपला स्थानाचा नेहेमी अॅक्सेस असेल."</string>
+    <!-- no translation found for permgrouprequestdetail_location (1347189607421252902) -->
+    <skip />
+    <!-- no translation found for permgroupbackgroundrequest_location (5039063878675613235) -->
+    <skip />
+    <!-- no translation found for permgroupbackgroundrequestdetail_location (4597006851453417387) -->
+    <skip />
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"कॅलेंडर"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"आपल्या कॅलेंडरवर प्रवेश"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला तुमचे कॅलेंडर अॅक्सेस करू द्यायचे?"</string>
@@ -316,7 +322,10 @@
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला तुमचे संगीत अॅक्सेस करू द्यायचे का?"</string>
     <string name="permgrouplab_visual" msgid="6477382108771145134">"फोटो आणि व्हिडिओ"</string>
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"तुमचे फोटो आणि व्हिडिओ अॅक्सेस करा"</string>
-    <string name="permgrouprequest_visual" msgid="3043752127595243314">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला टॅग केलेल्या स्थानांसह तुमचे फोटो आणि व्हिडिओ अॅक्सेस करण्याची अनुमती द्यायची का?"</string>
+    <!-- no translation found for permgrouprequest_visual (4926581398380334943) -->
+    <skip />
+    <!-- no translation found for permgrouprequestdetail_visual (3827237829805228971) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"विंडोमधील आशय पुन्हा मिळवा"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"तुम्ही वापरत असलेल्‍या विंडोमधील आशय तपासा."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"स्पर्श करून अन्वेषण चालू करा"</string>
@@ -509,8 +518,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"फील्ड जवळील कम्युनिकेशन (NFC) टॅग, कार्डे आणि वाचक यांच्यासह संवाद करण्यासाठी अॅपला अनुमती देते."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"तुमचे स्क्रीन लॉक अक्षम करा"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"कीलॉक आणि कोणतीही संबद्ध पासवर्ड सुरक्षितता अक्षम करण्यासाठी अ‍ॅप ला अनुमती देते. उदाहरणार्थ, येणारा फोन कॉल प्राप्त करताना फोन कीलॉक अक्षम करतो, नंतर जेव्हा कॉल समाप्त होतो तेव्हा तो कीलॉक पुन्हा-सक्षम करतो."</string>
-    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"स्क्रीन लॉक क्लिष्टतेची विनंती करा"</string>
-    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"अ‍ॅपला स्क्रीन लॉक कितपात क्लिष्ट आहे (खूप, मध्यम, कमी किंवा अजिबात नाही) हे जाणून घेण्याची अनुमती देते, जी वर्णांची साधारण रेंज आणि स्क्रीन लॉकचा प्रकार सूचित करते. अ‍ॅप वापरकर्त्यांना असे देखील सुचवू शकते की त्यांनी स्क्रीन लॉक ठराविक पातळीपर्यंत अपडेट करावे पण वापरकर्ते त्याकडे दुर्लक्षत करू शकतात आणि तेथून नेव्हिगेट करू शकता. लक्षात ठेवा की, स्क्रीन लॉक प्लेनटेक्स्टमध्ये स्टोअर केले जात नसल्यामुळे अ‍ॅपला नेमका पासवर्ड माहीत नसतो."</string>
+    <!-- no translation found for permlab_requestPasswordComplexity (202650535669249674) -->
+    <skip />
+    <!-- no translation found for permdesc_requestPasswordComplexity (4730994229754212347) -->
+    <skip />
     <string name="permlab_useBiometric" msgid="8837753668509919318">"बायोमेट्रिक हार्डवेअर वापरा"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"ऑथेंटिकेशनसाठी बायोमेट्रिक हार्डवेअरचा वापर करण्याची अॅपला अनुमती देते"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"फिंगरप्रिंट हार्डवेअर व्यवस्थापित करा"</string>
@@ -565,37 +576,59 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"अॅपला वापरासाठी चेहरा टेम्पलेट जोडण्याच्या आणि हटवण्याच्या पद्धती जारी करू देते."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"चेहरा ऑथेंटिकेशन हार्डवेअर वापरा"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"अॅपला चेहरा ऑथेंटिकेशनसाठी ऑथेंटिकेशन हार्डवेअर वापरू देते"</string>
-    <string name="face_acquired_insufficient" msgid="5901287247766106330">"चेहऱ्यावर प्रक्रिया झाली नाही. पुन्हा प्रयत्न करा."</string>
-    <string name="face_acquired_too_bright" msgid="610606792381297174">"चेहऱ्यावर खूप प्रकाश आहे. कृपया कमी प्रकाशात प्रयत्न करा."</string>
-    <string name="face_acquired_too_dark" msgid="7229162716976778371">"चेहऱ्यावर खूप अंधार आहे. कृपया प्रकाश स्रोत खुला करा."</string>
-    <string name="face_acquired_too_close" msgid="1980310037427755293">"कृपया सेन्सर चेहऱ्यापासून आणखी दूर हलवा."</string>
-    <string name="face_acquired_too_far" msgid="4494571381828850007">"कृपया सेन्सर चेहऱ्याच्या आणखी जवळ आणा."</string>
-    <string name="face_acquired_too_high" msgid="228411096134808372">"कृपया सेन्सर आणखी वर हलवा."</string>
-    <string name="face_acquired_too_low" msgid="4539774649296349109">"कृपया सेन्सर आणखी खाली हलवा."</string>
-    <string name="face_acquired_too_right" msgid="1650292067226118760">"कृपया सेन्सर उजवीकडे हलवा."</string>
-    <string name="face_acquired_too_left" msgid="2712489669456176505">"कृपया सेन्सर डावीकडे हलवा."</string>
-    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"कृपया सेन्सरकडे पहा."</string>
-    <string name="face_acquired_not_detected" msgid="5707782294589511391">"चेहरा आढळला नाही."</string>
-    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"डिव्हाइस खूप हलत आहे."</string>
+    <!-- no translation found for face_acquired_insufficient (2767330364802375742) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_bright (5005650874582450967) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_dark (1966194696381394616) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_close (1401011882624272753) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_far (1210969240069012510) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_high (3362395713403348013) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_low (488983581737550912) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_right (941726879175375970) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_left (5873592047381190672) -->
+    <skip />
+    <!-- no translation found for face_acquired_poor_gaze (8471716624377228327) -->
+    <skip />
+    <!-- no translation found for face_acquired_not_detected (4885504661626728809) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_much_motion (3149332171102108851) -->
+    <skip />
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"कृपया तुमच्या चेहऱ्याची पुन्हा नोंदणी करा."</string>
-    <string name="face_acquired_too_different" msgid="5553210341111255124">"वेगळा चेहरा आढळला आहे."</string>
+    <!-- no translation found for face_acquired_too_different (7663983770123789694) -->
+    <skip />
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"एकाच प्रकारची पोझ देत आहात कृपया तुमची पोझ बदला."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"कृपया थेट कॅमेऱ्याच्या दिशेने पाहा."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"कृपया थेट कॅमेऱ्याच्या दिशेने पाहा."</string>
+    <!-- no translation found for face_acquired_pan_too_extreme (1852495480382773759) -->
+    <skip />
+    <!-- no translation found for face_acquired_tilt_too_extreme (1290820400317982049) -->
+    <skip />
     <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"कृपया तुमची मान वर करा."</string>
-    <string name="face_acquired_obscured" msgid="3055077697850272097">"कृपया तुमचा चेहरा दाखवा."</string>
+    <!-- no translation found for face_acquired_obscured (5747521031647744553) -->
+    <skip />
+    <!-- no translation found for face_acquired_sensor_dirty (364493868630891300) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"चेहरा हार्डवेअर उपलब्ध नाही."</string>
-    <string name="face_error_timeout" msgid="4014326147867150054">"चेहरा टाइमआउट झाला. पुन्हा प्रयत्न करा."</string>
+    <!-- no translation found for face_error_timeout (2605673935810019129) -->
+    <skip />
     <string name="face_error_no_space" msgid="8224993703466381314">"चेहरा स्टोअर केला जाऊ शकत नाही."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"चेहरा ऑपरेशन रद्द केले गेले."</string>
     <string name="face_error_user_canceled" msgid="8943921120862164539">"वापरकर्त्याने चेहरा ऑथेंटिकेशन रद्द केले."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"खूप जास्त प्रयत्न केले. नंतर पुन्हा प्रयत्न करा."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"खूप जास्त प्रयत्न केले. चेहरा ऑथेंटिकेशन बंद केले गेले."</string>
-    <string name="face_error_unable_to_process" msgid="238761109287767270">"पुन्हा प्रयत्न करा."</string>
-    <string name="face_error_not_enrolled" msgid="9166792142679691323">"चेहरा नोंदवलेला नाही."</string>
-    <string name="face_error_hw_not_present" msgid="916085883581450331">"या डिव्हाइसमध्ये चेहरा ऑथेंटिकेशन सेन्सर नाही."</string>
+    <!-- no translation found for face_error_unable_to_process (4940944939691171539) -->
+    <skip />
+    <!-- no translation found for face_error_not_enrolled (4245760276260427472) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (5296043240874659926) -->
+    <skip />
     <string name="face_name_template" msgid="7004562145809595384">"चेहरा <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1164,7 +1197,7 @@
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> थांबतो"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> थांबते"</string>
     <string name="aerr_restart" msgid="7581308074153624475">"अ‍ॅप पुन्हा उघडा"</string>
-    <string name="aerr_report" msgid="5371800241488400617">"अभिप्राय पाठवा"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"फीडबॅक पाठवा"</string>
     <string name="aerr_close" msgid="2991640326563991340">"बंद करा"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"डिव्हाइस रीस्टार्ट होईपर्यंत म्यूट करा"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"प्रतीक्षा करा"</string>
@@ -1213,9 +1246,16 @@
     <string name="new_app_action" msgid="6694851182870774403">"<xliff:g id="NEW_APP">%1$s</xliff:g> उघडा"</string>
     <string name="new_app_description" msgid="5894852887817332322">"<xliff:g id="OLD_APP">%1$s</xliff:g> सेव्ह न करता बंद होईल"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> ने मेमेरी मर्यादा वाढविली"</string>
+    <!-- no translation found for dump_heap_ready_notification (1162196579925048701) -->
+    <skip />
     <string name="dump_heap_notification_detail" msgid="3993078784053054141">"हीप डंप गोळा केले. शेअर करण्यासाठी टॅप करा."</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"हीप डंप शेअर करायचे?"</string>
-    <string name="dump_heap_text" msgid="4809417337240334941">"<xliff:g id="PROC">%1$s</xliff:g> प्रक्रियेने त्याची <xliff:g id="SIZE">%2$s</xliff:g> ची प्रक्रिया मेमरी मर्यादा ओलांडली आहे. त्याच्या विकासकासह शेअर करण्यासाठी तुमच्यासाठी हीप डंप उपलब्ध आहे. सावधगिरी बाळगा: या हीप डंपमध्ये तुमची कोणतीही वैयक्तिक माहिती असू शकते ज्यात अॅप्लिकेशन प्रवेश करू शकतो."</string>
+    <!-- no translation found for dump_heap_text (8546022920319781701) -->
+    <skip />
+    <!-- no translation found for dump_heap_system_text (1205466256312104134) -->
+    <skip />
+    <!-- no translation found for dump_heap_ready_text (6759394977904051000) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"मजकुरासाठी क्रिया निवडा"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"रिंगर व्हॉल्यूम"</string>
     <string name="volume_music" msgid="5421651157138628171">"मीडिया व्हॉल्यूम"</string>
@@ -1254,8 +1294,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"सर्व नेटवर्क पाहण्यासाठी टॅप करा"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"कनेक्ट करा"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"सर्व नेटवर्क"</string>
-    <string name="wifi_suggestion_title" msgid="8951405130379148709">"<xliff:g id="NAME">%s</xliff:g> ने प्रस्तावित केलेले वाय-फाय नेटवर्क उपलब्ध आहे"</string>
-    <string name="wifi_suggestion_content" msgid="2658317015552324848">"<xliff:g id="NAME">%s</xliff:g> द्वारे प्रस्तावित नेटवर्कशी कनेक्ट करायचे आहे का?"</string>
+    <!-- no translation found for wifi_suggestion_title (9099832833531486167) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (5883181205841582873) -->
+    <skip />
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"होय"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"नाही"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"वाय-फाय आपोआप चालू होईल"</string>
@@ -1267,9 +1309,14 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"नेटवर्कवर साइन इन करा"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"वाय-फाय ला इंटरनेटचा अॅक्सेस नाही"</string>
+    <!-- no translation found for wifi_no_internet (5198100389964214865) -->
+    <skip />
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"पर्यायांसाठी टॅप करा"</string>
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"कनेक्ट केले"</string>
+    <!-- no translation found for network_partial_connectivity (7774883385494762741) -->
+    <skip />
+    <!-- no translation found for network_partial_connectivity_detailed (1959697814165325217) -->
+    <skip />
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"तुमच्या हॉटस्पॉट सेटिंग्जमधील बदल"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"तुमचा हॉटस्पॉट बँड बदलला आहे."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"हे डिव्हाइस तुमच्या फक्त ५GHz साठी प्राधान्याला सपोर्ट करत नाही. त्याऐवजी, हे डिव्हाइस ५GHz बँड उपलब्ध असताना वापरेल."</string>
@@ -1355,6 +1402,10 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB डीबग करणे कनेक्‍ट केले"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"USB डीबगिंग बंद करण्यासाठी टॅप करा"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB डीबगिंग बंद करण्यासाठी निवडा."</string>
+    <!-- no translation found for test_harness_mode_notification_title (2216359742631914387) -->
+    <skip />
+    <!-- no translation found for test_harness_mode_notification_message (1343197173054407119) -->
+    <skip />
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB पोर्ट मध्ये ओलावा किंवा धूळ आहे"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB पोर्ट आपोआप बंद होईल. अधिक जाणून घेण्यासाठी टॅप करा."</string>
     <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"USB फोर्ट वापरण्यासाठी सुरक्षित आहे"</string>
@@ -1906,8 +1957,6 @@
     <string name="profile_encrypted_message" msgid="6964994232310195874">"कार्य प्रोफाईल अनलॉक करण्यासाठी टॅप करा"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> शी कनेक्ट केलेले"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"फायली पाहण्यासाठी टॅप करा"</string>
-    <string name="pin_target" msgid="3052256031352291362">"पिन"</string>
-    <string name="unpin_target" msgid="3556545602439143442">"अनपिन करा"</string>
     <string name="app_info" msgid="6856026610594615344">"अ‍ॅप माहिती"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"डेमो प्रारंभ करत आहे..."</string>
@@ -1998,6 +2047,22 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"दिनक्रम मोडची माहिती सूचना"</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"चार्जिंगची सामान्य पातळी गाठेपर्यंत कदाचित बॅटरी संपू शकते"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"बॅटरी लाइफ वाढवण्यासाठी बॅटरी सेव्हर सुरू केला आहे"</string>
+    <!-- no translation found for battery_saver_notification_channel_name (2083316159716201806) -->
+    <skip />
+    <!-- no translation found for battery_saver_sticky_disabled_notification_title (6376147579378764641) -->
+    <skip />
+    <!-- no translation found for battery_saver_sticky_disabled_notification_summary (8090192609249817945) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (2960978289873161288) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (7555713825806482451) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (5954873381559605660) -->
+    <skip />
+    <!-- no translation found for battery_saver_off_notification_summary (1374222493681267143) -->
+    <skip />
+    <!-- no translation found for battery_saver_off_alternative_notification_summary (4340727818546508436) -->
+    <skip />
     <string name="mime_type_folder" msgid="7111951698626315204">"फोल्डर"</string>
     <string name="mime_type_apk" msgid="5518003630972506900">"Android अ‍ॅप्लिकेशन"</string>
     <string name="mime_type_generic" msgid="6833871596845900027">"फाइल"</string>

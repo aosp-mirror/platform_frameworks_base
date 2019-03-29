@@ -253,6 +253,7 @@ $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/vendor/overlay/ExperimentNav
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/vendor/overlay/ExperimentNavigationBarSlim)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/priv-app/SystemUI)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/media/audio)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/priv-app/DynamicAndroidInstallationService)
 # ******************************************************************
 # NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST ABOVE THIS BANNER
 # ******************************************************************

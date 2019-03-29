@@ -16,5 +16,6 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.server.om.hosttest.signature_overlay">
+    <application android:hasCode="false" />
     <overlay android:targetPackage="android" />
 </manifest>

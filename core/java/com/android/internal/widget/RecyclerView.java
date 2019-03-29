@@ -20,6 +20,7 @@ import android.annotation.CallSuper;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.database.Observable;
@@ -4953,6 +4954,7 @@ public class RecyclerView extends ViewGroup implements ScrollingView, NestedScro
          * constructed by {@link GapWorker} prefetch from being bound to a lower priority prefetch.
          */
         static class ScrapData {
+            @UnsupportedAppUsage
             ArrayList<ViewHolder> mScrapHeap = new ArrayList<>();
             int mMaxScrap = DEFAULT_MAX_SCRAP;
             long mCreateRunningAverageNs = 0;

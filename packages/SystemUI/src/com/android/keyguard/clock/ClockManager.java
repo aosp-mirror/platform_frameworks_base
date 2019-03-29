@@ -39,6 +39,7 @@ import android.view.ViewGroup;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.colorextraction.ColorExtractor;
+import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManager.DockEventListener;
@@ -72,6 +73,7 @@ public final class ClockManager {
     private final Map<String, ClockPlugin> mClocks = new ArrayMap<>();
     @Nullable private ClockPlugin mCurrentClock;
 
+    private final Context mContext;
     private final ContentResolver mContentResolver;
     private final SettingsWrapper mSettingsWrapper;
     private final Handler mMainHandler = new Handler(Looper.getMainLooper());
@@ -117,7 +119,7 @@ public final class ClockManager {
                     reload();
                 }
             };
-    @Nullable private final DockManager mDockManager;
+    @Nullable private DockManager mDockManager;
     /**
      * When docked, the DOCKED_CLOCK_FACE setting will be checked for the custom clock face
      * to show.
@@ -132,18 +134,16 @@ public final class ClockManager {
 
     @Inject
     public ClockManager(Context context, InjectionInflationController injectionInflater,
-            PluginManager pluginManager, @Nullable DockManager dockManager,
-            SysuiColorExtractor colorExtractor) {
-        this(context, injectionInflater, pluginManager, dockManager, colorExtractor,
+            PluginManager pluginManager, SysuiColorExtractor colorExtractor) {
+        this(context, injectionInflater, pluginManager, colorExtractor,
                 context.getContentResolver(), new SettingsWrapper(context.getContentResolver()));
     }
 
     ClockManager(Context context, InjectionInflationController injectionInflater,
-            PluginManager pluginManager, @Nullable DockManager dockManager,
-            SysuiColorExtractor colorExtractor, ContentResolver contentResolver,
-            SettingsWrapper settingsWrapper) {
+            PluginManager pluginManager, SysuiColorExtractor colorExtractor,
+            ContentResolver contentResolver, SettingsWrapper settingsWrapper) {
+        mContext = context;
         mPluginManager = pluginManager;
-        mDockManager = dockManager;
         mColorExtractor = colorExtractor;
         mContentResolver = contentResolver;
         mSettingsWrapper = settingsWrapper;
@@ -323,6 +323,9 @@ public final class ClockManager {
         mContentResolver.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.DOCKED_CLOCK_FACE),
                 false, mContentObserver);
+        if (mDockManager == null) {
+            mDockManager = SysUiServiceProvider.getComponent(mContext, DockManager.class);
+        }
         if (mDockManager != null) {
             mDockManager.addListener(mDockEventListener);
         }

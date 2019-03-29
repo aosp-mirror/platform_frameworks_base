@@ -364,7 +364,7 @@ public abstract class ActivityTaskManagerInternal {
      *  - Use the secondary home defined in the config.
      */
     public abstract boolean startHomeOnDisplay(int userId, String reason, int displayId,
-            boolean fromHomeKey);
+            boolean allowInstrumenting, boolean fromHomeKey);
     /** Start home activities on all displays that support system decorations. */
     public abstract boolean startHomeOnAllDisplays(int userId, String reason);
     /** @return true if the given process is the factory test process. */

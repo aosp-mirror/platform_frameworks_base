@@ -112,7 +112,6 @@ applications that come with the platform
         <permission name="android.permission.MANAGE_USERS"/>
         <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
         <permission name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME"/>
-        <permission name="android.permission.CLEAR_APP_USER_DATA"/>
         <permission name="android.permission.PACKAGE_USAGE_STATS"/>
     </privapp-permissions>
 
@@ -124,6 +123,7 @@ applications that come with the platform
         <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
         <permission name="android.permission.REQUEST_INCIDENT_REPORT_APPROVAL"/>
         <permission name="android.permission.APPROVE_INCIDENT_REPORTS"/>
+        <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.phone">
@@ -307,6 +307,9 @@ applications that come with the platform
         <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
         <permission name="android.permission.STATUS_BAR_SERVICE"/>
         <permission name="android.permission.REQUEST_INCIDENT_REPORT_APPROVAL"/>
+        <permission name="android.permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS"/>
+        <permission name="android.permission.SET_WALLPAPER" />
+        <permission name="android.permission.SET_WALLPAPER_COMPONENT" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
@@ -329,9 +332,9 @@ applications that come with the platform
         <permission name="android.permission.CONTROL_VPN"/>
     </privapp-permissions>
 
-    <privapp-permissions package="com.android.dynandroid">
+    <privapp-permissions package="com.android.dynsystem">
         <permission name="android.permission.REBOOT"/>
-        <permission name="android.permission.MANAGE_DYNAMIC_ANDROID"/>
+        <permission name="android.permission.MANAGE_DYNAMIC_SYSTEM"/>
     </privapp-permissions>
 
 </permissions>

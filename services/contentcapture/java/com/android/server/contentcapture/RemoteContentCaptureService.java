@@ -54,7 +54,7 @@ final class RemoteContentCaptureService
         mIdleUnbindTimeoutMs = idleUnbindTimeoutMs;
 
         // Bind right away, which will trigger a onConnected() on service's
-        scheduleBind();
+        ensureBoundLocked();
     }
 
     @Override // from AbstractRemoteService
@@ -87,6 +87,10 @@ final class RemoteContentCaptureService
         } catch (Exception e) {
             Slog.w(mTag, "Exception calling onConnectedStateChanged(" + connected + "): " + e);
         }
+    }
+
+    public void ensureBoundLocked() {
+        scheduleBind();
     }
 
     /**

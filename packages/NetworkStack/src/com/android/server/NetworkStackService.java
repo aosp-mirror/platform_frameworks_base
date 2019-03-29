@@ -277,9 +277,9 @@ public class NetworkStackService extends Service {
         }
 
         @Override
-        public void notifyAcceptPartialConnectivity() {
+        public void setAcceptPartialConnectivity() {
             checkNetworkStackCallingPermission();
-            mNm.notifyAcceptPartialConnectivity();
+            mNm.setAcceptPartialConnectivity();
         }
 
         @Override

@@ -23,7 +23,9 @@ import android.view.LayoutInflater;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
+import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.util.InjectionInflationController;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,7 +37,10 @@ public class KeyguardPresentationTest extends SysuiTestCase {
     @Test
     public void testInflation_doesntCrash() {
         com.android.systemui.util.Assert.sMainLooper = TestableLooper.get(this).getLooper();
-        LayoutInflater inflater = LayoutInflater.from(getContext());
+        InjectionInflationController inflationController = new InjectionInflationController(
+                SystemUIFactory.getInstance().getRootComponent());
+        LayoutInflater inflater = inflationController
+                .injectable(LayoutInflater.from(getContext()));
         inflater.inflate(R.layout.keyguard_presentation, null);
     }
 }

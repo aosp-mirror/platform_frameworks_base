@@ -1538,10 +1538,13 @@ class ActivityStarter {
                 if (!mAddingToTask && mReuseTask == null) {
                     // We didn't do anything...  but it was needed (a.k.a., client don't use that
                     // intent!)  And for paranoia, make sure we have correctly resumed the top activity.
-
                     resumeTargetStackIfNeeded();
                     if (outActivity != null && outActivity.length > 0) {
-                        outActivity[0] = reusedActivity;
+                        // The reusedActivity could be finishing, for example of starting an
+                        // activity with FLAG_ACTIVITY_CLEAR_TOP flag. In that case, return the
+                        // top running activity in the task instead.
+                        outActivity[0] = reusedActivity.finishing
+                                ? reusedActivity.getTaskRecord().getTopActivity() : reusedActivity;
                     }
 
                     return mMovedToFront ? START_TASK_TO_FRONT : START_DELIVERED_TO_TOP;

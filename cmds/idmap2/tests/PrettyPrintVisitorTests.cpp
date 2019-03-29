@@ -46,15 +46,14 @@ TEST(PrettyPrintVisitorTests, CreatePrettyPrintVisitor) {
   std::unique_ptr<const ApkAssets> overlay_apk = ApkAssets::Load(overlay_apk_path);
   ASSERT_THAT(overlay_apk, NotNull());
 
-  std::stringstream error;
-  std::unique_ptr<const Idmap> idmap =
+  const auto idmap =
       Idmap::FromApkAssets(target_apk_path, *target_apk, overlay_apk_path, *overlay_apk,
-                           PolicyFlags::POLICY_PUBLIC, /* enforce_overlayable */ true, error);
-  ASSERT_THAT(idmap, NotNull());
+                           PolicyFlags::POLICY_PUBLIC, /* enforce_overlayable */ true);
+  ASSERT_TRUE(idmap);
 
   std::stringstream stream;
   PrettyPrintVisitor visitor(stream);
-  idmap->accept(&visitor);
+  (*idmap)->accept(&visitor);
 
   ASSERT_NE(stream.str().find("target apk path  : "), std::string::npos);
   ASSERT_NE(stream.str().find("overlay apk path : "), std::string::npos);
@@ -67,13 +66,12 @@ TEST(PrettyPrintVisitorTests, CreatePrettyPrintVisitorWithoutAccessToApks) {
   std::string raw(reinterpret_cast<const char*>(idmap_raw_data), idmap_raw_data_len);
   std::istringstream raw_stream(raw);
 
-  std::stringstream error;
-  std::unique_ptr<const Idmap> idmap = Idmap::FromBinaryStream(raw_stream, error);
-  ASSERT_THAT(idmap, NotNull());
+  const auto idmap = Idmap::FromBinaryStream(raw_stream);
+  ASSERT_TRUE(idmap);
 
   std::stringstream stream;
   PrettyPrintVisitor visitor(stream);
-  idmap->accept(&visitor);
+  (*idmap)->accept(&visitor);
 
   ASSERT_NE(stream.str().find("target apk path  : "), std::string::npos);
   ASSERT_NE(stream.str().find("overlay apk path : "), std::string::npos);

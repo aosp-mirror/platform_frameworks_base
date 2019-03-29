@@ -16,7 +16,13 @@
 
 package com.android.systemui.shared.system;
 
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_2BUTTON;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
+
+import android.content.Context;
 import android.content.res.Resources;
+import android.view.WindowManagerPolicyConstants;
 
 /**
  * Various shared constants between Launcher and SysUI as part of quickstep
@@ -27,6 +33,13 @@ public class QuickStepContract {
     public static final String KEY_EXTRA_INPUT_CHANNEL = "extra_input_channel";
     public static final String KEY_EXTRA_WINDOW_CORNER_RADIUS = "extra_window_corner_radius";
     public static final String KEY_EXTRA_SUPPORTS_WINDOW_CORNERS = "extra_supports_window_corners";
+
+    public static final String NAV_BAR_MODE_2BUTTON_OVERLAY =
+            WindowManagerPolicyConstants.NAV_BAR_MODE_2BUTTON_OVERLAY;
+    public static final String NAV_BAR_MODE_3BUTTON_OVERLAY =
+            WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY;
+    public static final String NAV_BAR_MODE_GESTURAL_OVERLAY =
+            WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY;
 
     /**
      * Touch slopes and thresholds for quick step operations. Drag slop is the point where the
@@ -48,5 +61,55 @@ public class QuickStepContract {
 
     private static int convertDpToPixel(float dp) {
         return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
+    }
+
+    /**
+     * @return whether this nav bar mode is edge to edge
+     */
+    public static boolean isGesturalMode(int mode) {
+        return mode == NAV_BAR_MODE_GESTURAL;
+    }
+
+    /**
+     * @return whether the current nav bar mode is gestural
+     */
+    public static boolean isGesturalMode(Context context) {
+        return isGesturalMode(getCurrentInteractionMode(context));
+    }
+
+    /**
+     * @return whether this nav bar mode is swipe up
+     */
+    public static boolean isSwipeUpMode(int mode) {
+        return mode == NAV_BAR_MODE_2BUTTON;
+    }
+
+    /**
+     * @return whether the current nav bar mode is swipe up
+     */
+    public static boolean isSwipeUpMode(Context context) {
+        return isSwipeUpMode(getCurrentInteractionMode(context));
+    }
+
+    /**
+     * @return whether this nav bar mode is 3 button
+     */
+    public static boolean isLegacyMode(int mode) {
+        return mode == NAV_BAR_MODE_3BUTTON;
+    }
+
+    /**
+     * @return whether this nav bar mode is 3 button
+     */
+    public static boolean isLegacyMode(Context context) {
+        return isLegacyMode(getCurrentInteractionMode(context));
+    }
+
+    /**
+     * @return the current nav bar interaction mode
+     */
+    public static int getCurrentInteractionMode(Context context) {
+        return context.getResources().getInteger(
+                com.android.internal.R.integer.config_navBarInteractionMode);
     }
 }

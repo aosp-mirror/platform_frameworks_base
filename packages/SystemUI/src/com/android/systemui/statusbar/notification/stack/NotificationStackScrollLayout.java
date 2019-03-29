@@ -36,6 +36,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.PorterDuff;
@@ -58,6 +59,7 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.ViewOutlineProvider;
 import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityEvent;
@@ -394,6 +396,16 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             }
         }
     };
+    private final ViewOutlineProvider mOutlineProvider = new ViewOutlineProvider() {
+        @Override
+        public void getOutline(View view, Outline outline) {
+            if (mAmbientState.isDarkAtAll() && !mAmbientState.isFullyDark()) {
+                outline.setRoundRect(mBackgroundAnimationRect, mCornerRadius);
+            } else {
+                ViewOutlineProvider.BACKGROUND.getOutline(view, outline);
+            }
+        }
+    };
     private PorterDuffXfermode mSrcMode = new PorterDuffXfermode(PorterDuff.Mode.SRC);
     private boolean mPulsing;
     private boolean mGroupExpandedForMeasure;
@@ -520,6 +532,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         mRoundnessManager.setAnimatedChildren(mChildrenToAddAnimated);
         mRoundnessManager.setOnRoundingChangedCallback(this::invalidate);
         addOnExpandedHeightListener(mRoundnessManager::setExpanded);
+        setOutlineProvider(mOutlineProvider);
 
         // Blocking helper manager wants to know the expanded state, update as well.
         NotificationBlockingHelperManager blockingHelperManager =
@@ -1298,6 +1311,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     public void updateClipping() {
         boolean clipped = mRequestedClipBounds != null && !mInHeadsUpPinnedMode
                 && !mHeadsUpAnimatingAway;
+        boolean clipToOutline = false;
         if (mIsClipped != clipped) {
             mIsClipped = clipped;
         }
@@ -1306,12 +1320,15 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 && mAmbientState.isFullyDark() && mShowDarkShelf) {
             setClipBounds(null);
         } else if (mAmbientState.isDarkAtAll()) {
-            setClipBounds(mBackgroundAnimationRect);
+            clipToOutline = true;
+            invalidateOutline();
         } else if (clipped) {
             setClipBounds(mRequestedClipBounds);
         } else {
             setClipBounds(null);
         }
+
+        setClipToOutline(clipToOutline);
     }
 
     /**
@@ -4804,6 +4821,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         }
         if (!wasDarkAtAll && nowDarkAtAll) {
             resetExposedMenuView(true /* animate */, true /* animate */);
+        }
+        if (nowFullyDark != wasFullyDark || wasDarkAtAll != nowDarkAtAll) {
+            invalidateOutline();
         }
         updateAlgorithmHeightAndPadding();
         updateBackgroundDimming();

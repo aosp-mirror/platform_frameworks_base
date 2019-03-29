@@ -18,20 +18,15 @@ package com.android.server;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
-import android.app.ActivityManager;
 import android.content.Context;
 import android.hardware.ISensorPrivacyListener;
 import android.hardware.ISensorPrivacyManager;
-import android.location.LocationManager;
-import android.net.ConnectivityManager;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
-import android.os.UserHandle;
-import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.Log;
@@ -277,8 +272,6 @@ public final class SensorPrivacyService extends SystemService {
                 }
             }
             mListeners.finishBroadcast();
-            // Handle the state of all sensors managed by this service.
-            SensorState.handleSensorPrivacyToggled(mContext, enabled);
         }
     }
 
@@ -304,123 +297,6 @@ public final class SensorPrivacyService extends SystemService {
                 mListener.asBinder().unlinkToDeath(this, 0);
             } catch (NoSuchElementException e) {
             }
-        }
-    }
-
-    /**
-     * Maintains the state of the sensors when sensor privacy is enabled to return them to their
-     * original state when sensor privacy is disabled.
-     */
-    private static final class SensorState {
-
-        private static Object sLock = new Object();
-        @GuardedBy("sLock")
-        private static SensorState sPreviousState;
-
-        private boolean mAirplaneEnabled;
-        private boolean mLocationEnabled;
-
-        SensorState(boolean airplaneEnabled, boolean locationEnabled) {
-            mAirplaneEnabled = airplaneEnabled;
-            mLocationEnabled = locationEnabled;
-        }
-
-        public static void handleSensorPrivacyToggled(Context context, boolean enabled) {
-            synchronized (sLock) {
-                SensorState state;
-                if (enabled) {
-                    // if sensor privacy is being enabled then obtain the current state of the
-                    // sensors to be persisted and restored when sensor privacy is disabled.
-                    state = getCurrentSensorState(context);
-                } else {
-                    // else obtain the previous sensor state to be restored, first from the saved
-                    // state if available, otherwise attempt to read it from Settings.
-                    if (sPreviousState != null) {
-                        state = sPreviousState;
-                    } else {
-                        state = getPersistedSensorState(context);
-                    }
-                    // if the previous state is not available then return without attempting to
-                    // modify the sensor state.
-                    if (state == null) {
-                        return;
-                    }
-                }
-                // The SensorState represents the state of the sensor before sensor privacy was
-                // enabled; if airplane mode was not enabled then the state of airplane mode should
-                // be the same as the state of sensor privacy.
-                if (!state.mAirplaneEnabled) {
-                    setAirplaneMode(context, enabled);
-                }
-                // Similar to airplane mode the state of location should be the opposite of sensor
-                // privacy mode, if it was enabled when sensor privacy was enabled then it should be
-                // disabled. If location is disabled when sensor privacy is enabled then it will be
-                // left disabled when sensor privacy is disabled.
-                if (state.mLocationEnabled) {
-                    setLocationEnabled(context, !enabled);
-                }
-
-                // if sensor privacy is being enabled then persist the current state.
-                if (enabled) {
-                    sPreviousState = state;
-                    persistState(context, sPreviousState);
-                }
-            }
-        }
-
-        public static SensorState getCurrentSensorState(Context context) {
-            LocationManager locationManager = (LocationManager) context.getSystemService(
-                    Context.LOCATION_SERVICE);
-            boolean airplaneEnabled = Settings.Global.getInt(context.getContentResolver(),
-                    Settings.Global.AIRPLANE_MODE_ON, 0) != 0;
-            boolean locationEnabled = locationManager.isLocationEnabled();
-            return new SensorState(airplaneEnabled, locationEnabled);
-        }
-
-        public static void persistState(Context context, SensorState state) {
-            StringBuilder stateValue = new StringBuilder();
-            stateValue.append(state.mAirplaneEnabled
-                    ? Settings.Secure.MAINTAIN_AIRPLANE_MODE_AFTER_SP_DISABLED
-                    : Settings.Secure.DISABLE_AIRPLANE_MODE_AFTER_SP_DISABLED);
-            stateValue.append(",");
-            stateValue.append(
-                    state.mLocationEnabled ? Settings.Secure.REENABLE_LOCATION_AFTER_SP_DISABLED
-                            : Settings.Secure.MAINTAIN_LOCATION_AFTER_SP_DISABLED);
-            Settings.Secure.putString(context.getContentResolver(),
-                    Settings.Secure.SENSOR_PRIVACY_SENSOR_STATE, stateValue.toString());
-        }
-
-        public static SensorState getPersistedSensorState(Context context) {
-            String persistedState = Settings.Secure.getString(context.getContentResolver(),
-                    Settings.Secure.SENSOR_PRIVACY_SENSOR_STATE);
-            if (persistedState == null) {
-                Log.e(TAG, "The persisted sensor state could not be obtained from Settings");
-                return null;
-            }
-            String[] sensorStates = persistedState.split(",");
-            if (sensorStates.length < 2) {
-                Log.e(TAG, "The persisted sensor state does not contain the expected values: "
-                        + persistedState);
-                return null;
-            }
-            boolean airplaneEnabled = sensorStates[0].equals(
-                    Settings.Secure.MAINTAIN_AIRPLANE_MODE_AFTER_SP_DISABLED);
-            boolean locationEnabled = sensorStates[1].equals(
-                    Settings.Secure.REENABLE_LOCATION_AFTER_SP_DISABLED);
-            return new SensorState(airplaneEnabled, locationEnabled);
-        }
-
-        private static void setAirplaneMode(Context context, boolean enable) {
-            ConnectivityManager connectivityManager =
-                    (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-            connectivityManager.setAirplaneMode(enable);
-        }
-
-        private static void setLocationEnabled(Context context, boolean enable) {
-            LocationManager locationManager = (LocationManager) context.getSystemService(
-                    Context.LOCATION_SERVICE);
-            locationManager.setLocationEnabledForUser(enable,
-                    UserHandle.of(ActivityManager.getCurrentUser()));
         }
     }
 }

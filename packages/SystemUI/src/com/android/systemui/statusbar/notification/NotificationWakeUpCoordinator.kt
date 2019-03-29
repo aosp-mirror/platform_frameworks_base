@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification
 
 import android.animation.ObjectAnimator
+import android.content.Context
 import android.util.FloatProperty
 import com.android.systemui.Interpolators
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -25,12 +26,14 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
+import com.android.systemui.statusbar.phone.DozeParameters
 
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class NotificationWakeUpCoordinator @Inject constructor(
+        private val mContext: Context,
         private val mAmbientPulseManager: AmbientPulseManager,
         private val mStatusBarStateController: StatusBarStateController)
     : AmbientPulseManager.OnAmbientChangedListener, StatusBarStateController.StateListener {
@@ -59,10 +62,12 @@ class NotificationWakeUpCoordinator @Inject constructor(
     private var mLinearVisibilityAmount = 0.0f
     private var mWakingUp = false
     private val mEntrySetToClearWhenFinished = mutableSetOf<NotificationEntry>()
+    private val mDozeParameters: DozeParameters;
 
     init {
         mAmbientPulseManager.addListener(this)
         mStatusBarStateController.addCallback(this)
+        mDozeParameters = DozeParameters.getInstance(mContext)
     }
 
     fun setStackScroller(stackScroller: NotificationStackScrollLayout) {
@@ -194,7 +199,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
     }
 
     override fun onAmbientStateChanged(entry: NotificationEntry, isPulsing: Boolean) {
-        var animate = true
+        var animate = mDozeParameters.getAlwaysOn() && !mDozeParameters.getDisplayNeedsBlanking()
         if (!isPulsing) {
             if (mLinearDozeAmount != 0.0f) {
                 if (entry.isRowDismissed) {

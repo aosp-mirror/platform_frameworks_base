@@ -155,12 +155,26 @@ public class InstallOverlayTests extends BaseHostJUnit4Test {
         }
     }
 
+    private void delay() {
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+        }
+    }
+
+    private void installPackage(String pkg) throws Exception {
+        super.installPackage(pkg);
+        delay();
+    }
+
     private void setPackageEnabled(String pkg, boolean enabled) throws Exception {
         getDevice().executeShellCommand("cmd package " + (enabled ? "enable " : "disable ") + pkg);
+        delay();
     }
 
     private void setOverlayEnabled(String pkg, boolean enabled) throws Exception {
         getDevice().executeShellCommand("cmd overlay " + (enabled ? "enable " : "disable ") + pkg);
+        delay();
     }
 
     private boolean overlayManagerContainsPackage(String pkg) throws Exception {

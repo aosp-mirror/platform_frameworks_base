@@ -144,12 +144,14 @@ import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
+import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.system.Os;
 import android.test.mock.MockContentResolver;
 import android.text.TextUtils;
 import android.util.ArraySet;
@@ -188,6 +190,8 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.stubbing.Answer;
 
+import java.io.IOException;
+import java.net.DatagramSocket;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -421,7 +425,7 @@ public class ConnectivityServiceTest {
         private final ConditionVariable mPreventReconnectReceived = new ConditionVariable();
         private int mScore;
         private NetworkAgent mNetworkAgent;
-        private int mStartKeepaliveError = SocketKeepalive.ERROR_HARDWARE_UNSUPPORTED;
+        private int mStartKeepaliveError = SocketKeepalive.ERROR_UNSUPPORTED;
         private int mStopKeepaliveError = SocketKeepalive.NO_KEEPALIVE;
         private Integer mExpectedKeepaliveSlot = null;
         // Contains the redirectUrl from networkStatus(). Before reading, wait for
@@ -495,7 +499,7 @@ public class ConnectivityServiceTest {
             try {
                 doAnswer(validateAnswer).when(mNetworkMonitor).notifyNetworkConnected();
                 doAnswer(validateAnswer).when(mNetworkMonitor).forceReevaluation(anyInt());
-                doAnswer(validateAnswer).when(mNetworkMonitor).notifyAcceptPartialConnectivity();
+                doAnswer(validateAnswer).when(mNetworkMonitor).setAcceptPartialConnectivity();
             } catch (RemoteException e) {
                 fail(e.getMessage());
             }
@@ -2550,7 +2554,7 @@ public class ConnectivityServiceTest {
         verifyActiveNetwork(TRANSPORT_CELLULAR);
     }
 
-    // TODO: deflake and re-enable
+    // TODO(b/128426024): deflake and re-enable
     // @Test
     public void testPartialConnectivity() {
         // Register network callback.
@@ -2585,7 +2589,7 @@ public class ConnectivityServiceTest {
         waitForIdle();
         try {
             verify(mWiFiNetworkAgent.mNetworkMonitor,
-                    timeout(TIMEOUT_MS).times(1)).notifyAcceptPartialConnectivity();
+                    timeout(TIMEOUT_MS).times(1)).setAcceptPartialConnectivity();
         } catch (RemoteException e) {
             fail(e.getMessage());
         }
@@ -2641,7 +2645,7 @@ public class ConnectivityServiceTest {
         waitForIdle();
         try {
             verify(mWiFiNetworkAgent.mNetworkMonitor,
-                    timeout(TIMEOUT_MS).times(1)).notifyAcceptPartialConnectivity();
+                    timeout(TIMEOUT_MS).times(1)).setAcceptPartialConnectivity();
         } catch (RemoteException e) {
             fail(e.getMessage());
         }
@@ -4032,6 +4036,7 @@ public class ConnectivityServiceTest {
         runTestWithSerialExecutors(executor -> {
             try {
                 doTestNattSocketKeepalivesWithExecutor(executor);
+                doTestNattSocketKeepalivesFdWithExecutor(executor);
             } catch (Exception e) {
                 fail(e.getMessage());
             }
@@ -4041,6 +4046,8 @@ public class ConnectivityServiceTest {
     private void doTestNattSocketKeepalivesWithExecutor(Executor executor) throws Exception {
         // TODO: 1. Move this outside of ConnectivityServiceTest.
         //       2. Make test to verify that Nat-T keepalive socket is created by IpSecService.
+        //       3. Mock ipsec service.
+        //       4. Find a free port instead of a fixed port.
         final int srcPort = 12345;
         final InetAddress myIPv4 = InetAddress.getByName("192.0.2.129");
         final InetAddress notMyIPv4 = InetAddress.getByName("192.0.2.35");
@@ -4065,89 +4072,106 @@ public class ConnectivityServiceTest {
         Network myNet = connectKeepaliveNetwork(lp);
 
         TestSocketKeepaliveCallback callback = new TestSocketKeepaliveCallback(executor);
-        SocketKeepalive ka;
 
         // Attempt to start keepalives with invalid parameters and check for errors.
         // Invalid network.
-        ka = mCm.createSocketKeepalive(notMyNet, testSocket, myIPv4, dstIPv4, executor, callback);
-        ka.start(validKaInterval);
-        callback.expectError(SocketKeepalive.ERROR_INVALID_NETWORK);
+        try (SocketKeepalive ka = mCm.createSocketKeepalive(
+                notMyNet, testSocket, myIPv4, dstIPv4, executor, callback)) {
+            ka.start(validKaInterval);
+            callback.expectError(SocketKeepalive.ERROR_INVALID_NETWORK);
+        }
 
         // Invalid interval.
-        ka = mCm.createSocketKeepalive(myNet, testSocket, myIPv4, dstIPv4, executor, callback);
-        ka.start(invalidKaInterval);
-        callback.expectError(SocketKeepalive.ERROR_INVALID_INTERVAL);
+        try (SocketKeepalive ka = mCm.createSocketKeepalive(
+                myNet, testSocket, myIPv4, dstIPv4, executor, callback)) {
+            ka.start(invalidKaInterval);
+            callback.expectError(SocketKeepalive.ERROR_INVALID_INTERVAL);
+        }
 
         // Invalid destination.
-        ka = mCm.createSocketKeepalive(myNet, testSocket, myIPv4, dstIPv6, executor, callback);
-        ka.start(validKaInterval);
-        callback.expectError(SocketKeepalive.ERROR_INVALID_IP_ADDRESS);
+        try (SocketKeepalive ka = mCm.createSocketKeepalive(
+                myNet, testSocket, myIPv4, dstIPv6, executor, callback)) {
+            ka.start(validKaInterval);
+            callback.expectError(SocketKeepalive.ERROR_INVALID_IP_ADDRESS);
+        }
 
         // Invalid source;
-        ka = mCm.createSocketKeepalive(myNet, testSocket, myIPv6, dstIPv4, executor, callback);
-        ka.start(validKaInterval);
-        callback.expectError(SocketKeepalive.ERROR_INVALID_IP_ADDRESS);
+        try (SocketKeepalive ka = mCm.createSocketKeepalive(
+                myNet, testSocket, myIPv6, dstIPv4, executor, callback)) {
+            ka.start(validKaInterval);
+            callback.expectError(SocketKeepalive.ERROR_INVALID_IP_ADDRESS);
+        }
 
         // NAT-T is only supported for IPv4.
-        ka = mCm.createSocketKeepalive(myNet, testSocket, myIPv6, dstIPv6, executor, callback);
-        ka.start(validKaInterval);
-        callback.expectError(SocketKeepalive.ERROR_INVALID_IP_ADDRESS);
+        try (SocketKeepalive ka = mCm.createSocketKeepalive(
+                myNet, testSocket, myIPv6, dstIPv6, executor, callback)) {
+            ka.start(validKaInterval);
+            callback.expectError(SocketKeepalive.ERROR_INVALID_IP_ADDRESS);
+        }
 
         // Sanity check before testing started keepalive.
-        ka = mCm.createSocketKeepalive(myNet, testSocket, myIPv4, dstIPv4, executor, callback);
-        ka.start(validKaInterval);
-        callback.expectError(SocketKeepalive.ERROR_HARDWARE_UNSUPPORTED);
+        try (SocketKeepalive ka = mCm.createSocketKeepalive(
+                myNet, testSocket, myIPv4, dstIPv4, executor, callback)) {
+            ka.start(validKaInterval);
+            callback.expectError(SocketKeepalive.ERROR_UNSUPPORTED);
+        }
 
         // Check that a started keepalive can be stopped.
         mWiFiNetworkAgent.setStartKeepaliveError(SocketKeepalive.SUCCESS);
-        ka = mCm.createSocketKeepalive(myNet, testSocket, myIPv4, dstIPv4, executor, callback);
-        ka.start(validKaInterval);
-        callback.expectStarted();
-        mWiFiNetworkAgent.setStopKeepaliveError(SocketKeepalive.SUCCESS);
-        ka.stop();
-        callback.expectStopped();
+        try (SocketKeepalive ka = mCm.createSocketKeepalive(
+                myNet, testSocket, myIPv4, dstIPv4, executor, callback)) {
+            ka.start(validKaInterval);
+            callback.expectStarted();
+            mWiFiNetworkAgent.setStopKeepaliveError(SocketKeepalive.SUCCESS);
+            ka.stop();
+            callback.expectStopped();
 
-        // Check that keepalive could be restarted.
-        ka.start(validKaInterval);
-        callback.expectStarted();
-        ka.stop();
-        callback.expectStopped();
+            // Check that keepalive could be restarted.
+            ka.start(validKaInterval);
+            callback.expectStarted();
+            ka.stop();
+            callback.expectStopped();
 
-        // Check that keepalive can be restarted without waiting for callback.
-        ka.start(validKaInterval);
-        callback.expectStarted();
-        ka.stop();
-        ka.start(validKaInterval);
-        callback.expectStopped();
-        callback.expectStarted();
-        ka.stop();
-        callback.expectStopped();
+            // Check that keepalive can be restarted without waiting for callback.
+            ka.start(validKaInterval);
+            callback.expectStarted();
+            ka.stop();
+            ka.start(validKaInterval);
+            callback.expectStopped();
+            callback.expectStarted();
+            ka.stop();
+            callback.expectStopped();
+        }
 
         // Check that deleting the IP address stops the keepalive.
         LinkProperties bogusLp = new LinkProperties(lp);
-        ka = mCm.createSocketKeepalive(myNet, testSocket, myIPv4, dstIPv4, executor, callback);
-        ka.start(validKaInterval);
-        callback.expectStarted();
-        bogusLp.removeLinkAddress(new LinkAddress(myIPv4, 25));
-        bogusLp.addLinkAddress(new LinkAddress(notMyIPv4, 25));
-        mWiFiNetworkAgent.sendLinkProperties(bogusLp);
-        callback.expectError(SocketKeepalive.ERROR_INVALID_IP_ADDRESS);
-        mWiFiNetworkAgent.sendLinkProperties(lp);
+        try (SocketKeepalive ka = mCm.createSocketKeepalive(
+                myNet, testSocket, myIPv4, dstIPv4, executor, callback)) {
+            ka.start(validKaInterval);
+            callback.expectStarted();
+            bogusLp.removeLinkAddress(new LinkAddress(myIPv4, 25));
+            bogusLp.addLinkAddress(new LinkAddress(notMyIPv4, 25));
+            mWiFiNetworkAgent.sendLinkProperties(bogusLp);
+            callback.expectError(SocketKeepalive.ERROR_INVALID_IP_ADDRESS);
+            mWiFiNetworkAgent.sendLinkProperties(lp);
+        }
 
         // Check that a started keepalive is stopped correctly when the network disconnects.
-        ka = mCm.createSocketKeepalive(myNet, testSocket, myIPv4, dstIPv4, executor, callback);
-        ka.start(validKaInterval);
-        callback.expectStarted();
-        mWiFiNetworkAgent.disconnect();
-        waitFor(mWiFiNetworkAgent.getDisconnectedCV());
-        callback.expectError(SocketKeepalive.ERROR_INVALID_NETWORK);
+        try (SocketKeepalive ka = mCm.createSocketKeepalive(
+                myNet, testSocket, myIPv4, dstIPv4, executor, callback)) {
+            ka.start(validKaInterval);
+            callback.expectStarted();
+            mWiFiNetworkAgent.disconnect();
+            waitFor(mWiFiNetworkAgent.getDisconnectedCV());
+            callback.expectError(SocketKeepalive.ERROR_INVALID_NETWORK);
 
-        // ... and that stopping it after that has no adverse effects.
-        waitForIdle();
-        final Network myNetAlias = myNet;
-        assertNull(mCm.getNetworkCapabilities(myNetAlias));
-        ka.stop();
-        callback.assertNoCallback();
+            // ... and that stopping it after that has no adverse effects.
+            waitForIdle();
+            final Network myNetAlias = myNet;
+            assertNull(mCm.getNetworkCapabilities(myNetAlias));
+            ka.stop();
+            callback.assertNoCallback();
+        }
 
         // Reconnect.
         myNet = connectKeepaliveNetwork(lp);
@@ -4155,27 +4179,30 @@ public class ConnectivityServiceTest {
 
         // Check that keepalive slots start from 1 and increment. The first one gets slot 1.
         mWiFiNetworkAgent.setExpectedKeepaliveSlot(1);
-        ka = mCm.createSocketKeepalive(myNet, testSocket, myIPv4, dstIPv4, executor, callback);
-        ka.start(validKaInterval);
-        callback.expectStarted();
+        try (SocketKeepalive ka = mCm.createSocketKeepalive(
+                myNet, testSocket, myIPv4, dstIPv4, executor, callback)) {
+            ka.start(validKaInterval);
+            callback.expectStarted();
 
-        // The second one gets slot 2.
-        mWiFiNetworkAgent.setExpectedKeepaliveSlot(2);
-        final UdpEncapsulationSocket testSocket2 = mIpSec.openUdpEncapsulationSocket(6789);
-        TestSocketKeepaliveCallback callback2 = new TestSocketKeepaliveCallback(executor);
-        SocketKeepalive ka2 =
-                mCm.createSocketKeepalive(myNet, testSocket2, myIPv4, dstIPv4, executor, callback2);
-        ka2.start(validKaInterval);
-        callback2.expectStarted();
+            // The second one gets slot 2.
+            mWiFiNetworkAgent.setExpectedKeepaliveSlot(2);
+            final UdpEncapsulationSocket testSocket2 = mIpSec.openUdpEncapsulationSocket(6789);
+            TestSocketKeepaliveCallback callback2 = new TestSocketKeepaliveCallback(executor);
+            try (SocketKeepalive ka2 = mCm.createSocketKeepalive(
+                    myNet, testSocket2, myIPv4, dstIPv4, executor, callback2)) {
+                ka2.start(validKaInterval);
+                callback2.expectStarted();
 
-        ka.stop();
-        callback.expectStopped();
+                ka.stop();
+                callback.expectStopped();
 
-        ka2.stop();
-        callback2.expectStopped();
+                ka2.stop();
+                callback2.expectStopped();
 
-        testSocket.close();
-        testSocket2.close();
+                testSocket.close();
+                testSocket2.close();
+            }
+        }
 
         mWiFiNetworkAgent.disconnect();
         waitFor(mWiFiNetworkAgent.getDisconnectedCV());
@@ -4200,7 +4227,6 @@ public class ConnectivityServiceTest {
         final InetAddress myIPv6 = InetAddress.getByName("::1");
 
         final int validKaInterval = 15;
-        final int invalidKaInterval = 9;
 
         final LinkProperties lp = new LinkProperties();
         lp.setInterfaceName("wlan12");
@@ -4216,37 +4242,46 @@ public class ConnectivityServiceTest {
         final Socket testSocketV6 = new Socket();
 
         TestSocketKeepaliveCallback callback = new TestSocketKeepaliveCallback(executor);
-        SocketKeepalive ka;
 
         // Attempt to start Tcp keepalives with invalid parameters and check for errors.
         // Invalid network.
-        ka = mCm.createSocketKeepalive(notMyNet, testSocketV4, executor, callback);
-        ka.start(validKaInterval);
-        callback.expectError(SocketKeepalive.ERROR_INVALID_NETWORK);
+        try (SocketKeepalive ka = mCm.createSocketKeepalive(
+            notMyNet, testSocketV4, executor, callback)) {
+            ka.start(validKaInterval);
+            callback.expectError(SocketKeepalive.ERROR_INVALID_NETWORK);
+        }
 
         // Invalid Socket (socket is not bound with IPv4 address).
-        ka = mCm.createSocketKeepalive(myNet, testSocketV4, executor, callback);
-        ka.start(validKaInterval);
-        callback.expectError(SocketKeepalive.ERROR_INVALID_SOCKET);
+        try (SocketKeepalive ka = mCm.createSocketKeepalive(
+            myNet, testSocketV4, executor, callback)) {
+            ka.start(validKaInterval);
+            callback.expectError(SocketKeepalive.ERROR_INVALID_SOCKET);
+        }
 
         // Invalid Socket (socket is not bound with IPv6 address).
-        ka = mCm.createSocketKeepalive(myNet, testSocketV6, executor, callback);
-        ka.start(validKaInterval);
-        callback.expectError(SocketKeepalive.ERROR_INVALID_SOCKET);
+        try (SocketKeepalive ka = mCm.createSocketKeepalive(
+            myNet, testSocketV6, executor, callback)) {
+            ka.start(validKaInterval);
+            callback.expectError(SocketKeepalive.ERROR_INVALID_SOCKET);
+        }
 
         // Bind the socket address
         testSocketV4.bind(new InetSocketAddress(myIPv4, srcPortV4));
         testSocketV6.bind(new InetSocketAddress(myIPv6, srcPortV6));
 
         // Invalid Socket (socket is bound with IPv4 address).
-        ka = mCm.createSocketKeepalive(myNet, testSocketV4, executor, callback);
-        ka.start(validKaInterval);
-        callback.expectError(SocketKeepalive.ERROR_INVALID_SOCKET);
+        try (SocketKeepalive ka = mCm.createSocketKeepalive(
+            myNet, testSocketV4, executor, callback)) {
+            ka.start(validKaInterval);
+            callback.expectError(SocketKeepalive.ERROR_INVALID_SOCKET);
+        }
 
         // Invalid Socket (socket is bound with IPv6 address).
-        ka = mCm.createSocketKeepalive(myNet, testSocketV6, executor, callback);
-        ka.start(validKaInterval);
-        callback.expectError(SocketKeepalive.ERROR_INVALID_SOCKET);
+        try (SocketKeepalive ka = mCm.createSocketKeepalive(
+            myNet, testSocketV6, executor, callback)) {
+            ka.start(validKaInterval);
+            callback.expectError(SocketKeepalive.ERROR_INVALID_SOCKET);
+        }
 
         testSocketV4.close();
         testSocketV6.close();
@@ -4254,6 +4289,66 @@ public class ConnectivityServiceTest {
         mWiFiNetworkAgent.disconnect();
         waitFor(mWiFiNetworkAgent.getDisconnectedCV());
         mWiFiNetworkAgent = null;
+    }
+
+    private void doTestNattSocketKeepalivesFdWithExecutor(Executor executor) throws Exception {
+        final int srcPort = 12345;
+        final InetAddress myIPv4 = InetAddress.getByName("192.0.2.129");
+        final InetAddress anyIPv4 = InetAddress.getByName("0.0.0.0");
+        final InetAddress dstIPv4 = InetAddress.getByName("8.8.8.8");
+        final int validKaInterval = 15;
+
+        // Prepare the target network.
+        LinkProperties lp = new LinkProperties();
+        lp.setInterfaceName("wlan12");
+        lp.addLinkAddress(new LinkAddress(myIPv4, 25));
+        lp.addRoute(new RouteInfo(InetAddress.getByName("192.0.2.254")));
+        Network myNet = connectKeepaliveNetwork(lp);
+        mWiFiNetworkAgent.setStartKeepaliveError(SocketKeepalive.SUCCESS);
+        mWiFiNetworkAgent.setStopKeepaliveError(SocketKeepalive.SUCCESS);
+
+        TestSocketKeepaliveCallback callback = new TestSocketKeepaliveCallback(executor);
+
+        // Prepare the target file descriptor, keep only one instance.
+        final IpSecManager mIpSec = (IpSecManager) mContext.getSystemService(Context.IPSEC_SERVICE);
+        final UdpEncapsulationSocket testSocket = mIpSec.openUdpEncapsulationSocket(srcPort);
+        final ParcelFileDescriptor testPfd =
+                ParcelFileDescriptor.dup(testSocket.getFileDescriptor());
+        testSocket.close();
+        assertTrue(isUdpPortInUse(srcPort));
+
+        // Start keepalive and explicit make the variable goes out of scope with try-with-resources
+        // block.
+        try (SocketKeepalive ka = mCm.createNattKeepalive(
+                myNet, testPfd, myIPv4, dstIPv4, executor, callback)) {
+            ka.start(validKaInterval);
+            callback.expectStarted();
+            ka.stop();
+            callback.expectStopped();
+        }
+
+        // Check that the ParcelFileDescriptor is still valid after keepalive stopped,
+        // ErrnoException with EBADF will be thrown if the socket is closed when checking local
+        // address.
+        assertTrue(isUdpPortInUse(srcPort));
+        final InetSocketAddress sa =
+                (InetSocketAddress) Os.getsockname(testPfd.getFileDescriptor());
+        assertEquals(anyIPv4, sa.getAddress());
+
+        testPfd.close();
+        assertFalse(isUdpPortInUse(srcPort));
+
+        mWiFiNetworkAgent.disconnect();
+        waitFor(mWiFiNetworkAgent.getDisconnectedCV());
+        mWiFiNetworkAgent = null;
+    }
+
+    private static boolean isUdpPortInUse(int port) {
+        try (DatagramSocket ignored = new DatagramSocket(port)) {
+            return false;
+        } catch (IOException ignored) {
+            return true;
+        }
     }
 
     @Test

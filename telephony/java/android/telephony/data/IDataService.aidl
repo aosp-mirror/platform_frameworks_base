@@ -35,7 +35,7 @@ oneway interface IDataService
                              IDataServiceCallback callback);
     void setDataProfile(int slotId, in List<DataProfile> dps, boolean isRoaming,
                         IDataServiceCallback callback);
-    void getDataCallList(int slotId, IDataServiceCallback callback);
+    void requestDataCallList(int slotId, IDataServiceCallback callback);
     void registerForDataCallListChanged(int slotId, IDataServiceCallback callback);
     void unregisterForDataCallListChanged(int slotId, IDataServiceCallback callback);
 }

@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.Dependency.MAIN_HANDLER;
 import static com.android.systemui.statusbar.phone.StatusBar.getActivityOptions;
 
 import android.app.ActivityManager;
@@ -29,6 +28,7 @@ import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -43,6 +43,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.Dependency;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.UiOffloadThread;
@@ -65,7 +66,6 @@ import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.policy.HeadsUpUtil;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
-import com.android.systemui.statusbar.policy.PreviewInflater;
 
 /**
  * Status bar implementation of {@link NotificationActivityStarter}.
@@ -97,6 +97,8 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     private final IStatusBarService mBarService;
     private final CommandQueue mCommandQueue;
     private final IDreamManager mDreamManager;
+    private final Handler mMainThreadHandler;
+    private final ActivityIntentHelper mActivityIntentHelper;
 
     private boolean mIsCollapsingToShowActivityOverLockscreen;
 
@@ -121,7 +123,9 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             KeyguardMonitor keyguardMonitor,
             NotificationInterruptionStateProvider notificationInterruptionStateProvider,
             MetricsLogger metricsLogger,
-            LockPatternUtils lockPatternUtils) {
+            LockPatternUtils lockPatternUtils,
+            Handler mainThreadHandler,
+            ActivityIntentHelper activityIntentHelper) {
         mContext = context;
         mNotificationPanel = panel;
         mPresenter = presenter;
@@ -150,6 +154,8 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             }
         });
         mStatusBarRemoteInputCallback = remoteInputCallback;
+        mMainThreadHandler = mainThreadHandler;
+        mActivityIntentHelper = activityIntentHelper;
     }
 
     /**
@@ -176,12 +182,11 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
 
         boolean isActivityIntent = intent.isActivity();
         final boolean afterKeyguardGone = isActivityIntent
-                && PreviewInflater.wouldLaunchResolverActivity(mContext, intent.getIntent(),
+                && mActivityIntentHelper.wouldLaunchResolverActivity(intent.getIntent(),
                 mLockscreenUserManager.getCurrentUserId());
         final boolean wasOccluded = mShadeController.isOccluded();
         boolean showOverLockscreen = mKeyguardMonitor.isShowing()
-                && PreviewInflater.wouldShowOverLockscreen(mContext,
-                intent.getIntent(),
+                && mActivityIntentHelper.wouldShowOverLockscreen(intent.getIntent(),
                 mLockscreenUserManager.getCurrentUserId());
         ActivityStarter.OnDismissAction postKeyguardAction =
                 () -> handleNotificationClickAfterKeyguardDismissed(
@@ -358,7 +363,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                 mActivityLaunchAnimator.setLaunchResult(launchResult, true /* isActivityIntent */);
                 if (shouldCollapse()) {
                     // Putting it back on the main thread, since we're touching views
-                    Dependency.get(MAIN_HANDLER).post(() -> mCommandQueue.animateCollapsePanels(
+                    mMainThreadHandler.post(() -> mCommandQueue.animateCollapsePanels(
                             CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true /* force */));
                 }
             });
@@ -425,7 +430,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         if (Looper.getMainLooper().isCurrentThread()) {
             mShadeController.collapsePanel();
         } else {
-            Dependency.get(MAIN_HANDLER).post(mShadeController::collapsePanel);
+            mMainThreadHandler.post(mShadeController::collapsePanel);
         }
     }
 
@@ -444,7 +449,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
 
     private void removeNotification(StatusBarNotification notification) {
         // We have to post it to the UI thread for synchronization
-        Dependency.get(MAIN_HANDLER).post(() -> {
+        mMainThreadHandler.post(() -> {
             Runnable removeRunnable =
                     () -> mEntryManager.performRemoveNotification(notification);
             if (mPresenter.isCollapsing()) {

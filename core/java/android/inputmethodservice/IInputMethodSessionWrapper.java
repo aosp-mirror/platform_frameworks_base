@@ -16,6 +16,7 @@
 
 package android.inputmethodservice;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -53,6 +54,7 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
     private static final int DO_VIEW_CLICKED = 115;
     private static final int DO_NOTIFY_IME_HIDDEN = 120;
 
+    @UnsupportedAppUsage
     HandlerCaller mCaller;
     InputMethodSession mInputMethodSession;
     InputChannel mChannel;

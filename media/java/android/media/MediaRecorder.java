@@ -1537,8 +1537,8 @@ public class MediaRecorder implements AudioRouting,
      * @param direction Direction constant.
      * @return true if sucessful.
      */
-    public boolean setMicrophoneDirection(@DirectionMode int direction) {
-        return native_setMicrophoneDirection(direction) == 0;
+    public boolean setPreferredMicrophoneDirection(@DirectionMode int direction) {
+        return native_setPreferredMicrophoneDirection(direction) == 0;
     }
 
     /**
@@ -1549,14 +1549,15 @@ public class MediaRecorder implements AudioRouting,
      * though 0 (no zoom) to 1 (maximum zoom).
      * @return true if sucessful.
      */
-    public boolean setMicrophoneFieldDimension(@FloatRange(from = -1.0, to = 1.0) float zoom) {
+    public boolean setPreferredMicrophoneFieldDimension(
+                            @FloatRange(from = -1.0, to = 1.0) float zoom) {
         Preconditions.checkArgument(
                 zoom >= -1 && zoom <= 1, "Argument must fall between -1 & 1 (inclusive)");
-        return native_setMicrophoneFieldDimension(zoom) == 0;
+        return native_setPreferredMicrophoneFieldDimension(zoom) == 0;
     }
 
-    private native int native_setMicrophoneDirection(int direction);
-    private native int native_setMicrophoneFieldDimension(float zoom);
+    private native int native_setPreferredMicrophoneDirection(int direction);
+    private native int native_setPreferredMicrophoneFieldDimension(float zoom);
 
     //--------------------------------------------------------------------------
     // Implementation of AudioRecordingMonitor interface

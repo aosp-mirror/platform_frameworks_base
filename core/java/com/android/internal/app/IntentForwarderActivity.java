@@ -20,6 +20,7 @@ import static android.content.pm.PackageManager.MATCH_DEFAULT_ONLY;
 
 import android.annotation.Nullable;
 import android.annotation.StringRes;
+import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
 import android.app.ActivityTaskManager;
 import android.app.ActivityThread;
@@ -54,6 +55,7 @@ import java.util.Set;
  * be passed in and out of a managed profile.
  */
 public class IntentForwarderActivity extends Activity  {
+    @UnsupportedAppUsage
     public static String TAG = "IntentForwarderActivity";
 
     public static String FORWARD_INTENT_TO_PARENT

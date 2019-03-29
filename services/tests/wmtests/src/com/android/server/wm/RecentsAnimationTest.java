@@ -20,7 +20,6 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
@@ -28,6 +27,8 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
+
+import static org.mockito.ArgumentMatchers.any;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -51,11 +52,15 @@ public class RecentsAnimationTest extends ActivityTestsBase {
 
     private Context mContext = InstrumentationRegistry.getContext();
     private ComponentName mRecentsComponent;
+    private RecentsAnimationController mRecentsAnimationController;
 
     @Before
     public void setUp() throws Exception {
         mRecentsComponent = new ComponentName(mContext.getPackageName(), "RecentsActivity");
         mService = new TestActivityTaskManagerService(mContext);
+        mRecentsAnimationController = mock(RecentsAnimationController.class);
+        doReturn(mRecentsAnimationController).when(
+                mService.mWindowManager).getRecentsAnimationController();
 
         final RecentTasks recentTasks = mService.getRecentTasks();
         spyOn(recentTasks);
@@ -96,9 +101,18 @@ public class RecentsAnimationTest extends ActivityTestsBase {
 
         fullscreenStack.moveToFront("Activity start");
 
-        // Ensure that the recents animation was canceled
+        // Ensure that the recents animation was canceled by cancelAnimationSynchronously().
         verify(mService.mWindowManager, times(1)).cancelRecentsAnimationSynchronously(
                 eq(REORDER_KEEP_IN_PLACE), any());
+
+        // Assume recents animation already started, set a state that cancel recents animation
+        // with screenshot.
+        doReturn(true).when(mRecentsAnimationController).shouldCancelWithDeferredScreenshot();
+        // Start another fullscreen activity.
+        fullscreenStack2.moveToFront("Activity start");
+
+        // Ensure that the recents animation was canceled by cancelOnNextTransitionStart().
+        verify(mRecentsAnimationController, times(1)).cancelOnNextTransitionStart();
     }
 
     @Test
@@ -137,5 +151,6 @@ public class RecentsAnimationTest extends ActivityTestsBase {
         // Ensure that the recents animation was NOT canceled
         verify(mService.mWindowManager, times(0)).cancelRecentsAnimationSynchronously(
                 eq(REORDER_KEEP_IN_PLACE), any());
+        verify(mRecentsAnimationController, times(0)).cancelOnNextTransitionStart();
     }
 }

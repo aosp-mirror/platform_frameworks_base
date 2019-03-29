@@ -87,7 +87,6 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
 
     private boolean mListening;
 
-    private View mDivider;
     protected MultiUserSwitch mMultiUserSwitch;
     private ImageView mMultiUserAvatar;
 
@@ -133,7 +132,6 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mDivider = findViewById(R.id.qs_footer_divider);
         mEdit = findViewById(android.R.id.edit);
         mEdit.setOnClickListener(view ->
                 mActivityStarter.postQSRunnableDismissingKeyguard(() ->
@@ -218,7 +216,6 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     @Nullable
     private TouchAnimator createFooterAnimator() {
         return new TouchAnimator.Builder()
-                .addFloat(mDivider, "alpha", 0, 1)
                 .addFloat(mActionsContainer, "alpha", 0, 1)
                 .addFloat(mEditContainer, "alpha", 0, 1)
                 .addFloat(mDragHandle, "alpha", 1, 0, 0)

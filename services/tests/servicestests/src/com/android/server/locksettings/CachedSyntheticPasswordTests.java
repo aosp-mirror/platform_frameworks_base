@@ -61,12 +61,12 @@ public class CachedSyntheticPasswordTests extends SyntheticPasswordTests {
         long sid = mGateKeeperService.getSecureUserId(PRIMARY_USER_ID);
         // clear password
         mService.setLockCredential(null, LockPatternUtils.CREDENTIAL_TYPE_NONE, null,
-                PASSWORD_QUALITY_UNSPECIFIED, PRIMARY_USER_ID);
+                PASSWORD_QUALITY_UNSPECIFIED, PRIMARY_USER_ID, true);
         assertEquals(0, mGateKeeperService.getSecureUserId(PRIMARY_USER_ID));
 
         // set a new password
         mService.setLockCredential(newPassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, null,
-                PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID);
+                PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID, false);
         assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(newPassword,
                 LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID)
                         .getResponseCode());
@@ -81,7 +81,7 @@ public class CachedSyntheticPasswordTests extends SyntheticPasswordTests {
         long sid = mGateKeeperService.getSecureUserId(PRIMARY_USER_ID);
         // Untrusted change password
         mService.setLockCredential(newPassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, null,
-                PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID);
+                PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID, true);
         assertNotEquals(0, mGateKeeperService.getSecureUserId(PRIMARY_USER_ID));
         assertNotEquals(sid, mGateKeeperService.getSecureUserId(PRIMARY_USER_ID));
 
@@ -99,7 +99,7 @@ public class CachedSyntheticPasswordTests extends SyntheticPasswordTests {
         initializeCredentialUnderSP(password, PRIMARY_USER_ID);
         // Untrusted change password
         mService.setLockCredential(newPassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, null,
-                PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID);
+                PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID, true);
 
         // Verify the password
         assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(newPassword,
@@ -124,10 +124,12 @@ public class CachedSyntheticPasswordTests extends SyntheticPasswordTests {
         initializeCredentialUnderSP(password, PRIMARY_USER_ID);
         long sid = mGateKeeperService.getSecureUserId(PRIMARY_USER_ID);
         // Untrusted change password
-        assertExpectException(IllegalStateException.class, /* messageRegex= */ null,
+        assertExpectException(
+                IllegalStateException.class,
+                /* messageRegex= */ "Untrusted credential reset not possible without cached SP",
                 () -> mService.setLockCredential(newPassword,
                         LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, null,
-                        PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID));
+                        PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID, true));
         assertEquals(sid, mGateKeeperService.getSecureUserId(PRIMARY_USER_ID));
 
         // Verify the new password doesn't work but the old one still does

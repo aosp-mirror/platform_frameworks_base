@@ -75,7 +75,7 @@ public class TransportData {
     @Nullable public Intent configurationIntent;
     @Nullable public String currentDestinationString;
     @Nullable public Intent dataManagementIntent;
-    @Nullable public String dataManagementLabel;
+    @Nullable public CharSequence dataManagementLabel;
 
     private TransportData(
             @TransportStatus int transportStatus,
@@ -85,7 +85,7 @@ public class TransportData {
             Intent configurationIntent,
             String currentDestinationString,
             Intent dataManagementIntent,
-            String dataManagementLabel) {
+            CharSequence dataManagementLabel) {
         this.transportStatus = transportStatus;
         this.transportName = transportName;
         this.transportComponentShort = transportComponentShort;
@@ -103,7 +103,7 @@ public class TransportData {
             Intent configurationIntent,
             String currentDestinationString,
             Intent dataManagementIntent,
-            String dataManagementLabel) {
+            CharSequence dataManagementLabel) {
         this(
                 TransportStatus.REGISTERED_AVAILABLE,
                 transportName,

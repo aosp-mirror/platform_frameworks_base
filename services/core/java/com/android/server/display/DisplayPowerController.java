@@ -34,6 +34,7 @@ import android.hardware.display.BrightnessChangeEvent;
 import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerCallbacks;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
+import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
@@ -51,6 +52,8 @@ import android.util.TimeUtils;
 import android.view.Display;
 
 import com.android.internal.app.IBatteryStats;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.LocalServices;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.display.whitebalance.DisplayWhiteBalanceController;
@@ -731,6 +734,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private void updatePowerState() {
         // Update the power state request.
         final boolean mustNotify;
+        final int previousPolicy;
         boolean mustInitialize = false;
 
         synchronized (mLock) {
@@ -745,12 +749,18 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 mPendingWaitForNegativeProximityLocked = false;
                 mPendingRequestChangedLocked = false;
                 mustInitialize = true;
+                // Assume we're on and bright until told otherwise, since that's the state we turn
+                // on in.
+                previousPolicy = DisplayPowerRequest.POLICY_BRIGHT;
             } else if (mPendingRequestChangedLocked) {
+                previousPolicy = mPowerRequest.policy;
                 mPowerRequest.copyFrom(mPendingRequestLocked);
                 mWaitingForNegativeProximity |= mPendingWaitForNegativeProximityLocked;
                 mPendingWaitForNegativeProximityLocked = false;
                 mPendingRequestChangedLocked = false;
                 mDisplayReadyLocked = false;
+            } else {
+                previousPolicy = mPowerRequest.policy;
             }
 
             mustNotify = !mDisplayReadyLocked;
@@ -1103,6 +1113,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         // Record if dozing for future comparison.
         mDozing = state != Display.STATE_ON;
+
+        if (previousPolicy != mPowerRequest.policy) {
+            logDisplayPolicyChanged(mPowerRequest.policy);
+        }
     }
 
     @Override
@@ -1521,6 +1535,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private void sendOnStateChangedWithWakelock() {
         mCallbacks.acquireSuspendBlocker();
         mHandler.post(mOnStateChangedRunnable);
+    }
+
+    private void logDisplayPolicyChanged(int newPolicy) {
+        LogMaker log = new LogMaker(MetricsEvent.DISPLAY_POLICY);
+        log.setType(MetricsEvent.TYPE_UPDATE);
+        log.setSubtype(newPolicy);
+        MetricsLogger.action(log);
     }
 
     private void handleSettingsChange(boolean userSwitch) {

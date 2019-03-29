@@ -17,6 +17,7 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <utility>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -37,16 +38,17 @@ TEST(BinaryStreamVisitorTests, CreateBinaryStreamViaBinaryStreamVisitor) {
   std::string raw(reinterpret_cast<const char*>(idmap_raw_data), idmap_raw_data_len);
   std::istringstream raw_stream(raw);
 
-  std::stringstream error;
-  std::unique_ptr<const Idmap> idmap1 = Idmap::FromBinaryStream(raw_stream, error);
-  ASSERT_THAT(idmap1, NotNull());
+  auto result1 = Idmap::FromBinaryStream(raw_stream);
+  ASSERT_TRUE(result1);
+  const auto idmap1 = std::move(*result1);
 
   std::stringstream stream;
   BinaryStreamVisitor visitor(stream);
   idmap1->accept(&visitor);
 
-  std::unique_ptr<const Idmap> idmap2 = Idmap::FromBinaryStream(stream, error);
-  ASSERT_THAT(idmap2, NotNull());
+  auto result2 = Idmap::FromBinaryStream(stream);
+  ASSERT_TRUE(result2);
+  const auto idmap2 = std::move(*result2);
 
   ASSERT_EQ(idmap1->GetHeader()->GetTargetCrc(), idmap2->GetHeader()->GetTargetCrc());
   ASSERT_EQ(idmap1->GetHeader()->GetTargetPath(), idmap2->GetHeader()->GetTargetPath());
@@ -76,15 +78,14 @@ TEST(BinaryStreamVisitorTests, CreateIdmapFromApkAssetsInteropWithLoadedIdmap) {
   std::unique_ptr<const ApkAssets> overlay_apk = ApkAssets::Load(overlay_apk_path);
   ASSERT_THAT(overlay_apk, NotNull());
 
-  std::stringstream error;
-  std::unique_ptr<const Idmap> idmap =
+  const auto idmap =
       Idmap::FromApkAssets(target_apk_path, *target_apk, overlay_apk_path, *overlay_apk,
-                           PolicyFlags::POLICY_PUBLIC, /* enforce_overlayable */ true, error);
-  ASSERT_THAT(idmap, NotNull());
+                           PolicyFlags::POLICY_PUBLIC, /* enforce_overlayable */ true);
+  ASSERT_TRUE(idmap);
 
   std::stringstream stream;
   BinaryStreamVisitor visitor(stream);
-  idmap->accept(&visitor);
+  (*idmap)->accept(&visitor);
   const std::string str = stream.str();
   const StringPiece data(str);
   std::unique_ptr<const LoadedIdmap> loaded_idmap = LoadedIdmap::Load(data);

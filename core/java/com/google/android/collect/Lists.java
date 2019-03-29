@@ -57,6 +57,7 @@ public class Lists {
      * @param elements the elements that the list should contain, in order
      * @return a newly-created {@code ArrayList} containing those elements
      */
+    @UnsupportedAppUsage
     public static <E> ArrayList<E> newArrayList(E... elements) {
         int capacity = (elements.length * 110) / 100 + 5;
         ArrayList<E> list = new ArrayList<E>(capacity);

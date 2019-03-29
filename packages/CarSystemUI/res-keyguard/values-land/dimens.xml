@@ -15,6 +15,6 @@
   limitations under the License.
 -->
 <resources>
-    <dimen name="num_pad_key_margin_horizontal">@dimen/car_padding_5</dimen>
-    <dimen name="num_pad_key_margin_bottom">@dimen/car_padding_4</dimen>
+    <dimen name="num_pad_key_margin_horizontal">@*android:dimen/car_padding_5</dimen>
+    <dimen name="num_pad_key_margin_bottom">@*android:dimen/car_padding_4</dimen>
 </resources>

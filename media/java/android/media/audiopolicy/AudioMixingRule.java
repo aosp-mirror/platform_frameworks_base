@@ -409,6 +409,10 @@ public class AudioMixingRule {
                 final int match_rule = rule & ~RULE_EXCLUSION_MASK;
                 while (crIterator.hasNext()) {
                     final AudioMixMatchCriterion criterion = crIterator.next();
+
+                    if ((criterion.mRule & ~RULE_EXCLUSION_MASK) != match_rule) {
+                        continue; // The two rules are not of the same type
+                    }
                     switch (match_rule) {
                         case RULE_MATCH_ATTRIBUTE_USAGE:
                             // "usage"-based rule

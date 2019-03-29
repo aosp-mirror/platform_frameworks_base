@@ -21,6 +21,7 @@
     <dimen name="car_fullscreen_user_pod_height">356dp</dimen>
     <dimen name="car_fullscreen_user_pod_image_avatar_width">96dp</dimen>
     <dimen name="car_fullscreen_user_pod_image_avatar_height">96dp</dimen>
+    <dimen name="car_large_avatar_size">96dp</dimen>
 
 
     <!-- Application Bar -->

@@ -71,7 +71,7 @@ public class NavigationBackAction extends NavigationGestureAction {
 
     @Override
     protected void onGestureStart(MotionEvent event) {
-        if (!QuickStepController.shouldhideBackButton(getContext())) {
+        if (!QuickStepController.shouldHideBackButton(getContext())) {
             mNavigationBarView.getBackButton().setAlpha(0 /* alpha */, true /* animate */,
                     BACK_BUTTON_FADE_OUT_ALPHA);
         }
@@ -85,7 +85,7 @@ public class NavigationBackAction extends NavigationGestureAction {
     @Override
     protected void onGestureEnd() {
         mHandler.removeCallbacks(mExecuteBackRunnable);
-        if (!QuickStepController.shouldhideBackButton(getContext())) {
+        if (!QuickStepController.shouldHideBackButton(getContext())) {
             mNavigationBarView.getBackButton().setAlpha(
                     mProxySender.getBackButtonAlpha(), true /* animate */);
         }

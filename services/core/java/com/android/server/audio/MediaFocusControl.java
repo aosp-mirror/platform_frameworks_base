@@ -17,6 +17,7 @@
 package com.android.server.audio;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.media.AudioAttributes;
@@ -458,7 +459,15 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
         }
     }
 
-    private IAudioPolicyCallback mFocusPolicy = null;
+    /** The current audio focus policy */
+    @GuardedBy("mAudioFocusLock")
+    @Nullable private IAudioPolicyCallback mFocusPolicy = null;
+    /**
+     * The audio focus policy that was registered before a test focus policy was registered
+     * during a test
+     */
+    @GuardedBy("mAudioFocusLock")
+    @Nullable private IAudioPolicyCallback mPreviousFocusPolicy = null;
 
     // Since we don't have a stack of focus owners when using an external focus policy, we keep
     // track of all the focus requesters in this map, with their clientId as the key. This is
@@ -466,22 +475,30 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
     private HashMap<String, FocusRequester> mFocusOwnersForFocusPolicy =
             new HashMap<String, FocusRequester>();
 
-    void setFocusPolicy(IAudioPolicyCallback policy) {
+    void setFocusPolicy(IAudioPolicyCallback policy, boolean isTestFocusPolicy) {
         if (policy == null) {
             return;
         }
         synchronized (mAudioFocusLock) {
+            if (isTestFocusPolicy) {
+                mPreviousFocusPolicy = mFocusPolicy;
+            }
             mFocusPolicy = policy;
         }
     }
 
-    void unsetFocusPolicy(IAudioPolicyCallback policy) {
+    void unsetFocusPolicy(IAudioPolicyCallback policy, boolean isTestFocusPolicy) {
         if (policy == null) {
             return;
         }
         synchronized (mAudioFocusLock) {
             if (mFocusPolicy == policy) {
-                mFocusPolicy = null;
+                if (isTestFocusPolicy) {
+                    // restore the focus policy that was there before the focus policy test started
+                    mFocusPolicy = mPreviousFocusPolicy;
+                } else {
+                    mFocusPolicy = null;
+                }
             }
         }
     }

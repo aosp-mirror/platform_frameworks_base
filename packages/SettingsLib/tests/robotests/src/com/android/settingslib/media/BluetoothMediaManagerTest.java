@@ -425,4 +425,34 @@ public class BluetoothMediaManagerTest {
 
         verify(mCallback, never()).onConnectedDeviceChanged(any());
     }
+
+    @Test
+    public void onActiveDeviceChanged_hearingAidDeviceIsActive_returnHearingAidDeviceId() {
+        final BluetoothDevice bluetoothDevice = mock(BluetoothDevice.class);
+        final List<BluetoothDevice> devices = new ArrayList<>();
+        devices.add(bluetoothDevice);
+        final BluetoothMediaDevice bluetoothMediaDevice = mock(BluetoothMediaDevice.class);
+        mMediaManager.mMediaDevices.add(bluetoothMediaDevice);
+
+        when(bluetoothDevice.getAddress()).thenReturn(TEST_ADDRESS);
+        when(mHapProfile.getActiveDevices()).thenReturn(devices);
+        when(bluetoothMediaDevice.getId()).thenReturn(TEST_ADDRESS);
+
+        mMediaManager.registerCallback(mCallback);
+        mMediaManager.onActiveDeviceChanged(null, BluetoothProfile.A2DP);
+
+        verify(mCallback).onConnectedDeviceChanged(TEST_ADDRESS);
+    }
+
+    @Test
+    public void onActiveDeviceChanged_hearingAidDeviceNotActive_returnPhoneDeviceId() {
+        final List<BluetoothDevice> devices = new ArrayList<>();
+
+        when(mHapProfile.getActiveDevices()).thenReturn(devices);
+
+        mMediaManager.registerCallback(mCallback);
+        mMediaManager.onActiveDeviceChanged(null, BluetoothProfile.A2DP);
+
+        verify(mCallback).onConnectedDeviceChanged(PhoneMediaDevice.ID);
+    }
 }

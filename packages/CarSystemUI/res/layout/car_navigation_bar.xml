@@ -137,8 +137,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:paddingStart="@dimen/car_keyline_1"
-        android:paddingEnd="@dimen/car_keyline_1"
+        android:paddingStart="@*android:dimen/car_keyline_1"
+        android:paddingEnd="@*android:dimen/car_keyline_1"
         android:gravity="center"
         android:visibility="gone">
     </LinearLayout>

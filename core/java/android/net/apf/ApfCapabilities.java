@@ -16,6 +16,7 @@
 
 package android.net.apf;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.content.Context;
@@ -115,14 +116,14 @@ public final class ApfCapabilities implements Parcelable {
     /**
      * @return Whether the APF Filter in the device should filter out IEEE 802.3 Frames.
      */
-    public static boolean getApfDrop8023Frames(Context context) {
+    public static boolean getApfDrop8023Frames(@NonNull Context context) {
         return context.getResources().getBoolean(R.bool.config_apfDrop802_3Frames);
     }
 
     /**
      * @return An array of blacklisted EtherType, packets with EtherTypes within it will be dropped.
      */
-    public static int[] getApfEthTypeBlackList(Context context) {
+    public static @NonNull int[] getApfEthTypeBlackList(@NonNull Context context) {
         return context.getResources().getIntArray(R.array.config_apfEthTypeBlackList);
     }
 }

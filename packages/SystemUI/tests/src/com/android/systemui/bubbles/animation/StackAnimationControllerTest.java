@@ -209,6 +209,9 @@ public class StackAnimationControllerTest extends PhysicsAnimationLayoutTestCase
         final PointF prevStackPos = mStackController.getStackPosition();
 
         mLayout.removeAllViews();
+
+        waitForLayoutMessageQueue();
+
         mLayout.addView(new FrameLayout(getContext()));
 
         waitForLayoutMessageQueue();

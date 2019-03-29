@@ -119,8 +119,6 @@
     <string name="uninstall_update_text">Replace this app with the factory version? All data will be removed.</string>
     <!--  [CHAR LIMIT=none] -->
     <string name="uninstall_update_text_multiuser">Replace this app with the factory version? All data will be removed. This affects all users of this device, including those with work profiles.</string>
-    <!-- Label of a checkbox that allows to remove the files contributed by app during uninstall [CHAR LIMIT=none] -->
-    <string name="uninstall_remove_contributed_files">Also remove <xliff:g id="size" example="1.5MB">%1$s</xliff:g> of associated media files.</string>
     <!-- Label of a checkbox that allows to keep the data (e.g. files, settings) of the app on uninstall [CHAR LIMIT=none] -->
     <string name="uninstall_keep_data">Keep <xliff:g id="size" example="1.5MB">%1$s</xliff:g> of app data.</string>
 

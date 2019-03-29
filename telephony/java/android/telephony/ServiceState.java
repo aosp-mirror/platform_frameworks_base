@@ -1132,7 +1132,7 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
+    @TestApi
     public void setVoiceRoamingType(@RoamingType int type) {
         NetworkRegistrationInfo regState = getNetworkRegistrationInfo(
                 NetworkRegistrationInfo.DOMAIN_CS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
@@ -1153,7 +1153,7 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
+    @TestApi
     public void setDataRoamingType(@RoamingType int type) {
         NetworkRegistrationInfo regState = getNetworkRegistrationInfo(
                 NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
@@ -1586,7 +1586,7 @@ public class ServiceState implements Parcelable {
                 == NetworkRegistrationInfo.REGISTRATION_STATE_HOME) {
             // If the device is on IWLAN, return IWLAN as the network type. This is to simulate the
             // behavior of legacy mode device. In the future caller should use
-            // getNetworkRegistrationInfo() to retrieve the actual data network type on cellular
+            // requestNetworkRegistrationInfo() to retrieve the actual data network type on cellular
             // or on IWLAN.
             return iwlanRegState.getAccessNetworkTechnology();
         }
@@ -1855,6 +1855,7 @@ public class ServiceState implements Parcelable {
     /**
      * @hide
      */
+    @TestApi
     public void addNetworkRegistrationInfo(NetworkRegistrationInfo regState) {
         if (regState == null) return;
 

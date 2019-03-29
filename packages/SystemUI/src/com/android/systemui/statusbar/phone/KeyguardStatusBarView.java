@@ -468,6 +468,11 @@ public class KeyguardStatusBarView extends RelativeLayout
     }
 
     @Override
+    public void onDensityOrFontScaleChanged() {
+        loadDimens();
+    }
+
+    @Override
     public void onOverlayChanged() {
         mCarrierLabel.setTextAppearance(
                 Utils.getThemeAttr(mContext, com.android.internal.R.attr.textAppearanceSmall));
@@ -514,6 +519,8 @@ public class KeyguardStatusBarView extends RelativeLayout
             return;
         }
         mDozing = dozing;
+        setClipChildren(!dozing);
+        setClipToPadding(!dozing);
         updateVisibilities();
     }
 

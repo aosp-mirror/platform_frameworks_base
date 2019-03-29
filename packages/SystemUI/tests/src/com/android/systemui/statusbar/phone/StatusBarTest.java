@@ -29,6 +29,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -719,12 +720,25 @@ public class StatusBarTest extends SysuiTestCase {
     public void testOnStartedWakingUp_isNotDozing() {
         mStatusBar.setBarStateForTest(StatusBarState.KEYGUARD);
         when(mStatusBarStateController.isKeyguardRequested()).thenReturn(true);
-
         mStatusBar.mDozeServiceHost.startDozing();
         verify(mStatusBarStateController).setIsDozing(eq(true));
+        clearInvocations(mNotificationPanelView);
 
         mStatusBar.mWakefulnessObserver.onStartedWakingUp();
         verify(mStatusBarStateController).setIsDozing(eq(false));
+        verify(mNotificationPanelView).expand(eq(false));
+    }
+
+    @Test
+    public void testOnStartedWakingUp_doesNotDismissBouncer_whenPulsing() {
+        mStatusBar.setBarStateForTest(StatusBarState.KEYGUARD);
+        when(mStatusBarStateController.isKeyguardRequested()).thenReturn(true);
+        mStatusBar.mDozeServiceHost.startDozing();
+        clearInvocations(mNotificationPanelView);
+
+        mStatusBar.setBouncerShowing(true);
+        mStatusBar.mWakefulnessObserver.onStartedWakingUp();
+        verify(mNotificationPanelView, never()).expand(anyBoolean());
     }
 
     static class TestableStatusBar extends StatusBar {

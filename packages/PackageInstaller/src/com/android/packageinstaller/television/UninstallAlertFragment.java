@@ -99,7 +99,7 @@ public class UninstallAlertFragment extends GuidedStepFragment {
     public void onGuidedActionClicked(GuidedAction action) {
         if (isAdded()) {
             if (action.getId() == GuidedAction.ACTION_ID_OK) {
-                ((UninstallerActivity) getActivity()).startUninstallProgress(false, false);
+                ((UninstallerActivity) getActivity()).startUninstallProgress(false);
                 getActivity().finish();
             } else {
                 ((UninstallerActivity) getActivity()).dispatchAborted();

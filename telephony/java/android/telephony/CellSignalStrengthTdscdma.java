@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
@@ -25,7 +26,8 @@ import java.util.Objects;
 /**
  * Tdscdma signal strength related information.
  *
- * @hide
+ * This class provides signal strength and signal quality information for the TD-SCDMA air
+ * interface. For more information see 3gpp 25.225.
  */
 public final class CellSignalStrengthTdscdma extends CellSignalStrength implements Parcelable {
 
@@ -59,7 +61,9 @@ public final class CellSignalStrengthTdscdma extends CellSignalStrength implemen
      * @param rssi in dBm [-113, -51] or UNAVAILABLE
      * @param ber [0-7], 99 or UNAVAILABLE
      * @param rscp in dBm [-120, -24] or UNAVAILABLE
-     * @hide */
+     *
+     * @hide
+     */
     public CellSignalStrengthTdscdma(int rssi, int ber, int rscp) {
         mRssi = inRangeOrUnavailable(rssi, -113, -51);
         mBitErrorRate = inRangeOrUnavailable(ber, 0, 7, 99);
@@ -148,8 +152,7 @@ public final class CellSignalStrengthTdscdma extends CellSignalStrength implemen
     }
 
     /**
-     * Get the RSCP as dBm
-     * @hide
+     * Get the RSCP as dBm value -120..-24dBm or {@link CellInfo#UNAVAILABLE UNAVAILABLE}.
      */
     public int getRscp() {
         return mRscp;
@@ -160,7 +163,7 @@ public final class CellSignalStrengthTdscdma extends CellSignalStrength implemen
      *
      * Asu is calculated based on 3GPP RSRP. Refer to 3GPP 27.007 (Ver 10.3.0) Sec 8.69
      *
-     * @return RSCP in ASU 0..96, 255, or UNAVAILABLE
+     * @return RSCP in ASU 0..96, 255, or {@link CellInfo#UNAVAILABLE UNAVAILABLE}.
      */
     @Override
     public int getAsuLevel() {
@@ -237,15 +240,16 @@ public final class CellSignalStrengthTdscdma extends CellSignalStrength implemen
 
     /** Implement the Parcelable interface */
     @SuppressWarnings("hiding")
-    public static final @android.annotation.NonNull Parcelable.Creator<CellSignalStrengthTdscdma> CREATOR =
+    @NonNull
+    public static final Parcelable.Creator<CellSignalStrengthTdscdma> CREATOR =
             new Parcelable.Creator<CellSignalStrengthTdscdma>() {
         @Override
-        public CellSignalStrengthTdscdma createFromParcel(Parcel in) {
+        public @NonNull CellSignalStrengthTdscdma createFromParcel(Parcel in) {
             return new CellSignalStrengthTdscdma(in);
         }
 
         @Override
-        public CellSignalStrengthTdscdma[] newArray(int size) {
+        public @NonNull CellSignalStrengthTdscdma[] newArray(int size) {
             return new CellSignalStrengthTdscdma[size];
         }
     };

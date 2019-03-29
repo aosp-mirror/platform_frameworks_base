@@ -116,6 +116,6 @@ public class WifiUsabilityStatsEntryTest {
         assertEquals(expected.getCellularSignalStrengthDbm(),
                 actual.getCellularSignalStrengthDbm());
         assertEquals(expected.getCellularSignalStrengthDb(), actual.getCellularSignalStrengthDb());
-        assertEquals(expected.getIsSameRegisteredCell(), actual.getIsSameRegisteredCell());
+        assertEquals(expected.isSameRegisteredCell(), actual.isSameRegisteredCell());
     }
 }

@@ -354,12 +354,12 @@ public class PackageInfo implements Parcelable {
     public String overlayTarget;
 
     /**
-     * What overlayable set of elements package, if any, this package will overlay.
+     * The name of the overlayable set of elements package, if any, this package will overlay.
      *
      * Overlayable name defined within the target package, or null.
      * @hide
      */
-    public String overlayTargetName;
+    public String targetOverlayableName;
 
     /**
      * The overlay category, if any, of this package

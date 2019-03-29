@@ -37,27 +37,6 @@ public final class DhcpErrorEvent implements IpConnectivityLog.Event {
     public static final int DHCP_ERROR = 4;
     public static final int MISC_ERROR = 5;
 
-    public static final int L2_TOO_SHORT               = makeErrorCode(L2_ERROR, 1);
-    public static final int L2_WRONG_ETH_TYPE          = makeErrorCode(L2_ERROR, 2);
-
-    public static final int L3_TOO_SHORT               = makeErrorCode(L3_ERROR, 1);
-    public static final int L3_NOT_IPV4                = makeErrorCode(L3_ERROR, 2);
-    public static final int L3_INVALID_IP              = makeErrorCode(L3_ERROR, 3);
-
-    public static final int L4_NOT_UDP                 = makeErrorCode(L4_ERROR, 1);
-    public static final int L4_WRONG_PORT              = makeErrorCode(L4_ERROR, 2);
-
-    public static final int BOOTP_TOO_SHORT            = makeErrorCode(DHCP_ERROR, 1);
-    public static final int DHCP_BAD_MAGIC_COOKIE      = makeErrorCode(DHCP_ERROR, 2);
-    public static final int DHCP_INVALID_OPTION_LENGTH = makeErrorCode(DHCP_ERROR, 3);
-    public static final int DHCP_NO_MSG_TYPE           = makeErrorCode(DHCP_ERROR, 4);
-    public static final int DHCP_UNKNOWN_MSG_TYPE      = makeErrorCode(DHCP_ERROR, 5);
-    public static final int DHCP_NO_COOKIE             = makeErrorCode(DHCP_ERROR, 6);
-
-    public static final int BUFFER_UNDERFLOW           = makeErrorCode(MISC_ERROR, 1);
-    public static final int RECEIVE_ERROR              = makeErrorCode(MISC_ERROR, 2);
-    public static final int PARSING_ERROR              = makeErrorCode(MISC_ERROR, 3);
-
     // error code byte format (MSB to LSB):
     // byte 0: error type
     // byte 1: error subtype
@@ -65,6 +44,33 @@ public final class DhcpErrorEvent implements IpConnectivityLog.Event {
     // byte 3: optional code
     /** @hide */
     public final int errorCode;
+
+    private static final int L2_ERROR_TYPE = L2_ERROR << 8;
+    private static final int L3_ERROR_TYPE = L3_ERROR << 8;
+    private static final int L4_ERROR_TYPE = L4_ERROR << 8;
+    private static final int DHCP_ERROR_TYPE = DHCP_ERROR << 8;
+    private static final int MISC_ERROR_TYPE = MISC_ERROR << 8;
+
+    public static final int L2_TOO_SHORT               = (L2_ERROR_TYPE | 0x1) << 16;
+    public static final int L2_WRONG_ETH_TYPE          = (L2_ERROR_TYPE | 0x2) << 16;
+
+    public static final int L3_TOO_SHORT               = (L3_ERROR_TYPE | 0x1) << 16;
+    public static final int L3_NOT_IPV4                = (L3_ERROR_TYPE | 0x2) << 16;
+    public static final int L3_INVALID_IP              = (L3_ERROR_TYPE | 0x3) << 16;
+
+    public static final int L4_NOT_UDP                 = (L4_ERROR_TYPE | 0x1) << 16;
+    public static final int L4_WRONG_PORT              = (L4_ERROR_TYPE | 0x2) << 16;
+
+    public static final int BOOTP_TOO_SHORT            = (DHCP_ERROR_TYPE | 0x1) << 16;
+    public static final int DHCP_BAD_MAGIC_COOKIE      = (DHCP_ERROR_TYPE | 0x2) << 16;
+    public static final int DHCP_INVALID_OPTION_LENGTH = (DHCP_ERROR_TYPE | 0x3) << 16;
+    public static final int DHCP_NO_MSG_TYPE           = (DHCP_ERROR_TYPE | 0x4) << 16;
+    public static final int DHCP_UNKNOWN_MSG_TYPE      = (DHCP_ERROR_TYPE | 0x5) << 16;
+    public static final int DHCP_NO_COOKIE             = (DHCP_ERROR_TYPE | 0x6) << 16;
+
+    public static final int BUFFER_UNDERFLOW           = (MISC_ERROR_TYPE | 0x1) << 16;
+    public static final int RECEIVE_ERROR              = (MISC_ERROR_TYPE | 0x2) << 16;
+    public static final int PARSING_ERROR              = (MISC_ERROR_TYPE | 0x3) << 16;
 
     public DhcpErrorEvent(int errorCode) {
         this.errorCode = errorCode;
@@ -100,10 +106,6 @@ public final class DhcpErrorEvent implements IpConnectivityLog.Event {
 
     public static int errorCodeWithOption(int errorCode, int option) {
         return (0xFFFF0000 & errorCode) | (0xFF & option);
-    }
-
-    private static int makeErrorCode(int type, int subtype) {
-        return (type << 24) | ((0xFF & subtype) << 16);
     }
 
     @Override

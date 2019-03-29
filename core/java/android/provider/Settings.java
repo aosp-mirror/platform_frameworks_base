@@ -73,6 +73,7 @@ import android.os.Bundle;
 import android.os.DropBoxManager;
 import android.os.IBinder;
 import android.os.LocaleList;
+import android.os.PowerManager.AutoPowerSaveModeTriggers;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -875,7 +876,8 @@ public final class Settings {
 
     /**
      * Activity Action: Show screen for controlling app usage properties for an app.
-     * Input: Intent's extra EXTRA_PACKAGE_NAME must specify the application package name.
+     * Input: Intent's extra {@link android.content.Intent#EXTRA_PACKAGE_NAME} must specify the
+     * application package name.
      * Output: Nothing.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
@@ -1259,6 +1261,25 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS
             = "android.settings.NOTIFICATION_POLICY_ACCESS_SETTINGS";
+
+    /**
+     * Activity Action: Show do not disturb setting page for app.
+     * <p>
+     * Users can grant and deny access to Do Not Disturb configuration for an app from here.
+     * See {@link android.app.NotificationManager#isNotificationPolicyAccessGranted()} for more
+     * details.
+     * <p>
+     * Input: Intent's data URI set with an application name, using the
+     * "package" schema (like "package:com.my.app").
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_NOTIFICATION_POLICY_ACCESS_DETAIL_SETTINGS =
+            "android.settings.NOTIFICATION_POLICY_ACCESS_DETAIL_SETTINGS";
 
     /**
      * @hide
@@ -5613,6 +5634,17 @@ public final class Settings {
         private static final Validator ODI_CAPTIONS_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
+         * Setting to indicate that on device captions cannot be shown because the app
+         * which is currently playing media had opted out.
+         *
+         * @hide
+         */
+        @SystemApi
+        public static final String ODI_CAPTIONS_OPTED_OUT = "odi_captions_opted_out";
+
+        private static final Validator ODI_CAPTIONS_OPTED_OUT_VALIDATOR = BOOLEAN_VALIDATOR;
+
+        /**
          * On Android 8.0 (API level 26) and higher versions of the platform,
          * a 64-bit number (expressed as a hexadecimal string), unique to
          * each combination of app-signing key, user, and device.
@@ -8013,17 +8045,6 @@ public final class Settings {
                 BOOLEAN_VALIDATOR;
 
         /**
-         * Whether the swipe up gesture to switch apps should be enabled.
-         *
-         * @hide
-         */
-        public static final String SWIPE_UP_TO_SWITCH_APPS_ENABLED =
-                "swipe_up_to_switch_apps_enabled";
-
-        private static final Validator SWIPE_UP_TO_SWITCH_APPS_ENABLED_VALIDATOR =
-                BOOLEAN_VALIDATOR;
-
-        /**
          * Whether or not the smart camera lift trigger that launches the camera when the user moves
          * the phone into a position for taking photos should be enabled.
          *
@@ -8576,38 +8597,6 @@ public final class Settings {
                 "packages_to_clear_data_before_full_restore";
 
         /**
-         * Indicates the location state should be maintained after sensor privacy is disabled.
-         * @hide
-         */
-        public static final String MAINTAIN_LOCATION_AFTER_SP_DISABLED = "0";
-
-        /**
-         * Indicates location should be reenabled after sensor privacy is disabled.
-         * @hide
-         */
-        public static final String REENABLE_LOCATION_AFTER_SP_DISABLED = "1";
-
-        /**
-         * Indicates the state of airplane mode should be maintained after sensor privacy is
-         * disabled.
-         * @hide
-         */
-        public static final String MAINTAIN_AIRPLANE_MODE_AFTER_SP_DISABLED = "0";
-
-        /**
-         * Indicates airplane mode should be disabled after sensor privacy is disabled.
-         * @hide
-         */
-        public static final String DISABLE_AIRPLANE_MODE_AFTER_SP_DISABLED = "1";
-
-        /**
-         * The state of all sensors managed by SensorPrivacyService when sensor privacy is enabled.
-         * @hide
-         */
-        public static final String SENSOR_PRIVACY_SENSOR_STATE =
-                "sensor_privacy_sensor_state";
-
-        /**
          * Setting to determine whether to use the new notification priority handling features.
          * @hide
          */
@@ -8739,7 +8728,6 @@ public final class Settings {
             DISPLAY_WHITE_BALANCE_ENABLED,
             SYNC_PARENT_SOUNDS,
             CAMERA_DOUBLE_TWIST_TO_FLIP_ENABLED,
-            SWIPE_UP_TO_SWITCH_APPS_ENABLED,
             CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED,
             SYSTEM_NAVIGATION_KEYS_ENABLED,
             QS_TILES,
@@ -8902,8 +8890,6 @@ public final class Settings {
             VALIDATORS.put(SYNC_PARENT_SOUNDS, SYNC_PARENT_SOUNDS_VALIDATOR);
             VALIDATORS.put(CAMERA_DOUBLE_TWIST_TO_FLIP_ENABLED,
                     CAMERA_DOUBLE_TWIST_TO_FLIP_ENABLED_VALIDATOR);
-            VALIDATORS.put(SWIPE_UP_TO_SWITCH_APPS_ENABLED,
-                    SWIPE_UP_TO_SWITCH_APPS_ENABLED_VALIDATOR);
             VALIDATORS.put(CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED,
                     CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED_VALIDATOR);
             VALIDATORS.put(SYSTEM_NAVIGATION_KEYS_ENABLED,
@@ -8979,6 +8965,7 @@ public final class Settings {
             VALIDATORS.put(SILENCE_CALL_GESTURE_COUNT, SILENCE_GESTURE_COUNT_VALIDATOR);
             VALIDATORS.put(SILENCE_NOTIFICATION_GESTURE_COUNT, SILENCE_GESTURE_COUNT_VALIDATOR);
             VALIDATORS.put(ODI_CAPTIONS_ENABLED, ODI_CAPTIONS_ENABLED_VALIDATOR);
+            VALIDATORS.put(ODI_CAPTIONS_OPTED_OUT, ODI_CAPTIONS_OPTED_OUT_VALIDATOR);
         }
 
         /**
@@ -12600,12 +12587,11 @@ public final class Settings {
         /**
          * Battery level [1-100] at which low power mode automatically turns on.
          * If 0, it will not automatically turn on. For Q and newer, it will only automatically
-         * turn on if the value is greater than 0 and the {@link #AUTOMATIC_POWER_SAVER_MODE}
+         * turn on if the value is greater than 0 and the {@link #AUTOMATIC_POWER_SAVE_MODE}
          * setting is also set to
-         * {@link android.os.PowerManager.AutoPowerSaverMode#POWER_SAVER_MODE_PERCENTAGE}.
-         *
-         * @see #AUTOMATIC_POWER_SAVER_MODE
-         * @see android.os.PowerManager#getPowerSaveMode()
+         * {@link android.os.PowerManager.AutoPowerSaveMode#POWER_SAVE_MODE_TRIGGER_PERCENTAGE}.
+         * @see #AUTOMATIC_POWER_SAVE_MODE
+         * @see android.os.PowerManager#getPowerSaveModeTrigger()
          * @hide
          */
         public static final String LOW_POWER_MODE_TRIGGER_LEVEL = "low_power_trigger_level";
@@ -12615,22 +12601,22 @@ public final class Settings {
 
         /**
          * Whether battery saver is currently set to trigger based on percentage, dynamic power
-         * savings trigger, or none. See {@link android.os.PowerManager.AutoPowerSaverMode} for
+         * savings trigger, or none. See {@link AutoPowerSaveModeTriggers} for
          * accepted values.
          *
          *  @hide
          */
         @TestApi
-        public static final String AUTOMATIC_POWER_SAVER_MODE = "automatic_power_saver_mode";
+        public static final String AUTOMATIC_POWER_SAVE_MODE = "automatic_power_save_mode";
 
-        private static final Validator AUTOMATIC_POWER_SAVER_MODE_VALIDATOR =
+        private static final Validator AUTOMATIC_POWER_SAVE_MODE_VALIDATOR =
                 new SettingsValidators.DiscreteValueValidator(new String[] {"0", "1"});
 
         /**
          * The setting that backs the disable threshold for the setPowerSavingsWarning api in
          * PowerManager
          *
-         * @see android.os.PowerManager#setDynamicPowerSavings(boolean, int)
+         * @see android.os.PowerManager#setDynamicPowerSaveHint(boolean, int)
          * @hide
          */
         @TestApi
@@ -12640,9 +12626,9 @@ public final class Settings {
                 new SettingsValidators.InclusiveIntegerRangeValidator(0, 100);
 
         /**
-         * The setting which backs the setDynamicPowerSavings api in PowerManager.
+         * The setting which backs the setDynamicPowerSaveHint api in PowerManager.
          *
-         * @see android.os.PowerManager#setDynamicPowerSavings(boolean, int)
+         * @see android.os.PowerManager#setDynamicPowerSaveHint(boolean, int)
          * @hide
          */
         @TestApi
@@ -13631,7 +13617,7 @@ public final class Settings {
             VALIDATORS.put(LOW_POWER_MODE_TRIGGER_LEVEL, LOW_POWER_MODE_TRIGGER_LEVEL_VALIDATOR);
             VALIDATORS.put(LOW_POWER_MODE_TRIGGER_LEVEL_MAX,
                     LOW_POWER_MODE_TRIGGER_LEVEL_VALIDATOR);
-            VALIDATORS.put(AUTOMATIC_POWER_SAVER_MODE, AUTOMATIC_POWER_SAVER_MODE_VALIDATOR);
+            VALIDATORS.put(AUTOMATIC_POWER_SAVE_MODE, AUTOMATIC_POWER_SAVE_MODE_VALIDATOR);
             VALIDATORS.put(DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD,
                     DYNAMIC_POWER_SAVINGS_VALIDATOR);
             VALIDATORS.put(BLUETOOTH_ON, BLUETOOTH_ON_VALIDATOR);

@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_ARGUMENT_ACCESSIBLE_CLICKABLE_SPAN;
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_REQUESTED_KEY;
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY;
@@ -797,9 +798,17 @@ public final class AccessibilityInteractionController {
         }
         Rect boundsInScreen = mTempRect;
         info.getBoundsInScreen(boundsInScreen);
-        if (interactiveRegion.quickReject(boundsInScreen)) {
+        if (interactiveRegion.quickReject(boundsInScreen) && !shouldBypassAdjustIsVisible()) {
             info.setVisibleToUser(false);
         }
+    }
+
+    private boolean shouldBypassAdjustIsVisible() {
+        final int windowType = mViewRootImpl.mOrigWindowType;
+        if (windowType == TYPE_INPUT_METHOD) {
+            return true;
+        }
+        return false;
     }
 
     private void applyAppScaleAndMagnificationSpecIfNeeded(AccessibilityNodeInfo info,

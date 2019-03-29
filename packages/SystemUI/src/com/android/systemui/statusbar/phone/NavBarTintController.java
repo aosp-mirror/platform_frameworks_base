@@ -21,9 +21,10 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.Handler;
-import android.provider.Settings;
 import android.view.CompositionSamplingListener;
 import android.view.View;
+
+import com.android.systemui.shared.system.QuickStepContract;
 
 import java.io.PrintWriter;
 
@@ -166,9 +167,6 @@ public class NavBarTintController implements View.OnAttachStateChangeListener,
 
     public static boolean isEnabled(Context context) {
         return context.getDisplayId() == DEFAULT_DISPLAY
-                && Settings.Global.getInt(context.getContentResolver(),
-                        NavigationPrototypeController.NAV_COLOR_ADAPT_ENABLE_SETTING, 0) == 1
-                && Settings.Global.getInt(context.getContentResolver(),
-                        NavigationPrototypeController.SHOW_HOME_HANDLE_SETTING, 0) == 1;
+                && QuickStepContract.isGesturalMode(context);
     }
 }

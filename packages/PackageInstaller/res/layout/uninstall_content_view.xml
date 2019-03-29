@@ -36,16 +36,6 @@
         style="@android:style/TextAppearance.Material.Subhead" />
 
     <CheckBox
-        android:id="@+id/clearContributedFiles"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginStart="-8dp"
-        android:paddingLeft="8sp"
-        android:visibility="gone"
-        style="@android:style/TextAppearance.Material.Subhead" />
-
-    <CheckBox
         android:id="@+id/keepData"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

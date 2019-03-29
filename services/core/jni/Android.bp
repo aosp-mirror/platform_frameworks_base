@@ -50,6 +50,7 @@ cc_library_static {
         "com_android_server_VibratorService.cpp",
         "com_android_server_PersistentDataBlockService.cpp",
         "com_android_server_GraphicsStatsService.cpp",
+        "com_android_server_am_AppCompactor.cpp",
         "onload.cpp",
     ],
 

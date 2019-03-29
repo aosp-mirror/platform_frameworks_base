@@ -37,7 +37,8 @@ import com.android.internal.os.IResultReceiver;
  */
 oneway interface IAutoFillManager {
     // Returns flags: FLAG_ADD_CLIENT_ENABLED | FLAG_ADD_CLIENT_DEBUG | FLAG_ADD_CLIENT_VERBOSE
-    void addClient(in IAutoFillManagerClient client, int userId, in IResultReceiver result);
+    void addClient(in IAutoFillManagerClient client, in ComponentName componentName, int userId,
+        in IResultReceiver result);
     void removeClient(in IAutoFillManagerClient client, int userId);
     void startSession(IBinder activityToken, in IBinder appCallback, in AutofillId autoFillId,
         in Rect bounds, in AutofillValue value, int userId, boolean hasCallback, int flags,

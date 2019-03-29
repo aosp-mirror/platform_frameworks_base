@@ -32,8 +32,12 @@ import java.io.IOException;
  * you don't need to do your own synchronization unless you're modifying the
  * DataSourceCallback from another thread while it's being used by the framework.</p>
  *
+ * @hide
  */
 public abstract class DataSourceCallback implements Closeable {
+
+    public static final int END_OF_STREAM = -1;
+
     /**
      * Called to request data from the given position.
      *
@@ -49,7 +53,7 @@ public abstract class DataSourceCallback implements Closeable {
      * @param offset the offset within buffer to read the data into.
      * @param size the number of bytes to read.
      * @throws IOException on fatal errors.
-     * @return the number of bytes read, or -1 if end of stream is reached.
+     * @return the number of bytes read, or {@link #END_OF_STREAM} if end of stream is reached.
      */
     public abstract int readAt(long position, @NonNull byte[] buffer, int offset, int size)
             throws IOException;

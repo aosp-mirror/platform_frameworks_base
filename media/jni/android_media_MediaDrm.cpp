@@ -149,6 +149,7 @@ struct SessionExceptionFields {
 };
 
 struct SessionExceptionErrorCodes {
+    jint kErrorUnknown;
     jint kResourceContention;
 } gSessionExceptionErrorCodes;
 
@@ -888,6 +889,8 @@ static void android_media_MediaDrm_native_init(JNIEnv *env) {
     gFields.sessionException.classId = static_cast<jclass>(env->NewGlobalRef(clazz));
     GET_FIELD_ID(gFields.sessionException.errorCode, clazz, "mErrorCode", "I");
 
+    GET_STATIC_FIELD_ID(field, clazz, "ERROR_UNKNOWN", "I");
+    gSessionExceptionErrorCodes.kErrorUnknown = env->GetStaticIntField(clazz, field);
     GET_STATIC_FIELD_ID(field, clazz, "ERROR_RESOURCE_CONTENTION", "I");
     gSessionExceptionErrorCodes.kResourceContention = env->GetStaticIntField(clazz, field);
 }

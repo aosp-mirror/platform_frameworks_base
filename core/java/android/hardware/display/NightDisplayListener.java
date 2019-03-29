@@ -35,82 +35,91 @@ import java.time.LocalTime;
 public class NightDisplayListener {
 
     private final Context mContext;
-    private final int mUserId;
     private final ColorDisplayManager mManager;
+    private final Handler mHandler;
+    private final ContentObserver mContentObserver;
+    private final int mUserId;
 
-    private ContentObserver mContentObserver;
     private Callback mCallback;
 
     public NightDisplayListener(@NonNull Context context) {
-        this(context, ActivityManager.getCurrentUser());
+        this(context, ActivityManager.getCurrentUser(), new Handler(Looper.getMainLooper()));
     }
 
-    public NightDisplayListener(@NonNull Context context, @UserIdInt int userId) {
+    public NightDisplayListener(@NonNull Context context, @NonNull Handler handler) {
+        this(context, ActivityManager.getCurrentUser(), handler);
+    }
+
+    public NightDisplayListener(@NonNull Context context, @UserIdInt int userId,
+            @NonNull Handler handler) {
         mContext = context.getApplicationContext();
-        mUserId = userId;
         mManager = mContext.getSystemService(ColorDisplayManager.class);
+        mUserId = userId;
+
+        mHandler = handler;
+        mContentObserver = new ContentObserver(mHandler) {
+            @Override
+            public void onChange(boolean selfChange, Uri uri) {
+                super.onChange(selfChange, uri);
+                final String setting = uri == null ? null : uri.getLastPathSegment();
+                if (setting != null && mCallback != null) {
+                    switch (setting) {
+                        case Secure.NIGHT_DISPLAY_ACTIVATED:
+                            mCallback.onActivated(mManager.isNightDisplayActivated());
+                            break;
+                        case Secure.NIGHT_DISPLAY_AUTO_MODE:
+                            mCallback.onAutoModeChanged(mManager.getNightDisplayAutoMode());
+                            break;
+                        case Secure.NIGHT_DISPLAY_CUSTOM_START_TIME:
+                            mCallback.onCustomStartTimeChanged(
+                                    mManager.getNightDisplayCustomStartTime());
+                            break;
+                        case Secure.NIGHT_DISPLAY_CUSTOM_END_TIME:
+                            mCallback.onCustomEndTimeChanged(
+                                    mManager.getNightDisplayCustomEndTime());
+                            break;
+                        case Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE:
+                            mCallback.onColorTemperatureChanged(
+                                    mManager.getNightDisplayColorTemperature());
+                            break;
+                    }
+                }
+            }
+        };
     }
 
     /**
      * Register a callback to be invoked whenever the Night display settings are changed.
      */
     public void setCallback(Callback callback) {
+        if (Looper.myLooper() != mHandler.getLooper()) {
+            mHandler.post(() -> setCallbackInternal(callback));
+        }
+        setCallbackInternal(callback);
+    }
+
+    private void setCallbackInternal(Callback newCallback) {
         final Callback oldCallback = mCallback;
-        if (oldCallback != callback) {
-            mCallback = callback;
-
-            if (mContentObserver == null) {
-                mContentObserver = new ContentObserver(new Handler(Looper.getMainLooper())) {
-                    @Override
-                    public void onChange(boolean selfChange, Uri uri) {
-                        super.onChange(selfChange, uri);
-                        onSettingChanged(uri);
-                    }
-                };
-            }
-
-            if (callback == null) {
-                // Stop listening for changes now that there IS NOT a callback.
+        if (oldCallback != newCallback) {
+            mCallback = newCallback;
+            if (mCallback == null) {
                 mContext.getContentResolver().unregisterContentObserver(mContentObserver);
             } else if (oldCallback == null) {
-                // Start listening for changes now that there IS a callback.
                 final ContentResolver cr = mContext.getContentResolver();
                 cr.registerContentObserver(Secure.getUriFor(Secure.NIGHT_DISPLAY_ACTIVATED),
                         false /* notifyForDescendants */, mContentObserver, mUserId);
                 cr.registerContentObserver(Secure.getUriFor(Secure.NIGHT_DISPLAY_AUTO_MODE),
                         false /* notifyForDescendants */, mContentObserver, mUserId);
-                cr.registerContentObserver(Secure.getUriFor(Secure.NIGHT_DISPLAY_CUSTOM_START_TIME),
+                cr.registerContentObserver(
+                        Secure.getUriFor(Secure.NIGHT_DISPLAY_CUSTOM_START_TIME),
                         false /* notifyForDescendants */, mContentObserver, mUserId);
-                cr.registerContentObserver(Secure.getUriFor(Secure.NIGHT_DISPLAY_CUSTOM_END_TIME),
+                cr.registerContentObserver(
+                        Secure.getUriFor(Secure.NIGHT_DISPLAY_CUSTOM_END_TIME),
                         false /* notifyForDescendants */, mContentObserver, mUserId);
-                cr.registerContentObserver(Secure.getUriFor(Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE),
+                cr.registerContentObserver(
+                        Secure.getUriFor(Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE),
                         false /* notifyForDescendants */, mContentObserver, mUserId);
             }
-        }
-    }
-
-    private void onSettingChanged(Uri uri) {
-        final String setting = uri == null ? null : uri.getLastPathSegment();
-        if (setting == null || mCallback == null) {
-            return;
-        }
-
-        switch (setting) {
-            case Secure.NIGHT_DISPLAY_ACTIVATED:
-                mCallback.onActivated(mManager.isNightDisplayActivated());
-                break;
-            case Secure.NIGHT_DISPLAY_AUTO_MODE:
-                mCallback.onAutoModeChanged(mManager.getNightDisplayAutoMode());
-                break;
-            case Secure.NIGHT_DISPLAY_CUSTOM_START_TIME:
-                mCallback.onCustomStartTimeChanged(mManager.getNightDisplayCustomStartTime());
-                break;
-            case Secure.NIGHT_DISPLAY_CUSTOM_END_TIME:
-                mCallback.onCustomEndTimeChanged(mManager.getNightDisplayCustomEndTime());
-                break;
-            case Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE:
-                mCallback.onColorTemperatureChanged(mManager.getNightDisplayColorTemperature());
-                break;
         }
     }
 
@@ -118,36 +127,45 @@ public class NightDisplayListener {
      * Callback invoked whenever the Night display settings are changed.
      */
     public interface Callback {
+
         /**
          * Callback invoked when the activated state changes.
          *
          * @param activated {@code true} if Night display is activated
          */
-        default void onActivated(boolean activated) {}
+        default void onActivated(boolean activated) {
+        }
+
         /**
          * Callback invoked when the auto mode changes.
          *
          * @param autoMode the auto mode to use
          */
-        default void onAutoModeChanged(int autoMode) {}
+        default void onAutoModeChanged(int autoMode) {
+        }
+
         /**
          * Callback invoked when the time to automatically activate Night display changes.
          *
          * @param startTime the local time to automatically activate Night display
          */
-        default void onCustomStartTimeChanged(LocalTime startTime) {}
+        default void onCustomStartTimeChanged(LocalTime startTime) {
+        }
+
         /**
          * Callback invoked when the time to automatically deactivate Night display changes.
          *
          * @param endTime the local time to automatically deactivate Night display
          */
-        default void onCustomEndTimeChanged(LocalTime endTime) {}
+        default void onCustomEndTimeChanged(LocalTime endTime) {
+        }
 
         /**
          * Callback invoked when the color temperature changes.
          *
          * @param colorTemperature the color temperature to tint the screen
          */
-        default void onColorTemperatureChanged(int colorTemperature) {}
+        default void onColorTemperatureChanged(int colorTemperature) {
+        }
     }
 }

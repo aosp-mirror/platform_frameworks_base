@@ -207,7 +207,7 @@ public class InitialConfiguration {
     }
 
     private static boolean isIPv6GUA(LinkAddress addr) {
-        return addr.isIPv6() && addr.isGlobalPreferred();
+        return addr.isIpv6() && addr.isGlobalPreferred();
     }
 
     // TODO: extract out into CollectionUtils.

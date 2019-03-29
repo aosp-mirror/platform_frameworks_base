@@ -79,7 +79,7 @@ public class NotificationListener extends NotificationListenerWithPlugins {
             }
         });
         NotificationManager noMan = mContext.getSystemService(NotificationManager.class);
-        onStatusBarIconsBehaviorChanged(noMan.shouldHideSilentStatusBarIcons());
+        onSilentStatusBarIconsVisibilityChanged(noMan.shouldHideSilentStatusBarIcons());
     }
 
     @Override
@@ -144,7 +144,7 @@ public class NotificationListener extends NotificationListenerWithPlugins {
     }
 
     @Override
-    public void onStatusBarIconsBehaviorChanged(boolean hideSilentStatusIcons) {
+    public void onSilentStatusBarIconsVisibilityChanged(boolean hideSilentStatusIcons) {
         for (NotificationSettingsListener listener : mSettingsListeners) {
             listener.onStatusBarIconsBehaviorChanged(hideSilentStatusIcons);
         }

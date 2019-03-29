@@ -34,6 +34,7 @@ import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_M
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND;
 
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.app.KeyguardManager;
 import android.app.SearchManager;
@@ -246,6 +247,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private boolean mForcedStatusBarColor = false;
     private boolean mForcedNavigationBarColor = false;
 
+    @UnsupportedAppUsage
     private CharSequence mTitle = null;
 
     private int mTitleColor = 0;
@@ -309,6 +311,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     static final RotationWatcher sRotationWatcher = new RotationWatcher();
 
+    @UnsupportedAppUsage
     public PhoneWindow(Context context) {
         super(context);
         mLayoutInflater = LayoutInflater.from(context);

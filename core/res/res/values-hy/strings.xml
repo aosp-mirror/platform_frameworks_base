@@ -48,7 +48,7 @@
     <string name="invalidPin" msgid="3850018445187475377">"Մուտքագրեք PIN, որը 4-ից 8 թիվ է:"</string>
     <string name="invalidPuk" msgid="8761456210898036513">"Մուտքագրեք PUK, որն 8 կամ ավել թիվ ունի:"</string>
     <string name="needPuk" msgid="919668385956251611">"Ձեր SIM քարտը PUK-ով կողպված է: Մուտքագրեք PUK կոդը այն ապակողպելու համար:"</string>
-    <string name="needPuk2" msgid="4526033371987193070">"Մուտքագրեք PUK2-ը` SIM քարտն արգելաբացելու համար:"</string>
+    <string name="needPuk2" msgid="4526033371987193070">"Մուտքագրեք PUK2-ը` SIM քարտն արգելահանելու համար:"</string>
     <string name="enablePin" msgid="209412020907207950">"Ձախողվեց: Միացրեք SIM/RUIM կողպումը:"</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
       <item quantity="one">Մնաց <xliff:g id="NUMBER_1">%d</xliff:g> փորձ, որից հետո SIM քարտն արգելափակվելու է:</item>
@@ -141,8 +141,10 @@
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Զանգեր Wi-Fi-ի միջոցով"</string>
     <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Անջատված է"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi, նախընտրելի"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Նախընտրելի է բջջային ցանցը"</string>
+    <!-- no translation found for wfc_mode_wifi_preferred_summary (7335489823608689868) -->
+    <skip />
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (7081742743152286290) -->
+    <skip />
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Միայն Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>. Չի վերահասցեավորվել"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>. <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -228,7 +230,8 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"Վրիպակի զեկույց"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Ավարտել աշխատաշրջանը"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Սքրինշոթ"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"Հաղորդել սխալի մասին"</string>
+    <!-- no translation found for bugreport_title (5981047024855257269) -->
+    <skip />
     <string name="bugreport_message" msgid="398447048750350456">"Սա տեղեկություններ կհավաքագրի ձեր սարքի առկա կարգավիճակի մասին և կուղարկի այն էլեկտրոնային նամակով: Որոշակի ժամանակ կպահանջվի վրիպակի մասին զեկուցելու պահից սկսած մինչ ուղարկելը: Խնդրում ենք փոքր-ինչ համբերատար լինել:"</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Ինտերակտիվ զեկույց"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Հիմնականում օգտագործեք այս տարբերակը: Այն ձեզ թույլ է տալիս հետևել զեկույցի ստեղծման գործընթացին, խնդրի մասին լրացուցիչ տեղեկություններ մուտքագրել և սքրինշոթներ ստեղծել: Կարող է բաց թողնել քիչ օգտագործվող որոշ բաժիններ, որոնց ստեղծումը երկար է տևում:"</string>
@@ -241,9 +244,9 @@
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Անձայն ռեժիմ"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Ձայնը անջատված է"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Ձայնը միացված է"</string>
-    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Ինքնաթիռի ռեժիմ"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Ինքնաթիռի ռեժիմը միացված է"</string>
-    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Ինքնաթիռի ռեժիմը անջատված է"</string>
+    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Ավիառեժիմ"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Ավիառեժիմը միացված է"</string>
+    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Ավիառեժիմը անջատված է"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Կարգավորումներ"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Օգնական"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Ձայնային օգնութ"</string>
@@ -281,9 +284,12 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Տեղորոշում"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"տեղորոշել այս սարքը"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"Թույլ տա՞լ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; հավելվածին օգտագործել այս սարքի տեղադրության տվյալները:"</string>
-    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"Տեղադրության տվյալները հավելվածին հասանելի կլինեն միայն, երբ այն օգտագործելիս լինեք:"</string>
-    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"Միշտ թույլ տա՞լ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-ին օգտագործել սարքի տեղադրությունը:"</string>
-    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"Տեղադրության տվյալները հավելվածին միշտ հասանելի կլինեն, նույնիսկ եթե այն չեք օգտագործում:"</string>
+    <!-- no translation found for permgrouprequestdetail_location (1347189607421252902) -->
+    <skip />
+    <!-- no translation found for permgroupbackgroundrequest_location (5039063878675613235) -->
+    <skip />
+    <!-- no translation found for permgroupbackgroundrequestdetail_location (4597006851453417387) -->
+    <skip />
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Օրացույց"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"օգտագործել օրացույցը"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Թույլ տա՞լ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; հավելվածին օգտագործել ձեր օրացույցը:"</string>
@@ -316,7 +322,10 @@
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"Հասանելի դարձնե՞լ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; հավելվածին ձեր երաժշտությունը:"</string>
     <string name="permgrouplab_visual" msgid="6477382108771145134">"Լուսանկարներ և տեսանյութեր"</string>
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"լուսանկարների և տեսանյութերի հասանելիություն"</string>
-    <string name="permgrouprequest_visual" msgid="3043752127595243314">"Հասանելի դարձնե՞լ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; հավելվածին ձեր լուսանկարները, տեսանյութերը և տեղանշված վայրերը:"</string>
+    <!-- no translation found for permgrouprequest_visual (4926581398380334943) -->
+    <skip />
+    <!-- no translation found for permgrouprequestdetail_visual (3827237829805228971) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Առբերել պատուհանի բովանդակությունը"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Վերլուծել գործող պատուհանի բովանդակությունը"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Միացնել Հպման միջոցով հետազոտումը"</string>
@@ -509,8 +518,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Թույլ է տալիս հավելվածին հաղորդակցվել Մոտ տարածությամբ հաղորդակցման (NFC) պիտակների, քարտերի և ընթերցիչների հետ:"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"անջատել ձեր էկրանի կողպեքը"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Թույլ է տալիս հավելվածին անջատել ստեղնաշարի կողպումը և ցանկացած կապված գաղտնաբառի պաշտպանվածությունը: Սրա ճիշտ օրինակն է, երբ հեռախոսը անջատում է ստեղնաշարի կողպումը մուտքային զանգ ստանալիս, հետո այն կրկին միացնում է, երբ զանգը ավարտվում է:"</string>
-    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"էկրանի կողպման բարդության մակարդակի մասին տեղեկությունների ստացում"</string>
-    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"Հավելվածին հասանելի կդառնան էկրանի կողպման բարդության մակարդակի մասին տեղեկությունները (բարձր, միջին, ցածր կամ ոչ մի), այդ թվում կողպման տեսակի և գաղտնաբառի երկարության մասին տվյալները: Բացի այդ, հավելվածը կկարողանա առաջարկել օգտատերերին բարձրացնել կողպման բարդության մակարդակը: Օգտատերերը կարող են անտեսել այդ առաջարկները: Նկատի ունեցեք, որ գաղտնաբառը չի պահվում բաց տեքստի տեսքով և հասանելի չէ հավելվածին:"</string>
+    <!-- no translation found for permlab_requestPasswordComplexity (202650535669249674) -->
+    <skip />
+    <!-- no translation found for permdesc_requestPasswordComplexity (4730994229754212347) -->
+    <skip />
     <string name="permlab_useBiometric" msgid="8837753668509919318">"կենսաչափական սարքի օգտագործում"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Հավելվածին թույլ է տալիս օգտագործել նույնականացման համար նախատեսված կենսաչափական սարքը"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"կառավարել մատնահետքերի գրանցման սարքը"</string>
@@ -565,37 +576,59 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Հավելվածին թույլ է տալիս ավելացնել և հեռացնել դեմքի նմուշներ:"</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"օգտագործել դեմքի ճանաչման սարքը"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Հավելվածին թույլ է տալիս օգտագործել նույնականացման համար նախատեսված սարքը"</string>
-    <string name="face_acquired_insufficient" msgid="5901287247766106330">"Չհաջողվեց ճանաչել ձեր դեմքը: Նորից փորձեք:"</string>
-    <string name="face_acquired_too_bright" msgid="610606792381297174">"Դեմքը չափազանց վառ է երևում։ Թուլացրեք լույսը։"</string>
-    <string name="face_acquired_too_dark" msgid="7229162716976778371">"Դեմքը չափազանց մուգ է երևում։ Ուժեղացրեք լույսը։"</string>
-    <string name="face_acquired_too_close" msgid="1980310037427755293">"Սարքը մի փոքր հեռացրեք դեմքից։"</string>
-    <string name="face_acquired_too_far" msgid="4494571381828850007">"Սարքը մի փոքր մոտեցրեք դեմքին։"</string>
-    <string name="face_acquired_too_high" msgid="228411096134808372">"Սարքը մի փոքր վերև պահեք։"</string>
-    <string name="face_acquired_too_low" msgid="4539774649296349109">"Սարքը մի փոքր ներքև պահեք։"</string>
-    <string name="face_acquired_too_right" msgid="1650292067226118760">"Սարքը մի փոքր ձախ պահեք։"</string>
-    <string name="face_acquired_too_left" msgid="2712489669456176505">"Սարքը մի փոքր ձախ պահեք։"</string>
-    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Նայեք սարքի տեսախցիկին։"</string>
-    <string name="face_acquired_not_detected" msgid="5707782294589511391">"Դեմք չի հայտնաբերվել։"</string>
-    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"Սարքն անշարժ պահեք։"</string>
+    <!-- no translation found for face_acquired_insufficient (2767330364802375742) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_bright (5005650874582450967) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_dark (1966194696381394616) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_close (1401011882624272753) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_far (1210969240069012510) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_high (3362395713403348013) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_low (488983581737550912) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_right (941726879175375970) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_left (5873592047381190672) -->
+    <skip />
+    <!-- no translation found for face_acquired_poor_gaze (8471716624377228327) -->
+    <skip />
+    <!-- no translation found for face_acquired_not_detected (4885504661626728809) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_much_motion (3149332171102108851) -->
+    <skip />
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Նորից փորձեք։"</string>
-    <string name="face_acquired_too_different" msgid="5553210341111255124">"Հայտնաբերվել է այլ դեմք։"</string>
+    <!-- no translation found for face_acquired_too_different (7663983770123789694) -->
+    <skip />
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"Շատ նման է նախորդին։ Փոխեք ձեր դիրքը։"</string>
-    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"Նայեք ուղիղ տեսախցիկին։"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"Նայեք ուղիղ տեսախցիկին։"</string>
+    <!-- no translation found for face_acquired_pan_too_extreme (1852495480382773759) -->
+    <skip />
+    <!-- no translation found for face_acquired_tilt_too_extreme (1290820400317982049) -->
+    <skip />
     <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Ուղղեք գլուխը հորիզոնական գծով։"</string>
-    <string name="face_acquired_obscured" msgid="3055077697850272097">"Բացեք դեմքը։"</string>
+    <!-- no translation found for face_acquired_obscured (5747521031647744553) -->
+    <skip />
+    <!-- no translation found for face_acquired_sensor_dirty (364493868630891300) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"Դեմքի ճանաչման սարքն անհասանելի է։"</string>
-    <string name="face_error_timeout" msgid="4014326147867150054">"Ժամանակը սպառվել է: Նորից փորձեք:"</string>
+    <!-- no translation found for face_error_timeout (2605673935810019129) -->
+    <skip />
     <string name="face_error_no_space" msgid="8224993703466381314">"Դեմքը հնարավոր չէ պահել։"</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Դեմքի ճանաչումը չեղարկվել է։"</string>
     <string name="face_error_user_canceled" msgid="8943921120862164539">"Դեմքի ճանաչումը չեղարկվել է օգտատիրոջ կողմից:"</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Չափից շատ փորձեր եք կատարել: Փորձեք ավելի ուշ:"</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Չափից շատ փորձեր եք կատարել: Դեմքի ճանաչման գործառույթն անջատվել է։"</string>
-    <string name="face_error_unable_to_process" msgid="238761109287767270">"Նորից փորձեք:"</string>
-    <string name="face_error_not_enrolled" msgid="9166792142679691323">"Գրանցված դեմք չկա։"</string>
-    <string name="face_error_hw_not_present" msgid="916085883581450331">"Այս սարքը չունի դեմքի ճանաչման սկաներ։"</string>
+    <!-- no translation found for face_error_unable_to_process (4940944939691171539) -->
+    <skip />
+    <!-- no translation found for face_error_not_enrolled (4245760276260427472) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (5296043240874659926) -->
+    <skip />
     <string name="face_name_template" msgid="7004562145809595384">"Դեմք <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1213,9 +1246,16 @@
     <string name="new_app_action" msgid="6694851182870774403">"Բացել <xliff:g id="NEW_APP">%1$s</xliff:g> հավելվածը"</string>
     <string name="new_app_description" msgid="5894852887817332322">"<xliff:g id="OLD_APP">%1$s</xliff:g> հավելվածը կփակվի առանց տվյալները պահելու"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> գործընթացը գերազանցել է հիշողության սահմանաչափը"</string>
+    <!-- no translation found for dump_heap_ready_notification (1162196579925048701) -->
+    <skip />
     <string name="dump_heap_notification_detail" msgid="3993078784053054141">"Դինամիկ հիշողության տվյալները հավաքվել են: Հպեք՝ դրանք ուղարկելու համար:"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Տրամադրե՞լ օգտագործվող օբյեկտների վերաբերյալ տվյալները:"</string>
-    <string name="dump_heap_text" msgid="4809417337240334941">"<xliff:g id="PROC">%1$s</xliff:g> գործընթացը գերազանցել է իր կողմից հիշողության օգտագործման սահմանաչափը՝ <xliff:g id="SIZE">%2$s</xliff:g>: Հավաքվել են օգտագործվող օբյեկտների վերաբերյալ տվյալներ, որոնք կարող եք ուղարկել մշակողին: Սակայն զգույշ եղեք՝ նշված տվյալները կարող են ներառել հավելվածի կողմից օգտագործվող ձեր անձնական տվյալները:"</string>
+    <!-- no translation found for dump_heap_text (8546022920319781701) -->
+    <skip />
+    <!-- no translation found for dump_heap_system_text (1205466256312104134) -->
+    <skip />
+    <!-- no translation found for dump_heap_ready_text (6759394977904051000) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"Ընտրեք գործողություն տեքստի համար"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Զանգակի ձայնի ուժգնությունը"</string>
     <string name="volume_music" msgid="5421651157138628171">"Մեդիա ձայնի բարձրություն"</string>
@@ -1254,8 +1294,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Հպեք՝ բոլոր ցանցերը տեսնելու համար"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Միանալ"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Բոլոր ցանցերը"</string>
-    <string name="wifi_suggestion_title" msgid="8951405130379148709">"<xliff:g id="NAME">%s</xliff:g> հավելվածն առաջարկում է միանալ հասանելի Wi‑Fi ցանցի"</string>
-    <string name="wifi_suggestion_content" msgid="2658317015552324848">"Միանա՞լ <xliff:g id="NAME">%s</xliff:g> հավելվածի առաջարկած ցանցերին:"</string>
+    <!-- no translation found for wifi_suggestion_title (9099832833531486167) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (5883181205841582873) -->
+    <skip />
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Այո"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Ոչ"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi-ն ավտոմատ կմիանա"</string>
@@ -1267,9 +1309,14 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Մուտք գործեք ցանց"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi ցանցում ինտերնետ կապ չկա"</string>
+    <!-- no translation found for wifi_no_internet (5198100389964214865) -->
+    <skip />
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Հպեք՝ ընտրանքները տեսնելու համար"</string>
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Միացված է"</string>
+    <!-- no translation found for network_partial_connectivity (7774883385494762741) -->
+    <skip />
+    <!-- no translation found for network_partial_connectivity_detailed (1959697814165325217) -->
+    <skip />
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Փոփոխություններ թեժ կետի կարգավորումներում"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Ձեր թեժ կետի հաճախականությունը փոխվել է։"</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Սարքը չի կարող աշխատել միայն 5 ԳՀց հաճախականությամբ։ Այդ հաճախականությունը կօգտագործվի հնարավորության դեպքում։"</string>
@@ -1354,6 +1401,10 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB վրիպազերծումը միացված է"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"Հպեք՝ USB-ի վրիպազերծումն անջատելու համար"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Ընտրել` USB կարգաբերումը կասեցնելու համար:"</string>
+    <!-- no translation found for test_harness_mode_notification_title (2216359742631914387) -->
+    <skip />
+    <!-- no translation found for test_harness_mode_notification_message (1343197173054407119) -->
+    <skip />
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB միացքում ջուր կամ աղտ է հայտնաբերվել"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB միացքն ավտոմատ անջատվել է: Հպեք՝ ավելին իմանալու համար:"</string>
     <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"USB միացքը կարող է օգտագործվել"</string>
@@ -1396,8 +1447,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"Կարգավորել"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Անջատել"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Ուսումնասիրել"</string>
-    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
-    <skip />
+    <string name="ext_media_seamless_action" msgid="6575980560886881233">"Աուդիոելքի սարքի փոխարկում"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g>-ը տեղադրված չէ"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"Նորից տեղադրեք սարքը"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g>-ի տեղափոխում"</string>
@@ -1906,8 +1956,6 @@
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Հպեք՝ այն ապակողպելու համար"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Միացված է <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>-ին"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Հպեք՝ ֆայլերը տեսնելու համար"</string>
-    <string name="pin_target" msgid="3052256031352291362">"Ամրացնել"</string>
-    <string name="unpin_target" msgid="3556545602439143442">"Ապամրացնել"</string>
     <string name="app_info" msgid="6856026610594615344">"Հավելվածի տվյալներ"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"Ցուցադրական օգտատերը գործարկվում է…"</string>
@@ -1998,6 +2046,22 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"Ծանուցում լիցքավորման մասին"</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Մարտկոցի լիցքը կարող է սովորականից շուտ սպառվել"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Մարտկոցի կյանքը երկարացնելու համար ակտիվացվել է մարտկոցի տնտեսման ռեժիմը"</string>
+    <!-- no translation found for battery_saver_notification_channel_name (2083316159716201806) -->
+    <skip />
+    <!-- no translation found for battery_saver_sticky_disabled_notification_title (6376147579378764641) -->
+    <skip />
+    <!-- no translation found for battery_saver_sticky_disabled_notification_summary (8090192609249817945) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (2960978289873161288) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (7555713825806482451) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (5954873381559605660) -->
+    <skip />
+    <!-- no translation found for battery_saver_off_notification_summary (1374222493681267143) -->
+    <skip />
+    <!-- no translation found for battery_saver_off_alternative_notification_summary (4340727818546508436) -->
+    <skip />
     <string name="mime_type_folder" msgid="7111951698626315204">"Պանակ"</string>
     <string name="mime_type_apk" msgid="5518003630972506900">"Android հավելված"</string>
     <string name="mime_type_generic" msgid="6833871596845900027">"Ֆայլ"</string>

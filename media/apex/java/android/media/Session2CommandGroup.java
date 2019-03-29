@@ -167,22 +167,6 @@ public final class Session2CommandGroup implements Parcelable {
         }
 
         /**
-         * Adds a predefined command with given {@code commandCode} to this command group.
-         *
-         * @param commandCode A command code to add.
-         *                    Shouldn't be {@link Session2Command#COMMAND_CODE_CUSTOM}.
-         */
-        @NonNull
-        public Builder addCommand(int commandCode) {
-            if (commandCode == COMMAND_CODE_CUSTOM) {
-                throw new IllegalArgumentException(
-                        "Use addCommand(Session2Command) for COMMAND_CODE_CUSTOM.");
-            }
-            mCommands.add(new Session2Command(commandCode));
-            return this;
-        }
-
-        /**
          * Removes a command from this group which matches given {@code command}.
          *
          * @param command A command to find. Shouldn't be {@code null}.
@@ -193,21 +177,6 @@ public final class Session2CommandGroup implements Parcelable {
                 throw new IllegalArgumentException("command shouldn't be null");
             }
             mCommands.remove(command);
-            return this;
-        }
-
-        /**
-         * Removes a command from this group which matches given {@code commandCode}.
-         *
-         * @param commandCode A command code to find.
-         *                    Shouldn't be {@link Session2Command#COMMAND_CODE_CUSTOM}.
-         */
-        @NonNull
-        public Builder removeCommand(int commandCode) {
-            if (commandCode == COMMAND_CODE_CUSTOM) {
-                throw new IllegalArgumentException("commandCode shouldn't be COMMAND_CODE_CUSTOM");
-            }
-            mCommands.remove(new Session2Command(commandCode));
             return this;
         }
 

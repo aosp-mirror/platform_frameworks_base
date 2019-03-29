@@ -248,7 +248,6 @@ java_defaults {
         "core/java/android/os/ICancellationSignal.aidl",
         "core/java/android/os/IDeviceIdentifiersPolicyService.aidl",
         "core/java/android/os/IDeviceIdleController.aidl",
-        "core/java/android/os/IDynamicAndroidService.aidl",
         "core/java/android/os/IHardwarePropertiesManager.aidl",
         ":libincident_aidl",
         "core/java/android/os/IMaintenanceActivityListener.aidl",
@@ -272,6 +271,7 @@ java_defaults {
         "core/java/android/os/IUserManager.aidl",
         ":libvibrator_aidl",
         "core/java/android/os/IVibratorService.aidl",
+        "core/java/android/os/image/IDynamicSystemService.aidl",
         "core/java/android/os/storage/IStorageManager.aidl",
         "core/java/android/os/storage/IStorageEventListener.aidl",
         "core/java/android/os/storage/IStorageShutdownObserver.aidl",
@@ -318,6 +318,7 @@ java_defaults {
         "core/java/android/service/vr/IVrListener.aidl",
         "core/java/android/service/vr/IVrManager.aidl",
         "core/java/android/service/vr/IVrStateCallbacks.aidl",
+        "core/java/android/service/watchdog/IExplicitHealthCheckService.aidl",
         "core/java/android/print/ILayoutResultCallback.aidl",
         "core/java/android/print/IPrinterDiscoveryObserver.aidl",
         "core/java/android/print/IPrintDocumentAdapter.aidl",
@@ -475,7 +476,10 @@ java_defaults {
         "media/java/android/media/IMediaHTTPConnection.aidl",
         "media/java/android/media/IMediaHTTPService.aidl",
         "media/java/android/media/IMediaResourceMonitor.aidl",
+        "media/java/android/media/IMediaRoute2Callback.aidl",
+        "media/java/android/media/IMediaRoute2Provider.aidl",
         "media/java/android/media/IMediaRouterClient.aidl",
+        "media/java/android/media/IMediaRouter2ManagerClient.aidl",
         "media/java/android/media/IMediaRouterService.aidl",
         "media/java/android/media/IMediaScannerListener.aidl",
         "media/java/android/media/IMediaScannerService.aidl",
@@ -884,66 +888,6 @@ gensrcs {
         "libs/incident/**/*.proto",
     ],
     output_extension: "srcjar",
-}
-
-// AIDL interfaces between the core system and the networking mainline module.
-aidl_interface {
-    name: "networkstack-aidl-interfaces",
-    local_include_dir: "core/java",
-    srcs: [
-        "core/java/android/net/ApfCapabilitiesParcelable.aidl",
-        "core/java/android/net/DhcpResultsParcelable.aidl",
-        "core/java/android/net/INetworkMonitor.aidl",
-        "core/java/android/net/INetworkMonitorCallbacks.aidl",
-        "core/java/android/net/INetworkStackConnector.aidl",
-        "core/java/android/net/INetworkStackStatusCallback.aidl",
-        "core/java/android/net/InitialConfigurationParcelable.aidl",
-        "core/java/android/net/PrivateDnsConfigParcel.aidl",
-        "core/java/android/net/ProvisioningConfigurationParcelable.aidl",
-        "core/java/android/net/StaticIpConfigurationParcelable.aidl",
-        "core/java/android/net/TcpKeepalivePacketDataParcelable.aidl",
-        "core/java/android/net/dhcp/DhcpServingParamsParcel.aidl",
-        "core/java/android/net/dhcp/IDhcpServer.aidl",
-        "core/java/android/net/dhcp/IDhcpServerCallbacks.aidl",
-        "core/java/android/net/ip/IIpClient.aidl",
-        "core/java/android/net/ip/IIpClientCallbacks.aidl",
-        "core/java/android/net/IIpMemoryStore.aidl",
-        "core/java/android/net/IIpMemoryStoreCallbacks.aidl",
-        "core/java/android/net/ipmemorystore/**/*.aidl",
-    ],
-    backend: {
-        ndk: {
-            enabled: false,
-        },
-        cpp: {
-            enabled: false,
-        },
-    },
-    api_dir: "aidl/networkstack",
-}
-
-aidl_interface {
-    name: "ipmemorystore-aidl-interfaces",
-    local_include_dir: "core/java",
-    srcs: [
-        "core/java/android/net/IIpMemoryStore.aidl",
-        "core/java/android/net/IIpMemoryStoreCallbacks.aidl",
-        "core/java/android/net/ipmemorystore/**/*.aidl",
-    ],
-}
-
-aidl_interface {
-    name: "networkstack-aidl-framework",
-    local_include_dir: "core/java",
-    srcs: [
-        "core/java/android/net/TcpKeepalivePacketDataParcelable.aidl",
-    ],
-    api_dir: "aidl/networkstack",
-    backend: {
-        java: {
-            sdk_version: "28",
-        },
-    },
 }
 
 filegroup {
@@ -1685,6 +1629,8 @@ droidstubs {
     srcs: [
         ":openjdk_java_files",
         ":non_openjdk_java_files",
+        ":opt-telephony-common-srcs",
+        "core/java/**/*.java",
     ],
     arg_files: [
         "core/res/AndroidManifest.xml",

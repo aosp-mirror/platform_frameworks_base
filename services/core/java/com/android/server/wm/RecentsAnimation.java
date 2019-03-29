@@ -31,6 +31,7 @@ import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_ORIGINAL_POSITION;
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_TOP;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_RECENTS_ANIMATIONS;
 
 import android.app.ActivityOptions;
 import android.app.AppOpsManager;
@@ -59,7 +60,7 @@ import java.util.List;
 class RecentsAnimation implements RecentsAnimationCallbacks,
         ActivityDisplay.OnStackOrderChangedListener {
     private static final String TAG = RecentsAnimation.class.getSimpleName();
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = DEBUG_RECENTS_ANIMATIONS;
 
     private final ActivityTaskManagerService mService;
     private final ActivityStackSupervisor mStackSupervisor;
@@ -395,11 +396,23 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
             // The stack is not visible, so ignore this change
             return;
         }
+        final RecentsAnimationController controller =
+                mWindowManager.getRecentsAnimationController();
 
-        // If the activity display stack order changes, cancel any running recents animation in
-        // place
-        mWindowManager.cancelRecentsAnimationSynchronously(REORDER_KEEP_IN_PLACE,
-                "stackOrderChanged");
+        // Cancel running recents animation and screenshot previous task when the next
+        // transition starts in below cases:
+        // 1) The next launching task is not in recents animation task.
+        // 2) The next task is home activity. (i.e. pressing home key to back home in recents).
+        if ((!controller.isAnimatingTask(stack.getTaskStack().getTopChild())
+                || controller.isTargetApp(stack.getTopActivity().mAppWindowToken))
+                && controller.shouldCancelWithDeferredScreenshot()) {
+            controller.cancelOnNextTransitionStart();
+        } else {
+            // Just cancel directly to unleash from launcher when the next launching task is the
+            // current top task.
+            mWindowManager.cancelRecentsAnimationSynchronously(REORDER_KEEP_IN_PLACE,
+                    "stackOrderChanged");
+        }
     }
 
     /**
@@ -407,7 +420,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
      */
     private void notifyAnimationCancelBeforeStart(IRecentsAnimationRunner recentsAnimationRunner) {
         try {
-            recentsAnimationRunner.onAnimationCanceled();
+            recentsAnimationRunner.onAnimationCanceled(false /* deferredWithScreenshot */);
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to cancel recents animation before start", e);
         }

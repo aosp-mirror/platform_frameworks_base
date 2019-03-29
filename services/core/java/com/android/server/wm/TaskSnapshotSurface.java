@@ -454,7 +454,7 @@ class TaskSnapshotSurface implements StartingSurface {
         public void resized(Rect frame, Rect overscanInsets, Rect contentInsets, Rect visibleInsets,
                 Rect stableInsets, Rect outsets, boolean reportDraw,
                 MergedConfiguration mergedConfiguration, Rect backDropFrame, boolean forceLayout,
-                boolean alwaysConsumeNavBar, int displayId,
+                boolean alwaysConsumeSystemBars, int displayId,
                 DisplayCutout.ParcelableWrapper displayCutout) {
             if (mergedConfiguration != null && mOuter != null
                     && mOuter.mOrientationOnCreation

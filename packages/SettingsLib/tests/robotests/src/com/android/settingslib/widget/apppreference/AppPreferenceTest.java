@@ -57,24 +57,6 @@ public class AppPreferenceTest {
     }
 
     @Test
-    public void setSummary_showSummaryContainer() {
-        mPref.setSummary("test");
-        mPref.onBindViewHolder(mHolder);
-
-        assertThat(mHolder.findViewById(R.id.summary_container).getVisibility())
-                .isEqualTo(View.VISIBLE);
-    }
-
-    @Test
-    public void noSummary_hideSummaryContainer() {
-        mPref.setSummary(null);
-        mPref.onBindViewHolder(mHolder);
-
-        assertThat(mHolder.findViewById(R.id.summary_container).getVisibility())
-                .isEqualTo(View.GONE);
-    }
-
-    @Test
     public void foobar_testName() {
         float iconSize = mContext.getResources().getDimension(R.dimen.secondary_app_icon_size);
         assertThat(Float.floatToIntBits(iconSize)).isEqualTo(Float.floatToIntBits(32));

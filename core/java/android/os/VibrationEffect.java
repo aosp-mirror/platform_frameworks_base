@@ -23,7 +23,7 @@ import android.annotation.TestApi;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.hardware.vibrator.V1_0.EffectStrength;
-import android.hardware.vibrator.V1_2.Effect;
+import android.hardware.vibrator.V1_3.Effect;
 import android.net.Uri;
 import android.util.MathUtils;
 
@@ -93,6 +93,18 @@ public abstract class VibrationEffect implements Parcelable {
      * @see #get(int)
      */
     public static final int EFFECT_HEAVY_CLICK = Effect.HEAVY_CLICK;
+
+    /**
+     * A texture effect meant to replicate soft ticks.
+     *
+     * Unlike normal effects, texture effects are meant to be called repeatedly, generally in
+     * response to some motion, in order to replicate the feeling of some texture underneath the
+     * user's fingers.
+     *
+     * @see #get(int)
+     * @hide
+     */
+    public static final int EFFECT_TEXTURE_TICK = Effect.TEXTURE_TICK;
 
     /** {@hide} */
     @TestApi
@@ -746,6 +758,7 @@ public abstract class VibrationEffect implements Parcelable {
                 case EFFECT_CLICK:
                 case EFFECT_DOUBLE_CLICK:
                 case EFFECT_TICK:
+                case EFFECT_TEXTURE_TICK:
                 case EFFECT_THUD:
                 case EFFECT_POP:
                 case EFFECT_HEAVY_CLICK:
@@ -798,7 +811,7 @@ public abstract class VibrationEffect implements Parcelable {
             out.writeInt(mEffectStrength);
         }
 
-        public static final @android.annotation.NonNull Parcelable.Creator<Prebaked> CREATOR =
+        public static final @NonNull Parcelable.Creator<Prebaked> CREATOR =
             new Parcelable.Creator<Prebaked>() {
                 @Override
                 public Prebaked createFromParcel(Parcel in) {
@@ -813,7 +826,7 @@ public abstract class VibrationEffect implements Parcelable {
             };
     }
 
-    public static final @android.annotation.NonNull Parcelable.Creator<VibrationEffect> CREATOR =
+    public static final @NonNull Parcelable.Creator<VibrationEffect> CREATOR =
             new Parcelable.Creator<VibrationEffect>() {
                 @Override
                 public VibrationEffect createFromParcel(Parcel in) {

@@ -157,6 +157,10 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
         mSecurityContainer.showPrimarySecurityScreen(false);
     }
 
+    public KeyguardSecurityView getCurrentSecurityView() {
+        return mSecurityContainer != null ? mSecurityContainer.getCurrentSecurityView() : null;
+    }
+
     /**
      * Show a string explaining why the security view needs to be solved.
      *

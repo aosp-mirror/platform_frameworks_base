@@ -19,6 +19,7 @@ package com.android.internal.os;
 import static android.system.OsConstants.S_IRWXG;
 import static android.system.OsConstants.S_IRWXO;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.os.Build;
@@ -102,6 +103,7 @@ public class ZygoteInit {
     /**
      * Used to pre-load resources.
      */
+    @UnsupportedAppUsage
     private static Resources mResources;
 
     /**
@@ -777,6 +779,7 @@ public class ZygoteInit {
         return result;
     }
 
+    @UnsupportedAppUsage
     public static void main(String argv[]) {
         ZygoteServer zygoteServer = null;
 

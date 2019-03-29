@@ -1141,11 +1141,22 @@ public class PackageManagerService extends IPackageManager.Stub
                     switch (userStatus) {
                         case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS:
                             if (!verified) {
-                                // updatedStatus is already UNDEFINED
-                                needUpdate = true;
+                                // Don't demote if sysconfig says 'always'
+                                SystemConfig systemConfig = SystemConfig.getInstance();
+                                ArraySet<String> packages = systemConfig.getLinkedApps();
+                                if (!packages.contains(packageName)) {
+                                    // updatedStatus is already UNDEFINED
+                                    needUpdate = true;
 
-                                if (DEBUG_DOMAIN_VERIFICATION) {
-                                    Slog.d(TAG, "Formerly validated but now failing; demoting");
+                                    if (DEBUG_DOMAIN_VERIFICATION) {
+                                        Slog.d(TAG, "Formerly validated but now failing; demoting");
+                                    }
+                                } else {
+                                    if (DEBUG_DOMAIN_VERIFICATION) {
+                                        Slog.d(TAG, "Updating bundled package " + packageName
+                                                + " failed autoVerify, but sysconfig supersedes");
+                                    }
+                                    // leave needUpdate == false here intentionally
                                 }
                             }
                             break;
@@ -2450,7 +2461,9 @@ public class PackageManagerService extends IPackageManager.Stub
             mIsPreNUpgrade = mIsUpgrade && ver.sdkVersion < Build.VERSION_CODES.N;
 
             mIsPreNMR1Upgrade = mIsUpgrade && ver.sdkVersion < Build.VERSION_CODES.N_MR1;
-            mIsPreQUpgrade = mIsUpgrade && ver.sdkVersion < Build.VERSION_CODES.Q;
+            mIsPreQUpgrade = mIsUpgrade && ver.sdkVersion < Build.VERSION_CODES.Q
+                    // STOPSHIP: Remove next line when API level for Q is defined.
+                    && Build.VERSION.SDK_INT > Build.VERSION_CODES.P;
 
             int preUpgradeSdkVersion = ver.sdkVersion;
 
@@ -4979,7 +4992,9 @@ public class PackageManagerService extends IPackageManager.Stub
                         PackageManager.MATCH_STATIC_SHARED_LIBRARIES, userId,
                         false  /* throwIfPermNotDeclared*/)
                 || mContext.checkCallingOrSelfPermission(REQUEST_DELETE_PACKAGES)
-                        == PERMISSION_GRANTED;
+                        == PERMISSION_GRANTED
+                || mContext.checkCallingOrSelfPermission(
+                        Manifest.permission.ACCESS_SHARED_LIBRARIES) == PERMISSION_GRANTED;
 
         synchronized (mPackages) {
             List<SharedLibraryInfo> result = null;
@@ -5022,6 +5037,76 @@ public class PackageManagerService extends IPackageManager.Stub
                         result = new ArrayList<>();
                     }
                     result.add(resLibInfo);
+                }
+            }
+
+            return result != null ? new ParceledListSlice<>(result) : null;
+        }
+    }
+
+    @Nullable
+    @Override
+    public ParceledListSlice<SharedLibraryInfo> getDeclaredSharedLibraries(
+            @NonNull String packageName, int flags, @NonNull int userId) {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_SHARED_LIBRARIES,
+                "getDeclaredSharedLibraries");
+        int callingUid = Binder.getCallingUid();
+        mPermissionManager.enforceCrossUserPermission(callingUid, userId,
+                true /* requireFullPermission */, false /* checkShell */,
+                "getDeclaredSharedLibraries");
+
+        Preconditions.checkNotNull(packageName, "packageName cannot be null");
+        Preconditions.checkArgumentNonnegative(userId, "userId must be >= 0");
+        if (!sUserManager.exists(userId)) {
+            return null;
+        }
+
+        if (getInstantAppPackageName(callingUid) != null) {
+            return null;
+        }
+
+        synchronized (mPackages) {
+            List<SharedLibraryInfo> result = null;
+
+            int libraryCount = mSharedLibraries.size();
+            for (int i = 0; i < libraryCount; i++) {
+                LongSparseArray<SharedLibraryInfo> versionedLibrary = mSharedLibraries.valueAt(i);
+                if (versionedLibrary == null) {
+                    continue;
+                }
+
+                int versionCount = versionedLibrary.size();
+                for (int j = 0; j < versionCount; j++) {
+                    SharedLibraryInfo libraryInfo = versionedLibrary.valueAt(j);
+
+                    VersionedPackage declaringPackage = libraryInfo.getDeclaringPackage();
+                    if (!Objects.equals(declaringPackage.getPackageName(), packageName)) {
+                        continue;
+                    }
+
+                    long identity = Binder.clearCallingIdentity();
+                    try {
+                        PackageInfo packageInfo = getPackageInfoVersioned(declaringPackage, flags
+                                | PackageManager.MATCH_STATIC_SHARED_LIBRARIES, userId);
+                        if (packageInfo == null) {
+                            continue;
+                        }
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
+
+                    SharedLibraryInfo resultLibraryInfo = new SharedLibraryInfo(
+                            libraryInfo.getPath(), libraryInfo.getPackageName(),
+                            libraryInfo.getAllCodePaths(), libraryInfo.getName(),
+                            libraryInfo.getLongVersion(), libraryInfo.getType(),
+                            libraryInfo.getDeclaringPackage(), getPackagesUsingSharedLibraryLPr(
+                            libraryInfo, flags, userId), libraryInfo.getDependencies() == null
+                            ? null : new ArrayList<>(libraryInfo.getDependencies()));
+
+                    if (result == null) {
+                        result = new ArrayList<>();
+                    }
+                    result.add(resultLibraryInfo);
                 }
             }
 
@@ -17715,6 +17800,12 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public boolean isPackageDeviceAdminOnAnyUser(String packageName) {
         final int callingUid = Binder.getCallingUid();
+        if (checkUidPermission(android.Manifest.permission.MANAGE_USERS, callingUid)
+                != PERMISSION_GRANTED) {
+            EventLog.writeEvent(0x534e4554, "128599183", -1, "");
+            throw new SecurityException(android.Manifest.permission.MANAGE_USERS
+                    + " permission is required to call this API");
+        }
         if (getInstantAppPackageName(callingUid) != null
                 && !isCallerSameApp(packageName, callingUid)) {
             return false;

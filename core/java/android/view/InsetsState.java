@@ -17,9 +17,6 @@
 package android.view;
 
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
-import static android.view.ViewRootImpl.NEW_INSETS_MODE_IME;
-import static android.view.ViewRootImpl.NEW_INSETS_MODE_NONE;
-import static android.view.WindowInsets.Type.IME;
 import static android.view.WindowInsets.Type.SIZE;
 import static android.view.WindowInsets.Type.indexOf;
 
@@ -31,7 +28,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetType;
@@ -40,7 +36,6 @@ import android.view.WindowManager.LayoutParams;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
 import java.util.Objects;
 
 /**
@@ -130,7 +125,7 @@ public class InsetsState implements Parcelable {
      * @return The calculated insets.
      */
     public WindowInsets calculateInsets(Rect frame, boolean isScreenRound,
-            boolean alwaysConsumeNavBar, DisplayCutout cutout,
+            boolean alwaysConsumeSystemBars, DisplayCutout cutout,
             @Nullable Rect legacyContentInsets, @Nullable Rect legacyStableInsets,
             int legacySoftInputMode, @Nullable @InsetSide SparseIntArray typeSideMap) {
         Insets[] typeInsetsMap = new Insets[Type.SIZE];
@@ -180,7 +175,7 @@ public class InsetsState implements Parcelable {
             }
         }
         return new WindowInsets(typeInsetsMap, typeMaxInsetsMap, typeVisibilityMap, isScreenRound,
-                alwaysConsumeNavBar, cutout);
+                alwaysConsumeSystemBars, cutout);
     }
 
     private void processSource(InsetsSource source, Rect relativeFrame, boolean ignoreVisibility,

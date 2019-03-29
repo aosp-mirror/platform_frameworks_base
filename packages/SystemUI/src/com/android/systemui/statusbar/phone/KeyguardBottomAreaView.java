@@ -67,6 +67,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -170,6 +171,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private boolean mDozing;
     private int mIndicationBottomMargin;
     private float mDarkAmount;
+    private ActivityIntentHelper mActivityIntentHelper;
 
     public KeyguardBottomAreaView(Context context) {
         this(context, null);
@@ -235,6 +237,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     protected void onFinishInflate() {
         super.onFinishInflate();
         mLockPatternUtils = new LockPatternUtils(mContext);
+        mPreviewInflater = new PreviewInflater(mContext, new LockPatternUtils(mContext),
+                new ActivityIntentHelper(mContext));
         mPreviewContainer = findViewById(R.id.preview_container);
         mOverlayContainer = findViewById(R.id.overlay_container);
         mRightAffordanceView = findViewById(R.id.camera_button);
@@ -254,7 +258,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mLockIcon.update();
         setClipChildren(false);
         setClipToPadding(false);
-        mPreviewInflater = new PreviewInflater(mContext, new LockPatternUtils(mContext));
         inflateCameraPreview();
         mLockIcon.setOnClickListener(this);
         mLockIcon.setOnLongClickListener(this);
@@ -266,6 +269,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mAccessibilityController = Dependency.get(AccessibilityController.class);
         mAssistManager = Dependency.get(AssistManager.class);
         mLockIcon.setAccessibilityController(mAccessibilityController);
+        mActivityIntentHelper = new ActivityIntentHelper(getContext());
         updateLeftAffordance();
     }
 
@@ -459,7 +463,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
     public void bindCameraPrewarmService() {
         Intent intent = getCameraIntent();
-        ActivityInfo targetInfo = PreviewInflater.getTargetActivityInfo(mContext, intent,
+        ActivityInfo targetInfo = mActivityIntentHelper.getTargetActivityInfo(intent,
                 KeyguardUpdateMonitor.getCurrentUser(), true /* onlyDirectBootAware */);
         if (targetInfo != null && targetInfo.metaData != null) {
             String clazz = targetInfo.metaData.getString(
@@ -500,8 +504,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     public void launchCamera(String source) {
         final Intent intent = getCameraIntent();
         intent.putExtra(EXTRA_CAMERA_LAUNCH_SOURCE, source);
-        boolean wouldLaunchResolverActivity = PreviewInflater.wouldLaunchResolverActivity(
-                mContext, intent, KeyguardUpdateMonitor.getCurrentUser());
+        boolean wouldLaunchResolverActivity = mActivityIntentHelper.wouldLaunchResolverActivity(
+                intent, KeyguardUpdateMonitor.getCurrentUser());
         if (intent == SECURE_CAMERA_INTENT && !wouldLaunchResolverActivity) {
             AsyncTask.execute(new Runnable() {
                 @Override

@@ -16,10 +16,13 @@
 
 package com.android.internal.os;
 
+import android.annotation.UnsupportedAppUsage;
+
 /**
  * Exception thrown when a security policy is violated.
  */
 class ZygoteSecurityException extends RuntimeException {
+    @UnsupportedAppUsage
     ZygoteSecurityException(String message) {
         super(message);
     }

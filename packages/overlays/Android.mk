@@ -39,20 +39,15 @@ LOCAL_REQUIRED_MODULES := \
 	IconShapeRoundedRectOverlay \
 	IconShapeSquareOverlay \
 	IconShapeSquircleOverlay \
-	IconShapeTeardropOverlay
+	IconShapeTeardropOverlay \
+	NavigationBarMode3ButtonOverlay \
+	NavigationBarMode2ButtonOverlay \
+	NavigationBarModeGesturalOverlay
 
 include $(BUILD_PHONY_PACKAGE)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := frameworks-base-overlays-debug
-LOCAL_REQUIRED_MODULES := \
-	ExperimentNavigationBarFloatingOverlay \
-	ExperimentNavigationBarVisualInsetOverlay \
-	ExperimentNavigationBarDefaultOverlay \
-	ExperimentNavigationBarSlimOverlay32 \
-	ExperimentNavigationBarSlimOverlay40 \
-	ExperimentNavigationBarLargeOverlay56 \
-	ExperimentNavigationBarLargeOverlay64
 
 include $(BUILD_PHONY_PACKAGE)
 include $(call first-makefiles-under,$(LOCAL_PATH))

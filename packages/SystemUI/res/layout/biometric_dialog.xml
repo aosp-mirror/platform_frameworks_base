@@ -128,7 +128,6 @@
                             android:textSize="12sp"
                             android:gravity="center_horizontal"
                             android:accessibilityLiveRegion="polite"
-                            android:contentDescription="@string/accessibility_biometric_dialog_help_area"
                             android:textColor="?android:attr/textColorSecondary"/>
 
                         <LinearLayout

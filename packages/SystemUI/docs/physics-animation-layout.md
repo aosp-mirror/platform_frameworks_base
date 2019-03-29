@@ -25,21 +25,73 @@ Value to add every time chained animations update the subsequent animation in th
 Returns a SpringForce instance to use for animations of the given property. This allows the controller to configure stiffness and bounciness values. Since the physics animations internally use SpringForce instances to hold inflight animation values, this method needs to return a new SpringForce instance each time - no constants allowed.
 
 ### Animation Control Methods
-![Diagram of how calls to animateValueForChildAtIndex dispatch to DynamicAnimations.](physics-animation-layout-control-methods.png)
 Once the layout has used the controller’s configuration properties to build the animations, the controller can use them to actually run animations. This is done for two reasons - reacting to a view being added or removed, or responding to another class (such as a touch handler or broadcast receiver) requesting an animation. ```onChildAdded```, ```onChildRemoved```, and ```setChildVisibility``` are called automatically by the layout, giving the controller the opportunity to animate the child in/out/visible/gone. Custom methods are called by anyone with access to the controller instance to do things like expand, collapse, or move the child views.
 
-In either case, the controller has access to the layout’s protected ```animateValueForChildAtIndex(ViewProperty property, int index, float value)``` method. This method is used to actually run an animation.
+In either case, the controller can use `super.animationForChild` to retrieve a `PhysicsPropertyAnimator` instance. This object behaves similarly to the `ViewPropertyAnimator` object you would receive from `View.animate()`. 
 
-For example, moving the first child view to *(100, 200)*:
+#### PhysicsPropertyAnimator
+
+Like `ViewPropertyAnimator`, `PhysicsPropertyAnimator` provides the following methods for animating properties:
+- `alpha(float)`
+- `translationX/Y/Z(float)`
+- `scaleX/Y(float)`
+
+It also provides the following configuration methods:
+- `withStartDelay(int)`, for starting the animation after a given delay.
+- `withStartVelocity(float)`, for starting the animation with the given start velocity.
+- `withPositionStartVelocities(float, float)`, for setting specific start velocities for TRANSLATION_X and TRANSLATION_Y, since these typically differ.
+- `start(Runnable)`, to start the animation, with an optional end action to call when the animations for every property (including chained animations) have completed.
+
+For example, moving the first child view:
 
 ```
-animateValueForChildAtIndex(TRANSLATION_X, 0, 100);
-animateValueForChildAtIndex(TRANSLATION_Y, 0, 200);
+animationForChild(getChildAt(0))
+    .translationX(100)
+    .translationY(200)
+    .setStartDelay(500)
+    .start();
 ```
 
-This would use the physics animations constructed by the layout to spring the view to *(100, 200)*.
+This would use the physics animations constructed by the layout to spring the view to *(100, 200)* after 500ms.
 
 If the controller’s ```getNextAnimationInChain``` method set up the first child’s TRANSLATION_X/Y animations to be chained to the second child’s, this would result in the second child also springing towards (100, 200), plus any offset returned by ```getOffsetForChainedPropertyAnimation```.
+
+##### Advanced Usage
+The animator has additional functionality to reduce the amount of boilerplate required for typical physics animation use cases.
+
+- Often, animations will set starting values for properties before the animation begins. Property methods like `translationX` have an overloaded variant: `translationX(from, to)`. When `start()` is called, the animation will set the view's translationX property to `from` before beginning the animation to `to`.
+- We may want to use different end actions for each property. For example, if we're animating a view to the bottom of the screen, and also fading it out, we might want to perform an action as soon as the fade out is complete. We can use `alpha(to, endAction)`, which will call endAction as soon as the alpha animation is finished. A special case is `position(x, y, endAction)`, where the endAction is called when both translationX and translationY animations have completed.
+
+`PhysicsAnimationController` also provides `animationsForChildrenFromIndex(int, ChildAnimationConfigurator)`. This is a convenience method for starting animations on multiple child views, starting at the given index. The `ChildAnimationConfigurator` is called with a `PhysicsPropertyAnimator` for each child, where calls to methods like `translationX` and `withStartVelocity` can be made. `animationsForChildrenFromIndex` returns a `MultiAnimationStarter` with a single method, `startAll(endAction)`, which starts all of the animations and calls the end action when they have all completed.
+
+##### Examples
+Spring the stack of bubbles (whose animations are chained) to the bottom of the screen, shrinking them to 50% size. Once the first bubble is done shrinking, begin fading them out, and then remove them all from the parent once all bubbles have faded out:
+
+```
+animationForChild(leadBubble)
+    .position(screenCenter, screenBottom)
+    .scaleX(0.5f)
+    .scaleY(0.5f, () -> animationForChild(leadBubble).alpha(0).start(removeAllFromParent))
+    .start();
+```
+
+'Drop in' a child view that was just added to the layout:
+
+```
+animationForChild(newView)
+    .scaleX(1.15f /* from */, 1f /* to */)
+    .scaleY(1.15f /* from */, 1f /* to */)
+    .alpha(0f /* from */, 1f /* to */)
+    .position(posX, posY)
+    .start();
+```
+
+Move every view except for the first to x = (index - 1) * 50, then remove the first view.
+
+```
+animationsForChildrenFromIndex(1, (index, anim) -> anim.translationX((index - 1) * 50))
+    .startAll(removeFirstView);
+```
 
 ## PhysicsAnimationLayout
 The layout itself is a FrameLayout descendant with a few extra methods:

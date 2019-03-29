@@ -26,6 +26,7 @@ import static android.system.OsConstants.STDOUT_FILENO;
 import static com.android.internal.os.ZygoteConnectionConstants.CONNECTION_TIMEOUT_MILLIS;
 import static com.android.internal.os.ZygoteConnectionConstants.WRAPPED_PID_TIMEOUT_MILLIS;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.pm.ApplicationInfo;
 import android.metrics.LogMaker;
 import android.net.Credentials;
@@ -69,9 +70,12 @@ class ZygoteConnection {
      * that it closes when the child process terminates. In other cases,
      * it is closed in the peer.
      */
+    @UnsupportedAppUsage
     private final LocalSocket mSocket;
+    @UnsupportedAppUsage
     private final DataOutputStream mSocketOutStream;
     private final BufferedReader mSocketReader;
+    @UnsupportedAppUsage
     private final Credentials peer;
     private final String abiList;
     private boolean isEof;
@@ -522,6 +526,7 @@ class ZygoteConnection {
     /**
      * Closes socket associated with this connection.
      */
+    @UnsupportedAppUsage
     void closeSocket() {
         try {
             mSocket.close();

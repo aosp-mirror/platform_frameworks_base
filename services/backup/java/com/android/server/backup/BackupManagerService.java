@@ -362,8 +362,8 @@ public class BackupManagerService {
      * @param dataManagementIntent An {@link Intent} that can be passed to {@link
      *     Context#startActivity} in order to launch the transport's data-management UI. It may be
      *     {@code null} if the transport does not offer any user-facing data management UI.
-     * @param dataManagementLabel A {@link String} to be used as the label for the transport's data
-     *     management affordance. This MUST be {@code null} when dataManagementIntent is {@code
+     * @param dataManagementLabel A {@link CharSequence} to be used as the label for the transport's
+     *     data management affordance. This MUST be {@code null} when dataManagementIntent is {@code
      *     null} and MUST NOT be {@code null} when dataManagementIntent is not {@code null}.
      * @throws SecurityException If the UID of the calling process differs from the package UID of
      *     {@code transportComponent} or if the caller does NOT have BACKUP permission.
@@ -375,7 +375,7 @@ public class BackupManagerService {
             @Nullable Intent configurationIntent,
             String currentDestinationString,
             @Nullable Intent dataManagementIntent,
-            String dataManagementLabel) {
+            CharSequence dataManagementLabel) {
         UserBackupManagerService userBackupManagerService =
                 getServiceForUserIfCallerHasPermission(userId, "updateTransportAttributes()");
 
@@ -521,7 +521,7 @@ public class BackupManagerService {
      * transport.
      */
     @Nullable
-    public String getDataManagementLabel(@UserIdInt int userId, String transportName) {
+    public CharSequence getDataManagementLabel(@UserIdInt int userId, String transportName) {
         UserBackupManagerService userBackupManagerService =
                 getServiceForUserIfCallerHasPermission(userId, "getDataManagementLabel()");
 

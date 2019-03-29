@@ -97,9 +97,10 @@ public final class GetEuiccProfileInfoListResult implements Parcelable {
         if (this.result == EuiccService.RESULT_OK) {
             this.mProfiles = profiles;
         } else {
-            if (profiles != null) {
+            // For error case, profiles is either null or 0 size.
+            if (profiles != null && profiles.length > 0) {
                 throw new IllegalArgumentException(
-                        "Error result with non-null profiles: " + result);
+                        "Error result with non-empty profiles: " + result);
             }
             this.mProfiles = null;
         }

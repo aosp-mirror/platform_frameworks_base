@@ -2038,13 +2038,13 @@ android_media_AudioSystem_getStreamVolumeDB(JNIEnv *env, jobject thiz,
 
 static jboolean
 android_media_AudioSystem_isOffloadSupported(JNIEnv *env, jobject thiz,
-        jint encoding, jint sampleRate, jint channelMask, jint channelIndexMask)
+        jint encoding, jint sampleRate, jint channelMask, jint channelIndexMask, jint streamType)
 {
     audio_offload_info_t format = AUDIO_INFO_INITIALIZER;
     format.format = (audio_format_t) audioFormatToNative(encoding);
     format.sample_rate = (uint32_t) sampleRate;
     format.channel_mask = nativeChannelMaskFromJavaChannelMasks(channelMask, channelIndexMask);
-    format.stream_type = AUDIO_STREAM_MUSIC;
+    format.stream_type = (audio_stream_type_t) streamType;
     format.has_video = false;
     format.is_streaming = false;
     // offload duration unknown at this point:
@@ -2292,7 +2292,7 @@ static const JNINativeMethod gMethods[] = {
                                     (void *)android_media_AudioSystem_registerRecordingCallback},
     {"systemReady", "()I", (void *)android_media_AudioSystem_systemReady},
     {"getStreamVolumeDB", "(III)F", (void *)android_media_AudioSystem_getStreamVolumeDB},
-    {"native_is_offload_supported", "(IIII)Z", (void *)android_media_AudioSystem_isOffloadSupported},
+    {"native_is_offload_supported", "(IIIII)Z", (void *)android_media_AudioSystem_isOffloadSupported},
     {"getMicrophones", "(Ljava/util/ArrayList;)I", (void *)android_media_AudioSystem_getMicrophones},
     {"getSurroundFormats", "(Ljava/util/Map;Z)I", (void *)android_media_AudioSystem_getSurroundFormats},
     {"setSurroundFormatEnabled", "(IZ)I", (void *)android_media_AudioSystem_setSurroundFormatEnabled},

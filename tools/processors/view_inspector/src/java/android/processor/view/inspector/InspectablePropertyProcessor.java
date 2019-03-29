@@ -46,7 +46,7 @@ import javax.lang.model.type.TypeMirror;
  *
  * @see android.view.inspector.InspectableProperty
  */
-public final class InspectablePropertyProcessor implements ModelProcessor {
+public final class InspectablePropertyProcessor {
     private final @NonNull String mQualifiedName;
     private final @NonNull ProcessingEnvironment mProcessingEnv;
     private final @NonNull AnnotationUtils mAnnotationUtils;
@@ -139,7 +139,6 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
         mAnnotationUtils = new AnnotationUtils(processingEnv);
     }
 
-    @Override
     public void process(@NonNull Element element, @NonNull InspectableClassModel model) {
         try {
             final AnnotationMirror annotation =
@@ -608,7 +607,7 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
      * Build a model of an {@code int} enumeration mapping from annotation values.
      *
      * This method only handles the one-to-one mapping of mirrors of
-     * {@link android.view.inspector.InspectableProperty.EnumMap} annotations into
+     * {@link android.view.inspector.InspectableProperty.EnumEntry} annotations into
      * {@link IntEnumEntry} objects. Further validation should be handled elsewhere
      *
      * @see android.view.inspector.InspectableProperty#enumMapping()
@@ -656,7 +655,7 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
      * Build a model of an {@code int} flag mapping from annotation values.
      *
      * This method only handles the one-to-one mapping of mirrors of
-     * {@link android.view.inspector.InspectableProperty.FlagMap} annotations into
+     * {@link android.view.inspector.InspectableProperty.FlagEntry} annotations into
      * {@link IntFlagEntry} objects. Further validation should be handled elsewhere
      *
      * @see android.view.inspector.IntFlagMapping

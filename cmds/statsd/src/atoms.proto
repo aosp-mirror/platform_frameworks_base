@@ -40,6 +40,7 @@ import "frameworks/base/core/proto/android/server/job/enums.proto";
 import "frameworks/base/core/proto/android/server/location/enums.proto";
 import "frameworks/base/core/proto/android/service/procstats_enum.proto";
 import "frameworks/base/core/proto/android/service/usb.proto";
+import "frameworks/base/core/proto/android/stats/connectivity/network_stack.proto";
 import "frameworks/base/core/proto/android/stats/enums.proto";
 import "frameworks/base/core/proto/android/stats/docsui/docsui_enums.proto";
 import "frameworks/base/core/proto/android/stats/devicepolicy/device_policy.proto";
@@ -252,6 +253,7 @@ message Atom {
         StyleUIChanged style_ui_changed = 179;
         PrivacyIndicatorsInteracted privacy_indicators_interacted = 180;
         AppInstallOnExternalStorageReported app_install_on_external_storage_reported = 181;
+        NetworkStackReported network_stack_reported = 182;
     }
 
     // Pulled events will start at field 10000.
@@ -2065,6 +2067,9 @@ message BluetoothClassicPairingEventReported {
     // HCI reason code associated with this event
     // Default: STATUS_UNKNOWN
     optional android.bluetooth.hci.StatusEnum reason_code = 6;
+    // A status value related to this specific event
+    // Default: 0
+    optional int64 event_value = 7;
 }
 
 /**
@@ -2428,6 +2433,8 @@ message TouchEventReported {
     optional float latency_mean_micros = 3;
     // Standard deviation
     optional float latency_stdev_micros = 4;
+    // Number of touch events (input_event) in this report
+    optional int32 count = 5;
 }
 
 /**
@@ -3419,7 +3426,6 @@ message HiddenApiUsed {
  * - When user clicks privacy chip
  * - How does the user exit the Privacy Dialog
  * Logged from:
- *   packages/SystemUI/src/com/android/systemui/privacy/OngoingPrivacyDialog.kt
  *   packages/SystemUI/src/com/android/systemui/qs/QuickStatusBarHeader.java
  */
 message PrivacyIndicatorsInteracted {
@@ -5848,4 +5854,15 @@ message GpuStatsAppInfo {
 message SystemIonHeapSize {
     // Size of the system ion heap in bytes.
     optional int64 size_in_bytes = 1;
+}
+
+/**
+ * Push network stack events.
+ *
+ * Log from:
+ *     frameworks/base/packages/NetworkStack/
+ */
+message NetworkStackReported {
+    optional int32 eventId = 1;
+    optional android.stats.connectivity.NetworkStackEventData network_stack_event = 2 [(log_mode) = MODE_BYTES];
 }

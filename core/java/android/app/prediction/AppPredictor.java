@@ -131,14 +131,14 @@ public final class AppPredictor {
      * @param launchLocation The launch location where the targets are shown to the user.
      * @param targetIds List of {@link AppTargetId}s that are shown to the user.
      */
-    public void notifyLocationShown(@NonNull String launchLocation,
+    public void notifyLaunchLocationShown(@NonNull String launchLocation,
             @NonNull List<AppTargetId> targetIds) {
         if (mIsClosed.get()) {
             throw new IllegalStateException("This client has already been destroyed.");
         }
 
         try {
-            mPredictionManager.notifyLocationShown(mSessionId, launchLocation,
+            mPredictionManager.notifyLaunchLocationShown(mSessionId, launchLocation,
                     new ParceledListSlice<>(targetIds));
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to notify location shown event", e);

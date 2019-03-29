@@ -1460,7 +1460,7 @@ public final class PowerManager {
      * an on/off switch for a subset of features.
      * @hide
      *
-     * @param dynamicPowerSavingsEnabled A signal indicating to the system if it believes the
+     * @param powerSaveHint A signal indicating to the system if it believes the
      * dynamic power savings behaviors should be activated.
      * @param disableThreshold When the suggesting app believes it would be safe to disable dynamic
      * power savings behaviors.
@@ -1471,10 +1471,9 @@ public final class PowerManager {
     @SystemApi
     @TestApi
     @RequiresPermission(permission.POWER_SAVER)
-    public boolean setDynamicPowerSavings(boolean dynamicPowerSavingsEnabled,
-            int disableThreshold) {
+    public boolean setDynamicPowerSaveHint(boolean powerSaveHint, int disableThreshold) {
         try {
-            return mService.setDynamicPowerSavings(dynamicPowerSavingsEnabled, disableThreshold);
+            return mService.setDynamicPowerSaveHint(powerSaveHint, disableThreshold);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1525,54 +1524,54 @@ public final class PowerManager {
     /**
      * Indicates automatic battery saver toggling by the system will be based on percentage.
      *
-     * @see PowerManager#getPowerSaveMode()
+     * @see PowerManager#getPowerSaveModeTrigger()
      *
      *  @hide
      */
     @SystemApi
     @TestApi
-    public static final int POWER_SAVER_MODE_PERCENTAGE = 0;
+    public static final int POWER_SAVE_MODE_TRIGGER_PERCENTAGE = 0;
 
     /**
      * Indicates automatic battery saver toggling by the system will be based on the state
      * of the dynamic power savings signal.
      *
-     * @see PowerManager#setDynamicPowerSavings(boolean, int)
-     * @see PowerManager#getPowerSaveMode()
+     * @see PowerManager#setDynamicPowerSaveHint(boolean, int)
+     * @see PowerManager#getPowerSaveModeTrigger()
      *
      *  @hide
      */
     @SystemApi
     @TestApi
-    public static final int POWER_SAVER_MODE_DYNAMIC = 1;
+    public static final int POWER_SAVE_MODE_TRIGGER_DYNAMIC = 1;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(value = {
-        POWER_SAVER_MODE_PERCENTAGE,
-        POWER_SAVER_MODE_DYNAMIC
+        POWER_SAVE_MODE_TRIGGER_PERCENTAGE,
+        POWER_SAVE_MODE_TRIGGER_DYNAMIC
 
     })
-    public @interface AutoPowerSaverMode{}
+    public @interface AutoPowerSaveModeTriggers {}
 
 
     /**
      * Returns the current battery saver control mode. Values it may return are defined in
-     * AutoPowerSaverMode. Note that this is a global device state, not a per user setting.
+     * AutoPowerSaveModeTriggers. Note that this is a global device state, not a per user setting.
      *
      * @return The current value power saver mode for the system.
      *
-     * @see AutoPowerSaverMode
-     * @see PowerManager#getPowerSaveMode()
+     * @see AutoPowerSaveModeTriggers
+     * @see PowerManager#getPowerSaveModeTrigger()
      * @hide
      */
-    @AutoPowerSaverMode
+    @AutoPowerSaveModeTriggers
     @SystemApi
     @TestApi
     @RequiresPermission(android.Manifest.permission.POWER_SAVER)
-    public int getPowerSaveMode() {
+    public int getPowerSaveModeTrigger() {
         try {
-            return mService.getPowerSaveMode();
+            return mService.getPowerSaveModeTrigger();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

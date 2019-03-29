@@ -1428,6 +1428,70 @@ public class TelephonyManager {
     public static final String EXTRA_ANOMALY_DESCRIPTION =
             "android.telephony.extra.ANOMALY_DESCRIPTION";
 
+    /**
+     * Broadcast intent sent to indicate primary (non-opportunistic) subscription list has changed.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_PRIMARY_SUBSCRIPTION_LIST_CHANGED =
+            "android.telephony.action.PRIMARY_SUBSCRIPTION_LIST_CHANGED";
+
+    /**
+     * Integer intent extra to be used with {@link #ACTION_PRIMARY_SUBSCRIPTION_LIST_CHANGED}
+     * to indicate whether a SIM selection is needed to choose default subscription.
+     *
+     * @hide
+     */
+    public static final String EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE =
+            "android.telephony.extra.DEFAULT_SUBSCRIPTION_SELECT_TYPE";
+
+    /**
+     * Used as an int value for {@link #EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE}
+     * to indicate there's no need to re-select any default subscription.
+     * @hide
+     */
+    public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_NONE = 0;
+
+    /**
+     * Used as an int value for {@link #EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE}
+     * to indicate there's a need to select default data subscription.
+     * @hide
+     */
+    public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_DATA = 1;
+
+    /**
+     * Used as an int value for {@link #EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE}
+     * to indicate there's a need to select default voice call subscription.
+     * @hide
+     */
+    public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_VOICE = 2;
+
+    /**
+     * Used as an int value for {@link #EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE}
+     * to indicate there's a need to select default sms subscription.
+     * @hide
+     */
+    public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_SMS = 3;
+
+    /**
+     * Used as an int value for {@link #EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE}
+     * to indicate user to decide whether current SIM should be preferred for all
+     * data / voice / sms.
+     * @hide
+     */
+    public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_FOR_ALL_TYPES = 4;
+
+    /**
+     * Integer intent extra to be used with
+     * {@link #EXTRA_DEFAULT_SUBSCRIPTION_SELECT_FOR_ALL_TYPES}
+     * to indicate which SIM is being selected.
+     *
+     * @hide
+     */
+    public static final String EXTRA_DEFAULT_SUBSCRIPTION_ID =
+            "android.telephony.extra.DEFAULT_SUBSCRIPTION_ID";
+
     //
     //
     // Device Info
@@ -5296,7 +5360,6 @@ public class TelephonyManager {
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     @SystemApi
-    @Nullable
     public boolean iccCloseLogicalChannelBySlot(int slotIndex, int channel) {
         try {
             ITelephony telephony = getITelephony();
@@ -5373,8 +5436,8 @@ public class TelephonyManager {
      * @param p3 P3 value of the APDU command. If p3 is negative a 4 byte APDU
      *            is sent to the SIM.
      * @param data Data to be sent with the APDU.
-     * @return The APDU response from the ICC card with the status appended at
-     *            the end.
+     * @return The APDU response from the ICC card with the status appended at the end, or null if
+     * there is an issue connecting to the Telephony service.
      * @hide
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
@@ -7016,6 +7079,35 @@ public class TelephonyManager {
             Rlog.e(TAG, "getNetworkSelectionMode RemoteException", ex);
         }
         return mode;
+    }
+
+    /**
+     * Query Telephony to see if there has recently been an emergency SMS sent to the network by the
+     * user and we are still within the time interval after the emergency SMS was sent that we are
+     * considered in Emergency SMS mode.
+     *
+     * <p>This mode is used by other applications to allow them to perform special functionality,
+     * such as allow the GNSS service to provide user location to the carrier network for emergency
+     * when an emergency SMS is sent. This interval is set by
+     * {@link CarrierConfigManager#KEY_EMERGENCY_SMS_MODE_TIMER_MS_INT}. If
+     * the carrier does not support this mode, this function will always return false.
+     *
+     * @return true if this device is in emergency SMS mode, false otherwise.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public boolean isInEmergencySmsMode() {
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.isInEmergencySmsMode();
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getNetworkSelectionMode RemoteException", ex);
+        }
+        return false;
     }
 
     /**
@@ -10193,6 +10285,24 @@ public class TelephonyManager {
     }
 
     /**
+     * Determine whether the emergency assistance feature is available on the device.
+     * <p>
+     * Requires permission: {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE}
+     *
+     * @return whether the emergency assistance feature is available on the device
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @SystemApi
+    public boolean isEmergencyAssistanceEnabled() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+                "isEmergencyAssistanceEnabled");
+        return EMERGENCY_ASSISTANCE_ENABLED;
+    }
+
+    /**
      * Get the emergency number list based on current locale, sim, default, modem and network.
      *
      * <p>In each returned list, the emergency number {@link EmergencyNumber} coming from higher
@@ -10609,23 +10719,51 @@ public class TelephonyManager {
      * <p>Note: the API does not prevent access to the SIM cards for operations that don't require
      * access to the network.
      *
-     * @param isMultisimCarrierRestricted true if usage of multiple SIMs is restricted, false
+     * @param isMultiSimCarrierRestricted true if usage of multiple SIMs is restricted, false
      * otherwise.
      *
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    public void setMultisimCarrierRestriction(boolean isMultisimCarrierRestricted) {
+    public void setMultiSimCarrierRestriction(boolean isMultiSimCarrierRestricted) {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                service.setMultisimCarrierRestriction(isMultisimCarrierRestricted);
+                service.setMultiSimCarrierRestriction(isMultiSimCarrierRestricted);
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "setMultisimCarrierRestriction RemoteException", e);
+            Log.e(TAG, "setMultiSimCarrierRestriction RemoteException", e);
         }
     }
+
+    /**
+     * The usage of multiple SIM cards at the same time to register on the network (e.g. Dual
+     * Standby or Dual Active) is supported.
+     */
+    public static final int MULTISIM_ALLOWED = 0;
+
+    /**
+     * The usage of multiple SIM cards at the same time to register on the network (e.g. Dual
+     * Standby or Dual Active) is not supported by the hardware.
+     */
+    public static final int MULTISIM_NOT_SUPPORTED_BY_HARDWARE = 1;
+
+    /**
+     * The usage of multiple SIM cards at the same time to register on the network (e.g. Dual
+     * Standby or Dual Active) is supported by the hardware, but restricted by the carrier.
+     */
+    public static final int MULTISIM_NOT_SUPPORTED_BY_CARRIER = 2;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"MULTISIM_"},
+            value = {
+                    MULTISIM_ALLOWED,
+                    MULTISIM_NOT_SUPPORTED_BY_HARDWARE,
+                    MULTISIM_NOT_SUPPORTED_BY_CARRIER
+            })
+    public @interface IsMultiSimSupportedResult {}
 
     /**
      * Returns if the usage of multiple SIM cards at the same time to register on the network
@@ -10634,20 +10772,24 @@ public class TelephonyManager {
      * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
-     * @return true if usage of multiple SIMs is supported, false otherwise.
+     * @return {@link #MULTISIM_ALLOWED} if the device supports multiple SIMs.
+     * {@link #MULTISIM_NOT_SUPPORTED_BY_HARDWARE} if the device does not support multiple SIMs.
+     * {@link #MULTISIM_NOT_SUPPORTED_BY_CARRIER} in the device supports multiple SIMs, but the
+     * functionality is restricted by the carrier.
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    public boolean isMultisimSupported() {
+    @IsMultiSimSupportedResult
+    public int isMultiSimSupported() {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                return service.isMultisimSupported(getOpPackageName());
+                return service.isMultiSimSupported(getOpPackageName());
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "isMultisimSupported RemoteException", e);
+            Log.e(TAG, "isMultiSimSupported RemoteException", e);
         }
-        return false;
+        return MULTISIM_NOT_SUPPORTED_BY_HARDWARE;
     }
 
     /**

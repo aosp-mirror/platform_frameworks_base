@@ -58,6 +58,7 @@
         <item><xliff:g id="id">@string/status_bar_mobile</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_airplane</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_battery</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_sensors_off</xliff:g></item>
     </string-array>
 
     <string translatable="false" name="status_bar_rotate">rotate</string>
@@ -92,6 +93,7 @@
     <string translatable="false" name="status_bar_microphone">microphone</string>
     <string translatable="false" name="status_bar_camera">camera</string>
     <string translatable="false" name="status_bar_airplane">airplane</string>
+    <string translatable="false" name="status_bar_sensors_off">sensors_off</string>
 
     <!-- Flag indicating whether the surface flinger has limited
          alpha compositing functionality in hardware.  If set, the window
@@ -310,6 +312,15 @@
          Internet access. Actual device behaviour is controlled by
          Settings.Global.NETWORK_AVOID_BAD_WIFI. This is the default value of that setting. -->
     <integer translatable="false" name="config_networkAvoidBadWifi">1</integer>
+
+    <!-- The URL returned by ConnectivityManager#getCaptivePortalServerUrl. The actual returned
+         value is controlled by Settings.Global.CAPTIVE_PORTAL_HTTP_URL. This is the default value
+         used if that setting is unset.
+         This is *NOT* a URL that will always be used by the system network validation to detect
+         captive portals: NetworkMonitor may use different strategies and will not necessarily use
+         this URL. NetworkMonitor behaviour should be configured with NetworkStack resource overlays
+         instead. -->
+    <string translatable="false" name="config_networkDefaultCaptivePortalServerUrl">http://connectivitycheck.gstatic.com/generate_204</string>
 
     <!-- If the hardware supports specially marking packets that caused a wakeup of the
          main CPU, set this value to the mark used. -->
@@ -913,6 +924,11 @@
           enabled. But in environments like real car, default home app may be enough, and in that
           case, this can be disabled (set to false). -->
     <bool name="config_enableCarDockHomeLaunch">true</bool>
+
+    <!-- Control whether to force the display of System UI Bars at all times regardless of
+         System Ui Flags. This can be useful in the Automotive case if there's a requirement for
+         a UI element to be on screen at all times. -->
+    <bool name="config_forceShowSystemBars">false</bool>
 
     <!-- HDMI behavior -->
 
@@ -3215,6 +3231,12 @@
          -->
     <integer name="config_navBarOpacityMode">0</integer>
 
+    <!-- Controls the navigation bar interaction mode:
+         0: 3 button mode (back, home, overview buttons)
+         1: 2 button mode (back, home buttons + swipe up for overview)
+         2: gestures only for back, home and overview -->
+    <integer name="config_navBarInteractionMode">0</integer>
+
     <!-- Default insets [LEFT/RIGHTxTOP/BOTTOM] from the screen edge for picture-in-picture windows.
          These values are in DPs and will be converted to pixel sizes internally. -->
     <string translatable="false" name="config_defaultPictureInPictureScreenEdgeInsets">16x16</string>
@@ -3737,9 +3759,6 @@
 
     <!-- Package name for ManagedProvisioning which is responsible for provisioning work profiles. -->
     <string name="config_managed_provisioning_package" translatable="false">com.android.managedprovisioning</string>
-
-    <!-- Whether or not swipe up gesture is enabled by default -->
-    <bool name="config_swipe_up_gesture_default">false</bool>
 
     <!-- Whether or not swipe up gesture's opt-in setting is available on this device -->
     <bool name="config_swipe_up_gesture_setting_available">false</bool>

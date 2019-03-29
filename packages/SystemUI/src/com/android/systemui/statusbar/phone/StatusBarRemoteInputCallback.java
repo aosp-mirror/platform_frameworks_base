@@ -33,6 +33,7 @@ import android.os.UserHandle;
 import android.view.View;
 import android.view.ViewParent;
 
+import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.Dependency;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -46,7 +47,6 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
-import com.android.systemui.statusbar.policy.PreviewInflater;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -64,6 +64,7 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
             Dependency.get(NotificationLockscreenUserManager.class);
     private final ActivityStarter mActivityStarter = Dependency.get(ActivityStarter.class);
     private final Context mContext;
+    private final ActivityIntentHelper mActivityIntentHelper;
     private View mPendingWorkRemoteInputView;
     private View mPendingRemoteInputView;
     private final ShadeController mShadeController = Dependency.get(ShadeController.class);
@@ -83,6 +84,7 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
         mKeyguardManager = context.getSystemService(KeyguardManager.class);
         mCommandQueue = getComponent(context, CommandQueue.class);
         mCommandQueue.addCallback(this);
+        mActivityIntentHelper = new ActivityIntentHelper(mContext);
     }
 
     @Override
@@ -220,8 +222,8 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
             NotificationRemoteInputManager.ClickHandler defaultHandler) {
         final boolean isActivity = pendingIntent.isActivity();
         if (isActivity) {
-            final boolean afterKeyguardGone = PreviewInflater.wouldLaunchResolverActivity(
-                    mContext, pendingIntent.getIntent(), mLockscreenUserManager.getCurrentUserId());
+            final boolean afterKeyguardGone = mActivityIntentHelper.wouldLaunchResolverActivity(
+                    pendingIntent.getIntent(), mLockscreenUserManager.getCurrentUserId());
             mActivityStarter.dismissKeyguardThenExecute(() -> {
                 try {
                     ActivityManager.getService().resumeAppSwitches();

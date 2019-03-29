@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityManager.RECENT_WITH_EXCLUDED;
 import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
@@ -29,7 +30,9 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
@@ -512,6 +515,52 @@ public class RecentTasksTest extends ActivityTestsBase {
     }
 
     @Test
+    public void testVisibleTasks_excludedFromRecents_firstTaskNotVisible() {
+        // Create some set of tasks, some of which are visible and some are not
+        TaskRecord homeTask = setTaskActivityType(
+                createTaskBuilder("com.android.pkg1", ".HomeTask").build(),
+                ACTIVITY_TYPE_HOME);
+        homeTask.mUserSetupComplete = true;
+        mRecentTasks.add(homeTask);
+        TaskRecord excludedTask1 = createTaskBuilder(".ExcludedTask1")
+                .setFlags(FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                .build();
+        excludedTask1.mUserSetupComplete = true;
+        mRecentTasks.add(excludedTask1);
+
+        // Expect that the first visible excluded-from-recents task is visible
+        assertGetRecentTasksOrder(0 /* flags */, excludedTask1);
+    }
+
+    @Test
+    public void testVisibleTasks_excludedFromRecents_withExcluded() {
+        // Create some set of tasks, some of which are visible and some are not
+        TaskRecord t1 = createTaskBuilder("com.android.pkg1", ".Task1").build();
+        t1.mUserSetupComplete = true;
+        mRecentTasks.add(t1);
+        TaskRecord homeTask = setTaskActivityType(
+                createTaskBuilder("com.android.pkg1", ".HomeTask").build(),
+                ACTIVITY_TYPE_HOME);
+        homeTask.mUserSetupComplete = true;
+        mRecentTasks.add(homeTask);
+        TaskRecord excludedTask1 = createTaskBuilder(".ExcludedTask1")
+                .setFlags(FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                .build();
+        excludedTask1.mUserSetupComplete = true;
+        mRecentTasks.add(excludedTask1);
+        TaskRecord excludedTask2 = createTaskBuilder(".ExcludedTask2")
+                .setFlags(FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                .build();
+        excludedTask2.mUserSetupComplete = true;
+        mRecentTasks.add(excludedTask2);
+        TaskRecord t2 = createTaskBuilder("com.android.pkg2", ".Task1").build();
+        t2.mUserSetupComplete = true;
+        mRecentTasks.add(t2);
+
+        assertGetRecentTasksOrder(RECENT_WITH_EXCLUDED, t2, excludedTask2, excludedTask1, t1);
+    }
+
+    @Test
     public void testVisibleTasks_minNum() {
         mRecentTasks.setOnlyTestVisibleRange();
         mRecentTasks.setParameters(5 /* min */, -1 /* max */, 25 /* ms */);
@@ -830,7 +879,7 @@ public class RecentTasksTest extends ActivityTestsBase {
     }
 
     /**
-     * Ensures that the recent tasks list is in the provided order. Note that the expected tasks
+     * Ensures that the raw recent tasks list is in the provided order. Note that the expected tasks
      * should be ordered from least to most recent.
      */
     private void assertRecentTasksOrder(TaskRecord... expectedTasks) {
@@ -838,6 +887,22 @@ public class RecentTasksTest extends ActivityTestsBase {
         assertTrue(expectedTasks.length == tasks.size());
         for (int i = 0; i < tasks.size(); i++)  {
             assertTrue(expectedTasks[i] == tasks.get(i));
+        }
+    }
+
+    /**
+     * Ensures that the recent tasks list is in the provided order. Note that the expected tasks
+     * should be ordered from least to most recent.
+     */
+    private void assertGetRecentTasksOrder(int getRecentTaskFlags, TaskRecord... expectedTasks) {
+        doNothing().when(mRecentTasks).loadUserRecentsLocked(anyInt());
+        doReturn(true).when(mRecentTasks).isUserRunning(anyInt(), anyInt());
+        List<RecentTaskInfo> infos = mRecentTasks.getRecentTasks(MAX_VALUE, getRecentTaskFlags,
+                true /* getTasksAllowed */, false /* getDetailedTasks */,
+                TEST_USER_0_ID, 0).getList();
+        assertTrue(expectedTasks.length == infos.size());
+        for (int i = 0; i < infos.size(); i++)  {
+            assertTrue(expectedTasks[i].taskId == infos.get(i).taskId);
         }
     }
 
@@ -1018,7 +1083,7 @@ public class RecentTasksTest extends ActivityTestsBase {
 
         @Override
         protected RecentTasks createRecentTasks() {
-            return new TestRecentTasks(this, mTaskPersister);
+            return spy(new TestRecentTasks(this, mTaskPersister));
         }
 
         @Override

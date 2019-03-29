@@ -58,6 +58,7 @@ import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.shared.system.InputChannelCompat.InputEventDispatcher;
 import com.android.systemui.shared.system.NavigationBarCompat;
+import com.android.systemui.shared.system.QuickStepContract;
 
 import java.io.PrintWriter;
 
@@ -72,6 +73,7 @@ public class QuickStepController implements GestureHelper {
 
     /** Experiment to swipe home button left to execute a back key press */
     private static final String HIDE_BACK_BUTTON_PROP = "quickstepcontroller_hideback";
+    private static final String HIDE_HOME_BUTTON_PROP = "quickstepcontroller_hidehome";
     private static final String ENABLE_CLICK_THROUGH_NAV_PROP = "quickstepcontroller_clickthrough";
     private static final String GESTURE_REGION_THRESHOLD_SETTING = "gesture_region_threshold";
     private static final long BACK_BUTTON_FADE_IN_ALPHA = 150;
@@ -148,7 +150,7 @@ public class QuickStepController implements GestureHelper {
     public void setComponents(NavigationBarView navigationBarView) {
         mNavigationBarView = navigationBarView;
 
-        mNavigationBarView.getBackButton().setVisibility(shouldhideBackButton(mContext)
+        mNavigationBarView.getBackButton().setVisibility(shouldHideBackButton(mContext)
                 ? View.GONE
                 : View.VISIBLE);
     }
@@ -355,7 +357,7 @@ public class QuickStepController implements GestureHelper {
                         if (mCurrentAction != null) {
                             mCurrentAction.endGesture();
                         }
-                    } else if (getBoolGlobalSetting(mContext, ENABLE_CLICK_THROUGH_NAV_PROP)
+                    } else if (QuickStepContract.isGesturalMode(mContext)
                             && !mClickThroughPressed) {
                         // Enable click through functionality where no gesture has been detected and
                         // not passed the drag slop so inject a touch event at the same location
@@ -700,6 +702,8 @@ public class QuickStepController implements GestureHelper {
         return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
     }
 
+    // TODO(112934365): Clean up following methods when cleaning up nav bar experiments
+
     static boolean getBoolGlobalSetting(Context context, String key) {
         return Settings.Global.getInt(context.getContentResolver(), key, 0) != 0;
     }
@@ -708,7 +712,24 @@ public class QuickStepController implements GestureHelper {
         return Settings.Global.getInt(context.getContentResolver(), key, defaultValue);
     }
 
-    public static boolean shouldhideBackButton(Context context) {
-        return getBoolGlobalSetting(context, HIDE_BACK_BUTTON_PROP);
+    /**
+     * @return whether to hide the back button.
+     */
+    public static boolean shouldHideBackButton(Context context) {
+        return QuickStepContract.isGesturalMode(context);
+    }
+
+    /**
+     * @return whether to hide the home button.
+     */
+    public static boolean shouldHideHomeButton(Context context) {
+        return QuickStepContract.isGesturalMode(context);
+    }
+
+    /**
+     * @return whether to show the home handle.
+     */
+    public static boolean showHomeHandle(Context context) {
+        return QuickStepContract.isGesturalMode(context);
     }
 }

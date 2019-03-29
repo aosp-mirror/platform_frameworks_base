@@ -48,37 +48,32 @@
         android:paddingTop="16dp"
         android:paddingBottom="16dp">
 
-        <TextView android:id="@android:id/title"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:singleLine="true"
-                  android:textAppearance="?android:attr/textAppearanceListItem"
-                  android:ellipsize="marquee"
-                  android:fadingEdge="horizontal"/>
+        <TextView
+            android:id="@android:id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="marquee"
+            android:fadingEdge="horizontal"
+            android:singleLine="true"
+            android:textAppearance="?android:attr/textAppearanceListItem"/>
 
-        <LinearLayout
-            android:id="@+id/summary_container"
+        <TextView
+            android:id="@android:id/summary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="gone">
-            <TextView android:id="@android:id/summary"
-                      android:layout_width="0dp"
-                      android:layout_height="wrap_content"
-                      android:layout_weight="1"
-                      android:textAppearance="?android:attr/textAppearanceSmall"
-                      android:textAlignment="viewStart"
-                      android:textColor="?android:attr/textColorSecondary"/>
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="?android:attr/textColorSecondary"/>
 
-            <TextView android:id="@+id/appendix"
-                      android:layout_width="0dp"
-                      android:layout_height="wrap_content"
-                      android:layout_weight="1"
-                      android:textAppearance="?android:attr/textAppearanceSmall"
-                      android:textAlignment="viewEnd"
-                      android:textColor="?android:attr/textColorSecondary"
-                      android:maxLines="1"
-                      android:ellipsize="end"/>
-        </LinearLayout>
+        <TextView
+            android:id="@+id/appendix"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="?android:attr/textColorSecondary"
+            android:visibility="gone"/>
+
         <ProgressBar
             android:id="@android:id/progress"
             style="?android:attr/progressBarStyleHorizontal"

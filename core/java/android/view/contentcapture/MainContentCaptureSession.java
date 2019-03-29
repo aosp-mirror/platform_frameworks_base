@@ -230,7 +230,8 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
 
     /**
      * Callback from {@code system_server} after call to
-     * {@link IContentCaptureManager#startSession(IBinder, ComponentName, String, int, IBinder)}
+     * {@link IContentCaptureManager#startSession(IBinder, ComponentName, String, int,
+     * IResultReceiver)}.
      *
      * @param resultCode session state
      * @param binder handle to {@code IContentCaptureDirectManager}
