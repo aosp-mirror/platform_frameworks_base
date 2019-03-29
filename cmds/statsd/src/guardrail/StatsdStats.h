@@ -160,6 +160,8 @@ public:
     // Max platform atom tag number.
     static const int32_t kMaxPlatformAtomTag = 100000;
 
+    static const int64_t kInt64Max = 0x7fffffffffffffffLL;
+
     /**
      * Report a new config has been received and report the static stats about the config.
      *
@@ -419,6 +421,10 @@ public:
      */
     void noteBucketUnknownCondition(int64_t metricId);
 
+    /* Reports one event has been dropped due to queue overflow, and the oldest event timestamp in
+     * the queue */
+    void noteEventQueueOverflow(int64_t oldestEventTimestampNs);
+
     /**
      * Reset the historical stats. Including all stats in icebox, and the tracked stats about
      * metrics, matchers, and atoms. The active configs will be kept and StatsdStats will continue
@@ -521,6 +527,17 @@ private:
         int32_t mUid;
         int32_t mPid;
     };
+
+    // Max of {(now - oldestEventTimestamp) when overflow happens}.
+    // This number is helpful to understand how SLOW statsd can be.
+    int64_t mMaxQueueHistoryNs = 0;
+
+    // Min of {(now - oldestEventTimestamp) when overflow happens}.
+    // This number is helpful to understand how FAST the events floods to statsd.
+    int64_t mMinQueueHistoryNs = kInt64Max;
+
+    // Total number of events that are lost due to queue overflow.
+    int32_t mOverflowCount = 0;
 
     // Timestamps when we detect log loss, and the number of logs lost.
     std::list<LogLossStats> mLogLossStats;

@@ -41,8 +41,8 @@ namespace statsd {
 
 static const int kLogMsgHeaderSize = 28;
 
-StatsSocketListener::StatsSocketListener(const sp<LogListener>& listener)
-    : SocketListener(getLogSocket(), false /*start listen*/), mListener(listener) {
+StatsSocketListener::StatsSocketListener(std::shared_ptr<LogEventQueue> queue)
+    : SocketListener(getLogSocket(), false /*start listen*/), mQueue(queue) {
 }
 
 StatsSocketListener::~StatsSocketListener() {
@@ -134,10 +134,11 @@ bool StatsSocketListener::onDataAvailable(SocketClient* cli) {
     msg.entry.uid = cred->uid;
 
     memcpy(msg.buf + kLogMsgHeaderSize, ptr, n + 1);
-    LogEvent event(msg);
 
-    // Call the listener
-    mListener->OnLogEvent(&event);
+    int64_t oldestTimestamp;
+    if (!mQueue->push(std::make_unique<LogEvent>(msg), &oldestTimestamp)) {
+        StatsdStats::getInstance().noteEventQueueOverflow(oldestTimestamp);
+    }
 
     return true;
 }

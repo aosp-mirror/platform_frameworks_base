@@ -130,34 +130,36 @@ binder::Status checkDumpAndUsageStats(const String16& packageName) {
     }                                                             \
 }
 
-StatsService::StatsService(const sp<Looper>& handlerLooper)
-    : mAnomalyAlarmMonitor(new AlarmMonitor(MIN_DIFF_TO_UPDATE_REGISTERED_ALARM_SECS,
-       [](const sp<IStatsCompanionService>& sc, int64_t timeMillis) {
-           if (sc != nullptr) {
-               sc->setAnomalyAlarm(timeMillis);
-               StatsdStats::getInstance().noteRegisteredAnomalyAlarmChanged();
-           }
-       },
-       [](const sp<IStatsCompanionService>& sc) {
-           if (sc != nullptr) {
-               sc->cancelAnomalyAlarm();
-               StatsdStats::getInstance().noteRegisteredAnomalyAlarmChanged();
-           }
-       })),
-   mPeriodicAlarmMonitor(new AlarmMonitor(MIN_DIFF_TO_UPDATE_REGISTERED_ALARM_SECS,
-      [](const sp<IStatsCompanionService>& sc, int64_t timeMillis) {
-           if (sc != nullptr) {
-               sc->setAlarmForSubscriberTriggering(timeMillis);
-               StatsdStats::getInstance().noteRegisteredPeriodicAlarmChanged();
-           }
-      },
-      [](const sp<IStatsCompanionService>& sc) {
-           if (sc != nullptr) {
-               sc->cancelAlarmForSubscriberTriggering();
-               StatsdStats::getInstance().noteRegisteredPeriodicAlarmChanged();
-           }
-
-      }))  {
+StatsService::StatsService(const sp<Looper>& handlerLooper, shared_ptr<LogEventQueue> queue)
+    : mAnomalyAlarmMonitor(new AlarmMonitor(
+              MIN_DIFF_TO_UPDATE_REGISTERED_ALARM_SECS,
+              [](const sp<IStatsCompanionService>& sc, int64_t timeMillis) {
+                  if (sc != nullptr) {
+                      sc->setAnomalyAlarm(timeMillis);
+                      StatsdStats::getInstance().noteRegisteredAnomalyAlarmChanged();
+                  }
+              },
+              [](const sp<IStatsCompanionService>& sc) {
+                  if (sc != nullptr) {
+                      sc->cancelAnomalyAlarm();
+                      StatsdStats::getInstance().noteRegisteredAnomalyAlarmChanged();
+                  }
+              })),
+      mPeriodicAlarmMonitor(new AlarmMonitor(
+              MIN_DIFF_TO_UPDATE_REGISTERED_ALARM_SECS,
+              [](const sp<IStatsCompanionService>& sc, int64_t timeMillis) {
+                  if (sc != nullptr) {
+                      sc->setAlarmForSubscriberTriggering(timeMillis);
+                      StatsdStats::getInstance().noteRegisteredPeriodicAlarmChanged();
+                  }
+              },
+              [](const sp<IStatsCompanionService>& sc) {
+                  if (sc != nullptr) {
+                      sc->cancelAlarmForSubscriberTriggering();
+                      StatsdStats::getInstance().noteRegisteredPeriodicAlarmChanged();
+                  }
+              })),
+      mEventQueue(queue) {
     mUidMap = UidMap::getInstance();
     mPullerManager = new StatsPullerManager();
     StatsPuller::SetUidMap(mUidMap);
@@ -199,9 +201,31 @@ StatsService::StatsService(const sp<Looper>& handlerLooper)
     mConfigManager->AddListener(mProcessor);
 
     init_system_properties();
+
+    if (mEventQueue != nullptr) {
+        std::thread pushedEventThread([this] { readLogs(); });
+        pushedEventThread.detach();
+    }
 }
 
 StatsService::~StatsService() {
+}
+
+/* Runs on a dedicated thread to process pushed events. */
+void StatsService::readLogs() {
+    // Read forever..... long live statsd
+    while (1) {
+        // Block until an event is available.
+        auto event = mEventQueue->waitPop();
+        // Pass it to StatsLogProcess to all configs/metrics
+        // At this point, the LogEventQueue is not blocked, so that the socketListener
+        // can read events from the socket and write to buffer to avoid data drop.
+        mProcessor->OnLogEvent(event.get());
+        // The ShellSubscriber is only used by shell for local debugging.
+        if (mShellSubscriber != nullptr) {
+            mShellSubscriber->onLogEvent(*event);
+        }
+    }
 }
 
 void StatsService::init_system_properties() {
@@ -1007,6 +1031,7 @@ void StatsService::Terminate() {
     }
 }
 
+// Test only interface!!!
 void StatsService::OnLogEvent(LogEvent* event) {
     mProcessor->OnLogEvent(event);
     if (mShellSubscriber != nullptr) {
