@@ -316,6 +316,7 @@
     <style name="qs_theme" parent="@*android:style/Theme.DeviceDefault.QuickSettings">
         <item name="lightIconTheme">@style/QSIconTheme</item>
         <item name="darkIconTheme">@style/QSIconTheme</item>
+        <item name="android:colorError">@*android:color/error_color_material_dark</item>
         <item name="android:windowIsFloating">true</item>
     </style>
 
