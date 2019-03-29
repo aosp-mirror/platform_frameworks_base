@@ -58,6 +58,7 @@ java_library_static {
     name: "services.net",
     srcs: ["java/**/*.java"],
     static_libs: [
+        "dnsresolver_aidl_interface-java",
         "netd_aidl_interface-java",
         "networkstack-aidl-interfaces-java",
     ]
