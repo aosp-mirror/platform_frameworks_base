@@ -602,6 +602,19 @@ void StatsLogProcessor::WriteDataToDiskLocked(const ConfigKey& key,
 
 void StatsLogProcessor::WriteMetricsActivationToDisk(int64_t currentTimeNs) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
+
+    const int64_t timeNs = getElapsedRealtimeNs();
+    // Do not write to disk if we already have in the last few seconds.
+    // This is to avoid overwriting files that would have the same name if we
+    //   write twice in the same second.
+    if (static_cast<unsigned long long> (timeNs) <
+            mLastActiveMetricsWriteNs + WRITE_DATA_COOL_DOWN_SEC * NS_PER_SEC) {
+        ALOGI("Statsd skipping writing active metrics to disk. Already wrote data in last %d seconds",
+                WRITE_DATA_COOL_DOWN_SEC);
+        return;
+    }
+    mLastActiveMetricsWriteNs = timeNs;
+
     ProtoOutputStream proto;
 
     for (const auto& pair : mMetricsManagers) {
