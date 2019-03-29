@@ -58,6 +58,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.widget.LockPatternUtils;
 import com.android.server.locksettings.recoverablekeystore.storage.ApplicationKeyStorage;
 import com.android.server.locksettings.recoverablekeystore.storage.CleanupManager;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDb;
@@ -83,7 +84,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -156,6 +157,7 @@ public class RecoverableKeyStoreManagerTest {
     @Mock private PlatformKeyManager mPlatformKeyManager;
     @Mock private ApplicationKeyStorage mApplicationKeyStorage;
     @Mock private CleanupManager mCleanupManager;
+    @Mock private ExecutorService mExecutorService;
     @Spy private TestOnlyInsecureCertificateHelper mTestOnlyInsecureCertificateHelper;
 
     private RecoverableKeyStoreDb mRecoverableKeyStoreDb;
@@ -188,7 +190,7 @@ public class RecoverableKeyStoreManagerTest {
                 mMockContext,
                 mRecoverableKeyStoreDb,
                 mRecoverySessionStorage,
-                Executors.newSingleThreadExecutor(),
+                mExecutorService,
                 mRecoverySnapshotStorage,
                 mMockListenersStorage,
                 mPlatformKeyManager,
@@ -1244,6 +1246,24 @@ public class RecoverableKeyStoreManagerTest {
         } catch (NullPointerException e) {
             assertThat(e.getMessage()).contains("is null");
         }
+    }
+
+    @Test
+    public void lockScreenSecretAvailable_syncsKeysForUser() throws Exception {
+        mRecoverableKeyStoreManager.lockScreenSecretAvailable(
+                LockPatternUtils.CREDENTIAL_TYPE_PATTERN, "password".getBytes(), 11);
+
+        verify(mExecutorService).execute(any());
+    }
+
+    @Test
+    public void lockScreenSecretChanged_syncsKeysForUser() throws Exception {
+        mRecoverableKeyStoreManager.lockScreenSecretChanged(
+                LockPatternUtils.CREDENTIAL_TYPE_PATTERN,
+                "password".getBytes(),
+                11);
+
+        verify(mExecutorService).execute(any());
     }
 
     private static byte[] encryptedApplicationKey(
