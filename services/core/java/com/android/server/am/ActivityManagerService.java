@@ -2288,7 +2288,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         mBatteryStatsService = null;
         mHandler = hasHandlerThread ? new MainHandler(handlerThread.getLooper()) : null;
         mHandlerThread = handlerThread;
-        mConstants = hasHandlerThread ? new ActivityManagerConstants(this, mHandler) : null;
+        mConstants = hasHandlerThread
+                ? new ActivityManagerConstants(mContext, this, mHandler) : null;
         final ActiveUids activeUids = new ActiveUids(this, false /* postChangesToAtm */);
         mProcessList.init(this, activeUids);
         mOomAdjuster = new OomAdjuster(this, mProcessList, activeUids);
@@ -2336,7 +2337,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mProcStartHandlerThread.start();
         mProcStartHandler = new Handler(mProcStartHandlerThread.getLooper());
 
-        mConstants = new ActivityManagerConstants(this, mHandler);
+        mConstants = new ActivityManagerConstants(mContext, this, mHandler);
         final ActiveUids activeUids = new ActiveUids(this, true /* postChangesToAtm */);
         mProcessList.init(this, activeUids);
         mOomAdjuster = new OomAdjuster(this, mProcessList, activeUids);

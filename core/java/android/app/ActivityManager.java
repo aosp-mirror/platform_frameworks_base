@@ -4037,7 +4037,7 @@ public class ActivityManager {
      * continues running even if the process is killed and restarted.  To remove the watch,
      * use {@link #clearWatchHeapLimit()}.
      *
-     * <p>This API only work if the calling process has been marked as
+     * <p>This API only works if the calling process has been marked as
      * {@link ApplicationInfo#FLAG_DEBUGGABLE} or this is running on a debuggable
      * (userdebug or eng) build.</p>
      *

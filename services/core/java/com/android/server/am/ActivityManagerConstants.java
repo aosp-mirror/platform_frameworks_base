@@ -20,8 +20,10 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_POWER_QUICK
 
 import android.app.ActivityThread;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.database.ContentObserver;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.OnPropertyChangedListener;
@@ -38,6 +40,7 @@ import java.io.PrintWriter;
  * Settings constants that can modify the activity manager's behavior.
  */
 final class ActivityManagerConstants extends ContentObserver {
+    private static final String TAG = "ActivityManagerConstants";
 
     // Key names stored in the settings value.
     private static final String KEY_BACKGROUND_SETTLE_TIME = "background_settle_time";
@@ -272,6 +275,16 @@ final class ActivityManagerConstants extends ContentObserver {
     // memory trimming.
     public int CUR_TRIM_CACHED_PROCESSES;
 
+    private static final long MIN_AUTOMATIC_HEAP_DUMP_PSS_THRESHOLD_BYTES = 100 * 1024; // 100 KB
+
+    private final boolean mSystemServerAutomaticHeapDumpEnabled;
+
+    /** Package to report to when the memory usage exceeds the limit. */
+    private final String mSystemServerAutomaticHeapDumpPackageName;
+
+    /** Byte limit for dump heap monitoring. */
+    private long mSystemServerAutomaticHeapDumpPssThresholdBytes;
+
     private static final Uri ACTIVITY_MANAGER_CONSTANTS_URI = Settings.Global.getUriFor(
                 Settings.Global.ACTIVITY_MANAGER_CONSTANTS);
 
@@ -286,6 +299,9 @@ final class ActivityManagerConstants extends ContentObserver {
                 Settings.Global.getUriFor(
                         Settings.Global.BACKGROUND_ACTIVITY_STARTS_PACKAGE_NAMES_WHITELIST);
 
+    private static final Uri ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS_URI =
+            Settings.Global.getUriFor(Settings.Global.ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS);
+
     private final OnPropertyChangedListener mOnDeviceConfigChangedListener =
             new OnPropertyChangedListener() {
                 @Override
@@ -296,9 +312,17 @@ final class ActivityManagerConstants extends ContentObserver {
                 }
             };
 
-    public ActivityManagerConstants(ActivityManagerService service, Handler handler) {
+    ActivityManagerConstants(Context context, ActivityManagerService service, Handler handler) {
         super(handler);
         mService = service;
+        mSystemServerAutomaticHeapDumpEnabled = Build.IS_DEBUGGABLE
+                && context.getResources().getBoolean(
+                com.android.internal.R.bool.config_debugEnableAutomaticSystemServerHeapDumps);
+        mSystemServerAutomaticHeapDumpPackageName = context.getPackageName();
+        mSystemServerAutomaticHeapDumpPssThresholdBytes = Math.max(
+                MIN_AUTOMATIC_HEAP_DUMP_PSS_THRESHOLD_BYTES,
+                context.getResources().getInteger(
+                        com.android.internal.R.integer.config_debugSystemServerPssThresholdBytes));
     }
 
     public void start(ContentResolver resolver) {
@@ -308,10 +332,17 @@ final class ActivityManagerConstants extends ContentObserver {
         mResolver.registerContentObserver(BACKGROUND_ACTIVITY_STARTS_ENABLED_URI, false, this);
         mResolver.registerContentObserver(BACKGROUND_ACTIVITY_STARTS_PACKAGE_NAMES_WHITELIST_URI,
                 false, this);
+        if (mSystemServerAutomaticHeapDumpEnabled) {
+            mResolver.registerContentObserver(ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS_URI,
+                    false, this);
+        }
         updateConstants();
         updateActivityStartsLoggingEnabled();
         updateBackgroundActivityStartsEnabled();
         updateBackgroundActivityStartsPackageNamesWhitelist();
+        if (mSystemServerAutomaticHeapDumpEnabled) {
+            updateEnableAutomaticSystemServerHeapDumps();
+        }
         DeviceConfig.addOnPropertyChangedListener(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 ActivityThread.currentApplication().getMainExecutor(),
                 mOnDeviceConfigChangedListener);
@@ -343,6 +374,8 @@ final class ActivityManagerConstants extends ContentObserver {
             updateBackgroundActivityStartsEnabled();
         } else if (BACKGROUND_ACTIVITY_STARTS_PACKAGE_NAMES_WHITELIST_URI.equals(uri)) {
             updateBackgroundActivityStartsPackageNamesWhitelist();
+        } else if (ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS_URI.equals(uri)) {
+            updateEnableAutomaticSystemServerHeapDumps();
         }
     }
 
@@ -450,6 +483,24 @@ final class ActivityManagerConstants extends ContentObserver {
         mPackageNamesWhitelistedForBgActivityStarts = newSet;
     }
 
+    private void updateEnableAutomaticSystemServerHeapDumps() {
+        if (!mSystemServerAutomaticHeapDumpEnabled) {
+            Slog.wtf(TAG,
+                    "updateEnableAutomaticSystemServerHeapDumps called when leak detection "
+                            + "disabled");
+            return;
+        }
+        // Monitoring is on by default, so if the setting hasn't been set by the user,
+        // monitoring should be on.
+        final boolean enabled = Settings.Global.getInt(mResolver,
+                Settings.Global.ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS, 1) == 1;
+
+        // Setting the threshold to 0 stops the checking.
+        final long threshold = enabled ? mSystemServerAutomaticHeapDumpPssThresholdBytes : 0;
+        mService.setDumpHeapDebugLimit(null, 0, threshold,
+                mSystemServerAutomaticHeapDumpPackageName);
+    }
+
     private void updateMaxCachedProcesses() {
         String maxCachedProcessesFlag = DeviceConfig.getProperty(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER, KEY_MAX_CACHED_PROCESSES);
@@ -460,7 +511,7 @@ final class ActivityManagerConstants extends ContentObserver {
                     : mOverrideMaxCachedProcesses;
         } catch (NumberFormatException e) {
             // Bad flag value from Phenotype, revert to default.
-            Slog.e("ActivityManagerConstants",
+            Slog.e(TAG,
                     "Unable to parse flag for max_cached_processes: " + maxCachedProcessesFlag, e);
             CUR_MAX_CACHED_PROCESSES = DEFAULT_MAX_CACHED_PROCESSES;
         }
