@@ -3525,12 +3525,7 @@ public abstract class ContentResolver implements ContentInterface {
      */
     public @NonNull Bitmap loadThumbnail(@NonNull Uri uri, @NonNull Size size,
             @Nullable CancellationSignal signal) throws IOException {
-        Objects.requireNonNull(uri);
-        Objects.requireNonNull(size);
-
-        try (ContentProviderClient client = acquireContentProviderClient(uri)) {
-            return loadThumbnail(client, uri, size, signal, ImageDecoder.ALLOCATOR_SOFTWARE);
-        }
+        return loadThumbnail(this, uri, size, signal, ImageDecoder.ALLOCATOR_SOFTWARE);
     }
 
     /** {@hide} */

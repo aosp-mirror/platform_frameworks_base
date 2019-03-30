@@ -2990,6 +2990,7 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
+    @TestApi
     public static final int FLAG_PERMISSION_POLICY_FIXED =  1 << 2;
 
     /**
@@ -3013,6 +3014,7 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
+    @TestApi
     public static final int FLAG_PERMISSION_SYSTEM_FIXED =  1 << 4;
 
     /**
