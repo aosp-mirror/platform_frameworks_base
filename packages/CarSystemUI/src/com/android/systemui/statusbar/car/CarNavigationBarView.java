@@ -38,6 +38,7 @@ class CarNavigationBarView extends LinearLayout {
     private CarStatusBar mCarStatusBar;
     private Context mContext;
     private View mLockScreenButtons;
+    // used to wire in open/close gestures for notifications
     private OnTouchListener mStatusBarWindowTouchListener;
 
 
@@ -65,26 +66,45 @@ class CarNavigationBarView extends LinearLayout {
             mDarkIconManager.setShouldLog(true);
             Dependency.get(StatusBarIconController.class).addIconGroup(mDarkIconManager);
         }
+        // needs to be clickable so that it will receive ACTION_MOVE events
+        setClickable(true);
     }
 
+    // Used to forward touch events even if the touch was initiated from a child component
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        if (mStatusBarWindowTouchListener == null) {
-            return false;
+        if (mStatusBarWindowTouchListener != null) {
+            // forward touch events to the status bar window so it can add a drag down
+            // windows if required (Notification shade)
+            mStatusBarWindowTouchListener.onTouch(this, ev);
         }
-        // forward touch events to the status bar window so it can add a drag down
-        // windows if required (Notification shade)
-        mStatusBarWindowTouchListener.onTouch(this, ev);
-        return false;
+        return super.onInterceptTouchEvent(ev);
     }
+
 
     void setStatusBar(CarStatusBar carStatusBar) {
         mCarStatusBar = carStatusBar;
-        mStatusBarWindowTouchListener = carStatusBar.getStatusBarWindowTouchListener();
+    }
+
+    /**
+     * Set a touch listener that will be called from onInterceptTouchEvent and onTouchEvent
+     *
+     * @param statusBarWindowTouchListener The listener to call from touch and intercept touch
+     */
+    void setStatusBarWindowTouchListener(OnTouchListener statusBarWindowTouchListener) {
+        mStatusBarWindowTouchListener = statusBarWindowTouchListener;
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (mStatusBarWindowTouchListener != null) {
+            mStatusBarWindowTouchListener.onTouch(this, event);
+        }
+        return super.onTouchEvent(event);
     }
 
     protected void onNotificationsClick(View v) {
-        mCarStatusBar.toggleCarNotifications();
+        mCarStatusBar.togglePanel();
     }
 
     /**
