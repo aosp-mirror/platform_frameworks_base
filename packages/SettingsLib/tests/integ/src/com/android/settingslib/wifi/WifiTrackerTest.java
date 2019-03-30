@@ -270,7 +270,7 @@ public class WifiTrackerTest {
                 SystemClock.elapsedRealtime() * 1000 /* microsecond timestamp */);
     }
 
-    private static ScanResult buildStaleScanResult() {
+    private static ScanResult buildScanResultWithTimestamp(long timestampMillis) {
         return new ScanResult(
                 WifiSsid.createFromAsciiEncoded(SSID_3),
                 BSSID_3,
@@ -280,7 +280,7 @@ public class WifiTrackerTest {
                 "", // capabilities
                 RSSI_3,
                 0, // frequency
-                0 /* microsecond timestamp */);
+                timestampMillis * 1000 /* microsecond timestamp */);
     }
 
     private static WifiConfiguration buildPasspointConfiguration(String fqdn, String friendlyName) {
@@ -376,6 +376,12 @@ public class WifiTrackerTest {
 
     private void sendScanResults(WifiTracker tracker) throws InterruptedException {
         Intent i = new Intent(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+        tracker.mReceiver.onReceive(mContext, i);
+    }
+
+    private void sendFailedScanResults(WifiTracker tracker) throws InterruptedException {
+        Intent i = new Intent(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+        i.putExtra(WifiManager.EXTRA_RESULTS_UPDATED, false);
         tracker.mReceiver.onReceive(mContext, i);
     }
 
@@ -982,13 +988,40 @@ public class WifiTrackerTest {
 
     @Test
     public void onStart_updateScanResults_evictOldScanResult() {
-        when(mockWifiManager.getScanResults()).thenReturn(
-                Arrays.asList(buildScanResult1(), buildScanResult2(), buildStaleScanResult()));
+        when(mockWifiManager.getScanResults()).thenReturn(Arrays.asList(
+                buildScanResult1(), buildScanResult2(), buildScanResultWithTimestamp(0)));
         WifiTracker tracker = createMockedWifiTracker();
 
         tracker.forceUpdate();
 
         // Only has scanResult1 and scanResult2
+        assertThat(tracker.getAccessPoints()).hasSize(2);
+        assertThat(tracker.getAccessPoints().get(0).getBssid()).isEqualTo(BSSID_1);
+        assertThat(tracker.getAccessPoints().get(1).getBssid()).isEqualTo(BSSID_2);
+    }
+
+    /**
+     * Verifies that a failed scan reported on SCAN_RESULTS_AVAILABLE_ACTION should increase the
+     * ScanResult eviction timeout to twice the default.
+     */
+    @Test
+    public void failedScan_increasesEvictionTimeout() throws InterruptedException {
+        when(mockWifiManager.getScanResults()).thenReturn(Arrays.asList(
+                buildScanResult1(), buildScanResult2(), buildScanResultWithTimestamp(
+                        SystemClock.elapsedRealtime() - WifiTracker.MAX_SCAN_RESULT_AGE_MILLIS)));
+        WifiTracker tracker = createMockedWifiTracker();
+
+        sendFailedScanResults(tracker);
+
+        // Failed scan increases timeout window to include the stale scan
+        assertThat(tracker.getAccessPoints()).hasSize(3);
+        assertThat(tracker.getAccessPoints().get(0).getBssid()).isEqualTo(BSSID_1);
+        assertThat(tracker.getAccessPoints().get(1).getBssid()).isEqualTo(BSSID_2);
+        assertThat(tracker.getAccessPoints().get(2).getBssid()).isEqualTo(BSSID_3);
+
+        sendScanResults(tracker);
+
+        // Successful scan resets the timeout window to remove the stale scan
         assertThat(tracker.getAccessPoints()).hasSize(2);
         assertThat(tracker.getAccessPoints().get(0).getBssid()).isEqualTo(BSSID_1);
         assertThat(tracker.getAccessPoints().get(1).getBssid()).isEqualTo(BSSID_2);
