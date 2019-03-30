@@ -799,4 +799,9 @@ public class PhysicsAnimationLayout extends FrameLayout {
             }
         }
     }
+
+    @Override
+    protected boolean canReceivePointerEvents() {
+        return false;
+    }
 }

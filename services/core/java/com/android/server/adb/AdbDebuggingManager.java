@@ -307,7 +307,6 @@ public class AdbDebuggingManager {
                     }
 
                     cancelJobToUpdateAdbKeyStore();
-                    mAdbKeyStore = null;
                     mConnectedKey = null;
                     break;
 

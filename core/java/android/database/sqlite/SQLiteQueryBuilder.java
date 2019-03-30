@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -47,11 +48,15 @@ import java.util.regex.Pattern;
  */
 public class SQLiteQueryBuilder {
     private static final String TAG = "SQLiteQueryBuilder";
+
     private static final Pattern sLimitPattern =
             Pattern.compile("\\s*\\d+\\s*(,\\s*\\d+\\s*)?");
+    private static final Pattern sAggregationPattern = Pattern.compile(
+            "(?i)(AVG|COUNT|MAX|MIN|SUM|TOTAL)\\((.+)\\)");
 
     private Map<String, String> mProjectionMap = null;
     private List<Pattern> mProjectionGreylist = null;
+    private boolean mProjectionAggregationAllowed = false;
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private String mTables = "";
@@ -201,6 +206,16 @@ public class SQLiteQueryBuilder {
      */
     public @Nullable List<Pattern> getProjectionGreylist() {
         return mProjectionGreylist;
+    }
+
+    /** {@hide} */
+    public void setProjectionAggregationAllowed(boolean projectionAggregationAllowed) {
+        mProjectionAggregationAllowed = projectionAggregationAllowed;
+    }
+
+    /** {@hide} */
+    public boolean isProjectionAggregationAllowed() {
+        return mProjectionAggregationAllowed;
     }
 
     /**
@@ -842,26 +857,48 @@ public class SQLiteQueryBuilder {
         return query.toString();
     }
 
+    private static @NonNull String maybeWithOperator(@Nullable String operator,
+            @NonNull String column) {
+        if (operator != null) {
+            return operator + "(" + column + ")";
+        } else {
+            return column;
+        }
+    }
+
+    /** {@hide} */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    private String[] computeProjection(String[] projectionIn) {
+    public String[] computeProjection(String[] projectionIn) {
         if (projectionIn != null && projectionIn.length > 0) {
             if (mProjectionMap != null) {
                 String[] projection = new String[projectionIn.length];
                 int length = projectionIn.length;
 
                 for (int i = 0; i < length; i++) {
+                    String operator = null;
                     String userColumn = projectionIn[i];
                     String column = mProjectionMap.get(userColumn);
 
+                    // If aggregation is allowed, extract the underlying column
+                    // that may be aggregated
+                    if (mProjectionAggregationAllowed) {
+                        final Matcher matcher = sAggregationPattern.matcher(userColumn);
+                        if (matcher.matches()) {
+                            operator = matcher.group(1);
+                            userColumn = matcher.group(2);
+                            column = mProjectionMap.get(userColumn);
+                        }
+                    }
+
                     if (column != null) {
-                        projection[i] = column;
+                        projection[i] = maybeWithOperator(operator, column);
                         continue;
                     }
 
                     if (!mStrict &&
                             ( userColumn.contains(" AS ") || userColumn.contains(" as "))) {
                         /* A column alias already exist */
-                        projection[i] = userColumn;
+                        projection[i] = maybeWithOperator(operator, userColumn);
                         continue;
                     }
 
@@ -878,7 +915,7 @@ public class SQLiteQueryBuilder {
 
                         if (match) {
                             Log.w(TAG, "Allowing abusive custom column: " + userColumn);
-                            projection[i] = userColumn;
+                            projection[i] = maybeWithOperator(operator, userColumn);
                             continue;
                         }
                     }
@@ -911,7 +948,8 @@ public class SQLiteQueryBuilder {
         return null;
     }
 
-    private @Nullable String computeWhere(@Nullable String selection) {
+    /** {@hide} */
+    public @Nullable String computeWhere(@Nullable String selection) {
         final boolean hasInternal = !TextUtils.isEmpty(mWhereClause);
         final boolean hasExternal = !TextUtils.isEmpty(selection);
 

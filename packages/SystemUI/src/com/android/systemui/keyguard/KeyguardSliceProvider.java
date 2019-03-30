@@ -286,8 +286,9 @@ public class KeyguardSliceProvider extends SliceProvider implements
         RowBuilder dndBuilder = new RowBuilder(mDndUri)
                 .setContentDescription(getContext().getResources()
                         .getString(R.string.accessibility_quick_settings_dnd))
-                .addEndItem(IconCompat.createWithResource(getContext(), R.drawable.stat_sys_dnd),
-                        ListBuilder.ICON_IMAGE);
+                .addEndItem(
+                    IconCompat.createWithResource(getContext(), R.drawable.stat_sys_dnd),
+                    ListBuilder.ICON_IMAGE);
         builder.addRow(dndBuilder);
     }
 

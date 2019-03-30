@@ -34,7 +34,9 @@ import static com.google.android.collect.Sets.newHashSet;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
@@ -64,6 +66,7 @@ import android.os.IRemoteCallback;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.os.UserManagerInternal;
 import android.platform.test.annotations.Presubmit;
 import android.util.Log;
@@ -321,6 +324,14 @@ public class UserControllerTest {
         verify(mInjector.getWindowManager(), times(1)).setSwitchingUser(false);
     }
 
+    @Test
+    public void testExplicitSystenUserStartInBackground() {
+        setUpUser(UserHandle.USER_SYSTEM, 0);
+        assertFalse(mUserController.isSystemUserStarted());
+        assertTrue(mUserController.startUser(UserHandle.USER_SYSTEM, false, null));
+        assertTrue(mUserController.isSystemUserStarted());
+    }
+
     private void setUpUser(int userId, int flags) {
         UserInfo userInfo = new UserInfo(userId, "User" + userId, flags);
         when(mInjector.mUserManagerMock.getUserInfo(eq(userId))).thenReturn(userInfo);
@@ -416,6 +427,12 @@ public class UserControllerTest {
 
         @Override
         void reportCurWakefulnessUsageEvent() {
+        }
+
+        @Override
+        boolean isRuntimeRestarted() {
+            // to pass all metrics related calls
+            return true;
         }
     }
 

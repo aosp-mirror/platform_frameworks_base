@@ -300,7 +300,7 @@ public class IncidentCompanionService extends SystemService {
                         android.Manifest.permission.DUMP, null);
                 getContext().enforceCallingOrSelfPermission(
                         android.Manifest.permission.PACKAGE_USAGE_STATS, null);
-                if (pkg == null) {
+                if (pkg != null) {
                     enforceCallerIsSameApp(pkg);
                 }
             }

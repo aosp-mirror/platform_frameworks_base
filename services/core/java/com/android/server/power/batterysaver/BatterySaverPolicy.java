@@ -594,7 +594,7 @@ public class BatterySaverPolicy extends ContentObserver {
                 boolean forceBackgroundCheck,
                 int locationMode) {
 
-            this.adjustBrightnessFactor = adjustBrightnessFactor;
+            this.adjustBrightnessFactor = Math.min(1, Math.max(0, adjustBrightnessFactor));
             this.advertiseIsEnabled = advertiseIsEnabled;
             this.deferFullBackup = deferFullBackup;
             this.deferKeyValueBackup = deferKeyValueBackup;
@@ -613,7 +613,14 @@ public class BatterySaverPolicy extends ContentObserver {
             this.filesForNoninteractive = filesForNoninteractive;
             this.forceAllAppsStandby = forceAllAppsStandby;
             this.forceBackgroundCheck = forceBackgroundCheck;
-            this.locationMode = locationMode;
+
+            if (locationMode < PowerManager.MIN_LOCATION_MODE
+                    || PowerManager.MAX_LOCATION_MODE < locationMode) {
+                Slog.e(TAG, "Invalid location mode: " + locationMode);
+                this.locationMode = PowerManager.LOCATION_MODE_NO_CHANGE;
+            } else {
+                this.locationMode = locationMode;
+            }
 
             mHashCode = Objects.hash(
                     adjustBrightnessFactor,

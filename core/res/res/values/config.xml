@@ -3237,6 +3237,10 @@
          2: gestures only for back, home and overview -->
     <integer name="config_navBarInteractionMode">0</integer>
 
+    <!-- Controls whether the nav bar can move from the bottom to the side in landscape.
+         Only applies if the device display is not square. -->
+    <bool name="config_navBarCanMove">true</bool>
+
     <!-- Default insets [LEFT/RIGHTxTOP/BOTTOM] from the screen edge for picture-in-picture windows.
          These values are in DPs and will be converted to pixel sizes internally. -->
     <string translatable="false" name="config_defaultPictureInPictureScreenEdgeInsets">16x16</string>
@@ -3978,4 +3982,28 @@
 
     <!-- Whether or not to enable automatic heap dumps for the system server on debuggable builds. -->
     <bool name="config_debugEnableAutomaticSystemServerHeapDumps">false</bool>
+
+    <!-- Trigger a heap dump if the system server pss usage exceeds this threshold. 400 MB -->
+    <integer name="config_debugSystemServerPssThresholdBytes">419430400</integer>
+
+    <!-- See DropBoxManagerService.
+         The minimum period in milliseconds between broadcasts for entries with low priority
+         dropbox tags. -->
+    <integer name="config_dropboxLowPriorityBroadcastRateLimitPeriod">2000</integer>
+
+    <!-- See DropBoxManagerService.
+         An array of dropbox entry tags to marked as low priority. Low priority broadcasts will be
+         rated limited to a period defined by config_dropboxLowPriorityBroadcastRateLimitPeriod
+         (high frequency broadcasts for the tag will be dropped) -->
+    <string-array name="config_dropboxLowPriorityTags" translatable="false">
+        <item>data_app_strictmode</item>
+        <item>data_app_wtf</item>
+        <item>keymaster</item>
+        <item>netstats</item>
+        <item>system_app_strictmode</item>
+        <item>system_app_wtf</item>
+        <item>system_server_strictmode</item>
+        <item>system_server_wtf</item>
+    </string-array>
+
 </resources>

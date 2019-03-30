@@ -86,7 +86,6 @@ import android.os.Trace;
 import android.sysprop.DisplayProperties;
 import android.text.InputType;
 import android.text.TextUtils;
-import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
 import android.util.LayoutDirection;
@@ -7956,6 +7955,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *                               View is not a pane.
      *
      * {@see AccessibilityNodeInfo#setPaneTitle(CharSequence)}
+     *
+     * @attr ref android.R.styleable#View_accessibilityPaneTitle
      */
     public void setAccessibilityPaneTitle(@Nullable CharSequence accessibilityPaneTitle) {
         if (!TextUtils.equals(accessibilityPaneTitle, mAccessibilityPaneTitle)) {
@@ -7971,6 +7972,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return The current pane title.
      *
      * {@see #setAccessibilityPaneTitle}.
+     *
+     * @attr ref android.R.styleable#View_accessibilityPaneTitle
      */
     @InspectableProperty
     @Nullable
@@ -8525,11 +8528,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Populates a {@link ViewStructure} for Content Capture.
+     * Populates a {@link ViewStructure} for content capture.
      *
-     * <p>This method is called after a view is that is eligible for Content Capture
+     * <p>This method is called after a view is that is eligible for content capture
      * (for example, if it {@link #isImportantForAutofill()}, an intelligence service is enabled for
-     * the user, and the activity rendering the view is enabled for Content Capture) is laid out and
+     * the user, and the activity rendering the view is enabled for content capture) is laid out and
      * is visible.
      *
      * <p>The populated structure is then passed to the service through
@@ -8547,6 +8550,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@code autofillId} for a child can be obtained either through
      * {@code childStructure.getAutofillId()} or
      * {@link ContentCaptureSession#newAutofillId(AutofillId, long)}.
+     *
+     * <p>When the virtual view hierarchy represents a web page, you should also:
+     *
+     * <ul>
+     *   <li>Call {@link ContentCaptureManager#getContentCaptureConditions()} to infer content
+     *   capture events should be generate for that URL.
+     *   <li>Create a new {@link ContentCaptureSession} child for every HTML element that
+     *   renders a new URL (like an {@code IFRAME}) and use that session to notify events from
+     *   that subtree.
+     * </ul>
      *
      * <p><b>Note: </b>the following methods of the {@code structure} will be ignored:
      * <ul>
@@ -9264,11 +9277,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Hints the Android System whether this view is considered important for Content Capture, based
+     * Hints the Android System whether this view is considered important for content capture, based
      * on the value explicitly set by {@link #setImportantForContentCapture(int)} and heuristics
      * when it's {@link #IMPORTANT_FOR_CONTENT_CAPTURE_AUTO}.
      *
-     * @return whether the view is considered important for autofill.
+     * <p>See {@link ContentCaptureManager} for more info about content capture.
+     *
+     * @return whether the view is considered important for content capture.
      *
      * @see #setImportantForContentCapture(int)
      * @see #IMPORTANT_FOR_CONTENT_CAPTURE_AUTO
@@ -9467,7 +9482,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Sets the (optional) {@link ContentCaptureSession} associated with this view.
      *
      * <p>This method should be called when you need to associate a {@link ContentCaptureContext} to
-     * the Content Capture events associated with this view or its view hierarchy (if it's a
+     * the content capture events associated with this view or its view hierarchy (if it's a
      * {@link ViewGroup}).
      *
      * <p>For example, if your activity is associated with a web domain, first you would need to
@@ -9498,7 +9513,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Gets the session used to notify Content Capture events.
+     * Gets the session used to notify content capture events.
      *
      * @return session explicitly set by {@link #setContentCaptureSession(ContentCaptureSession)},
      * inherited by ancestors, default session or {@code null} if content capture is disabled for
@@ -9719,7 +9734,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Dispatches the initial Content Capture events for a view structure.
+     * Dispatches the initial content capture events for a view structure.
      *
      * @hide
      */
@@ -12101,6 +12116,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #setScreenReaderFocusable(boolean)
      *
      * @return Whether the view should be treated as a focusable unit by screen reader.
+     *
+     * @attr ref android.R.styleable#View_screenReaderFocusable
      */
     @InspectableProperty
     public boolean isScreenReaderFocusable() {
@@ -12119,6 +12136,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @param screenReaderFocusable Whether the view should be treated as a unit by screen reader
      *                              accessibility tools.
+     *
+     * @attr ref android.R.styleable#View_screenReaderFocusable
      */
     public void setScreenReaderFocusable(boolean screenReaderFocusable) {
         updatePflags3AndNotifyA11yIfChanged(PFLAG3_SCREEN_READER_FOCUSABLE, screenReaderFocusable);
@@ -13897,6 +13916,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     boolean isAccessibilityFocusedViewOrHost() {
         return isAccessibilityFocused() || (getViewRootImpl() != null && getViewRootImpl()
                 .getAccessibilityFocusedHost() == this);
+    }
+
+    /**
+     * Returns whether this view can receive pointer events.
+     *
+     * @return {@code true} if this view can receive pointer events.
+     * @hide
+     */
+    protected boolean canReceivePointerEvents() {
+        return (mViewFlags & VISIBILITY_MASK) == VISIBLE || getAnimation() != null;
     }
 
     /**
@@ -17939,7 +17968,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final int scrollX = mScrollX;
         final int scrollY = mScrollY;
         invalidateInternal(dirty.left - scrollX, dirty.top - scrollY,
-                dirty.right - scrollX, dirty.bottom - scrollY, true, false);
+                dirty.right - scrollX, dirty.bottom - scrollY, true);
     }
 
     /**
@@ -17965,7 +17994,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public void invalidate(int l, int t, int r, int b) {
         final int scrollX = mScrollX;
         final int scrollY = mScrollY;
-        invalidateInternal(l - scrollX, t - scrollY, r - scrollX, b - scrollY, true, false);
+        invalidateInternal(l - scrollX, t - scrollY, r - scrollX, b - scrollY, true);
     }
 
     /**
@@ -17995,11 +18024,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @UnsupportedAppUsage
     public void invalidate(boolean invalidateCache) {
-        invalidateInternal(0, 0, mRight - mLeft, mBottom - mTop, invalidateCache, true);
+        invalidateInternal(0, 0, mRight - mLeft, mBottom - mTop, invalidateCache);
     }
 
-    void invalidateInternal(int l, int t, int r, int b, boolean invalidateCache,
-            boolean fullInvalidate) {
+    void invalidateInternal(int l, int t, int r, int b, boolean invalidateCache) {
         if (mGhostView != null) {
             mGhostView.invalidate(true);
             return;
@@ -18016,11 +18044,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if ((mPrivateFlags & (PFLAG_DRAWN | PFLAG_HAS_BOUNDS)) == (PFLAG_DRAWN | PFLAG_HAS_BOUNDS)
                 || (invalidateCache && (mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) == PFLAG_DRAWING_CACHE_VALID)
                 || (mPrivateFlags & PFLAG_INVALIDATED) != PFLAG_INVALIDATED
-                || (fullInvalidate && isOpaque() != mLastIsOpaque)) {
-            if (fullInvalidate) {
-                mLastIsOpaque = isOpaque();
-                mPrivateFlags &= ~PFLAG_DRAWN;
-            }
+                || isOpaque() != mLastIsOpaque) {
+            mLastIsOpaque = isOpaque();
+            mPrivateFlags &= ~PFLAG_DRAWN;
 
             mPrivateFlags |= PFLAG_DIRTY;
 
@@ -22565,12 +22591,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @Override
     public void invalidateDrawable(@NonNull Drawable drawable) {
         if (verifyDrawable(drawable)) {
-            final Rect dirty = drawable.getDirtyBounds();
-            final int scrollX = mScrollX;
-            final int scrollY = mScrollY;
-
-            invalidate(dirty.left + scrollX, dirty.top + scrollY,
-                    dirty.right + scrollX, dirty.bottom + scrollY);
+            invalidate();
             rebuildOutline();
         }
     }
@@ -28578,8 +28599,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * hierarchy is traversed: value is either the view itself for appearead events, or its
          * autofill id for disappeared.
          */
-        // TODO(b/121197119): use SparseArray once session id becomes integer
-        ArrayMap<String, ArrayList<Object>> mContentCaptureEvents;
+        SparseArray<ArrayList<Object>> mContentCaptureEvents;
 
         /**
          * Cached reference to the {@link ContentCaptureManager}.
@@ -28609,9 +28629,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 @NonNull View view, boolean appeared) {
             if (mContentCaptureEvents == null) {
                 // Most of the time there will be just one session, so intial capacity is 1
-                mContentCaptureEvents = new ArrayMap<>(1);
+                mContentCaptureEvents = new SparseArray<>(1);
             }
-            String sessionId = session.getId();
+            int sessionId = session.getId();
             // TODO: life would be much easier if we provided a MultiMap implementation somwhere...
             ArrayList<Object> events = mContentCaptureEvents.get(sessionId);
             if (events == null) {

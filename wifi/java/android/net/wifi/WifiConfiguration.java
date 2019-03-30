@@ -2190,26 +2190,35 @@ public class WifiConfiguration implements Parcelable {
                 key += "-" + Integer.toString(UserHandle.getUserId(creatorUid));
             }
         } else {
-            if (allowedKeyManagement.get(KeyMgmt.WPA_PSK)) {
-                key = SSID + KeyMgmt.strings[KeyMgmt.WPA_PSK];
-            } else if (allowedKeyManagement.get(KeyMgmt.WPA_EAP) ||
-                    allowedKeyManagement.get(KeyMgmt.IEEE8021X)) {
-                key = SSID + KeyMgmt.strings[KeyMgmt.WPA_EAP];
-            } else if (wepKeys[0] != null) {
-                key = SSID + "WEP";
-            } else if (allowedKeyManagement.get(KeyMgmt.OWE)) {
-                key = SSID + KeyMgmt.strings[KeyMgmt.OWE];
-            } else if (allowedKeyManagement.get(KeyMgmt.SAE)) {
-                key = SSID + KeyMgmt.strings[KeyMgmt.SAE];
-            } else if (allowedKeyManagement.get(KeyMgmt.SUITE_B_192)) {
-                key = SSID + KeyMgmt.strings[KeyMgmt.SUITE_B_192];
-            } else {
-                key = SSID + KeyMgmt.strings[KeyMgmt.NONE];
-            }
+            key = getSsidAndSecurityTypeString();
             if (!shared) {
                 key += "-" + Integer.toString(UserHandle.getUserId(creatorUid));
             }
             mCachedConfigKey = key;
+        }
+        return key;
+    }
+
+    /** @hide
+     *  return the SSID + security type in String format.
+     */
+    public String getSsidAndSecurityTypeString() {
+        String key;
+        if (allowedKeyManagement.get(KeyMgmt.WPA_PSK)) {
+            key = SSID + KeyMgmt.strings[KeyMgmt.WPA_PSK];
+        } else if (allowedKeyManagement.get(KeyMgmt.WPA_EAP)
+                || allowedKeyManagement.get(KeyMgmt.IEEE8021X)) {
+            key = SSID + KeyMgmt.strings[KeyMgmt.WPA_EAP];
+        } else if (wepKeys[0] != null) {
+            key = SSID + "WEP";
+        } else if (allowedKeyManagement.get(KeyMgmt.OWE)) {
+            key = SSID + KeyMgmt.strings[KeyMgmt.OWE];
+        } else if (allowedKeyManagement.get(KeyMgmt.SAE)) {
+            key = SSID + KeyMgmt.strings[KeyMgmt.SAE];
+        } else if (allowedKeyManagement.get(KeyMgmt.SUITE_B_192)) {
+            key = SSID + KeyMgmt.strings[KeyMgmt.SUITE_B_192];
+        } else {
+            key = SSID + KeyMgmt.strings[KeyMgmt.NONE];
         }
         return key;
     }

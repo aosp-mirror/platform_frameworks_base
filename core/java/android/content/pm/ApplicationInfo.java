@@ -678,6 +678,14 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public static final int PRIVATE_FLAG_IS_RESOURCE_OVERLAY = 1 << 28;
 
+    /**
+     * Value for {@link #privateFlags}: If {@code true} this app allows
+     * shared/external storage media to be a sandboxed view that only contains
+     * files owned by the app.
+     *
+     * @hide
+     */
+    public static final int PRIVATE_FLAG_ALLOW_EXTERNAL_STORAGE_SANDBOX = 1 << 29;
 
     /** @hide */
     @IntDef(flag = true, prefix = { "PRIVATE_FLAG_" }, value = {
@@ -707,7 +715,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             PRIVATE_FLAG_VIRTUAL_PRELOAD,
             PRIVATE_FLAG_HAS_FRAGILE_USER_DATA,
             PRIVATE_FLAG_ALLOW_CLEAR_USER_DATA_ON_FAILED_RESTORE,
-            PRIVATE_FLAG_ALLOW_AUDIO_PLAYBACK_CAPTURE
+            PRIVATE_FLAG_ALLOW_AUDIO_PLAYBACK_CAPTURE,
+            PRIVATE_FLAG_ALLOW_EXTERNAL_STORAGE_SANDBOX,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ApplicationInfoPrivateFlags {}
@@ -1820,6 +1829,16 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public boolean isAudioPlaybackCaptureAllowed() {
         return (privateFlags & PRIVATE_FLAG_ALLOW_AUDIO_PLAYBACK_CAPTURE) != 0;
+    }
+
+    /**
+     * If {@code true} this app allows shared/external storage media to be a
+     * sandboxed view that only contains files owned by the app.
+     *
+     * @hide
+     */
+    public boolean isExternalStorageSandboxAllowed() {
+        return (privateFlags & PRIVATE_FLAG_ALLOW_EXTERNAL_STORAGE_SANDBOX) != 0;
     }
 
     private boolean isAllowedToUseHiddenApis() {

@@ -103,13 +103,16 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.localLOGV;
 
+import android.Manifest.permission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.Px;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.StatusBarManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Insets;
 import android.graphics.PixelFormat;
@@ -254,6 +257,9 @@ public class DisplayPolicy {
     private int[] mNavigationBarWidthForRotationDefault = new int[4];
     private int[] mNavigationBarHeightForRotationInCarMode = new int[4];
     private int[] mNavigationBarWidthForRotationInCarMode = new int[4];
+
+    /** Cached value of {@link ScreenShapeHelper#getWindowOutsetBottomPx} */
+    @Px private int mWindowOutsetBottom;
 
     private final StatusBarController mStatusBarController = new StatusBarController();
 
@@ -415,7 +421,6 @@ public class DisplayPolicy {
         mDeskDockEnablesAccelerometer = r.getBoolean(R.bool.config_deskDockEnablesAccelerometer);
         mTranslucentDecorEnabled = r.getBoolean(R.bool.config_enableTranslucentDecor);
         mForceShowSystemBarsFromExternal = r.getBoolean(R.bool.config_forceShowSystemBars);
-        updateConfigurationDependentBehaviors();
 
         mAccessibilityManager = (AccessibilityManager) mContext.getSystemService(
                 Context.ACCESSIBILITY_SERVICE);
@@ -565,15 +570,6 @@ public class DisplayPolicy {
 
     private int getDisplayId() {
         return mDisplayContent.getDisplayId();
-    }
-
-    void configure(int width, int height, int shortSizeDp) {
-        // Allow the navigation bar to move on non-square small devices (phones).
-        mNavigationBarCanMove = width != height && shortSizeDp < 600;
-    }
-
-    void updateConfigurationDependentBehaviors() {
-        mNavBarOpacityMode = mContext.getResources().getInteger(R.integer.config_navBarOpacityMode);
     }
 
     public void setHdmiPlugged(boolean plugged) {
@@ -741,6 +737,11 @@ public class DisplayPolicy {
         return true;
     }
 
+    private boolean hasStatusBarServicePermission(int pid, int uid) {
+        return mContext.checkPermission(permission.STATUS_BAR_SERVICE, pid, uid)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
     /**
      * Sanitize the layout parameters coming from a client.  Allows the policy
      * to do things like ensure that windows of a specific type can't take
@@ -750,7 +751,7 @@ public class DisplayPolicy {
      * are modified in-place.
      */
     public void adjustWindowParamsLw(WindowState win, WindowManager.LayoutParams attrs,
-            boolean hasStatusBarServicePermission) {
+            int callingPid, int callingUid) {
 
         final boolean isScreenDecor = (attrs.privateFlags & PRIVATE_FLAG_IS_SCREEN_DECOR) != 0;
         if (mScreenDecorWindows.contains(win)) {
@@ -758,7 +759,7 @@ public class DisplayPolicy {
                 // No longer has the flag set, so remove from the set.
                 mScreenDecorWindows.remove(win);
             }
-        } else if (isScreenDecor && hasStatusBarServicePermission) {
+        } else if (isScreenDecor && hasStatusBarServicePermission(callingPid, callingUid)) {
             mScreenDecorWindows.add(win);
         }
 
@@ -1169,7 +1170,7 @@ public class DisplayPolicy {
 
         final boolean useOutsets = outOutsets != null && shouldUseOutsets(attrs, fl);
         if (useOutsets) {
-            int outset = ScreenShapeHelper.getWindowOutsetBottomPx(mContext.getResources());
+            int outset = mWindowOutsetBottom;
             if (outset > 0) {
                 if (displayRotation == Surface.ROTATION_0) {
                     outOutsets.bottom += outset;
@@ -1489,12 +1490,13 @@ public class DisplayPolicy {
         }
         // apply any navigation bar insets
         sTmpRect.setEmpty();
-        mStatusBar.getWindowFrames().setFrames(displayFrames.mUnrestricted /* parentFrame */,
+        final WindowFrames windowFrames = mStatusBar.getWindowFrames();
+        windowFrames.setFrames(displayFrames.mUnrestricted /* parentFrame */,
                 displayFrames.mUnrestricted /* displayFrame */,
                 displayFrames.mStable /* overscanFrame */, displayFrames.mStable /* contentFrame */,
                 displayFrames.mStable /* visibleFrame */, sTmpRect /* decorFrame */,
                 displayFrames.mStable /* stableFrame */, displayFrames.mStable /* outsetFrame */);
-        mStatusBar.getWindowFrames().setDisplayCutout(displayFrames.mDisplayCutout);
+        windowFrames.setDisplayCutout(displayFrames.mDisplayCutout);
 
         // Let the status bar determine its size.
         mStatusBar.computeFrameLw();
@@ -1534,8 +1536,9 @@ public class DisplayPolicy {
                     "dock=%s content=%s cur=%s", dockFrame.toString(),
                     displayFrames.mContent.toString(), displayFrames.mCurrent.toString()));
 
-            if (!mStatusBar.isAnimatingLw() && !statusBarTranslucent
-                    && !mStatusBarController.wasRecentlyTranslucent()) {
+            if (!statusBarTranslucent && !mStatusBarController.wasRecentlyTranslucent()
+                    && !mStatusBar.isAnimatingLw()) {
+
                 // If the opaque status bar is currently requested to be visible, and not in the
                 // process of animating on or off, then we can tell the app that it is covered by
                 // it.
@@ -2190,7 +2193,7 @@ public class DisplayPolicy {
             final Rect osf = windowFrames.mOutsetFrame;
             osf.set(cf.left, cf.top, cf.right, cf.bottom);
             windowFrames.setHasOutsets(true);
-            int outset = ScreenShapeHelper.getWindowOutsetBottomPx(mContext.getResources());
+            int outset = mWindowOutsetBottom;
             if (outset > 0) {
                 int rotation = displayFrames.mRotation;
                 if (rotation == Surface.ROTATION_0) {
@@ -2346,7 +2349,7 @@ public class DisplayPolicy {
         }
 
         // Voice interaction overrides both top fullscreen and top docked.
-        if (affectsSystemUi && win.getAttrs().type == TYPE_VOICE_INTERACTION) {
+        if (affectsSystemUi && attrs.type == TYPE_VOICE_INTERACTION) {
             if (mTopFullscreenOpaqueWindowState == null) {
                 mTopFullscreenOpaqueWindowState = win;
                 if (mTopFullscreenOpaqueOrDimmingWindowState == null) {
@@ -2602,9 +2605,22 @@ public class DisplayPolicy {
                     res.getDimensionPixelSize(R.dimen.navigation_bar_width_car_mode);
         }
 
+        mNavBarOpacityMode = res.getInteger(R.integer.config_navBarOpacityMode);
+
         // EXPERIMENT TODO(b/113952590): Remove once experiment in bug is completed
         mExperiments.onConfigurationChanged(uiContext);
         // EXPERIMENT END
+
+        updateConfigurationAndScreenSizeDependentBehaviors();
+        mWindowOutsetBottom = ScreenShapeHelper.getWindowOutsetBottomPx(mContext.getResources());
+    }
+
+    void updateConfigurationAndScreenSizeDependentBehaviors() {
+        final Context uiContext = getSystemUiContext();
+        final Resources res = uiContext.getResources();
+        mNavigationBarCanMove =
+                mDisplayContent.mBaseDisplayWidth != mDisplayContent.mBaseDisplayHeight
+                        && res.getBoolean(R.bool.config_navBarCanMove);
     }
 
     @VisibleForTesting
@@ -2960,6 +2976,8 @@ public class DisplayPolicy {
         mLastDockedStackSysUiFlags = dockedVisibility;
         mLastFocusNeedsMenu = needsMenu;
         mFocusedApp = win.getAppToken();
+        mLastNonDockedStackBounds.set(mNonDockedStackBounds);
+        mLastDockedStackBounds.set(mDockedStackBounds);
         final Rect fullscreenStackBounds = new Rect(mNonDockedStackBounds);
         final Rect dockedStackBounds = new Rect(mDockedStackBounds);
         mHandler.post(() -> {
@@ -3411,6 +3429,10 @@ public class DisplayPolicy {
         }
         if (mNavigationBar != null) {
             pw.print(prefix); pw.print("mNavigationBar="); pw.println(mNavigationBar);
+            pw.print(prefix); pw.print("mNavBarOpacityMode="); pw.println(mNavBarOpacityMode);
+            pw.print(prefix); pw.print("mNavigationBarCanMove="); pw.println(mNavigationBarCanMove);
+            pw.print(prefix); pw.print("mNavigationBarPosition=");
+            pw.println(mNavigationBarPosition);
         }
         if (mFocusedWindow != null) {
             pw.print(prefix); pw.print("mFocusedWindow="); pw.println(mFocusedWindow);

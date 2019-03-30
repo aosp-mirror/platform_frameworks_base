@@ -1719,6 +1719,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     final WallpaperData systemWallpaper =
                             getWallpaperSafeLocked(userId, FLAG_SYSTEM);
                     switchWallpaper(systemWallpaper, null);
+                    notifyCallbacksLocked(systemWallpaper);
                 }
 
                 // Make sure that the SELinux labeling of all the relevant files is correct.
@@ -2668,6 +2669,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 } catch (RemoteException e) {
                 }
                 wallpaper.connection.mReply = null;
+            }
+            try {
+                wallpaper.connection.mService.detach();
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed detaching wallpaper service ", e);
             }
             mContext.unbindService(wallpaper.connection);
             wallpaper.connection.forEachDisplayConnector(

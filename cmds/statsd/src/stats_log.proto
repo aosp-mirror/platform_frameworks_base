@@ -460,6 +460,14 @@ message StatsdStatsReport {
         optional int32 pid = 6;
     }
     repeated LogLossStats detected_log_loss = 16;
+
+    message EventQueueOverflow {
+        optional int32 count = 1;
+        optional int64 max_queue_history_ns = 2;
+        optional int64 min_queue_history_ns = 3;
+    }
+
+    optional EventQueueOverflow queue_overflow = 18;
 }
 
 message AlertTriggerDetails {

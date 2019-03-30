@@ -44,7 +44,7 @@ public final class OverlayInfo implements Parcelable {
             STATE_DISABLED,
             STATE_ENABLED,
             STATE_ENABLED_STATIC,
-            STATE_TARGET_UPGRADING,
+            // @Deprecated STATE_TARGET_UPGRADING,
             STATE_OVERLAY_UPGRADING,
     })
     /** @hide */
@@ -96,7 +96,14 @@ public final class OverlayInfo implements Parcelable {
      * The target package is currently being upgraded; the state will change
      * once the package installation has finished.
      * @hide
+     *
+     * @deprecated No longer used. Caused invalid transitions from enabled -> upgrading -> enabled,
+     * where an update is propagated when nothing has changed. Can occur during --dont-kill
+     * installs when code and resources are hot swapped and the Activity should not be relaunched.
+     * In all other cases, the process and therefore Activity is killed, so the state loop is
+     * irrelevant.
      */
+    @Deprecated
     public static final int STATE_TARGET_UPGRADING = 4;
 
     /**

@@ -27,10 +27,13 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.colorextraction.SysuiColorExtractor;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -38,12 +41,16 @@ import org.junit.runner.RunWith;
 public final class StretchAnalogClockControllerTest extends SysuiTestCase {
 
     private StretchAnalogClockController mClockController;
+    @Mock SysuiColorExtractor mMockColorExtractor;
 
     @Before
     public void setUp() {
+        MockitoAnnotations.initMocks(this);
+
         Resources res = getContext().getResources();
         LayoutInflater layoutInflater = LayoutInflater.from(getContext());
-        mClockController = new StretchAnalogClockController(res, layoutInflater);
+        mClockController = new StretchAnalogClockController(res, layoutInflater,
+                mMockColorExtractor);
     }
 
     @Test

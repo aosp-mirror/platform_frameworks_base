@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.content.LocusId;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.DebugUtils;
 
 import com.android.internal.util.Preconditions;
 
@@ -58,7 +59,6 @@ public final class ContentCaptureCondition implements Parcelable {
     public ContentCaptureCondition(@NonNull LocusId locusId, @Flags int flags) {
         this.mLocusId = Preconditions.checkNotNull(locusId);
         this.mFlags = flags;
-        // TODO(b/129267994): check flags, add test case for null and invalid flags
     }
 
     /**
@@ -76,6 +76,42 @@ public final class ContentCaptureCondition implements Parcelable {
      */
     public @Flags int getFlags() {
         return mFlags;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + mFlags;
+        result = prime * result + ((mLocusId == null) ? 0 : mLocusId.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
+        final ContentCaptureCondition other = (ContentCaptureCondition) obj;
+        if (mFlags != other.mFlags) return false;
+        if (mLocusId == null) {
+            if (other.mLocusId != null) return false;
+        } else {
+            if (!mLocusId.equals(other.mLocusId)) return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder string = new StringBuilder(mLocusId.toString()); // LocusID is PII safe
+        if (mFlags != 0) {
+            string
+                .append(" (")
+                .append(DebugUtils.flagsToString(ContentCaptureCondition.class, "FLAG_", mFlags))
+                .append(')');
+        }
+        return string.toString();
     }
 
     @Override

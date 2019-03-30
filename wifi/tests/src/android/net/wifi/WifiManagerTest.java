@@ -1382,4 +1382,60 @@ i     * Verify that a call to cancel WPS immediately returns a failure.
             r.run();
         }
     }
+
+    /**
+     * Test behavior of isEnhancedOpenSupported
+     * @throws Exception
+     */
+    @Test
+    public void testIsEnhancedOpenSupported() throws Exception {
+        when(mWifiService.getSupportedFeatures())
+                .thenReturn(new Long(WifiManager.WIFI_FEATURE_OWE));
+        assertTrue(mWifiManager.isEnhancedOpenSupported());
+        when(mWifiService.getSupportedFeatures())
+                .thenReturn(new Long(~WifiManager.WIFI_FEATURE_OWE));
+        assertFalse(mWifiManager.isEnhancedOpenSupported());
+    }
+
+    /**
+     * Test behavior of isWpa3SaeSupported
+     * @throws Exception
+     */
+    @Test
+    public void testIsWpa3SaeSupported() throws Exception {
+        when(mWifiService.getSupportedFeatures())
+                .thenReturn(new Long(WifiManager.WIFI_FEATURE_WPA3_SAE));
+        assertTrue(mWifiManager.isWpa3SaeSupported());
+        when(mWifiService.getSupportedFeatures())
+                .thenReturn(new Long(~WifiManager.WIFI_FEATURE_WPA3_SAE));
+        assertFalse(mWifiManager.isWpa3SaeSupported());
+    }
+
+    /**
+     * Test behavior of isWpa3SuiteBSupported
+     * @throws Exception
+     */
+    @Test
+    public void testIsWpa3SuiteBSupported() throws Exception {
+        when(mWifiService.getSupportedFeatures())
+                .thenReturn(new Long(WifiManager.WIFI_FEATURE_WPA3_SUITE_B));
+        assertTrue(mWifiManager.isWpa3SuiteBSupported());
+        when(mWifiService.getSupportedFeatures())
+                .thenReturn(new Long(~WifiManager.WIFI_FEATURE_WPA3_SUITE_B));
+        assertFalse(mWifiManager.isWpa3SuiteBSupported());
+    }
+
+    /**
+     * Test behavior of isEasyConnectSupported
+     * @throws Exception
+     */
+    @Test
+    public void testIsEasyConnectSupported() throws Exception {
+        when(mWifiService.getSupportedFeatures())
+                .thenReturn(new Long(WifiManager.WIFI_FEATURE_DPP));
+        assertTrue(mWifiManager.isEasyConnectSupported());
+        when(mWifiService.getSupportedFeatures())
+                .thenReturn(new Long(~WifiManager.WIFI_FEATURE_DPP));
+        assertFalse(mWifiManager.isEasyConnectSupported());
+    }
 }

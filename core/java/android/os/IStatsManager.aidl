@@ -217,4 +217,9 @@ interface IStatsManager {
      */
      oneway void sendBinaryPushStateChangedAtom(in String trainName, in long trainVersionCode,
          in int options, in int state, in long[] experimentId);
+
+    /**
+     * Returns the most recently registered experiment IDs.
+     */
+    long[] getRegisteredExperimentIds();
 }

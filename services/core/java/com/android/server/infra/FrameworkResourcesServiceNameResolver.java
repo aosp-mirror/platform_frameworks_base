@@ -155,7 +155,8 @@ public final class FrameworkResourcesServiceNameResolver implements ServiceNameR
             }
             mTemporaryServiceExpiration = SystemClock.elapsedRealtime() + durationMs;
             mTemporaryHandler.sendEmptyMessageDelayed(MSG_RESET_TEMPORARY_SERVICE, durationMs);
-            notifyTemporaryServiceNameChangedLocked(userId, componentName);
+            notifyTemporaryServiceNameChangedLocked(userId, componentName,
+                    /* isTemporary= */ true);
         }
     }
 
@@ -169,7 +170,8 @@ public final class FrameworkResourcesServiceNameResolver implements ServiceNameR
                 mTemporaryHandler.removeMessages(MSG_RESET_TEMPORARY_SERVICE);
                 mTemporaryHandler = null;
             }
-            notifyTemporaryServiceNameChangedLocked(userId, /* newTemporaryName= */ null);
+            notifyTemporaryServiceNameChangedLocked(userId, /* newTemporaryName= */ null,
+                    /* isTemporary= */ false);
         }
     }
 
@@ -235,9 +237,9 @@ public final class FrameworkResourcesServiceNameResolver implements ServiceNameR
     }
 
     private void notifyTemporaryServiceNameChangedLocked(@UserIdInt int userId,
-            @Nullable String newTemporaryName) {
+            @Nullable String newTemporaryName, boolean isTemporary) {
         if (mOnSetCallback != null) {
-            mOnSetCallback.onNameResolved(userId, newTemporaryName);
+            mOnSetCallback.onNameResolved(userId, newTemporaryName, isTemporary);
         }
     }
 }

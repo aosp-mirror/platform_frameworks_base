@@ -27,6 +27,9 @@ namespace android {
 namespace os {
 namespace statsd {
 
+// for TrainInfo experiment id serialization
+const int FIELD_ID_EXPERIMENT_ID = 1;
+
 using namespace android::util;
 using android::util::ProtoOutputStream;
 using std::string;
@@ -118,6 +121,7 @@ void LogEvent::createLogEvents(const StatsLogEventWrapper& statsLogEventWrapper,
 
 LogEvent::LogEvent(int32_t tagId, int64_t wallClockTimestampNs, int64_t elapsedTimestampNs) {
     mLogdTimestampNs = wallClockTimestampNs;
+    mElapsedTimestampNs = elapsedTimestampNs;
     mTagId = tagId;
     mLogUid = 0;
     mContext = create_android_logger(1937006964); // the event tag shared by all stats logs
@@ -241,12 +245,15 @@ LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
 
     mValues.push_back(
             FieldValue(Field(mTagId, getSimpleField(1)), Value(trainInfo.trainVersionCode)));
-    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(2)), Value(trainInfo.experimentIds)));
+    std::vector<uint8_t> experimentIdsProto;
+    writeExperimentIdsToProto(trainInfo.experimentIds, &experimentIdsProto);
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(2)), Value(experimentIdsProto)));
     mValues.push_back(FieldValue(Field(mTagId, getSimpleField(3)), Value(trainInfo.trainName)));
     mValues.push_back(FieldValue(Field(mTagId, getSimpleField(4)), Value(trainInfo.status)));
 }
 
-LogEvent::LogEvent(int32_t tagId, int64_t timestampNs) : LogEvent(tagId, timestampNs, 0) {}
+LogEvent::LogEvent(int32_t tagId, int64_t timestampNs) : LogEvent(tagId, timestampNs, timestampNs) {
+}
 
 LogEvent::LogEvent(int32_t tagId, int64_t timestampNs, int32_t uid) {
     mLogdTimestampNs = timestampNs;
@@ -669,6 +676,24 @@ string LogEvent::ToString() const {
 
 void LogEvent::ToProto(ProtoOutputStream& protoOutput) const {
     writeFieldValueTreeToStream(mTagId, getValues(), &protoOutput);
+}
+
+void writeExperimentIdsToProto(const std::vector<int64_t>& experimentIds, std::vector<uint8_t>* protoOut) {
+    ProtoOutputStream proto;
+    for (const auto& expId : experimentIds) {
+        proto.write(FIELD_TYPE_INT64 | FIELD_COUNT_REPEATED | FIELD_ID_EXPERIMENT_ID,
+                    (long long)expId);
+    }
+
+    protoOut->resize(proto.size());
+    size_t pos = 0;
+    sp<ProtoReader> reader = proto.data();
+    while (reader->readBuffer() != NULL) {
+        size_t toRead = reader->currentToRead();
+        std::memcpy(protoOut->data() + pos, reader->readBuffer(), toRead);
+        pos += toRead;
+        reader->move(toRead);
+    }
 }
 
 }  // namespace statsd

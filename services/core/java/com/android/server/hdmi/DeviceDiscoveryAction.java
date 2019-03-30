@@ -335,7 +335,6 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
         current.mDeviceType = params[2] & 0xFF;
         current.mDisplayName = HdmiUtils.getDefaultDeviceName(current.mDeviceType);
 
-        // TODO(amyjojo): check if non-TV device needs to update cec switch info.
         // This is to manager CEC device separately in case they don't have address.
         if (mIsTvDevice) {
             tv().updateCecSwitchInfo(current.mLogicalAddress, current.mDeviceType,

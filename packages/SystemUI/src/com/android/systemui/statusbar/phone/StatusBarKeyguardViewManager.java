@@ -760,9 +760,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     public boolean bouncerNeedsScrimming() {
-        return mOccluded || mBouncer.willDismissWithAction()  || mBouncer.needsFullscreenBouncer()
+        return mOccluded || mBouncer.willDismissWithAction()
                 || mStatusBar.isFullScreenUserSwitcherState()
-                || (mBouncer.isShowing() && mBouncer.isScrimmed());
+                || (mBouncer.isShowing() && mBouncer.isScrimmed())
+                || mBouncer.isFullscreenBouncer();
     }
 
     public void dump(PrintWriter pw) {

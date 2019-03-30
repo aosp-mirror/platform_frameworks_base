@@ -181,9 +181,8 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
 
         mServiceNameResolver = serviceNameResolver;
         if (mServiceNameResolver != null) {
-            mServiceNameResolver
-                    .setOnTemporaryServiceNameChangedCallback(
-                            (u, s) -> updateCachedServiceLocked(u));
+            mServiceNameResolver.setOnTemporaryServiceNameChangedCallback(
+                    (u, s, t) -> onServiceNameChanged(u, s, t));
 
         }
         if (disallowProperty == null) {
@@ -582,6 +581,23 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
     }
 
     /**
+     * Called when the service name changed (typically when using temporary services).
+     *
+     * <p>By default, it calls {@link #updateCachedServiceLocked(int)}; subclasses must either call
+     * that same method, or {@code super.onServiceNameChanged()}.
+     *
+     * @param userId user handle.
+     * @param serviceName the new service name.
+     * @param isTemporary whether the new service is temporary.
+     */
+    protected void onServiceNameChanged(@UserIdInt int userId, @Nullable String serviceName,
+            boolean isTemporary) {
+        synchronized (mLock) {
+            updateCachedServiceLocked(userId);
+        }
+    }
+
+    /**
      * Visits all services in the cache.
      */
     @GuardedBy("mLock")
@@ -598,6 +614,23 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
     @GuardedBy("mLock")
     protected void clearCacheLocked() {
         mServicesCache.clear();
+    }
+
+    /**
+     * Asserts that the given package name is owned by the UID making this call.
+     *
+     * @throws SecurityException when it's not...
+     */
+    protected final void assertCalledByPackageOwner(@NonNull String packageName) {
+        Preconditions.checkNotNull(packageName);
+        final int uid = Binder.getCallingUid();
+        final String[] packages = getContext().getPackageManager().getPackagesForUid(uid);
+        if (packages != null) {
+            for (String candidate : packages) {
+                if (packageName.equals(candidate)) return; // Found it
+            }
+        }
+        throw new SecurityException("UID " + uid + " does not own " + packageName);
     }
 
     // TODO(b/117779333): support proto

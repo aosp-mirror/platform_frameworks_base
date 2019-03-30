@@ -79,6 +79,9 @@
     <!-- Battery saver confirmation dialog title [CHAR LIMIT=NONE]-->
     <string name="battery_saver_confirmation_title">Turn on Battery Saver?</string>
 
+    <!-- The more generic version of the battery saver confirmation dialog title [CHAR LIMIT=NONE] -->
+    <string name="battery_saver_confirmation_title_generic">About Battery Saver</string>
+
     <!-- Battery saver confirmation dialog ok text [CHAR LIMIT=40]-->
     <string name="battery_saver_confirmation_ok">Turn on</string>
 
@@ -2341,18 +2344,6 @@
 
     <!-- Content description for ongoing privacy chip. Use with multiple apps [CHAR LIMIT=NONE]-->
     <string name="ongoing_privacy_chip_content_multiple_apps">Applications are using your <xliff:g id="types_list" example="camera, location">%s</xliff:g>.</string>
-
-    <!-- Action for accepting the Ongoing privacy dialog [CHAR LIMIT=10]-->
-    <string name="ongoing_privacy_dialog_ok">Got it</string>
-
-    <!-- Action on Ongoing Privacy Dialog to open privacy hub [CHAR LIMIT=23]-->
-    <string name="ongoing_privacy_dialog_open_settings">Privacy settings</string>
-
-    <!-- Text for item in Ongoing Privacy Dialog title when only one app is using app ops [CHAR LIMIT=NONE] -->
-    <string name="ongoing_privacy_dialog_single_app_title">App using your <xliff:g id="types_list" example="camera( and location)">%s</xliff:g></string>
-
-    <!-- Text for item in Ongoing Privacy Dialog title when multiple apps is using app ops [CHAR LIMIT=NONE] -->
-    <string name="ongoing_privacy_dialog_multiple_apps_title">Apps using your <xliff:g id="types_list" example="camera( and location)">%s</xliff:g></string>
 
     <!-- Separator for types. Include spaces before and after if needed [CHAR LIMIT=10] -->
     <string name="ongoing_privacy_dialog_separator">,\u0020</string>

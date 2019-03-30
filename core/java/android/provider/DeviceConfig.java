@@ -299,27 +299,6 @@ public final class DeviceConfig {
                 "device_identifier_access_restrictions_disabled";
     }
 
-    /**
-     * Telephony related properties definitions.
-     *
-     * @hide
-     */
-    public interface Telephony {
-        String NAMESPACE = "telephony";
-        /**
-         * Ringer ramping time in milliseconds.
-         */
-        String RAMPING_RINGER_DURATION = "ramping_ringer_duration";
-        /**
-         * Whether to apply ramping ringer on incoming phone calls.
-         */
-        String RAMPING_RINGER_ENABLED = "ramping_ringer_enabled";
-        /**
-         * Vibration time in milliseconds before ramping ringer starts.
-         */
-        String RAMPING_RINGER_VIBRATION_DURATION = "ramping_ringer_vibration_duration";
-    }
-
     private static final Object sLock = new Object();
     @GuardedBy("sLock")
     private static ArrayMap<OnPropertyChangedListener, Pair<String, Executor>> sSingleListeners =

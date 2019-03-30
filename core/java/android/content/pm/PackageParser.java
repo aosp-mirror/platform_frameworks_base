@@ -3689,6 +3689,12 @@ public class PackageParser {
             ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_ALLOW_AUDIO_PLAYBACK_CAPTURE;
         }
 
+        if (sa.getBoolean(
+                R.styleable.AndroidManifestApplication_allowExternalStorageSandbox,
+                owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.Q)) {
+            ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_ALLOW_EXTERNAL_STORAGE_SANDBOX;
+        }
+
         ai.maxAspectRatio = sa.getFloat(R.styleable.AndroidManifestApplication_maxAspectRatio, 0);
         ai.minAspectRatio = sa.getFloat(R.styleable.AndroidManifestApplication_minAspectRatio, 0);
 

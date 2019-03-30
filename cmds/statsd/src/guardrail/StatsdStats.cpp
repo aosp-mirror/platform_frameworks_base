@@ -50,6 +50,7 @@ const int FIELD_ID_ANOMALY_ALARM_STATS = 9;
 const int FIELD_ID_PERIODIC_ALARM_STATS = 12;
 const int FIELD_ID_SYSTEM_SERVER_RESTART = 15;
 const int FIELD_ID_LOGGER_ERROR_STATS = 16;
+const int FIELD_ID_OVERFLOW = 18;
 
 const int FIELD_ID_ATOM_STATS_TAG = 1;
 const int FIELD_ID_ATOM_STATS_COUNT = 2;
@@ -63,6 +64,10 @@ const int FIELD_ID_LOG_LOSS_STATS_ERROR = 3;
 const int FIELD_ID_LOG_LOSS_STATS_TAG = 4;
 const int FIELD_ID_LOG_LOSS_STATS_UID = 5;
 const int FIELD_ID_LOG_LOSS_STATS_PID = 6;
+
+const int FIELD_ID_OVERFLOW_COUNT = 1;
+const int FIELD_ID_OVERFLOW_MAX_HISTORY = 2;
+const int FIELD_ID_OVERFLOW_MIN_HISTORY = 3;
 
 const int FIELD_ID_CONFIG_STATS_UID = 1;
 const int FIELD_ID_CONFIG_STATS_ID = 2;
@@ -233,6 +238,22 @@ void StatsdStats::noteActiveStatusChanged(const ConfigKey& key, bool activated, 
 
 void StatsdStats::noteDataDropped(const ConfigKey& key, const size_t totalBytes) {
     noteDataDropped(key, totalBytes, getWallClockSec());
+}
+
+void StatsdStats::noteEventQueueOverflow(int64_t oldestEventTimestampNs) {
+    lock_guard<std::mutex> lock(mLock);
+
+    mOverflowCount++;
+
+    int64_t history = getElapsedRealtimeNs() - oldestEventTimestampNs;
+
+    if (history > mMaxQueueHistoryNs) {
+        mMaxQueueHistoryNs = history;
+    }
+
+    if (history < mMinQueueHistoryNs) {
+        mMinQueueHistoryNs = history;
+    }
 }
 
 void StatsdStats::noteDataDropped(const ConfigKey& key, const size_t totalBytes, int32_t timeSec) {
@@ -534,6 +555,9 @@ void StatsdStats::resetInternalLocked() {
     mPeriodicAlarmRegisteredStats = 0;
     mSystemServerRestartSec.clear();
     mLogLossStats.clear();
+    mOverflowCount = 0;
+    mMinQueueHistoryNs = kInt64Max;
+    mMaxQueueHistoryNs = 0;
     for (auto& config : mConfigStats) {
         config.second->broadcast_sent_time_sec.clear();
         config.second->activation_time_sec.clear();
@@ -726,6 +750,9 @@ void StatsdStats::dumpStats(int out) const {
                 (long long)loss.mWallClockSec, loss.mCount, loss.mLastError, loss.mLastTag,
                 loss.mUid, loss.mPid);
     }
+
+    dprintf(out, "Event queue overflow: %d; MaxHistoryNs: %lld; MinHistoryNs: %lld\n",
+            mOverflowCount, (long long)mMaxQueueHistoryNs, (long long)mMinQueueHistoryNs);
 }
 
 void addConfigStatsToProto(const ConfigStats& configStats, ProtoOutputStream* proto) {
@@ -901,6 +928,16 @@ void StatsdStats::dumpStats(std::vector<uint8_t>* output, bool reset) {
         proto.write(FIELD_TYPE_INT32 | FIELD_ID_LOG_LOSS_STATS_TAG, error.mLastTag);
         proto.write(FIELD_TYPE_INT32 | FIELD_ID_LOG_LOSS_STATS_UID, error.mUid);
         proto.write(FIELD_TYPE_INT32 | FIELD_ID_LOG_LOSS_STATS_PID, error.mPid);
+        proto.end(token);
+    }
+
+    if (mOverflowCount > 0) {
+        uint64_t token = proto.start(FIELD_TYPE_MESSAGE | FIELD_ID_OVERFLOW);
+        proto.write(FIELD_TYPE_INT32 | FIELD_ID_OVERFLOW_COUNT, (int32_t)mOverflowCount);
+        proto.write(FIELD_TYPE_INT64 | FIELD_ID_OVERFLOW_MAX_HISTORY,
+                    (long long)mMaxQueueHistoryNs);
+        proto.write(FIELD_TYPE_INT64 | FIELD_ID_OVERFLOW_MIN_HISTORY,
+                    (long long)mMinQueueHistoryNs);
         proto.end(token);
     }
 

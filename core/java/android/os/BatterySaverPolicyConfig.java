@@ -58,7 +58,8 @@ public final class BatterySaverPolicyConfig implements Parcelable {
         mAdvertiseIsEnabled = in.mAdvertiseIsEnabled;
         mDeferFullBackup = in.mDeferFullBackup;
         mDeferKeyValueBackup = in.mDeferKeyValueBackup;
-        mDeviceSpecificSettings = Collections.unmodifiableMap(in.mDeviceSpecificSettings);
+        mDeviceSpecificSettings = Collections.unmodifiableMap(
+                new ArrayMap<>(in.mDeviceSpecificSettings));
         mDisableAnimation = in.mDisableAnimation;
         mDisableAod = in.mDisableAod;
         mDisableLaunchBoost = in.mDisableLaunchBoost;

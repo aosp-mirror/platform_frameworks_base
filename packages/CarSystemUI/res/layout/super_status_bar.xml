@@ -64,7 +64,6 @@
         <include layout="@layout/car_top_navigation_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
         />
     </LinearLayout>
 
@@ -79,6 +78,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="invisible"/>
+
+    <include layout="@layout/notification_center_activity"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:layout_marginBottom="112dp"
+             android:visibility="invisible"
+    />
 
     <com.android.systemui.statusbar.ScrimView
         android:id="@+id/scrim_in_front"

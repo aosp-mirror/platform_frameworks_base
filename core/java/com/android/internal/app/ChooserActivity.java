@@ -1594,7 +1594,7 @@ public class ChooserActivity extends ResolverActivity {
             if (info == null) return null;
 
             // Now fetch app icon and raster with no badging even in work profile
-            Bitmap appIcon = (new ActivityInfoPresentationGetter(info)).getIconBitmap();
+            Bitmap appIcon = makePresentationGetter(info).getIconBitmap();
 
             // Raster target drawable with appIcon as a badge
             SimpleIconFactory sif = SimpleIconFactory.obtain(ChooserActivity.this);
@@ -1865,8 +1865,9 @@ public class ChooserActivity extends ResolverActivity {
                         ri.noResourceId = true;
                         ri.icon = 0;
                     }
+                    ResolveInfoPresentationGetter getter = makePresentationGetter(ri);
                     mCallerTargets.add(new DisplayResolveInfo(ii, ri,
-                            ri.loadLabel(pm), null, ii));
+                            getter.getLabel(), getter.getSubLabel(), ii));
                 }
             }
         }
@@ -1876,12 +1877,6 @@ public class ChooserActivity extends ResolverActivity {
             for (int i = 0; i < MAX_SERVICE_TARGETS; i++) {
                 mServiceTargets.add(mPlaceHolderTargetInfo);
             }
-        }
-
-        @Override
-        public boolean showsExtendedInfo(TargetInfo info) {
-            // We have badges so we don't need this text shown.
-            return false;
         }
 
         @Override
@@ -2301,8 +2296,10 @@ public class ChooserActivity extends ResolverActivity {
             final int spec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
             int columnCount = holder.getColumnCount();
 
+            final boolean isDirectShare = holder instanceof DirectShareViewHolder;
+
             for (int i = 0; i < columnCount; i++) {
-                final View v = mChooserListAdapter.createView(holder.getRow(i));
+                final View v = mChooserListAdapter.createView(holder.getRowByIndex(i));
                 final int column = i;
                 v.setOnClickListener(new OnClickListener() {
                     @Override
@@ -2321,32 +2318,46 @@ public class ChooserActivity extends ResolverActivity {
                 });
                 ViewGroup row = holder.addView(i, v);
 
-                // Force height to be a given so we don't have visual disruption during scaling.
-                LayoutParams lp = v.getLayoutParams();
-                v.measure(spec, spec);
-                if (lp == null) {
-                    lp = new LayoutParams(LayoutParams.MATCH_PARENT, v.getMeasuredHeight());
-                    row.setLayoutParams(lp);
-                } else {
-                    lp.height = v.getMeasuredHeight();
+                // Force Direct Share to be 2 lines and auto-wrap to second line via hoz scroll =
+                // false. TextView#setHorizontallyScrolling must be reset after #setLines. Must be
+                // done before measuring.
+                if (isDirectShare) {
+                    final ViewHolder vh = (ViewHolder) v.getTag();
+                    vh.text.setLines(2);
+                    vh.text.setHorizontallyScrolling(false);
+                    vh.text2.setVisibility(View.GONE);
                 }
+
+                // Force height to be a given so we don't have visual disruption during scaling.
+                v.measure(spec, spec);
+                setViewHeight(v, v.getMeasuredHeight());
             }
 
             final ViewGroup viewGroup = holder.getViewGroup();
 
-            // Pre-measure so we can scale later.
+            // Pre-measure and fix height so we can scale later.
             holder.measure();
-            LayoutParams lp = viewGroup.getLayoutParams();
-            if (lp == null) {
-                lp = new LayoutParams(LayoutParams.MATCH_PARENT, holder.getMeasuredRowHeight());
-                viewGroup.setLayoutParams(lp);
-            } else {
-                lp.height = holder.getMeasuredRowHeight();
+            setViewHeight(viewGroup, holder.getMeasuredRowHeight());
+
+            if (isDirectShare) {
+                DirectShareViewHolder dsvh = (DirectShareViewHolder) holder;
+                setViewHeight(dsvh.getRow(0), holder.getMeasuredRowHeight());
+                setViewHeight(dsvh.getRow(1), holder.getMeasuredRowHeight());
             }
 
             viewGroup.setTag(holder);
 
             return holder;
+        }
+
+        private void setViewHeight(View view, int heightPx) {
+            LayoutParams lp = view.getLayoutParams();
+            if (lp == null) {
+                lp = new LayoutParams(LayoutParams.MATCH_PARENT, heightPx);
+                view.setLayoutParams(lp);
+            } else {
+                lp.height = heightPx;
+            }
         }
 
         RowViewHolder createViewHolder(int viewType, ViewGroup parent) {
@@ -2386,7 +2397,7 @@ public class ChooserActivity extends ResolverActivity {
 
             if (startType != lastStartType || rowPosition == getContentPreviewRowCount()) {
                 row.setBackground(mChooserRowLayer);
-                setVertPadding(row, mChooserRowServiceSpacing, 0);
+                setVertPadding(row, 0, 0);
             } else {
                 row.setBackground(null);
                 setVertPadding(row, 0, 0);
@@ -2483,7 +2494,9 @@ public class ChooserActivity extends ResolverActivity {
 
         abstract ViewGroup getViewGroup();
 
-        abstract ViewGroup getRow(int index);
+        abstract ViewGroup getRowByIndex(int index);
+
+        abstract ViewGroup getRow(int rowNumber);
 
         abstract void setViewVisibility(int i, int visibility);
 
@@ -2532,8 +2545,13 @@ public class ChooserActivity extends ResolverActivity {
             return mRow;
         }
 
-        public ViewGroup getRow(int index) {
+        public ViewGroup getRowByIndex(int index) {
             return mRow;
+        }
+
+        public ViewGroup getRow(int rowNumber) {
+            if (rowNumber == 0) return mRow;
+            return null;
         }
 
         public ViewGroup addView(int index, View v) {
@@ -2574,7 +2592,7 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         public ViewGroup addView(int index, View v) {
-            ViewGroup row = getRow(index);
+            ViewGroup row = getRowByIndex(index);
             row.addView(v);
             mCells[index] = v;
 
@@ -2589,8 +2607,12 @@ public class ChooserActivity extends ResolverActivity {
             return mParent;
         }
 
-        public ViewGroup getRow(int index) {
+        public ViewGroup getRowByIndex(int index) {
             return mRows.get(index / mCellCountPerRow);
+        }
+
+        public ViewGroup getRow(int rowNumber) {
+            return mRows.get(rowNumber);
         }
 
         public void measure() {

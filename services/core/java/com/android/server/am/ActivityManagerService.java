@@ -2288,7 +2288,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         mBatteryStatsService = null;
         mHandler = hasHandlerThread ? new MainHandler(handlerThread.getLooper()) : null;
         mHandlerThread = handlerThread;
-        mConstants = hasHandlerThread ? new ActivityManagerConstants(this, mHandler) : null;
+        mConstants = hasHandlerThread
+                ? new ActivityManagerConstants(mContext, this, mHandler) : null;
         final ActiveUids activeUids = new ActiveUids(this, false /* postChangesToAtm */);
         mProcessList.init(this, activeUids);
         mOomAdjuster = new OomAdjuster(this, mProcessList, activeUids);
@@ -2336,7 +2337,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mProcStartHandlerThread.start();
         mProcStartHandler = new Handler(mProcStartHandlerThread.getLooper());
 
-        mConstants = new ActivityManagerConstants(this, mHandler);
+        mConstants = new ActivityManagerConstants(mContext, this, mHandler);
         final ActiveUids activeUids = new ActiveUids(this, true /* postChangesToAtm */);
         mProcessList.init(this, activeUids);
         mOomAdjuster = new OomAdjuster(this, mProcessList, activeUids);
@@ -3128,7 +3129,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @GuardedBy("this")
-    ProcessChangeItem enqueueProcessChangeItemLocked(int uid, int pid) {
+    ProcessChangeItem enqueueProcessChangeItemLocked(int pid, int uid) {
         int i = mPendingProcessChanges.size()-1;
         ActivityManagerService.ProcessChangeItem item = null;
         while (i >= 0) {
@@ -8835,7 +8836,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         mAtmInternal.updateTopComponentForFactoryTest();
 
         retrieveSettings();
-        final int currentUserId = mUserController.getCurrentUserId();
         mUgmInternal.onSystemReady();
 
         final PowerManagerInternal pmi = LocalServices.getService(PowerManagerInternal.class);
@@ -8849,6 +8849,16 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         if (goingCallback != null) goingCallback.run();
+        // Check the current user here as a user can be started inside goingCallback.run() from
+        // other system services.
+        final int currentUserId = mUserController.getCurrentUserId();
+        Slog.i(TAG, "Current user:" + currentUserId);
+        if (currentUserId != UserHandle.USER_SYSTEM && !mUserController.isSystemUserStarted()) {
+            // User other than system user has started. Make sure that system user is already
+            // started before switching user.
+            throw new RuntimeException("System user not started while current user is:"
+                    + currentUserId);
+        }
         traceLog.traceBegin("ActivityManagerStartApps");
         mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_USER_RUNNING_START,
                 Integer.toString(currentUserId), currentUserId);
@@ -16414,7 +16424,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             proc.setReportedForegroundServiceTypes(fgServiceTypes);
-            ProcessChangeItem item = enqueueProcessChangeItemLocked(proc.info.uid, proc.pid);
+            ProcessChangeItem item = enqueueProcessChangeItemLocked(proc.pid, proc.info.uid);
             item.changes = ProcessChangeItem.CHANGE_FOREGROUND_SERVICES;
             item.foregroundServiceTypes = fgServiceTypes;
 

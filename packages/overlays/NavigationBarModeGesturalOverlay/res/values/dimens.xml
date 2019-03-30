@@ -19,6 +19,8 @@
 <resources>
     <!-- Height of the bottom navigation / system bar. -->
     <dimen name="navigation_bar_height">16dp</dimen>
+    <!-- Height of the bottom navigation bar in portrait; often the same as @dimen/navigation_bar_height -->
+    <dimen name="navigation_bar_height_landscape">16dp</dimen>
     <!-- Width of the navigation bar when it is placed vertically on the screen -->
     <dimen name="navigation_bar_width">16dp</dimen>
     <!-- Height of the bottom navigation / system bar. -->

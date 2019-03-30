@@ -411,6 +411,36 @@ public final class StatsManager {
     }
 
     /**
+     * Returns the experiments IDs registered with statsd, or an empty array if there aren't any.
+     *
+     * @throws StatsUnavailableException if unsuccessful due to failing to connect to stats service
+     * @hide
+     */
+    @RequiresPermission(allOf = {DUMP, PACKAGE_USAGE_STATS})
+    public long[] getRegisteredExperimentIds()
+            throws StatsUnavailableException {
+        synchronized (this) {
+            try {
+                IStatsManager service = getIStatsManagerLocked();
+                if (service == null) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Failed to find statsd when getting experiment IDs");
+                    }
+                    return new long[0];
+                }
+                return service.getRegisteredExperimentIds();
+            } catch (RemoteException e) {
+                if (DEBUG) {
+                    Slog.d(TAG,
+                            "Failed to connect to StatsCompanionService when getting "
+                                    + "registered experiment IDs");
+                }
+                return new long[0];
+            }
+        }
+    }
+
+    /**
      * Registers a callback for an atom when that atom is to be pulled. The stats service will
      * invoke pullData in the callback when the stats service determines that this atom needs to be
      * pulled. Currently, this only works for atoms with tags above 100,000 that do not have a uid.

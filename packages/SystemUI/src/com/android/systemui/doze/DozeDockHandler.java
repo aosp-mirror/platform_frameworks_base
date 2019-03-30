@@ -87,7 +87,8 @@ public class DozeDockHandler implements DozeMachine.Part {
     }
 
     private void requestPulseOutNow(State dozeState) {
-        if (dozeState == State.DOZE_REQUEST_PULSE || dozeState == State.DOZE_PULSING) {
+        if (dozeState == State.DOZE_REQUEST_PULSE || dozeState == State.DOZE_PULSING
+                || dozeState == State.DOZE_PULSING_BRIGHT) {
             final int pulseReason = mMachine.getPulseReason();
             if (pulseReason == DozeLog.PULSE_REASON_DOCKING) {
                 mDozeHost.stopPulsing();

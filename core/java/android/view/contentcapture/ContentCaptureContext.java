@@ -15,6 +15,8 @@
  */
 package android.view.contentcapture;
 
+import static android.view.contentcapture.ContentCaptureSession.NO_SESSION_ID;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -35,9 +37,9 @@ import com.android.internal.util.Preconditions;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-
 /**
- * Context associated with a {@link ContentCaptureSession}.
+ * Context associated with a {@link ContentCaptureSession} - see {@link ContentCaptureManager} for
+ * more info.
  */
 public final class ContentCaptureContext implements Parcelable {
 
@@ -50,8 +52,7 @@ public final class ContentCaptureContext implements Parcelable {
 
     /**
      * Flag used to indicate that the app explicitly disabled content capture for the activity
-     * (using
-     * {@link android.view.contentcapture.ContentCaptureManager#setContentCaptureEnabled(boolean)}),
+     * (using {@link ContentCaptureManager#setContentCaptureEnabled(boolean)}),
      * in which case the service will just receive activity-level events.
      *
      * @hide
@@ -107,7 +108,7 @@ public final class ContentCaptureContext implements Parcelable {
     private final int mDisplayId;
 
     // Fields below are set by the service upon "delivery" and are not marshalled in the parcel
-    private @Nullable String mParentSessionId;
+    private int mParentSessionId = NO_SESSION_ID;
 
     /** @hide */
     public ContentCaptureContext(@Nullable ContentCaptureContext clientContext,
@@ -198,11 +199,12 @@ public final class ContentCaptureContext implements Parcelable {
     @SystemApi
     @TestApi
     public @Nullable ContentCaptureSessionId getParentSessionId() {
-        return mParentSessionId == null ?  null : new ContentCaptureSessionId(mParentSessionId);
+        return mParentSessionId == NO_SESSION_ID ? null
+                : new ContentCaptureSessionId(mParentSessionId);
     }
 
     /** @hide */
-    public void setParentSessionId(@NonNull String parentSessionId) {
+    public void setParentSessionId(int parentSessionId) {
         mParentSessionId = parentSessionId;
     }
 
@@ -260,9 +262,10 @@ public final class ContentCaptureContext implements Parcelable {
          *   <li>A unique identifier of the application state (for example, a conversation between
          *   2 users in a chat app).
          *
+         * <p>See {@link ContentCaptureManager} for more info about the content capture context.
+         *
          * @param id id associated with this context.
          */
-        // TODO(b/123577059): make sure this is well documented and understandable
         public Builder(@NonNull LocusId id) {
             mId = Preconditions.checkNotNull(id);
         }
@@ -316,7 +319,7 @@ public final class ContentCaptureContext implements Parcelable {
         }
         pw.print(", taskId="); pw.print(mTaskId);
         pw.print(", displayId="); pw.print(mDisplayId);
-        if (mParentSessionId != null) {
+        if (mParentSessionId != NO_SESSION_ID) {
             pw.print(", parentId="); pw.print(mParentSessionId);
         }
         if (mFlags > 0) {
@@ -348,7 +351,7 @@ public final class ContentCaptureContext implements Parcelable {
                 builder.append(", hasExtras");
             }
         }
-        if (mParentSessionId != null) {
+        if (mParentSessionId != NO_SESSION_ID) {
             builder.append(", parentId=").append(mParentSessionId);
         }
         return builder.append(']').toString();

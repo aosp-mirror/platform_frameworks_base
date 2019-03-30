@@ -191,6 +191,7 @@ import android.os.Message;
 import android.os.PersistableBundle;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StrictMode;
@@ -243,6 +244,7 @@ import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.AttributeCache;
+import com.android.server.DeviceIdleController;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
@@ -425,6 +427,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private static final long START_AS_CALLER_TOKEN_EXPIRED_TIMEOUT =
             START_AS_CALLER_TOKEN_TIMEOUT_IMPL + 20 * MINUTE_IN_MILLIS;
 
+    // How long to whitelist the Services for when requested.
+    private static final int SERVICE_LAUNCH_IDLE_WHITELIST_DURATION_MS = 5 * 1000;
+
     // Activity tokens of system activities that are delegating their call to
     // #startActivityByCaller, keyed by the permissionToken granted to the delegate.
     final HashMap<IBinder, IBinder> mStartActivitySources = new HashMap<>();
@@ -437,6 +442,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     // Keeps track of the active voice interaction service component, notified from
     // VoiceInteractionManagerService
     ComponentName mActiveVoiceInteractionServiceComponent;
+
+    // A map userId and all its companion app packages
+    private final Map<Integer, Set<String>> mCompanionAppPackageMap = new ArrayMap<>();
 
     VrController mVrController;
     KeyguardController mKeyguardController;
@@ -2967,7 +2975,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (TextUtils.equals(pae.intent.getAction(),
                     android.service.voice.VoiceInteractionService.SERVICE_INTERFACE)) {
                 pae.intent.putExtras(pae.extras);
-                mContext.startServiceAsUser(pae.intent, new UserHandle(pae.userHandle));
+
+                startVoiceInteractionServiceAsUser(pae.intent, pae.userHandle, "AssistContext");
             } else {
                 pae.intent.replaceExtras(pae.extras);
                 pae.intent.setFlags(FLAG_ACTIVITY_NEW_TASK
@@ -2983,6 +2992,34 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    /**
+     * Workaround for historical API which starts the Assist service with a non-foreground
+     * {@code startService()} call.
+     */
+    private void startVoiceInteractionServiceAsUser(
+            Intent intent, int userHandle, String reason) {
+        // Resolve the intent to find out which package we need to whitelist.
+        ResolveInfo resolveInfo =
+                mContext.getPackageManager().resolveServiceAsUser(intent, 0, userHandle);
+        if (resolveInfo == null || resolveInfo.serviceInfo == null) {
+            Slog.e(TAG, "VoiceInteractionService intent does not resolve. Not starting.");
+            return;
+        }
+        intent.setPackage(resolveInfo.serviceInfo.packageName);
+
+        // Whitelist background services temporarily.
+        LocalServices.getService(DeviceIdleController.LocalService.class)
+                .addPowerSaveTempWhitelistApp(Process.myUid(), intent.getPackage(),
+                        SERVICE_LAUNCH_IDLE_WHITELIST_DURATION_MS, userHandle, false, reason);
+
+        // Finally, try to start the service.
+        try {
+            mContext.startServiceAsUser(intent, UserHandle.of(userHandle));
+        } catch (RuntimeException e) {
+            Slog.e(TAG, "VoiceInteractionService failed to start.", e);
         }
     }
 
@@ -5875,6 +5912,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
+    boolean isAssociatedCompanionApp(int userId, String packageName) {
+        final Set<String> allPackages = mCompanionAppPackageMap.get(userId);
+        if (allPackages == null) {
+            return false;
+        }
+        return allPackages.contains(packageName);
+    }
+
     final class H extends Handler {
         static final int REPORT_TIME_TRACKER_MSG = 1;
 
@@ -7246,6 +7291,18 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public void setDeviceOwnerPackageName(String deviceOwnerPkg) {
             synchronized (mGlobalLock) {
                 ActivityTaskManagerService.this.setDeviceOwnerPackageName(deviceOwnerPkg);
+            }
+        }
+
+        @Override
+        public void setCompanionAppPackages(int userId, Set<String> companionAppPackages) {
+            // Deep copy all content to make sure we do not rely on the source
+            final Set<String> result = new HashSet<>();
+            for (String pkg : companionAppPackages) {
+                result.add(pkg);
+            }
+            synchronized (mGlobalLock) {
+                mCompanionAppPackageMap.put(userId, result);
             }
         }
     }

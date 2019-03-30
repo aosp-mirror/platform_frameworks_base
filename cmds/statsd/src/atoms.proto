@@ -187,7 +187,7 @@ message Atom {
         WifiEnabledStateChanged wifi_enabled_state_changed = 113;
         WifiRunningStateChanged wifi_running_state_changed = 114;
         AppCompacted app_compacted = 115;
-        NetworkDnsEventReported network_dns_event_reported = 116;
+        NetworkDnsEventReported network_dns_event_reported = 116 [(log_from_module) = "resolv"];
         DocsUIPickerLaunchedFromReported docs_ui_picker_launched_from_reported = 117;
         DocsUIPickResultReported docs_ui_pick_result_reported = 118;
         DocsUISearchModeReported docs_ui_search_mode_reported = 119;
@@ -254,6 +254,7 @@ message Atom {
         PrivacyIndicatorsInteracted privacy_indicators_interacted = 180;
         AppInstallOnExternalStorageReported app_install_on_external_storage_reported = 181;
         NetworkStackReported network_stack_reported = 182;
+        AppMovedStorageReported app_moved_storage_reported = 183;
     }
 
     // Pulled events will start at field 10000.
@@ -3446,6 +3447,30 @@ message PrivacyIndicatorsInteracted {
     optional string package_name = 2;
 }
 
+/**
+ * Logs information about a package that is moved from the internal to external storage and vice
+ * versa.
+ * It logs the package name, the type of the external storage where the package is installed
+ * (if moved to external storage, or UNKNOWN if moved to internal storage),
+ * and the move type: if it's from internal to external or the other way around.
+ *
+ * Logged from:
+        frameworks/base/services/core/java/com/android/server/pm/PackageManagerService.java
+ */
+message AppMovedStorageReported {
+    enum MoveType {
+        UNKNOWN = 0;
+        TO_EXTERNAL = 1;
+        TO_INTERNAL = 2;
+    }
+    // The type of the external storage.
+    optional android.stats.storage.ExternalStorageType external_storage_type = 1;
+    // The type of move.
+    optional MoveType move_type = 2;
+    // The name of the package that was moved.
+    optional string package_name = 3;
+}
+
 //////////////////////////////////////////////////////////////////////
 // Pulled atoms below this line //
 //////////////////////////////////////////////////////////////////////
@@ -5867,7 +5892,9 @@ message SystemIonHeapSize {
  *     frameworks/base/packages/NetworkStack/
  */
 message NetworkStackReported {
-    optional int32 eventId = 1;
+    // The id that indicates the event reported from NetworkStack.
+    optional int32 event_id = 1;
+    // The data for the reported events.
     optional android.stats.connectivity.NetworkStackEventData network_stack_event = 2 [(log_mode) = MODE_BYTES];
 }
 

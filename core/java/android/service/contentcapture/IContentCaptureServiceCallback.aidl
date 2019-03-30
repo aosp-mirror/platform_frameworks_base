@@ -17,6 +17,7 @@
 package android.service.contentcapture;
 
 import android.content.ComponentName;
+import android.view.contentcapture.ContentCaptureCondition;
 
 import java.util.List;
 
@@ -27,5 +28,6 @@ import java.util.List;
  */
 oneway interface IContentCaptureServiceCallback {
     void setContentCaptureWhitelist(in List<String> packages, in List<ComponentName> activities);
+    void setContentCaptureConditions(String packageName, in List<ContentCaptureCondition> conditions);
     void disableSelf();
  }

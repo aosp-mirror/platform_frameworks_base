@@ -17,6 +17,7 @@ package android.view.contentcapture;
 
 import static android.view.contentcapture.ContentCaptureHelper.sDebug;
 import static android.view.contentcapture.ContentCaptureHelper.sVerbose;
+import static android.view.contentcapture.ContentCaptureHelper.toSet;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -28,12 +29,15 @@ import android.annotation.UiThread;
 import android.content.ComponentName;
 import android.content.ContentCaptureOptions;
 import android.content.Context;
+import android.graphics.Canvas;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewStructure;
 import android.view.contentcapture.ContentCaptureSession.FlushReason;
 
 import com.android.internal.annotations.GuardedBy;
@@ -43,10 +47,152 @@ import com.android.internal.util.SyncResultReceiver;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.Set;
 
 /**
- * TODO(b/123577059): add javadocs / mention it can be null
+ * <p>The {@link ContentCaptureManager} provides additional ways for for apps to
+ * integrate with the content capture subsystem.
+ *
+ * <p>Content capture provides real-time, continuous capture of application activity, display and
+ * events to an intelligence service that is provided by the Android system. The intelligence
+ * service then uses that info to mediate and speed user journey through different apps. For
+ * example, when the user receives a restaurant address in a chat app and switchs to a map app
+ * to search for that restaurant, the intelligence service could offer an autofill dialog to
+ * let the user automatically select its address.
+ *
+ * <p>Content capture was designed with two major concerns in mind: privacy and performance.
+ *
+ * <ul>
+ *   <li><b>Privacy:</b> the intelligence service is a trusted component provided that is provided
+ *   by the device manufacturer and that cannot be changed by the user (although the user can
+ *   globaly disable content capture using the Android Settings app). This service can only use the
+ *   data for in-device machine learning, which is enforced both by process isolation and
+ *   <a href="https://source.android.com/compatibility/cdd">CDD requirements</a>.
+ *   <li><b>Performance:</b> content capture is highly optimized to minimize its impact in the app
+ *   jankiness and overall device system health. For example, its only enabled on apps (or even
+ *   specific activities from an app) that were explicitly whitelisted by the intelligence service,
+ *   and it buffers the events so they are sent in a batch to the service (see
+ *   {@link #isContentCaptureEnabled()} for other cases when its disabled).
+ * </ul>
+ *
+ * <p>In fact, before using this manager, the app developer should check if it's available. Example:
+ *  <code>
+ *  ContentCaptureManager mgr = context.getSystemService(ContentCaptureManager.class);
+ *  if (mgr != null && mgr.isContentCaptureEnabled()) {
+ *    // ...
+ *  }
+ *  </code>
+ *
+ * <p>App developers usually don't need to explicitly interact with content capture, except when the
+ * app:
+ *
+ * <ul>
+ *   <li>Can define a contextual {@link android.content.LocusId} to identify unique state (such as a
+ *   conversation between 2 chat users).
+ *   <li>Can have multiple view hierarchies with different contextual meaning (for example, a
+ *   browser app with multiple tabs, each representing a different URL).
+ *   <li>Contains custom views (that extend View directly and are not provided by the standard
+ *   Android SDK.
+ *   <li>Contains views that provide their own virtual hierarchy (like a web browser that render the
+ *   HTML elements using a Canvas).
+ * </ul>
+ *
+ * <p>The main integration point with content capture is the {@link ContentCaptureSession}. A "main"
+ * session is automatically created by the Android System when content capture is enabled for the
+ * activity and its used by the standard Android views to notify the content capture service of
+ * events such as views being added, views been removed, and text changed by user input. The session
+ * could have a {@link ContentCaptureContext} to provide more contextual info about it, such as
+ * the locus associated with the view hierarchy (see {@link android.content.LocusId} for more info
+ * about locus). By default, the main session doesn't have a {@code ContentCaptureContext}, but you
+ * can change it after its created. Example:
+ *
+ * <pre><code>
+ * protected void onCreate(Bundle savedInstanceState) {
+ *   // Initialize view structure
+ *   ContentCaptureSession session = rootView.getContentCaptureSession();
+ *   if (session != null) {
+ *     session.setContentCaptureContext(ContentCaptureContext.forLocusId("chat_UserA_UserB"));
+ *   }
+ * }
+ * </code></pre>
+ *
+ * <p>If your activity contains view hierarchies with a different contextual meaning, you should
+ * created child sessions for each view hierarchy root. For example, if your activity is a browser,
+ * you could use the main session for the main URL being rendered, then child sessions for each
+ * {@code IFRAME}:
+ *
+ * <pre><code>
+ * ContentCaptureSession mMainSession;
+ *
+ * protected void onCreate(Bundle savedInstanceState) {
+ *    // Initialize view structure...
+ *    mMainSession = rootView.getContentCaptureSession();
+ *    if (mMainSession != null) {
+ *      mMainSession.setContentCaptureContext(
+ *          ContentCaptureContext.forLocusId("https://example.com"));
+ *    }
+ * }
+ *
+ * private void loadIFrame(View iframeRootView, String url) {
+ *   if (mMainSession != null) {
+ *      ContentCaptureSession iFrameSession = mMainSession.newChild(
+ *          ContentCaptureContext.forLocusId(url));
+ *      }
+ *      iframeRootView.setContentCaptureSession(iFrameSession);
+ *   }
+ *   // Load iframe...
+ * }
+ * </code></pre>
+ *
+ * <p>If your activity has custom views (i.e., views that extend {@link View} directly and provide
+ * just one logical view, not a virtual tree hiearchy) and it provides content that's relevant for
+ * content capture (as of {@link android.os.Build.VERSION_CODES#Q Android Q}, the only relevant
+ * content is text), then your view implementation should:
+ *
+ * <ul>
+ *   <li>Set it as important for content capture.
+ *   <li>Fill {@link ViewStructure} used for content capture.
+ *   <li>Notify the {@link ContentCaptureSession} when the text is changed by user input.
+ * </ul>
+ *
+ * <p>Here's an example of the relevant methods for an {@code EditText}-like view:
+ *
+ * <pre><code>
+ * public class MyEditText extends View {
+ *
+ * public MyEditText(...) {
+ *   if (getImportantForContentCapture() == IMPORTANT_FOR_CONTENT_CAPTURE_AUTO) {
+ *     setImportantForContentCapture(IMPORTANT_FOR_CONTENT_CAPTURE_YES);
+ *   }
+ * }
+ *
+ * public void onProvideContentCaptureStructure(@NonNull ViewStructure structure, int flags) {
+ *   super.onProvideContentCaptureStructure(structure, flags);
+ *
+ *   structure.setText(getText(), getSelectionStart(), getSelectionEnd());
+ *   structure.setHint(getHint());
+ *   structure.setInputType(getInputType());
+ *   // set other properties like setTextIdEntry(), setTextLines(), setTextStyle(),
+ *   // setMinTextEms(), setMaxTextEms(), setMaxTextLength()
+ * }
+ *
+ * private void onTextChanged() {
+ *   if (isLaidOut() && isImportantForContentCapture() && isTextEditable()) {
+ *     ContentCaptureManager mgr = mContext.getSystemService(ContentCaptureManager.class);
+ *     if (cm != null && cm.isContentCaptureEnabled()) {
+ *        ContentCaptureSession session = getContentCaptureSession();
+ *        if (session != null) {
+ *          session.notifyViewTextChanged(getAutofillId(), getText());
+ *        }
+ *   }
+ * }
+ * </code></pre>
+ *
+ * <p>If your view provides its own virtual hierarchy (for example, if it's a browser that draws
+ * the HTML using {@link Canvas} or native libraries in a different render process), then the view
+ * is also responsible to notify the session when the virtual elements appear and disappear - see
+ * {@link View#onProvideContentCaptureStructure(ViewStructure, int)} for more info.
  */
 @SystemService(Context.CONTENT_CAPTURE_MANAGER_SERVICE)
 public final class ContentCaptureManager {
@@ -69,7 +215,7 @@ public final class ContentCaptureManager {
 
     /**
      * DeviceConfig property used by {@code com.android.server.SystemServer} on start to decide
-     * whether the Content Capture service should be created or not
+     * whether the content capture service should be created or not
      *
      * <p>By default it should *NOT* be set (or set to {@code "default"}, so the decision is based
      * on whether the OEM provides an implementation for the service), but it can be overridden to:
@@ -340,12 +486,12 @@ public final class ContentCaptureManager {
      * <p>There are many reasons it could be disabled, such as:
      * <ul>
      *   <li>App itself disabled content capture through {@link #setContentCaptureEnabled(boolean)}.
-     *   <li>Service disabled content capture for this specific activity.
-     *   <li>Service disabled content capture for all activities of this package.
-     *   <li>Service disabled content capture globally.
-     *   <li>User disabled content capture globally (through Settings).
-     *   <li>OEM disabled content capture globally.
-     *   <li>Transient errors.
+     *   <li>Intelligence service did not whitelist content capture for this activity's package.
+     *   <li>Intelligence service did not whitelist content capture for this specific activity.
+     *   <li>Intelligence service disabled content capture globally.
+     *   <li>User disabled content capture globally through the Android Settings app.
+     *   <li>Device manufacturer (OEM) disabled content capture globally.
+     *   <li>Transient errors, such as intelligence service package being updated.
      * </ul>
      */
     public boolean isContentCaptureEnabled() {
@@ -369,11 +515,22 @@ public final class ContentCaptureManager {
      * capture events for websites the content capture service is not interested on.
      *
      * @return list of conditions, or {@code null} if the service didn't set any restriction
-     * (in which case content capture events should always be generated).
+     * (in which case content capture events should always be generated). If the list is empty,
+     * then it should not generate any event at all.
      */
     @Nullable
     public Set<ContentCaptureCondition> getContentCaptureConditions() {
-        return null; // TODO(b/129267994): implement
+        // NOTE: we could cache the conditions on ContentCaptureOptions, but then it would be stick
+        // to the lifetime of the app. OTOH, by dynamically calling the server every time, we allow
+        // the service to fine tune how long-lived apps (like browsers) are whitelisted.
+        if (!isContentCaptureEnabled() && !mOptions.lite) return null;
+
+        final SyncResultReceiver resultReceiver = syncRun(
+                (r) -> mService.getContentCaptureConditions(mContext.getPackageName(), r));
+
+        final ArrayList<ContentCaptureCondition> result = resultReceiver
+                .getParcelableListResult();
+        return toSet(result);
     }
 
     /**
@@ -393,12 +550,12 @@ public final class ContentCaptureManager {
     }
 
     /**
-     * Gets whether Content Capture is enabled for the given user.
+     * Gets whether content capture is enabled for the given user.
      *
-     * <p>This method is typically used by the Content Capture Service settings page, so it can
+     * <p>This method is typically used by the content capture service settings page, so it can
      * provide a toggle to enable / disable it.
      *
-     * @throws SecurityException if caller is not the app that owns the Content Capture service
+     * @throws SecurityException if caller is not the app that owns the content capture service
      * associated with the user.
      *
      * @hide
@@ -406,21 +563,14 @@ public final class ContentCaptureManager {
     @SystemApi
     @TestApi
     public boolean isContentCaptureFeatureEnabled() {
-        final SyncResultReceiver resultReceiver = new SyncResultReceiver(SYNC_CALLS_TIMEOUT_MS);
-        final int resultCode;
-        try {
-            mService.isContentCaptureFeatureEnabled(resultReceiver);
-            resultCode = resultReceiver.getIntResult();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        final SyncResultReceiver resultReceiver = syncRun(
+                (r) -> mService.isContentCaptureFeatureEnabled(r));
+        final int resultCode = resultReceiver.getIntResult();
         switch (resultCode) {
             case RESULT_CODE_TRUE:
                 return true;
             case RESULT_CODE_FALSE:
                 return false;
-            case RESULT_CODE_SECURITY_EXCEPTION:
-                throw new SecurityException("caller is not user's ContentCapture service");
             default:
                 Log.wtf(TAG, "received invalid result: " + resultCode);
                 return false;
@@ -428,7 +578,7 @@ public final class ContentCaptureManager {
     }
 
     /**
-     * Called by the app to request the Content Capture service to remove user-data associated with
+     * Called by the app to request the content capture service to remove user-data associated with
      * some context.
      *
      * @param request object specifying what user data should be removed.
@@ -440,6 +590,26 @@ public final class ContentCaptureManager {
             mService.removeUserData(request);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Runs a sync method in the service, properly handling exceptions.
+     *
+     * @throws SecurityException if caller is not allowed to execute the method.
+     */
+    @NonNull
+    private SyncResultReceiver syncRun(@NonNull MyRunnable r) {
+        final SyncResultReceiver resultReceiver = new SyncResultReceiver(SYNC_CALLS_TIMEOUT_MS);
+        try {
+            r.run(resultReceiver);
+            final int resultCode = resultReceiver.getIntResult();
+            if (resultCode == RESULT_CODE_SECURITY_EXCEPTION) {
+                throw new SecurityException(resultReceiver.getStringResult());
+            }
+            return resultReceiver;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -465,5 +635,9 @@ public final class ContentCaptureManager {
                 pw.print(prefix2); pw.println("No sessions");
             }
         }
+    }
+
+    private interface MyRunnable {
+        void run(@NonNull SyncResultReceiver receiver) throws RemoteException;
     }
 }

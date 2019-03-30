@@ -1958,5 +1958,7 @@ interface ITelephony {
     /**
      * Get the IRadio HAL Version encoded as 100 * MAJOR_VERSION + MINOR_VERSION or -1 if unknown
      */
-     int getRadioHalVersion();
+    int getRadioHalVersion();
+
+    boolean isModemEnabledForSlot(int slotIndex, String callingPackage);
 }

@@ -1022,6 +1022,11 @@ public class AudioSystem
 
     public static native float getStreamVolumeDB(int stream, int index, int device);
 
+    /**
+     * @see AudioManager#setAllowedCapturePolicy()
+     */
+    public static native int setAllowedCapturePolicy(int uid, int flags);
+
     static boolean isOffloadSupported(@NonNull AudioFormat format, @NonNull AudioAttributes attr) {
         return native_is_offload_supported(format.getEncoding(), format.getSampleRate(),
                 format.getChannelMask(), format.getChannelIndexMask(),

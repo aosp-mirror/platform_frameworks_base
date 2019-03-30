@@ -38,7 +38,7 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.UUID;
+import java.util.Random;
 
 /**
  * Session used to notify a system-provided Content Capture service about events associated with
@@ -47,6 +47,11 @@ import java.util.UUID;
 public abstract class ContentCaptureSession implements AutoCloseable {
 
     private static final String TAG = ContentCaptureSession.class.getSimpleName();
+
+    private static final Random sIdGenerator = new Random();
+
+    /** @hide */
+    public static final int NO_SESSION_ID = 0;
 
     /**
      * Initial state, when there is no session.
@@ -186,7 +191,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
 
     /** @hide */
     @Nullable
-    protected final String mId;
+    protected final int mId;
 
     private int mState = UNKNOWN_STATE;
 
@@ -210,13 +215,14 @@ public abstract class ContentCaptureSession implements AutoCloseable {
 
     /** @hide */
     protected ContentCaptureSession() {
-        this(UUID.randomUUID().toString());
+        this(getRandomSessionId());
     }
 
     /** @hide */
     @VisibleForTesting
-    public ContentCaptureSession(@NonNull String id) {
-        mId = Preconditions.checkNotNull(id);
+    public ContentCaptureSession(int id) {
+        Preconditions.checkArgument(id != NO_SESSION_ID);
+        mId = id;
     }
 
     // Used by ChildCOntentCaptureSession
@@ -241,15 +247,8 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     }
 
     /** @hide */
-    @VisibleForTesting
-    public int getIdAsInt() {
-        // TODO(b/121197119): use sessionId instead of hashcode once it's changed to int
-        return mId.hashCode();
-    }
-
-    /** @hide */
     @NonNull
-    public String getId() {
+    public int getId() {
         return mId;
     }
 
@@ -415,7 +414,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
         // TODO(b/123036895): use a internalNotifyViewsDisappeared that optimizes how the event is
         // parcelized
         for (long id : virtualIds) {
-            internalNotifyViewDisappeared(new AutofillId(hostId, id, getIdAsInt()));
+            internalNotifyViewDisappeared(new AutofillId(hostId, id, mId));
         }
     }
 
@@ -464,7 +463,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     public @NonNull AutofillId newAutofillId(@NonNull AutofillId hostId, long virtualChildId) {
         Preconditions.checkNotNull(hostId);
         Preconditions.checkArgument(hostId.isNonVirtual(), "hostId cannot be virtual: %s", hostId);
-        return new AutofillId(hostId, virtualChildId, getIdAsInt());
+        return new AutofillId(hostId, virtualChildId, mId);
     }
 
     /**
@@ -480,7 +479,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     @NonNull
     public final ViewStructure newVirtualViewStructure(@NonNull AutofillId parentId,
             long virtualId) {
-        return new ViewNode.ViewStructureImpl(parentId, virtualId, getIdAsInt());
+        return new ViewNode.ViewStructureImpl(parentId, virtualId, mId);
     }
 
     boolean isContentCaptureEnabled() {
@@ -511,7 +510,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
 
     @Override
     public String toString() {
-        return mId;
+        return Integer.toString(mId);
     }
 
     /** @hide */
@@ -540,5 +539,13 @@ public abstract class ContentCaptureSession implements AutoCloseable {
             default:
                 return "UNKOWN-" + reason;
         }
+    }
+
+    private static int getRandomSessionId() {
+        int id;
+        do {
+            id = sIdGenerator.nextInt();
+        } while (id == NO_SESSION_ID);
+        return id;
     }
 }

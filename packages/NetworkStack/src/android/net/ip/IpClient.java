@@ -282,6 +282,7 @@ public class IpClient extends StateMachine {
 
     public static final String DUMP_ARG_CONFIRM = "confirm";
 
+    // Below constants are picked up by MessageUtils and exempt from ProGuard optimization.
     private static final int CMD_TERMINATE_AFTER_STOP             = 1;
     private static final int CMD_STOP                             = 2;
     private static final int CMD_START                            = 3;

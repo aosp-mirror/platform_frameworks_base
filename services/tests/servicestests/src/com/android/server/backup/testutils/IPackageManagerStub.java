@@ -1148,6 +1148,11 @@ public class IPackageManagerStub implements IPackageManager {
         return null;
     }
 
+    @Override
+    public String getAttentionServicePackageName() throws RemoteException {
+        return null;
+    }
+
     public String getIncidentReportApproverPackageName() throws RemoteException {
         return null;
     }

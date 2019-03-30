@@ -17,7 +17,7 @@
 
 #include <sysutils/SocketListener.h>
 #include <utils/RefBase.h>
-#include "logd/LogListener.h"
+#include "logd/LogEventQueue.h"
 
 // DEFAULT_OVERFLOWUID is defined in linux/highuid.h, which is not part of
 // the uapi headers for userspace to use.  This value is filled in on the
@@ -35,7 +35,7 @@ namespace statsd {
 
 class StatsSocketListener : public SocketListener, public virtual android::RefBase {
 public:
-    explicit StatsSocketListener(const sp<LogListener>& listener);
+    explicit StatsSocketListener(std::shared_ptr<LogEventQueue> queue);
 
     virtual ~StatsSocketListener();
 
@@ -47,7 +47,7 @@ private:
     /**
      * Who is going to get the events when they're read.
      */
-    sp<LogListener> mListener;
+    std::shared_ptr<LogEventQueue> mQueue;
 };
 }  // namespace statsd
 }  // namespace os

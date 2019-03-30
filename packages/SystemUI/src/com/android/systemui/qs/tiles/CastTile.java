@@ -202,8 +202,8 @@ public class CastTile extends QSTileImpl<BooleanState> {
         if (connecting && !state.value) {
             state.secondaryLabel = mContext.getString(R.string.quick_settings_connecting);
         }
-        state.icon = ResourceIcon.get(state.value ? R.drawable.ic_qs_cast_on
-                : R.drawable.ic_qs_cast_off);
+        state.icon = ResourceIcon.get(state.value ? R.drawable.ic_cast_connected
+                : R.drawable.ic_cast);
         if (mWifiConnected || state.value) {
             state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
             if (!state.value) {
@@ -334,7 +334,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
                 for (CastDevice device : devices) {
                     if (device.state == CastDevice.STATE_CONNECTED) {
                         final Item item = new Item();
-                        item.iconResId = R.drawable.ic_qs_cast_on;
+                        item.iconResId = R.drawable.ic_cast_connected;
                         item.line1 = getDeviceName(device);
                         item.line2 = mContext.getString(R.string.quick_settings_connected);
                         item.tag = device;
@@ -354,7 +354,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
                         final CastDevice device = mVisibleOrder.get(id);
                         if (!devices.contains(device)) continue;
                         final Item item = new Item();
-                        item.iconResId = R.drawable.ic_qs_cast_off;
+                        item.iconResId = R.drawable.ic_cast;
                         item.line1 = getDeviceName(device);
                         if (device.state == CastDevice.STATE_CONNECTING) {
                             item.line2 = mContext.getString(R.string.quick_settings_connecting);

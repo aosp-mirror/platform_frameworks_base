@@ -3947,6 +3947,23 @@ class StorageManagerService extends IStorageManager.Stub
                 case "ak.alizandro.smartaudiobookplayer": // b/129084042
                 case "com.campmobile.snow": // b/128803870
                 case "com.qnap.qfile": // b/126374406
+                case "com.google.android.apps.photos": // b/125506293
+                case "com.facebook.mlite": // b/126561155
+                case "com.ss.android.ugc.trill": // b/126610656
+                case "com.instagram.android": // b/127526615
+                case "com.facebook.orca": // b/128255453
+                case "org.videolan.vlc": // b/128391743
+                case "vStudio.Android.Camera360": // b/128882110
+                case "com.twitter.android": // b/128948908
+                case "com.tumblr": // b/129022664
+                case "com.sina.weibo": // b/129029018
+                case "com.kwai.video": // b/129037235
+                case "com.fotoable.photocollage": // b/129236353
+                case "com.xvideostudio.videoeditor": // b/129247146
+                case "app.buzz.share": // b/129304005
+                case "com.ss.android.article.topbuzzvideo.en": // b/129303979
+                case "com.linecorp.b612.android": // b/129318512
+                case "com.google.android.GoogleCamera": // b/128326994
                     return true;
             }
         }

@@ -86,7 +86,7 @@ class DozeHostFake implements DozeHost {
     }
 
     @Override
-    public void extendPulse() {
+    public void extendPulse(int reason) {
         pulseExtended = true;
     }
 

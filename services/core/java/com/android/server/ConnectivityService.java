@@ -63,6 +63,7 @@ import android.net.ConnectionInfo;
 import android.net.ConnectivityManager;
 import android.net.ICaptivePortal;
 import android.net.IConnectivityManager;
+import android.net.IDnsResolver;
 import android.net.IIpConnectivityMetrics;
 import android.net.INetd;
 import android.net.INetdEventCallback;
@@ -294,6 +295,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private INetworkManagementService mNMS;
     @VisibleForTesting
+    protected IDnsResolver mDnsResolver;
+    @VisibleForTesting
     protected INetd mNetd;
     private INetworkStatsService mStatsService;
     private INetworkPolicyManager mPolicyManager;
@@ -523,6 +526,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private static String eventName(int what) {
         return sMagicDecoderRing.get(what, Integer.toString(what));
+    }
+
+    private static IDnsResolver getDnsResolver() {
+        return IDnsResolver.Stub
+                .asInterface(ServiceManager.getService("dnsresolver"));
     }
 
     /** Handler thread used for both of the handlers below. */
@@ -810,13 +818,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     public ConnectivityService(Context context, INetworkManagementService netManager,
             INetworkStatsService statsService, INetworkPolicyManager policyManager) {
-        this(context, netManager, statsService, policyManager, new IpConnectivityLog());
+        this(context, netManager, statsService, policyManager,
+            getDnsResolver(), new IpConnectivityLog());
     }
 
     @VisibleForTesting
     protected ConnectivityService(Context context, INetworkManagementService netManager,
             INetworkStatsService statsService, INetworkPolicyManager policyManager,
-            IpConnectivityLog logger) {
+            IDnsResolver dnsresolver, IpConnectivityLog logger) {
         if (DBG) log("ConnectivityService starting up");
 
         mSystemProperties = getSystemProperties();
@@ -853,6 +862,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mPolicyManagerInternal = checkNotNull(
                 LocalServices.getService(NetworkPolicyManagerInternal.class),
                 "missing NetworkPolicyManagerInternal");
+        mDnsResolver = checkNotNull(dnsresolver, "missing IDnsResolver");
         mProxyTracker = makeProxyTracker();
 
         mNetd = NetdService.getInstance();
@@ -1006,7 +1016,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         mMultipathPolicyTracker = new MultipathPolicyTracker(mContext, mHandler);
 
-        mDnsManager = new DnsManager(mContext, mNMS, mSystemProperties);
+        mDnsManager = new DnsManager(mContext, mDnsResolver, mSystemProperties);
         registerPrivateDnsSettingsCallbacks();
     }
 
@@ -3021,9 +3031,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // NetworkFactories, so network traffic isn't interrupted for an unnecessarily
             // long time.
             try {
-                mNMS.removeNetwork(nai.network.netId);
-            } catch (Exception e) {
-                loge("Exception removing network: " + e);
+                mNetd.networkDestroy(nai.network.netId);
+            } catch (RemoteException | ServiceSpecificException e) {
+                loge("Exception destroying network: " + e);
             }
             mDnsManager.removeNetwork(nai.network);
         }
@@ -5372,8 +5382,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final NetworkCapabilities nc = new NetworkCapabilities(networkCapabilities);
         final NetworkAgentInfo nai = new NetworkAgentInfo(messenger, new AsyncChannel(),
                 new Network(reserveNetId()), new NetworkInfo(networkInfo), lp, nc, currentScore,
-                mContext, mTrackerHandler, new NetworkMisc(networkMisc), this, mNetd, mNMS,
-                factorySerialNumber);
+                mContext, mTrackerHandler, new NetworkMisc(networkMisc), this, mNetd, mDnsResolver,
+                mNMS, factorySerialNumber);
         // Make sure the network capabilities reflect what the agent info says.
         nai.networkCapabilities = mixInCapabilities(nai, nc);
         final String extraInfo = networkInfo.getExtraInfo();

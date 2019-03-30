@@ -2178,6 +2178,18 @@ public final class AutofillManager {
             boolean saveOnAllViewsInvisible, boolean saveOnFinish,
             @Nullable AutofillId[] fillableIds, @Nullable AutofillId saveTriggerId) {
         synchronized (mLock) {
+            if (sVerbose) {
+                Log.v(TAG, "setTrackedViews(): sessionId=" + sessionId
+                        + ", trackedIds=" + Arrays.toString(trackedIds)
+                        + ", saveOnAllViewsInvisible=" + saveOnAllViewsInvisible
+                        + ", saveOnFinish=" + saveOnFinish
+                        + ", fillableIds=" + Arrays.toString(fillableIds)
+                        + ", saveTrigerId=" + saveTriggerId
+                        + ", mFillableIds=" + mFillableIds
+                        + ", mEnabled=" + mEnabled
+                        + ", mSessionId=" + mSessionId);
+
+            }
             if (mEnabled && mSessionId == sessionId) {
                 if (saveOnAllViewsInvisible) {
                     mTrackedViews = new TrackedViews(trackedIds);
@@ -2191,10 +2203,6 @@ public final class AutofillManager {
                     }
                     for (AutofillId id : fillableIds) {
                         mFillableIds.add(id);
-                    }
-                    if (sVerbose) {
-                        Log.v(TAG, "setTrackedViews(): fillableIds=" + Arrays.toString(fillableIds)
-                                + ", mFillableIds" + mFillableIds);
                     }
                 }
 

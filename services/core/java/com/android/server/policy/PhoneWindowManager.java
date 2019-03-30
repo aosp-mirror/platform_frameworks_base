@@ -206,7 +206,6 @@ import com.android.internal.policy.IShortcutService;
 import com.android.internal.policy.PhoneWindow;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.ScreenshotHelper;
 import com.android.server.ExtconStateObserver;
 import com.android.server.ExtconUEventObserver;
 import com.android.server.GestureLauncherService;
@@ -377,7 +376,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     BurnInProtectionHelper mBurnInProtectionHelper;
     private DisplayFoldController mDisplayFoldController;
     AppOpsManager mAppOpsManager;
-    private ScreenshotHelper mScreenshotHelper;
     private boolean mHasFeatureWatch;
     private boolean mHasFeatureLeanback;
     private boolean mHasFeatureHdmiCec;
@@ -1923,7 +1921,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         mWindowManagerFuncs.onKeyguardShowingAndNotOccludedChanged();
                     }
                 });
-        mScreenshotHelper = new ScreenshotHelper(mContext);
     }
 
     /**
@@ -2226,6 +2223,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public boolean canBeHiddenByKeyguardLw(WindowState win) {
+
+        // Keyguard visibility of window from activities are determined over activity visibility.
+        if (win.getAppToken() != null) {
+            return false;
+        }
         switch (win.getAttrs().type) {
             case TYPE_STATUS_BAR:
             case TYPE_NAVIGATION_BAR:
@@ -2239,19 +2241,30 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private boolean shouldBeHiddenByKeyguard(WindowState win, WindowState imeTarget) {
+        final LayoutParams attrs = win.getAttrs();
 
-        // Keyguard visibility of window from activities are determined over activity visibility.
-        if (win.getAppToken() != null) {
-            return false;
+        boolean hideDockDivider = attrs.type == TYPE_DOCK_DIVIDER
+                && !mWindowManagerInternal.isStackVisibleLw(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+        if (hideDockDivider) {
+            return true;
         }
 
-        final LayoutParams attrs = win.getAttrs();
+        // If AOD is showing, the IME should be hidden. However, sometimes the AOD is considered
+        // hidden because it's in the process of hiding, but it's still being shown on screen.
+        // In that case, we want to continue hiding the IME until the windows have completed
+        // drawing. This way, we know that the IME can be safely shown since the other windows are
+        // now shown.
+        final boolean hideIme = win.isInputMethodWindow()
+                && (mAodShowing || !mDefaultDisplayPolicy.isWindowManagerDrawComplete());
+        if (hideIme) {
+            return true;
+        }
+
         final boolean showImeOverKeyguard = imeTarget != null && imeTarget.isVisibleLw()
                 && (imeTarget.canShowWhenLocked() || !canBeHiddenByKeyguardLw(imeTarget));
 
         // Show IME over the keyguard if the target allows it
-        boolean allowWhenLocked = (win.isInputMethodWindow() || imeTarget == this)
-                && showImeOverKeyguard;
+        boolean allowWhenLocked = win.isInputMethodWindow() && showImeOverKeyguard;
 
         final boolean isKeyguardShowing = mKeyguardDelegate.isShowing();
 
@@ -2262,17 +2275,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     || (attrs.privateFlags & PRIVATE_FLAG_SYSTEM_ERROR) != 0;
         }
 
-        boolean hideDockDivider = attrs.type == TYPE_DOCK_DIVIDER
-                && !mWindowManagerInternal.isStackVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
-        // If AOD is showing, the IME should be hidden. However, sometimes the AOD is considered
-        // hidden because it's in the process of hiding, but it's still being shown on screen.
-        // In that case, we want to continue hiding the IME until the windows have completed
-        // drawing. This way, we know that the IME can be safely shown since the other windows are
-        // now shown.
-        final boolean hideIme = win.isInputMethodWindow()
-                && (mAodShowing || !mDefaultDisplayPolicy.isWindowManagerDrawComplete());
-        return (isKeyguardShowing && !allowWhenLocked && win.getDisplayId() == DEFAULT_DISPLAY)
-                || hideDockDivider || hideIme;
+        return isKeyguardShowing && !allowWhenLocked && win.getDisplayId() == DEFAULT_DISPLAY;
     }
 
     /** {@inheritDoc} */

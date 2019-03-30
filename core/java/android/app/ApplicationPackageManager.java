@@ -3049,6 +3049,15 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public String getAttentionServicePackageName() {
+        try {
+            return mPM.getAttentionServicePackageName();
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    @Override
     public String getWellbeingPackageName() {
         try {
             return mPM.getWellbeingPackageName();

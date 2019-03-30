@@ -1582,25 +1582,25 @@
     </string-array>
 
     <!-- Error message shown when the face hardware can't be accessed. [CHAR LIMIT=50] -->
-    <string name="face_error_hw_not_available">Face hardware not available.</string>
+    <string name="face_error_hw_not_available">Can\u2019t verify face. Hardware not available.</string>
     <!-- Error message shown when the face hardware timer has expired and the user needs to restart the operation. [CHAR LIMIT=50] -->
     <string name="face_error_timeout">Face timeout reached. Try again.</string>
-    <!-- Error message shown when the face hardware has run out of room for storing faces. [CHAR LIMIT=50] -->
-    <string name="face_error_no_space">Face can\u2019t be stored.</string>
+    <!-- Error message shown when the face hardware has run out of room for storing faces. [CHAR LIMIT=60] -->
+    <string name="face_error_no_space">Can\u2019t store new face data. Delete an old one first.</string>
     <!-- Generic error message shown when the face operation (e.g. enrollment or authentication) is canceled. Generally not shown to the user. [CHAR LIMIT=50] -->
-    <string name="face_error_canceled">Face operation canceled.</string>
+    <string name="face_error_canceled">Face operation canceled</string>
     <!-- Generic error message shown when the face authentication operation is canceled due to user input. Generally not shown to the user [CHAR LIMIT=50] -->
-    <string name="face_error_user_canceled">Face authentication canceled by user.</string>
+    <string name="face_error_user_canceled">Face authentication canceled by user</string>
     <!-- Generic error message shown when the face operation fails because too many attempts have been made. [CHAR LIMIT=50] -->
     <string name="face_error_lockout">Too many attempts. Try again later.</string>
-    <!-- Generic error message shown when the face operation fails because strong authentication is required. [CHAR LIMIT=50] -->
-    <string name="face_error_lockout_permanent">Too many attempts. Facial authentication disabled.</string>
+    <!-- Generic error message shown when the face operation fails because strong authentication is required. [CHAR LIMIT=60] -->
+    <string name="face_error_lockout_permanent">Too many attempts. Face authentication disabled.</string>
     <!-- Generic error message shown when the face hardware can't recognize the face. [CHAR LIMIT=50] -->
     <string name="face_error_unable_to_process">Can\u2019t verify face. Try again.</string>
     <!-- Generic error message shown when the user has no enrolled face. [CHAR LIMIT=50] -->
-    <string name="face_error_not_enrolled">You haven\u2019t set up face authentication.</string>
+    <string name="face_error_not_enrolled">You haven\u2019t set up face authentication</string>
     <!-- Generic error message shown when the app requests face authentication on a device without a sensor. [CHAR LIMIT=60] -->
-    <string name="face_error_hw_not_present">Face authentication is not supported on this device.</string>
+    <string name="face_error_hw_not_present">Face authentication is not supported on this device</string>
 
     <!-- Template to be used to name enrolled faces by default. [CHAR LIMIT=10] -->
     <string name="face_name_template">Face <xliff:g id="faceId" example="1">%d</xliff:g></string>
@@ -4325,10 +4325,10 @@
 
     <!-- Activity starter -->
     <!-- Toast message for blocking background activity starts feature running in permissive mode -->
-    <string name="activity_starter_block_bg_activity_starts_permissive">This background activity start from <xliff:g id="packageName" example="com.example">%1$s</xliff:g> will be blocked in future Q builds. See go/q-bg-block.</string>
+    <string name="activity_starter_block_bg_activity_starts_permissive">This background activity start from <xliff:g id="packageName" example="com.example">%1$s</xliff:g> will be blocked in future Q builds. See g.co/dev/bgblock.</string>
 
     <!-- Toast message for blocking background activity starts feature running in enforcing mode -->
-    <string name="activity_starter_block_bg_activity_starts_enforcing">Background activity start from <xliff:g id="packageName" example="com.example">%1$s</xliff:g> blocked. See go/q-bg-block. </string>
+    <string name="activity_starter_block_bg_activity_starts_enforcing">Background activity start from <xliff:g id="packageName" example="com.example">%1$s</xliff:g> blocked. See g.co/dev/bgblock. </string>
 
     <!-- Keyguard strings -->
     <!-- Message shown in pattern unlock after some number of unsuccessful attempts -->
@@ -4835,7 +4835,7 @@
     <string name="package_deleted_device_owner">Deleted by your admin</string>
 
     <!-- [CHAR LIMIT=25] String for confirmation button to enable a feature gated by the battery saver warning-->
-    <string name="confirm_battery_saver">Confirm</string>
+    <string name="confirm_battery_saver">OK</string>
 
     <!-- [CHAR_LIMIT=NONE] Battery saver: Feature description, with a "learn more" link. -->
     <string name="battery_saver_description_with_learn_more">Battery Saver turns off or restricts background activity, some visual effects \u0026 other high-power features to extend battery life. <annotation id="url">Learn More</annotation></string>

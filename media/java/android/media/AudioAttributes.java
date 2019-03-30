@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
+import android.media.audiopolicy.AudioProductStrategies;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -709,20 +710,7 @@ public final class AudioAttributes implements Parcelable {
          * @throws IllegalArgumentException if the argument is not a valid value.
          */
         public @NonNull Builder setAllowedCapturePolicy(@CapturePolicy int capturePolicy) {
-            switch (capturePolicy) {
-                case ALLOW_CAPTURE_BY_NONE:
-                    mFlags |= FLAG_NO_MEDIA_PROJECTION | FLAG_NO_SYSTEM_CAPTURE;
-                    break;
-                case ALLOW_CAPTURE_BY_SYSTEM:
-                    mFlags |= FLAG_NO_MEDIA_PROJECTION;
-                    mFlags &= ~FLAG_NO_SYSTEM_CAPTURE;
-                    break;
-                case ALLOW_CAPTURE_BY_ALL:
-                    mFlags &= ~FLAG_NO_SYSTEM_CAPTURE & ~FLAG_NO_MEDIA_PROJECTION;
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unknown allow playback capture policy");
-            }
+            mFlags = capturePolicyToFlags(capturePolicy, mFlags);
             return this;
         }
 
@@ -794,6 +782,13 @@ public final class AudioAttributes implements Parcelable {
          */
         @UnsupportedAppUsage
         public Builder setInternalLegacyStreamType(int streamType) {
+            final AudioProductStrategies ps = new AudioProductStrategies();
+            if (ps.size() > 0) {
+                AudioAttributes attributes = ps.getAudioAttributesForLegacyStreamType(streamType);
+                if (attributes != null) {
+                    return new Builder(attributes);
+                }
+            }
             switch(streamType) {
                 case AudioSystem.STREAM_VOICE_CALL:
                     mContentType = CONTENT_TYPE_SPEECH;
@@ -1169,6 +1164,10 @@ public final class AudioAttributes implements Parcelable {
                     AudioSystem.STREAM_MUSIC : AudioSystem.STREAM_TTS;
         }
 
+        final AudioProductStrategies ps = new AudioProductStrategies();
+        if (ps.size() > 0) {
+            return ps.getLegacyStreamTypeForAudioAttributes(aa);
+        }
         // usage to stream type mapping
         switch (aa.getUsage()) {
             case USAGE_MEDIA:
@@ -1205,6 +1204,24 @@ public final class AudioAttributes implements Parcelable {
                     return AudioSystem.STREAM_MUSIC;
                 }
         }
+    }
+
+    static int capturePolicyToFlags(@CapturePolicy int capturePolicy, int flags) {
+        switch (capturePolicy) {
+            case ALLOW_CAPTURE_BY_NONE:
+                flags |= FLAG_NO_MEDIA_PROJECTION | FLAG_NO_SYSTEM_CAPTURE;
+                break;
+            case ALLOW_CAPTURE_BY_SYSTEM:
+                flags |= FLAG_NO_MEDIA_PROJECTION;
+                flags &= ~FLAG_NO_SYSTEM_CAPTURE;
+                break;
+            case ALLOW_CAPTURE_BY_ALL:
+                flags &= ~FLAG_NO_SYSTEM_CAPTURE & ~FLAG_NO_MEDIA_PROJECTION;
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown allow playback capture policy");
+        }
+        return flags;
     }
 
     /** @hide */

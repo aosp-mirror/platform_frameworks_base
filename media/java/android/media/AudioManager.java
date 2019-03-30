@@ -1478,6 +1478,30 @@ public class AudioManager {
         }
      }
 
+    /**
+     * Specifying if this audio may or may not be captured by other apps or the system.
+     *
+     * The default is {@link AudioAttributes#ALLOW_CAPTURE_BY_ALL}.
+     *
+     * Note that each audio track can also set its policy, in which case the most
+     * restrictive policy is always applied.
+     *
+     * @param capturePolicy one of
+     *     {@link AudioAttributes#ALLOW_CAPTURE_BY_ALL},
+     *     {@link AudioAttributes#ALLOW_CAPTURE_BY_SYSTEM},
+     *     {@link AudioAttributes#ALLOW_CAPTURE_BY_NONE}.
+     * @throws IllegalArgumentException if the argument is not a valid value.
+     */
+    public void setAllowedCapturePolicy(@AudioAttributes.CapturePolicy int capturePolicy) {
+        int flags = AudioAttributes.capturePolicyToFlags(capturePolicy, 0x0);
+        // TODO: got trough AudioService and save a cache to restore in case of AP crash
+        // TODO: also pass the package in case multiple packages have the same UID
+        int result = AudioSystem.setAllowedCapturePolicy(Process.myUid(), flags);
+        if (result != AudioSystem.AUDIO_STATUS_OK) {
+            Log.e(TAG, "Could not setAllowedCapturePolicy: " + result);
+        }
+    }
+
     //====================================================================
     // Offload query
     /**

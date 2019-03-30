@@ -114,6 +114,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.service.voice.IVoiceInteractionSession;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.Pools.SynchronizedPool;
 import android.util.Slog;
@@ -1001,6 +1002,10 @@ class ActivityStarter {
             if (callerApp.hasActivityInVisibleTask()) {
                 return false;
             }
+            // don't abort if the caller is bound by a UID that's currently foreground
+            if (isBoundByForegroundUid(callerApp)) {
+                return false;
+            }
         }
         // don't abort if the callingUid has START_ACTIVITIES_FROM_BACKGROUND permission
         if (mService.checkPermission(START_ACTIVITIES_FROM_BACKGROUND, callingPid, callingUid)
@@ -1013,6 +1018,11 @@ class ActivityStarter {
         }
         // don't abort if the callingPackage is the device owner
         if (mService.isDeviceOwner(callingPackage)) {
+            return false;
+        }
+        // don't abort if the callingPackage has companion device
+        final int callingUserId = UserHandle.getUserId(callingUid);
+        if (mService.isAssociatedCompanionApp(callingUserId, callingPackage)) {
             return false;
         }
         // don't abort if the callingPackage is temporarily whitelisted
@@ -1043,6 +1053,18 @@ class ActivityStarter {
                     (originatingPendingIntent != null));
         }
         return true;
+    }
+
+    private boolean isBoundByForegroundUid(WindowProcessController callerApp) {
+        final ArraySet<Integer> boundClientUids = callerApp.getBoundClientUids();
+        for (int i = boundClientUids.size() - 1; i >= 0; --i) {
+            final int uid = boundClientUids.valueAt(i);
+            if (mService.mWindowManager.mRoot.isAnyNonToastWindowVisibleForUid(uid)
+                    || mService.getUidState(uid) == ActivityManager.PROCESS_STATE_TOP) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

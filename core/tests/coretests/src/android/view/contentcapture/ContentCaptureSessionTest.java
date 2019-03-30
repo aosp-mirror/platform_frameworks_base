@@ -39,9 +39,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class ContentCaptureSessionTest {
 
-    private ContentCaptureSession mSession1 = new MyContentCaptureSession("111");
+    private ContentCaptureSession mSession1 = new MyContentCaptureSession(111);
 
-    private ContentCaptureSession mSession2 = new MyContentCaptureSession("2222");
+    private ContentCaptureSession mSession2 = new MyContentCaptureSession(2222);
 
     @Mock
     private View mMockView;
@@ -60,12 +60,12 @@ public class ContentCaptureSessionTest {
         assertThat(childId.getViewId()).isEqualTo(42);
         assertThat(childId.getVirtualChildLongId()).isEqualTo(108L);
         assertThat(childId.getVirtualChildIntId()).isEqualTo(View.NO_ID);
-        assertThat(childId.getSessionId()).isEqualTo(mSession1.getIdAsInt());
+        assertThat(childId.getSessionId()).isEqualTo(mSession1.getId());
     }
 
     @Test
     public void testNewAutofillId_differentSessions() {
-        assertThat(mSession1.getIdAsInt()).isNotSameAs(mSession2.getIdAsInt()); //sanity check
+        assertThat(mSession1.getId()).isNotEqualTo(mSession2.getId()); //sanity check
         final AutofillId parentId = new AutofillId(42);
         final AutofillId childId1 = mSession1.newAutofillId(parentId, 108L);
         final AutofillId childId2 = mSession2.newAutofillId(parentId, 108L);
@@ -117,7 +117,7 @@ public class ContentCaptureSessionTest {
     // Cannot use @Spy because we need to pass the session id on constructor
     private class MyContentCaptureSession extends ContentCaptureSession {
 
-        private MyContentCaptureSession(String id) {
+        private MyContentCaptureSession(int id) {
             super(id);
         }
 

@@ -36,7 +36,7 @@ import javax.inject.Inject;
 /** Quick settings tile: Rotation **/
 public class RotationLockTile extends QSTileImpl<BooleanState> {
 
-    private final Icon mIcon = ResourceIcon.get(R.drawable.ic_qs_auto_rotate);
+    private final Icon mIcon = ResourceIcon.get(com.android.internal.R.drawable.ic_qs_auto_rotate);
     private final RotationLockController mController;
 
     @Inject

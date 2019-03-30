@@ -396,6 +396,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         } finally {
             IoUtils.closeQuietly(fis);
         }
+        // After all of the sessions were loaded, they are ready to be sealed and validated
+        for (int i = 0; i < mSessions.size(); ++i) {
+            PackageInstallerSession session = mSessions.valueAt(i);
+            session.sealAndValidateIfNecessary();
+        }
     }
 
     @GuardedBy("mSessions")
@@ -808,7 +813,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
         final PackageDeleteObserverAdapter adapter = new PackageDeleteObserverAdapter(mContext,
                 statusReceiver, versionedPackage.getPackageName(),
-                canSilentlyInstallPackage, userId);
+                !canSilentlyInstallPackage, userId);
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DELETE_PACKAGES)
                     == PackageManager.PERMISSION_GRANTED) {
             // Sweet, call straight through!

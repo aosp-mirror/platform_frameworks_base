@@ -4115,9 +4115,16 @@ class ActivityStack extends ConfigurationContainer {
         if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to FINISHING: " + r);
 
         r.setState(FINISHING, "finishCurrentActivityLocked");
+
+        // Don't destroy activity immediately if the display contains home stack, although there is
+        // no next activity at the moment but another home activity should be started later. Keep
+        // this activity alive until next home activity is resumed then user won't see a temporary
+        // black screen.
+        final boolean noRunningStack = next == null && display.topRunningActivity() == null
+                && display.getHomeStack() == null;
+        final boolean noFocusedStack = r.getActivityStack() != display.getFocusedStack();
         final boolean finishingInNonFocusedStackOrNoRunning = mode == FINISH_AFTER_VISIBLE
-                && prevState == PAUSED && (r.getActivityStack() != display.getFocusedStack()
-                        || (next == null && display.topRunningActivity() == null));
+                && prevState == PAUSED && (noFocusedStack || noRunningStack);
 
         if (mode == FINISH_IMMEDIATELY
                 || (prevState == PAUSED

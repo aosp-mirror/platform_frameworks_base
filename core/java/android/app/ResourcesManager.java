@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.res.ApkAssets;
 import android.content.res.AssetManager;
 import android.content.res.CompatResources;
@@ -32,6 +33,7 @@ import android.content.res.ResourcesImpl;
 import android.content.res.ResourcesKey;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
@@ -1136,11 +1138,22 @@ public class ResourcesManager {
     }
 
     // TODO(adamlesinski): Make this accept more than just overlay directories.
-    final void applyNewResourceDirsLocked(@NonNull final String baseCodePath,
-            @Nullable final String[] newResourceDirs) {
+    final void applyNewResourceDirsLocked(@NonNull final ApplicationInfo appInfo,
+            @Nullable final String[] oldPaths) {
         try {
             Trace.traceBegin(Trace.TRACE_TAG_RESOURCES,
                     "ResourcesManager#applyNewResourceDirsLocked");
+
+            String baseCodePath = appInfo.getBaseCodePath();
+
+            final int myUid = Process.myUid();
+            String[] newSplitDirs = appInfo.uid == myUid
+                    ? appInfo.splitSourceDirs
+                    : appInfo.splitPublicSourceDirs;
+
+            // ApplicationInfo is mutable, so clone the arrays to prevent outside modification
+            String[] copiedSplitDirs = ArrayUtils.cloneOrNull(newSplitDirs);
+            String[] copiedResourceDirs = ArrayUtils.cloneOrNull(appInfo.resourceDirs);
 
             final ArrayMap<ResourcesImpl, ResourcesKey> updatedResourceKeys = new ArrayMap<>();
             final int implCount = mResourceImpls.size();
@@ -1148,15 +1161,23 @@ public class ResourcesManager {
                 final ResourcesKey key = mResourceImpls.keyAt(i);
                 final WeakReference<ResourcesImpl> weakImplRef = mResourceImpls.valueAt(i);
                 final ResourcesImpl impl = weakImplRef != null ? weakImplRef.get() : null;
-                if (impl != null && (key.mResDir == null || key.mResDir.equals(baseCodePath))) {
+
+                if (impl == null) {
+                    continue;
+                }
+
+                if (key.mResDir == null
+                        || key.mResDir.equals(baseCodePath)
+                        || ArrayUtils.contains(oldPaths, key.mResDir)) {
                     updatedResourceKeys.put(impl, new ResourcesKey(
-                            key.mResDir,
-                            key.mSplitResDirs,
-                            newResourceDirs,
+                            baseCodePath,
+                            copiedSplitDirs,
+                            copiedResourceDirs,
                             key.mLibDirs,
                             key.mDisplayId,
                             key.mOverrideConfiguration,
-                            key.mCompatInfo));
+                            key.mCompatInfo
+                    ));
                 }
             }
 

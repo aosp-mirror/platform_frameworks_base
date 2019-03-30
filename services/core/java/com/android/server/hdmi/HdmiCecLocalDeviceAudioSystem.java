@@ -74,7 +74,15 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     @GuardedBy("mLock")
     private boolean mSystemAudioControlFeatureEnabled;
 
-    private boolean mTvSystemAudioModeSupport;
+    /**
+     * Indicates if the TV that the current device is connected to supports System Audio Mode or not
+     *
+     * <p>If the current device has no information on this, keep mTvSystemAudioModeSupport null
+     *
+     * <p>The boolean will be reset to null every time when the current device goes to standby
+     * or loses its physical address.
+     */
+    private Boolean mTvSystemAudioModeSupport = null;
 
     // Whether ARC is available or not. "true" means that ARC is established between TV and
     // AVR as audio receiver.
@@ -314,14 +322,14 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         super.disableDevice(initiatedByCec, callback);
         assertRunOnServiceThread();
         mService.unregisterTvInputCallback(mTvInputCallback);
-        // TODO(amyjojo): check disableDevice and onStandby behaviors per spec
+        // TODO(b/129088603): check disableDevice and onStandby behaviors per spec
     }
 
     @Override
     @ServiceThreadOnly
     protected void onStandby(boolean initiatedByCec, int standbyAction) {
         assertRunOnServiceThread();
-        mTvSystemAudioModeSupport = false;
+        mTvSystemAudioModeSupport = null;
         // Record the last state of System Audio Control before going to standby
         synchronized (mLock) {
             mService.writeStringSystemProperty(
@@ -460,15 +468,6 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         updateCecDevice(new HdmiDeviceInfo(deviceInfo.getLogicalAddress(),
                 deviceInfo.getPhysicalAddress(), deviceInfo.getPortId(),
                 deviceInfo.getDeviceType(), deviceInfo.getVendorId(), osdName));
-        return true;
-    }
-
-    @Override
-    @ServiceThreadOnly
-    protected boolean handleReportAudioStatus(HdmiCecMessage message) {
-        assertRunOnServiceThread();
-        // TODO(amyjojo): implement report audio status handler
-        HdmiLogger.debug(TAG + "Stub handleReportAudioStatus");
         return true;
     }
 
@@ -970,7 +969,10 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     @ServiceThreadOnly
     void doManualPortSwitching(int portId, IHdmiControlCallback callback) {
         assertRunOnServiceThread();
-        // TODO: validate port ID
+        if (!mService.isValidPortId(portId)) {
+            invokeCallback(callback, HdmiControlManager.RESULT_TARGET_NOT_AVAILABLE);
+            return;
+        }
         if (portId == getLocalActivePort()) {
             invokeCallback(callback, HdmiControlManager.RESULT_SUCCESS);
             return;
@@ -1035,12 +1037,11 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
      * <p>The result of the query may be cached until Audio device type is put in standby or loses
      * its physical address.
      */
-    // TODO(amyjojo): making mTvSystemAudioModeSupport null originally and fix the logic.
     void queryTvSystemAudioModeSupport(TvSystemAudioModeSupportedCallback callback) {
-        if (!mTvSystemAudioModeSupport) {
+        if (mTvSystemAudioModeSupport == null) {
             addAndStartAction(new DetectTvSystemAudioModeSupportAction(this, callback));
         } else {
-            callback.onResult(true);
+            callback.onResult(mTvSystemAudioModeSupport);
         }
     }
 

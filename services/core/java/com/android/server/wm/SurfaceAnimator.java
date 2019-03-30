@@ -82,6 +82,11 @@ class SurfaceAnimator {
                     return;
                 }
                 final Runnable resetAndInvokeFinish = () -> {
+                    // We need to check again if the animation has been replaced with a new
+                    // animation because the animatable may defer to finish.
+                    if (anim != mAnimation) {
+                        return;
+                    }
                     reset(mAnimatable.getPendingTransaction(), true /* destroyLeash */);
                     if (animationFinishedCallback != null) {
                         animationFinishedCallback.run();

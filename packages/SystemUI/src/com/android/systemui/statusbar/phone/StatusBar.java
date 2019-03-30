@@ -434,6 +434,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         public void onUserSetupChanged() {
             final boolean userSetup = mDeviceProvisionedController.isUserSetup(
                     mDeviceProvisionedController.getCurrentUser());
+            // STOPSHIP(kozynski, b/129405675) Remove log
+            Log.d(TAG, "mUserSetupObserver - DeviceProvisionedListener called for user "
+                    + mDeviceProvisionedController.getCurrentUser());
             if (MULTIUSER_DEBUG) {
                 Log.d(TAG, String.format("User setup changed: userSetup=%s mUserSetup=%s",
                         userSetup, mUserSetup));
@@ -1297,13 +1300,16 @@ public class StatusBar extends SystemUI implements DemoMode,
      * the user intends to use the lock screen user switcher, QS in not needed.
      */
     private void updateQsExpansionEnabled() {
-        mNotificationPanel.setQsExpansionEnabled(mDeviceProvisionedController.isDeviceProvisioned()
+        final boolean expandEnabled = mDeviceProvisionedController.isDeviceProvisioned()
                 && (mUserSetup || mUserSwitcherController == null
                         || !mUserSwitcherController.isSimpleUserSwitcher())
                 && ((mDisabled2 & StatusBarManager.DISABLE2_NOTIFICATION_SHADE) == 0)
                 && ((mDisabled2 & StatusBarManager.DISABLE2_QUICK_SETTINGS) == 0)
                 && !mDozing
-                && !ONLY_CORE_APPS);
+                && !ONLY_CORE_APPS;
+        mNotificationPanel.setQsExpansionEnabled(expandEnabled);
+        // STOPSHIP(kozynski, b/129405675) Remove log
+        Log.d(TAG, "updateQsExpansionEnabled - QS Expand enabled: " + expandEnabled);
     }
 
     public void addQsTile(ComponentName tile) {
@@ -3902,12 +3908,15 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         @Override
         public void pulseWhileDozing(@NonNull PulseCallback callback, int reason) {
-            mScrimController.setPulseReason(reason);
             if (reason == DozeLog.PULSE_REASON_SENSOR_LONG_PRESS) {
                 mPowerManager.wakeUp(SystemClock.uptimeMillis(), PowerManager.WAKE_REASON_GESTURE,
                         "com.android.systemui:LONG_PRESS");
                 startAssist(new Bundle());
                 return;
+            }
+
+            if (reason == DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN) {
+                mScrimController.setWakeLockScreenSensorActive(true);
             }
 
             boolean passiveAuthInterrupt = reason == DozeLog.PULSE_REASON_NOTIFICATION;
@@ -3928,6 +3937,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     mPulsing = false;
                     callback.onPulseFinished();
                     updateNotificationPanelTouchState();
+                    mScrimController.setWakeLockScreenSensorActive(false);
                     setPulsing(false);
                 }
 
@@ -4004,7 +4014,10 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         @Override
-        public void extendPulse() {
+        public void extendPulse(int reason) {
+            if (reason == DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN) {
+                mScrimController.setWakeLockScreenSensorActive(true);
+            }
             if (mDozeScrimController.isPulsing() && mAmbientPulseManager.hasNotifications()) {
                 mAmbientPulseManager.extendPulse();
             } else {

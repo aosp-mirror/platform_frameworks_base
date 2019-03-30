@@ -53,9 +53,4 @@ class PrivacyDialogBuilder(private val context: Context, itemsList: List<Privacy
             else -> types.map { it.getName(context) }.joinWithAnd().toString()
         }
     }
-
-    fun getDialogTitle(): String {
-        return context.getString(R.string.ongoing_privacy_dialog_multiple_apps_title,
-                    joinTypes())
-    }
 }

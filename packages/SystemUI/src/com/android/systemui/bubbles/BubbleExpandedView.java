@@ -381,10 +381,18 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     }
 
     /**
-     * Update bubble expanded view header when user toggles dark mode.
+     * Update header color when user toggles dark mode.
      */
     void updateHeaderColor() {
-        mHeaderView.setBackgroundColor(mContext.getColor(R.attr.colorAccent));
+        TypedArray ta = mContext.obtainStyledAttributes(
+                new int[] {android.R.attr.colorBackgroundFloating, android.R.attr.colorForeground});
+        int bgColor = ta.getColor(0, Color.WHITE /* default */);
+        int btnColor = ta.getColor(1, Color.BLACK /* default */);
+        ta.recycle();
+
+        mHeaderView.setBackgroundColor(bgColor);
+        mSettingsIcon.setColorFilter(btnColor);
+        mDeepLinkIcon.setColorFilter(btnColor);
     }
 
     private void updateHeaderView() {
