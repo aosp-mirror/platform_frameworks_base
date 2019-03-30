@@ -26,7 +26,7 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_PRIVILEGED_MODULE := true
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
-    bmgrlib \
+    bmgr \
     bu \
     services.backup \
     services.core \
