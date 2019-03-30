@@ -2328,4 +2328,7 @@ enum PageId {
 
     // OPEN: Settings > System > Aware > Info dialog
     DIALOG_AWARE_STATUS = 1701;
+
+    // Open: Settings > app > bubble settings > confirmation dialog
+    DIALOG_APP_BUBBLE_SETTINGS = 1702;
 }
