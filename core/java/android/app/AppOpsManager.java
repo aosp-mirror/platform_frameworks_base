@@ -18,6 +18,7 @@ package android.app;
 
 import android.Manifest;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -3112,7 +3113,7 @@ public class AppOpsManager {
          *
          * @see #getUidOpsAt(int)
          */
-        public int getUidCount() {
+        public @IntRange(from = 0) int getUidCount() {
             if (mHistoricalUidOps == null) {
                 return 0;
             }
@@ -3128,7 +3129,7 @@ public class AppOpsManager {
          *
          * @see #getUidCount()
          */
-        public @NonNull HistoricalUidOps getUidOpsAt(int index) {
+        public @NonNull HistoricalUidOps getUidOpsAt(@IntRange(from = 0) int index) {
             if (mHistoricalUidOps == null) {
                 throw new IndexOutOfBoundsException();
             }
@@ -3389,7 +3390,7 @@ public class AppOpsManager {
          *
          * @see #getPackageOpsAt(int)
          */
-        public int getPackageCount() {
+        public @IntRange(from = 0) int getPackageCount() {
             if (mHistoricalPackageOps == null) {
                 return 0;
             }
@@ -3405,7 +3406,7 @@ public class AppOpsManager {
          *
          * @see #getPackageCount()
          */
-        public @NonNull HistoricalPackageOps getPackageOpsAt(int index) {
+        public @NonNull HistoricalPackageOps getPackageOpsAt(@IntRange(from = 0) int index) {
             if (mHistoricalPackageOps == null) {
                 throw new IndexOutOfBoundsException();
             }
@@ -3624,7 +3625,7 @@ public class AppOpsManager {
          * @return The number historical app ops.
          * @see #getOpAt(int)
          */
-        public int getOpCount() {
+        public @IntRange(from = 0) int getOpCount() {
             if (mHistoricalOps == null) {
                 return 0;
             }
@@ -3638,7 +3639,7 @@ public class AppOpsManager {
          * @return The op at the given index.
          * @see #getOpCount()
          */
-        public @NonNull HistoricalOp getOpAt(int index) {
+        public @NonNull HistoricalOp getOpAt(@IntRange(from = 0) int index) {
             if (mHistoricalOps == null) {
                 throw new IndexOutOfBoundsException();
             }
