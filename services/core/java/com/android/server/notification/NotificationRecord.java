@@ -1291,13 +1291,11 @@ public final class NotificationRecord {
                 lm.addTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_INITIAL,
                         stats.naturalImportance);
             }
-            // Log Assistant override if it was itself overridden by System. Since System can't be
-            // overridden, it never needs logging.
-            if (mImportanceExplanationCode == MetricsEvent.IMPORTANCE_EXPLANATION_SYSTEM
-                    && mAssistantImportance != IMPORTANCE_UNSPECIFIED) {
-                lm.addTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_ASST,
+        }
+        // Log Assistant override if present, whether or not importance calculation is complete.
+        if (mAssistantImportance != IMPORTANCE_UNSPECIFIED) {
+            lm.addTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_ASST,
                         mAssistantImportance);
-            }
         }
         return lm;
     }
