@@ -16,9 +16,13 @@
 package com.android.settingslib.media;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.widget.Toast;
 
 import androidx.mediarouter.media.MediaRouter;
+
+import com.android.settingslib.R;
+import com.android.settingslib.bluetooth.BluetoothUtils;
 
 /**
  * InfoMediaDevice extends MediaDevice to represents wifi device.
@@ -46,9 +50,10 @@ public class InfoMediaDevice extends MediaDevice {
     }
 
     @Override
-    public int getIcon() {
-        //TODO(b/121083246): This is not final icon for cast device, just for demo.
-        return com.android.internal.R.drawable.ic_settings_print;
+    public Drawable getIcon() {
+        //TODO(b/120669861): Return remote device icon uri once api is ready.
+        return BluetoothUtils.buildBtRainbowDrawable(mContext,
+                mContext.getDrawable(R.drawable.ic_media_device), getId().hashCode());
     }
 
     @Override

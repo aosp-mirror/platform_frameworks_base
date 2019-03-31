@@ -16,10 +16,12 @@
 package com.android.settingslib.media;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 
 import com.android.settingslib.R;
 import com.android.settingslib.bluetooth.A2dpProfile;
+import com.android.settingslib.bluetooth.BluetoothUtils;
 import com.android.settingslib.bluetooth.HearingAidProfile;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
@@ -56,8 +58,9 @@ public class PhoneMediaDevice extends MediaDevice {
     }
 
     @Override
-    public int getIcon() {
-        return R.drawable.ic_smartphone;
+    public Drawable getIcon() {
+        return BluetoothUtils.buildBtRainbowDrawable(mContext,
+                mContext.getDrawable(R.drawable.ic_smartphone), getId().hashCode());
     }
 
     @Override

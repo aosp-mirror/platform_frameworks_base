@@ -1,11 +1,11 @@
-/**
- * Copyright (C) 2015 The Android Open Source Project
+/*
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -84,8 +84,8 @@ public class Tile implements Parcelable {
         mActivityPackage = in.readString();
         mActivityName = in.readString();
         mIntent = new Intent().setClassName(mActivityPackage, mActivityName);
-        final int N = in.readInt();
-        for (int i = 0; i < N; i++) {
+        final int number = in.readInt();
+        for (int i = 0; i < number; i++) {
             userHandle.add(UserHandle.CREATOR.createFromParcel(in));
         }
         mCategory = in.readString();
@@ -101,9 +101,9 @@ public class Tile implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mActivityPackage);
         dest.writeString(mActivityName);
-        final int N = userHandle.size();
-        dest.writeInt(N);
-        for (int i = 0; i < N; i++) {
+        final int size = userHandle.size();
+        dest.writeInt(size);
+        for (int i = 0; i < size; i++) {
             userHandle.get(i).writeToParcel(dest, flags);
         }
         dest.writeString(mCategory);
@@ -151,6 +151,9 @@ public class Tile implements Parcelable {
         }
     }
 
+    /**
+     * Check whether title has order.
+     */
     public boolean hasOrder() {
         return mMetaData.containsKey(META_DATA_KEY_ORDER)
                 && mMetaData.get(META_DATA_KEY_ORDER) instanceof Integer;
@@ -262,6 +265,9 @@ public class Tile implements Parcelable {
         }
     }
 
+    /**
+     * Check whether title has key.
+     */
     public boolean hasKey() {
         return mMetaData != null && mMetaData.containsKey(META_DATA_PREFERENCE_KEYHINT);
     }
@@ -361,9 +367,12 @@ public class Tile implements Parcelable {
         }
     };
 
+    /**
+     * Check whether title is only have primary profile
+     */
     public boolean isPrimaryProfileOnly() {
-        String profile = mMetaData != null ?
-                mMetaData.getString(META_DATA_KEY_PROFILE) : PROFILE_ALL;
+        String profile = mMetaData != null
+                ? mMetaData.getString(META_DATA_KEY_PROFILE) : PROFILE_ALL;
         profile = (profile != null ? profile : PROFILE_ALL);
         return TextUtils.equals(profile, PROFILE_PRIMARY);
     }
