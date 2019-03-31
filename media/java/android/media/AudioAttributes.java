@@ -557,7 +557,7 @@ public final class AudioAttributes implements Parcelable {
         private int mContentType = CONTENT_TYPE_UNKNOWN;
         private int mSource = MediaRecorder.AudioSource.AUDIO_SOURCE_INVALID;
         private int mFlags = 0x0;
-        private boolean mMuteHapticChannels = false;
+        private boolean mMuteHapticChannels = true;
         private HashSet<String> mTags = new HashSet<String>();
         private Bundle mBundle;
 
@@ -888,7 +888,7 @@ public final class AudioAttributes implements Parcelable {
 
         /**
          * Specifying if haptic should be muted or not when playing audio-haptic coupled data.
-         * By default, haptic channels are enabled.
+         * By default, haptic channels are disabled.
          * @param muted true to force muting haptic channels.
          * @return the same Builder instance.
          */
