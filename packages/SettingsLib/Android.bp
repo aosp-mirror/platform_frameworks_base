@@ -22,6 +22,7 @@ android_library {
         "SettingsLibEntityHeaderWidgets",
         "SettingsLibBarChartPreference",
         "SettingsLibProgressBar",
+        "SettingsLibAdaptiveIcon",
     ],
 
     // ANDROIDMK TRANSLATION ERROR: unsupported assignment to LOCAL_SHARED_JAVA_LIBRARIES

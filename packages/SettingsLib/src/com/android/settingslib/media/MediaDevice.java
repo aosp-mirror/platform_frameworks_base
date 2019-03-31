@@ -16,6 +16,7 @@
 package com.android.settingslib.media;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 
 import androidx.annotation.IntDef;
@@ -70,11 +71,11 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
     public abstract String getSummary();
 
     /**
-     * Get resource id of MediaDevice.
+     * Get icon of MediaDevice.
      *
-     * @return resource id of MediaDevice.
+     * @return drawable of icon.
      */
-    public abstract int getIcon();
+    public abstract Drawable getIcon();
 
     /**
      * Get unique ID that represent MediaDevice
