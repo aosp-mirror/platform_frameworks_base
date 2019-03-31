@@ -573,7 +573,10 @@ public class SettingsBackupTest {
                     Settings.Global.RADIO_BUG_WAKELOCK_TIMEOUT_COUNT_THRESHOLD,
                     Settings.Global.RADIO_BUG_SYSTEM_ERROR_COUNT_THRESHOLD,
                     Settings.Global.ENABLED_SUBSCRIPTION_FOR_SLOT,
-                    Settings.Global.MODEM_STACK_ENABLED_FOR_SLOT);
+                    Settings.Global.MODEM_STACK_ENABLED_FOR_SLOT,
+                    Settings.Global.POWER_BUTTON_LONG_PRESS,
+                    Settings.Global.POWER_BUTTON_VERY_LONG_PRESS);
+
     private static final Set<String> BACKUP_BLACKLISTED_SECURE_SETTINGS =
              newHashSet(
                  Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE,
