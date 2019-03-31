@@ -80,7 +80,8 @@ public class PasswordMetricsTest {
 
     @Test
     public void testComputeForPassword_metrics() {
-        final PasswordMetrics metrics = PasswordMetrics.computeForPassword("6B~0z1Z3*8A");
+        final PasswordMetrics metrics =
+                PasswordMetrics.computeForPassword("6B~0z1Z3*8A".getBytes());
         assertEquals(11, metrics.length);
         assertEquals(4, metrics.letters);
         assertEquals(3, metrics.upperCase);
@@ -93,32 +94,32 @@ public class PasswordMetricsTest {
     @Test
     public void testComputeForPassword_quality() {
         assertEquals(DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC,
-                PasswordMetrics.computeForPassword("a1").quality);
+                PasswordMetrics.computeForPassword("a1".getBytes()).quality);
         assertEquals(DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC,
-                PasswordMetrics.computeForPassword("a").quality);
+                PasswordMetrics.computeForPassword("a".getBytes()).quality);
         assertEquals(DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC,
-                PasswordMetrics.computeForPassword("*~&%$").quality);
+                PasswordMetrics.computeForPassword("*~&%$".getBytes()).quality);
         assertEquals(DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX,
-                PasswordMetrics.computeForPassword("1").quality);
+                PasswordMetrics.computeForPassword("1".getBytes()).quality);
         // contains a long sequence so isn't complex
         assertEquals(DevicePolicyManager.PASSWORD_QUALITY_NUMERIC,
-                PasswordMetrics.computeForPassword("1234").quality);
+                PasswordMetrics.computeForPassword("1234".getBytes()).quality);
         assertEquals(DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED,
-                PasswordMetrics.computeForPassword("").quality);
+                PasswordMetrics.computeForPassword("".getBytes()).quality);
     }
 
     @Test
     public void testMaxLengthSequence() {
-        assertEquals(4, PasswordMetrics.maxLengthSequence("1234"));
-        assertEquals(5, PasswordMetrics.maxLengthSequence("13579"));
-        assertEquals(4, PasswordMetrics.maxLengthSequence("1234abd"));
-        assertEquals(3, PasswordMetrics.maxLengthSequence("aabc"));
-        assertEquals(1, PasswordMetrics.maxLengthSequence("qwertyuio"));
-        assertEquals(3, PasswordMetrics.maxLengthSequence("@ABC"));
+        assertEquals(4, PasswordMetrics.maxLengthSequence("1234".getBytes()));
+        assertEquals(5, PasswordMetrics.maxLengthSequence("13579".getBytes()));
+        assertEquals(4, PasswordMetrics.maxLengthSequence("1234abd".getBytes()));
+        assertEquals(3, PasswordMetrics.maxLengthSequence("aabc".getBytes()));
+        assertEquals(1, PasswordMetrics.maxLengthSequence("qwertyuio".getBytes()));
+        assertEquals(3, PasswordMetrics.maxLengthSequence("@ABC".getBytes()));
         // anything that repeats
-        assertEquals(4, PasswordMetrics.maxLengthSequence(";;;;"));
+        assertEquals(4, PasswordMetrics.maxLengthSequence(";;;;".getBytes()));
         // ordered, but not composed of alphas or digits
-        assertEquals(1, PasswordMetrics.maxLengthSequence(":;<=>"));
+        assertEquals(1, PasswordMetrics.maxLengthSequence(":;<=>".getBytes()));
     }
 
     @Test
@@ -139,8 +140,8 @@ public class PasswordMetricsTest {
         assertNotEquals(new PasswordMetrics(DevicePolicyManager.PASSWORD_QUALITY_SOMETHING, 4),
                 new PasswordMetrics(DevicePolicyManager.PASSWORD_QUALITY_COMPLEX, 4));
 
-        metrics0 = PasswordMetrics.computeForPassword("1234abcd,./");
-        metrics1 = PasswordMetrics.computeForPassword("1234abcd,./");
+        metrics0 = PasswordMetrics.computeForPassword("1234abcd,./".getBytes());
+        metrics1 = PasswordMetrics.computeForPassword("1234abcd,./".getBytes());
         assertEquals(metrics0, metrics1);
         metrics1.letters++;
         assertNotEquals(metrics0, metrics1);
@@ -161,7 +162,5 @@ public class PasswordMetricsTest {
         assertNotEquals(metrics0, metrics1);
         metrics1.nonLetter--;
         assertEquals(metrics0, metrics1);
-
-
     }
 }

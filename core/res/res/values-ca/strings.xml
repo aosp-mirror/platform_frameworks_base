@@ -258,7 +258,7 @@
     <string name="notification_channel_vpn" msgid="8330103431055860618">"Estat de la VPN"</string>
     <string name="notification_channel_device_admin" msgid="1568154104368069249">"Administració del dispositiu"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Alertes"</string>
-    <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Demostració comercial"</string>
+    <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Demostració per a botigues"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"Connexió USB"</string>
     <string name="notification_channel_heavy_weight_app" msgid="6218742927792852607">"S\'està executant una aplicació"</string>
     <string name="notification_channel_foreground_service" msgid="3931987440602669158">"Aplicacions que consumeixen bateria"</string>

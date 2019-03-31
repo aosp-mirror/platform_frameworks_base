@@ -122,6 +122,8 @@ message Atom {
         WTFOccurred wtf_occurred = 80;
         LowMemReported low_mem_reported = 81;
         ThermalThrottlingStateChanged thermal_throttling = 86;
+        // 86 - 165 are not available
+        BluetoothClassicPairingEventReported bluetooth_classic_pairing_event_reported = 166;
     }
 
     // Pulled events will start at field 10000.
@@ -1024,6 +1026,42 @@ message BluetoothConnectionStateChanged {
     // The profile that is connected. Eg. GATT, A2DP, HEADSET.
     // From android.bluetooth.BluetoothAdapter.java
     optional int32 bt_profile = 3;
+}
+
+/**
+ * Logs there is an event related Bluetooth classic pairing
+ *
+ * Logged from:
+ *     system/bt
+ */
+message BluetoothClassicPairingEventReported {
+    // An identifier that can be used to match events for this device.
+    // Currently, this is a salted hash of the MAC address of this Bluetooth device.
+    // Salt: Randomly generated 256 bit value
+    // Hash algorithm: HMAC-SHA256
+    // Size: 32 byte
+    // Default: null or empty if the device identifier is not known
+    // Note: string is here for backward compatibility purpose only
+    optional string obfuscated_id = 1;
+    // Connection handle of this connection if available
+    // Range: 0x0000 - 0x0EFF (12 bits)
+    // Default: 0xFFFF if the handle is unknown
+    optional int32 connection_handle = 2;
+    // HCI command associated with this event
+    // Default: CMD_UNKNOWN
+    optional int32 hci_cmd = 3;
+    // HCI event associated with this event
+    // Default: EVT_UNKNOWN
+    optional int32 hci_event = 4;
+    // HCI command status code if this is triggered by hci_cmd
+    // Default: STATUS_UNKNOWN
+    optional int32 cmd_status = 5;
+    // HCI reason code associated with this event
+    // Default: STATUS_UNKNOWN
+    optional int32 reason_code = 6;
+    // A status value related to this specific event
+    // Default: 0
+    optional int64 event_value = 7;
 }
 
 /**

@@ -48,7 +48,7 @@
     <string name="invalidPin" msgid="3850018445187475377">"Մուտքագրեք PIN, որը 4-ից 8 թիվ է:"</string>
     <string name="invalidPuk" msgid="8761456210898036513">"Մուտքագրեք PUK, որն 8 կամ ավել թիվ ունի:"</string>
     <string name="needPuk" msgid="919668385956251611">"Ձեր SIM քարտը PUK-ով կողպված է: Մուտքագրեք PUK կոդը այն ապակողպելու համար:"</string>
-    <string name="needPuk2" msgid="4526033371987193070">"Մուտքագրեք PUK2-ը` SIM քարտն արգելաբացելու համար:"</string>
+    <string name="needPuk2" msgid="4526033371987193070">"Մուտքագրեք PUK2-ը` SIM քարտն արգելահանելու համար:"</string>
     <string name="enablePin" msgid="209412020907207950">"Ձախողվեց: Միացրեք SIM/RUIM կողպումը:"</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
       <item quantity="one">Մնաց <xliff:g id="NUMBER_1">%d</xliff:g> փորձ, որից հետո SIM քարտն արգելափակվելու է:</item>
@@ -233,9 +233,9 @@
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Անձայն ռեժիմ"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Ձայնը անջատված է"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Ձայնը միացված է"</string>
-    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Ինքնաթիռի ռեժիմ"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Ինքնաթիռի ռեժիմը միացված է"</string>
-    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Ինքնաթիռի ռեժիմը անջատված է"</string>
+    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Ավիառեժիմ"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Ավիառեժիմը միացված է"</string>
+    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Ավիառեժիմը անջատված է"</string>
     <string name="global_action_toggle_battery_saver" msgid="708515500418994208">"Մարտկոցի տնտեսում"</string>
     <string name="global_action_battery_saver_on_status" msgid="484059130698197787">"Անջատել"</string>
     <string name="global_action_battery_saver_off_status" msgid="75550964969478405">"Միացնել"</string>
