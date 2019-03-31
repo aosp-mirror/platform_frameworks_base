@@ -885,9 +885,7 @@ public final class MediaStore {
          *             access this path. Instead of trying to open this path
          *             directly, apps should use
          *             {@link ContentResolver#openFileDescriptor(Uri, String)}
-         *             to gain access. This value will always be {@code NULL}
-         *             for apps targeting
-         *             {@link android.os.Build.VERSION_CODES#Q} or higher.
+         *             to gain access.
          */
         @Deprecated
         @Column(Cursor.FIELD_TYPE_STRING)
@@ -1958,9 +1956,7 @@ public final class MediaStore {
              *             access this path. Instead of trying to open this path
              *             directly, apps should use
              *             {@link ContentResolver#loadThumbnail}
-             *             to gain access. This value will always be
-             *             {@code NULL} for apps targeting
-             *             {@link android.os.Build.VERSION_CODES#Q} or higher.
+             *             to gain access.
              */
             @Deprecated
             @Column(Cursor.FIELD_TYPE_STRING)
@@ -2441,9 +2437,7 @@ public final class MediaStore {
              *             access this path. Instead of trying to open this path
              *             directly, apps should use
              *             {@link ContentResolver#openFileDescriptor(Uri, String)}
-             *             to gain access. This value will always be
-             *             {@code NULL} for apps targeting
-             *             {@link android.os.Build.VERSION_CODES#Q} or higher.
+             *             to gain access.
              */
             @Deprecated
             @Column(Cursor.FIELD_TYPE_STRING)
@@ -2733,9 +2727,7 @@ public final class MediaStore {
              *             access this path. Instead of trying to open this path
              *             directly, apps should use
              *             {@link ContentResolver#loadThumbnail}
-             *             to gain access. This value will always be
-             *             {@code NULL} for apps targeting
-             *             {@link android.os.Build.VERSION_CODES#Q} or higher.
+             *             to gain access.
              */
             @Deprecated
             @Column(Cursor.FIELD_TYPE_STRING)
@@ -2822,9 +2814,7 @@ public final class MediaStore {
              *             access this path. Instead of trying to open this path
              *             directly, apps should use
              *             {@link ContentResolver#loadThumbnail}
-             *             to gain access. This value will always be
-             *             {@code NULL} for apps targeting
-             *             {@link android.os.Build.VERSION_CODES#Q} or higher.
+             *             to gain access.
              */
             @Deprecated
             @Column(Cursor.FIELD_TYPE_STRING)
@@ -3192,9 +3182,7 @@ public final class MediaStore {
              *             access this path. Instead of trying to open this path
              *             directly, apps should use
              *             {@link ContentResolver#openFileDescriptor(Uri, String)}
-             *             to gain access. This value will always be
-             *             {@code NULL} for apps targeting
-             *             {@link android.os.Build.VERSION_CODES#Q} or higher.
+             *             to gain access.
              */
             @Deprecated
             @Column(Cursor.FIELD_TYPE_STRING)

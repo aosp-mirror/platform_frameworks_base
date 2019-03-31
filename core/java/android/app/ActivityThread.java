@@ -6937,9 +6937,6 @@ public final class ActivityThread extends ClientTransactionHandler {
             // If feature is disabled, we don't need to install
             if (!DEPRECATE_DATA_COLUMNS) return;
 
-            // If app is modern enough, we don't need to install
-            if (VMRuntime.getRuntime().getTargetSdkVersion() >= Build.VERSION_CODES.Q) return;
-
             // Install interception and make sure it sticks!
             Os def = null;
             do {
