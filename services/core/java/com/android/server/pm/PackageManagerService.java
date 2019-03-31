@@ -3502,7 +3502,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private @NonNull String getRequiredInstallerLPr() {
         final Intent intent = new Intent(Intent.ACTION_INSTALL_PACKAGE);
         intent.addCategory(Intent.CATEGORY_DEFAULT);
-        intent.setDataAndType(Uri.fromFile(new File("foo.apk")), PACKAGE_MIME_TYPE);
+        intent.setDataAndType(Uri.parse("content://com.example/foo.apk"), PACKAGE_MIME_TYPE);
 
         final List<ResolveInfo> matches = queryIntentActivitiesInternal(intent, PACKAGE_MIME_TYPE,
                 MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
