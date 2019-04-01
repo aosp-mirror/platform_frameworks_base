@@ -21,7 +21,9 @@ import static org.mockito.Mockito.mock;
 import android.app.usage.UsageStatsManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -119,6 +121,11 @@ public class ChooserWrapperActivity extends ChooserActivity {
             return sOverrides.alternateProfileSetting == MetricsEvent.MANAGED_PROFILE;
         }
         return super.isWorkProfile();
+    }
+
+    public DisplayResolveInfo createTestDisplayResolveInfo(Intent originalIntent, ResolveInfo pri,
+            CharSequence pLabel, CharSequence pInfo, Intent pOrigIntent) {
+        return new DisplayResolveInfo(originalIntent, pri, pLabel, pInfo, pOrigIntent);
     }
 
     /**
