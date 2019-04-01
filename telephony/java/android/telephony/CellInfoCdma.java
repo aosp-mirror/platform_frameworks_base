@@ -90,6 +90,15 @@ public final class CellInfoCdma extends CellInfo implements Parcelable {
     public CellSignalStrengthCdma getCellSignalStrength() {
         return mCellSignalStrengthCdma;
     }
+
+    /** @hide */
+    @Override
+    public CellInfo sanitizeLocationInfo() {
+        CellInfoCdma result = new CellInfoCdma(this);
+        result.mCellIdentityCdma = mCellIdentityCdma.sanitizeLocationInfo();
+        return result;
+    }
+
     /** @hide */
     public void setCellSignalStrength(CellSignalStrengthCdma css) {
         mCellSignalStrengthCdma = css;
