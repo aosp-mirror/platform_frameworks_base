@@ -241,7 +241,10 @@ public final class BatterySaverPolicyConfig implements Parcelable {
         return mDisableOptionalSensors;
     }
 
-    /** Whether or not to disable sound trigger while in Battery Saver. */
+    /**
+     * Whether or not to disable {@link android.hardware.soundtrigger.SoundTrigger}
+     * while in Battery Saver.
+     */
     public boolean getDisableSoundTrigger() {
         return mDisableSoundTrigger;
     }
@@ -261,7 +264,10 @@ public final class BatterySaverPolicyConfig implements Parcelable {
         return mEnableDataSaver;
     }
 
-    /** Whether or not to enable the network firewall while in Battery Saver. */
+    /**
+     * Whether or not to enable network firewall rules to restrict background network use
+     * while in Battery Saver.
+     */
     public boolean getEnableFirewall() {
         return mEnableFirewall;
     }
@@ -281,7 +287,12 @@ public final class BatterySaverPolicyConfig implements Parcelable {
         return mForceAllAppsStandby;
     }
 
-    /** Whether or not to force background check while in Battery Saver. */
+    /**
+     * Whether or not to force background check (disallow background services and manifest
+     * broadcast receivers) on all apps (not just apps targeting Android
+     * {@link Build.VERSION_CODES#O} and above)
+     * while in Battery Saver.
+     */
     public boolean getForceBackgroundCheck() {
         return mForceBackgroundCheck;
     }
@@ -401,7 +412,10 @@ public final class BatterySaverPolicyConfig implements Parcelable {
             return this;
         }
 
-        /** Set whether or not to disable sound trigger while in Battery Saver. */
+        /**
+         * Set whether or not to disable  {@link android.hardware.soundtrigger.SoundTrigger}
+         * while in Battery Saver.
+         */
         @NonNull
         public Builder setDisableSoundTrigger(boolean disableSoundTrigger) {
             mDisableSoundTrigger = disableSoundTrigger;
@@ -429,7 +443,10 @@ public final class BatterySaverPolicyConfig implements Parcelable {
             return this;
         }
 
-        /** Set whether or not to enable the network firewall while in Battery Saver. */
+        /**
+         * Set whether or not to enable network firewall rules to restrict background network use
+         * while in Battery Saver.
+         */
         @NonNull
         public Builder setEnableFirewall(boolean enableFirewall) {
             mEnableFirewall = enableFirewall;
@@ -457,7 +474,12 @@ public final class BatterySaverPolicyConfig implements Parcelable {
             return this;
         }
 
-        /** Set whether or not to force background check while in Battery Saver. */
+        /**
+         * Set whether or not to force background check (disallow background services and manifest
+         * broadcast receivers) on all apps (not just apps targeting Android
+         * {@link Build.VERSION_CODES#O} and above)
+         * while in Battery Saver.
+         */
         @NonNull
         public Builder setForceBackgroundCheck(boolean forceBackgroundCheck) {
             mForceBackgroundCheck = forceBackgroundCheck;
