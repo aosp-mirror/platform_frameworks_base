@@ -1924,6 +1924,11 @@ public final class SystemServer {
 
             traceBeginAndSlog("StartNetworkStack");
             try {
+                // Note : the network stack is creating on-demand objects that need to send
+                // broadcasts, which means it currently depends on being started after
+                // ActivityManagerService.mSystemReady and ActivityManagerService.mProcessesReady
+                // are set to true. Be careful if moving this to a different place in the
+                // startup sequence.
                 NetworkStackClient.getInstance().start(context);
             } catch (Throwable e) {
                 reportWtf("starting Network Stack", e);
