@@ -21,6 +21,7 @@ import static android.app.Notification.CATEGORY_CALL;
 import static android.app.Notification.CATEGORY_EVENT;
 import static android.app.Notification.CATEGORY_MESSAGE;
 import static android.app.Notification.CATEGORY_REMINDER;
+import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST;
@@ -146,11 +147,6 @@ public final class NotificationEntry {
     private boolean hasSentReply;
 
     /**
-     * Whether this notification should be displayed as a bubble.
-     */
-    private boolean mIsBubble;
-
-    /**
      * Whether this notification has been approved globally, at the app level, and at the channel
      * level for bubbling.
      */
@@ -222,12 +218,8 @@ public final class NotificationEntry {
         this.mHighPriority = highPriority;
     }
 
-    public void setIsBubble(boolean bubbleable) {
-        mIsBubble = bubbleable;
-    }
-
     public boolean isBubble() {
-        return mIsBubble;
+        return (notification.getNotification().flags & FLAG_BUBBLE) != 0;
     }
 
     public void setBubbleDismissed(boolean userDismissed) {
