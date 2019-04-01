@@ -2166,6 +2166,7 @@ public class PackageInstaller {
          * Returns the set of session IDs that will be committed when this session is commited if
          * this session is a multi-package session.
          */
+        @NonNull
         public int[] getChildSessionIds() {
             return childSessionIds;
         }
