@@ -54,7 +54,6 @@ import android.net.NetworkUtils;
 import android.net.PrivateDnsConnectivityChecker;
 import android.net.ProxyInfo;
 import android.net.Uri;
-import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
@@ -6410,27 +6409,20 @@ public class DevicePolicyManager {
      * Returns whether the specified package can read the device identifiers.
      *
      * @param packageName The package name of the app to check for device identifier access.
+     * @param pid The process id of the package to be checked.
+     * @param uid The uid of the package to be checked.
      * @return whether the package can read the device identifiers.
      *
      * @hide
      */
-    public boolean checkDeviceIdentifierAccess(String packageName) {
-        return checkDeviceIdentifierAccessAsUser(packageName, myUserId());
-    }
-
-    /**
-     * @hide
-     */
-    @RequiresPermission(value = android.Manifest.permission.MANAGE_USERS, conditional = true)
-    public boolean checkDeviceIdentifierAccessAsUser(String packageName, int userId) {
-        throwIfParentInstance("checkDeviceIdentifierAccessAsUser");
+    public boolean checkDeviceIdentifierAccess(String packageName, int pid, int uid) {
+        throwIfParentInstance("checkDeviceIdentifierAccess");
         if (packageName == null) {
             return false;
         }
         if (mService != null) {
             try {
-                return mService.checkDeviceIdentifierAccess(packageName, userId,
-                        Binder.getCallingPid(), Binder.getCallingUid());
+                return mService.checkDeviceIdentifierAccess(packageName, pid, uid);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
