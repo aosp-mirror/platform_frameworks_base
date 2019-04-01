@@ -608,6 +608,7 @@ class ActivityStarter {
             boolean ignoreTargetSecurity, boolean componentSpecified, ActivityRecord[] outActivity,
             TaskRecord inTask, boolean allowPendingRemoteAnimationRegistryLookup,
             PendingIntentRecord originatingPendingIntent, boolean allowBackgroundActivityStart) {
+        mSupervisor.getActivityMetricsLogger().notifyActivityLaunching(intent);
         int err = ActivityManager.START_SUCCESS;
         // Pull the optional Ephemeral Installer-only bundle out of the options early.
         final Bundle verificationBundle
@@ -928,8 +929,10 @@ class ActivityStarter {
         mService.onStartActivitySetDidAppSwitch();
         mController.doPendingActivityLaunches(false);
 
-        return startActivity(r, sourceRecord, voiceSession, voiceInteractor, startFlags,
+        final int res = startActivity(r, sourceRecord, voiceSession, voiceInteractor, startFlags,
                 true /* doResume */, checkedOptions, inTask, outActivity);
+        mSupervisor.getActivityMetricsLogger().notifyActivityLaunched(res, outActivity[0]);
+        return res;
     }
 
     private boolean shouldAbortBackgroundActivityStart(int callingUid, int callingPid,
