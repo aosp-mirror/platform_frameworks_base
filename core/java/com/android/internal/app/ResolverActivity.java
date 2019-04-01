@@ -1230,7 +1230,7 @@ public class ResolverActivity extends Activity {
         final ImageView iconView = findViewById(R.id.icon);
         final DisplayResolveInfo iconInfo = mAdapter.getFilteredItem();
         if (iconView != null && iconInfo != null) {
-            new LoadIconIntoViewTask(iconInfo, iconView).execute();
+            new LoadIconTask(iconInfo, iconView).execute();
         }
     }
 
@@ -1871,14 +1871,6 @@ public class ResolverActivity extends Activity {
             return mDisplayList.size();
         }
 
-        public int getDisplayInfoCount() {
-            return mDisplayList.size();
-        }
-
-        public DisplayResolveInfo getDisplayInfoAt(int index) {
-            return mDisplayList.get(index);
-        }
-
         @Nullable
         public TargetInfo getItem(int position) {
             if (mFilterLastUsed && mLastChosenPosition >= 0 && position >= mLastChosenPosition) {
@@ -1966,9 +1958,10 @@ public class ResolverActivity extends Activity {
 
             if (info instanceof DisplayResolveInfo
                     && !((DisplayResolveInfo) info).hasDisplayIcon()) {
-                new LoadAdapterIconTask((DisplayResolveInfo) info).execute();
+                new LoadIconTask((DisplayResolveInfo) info, holder.icon).execute();
+            } else {
+                holder.icon.setImageDrawable(info.getDisplayIcon());
             }
-            holder.icon.setImageDrawable(info.getDisplayIcon());
         }
     }
 
@@ -2087,13 +2080,15 @@ public class ResolverActivity extends Activity {
 
     }
 
-    abstract class LoadIconTask extends AsyncTask<Void, Void, Drawable> {
+    class LoadIconTask extends AsyncTask<Void, Void, Drawable> {
         protected final DisplayResolveInfo mDisplayResolveInfo;
         private final ResolveInfo mResolveInfo;
+        private final ImageView mTargetView;
 
-        public LoadIconTask(DisplayResolveInfo dri) {
+        LoadIconTask(DisplayResolveInfo dri, ImageView target) {
             mDisplayResolveInfo = dri;
             mResolveInfo = dri.getResolveInfo();
+            mTargetView = target;
         }
 
         @Override
@@ -2103,37 +2098,12 @@ public class ResolverActivity extends Activity {
 
         @Override
         protected void onPostExecute(Drawable d) {
-            mDisplayResolveInfo.setDisplayIcon(d);
-        }
-    }
-
-    class LoadAdapterIconTask extends LoadIconTask {
-        public LoadAdapterIconTask(DisplayResolveInfo dri) {
-            super(dri);
-        }
-
-        @Override
-        protected void onPostExecute(Drawable d) {
-            super.onPostExecute(d);
             if (mProfileView != null && mAdapter.getOtherProfile() == mDisplayResolveInfo) {
                 bindProfileView();
+            } else {
+                mDisplayResolveInfo.setDisplayIcon(d);
+                mTargetView.setImageDrawable(d);
             }
-            mAdapter.notifyDataSetChanged();
-        }
-    }
-
-    class LoadIconIntoViewTask extends LoadIconTask {
-        private final ImageView mTargetView;
-
-        public LoadIconIntoViewTask(DisplayResolveInfo dri, ImageView target) {
-            super(dri);
-            mTargetView = target;
-        }
-
-        @Override
-        protected void onPostExecute(Drawable d) {
-            super.onPostExecute(d);
-            mTargetView.setImageDrawable(d);
         }
     }
 

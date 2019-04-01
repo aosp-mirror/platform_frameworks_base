@@ -24,7 +24,6 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
-import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.prediction.AppPredictionContext;
@@ -197,6 +196,11 @@ public class ChooserActivity extends ResolverActivity {
     private static final int CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT = 2;
     private static final int SHORTCUT_MANAGER_SHARE_TARGET_RESULT = 3;
     private static final int SHORTCUT_MANAGER_SHARE_TARGET_RESULT_COMPLETED = 4;
+    private static final int LIST_VIEW_UPDATE_MESSAGE = 5;
+
+    private static final int LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS = 250;
+
+    private boolean mListViewDataChanged = false;
 
     @Retention(SOURCE)
     @IntDef({CONTENT_PREVIEW_FILE, CONTENT_PREVIEW_IMAGE, CONTENT_PREVIEW_TEXT})
@@ -213,10 +217,13 @@ public class ChooserActivity extends ResolverActivity {
     private final Handler mChooserHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
+            if (mChooserListAdapter == null || isDestroyed()) {
+                return;
+            }
+
             switch (msg.what) {
                 case CHOOSER_TARGET_SERVICE_RESULT:
                     if (DEBUG) Log.d(TAG, "CHOOSER_TARGET_SERVICE_RESULT");
-                    if (isDestroyed()) break;
                     final ServiceResultInfo sri = (ServiceResultInfo) msg.obj;
                     if (!mServiceConnections.contains(sri.connection)) {
                         Log.w(TAG, "ChooserTargetServiceConnection " + sri.connection
@@ -240,17 +247,22 @@ public class ChooserActivity extends ResolverActivity {
                     if (DEBUG) {
                         Log.d(TAG, "CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT; unbinding services");
                     }
-                    if (mChooserListAdapter == null || isDestroyed()) {
-                        break;
-                    }
+
                     unbindRemainingServices();
                     sendVoiceChoicesIfNeeded();
                     mChooserListAdapter.completeServiceTargetLoading();
                     break;
 
+                case LIST_VIEW_UPDATE_MESSAGE:
+                    if (DEBUG) {
+                        Log.d(TAG, "LIST_VIEW_UPDATE_MESSAGE; ");
+                    }
+
+                    mChooserListAdapter.refreshListView();
+                    break;
+
                 case SHORTCUT_MANAGER_SHARE_TARGET_RESULT:
                     if (DEBUG) Log.d(TAG, "SHORTCUT_MANAGER_SHARE_TARGET_RESULT");
-                    if (isDestroyed()) break;
                     final ServiceResultInfo resultInfo = (ServiceResultInfo) msg.obj;
                     if (resultInfo.resultTargets != null) {
                         mChooserListAdapter.addServiceResults(resultInfo.originalTarget,
@@ -829,6 +841,7 @@ public class ChooserActivity extends ResolverActivity {
             mRefinementResultReceiver = null;
         }
         unbindRemainingServices();
+        mChooserHandler.removeMessages(LIST_VIEW_UPDATE_MESSAGE);
         mChooserHandler.removeMessages(CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT);
         mChooserHandler.removeMessages(CHOOSER_TARGET_SERVICE_RESULT);
         if (USE_PREDICTION_MANAGER_FOR_DIRECT_TARGETS) {
@@ -1872,6 +1885,23 @@ public class ChooserActivity extends ResolverActivity {
             }
         }
 
+        @Override
+        public void notifyDataSetChanged() {
+            if (!mListViewDataChanged) {
+                mChooserHandler.sendEmptyMessageDelayed(LIST_VIEW_UPDATE_MESSAGE,
+                        LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS);
+                mListViewDataChanged = true;
+            }
+        }
+
+        private void refreshListView() {
+            if (mListViewDataChanged) {
+                super.notifyDataSetChanged();
+            }
+            mListViewDataChanged = false;
+        }
+
+
         private void createPlaceHolders() {
             mServiceTargets.clear();
             for (int i = 0; i < MAX_SERVICE_TARGETS; i++) {
@@ -1893,7 +1923,7 @@ public class ChooserActivity extends ResolverActivity {
             }
 
             if (mServiceTargets != null) {
-                if (getDisplayInfoCount() == 0) {
+                if (getDisplayResolveInfoCount() == 0) {
                     // b/109676071: When packages change, onListRebuilt() is called before
                     // ResolverActivity.mDisplayList is re-populated; pruning now would cause the
                     // list to disappear briefly, so instead we detect this case (the
@@ -1906,12 +1936,14 @@ public class ChooserActivity extends ResolverActivity {
                 if (DEBUG) {
                     Log.d(TAG, "querying direct share targets from ShortcutManager");
                 }
+
                 queryDirectShareTargets(this);
             }
             if (USE_CHOOSER_TARGET_SERVICE_FOR_DIRECT_TARGETS) {
                 if (DEBUG) {
                     Log.d(TAG, "List built querying services");
                 }
+
                 queryTargetServices(this);
             }
         }
@@ -2007,7 +2039,7 @@ public class ChooserActivity extends ResolverActivity {
             offset += callerTargetCount;
 
             return filtered ? super.getItem(position - offset)
-                    : getDisplayInfoAt(position - offset);
+                    : getDisplayResolveInfo(position - offset);
         }
 
         public void addServiceResults(DisplayResolveInfo origTarget, List<ChooserTarget> targets) {
