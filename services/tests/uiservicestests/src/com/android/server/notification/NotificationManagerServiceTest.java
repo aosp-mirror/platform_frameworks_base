@@ -18,6 +18,7 @@ package com.android.server.notification;
 
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_GONE;
+import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
 import static android.app.NotificationManager.EXTRA_BLOCKED_STATE;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
@@ -123,6 +124,9 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 
+import androidx.annotation.Nullable;
+import androidx.test.InstrumentationRegistry;
+
 import com.android.internal.R;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.statusbar.NotificationVisibility;
@@ -133,7 +137,6 @@ import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
 import com.android.server.notification.NotificationManagerService.NotificationAssistants;
 import com.android.server.notification.NotificationManagerService.NotificationListeners;
-import com.android.server.pm.UserManagerService;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -158,9 +161,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
-
-import androidx.annotation.Nullable;
-import androidx.test.InstrumentationRegistry;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -4424,6 +4424,77 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 sbn.getKey()).getNotification().isBubbleNotification());
     }
 
+    @Test
+    public void testCancelAllNotifications_cancelsBubble() throws Exception {
+        final NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel);
+        nr.sbn.getNotification().flags |= FLAG_BUBBLE;
+        mService.addNotification(nr);
+
+        mBinderService.cancelAllNotifications(PKG, nr.sbn.getUserId());
+        waitForIdle();
+
+        StatusBarNotification[] notifs = mBinderService.getActiveNotifications(PKG);
+        assertEquals(0, notifs.length);
+        assertEquals(0, mService.getNotificationRecordCount());
+    }
+
+    @Test
+    public void testAppCancelNotifications_cancelsBubbles() throws Exception {
+        final NotificationRecord nrBubble = generateNotificationRecord(mTestNotificationChannel);
+        nrBubble.sbn.getNotification().flags |= FLAG_BUBBLE;
+
+        // Post the notification
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, null,
+                nrBubble.sbn.getId(), nrBubble.sbn.getNotification(), nrBubble.sbn.getUserId());
+        waitForIdle();
+
+        StatusBarNotification[] notifs = mBinderService.getActiveNotifications(PKG);
+        assertEquals(1, notifs.length);
+        assertEquals(1, mService.getNotificationRecordCount());
+
+        mBinderService.cancelNotificationWithTag(PKG, null, nrBubble.sbn.getId(),
+                nrBubble.sbn.getUserId());
+        waitForIdle();
+
+        StatusBarNotification[] notifs2 = mBinderService.getActiveNotifications(PKG);
+        assertEquals(0, notifs2.length);
+        assertEquals(0, mService.getNotificationRecordCount());
+    }
+
+    @Test
+    public void testCancelAllNotificationsFromListener_ignoresBubbles() throws Exception {
+        final NotificationRecord nrNormal = generateNotificationRecord(mTestNotificationChannel);
+        final NotificationRecord nrBubble = generateNotificationRecord(mTestNotificationChannel);
+        nrBubble.sbn.getNotification().flags |= FLAG_BUBBLE;
+
+        mService.addNotification(nrNormal);
+        mService.addNotification(nrBubble);
+
+        mService.getBinderService().cancelNotificationsFromListener(null, null);
+        waitForIdle();
+
+        StatusBarNotification[] notifs = mBinderService.getActiveNotifications(PKG);
+        assertEquals(1, notifs.length);
+        assertEquals(1, mService.getNotificationRecordCount());
+    }
+
+    @Test
+    public void testCancelNotificationsFromListener_ignoresBubbles() throws Exception {
+        final NotificationRecord nrNormal = generateNotificationRecord(mTestNotificationChannel);
+        final NotificationRecord nrBubble = generateNotificationRecord(mTestNotificationChannel);
+        nrBubble.sbn.getNotification().flags |= FLAG_BUBBLE;
+
+        mService.addNotification(nrNormal);
+        mService.addNotification(nrBubble);
+
+        String[] keys = {nrNormal.sbn.getKey(), nrBubble.sbn.getKey()};
+        mService.getBinderService().cancelNotificationsFromListener(null, keys);
+        waitForIdle();
+
+        StatusBarNotification[] notifs = mBinderService.getActiveNotifications(PKG);
+        assertEquals(1, notifs.length);
+        assertEquals(1, mService.getNotificationRecordCount());
+    }
 
     public void testGetAllowedAssistantCapabilities() throws Exception {
         List<String> capabilities = mBinderService.getAllowedAssistantCapabilities(null);
