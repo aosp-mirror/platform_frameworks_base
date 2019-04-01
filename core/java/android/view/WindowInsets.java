@@ -29,9 +29,6 @@ import static android.view.WindowInsets.Type.TOP_BAR;
 import static android.view.WindowInsets.Type.all;
 import static android.view.WindowInsets.Type.compatSystemInsets;
 import static android.view.WindowInsets.Type.indexOf;
-import static android.view.WindowInsets.Type.mandatorySystemGestures;
-import static android.view.WindowInsets.Type.systemGestures;
-import static android.view.WindowInsets.Type.tappableElement;
 
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -225,10 +222,6 @@ public final class WindowInsets {
         }
         Insets[] typeInsetMap = new Insets[SIZE];
         assignCompatInsets(typeInsetMap, insets);
-        // TODO: set system gesture insets based on actual system gesture area.
-        typeInsetMap[indexOf(systemGestures())] = Insets.of(insets);
-        typeInsetMap[indexOf(mandatorySystemGestures())] = Insets.of(insets);
-        typeInsetMap[indexOf(tappableElement())] = Insets.of(insets);
         return typeInsetMap;
     }
 

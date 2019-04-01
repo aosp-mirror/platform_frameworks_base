@@ -1916,16 +1916,10 @@ public final class ViewRootImpl implements ViewParent,
             }
             contentInsets = ensureInsetsNonNegative(contentInsets, "content");
             stableInsets = ensureInsetsNonNegative(stableInsets, "stable");
-            if (sNewInsetsMode != NEW_INSETS_MODE_NONE) {
-                mLastWindowInsets = mInsetsController.calculateInsets(
-                        mContext.getResources().getConfiguration().isScreenRound(),
-                        mAttachInfo.mAlwaysConsumeSystemBars, displayCutout,
-                        contentInsets, stableInsets, mWindowAttributes.softInputMode);
-            } else {
-                mLastWindowInsets = new WindowInsets(contentInsets, stableInsets,
-                        mContext.getResources().getConfiguration().isScreenRound(),
-                        mAttachInfo.mAlwaysConsumeSystemBars, displayCutout);
-            }
+            mLastWindowInsets = mInsetsController.calculateInsets(
+                    mContext.getResources().getConfiguration().isScreenRound(),
+                    mAttachInfo.mAlwaysConsumeSystemBars, displayCutout,
+                    contentInsets, stableInsets, mWindowAttributes.softInputMode);
         }
         return mLastWindowInsets;
     }

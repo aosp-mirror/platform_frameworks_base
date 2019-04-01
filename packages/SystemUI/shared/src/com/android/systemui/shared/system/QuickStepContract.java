@@ -112,4 +112,22 @@ public class QuickStepContract {
         return context.getResources().getInteger(
                 com.android.internal.R.integer.config_navBarInteractionMode);
     }
+
+    /**
+     * @return {@code true} if the navbar can be clicked through
+     */
+    public static boolean isNavBarClickThrough(Context context) {
+        return context.getResources().getBoolean(
+                com.android.internal.R.bool.config_navBarTapThrough);
+    }
+
+    /**
+     * @return the edge sensitivity width in px
+     */
+    public static int getEdgeSensitivityWidth(Context context) {
+        return context.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.config_backGestureInset);
+    }
+
+
 }
