@@ -261,15 +261,9 @@ public class DisplayPolicy {
     /** Cached value of {@link ScreenShapeHelper#getWindowOutsetBottomPx} */
     @Px private int mWindowOutsetBottom;
 
-    private final StatusBarController mStatusBarController = new StatusBarController();
+    private final StatusBarController mStatusBarController;
 
-    private final BarController mNavigationBarController = new BarController("NavigationBar",
-            View.NAVIGATION_BAR_TRANSIENT,
-            View.NAVIGATION_BAR_UNHIDE,
-            View.NAVIGATION_BAR_TRANSLUCENT,
-            StatusBarManager.WINDOW_NAVIGATION_BAR,
-            FLAG_TRANSLUCENT_NAVIGATION,
-            View.NAVIGATION_BAR_TRANSPARENT);
+    private final BarController mNavigationBarController;
 
     private final BarController.OnBarVisibilityChangedListener mNavBarVisibilityListener =
             new BarController.OnBarVisibilityChangedListener() {
@@ -416,6 +410,17 @@ public class DisplayPolicy {
         mDisplayContent = displayContent;
         mLock = service.getWindowManagerLock();
 
+        final int displayId = displayContent.getDisplayId();
+        mStatusBarController = new StatusBarController(displayId);
+        mNavigationBarController = new BarController("NavigationBar",
+                displayId,
+                View.NAVIGATION_BAR_TRANSIENT,
+                View.NAVIGATION_BAR_UNHIDE,
+                View.NAVIGATION_BAR_TRANSLUCENT,
+                StatusBarManager.WINDOW_NAVIGATION_BAR,
+                FLAG_TRANSLUCENT_NAVIGATION,
+                View.NAVIGATION_BAR_TRANSPARENT);
+
         final Resources r = mContext.getResources();
         mCarDockEnablesAccelerometer = r.getBoolean(R.bool.config_carDockEnablesAccelerometer);
         mDeskDockEnablesAccelerometer = r.getBoolean(R.bool.config_deskDockEnablesAccelerometer);
@@ -527,7 +532,6 @@ public class DisplayPolicy {
             if (mWindowSleepToken != null) {
                 return;
             }
-            final int displayId = displayContent.getDisplayId();
             mWindowSleepToken = service.mAtmInternal.acquireSleepToken(
                     "WindowSleepTokenOnDisplay" + displayId, displayId);
         };
