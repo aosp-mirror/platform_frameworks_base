@@ -92,10 +92,15 @@ public final class Formatter {
      * @return formatted string with the number
      */
     public static String formatFileSize(@Nullable Context context, long sizeBytes) {
+        return formatFileSize(context, sizeBytes, FLAG_SI_UNITS);
+    }
+
+    /** @hide */
+    public static String formatFileSize(@Nullable Context context, long sizeBytes, int flags) {
         if (context == null) {
             return "";
         }
-        final BytesResult res = formatBytes(context.getResources(), sizeBytes, FLAG_SI_UNITS);
+        final BytesResult res = formatBytes(context.getResources(), sizeBytes, flags);
         return bidiWrap(context, context.getString(com.android.internal.R.string.fileSizeSuffix,
                 res.value, res.units));
     }
