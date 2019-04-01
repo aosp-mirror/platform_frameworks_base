@@ -209,8 +209,8 @@ void RenderThread::requireVkContext() {
     mVkManager->initialize();
     GrContextOptions options;
     initGrContextOptions(options);
-    // TODO: get a string describing the SPIR-V compiler version and use it here
-    cacheManager().configureContext(&options, nullptr, 0);
+    auto vkDriverVersion = mVkManager->getDriverVersion();
+    cacheManager().configureContext(&options, &vkDriverVersion, sizeof(vkDriverVersion));
     sk_sp<GrContext> grContext = mVkManager->createContext(options);
     LOG_ALWAYS_FATAL_IF(!grContext.get());
     setGrContext(grContext);
