@@ -96,6 +96,7 @@ static struct {
     jmethodID interceptKeyBeforeDispatching;
     jmethodID dispatchUnhandledKey;
     jmethodID checkInjectEventsPermission;
+    jmethodID onPointerDownOutsideFocus;
     jmethodID getVirtualKeyQuietTimeMillis;
     jmethodID getExcludedDeviceNames;
     jmethodID getInputPortAssociations;
@@ -259,6 +260,7 @@ public:
     virtual void pokeUserActivity(nsecs_t eventTime, int32_t eventType);
     virtual bool checkInjectEventsPermissionNonReentrant(
             int32_t injectorPid, int32_t injectorUid);
+    virtual void onPointerDownOutsideFocus(const sp<IBinder>& touchedToken);
 
     /* --- PointerControllerPolicyInterface implementation --- */
 
@@ -1205,6 +1207,15 @@ bool NativeInputManager::checkInjectEventsPermissionNonReentrant(
     return result;
 }
 
+void NativeInputManager::onPointerDownOutsideFocus(const sp<IBinder>& touchedToken) {
+    ATRACE_CALL();
+    JNIEnv* env = jniEnv();
+
+    jobject touchedTokenObj = javaObjectForIBinder(env, touchedToken);
+    env->CallVoidMethod(mServiceObj, gServiceClassInfo.onPointerDownOutsideFocus, touchedTokenObj);
+    checkAndClearExceptionFromCallback(env, "onPointerDownOutsideFocus");
+}
+
 void NativeInputManager::loadPointerIcon(SpriteIcon* icon, int32_t displayId) {
     ATRACE_CALL();
     JNIEnv* env = jniEnv();
@@ -1808,6 +1819,9 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gServiceClassInfo.checkInjectEventsPermission, clazz,
             "checkInjectEventsPermission", "(II)Z");
+
+    GET_METHOD_ID(gServiceClassInfo.onPointerDownOutsideFocus, clazz,
+            "onPointerDownOutsideFocus", "(Landroid/os/IBinder;)V");
 
     GET_METHOD_ID(gServiceClassInfo.getVirtualKeyQuietTimeMillis, clazz,
             "getVirtualKeyQuietTimeMillis", "()I");
