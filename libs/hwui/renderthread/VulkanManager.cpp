@@ -172,6 +172,8 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
     LOG_ALWAYS_FATAL_IF(physDeviceProperties.apiVersion < VK_MAKE_VERSION(1, 1, 0));
     mDriverVersion = physDeviceProperties.driverVersion;
 
+    mIsQualcomm = physDeviceProperties.vendorID == 20803;
+
     // query to get the initial queue props size
     uint32_t queueCount;
     mGetPhysicalDeviceQueueFamilyProperties(mPhysicalDevice, &queueCount, nullptr);
