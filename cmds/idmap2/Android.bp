@@ -84,6 +84,7 @@ cc_test {
         "-readability-magic-numbers",
     ],
     host_supported: true,
+    test_suites: ["general-tests"],
     srcs: [
         "tests/BinaryStreamVisitorTests.cpp",
         "tests/CommandLineOptionsTests.cpp",
