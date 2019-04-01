@@ -64,6 +64,8 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Renders bubbles in a stack and handles animating expanded and collapsed states.
@@ -164,6 +166,8 @@ public class BubbleStackView extends FrameLayout {
     int[] mTempLoc = new int[2];
     RectF mTempRect = new RectF();
 
+    private final List<Rect> mSystemGestureExclusionRects = Collections.singletonList(new Rect());
+
     private ViewTreeObserver.OnPreDrawListener mViewUpdater =
             new ViewTreeObserver.OnPreDrawListener() {
                 @Override
@@ -174,6 +178,9 @@ public class BubbleStackView extends FrameLayout {
                     return true;
                 }
             };
+
+    private ViewTreeObserver.OnDrawListener mSystemGestureExcludeUpdater =
+            this::updateSystemGestureExcludeRects;
 
     private ViewClippingUtil.ClippingParameters mClippingParameters =
             new ViewClippingUtil.ClippingParameters() {
@@ -359,6 +366,19 @@ public class BubbleStackView extends FrameLayout {
                 return true;
         }
         return false;
+    }
+
+    private void updateSystemGestureExcludeRects() {
+        // Exclude the region occupied by the first BubbleView in the stack
+        Rect excludeZone = mSystemGestureExclusionRects.get(0);
+        if (mBubbleContainer.getChildCount() > 0) {
+            View firstBubble = mBubbleContainer.getChildAt(0);
+            excludeZone.set(firstBubble.getLeft(), firstBubble.getTop(), firstBubble.getRight(),
+                    firstBubble.getBottom());
+        } else {
+            excludeZone.setEmpty();
+        }
+        mBubbleContainer.setSystemGestureExclusionRects(mSystemGestureExclusionRects);
     }
 
     /**
@@ -669,12 +689,17 @@ public class BubbleStackView extends FrameLayout {
             updateExpandedBubble();
             applyCurrentState();
 
+            // This must be a separate OnDrawListener since it should be called for every draw.
+            getViewTreeObserver().addOnDrawListener(mSystemGestureExcludeUpdater);
+
             mIsExpansionAnimating = true;
 
             Runnable updateAfter = () -> {
                 applyCurrentState();
                 mIsExpansionAnimating = false;
                 requestUpdate();
+                getViewTreeObserver().removeOnDrawListener(mSystemGestureExcludeUpdater);
+                updateSystemGestureExcludeRects();
             };
 
             if (shouldExpand) {
