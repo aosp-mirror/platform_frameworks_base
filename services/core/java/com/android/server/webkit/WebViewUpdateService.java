@@ -241,11 +241,6 @@ public class WebViewUpdateService extends SystemService {
         }
 
         @Override // Binder call
-        public boolean isFallbackPackage(String packageName) {
-            return false;
-        }
-
-        @Override // Binder call
         public boolean isMultiProcessEnabled() {
             return WebViewUpdateService.this.mImpl.isMultiProcessEnabled();
         }

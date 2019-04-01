@@ -71,13 +71,6 @@ interface IWebViewUpdateService {
     PackageInfo getCurrentWebViewPackage();
 
     /**
-     * Used by Settings to determine whether a certain package can be enabled/disabled by the user -
-     * the package should not be modifiable in this way if it is a fallback package.
-     */
-    @UnsupportedAppUsage
-    boolean isFallbackPackage(String packageName);
-
-    /**
      * Used by Settings to determine whether multiprocess is enabled.
      */
     boolean isMultiProcessEnabled();
