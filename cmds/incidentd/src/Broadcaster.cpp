@@ -22,6 +22,7 @@
 
 #include <android/os/DropBoxManager.h>
 #include <binder/IServiceManager.h>
+#include <thread>
 
 namespace android {
 namespace os {
@@ -391,12 +392,19 @@ status_t Broadcaster::send_to_dropbox(const sp<ReportFile>& file,
         return NO_ERROR;
     }
 
-    // Start a thread to write the data to dropbox.
-    int readFd = -1;
-    err = file->startFilteringData(&readFd, args);
-    if (err != NO_ERROR) {
-        return err;
+    int fds[2];
+    if (pipe(fds) != 0) {
+        ALOGW("Error opening pipe to filter incident report: %s", file->getDataFileName().c_str());
+        return NO_ERROR;
     }
+
+    int readFd = fds[0];
+    int writeFd = fds[1];
+
+    // spawn a thread to write the data. Release the writeFd ownership to the thread.
+    thread th([file, writeFd, args]() { file->startFilteringData(writeFd, args); });
+
+    th.detach();
 
     // Takes ownership of readFd.
     Status status = dropbox->addFile(String16("incident"), readFd, 0);

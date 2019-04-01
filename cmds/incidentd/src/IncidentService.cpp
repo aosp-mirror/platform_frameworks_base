@@ -32,6 +32,7 @@
 #include <log/log.h>
 #include <private/android_filesystem_config.h>
 #include <utils/Looper.h>
+#include <thread>
 
 #include <unistd.h>
 
@@ -117,7 +118,8 @@ static Status checkIncidentPermissions(const IncidentReportArgs& args) {
 }
 
 static string build_uri(const string& pkg, const string& cls, const string& id) {
-    return "build_uri not implemented " + pkg + "/" + cls + "/" + id;
+    return "content://android.os.IncidentManager/pending?pkg="
+        + pkg + "&receiver=" + cls + "&r=" + id;
 }
 
 // ================================================================================
@@ -358,17 +360,21 @@ Status IncidentService::getIncidentReport(const String16& pkg16, const String16&
     IncidentReportArgs args;
     sp<ReportFile> file = mWorkDirectory->getReport(pkg, cls, id, &args);
     if (file != nullptr) {
-        int fd;
-        err = file->startFilteringData(&fd, args);
-        if (err != 0) {
-            ALOGW("Error reading data file that we think should exist: %s",
-                    file->getDataFileName().c_str());
+        // Create pipe
+        int fds[2];
+        if (pipe(fds) != 0) {
+            ALOGW("Error opening pipe to filter incident report: %s",
+                  file->getDataFileName().c_str());
             return Status::ok();
         }
-
         result->setTimestampNs(file->getTimestampNs());
         result->setPrivacyPolicy(file->getEnvelope().privacy_policy());
-        result->takeFileDescriptor(fd);
+        result->takeFileDescriptor(fds[0]);
+        int writeFd = fds[1];
+        // spawn a thread to write the data. Release the writeFd ownership to the thread.
+        thread th([file, writeFd, args]() { file->startFilteringData(writeFd, args); });
+
+        th.detach();
     }
 
     return Status::ok();

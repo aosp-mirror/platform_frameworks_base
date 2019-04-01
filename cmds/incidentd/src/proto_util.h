@@ -32,7 +32,7 @@ using google::protobuf::MessageLite;
 /**
  * Write the IncidentHeaderProto section
  */
-status_t write_header_section(int fd, const vector<uint8_t>& buf);
+status_t write_header_section(int fd, const uint8_t* buf, size_t bufSize);
 
 /**
  * Write the prologue for a section in the incident report
