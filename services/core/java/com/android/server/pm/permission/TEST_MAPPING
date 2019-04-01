@@ -19,9 +19,6 @@
                 },
                 {
                     "include-filter": "android.permission.cts.PermissionFlagsTest"
-                },
-                {
-                    "include-filter": "android.permission.cts.DualStoragePermissionModelTest"
                 }
             ]
         },

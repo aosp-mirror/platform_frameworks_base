@@ -186,38 +186,10 @@ public final class DefaultPermissionGrantPolicy {
         SENSORS_PERMISSIONS.add(Manifest.permission.BODY_SENSORS);
     }
 
-    @Deprecated
     private static final Set<String> STORAGE_PERMISSIONS = new ArraySet<>();
     static {
         STORAGE_PERMISSIONS.add(Manifest.permission.READ_EXTERNAL_STORAGE);
         STORAGE_PERMISSIONS.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-    }
-
-    private static final Set<String> MEDIA_AURAL_PERMISSIONS = new ArraySet<>();
-    static {
-        // STOPSHIP(b/112545973): remove once feature enabled by default
-        if (StorageManager.hasIsolatedStorage()) {
-            MEDIA_AURAL_PERMISSIONS.add(Manifest.permission.READ_MEDIA_AUDIO);
-
-            // STOPSHIP(b/124466734): remove these manual grants once the legacy
-            // permission logic is unified with PermissionController
-            MEDIA_AURAL_PERMISSIONS.add(Manifest.permission.READ_EXTERNAL_STORAGE);
-            MEDIA_AURAL_PERMISSIONS.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        }
-    }
-
-    private static final Set<String> MEDIA_VISUAL_PERMISSIONS = new ArraySet<>();
-    static {
-        // STOPSHIP(b/112545973): remove once feature enabled by default
-        if (StorageManager.hasIsolatedStorage()) {
-            MEDIA_VISUAL_PERMISSIONS.add(Manifest.permission.READ_MEDIA_VIDEO);
-            MEDIA_VISUAL_PERMISSIONS.add(Manifest.permission.READ_MEDIA_IMAGES);
-
-            // STOPSHIP(b/124466734): remove these manual grants once the legacy
-            // permission logic is unified with PermissionController
-            MEDIA_VISUAL_PERMISSIONS.add(Manifest.permission.READ_EXTERNAL_STORAGE);
-            MEDIA_VISUAL_PERMISSIONS.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        }
     }
 
     private static final int MSG_READ_DEFAULT_PERMISSION_EXCEPTIONS = 1;
@@ -474,8 +446,7 @@ public final class DefaultPermissionGrantPolicy {
         // Media provider
         grantSystemFixedPermissionsToSystemPackage(
                 getDefaultProviderAuthorityPackage(MediaStore.AUTHORITY, userId), userId,
-                STORAGE_PERMISSIONS, MEDIA_AURAL_PERMISSIONS, MEDIA_VISUAL_PERMISSIONS,
-                PHONE_PERMISSIONS);
+                STORAGE_PERMISSIONS, PHONE_PERMISSIONS);
 
         // Downloads provider
         grantSystemFixedPermissionsToSystemPackage(
@@ -597,7 +568,7 @@ public final class DefaultPermissionGrantPolicy {
         grantPermissionsToSystemPackage(
                 getDefaultSystemHandlerActivityPackageForCategory(
                         Intent.CATEGORY_APP_GALLERY, userId),
-                userId, STORAGE_PERMISSIONS, MEDIA_VISUAL_PERMISSIONS);
+                userId, STORAGE_PERMISSIONS);
 
         // Email
         grantPermissionsToSystemPackage(
@@ -647,7 +618,7 @@ public final class DefaultPermissionGrantPolicy {
                 grantPermissionsToSystemPackage(packageName, userId,
                         CONTACTS_PERMISSIONS, CALENDAR_PERMISSIONS, MICROPHONE_PERMISSIONS,
                         PHONE_PERMISSIONS, SMS_PERMISSIONS, CAMERA_PERMISSIONS,
-                        SENSORS_PERMISSIONS, STORAGE_PERMISSIONS, MEDIA_AURAL_PERMISSIONS);
+                        SENSORS_PERMISSIONS, STORAGE_PERMISSIONS);
                 grantSystemFixedPermissionsToSystemPackage(packageName, userId,
                         ALWAYS_LOCATION_PERMISSIONS, ACTIVITY_RECOGNITION_PERMISSIONS);
             }
@@ -665,7 +636,7 @@ public final class DefaultPermissionGrantPolicy {
                 .setDataAndType(Uri.fromFile(new File("foo.mp3")), AUDIO_MIME_TYPE);
         grantPermissionsToSystemPackage(
                 getDefaultSystemHandlerActivityPackage(musicIntent, userId), userId,
-                STORAGE_PERMISSIONS, MEDIA_AURAL_PERMISSIONS);
+                STORAGE_PERMISSIONS);
 
         // Home
         Intent homeIntent = new Intent(Intent.ACTION_MAIN)
@@ -729,7 +700,7 @@ public final class DefaultPermissionGrantPolicy {
         grantSystemFixedPermissionsToSystemPackage(
                 getDefaultSystemHandlerActivityPackage(
                         RingtoneManager.ACTION_RINGTONE_PICKER, userId),
-                userId, STORAGE_PERMISSIONS, MEDIA_AURAL_PERMISSIONS);
+                userId, STORAGE_PERMISSIONS);
 
         // TextClassifier Service
         String textClassifierPackageName =

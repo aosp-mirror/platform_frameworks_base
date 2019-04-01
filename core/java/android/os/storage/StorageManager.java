@@ -17,9 +17,6 @@
 package android.os.storage;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
-import static android.Manifest.permission.READ_MEDIA_AUDIO;
-import static android.Manifest.permission.READ_MEDIA_IMAGES;
-import static android.Manifest.permission.READ_MEDIA_VIDEO;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.app.AppOpsManager.OP_READ_EXTERNAL_STORAGE;
 import static android.app.AppOpsManager.OP_READ_MEDIA_AUDIO;
@@ -306,6 +303,7 @@ public class StorageManager {
     private final ContentResolver mResolver;
 
     private final IStorageManager mStorageManager;
+    private final AppOpsManager mAppOps;
     private final Looper mLooper;
     private final AtomicInteger mNextNonce = new AtomicInteger(0);
 
@@ -516,6 +514,7 @@ public class StorageManager {
         mResolver = context.getContentResolver();
         mLooper = looper;
         mStorageManager = IStorageManager.Stub.asInterface(ServiceManager.getServiceOrThrow("mount"));
+        mAppOps = mContext.getSystemService(AppOpsManager.class);
     }
 
     /**
@@ -1666,7 +1665,7 @@ public class StorageManager {
             }
         }
 
-        final AppOpsManager appOps = context.getSystemService(AppOpsManager.class);
+        AppOpsManager appOps = context.getSystemService(AppOpsManager.class);
         final int mode = appOps.noteOpNoThrow(op, uid, packageName);
         switch (mode) {
             case AppOpsManager.MODE_ALLOWED:
@@ -1701,8 +1700,7 @@ public class StorageManager {
             int pid, int uid, String packageName) {
         if (!checkPermissionAndAppOp(enforce, pid, uid, packageName,
                 READ_EXTERNAL_STORAGE, OP_READ_EXTERNAL_STORAGE)) return false;
-        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName,
-                READ_MEDIA_AUDIO, OP_READ_MEDIA_AUDIO)) return false;
+        mAppOps.noteOpNoThrow(OP_READ_MEDIA_AUDIO, uid, packageName);
         return true;
     }
 
@@ -1711,8 +1709,7 @@ public class StorageManager {
             int pid, int uid, String packageName) {
         if (!checkPermissionAndAppOp(enforce, pid, uid, packageName,
                 WRITE_EXTERNAL_STORAGE, OP_WRITE_EXTERNAL_STORAGE)) return false;
-        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName,
-                READ_MEDIA_AUDIO, OP_WRITE_MEDIA_AUDIO)) return false;
+        mAppOps.noteOpNoThrow(OP_WRITE_MEDIA_AUDIO, uid, packageName);
         return true;
     }
 
@@ -1721,8 +1718,7 @@ public class StorageManager {
             int pid, int uid, String packageName) {
         if (!checkPermissionAndAppOp(enforce, pid, uid, packageName,
                 READ_EXTERNAL_STORAGE, OP_READ_EXTERNAL_STORAGE)) return false;
-        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName,
-                READ_MEDIA_VIDEO, OP_READ_MEDIA_VIDEO)) return false;
+        mAppOps.noteOpNoThrow(OP_READ_MEDIA_VIDEO, uid, packageName);
         return true;
     }
 
@@ -1731,8 +1727,7 @@ public class StorageManager {
             int pid, int uid, String packageName) {
         if (!checkPermissionAndAppOp(enforce, pid, uid, packageName,
                 WRITE_EXTERNAL_STORAGE, OP_WRITE_EXTERNAL_STORAGE)) return false;
-        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName,
-                READ_MEDIA_VIDEO, OP_WRITE_MEDIA_VIDEO)) return false;
+        mAppOps.noteOpNoThrow(OP_WRITE_MEDIA_VIDEO, uid, packageName);
         return true;
     }
 
@@ -1741,8 +1736,7 @@ public class StorageManager {
             int pid, int uid, String packageName) {
         if (!checkPermissionAndAppOp(enforce, pid, uid, packageName,
                 READ_EXTERNAL_STORAGE, OP_READ_EXTERNAL_STORAGE)) return false;
-        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName,
-                READ_MEDIA_IMAGES, OP_READ_MEDIA_IMAGES)) return false;
+        mAppOps.noteOpNoThrow(OP_READ_MEDIA_IMAGES, uid, packageName);
         return true;
     }
 
@@ -1751,8 +1745,7 @@ public class StorageManager {
             int pid, int uid, String packageName) {
         if (!checkPermissionAndAppOp(enforce, pid, uid, packageName,
                 WRITE_EXTERNAL_STORAGE, OP_WRITE_EXTERNAL_STORAGE)) return false;
-        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName,
-                READ_MEDIA_IMAGES, OP_WRITE_MEDIA_IMAGES)) return false;
+        mAppOps.noteOpNoThrow(OP_WRITE_MEDIA_IMAGES, uid, packageName);
         return true;
     }
 
