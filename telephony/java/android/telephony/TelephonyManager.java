@@ -4755,22 +4755,18 @@ public class TelephonyManager {
      * Registers a listener object to receive notification of changes
      * in specified telephony states.
      * <p>
-     * To register a listener, pass a {@link PhoneStateListener} and specify at least one telephony
-     * state of interest in the events argument.
+     * To register a listener, pass a {@link PhoneStateListener}
+     * and specify at least one telephony state of interest in
+     * the events argument.
      *
-     * At registration, and when a specified telephony state changes, the telephony manager invokes
-     * the appropriate callback method on the listener object and passes the current (updated)
-     * values.
+     * At registration, and when a specified telephony state
+     * changes, the telephony manager invokes the appropriate
+     * callback method on the listener object and passes the
+     * current (updated) values.
      * <p>
-     * To un-register a listener, pass the listener object and set the events argument to
+     * To unregister a listener, pass the listener object and set the
+     * events argument to
      * {@link PhoneStateListener#LISTEN_NONE LISTEN_NONE} (0).
-     *
-     * If this TelephonyManager object has been created with {@link #createForSubscriptionId},
-     * applies to the given subId. Otherwise, applies to
-     * {@link SubscriptionManager#getDefaultSubscriptionId()}. To listen events for multiple subIds,
-     * pass a separate listener object to each TelephonyManager object created with
-     * {@link #createForSubscriptionId}.
-     *
      * Note: if you call this method while in the middle of a binder transaction, you <b>must</b>
      * call {@link android.os.Binder#clearCallingIdentity()} before calling this method. A
      * {@link SecurityException} will be thrown otherwise.
@@ -4785,18 +4781,17 @@ public class TelephonyManager {
         if (mContext == null) return;
         try {
             boolean notifyNow = (getITelephony() != null);
+            // If the listener has not explicitly set the subId (for example, created with the
+            // default constructor), replace the subId so it will listen to the account the
+            // telephony manager is created with.
+            if (listener.mSubId == null) {
+                listener.mSubId = mSubId;
+            }
+
             ITelephonyRegistry registry = getTelephonyRegistry();
             if (registry != null) {
-                // listen to the subId the telephony manager is created with. Ignore subId in
-                // PhoneStateListener.
-                registry.listenForSubscriber(mSubId, getOpPackageName(),
+                registry.listenForSubscriber(listener.mSubId, getOpPackageName(),
                         listener.callback, events, notifyNow);
-                // TODO: remove this once we remove PhoneStateListener constructor with subId.
-                if (events == PhoneStateListener.LISTEN_NONE) {
-                    listener.mSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
-                } else {
-                    listener.mSubId = mSubId;
-                }
             } else {
                 Rlog.w(TAG, "telephony registry not ready.");
             }
@@ -10265,15 +10260,20 @@ public class TelephonyManager {
     }
 
     /**
-     * Checks if the supplied number is an emergency number based on current locale, sim, default,
-     * modem and network.
+     * Identifies if the supplied phone number is an emergency number that matches a known
+     * emergency number based on current locale, SIM card(s), Android database, modem, network,
+     * or defaults.
+     *
+     * <p>This method assumes that only dialable phone numbers are passed in; non-dialable
+     * numbers are not considered emergency numbers. A dialable phone number consists only
+     * of characters/digits identified by {@link PhoneNumberUtils#isDialable(char)}.
      *
      * <p>The subscriptions which the identification would be based on, are all the active
      * subscriptions, no matter which subscription could be used to create TelephonyManager.
      *
      * @param number - the number to look up
      * @return {@code true} if the given number is an emergency number based on current locale,
-     * sim, modem and network; {@code false} otherwise.
+     * SIM card(s), Android database, modem, network or defaults; {@code false} otherwise.
      */
     public boolean isEmergencyNumber(@NonNull String number) {
         try {
@@ -10334,7 +10334,7 @@ public class TelephonyManager {
     @IntDef(prefix = {"SET_OPPORTUNISTIC_SUB"}, value = {
             SET_OPPORTUNISTIC_SUB_SUCCESS,
             SET_OPPORTUNISTIC_SUB_VALIDATION_FAILED,
-            SET_OPPORTUNISTIC_SUB_INVALID_PARAMETER})
+            SET_OPPORTUNISTIC_SUB_INACTIVE_SUBSCRIPTION})
     public @interface SetOpportunisticSubscriptionResult {}
 
     /**
@@ -10348,9 +10348,9 @@ public class TelephonyManager {
     public static final int SET_OPPORTUNISTIC_SUB_VALIDATION_FAILED = 1;
 
     /**
-     * The parameter passed in is invalid.
+     * The subscription is not valid. It must be an active opportunistic subscription.
      */
-    public static final int SET_OPPORTUNISTIC_SUB_INVALID_PARAMETER = 2;
+    public static final int SET_OPPORTUNISTIC_SUB_INACTIVE_SUBSCRIPTION = 2;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -10390,6 +10390,9 @@ public class TelephonyManager {
     /**
      * Set preferred opportunistic data subscription id.
      *
+     * Switch internet data to preferred opportunistic data subscription id. This api
+     * can result in lose of internet connectivity for short period of time while internet data
+     * is handed over.
      * <p>Requires that the calling app has carrier privileges on both primary and
      * secondary subscriptions (see
      * {@link #hasCarrierPrivileges}), or has permission
@@ -10468,9 +10471,11 @@ public class TelephonyManager {
      *
      * This api should be called to inform OpportunisticNetwork Service about the availability
      * of a network at the current location. This information will be used by OpportunisticNetwork
-     * service to decide to attach to the network opportunistically. If an empty list is passed,
+     * service to enable modem stack and to attach to the network. If an empty list is passed,
      * it is assumed that no network is available and will result in disabling the modem stack
-     * to save power.
+     * to save power. This api do not switch internet data once network attach is completed.
+     * Use {@link TelephonyManager#setPreferredOpportunisticDataSubscription}
+     * to switch internet data after network attach is complete.
      * Requires that the calling app has carrier privileges on both primary and
      * secondary subscriptions (see {@link #hasCarrierPrivileges}), or has permission
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.

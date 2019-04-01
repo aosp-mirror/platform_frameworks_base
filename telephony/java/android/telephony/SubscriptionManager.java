@@ -1271,7 +1271,7 @@ public class SubscriptionManager {
         if (!userVisibleOnly || activeList == null) {
             return activeList;
         } else {
-            return activeList.stream().filter(subInfo -> !shouldHideSubscription(subInfo))
+            return activeList.stream().filter(subInfo -> isSubscriptionVisible(subInfo))
                     .collect(Collectors.toList());
         }
     }
@@ -2596,7 +2596,9 @@ public class SubscriptionManager {
      *              {@link SubscriptionManager#DEFAULT_SUBSCRIPTION_ID}, it means
      *              it's unset and {@link SubscriptionManager#getDefaultDataSubscriptionId()}
      *              is used to determine which modem is preferred.
-     * @param needValidation whether validation is needed before switch happens.
+     * @param needValidation whether Telephony will wait until the network is validated by
+     *              connectivity service before switching data to it. More details see
+     *              {@link NetworkCapabilities#NET_CAPABILITY_VALIDATED}.
      * @param executor The executor of where the callback will execute.
      * @param callback Callback will be triggered once it succeeds or failed.
      *                 See {@link TelephonyManager.SetOpportunisticSubscriptionResult}
@@ -2854,55 +2856,27 @@ public class SubscriptionManager {
     }
 
     /**
-     * Set if a subscription is metered or not. Similar to Wi-Fi, metered means
-     * user may be charged more if more data is used.
-     *
-     * By default all Cellular networks are considered metered. System or carrier privileged apps
-     * can set a subscription un-metered which will be considered when system switches data between
-     * primary subscription and opportunistic subscription.
-     *
-     * Caller will either have {@link android.Manifest.permission#MODIFY_PHONE_STATE} or carrier
-     * privilege permission of the subscription.
-     *
-     * @param isMetered whether it’s a metered subscription.
-     * @param subId the unique SubscriptionInfo index in database
-     * @return {@code true} if the operation is succeed, {@code false} otherwise.
-     */
-    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
-    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    public boolean setMetered(boolean isMetered, int subId) {
-        if (VDBG) logd("[setIsMetered]+ isMetered:" + isMetered + " subId:" + subId);
-        return setSubscriptionPropertyHelper(subId, "setIsMetered",
-                (iSub)-> iSub.setMetered(isMetered, subId, mContext.getOpPackageName())) == 1;
-    }
-
-    /**
-     * Whether system UI should hide a subscription. If it's a bundled opportunistic
-     * subscription, it shouldn't show up in anywhere in Settings app, dialer app,
-     * or status bar. Exception is if caller is carrier app, in which case they will
+     * Whether a subscription is visible to API caller. If it's a bundled opportunistic
+     * subscription, it should be hidden anywhere in Settings, dialer, status bar etc.
+     * Exception is if caller owns carrier privilege, in which case they will
      * want to see their own hidden subscriptions.
      *
      * @param info the subscriptionInfo to check against.
-     * @return true if this subscription should be hidden.
+     * @return true if this subscription should be visible to the API caller.
      *
-     * @hide
      */
-    public boolean shouldHideSubscription(SubscriptionInfo info) {
+    private boolean isSubscriptionVisible(SubscriptionInfo info) {
         if (info == null) return false;
 
-        // If hasCarrierPrivileges or canManageSubscription returns true, it means caller
-        // has carrier privilege.
-        boolean hasCarrierPrivilegePermission = (info.isEmbedded() && canManageSubscription(info))
-                || TelephonyManager.from(mContext).hasCarrierPrivileges(info.getSubscriptionId());
+        // If subscription is NOT grouped opportunistic subscription, it's visible.
+        if (TextUtils.isEmpty(info.getGroupUuid()) || !info.isOpportunistic()) return true;
 
-        return isInvisibleSubscription(info) && !hasCarrierPrivilegePermission;
-    }
-
-    /**
-     * @hide
-     */
-    public static boolean isInvisibleSubscription(SubscriptionInfo info) {
-        return info != null && !TextUtils.isEmpty(info.getGroupUuid()) && info.isOpportunistic();
+        // If the caller is the carrier app and owns the subscription, it should be visible
+        // to the caller.
+        boolean hasCarrierPrivilegePermission = TelephonyManager.from(mContext)
+                .hasCarrierPrivileges(info.getSubscriptionId())
+                || (info.isEmbedded() && canManageSubscription(info));
+        return hasCarrierPrivilegePermission;
     }
 
     /**
@@ -2930,7 +2904,7 @@ public class SubscriptionManager {
             for (SubscriptionInfo info : availableList) {
                 // Opportunistic subscriptions are considered invisible
                 // to users so they should never be returned.
-                if (isInvisibleSubscription(info)) continue;
+                if (!isSubscriptionVisible(info)) continue;
 
                 String groupUuid = info.getGroupUuid();
                 if (groupUuid == null) {
@@ -2952,7 +2926,7 @@ public class SubscriptionManager {
     }
 
     /**
-     * Enabled or disable a subscription. This is currently used in the settings page.
+     * Enables or disables a subscription. This is currently used in the settings page.
      *
      * <p>
      * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required

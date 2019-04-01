@@ -30,6 +30,7 @@ import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.hardware.usb.UsbManager;
 import android.net.ConnectivityManager;
+import android.net.INetworkStatsService;
 import android.net.NetworkStats;
 import android.net.Uri;
 import android.net.wifi.WifiActivityEnergyInfo;
@@ -87,7 +88,6 @@ import android.view.Display;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.location.gnssmetrics.GnssMetrics;
-import com.android.internal.net.NetworkStatsFactory;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FastXmlSerializer;
@@ -11092,7 +11092,6 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    private final NetworkStatsFactory mNetworkStatsFactory = new NetworkStatsFactory();
     private final Pools.Pool<NetworkStats> mNetworkStatsPool = new Pools.SynchronizedPool<>(6);
 
     private final Object mWifiNetworkLock = new Object();
@@ -11114,11 +11113,16 @@ public class BatteryStatsImpl extends BatteryStats {
     private NetworkStats readNetworkStatsLocked(String[] ifaces) {
         try {
             if (!ArrayUtils.isEmpty(ifaces)) {
-                return mNetworkStatsFactory.readNetworkStatsDetail(NetworkStats.UID_ALL, ifaces,
-                        NetworkStats.TAG_NONE, mNetworkStatsPool.acquire());
+                INetworkStatsService statsService = INetworkStatsService.Stub.asInterface(
+                        ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
+                if (statsService != null) {
+                    return statsService.getDetailedUidStats(ifaces);
+                } else {
+                    Slog.e(TAG, "Failed to get networkStatsService ");
+                }
             }
-        } catch (IOException e) {
-            Slog.e(TAG, "failed to read network stats for ifaces: " + Arrays.toString(ifaces));
+        } catch (RemoteException e) {
+            Slog.e(TAG, "failed to read network stats for ifaces: " + Arrays.toString(ifaces) + e);
         }
         return null;
     }

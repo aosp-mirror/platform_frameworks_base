@@ -19,14 +19,17 @@ package android.net.apf;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.content.Context;
+import android.content.res.Resources;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.android.internal.R;
 
 /**
- * APF program support capabilities.
+ * APF program support capabilities. APF stands for Android Packet Filtering and it is a flexible
+ * way to drop unwanted network packets to save power.
+ *
+ * See documentation at hardware/google/apf/apf.h
  *
  * This class is immutable.
  * @hide
@@ -104,10 +107,11 @@ public final class ApfCapabilities implements Parcelable {
     }
 
     /**
-     * Returns true if the APF interpreter advertises support for the data buffer access opcodes
-     * LDDW and STDW.
+     * Determines whether the APF interpreter advertises support for the data buffer access opcodes
+     * LDDW (LoaD Data Word) and STDW (STore Data Word). Full LDDW (LoaD Data Word) and
+     * STDW (STore Data Word) support is present from APFv4 on.
      *
-     * Full LDDW and STDW support is present from APFv4 on.
+     * @return {@code true} if the IWifiStaIface#readApfPacketFilterData is supported.
      */
     public boolean hasDataAccess() {
         return apfVersionSupported >= 4;
@@ -116,14 +120,14 @@ public final class ApfCapabilities implements Parcelable {
     /**
      * @return Whether the APF Filter in the device should filter out IEEE 802.3 Frames.
      */
-    public static boolean getApfDrop8023Frames(@NonNull Context context) {
-        return context.getResources().getBoolean(R.bool.config_apfDrop802_3Frames);
+    public static boolean getApfDrop8023Frames() {
+        return Resources.getSystem().getBoolean(R.bool.config_apfDrop802_3Frames);
     }
 
     /**
      * @return An array of blacklisted EtherType, packets with EtherTypes within it will be dropped.
      */
-    public static @NonNull int[] getApfEthTypeBlackList(@NonNull Context context) {
-        return context.getResources().getIntArray(R.array.config_apfEthTypeBlackList);
+    public static @NonNull int[] getApfEtherTypeBlackList() {
+        return Resources.getSystem().getIntArray(R.array.config_apfEthTypeBlackList);
     }
 }

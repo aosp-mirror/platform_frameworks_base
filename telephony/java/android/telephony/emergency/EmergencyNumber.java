@@ -22,6 +22,7 @@ import android.hardware.radio.V1_4.EmergencyNumberSource;
 import android.hardware.radio.V1_4.EmergencyServiceCategory;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telephony.PhoneNumberUtils;
 import android.telephony.Rlog;
 
 import java.lang.annotation.Retention;
@@ -673,11 +674,20 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
     }
 
     /**
-     * Validate Emergency Number address that only allows '0'-'9', '*', or '#'
+     * Validate Emergency Number address that only contains the dialable character
+     * {@link PhoneNumberUtils#isDialable(char)}
      *
      * @hide
      */
     public static boolean validateEmergencyNumberAddress(String address) {
-        return address.matches("[0-9*#]+");
+        if (address == null) {
+            return false;
+        }
+        for (char c : address.toCharArray()) {
+            if (!PhoneNumberUtils.isDialable(c)) {
+                return false;
+            }
+        }
+        return true;
     }
 }
