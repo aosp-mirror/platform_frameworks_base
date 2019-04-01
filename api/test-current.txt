@@ -238,9 +238,9 @@ package android.app {
     method public int describeContents();
     method public long getBeginTimeMillis();
     method public long getEndTimeMillis();
-    method public int getUidCount();
+    method @IntRange(from=0) public int getUidCount();
     method @Nullable public android.app.AppOpsManager.HistoricalUidOps getUidOps(int);
-    method @NonNull public android.app.AppOpsManager.HistoricalUidOps getUidOpsAt(int);
+    method @NonNull public android.app.AppOpsManager.HistoricalUidOps getUidOpsAt(@IntRange(from=0) int);
     method public void increaseAccessCount(int, int, @NonNull String, int, int, long);
     method public void increaseAccessDuration(int, int, @NonNull String, int, int, long);
     method public void increaseRejectCount(int, int, @NonNull String, int, int, long);
@@ -264,8 +264,8 @@ package android.app {
   public static final class AppOpsManager.HistoricalPackageOps implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public android.app.AppOpsManager.HistoricalOp getOp(@NonNull String);
-    method @NonNull public android.app.AppOpsManager.HistoricalOp getOpAt(int);
-    method public int getOpCount();
+    method @NonNull public android.app.AppOpsManager.HistoricalOp getOpAt(@IntRange(from=0) int);
+    method @IntRange(from=0) public int getOpCount();
     method @NonNull public String getPackageName();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.HistoricalPackageOps> CREATOR;
@@ -273,9 +273,9 @@ package android.app {
 
   public static final class AppOpsManager.HistoricalUidOps implements android.os.Parcelable {
     method public int describeContents();
-    method public int getPackageCount();
+    method @IntRange(from=0) public int getPackageCount();
     method @Nullable public android.app.AppOpsManager.HistoricalPackageOps getPackageOps(@NonNull String);
-    method @NonNull public android.app.AppOpsManager.HistoricalPackageOps getPackageOpsAt(int);
+    method @NonNull public android.app.AppOpsManager.HistoricalPackageOps getPackageOpsAt(@IntRange(from=0) int);
     method public int getUid();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.HistoricalUidOps> CREATOR;
