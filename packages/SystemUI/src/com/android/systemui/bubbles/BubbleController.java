@@ -109,11 +109,6 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
     /** Use an activityView for an auto-bubbled notifs if it has an appropriate content intent */
     private static final String ENABLE_BUBBLE_CONTENT_INTENT = "experiment_bubble_content_intent";
 
-    /** Whether the row of bubble circles are anchored to the top or bottom of the screen. */
-    private static final String ENABLE_BUBBLES_AT_TOP = "experiment_enable_top_bubbles";
-    /** Flag to position the header below the activity view */
-    private static final String ENABLE_BUBBLE_FOOTER = "experiment_enable_bubble_footer";
-
     private static final String BUBBLE_STIFFNESS = "experiment_bubble_stiffness";
     private static final String BUBBLE_BOUNCINESS = "experiment_bubble_bounciness";
 
@@ -605,22 +600,6 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
     private static boolean areBubblesEnabled(Context context) {
         return Settings.Secure.getInt(context.getContentResolver(),
                 ENABLE_BUBBLES, 1) != 0;
-    }
-
-    /**
-     * Whether bubbles should be positioned at the top of the screen or not.
-     */
-    public static boolean showBubblesAtTop(Context context) {
-        return Settings.Secure.getInt(context.getContentResolver(),
-                ENABLE_BUBBLES_AT_TOP, 0) != 0;
-    }
-
-    /**
-     * Whether the bubble chrome should display as a footer or not (in which case it's a header).
-     */
-    public static boolean useFooter(Context context) {
-        return Settings.Secure.getInt(context.getContentResolver(),
-                ENABLE_BUBBLE_FOOTER, 0) != 0;
     }
 
     /** Default stiffness to use for bubble physics animations. */
