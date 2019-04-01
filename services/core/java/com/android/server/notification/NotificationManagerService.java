@@ -17,6 +17,7 @@
 package com.android.server.notification;
 
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
+import static android.app.Notification.CATEGORY_CALL;
 import static android.app.Notification.FLAG_AUTOGROUP_SUMMARY;
 import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
@@ -107,6 +108,7 @@ import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
 import android.app.NotificationManager.Policy;
 import android.app.PendingIntent;
+import android.app.Person;
 import android.app.StatusBarManager;
 import android.app.UriGrantsManager;
 import android.app.admin.DeviceAdminInfo;
@@ -4762,11 +4764,36 @@ public class NotificationManagerService extends SystemService {
     /**
      * Updates the flags for this notification to reflect whether it is a bubble or not.
      */
-    private void flagNotificationForBubbles(NotificationRecord r, String pkg, int userId) {
+    private void flagNotificationForBubbles(NotificationRecord r, String pkg, int userId,
+            NotificationRecord oldRecord) {
         Notification notification = r.getNotification();
-        boolean canBubble = mPreferencesHelper.areBubblesAllowed(pkg, userId)
+
+        // Does the app want to bubble & have permission to bubble?
+        boolean canBubble = notification.getBubbleMetadata() != null
+                && mPreferencesHelper.areBubblesAllowed(pkg, userId)
                 && r.getChannel().canBubble();
-        if (notification.getBubbleMetadata() != null && canBubble) {
+
+        // Is the app in the foreground?
+        final boolean appIsForeground =
+                mActivityManager.getPackageImportance(pkg) == IMPORTANCE_FOREGROUND;
+
+        // Is the notification something we'd allow to bubble?
+        // A call with a foreground service + person
+        ArrayList<Person> peopleList = notification.extras != null
+                ? notification.extras.getParcelableArrayList(Notification.EXTRA_PEOPLE_LIST)
+                : null;
+        boolean isForegroundCall = CATEGORY_CALL.equals(notification.category)
+                && (notification.flags & FLAG_FOREGROUND_SERVICE) != 0;
+        // OR message style (which always has a person)
+        Class<? extends Notification.Style> style = notification.getNotificationStyle();
+        boolean isMessageStyle = Notification.MessagingStyle.class.equals(style);
+        boolean notificationAppropriateToBubble = isMessageStyle
+                || (peopleList != null && !peopleList.isEmpty() && isForegroundCall);
+        // OR something that was previously a bubble & still exists
+        boolean bubbleUpdate = oldRecord != null
+                && (oldRecord.getNotification().flags & FLAG_BUBBLE) != 0;
+
+        if (canBubble && (notificationAppropriateToBubble || appIsForeground || bubbleUpdate)) {
             notification.flags |= FLAG_BUBBLE;
         } else {
             notification.flags &= ~FLAG_BUBBLE;
@@ -5129,7 +5156,7 @@ public class NotificationManagerService extends SystemService {
                 final String tag = n.getTag();
 
                 // We need to fix the notification up a little for bubbles
-                flagNotificationForBubbles(r, pkg, callingUid);
+                flagNotificationForBubbles(r, pkg, callingUid, old);
 
                 // Handle grouped notifications and bail out early if we
                 // can to avoid extracting signals.
