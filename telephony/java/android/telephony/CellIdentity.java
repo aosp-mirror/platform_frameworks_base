@@ -110,6 +110,22 @@ public abstract class CellIdentity implements Parcelable {
     }
 
     /**
+     * @return MCC or null for CDMA
+     * @hide
+     */
+    public String getMccString() {
+        return mMccStr;
+    }
+
+    /**
+     * @return MNC or null for CDMA
+     * @hide
+     */
+    public String getMncString() {
+        return mMncStr;
+    }
+
+    /**
      * Returns the channel number of the cell identity.
      *
      * @hide

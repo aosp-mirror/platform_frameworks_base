@@ -267,8 +267,6 @@ interface ISub {
 
     void setDefaultSmsSubId(int subId);
 
-    void clearDefaultsForInactiveSubIds();
-
     @UnsupportedAppUsage
     int[] getActiveSubIdList(boolean visibleOnly);
 

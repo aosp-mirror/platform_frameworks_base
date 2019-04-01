@@ -109,6 +109,13 @@ public final class CellIdentityCdma extends CellIdentity {
         return new CellIdentityCdma(this);
     }
 
+    /** @hide */
+    public CellIdentityCdma sanitizeLocationInfo() {
+        return new CellIdentityCdma(CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE,
+                CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE,
+                mAlphaLong, mAlphaShort);
+    }
+
     /**
      * Take the latitude and longitude in 1/4 seconds and see if
      * the reported location is on Null Island.
