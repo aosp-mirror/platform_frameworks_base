@@ -1457,14 +1457,14 @@ package android.content.om {
 
   public final class OverlayInfo implements android.os.Parcelable {
     method public int describeContents();
+    method @Nullable public String getCategory();
+    method @NonNull public String getPackageName();
+    method @Nullable public String getTargetOverlayableName();
+    method @Nullable public String getTargetPackageName();
+    method public int getUserId();
     method public boolean isEnabled();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.om.OverlayInfo> CREATOR;
-    field public final String category;
-    field public final String packageName;
-    field public final String targetOverlayableName;
-    field public final String targetPackageName;
-    field public final int userId;
   }
 
   public class OverlayManager {
