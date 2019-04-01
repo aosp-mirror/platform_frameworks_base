@@ -2671,7 +2671,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 wallpaper.connection.mReply = null;
             }
             try {
-                wallpaper.connection.mService.detach();
+                // It can be null if user switching happens before service connection.
+                if (wallpaper.connection.mService != null) {
+                    wallpaper.connection.mService.detach();
+                }
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed detaching wallpaper service ", e);
             }
