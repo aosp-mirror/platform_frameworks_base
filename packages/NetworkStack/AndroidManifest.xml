@@ -34,7 +34,7 @@
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE" />
-
+    <uses-permission android:name="android.permission.READ_DEVICE_CONFIG" />
     <!-- Signature permission defined in NetworkStackStub -->
     <uses-permission android:name="android.permission.MAINLINE_NETWORK_STACK" />
     <application>
