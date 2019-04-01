@@ -72,6 +72,10 @@ public class IpMemoryStoreDatabase {
         public static final String COLNAME_ASSIGNEDV4ADDRESS = "assignedV4Address";
         public static final String COLTYPE_ASSIGNEDV4ADDRESS = "INTEGER";
 
+        public static final String COLNAME_ASSIGNEDV4ADDRESSEXPIRY = "assignedV4AddressExpiry";
+        // The lease expiry timestamp in uint of milliseconds
+        public static final String COLTYPE_ASSIGNEDV4ADDRESSEXPIRY = "BIGINT";
+
         // Please note that the group hint is only a *hint*, hence its name. The client can offer
         // this information to nudge the grouping in the decision it thinks is right, but it can't
         // decide for the memory store what is the same L3 network.
@@ -86,13 +90,14 @@ public class IpMemoryStoreDatabase {
         public static final String COLTYPE_MTU = "INTEGER DEFAULT -1";
 
         public static final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS "
-                + TABLENAME                 + " ("
-                + COLNAME_L2KEY             + " " + COLTYPE_L2KEY + " PRIMARY KEY NOT NULL, "
-                + COLNAME_EXPIRYDATE        + " " + COLTYPE_EXPIRYDATE        + ", "
-                + COLNAME_ASSIGNEDV4ADDRESS + " " + COLTYPE_ASSIGNEDV4ADDRESS + ", "
-                + COLNAME_GROUPHINT         + " " + COLTYPE_GROUPHINT         + ", "
-                + COLNAME_DNSADDRESSES      + " " + COLTYPE_DNSADDRESSES      + ", "
-                + COLNAME_MTU               + " " + COLTYPE_MTU               + ")";
+                + TABLENAME                       + " ("
+                + COLNAME_L2KEY                   + " " + COLTYPE_L2KEY + " PRIMARY KEY NOT NULL, "
+                + COLNAME_EXPIRYDATE              + " " + COLTYPE_EXPIRYDATE              + ", "
+                + COLNAME_ASSIGNEDV4ADDRESS       + " " + COLTYPE_ASSIGNEDV4ADDRESS       + ", "
+                + COLNAME_ASSIGNEDV4ADDRESSEXPIRY + " " + COLTYPE_ASSIGNEDV4ADDRESSEXPIRY + ", "
+                + COLNAME_GROUPHINT               + " " + COLTYPE_GROUPHINT               + ", "
+                + COLNAME_DNSADDRESSES            + " " + COLTYPE_DNSADDRESSES            + ", "
+                + COLNAME_MTU                     + " " + COLTYPE_MTU                     + ")";
         public static final String DROP_TABLE = "DROP TABLE IF EXISTS " + TABLENAME;
     }
 
@@ -134,7 +139,7 @@ public class IpMemoryStoreDatabase {
     /** The SQLite DB helper */
     public static class DbHelper extends SQLiteOpenHelper {
         // Update this whenever changing the schema.
-        private static final int SCHEMA_VERSION = 2;
+        private static final int SCHEMA_VERSION = 3;
         private static final String DATABASE_FILENAME = "IpMemoryStore.db";
 
         public DbHelper(@NonNull final Context context) {
@@ -153,10 +158,27 @@ public class IpMemoryStoreDatabase {
         @Override
         public void onUpgrade(@NonNull final SQLiteDatabase db, final int oldVersion,
                 final int newVersion) {
-            // No upgrade supported yet.
-            db.execSQL(NetworkAttributesContract.DROP_TABLE);
-            db.execSQL(PrivateDataContract.DROP_TABLE);
-            onCreate(db);
+            try {
+                if (oldVersion < 2) {
+                    // upgrade from version 1 to version 2
+                    // since we starts from version 2, do nothing here
+                }
+
+                if (oldVersion < 3) {
+                    // upgrade from version 2 to version 3
+                    final String sqlUpgradeAddressExpiry = "alter table"
+                            + " " + NetworkAttributesContract.TABLENAME + " ADD"
+                            + " " + NetworkAttributesContract.COLNAME_ASSIGNEDV4ADDRESSEXPIRY
+                            + " " + NetworkAttributesContract.COLTYPE_ASSIGNEDV4ADDRESSEXPIRY;
+                    db.execSQL(sqlUpgradeAddressExpiry);
+                }
+            } catch (SQLiteException e) {
+                Log.e(TAG, "Could not upgrade to the new version", e);
+                // create database with new version
+                db.execSQL(NetworkAttributesContract.DROP_TABLE);
+                db.execSQL(PrivateDataContract.DROP_TABLE);
+                onCreate(db);
+            }
         }
 
         /** Called when the database is downgraded */
@@ -203,6 +225,10 @@ public class IpMemoryStoreDatabase {
         if (null != attributes.assignedV4Address) {
             values.put(NetworkAttributesContract.COLNAME_ASSIGNEDV4ADDRESS,
                     inet4AddressToIntHTH(attributes.assignedV4Address));
+        }
+        if (null != attributes.assignedV4AddressExpiry) {
+            values.put(NetworkAttributesContract.COLNAME_ASSIGNEDV4ADDRESSEXPIRY,
+                    attributes.assignedV4AddressExpiry);
         }
         if (null != attributes.groupHint) {
             values.put(NetworkAttributesContract.COLNAME_GROUPHINT, attributes.groupHint);
@@ -251,12 +277,17 @@ public class IpMemoryStoreDatabase {
         final NetworkAttributes.Builder builder = new NetworkAttributes.Builder();
         final int assignedV4AddressInt = getInt(cursor,
                 NetworkAttributesContract.COLNAME_ASSIGNEDV4ADDRESS, 0);
+        final long assignedV4AddressExpiry = getLong(cursor,
+                NetworkAttributesContract.COLNAME_ASSIGNEDV4ADDRESSEXPIRY, 0);
         final String groupHint = getString(cursor, NetworkAttributesContract.COLNAME_GROUPHINT);
         final byte[] dnsAddressesBlob =
                 getBlob(cursor, NetworkAttributesContract.COLNAME_DNSADDRESSES);
         final int mtu = getInt(cursor, NetworkAttributesContract.COLNAME_MTU, -1);
         if (0 != assignedV4AddressInt) {
             builder.setAssignedV4Address(intToInet4AddressHTH(assignedV4AddressInt));
+        }
+        if (0 != assignedV4AddressExpiry) {
+            builder.setAssignedV4AddressExpiry(assignedV4AddressExpiry);
         }
         builder.setGroupHint(groupHint);
         if (null != dnsAddressesBlob) {

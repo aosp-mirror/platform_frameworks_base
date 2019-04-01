@@ -228,6 +228,7 @@ public class IpMemoryStoreServiceTest {
     public void testNetworkAttributes() throws UnknownHostException {
         final NetworkAttributes.Builder na = new NetworkAttributes.Builder();
         na.setAssignedV4Address((Inet4Address) Inet4Address.getByName("1.2.3.4"));
+        na.setAssignedV4AddressExpiry(System.currentTimeMillis() + 7_200_000);
         na.setGroupHint("hint1");
         na.setMtu(219);
         final String l2Key = FAKE_KEYS[0];
@@ -257,6 +258,8 @@ public class IpMemoryStoreServiceTest {
                                     + status.resultCode, status.isSuccess());
                             assertEquals(l2Key, key);
                             assertEquals(attributes.assignedV4Address, attr.assignedV4Address);
+                            assertEquals(attributes.assignedV4AddressExpiry,
+                                    attr.assignedV4AddressExpiry);
                             assertEquals(attributes.groupHint, attr.groupHint);
                             assertEquals(attributes.mtu, attr.mtu);
                             assertEquals(attributes2.dnsAddresses, attr.dnsAddresses);
@@ -278,7 +281,7 @@ public class IpMemoryStoreServiceTest {
         // Verify that this test does not miss any new field added later.
         // If any field is added to NetworkAttributes it must be tested here for storing
         // and retrieving.
-        assertEquals(4, Arrays.stream(NetworkAttributes.class.getDeclaredFields())
+        assertEquals(5, Arrays.stream(NetworkAttributes.class.getDeclaredFields())
                 .filter(f -> !Modifier.isStatic(f.getModifiers())).count());
     }
 
