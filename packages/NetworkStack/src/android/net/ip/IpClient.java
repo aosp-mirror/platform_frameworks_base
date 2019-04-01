@@ -1389,8 +1389,8 @@ public class IpClient extends StateMachine {
             apfConfig.apfCapabilities = mConfiguration.mApfCapabilities;
             apfConfig.multicastFilter = mMulticastFiltering;
             // Get the Configuration for ApfFilter from Context
-            apfConfig.ieee802_3Filter = ApfCapabilities.getApfDrop8023Frames(mContext);
-            apfConfig.ethTypeBlackList = ApfCapabilities.getApfEthTypeBlackList(mContext);
+            apfConfig.ieee802_3Filter = ApfCapabilities.getApfDrop8023Frames();
+            apfConfig.ethTypeBlackList = ApfCapabilities.getApfEtherTypeBlackList();
             mApfFilter = ApfFilter.maybeCreate(mContext, apfConfig, mInterfaceParams, mCallback);
             // TODO: investigate the effects of any multicast filtering racing/interfering with the
             // rest of this IP configuration startup.
