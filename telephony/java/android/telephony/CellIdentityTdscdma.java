@@ -90,6 +90,12 @@ public final class CellIdentityTdscdma extends CellIdentity {
                 cid.uarfcn, cid.operatorNames.alphaLong, cid.operatorNames.alphaShort);
     }
 
+    /** @hide */
+    public CellIdentityTdscdma sanitizeLocationInfo() {
+        return new CellIdentityTdscdma(mMccStr, mMncStr, CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE,
+                CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE, mAlphaLong, mAlphaShort);
+    }
+
     CellIdentityTdscdma copy() {
         return new CellIdentityTdscdma(this);
     }
