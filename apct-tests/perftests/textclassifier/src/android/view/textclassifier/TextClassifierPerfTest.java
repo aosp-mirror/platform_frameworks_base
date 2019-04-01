@@ -13,15 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.textclassifier;
+package android.view.textclassifier;
 
 import android.content.Context;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
-import android.view.textclassifier.ConversationActions;
-import android.view.textclassifier.TextClassificationManager;
-import android.view.textclassifier.TextClassifier;
-import android.view.textclassifier.TextLanguage;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
