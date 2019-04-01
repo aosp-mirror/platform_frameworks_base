@@ -298,7 +298,10 @@ public final class UsageStatsManager {
      *
      * @param intervalType The time interval by which the stats are aggregated.
      * @param beginTime The inclusive beginning of the range of stats to include in the results.
-     * @param endTime The exclusive end of the range of stats to include in the results.
+     *                  Defined in terms of "Unix time", see
+     *                  {@link java.lang.System#currentTimeMillis}.
+     * @param endTime The exclusive end of the range of stats to include in the results. Defined
+     *                in terms of "Unix time", see {@link java.lang.System#currentTimeMillis}.
      * @return A list of {@link UsageStats}
      *
      * @see #INTERVAL_DAILY
@@ -329,7 +332,10 @@ public final class UsageStatsManager {
      *
      * @param intervalType The time interval by which the stats are aggregated.
      * @param beginTime The inclusive beginning of the range of stats to include in the results.
-     * @param endTime The exclusive end of the range of stats to include in the results.
+     *                  Defined in terms of "Unix time", see
+     *                  {@link java.lang.System#currentTimeMillis}.
+     * @param endTime The exclusive end of the range of stats to include in the results. Defined
+     *                in terms of "Unix time", see {@link java.lang.System#currentTimeMillis}.
      * @return A list of {@link ConfigurationStats}
      */
     public List<ConfigurationStats> queryConfigurations(int intervalType, long beginTime,
@@ -364,7 +370,10 @@ public final class UsageStatsManager {
      *
      * @param intervalType The time interval by which the stats are aggregated.
      * @param beginTime The inclusive beginning of the range of stats to include in the results.
-     * @param endTime The exclusive end of the range of stats to include in the results.
+     *                  Defined in terms of "Unix time", see
+     *                  {@link java.lang.System#currentTimeMillis}.
+     * @param endTime The exclusive end of the range of stats to include in the results. Defined
+     *                in terms of "Unix time", see {@link java.lang.System#currentTimeMillis}.
      * @return A list of {@link EventStats}
      *
      * @see #INTERVAL_DAILY
@@ -393,7 +402,10 @@ public final class UsageStatsManager {
      * <p> The caller must have {@link android.Manifest.permission#PACKAGE_USAGE_STATS} </p>
      *
      * @param beginTime The inclusive beginning of the range of events to include in the results.
-     * @param endTime The exclusive end of the range of events to include in the results.
+     *                 Defined in terms of "Unix time", see
+     *                 {@link java.lang.System#currentTimeMillis}.
+     * @param endTime The exclusive end of the range of events to include in the results. Defined
+     *               in terms of "Unix time", see {@link java.lang.System#currentTimeMillis}.
      * @return A {@link UsageEvents}.
      */
     public UsageEvents queryEvents(long beginTime, long endTime) {
@@ -413,7 +425,10 @@ public final class UsageStatsManager {
      * Like {@link #queryEvents(long, long)}, but only returns events for the calling package.
      *
      * @param beginTime The inclusive beginning of the range of events to include in the results.
-     * @param endTime The exclusive end of the range of events to include in the results.
+     *                 Defined in terms of "Unix time", see
+     *                 {@link java.lang.System#currentTimeMillis}.
+     * @param endTime The exclusive end of the range of events to include in the results. Defined
+     *               in terms of "Unix time", see {@link java.lang.System#currentTimeMillis}.
      * @return A {@link UsageEvents} object.
      *
      * @see #queryEvents(long, long)
@@ -438,7 +453,10 @@ public final class UsageStatsManager {
      * <p> The caller must have {@link android.Manifest.permission#PACKAGE_USAGE_STATS} </p>
      *
      * @param beginTime The inclusive beginning of the range of stats to include in the results.
-     * @param endTime The exclusive end of the range of stats to include in the results.
+     *                  Defined in terms of "Unix time", see
+     *                  {@link java.lang.System#currentTimeMillis}.
+     * @param endTime The exclusive end of the range of stats to include in the results. Defined
+     *                in terms of "Unix time", see {@link java.lang.System#currentTimeMillis}.
      * @return A {@link java.util.Map} keyed by package name
      */
     public Map<String, UsageStats> queryAndAggregateUsageStats(long beginTime, long endTime) {
