@@ -304,6 +304,15 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         }
         if (mService.getPortInfo(portId).getType() == HdmiPortInfo.PORT_OUTPUT) {
             mCecMessageCache.flushAll();
+            if (!connected) {
+                if (isSystemAudioActivated()) {
+                    mTvSystemAudioModeSupport = null;
+                    checkSupportAndSetSystemAudioMode(false);
+                }
+                if (isArcEnabled()) {
+                    setArcStatus(false);
+                }
+            }
         } else if (!connected && mPortIdToTvInputs.get(portId) != null) {
             String tvInputId = mPortIdToTvInputs.get(portId);
             HdmiDeviceInfo info = mTvInputsToDeviceInfo.get(tvInputId);
