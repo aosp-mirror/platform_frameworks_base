@@ -1319,6 +1319,9 @@ public class PackageManagerService extends IPackageManager.Stub
     static final int INSTANT_APP_RESOLUTION_PHASE_TWO = 20;
     static final int ENABLE_ROLLBACK_STATUS = 21;
     static final int ENABLE_ROLLBACK_TIMEOUT = 22;
+    static final int DEFERRED_NO_KILL_POST_DELETE = 23;
+
+    static final int DEFERRED_NO_KILL_POST_DELETE_DELAY_MS = 5 * 1000;
 
     static final int WRITE_SETTINGS_DELAY = 10*1000;  // 10 seconds
 
@@ -1524,6 +1527,12 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
 
                     Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "postInstall", msg.arg1);
+                } break;
+                case DEFERRED_NO_KILL_POST_DELETE: {
+                    synchronized (mInstallLock) {
+                        InstallArgs args = (InstallArgs) msg.obj;
+                        args.doPostDeleteLI(true);
+                    }
                 } break;
                 case WRITE_SETTINGS: {
                     Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
@@ -2029,11 +2038,18 @@ public class PackageManagerService extends IPackageManager.Stub
                     getUnknownSourcesSettings());
 
             // Remove the replaced package's older resources safely now
-            // We delete after a gc for applications  on sdcard.
-            if (res.removedInfo != null && res.removedInfo.args != null) {
-                Runtime.getRuntime().gc();
-                synchronized (mInstallLock) {
-                    res.removedInfo.args.doPostDeleteLI(true);
+            InstallArgs args = res.removedInfo != null ? res.removedInfo.args : null;
+            if (args != null) {
+                if (!killApp) {
+                    // If we didn't kill the app, defer the deletion of code/resource files, since
+                    // they may still be in use by the running application. This mitigates problems
+                    // in cases where resources or code is loaded by a new Activity before
+                    // ApplicationInfo changes have propagated to all application threads.
+                    scheduleDeferredNoKillPostDelete(args);
+                } else {
+                    synchronized (mInstallLock) {
+                        args.doPostDeleteLI(true);
+                    }
                 }
             } else {
                 // Force a gc to clear up things. Ask for a background one, it's fine to go on
@@ -2066,6 +2082,11 @@ public class PackageManagerService extends IPackageManager.Stub
                 Slog.i(TAG, "Observer no longer exists.");
             }
         }
+    }
+
+    private void scheduleDeferredNoKillPostDelete(InstallArgs args) {
+        Message message = mHandler.obtainMessage(DEFERRED_NO_KILL_POST_DELETE, args);
+        mHandler.sendMessageDelayed(message, DEFERRED_NO_KILL_POST_DELETE_DELAY_MS);
     }
 
     /**
