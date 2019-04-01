@@ -688,20 +688,20 @@ public abstract class Drawable {
      * {@link #setColorFilter(int, PorterDuff.Mode)} overrides tint.
      * </p>
      *
-     * @param tintMode A Porter-Duff blending mode
+     * @param tintMode A Porter-Duff blending mode to apply to the drawable, a value of null sets
+     *                 the default Porter-Diff blending mode value
+     *                 of {@link PorterDuff.Mode#SRC_IN}
      * @see #setTint(int)
      * @see #setTintList(ColorStateList)
      *
      * @deprecated use {@link #setTintMode(BlendMode)} instead
      */
     @Deprecated
-    public void setTintMode(@NonNull PorterDuff.Mode tintMode) {
+    public void setTintMode(@Nullable PorterDuff.Mode tintMode) {
         if (!mSetTintModeInvoked) {
             mSetTintModeInvoked = true;
-            BlendMode mode = BlendMode.fromValue(tintMode.nativeInt);
-            if (mode != null) {
-                setTintMode(mode);
-            }
+            BlendMode mode = tintMode != null ? BlendMode.fromValue(tintMode.nativeInt) : null;
+            setTintMode(mode != null ? mode : Drawable.DEFAULT_BLEND_MODE);
             mSetTintModeInvoked = false;
         }
     }
@@ -716,17 +716,16 @@ public abstract class Drawable {
      * {@link #setColorFilter(ColorFilter)}
      * </p>
      *
-     * @param blendMode
+     * @param blendMode BlendMode to apply to the drawable, a value of null sets the default
+     *                  blend mode value of {@link BlendMode#SRC_IN}
      * @see #setTint(int)
      * @see #setTintList(ColorStateList)
      */
-    public void setTintMode(@NonNull BlendMode blendMode) {
+    public void setTintMode(@Nullable BlendMode blendMode) {
         if (!mSetBlendModeInvoked) {
             mSetBlendModeInvoked = true;
             PorterDuff.Mode mode = BlendMode.blendModeToPorterDuffMode(blendMode);
-            if (mode != null) {
-                setTintMode(mode);
-            }
+            setTintMode(mode != null ? mode : Drawable.DEFAULT_TINT_MODE);
             mSetBlendModeInvoked = false;
         }
     }
