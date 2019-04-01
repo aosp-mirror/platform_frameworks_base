@@ -2587,8 +2587,7 @@ public class SubscriptionManager {
      *              {@link NetworkCapabilities#NET_CAPABILITY_VALIDATED}.
      * @param executor The executor of where the callback will execute.
      * @param callback Callback will be triggered once it succeeds or failed.
-     *                 See {@link TelephonyManager.SetOpportunisticSubscriptionResult}
-     *                 for more details. Pass null if don't care about the result.
+     *                 Pass null if don't care about the result.
      *
      * @hide
      *
@@ -2596,7 +2595,8 @@ public class SubscriptionManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void setPreferredDataSubscriptionId(int subId, boolean needValidation,
-            @Nullable @CallbackExecutor Executor executor, @Nullable  Consumer<Integer> callback) {
+            @Nullable @CallbackExecutor Executor executor, @Nullable
+            @TelephonyManager.SetOpportunisticSubscriptionResult Consumer<Integer> callback) {
         if (VDBG) logd("[setPreferredDataSubscriptionId]+ subId:" + subId);
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
