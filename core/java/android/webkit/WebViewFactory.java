@@ -321,45 +321,6 @@ public final class WebViewFactory {
         }
     }
 
-    /**
-     * If the ApplicationInfo provided is for a stub WebView, fix up the object to include the
-     * required values from the donor package. If the ApplicationInfo is for a full WebView,
-     * leave it alone. Throws MissingWebViewPackageException if the donor is missing.
-     */
-    private static void fixupStubApplicationInfo(ApplicationInfo ai, PackageManager pm)
-            throws MissingWebViewPackageException {
-        String donorPackageName = null;
-        if (ai.metaData != null) {
-            donorPackageName = ai.metaData.getString("com.android.webview.WebViewDonorPackage");
-        }
-        if (donorPackageName != null) {
-            PackageInfo donorPackage;
-            try {
-                donorPackage = pm.getPackageInfo(
-                        donorPackageName,
-                        PackageManager.GET_SHARED_LIBRARY_FILES
-                        | PackageManager.MATCH_DEBUG_TRIAGED_MISSING
-                        | PackageManager.MATCH_UNINSTALLED_PACKAGES
-                        | PackageManager.MATCH_FACTORY_ONLY);
-            } catch (PackageManager.NameNotFoundException e) {
-                throw new MissingWebViewPackageException("Failed to find donor package: " +
-                                                         donorPackageName);
-            }
-            ApplicationInfo donorInfo = donorPackage.applicationInfo;
-
-            // Replace the stub's code locations with the donor's.
-            ai.sourceDir = donorInfo.sourceDir;
-            ai.splitSourceDirs = donorInfo.splitSourceDirs;
-            ai.nativeLibraryDir = donorInfo.nativeLibraryDir;
-            ai.secondaryNativeLibraryDir = donorInfo.secondaryNativeLibraryDir;
-
-            // Copy the donor's primary and secondary ABIs, since the stub doesn't have native code
-            // and so they are unset.
-            ai.primaryCpuAbi = donorInfo.primaryCpuAbi;
-            ai.secondaryCpuAbi = donorInfo.secondaryCpuAbi;
-        }
-    }
-
     @UnsupportedAppUsage
     private static Context getWebViewContextAndSetProvider() throws MissingWebViewPackageException {
         Application initialApplication = AppGlobals.getInitialApplication();
@@ -411,7 +372,6 @@ public final class WebViewFactory {
             verifyPackageInfo(response.packageInfo, newPackageInfo);
 
             ApplicationInfo ai = newPackageInfo.applicationInfo;
-            fixupStubApplicationInfo(ai, pm);
 
             Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW,
                     "initialApplication.createApplicationContext");
@@ -494,18 +454,14 @@ public final class WebViewFactory {
      */
     public static int onWebViewProviderChanged(PackageInfo packageInfo) {
         int startedRelroProcesses = 0;
-        ApplicationInfo originalAppInfo = new ApplicationInfo(packageInfo.applicationInfo);
         try {
-            fixupStubApplicationInfo(packageInfo.applicationInfo,
-                                     AppGlobals.getInitialApplication().getPackageManager());
-
             startedRelroProcesses = WebViewLibraryLoader.prepareNativeLibraries(packageInfo);
         } catch (Throwable t) {
             // Log and discard errors at this stage as we must not crash the system server.
             Log.e(LOGTAG, "error preparing webview native library", t);
         }
 
-        WebViewZygote.onWebViewProviderChanged(packageInfo, originalAppInfo);
+        WebViewZygote.onWebViewProviderChanged(packageInfo);
 
         return startedRelroProcesses;
     }
