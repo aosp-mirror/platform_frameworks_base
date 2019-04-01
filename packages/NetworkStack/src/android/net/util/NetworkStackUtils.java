@@ -17,10 +17,14 @@
 package android.net.util;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.util.SparseArray;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.util.List;
+import java.util.function.Predicate;
+
 
 /**
  * Collection of utilities for the network stack.
@@ -64,5 +68,33 @@ public class NetworkStackUtils {
             array[i] = list.get(i);
         }
         return array;
+    }
+
+    /**
+     * @return True if there exists at least one element in the sparse array for which
+     * condition {@code predicate}
+     */
+    public static <T> boolean any(SparseArray<T> array, Predicate<T> predicate) {
+        for (int i = 0; i < array.size(); ++i) {
+            if (predicate.test(array.valueAt(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Look up the value of a property for a particular namespace from {@link DeviceConfig}.
+     * @param namespace The namespace containing the property to look up.
+     * @param name The name of the property to look up.
+     * @param defaultValue The value to return if the property does not exist or has no non-null
+     *                     value.
+     * @return the corresponding value, or defaultValue if none exists.
+     */
+    @Nullable
+    public static String getDeviceConfigProperty(@NonNull String namespace, @NonNull String name,
+            @Nullable String defaultValue) {
+        // TODO: Link to DeviceConfig API once it is ready.
+        return defaultValue;
     }
 }

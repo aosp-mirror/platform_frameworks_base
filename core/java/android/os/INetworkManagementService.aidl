@@ -330,12 +330,6 @@ interface INetworkManagementService
      */
     void removeIdleTimer(String iface);
 
-    /**
-     * Configure name servers, search paths, and resolver parameters for the given network.
-     */
-    void setDnsConfigurationForNetwork(int netId, in String[] servers, in String[] domains,
-            in int[] params, String tlsHostname, in String[] tlsServers);
-
     void setFirewallEnabled(boolean enabled);
     boolean isFirewallEnabled();
     void setFirewallInterfaceRule(String iface, boolean allow);
@@ -379,11 +373,6 @@ interface INetworkManagementService
      * Setup a new VPN.
      */
     void createVirtualNetwork(int netId, boolean secure);
-
-    /**
-     * Remove a network.
-     */
-    void removeNetwork(int netId);
 
     /**
      * Add an interface to a network.

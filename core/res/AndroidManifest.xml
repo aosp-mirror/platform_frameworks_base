@@ -608,6 +608,9 @@
 
     <protected-broadcast android:name="android.provider.action.DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL" />
 
+    <!-- For tether entitlement recheck-->
+    <protected-broadcast
+        android:name="com.android.server.connectivity.tethering.PROVISIONING_RECHECK_ALARM" />
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
     <!-- ====================================================================== -->
@@ -912,6 +915,9 @@
          call with the option to redirect the call to a different number or
          abort the call altogether.
          <p>Protection level: dangerous
+
+         @deprecated Applications should use {@link android.telecom.CallRedirectionService} instead
+         of the {@link android.content.Intent#ACTION_NEW_OUTGOING_CALL} broadcast.
     -->
     <permission android:name="android.permission.PROCESS_OUTGOING_CALLS"
         android:permissionGroup="android.permission-group.CALL_LOG"
@@ -1007,6 +1013,18 @@
     <permission android:name="android.permission.MANAGE_OWN_CALLS"
                 android:label="@string/permlab_manageOwnCalls"
                 android:description="@string/permdesc_manageOwnCalls"
+                android:protectionLevel="normal" />
+
+    <!--Allows an app which implements the
+        {@link android.telecom.InCallService} API to be eligible to be enabled as a calling companion app. This
+        means that the Telecom framework will bind to the app's InCallService implementation when
+        there are calls active. The app can use the InCallService API to view information about
+        calls on the system and control these calls.
+        <p>Protection level: normal
+    -->
+    <permission android:name="android.permission.CALL_COMPANION_APP"
+                android:label="@string/permlab_callCompanionApp"
+                android:description="@string/permdesc_callCompanionApp"
                 android:protectionLevel="normal" />
 
     <!-- Allows a calling app to continue a call which was started in another app.  An example is a
