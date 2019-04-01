@@ -8555,16 +8555,16 @@ public class Notification implements Parcelable
         private static final int FLAG_AUTO_EXPAND_BUBBLE = 0x00000001;
 
         /**
-         * If set and the app creating the bubble is in the foreground, the bubble will be posted
-         * <b>without</b> the associated notification in the notification shade. Subsequent update
-         * notifications to this bubble will post a notification in the shade.
+         * If set and the app posting the bubble is in the foreground, the bubble will
+         * be posted <b>without</b> the associated notification in the notification shade.
          *
-         * <p>If the app creating the bubble is not in the foreground this flag has no effect.</p>
+         * <p>If the app posting the bubble is not in the foreground this flag has no effect.</p>
          *
          * <p>Generally this flag should only be set if the user has performed an action to request
-         * or create a bubble.</p>
+         * or create a bubble, or if the user has seen the content in the notification and the
+         * notification is no longer relevant.</p>
          */
-        private static final int FLAG_SUPPRESS_INITIAL_NOTIFICATION = 0x00000002;
+        private static final int FLAG_SUPPRESS_NOTIFICATION = 0x00000002;
 
         private BubbleMetadata(PendingIntent expandIntent, PendingIntent deleteIntent,
                 Icon icon, int height, @DimenRes int heightResId) {
@@ -8643,9 +8643,20 @@ public class Notification implements Parcelable
          * @return whether this bubble should suppress the initial notification when it is posted.
          *
          * @see BubbleMetadata.Builder#setSuppressInitialNotification(boolean)
+         * @deprecated TO BE REMOVED, use {@link #getSuppressNotification()} instead.
          */
+        @Deprecated
         public boolean getSuppressInitialNotification() {
-            return (mFlags & FLAG_SUPPRESS_INITIAL_NOTIFICATION) != 0;
+            return (mFlags & FLAG_SUPPRESS_NOTIFICATION) != 0;
+        }
+
+        /**
+         * @return whether this bubble should suppress the notification when it is posted.
+         *
+         * @see BubbleMetadata.Builder#setSuppressInitialNotification(boolean)
+         */
+        public boolean getSuppressNotification() {
+            return (mFlags & FLAG_SUPPRESS_NOTIFICATION) != 0;
         }
 
         public static final @android.annotation.NonNull Parcelable.Creator<BubbleMetadata> CREATOR =
@@ -8804,11 +8815,31 @@ public class Notification implements Parcelable
              *
              * <p>Generally this flag should only be set if the user has performed an action to
              * request or create a bubble.</p>
+             *
+             * @deprecated TO BE REMOVED, use {@link #setSuppressNotification(boolean)} instead.
              */
+            @Deprecated
             @NonNull
             public BubbleMetadata.Builder setSuppressInitialNotification(
                     boolean shouldSupressNotif) {
-                setFlag(FLAG_SUPPRESS_INITIAL_NOTIFICATION, shouldSupressNotif);
+                setFlag(FLAG_SUPPRESS_NOTIFICATION, shouldSupressNotif);
+                return this;
+            }
+
+            /**
+             * If set and the app posting the bubble is in the foreground, the bubble will be
+             * posted <b>without</b> the associated notification in the notification shade.
+             *
+             * <p>If the app posting the bubble is not in the foreground this flag has no effect.
+             * </p>
+             *
+             * <p>Generally this flag should only be set if the user has performed an action to
+             * request or create a bubble, or if the user has seen the content in the notification
+             * and the notification is no longer relevant.</p>
+             */
+            @NonNull
+            public BubbleMetadata.Builder setSuppressNotification(boolean shouldSupressNotif) {
+                setFlag(FLAG_SUPPRESS_NOTIFICATION, shouldSupressNotif);
                 return this;
             }
 

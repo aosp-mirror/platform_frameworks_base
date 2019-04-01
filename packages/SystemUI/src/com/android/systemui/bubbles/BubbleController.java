@@ -394,11 +394,8 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
                 return;
             }
             if (shouldAutoBubbleForFlags(mContext, entry) || shouldBubble(entry)) {
-                // TODO: handle group summaries
-                boolean suppressNotification = entry.getBubbleMetadata() != null
-                        && entry.getBubbleMetadata().getSuppressInitialNotification()
-                        && isForegroundApp(entry.notification.getPackageName());
-                entry.setShowInShadeWhenBubble(!suppressNotification);
+                // TODO: handle group summaries?
+                updateShowInShadeForSuppressNotification(entry);
             }
         }
 
@@ -419,7 +416,7 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
             }
             if (mNotificationInterruptionStateProvider.shouldBubbleUp(entry)
                     && alertAgain(entry, entry.notification.getNotification())) {
-                entry.setShowInShadeWhenBubble(true);
+                updateShowInShadeForSuppressNotification(entry);
                 entry.setBubbleDismissed(false); // updates come back as bubbles even if dismissed
                 updateBubble(entry, true /* updatePosition */);
                 mStackView.updateDotVisibility(entry.key);
@@ -543,6 +540,13 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
         Notification.BubbleMetadata metadata = entry.getBubbleMetadata();
         return metadata != null && metadata.getAutoExpandBubble()
                 && isForegroundApp(entry.notification.getPackageName());
+    }
+
+    private void updateShowInShadeForSuppressNotification(NotificationEntry entry) {
+        boolean suppressNotification = entry.getBubbleMetadata() != null
+                && entry.getBubbleMetadata().getSuppressNotification()
+                && isForegroundApp(entry.notification.getPackageName());
+        entry.setShowInShadeWhenBubble(!suppressNotification);
     }
 
     /**
