@@ -6864,6 +6864,17 @@ public class TelephonyManager {
      * app has carrier privileges (see {@link #hasCarrierPrivileges})
      * and {@link android.Manifest.permission#ACCESS_FINE_LOCATION}.
      *
+     * If the system-wide location switch is off, apps may still call this API, with the
+     * following constraints:
+     * <ol>
+     *     <li>The app must hold the {@code android.permission.NETWORK_SCAN} permission.</li>
+     *     <li>The app must not supply any specific bands or channels to scan.</li>
+     *     <li>The app must only specify MCC/MNC pairs that are
+     *     associated to a SIM in the device.</li>
+     *     <li>Returned results will have no meaningful info other than signal strength
+     *     and MCC/MNC info.</li>
+     * </ol>
+     *
      * @param request Contains all the RAT with bands/channels that need to be scanned.
      * @param executor The executor through which the callback should be invoked. Since the scan
      *        request may trigger multiple callbacks and they must be invoked in the same order as
