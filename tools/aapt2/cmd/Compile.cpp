@@ -143,6 +143,8 @@ static bool CompileTable(IAaptContext* context, const CompileOptions& options,
                          const ResourcePathData& path_data, io::IFile* file, IArchiveWriter* writer,
                          const std::string& output_path) {
   TRACE_CALL();
+  // Filenames starting with "donottranslate" are not localizable
+  bool translatable_file = path_data.name.find("donottranslate") != 0;
   ResourceTable table;
   {
     auto fin = file->OpenInputStream();
@@ -157,9 +159,7 @@ static bool CompileTable(IAaptContext* context, const CompileOptions& options,
 
     ResourceParserOptions parser_options;
     parser_options.error_on_positional_arguments = !options.legacy_mode;
-
-    // If the filename includes donottranslate, then the default translatable is false.
-    parser_options.translatable = path_data.name.find("donottranslate") == std::string::npos;
+    parser_options.translatable = translatable_file;
 
     // If visibility was forced, we need to use it when creating a new resource and also error if
     // we try to parse the <public>, <public-group>, <java-symbol> or <symbol> tags.
@@ -172,7 +172,7 @@ static bool CompileTable(IAaptContext* context, const CompileOptions& options,
     }
   }
 
-  if (options.pseudolocalize) {
+  if (options.pseudolocalize && translatable_file) {
     // Generate pseudo-localized strings (en-XA and ar-XB).
     // These are created as weak symbols, and are only generated from default
     // configuration

@@ -217,6 +217,29 @@ TEST_F(ResourceParserTest, ParseStyledStringWithWhitespace) {
   EXPECT_THAT(str->value->spans[1].last_char, Eq(13u));
 }
 
+TEST_F(ResourceParserTest, ParseStringTranslatableAttribute) {
+  // If there is no translate attribute the default is 'true'
+  EXPECT_TRUE(TestParse(R"(<string name="foo1">Translate</string>)"));
+  String* str = test::GetValue<String>(&table_, "string/foo1");
+  ASSERT_THAT(str, NotNull());
+  ASSERT_TRUE(str->IsTranslatable());
+
+  // Explicit 'true' translate attribute
+  EXPECT_TRUE(TestParse(R"(<string name="foo2" translatable="true">Translate</string>)"));
+  str = test::GetValue<String>(&table_, "string/foo2");
+  ASSERT_THAT(str, NotNull());
+  ASSERT_TRUE(str->IsTranslatable());
+
+  // Explicit 'false' translate attribute
+  EXPECT_TRUE(TestParse(R"(<string name="foo3" translatable="false">Do not translate</string>)"));
+  str = test::GetValue<String>(&table_, "string/foo3");
+  ASSERT_THAT(str, NotNull());
+  ASSERT_FALSE(str->IsTranslatable());
+
+  // Invalid value for the translate attribute, should be boolean ('true' or 'false')
+  EXPECT_FALSE(TestParse(R"(<string name="foo4" translatable="yes">Translate</string>)"));
+}
+
 TEST_F(ResourceParserTest, IgnoreXliffTagsOtherThanG) {
   std::string input = R"(
       <string name="foo" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
