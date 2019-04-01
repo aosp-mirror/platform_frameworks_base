@@ -6,7 +6,6 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
@@ -135,7 +134,7 @@ public class BluetoothUtils {
         final BluetoothDevice bluetoothDevice = cachedDevice.getDevice();
         final boolean untetheredHeadset = bluetoothDevice != null
                 ? Boolean.parseBoolean(bluetoothDevice.getMetadata(
-                        BluetoothDevice.METADATA_IS_UNTHETHERED_HEADSET))
+                BluetoothDevice.METADATA_IS_UNTHETHERED_HEADSET))
                 : false;
         final int iconSize = context.getResources().getDimensionPixelSize(
                 R.dimen.bt_nearby_icon_size);
@@ -181,8 +180,8 @@ public class BluetoothUtils {
         final int[] iconBgColors = resources.getIntArray(R.array.bt_icon_bg_colors);
 
         // get color index based on mac address
-        final int index =  Math.abs(hashCode % iconBgColors.length);
-        drawable.setColorFilter(iconFgColors[index], PorterDuff.Mode.SRC_ATOP);
+        final int index = Math.abs(hashCode % iconBgColors.length);
+        drawable.setTint(iconFgColors[index]);
         final Drawable adaptiveIcon = new AdaptiveIcon(context, drawable);
         ((AdaptiveIcon) adaptiveIcon).setBackgroundColor(iconBgColors[index]);
 
