@@ -35,6 +35,8 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.ParcelableException;
 import android.os.RemoteException;
+import android.os.SystemProperties;
+import android.util.FeatureFlagUtils;
 import android.util.Slog;
 
 import java.lang.annotation.Retention;
@@ -315,6 +317,11 @@ public class DynamicSystemClient {
      */
     @RequiresPermission(android.Manifest.permission.INSTALL_DYNAMIC_SYSTEM)
     public void bind() {
+        if (!featureFlagEnabled()) {
+            Slog.w(TAG, FeatureFlagUtils.DYNAMIC_SYSTEM + " not enabled; bind() aborted.");
+            return;
+        }
+
         Intent intent = new Intent();
         intent.setClassName("com.android.dynsystem",
                 "com.android.dynsystem.DynamicSystemInstallationService");
@@ -381,6 +388,11 @@ public class DynamicSystemClient {
     @RequiresPermission(android.Manifest.permission.INSTALL_DYNAMIC_SYSTEM)
     public void start(@NonNull Uri systemUrl, @BytesLong long systemSize,
             @BytesLong long userdataSize) {
+        if (!featureFlagEnabled()) {
+            Slog.w(TAG, FeatureFlagUtils.DYNAMIC_SYSTEM + " not enabled; start() aborted.");
+            return;
+        }
+
         Intent intent = new Intent();
 
         intent.setClassName("com.android.dynsystem",
@@ -393,6 +405,11 @@ public class DynamicSystemClient {
         intent.putExtra(KEY_USERDATA_SIZE, userdataSize);
 
         mContext.startActivity(intent);
+    }
+
+    private boolean featureFlagEnabled() {
+        return SystemProperties.getBoolean(
+                FeatureFlagUtils.PERSIST_PREFIX + FeatureFlagUtils.DYNAMIC_SYSTEM, false);
     }
 
     private void handleMessage(Message msg) {
