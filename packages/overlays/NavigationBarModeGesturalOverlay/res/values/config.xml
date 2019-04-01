@@ -31,6 +31,6 @@
     <bool name="config_navBarTapThrough">true</bool>
 
     <!-- Controls the size of the back gesture inset. -->
-    <dimen name="config_backGestureInset">48dp</dimen>
+    <dimen name="config_backGestureInset">20dp</dimen>
 
 </resources>
