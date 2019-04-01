@@ -257,7 +257,7 @@ public class DynamicSystemInstallationService extends Service
             return;
         }
 
-        if (getStatus() != STATUS_READY) {
+        if (!isDynamicSystemInstalled() && (getStatus() != STATUS_READY)) {
             Log.e(TAG, "Trying to discard AOT while there is no complete installation");
             return;
         }
@@ -273,13 +273,25 @@ public class DynamicSystemInstallationService extends Service
     }
 
     private void executeRebootToDynSystemCommand() {
-        if (mInstallTask == null || mInstallTask.getStatus() != FINISHED) {
+        boolean enabled = false;
+
+        if (mInstallTask != null && mInstallTask.getStatus() == FINISHED) {
+            enabled = mInstallTask.commit();
+        } else if (isDynamicSystemInstalled()) {
+            enabled = mDynSystem.setEnable(true);
+        } else {
             Log.e(TAG, "Trying to reboot to AOT while there is no complete installation");
             return;
         }
 
-        if (!mInstallTask.commit()) {
-            Log.e(TAG, "Failed to commit installation because of native runtime error.");
+        if (enabled) {
+            PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+
+            if (powerManager != null) {
+                powerManager.reboot("dynsystem");
+            }
+        } else {
+            Log.e(TAG, "Failed to enable DynamicSystem because of native runtime error.");
             mNM.cancel(NOTIFICATION_ID);
 
             Toast.makeText(this,
@@ -287,14 +299,6 @@ public class DynamicSystemInstallationService extends Service
                     Toast.LENGTH_LONG).show();
 
             mDynSystem.remove();
-
-            return;
-        }
-
-        PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-
-        if (powerManager != null) {
-            powerManager.reboot("dynsystem");
         }
     }
 
