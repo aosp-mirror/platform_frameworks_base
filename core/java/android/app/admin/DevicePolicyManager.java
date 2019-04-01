@@ -10789,8 +10789,8 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Returns whether the device is being used as a managed kiosk, as defined in the CDD. As of
-     * this release, these requirements are as follows:
+     * Returns whether the device is being used as a managed kiosk. These requirements are as
+     * follows:
      * <ul>
      *     <li>The device is in Lock Task (therefore there is also a Device Owner app on the
      *     device)</li>
@@ -10829,11 +10829,11 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Returns whether the device is being used as an unattended managed kiosk, as defined in the
-     * CDD. As of this release, these requirements are as follows:
+     * Returns whether the device is being used as an unattended managed kiosk. These requirements
+     * are as follows:
      * <ul>
-     *     <li>The device is being used as a managed kiosk, as defined in the CDD and verified at
-     *     {@link #isManagedKiosk()}</li>
+     *     <li>The device is being used as a managed kiosk, as defined at {@link
+     *     #isManagedKiosk()}</li>
      *     <li>The device has not received user input for at least 30 minutes</li>
      * </ul>
      *
