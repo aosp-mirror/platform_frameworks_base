@@ -2147,8 +2147,8 @@ public class DevicePolicyManager {
         public static final int UPDATE_ERROR_INCORRECT_OS_VERSION = 2;
 
         /**
-         * Represents the update file being wrong, i.e. payloads are mismatched, wrong compressions
-         * method.
+         * Represents the update file being wrong; e.g. payloads are mismatched, or the wrong
+         * compression method is used.
          */
         public static final int UPDATE_ERROR_UPDATE_FILE_INVALID = 3;
 
