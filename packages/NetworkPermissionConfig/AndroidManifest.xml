@@ -17,7 +17,7 @@
  */
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.networkstack.permissionstub"
+    package="com.android.networkstack.permissionconfig"
     android:sharedUserId="android.uid.networkstack"
     android:versionCode="11"
     android:versionName="Q-initial">
@@ -36,5 +36,5 @@
     <permission android:name="android.permission.MAINLINE_NETWORK_STACK"
                 android:protectionLevel="signature"/>
 
-    <application android:name="com.android.server.NetworkStackPermissionStub"/>
+    <application android:name="com.android.server.NetworkPermissionConfig"/>
 </manifest>

@@ -16,7 +16,7 @@
 
 // Stub APK to define permissions for NetworkStack
 android_app {
-    name: "NetworkStackPermissionStub",
+    name: "NetworkPermissionConfig",
     // TODO: mark app as hasCode=false in manifest once soong stops complaining about apps without
     // a classes.dex.
     srcs: ["src/**/*.java"],
