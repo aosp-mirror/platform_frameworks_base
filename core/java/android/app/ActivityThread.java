@@ -5885,6 +5885,11 @@ public final class ActivityThread extends ClientTransactionHandler {
     private void handleBindApplication(AppBindData data) {
         // Register the UI Thread as a sensitive thread to the runtime.
         VMRuntime.registerSensitiveThread();
+        // In the case the stack depth property exists, pass it down to the runtime.
+        String property = SystemProperties.get("debug.allocTracker.stackDepth");
+        if (property.length() != 0) {
+            VMDebug.setAllocTrackerStackDepth(Integer.parseInt(property));
+        }
         if (data.trackAllocation) {
             DdmVmInternal.enableRecentAllocations(true);
         }
