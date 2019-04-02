@@ -298,8 +298,6 @@ public class NetworkMonitor extends StateMachine {
     // Avoids surfacing "Sign in to network" notification.
     private boolean mDontDisplaySigninNotification = false;
 
-    private volatile boolean mSystemReady = false;
-
     private final State mDefaultState = new DefaultState();
     private final State mValidatedState = new ValidatedState();
     private final State mMaybeNotifyState = new MaybeNotifyState();
@@ -431,15 +429,6 @@ public class NetworkMonitor extends StateMachine {
         removeMessages(CMD_PRIVATE_DNS_SETTINGS_CHANGED);
         // Send the update to the proper thread.
         sendMessage(CMD_PRIVATE_DNS_SETTINGS_CHANGED, newCfg);
-    }
-
-    /**
-     * Send a notification to NetworkMonitor indicating that the system is ready.
-     */
-    public void notifySystemReady() {
-        // No need to run on the handler thread: mSystemReady is volatile and read only once on the
-        // isCaptivePortal() thread.
-        mSystemReady = true;
     }
 
     /**
@@ -1592,10 +1581,6 @@ public class NetworkMonitor extends StateMachine {
      */
     private void sendNetworkConditionsBroadcast(boolean responseReceived, boolean isCaptivePortal,
             long requestTimestampMs, long responseTimestampMs) {
-        if (!mSystemReady) {
-            return;
-        }
-
         Intent latencyBroadcast =
                 new Intent(NetworkMonitorUtils.ACTION_NETWORK_CONDITIONS_MEASURED);
         if (mNetworkCapabilities.hasTransport(TRANSPORT_WIFI)) {
