@@ -255,6 +255,7 @@ message Atom {
         AppInstallOnExternalStorageReported app_install_on_external_storage_reported = 181;
         NetworkStackReported network_stack_reported = 182;
         AppMovedStorageReported app_moved_storage_reported = 183;
+        BiometricEnrolled biometric_enrolled = 184;
     }
 
     // Pulled events will start at field 10000.
@@ -3152,6 +3153,23 @@ message BiometricSystemHealthIssueDetected {
     optional android.hardware.biometrics.ModalityEnum modality = 1;
     // Type of issue detected.
     optional android.hardware.biometrics.IssueEnum issue = 2;
+}
+
+/**
+ * Logs when a biometric enrollment occurs.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/biometrics
+ */
+message BiometricEnrolled {
+    // Biometric modality that was used.
+    optional android.hardware.biometrics.ModalityEnum modality = 1;
+    // The associated user. Eg: 0 for owners, 10+ for others. Defined in android/os/UserHandle.java
+    optional int32 user = 2;
+    // The amount of time the enrollment took in milliseconds.
+    optional int64 latency_millis = 3;
+    // Whether or not the enrollment was successful.
+    optional bool success = 4;
 }
 
 message Notification {
