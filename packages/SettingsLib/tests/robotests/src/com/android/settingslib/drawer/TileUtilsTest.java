@@ -205,10 +205,6 @@ public class TileUtilsTest {
                 null /* defaultCategory */, outTiles, false /* usePriority */);
         assertThat(outTiles.size()).isEqualTo(1);
         assertThat(outTiles.get(0).getTitle(mContext)).isEqualTo("my localized title");
-
-        // Icon should be tintable because the tile is not from settings package, and
-        // "forceTintExternalIcon" is set
-        assertThat(outTiles.get(0).isIconTintable(mContext)).isTrue();
     }
 
     @Test
