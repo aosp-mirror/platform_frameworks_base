@@ -309,7 +309,6 @@ final class OverlayManagerSettings {
             pw.println("mTargetOverlayableName.: " + item.getTargetOverlayableName());
             pw.println("mBaseCodePath..........: " + item.getBaseCodePath());
             pw.println("mState.................: " + OverlayInfo.stateToString(item.getState()));
-            pw.println("mState.................: " + OverlayInfo.stateToString(item.getState()));
             pw.println("mIsEnabled.............: " + item.isEnabled());
             pw.println("mIsStatic..............: " + item.isStatic());
             pw.println("mPriority..............: " + item.mPriority);
