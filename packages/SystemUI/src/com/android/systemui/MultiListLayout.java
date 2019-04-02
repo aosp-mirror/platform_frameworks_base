@@ -148,6 +148,16 @@ public abstract class MultiListLayout extends LinearLayout {
     }
 
     /**
+     * Get the X offset in pixels for use when animating the view onto or off of the screen.
+     */
+    public abstract float getAnimationOffsetX();
+
+    /**
+     * Get the Y offset in pixels for use when animating the view onto or off of the screen.
+     */
+    public abstract float getAnimationOffsetY();
+
+    /**
      * Adapter class for converting items into child views for MultiListLayout and handling
      * callbacks for input events.
      */
