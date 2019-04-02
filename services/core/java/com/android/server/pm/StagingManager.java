@@ -384,8 +384,10 @@ public class StagingManager {
         PackageInstaller.SessionParams params = originalSession.params.copy();
         params.isStaged = false;
         params.installFlags |= PackageManager.INSTALL_DISABLE_VERIFICATION;
+        // TODO(b/129744602): use the userid from the original session.
         int apkSessionId = mPi.createSession(
-                params, originalSession.getInstallerPackageName(), originalSession.userId);
+                params, originalSession.getInstallerPackageName(),
+                0 /* UserHandle.SYSTEM */);
         PackageInstallerSession apkSession = mPi.getSession(apkSessionId);
 
         try {
@@ -465,8 +467,10 @@ public class StagingManager {
             }
             PackageInstaller.SessionParams params = session.params.copy();
             params.isStaged = false;
+            // TODO(b/129744602): use the userid from the original session.
             int apkParentSessionId = mPi.createSession(
-                    params, session.getInstallerPackageName(), session.userId);
+                    params, session.getInstallerPackageName(),
+                    0 /* UserHandle.SYSTEM */);
             PackageInstallerSession apkParentSession = mPi.getSession(apkParentSessionId);
             try {
                 apkParentSession.open();
