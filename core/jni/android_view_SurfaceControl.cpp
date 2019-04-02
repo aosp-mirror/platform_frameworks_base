@@ -171,9 +171,10 @@ static jobject nativeScreenshotToBuffer(JNIEnv* env, jclass clazz,
         maxLayer = INT32_MAX;
     }
     sp<GraphicBuffer> buffer;
+    bool capturedSecureLayers = false;
     status_t res = ScreenshotClient::capture(displayToken,
             sourceCrop, width, height, minLayer, maxLayer, useIdentityTransform,
-            rotation, captureSecureLayers, &buffer);
+            rotation, captureSecureLayers, &buffer, capturedSecureLayers);
     if (res != NO_ERROR) {
         return NULL;
     }
@@ -184,7 +185,8 @@ static jobject nativeScreenshotToBuffer(JNIEnv* env, jclass clazz,
             buffer->getHeight(),
             buffer->getPixelFormat(),
             (jint)buffer->getUsage(),
-            (jlong)buffer.get());
+            (jlong)buffer.get(),
+            capturedSecureLayers);
 }
 
 static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
@@ -1082,7 +1084,7 @@ int register_android_view_SurfaceControl(JNIEnv* env)
     jclass graphicsBufferClazz = FindClassOrDie(env, "android/graphics/GraphicBuffer");
     gGraphicBufferClassInfo.clazz = MakeGlobalRefOrDie(env, graphicsBufferClazz);
     gGraphicBufferClassInfo.builder = GetStaticMethodIDOrDie(env, graphicsBufferClazz,
-            "createFromExisting", "(IIIIJ)Landroid/graphics/GraphicBuffer;");
+            "createFromExisting", "(IIIIJZ)Landroid/graphics/GraphicBuffer;");
 
     return err;
 }
