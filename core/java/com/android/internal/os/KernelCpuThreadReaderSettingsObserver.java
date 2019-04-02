@@ -67,12 +67,14 @@ public class KernelCpuThreadReaderSettingsObserver extends ContentObserver {
 
     @Nullable private final KernelCpuThreadReader mKernelCpuThreadReader;
 
+    @Nullable private final KernelCpuThreadReaderDiff mKernelCpuThreadReaderDiff;
+
     /**
      * @return returns a created {@link KernelCpuThreadReader} that will be modified by any change
      *     in settings, returns null if creation failed
      */
     @Nullable
-    public static KernelCpuThreadReader getSettingsModifiedReader(Context context) {
+    public static KernelCpuThreadReaderDiff getSettingsModifiedReader(Context context) {
         // Create the observer
         KernelCpuThreadReaderSettingsObserver settingsObserver =
                 new KernelCpuThreadReaderSettingsObserver(context);
@@ -82,7 +84,7 @@ public class KernelCpuThreadReaderSettingsObserver extends ContentObserver {
                 .registerContentObserver(
                         settingsUri, false, settingsObserver, UserHandle.USER_SYSTEM);
         // Return the observer's reader
-        return settingsObserver.mKernelCpuThreadReader;
+        return settingsObserver.mKernelCpuThreadReaderDiff;
     }
 
     private KernelCpuThreadReaderSettingsObserver(Context context) {
@@ -90,9 +92,10 @@ public class KernelCpuThreadReaderSettingsObserver extends ContentObserver {
         mContext = context;
         mKernelCpuThreadReader =
                 KernelCpuThreadReader.create(
-                        NUM_BUCKETS_DEFAULT,
-                        UidPredicate.fromString(COLLECTED_UIDS_DEFAULT),
-                        MINIMUM_TOTAL_CPU_USAGE_MILLIS_DEFAULT);
+                        NUM_BUCKETS_DEFAULT, UidPredicate.fromString(COLLECTED_UIDS_DEFAULT));
+        mKernelCpuThreadReaderDiff =
+                new KernelCpuThreadReaderDiff(
+                        mKernelCpuThreadReader, MINIMUM_TOTAL_CPU_USAGE_MILLIS_DEFAULT);
     }
 
     @Override
@@ -130,7 +133,7 @@ public class KernelCpuThreadReaderSettingsObserver extends ContentObserver {
         mKernelCpuThreadReader.setNumBuckets(
                 parser.getInt(NUM_BUCKETS_SETTINGS_KEY, NUM_BUCKETS_DEFAULT));
         mKernelCpuThreadReader.setUidPredicate(uidPredicate);
-        mKernelCpuThreadReader.setMinimumTotalCpuUsageMillis(
+        mKernelCpuThreadReaderDiff.setMinimumTotalCpuUsageMillis(
                 parser.getInt(
                         MINIMUM_TOTAL_CPU_USAGE_MILLIS_SETTINGS_KEY,
                         MINIMUM_TOTAL_CPU_USAGE_MILLIS_DEFAULT));
