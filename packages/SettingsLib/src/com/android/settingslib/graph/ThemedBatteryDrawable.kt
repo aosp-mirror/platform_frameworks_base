@@ -172,6 +172,7 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
     }
 
     override fun draw(c: Canvas) {
+        c.saveLayer(null, null)
         unifiedPath.reset()
         levelPath.reset()
         levelRect.set(fillRect)
@@ -248,6 +249,7 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
             c.clipOutPath(scaledPlus)
             c.drawPath(scaledPlus, fillColorStrokeProtection)
         }
+        c.restore()
     }
 
     private fun batteryColorForLevel(level: Int): Int {
