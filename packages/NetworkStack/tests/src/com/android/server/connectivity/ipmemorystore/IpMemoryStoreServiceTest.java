@@ -16,6 +16,8 @@
 
 package com.android.server.connectivity.ipmemorystore;
 
+import static com.android.server.connectivity.ipmemorystore.RegularMaintenanceJobService.InterruptMaintenance;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -24,6 +26,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 
+import android.app.job.JobScheduler;
 import android.content.Context;
 import android.net.ipmemorystore.Blob;
 import android.net.ipmemorystore.IOnBlobRetrievedListener;
@@ -37,6 +40,7 @@ import android.net.ipmemorystore.SameL3NetworkResponse;
 import android.net.ipmemorystore.SameL3NetworkResponseParcelable;
 import android.net.ipmemorystore.Status;
 import android.net.ipmemorystore.StatusParcelable;
+import android.os.ConditionVariable;
 import android.os.IBinder;
 import android.os.RemoteException;
 
@@ -69,6 +73,9 @@ public class IpMemoryStoreServiceTest {
     private static final String TEST_CLIENT_ID = "testClientId";
     private static final String TEST_DATA_NAME = "testData";
 
+    private static final int TEST_DATABASE_SIZE_THRESHOLD = 100 * 1024; //100KB
+    private static final int DEFAULT_TIMEOUT_MS = 5000;
+    private static final int LONG_TIMEOUT_MS = 30000;
     private static final int FAKE_KEY_COUNT = 20;
     private static final String[] FAKE_KEYS;
     static {
@@ -80,6 +87,8 @@ public class IpMemoryStoreServiceTest {
 
     @Mock
     private Context mMockContext;
+    @Mock
+    private JobScheduler mMockJobScheduler;
     private File mDbFile;
 
     private IpMemoryStoreService mService;
@@ -91,7 +100,22 @@ public class IpMemoryStoreServiceTest {
         final File dir = context.getFilesDir();
         mDbFile = new File(dir, "test.db");
         doReturn(mDbFile).when(mMockContext).getDatabasePath(anyString());
-        mService = new IpMemoryStoreService(mMockContext);
+        doReturn(mMockJobScheduler).when(mMockContext)
+                .getSystemService(Context.JOB_SCHEDULER_SERVICE);
+        mService = new IpMemoryStoreService(mMockContext) {
+            @Override
+            protected int getDbSizeThreshold() {
+                return TEST_DATABASE_SIZE_THRESHOLD;
+            }
+
+            @Override
+            boolean isDbSizeOverThreshold() {
+                // Add a 100ms delay here for pausing maintenance job a while. Interrupted flag can
+                // be set at this time.
+                waitForMs(100);
+                return super.isDbSizeOverThreshold();
+            }
+        };
     }
 
     @After
@@ -200,10 +224,15 @@ public class IpMemoryStoreServiceTest {
 
     // Helper method to factorize some boilerplate
     private void doLatched(final String timeoutMessage, final Consumer<CountDownLatch> functor) {
+        doLatched(timeoutMessage, functor, DEFAULT_TIMEOUT_MS);
+    }
+
+    private void doLatched(final String timeoutMessage, final Consumer<CountDownLatch> functor,
+            final int timeout) {
         final CountDownLatch latch = new CountDownLatch(1);
         functor.accept(latch);
         try {
-            if (!latch.await(5000, TimeUnit.MILLISECONDS)) {
+            if (!latch.await(timeout, TimeUnit.MILLISECONDS)) {
                 fail(timeoutMessage);
             }
         } catch (InterruptedException e) {
@@ -222,6 +251,46 @@ public class IpMemoryStoreServiceTest {
                     assertTrue("Store not successful : " + status.resultCode, status.isSuccess());
                     latch.countDown();
                 })));
+    }
+
+    /** Insert large data that db size will be over threshold for maintenance test usage. */
+    private void insertFakeDataAndOverThreshold() {
+        try {
+            final NetworkAttributes.Builder na = new NetworkAttributes.Builder();
+            na.setAssignedV4Address((Inet4Address) Inet4Address.getByName("1.2.3.4"));
+            na.setGroupHint("hint1");
+            na.setMtu(219);
+            na.setDnsAddresses(Arrays.asList(Inet6Address.getByName("0A1C:2E40:480A::1CA6")));
+            final byte[] data = new byte[]{-3, 6, 8, -9, 12, -128, 0, 89, 112, 91, -34};
+            final long time = System.currentTimeMillis() - 1;
+            for (int i = 0; i < 1000; i++) {
+                int errorCode = IpMemoryStoreDatabase.storeNetworkAttributes(
+                        mService.mDb,
+                        "fakeKey" + i,
+                        // Let first 100 records get expiry.
+                        i < 100 ? time : time + TimeUnit.HOURS.toMillis(i),
+                        na.build());
+                assertEquals(errorCode, Status.SUCCESS);
+
+                errorCode = IpMemoryStoreDatabase.storeBlob(
+                        mService.mDb, "fakeKey" + i, TEST_CLIENT_ID, TEST_DATA_NAME, data);
+                assertEquals(errorCode, Status.SUCCESS);
+            }
+
+            // After added 5000 records, db size is larger than fake threshold(100KB).
+            assertTrue(mService.isDbSizeOverThreshold());
+        } catch (final UnknownHostException e) {
+            fail("Insert fake data fail");
+        }
+    }
+
+    /** Wait for assigned time. */
+    private void waitForMs(long ms) {
+        try {
+            Thread.sleep(ms);
+        } catch (final InterruptedException e) {
+            fail("Thread was interrupted");
+        }
     }
 
     @Test
@@ -344,7 +413,7 @@ public class IpMemoryStoreServiceTest {
                                     status.isSuccess());
                             assertEquals(l2Key, key);
                             assertEquals(name, TEST_DATA_NAME);
-                            Arrays.equals(b.data, data);
+                            assertTrue(Arrays.equals(b.data, data));
                             latch.countDown();
                         })));
 
@@ -505,5 +574,65 @@ public class IpMemoryStoreServiceTest {
                     assertNull(answer);
                     latch.countDown();
                 })));
+    }
+
+
+    @Test
+    public void testFullMaintenance() {
+        insertFakeDataAndOverThreshold();
+
+        final InterruptMaintenance im = new InterruptMaintenance(0/* Fake JobId */);
+        // Do full maintenance and then db size should go down and meet the threshold.
+        doLatched("Maintenance unexpectedly completed successfully", latch ->
+                mService.fullMaintenance(onStatus((status) -> {
+                    assertTrue("Execute full maintenance failed: "
+                            + status.resultCode, status.isSuccess());
+                    latch.countDown();
+                }), im), LONG_TIMEOUT_MS);
+
+        // Assume that maintenance is successful, db size shall meet the threshold.
+        assertFalse(mService.isDbSizeOverThreshold());
+    }
+
+    @Test
+    public void testInterruptMaintenance() {
+        insertFakeDataAndOverThreshold();
+
+        final InterruptMaintenance im = new InterruptMaintenance(0/* Fake JobId */);
+
+        // Test interruption immediately.
+        im.setInterrupted(true);
+        // Do full maintenance and the expectation is not completed by interruption.
+        doLatched("Maintenance unexpectedly completed successfully", latch ->
+                mService.fullMaintenance(onStatus((status) -> {
+                    assertFalse(status.isSuccess());
+                    latch.countDown();
+                }), im), LONG_TIMEOUT_MS);
+
+        // Assume that no data are removed, db size shall be over the threshold.
+        assertTrue(mService.isDbSizeOverThreshold());
+
+        // Reset the flag and test interruption during maintenance.
+        im.setInterrupted(false);
+
+        final ConditionVariable latch = new ConditionVariable();
+        // Do full maintenance and the expectation is not completed by interruption.
+        mService.fullMaintenance(onStatus((status) -> {
+            assertFalse(status.isSuccess());
+            latch.open();
+        }), im);
+
+        // Give a little bit of time for maintenance to start up for realism
+        waitForMs(50);
+        // Interrupt maintenance job.
+        im.setInterrupted(true);
+
+        if (!latch.block(LONG_TIMEOUT_MS)) {
+            fail("Maintenance unexpectedly completed successfully");
+        }
+
+        // Assume that only do dropAllExpiredRecords method in previous maintenance, db size shall
+        // still be over the threshold.
+        assertTrue(mService.isDbSizeOverThreshold());
     }
 }

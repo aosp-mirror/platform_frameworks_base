@@ -1,0 +1,7 @@
+// Copyright 2013 The Android Open Source Project
+//
+
+sh_binary {
+    name: "wm",
+    src: "wm",
+}
