@@ -19,8 +19,8 @@ package com.android.server;
 import android.app.Application;
 
 /**
- * Empty application for NetworkStackStub that only exists because soong builds complain if APKs
- * have no source file.
+ * Empty application for NetworkPermissionConfig that only exists because
+ * soong builds complain if APKs have no source file.
  */
-public class NetworkStackPermissionStub extends Application {
+public class NetworkPermissionConfig extends Application {
 }
