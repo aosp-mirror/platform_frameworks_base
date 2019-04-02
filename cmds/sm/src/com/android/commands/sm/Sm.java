@@ -103,8 +103,6 @@ public final class Sm {
             runSetVirtualDisk();
         } else if ("set-isolated-storage".equals(op)) {
             runIsolatedStorage();
-        } else if ("set-legacy-greylist".equals(op)) {
-            runLegacyGreylist();
         } else {
             throw new IllegalArgumentException();
         }
@@ -304,12 +302,6 @@ public final class Sm {
                 return;
         }
         mSm.setDebugFlags(value, mask);
-    }
-
-    public void runLegacyGreylist() throws RemoteException {
-        final boolean legacyGreylist = Boolean.parseBoolean(nextArg());
-        mSm.setDebugFlags(legacyGreylist ? StorageManager.DEBUG_LEGACY_GREYLIST : 0,
-                StorageManager.DEBUG_LEGACY_GREYLIST);
     }
 
     public void runIdleMaint() throws RemoteException {

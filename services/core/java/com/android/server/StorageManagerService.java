@@ -210,9 +210,6 @@ class StorageManagerService extends IStorageManager.Stub
 
     private static final boolean ENABLE_ISOLATED_STORAGE = StorageManager.hasIsolatedStorage();
 
-    private static final boolean ENABLE_LEGACY_GREYLIST = SystemProperties
-            .getBoolean(StorageManager.PROP_LEGACY_GREYLIST, true);
-
     /**
      * If {@code 1}, enables the isolated storage feature. If {@code -1},
      * disables the isolated storage feature. If {@code 0}, uses the default
@@ -1733,7 +1730,7 @@ class StorageManagerService extends IStorageManager.Stub
 
                 final long lastAccess = getLastAccessTime(appOps, uid, packageName, new int[] {
                         AppOpsManager.OP_READ_EXTERNAL_STORAGE,
-                        OP_WRITE_EXTERNAL_STORAGE,
+                        AppOpsManager.OP_WRITE_EXTERNAL_STORAGE,
                 });
 
                 Log.d(TAG, "Found " + uid + " " + packageName
@@ -2385,23 +2382,6 @@ class StorageManagerService extends IStorageManager.Stub
                 Settings.Global.putInt(mContext.getContentResolver(),
                         Settings.Global.ISOLATED_STORAGE_LOCAL, value);
                 refreshIsolatedStorageSettings();
-
-                // Perform hard reboot to kick policy into place
-                mHandler.post(() -> {
-                    mContext.getSystemService(PowerManager.class).reboot(null);
-                });
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
-
-        if ((mask & StorageManager.DEBUG_LEGACY_GREYLIST) != 0) {
-            final boolean enabled = (flags & StorageManager.DEBUG_LEGACY_GREYLIST) != 0;
-
-            final long token = Binder.clearCallingIdentity();
-            try {
-                SystemProperties.set(StorageManager.PROP_LEGACY_GREYLIST,
-                        Boolean.toString(enabled));
 
                 // Perform hard reboot to kick policy into place
                 mHandler.post(() -> {
@@ -3884,8 +3864,11 @@ class StorageManagerService extends IStorageManager.Stub
             // they hold the runtime permission
             final boolean hasLegacy = mIAppOpsService.checkOperation(OP_LEGACY_STORAGE,
                     uid, packageName) == MODE_ALLOWED;
-            final boolean hasGreylist = isLegacyGreylisted(packageName);
-            if ((hasLegacy || hasGreylist) && hasStorage) {
+            // STOPSHIP: only use app-op once permission model has fully landed
+            final boolean requestedLegacy = !mIPackageManager
+                    .getApplicationInfo(packageName, 0, UserHandle.getUserId(uid))
+                    .isExternalStorageSandboxAllowed();
+            if ((hasLegacy || requestedLegacy) && hasStorage) {
                 return Zygote.MOUNT_EXTERNAL_LEGACY;
             } else {
                 return Zygote.MOUNT_EXTERNAL_WRITE;
@@ -3894,49 +3877,6 @@ class StorageManagerService extends IStorageManager.Stub
             // Should not happen
         }
         return Zygote.MOUNT_EXTERNAL_NONE;
-    }
-
-    private boolean isLegacyGreylisted(String packageName) {
-        // TODO: decide legacy defaults at install time based on signals
-        if (ENABLE_LEGACY_GREYLIST) {
-            // STOPSHIP: remove this temporary workaround once developers
-            // fix bugs where they're opening _data paths in native code
-            switch (packageName) {
-                case "com.facebook.katana": // b/123996076
-                case "jp.naver.line.android": // b/124767356
-                case "com.mxtech.videoplayer.ad": // b/124531483
-                case "com.whatsapp": // b/124766614
-                case "com.maxmpz.audioplayer": // b/127886230
-                case "com.estrongs.android.pop": // b/127926473
-                case "com.roidapp.photogrid": // b/128269119
-                case "com.cleanmaster.mguard": // b/128384413
-                case "com.skype.raider": // b/128487044
-                case "org.telegram.messenger": // b/128652960
-                case "com.jrtstudio.AnotherMusicPlayer": // b/129084562
-                case "ak.alizandro.smartaudiobookplayer": // b/129084042
-                case "com.campmobile.snow": // b/128803870
-                case "com.qnap.qfile": // b/126374406
-                case "com.google.android.apps.photos": // b/125506293
-                case "com.facebook.mlite": // b/126561155
-                case "com.ss.android.ugc.trill": // b/126610656
-                case "com.instagram.android": // b/127526615
-                case "com.facebook.orca": // b/128255453
-                case "org.videolan.vlc": // b/128391743
-                case "vStudio.Android.Camera360": // b/128882110
-                case "com.twitter.android": // b/128948908
-                case "com.tumblr": // b/129022664
-                case "com.sina.weibo": // b/129029018
-                case "com.kwai.video": // b/129037235
-                case "com.fotoable.photocollage": // b/129236353
-                case "com.xvideostudio.videoeditor": // b/129247146
-                case "app.buzz.share": // b/129304005
-                case "com.ss.android.article.topbuzzvideo.en": // b/129303979
-                case "com.linecorp.b612.android": // b/129318512
-                case "com.google.android.GoogleCamera": // b/128326994
-                    return true;
-            }
-        }
-        return false;
     }
 
     private static class Callbacks extends Handler {
