@@ -38,6 +38,14 @@
     <dimen name="navigation_handle_sample_horizontal_margin">10dp</dimen>
     <dimen name="navigation_home_handle_width">72dp</dimen>
 
+
+    <!-- Size of the nav bar edge panels, should be greater to the
+         edge sensitivity + the drag threshold -->
+    <dimen name="navigation_edge_panel_width">52dp</dimen>
+    <dimen name="navigation_edge_panel_height">52dp</dimen>
+    <!-- The threshold to drag to trigger the edge action -->
+    <dimen name="navigation_edge_action_drag_threshold">16dp</dimen>
+
     <!-- Luminance threshold to determine black/white contrast for the navigation affordances -->
     <item name="navigation_luminance_threshold" type="dimen" format="float">0.5</item>
     <!-- Luminance change threshold that allows applying new value if difference was exceeded -->

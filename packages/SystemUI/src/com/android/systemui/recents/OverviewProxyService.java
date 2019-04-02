@@ -24,7 +24,7 @@ import static android.view.MotionEvent.ACTION_UP;
 import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_DISABLE_SWIPE_UP;
 import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_SHOW_OVERVIEW_BUTTON;
 import static com.android.systemui.shared.system.NavigationBarCompat.InteractionType;
-import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_INPUT_CHANNEL;
+import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_INPUT_MONITOR;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SUPPORTS_WINDOW_CORNERS;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SYSUI_PROXY;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_WINDOW_CORNER_RADIUS;
@@ -38,6 +38,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.hardware.input.InputManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -47,7 +48,7 @@ import android.os.PatternMatcher;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
-import android.view.InputChannel;
+import android.view.InputMonitor;
 import android.view.MotionEvent;
 
 import com.android.internal.policy.ScreenDecorationsUtils;
@@ -58,7 +59,6 @@ import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.recents.ISystemUiProxy;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
-import com.android.systemui.shared.system.InputChannelCompat.InputEventDispatcher;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -114,8 +114,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private MotionEvent mStatusBarGestureDownEvent;
     private float mWindowCornerRadius;
     private boolean mSupportsRoundedCornersOnWindows;
-
-    private InputEventDispatcher mInputEventDispatcher;
 
     private ISystemUiProxy mSysUiProxy = new ISystemUiProxy.Stub() {
 
@@ -295,6 +293,22 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             }
         }
 
+        public Bundle monitorGestureInput(String name, int displayId) {
+            if (!verifyCaller("monitorGestureInput")) {
+                return null;
+            }
+            long token = Binder.clearCallingIdentity();
+            try {
+                InputMonitor monitor =
+                        InputManager.getInstance().monitorGestureInput(name, displayId);
+                Bundle result = new Bundle();
+                result.putParcelable(KEY_EXTRA_INPUT_MONITOR, monitor);
+                return result;
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
         private boolean verifyCaller(String reason) {
             final int callerId = Binder.getCallingUserHandle().getIdentifier();
             if (callerId != mCurrentBoundedUserId) {
@@ -341,23 +355,16 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             } catch (RemoteException e) {
                 Log.e(TAG_OPS, "Lost connection to launcher service", e);
             }
-            try {
-                mOverviewProxy.onBind(mSysUiProxy);
-            } catch (RemoteException e) {
-                mCurrentBoundedUserId = -1;
-                Log.e(TAG_OPS, "Failed to call onBind()", e);
-            }
 
             Bundle params = new Bundle();
             params.putBinder(KEY_EXTRA_SYSUI_PROXY, mSysUiProxy.asBinder());
-            params.putParcelable(KEY_EXTRA_INPUT_CHANNEL, createNewInputDispatcher());
             params.putFloat(KEY_EXTRA_WINDOW_CORNER_RADIUS, mWindowCornerRadius);
             params.putBoolean(KEY_EXTRA_SUPPORTS_WINDOW_CORNERS, mSupportsRoundedCornersOnWindows);
             try {
                 mOverviewProxy.onInitialize(params);
             } catch (RemoteException e) {
-                // Ignore error until the migration is complete.
-                Log.e(TAG_OPS, "Failed to call onBind()", e);
+                mCurrentBoundedUserId = -1;
+                Log.e(TAG_OPS, "Failed to call onInitialize()", e);
             }
             dispatchNavButtonBounds();
 
@@ -369,7 +376,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             Log.w(TAG_OPS, "Null binding of '" + name + "', try reconnecting");
             mCurrentBoundedUserId = -1;
             retryConnectionWithBackoff();
-            disposeInputDispatcher();
         }
 
         @Override
@@ -377,31 +383,14 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             Log.w(TAG_OPS, "Binding died of '" + name + "', try reconnecting");
             mCurrentBoundedUserId = -1;
             retryConnectionWithBackoff();
-            disposeInputDispatcher();
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
             // Do nothing
             mCurrentBoundedUserId = -1;
-            disposeInputDispatcher();
         }
     };
-
-    private void disposeInputDispatcher() {
-        if (mInputEventDispatcher != null) {
-            mInputEventDispatcher.dispose();
-            mInputEventDispatcher = null;
-        }
-    }
-
-    private InputChannel createNewInputDispatcher() {
-        disposeInputDispatcher();
-
-        InputChannel[] channels = InputChannel.openInputChannelPair("overview-proxy-service");
-        mInputEventDispatcher = new InputEventDispatcher(channels[0], Looper.getMainLooper());
-        return channels[1];
-    }
 
     private final DeviceProvisionedListener mDeviceProvisionedCallback =
                 new DeviceProvisionedListener() {
@@ -565,10 +554,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     public IOverviewProxy getProxy() {
         return mOverviewProxy;
-    }
-
-    public InputEventDispatcher getInputEventDispatcher() {
-        return mInputEventDispatcher;
     }
 
     public int getInteractionFlags() {
