@@ -115,6 +115,7 @@ public class IntentForwarderActivity extends Activity  {
                 // At this point, innerIntent is not null. Otherwise, canForward would have returned
                 // false.
                 innerIntent.prepareToLeaveUser(callingUserId);
+                innerIntent.fixUris(callingUserId);
             } else {
                 newIntent.prepareToLeaveUser(callingUserId);
             }
