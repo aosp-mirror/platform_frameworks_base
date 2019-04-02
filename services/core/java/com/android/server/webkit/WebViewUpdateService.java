@@ -242,28 +242,7 @@ public class WebViewUpdateService extends SystemService {
 
         @Override // Binder call
         public boolean isFallbackPackage(String packageName) {
-            return WebViewUpdateService.this.mImpl.isFallbackPackage(packageName);
-        }
-
-        @Override // Binder call
-        public void enableFallbackLogic(boolean enable) {
-            if (getContext().checkCallingPermission(
-                        android.Manifest.permission.WRITE_SECURE_SETTINGS)
-                    != PackageManager.PERMISSION_GRANTED) {
-                String msg = "Permission Denial: enableFallbackLogic() from pid="
-                        + Binder.getCallingPid()
-                        + ", uid=" + Binder.getCallingUid()
-                        + " requires " + android.Manifest.permission.WRITE_SECURE_SETTINGS;
-                Slog.w(TAG, msg);
-                throw new SecurityException(msg);
-            }
-
-            long callingId = Binder.clearCallingIdentity();
-            try {
-                WebViewUpdateService.this.mImpl.enableFallbackLogic(enable);
-            } finally {
-                Binder.restoreCallingIdentity(callingId);
-            }
+            return false;
         }
 
         @Override // Binder call
