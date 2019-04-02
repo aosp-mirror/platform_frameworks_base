@@ -2,8 +2,7 @@
 //
 
 java_binary {
-    name: "hid",
-    wrapper: "hid",
+    name: "sm",
+    wrapper: "sm",
     srcs: ["**/*.java"],
-    required: ["libhidcommand_jni"],
 }

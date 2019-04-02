@@ -30,6 +30,17 @@ droiddoc {
     api_tag_name: "UIAUTOMATOR",
     api_filename: "uiautomator_api.txt",
     removed_api_filename: "uiautomator_removed_api.txt",
+
+    check_api: {
+        current: {
+            api_file: ":uiautomator-current-api",
+            removed_api_file: ":uiautomator-removed-api",
+        },
+        last_released: {
+            api_file: ":uiautomator-last-released-api",
+            removed_api_file: ":uiautomator-removed-api",
+        },
+    },
 }
 
 java_library_static {
@@ -56,4 +67,11 @@ java_library_static {
     static_libs: [
         "junit",
     ]
+}
+
+java_library_static {
+    name: "uiautomator.library",
+    srcs: [
+        "core-src/**/*.java",
+    ],
 }
