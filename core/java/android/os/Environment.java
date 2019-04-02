@@ -20,6 +20,8 @@ import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
+import android.app.AppGlobals;
+import android.app.AppOpsManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.os.storage.StorageManager;
@@ -1060,7 +1062,7 @@ public class Environment {
      * @throws IllegalArgumentException if the path is not a valid storage
      *             device.
      */
-    public static boolean isExternalStorageRemovable(File path) {
+    public static boolean isExternalStorageRemovable(@NonNull File path) {
         final StorageVolume volume = StorageManager.getStorageVolume(path, UserHandle.myUserId());
         if (volume != null) {
             return volume.isRemovable();
@@ -1103,13 +1105,51 @@ public class Environment {
      * @throws IllegalArgumentException if the path is not a valid storage
      *             device.
      */
-    public static boolean isExternalStorageEmulated(File path) {
+    public static boolean isExternalStorageEmulated(@NonNull File path) {
         final StorageVolume volume = StorageManager.getStorageVolume(path, UserHandle.myUserId());
         if (volume != null) {
             return volume.isEmulated();
         } else {
             throw new IllegalArgumentException("Failed to find storage device at " + path);
         }
+    }
+
+    /**
+     * Returns whether the shared/external storage media at the given path is a
+     * sandboxed view that only contains files owned by the app.
+     * <p>
+     * This value may be different from the value requested by
+     * {@code allowExternalStorageSandbox} in the app's manifest, since an app
+     * may inherit its sandboxed state based on when it was first installed.
+     * <p>
+     * Sandboxed apps can continue to discover and read media belonging to other
+     * apps via {@link android.provider.MediaStore}.
+     */
+    public static boolean isExternalStorageSandboxed() {
+        final File externalDir = sCurrentUser.getExternalDirs()[0];
+        return isExternalStorageSandboxed(externalDir);
+    }
+
+    /**
+     * Returns whether the shared/external storage media at the given path is a
+     * sandboxed view that only contains files owned by the app.
+     * <p>
+     * This value may be different from the value requested by
+     * {@code allowExternalStorageSandbox} in the app's manifest, since an app
+     * may inherit its sandboxed state based on when it was first installed.
+     * <p>
+     * Sandboxed apps can continue to discover and read media belonging to other
+     * apps via {@link android.provider.MediaStore}.
+     *
+     * @throws IllegalArgumentException if the path is not a valid storage
+     *             device.
+     */
+    public static boolean isExternalStorageSandboxed(@NonNull File path) {
+        final Context context = AppGlobals.getInitialApplication();
+        final AppOpsManager appOps = context.getSystemService(AppOpsManager.class);
+        return appOps.noteOpNoThrow(AppOpsManager.OP_LEGACY_STORAGE,
+                context.getApplicationInfo().uid,
+                context.getPackageName()) != AppOpsManager.MODE_ALLOWED;
     }
 
     static File getDirectory(String variableName, String defaultPath) {

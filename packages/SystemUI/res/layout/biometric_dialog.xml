@@ -76,10 +76,6 @@
                             android:layout_marginTop="24dp"
                             android:gravity="@integer/biometric_dialog_text_gravity"
                             android:textSize="20sp"
-                            android:maxLines="1"
-                            android:singleLine="true"
-                            android:ellipsize="marquee"
-                            android:marqueeRepeatLimit="marquee_forever"
                             android:textColor="?android:attr/textColorPrimary"/>
 
                         <TextView
@@ -91,10 +87,6 @@
                             android:layout_marginEnd="24dp"
                             android:gravity="@integer/biometric_dialog_text_gravity"
                             android:textSize="16sp"
-                            android:maxLines="1"
-                            android:singleLine="true"
-                            android:ellipsize="marquee"
-                            android:marqueeRepeatLimit="marquee_forever"
                             android:textColor="?android:attr/textColorPrimary"/>
 
                         <TextView
@@ -106,7 +98,6 @@
                             android:gravity="@integer/biometric_dialog_text_gravity"
                             android:paddingTop="8dp"
                             android:textSize="16sp"
-                            android:maxLines="4"
                             android:textColor="?android:attr/textColorPrimary"/>
 
                         <ImageView

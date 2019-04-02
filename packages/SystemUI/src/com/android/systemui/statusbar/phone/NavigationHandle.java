@@ -57,6 +57,7 @@ public class NavigationHandle extends View implements ButtonInterface {
         mLightColor = Utils.getColorAttrDefaultColor(lightContext, R.attr.singleToneColor);
         mDarkColor = Utils.getColorAttrDefaultColor(darkContext, R.attr.singleToneColor);
         mPaint.setAntiAlias(true);
+        setFocusable(false);
     }
 
     @Override
@@ -68,7 +69,7 @@ public class NavigationHandle extends View implements ButtonInterface {
         int height = mRadius * 2;
         int width = getWidth();
         int y = (navHeight - mBottom - height);
-        canvas.drawRoundRect(mRadius, y, width - mRadius, y + height, mRadius, mRadius, mPaint);
+        canvas.drawRoundRect(0, y, width, y + height, mRadius, mRadius, mPaint);
     }
 
     @Override

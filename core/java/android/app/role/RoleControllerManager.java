@@ -167,7 +167,7 @@ public class RoleControllerManager {
         RemoteService(@NonNull Context context, @NonNull ComponentName componentName,
                 @NonNull Handler handler, @UserIdInt int userId) {
             super(context, RoleControllerService.SERVICE_INTERFACE, componentName, userId,
-                    service -> Log.e(LOG_TAG, "RemoteService " + service + " died"), handler, false,
+                    service -> Log.e(LOG_TAG, "RemoteService " + service + " died"), handler, 0,
                     false, 1);
         }
 

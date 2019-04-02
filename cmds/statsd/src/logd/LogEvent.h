@@ -60,8 +60,9 @@ struct InstallTrainInfo {
     int64_t trainVersionCode;
     std::string trainName;
     int32_t status;
-    std::vector<uint8_t> experimentIds;
+    std::vector<int64_t> experimentIds;
 };
+
 /**
  * Wrapper for the log_msg structure.
  */
@@ -238,6 +239,8 @@ private:
 
     uint32_t mLogUid;
 };
+
+void writeExperimentIdsToProto(const std::vector<int64_t>& experimentIds, std::vector<uint8_t>* protoOut);
 
 }  // namespace statsd
 }  // namespace os

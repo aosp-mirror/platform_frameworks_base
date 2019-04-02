@@ -209,8 +209,8 @@ void RenderThread::requireVkContext() {
     mVkManager->initialize();
     GrContextOptions options;
     initGrContextOptions(options);
-    // TODO: get a string describing the SPIR-V compiler version and use it here
-    cacheManager().configureContext(&options, nullptr, 0);
+    auto vkDriverVersion = mVkManager->getDriverVersion();
+    cacheManager().configureContext(&options, &vkDriverVersion, sizeof(vkDriverVersion));
     sk_sp<GrContext> grContext = mVkManager->createContext(options);
     LOG_ALWAYS_FATAL_IF(!grContext.get());
     setGrContext(grContext);
@@ -408,12 +408,13 @@ bool RenderThread::isCurrent() {
 }
 
 void RenderThread::preload() {
-    std::thread eglInitThread([]() {
-        //TODO: don't load EGL drivers for Vulkan, when HW bitmap uploader is refactored.
-        eglGetDisplay(EGL_DEFAULT_DISPLAY);
-    });
-    eglInitThread.detach();
-    if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
+    // EGL driver is always preloaded only if HWUI renders with GL.
+    if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaGL) {
+        std::thread eglInitThread([]() {
+            eglGetDisplay(EGL_DEFAULT_DISPLAY);
+        });
+        eglInitThread.detach();
+    } else {
         requireVkContext();
     }
     HardwareBitmapUploader::initialize();

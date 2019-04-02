@@ -222,7 +222,17 @@ VulkanSurface* VulkanSurface::Create(ANativeWindow* window, ColorMode colorMode,
     const SkISize maxSize = SkISize::Make(caps.maxImageExtent.width, caps.maxImageExtent.height);
     ComputeWindowSizeAndTransform(&windowInfo, minSize, maxSize);
 
-    windowInfo.bufferCount = std::max<uint32_t>(VulkanSurface::sMaxBufferCount, caps.minImageCount);
+    int query_value;
+    int err = window->query(window, NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS, &query_value);
+    if (err != 0 || query_value < 0) {
+        ALOGE("window->query failed: %s (%d) value=%d", strerror(-err), err,
+              query_value);
+        return nullptr;
+    }
+    auto min_undequeued_buffers = static_cast<uint32_t>(query_value);
+
+    windowInfo.bufferCount = min_undequeued_buffers
+            + std::max(VulkanSurface::sTargetBufferCount, caps.minImageCount);
     if (caps.maxImageCount > 0 && windowInfo.bufferCount > caps.maxImageCount) {
         // Application must settle for fewer images than desired:
         windowInfo.bufferCount = caps.maxImageCount;
@@ -357,10 +367,9 @@ bool VulkanSurface::UpdateWindow(ANativeWindow* window, const WindowInfo& window
         return false;
     }
 
-    // Lower layer insists that we have at least two buffers.
-    err = native_window_set_buffer_count(window, std::max(2, windowInfo.bufferCount));
+    err = native_window_set_buffer_count(window, windowInfo.bufferCount);
     if (err != 0) {
-        ALOGE("VulkanSurface::UpdateWindow() native_window_set_buffer_count(%d) failed: %s (%d)",
+        ALOGE("VulkanSurface::UpdateWindow() native_window_set_buffer_count(%zu) failed: %s (%d)",
               windowInfo.bufferCount, strerror(-err), err);
         return false;
     }
@@ -392,7 +401,7 @@ VulkanSurface::~VulkanSurface() {
 }
 
 void VulkanSurface::releaseBuffers() {
-    for (uint32_t i = 0; i < VulkanSurface::sMaxBufferCount; i++) {
+    for (uint32_t i = 0; i < mWindowInfo.bufferCount; i++) {
         VulkanSurface::NativeBufferInfo& bufferInfo = mNativeBuffers[i];
 
         if (bufferInfo.buffer.get() != nullptr && bufferInfo.dequeued) {
@@ -420,9 +429,10 @@ void VulkanSurface::releaseBuffers() {
 }
 
 VulkanSurface::NativeBufferInfo* VulkanSurface::dequeueNativeBuffer() {
-    // Set the dequeue index to invalid in case of error and only reset it to the correct
+    // Set the mCurrentBufferInfo to invalid in case of error and only reset it to the correct
     // value at the end of the function if everything dequeued correctly.
-    mDequeuedIndex = -1;
+    mCurrentBufferInfo = nullptr;
+
 
     //check if the native window has been resized or rotated and update accordingly
     SkISize newSize = SkISize::MakeEmpty();
@@ -511,7 +521,7 @@ VulkanSurface::NativeBufferInfo* VulkanSurface::dequeueNativeBuffer() {
         }
     }
 
-    mDequeuedIndex = idx;
+    mCurrentBufferInfo = bufferInfo;
     return bufferInfo;
 }
 
@@ -535,7 +545,8 @@ bool VulkanSurface::presentCurrentBuffer(const SkRect& dirtyRect, int semaphoreF
         ALOGE_IF(err != 0, "native_window_set_surface_damage failed: %s (%d)", strerror(-err), err);
     }
 
-    VulkanSurface::NativeBufferInfo& currentBuffer = mNativeBuffers[mDequeuedIndex];
+    LOG_ALWAYS_FATAL_IF(!mCurrentBufferInfo);
+    VulkanSurface::NativeBufferInfo& currentBuffer = *mCurrentBufferInfo;
     int queuedFd = (semaphoreFd != -1) ? semaphoreFd : currentBuffer.dequeue_fence;
     int err = mNativeWindow->queueBuffer(mNativeWindow.get(), currentBuffer.buffer.get(), queuedFd);
 
@@ -560,7 +571,8 @@ bool VulkanSurface::presentCurrentBuffer(const SkRect& dirtyRect, int semaphoreF
 }
 
 int VulkanSurface::getCurrentBuffersAge() {
-    VulkanSurface::NativeBufferInfo& currentBuffer = mNativeBuffers[mDequeuedIndex];
+    LOG_ALWAYS_FATAL_IF(!mCurrentBufferInfo);
+    VulkanSurface::NativeBufferInfo& currentBuffer = *mCurrentBufferInfo;
     return currentBuffer.hasValidContents ? (mPresentCount - currentBuffer.lastPresentedCount) : 0;
 }
 

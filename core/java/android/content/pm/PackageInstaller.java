@@ -1211,6 +1211,9 @@ public class PackageInstaller {
          * Adds a session ID to the set of sessions that will be committed atomically
          * when this session is committed.
          *
+         * <p>If the parent is staged or has rollback enabled, all children must have
+         * the same properties.
+         *
          * @param sessionId the session ID to add to this multi-package session.
          */
         public void addChildSessionId(int sessionId) {
@@ -1480,6 +1483,9 @@ public class PackageInstaller {
         /**
          * Request that rollbacks be enabled or disabled for the given upgrade.
          *
+         * <p>If the parent session is staged or has rollback enabled, all children sessions
+         * must have the same properties.
+         *
          * @param enable set to {@code true} to enable, {@code false} to disable
          * @hide
          */
@@ -1607,6 +1613,9 @@ public class PackageInstaller {
          * multi-package. In that case, if any of the children sessions fail to install at reboot,
          * all the other children sessions are aborted as well.
          *
+         * <p>If the parent session is staged or has rollback enabled, all children sessions
+         * must have the same properties.
+         *
          * {@hide}
          */
         @SystemApi @TestApi
@@ -1624,6 +1633,11 @@ public class PackageInstaller {
         @RequiresPermission(Manifest.permission.INSTALL_PACKAGES)
         public void setInstallAsApex() {
             installFlags |= PackageManager.INSTALL_APEX;
+        }
+
+        /** @hide */
+        public boolean getEnableRollback() {
+            return (installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) != 0;
         }
 
         /** {@hide} */
@@ -2152,6 +2166,7 @@ public class PackageInstaller {
          * Returns the set of session IDs that will be committed when this session is commited if
          * this session is a multi-package session.
          */
+        @NonNull
         public int[] getChildSessionIds() {
             return childSessionIds;
         }

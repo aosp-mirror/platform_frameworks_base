@@ -37,7 +37,7 @@ import javax.inject.Inject;
 /** Quick settings tile: Location **/
 public class LocationTile extends QSTileImpl<BooleanState> {
 
-    private final Icon mIcon = ResourceIcon.get(com.android.internal.R.drawable.ic_signal_location);
+    private final Icon mIcon = ResourceIcon.get(R.drawable.ic_location);
 
     private final LocationController mController;
     private final KeyguardMonitor mKeyguard;

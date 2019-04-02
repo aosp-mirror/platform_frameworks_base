@@ -80,8 +80,11 @@ int main(int /*argc*/, char** /*argv*/) {
 
     ::android::hardware::configureRpcThreadpool(1 /*threads*/, false /*willJoin*/);
 
+    std::shared_ptr<LogEventQueue> eventQueue =
+            std::make_shared<LogEventQueue>(2000 /*buffer limit. Buffer is NOT pre-allocated*/);
+
     // Create the service
-    gStatsService = new StatsService(looper);
+    gStatsService = new StatsService(looper, eventQueue);
     if (defaultServiceManager()->addService(String16("stats"), gStatsService, false,
                 IServiceManager::DUMP_FLAG_PRIORITY_NORMAL | IServiceManager::DUMP_FLAG_PROTO)
             != 0) {
@@ -101,13 +104,13 @@ int main(int /*argc*/, char** /*argv*/) {
 
     gStatsService->Startup();
 
-    sp<StatsSocketListener> socketListener = new StatsSocketListener(gStatsService);
+    sp<StatsSocketListener> socketListener = new StatsSocketListener(eventQueue);
 
-        ALOGI("using statsd socket");
-        // Backlog and /proc/sys/net/unix/max_dgram_qlen set to large value
-        if (socketListener->startListener(600)) {
-            exit(1);
-        }
+    ALOGI("Statsd starts to listen to socket.");
+    // Backlog and /proc/sys/net/unix/max_dgram_qlen set to large value
+    if (socketListener->startListener(600)) {
+        exit(1);
+    }
 
     // Loop forever -- the reports run on this thread in a handler, and the
     // binder calls remain responsive in their pool of one thread.

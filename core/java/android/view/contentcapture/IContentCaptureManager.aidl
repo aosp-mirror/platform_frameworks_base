@@ -42,13 +42,13 @@ oneway interface IContentCaptureManager {
      *     {@link IContentCaptureContext#flags}).
      */
     void startSession(IBinder activityToken, in ComponentName componentName,
-                      String sessionId, int flags, in IResultReceiver result);
+                      int sessionId, int flags, in IResultReceiver result);
 
     /**
      * Marks the end of a session for the calling user identified by
      * the corresponding {@code startSession}'s {@code sessionId}.
      */
-    void finishSession(String sessionId);
+    void finishSession(int sessionId);
 
     /**
      * Returns the content capture service's component name (if enabled and
@@ -72,4 +72,9 @@ oneway interface IContentCaptureManager {
      * Returns a ComponentName with the name of custom service activity, if defined.
      */
     void getServiceSettingsActivity(in IResultReceiver result);
+
+    /**
+     * Returns a list with the ContentCaptureConditions for the package (or null if not defined).
+     */
+    void getContentCaptureConditions(String packageName, in IResultReceiver result);
 }

@@ -33,7 +33,7 @@ import javax.inject.Inject;
 /** Quick settings tile: Work profile on/off */
 public class WorkModeTile extends QSTileImpl<BooleanState> implements
         ManagedProfileController.Callback {
-    private final Icon mIcon = ResourceIcon.get(R.drawable.ic_signal_workmode_disable);
+    private final Icon mIcon = ResourceIcon.get(R.drawable.stat_sys_managed_profile_status);
 
     private final ManagedProfileController mProfileController;
 

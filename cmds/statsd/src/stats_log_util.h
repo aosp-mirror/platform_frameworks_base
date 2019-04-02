@@ -80,11 +80,11 @@ void writeAtomMetricStatsToStream(const std::pair<int64_t, StatsdStats::AtomMetr
 template<class T>
 bool parseProtoOutputStream(util::ProtoOutputStream& protoOutput, T* message) {
     std::string pbBytes;
-    auto iter = protoOutput.data();
-    while (iter.readBuffer() != NULL) {
-        size_t toRead = iter.currentToRead();
-         pbBytes.append(reinterpret_cast<const char*>(iter.readBuffer()), toRead);
-        iter.rp()->move(toRead);
+    sp<android::util::ProtoReader> reader = protoOutput.data();
+    while (reader->readBuffer() != NULL) {
+        size_t toRead = reader->currentToRead();
+         pbBytes.append(reinterpret_cast<const char*>(reader->readBuffer()), toRead);
+        reader->move(toRead);
     }
     return message->ParseFromArray(pbBytes.c_str(), pbBytes.size());
 }

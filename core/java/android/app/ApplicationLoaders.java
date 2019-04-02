@@ -17,20 +17,27 @@
 package android.app;
 
 import android.annotation.UnsupportedAppUsage;
+import android.content.pm.SharedLibraryInfo;
 import android.os.Build;
 import android.os.GraphicsEnvironment;
 import android.os.Trace;
 import android.util.ArrayMap;
+import android.util.Log;
 
 import com.android.internal.os.ClassLoaderFactory;
 
 import dalvik.system.PathClassLoader;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /** @hide */
 public class ApplicationLoaders {
+    private static final String TAG = "ApplicationLoaders";
+
     @UnsupportedAppUsage
     public static ApplicationLoaders getDefault() {
         return gApplicationLoaders;
@@ -52,6 +59,26 @@ public class ApplicationLoaders {
         // For normal usage the cache key used is the same as the zip path.
         return getClassLoader(zip, targetSdkVersion, isBundled, librarySearchPath,
                               libraryPermittedPath, parent, zip, classLoaderName, sharedLibraries);
+    }
+
+    /**
+     * Gets a class loader for a shared library. Additional dependent shared libraries are allowed
+     * to be specified (sharedLibraries).
+     *
+     * Additionally, as an optimization, this will return a pre-created ClassLoader if one has
+     * been cached by createAndCacheNonBootclasspathSystemClassLoaders.
+     */
+    ClassLoader getSharedLibraryClassLoaderWithSharedLibraries(String zip, int targetSdkVersion,
+            boolean isBundled, String librarySearchPath, String libraryPermittedPath,
+            ClassLoader parent, String classLoaderName, List<ClassLoader> sharedLibraries) {
+        ClassLoader loader = getCachedNonBootclasspathSystemLib(zip, parent, classLoaderName,
+                sharedLibraries);
+        if (loader != null) {
+            return loader;
+        }
+
+        return getClassLoaderWithSharedLibraries(zip, targetSdkVersion, isBundled,
+              librarySearchPath, libraryPermittedPath, parent, classLoaderName, sharedLibraries);
     }
 
     private ClassLoader getClassLoader(String zip, int targetSdkVersion, boolean isBundled,
@@ -95,7 +122,9 @@ public class ApplicationLoaders {
                         classloader, librarySearchPath, libraryPermittedPath);
                 Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
-                mLoaders.put(cacheKey, classloader);
+                if (cacheKey != null) {
+                    mLoaders.put(cacheKey, classloader);
+                }
                 return classloader;
             }
 
@@ -105,6 +134,112 @@ public class ApplicationLoaders {
             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
             return loader;
         }
+    }
+
+    /**
+     * Caches system library class loaders which are not on the bootclasspath but are still used
+     * by many system apps.
+     *
+     * All libraries in the closure of libraries to be loaded must be in libs. A library can
+     * only depend on libraries that come before it in the list.
+     */
+    public void createAndCacheNonBootclasspathSystemClassLoaders(SharedLibraryInfo[] libs) {
+        if (mSystemLibsCacheMap != null) {
+            Log.wtf(TAG, "Already cached.");
+            return;
+        }
+
+        mSystemLibsCacheMap = new HashMap<String, CachedClassLoader>();
+
+        for (SharedLibraryInfo lib : libs) {
+            createAndCacheNonBootclasspathSystemClassLoader(lib);
+        }
+    }
+
+    /**
+     * Caches a single non-bootclasspath class loader.
+     *
+     * All of this library's dependencies must have previously been cached.
+     */
+    private void createAndCacheNonBootclasspathSystemClassLoader(SharedLibraryInfo lib) {
+        String path = lib.getPath();
+        List<SharedLibraryInfo> dependencies = lib.getDependencies();
+
+        // get cached classloaders for dependencies
+        ArrayList<ClassLoader> sharedLibraries = null;
+        if (dependencies != null) {
+            sharedLibraries = new ArrayList<ClassLoader>(dependencies.size());
+            for (SharedLibraryInfo dependency : dependencies) {
+                String dependencyPath = dependency.getPath();
+                CachedClassLoader cached = mSystemLibsCacheMap.get(dependencyPath);
+
+                if (cached == null) {
+                    Log.e(TAG, "Failed to find dependency " + dependencyPath
+                            + " of cached library " + path);
+                    return;
+                }
+
+                sharedLibraries.add(cached.loader);
+            }
+        }
+
+        // assume cached libraries work with current sdk since they are built-in
+        ClassLoader classLoader = getClassLoader(path, Build.VERSION.SDK_INT, true /*isBundled*/,
+                null /*librarySearchPath*/, null /*libraryPermittedPath*/, null /*parent*/,
+                null /*cacheKey*/, null /*classLoaderName*/, sharedLibraries /*sharedLibraries*/);
+
+        if (classLoader == null) {
+            Log.e(TAG, "Failed to cache " + path);
+            return;
+        }
+
+        CachedClassLoader cached = new CachedClassLoader();
+        cached.loader = classLoader;
+        cached.sharedLibraries = sharedLibraries;
+
+        Log.d(TAG, "Created zygote-cached class loader: " + path);
+        mSystemLibsCacheMap.put(path, cached);
+    }
+
+    private static boolean sharedLibrariesEquals(List<ClassLoader> lhs, List<ClassLoader> rhs) {
+        if (lhs == null) {
+            return rhs == null;
+        }
+
+        return lhs.equals(rhs);
+    }
+
+    /**
+     * Returns lib cached with createAndCacheNonBootclasspathSystemClassLoader. This is called by
+     * the zygote during caching.
+     *
+     * If there is an error or the cache is not available, this returns null.
+     */
+    private ClassLoader getCachedNonBootclasspathSystemLib(String zip, ClassLoader parent,
+            String classLoaderName, List<ClassLoader> sharedLibraries) {
+        if (mSystemLibsCacheMap == null) {
+            return null;
+        }
+
+        // we only cache top-level libs with the default class loader
+        if (parent != null || classLoaderName != null) {
+            return null;
+        }
+
+        CachedClassLoader cached = mSystemLibsCacheMap.get(zip);
+        if (cached == null) {
+            return null;
+        }
+
+        // cached must be built and loaded in the same environment
+        if (!sharedLibrariesEquals(sharedLibraries, cached.sharedLibraries)) {
+            Log.w(TAG, "Unexpected environment for cached library: (" + sharedLibraries + "|"
+                    + cached.sharedLibraries + ")");
+            return null;
+        }
+
+        Log.d(TAG, "Returning zygote-cached class loader: " + zip);
+        return cached.loader;
     }
 
     /**
@@ -151,4 +286,18 @@ public class ApplicationLoaders {
     private final ArrayMap<String, ClassLoader> mLoaders = new ArrayMap<>();
 
     private static final ApplicationLoaders gApplicationLoaders = new ApplicationLoaders();
+
+    private static class CachedClassLoader {
+        ClassLoader loader;
+
+        /**
+         * The shared libraries used when constructing loader for verification.
+         */
+        List<ClassLoader> sharedLibraries;
+    }
+
+    /**
+     * This is a map of zip to associated class loader.
+     */
+    private Map<String, CachedClassLoader> mSystemLibsCacheMap = null;
 }

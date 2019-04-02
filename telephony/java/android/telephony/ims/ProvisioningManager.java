@@ -21,6 +21,7 @@ import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.StringDef;
 import android.annotation.SystemApi;
 import android.annotation.WorkerThread;
 import android.content.Context;
@@ -38,24 +39,35 @@ import android.telephony.ims.stub.ImsRegistrationImplBase;
 
 import com.android.internal.telephony.ITelephony;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.Executor;
 
 /**
  * Manages IMS provisioning and configuration parameters, as well as callbacks for apps to listen
  * to changes in these configurations.
  *
- * Note: IMS provisioning keys are defined per carrier or OEM using OMA-DM or other provisioning
- * applications and may vary. For compatibility purposes, the first 100 integer values used in
- * {@link #setProvisioningIntValue(int, int)} have been reserved for existing provisioning keys
- * previously defined in the Android framework. Some common constants have been defined in this
- * class to make integrating with other system apps easier. USE WITH CARE!
+ * IMS provisioning keys are defined per carrier or OEM using OMA-DM or other provisioning
+ * applications and may vary. It is up to the carrier and OEM applications to ensure that the
+ * correct provisioning keys are being used when integrating with a vendor's ImsService.
  *
- * To avoid collisions, please use String based configurations when possible:
- * {@link #setProvisioningStringValue(int, String)} and {@link #getProvisioningStringValue(int)}.
+ * Note: For compatibility purposes, the integer values [0 - 99] used in
+ * {@link #setProvisioningIntValue(int, int)} have been reserved for existing provisioning keys
+ * previously defined in the Android framework. Please do not redefine new provisioning keys in this
+ * range or it may generate collisions with existing keys. Some common constants have also been
+ * defined in this class to make integrating with other system apps easier.
  * @hide
  */
 @SystemApi
 public class ProvisioningManager {
+
+    /**@hide*/
+    @StringDef(prefix = "STRING_QUERY_RESULT_ERROR_", value = {
+            STRING_QUERY_RESULT_ERROR_GENERIC,
+            STRING_QUERY_RESULT_ERROR_NOT_READY
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface StringResultError {}
 
     /**
      * The query from {@link #getProvisioningStringValue(int)} has resulted in an unspecified error.
@@ -268,14 +280,13 @@ public class ProvisioningManager {
      * This operation is blocking and should not be performed on the UI thread.
      *
      * @param key A String that represents the provisioning key, which is defined by the OEM.
-     * @return a String value for the provided key, {@code null} if the key doesn't exist, or one
-     * of the following error codes: {@link #STRING_QUERY_RESULT_ERROR_GENERIC},
-     * {@link #STRING_QUERY_RESULT_ERROR_NOT_READY}.
+     * @return a String value for the provided key, {@code null} if the key doesn't exist, or
+     * {@link StringResultError} if there was an error getting the value for the provided key.
      * @throws IllegalArgumentException if the key provided was invalid.
      */
     @WorkerThread
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public @Nullable String getProvisioningStringValue(int key) {
+    public @Nullable @StringResultError String getProvisioningStringValue(int key) {
         try {
             return getITelephony().getImsProvisioningString(mSubId, key);
         } catch (RemoteException e) {

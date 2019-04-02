@@ -116,6 +116,7 @@
     <protected-broadcast android:name="android.app.action.BUGREPORT_SHARE" />
     <protected-broadcast android:name="android.app.action.SHOW_DEVICE_MONITORING_DIALOG" />
     <protected-broadcast android:name="android.intent.action.PENDING_INCIDENT_REPORTS_CHANGED" />
+    <protected-broadcast android:name="android.intent.action.INCIDENT_REPORT_READY" />
 
     <protected-broadcast android:name="android.appwidget.action.APPWIDGET_UPDATE_OPTIONS" />
     <protected-broadcast android:name="android.appwidget.action.APPWIDGET_DELETED" />
@@ -266,6 +267,7 @@
     <protected-broadcast android:name="android.intent.action.HEADSET_PLUG" />
     <protected-broadcast android:name="android.media.action.HDMI_AUDIO_PLUG" />
     <protected-broadcast android:name="android.media.action.MICROPHONE_MUTE_CHANGED" />
+    <protected-broadcast android:name="android.media.action.SPEAKERPHONE_STATE_CHANGED" />
 
     <protected-broadcast android:name="android.media.AUDIO_BECOMING_NOISY" />
     <protected-broadcast android:name="android.media.RINGER_MODE_CHANGED" />
@@ -627,6 +629,9 @@
 
     <protected-broadcast android:name="android.intent.action.DEVICE_CUSTOMIZATION_READY" />
 
+    <!-- For tether entitlement recheck-->
+    <protected-broadcast
+        android:name="com.android.server.connectivity.tethering.PROVISIONING_RECHECK_ALARM" />
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
     <!-- ====================================================================== -->
@@ -784,8 +789,7 @@
     <!-- ====================================================================== -->
     <eat-comment />
 
-    <!-- Used for runtime permissions related to the shared external storage.
-         @deprecated replaced by new strongly-typed permission groups in Q. -->
+    <!-- Used for runtime permissions related to the shared external storage. -->
     <permission-group android:name="android.permission-group.STORAGE"
         android:icon="@drawable/perm_group_storage"
         android:label="@string/permgrouplab_storage"
@@ -813,7 +817,6 @@
      grants your app this permission. If you don't need this permission, be sure your <a
      href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
      targetSdkVersion}</a> is 4 or higher.
-     @deprecated replaced by new strongly-typed permission groups in Q.
      -->
     <permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:permissionGroup="android.permission-group.UNDEFINED"
@@ -834,52 +837,11 @@
          read/write files in your application-specific directories returned by
          {@link android.content.Context#getExternalFilesDir} and
          {@link android.content.Context#getExternalCacheDir}.
-         @deprecated replaced by new strongly-typed permission groups in Q.
     -->
     <permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:permissionGroup="android.permission-group.UNDEFINED"
         android:label="@string/permlab_sdcardWrite"
         android:description="@string/permdesc_sdcardWrite"
-        android:protectionLevel="dangerous" />
-
-    <!-- Runtime permission controlling access to the user's shared aural media
-         collection. -->
-    <permission-group android:name="android.permission-group.MEDIA_AURAL"
-        android:icon="@drawable/perm_group_aural"
-        android:label="@string/permgrouplab_aural"
-        android:description="@string/permgroupdesc_aural"
-        android:request="@string/permgrouprequest_aural"
-        android:priority="910" />
-
-    <!-- Allows an application to read the user's shared audio collection. -->
-    <permission android:name="android.permission.READ_MEDIA_AUDIO"
-        android:permissionGroup="android.permission-group.UNDEFINED"
-        android:label="@string/permlab_audioRead"
-        android:description="@string/permdesc_audioRead"
-        android:protectionLevel="dangerous" />
-
-    <!-- Runtime permission controlling access to the user's shared visual media
-         collection, including images and videos. -->
-    <permission-group android:name="android.permission-group.MEDIA_VISUAL"
-        android:icon="@drawable/perm_group_visual"
-        android:label="@string/permgrouplab_visual"
-        android:description="@string/permgroupdesc_visual"
-        android:request="@string/permgrouprequest_visual"
-        android:requestDetail="@string/permgrouprequestdetail_visual"
-        android:priority="920" />
-
-    <!-- Allows an application to read the user's shared images collection. -->
-    <permission android:name="android.permission.READ_MEDIA_IMAGES"
-        android:permissionGroup="android.permission-group.UNDEFINED"
-        android:label="@string/permlab_imagesRead"
-        android:description="@string/permdesc_imagesRead"
-        android:protectionLevel="dangerous" />
-
-    <!-- Allows an application to read the user's shared video collection. -->
-    <permission android:name="android.permission.READ_MEDIA_VIDEO"
-        android:permissionGroup="android.permission-group.UNDEFINED"
-        android:label="@string/permlab_videoRead"
-        android:description="@string/permdesc_videoRead"
         android:protectionLevel="dangerous" />
 
     <!-- Allows an application to access any geographic locations persisted in the
@@ -1009,6 +971,9 @@
          call with the option to redirect the call to a different number or
          abort the call altogether.
          <p>Protection level: dangerous
+
+         @deprecated Applications should use {@link android.telecom.CallRedirectionService} instead
+         of the {@link android.content.Intent#ACTION_NEW_OUTGOING_CALL} broadcast.
     -->
     <permission android:name="android.permission.PROCESS_OUTGOING_CALLS"
         android:permissionGroup="android.permission-group.UNDEFINED"
@@ -1598,6 +1563,14 @@
     <permission android:name="android.permission.NETWORK_MANAGED_PROVISIONING"
         android:protectionLevel="signature" />
 
+    <!-- Allows Carrier Provisioning to call methods in Networking services
+         <p>Not for use by any other third-party or privileged applications.
+         @SystemApi
+         @hide This should only be used by CarrierProvisioning.
+    -->
+    <permission android:name="android.permission.NETWORK_CARRIER_PROVISIONING"
+        android:protectionLevel="signature|privileged" />
+
     <!-- #SystemApi @hide Allows applications to access information about LoWPAN interfaces.
          <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.ACCESS_LOWPAN_STATE"
@@ -1711,6 +1684,12 @@
          @hide -->
     <permission android:name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS"
         android:protectionLevel="signature|privileged" />
+
+    <!-- @SystemApi Allows an internal user to set signal strength in NetworkRequest. This kind of
+         request will wake up device when signal strength meets the given value.
+         @hide -->
+    <permission android:name="android.permission.NETWORK_SIGNAL_STRENGTH_WAKEUP"
+                android:protectionLevel="signature|privileged" />
 
     <!-- @SystemApi Allows a system application to access hardware packet offload capabilities.
          @hide -->
@@ -1852,6 +1831,11 @@
     <!-- @hide Allows an application to manage DynamicSystem image -->
     <permission android:name="android.permission.MANAGE_DYNAMIC_SYSTEM"
         android:protectionLevel="signature" />
+
+    <!-- @SystemApi Allows an application to install a DynamicSystem image and get status updates.
+         @hide -->
+    <permission android:name="android.permission.INSTALL_DYNAMIC_SYSTEM"
+        android:protectionLevel="signature|privileged" />
 
     <!-- @SystemApi Allows access to Broadcast Radio
          @hide This is not a third-party API (intended for system apps).-->
@@ -3555,8 +3539,28 @@
         android:protectionLevel="signature" />
 
     <!-- Allows an application to capture audio output.
+         Use the {@code CAPTURE_MEDIA_OUTPUT} permission if only the {@code USAGE_UNKNOWN}),
+         {@code USAGE_MEDIA}) or {@code USAGE_GAME}) usages are intended to be captured.
          <p>Not for use by third-party applications.</p> -->
     <permission android:name="android.permission.CAPTURE_AUDIO_OUTPUT"
+        android:protectionLevel="signature|privileged" />
+
+    <!-- @SystemApi Allows an application to capture the audio played by other apps
+         that have set an allow capture policy of
+         {@link android.media.AudioAttributes#ALLOW_CAPTURE_BY_SYSTEM}.
+
+         Without this permission, only audio with an allow capture policy of
+         {@link android.media.AudioAttributes#ALLOW_CAPTURE_BY_ALL} can be used.
+
+         There are strong restriction listed at
+         {@link android.media.AudioAttributes#ALLOW_CAPTURE_BY_SYSTEM}
+         on what an app can do with the captured audio.
+
+         See {@code CAPTURE_AUDIO_OUTPUT} for capturing audio use cases other than media playback.
+
+         <p>Not for use by third-party applications.</p>
+         @hide -->
+    <permission android:name="android.permission.CAPTURE_MEDIA_OUTPUT"
         android:protectionLevel="signature|privileged" />
 
     <!-- @SystemApi Allows an application to capture audio for hotword detection.

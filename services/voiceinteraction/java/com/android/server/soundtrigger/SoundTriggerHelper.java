@@ -889,7 +889,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         public void onCallStateChanged(int state, String arg1) {
             if (DBG) Slog.d(TAG, "onCallStateChanged: " + state);
             synchronized (mLock) {
-                onCallStateChangedLocked(TelephonyManager.CALL_STATE_IDLE != state);
+                onCallStateChangedLocked(TelephonyManager.CALL_STATE_OFFHOOK == state);
             }
         }
     }
@@ -924,7 +924,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         long token = Binder.clearCallingIdentity();
         try {
             // Get the current call state synchronously for the first recognition.
-            mCallActive = mTelephonyManager.getCallState() != TelephonyManager.CALL_STATE_IDLE;
+            mCallActive = mTelephonyManager.getCallState() == TelephonyManager.CALL_STATE_OFFHOOK;
 
             // Register for call state changes when the first call to start recognition occurs.
             mTelephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);

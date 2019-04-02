@@ -477,8 +477,9 @@ public class NotificationRecordTest extends UiServiceTestCase {
         assertEquals(MetricsEvent.IMPORTANCE_EXPLANATION_APP,
                 logMaker.getTaggedData(
                         MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_INITIAL_EXPLANATION));
-        // This field is only populated if the assistant was itself overridden by the system.
-        assertNull(logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_ASST));
+        // This field is populated whenever mImportanceExplanationCode is.
+        assertEquals(IMPORTANCE_LOW,
+                logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_ASST));
     }
 
     @Test
@@ -952,7 +953,31 @@ public class NotificationRecordTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testApplyImportanceAdjustmentsForNonOemLockedChannels() {
+    public void testIgnoreImportanceAdjustmentsForDefaultAppLockedChannels() {
+        NotificationChannel channel = new NotificationChannel("a", "a", IMPORTANCE_DEFAULT);
+        channel.setImportanceLockedByCriticalDeviceFunction(true);
+
+        StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, groupId /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        assertEquals(IMPORTANCE_DEFAULT, record.getImportance());
+
+        Bundle bundle = new Bundle();
+        bundle.putInt(KEY_IMPORTANCE, IMPORTANCE_LOW);
+        Adjustment adjustment = new Adjustment(
+                PKG_O, record.getKey(), bundle, "", record.getUserId());
+
+        record.addAdjustment(adjustment);
+        record.applyAdjustments();
+        record.calculateImportance();
+
+        assertEquals(IMPORTANCE_DEFAULT, record.getImportance());
+    }
+
+    @Test
+    public void testApplyImportanceAdjustmentsForNonOemDefaultAppLockedChannels() {
         NotificationChannel channel = new NotificationChannel("a", "a", IMPORTANCE_DEFAULT);
         channel.setImportanceLockedByOEM(false);
 

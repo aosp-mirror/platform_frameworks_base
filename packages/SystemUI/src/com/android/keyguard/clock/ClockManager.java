@@ -16,29 +16,19 @@
 package com.android.keyguard.clock;
 
 import android.annotation.Nullable;
-import android.app.WallpaperManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.ContentObserver;
-import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
-import android.graphics.Canvas;
-import android.graphics.Color;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.View;
-import android.view.View.MeasureSpec;
-import android.view.ViewGroup;
 
 import androidx.annotation.VisibleForTesting;
 
-import com.android.internal.colorextraction.ColorExtractor;
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dock.DockManager;
@@ -51,8 +41,6 @@ import com.android.systemui.util.InjectionInflationController;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.FutureTask;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -128,7 +116,6 @@ public final class ClockManager {
 
     private final List<ClockChangedListener> mListeners = new ArrayList<>();
 
-    private final SysuiColorExtractor mColorExtractor;
     private final int mWidth;
     private final int mHeight;
 
@@ -144,17 +131,16 @@ public final class ClockManager {
             ContentResolver contentResolver, SettingsWrapper settingsWrapper) {
         mContext = context;
         mPluginManager = pluginManager;
-        mColorExtractor = colorExtractor;
         mContentResolver = contentResolver;
         mSettingsWrapper = settingsWrapper;
 
         Resources res = context.getResources();
         LayoutInflater layoutInflater = injectionInflater.injectable(LayoutInflater.from(context));
 
-        addClockPlugin(new DefaultClockController(res, layoutInflater));
-        addClockPlugin(new BubbleClockController(res, layoutInflater));
-        addClockPlugin(new StretchAnalogClockController(res, layoutInflater));
-        addClockPlugin(new TypeClockController(res, layoutInflater));
+        addClockPlugin(new DefaultClockController(res, layoutInflater, colorExtractor));
+        addClockPlugin(new BubbleClockController(res, layoutInflater, colorExtractor));
+        addClockPlugin(new StretchAnalogClockController(res, layoutInflater, colorExtractor));
+        addClockPlugin(new TypeClockController(res, layoutInflater, colorExtractor));
 
         // Store the size of the display for generation of clock preview.
         DisplayMetrics dm = res.getDisplayMetrics();
@@ -217,7 +203,7 @@ public final class ClockManager {
                 .setTitle(plugin.getTitle())
                 .setId(id)
                 .setThumbnail(() -> plugin.getThumbnail())
-                .setPreview(() -> getClockPreview(id))
+                .setPreview(() -> plugin.getPreview(mWidth, mHeight))
                 .build());
     }
 
@@ -228,81 +214,6 @@ public final class ClockManager {
             if (id.equals(mClockInfos.get(i).getId())) {
                 mClockInfos.remove(i);
                 break;
-            }
-        }
-    }
-
-    /**
-     * Generate a realistic preview of a clock face.
-     * @param clockId ID of clock to use for preview, should be obtained from {@link getClockInfos}.
-     *        Returns null if clockId is not found.
-     */
-    @Nullable
-    private Bitmap getClockPreview(String clockId) {
-        FutureTask<Bitmap> task = new FutureTask<>(new Callable<Bitmap>() {
-            @Override
-            public Bitmap call() {
-                Bitmap bitmap = Bitmap.createBitmap(mWidth, mHeight, Config.ARGB_8888);
-                ClockPlugin plugin = mClocks.get(clockId);
-                if (plugin == null) {
-                    return null;
-                }
-
-                // Use the big clock view for the preview
-                View clockView = plugin.getBigClockView();
-                if (clockView == null) {
-                    return null;
-                }
-
-                // Initialize state of plugin before generating preview.
-                plugin.setDarkAmount(1f);
-                plugin.setTextColor(Color.WHITE);
-
-                ColorExtractor.GradientColors colors = mColorExtractor.getColors(
-                        WallpaperManager.FLAG_LOCK, true);
-                plugin.setColorPalette(colors.supportsDarkText(), colors.getColorPalette());
-                plugin.onTimeTick();
-
-                // Draw clock view hierarchy to canvas.
-                Canvas canvas = new Canvas(bitmap);
-                canvas.drawColor(Color.BLACK);
-                dispatchVisibilityAggregated(clockView, true);
-                clockView.measure(MeasureSpec.makeMeasureSpec(mWidth, MeasureSpec.EXACTLY),
-                        MeasureSpec.makeMeasureSpec(mHeight, MeasureSpec.EXACTLY));
-                clockView.layout(0, 0, mWidth, mHeight);
-                clockView.draw(canvas);
-                return bitmap;
-            }
-        });
-
-        if (Looper.myLooper() == Looper.getMainLooper()) {
-            task.run();
-        } else {
-            mMainHandler.post(task);
-        }
-
-        try {
-            return task.get();
-        } catch (Exception e) {
-            Log.e(TAG, "Error completing task", e);
-            return null;
-        }
-    }
-
-    private void dispatchVisibilityAggregated(View view, boolean isVisible) {
-        // Similar to View.dispatchVisibilityAggregated implementation.
-        final boolean thisVisible = view.getVisibility() == View.VISIBLE;
-        if (thisVisible || !isVisible) {
-            view.onVisibilityAggregated(isVisible);
-        }
-
-        if (view instanceof ViewGroup) {
-            isVisible = thisVisible && isVisible;
-            ViewGroup vg = (ViewGroup) view;
-            int count = vg.getChildCount();
-
-            for (int i = 0; i < count; i++) {
-                dispatchVisibilityAggregated(vg.getChildAt(i), isVisible);
             }
         }
     }

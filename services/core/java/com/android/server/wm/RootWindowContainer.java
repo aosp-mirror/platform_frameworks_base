@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
@@ -65,6 +66,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.EventLog;
@@ -551,18 +553,26 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         return leakedSurface || killedApps;
     }
 
+    void performSurfacePlacement(boolean recoveringMemory) {
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "performSurfacePlacement");
+        try {
+            performSurfacePlacementNoTrace(recoveringMemory);
+        } finally {
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+        }
+    }
+
     // "Something has changed!  Let's make it correct now."
     // TODO: Super crazy long method that should be broken down...
-    void performSurfacePlacement(boolean recoveringMemory) {
+    void performSurfacePlacementNoTrace(boolean recoveringMemory) {
         if (DEBUG_WINDOW_TRACE) Slog.v(TAG, "performSurfacePlacementInner: entry. Called by "
                 + Debug.getCallers(3));
 
         int i;
-        boolean updateInputWindowsNeeded = false;
 
         if (mWmService.mFocusMayChange) {
             mWmService.mFocusMayChange = false;
-            updateInputWindowsNeeded = mWmService.updateFocusedWindowLocked(
+            mWmService.updateFocusedWindowLocked(
                     UPDATE_FOCUS_WILL_PLACE_SURFACES, false /*updateInputWindows*/);
         }
 
@@ -586,6 +596,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                 ">>> OPEN TRANSACTION performLayoutAndPlaceSurfaces");
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "applySurfaceChanges");
         mWmService.openSurfaceTransaction();
         try {
             applySurfaceChangesTransaction(recoveringMemory);
@@ -593,6 +604,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             Slog.wtf(TAG, "Unhandled exception in Window Manager", e);
         } finally {
             mWmService.closeSurfaceTransaction("performLayoutAndPlaceSurfaces");
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                     "<<< CLOSE TRANSACTION performLayoutAndPlaceSurfaces");
         }
@@ -621,10 +633,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         if (mWmService.mFocusMayChange) {
             mWmService.mFocusMayChange = false;
-            if (mWmService.updateFocusedWindowLocked(UPDATE_FOCUS_PLACING_SURFACES,
-                    false /*updateInputWindows*/)) {
-                updateInputWindowsNeeded = true;
-            }
+            mWmService.updateFocusedWindowLocked(UPDATE_FOCUS_PLACING_SURFACES,
+                    false /*updateInputWindows*/);
         }
 
         if (isLayoutNeeded()) {
@@ -679,12 +689,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             }
         }
 
-        // Finally update all input windows now that the window changes have stabilized.
-        forAllDisplays(dc -> {
-            dc.getInputMonitor().updateInputWindowsLw(true /*force*/);
-            dc.updateSystemGestureExclusion();
-        });
-
         mWmService.setHoldScreenLocked(mHoldScreen);
         if (!mWmService.mDisplayFrozen) {
             final int brightness = mScreenBrightness < 0 || mScreenBrightness > 1.0f
@@ -710,7 +714,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         if (mWmService.mWaitingForDrawnCallback != null
                 || (mOrientationChangeComplete && !isLayoutNeeded()
-                        && !mUpdateRotation)) {
+                && !mUpdateRotation)) {
             mWmService.checkDrawnWindowsLocked();
         }
 
@@ -742,12 +746,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             mChildren.get(displayNdx).checkCompleteDeferredRemoval();
         }
 
-        if (updateInputWindowsNeeded) {
-            forAllDisplays(dc -> {
-                dc.getInputMonitor().updateInputWindowsLw(false /*force*/);
-            });
-        }
-        forAllDisplays(DisplayContent::updateTouchExcludeRegion);
+        forAllDisplays(dc -> {
+            dc.getInputMonitor().updateInputWindowsLw(true /*force*/);
+            dc.updateSystemGestureExclusion();
+            dc.updateTouchExcludeRegion();
+        });
 
         // Check to see if we are now in a state where the screen should
         // be enabled, because the window obscured flags have changed.
@@ -776,7 +779,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 }
             }
 
-            if (!curDisplay.isAppAnimating() && curDisplay.mAppTransition.isRunning()) {
+            if (curDisplay.mAppTransition.isRunning() && !curDisplay.isAppAnimating()) {
                 // We have finished the animation of an app transition. To do this, we have
                 // delayed a lot of operations like showing and hiding apps, moving apps in
                 // Z-order, etc.

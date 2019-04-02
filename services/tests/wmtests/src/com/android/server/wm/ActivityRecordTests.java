@@ -438,8 +438,11 @@ public class ActivityRecordTests extends ActivityTestsBase {
         doReturn(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)
                 .when(mActivity.mAppWindowToken).getOrientationIgnoreVisibility();
         mActivity.info.resizeMode = ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
-        mActivity.info.maxAspectRatio = 1;
+        mActivity.info.minAspectRatio = mActivity.info.maxAspectRatio = 1;
         ensureActivityConfiguration();
+        // The parent configuration doesn't change since the first resolved configuration, so the
+        // activity shouldn't be in the size compatibility mode.
+        assertFalse(mActivity.inSizeCompatMode());
 
         final Rect appBounds = mActivity.getWindowConfiguration().getAppBounds();
         // Ensure the app bounds keep the declared aspect ratio.

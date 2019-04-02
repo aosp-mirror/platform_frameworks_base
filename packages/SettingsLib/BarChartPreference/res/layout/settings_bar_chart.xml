@@ -20,17 +20,11 @@
     xmlns:settings="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginStart="16dp"
-    android:layout_marginEnd="16dp"
-    android:gravity="center"
-    android:orientation="vertical">
+    style="@style/SettingsBarChart">
 
     <TextView
         android:id="@+id/bar_chart_title"
-        android:layout_width="wrap_content"
-        android:layout_height="48dp"
-        android:gravity="center"
-        android:textAppearance="@style/BarChart.Text.HeaderTitle"/>
+        style="@style/SettingsBarChartTitle"/>
 
     <LinearLayout
         android:id="@+id/bar_views_container"
@@ -46,36 +40,29 @@
 
             <com.android.settingslib.widget.BarView
                 android:id="@+id/bar_view1"
-                style="@style/BarViewStyle"
-                settings:barColor="#FA7B17"/>
+                style="@style/SettingsBarViewStyle"
+                settings:barColor="@color/settings_bar_view_1_color"/>
             <com.android.settingslib.widget.BarView
                 android:id="@+id/bar_view2"
-                style="@style/BarViewStyle"
-                settings:barColor="#F439A0"/>
+                style="@style/SettingsBarViewStyle"
+                settings:barColor="@color/settings_bar_view_2_color"/>
             <com.android.settingslib.widget.BarView
                 android:id="@+id/bar_view3"
-                style="@style/BarViewStyle"
-                settings:barColor="#A142F4"/>
+                style="@style/SettingsBarViewStyle"
+                settings:barColor="@color/settings_bar_view_3_color"/>
             <com.android.settingslib.widget.BarView
                 android:id="@+id/bar_view4"
-                style="@style/BarViewStyle"
-                settings:barColor="#24C1E0"/>
+                style="@style/SettingsBarViewStyle"
+                settings:barColor="@color/settings_bar_view_4_color"/>
         </LinearLayout>
 
         <Button
             android:id="@+id/bar_chart_details"
-            style="@android:style/Widget.DeviceDefault.Button.Borderless.Colored"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"/>
+            style="@style/SettingsBarChartDetailsButton"/>
     </LinearLayout>
 
     <TextView
         android:id="@+id/empty_view"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/settings_bar_view_max_height"
-        android:gravity="center"
-        android:visibility="gone"
-        android:textAppearance="@style/BarChart.Text.Summary"/>
+        style="@style/SettingsBarChartEmptyText"/>
 
 </LinearLayout>

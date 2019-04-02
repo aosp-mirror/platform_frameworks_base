@@ -18,7 +18,7 @@ syntax = "proto2";
 
 import "frameworks/base/core/proto/android/graphics/point.proto";
 import "frameworks/base/core/proto/android/view/remote_animation_target.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 package com.android.server.wm;
 option java_multiple_files = true;

@@ -85,6 +85,7 @@ import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_T
 
 import android.app.WaitResult;
 import android.app.WindowConfiguration.WindowingMode;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -876,6 +877,11 @@ class ActivityMetricsLogger {
         builder.addTaggedData(FIELD_COMING_FROM_PENDING_INTENT, comingFromPendingIntent ? 1 : 0);
         if (intent != null) {
             builder.addTaggedData(FIELD_INTENT_ACTION, intent.getAction());
+            ComponentName component = intent.getComponent();
+            if (component != null) {
+                builder.addTaggedData(FIELD_TARGET_SHORT_COMPONENT_NAME,
+                        component.flattenToShortString());
+            }
         }
         if (callerApp != null) {
             builder.addTaggedData(FIELD_PROCESS_RECORD_PROCESS_NAME, callerApp.mName);

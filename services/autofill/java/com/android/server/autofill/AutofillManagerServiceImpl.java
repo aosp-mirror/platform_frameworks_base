@@ -31,7 +31,6 @@ import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
-import android.content.AutofillOptions;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -40,7 +39,6 @@ import android.graphics.Rect;
 import android.metrics.LogMaker;
 import android.os.AsyncTask;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -76,7 +74,6 @@ import android.view.autofill.IAutoFillManagerClient;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.infra.WhitelistHelper;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.LocalServices;
@@ -170,12 +167,6 @@ final class AutofillManagerServiceImpl
     @Nullable
     private ServiceInfo mRemoteAugmentedAutofillServiceInfo;
 
-    /**
-     * List of packages/activities that are whitelisted to be trigger augmented autofill.
-     */
-    @GuardedBy("mLock")
-    private final WhitelistHelper mAugmentedWhitelistHelper = new WhitelistHelper();
-
     AutofillManagerServiceImpl(AutofillManagerService master, Object lock,
             LocalLog uiLatencyHistory, LocalLog wtfHistory, int userId, AutoFillUI ui,
             AutofillCompatState autofillCompatState,
@@ -247,7 +238,8 @@ final class AutofillManagerServiceImpl
         if (isEnabledLocked()) return FLAG_ADD_CLIENT_ENABLED;
 
         // Check if it's enabled for augmented autofill
-        if (isSetupCompletedLocked() && isWhitelistedForAugmentedAutofillLocked(componentName)) {
+        if (isAugmentedAutofillServiceAvailableLocked()
+                && isWhitelistedForAugmentedAutofillLocked(componentName)) {
             return FLAG_ADD_CLIENT_ENABLED_FOR_AUGMENTED_AUTOFILL_ONLY;
         }
 
@@ -950,8 +942,6 @@ final class AutofillManagerServiceImpl
             pw.println(mRemoteAugmentedAutofillServiceInfo);
         }
 
-        mAugmentedWhitelistHelper.dump(prefix, "Augmented autofill whitelist", pw);
-
         pw.print(prefix); pw.print("Field classification enabled: ");
             pw.println(isFieldClassificationEnabledLocked());
         pw.print(prefix); pw.print("Compat pkgs: ");
@@ -1148,12 +1138,31 @@ final class AutofillManagerServiceImpl
                 mRemoteAugmentedAutofillService.destroy();
                 mRemoteAugmentedAutofillService = null;
                 mRemoteAugmentedAutofillServiceInfo = null;
+                resetAugmentedAutofillWhitelistLocked();
             }
 
-            if (isEnabledLocked()) {
+            final boolean available = isAugmentedAutofillServiceAvailableLocked();
+            if (sVerbose) Slog.v(TAG, "updateRemoteAugmentedAutofillService(): " + available);
+
+            if (available) {
                 mRemoteAugmentedAutofillService = getRemoteAugmentedAutofillServiceLocked();
             }
         }
+    }
+
+    private boolean isAugmentedAutofillServiceAvailableLocked() {
+        if (mMaster.verbose) {
+            Slog.v(TAG, "isAugmentedAutofillService(): "
+                    + "setupCompleted=" + isSetupCompletedLocked()
+                    + ", disabled=" + isDisabledByUserRestrictionsLocked()
+                    + ", augmentedService="
+                    + mMaster.mAugmentedAutofillResolver.getServiceName(mUserId));
+        }
+        if (!isSetupCompletedLocked() || isDisabledByUserRestrictionsLocked()
+                || mMaster.mAugmentedAutofillResolver.getServiceName(mUserId) == null) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -1161,6 +1170,7 @@ final class AutofillManagerServiceImpl
      *
      * @return whether caller UID is the augmented autofill service for the user
      */
+    @GuardedBy("mLock")
     boolean setAugmentedAutofillWhitelistLocked(List<String> packages,
             List<ComponentName> activities, int callingUid) {
 
@@ -1213,27 +1223,7 @@ final class AutofillManagerServiceImpl
 
     @GuardedBy("mLock")
     boolean isWhitelistedForAugmentedAutofillLocked(@NonNull ComponentName componentName) {
-        if (Build.IS_USER && mMaster.mAugmentedAutofillResolver.isTemporary(mUserId)) {
-            final String serviceName = mMaster.mAugmentedAutofillResolver.getServiceName(mUserId);
-            final ComponentName component = ComponentName.unflattenFromString(serviceName);
-            final String servicePackage = component == null ? null : component.getPackageName();
-            final String packageName = componentName.getPackageName();
-            if (!packageName.equals(servicePackage)) {
-                Slog.w(TAG, "Ignoring package " + packageName + " for augmented autofill while "
-                        + "using temporary service " + servicePackage);
-                return false;
-            }
-        }
-
-        return mAugmentedWhitelistHelper.isWhitelisted(componentName);
-    }
-
-    @GuardedBy("mLock")
-    void setAugmentedAutofillWhitelistLocked(@NonNull AutofillOptions options,
-            @NonNull String packageName) {
-        options.augmentedAutofillEnabled = mAugmentedWhitelistHelper.isWhitelisted(packageName);
-        options.whitelistedActivitiesForAugmentedAutofill = mAugmentedWhitelistHelper
-                .getWhitelistedComponents(packageName);
+        return mMaster.mAugmentedAutofillState.isWhitelisted(mUserId, componentName);
     }
 
     /**
@@ -1247,9 +1237,19 @@ final class AutofillManagerServiceImpl
             if (mMaster.verbose) {
                 Slog.v(TAG, "whitelisting packages: " + packages + "and activities: " + components);
             }
-            mAugmentedWhitelistHelper.setWhitelist(packages, components);
-            mRemoteAugmentedAutofillService = getRemoteAugmentedAutofillServiceLocked();
+            mMaster.mAugmentedAutofillState.setWhitelist(mUserId, packages, components);
         }
+    }
+
+    /**
+     * Resets the augmented autofill whitelist.
+     */
+    @GuardedBy("mLock")
+    void resetAugmentedAutofillWhitelistLocked() {
+        if (mMaster.verbose) {
+            Slog.v(TAG, "resetting augmented autofill whitelist");
+        }
+        mMaster.mAugmentedAutofillState.resetWhitelist(mUserId);
     }
 
     private void sendStateToClients(boolean resetClient) {

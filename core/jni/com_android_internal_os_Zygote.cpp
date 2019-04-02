@@ -46,6 +46,7 @@
 #include <fcntl.h>
 #include <grp.h>
 #include <inttypes.h>
+#include <link.h>
 #include <malloc.h>
 #include <mntent.h>
 #include <paths.h>
@@ -54,6 +55,7 @@
 #include <sys/capability.h>
 #include <sys/cdefs.h>
 #include <sys/eventfd.h>
+#include <sys/mman.h>
 #include <sys/personality.h>
 #include <sys/prctl.h>
 #include <sys/resource.h>
@@ -69,6 +71,7 @@
 #include <android-base/properties.h>
 #include <android-base/file.h>
 #include <android-base/stringprintf.h>
+#include <android-base/strings.h>
 #include <android-base/unique_fd.h>
 #include <cutils/fs.h>
 #include <cutils/multiuser.h>
@@ -1975,6 +1978,26 @@ static void com_android_internal_os_Zygote_nativeEmptyUsapPool(JNIEnv* env, jcla
   }
 }
 
+static int disable_execute_only(struct dl_phdr_info *info, size_t size, void *data) {
+  // Search for any execute-only segments and mark them read+execute.
+  for (int i = 0; i < info->dlpi_phnum; i++) {
+    if ((info->dlpi_phdr[i].p_type == PT_LOAD) && (info->dlpi_phdr[i].p_flags == PF_X)) {
+      mprotect(reinterpret_cast<void*>(info->dlpi_addr + info->dlpi_phdr[i].p_vaddr),
+              info->dlpi_phdr[i].p_memsz, PROT_READ | PROT_EXEC);
+    }
+  }
+  // Return non-zero to exit dl_iterate_phdr.
+  return 0;
+}
+
+/**
+ * @param env  Managed runtime environment
+ * @return  True if disable was successful.
+ */
+static jboolean com_android_internal_os_Zygote_nativeDisableExecuteOnly(JNIEnv* env, jclass) {
+  return dl_iterate_phdr(disable_execute_only, nullptr) == 0;
+}
+
 static const JNINativeMethod gMethods[] = {
     { "nativeSecurityInit", "()V",
       (void *) com_android_internal_os_Zygote_nativeSecurityInit },
@@ -2007,7 +2030,9 @@ static const JNINativeMethod gMethods[] = {
     { "nativeGetUsapPoolCount", "()I",
       (void *) com_android_internal_os_Zygote_nativeGetUsapPoolCount },
     { "nativeEmptyUsapPool", "()V",
-      (void *) com_android_internal_os_Zygote_nativeEmptyUsapPool }
+      (void *) com_android_internal_os_Zygote_nativeEmptyUsapPool },
+    { "nativeDisableExecuteOnly", "()Z",
+      (void *) com_android_internal_os_Zygote_nativeDisableExecuteOnly }
 };
 
 int register_com_android_internal_os_Zygote(JNIEnv* env) {

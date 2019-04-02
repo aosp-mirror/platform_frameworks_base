@@ -111,7 +111,7 @@ StatsdConfig MakeGaugeMetricConfig(int64_t minTime) {
 }
 
 TEST(PartialBucketE2eTest, TestCountMetricWithoutSplit) {
-    StatsService service(nullptr);
+    StatsService service(nullptr, nullptr);
     SendConfig(service, MakeConfig());
     int64_t start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
                                              // initialized with.
@@ -126,7 +126,7 @@ TEST(PartialBucketE2eTest, TestCountMetricWithoutSplit) {
 }
 
 TEST(PartialBucketE2eTest, TestCountMetricNoSplitOnNewApp) {
-    StatsService service(nullptr);
+    StatsService service(nullptr, nullptr);
     SendConfig(service, MakeConfig());
     int64_t start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
                                              // initialized with.
@@ -146,7 +146,7 @@ TEST(PartialBucketE2eTest, TestCountMetricNoSplitOnNewApp) {
 }
 
 TEST(PartialBucketE2eTest, TestCountMetricSplitOnUpgrade) {
-    StatsService service(nullptr);
+    StatsService service(nullptr, nullptr);
     SendConfig(service, MakeConfig());
     int64_t start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
                                              // initialized with.
@@ -171,7 +171,7 @@ TEST(PartialBucketE2eTest, TestCountMetricSplitOnUpgrade) {
 }
 
 TEST(PartialBucketE2eTest, TestCountMetricSplitOnRemoval) {
-    StatsService service(nullptr);
+    StatsService service(nullptr, nullptr);
     SendConfig(service, MakeConfig());
     int64_t start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
                                              // initialized with.
@@ -195,7 +195,7 @@ TEST(PartialBucketE2eTest, TestCountMetricSplitOnRemoval) {
 }
 
 TEST(PartialBucketE2eTest, TestValueMetricWithoutMinPartialBucket) {
-    StatsService service(nullptr);
+    StatsService service(nullptr, nullptr);
     // Partial buckets don't occur when app is first installed.
     service.mUidMap->updateApp(1, String16(kApp1.c_str()), 1, 1, String16("v1"), String16(""));
     SendConfig(service, MakeValueMetricConfig(0));
@@ -213,7 +213,7 @@ TEST(PartialBucketE2eTest, TestValueMetricWithoutMinPartialBucket) {
 }
 
 TEST(PartialBucketE2eTest, TestValueMetricWithMinPartialBucket) {
-    StatsService service(nullptr);
+    StatsService service(nullptr, nullptr);
     // Partial buckets don't occur when app is first installed.
     service.mUidMap->updateApp(1, String16(kApp1.c_str()), 1, 1, String16("v1"), String16(""));
     SendConfig(service, MakeValueMetricConfig(60 * NS_PER_SEC /* One minute */));
@@ -237,7 +237,7 @@ TEST(PartialBucketE2eTest, TestValueMetricWithMinPartialBucket) {
 }
 
 TEST(PartialBucketE2eTest, TestGaugeMetricWithoutMinPartialBucket) {
-    StatsService service(nullptr);
+    StatsService service(nullptr, nullptr);
     // Partial buckets don't occur when app is first installed.
     service.mUidMap->updateApp(1, String16(kApp1.c_str()), 1, 1, String16("v1"), String16(""));
     SendConfig(service, MakeGaugeMetricConfig(0));
@@ -255,7 +255,7 @@ TEST(PartialBucketE2eTest, TestGaugeMetricWithoutMinPartialBucket) {
 }
 
 TEST(PartialBucketE2eTest, TestGaugeMetricWithMinPartialBucket) {
-    StatsService service(nullptr);
+    StatsService service(nullptr, nullptr);
     // Partial buckets don't occur when app is first installed.
     service.mUidMap->updateApp(1, String16(kApp1.c_str()), 1, 1, String16("v1"), String16(""));
     SendConfig(service, MakeGaugeMetricConfig(60 * NS_PER_SEC /* One minute */));

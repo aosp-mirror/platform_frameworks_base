@@ -23,6 +23,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.platform.test.annotations.Presubmit;
 import android.provider.DeviceConfig;
 
 import com.android.server.appop.AppOpsService;
@@ -44,8 +45,9 @@ import java.util.concurrent.TimeUnit;
  * Tests for {@link AppCompactor}.
  *
  * Build/Install/Run:
- * atest FrameworksServicesTests:AppCompactorTest
+ * atest FrameworksMockingServicesTests:AppCompactorTest
  */
+@Presubmit
 @RunWith(MockitoJUnitRunner.class)
 public final class AppCompactorTest {
 
@@ -129,6 +131,12 @@ public final class AppCompactorTest {
                 AppCompactor.KEY_COMPACT_THROTTLE_4,
                 Long.toString(AppCompactor.DEFAULT_COMPACT_THROTTLE_4 + 1), false);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_THROTTLE_5,
+                Long.toString(AppCompactor.DEFAULT_COMPACT_THROTTLE_5 + 1), false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_THROTTLE_6,
+                Long.toString(AppCompactor.DEFAULT_COMPACT_THROTTLE_6 + 1), false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 AppCompactor.KEY_COMPACT_STATSD_SAMPLE_RATE,
                 Float.toString(AppCompactor.DEFAULT_STATSD_SAMPLE_RATE + 0.1f), false);
 
@@ -151,6 +159,10 @@ public final class AppCompactorTest {
                 AppCompactor.DEFAULT_COMPACT_THROTTLE_4 + 1);
         assertThat(mCompactorUnderTest.mStatsdSampleRate).isEqualTo(
                 AppCompactor.DEFAULT_STATSD_SAMPLE_RATE + 0.1f);
+        assertThat(mCompactorUnderTest.mCompactThrottleBFGS).isEqualTo(
+                AppCompactor.DEFAULT_COMPACT_THROTTLE_5 + 1);
+        assertThat(mCompactorUnderTest.mCompactThrottlePersistent).isEqualTo(
+                AppCompactor.DEFAULT_COMPACT_THROTTLE_6 + 1);
     }
 
     @Test
@@ -254,7 +266,7 @@ public final class AppCompactorTest {
         mCompactorUnderTest.init();
 
         // When we override new reasonable throttle values after init...
-        mCountDown = new CountDownLatch(4);
+        mCountDown = new CountDownLatch(6);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 AppCompactor.KEY_COMPACT_THROTTLE_1,
                 Long.toString(AppCompactor.DEFAULT_COMPACT_THROTTLE_1 + 1), false);
@@ -267,6 +279,12 @@ public final class AppCompactorTest {
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 AppCompactor.KEY_COMPACT_THROTTLE_4,
                 Long.toString(AppCompactor.DEFAULT_COMPACT_THROTTLE_4 + 1), false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_THROTTLE_5,
+                Long.toString(AppCompactor.DEFAULT_COMPACT_THROTTLE_5 + 1), false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_THROTTLE_6,
+                Long.toString(AppCompactor.DEFAULT_COMPACT_THROTTLE_6 + 1), false);
         assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
 
         // Then those flags values are reflected in the compactor.
@@ -278,6 +296,10 @@ public final class AppCompactorTest {
                 AppCompactor.DEFAULT_COMPACT_THROTTLE_3 + 1);
         assertThat(mCompactorUnderTest.mCompactThrottleFullFull).isEqualTo(
                 AppCompactor.DEFAULT_COMPACT_THROTTLE_4 + 1);
+        assertThat(mCompactorUnderTest.mCompactThrottleBFGS).isEqualTo(
+                AppCompactor.DEFAULT_COMPACT_THROTTLE_5 + 1);
+        assertThat(mCompactorUnderTest.mCompactThrottlePersistent).isEqualTo(
+                AppCompactor.DEFAULT_COMPACT_THROTTLE_6 + 1);
     }
 
     @Test

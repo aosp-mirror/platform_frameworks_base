@@ -17,13 +17,17 @@
 package com.android.systemui.statusbar.phone;
 
 import android.annotation.IntDef;
+import android.content.ComponentCallbacks;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Handler;
 import android.provider.Settings;
+
+import com.android.systemui.shared.system.QuickStepContract;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -33,7 +37,7 @@ import java.lang.annotation.RetentionPolicy;
  * prototypes to run in the system. The class will handle communication changes from the settings
  * app and call back to listeners.
  */
-public class NavigationPrototypeController extends ContentObserver {
+public class NavigationPrototypeController extends ContentObserver implements ComponentCallbacks {
     private static final String HIDE_BACK_BUTTON_SETTING = "quickstepcontroller_hideback";
     private static final String HIDE_HOME_BUTTON_SETTING = "quickstepcontroller_hidehome";
     private static final String PROTOTYPE_ENABLED = "prototype_enabled";
@@ -85,9 +89,9 @@ public class NavigationPrototypeController extends ContentObserver {
         registerObserver(HIDE_HOME_BUTTON_SETTING);
         registerObserver(GESTURE_MATCH_SETTING);
         registerObserver(NAV_COLOR_ADAPT_ENABLE_SETTING);
-        registerObserver(EDGE_SENSITIVITY_WIDTH_SETTING);
         registerObserver(SHOW_HOME_HANDLE_SETTING);
         registerObserver(ENABLE_ASSISTANT_GESTURE);
+        mContext.registerComponentCallbacks(this);
     }
 
     /**
@@ -95,6 +99,7 @@ public class NavigationPrototypeController extends ContentObserver {
      */
     public void unregister() {
         mContext.getContentResolver().unregisterContentObserver(this);
+        mContext.unregisterComponentCallbacks(this);
     }
 
     @Override
@@ -115,9 +120,6 @@ public class NavigationPrototypeController extends ContentObserver {
             } else if (path.endsWith(NAV_COLOR_ADAPT_ENABLE_SETTING)) {
                 mListener.onColorAdaptChanged(
                         NavBarTintController.isEnabled(mContext));
-            } else if (path.endsWith(EDGE_SENSITIVITY_WIDTH_SETTING)) {
-                mListener.onEdgeSensitivityChanged(getEdgeSensitivityWidth(),
-                        getEdgeSensitivityHeight());
             } else if (path.endsWith(SHOW_HOME_HANDLE_SETTING)) {
                 mListener.onHomeHandleVisiblilityChanged(showHomeHandle());
             } else if (path.endsWith(ENABLE_ASSISTANT_GESTURE)) {
@@ -130,8 +132,7 @@ public class NavigationPrototypeController extends ContentObserver {
      * @return the width for edge swipe
      */
     public int getEdgeSensitivityWidth() {
-        // TODO: Move into resource
-        return convertDpToPixel(getGlobalInt(EDGE_SENSITIVITY_WIDTH_SETTING, 48));
+        return QuickStepContract.getEdgeSensitivityWidth(mContext);
     }
 
     /**
@@ -201,6 +202,18 @@ public class NavigationPrototypeController extends ContentObserver {
 
     private static int convertDpToPixel(float dp) {
         return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        if (mListener != null) {
+            mListener.onEdgeSensitivityChanged(getEdgeSensitivityWidth(),
+                    getEdgeSensitivityHeight());
+        }
+    }
+
+    @Override
+    public void onLowMemory() {
     }
 
     public interface OnPrototypeChangedListener {

@@ -62,6 +62,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     private int mLayoutOrientation;
     private int mLayoutDirection;
     private int mHorizontalClipBound;
+    private final Rect mClippingRect;
 
     public PagedTileLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -71,6 +72,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         setCurrentItem(0, false);
         mLayoutOrientation = getResources().getConfiguration().orientation;
         mLayoutDirection = getLayoutDirection();
+        mClippingRect = new Rect();
     }
 
     public void saveInstanceState(Bundle outState) {
@@ -280,8 +282,8 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
-        Rect clipBounds = new Rect(mHorizontalClipBound, 0, (r-l) - mHorizontalClipBound, b - t);
-        setClipBounds(clipBounds);
+        mClippingRect.set(mHorizontalClipBound, 0, (r - l) - mHorizontalClipBound, b - t);
+        setClipBounds(mClippingRect);
     }
 
     @Override

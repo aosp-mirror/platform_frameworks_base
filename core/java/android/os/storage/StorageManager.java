@@ -16,7 +16,18 @@
 
 package android.os.storage;
 
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+import static android.app.AppOpsManager.OP_READ_EXTERNAL_STORAGE;
+import static android.app.AppOpsManager.OP_READ_MEDIA_AUDIO;
+import static android.app.AppOpsManager.OP_READ_MEDIA_IMAGES;
+import static android.app.AppOpsManager.OP_READ_MEDIA_VIDEO;
+import static android.app.AppOpsManager.OP_WRITE_EXTERNAL_STORAGE;
+import static android.app.AppOpsManager.OP_WRITE_MEDIA_AUDIO;
+import static android.app.AppOpsManager.OP_WRITE_MEDIA_IMAGES;
+import static android.app.AppOpsManager.OP_WRITE_MEDIA_VIDEO;
 import static android.content.ContentResolver.DEPRECATE_DATA_PREFIX;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import android.annotation.BytesLong;
 import android.annotation.IntDef;
@@ -33,6 +44,7 @@ import android.annotation.WorkerThread;
 import android.app.Activity;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
+import android.app.AppOpsManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -120,6 +132,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @SystemService(Context.STORAGE_SERVICE)
 public class StorageManager {
     private static final String TAG = "StorageManager";
+    private static final boolean LOCAL_LOGV = Log.isLoggable(TAG, Log.VERBOSE);
 
     /** {@hide} */
     public static final String PROP_PRIMARY_PHYSICAL = "ro.vold.primary_physical";
@@ -139,8 +152,6 @@ public class StorageManager {
     public static final String PROP_ISOLATED_STORAGE = "persist.sys.isolated_storage";
     /** {@hide} */
     public static final String PROP_ISOLATED_STORAGE_SNAPSHOT = "sys.isolated_storage_snapshot";
-    /** {@hide} */
-    public static final String PROP_LEGACY_GREYLIST = "persist.sys.legacy_greylist";
 
     /** {@hide} */
     public static final String PROP_FORCE_AUDIO = "persist.fw.force_audio";
@@ -238,8 +249,6 @@ public class StorageManager {
     public static final int DEBUG_ISOLATED_STORAGE_FORCE_ON = 1 << 6;
     /** {@hide} */
     public static final int DEBUG_ISOLATED_STORAGE_FORCE_OFF = 1 << 7;
-    /** {@hide} */
-    public static final int DEBUG_LEGACY_GREYLIST = 1 << 8;
 
     /** {@hide} */
     public static final int FLAG_STORAGE_DE = IInstalld.FLAG_STORAGE_DE;
@@ -290,6 +299,7 @@ public class StorageManager {
     private final ContentResolver mResolver;
 
     private final IStorageManager mStorageManager;
+    private final AppOpsManager mAppOps;
     private final Looper mLooper;
     private final AtomicInteger mNextNonce = new AtomicInteger(0);
 
@@ -500,6 +510,7 @@ public class StorageManager {
         mResolver = context.getContentResolver();
         mLooper = looper;
         mStorageManager = IStorageManager.Stub.asInterface(ServiceManager.getServiceOrThrow("mount"));
+        mAppOps = mContext.getSystemService(AppOpsManager.class);
     }
 
     /**
@@ -1633,6 +1644,105 @@ public class StorageManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Check that given app holds both permission and appop.
+     * @hide
+     */
+    public static boolean checkPermissionAndAppOp(Context context, boolean enforce,
+            int pid, int uid, String packageName, String permission, int op) {
+        if (context.checkPermission(permission, pid, uid) != PERMISSION_GRANTED) {
+            if (enforce) {
+                throw new SecurityException(
+                        "Permission " + permission + " denied for package " + packageName);
+            } else {
+                return false;
+            }
+        }
+
+        AppOpsManager appOps = context.getSystemService(AppOpsManager.class);
+        final int mode = appOps.noteOpNoThrow(op, uid, packageName);
+        switch (mode) {
+            case AppOpsManager.MODE_ALLOWED:
+                return true;
+            case AppOpsManager.MODE_DEFAULT:
+            case AppOpsManager.MODE_IGNORED:
+            case AppOpsManager.MODE_ERRORED:
+                if (enforce) {
+                    throw new SecurityException("Op " + AppOpsManager.opToName(op) + " "
+                            + AppOpsManager.modeToName(mode) + " for package " + packageName);
+                } else {
+                    return false;
+                }
+            default:
+                throw new IllegalStateException(
+                        AppOpsManager.opToName(op) + " has unknown mode "
+                                + AppOpsManager.modeToName(mode));
+        }
+    }
+
+    private boolean checkPermissionAndAppOp(boolean enforce,
+            int pid, int uid, String packageName, String permission, int op) {
+        return checkPermissionAndAppOp(mContext, enforce, pid, uid, packageName, permission, op);
+    }
+
+    // Callers must hold both the old and new permissions, so that we can
+    // handle obscure cases like when an app targets Q but was installed on
+    // a device that was originally running on P before being upgraded to Q.
+
+    /** {@hide} */
+    public boolean checkPermissionReadAudio(boolean enforce,
+            int pid, int uid, String packageName) {
+        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName,
+                READ_EXTERNAL_STORAGE, OP_READ_EXTERNAL_STORAGE)) return false;
+        mAppOps.noteOpNoThrow(OP_READ_MEDIA_AUDIO, uid, packageName);
+        return true;
+    }
+
+    /** {@hide} */
+    public boolean checkPermissionWriteAudio(boolean enforce,
+            int pid, int uid, String packageName) {
+        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName,
+                WRITE_EXTERNAL_STORAGE, OP_WRITE_EXTERNAL_STORAGE)) return false;
+        mAppOps.noteOpNoThrow(OP_WRITE_MEDIA_AUDIO, uid, packageName);
+        return true;
+    }
+
+    /** {@hide} */
+    public boolean checkPermissionReadVideo(boolean enforce,
+            int pid, int uid, String packageName) {
+        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName,
+                READ_EXTERNAL_STORAGE, OP_READ_EXTERNAL_STORAGE)) return false;
+        mAppOps.noteOpNoThrow(OP_READ_MEDIA_VIDEO, uid, packageName);
+        return true;
+    }
+
+    /** {@hide} */
+    public boolean checkPermissionWriteVideo(boolean enforce,
+            int pid, int uid, String packageName) {
+        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName,
+                WRITE_EXTERNAL_STORAGE, OP_WRITE_EXTERNAL_STORAGE)) return false;
+        mAppOps.noteOpNoThrow(OP_WRITE_MEDIA_VIDEO, uid, packageName);
+        return true;
+    }
+
+    /** {@hide} */
+    public boolean checkPermissionReadImages(boolean enforce,
+            int pid, int uid, String packageName) {
+        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName,
+                READ_EXTERNAL_STORAGE, OP_READ_EXTERNAL_STORAGE)) return false;
+        mAppOps.noteOpNoThrow(OP_READ_MEDIA_IMAGES, uid, packageName);
+        return true;
+    }
+
+    /** {@hide} */
+    public boolean checkPermissionWriteImages(boolean enforce,
+            int pid, int uid, String packageName) {
+        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName,
+                WRITE_EXTERNAL_STORAGE, OP_WRITE_EXTERNAL_STORAGE)) return false;
+        mAppOps.noteOpNoThrow(OP_WRITE_MEDIA_IMAGES, uid, packageName);
+        return true;
     }
 
     /** {@hide} */

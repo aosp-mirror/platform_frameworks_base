@@ -49,6 +49,7 @@ package android {
     field @Deprecated public static final String BROADCAST_NETWORK_PRIVILEGED = "android.permission.BROADCAST_NETWORK_PRIVILEGED";
     field public static final String CAMERA_DISABLE_TRANSMIT_LED = "android.permission.CAMERA_DISABLE_TRANSMIT_LED";
     field public static final String CAPTURE_AUDIO_HOTWORD = "android.permission.CAPTURE_AUDIO_HOTWORD";
+    field public static final String CAPTURE_MEDIA_OUTPUT = "android.permission.CAPTURE_MEDIA_OUTPUT";
     field public static final String CAPTURE_TV_INPUT = "android.permission.CAPTURE_TV_INPUT";
     field public static final String CHANGE_APP_IDLE_STATE = "android.permission.CHANGE_APP_IDLE_STATE";
     field public static final String CHANGE_DEVICE_IDLE_TEMP_WHITELIST = "android.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST";
@@ -76,6 +77,7 @@ package android {
     field public static final String HDMI_CEC = "android.permission.HDMI_CEC";
     field public static final String HIDE_NON_SYSTEM_OVERLAY_WINDOWS = "android.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS";
     field public static final String INJECT_EVENTS = "android.permission.INJECT_EVENTS";
+    field public static final String INSTALL_DYNAMIC_SYSTEM = "android.permission.INSTALL_DYNAMIC_SYSTEM";
     field public static final String INSTALL_GRANT_RUNTIME_PERMISSIONS = "android.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS";
     field public static final String INSTALL_PACKAGE_UPDATES = "android.permission.INSTALL_PACKAGE_UPDATES";
     field public static final String INSTALL_SELF_UPDATES = "android.permission.INSTALL_SELF_UPDATES";
@@ -117,9 +119,11 @@ package android {
     field public static final String MODIFY_PARENTAL_CONTROLS = "android.permission.MODIFY_PARENTAL_CONTROLS";
     field public static final String MODIFY_QUIET_MODE = "android.permission.MODIFY_QUIET_MODE";
     field public static final String MOVE_PACKAGE = "android.permission.MOVE_PACKAGE";
+    field public static final String NETWORK_CARRIER_PROVISIONING = "android.permission.NETWORK_CARRIER_PROVISIONING";
     field public static final String NETWORK_MANAGED_PROVISIONING = "android.permission.NETWORK_MANAGED_PROVISIONING";
     field public static final String NETWORK_SCAN = "android.permission.NETWORK_SCAN";
     field public static final String NETWORK_SETUP_WIZARD = "android.permission.NETWORK_SETUP_WIZARD";
+    field public static final String NETWORK_SIGNAL_STRENGTH_WAKEUP = "android.permission.NETWORK_SIGNAL_STRENGTH_WAKEUP";
     field public static final String NOTIFICATION_DURING_SETUP = "android.permission.NOTIFICATION_DURING_SETUP";
     field public static final String NOTIFY_TV_INPUTS = "android.permission.NOTIFY_TV_INPUTS";
     field public static final String OBSERVE_APP_USAGE = "android.permission.OBSERVE_APP_USAGE";
@@ -402,9 +406,9 @@ package android.app {
     method public int describeContents();
     method public long getBeginTimeMillis();
     method public long getEndTimeMillis();
-    method public int getUidCount();
+    method @IntRange(from=0) public int getUidCount();
     method @Nullable public android.app.AppOpsManager.HistoricalUidOps getUidOps(int);
-    method @NonNull public android.app.AppOpsManager.HistoricalUidOps getUidOpsAt(int);
+    method @NonNull public android.app.AppOpsManager.HistoricalUidOps getUidOpsAt(@IntRange(from=0) int);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.HistoricalOps> CREATOR;
   }
@@ -424,8 +428,8 @@ package android.app {
   public static final class AppOpsManager.HistoricalPackageOps implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public android.app.AppOpsManager.HistoricalOp getOp(@NonNull String);
-    method @NonNull public android.app.AppOpsManager.HistoricalOp getOpAt(int);
-    method public int getOpCount();
+    method @NonNull public android.app.AppOpsManager.HistoricalOp getOpAt(@IntRange(from=0) int);
+    method @IntRange(from=0) public int getOpCount();
     method @NonNull public String getPackageName();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.HistoricalPackageOps> CREATOR;
@@ -433,9 +437,9 @@ package android.app {
 
   public static final class AppOpsManager.HistoricalUidOps implements android.os.Parcelable {
     method public int describeContents();
-    method public int getPackageCount();
+    method @IntRange(from=0) public int getPackageCount();
     method @Nullable public android.app.AppOpsManager.HistoricalPackageOps getPackageOps(@NonNull String);
-    method @NonNull public android.app.AppOpsManager.HistoricalPackageOps getPackageOpsAt(int);
+    method @NonNull public android.app.AppOpsManager.HistoricalPackageOps getPackageOpsAt(@IntRange(from=0) int);
     method public int getUid();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.HistoricalUidOps> CREATOR;
@@ -491,12 +495,12 @@ package android.app {
     ctor public InstantAppResolverService();
     method public final void attachBaseContext(android.content.Context);
     method public final android.os.IBinder onBind(android.content.Intent);
-    method @Deprecated public void onGetInstantAppIntentFilter(int[], String, android.app.InstantAppResolverService.InstantAppResolutionCallback);
-    method @Deprecated public void onGetInstantAppIntentFilter(android.content.Intent, int[], String, android.app.InstantAppResolverService.InstantAppResolutionCallback);
-    method public void onGetInstantAppIntentFilter(android.content.Intent, int[], android.os.UserHandle, String, android.app.InstantAppResolverService.InstantAppResolutionCallback);
-    method @Deprecated public void onGetInstantAppResolveInfo(int[], String, android.app.InstantAppResolverService.InstantAppResolutionCallback);
-    method @Deprecated public void onGetInstantAppResolveInfo(android.content.Intent, int[], String, android.app.InstantAppResolverService.InstantAppResolutionCallback);
-    method public void onGetInstantAppResolveInfo(android.content.Intent, int[], android.os.UserHandle, String, android.app.InstantAppResolverService.InstantAppResolutionCallback);
+    method @Deprecated public void onGetInstantAppIntentFilter(@Nullable int[], @NonNull String, @NonNull android.app.InstantAppResolverService.InstantAppResolutionCallback);
+    method @Deprecated public void onGetInstantAppIntentFilter(@NonNull android.content.Intent, @Nullable int[], @NonNull String, @NonNull android.app.InstantAppResolverService.InstantAppResolutionCallback);
+    method public void onGetInstantAppIntentFilter(@NonNull android.content.Intent, @Nullable int[], @NonNull android.os.UserHandle, @NonNull String, @NonNull android.app.InstantAppResolverService.InstantAppResolutionCallback);
+    method @Deprecated public void onGetInstantAppResolveInfo(@Nullable int[], @NonNull String, @NonNull android.app.InstantAppResolverService.InstantAppResolutionCallback);
+    method @Deprecated public void onGetInstantAppResolveInfo(@NonNull android.content.Intent, @Nullable int[], @NonNull String, @NonNull android.app.InstantAppResolverService.InstantAppResolutionCallback);
+    method public void onGetInstantAppResolveInfo(@NonNull android.content.Intent, @Nullable int[], @NonNull android.os.UserHandle, @NonNull String, @NonNull android.app.InstantAppResolverService.InstantAppResolutionCallback);
   }
 
   public static final class InstantAppResolverService.InstantAppResolutionCallback {
@@ -563,7 +567,7 @@ package android.app {
     method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public byte[] getStatsMetadata() throws android.app.StatsManager.StatsUnavailableException;
     method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public void removeConfig(long) throws android.app.StatsManager.StatsUnavailableException;
     method @Deprecated @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public boolean removeConfiguration(long);
-    method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public long[] setActiveConfigsChangedOperation(@Nullable android.app.PendingIntent) throws android.app.StatsManager.StatsUnavailableException;
+    method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) @NonNull public long[] setActiveConfigsChangedOperation(@Nullable android.app.PendingIntent) throws android.app.StatsManager.StatsUnavailableException;
     method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public void setBroadcastSubscriber(android.app.PendingIntent, long, long) throws android.app.StatsManager.StatsUnavailableException;
     method @Deprecated @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public boolean setBroadcastSubscriber(long, long, android.app.PendingIntent);
     method @Deprecated @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public boolean setDataFetchOperation(long, android.app.PendingIntent);
@@ -1256,9 +1260,9 @@ package android.bluetooth {
   public final class BluetoothDevice implements android.os.Parcelable {
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean cancelBondProcess();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public String getMetadata(int);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean getSilenceMode();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public boolean isConnected();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public boolean isEncrypted();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean isInSilenceMode();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean removeBond();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setMetadata(int, String);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setPhonebookAccessPermission(int);
@@ -1267,7 +1271,6 @@ package android.bluetooth {
     field public static final int ACCESS_REJECTED = 2; // 0x2
     field public static final int ACCESS_UNKNOWN = 0; // 0x0
     field public static final String ACTION_SILENCE_MODE_CHANGED = "android.bluetooth.device.action.SILENCE_MODE_CHANGED";
-    field public static final String EXTRA_SILENCE_ENABLED = "android.bluetooth.device.extra.SILENCE_ENABLED";
     field public static final int METADATA_COMPANION_APP = 4; // 0x4
     field public static final int METADATA_ENHANCED_SETTINGS_UI_URI = 16; // 0x10
     field public static final int METADATA_HARDWARE_VERSION = 3; // 0x3
@@ -1456,14 +1459,14 @@ package android.content.om {
 
   public final class OverlayInfo implements android.os.Parcelable {
     method public int describeContents();
+    method @Nullable public String getCategory();
+    method @NonNull public String getPackageName();
+    method @Nullable public String getTargetOverlayableName();
+    method @Nullable public String getTargetPackageName();
+    method public int getUserId();
     method public boolean isEnabled();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.om.OverlayInfo> CREATOR;
-    field public final String category;
-    field public final String packageName;
-    field public final String targetOverlayableName;
-    field public final String targetPackageName;
-    field public final int userId;
   }
 
   public class OverlayManager {
@@ -1548,6 +1551,18 @@ package android.content.pm {
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.IntentFilterVerificationInfo> CREATOR;
   }
 
+  public class LauncherApps {
+    method @Nullable public android.content.pm.LauncherApps.AppUsageLimit getAppUsageLimit(@NonNull String, @NonNull android.os.UserHandle);
+  }
+
+  public static final class LauncherApps.AppUsageLimit implements android.os.Parcelable {
+    method public int describeContents();
+    method public long getTotalUsageLimit();
+    method public long getUsageRemaining();
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.LauncherApps.AppUsageLimit> CREATOR;
+  }
+
   public class PackageInstaller {
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setPermissionsResult(int, boolean);
   }
@@ -1591,53 +1606,52 @@ package android.content.pm {
   }
 
   public abstract class PackageManager {
-    method @RequiresPermission("android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS") public abstract void addOnPermissionsChangeListener(android.content.pm.PackageManager.OnPermissionsChangedListener);
+    method @RequiresPermission("android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS") public abstract void addOnPermissionsChangeListener(@NonNull android.content.pm.PackageManager.OnPermissionsChangedListener);
     method public abstract boolean arePermissionsIndividuallyControlled();
-    method public abstract java.util.List<android.content.IntentFilter> getAllIntentFilters(String);
+    method @NonNull public abstract java.util.List<android.content.IntentFilter> getAllIntentFilters(@NonNull String);
     method @NonNull @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public android.content.pm.ApplicationInfo getApplicationInfoAsUser(@NonNull String, int, @NonNull android.os.UserHandle) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull public android.content.pm.dex.ArtManager getArtManager();
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_SHARED_LIBRARIES) public java.util.List<android.content.pm.SharedLibraryInfo> getDeclaredSharedLibraries(@NonNull String, int);
-    method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public abstract String getDefaultBrowserPackageNameAsUser(int);
+    method @Nullable @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public abstract String getDefaultBrowserPackageNameAsUser(int);
     method @Nullable @RequiresPermission(android.Manifest.permission.SET_HARMFUL_APP_WARNINGS) public CharSequence getHarmfulAppWarning(@NonNull String);
-    method public String getIncidentReportApproverPackageName();
-    method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public abstract java.util.List<android.content.pm.PackageInfo> getInstalledPackagesAsUser(int, int);
+    method @Nullable public String getIncidentReportApproverPackageName();
+    method @NonNull @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public abstract java.util.List<android.content.pm.PackageInfo> getInstalledPackagesAsUser(int, int);
     method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_INSTANT_APPS) public abstract android.graphics.drawable.Drawable getInstantAppIcon(String);
-    method public abstract android.content.ComponentName getInstantAppInstallerComponent();
-    method public abstract android.content.ComponentName getInstantAppResolverSettingsComponent();
+    method @Nullable public abstract android.content.ComponentName getInstantAppInstallerComponent();
+    method @Nullable public abstract android.content.ComponentName getInstantAppResolverSettingsComponent();
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_INSTANT_APPS) public abstract java.util.List<android.content.pm.InstantAppInfo> getInstantApps();
-    method public abstract java.util.List<android.content.pm.IntentFilterVerificationInfo> getIntentFilterVerifications(String);
-    method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public abstract int getIntentVerificationStatusAsUser(String, int);
-    method @android.content.pm.PackageManager.PermissionFlags @RequiresPermission(anyOf={android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS, android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS, android.Manifest.permission.GET_RUNTIME_PERMISSIONS}) public abstract int getPermissionFlags(String, String, @NonNull android.os.UserHandle);
+    method @NonNull public abstract java.util.List<android.content.pm.IntentFilterVerificationInfo> getIntentFilterVerifications(@NonNull String);
+    method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public abstract int getIntentVerificationStatusAsUser(@NonNull String, int);
+    method @android.content.pm.PackageManager.PermissionFlags @RequiresPermission(anyOf={android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS, android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS, android.Manifest.permission.GET_RUNTIME_PERMISSIONS}) public abstract int getPermissionFlags(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
     method @NonNull @RequiresPermission(android.Manifest.permission.SUSPEND_APPS) public String[] getUnsuspendablePackages(@NonNull String[]);
     method @RequiresPermission(android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS) public abstract void grantRuntimePermission(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
-    method @Deprecated public abstract int installExistingPackage(String) throws android.content.pm.PackageManager.NameNotFoundException;
-    method @Deprecated public abstract int installExistingPackage(String, int) throws android.content.pm.PackageManager.NameNotFoundException;
-    method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public java.util.List<android.content.pm.ResolveInfo> queryBroadcastReceiversAsUser(android.content.Intent, int, android.os.UserHandle);
+    method @Deprecated public abstract int installExistingPackage(@NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @Deprecated public abstract int installExistingPackage(@NonNull String, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @NonNull @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public java.util.List<android.content.pm.ResolveInfo> queryBroadcastReceiversAsUser(@NonNull android.content.Intent, int, android.os.UserHandle);
     method @NonNull @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public java.util.List<android.content.pm.ResolveInfo> queryIntentActivitiesAsUser(@NonNull android.content.Intent, int, @NonNull android.os.UserHandle);
     method @NonNull @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public java.util.List<android.content.pm.ResolveInfo> queryIntentContentProvidersAsUser(@NonNull android.content.Intent, int, @NonNull android.os.UserHandle);
     method @NonNull @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public java.util.List<android.content.pm.ResolveInfo> queryIntentServicesAsUser(@NonNull android.content.Intent, int, @NonNull android.os.UserHandle);
-    method public abstract void registerDexModule(String, @Nullable android.content.pm.PackageManager.DexModuleRegisterCallback);
-    method @RequiresPermission("android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS") public abstract void removeOnPermissionsChangeListener(android.content.pm.PackageManager.OnPermissionsChangedListener);
+    method public abstract void registerDexModule(@NonNull String, @Nullable android.content.pm.PackageManager.DexModuleRegisterCallback);
+    method @RequiresPermission("android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS") public abstract void removeOnPermissionsChangeListener(@NonNull android.content.pm.PackageManager.OnPermissionsChangedListener);
     method @Deprecated public void replacePreferredActivity(@NonNull android.content.IntentFilter, int, @NonNull java.util.List<android.content.ComponentName>, @NonNull android.content.ComponentName);
     method @RequiresPermission(android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS) public abstract void revokeRuntimePermission(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
     method public void sendDeviceCustomizationReadyBroadcast();
-    method @RequiresPermission(allOf={android.Manifest.permission.SET_PREFERRED_APPLICATIONS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}) public abstract boolean setDefaultBrowserPackageNameAsUser(String, int);
+    method @RequiresPermission(allOf={android.Manifest.permission.SET_PREFERRED_APPLICATIONS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}) public abstract boolean setDefaultBrowserPackageNameAsUser(@Nullable String, int);
     method @NonNull @RequiresPermission(android.Manifest.permission.SUSPEND_APPS) public String[] setDistractingPackageRestrictions(@NonNull String[], int);
     method @RequiresPermission(android.Manifest.permission.SET_HARMFUL_APP_WARNINGS) public void setHarmfulAppWarning(@NonNull String, @Nullable CharSequence);
     method @Deprecated @Nullable @RequiresPermission(android.Manifest.permission.SUSPEND_APPS) public String[] setPackagesSuspended(@Nullable String[], boolean, @Nullable android.os.PersistableBundle, @Nullable android.os.PersistableBundle, @Nullable String);
     method @Nullable @RequiresPermission(android.Manifest.permission.SUSPEND_APPS) public String[] setPackagesSuspended(@Nullable String[], boolean, @Nullable android.os.PersistableBundle, @Nullable android.os.PersistableBundle, @Nullable android.content.pm.SuspendDialogInfo);
     method @RequiresPermission(value=android.Manifest.permission.CHANGE_COMPONENT_ENABLED_STATE, conditional=true) public void setSyntheticAppDetailsActivityEnabled(@NonNull String, boolean);
-    method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public abstract void setUpdateAvailable(String, boolean);
-    method @RequiresPermission(android.Manifest.permission.SET_PREFERRED_APPLICATIONS) public abstract boolean updateIntentVerificationStatusAsUser(String, int, int);
-    method @RequiresPermission(anyOf={android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS, android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS}) public abstract void updatePermissionFlags(String, String, @android.content.pm.PackageManager.PermissionFlags int, @android.content.pm.PackageManager.PermissionFlags int, @NonNull android.os.UserHandle);
-    method @RequiresPermission(android.Manifest.permission.INTENT_FILTER_VERIFICATION_AGENT) public abstract void verifyIntentFilter(int, int, java.util.List<java.lang.String>);
+    method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public abstract void setUpdateAvailable(@NonNull String, boolean);
+    method @RequiresPermission(android.Manifest.permission.SET_PREFERRED_APPLICATIONS) public abstract boolean updateIntentVerificationStatusAsUser(@NonNull String, int, int);
+    method @RequiresPermission(anyOf={android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS, android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS}) public abstract void updatePermissionFlags(@NonNull String, @NonNull String, @android.content.pm.PackageManager.PermissionFlags int, @android.content.pm.PackageManager.PermissionFlags int, @NonNull android.os.UserHandle);
+    method @RequiresPermission(android.Manifest.permission.INTENT_FILTER_VERIFICATION_AGENT) public abstract void verifyIntentFilter(int, int, @NonNull java.util.List<java.lang.String>);
     field public static final String ACTION_REQUEST_PERMISSIONS = "android.content.pm.action.REQUEST_PERMISSIONS";
     field public static final String EXTRA_REQUEST_PERMISSIONS_NAMES = "android.content.pm.extra.REQUEST_PERMISSIONS_NAMES";
     field public static final String EXTRA_REQUEST_PERMISSIONS_RESULTS = "android.content.pm.extra.REQUEST_PERMISSIONS_RESULTS";
     field public static final String FEATURE_BROADCAST_RADIO = "android.hardware.broadcastradio";
     field public static final String FEATURE_TELEPHONY_CARRIERLOCK = "android.hardware.telephony.carrierlock";
     field public static final int FLAG_PERMISSION_GRANTED_BY_DEFAULT = 32; // 0x20
-    field public static final int FLAG_PERMISSION_HIDDEN = 1024; // 0x400
     field public static final int FLAG_PERMISSION_POLICY_FIXED = 4; // 0x4
     field public static final int FLAG_PERMISSION_REVIEW_REQUIRED = 64; // 0x40
     field public static final int FLAG_PERMISSION_REVOKE_ON_UPGRADE = 8; // 0x8
@@ -1708,7 +1722,7 @@ package android.content.pm {
     method public void onPermissionsChanged(int);
   }
 
-  @IntDef(prefix={"FLAG_PERMISSION_"}, value={android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET, android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_POLICY_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_ON_UPGRADE, android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT, android.content.pm.PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED, android.content.pm.PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED, android.content.pm.PackageManager.FLAG_PERMISSION_HIDDEN}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface PackageManager.PermissionFlags {
+  @IntDef(prefix={"FLAG_PERMISSION_"}, value={android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET, android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_POLICY_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_ON_UPGRADE, android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT, android.content.pm.PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED, android.content.pm.PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface PackageManager.PermissionFlags {
   }
 
   public class PermissionGroupInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
@@ -3376,19 +3390,19 @@ package android.location {
 
   public class LocationManager {
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void flushGnssBatch();
+    method @Nullable public String getExtraLocationControllerPackage();
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public int getGnssBatchSize();
     method @Nullable public android.location.GnssCapabilities getGnssCapabilities();
-    method @Nullable public String getLocationControllerExtraPackage();
     method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public void injectGnssMeasurementCorrections(@NonNull android.location.GnssMeasurementCorrections);
-    method public boolean isLocationControllerExtraPackageEnabled();
+    method public boolean isExtraLocationControllerPackageEnabled();
     method public boolean isLocationEnabledForUser(@NonNull android.os.UserHandle);
     method public boolean isProviderEnabledForUser(@NonNull String, @NonNull android.os.UserHandle);
     method public boolean isProviderPackage(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public boolean registerGnssBatchedLocationCallback(long, boolean, @NonNull android.location.BatchedLocationCallback, @Nullable android.os.Handler);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@NonNull android.location.LocationRequest, @NonNull android.location.LocationListener, @Nullable android.os.Looper);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@NonNull android.location.LocationRequest, @NonNull android.app.PendingIntent);
-    method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void setLocationControllerExtraPackage(@NonNull String);
-    method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void setLocationControllerExtraPackageEnabled(boolean);
+    method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void setExtraLocationControllerPackage(@Nullable String);
+    method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void setExtraLocationControllerPackageEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setLocationEnabledForUser(boolean, @NonNull android.os.UserHandle);
     method @Deprecated @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean setProviderEnabledForUser(@NonNull String, boolean, @NonNull android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public boolean unregisterGnssBatchedLocationCallback(@NonNull android.location.BatchedLocationCallback);
@@ -3601,6 +3615,7 @@ package android.media.audiopolicy {
     ctor public AudioMixingRule.Builder();
     method public android.media.audiopolicy.AudioMixingRule.Builder addMixRule(int, Object) throws java.lang.IllegalArgumentException;
     method public android.media.audiopolicy.AudioMixingRule.Builder addRule(android.media.AudioAttributes, int) throws java.lang.IllegalArgumentException;
+    method @NonNull public android.media.audiopolicy.AudioMixingRule.Builder allowPrivilegedPlaybackCapture(boolean);
     method public android.media.audiopolicy.AudioMixingRule build();
     method public android.media.audiopolicy.AudioMixingRule.Builder excludeMixRule(int, Object) throws java.lang.IllegalArgumentException;
     method public android.media.audiopolicy.AudioMixingRule.Builder excludeRule(android.media.AudioAttributes, int) throws java.lang.IllegalArgumentException;
@@ -4058,7 +4073,7 @@ package android.net {
   }
 
   public final class IpPrefix implements android.os.Parcelable {
-    ctor public IpPrefix(@NonNull java.net.InetAddress, int);
+    ctor public IpPrefix(@NonNull java.net.InetAddress, @IntRange(from=0, to=128) int);
     ctor public IpPrefix(@NonNull String);
   }
 
@@ -4079,8 +4094,8 @@ package android.net {
   }
 
   public class LinkAddress implements android.os.Parcelable {
-    ctor public LinkAddress(java.net.InetAddress, int, int, int);
-    ctor public LinkAddress(@NonNull java.net.InetAddress, int);
+    ctor public LinkAddress(@NonNull java.net.InetAddress, @IntRange(from=0, to=128) int, int, int);
+    ctor public LinkAddress(@NonNull java.net.InetAddress, @IntRange(from=0, to=128) int);
     ctor public LinkAddress(@NonNull String);
     ctor public LinkAddress(@NonNull String, int, int);
     method public boolean isGlobalPreferred();
@@ -4144,7 +4159,7 @@ package android.net {
   }
 
   public static class NetworkRequest.Builder {
-    method @NonNull public android.net.NetworkRequest.Builder setSignalStrength(int);
+    method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_SIGNAL_STRENGTH_WAKEUP) public android.net.NetworkRequest.Builder setSignalStrength(int);
   }
 
   public class NetworkScoreManager {
@@ -4233,6 +4248,10 @@ package android.net {
     field public static final int TAG_SYSTEM_PROBE = -190; // 0xffffff42
   }
 
+  public abstract class Uri implements java.lang.Comparable<android.net.Uri> android.os.Parcelable {
+    method @NonNull public String toSafeString();
+  }
+
   public class VpnService extends android.app.Service {
     method @RequiresPermission(android.Manifest.permission.CONTROL_VPN) public static void prepareAndAuthorize(android.content.Context);
   }
@@ -4257,8 +4276,8 @@ package android.net.apf {
   public final class ApfCapabilities implements android.os.Parcelable {
     ctor public ApfCapabilities(int, int, int);
     method public int describeContents();
-    method public static boolean getApfDrop8023Frames(@NonNull android.content.Context);
-    method @NonNull public static int[] getApfEthTypeBlackList(@NonNull android.content.Context);
+    method public static boolean getApfDrop8023Frames();
+    method @NonNull public static int[] getApfEtherTypeBlackList();
     method public boolean hasDataAccess();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.net.apf.ApfCapabilities> CREATOR;
@@ -5643,12 +5662,12 @@ package android.os.image {
 
   public class DynamicSystemClient {
     ctor public DynamicSystemClient(@NonNull android.content.Context);
-    method @RequiresPermission("android.permission.MANAGE_DYNAMIC_SYSTEM") public void bind();
+    method @RequiresPermission(android.Manifest.permission.INSTALL_DYNAMIC_SYSTEM) public void bind();
     method public void setOnStatusChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.os.image.DynamicSystemClient.OnStatusChangedListener);
     method public void setOnStatusChangedListener(@NonNull android.os.image.DynamicSystemClient.OnStatusChangedListener);
-    method @RequiresPermission("android.permission.MANAGE_DYNAMIC_SYSTEM") public void start(@NonNull String, long);
-    method @RequiresPermission("android.permission.MANAGE_DYNAMIC_SYSTEM") public void start(@NonNull String, long, long);
-    method @RequiresPermission("android.permission.MANAGE_DYNAMIC_SYSTEM") public void unbind();
+    method @RequiresPermission(android.Manifest.permission.INSTALL_DYNAMIC_SYSTEM) public void start(@NonNull android.net.Uri, long);
+    method @RequiresPermission(android.Manifest.permission.INSTALL_DYNAMIC_SYSTEM) public void start(@NonNull android.net.Uri, long, long);
+    method @RequiresPermission(android.Manifest.permission.INSTALL_DYNAMIC_SYSTEM) public void unbind();
     field public static final int CAUSE_ERROR_EXCEPTION = 6; // 0x6
     field public static final int CAUSE_ERROR_INVALID_URL = 4; // 0x4
     field public static final int CAUSE_ERROR_IO = 3; // 0x3
@@ -5664,7 +5683,7 @@ package android.os.image {
   }
 
   public static interface DynamicSystemClient.OnStatusChangedListener {
-    method public void onStatusChanged(int, int, long);
+    method public void onStatusChanged(int, int, long, @Nullable Throwable);
   }
 
 }
@@ -6048,6 +6067,7 @@ package android.provider {
     field public static final String ACTION_ENTERPRISE_PRIVACY_SETTINGS = "android.settings.ENTERPRISE_PRIVACY_SETTINGS";
     field public static final String ACTION_LOCATION_CONTROLLER_EXTRA_PACKAGE_SETTINGS = "android.settings.LOCATION_CONTROLLER_EXTRA_PACKAGE_SETTINGS";
     field public static final String ACTION_MANAGE_DOMAIN_URLS = "android.settings.MANAGE_DOMAIN_URLS";
+    field public static final String ACTION_MANAGE_MORE_DEFAULT_APPS_SETTINGS = "android.settings.MANAGE_MORE_DEFAULT_APPS_SETTINGS";
     field public static final String ACTION_NOTIFICATION_POLICY_ACCESS_DETAIL_SETTINGS = "android.settings.NOTIFICATION_POLICY_ACCESS_DETAIL_SETTINGS";
     field public static final String ACTION_REQUEST_ENABLE_CONTENT_CAPTURE = "android.settings.REQUEST_ENABLE_CONTENT_CAPTURE";
     field public static final String ACTION_SHOW_ADMIN_SUPPORT_DETAILS = "android.settings.SHOW_ADMIN_SUPPORT_DETAILS";
@@ -6444,6 +6464,7 @@ package android.service.contentcapture {
     method public void onDestroyContentCaptureSession(@NonNull android.view.contentcapture.ContentCaptureSessionId);
     method public void onDisconnected();
     method public void onUserDataRemovalRequest(@NonNull android.view.contentcapture.UserDataRemovalRequest);
+    method public final void setContentCaptureConditions(@NonNull String, @Nullable java.util.Set<android.view.contentcapture.ContentCaptureCondition>);
     method public final void setContentCaptureWhitelist(@Nullable java.util.Set<java.lang.String>, @Nullable java.util.Set<android.content.ComponentName>);
     field public static final String SERVICE_INTERFACE = "android.service.contentcapture.ContentCaptureService";
     field public static final String SERVICE_META_DATA = "android.content_capture";

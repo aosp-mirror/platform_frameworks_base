@@ -44,6 +44,8 @@ public class ParcelableTests {
         assertEquals(in, new NetworkAttributes(parcelingRoundTrip(in.toParcelable())));
 
         builder.setAssignedV4Address((Inet4Address) Inet4Address.getByName("1.2.3.4"));
+        // lease will expire in two hours
+        builder.setAssignedV4AddressExpiry(System.currentTimeMillis() + 7_200_000);
         // groupHint stays null this time around
         builder.setDnsAddresses(Collections.emptyList());
         builder.setMtu(18);
@@ -51,6 +53,7 @@ public class ParcelableTests {
         assertEquals(in, new NetworkAttributes(parcelingRoundTrip(in.toParcelable())));
 
         builder.setAssignedV4Address((Inet4Address) Inet4Address.getByName("6.7.8.9"));
+        builder.setAssignedV4AddressExpiry(System.currentTimeMillis() + 3_600_000);
         builder.setGroupHint("groupHint");
         builder.setDnsAddresses(Arrays.asList(
                 InetAddress.getByName("ACA1:652B:0911:DE8F:1200:115E:913B:AA2A"),
@@ -66,7 +69,7 @@ public class ParcelableTests {
         // Verify that this test does not miss any new field added later.
         // If any field is added to NetworkAttributes it must be tested here for parceling
         // roundtrip.
-        assertEquals(4, Arrays.stream(NetworkAttributes.class.getDeclaredFields())
+        assertEquals(5, Arrays.stream(NetworkAttributes.class.getDeclaredFields())
                 .filter(f -> !Modifier.isStatic(f.getModifiers())).count());
     }
 

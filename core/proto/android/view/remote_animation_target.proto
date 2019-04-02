@@ -23,7 +23,7 @@ import "frameworks/base/core/proto/android/app/window_configuration.proto";
 import "frameworks/base/core/proto/android/graphics/point.proto";
 import "frameworks/base/core/proto/android/graphics/rect.proto";
 import "frameworks/base/core/proto/android/view/surfacecontrol.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 /** Proto representation for android.view.RemoteAnimationTarget.java class. */
 message RemoteAnimationTargetProto {

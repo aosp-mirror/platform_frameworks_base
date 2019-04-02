@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 using namespace android::util;
+using android::sp;
 
 constexpr size_t TEST_CHUNK_SIZE = 16UL;
 constexpr size_t TEST_CHUNK_HALF_SIZE = TEST_CHUNK_SIZE / 2;
@@ -122,33 +123,30 @@ TEST(EncodedBufferTest, ReadSimple) {
     for (size_t i = 0; i < TEST_CHUNK_3X_SIZE; i++) {
         buffer.writeRawByte(i);
     }
-    auto iter = buffer.begin();
-    EXPECT_EQ(iter.size(), TEST_CHUNK_3X_SIZE);
-    EXPECT_EQ(iter.bytesRead(), 0);
+    sp<ProtoReader> reader1 = buffer.read();
+    EXPECT_EQ(reader1->size(), TEST_CHUNK_3X_SIZE);
+    EXPECT_EQ(reader1->bytesRead(), 0);
 
-    expectPointer(iter.rp(), 0);
-    while (iter.readBuffer() != NULL) {
-        iter.rp()->move(iter.currentToRead());
+    while (reader1->readBuffer() != NULL) {
+        reader1->move(reader1->currentToRead());
     }
-    EXPECT_EQ(iter.bytesRead(), TEST_CHUNK_3X_SIZE);
-    expectPointer(iter.rp(), TEST_CHUNK_3X_SIZE);
+    EXPECT_EQ(reader1->bytesRead(), TEST_CHUNK_3X_SIZE);
 
-    iter.rp()->rewind();
-    expectPointer(iter.rp(), 0);
+    sp<ProtoReader> reader2 = buffer.read();
     uint8_t val = 0;
-    while (iter.hasNext()) {
-        EXPECT_EQ(iter.next(), val);
+    while (reader2->hasNext()) {
+        EXPECT_EQ(reader2->next(), val);
         val++;
     }
-    EXPECT_EQ(iter.bytesRead(), TEST_CHUNK_3X_SIZE);
-    expectPointer(iter.rp(), TEST_CHUNK_3X_SIZE);
+    EXPECT_EQ(reader2->bytesRead(), TEST_CHUNK_3X_SIZE);
+    EXPECT_EQ(reader1->bytesRead(), TEST_CHUNK_3X_SIZE);
 }
 
 TEST(EncodedBufferTest, ReadVarint) {
     EncodedBuffer buffer;
     uint64_t val = UINT64_C(1522865904593);
     size_t len = buffer.writeRawVarint64(val);
-    auto iter = buffer.begin();
-    EXPECT_EQ(iter.size(), len);
-    EXPECT_EQ(iter.readRawVarint(), val);
+    sp<ProtoReader> reader = buffer.read();
+    EXPECT_EQ(reader->size(), len);
+    EXPECT_EQ(reader->readRawVarint(), val);
 }

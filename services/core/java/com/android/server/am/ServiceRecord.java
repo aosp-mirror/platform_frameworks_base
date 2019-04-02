@@ -38,6 +38,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Slog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
@@ -88,7 +89,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     final ArrayMap<Intent.FilterComparison, IntentBindRecord> bindings
             = new ArrayMap<Intent.FilterComparison, IntentBindRecord>();
                             // All active bindings to the service.
-    final ArrayMap<IBinder, ArrayList<ConnectionRecord>> connections
+    private final ArrayMap<IBinder, ArrayList<ConnectionRecord>> connections
             = new ArrayMap<IBinder, ArrayList<ConnectionRecord>>();
                             // IBinder -> ConnectionRecord of all bound clients
 
@@ -542,6 +543,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             }
         } else if (app != null) {
             app.removeAllowBackgroundActivityStartsToken(this);
+            app.updateBoundClientUids();
         }
         app = _proc;
         if (pendingConnectionGroup > 0 && _proc != null) {
@@ -562,6 +564,33 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                     }
                 }
             }
+        }
+        if (_proc != null) {
+            _proc.updateBoundClientUids();
+        }
+    }
+
+    ArrayMap<IBinder, ArrayList<ConnectionRecord>> getConnections() {
+        return connections;
+    }
+
+    void putConnection(IBinder binder, ArrayList<ConnectionRecord> clist) {
+        connections.put(binder, clist);
+        // if we have a process attached, add bound client uids of this connection to it
+        if (app != null) {
+            ArraySet<Integer> boundClientUids = new ArraySet<>();
+            for (int i = 0; i < clist.size(); i++) {
+                boundClientUids.add(clist.get(i).clientUid);
+            }
+            app.addBoundClientUids(boundClientUids);
+        }
+    }
+
+    void removeConnection(IBinder binder) {
+        connections.remove(binder);
+        // if we have a process attached, tell it to update the state of bound clients
+        if (app != null) {
+            app.updateBoundClientUids();
         }
     }
 

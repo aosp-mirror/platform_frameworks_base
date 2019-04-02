@@ -422,8 +422,6 @@ public final class OverlayManagerService extends SystemService {
                         final OverlayInfo oi = mImpl.getOverlayInfo(packageName, userId);
                         if (oi != null) {
                             mImpl.onOverlayPackageUpgrading(packageName, userId);
-                        } else {
-                            mImpl.onTargetPackageUpgrading(packageName, userId);
                         }
                     }
                 }

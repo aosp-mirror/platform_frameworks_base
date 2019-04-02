@@ -31,7 +31,6 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.HexDump;
-import com.android.server.IoThread;
 import com.android.server.LocalServices;
 import com.android.server.job.JobStore.JobSet;
 import com.android.server.job.controllers.JobStatus;
@@ -45,8 +44,6 @@ import java.time.Clock;
 import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Test reading and writing correctly from file.
@@ -96,14 +93,12 @@ public class JobStoreTest {
     @After
     public void tearDown() throws Exception {
         mTaskStoreUnderTest.clear();
+        mTaskStoreUnderTest.waitForWriteToCompleteForTesting(5_000L);
     }
 
     private void waitForPendingIo() throws Exception {
-        final CountDownLatch latch = new CountDownLatch(1);
-        IoThread.getHandler().post(() -> {
-            latch.countDown();
-        });
-        latch.await(10, TimeUnit.SECONDS);
+        assertTrue("Timed out waiting for persistence I/O to complete",
+                mTaskStoreUnderTest.waitForWriteToCompleteForTesting(5_000L));
     }
 
     @Test

@@ -33,7 +33,7 @@ using android::util::ProtoOutputStream;
 #ifdef __ANDROID__
 
 TEST(StatsServiceTest, TestAddConfig_simple) {
-    StatsService service(nullptr);
+    StatsService service(nullptr, nullptr);
     StatsdConfig config;
     config.set_id(12345);
     string serialized = config.SerializeAsString();
@@ -43,7 +43,7 @@ TEST(StatsServiceTest, TestAddConfig_simple) {
 }
 
 TEST(StatsServiceTest, TestAddConfig_empty) {
-    StatsService service(nullptr);
+    StatsService service(nullptr, nullptr);
     string serialized = "";
 
     EXPECT_TRUE(
@@ -51,7 +51,7 @@ TEST(StatsServiceTest, TestAddConfig_empty) {
 }
 
 TEST(StatsServiceTest, TestAddConfig_invalid) {
-    StatsService service(nullptr);
+    StatsService service(nullptr, nullptr);
     string serialized = "Invalid config!";
 
     EXPECT_FALSE(
@@ -69,7 +69,7 @@ TEST(StatsServiceTest, TestGetUidFromArgs) {
 
     int32_t uid;
 
-    StatsService service(nullptr);
+    StatsService service(nullptr, nullptr);
     service.mEngBuild = true;
 
     // "-1"

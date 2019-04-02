@@ -59,6 +59,8 @@ public class RoSystemProperties {
     // ------ ro.fw.* ------------ //
     public static final boolean FW_SYSTEM_USER_SPLIT =
             SystemProperties.getBoolean("ro.fw.system_user_split", false);
+    public static final boolean MULTIUSER_HEADLESS_SYSTEM_USER =
+            SystemProperties.getBoolean("ro.fw.multiuser.headless_system_user", false);
 
     // ------ ro.crypto.* -------- //
     public static final CryptoProperties.state_values CRYPTO_STATE =

@@ -45,6 +45,8 @@ android_test {
         "libcrypto",
         "libcutils",
         "libdexfile",
+        "ld-android",
+        "libdl_android",
         "libhidl-gen-utils",
         "libhidlbase",
         "libhidltransport",

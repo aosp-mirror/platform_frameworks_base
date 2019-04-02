@@ -91,6 +91,13 @@ public final class CellIdentityWcdma extends CellIdentity {
                 cid.mMncStr, cid.mAlphaLong, cid.mAlphaShort);
     }
 
+    /** @hide */
+    public CellIdentityWcdma sanitizeLocationInfo() {
+        return new CellIdentityWcdma(CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE,
+                CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE, mMccStr, mMncStr,
+                mAlphaLong, mAlphaShort);
+    }
+
     CellIdentityWcdma copy() {
         return new CellIdentityWcdma(this);
     }

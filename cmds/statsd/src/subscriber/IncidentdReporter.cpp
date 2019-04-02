@@ -120,12 +120,12 @@ void getProtoData(const int64_t& rule_id, int64_t metricId, const MetricDimensio
 
     protoData->resize(headerProto.size());
     size_t pos = 0;
-    auto iter = headerProto.data();
-    while (iter.readBuffer() != NULL) {
-        size_t toRead = iter.currentToRead();
-        std::memcpy(&((*protoData)[pos]), iter.readBuffer(), toRead);
+    sp<android::util::ProtoReader> reader = headerProto.data();
+    while (reader->readBuffer() != NULL) {
+        size_t toRead = reader->currentToRead();
+        std::memcpy(&((*protoData)[pos]), reader->readBuffer(), toRead);
         pos += toRead;
-        iter.rp()->move(toRead);
+        reader->move(toRead);
     }
 }
 }  // namespace
@@ -152,15 +152,15 @@ bool GenerateIncidentReport(const IncidentdDetails& config, int64_t rule_id, int
     uint8_t dest;
     switch (config.dest()) {
         case IncidentdDetails_Destination_AUTOMATIC:
-            dest = android::os::DEST_AUTOMATIC;
+            dest = android::os::PRIVACY_POLICY_AUTOMATIC;
             break;
         case IncidentdDetails_Destination_EXPLICIT:
-            dest = android::os::DEST_EXPLICIT;
+            dest = android::os::PRIVACY_POLICY_EXPLICIT;
             break;
         default:
-            dest = android::os::DEST_AUTOMATIC;
+            dest = android::os::PRIVACY_POLICY_AUTOMATIC;
     }
-    incidentReport.setDest(dest);
+    incidentReport.setPrivacyPolicy(dest);
 
     incidentReport.setReceiverPkg(config.receiver_pkg());
 

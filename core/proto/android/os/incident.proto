@@ -22,7 +22,9 @@ import "frameworks/base/core/proto/android/os/batterytype.proto";
 import "frameworks/base/core/proto/android/os/cpufreq.proto";
 import "frameworks/base/core/proto/android/os/cpuinfo.proto";
 import "frameworks/base/core/proto/android/os/data.proto";
+import "frameworks/base/core/proto/android/os/header.proto";
 import "frameworks/base/core/proto/android/os/kernelwake.proto";
+import "frameworks/base/core/proto/android/os/metadata.proto";
 import "frameworks/base/core/proto/android/os/pagetypeinfo.proto";
 import "frameworks/base/core/proto/android/os/procrank.proto";
 import "frameworks/base/core/proto/android/os/ps.proto";
@@ -46,13 +48,12 @@ import "frameworks/base/core/proto/android/service/notification.proto";
 import "frameworks/base/core/proto/android/service/package.proto";
 import "frameworks/base/core/proto/android/service/print.proto";
 import "frameworks/base/core/proto/android/service/procstats.proto";
+import "frameworks/base/core/proto/android/service/restricted_image.proto";
 import "frameworks/base/core/proto/android/service/usb.proto";
 import "frameworks/base/core/proto/android/util/event_log_tags.proto";
 import "frameworks/base/core/proto/android/util/log.proto";
-import "frameworks/base/libs/incident/proto/android/os/header.proto";
-import "frameworks/base/libs/incident/proto/android/os/metadata.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
-import "frameworks/base/libs/incident/proto/android/section.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/section.proto";
 
 package android.os;
 
@@ -312,6 +313,12 @@ message IncidentProto {
     optional com.android.server.role.RoleManagerServiceDumpProto role = 3024 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "role --proto"
+    ];
+
+    optional android.service.restricted_image.RestrictedImagesDumpProto restricted_images = 3025 [
+        (section).type = SECTION_DUMPSYS,
+        (section).userdebug_and_eng_only = true,
+        (section).args = "incidentcompanion --restricted_image"
     ];
 
     // Reserved for OEMs.

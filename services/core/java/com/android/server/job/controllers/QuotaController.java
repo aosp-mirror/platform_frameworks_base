@@ -769,6 +769,91 @@ public final class QuotaController extends StateController {
                 mMaxExecutionTimeMs - stats.executionTimeInMaxPeriodMs);
     }
 
+    /**
+     * Returns the amount of time, in milliseconds, until the package would have reached its
+     * duration quota, assuming it has a job counting towards its quota the entire time. This takes
+     * into account any {@link TimingSession}s that may roll out of the window as the job is
+     * running.
+     */
+    @VisibleForTesting
+    long getTimeUntilQuotaConsumedLocked(final int userId, @NonNull final String packageName) {
+        final long nowElapsed = sElapsedRealtimeClock.millis();
+        final int standbyBucket = JobSchedulerService.standbyBucketForPackage(
+                packageName, userId, nowElapsed);
+        if (standbyBucket == NEVER_INDEX) {
+            return 0;
+        }
+        List<TimingSession> sessions = mTimingSessions.get(userId, packageName);
+        if (sessions == null || sessions.size() == 0) {
+            return mAllowedTimePerPeriodMs;
+        }
+
+        final ExecutionStats stats = getExecutionStatsLocked(userId, packageName, standbyBucket);
+        final long startWindowElapsed = nowElapsed - stats.windowSizeMs;
+        final long startMaxElapsed = nowElapsed - MAX_PERIOD_MS;
+        final long allowedTimeRemainingMs = mAllowedTimePerPeriodMs - stats.executionTimeInWindowMs;
+        final long maxExecutionTimeRemainingMs =
+                mMaxExecutionTimeMs - stats.executionTimeInMaxPeriodMs;
+
+        // Regular ACTIVE case. Since the bucket size equals the allowed time, the app jobs can
+        // essentially run until they reach the maximum limit.
+        if (stats.windowSizeMs == mAllowedTimePerPeriodMs) {
+            return calculateTimeUntilQuotaConsumedLocked(
+                    sessions, startMaxElapsed, maxExecutionTimeRemainingMs);
+        }
+
+        // Need to check both max time and period time in case one is less than the other.
+        // For example, max time remaining could be less than bucket time remaining, but sessions
+        // contributing to the max time remaining could phase out enough that we'd want to use the
+        // bucket value.
+        return Math.min(
+                calculateTimeUntilQuotaConsumedLocked(
+                        sessions, startMaxElapsed, maxExecutionTimeRemainingMs),
+                calculateTimeUntilQuotaConsumedLocked(
+                        sessions, startWindowElapsed, allowedTimeRemainingMs));
+    }
+
+    /**
+     * Calculates how much time it will take, in milliseconds, until the quota is fully consumed.
+     *
+     * @param windowStartElapsed The start of the window, in the elapsed realtime timebase.
+     * @param deadSpaceMs        How much time can be allowed to count towards the quota
+     */
+    private long calculateTimeUntilQuotaConsumedLocked(@NonNull List<TimingSession> sessions,
+            final long windowStartElapsed, long deadSpaceMs) {
+        long timeUntilQuotaConsumedMs = 0;
+        long start = windowStartElapsed;
+        for (int i = 0; i < sessions.size(); ++i) {
+            TimingSession session = sessions.get(i);
+
+            if (session.endTimeElapsed < windowStartElapsed) {
+                // Outside of window. Ignore.
+                continue;
+            } else if (session.startTimeElapsed <= windowStartElapsed) {
+                // Overlapping session. Can extend time by portion of session in window.
+                timeUntilQuotaConsumedMs += session.endTimeElapsed - windowStartElapsed;
+                start = session.endTimeElapsed;
+            } else {
+                // Completely within the window. Can only consider if there's enough dead space
+                // to get to the start of the session.
+                long diff = session.startTimeElapsed - start;
+                if (diff > deadSpaceMs) {
+                    break;
+                }
+                timeUntilQuotaConsumedMs += diff
+                        + (session.endTimeElapsed - session.startTimeElapsed);
+                deadSpaceMs -= diff;
+                start = session.endTimeElapsed;
+            }
+        }
+        // Will be non-zero if the loop didn't look at any sessions.
+        timeUntilQuotaConsumedMs += deadSpaceMs;
+        if (timeUntilQuotaConsumedMs > mMaxExecutionTimeMs) {
+            Slog.wtf(TAG, "Calculated quota consumed time too high: " + timeUntilQuotaConsumedMs);
+        }
+        return timeUntilQuotaConsumedMs;
+    }
+
     /** Returns the execution stats of the app in the most recent window. */
     @VisibleForTesting
     @NonNull
@@ -1483,7 +1568,7 @@ public final class QuotaController extends StateController {
                     return;
                 }
                 Message msg = mHandler.obtainMessage(MSG_REACHED_QUOTA, mPkg);
-                final long timeRemainingMs = getRemainingExecutionTimeLocked(mPkg.userId,
+                final long timeRemainingMs = getTimeUntilQuotaConsumedLocked(mPkg.userId,
                         mPkg.packageName);
                 if (DEBUG) {
                     Slog.i(TAG, "Job for " + mPkg + " has " + timeRemainingMs + "ms left.");
@@ -1642,6 +1727,8 @@ public final class QuotaController extends StateController {
                             // job is currently running.
                             // Reschedule message
                             Message rescheduleMsg = obtainMessage(MSG_REACHED_QUOTA, pkg);
+                            timeRemainingMs = getTimeUntilQuotaConsumedLocked(pkg.userId,
+                                    pkg.packageName);
                             if (DEBUG) {
                                 Slog.d(TAG, pkg + " has " + timeRemainingMs + "ms left.");
                             }

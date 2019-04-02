@@ -16,6 +16,7 @@
 
 package com.android.providers.settings;
 
+import static android.os.Process.INVALID_UID;
 import static android.os.Process.ROOT_UID;
 import static android.os.Process.SHELL_UID;
 import static android.os.Process.SYSTEM_UID;
@@ -2777,7 +2778,7 @@ public class SettingsProvider extends ContentProvider {
                         boolean someSettingChanged = false;
                         Setting setting = settingsState.getSettingLocked(name);
                         if (!SettingsState.isSystemPackage(getContext(),
-                                setting.getPackageName())) {
+                                setting.getPackageName(), INVALID_UID, userId)) {
                             if (prefix != null && !setting.getName().startsWith(prefix)) {
                                 continue;
                             }
@@ -2797,7 +2798,7 @@ public class SettingsProvider extends ContentProvider {
                         boolean someSettingChanged = false;
                         Setting setting = settingsState.getSettingLocked(name);
                         if (!SettingsState.isSystemPackage(getContext(),
-                                setting.getPackageName())) {
+                                setting.getPackageName(), INVALID_UID, userId)) {
                             if (prefix != null && !setting.getName().startsWith(prefix)) {
                                 continue;
                             }
@@ -4410,7 +4411,7 @@ public class SettingsProvider extends ContentProvider {
                 }
                 try {
                     final boolean systemSet = SettingsState.isSystemPackage(getContext(),
-                            setting.getPackageName(), callingUid);
+                            setting.getPackageName(), callingUid, userId);
                     if (systemSet) {
                         settings.insertSettingLocked(name, setting.getValue(),
                                 setting.getTag(), true, setting.getPackageName());

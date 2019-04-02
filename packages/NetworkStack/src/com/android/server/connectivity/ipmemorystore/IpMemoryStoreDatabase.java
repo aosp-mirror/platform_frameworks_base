@@ -72,6 +72,10 @@ public class IpMemoryStoreDatabase {
         public static final String COLNAME_ASSIGNEDV4ADDRESS = "assignedV4Address";
         public static final String COLTYPE_ASSIGNEDV4ADDRESS = "INTEGER";
 
+        public static final String COLNAME_ASSIGNEDV4ADDRESSEXPIRY = "assignedV4AddressExpiry";
+        // The lease expiry timestamp in uint of milliseconds
+        public static final String COLTYPE_ASSIGNEDV4ADDRESSEXPIRY = "BIGINT";
+
         // Please note that the group hint is only a *hint*, hence its name. The client can offer
         // this information to nudge the grouping in the decision it thinks is right, but it can't
         // decide for the memory store what is the same L3 network.
@@ -86,13 +90,14 @@ public class IpMemoryStoreDatabase {
         public static final String COLTYPE_MTU = "INTEGER DEFAULT -1";
 
         public static final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS "
-                + TABLENAME                 + " ("
-                + COLNAME_L2KEY             + " " + COLTYPE_L2KEY + " PRIMARY KEY NOT NULL, "
-                + COLNAME_EXPIRYDATE        + " " + COLTYPE_EXPIRYDATE        + ", "
-                + COLNAME_ASSIGNEDV4ADDRESS + " " + COLTYPE_ASSIGNEDV4ADDRESS + ", "
-                + COLNAME_GROUPHINT         + " " + COLTYPE_GROUPHINT         + ", "
-                + COLNAME_DNSADDRESSES      + " " + COLTYPE_DNSADDRESSES      + ", "
-                + COLNAME_MTU               + " " + COLTYPE_MTU               + ")";
+                + TABLENAME                       + " ("
+                + COLNAME_L2KEY                   + " " + COLTYPE_L2KEY + " PRIMARY KEY NOT NULL, "
+                + COLNAME_EXPIRYDATE              + " " + COLTYPE_EXPIRYDATE              + ", "
+                + COLNAME_ASSIGNEDV4ADDRESS       + " " + COLTYPE_ASSIGNEDV4ADDRESS       + ", "
+                + COLNAME_ASSIGNEDV4ADDRESSEXPIRY + " " + COLTYPE_ASSIGNEDV4ADDRESSEXPIRY + ", "
+                + COLNAME_GROUPHINT               + " " + COLTYPE_GROUPHINT               + ", "
+                + COLNAME_DNSADDRESSES            + " " + COLTYPE_DNSADDRESSES            + ", "
+                + COLNAME_MTU                     + " " + COLTYPE_MTU                     + ")";
         public static final String DROP_TABLE = "DROP TABLE IF EXISTS " + TABLENAME;
     }
 
@@ -134,8 +139,9 @@ public class IpMemoryStoreDatabase {
     /** The SQLite DB helper */
     public static class DbHelper extends SQLiteOpenHelper {
         // Update this whenever changing the schema.
-        private static final int SCHEMA_VERSION = 2;
+        private static final int SCHEMA_VERSION = 4;
         private static final String DATABASE_FILENAME = "IpMemoryStore.db";
+        private static final String TRIGGER_NAME = "delete_cascade_to_private";
 
         public DbHelper(@NonNull final Context context) {
             super(context, DATABASE_FILENAME, null, SCHEMA_VERSION);
@@ -147,16 +153,38 @@ public class IpMemoryStoreDatabase {
         public void onCreate(@NonNull final SQLiteDatabase db) {
             db.execSQL(NetworkAttributesContract.CREATE_TABLE);
             db.execSQL(PrivateDataContract.CREATE_TABLE);
+            createTrigger(db);
         }
 
         /** Called when the database is upgraded */
         @Override
         public void onUpgrade(@NonNull final SQLiteDatabase db, final int oldVersion,
                 final int newVersion) {
-            // No upgrade supported yet.
-            db.execSQL(NetworkAttributesContract.DROP_TABLE);
-            db.execSQL(PrivateDataContract.DROP_TABLE);
-            onCreate(db);
+            try {
+                if (oldVersion < 2) {
+                    // upgrade from version 1 to version 2
+                    // since we starts from version 2, do nothing here
+                }
+
+                if (oldVersion < 3) {
+                    // upgrade from version 2 to version 3
+                    final String sqlUpgradeAddressExpiry = "alter table"
+                            + " " + NetworkAttributesContract.TABLENAME + " ADD"
+                            + " " + NetworkAttributesContract.COLNAME_ASSIGNEDV4ADDRESSEXPIRY
+                            + " " + NetworkAttributesContract.COLTYPE_ASSIGNEDV4ADDRESSEXPIRY;
+                    db.execSQL(sqlUpgradeAddressExpiry);
+                }
+
+                if (oldVersion < 4) {
+                    createTrigger(db);
+                }
+            } catch (SQLiteException e) {
+                Log.e(TAG, "Could not upgrade to the new version", e);
+                // create database with new version
+                db.execSQL(NetworkAttributesContract.DROP_TABLE);
+                db.execSQL(PrivateDataContract.DROP_TABLE);
+                onCreate(db);
+            }
         }
 
         /** Called when the database is downgraded */
@@ -166,7 +194,19 @@ public class IpMemoryStoreDatabase {
             // Downgrades always nuke all data and recreate an empty table.
             db.execSQL(NetworkAttributesContract.DROP_TABLE);
             db.execSQL(PrivateDataContract.DROP_TABLE);
+            db.execSQL("DROP TRIGGER " + TRIGGER_NAME);
             onCreate(db);
+        }
+
+        private void createTrigger(@NonNull final SQLiteDatabase db) {
+            final String createTrigger = "CREATE TRIGGER " + TRIGGER_NAME
+                    + " DELETE ON " + NetworkAttributesContract.TABLENAME
+                    + " BEGIN"
+                    + " DELETE FROM " + PrivateDataContract.TABLENAME + " WHERE OLD."
+                    + NetworkAttributesContract.COLNAME_L2KEY
+                    + "=" + PrivateDataContract.COLNAME_L2KEY
+                    + "; END;";
+            db.execSQL(createTrigger);
         }
     }
 
@@ -203,6 +243,10 @@ public class IpMemoryStoreDatabase {
         if (null != attributes.assignedV4Address) {
             values.put(NetworkAttributesContract.COLNAME_ASSIGNEDV4ADDRESS,
                     inet4AddressToIntHTH(attributes.assignedV4Address));
+        }
+        if (null != attributes.assignedV4AddressExpiry) {
+            values.put(NetworkAttributesContract.COLNAME_ASSIGNEDV4ADDRESSEXPIRY,
+                    attributes.assignedV4AddressExpiry);
         }
         if (null != attributes.groupHint) {
             values.put(NetworkAttributesContract.COLNAME_GROUPHINT, attributes.groupHint);
@@ -251,12 +295,17 @@ public class IpMemoryStoreDatabase {
         final NetworkAttributes.Builder builder = new NetworkAttributes.Builder();
         final int assignedV4AddressInt = getInt(cursor,
                 NetworkAttributesContract.COLNAME_ASSIGNEDV4ADDRESS, 0);
+        final long assignedV4AddressExpiry = getLong(cursor,
+                NetworkAttributesContract.COLNAME_ASSIGNEDV4ADDRESSEXPIRY, 0);
         final String groupHint = getString(cursor, NetworkAttributesContract.COLNAME_GROUPHINT);
         final byte[] dnsAddressesBlob =
                 getBlob(cursor, NetworkAttributesContract.COLNAME_DNSADDRESSES);
         final int mtu = getInt(cursor, NetworkAttributesContract.COLNAME_MTU, -1);
         if (0 != assignedV4AddressInt) {
             builder.setAssignedV4Address(intToInet4AddressHTH(assignedV4AddressInt));
+        }
+        if (0 != assignedV4AddressExpiry) {
+            builder.setAssignedV4AddressExpiry(assignedV4AddressExpiry);
         }
         builder.setGroupHint(groupHint);
         if (null != dnsAddressesBlob) {
@@ -305,7 +354,7 @@ public class IpMemoryStoreDatabase {
     }
 
     // If the attributes are null, this will only write the expiry.
-    // Returns an int out of Status.{SUCCESS,ERROR_*}
+    // Returns an int out of Status.{SUCCESS, ERROR_*}
     static int storeNetworkAttributes(@NonNull final SQLiteDatabase db, @NonNull final String key,
             final long expiry, @Nullable final NetworkAttributes attributes) {
         final ContentValues cv = toContentValues(key, attributes, expiry);
@@ -330,7 +379,7 @@ public class IpMemoryStoreDatabase {
         return Status.ERROR_STORAGE;
     }
 
-    // Returns an int out of Status.{SUCCESS,ERROR_*}
+    // Returns an int out of Status.{SUCCESS, ERROR_*}
     static int storeBlob(@NonNull final SQLiteDatabase db, @NonNull final String key,
             @NonNull final String clientId, @NonNull final String name,
             @NonNull final byte[] data) {
@@ -491,6 +540,93 @@ public class IpMemoryStoreDatabase {
         }
         cursor.close();
         return bestKey;
+    }
+
+    // Drops all records that are expired. Relevance has decayed to zero of these records. Returns
+    // an int out of Status.{SUCCESS, ERROR_*}
+    static int dropAllExpiredRecords(@NonNull final SQLiteDatabase db) {
+        db.beginTransaction();
+        try {
+            // Deletes NetworkAttributes that have expired.
+            db.delete(NetworkAttributesContract.TABLENAME,
+                    NetworkAttributesContract.COLNAME_EXPIRYDATE + " < ?",
+                    new String[]{Long.toString(System.currentTimeMillis())});
+            db.setTransactionSuccessful();
+        } catch (SQLiteException e) {
+            Log.e(TAG, "Could not delete data from memory store", e);
+            return Status.ERROR_STORAGE;
+        } finally {
+            db.endTransaction();
+        }
+
+        // Execute vacuuming here if above operation has no exception. If above operation got
+        // exception, vacuuming can be ignored for reducing unnecessary consumption.
+        try {
+            db.execSQL("VACUUM");
+        } catch (SQLiteException e) {
+            // Do nothing.
+        }
+        return Status.SUCCESS;
+    }
+
+    // Drops number of records that start from the lowest expiryDate. Returns an int out of
+    // Status.{SUCCESS, ERROR_*}
+    static int dropNumberOfRecords(@NonNull final SQLiteDatabase db, int number) {
+        if (number <= 0) {
+            return Status.ERROR_ILLEGAL_ARGUMENT;
+        }
+
+        // Queries number of NetworkAttributes that start from the lowest expiryDate.
+        final Cursor cursor = db.query(NetworkAttributesContract.TABLENAME,
+                new String[] {NetworkAttributesContract.COLNAME_EXPIRYDATE}, // columns
+                null, // selection
+                null, // selectionArgs
+                null, // groupBy
+                null, // having
+                NetworkAttributesContract.COLNAME_EXPIRYDATE, // orderBy
+                Integer.toString(number)); // limit
+        if (cursor == null || cursor.getCount() <= 0) return Status.ERROR_GENERIC;
+        cursor.moveToLast();
+
+        //Get the expiryDate from last record.
+        final long expiryDate = getLong(cursor, NetworkAttributesContract.COLNAME_EXPIRYDATE, 0);
+        cursor.close();
+
+        db.beginTransaction();
+        try {
+            // Deletes NetworkAttributes that expiryDate are lower than given value.
+            db.delete(NetworkAttributesContract.TABLENAME,
+                    NetworkAttributesContract.COLNAME_EXPIRYDATE + " <= ?",
+                    new String[]{Long.toString(expiryDate)});
+            db.setTransactionSuccessful();
+        } catch (SQLiteException e) {
+            Log.e(TAG, "Could not delete data from memory store", e);
+            return Status.ERROR_STORAGE;
+        } finally {
+            db.endTransaction();
+        }
+
+        // Execute vacuuming here if above operation has no exception. If above operation got
+        // exception, vacuuming can be ignored for reducing unnecessary consumption.
+        try {
+            db.execSQL("VACUUM");
+        } catch (SQLiteException e) {
+            // Do nothing.
+        }
+        return Status.SUCCESS;
+    }
+
+    static int getTotalRecordNumber(@NonNull final SQLiteDatabase db) {
+        // Query the total number of NetworkAttributes
+        final Cursor cursor = db.query(NetworkAttributesContract.TABLENAME,
+                new String[] {"COUNT(*)"}, // columns
+                null, // selection
+                null, // selectionArgs
+                null, // groupBy
+                null, // having
+                null); // orderBy
+        cursor.moveToFirst();
+        return cursor == null ? 0 : cursor.getInt(0);
     }
 
     // Helper methods

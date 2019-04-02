@@ -32,6 +32,7 @@ import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -916,13 +917,13 @@ public final class Settings {
     }
 
     /*
-     * Update the shared user setting when a package using
-     * specifying the shared user id is removed. The gids
-     * associated with each permission of the deleted package
-     * are removed from the shared user's gid list only if its
-     * not in use by other permissions of packages in the
-     * shared user setting.
+     * Update the shared user setting when a package with a shared user id is removed. The gids
+     * associated with each permission of the deleted package are removed from the shared user'
+     * gid list only if its not in use by other permissions of packages in the shared user setting.
+     *
+     * @return the affected user id
      */
+    @UserIdInt
     int updateSharedUserPermsLPw(PackageSetting deletedPs, int userId) {
         if ((deletedPs == null) || (deletedPs.pkg == null)) {
             Slog.i(PackageManagerService.TAG,
@@ -937,6 +938,7 @@ public final class Settings {
 
         SharedUserSetting sus = deletedPs.sharedUser;
 
+        int affectedUserId = UserHandle.USER_NULL;
         // Update permissions
         for (String eachPerm : deletedPs.pkg.requestedPermissions) {
             BasePermission bp = mPermissions.getPermission(eachPerm);
@@ -983,17 +985,22 @@ public final class Settings {
 
             if (permissionsState.revokeInstallPermission(bp) ==
                     PermissionsState.PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED) {
-                return UserHandle.USER_ALL;
+                affectedUserId = UserHandle.USER_ALL;
             }
 
             // Try to revoke as an install permission which is per user.
             if (permissionsState.revokeRuntimePermission(bp, userId) ==
                     PermissionsState.PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED) {
-                return userId;
+                if (affectedUserId == UserHandle.USER_NULL) {
+                    affectedUserId = userId;
+                } else if (affectedUserId != userId) {
+                    // Multiple users affected.
+                    affectedUserId = UserHandle.USER_ALL;
+                }
             }
         }
 
-        return UserHandle.USER_NULL;
+        return affectedUserId;
     }
 
     int removePackageLPw(String name) {
@@ -4376,6 +4383,7 @@ public final class Settings {
             ApplicationInfo.PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION, "PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION",
             ApplicationInfo.PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_UNRESIZEABLE, "PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_UNRESIZEABLE",
             ApplicationInfo.PRIVATE_FLAG_ALLOW_AUDIO_PLAYBACK_CAPTURE, "ALLOW_AUDIO_PLAYBACK_CAPTURE",
+            ApplicationInfo.PRIVATE_FLAG_ALLOW_EXTERNAL_STORAGE_SANDBOX, "ALLOW_EXTERNAL_STORAGE_SANDBOX",
             ApplicationInfo.PRIVATE_FLAG_BACKUP_IN_FOREGROUND, "BACKUP_IN_FOREGROUND",
             ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE, "CANT_SAVE_STATE",
             ApplicationInfo.PRIVATE_FLAG_DEFAULT_TO_DEVICE_PROTECTED_STORAGE, "DEFAULT_TO_DEVICE_PROTECTED_STORAGE",

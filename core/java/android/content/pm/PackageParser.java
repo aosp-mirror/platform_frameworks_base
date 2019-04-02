@@ -166,6 +166,9 @@ public class PackageParser {
     private static final float DEFAULT_PRE_Q_MIN_ASPECT_RATIO = 1.333f;
     private static final float DEFAULT_PRE_Q_MIN_ASPECT_RATIO_WATCH = 1f;
 
+    private static final int DEFAULT_MIN_SDK_VERSION = 1;
+    private static final int DEFAULT_TARGET_SDK_VERSION = 0;
+
     // TODO: switch outError users to PackageParserException
     // TODO: refactor "codePath" to "apkPath"
 
@@ -466,6 +469,8 @@ public class PackageParser {
         public final int versionCodeMajor;
         public final int revisionCode;
         public final int installLocation;
+        public final int minSdkVersion;
+        public final int targetSdkVersion;
         public final VerifierInfo[] verifiers;
         public final SigningDetails signingDetails;
         public final boolean coreApp;
@@ -484,7 +489,8 @@ public class PackageParser {
                 int revisionCode, int installLocation, List<VerifierInfo> verifiers,
                 SigningDetails signingDetails, boolean coreApp,
                 boolean debuggable, boolean multiArch, boolean use32bitAbi,
-                boolean useEmbeddedDex, boolean extractNativeLibs, boolean isolatedSplits) {
+                boolean useEmbeddedDex, boolean extractNativeLibs, boolean isolatedSplits,
+                int minSdkVersion, int targetSdkVersion) {
             this.codePath = codePath;
             this.packageName = packageName;
             this.splitName = splitName;
@@ -505,6 +511,8 @@ public class PackageParser {
             this.extractNativeLibs = extractNativeLibs;
             this.isolatedSplits = isolatedSplits;
             this.isSplitRequired = isSplitRequired;
+            this.minSdkVersion = minSdkVersion;
+            this.targetSdkVersion = targetSdkVersion;
         }
 
         public long getLongVersionCode() {
@@ -1712,6 +1720,8 @@ public class PackageParser {
         int installLocation = PARSE_DEFAULT_INSTALL_LOCATION;
         int versionCode = 0;
         int versionCodeMajor = 0;
+        int targetSdkVersion = DEFAULT_TARGET_SDK_VERSION;
+        int minSdkVersion = DEFAULT_MIN_SDK_VERSION;
         int revisionCode = 0;
         boolean coreApp = false;
         boolean debuggable = false;
@@ -1749,7 +1759,7 @@ public class PackageParser {
             }
         }
 
-        // Only search the tree when the tag is directly below <manifest>
+        // Only search the tree when the tag is the direct child of <manifest> tag
         int type;
         final int searchDepth = parser.getDepth() + 1;
 
@@ -1800,13 +1810,25 @@ public class PackageParser {
                             PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
                             "<uses-split> tag requires 'android:name' attribute");
                 }
+            } else if (TAG_USES_SDK.equals(parser.getName())) {
+                for (int i = 0; i < attrs.getAttributeCount(); ++i) {
+                    final String attr = attrs.getAttributeName(i);
+                    if ("targetSdkVersion".equals(attr)) {
+                        targetSdkVersion = attrs.getAttributeIntValue(i,
+                                DEFAULT_TARGET_SDK_VERSION);
+                    }
+                    if ("minSdkVersion".equals(attr)) {
+                        minSdkVersion = attrs.getAttributeIntValue(i, DEFAULT_MIN_SDK_VERSION);
+                    }
+                }
             }
         }
 
         return new ApkLite(codePath, packageSplit.first, packageSplit.second, isFeatureSplit,
                 configForSplit, usesSplitName, isSplitRequired, versionCode, versionCodeMajor,
                 revisionCode, installLocation, verifiers, signingDetails, coreApp, debuggable,
-                multiArch, use32bitAbi, useEmbeddedDex, extractNativeLibs, isolatedSplits);
+                multiArch, use32bitAbi, useEmbeddedDex, extractNativeLibs, isolatedSplits,
+                minSdkVersion, targetSdkVersion);
     }
 
     /**
@@ -2525,46 +2547,26 @@ public class PackageParser {
         // STOPSHIP(b/112545973): remove once feature enabled by default
         if (!StorageManager.hasIsolatedStorage()) {
             if ("android".equals(pkg.packageName)) {
-                final ArraySet<String> newGroups = new ArraySet<>();
-                newGroups.add(android.Manifest.permission_group.MEDIA_AURAL);
-                newGroups.add(android.Manifest.permission_group.MEDIA_VISUAL);
-
-                for (int i = pkg.permissionGroups.size() - 1; i >= 0; i--) {
-                    final PermissionGroup pg = pkg.permissionGroups.get(i);
-                    if (newGroups.contains(pg.info.name)) {
-                        pkg.permissionGroups.remove(i);
-                    }
-                }
-
                 final ArraySet<String> newPermissions = new ArraySet<>();
-                newPermissions.add(android.Manifest.permission.READ_MEDIA_AUDIO);
-                newPermissions.add(android.Manifest.permission.READ_MEDIA_VIDEO);
-                newPermissions.add(android.Manifest.permission.READ_MEDIA_IMAGES);
                 newPermissions.add(android.Manifest.permission.ACCESS_MEDIA_LOCATION);
                 newPermissions.add(android.Manifest.permission.WRITE_OBB);
-
-                final ArraySet<String> removedPermissions = new ArraySet<>();
-                removedPermissions.add(android.Manifest.permission.READ_EXTERNAL_STORAGE);
-                removedPermissions.add(android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
                 for (int i = pkg.permissions.size() - 1; i >= 0; i--) {
                     final Permission p = pkg.permissions.get(i);
                     if (newPermissions.contains(p.info.name)) {
                         pkg.permissions.remove(i);
-                    } else if (removedPermissions.contains(p.info.name)) {
-                        p.info.flags &= ~PermissionInfo.FLAG_REMOVED;
                     }
                 }
             }
         } else {
             if (FORCE_AUDIO_PACKAGES.contains(pkg.packageName)) {
-                pkg.requestedPermissions.add(android.Manifest.permission.READ_MEDIA_AUDIO);
+                pkg.requestedPermissions.add(android.Manifest.permission.READ_EXTERNAL_STORAGE);
             }
             if (FORCE_VIDEO_PACKAGES.contains(pkg.packageName)) {
-                pkg.requestedPermissions.add(android.Manifest.permission.READ_MEDIA_VIDEO);
+                pkg.requestedPermissions.add(android.Manifest.permission.READ_EXTERNAL_STORAGE);
             }
             if (FORCE_IMAGES_PACKAGES.contains(pkg.packageName)) {
-                pkg.requestedPermissions.add(android.Manifest.permission.READ_MEDIA_IMAGES);
+                pkg.requestedPermissions.add(android.Manifest.permission.READ_EXTERNAL_STORAGE);
             }
         }
 
@@ -3665,6 +3667,12 @@ public class PackageParser {
                 R.styleable.AndroidManifestApplication_allowAudioPlaybackCapture,
                 owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.Q)) {
             ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_ALLOW_AUDIO_PLAYBACK_CAPTURE;
+        }
+
+        if (sa.getBoolean(
+                R.styleable.AndroidManifestApplication_allowExternalStorageSandbox,
+                owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.Q)) {
+            ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_ALLOW_EXTERNAL_STORAGE_SANDBOX;
         }
 
         ai.maxAspectRatio = sa.getFloat(R.styleable.AndroidManifestApplication_maxAspectRatio, 0);
@@ -4774,7 +4782,7 @@ public class PackageParser {
             // except for watches which always supported 1:1.
             minAspectRatio = owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.Q
                     ? 0
-                    : mCallback.hasFeature(FEATURE_WATCH)
+                    : (mCallback != null && mCallback.hasFeature(FEATURE_WATCH))
                             ? DEFAULT_PRE_Q_MIN_ASPECT_RATIO_WATCH
                             : DEFAULT_PRE_Q_MIN_ASPECT_RATIO;
         }
@@ -8350,69 +8358,37 @@ public class PackageParser {
         }
     }
 
-    public static PackageInfo generatePackageInfoFromApex(File apexFile, boolean collectCerts)
+    // TODO(b/129261524): Clean up API
+    /**
+     * PackageInfo parser specifically for apex files.
+     * NOTE: It will collect certificates
+     *
+     * @param apexFile
+     * @return PackageInfo
+     * @throws PackageParserException
+     */
+    public static PackageInfo generatePackageInfoFromApex(File apexFile, int flags)
             throws PackageParserException {
-        PackageInfo pi = new PackageInfo();
-        int parseFlags = 0;
-        if (collectCerts) {
-            parseFlags |= PARSE_COLLECT_CERTIFICATES;
-            try {
-                if (apexFile.getCanonicalPath().startsWith("/system")) {
-                    // Don't need verify the APK integrity of APEXes on /system, just like
-                    // we don't do that for APKs.
-                    // TODO(b/126514108): we may be able to do this for APEXes on /data as well.
-                    parseFlags |= PARSE_IS_SYSTEM_DIR;
-                }
-            } catch (IOException e) {
-                throw new PackageParserException(INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION,
-                        "Failed to get path for " + apexFile.getPath(), e);
-            }
-        }
+        PackageParser pp = new PackageParser();
+        final Package p = pp.parsePackage(apexFile, flags, false);
+        PackageUserState state = new PackageUserState();
+        PackageInfo pi = generatePackageInfo(p, EmptyArray.INT, flags, 0, 0,
+                Collections.emptySet(), state);
 
-        // TODO(b/123086053) properly fill in the ApplicationInfo with data from AndroidManifest
-        // Add ApplicationInfo to the PackageInfo.
-        ApplicationInfo ai = new ApplicationInfo();
-        ai.sourceDir = apexFile.getPath();
-        ai.flags = ApplicationInfo.FLAG_SYSTEM | ApplicationInfo.FLAG_INSTALLED;
-        ai.enabled = true;
-        ai.targetSdkVersion = 28;
-        ai.targetSandboxVersion = 0;
-        pi.applicationInfo = ai;
+        pi.applicationInfo.sourceDir = apexFile.getPath();
+        pi.applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM | ApplicationInfo.FLAG_INSTALLED;
+        pi.isApex = true;
 
-
-        // TODO(b/123052859): We should avoid these repeated calls to parseApkLite each time
-        // we want to generate information for APEX modules.
-        PackageParser.ApkLite apk = PackageParser.parseApkLite(apexFile, parseFlags);
-
-        pi.packageName = apk.packageName;
-        ai.packageName = apk.packageName;
-        pi.setLongVersionCode(apk.getLongVersionCode());
-        ai.setVersionCode(apk.getLongVersionCode());
-
-        if (collectCerts) {
-            if (apk.signingDetails.hasPastSigningCertificates()) {
-                // Package has included signing certificate rotation information.  Return
-                // the oldest cert so that programmatic checks keep working even if unaware
-                // of key rotation.
-                pi.signatures = new Signature[1];
-                pi.signatures[0] = apk.signingDetails.pastSigningCertificates[0];
-            } else if (apk.signingDetails.hasSignatures()) {
-                // otherwise keep old behavior
-                int numberOfSigs = apk.signingDetails.signatures.length;
-                pi.signatures = new Signature[numberOfSigs];
-                System.arraycopy(apk.signingDetails.signatures, 0, pi.signatures, 0,
-                    numberOfSigs);
-            }
-
-            if (apk.signingDetails != SigningDetails.UNKNOWN) {
+        // Collect certificates
+        if ((flags & PackageManager.GET_SIGNING_CERTIFICATES) != 0) {
+            collectCertificates(p, apexFile, false);
+            if (p.mSigningDetails != SigningDetails.UNKNOWN) {
                 // only return a valid SigningInfo if there is signing information to report
-                pi.signingInfo = new SigningInfo(apk.signingDetails);
+                pi.signingInfo = new SigningInfo(p.mSigningDetails);
             } else {
                 pi.signingInfo = null;
             }
         }
-
-        pi.isApex = true;
         return pi;
     }
 }

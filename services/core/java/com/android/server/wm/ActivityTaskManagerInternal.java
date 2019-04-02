@@ -510,4 +510,7 @@ public abstract class ActivityTaskManagerInternal {
      * Called by DevicePolicyManagerService to set the package name of the device owner.
      */
     public abstract void setDeviceOwnerPackageName(String deviceOwnerPkg);
+
+    /** Set all associated companion app that belongs to an userId. */
+    public abstract void setCompanionAppPackages(int userId, Set<String> companionAppPackages);
 }

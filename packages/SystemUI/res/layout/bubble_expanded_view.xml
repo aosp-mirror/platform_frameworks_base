@@ -33,35 +33,13 @@
         android:layout_height="wrap_content"
         android:animateLayoutChanges="true">
 
-        <LinearLayout
-            android:id="@+id/header_layout"
-            android:layout_height="@dimen/bubble_expanded_header_height"
-            android:layout_width="match_parent"
-            android:animateLayoutChanges="true"
-            android:gravity="end|center_vertical"
-            android:orientation="horizontal">
-
-            <ImageButton
-                android:id="@+id/deep_link_button"
-                android:layout_width="@dimen/bubble_header_icon_size"
-                android:layout_height="@dimen/bubble_header_icon_size"
-                android:src="@drawable/ic_open_in_new"
-                android:scaleType="center"
-                android:tint="?android:attr/colorForeground"
-                android:background="?android:attr/selectableItemBackground"
-            />
-
-            <ImageButton
-                android:id="@id/settings_button"
-                android:layout_width="@dimen/bubble_header_icon_size"
-                android:layout_height="@dimen/bubble_header_icon_size"
-                android:src="@drawable/ic_settings"
-                android:scaleType="center"
-                android:tint="?android:attr/colorForeground"
-                android:background="?android:attr/selectableItemBackground"
-            />
-
-        </LinearLayout>
+        <ImageView
+            android:id="@+id/settings_button"
+            android:layout_width="@dimen/bubble_header_icon_size"
+            android:layout_height="@dimen/bubble_header_icon_size"
+            android:src="@drawable/ic_settings"
+            android:scaleType="center"
+            android:layout_gravity="end"/>
 
         <include layout="@layout/bubble_permission_view"
                  android:id="@+id/permission_layout"

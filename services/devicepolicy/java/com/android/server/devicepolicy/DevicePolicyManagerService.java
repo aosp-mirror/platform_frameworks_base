@@ -8398,13 +8398,40 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public boolean checkDeviceIdentifierAccess(String packageName, int userHandle, int pid,
-            int uid) {
+    public boolean checkDeviceIdentifierAccess(String packageName, int pid, int uid) {
         // If the caller is not a system app then it should only be able to check its own device
         // identifier access.
-        int callingAppId = UserHandle.getAppId(mInjector.binderGetCallingUid());
-        if (callingAppId >= Process.FIRST_APPLICATION_UID
-                && callingAppId != UserHandle.getAppId(uid)) {
+        int callingUid = mInjector.binderGetCallingUid();
+        int callingPid = mInjector.binderGetCallingPid();
+        if (UserHandle.getAppId(callingUid) >= Process.FIRST_APPLICATION_UID
+                && (callingUid != uid || callingPid != pid)) {
+            String message = String.format(
+                    "Calling uid %d, pid %d cannot check device identifier access for package %s "
+                            + "(uid=%d, pid=%d)", callingUid, callingPid, packageName, uid, pid);
+            Log.w(LOG_TAG, message);
+            throw new SecurityException(message);
+        }
+        // Verify that the specified packages matches the provided uid.
+        int userId = UserHandle.getUserId(uid);
+        try {
+            ApplicationInfo appInfo = mIPackageManager.getApplicationInfo(packageName, 0, userId);
+            // Since this call goes directly to PackageManagerService a NameNotFoundException is not
+            // thrown but null data can be returned; if the appInfo for the specified package cannot
+            // be found then return false to prevent crashing the app.
+            if (appInfo == null) {
+                Log.w(LOG_TAG,
+                        String.format("appInfo could not be found for package %s", packageName));
+                return false;
+            } else if (uid != appInfo.uid) {
+                String message = String.format("Package %s (uid=%d) does not match provided uid %d",
+                        packageName, appInfo.uid, uid);
+                Log.w(LOG_TAG, message);
+                throw new SecurityException(message);
+            }
+        } catch (RemoteException e) {
+            // If an exception is caught obtaining the appInfo just return false to prevent crashing
+            // apps due to an internal error.
+            Log.e(LOG_TAG, "Exception caught obtaining appInfo for package " + packageName, e);
             return false;
         }
         // A device or profile owner must also have the READ_PHONE_STATE permission to access device
@@ -8421,7 +8448,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return true;
         }
         // Allow access to the profile owner for the specified user, or delegate cert installer
-        ComponentName profileOwner = getProfileOwnerAsUser(userHandle);
+        ComponentName profileOwner = getProfileOwnerAsUser(userId);
         if (profileOwner != null && (profileOwner.getPackageName().equals(packageName)
                     || isCallerDelegate(packageName, uid, DELEGATION_CERT_INSTALL))) {
             return true;
@@ -11180,47 +11207,50 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         @Override
         public Intent createUserRestrictionSupportIntent(int userId, String userRestriction) {
-            int source;
-            long ident = mInjector.binderClearCallingIdentity();
+            final long ident = mInjector.binderClearCallingIdentity();
             try {
-                source = mUserManager.getUserRestrictionSource(userRestriction,
-                        UserHandle.of(userId));
+                final List<UserManager.EnforcingUser> sources = mUserManager
+                        .getUserRestrictionSources(userRestriction, UserHandle.of(userId));
+                if (sources == null || sources.isEmpty()) {
+                    // The restriction is not enforced.
+                    return null;
+                } else if (sources.size() > 1) {
+                    // In this case, we'll show an admin support dialog that does not
+                    // specify the admin.
+                    // TODO(b/128928355): if this restriction is enforced by multiple DPCs, return
+                    // the admin for the calling user.
+                    return DevicePolicyManagerService.this.createShowAdminSupportIntent(
+                            null, userId);
+                }
+                final UserManager.EnforcingUser enforcingUser = sources.get(0);
+                final int sourceType = enforcingUser.getUserRestrictionSource();
+                final int enforcingUserId = enforcingUser.getUserHandle().getIdentifier();
+                if (sourceType == UserManager.RESTRICTION_SOURCE_PROFILE_OWNER) {
+                    // Restriction was enforced by PO
+                    final ComponentName profileOwner = mOwners.getProfileOwnerComponent(
+                            enforcingUserId);
+                    if (profileOwner != null) {
+                        return DevicePolicyManagerService.this.createShowAdminSupportIntent(
+                                profileOwner, enforcingUserId);
+                    }
+                } else if (sourceType == UserManager.RESTRICTION_SOURCE_DEVICE_OWNER) {
+                    // Restriction was enforced by DO
+                    final Pair<Integer, ComponentName> deviceOwner =
+                            mOwners.getDeviceOwnerUserIdAndComponent();
+                    if (deviceOwner != null) {
+                        return DevicePolicyManagerService.this.createShowAdminSupportIntent(
+                                deviceOwner.second, deviceOwner.first);
+                    }
+                } else if (sourceType == UserManager.RESTRICTION_SOURCE_SYSTEM) {
+                    /*
+                     * In this case, the user restriction is enforced by the system.
+                     * So we won't show an admin support intent, even if it is also
+                     * enforced by a profile/device owner.
+                     */
+                    return null;
+                }
             } finally {
                 mInjector.binderRestoreCallingIdentity(ident);
-            }
-            if ((source & UserManager.RESTRICTION_SOURCE_SYSTEM) != 0) {
-                /*
-                 * In this case, the user restriction is enforced by the system.
-                 * So we won't show an admin support intent, even if it is also
-                 * enforced by a profile/device owner.
-                 */
-                return null;
-            }
-            boolean enforcedByDo = (source & UserManager.RESTRICTION_SOURCE_DEVICE_OWNER) != 0;
-            boolean enforcedByPo = (source & UserManager.RESTRICTION_SOURCE_PROFILE_OWNER) != 0;
-            if (enforcedByDo && enforcedByPo) {
-                // In this case, we'll show an admin support dialog that does not
-                // specify the admin.
-                return DevicePolicyManagerService.this.createShowAdminSupportIntent(null, userId);
-            } else if (enforcedByPo) {
-                final ComponentName profileOwner = mOwners.getProfileOwnerComponent(userId);
-                if (profileOwner != null) {
-                    return DevicePolicyManagerService.this
-                            .createShowAdminSupportIntent(profileOwner, userId);
-                }
-                // This could happen if another thread has changed the profile owner since we called
-                // getUserRestrictionSource
-                return null;
-            } else if (enforcedByDo) {
-                final Pair<Integer, ComponentName> deviceOwner
-                        = mOwners.getDeviceOwnerUserIdAndComponent();
-                if (deviceOwner != null) {
-                    return DevicePolicyManagerService.this
-                            .createShowAdminSupportIntent(deviceOwner.second, deviceOwner.first);
-                }
-                // This could happen if another thread has changed the device owner since we called
-                // getUserRestrictionSource
-                return null;
             }
             return null;
         }

@@ -94,7 +94,10 @@ public class DozeUi implements DozeMachine.Part {
                     @Override
                     public void onPulseStarted() {
                         try {
-                            mMachine.requestState(DozeMachine.State.DOZE_PULSING);
+                            mMachine.requestState(
+                                    reason == DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN
+                                            ? DozeMachine.State.DOZE_PULSING_BRIGHT
+                                            : DozeMachine.State.DOZE_PULSING);
                         } catch (IllegalStateException e) {
                             // It's possible that the pulse was asynchronously cancelled while
                             // we were waiting for it to start (under stress conditions.)
@@ -148,6 +151,7 @@ public class DozeUi implements DozeMachine.Part {
         switch (state) {
             case DOZE_REQUEST_PULSE:
             case DOZE_PULSING:
+            case DOZE_PULSING_BRIGHT:
             case DOZE_PULSE_DONE:
                 mHost.setAnimateWakeup(true);
                 break;

@@ -1764,7 +1764,7 @@ public class HdmiControlService extends SystemService {
         }
 
         @Override
-        // TODO(AMYJOJO): add a result callback
+        // TODO(b/128427908): add a result callback
         public void askRemoteDeviceToBecomeActiveSource(int physicalAddress) {
             enforceAccessPermission();
             runOnServiceThread(new Runnable() {

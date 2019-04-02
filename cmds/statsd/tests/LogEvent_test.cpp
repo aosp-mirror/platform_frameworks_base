@@ -26,6 +26,7 @@ namespace statsd {
 
 using std::string;
 using util::ProtoOutputStream;
+using util::ProtoReader;
 
 TEST(LogEventTest, TestLogParsing) {
     LogEvent event1(1, 2000);
@@ -590,12 +591,12 @@ TEST(LogEventTest, TestBinaryFieldAtom) {
     std::vector<uint8_t> outData;
     outData.resize(proto.size());
     size_t pos = 0;
-    auto iter = proto.data();
-    while (iter.readBuffer() != NULL) {
-        size_t toRead = iter.currentToRead();
-        std::memcpy(&(outData[pos]), iter.readBuffer(), toRead);
+    sp<ProtoReader> reader = proto.data();
+    while (reader->readBuffer() != NULL) {
+        size_t toRead = reader->currentToRead();
+        std::memcpy(&(outData[pos]), reader->readBuffer(), toRead);
         pos += toRead;
-        iter.rp()->move(toRead);
+        reader->move(toRead);
     }
 
     std::string result_str(outData.begin(), outData.end());
@@ -629,12 +630,12 @@ TEST(LogEventTest, TestBinaryFieldAtom_empty) {
     std::vector<uint8_t> outData;
     outData.resize(proto.size());
     size_t pos = 0;
-    auto iter = proto.data();
-    while (iter.readBuffer() != NULL) {
-        size_t toRead = iter.currentToRead();
-        std::memcpy(&(outData[pos]), iter.readBuffer(), toRead);
+    sp<ProtoReader> reader = proto.data();
+    while (reader->readBuffer() != NULL) {
+        size_t toRead = reader->currentToRead();
+        std::memcpy(&(outData[pos]), reader->readBuffer(), toRead);
         pos += toRead;
-        iter.rp()->move(toRead);
+        reader->move(toRead);
     }
 
     std::string result_str(outData.begin(), outData.end());
@@ -643,6 +644,22 @@ TEST(LogEventTest, TestBinaryFieldAtom_empty) {
 
     EXPECT_EQ(orig_str, result_str);
 }
+
+TEST(LogEventTest, TestWriteExperimentIdsToProto) {
+    std::vector<int64_t> expIds;
+    expIds.push_back(5038);
+    std::vector<uint8_t> proto;
+
+    writeExperimentIdsToProto(expIds, &proto);
+
+    EXPECT_EQ(proto.size(), 3);
+    // Proto wire format for field ID 1, varint
+    EXPECT_EQ(proto[0], 0x08);
+    // varint of 5038, 2 bytes long
+    EXPECT_EQ(proto[1], 0xae);
+    EXPECT_EQ(proto[2], 0x27);
+}
+
 
 }  // namespace statsd
 }  // namespace os

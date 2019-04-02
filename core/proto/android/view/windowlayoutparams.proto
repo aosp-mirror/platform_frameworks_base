@@ -18,7 +18,7 @@ syntax = "proto2";
 
 import "frameworks/base/core/proto/android/graphics/pixelformat.proto";
 import "frameworks/base/core/proto/android/view/display.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 package android.view;
 option java_multiple_files = true;

@@ -29,7 +29,6 @@ import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.content.res.AssetFileDescriptor;
@@ -40,7 +39,6 @@ import android.os.Environment;
 import android.os.FileUtils;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -597,24 +595,14 @@ public class RingtoneManager {
 
     @UnsupportedAppUsage
     private Cursor getMediaRingtones(Context context) {
-        if (PackageManager.PERMISSION_GRANTED != context.checkPermission(
-                android.Manifest.permission.READ_EXTERNAL_STORAGE,
-                Process.myPid(), Process.myUid())) {
-            Log.w(TAG, "No READ_EXTERNAL_STORAGE permission, ignoring ringtones on ext storage");
-            return null;
-        }
-         // Get the external media cursor. First check to see if it is mounted.
-        final String status = Environment.getExternalStorageState();
-        
-        return (status.equals(Environment.MEDIA_MOUNTED) ||
-                    status.equals(Environment.MEDIA_MOUNTED_READ_ONLY))
-                ? query(
-                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, MEDIA_COLUMNS,
-                    constructBooleanTrueWhereClause(mFilterColumns), null,
-                    MediaStore.Audio.Media.DEFAULT_SORT_ORDER, context)
-                : null;
+        // MediaStore now returns ringtones on other storage devices, even when
+        // we don't have storage or audio permissions
+        return query(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, MEDIA_COLUMNS,
+                constructBooleanTrueWhereClause(mFilterColumns), null,
+                MediaStore.Audio.Media.DEFAULT_SORT_ORDER, context);
     }
-    
+
     private void setFilterColumnsList(int type) {
         List<String> columns = mFilterColumns;
         columns.clear();

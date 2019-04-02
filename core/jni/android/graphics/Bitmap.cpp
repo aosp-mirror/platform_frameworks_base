@@ -39,7 +39,6 @@ static jclass   gBitmap_class;
 static jfieldID gBitmap_nativePtr;
 static jmethodID gBitmap_constructorMethodID;
 static jmethodID gBitmap_reinitMethodID;
-static jmethodID gBitmap_getAllocationByteCountMethodID;
 
 namespace android {
 
@@ -193,11 +192,6 @@ void reinitBitmap(JNIEnv* env, jobject javaBitmap, const SkImageInfo& info,
             info.width(), info.height(), isPremultiplied);
 }
 
-int getBitmapAllocationByteCount(JNIEnv* env, jobject javaBitmap)
-{
-    return env->CallIntMethod(javaBitmap, gBitmap_getAllocationByteCountMethodID);
-}
-
 jobject createBitmap(JNIEnv* env, Bitmap* bitmap,
         int bitmapCreateFlags, jbyteArray ninePatchChunk, jobject ninePatchInsets,
         int density) {
@@ -236,8 +230,7 @@ Bitmap& toBitmap(JNIEnv* env, jobject bitmap) {
     return localBitmap->bitmap();
 }
 
-Bitmap& toBitmap(JNIEnv* env, jlong bitmapHandle) {
-    SkASSERT(env);
+Bitmap& toBitmap(jlong bitmapHandle) {
     LocalScopedBitmap localBitmap(bitmapHandle);
     return localBitmap->bitmap();
 }
@@ -1227,7 +1220,6 @@ int register_android_graphics_Bitmap(JNIEnv* env)
     gBitmap_nativePtr = GetFieldIDOrDie(env, gBitmap_class, "mNativePtr", "J");
     gBitmap_constructorMethodID = GetMethodIDOrDie(env, gBitmap_class, "<init>", "(JIIIZ[BLandroid/graphics/NinePatch$InsetStruct;Z)V");
     gBitmap_reinitMethodID = GetMethodIDOrDie(env, gBitmap_class, "reinit", "(IIZ)V");
-    gBitmap_getAllocationByteCountMethodID = GetMethodIDOrDie(env, gBitmap_class, "getAllocationByteCount", "()I");
     return android::RegisterMethodsOrDie(env, "android/graphics/Bitmap", gBitmapMethods,
                                          NELEM(gBitmapMethods));
 }

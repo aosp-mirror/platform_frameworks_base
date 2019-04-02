@@ -41,7 +41,7 @@ jobject createBitmap(JNIEnv* env, Bitmap* bitmap,
 void toSkBitmap(jlong bitmapHandle, SkBitmap* outBitmap);
 
 Bitmap& toBitmap(JNIEnv* env, jobject bitmap);
-Bitmap& toBitmap(JNIEnv* env, jlong bitmapHandle);
+Bitmap& toBitmap(jlong bitmapHandle);
 
 // NDK access
 void imageInfo(JNIEnv* env, jobject bitmap, AndroidBitmapInfo* info);
@@ -55,8 +55,6 @@ bool unlockPixels(JNIEnv* env, jobject bitmap);
 */
 void reinitBitmap(JNIEnv* env, jobject javaBitmap, const SkImageInfo& info,
         bool isPremultiplied);
-
-int getBitmapAllocationByteCount(JNIEnv* env, jobject javaBitmap);
 
 } // namespace bitmap
 

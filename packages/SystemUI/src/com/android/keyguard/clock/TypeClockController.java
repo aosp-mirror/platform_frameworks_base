@@ -15,14 +15,18 @@
  */
 package com.android.keyguard.clock;
 
+import android.app.WallpaperManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Paint.Style;
 import android.view.LayoutInflater;
 import android.view.View;
 
+import com.android.internal.colorextraction.ColorExtractor;
 import com.android.keyguard.R;
+import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.plugins.ClockPlugin;
 
 import java.util.TimeZone;
@@ -43,6 +47,16 @@ public class TypeClockController implements ClockPlugin {
     private final LayoutInflater mLayoutInflater;
 
     /**
+     * Extracts accent color from wallpaper.
+     */
+    private final SysuiColorExtractor mColorExtractor;
+
+    /**
+     * Renders preview from clock view.
+     */
+    private final ViewPreviewer mRenderer = new ViewPreviewer();
+
+    /**
      * Custom clock shown on AOD screen and behind stack scroller on lock.
      */
     private View mView;
@@ -61,11 +75,15 @@ public class TypeClockController implements ClockPlugin {
     /**
      * Create a TypeClockController instance.
      *
+     * @param res Resources contains title and thumbnail.
      * @param inflater Inflater used to inflate custom clock views.
+     * @param colorExtractor Extracts accent color from wallpaper.
      */
-    TypeClockController(Resources res, LayoutInflater inflater) {
+    TypeClockController(Resources res, LayoutInflater inflater,
+            SysuiColorExtractor colorExtractor) {
         mResources = res;
         mLayoutInflater = inflater;
+        mColorExtractor = colorExtractor;
     }
 
     private void createViews() {
@@ -93,6 +111,23 @@ public class TypeClockController implements ClockPlugin {
     @Override
     public Bitmap getThumbnail() {
         return BitmapFactory.decodeResource(mResources, R.drawable.type_thumbnail);
+    }
+
+    @Override
+    public Bitmap getPreview(int width, int height) {
+
+        // Use the big clock view for the preview
+        View view = getBigClockView();
+
+        // Initialize state of plugin before generating preview.
+        setDarkAmount(1f);
+        setTextColor(Color.WHITE);
+        ColorExtractor.GradientColors colors = mColorExtractor.getColors(
+                WallpaperManager.FLAG_LOCK, true);
+        setColorPalette(colors.supportsDarkText(), colors.getColorPalette());
+        onTimeTick();
+
+        return mRenderer.createPreview(view, width, height);
     }
 
     @Override

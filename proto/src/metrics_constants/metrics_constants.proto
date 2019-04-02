@@ -7149,6 +7149,19 @@ message MetricsEvent {
 
     // Settings > Display > Theme
     DARK_UI_SETTINGS = 1698;
+
+    // Settings > global bubble settings
+    BUBBLE_SETTINGS = 1699;
+
+    // Settings > app > bubble settings
+    APP_BUBBLE_SETTINGS = 1700;
+
+    // OPEN: Settings > System > Aware > Info dialog
+    DIALOG_AWARE_STATUS = 1701;
+
+    // Open: Settings > app > bubble settings > confirmation dialog
+    DIALOG_APP_BUBBLE_SETTINGS = 1702;
+
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS

@@ -360,7 +360,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
                         final long age = System.currentTimeMillis() - session.createdMillis;
                         final long timeSinceUpdate =
-                                System.currentTimeMillis() - session.updatedMillis;
+                                System.currentTimeMillis() - session.getUpdatedMillis();
                         final boolean valid;
                         if (session.isStaged()) {
                             if (timeSinceUpdate >= MAX_TIME_SINCE_UPDATE_MILLIS
@@ -395,6 +395,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             Slog.wtf(TAG, "Failed reading install sessions", e);
         } finally {
             IoUtils.closeQuietly(fis);
+        }
+        // After all of the sessions were loaded, they are ready to be sealed and validated
+        for (int i = 0; i < mSessions.size(); ++i) {
+            PackageInstallerSession session = mSessions.valueAt(i);
+            session.sealAndValidateIfNecessary();
         }
     }
 
@@ -493,10 +498,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             }
         }
 
-        if (callingUid == Process.SYSTEM_UID) {
+        if (Build.IS_DEBUGGABLE || isDowngradeAllowedForCaller(callingUid)) {
             params.installFlags |= PackageManager.INSTALL_ALLOW_DOWNGRADE;
         } else {
             params.installFlags &= ~PackageManager.INSTALL_ALLOW_DOWNGRADE;
+            params.installFlags &= ~PackageManager.INSTALL_REQUEST_DOWNGRADE;
         }
 
         boolean isApex = (params.installFlags & PackageManager.INSTALL_APEX) != 0;
@@ -614,6 +620,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         mCallbacks.notifySessionCreated(session.sessionId, session.userId);
         writeSessionsAsync();
         return sessionId;
+    }
+
+    private boolean isDowngradeAllowedForCaller(int callingUid) {
+        return callingUid == Process.SYSTEM_UID || callingUid == Process.ROOT_UID
+                || callingUid == Process.SHELL_UID;
     }
 
     @Override

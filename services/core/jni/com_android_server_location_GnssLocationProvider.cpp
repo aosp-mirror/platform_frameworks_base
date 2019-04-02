@@ -1700,8 +1700,12 @@ static void android_location_GnssLocationProvider_init_once(JNIEnv* env, jclass 
         gnssNavigationMessageIface = gnssNavigationMessage;
     }
 
-    if (gnssHal_V2_0 != nullptr) {
-        // TODO: getExtensionGnssMeasurement_1_1 from gnssHal_V2_0
+    // Allow all causal combinations between IGnss.hal and IGnssMeasurement.hal. That means,
+    // 2.0@IGnss can be paired with {1.0, 1,1, 2.0}@IGnssMeasurement
+    // 1.1@IGnss can be paired {1.0, 1.1}@IGnssMeasurement
+    // 1.0@IGnss is paired with 1.0@IGnssMeasurement
+    gnssMeasurementIface = nullptr;
+    if (gnssHal_V2_0 != nullptr && gnssMeasurementIface == nullptr) {
         auto gnssMeasurement = gnssHal_V2_0->getExtensionGnssMeasurement_2_0();
         if (!gnssMeasurement.isOk()) {
             ALOGD("Unable to get a handle to GnssMeasurement_V2_0");
@@ -1710,13 +1714,8 @@ static void android_location_GnssLocationProvider_init_once(JNIEnv* env, jclass 
             gnssMeasurementIface_V1_1 = gnssMeasurementIface_V2_0;
             gnssMeasurementIface = gnssMeasurementIface_V2_0;
         }
-        auto gnssCorrections = gnssHal_V2_0->getExtensionMeasurementCorrections();
-        if (!gnssCorrections.isOk()) {
-            ALOGD("Unable to get a handle to GnssMeasurementCorrections interface");
-        } else {
-            gnssCorrectionsIface = gnssCorrections;
-        }
-    } else if (gnssHal_V1_1 != nullptr) {
+    }
+    if (gnssHal_V1_1 != nullptr && gnssMeasurementIface == nullptr) {
          auto gnssMeasurement = gnssHal_V1_1->getExtensionGnssMeasurement_1_1();
          if (!gnssMeasurement.isOk()) {
              ALOGD("Unable to get a handle to GnssMeasurement_V1_1");
@@ -1724,13 +1723,23 @@ static void android_location_GnssLocationProvider_init_once(JNIEnv* env, jclass 
              gnssMeasurementIface_V1_1 = gnssMeasurement;
              gnssMeasurementIface = gnssMeasurementIface_V1_1;
          }
-    } else {
-         auto gnssMeasurement_V1_0 = gnssHal->getExtensionGnssMeasurement();
-         if (!gnssMeasurement_V1_0.isOk()) {
+    }
+    if (gnssMeasurementIface == nullptr) {
+         auto gnssMeasurement = gnssHal->getExtensionGnssMeasurement();
+         if (!gnssMeasurement.isOk()) {
              ALOGD("Unable to get a handle to GnssMeasurement");
          } else {
-             gnssMeasurementIface = gnssMeasurement_V1_0;
+             gnssMeasurementIface = gnssMeasurement;
          }
+    }
+
+    if (gnssHal_V2_0 != nullptr) {
+        auto gnssCorrections = gnssHal_V2_0->getExtensionMeasurementCorrections();
+        if (!gnssCorrections.isOk()) {
+            ALOGD("Unable to get a handle to GnssMeasurementCorrections interface");
+        } else {
+            gnssCorrectionsIface = gnssCorrections;
+        }
     }
 
     if (gnssHal_V2_0 != nullptr) {

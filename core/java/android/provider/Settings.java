@@ -1501,6 +1501,22 @@ public final class Settings {
             = "android.settings.MANAGE_DEFAULT_APPS_SETTINGS";
 
     /**
+     * Activity Action: Show More default apps settings.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @SystemApi
+    public static final String ACTION_MANAGE_MORE_DEFAULT_APPS_SETTINGS =
+            "android.settings.MANAGE_MORE_DEFAULT_APPS_SETTINGS";
+
+    /**
      * Activity Action: Show notification settings.
      *
      * @hide
@@ -1540,6 +1556,18 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_CHANNEL_NOTIFICATION_SETTINGS
             = "android.settings.CHANNEL_NOTIFICATION_SETTINGS";
+
+    /**
+     * Activity Action: Show notification bubble settings for a single app.
+     * See {@link NotificationManager#areBubblesAllowed()}.
+     * <p>
+     *     Input: {@link #EXTRA_APP_PACKAGE}, the package to display.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_APP_NOTIFICATION_BUBBLE_SETTINGS
+            = "android.settings.APP_NOTIFICATION_BUBBLE_SETTINGS";
 
     /**
      * Activity Extra: The package owner of the notification channel settings to display.
@@ -7739,15 +7767,6 @@ public final class Settings {
                 "call_screening_default_component";
 
         /**
-         * Specifies the component name currently configured to be the default application to
-         * perform the user-defined call redirection service with Telecom.
-         * @hide
-         */
-        @UnsupportedAppUsage
-        public static final String CALL_REDIRECTION_DEFAULT_APPLICATION =
-                "call_redirection_default_application";
-
-        /**
          * Specifies the package name currently configured to be the emergency assistance application
          *
          * @see android.telephony.TelephonyManager#ACTION_EMERGENCY_ASSISTANCE
@@ -11509,15 +11528,6 @@ public final class Settings {
                 "background_activity_starts_enabled";
 
         /**
-         * The packages temporarily whitelisted to be able so start activities from background.
-         * The list of packages is {@code ":"} colon delimited.
-         *
-         * @hide
-         */
-        public static final String BACKGROUND_ACTIVITY_STARTS_PACKAGE_NAMES_WHITELIST =
-                "background_activity_starts_package_names_whitelist";
-
-        /**
          * @hide
          * @see com.android.server.appbinding.AppBindingConstants
          */
@@ -12393,6 +12403,19 @@ public final class Settings {
          * @hide
          */
         public static final String EMERGENCY_AFFORDANCE_NEEDED = "emergency_affordance_needed";
+
+        /**
+         * Whether to enable automatic system server heap dumps. This only works on userdebug or
+         * eng builds, not on user builds. This is set by the user and overrides the config value.
+         * 1 means enable, 0 means disable.
+         *
+         * @hide
+         */
+        public static final String ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS =
+                "enable_automatic_system_server_heap_dumps";
+
+        private static final Validator ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS_VALIDATOR =
+                new SettingsValidators.DiscreteValueValidator(new String[] {"0", "1"});
 
         /**
          * See RIL_PreferredNetworkType in ril.h
@@ -13464,24 +13487,6 @@ public final class Settings {
                 "hidden_api_blacklist_exemptions";
 
         /**
-         * Sampling rate for hidden API access event logs with libmetricslogger, as an integer in
-         * the range 0 to 0x10000 inclusive.
-         *
-         * @hide
-         */
-        public static final String HIDDEN_API_ACCESS_LOG_SAMPLING_RATE =
-                "hidden_api_access_log_sampling_rate";
-
-        /**
-         * Sampling rate for hidden API access event logging with statslog, as an integer in the
-         * range 0 to 0x10000 inclusive.
-         *
-         * @hide
-         */
-        public static final String HIDDEN_API_ACCESS_STATSLOG_SAMPLING_RATE =
-                "hidden_api_access_statslog_sampling_rate";
-
-        /**
          * Hidden API enforcement policy for apps.
          *
          * Values correspond to @{@link
@@ -13565,6 +13570,7 @@ public final class Settings {
             EMERGENCY_TONE,
             CALL_AUTO_RETRY,
             DOCK_AUDIO_MEDIA_ENABLED,
+            ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS,
             ENCODED_SURROUND_OUTPUT,
             ENCODED_SURROUND_OUTPUT_ENABLED_FORMATS,
             LOW_POWER_MODE_TRIGGER_LEVEL,
@@ -13607,6 +13613,8 @@ public final class Settings {
             VALIDATORS.put(EMERGENCY_TONE, EMERGENCY_TONE_VALIDATOR);
             VALIDATORS.put(CALL_AUTO_RETRY, CALL_AUTO_RETRY_VALIDATOR);
             VALIDATORS.put(DOCK_AUDIO_MEDIA_ENABLED, DOCK_AUDIO_MEDIA_ENABLED_VALIDATOR);
+            VALIDATORS.put(ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS,
+                    ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS_VALIDATOR);
             VALIDATORS.put(ENCODED_SURROUND_OUTPUT, ENCODED_SURROUND_OUTPUT_VALIDATOR);
             VALIDATORS.put(ENCODED_SURROUND_OUTPUT_ENABLED_FORMATS,
                     ENCODED_SURROUND_OUTPUT_ENABLED_FORMATS_VALIDATOR);
@@ -14716,7 +14724,6 @@ public final class Settings {
          *
          * @hide
          */
-        // TODO(b/117663715): require a new write permission restricted to a single source
         @RequiresPermission(Manifest.permission.WRITE_DEVICE_CONFIG)
         static void resetToDefaults(@NonNull ContentResolver resolver, @ResetMode int resetMode,
                 @Nullable String prefix) {

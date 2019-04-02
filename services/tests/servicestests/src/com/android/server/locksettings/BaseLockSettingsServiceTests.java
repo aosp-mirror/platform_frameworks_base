@@ -56,7 +56,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 
-public class BaseLockSettingsServiceTests extends AndroidTestCase {
+public abstract class BaseLockSettingsServiceTests extends AndroidTestCase {
     protected static final int PRIMARY_USER_ID = 0;
     protected static final int MANAGED_PROFILE_USER_ID = 12;
     protected static final int TURNED_OFF_PROFILE_USER_ID = 17;

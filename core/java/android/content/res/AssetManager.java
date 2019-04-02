@@ -1263,12 +1263,19 @@ public final class AssetManager implements AutoCloseable {
      */
     @UnsupportedAppUsage
     public boolean isUpToDate() {
-        for (ApkAssets apkAssets : getApkAssets()) {
-            if (!apkAssets.isUpToDate()) {
+        synchronized (this) {
+            if (!mOpen) {
                 return false;
             }
+
+            for (ApkAssets apkAssets : mApkAssets) {
+                if (!apkAssets.isUpToDate()) {
+                    return false;
+                }
+            }
+
+            return true;
         }
-        return true;
     }
 
     /**

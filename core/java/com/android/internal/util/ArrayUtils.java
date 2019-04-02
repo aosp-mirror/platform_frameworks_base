@@ -527,6 +527,13 @@ public class ArrayUtils {
         return (array != null) ? array.clone() : null;
     }
 
+    /**
+     * Clones an array or returns null if the array is null.
+     */
+    public static @Nullable <T> T[] cloneOrNull(@Nullable T[] array) {
+        return (array != null) ? array.clone() : null;
+    }
+
     public static @Nullable <T> ArraySet<T> cloneOrNull(@Nullable ArraySet<T> array) {
         return (array != null) ? new ArraySet<T>(array) : null;
     }

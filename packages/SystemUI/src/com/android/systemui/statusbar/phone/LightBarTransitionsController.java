@@ -16,9 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.statusbar.phone.NavBarTintController.DEFAULT_COLOR_ADAPT_TRANSITION_TIME;
-import static com.android.systemui.statusbar.phone.NavBarTintController.MIN_COLOR_ADAPT_TRANSITION_TIME;
-
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.os.Bundle;
@@ -52,7 +49,6 @@ public class LightBarTransitionsController implements Dumpable, Callbacks,
     private final DarkIntensityApplier mApplier;
     private final KeyguardMonitor mKeyguardMonitor;
     private final StatusBarStateController mStatusBarStateController;
-    private NavBarTintController mColorAdaptionController;
 
     private boolean mTransitionDeferring;
     private long mTransitionDeferringStartTime;
@@ -118,7 +114,8 @@ public class LightBarTransitionsController implements Dumpable, Callbacks,
         }
         if (mTransitionPending && mTintChangePending) {
             mTintChangePending = false;
-            animateIconTint(mPendingDarkIntensity, 0 /* delay */, getTintAnimationDuration());
+            animateIconTint(mPendingDarkIntensity, 0 /* delay */,
+                    mApplier.getTintAnimationDuration());
         }
         mTransitionPending = false;
     }
@@ -159,15 +156,8 @@ public class LightBarTransitionsController implements Dumpable, Callbacks,
                     Math.max(0, mTransitionDeferringStartTime - SystemClock.uptimeMillis()),
                     mTransitionDeferringDuration);
         } else {
-            animateIconTint(dark ? 1.0f : 0.0f, 0 /* delay */, getTintAnimationDuration());
+            animateIconTint(dark ? 1.0f : 0.0f, 0 /* delay */, mApplier.getTintAnimationDuration());
         }
-    }
-
-    public long getTintAnimationDuration() {
-        if (NavBarTintController.isEnabled(mContext)) {
-            return Math.max(DEFAULT_COLOR_ADAPT_TRANSITION_TIME, MIN_COLOR_ADAPT_TRANSITION_TIME);
-        }
-        return DEFAULT_TINT_ANIMATION_DURATION;
     }
 
     public float getCurrentDarkIntensity() {
@@ -243,5 +233,6 @@ public class LightBarTransitionsController implements Dumpable, Callbacks,
      */
     public interface DarkIntensityApplier {
         void applyDarkIntensity(float darkIntensity);
+        int getTintAnimationDuration();
     }
 }

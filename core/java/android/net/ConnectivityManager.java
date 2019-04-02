@@ -1934,6 +1934,8 @@ public class ConnectivityManager {
             @NonNull Callback callback) {
         ParcelFileDescriptor dup;
         try {
+            // Dup is needed here as the pfd inside the socket is owned by the IpSecService,
+            // which cannot be obtained by the app process.
             dup = ParcelFileDescriptor.dup(socket.getFileDescriptor());
         } catch (IOException ignored) {
             // Construct an invalid fd, so that if the user later calls start(), it will fail with
@@ -1975,6 +1977,7 @@ public class ConnectivityManager {
             @NonNull Callback callback) {
         ParcelFileDescriptor dup;
         try {
+            // TODO: Consider remove unnecessary dup.
             dup = pfd.dup();
         } catch (IOException ignored) {
             // Construct an invalid fd, so that if the user later calls start(), it will fail with
@@ -3231,7 +3234,7 @@ public class ConnectivityManager {
          *
          * @hide
          */
-        public void onPreCheck(Network network) {}
+        public void onPreCheck(@NonNull Network network) {}
 
         /**
          * Called when the framework connects and has declared a new network ready for use.
@@ -3244,8 +3247,9 @@ public class ConnectivityManager {
          * @param blocked Whether access to the {@link Network} is blocked due to system policy.
          * @hide
          */
-        public void onAvailable(Network network, NetworkCapabilities networkCapabilities,
-                LinkProperties linkProperties, boolean blocked) {
+        public void onAvailable(@NonNull Network network,
+                @NonNull NetworkCapabilities networkCapabilities,
+                @NonNull LinkProperties linkProperties, boolean blocked) {
             // Internally only this method is called when a new network is available, and
             // it calls the callback in the same way and order that older versions used
             // to call so as not to change the behavior.
@@ -3269,7 +3273,7 @@ public class ConnectivityManager {
          *
          * @param network The {@link Network} of the satisfying network.
          */
-        public void onAvailable(Network network) {}
+        public void onAvailable(@NonNull Network network) {}
 
         /**
          * Called when the network is about to be disconnected.  Often paired with an
@@ -3285,7 +3289,7 @@ public class ConnectivityManager {
          *                     network connected.  Note that the network may suffer a
          *                     hard loss at any time.
          */
-        public void onLosing(Network network, int maxMsToLive) {}
+        public void onLosing(@NonNull Network network, int maxMsToLive) {}
 
         /**
          * Called when the framework has a hard loss of the network or when the
@@ -3293,7 +3297,7 @@ public class ConnectivityManager {
          *
          * @param network The {@link Network} lost.
          */
-        public void onLost(Network network) {}
+        public void onLost(@NonNull Network network) {}
 
         /**
          * Called if no network is found in the timeout time specified in
@@ -3313,8 +3317,8 @@ public class ConnectivityManager {
          * @param networkCapabilities The new {@link android.net.NetworkCapabilities} for this
          *                            network.
          */
-        public void onCapabilitiesChanged(Network network,
-                NetworkCapabilities networkCapabilities) {}
+        public void onCapabilitiesChanged(@NonNull Network network,
+                @NonNull NetworkCapabilities networkCapabilities) {}
 
         /**
          * Called when the network the framework connected to for this request
@@ -3323,7 +3327,8 @@ public class ConnectivityManager {
          * @param network The {@link Network} whose link properties have changed.
          * @param linkProperties The new {@link LinkProperties} for this network.
          */
-        public void onLinkPropertiesChanged(Network network, LinkProperties linkProperties) {}
+        public void onLinkPropertiesChanged(@NonNull Network network,
+                @NonNull LinkProperties linkProperties) {}
 
         /**
          * Called when the network the framework connected to for this request
@@ -3334,7 +3339,7 @@ public class ConnectivityManager {
          * a tunnel, etc.
          * @hide
          */
-        public void onNetworkSuspended(Network network) {}
+        public void onNetworkSuspended(@NonNull Network network) {}
 
         /**
          * Called when the network the framework connected to for this request
@@ -3342,7 +3347,7 @@ public class ConnectivityManager {
          * preceded by a matching {@link NetworkCallback#onNetworkSuspended} call.
          * @hide
          */
-        public void onNetworkResumed(Network network) {}
+        public void onNetworkResumed(@NonNull Network network) {}
 
         /**
          * Called when access to the specified network is blocked or unblocked.

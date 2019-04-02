@@ -1102,7 +1102,7 @@ final class ActivityRecord extends ConfigurationContainer {
                     ActivityTaskManagerService.getInputDispatchingTimeoutLocked(this)
                             * 1000000L, fullscreen,
                     (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0, appInfo.targetSdkVersion,
-                    info.screenOrientation, mRotationAnimationHint, info.configChanges,
+                    info.screenOrientation, mRotationAnimationHint,
                     mLaunchTaskBehind, isAlwaysFocusable());
             if (DEBUG_TOKEN_MOVEMENT || DEBUG_ADD_REMOVE) {
                 Slog.v(TAG, "addAppToken: "
@@ -1151,11 +1151,11 @@ final class ActivityRecord extends ConfigurationContainer {
     AppWindowToken createAppWindow(WindowManagerService service, IApplicationToken token,
             boolean voiceInteraction, DisplayContent dc, long inputDispatchingTimeoutNanos,
             boolean fullscreen, boolean showForAllUsers, int targetSdk, int orientation,
-            int rotationAnimationHint, int configChanges, boolean launchTaskBehind,
+            int rotationAnimationHint, boolean launchTaskBehind,
             boolean alwaysFocusable) {
         return new AppWindowToken(service, token, mActivityComponent, voiceInteraction, dc,
                 inputDispatchingTimeoutNanos, fullscreen, showForAllUsers, targetSdk, orientation,
-                rotationAnimationHint, configChanges, launchTaskBehind, alwaysFocusable,
+                rotationAnimationHint, launchTaskBehind, alwaysFocusable,
                 this);
     }
 
@@ -2730,30 +2730,40 @@ final class ActivityRecord extends ConfigurationContainer {
         final int appHeight = resolvedAppBounds.height();
         final int parentAppWidth = parentAppBounds.width();
         final int parentAppHeight = parentAppBounds.height();
+        if (parentAppWidth == appWidth && parentAppHeight == appHeight) {
+            // Matched the parent bounds.
+            return false;
+        }
+        if (parentAppWidth > appWidth && parentAppHeight > appHeight) {
+            // Both sides are smaller than the parent.
+            return true;
+        }
         if (parentAppWidth < appWidth || parentAppHeight < appHeight) {
             // One side is larger than the parent.
             return true;
         }
 
-        if (info.hasFixedAspectRatio()) {
+        // The rest of the condition is that only one side is smaller than the parent, but it still
+        // needs to exclude the cases where the size is limited by the fixed aspect ratio.
+        if (info.maxAspectRatio > 0) {
             final float aspectRatio = (0.5f + Math.max(appWidth, appHeight))
                     / Math.min(appWidth, appHeight);
-            final float parentAspectRatio = (0.5f + Math.max(parentAppWidth, parentAppHeight))
-                    / Math.min(parentAppWidth, parentAppHeight);
-            // Check if the parent still has available space in long side.
-            if (aspectRatio < parentAspectRatio
-                    && (aspectRatio < info.maxAspectRatio || info.minAspectRatio > 0)) {
-                return true;
+            if (aspectRatio >= info.maxAspectRatio) {
+                // The current size has reached the max aspect ratio.
+                return false;
             }
         }
-
-        final Rect resolvedBounds = resolvedConfig.windowConfiguration.getBounds();
-        // If the width or height is the same as parent, it is already the best fit of the override
-        // bounds, therefore this condition is considered as not size compatibility mode. Here uses
-        // right and bottom as width and height of parent because the bounds may contain decor
-        // insets which has been accounted in override bounds. See {@link #computeBounds}.
-        return parentAppBounds.right != resolvedBounds.width()
-                && parentAppBounds.bottom != resolvedBounds.height();
+        if (info.minAspectRatio > 0) {
+            // The activity should have at least the min aspect ratio, so this checks if the parent
+            // still has available space to provide larger aspect ratio.
+            final float parentAspectRatio = (0.5f + Math.max(parentAppWidth, parentAppHeight))
+                    / Math.min(parentAppWidth, parentAppHeight);
+            if (parentAspectRatio <= info.minAspectRatio) {
+                // The long side has reached the parent.
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

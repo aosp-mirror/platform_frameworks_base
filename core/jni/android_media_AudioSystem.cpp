@@ -144,6 +144,7 @@ static struct {
 static jclass gAudioMixingRuleClass;
 static struct {
     jfieldID    mCriteria;
+    jfieldID    mAllowPrivilegedPlaybackCapture;
     // other fields unused by JNI
 } gAudioMixingRuleFields;
 
@@ -1868,6 +1869,8 @@ static jint convertAudioMixToNative(JNIEnv *env,
 
     jobject jRule = env->GetObjectField(jAudioMix, gAudioMixFields.mRule);
     jobject jRuleCriteria = env->GetObjectField(jRule, gAudioMixingRuleFields.mCriteria);
+    nAudioMix->mAllowPrivilegedPlaybackCapture =
+            env->GetBooleanField(jRule, gAudioMixingRuleFields.mAllowPrivilegedPlaybackCapture);
     env->DeleteLocalRef(jRule);
     jobjectArray jCriteria = (jobjectArray)env->CallObjectMethod(jRuleCriteria,
                                                                  gArrayListMethods.toArray);
@@ -2226,6 +2229,11 @@ android_media_AudioSystem_isHapticPlaybackSupported(JNIEnv *env, jobject thiz)
     return AudioSystem::isHapticPlaybackSupported();
 }
 
+static jint
+android_media_AudioSystem_setAllowedCapturePolicy(JNIEnv *env, jobject thiz, jint uid, jint flags) {
+    return AudioSystem::setAllowedCapturePolicy(uid, flags);
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gMethods[] = {
@@ -2301,6 +2309,7 @@ static const JNINativeMethod gMethods[] = {
     {"isHapticPlaybackSupported", "()Z", (void *)android_media_AudioSystem_isHapticPlaybackSupported},
     {"getHwOffloadEncodingFormatsSupportedForA2DP", "(Ljava/util/ArrayList;)I",
                     (void*)android_media_AudioSystem_getHwOffloadEncodingFormatsSupportedForA2DP},
+    {"setAllowedCapturePolicy", "(II)I", (void *)android_media_AudioSystem_setAllowedCapturePolicy},
 };
 
 static const JNINativeMethod gEventHandlerMethods[] = {
@@ -2456,6 +2465,8 @@ int register_android_media_AudioSystem(JNIEnv *env)
     gAudioMixingRuleClass = MakeGlobalRefOrDie(env, audioMixingRuleClass);
     gAudioMixingRuleFields.mCriteria = GetFieldIDOrDie(env, audioMixingRuleClass, "mCriteria",
                                                        "Ljava/util/ArrayList;");
+    gAudioMixingRuleFields.mAllowPrivilegedPlaybackCapture =
+            GetFieldIDOrDie(env, audioMixingRuleClass, "mAllowPrivilegedPlaybackCapture", "Z");
 
     jclass audioMixMatchCriterionClass =
                 FindClassOrDie(env, "android/media/audiopolicy/AudioMixingRule$AudioMixMatchCriterion");

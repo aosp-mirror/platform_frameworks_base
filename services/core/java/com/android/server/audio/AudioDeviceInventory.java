@@ -896,7 +896,7 @@ public final class AudioDeviceInventory {
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            ActivityManager.broadcastStickyIntent(intent, UserHandle.USER_ALL);
+            ActivityManager.broadcastStickyIntent(intent, UserHandle.USER_CURRENT);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }

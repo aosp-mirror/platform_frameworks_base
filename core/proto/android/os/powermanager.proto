@@ -20,7 +20,7 @@ package android.os;
 option java_multiple_files = true;
 
 import "frameworks/base/core/proto/android/os/worksource.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 message PowerManagerProto {
     /* User activity events in PowerManager.java. */

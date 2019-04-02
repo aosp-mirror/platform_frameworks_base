@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.UserIdInt;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -44,7 +45,7 @@ public final class OverlayInfo implements Parcelable {
             STATE_DISABLED,
             STATE_ENABLED,
             STATE_ENABLED_STATIC,
-            STATE_TARGET_UPGRADING,
+            // @Deprecated STATE_TARGET_UPGRADING,
             STATE_OVERLAY_UPGRADING,
     })
     /** @hide */
@@ -96,7 +97,14 @@ public final class OverlayInfo implements Parcelable {
      * The target package is currently being upgraded; the state will change
      * once the package installation has finished.
      * @hide
+     *
+     * @deprecated No longer used. Caused invalid transitions from enabled -> upgrading -> enabled,
+     * where an update is propagated when nothing has changed. Can occur during --dont-kill
+     * installs when code and resources are hot swapped and the Activity should not be relaunched.
+     * In all other cases, the process and therefore Activity is killed, so the state loop is
+     * irrelevant.
      */
+    @Deprecated
     public static final int STATE_TARGET_UPGRADING = 4;
 
     /**
@@ -128,7 +136,6 @@ public final class OverlayInfo implements Parcelable {
      *
      * @hide
      */
-    @SystemApi
     public final String packageName;
 
     /**
@@ -136,7 +143,6 @@ public final class OverlayInfo implements Parcelable {
      *
      * @hide
      */
-    @SystemApi
     public final String targetPackageName;
 
     /**
@@ -144,7 +150,6 @@ public final class OverlayInfo implements Parcelable {
      *
      * @hide
      */
-    @SystemApi
     public final String targetOverlayableName;
 
     /**
@@ -152,7 +157,6 @@ public final class OverlayInfo implements Parcelable {
      *
      * @hide
      */
-    @SystemApi
     public final String category;
 
     /**
@@ -171,7 +175,6 @@ public final class OverlayInfo implements Parcelable {
      * User handle for which this overlay applies
      * @hide
      */
-    @SystemApi
     public final int userId;
 
     /**
@@ -234,6 +237,56 @@ public final class OverlayInfo implements Parcelable {
         priority = source.readInt();
         isStatic = source.readBoolean();
         ensureValidState();
+    }
+
+    /**
+     * Returns package name of the current overlay.
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    public String getPackageName() {
+        return packageName;
+    }
+
+    /**
+     * Returns the target package name of the current overlay.
+     * @hide
+     */
+    @SystemApi
+    @Nullable
+    public String getTargetPackageName() {
+        return targetPackageName;
+    }
+
+    /**
+     * Returns the category of the current overlay.
+     * @hide\
+     */
+    @SystemApi
+    @Nullable
+    public String getCategory() {
+        return category;
+    }
+
+    /**
+     * Returns user handle for which this overlay applies to.
+     * @hide
+     */
+    @SystemApi
+    @UserIdInt
+    public int getUserId() {
+        return userId;
+    }
+
+    /**
+     * Returns name of the target overlayable declaration.
+     * @hide
+     */
+    @SystemApi
+    @Nullable
+    public String getTargetOverlayableName() {
+        return targetOverlayableName;
     }
 
     private void ensureValidState() {

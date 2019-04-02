@@ -16,12 +16,14 @@
 
 package android.app;
 
+import static android.annotation.Dimension.DP;
 import static android.graphics.drawable.Icon.TYPE_BITMAP;
 
 import static com.android.internal.util.ContrastColorUtil.satisfiesTextContrast;
 
 import android.annotation.ColorInt;
 import android.annotation.DimenRes;
+import android.annotation.Dimension;
 import android.annotation.DrawableRes;
 import android.annotation.IdRes;
 import android.annotation.IntDef;
@@ -614,6 +616,13 @@ public class Notification implements Parcelable
      * @hide
      */
     public static final int FLAG_CAN_COLORIZE = 0x00000800;
+
+    /**
+     * Bit to be bitswised-ored into the {@link #flags} field that should be
+     * set if this notification can be shown as a bubble.
+     * @hide
+     */
+    public static final int FLAG_BUBBLE = 0x00001000;
 
     public int flags;
 
@@ -6241,6 +6250,15 @@ public class Notification implements Parcelable
         return false;
     }
 
+    /**
+     * @return true if this is a notification that can show as a bubble.
+     *
+     * @hide
+     */
+    public boolean isBubbleNotification() {
+        return (flags & Notification.FLAG_BUBBLE) != 0;
+    }
+
     private boolean hasLargeIcon() {
         return mLargeIcon != null || largeIcon != null;
     }
@@ -8594,15 +8612,18 @@ public class Notification implements Parcelable
 
         /**
          * @return the ideal height, in DPs, for the floating window that app content defined by
-         * {@link #getIntent()} for this bubble.
+         * {@link #getIntent()} for this bubble. A value of 0 indicates a desired height has not
+         * been set.
          */
+        @Dimension(unit = DP)
         public int getDesiredHeight() {
             return mDesiredHeight;
         }
 
         /**
          * @return the resId of ideal height for the floating window that app content defined by
-         * {@link #getIntent()} for this bubble.
+         * {@link #getIntent()} for this bubble. A value of 0 indicates a res value has not
+         * been provided for the desired height.
          */
         @DimenRes
         public int getDesiredHeightResId() {
@@ -8733,7 +8754,7 @@ public class Notification implements Parcelable
              * be used instead.
              */
             @NonNull
-            public BubbleMetadata.Builder setDesiredHeight(int height) {
+            public BubbleMetadata.Builder setDesiredHeight(@Dimension(unit = DP) int height) {
                 mDesiredHeight = Math.max(height, 0);
                 mDesiredHeightResId = 0;
                 return this;

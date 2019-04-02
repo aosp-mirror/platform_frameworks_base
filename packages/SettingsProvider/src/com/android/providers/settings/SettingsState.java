@@ -17,6 +17,7 @@
 package com.android.providers.settings;
 
 import static android.os.Process.FIRST_APPLICATION_UID;
+import static android.os.Process.INVALID_UID;
 
 import android.annotation.NonNull;
 import android.content.Context;
@@ -1124,11 +1125,16 @@ final class SettingsState {
         return sb.toString();
     }
 
+    // Check if a specific package belonging to the caller is part of the system package.
     public static boolean isSystemPackage(Context context, String packageName) {
-        return isSystemPackage(context, packageName, Binder.getCallingUid());
+        final int callingUid = Binder.getCallingUid();
+        final int callingUserId = UserHandle.getUserId(callingUid);
+        return isSystemPackage(context, packageName, callingUid, callingUserId);
     }
 
-    public static boolean isSystemPackage(Context context, String packageName, int callingUid) {
+    // Check if a specific package, uid, and user ID are part of the system package.
+    public static boolean isSystemPackage(Context context, String packageName, int uid,
+            int userId) {
         synchronized (sLock) {
             if (SYSTEM_PACKAGE_NAME.equals(packageName)) {
                 return true;
@@ -1140,26 +1146,19 @@ final class SettingsState {
                 return false;
             }
 
-            // Native services running as a special UID get a pass
-            final int callingAppId = UserHandle.getAppId(callingUid);
-            if (callingAppId < FIRST_APPLICATION_UID) {
-                sSystemUids.put(callingAppId, callingAppId);
-                return true;
+            if (uid != INVALID_UID) {
+                // Native services running as a special UID get a pass
+                final int callingAppId = UserHandle.getAppId(uid);
+                if (callingAppId < FIRST_APPLICATION_UID) {
+                    sSystemUids.put(callingAppId, callingAppId);
+                    return true;
+                }
             }
-
-            // While some callers may have permissions to manipulate cross user
-            // settings or some settings are stored in the parent of a managed
-            // profile for the purpose of determining whether the other end is a
-            // system component we need to use the user id of the caller for
-            // pulling information about the caller from the package manager.
-            final int callingUserId = UserHandle.getUserId(callingUid);
 
             final long identity = Binder.clearCallingIdentity();
             try {
-                final int uid;
                 try {
-                    uid = context.getPackageManager().getPackageUidAsUser(packageName, 0,
-                            callingUserId);
+                    uid = context.getPackageManager().getPackageUidAsUser(packageName, 0, userId);
                 } catch (PackageManager.NameNotFoundException e) {
                     return false;
                 }
@@ -1187,7 +1186,7 @@ final class SettingsState {
                 PackageInfo packageInfo;
                 try {
                     packageInfo = context.getPackageManager().getPackageInfoAsUser(
-                            packageName, PackageManager.GET_SIGNATURES, callingUserId);
+                            packageName, PackageManager.GET_SIGNATURES, userId);
                     if ((packageInfo.applicationInfo.flags
                             & ApplicationInfo.FLAG_PERSISTENT) != 0
                             && (packageInfo.applicationInfo.flags

@@ -23,6 +23,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.isEnabled;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
+import static com.android.internal.app.ResolverDataProvider.createPackageManagerMockedInfo;
 import static com.android.internal.app.ResolverWrapperActivity.sOverrides;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -32,6 +33,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.RelativeLayout;
 
@@ -40,7 +42,10 @@ import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.R;
+import com.android.internal.app.ResolverActivity.ActivityInfoPresentationGetter;
+import com.android.internal.app.ResolverActivity.ResolveInfoPresentationGetter;
 import com.android.internal.app.ResolverActivity.ResolvedComponentInfo;
+import com.android.internal.app.ResolverDataProvider.PackageManagerMockedInfo;
 import com.android.internal.widget.ResolverDrawerLayout;
 
 import org.junit.Before;
@@ -317,6 +322,50 @@ public class ResolverActivityTest {
         onView(withId(R.id.button_once)).perform(click());
         waitForIdle();
         assertThat(chosen[0], is(toChoose));
+    }
+
+    @Test
+    public void getActivityLabelAndSubLabel() throws Exception {
+        ActivityInfoPresentationGetter pg;
+        PackageManagerMockedInfo info;
+
+        info = createPackageManagerMockedInfo(false);
+        pg = new ActivityInfoPresentationGetter(
+                info.ctx, 0, info.activityInfo);
+        assertThat("Label should match app label", pg.getLabel().equals(
+                info.setAppLabel));
+        assertThat("Sublabel should match activity label if set",
+                pg.getSubLabel().equals(info.setActivityLabel));
+
+        info = createPackageManagerMockedInfo(true);
+        pg = new ActivityInfoPresentationGetter(
+                info.ctx, 0, info.activityInfo);
+        assertThat("With override permission label should match activity label if set",
+                pg.getLabel().equals(info.setActivityLabel));
+        assertThat("With override permission sublabel should be empty",
+                TextUtils.isEmpty(pg.getSubLabel()));
+    }
+
+    @Test
+    public void getResolveInfoLabelAndSubLabel() throws Exception {
+        ResolveInfoPresentationGetter pg;
+        PackageManagerMockedInfo info;
+
+        info = createPackageManagerMockedInfo(false);
+        pg = new ResolveInfoPresentationGetter(
+                info.ctx, 0, info.resolveInfo);
+        assertThat("Label should match app label", pg.getLabel().equals(
+                info.setAppLabel));
+        assertThat("Sublabel should match resolve info label if set",
+                pg.getSubLabel().equals(info.setResolveInfoLabel));
+
+        info = createPackageManagerMockedInfo(true);
+        pg = new ResolveInfoPresentationGetter(
+                info.ctx, 0, info.resolveInfo);
+        assertThat("With override permission label should match resolve info label if set",
+                pg.getLabel().equals(info.setResolveInfoLabel));
+        assertThat("With override permission sublabel should be empty",
+                TextUtils.isEmpty(pg.getSubLabel()));
     }
 
     private Intent createSendImageIntent() {

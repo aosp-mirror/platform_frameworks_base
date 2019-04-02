@@ -46,13 +46,19 @@ public final class CellIdentityNr extends CellIdentity {
      *
      * @hide
      */
-    public CellIdentityNr(int pci, int tac, int nrArfcn,  String mccStr, String mncStr,
+    public CellIdentityNr(int pci, int tac, int nrArfcn, String mccStr, String mncStr,
             long nci, String alphal, String alphas) {
         super(TAG, CellInfo.TYPE_NR, mccStr, mncStr, alphal, alphas);
         mPci = pci;
         mTac = tac;
         mNrArfcn = nrArfcn;
         mNci = nci;
+    }
+
+    /** @hide */
+    public CellIdentityNr sanitizeLocationInfo() {
+        return new CellIdentityNr(CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE,
+                mMccStr, mMncStr, CellInfo.UNAVAILABLE, mAlphaLong, mAlphaShort);
     }
 
     /**

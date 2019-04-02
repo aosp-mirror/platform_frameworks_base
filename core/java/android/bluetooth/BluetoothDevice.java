@@ -535,7 +535,6 @@ public final class BluetoothDevice implements Parcelable {
     /**
      * Intent to broadcast silence mode changed.
      * Alway contains the extra field {@link #EXTRA_DEVICE}
-     * Alway contains the extra field {@link #EXTRA_SILENCE_ENABLED}
      *
      * @hide
      */
@@ -543,16 +542,6 @@ public final class BluetoothDevice implements Parcelable {
     @SystemApi
     public static final String ACTION_SILENCE_MODE_CHANGED =
             "android.bluetooth.device.action.SILENCE_MODE_CHANGED";
-
-    /**
-     * Used as an extra field in {@link #ACTION_SILENCE_MODE_CHANGED} intent,
-     * contains whether device is in silence mode as boolean.
-     *
-     * @hide
-     */
-    @SystemApi
-    public static final String EXTRA_SILENCE_ENABLED =
-            "android.bluetooth.device.extra.SILENCE_ENABLED";
 
     /**
      * Used as an extra field in {@link #ACTION_CONNECTION_ACCESS_REQUEST} intent.
@@ -1615,7 +1604,8 @@ public final class BluetoothDevice implements Parcelable {
     }
 
     /**
-     * Set the Bluetooth device silence mode.
+     * Sets whether the {@link BluetoothDevice} enters silence mode. Audio will not
+     * be routed to the {@link BluetoothDevice} if set to {@code true}.
      *
      * When the {@link BluetoothDevice} enters silence mode, and the {@link BluetoothDevice}
      * is an active device (for A2DP or HFP), the active device for that profile
@@ -1635,6 +1625,7 @@ public final class BluetoothDevice implements Parcelable {
      *
      * @param silence true to enter silence mode, false to exit
      * @return true on success, false on error.
+     * @throws IllegalStateException if Bluetooth is not turned ON.
      * @hide
      */
     @SystemApi
@@ -1642,12 +1633,9 @@ public final class BluetoothDevice implements Parcelable {
     public boolean setSilenceMode(boolean silence) {
         final IBluetooth service = sService;
         if (service == null) {
-            return false;
+            throw new IllegalStateException("Bluetooth is not turned ON");
         }
         try {
-            if (getSilenceMode() == silence) {
-                return true;
-            }
             return service.setSilenceMode(this, silence);
         } catch (RemoteException e) {
             Log.e(TAG, "setSilenceMode fail", e);
@@ -1656,24 +1644,25 @@ public final class BluetoothDevice implements Parcelable {
     }
 
     /**
-     * Get the device silence mode status
+     * Check whether the {@link BluetoothDevice} is in silence mode
      *
      * <p> Requires {@link android.Manifest.permission#BLUETOOTH_PRIVILEGED}.
      *
      * @return true on device in silence mode, otherwise false.
+     * @throws IllegalStateException if Bluetooth is not turned ON.
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED)
-    public boolean getSilenceMode() {
+    public boolean isInSilenceMode() {
         final IBluetooth service = sService;
         if (service == null) {
-            return false;
+            throw new IllegalStateException("Bluetooth is not turned ON");
         }
         try {
             return service.getSilenceMode(this);
         } catch (RemoteException e) {
-            Log.e(TAG, "getSilenceMode fail", e);
+            Log.e(TAG, "isInSilenceMode fail", e);
             return false;
         }
     }

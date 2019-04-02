@@ -2232,6 +2232,7 @@ public class CameraDeviceImpl extends CameraDevice
             final int requestId = resultExtras.getRequestId();
             final int subsequenceId = resultExtras.getSubsequenceId();
             final long frameNumber = resultExtras.getFrameNumber();
+            final String errorPhysicalCameraId = resultExtras.getErrorPhysicalCameraId();
             final CaptureCallbackHolder holder =
                     CameraDeviceImpl.this.mCaptureCallbackMap.get(requestId);
 
@@ -2287,7 +2288,8 @@ public class CameraDeviceImpl extends CameraDevice
                     reason,
                     /*dropped*/ mayHaveBuffers,
                     requestId,
-                    frameNumber);
+                    frameNumber,
+                    errorPhysicalCameraId);
 
                 failureDispatch = new Runnable() {
                     @Override

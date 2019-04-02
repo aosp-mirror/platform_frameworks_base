@@ -16,8 +16,6 @@
 
 package android.webkit;
 
-import android.app.LoadedApk;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -28,10 +26,6 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 /** @hide */
 public class WebViewZygote {
@@ -54,13 +48,6 @@ public class WebViewZygote {
      */
     @GuardedBy("sLock")
     private static PackageInfo sPackage;
-
-    /**
-     * Original ApplicationInfo for the selected WebView package before stub fixup. This is set from
-     * #onWebViewProviderChanged().
-     */
-    @GuardedBy("sLock")
-    private static ApplicationInfo sPackageOriginalAppInfo;
 
     /**
      * Flag for whether multi-process WebView is enabled. If this is {@code false}, the zygote
@@ -110,11 +97,9 @@ public class WebViewZygote {
         }
     }
 
-    public static void onWebViewProviderChanged(PackageInfo packageInfo,
-                                                ApplicationInfo originalAppInfo) {
+    static void onWebViewProviderChanged(PackageInfo packageInfo) {
         synchronized (sLock) {
             sPackage = packageInfo;
-            sPackageOriginalAppInfo = originalAppInfo;
 
             // If multi-process is not enabled, then do not start the zygote service.
             if (!sMultiprocessEnabled) {
@@ -165,34 +150,7 @@ public class WebViewZygote {
                     Process.FIRST_ISOLATED_UID,
                     Integer.MAX_VALUE); // TODO(b/123615476) deal with user-id ranges properly
             ZygoteProcess.waitForConnectionToZygote(sZygote.getPrimarySocketAddress());
-
-            if (sPackageOriginalAppInfo.sourceDir.equals(sPackage.applicationInfo.sourceDir)) {
-                // No stub WebView is involved here, so we can preload the package the "clean" way
-                // using the ApplicationInfo.
-                sZygote.preloadApp(sPackage.applicationInfo, abi);
-            } else {
-                // Legacy path to support the stub WebView.
-                // Reuse the logic from LoadedApk to determine the correct paths and pass them to
-                // the zygote as strings.
-                final List<String> zipPaths = new ArrayList<>(10);
-                final List<String> libPaths = new ArrayList<>(10);
-                LoadedApk.makePaths(null, false, sPackage.applicationInfo, zipPaths, libPaths);
-                final String librarySearchPath = TextUtils.join(File.pathSeparator, libPaths);
-                final String zip = (zipPaths.size() == 1) ? zipPaths.get(0) :
-                        TextUtils.join(File.pathSeparator, zipPaths);
-
-                String libFileName = WebViewFactory.getWebViewLibrary(sPackage.applicationInfo);
-
-                // Use the original ApplicationInfo to determine what the original classpath would
-                // have been to use as a cache key.
-                LoadedApk.makePaths(null, false, sPackageOriginalAppInfo, zipPaths, null);
-                final String cacheKey = (zipPaths.size() == 1) ? zipPaths.get(0) :
-                        TextUtils.join(File.pathSeparator, zipPaths);
-
-                Log.d(LOGTAG, "Preloading package " + zip + " " + librarySearchPath);
-                sZygote.preloadPackageForAbi(zip, librarySearchPath, libFileName, cacheKey,
-                                             Build.SUPPORTED_ABIS[0]);
-            }
+            sZygote.preloadApp(sPackage.applicationInfo, abi);
         } catch (Exception e) {
             Log.e(LOGTAG, "Error connecting to webview zygote", e);
             stopZygoteLocked();

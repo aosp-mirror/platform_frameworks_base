@@ -37,6 +37,8 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.RankingHelperProto;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.ArraySet;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.util.proto.ProtoOutputStream;
@@ -100,6 +102,7 @@ public class PreferencesHelper implements RankingConfig {
     private static final boolean DEFAULT_SHOW_BADGE = true;
     private static final boolean DEFAULT_ALLOW_BUBBLE = true;
     private static final boolean DEFAULT_OEM_LOCKED_IMPORTANCE  = false;
+    private static final boolean DEFAULT_APP_LOCKED_IMPORTANCE  = false;
 
     /**
      * Default value for what fields are user locked. See {@link LockableAppFields} for all lockable
@@ -659,6 +662,7 @@ public class PreferencesHelper implements RankingConfig {
                 channel.setImportanceLockedByOEM(true);
             }
         }
+        channel.setImportanceLockedByCriticalDeviceFunction(r.defaultAppLockedImportance);
         if (channel.getLockscreenVisibility() == Notification.VISIBILITY_PUBLIC) {
             channel.setLockscreenVisibility(
                     NotificationListenerService.Ranking.VISIBILITY_NO_OVERRIDE);
@@ -705,6 +709,10 @@ public class PreferencesHelper implements RankingConfig {
         // no importance updates are allowed if OEM blocked it
         updatedChannel.setImportanceLockedByOEM(channel.isImportanceLockedByOEM());
         if (updatedChannel.isImportanceLockedByOEM()) {
+            updatedChannel.setImportance(channel.getImportance());
+        }
+        updatedChannel.setImportanceLockedByCriticalDeviceFunction(r.defaultAppLockedImportance);
+        if (updatedChannel.isImportanceLockedByCriticalDeviceFunction()) {
             updatedChannel.setImportance(channel.getImportance());
         }
 
@@ -837,6 +845,26 @@ public class PreferencesHelper implements RankingConfig {
                                     }
                                 }
                             }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public void updateDefaultApps(int userId, ArraySet<String> toRemove, ArraySet<String> toAdd) {
+        synchronized (mPackagePreferences) {
+            for (PackagePreferences p : mPackagePreferences.values()) {
+                if (userId == UserHandle.getUserId(p.uid)) {
+                    if (toRemove != null && toRemove.contains(p.pkg)) {
+                        p.defaultAppLockedImportance = false;
+                        for (NotificationChannel channel : p.channels.values()) {
+                            channel.setImportanceLockedByCriticalDeviceFunction(false);
+                        }
+                    } else if (toAdd != null && toAdd.contains(p.pkg)) {
+                        p.defaultAppLockedImportance = true;
+                        for (NotificationChannel channel : p.channels.values()) {
+                            channel.setImportanceLockedByCriticalDeviceFunction(true);
                         }
                     }
                 }
@@ -1729,8 +1757,11 @@ public class PreferencesHelper implements RankingConfig {
         boolean showBadge = DEFAULT_SHOW_BADGE;
         boolean allowBubble = DEFAULT_ALLOW_BUBBLE;
         int lockedAppFields = DEFAULT_LOCKED_APP_FIELDS;
+        // these fields are loaded on boot from a different source of truth and so are not
+        // written to notification policy xml
         boolean oemLockedImportance = DEFAULT_OEM_LOCKED_IMPORTANCE;
         List<String> futureOemLockedChannels = new ArrayList<>();
+        boolean defaultAppLockedImportance = DEFAULT_APP_LOCKED_IMPORTANCE;
 
         Delegate delegate = null;
         ArrayMap<String, NotificationChannel> channels = new ArrayMap<>();

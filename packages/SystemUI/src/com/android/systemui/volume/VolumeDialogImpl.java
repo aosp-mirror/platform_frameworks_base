@@ -95,6 +95,7 @@ import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.plugins.VolumeDialogController.State;
 import com.android.systemui.plugins.VolumeDialogController.StreamState;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 
 import java.io.PrintWriter;
@@ -108,7 +109,8 @@ import java.util.List;
  *
  * Methods ending in "H" must be called on the (ui) handler.
  */
-public class VolumeDialogImpl implements VolumeDialog {
+public class VolumeDialogImpl implements VolumeDialog,
+        ConfigurationController.ConfigurationListener {
     private static final String TAG = Util.logTag(VolumeDialogImpl.class);
 
     private static final long USER_ATTEMPT_GRACE_PERIOD = 1000;
@@ -175,6 +177,11 @@ public class VolumeDialogImpl implements VolumeDialog {
                 Prefs.getBoolean(context, Prefs.Key.HAS_SEEN_ODI_CAPTIONS_TOOLTIP, false);
     }
 
+    @Override
+    public void onUiModeChanged() {
+        mContext.getTheme().applyStyle(mContext.getThemeResId(), true);
+    }
+
     public void init(int windowType, Callback callback) {
         initDialog();
 
@@ -182,12 +189,15 @@ public class VolumeDialogImpl implements VolumeDialog {
 
         mController.addCallback(mControllerCallbackH, mHandler);
         mController.getState();
+
+        Dependency.get(ConfigurationController.class).addCallback(this);
     }
 
     @Override
     public void destroy() {
         mController.removeCallback(mControllerCallbackH);
         mHandler.removeCallbacksAndMessages(null);
+        Dependency.get(ConfigurationController.class).removeCallback(this);
     }
 
     private void initDialog() {
@@ -278,7 +288,7 @@ public class VolumeDialogImpl implements VolumeDialog {
                 addRow(AudioManager.STREAM_RING,
                         R.drawable.ic_volume_ringer, R.drawable.ic_volume_ringer_mute, true, false);
                 addRow(STREAM_ALARM,
-                        R.drawable.ic_volume_alarm, R.drawable.ic_volume_alarm_mute, true, false);
+                        R.drawable.ic_alarm, R.drawable.ic_volume_alarm_mute, true, false);
                 addRow(AudioManager.STREAM_VOICE_CALL,
                         com.android.internal.R.drawable.ic_phone,
                         com.android.internal.R.drawable.ic_phone, false, false);

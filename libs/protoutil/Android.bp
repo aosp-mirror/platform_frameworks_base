@@ -25,12 +25,15 @@ cc_defaults {
 
     srcs: [
         "src/EncodedBuffer.cpp",
+        "src/ProtoFileReader.cpp",
         "src/ProtoOutputStream.cpp",
+        "src/ProtoReader.cpp",
         "src/protobuf.cpp",
     ],
 
     shared_libs: [
         "libbase",
+        "libutils",
         "libcutils",
         "liblog",
     ],

@@ -22,7 +22,7 @@ option java_outer_classname = "ProcessStatsServiceProto";
 
 import "frameworks/base/core/proto/android/util/common.proto";
 import "frameworks/base/core/proto/android/service/procstats_enum.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 /**
  * Data from ProcStatsService Dumpsys

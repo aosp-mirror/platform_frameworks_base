@@ -21,9 +21,10 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.net.Uri;
+import android.os.Handler;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
-import android.os.Handler;
+import android.util.Log;
 
 import com.android.systemui.settings.CurrentUserTracker;
 
@@ -39,6 +40,7 @@ import javax.inject.Singleton;
 public class DeviceProvisionedControllerImpl extends CurrentUserTracker implements
         DeviceProvisionedController {
 
+    private static final String TAG = DeviceProvisionedControllerImpl.class.getSimpleName();
     private final ArrayList<DeviceProvisionedListener> mListeners = new ArrayList<>();
     private final ContentResolver mContentResolver;
     private final Context mContext;
@@ -59,6 +61,8 @@ public class DeviceProvisionedControllerImpl extends CurrentUserTracker implemen
         mSettingsObserver = new ContentObserver(mainHandler) {
             @Override
             public void onChange(boolean selfChange, Uri uri, int userId) {
+                // STOPSHIP(kozynski, b/129405675) Remove log
+                Log.d(TAG, "Setting change: " + uri);
                 if (mUserSetupUri.equals(uri)) {
                     notifySetupChanged();
                 } else {

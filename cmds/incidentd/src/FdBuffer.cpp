@@ -31,12 +31,18 @@ namespace os {
 namespace incidentd {
 
 const ssize_t BUFFER_SIZE = 16 * 1024;  // 16 KB
-const ssize_t MAX_BUFFER_COUNT = 256;   // 4 MB max
+const ssize_t MAX_BUFFER_COUNT = 1536;   // 24 MB max
 
 FdBuffer::FdBuffer()
-    : mBuffer(BUFFER_SIZE), mStartTime(-1), mFinishTime(-1), mTimedOut(false), mTruncated(false) {}
+        :mBuffer(new EncodedBuffer(BUFFER_SIZE)),
+         mStartTime(-1),
+         mFinishTime(-1),
+         mTimedOut(false),
+         mTruncated(false) {
+}
 
-FdBuffer::~FdBuffer() {}
+FdBuffer::~FdBuffer() {
+}
 
 status_t FdBuffer::read(int fd, int64_t timeout) {
     struct pollfd pfds = {.fd = fd, .events = POLLIN};
@@ -45,12 +51,12 @@ status_t FdBuffer::read(int fd, int64_t timeout) {
     fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
 
     while (true) {
-        if (mBuffer.size() >= MAX_BUFFER_COUNT * BUFFER_SIZE) {
+        if (mBuffer->size() >= MAX_BUFFER_COUNT * BUFFER_SIZE) {
             mTruncated = true;
             VLOG("Truncating data");
             break;
         }
-        if (mBuffer.writeBuffer() == NULL) {
+        if (mBuffer->writeBuffer() == NULL) {
             VLOG("No memory");
             return NO_MEMORY;
         }
@@ -76,7 +82,7 @@ status_t FdBuffer::read(int fd, int64_t timeout) {
                 return errno != 0 ? -errno : UNKNOWN_ERROR;
             } else {
                 ssize_t amt = TEMP_FAILURE_RETRY(
-                        ::read(fd, mBuffer.writeBuffer(), mBuffer.currentToWrite()));
+                        ::read(fd, mBuffer->writeBuffer(), mBuffer->currentToWrite()));
                 if (amt < 0) {
                     if (errno == EAGAIN || errno == EWOULDBLOCK) {
                         continue;
@@ -88,7 +94,7 @@ status_t FdBuffer::read(int fd, int64_t timeout) {
                     VLOG("Reached EOF of fd=%d", fd);
                     break;
                 }
-                mBuffer.wp()->move(amt);
+                mBuffer->wp()->move(amt);
             }
         }
     }
@@ -100,28 +106,28 @@ status_t FdBuffer::readFully(int fd) {
     mStartTime = uptimeMillis();
 
     while (true) {
-        if (mBuffer.size() >= MAX_BUFFER_COUNT * BUFFER_SIZE) {
+        if (mBuffer->size() >= MAX_BUFFER_COUNT * BUFFER_SIZE) {
             // Don't let it get too big.
             mTruncated = true;
             VLOG("Truncating data");
             break;
         }
-        if (mBuffer.writeBuffer() == NULL) {
+        if (mBuffer->writeBuffer() == NULL) {
             VLOG("No memory");
             return NO_MEMORY;
         }
 
         ssize_t amt =
-                TEMP_FAILURE_RETRY(::read(fd, mBuffer.writeBuffer(), mBuffer.currentToWrite()));
+                TEMP_FAILURE_RETRY(::read(fd, mBuffer->writeBuffer(), mBuffer->currentToWrite()));
         if (amt < 0) {
             VLOG("Fail to read %d: %s", fd, strerror(errno));
             return -errno;
         } else if (amt == 0) {
-            VLOG("Done reading %zu bytes", mBuffer.size());
+            VLOG("Done reading %zu bytes", mBuffer->size());
             // We're done.
             break;
         }
-        mBuffer.wp()->move(amt);
+        mBuffer->wp()->move(amt);
     }
 
     mFinishTime = uptimeMillis();
@@ -150,12 +156,12 @@ status_t FdBuffer::readProcessedDataInStream(int fd, unique_fd toFd, unique_fd f
 
     // This is the buffer used to store processed data
     while (true) {
-        if (mBuffer.size() >= MAX_BUFFER_COUNT * BUFFER_SIZE) {
+        if (mBuffer->size() >= MAX_BUFFER_COUNT * BUFFER_SIZE) {
             VLOG("Truncating data");
             mTruncated = true;
             break;
         }
-        if (mBuffer.writeBuffer() == NULL) {
+        if (mBuffer->writeBuffer() == NULL) {
             VLOG("No memory");
             return NO_MEMORY;
         }
@@ -248,7 +254,7 @@ status_t FdBuffer::readProcessedDataInStream(int fd, unique_fd toFd, unique_fd f
 
         // read from parsing process
         ssize_t amt = TEMP_FAILURE_RETRY(
-                ::read(fromFd.get(), mBuffer.writeBuffer(), mBuffer.currentToWrite()));
+                ::read(fromFd.get(), mBuffer->writeBuffer(), mBuffer->currentToWrite()));
         if (amt < 0) {
             if (!(errno == EAGAIN || errno == EWOULDBLOCK)) {
                 VLOG("Fail to read fromFd %d: %s", fromFd.get(), strerror(errno));
@@ -258,7 +264,7 @@ status_t FdBuffer::readProcessedDataInStream(int fd, unique_fd toFd, unique_fd f
             VLOG("Reached EOF of fromFd %d", fromFd.get());
             break;
         } else {
-            mBuffer.wp()->move(amt);
+            mBuffer->wp()->move(amt);
         }
     }
 
@@ -266,9 +272,25 @@ status_t FdBuffer::readProcessedDataInStream(int fd, unique_fd toFd, unique_fd f
     return NO_ERROR;
 }
 
-size_t FdBuffer::size() const { return mBuffer.size(); }
+status_t FdBuffer::write(uint8_t const* buf, size_t size) {
+    return mBuffer->writeRaw(buf, size);
+}
 
-EncodedBuffer::iterator FdBuffer::data() const { return mBuffer.begin(); }
+status_t FdBuffer::write(const sp<ProtoReader>& reader) {
+    return mBuffer->writeRaw(reader);
+}
+
+status_t FdBuffer::write(const sp<ProtoReader>& reader, size_t size) {
+    return mBuffer->writeRaw(reader, size);
+}
+
+size_t FdBuffer::size() const {
+    return mBuffer->size();
+}
+
+sp<EncodedBuffer> FdBuffer::data() const {
+    return mBuffer;
+}
 
 }  // namespace incidentd
 }  // namespace os

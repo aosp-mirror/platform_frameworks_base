@@ -95,7 +95,7 @@ public class Canvas extends BaseCanvas {
     public Canvas() {
         if (!isHardwareAccelerated()) {
             // 0 means no native bitmap
-            mNativeCanvasWrapper = nInitRaster(null);
+            mNativeCanvasWrapper = nInitRaster(0);
             mFinalizer = NoImagePreloadHolder.sRegistry.registerNativeAllocation(
                     this, mNativeCanvasWrapper);
         } else {
@@ -117,7 +117,7 @@ public class Canvas extends BaseCanvas {
             throw new IllegalStateException("Immutable bitmap passed to Canvas constructor");
         }
         throwIfCannotDraw(bitmap);
-        mNativeCanvasWrapper = nInitRaster(bitmap);
+        mNativeCanvasWrapper = nInitRaster(bitmap.getNativeInstance());
         mFinalizer = NoImagePreloadHolder.sRegistry.registerNativeAllocation(
                 this, mNativeCanvasWrapper);
         mBitmap = bitmap;
@@ -185,7 +185,7 @@ public class Canvas extends BaseCanvas {
         }
 
         if (bitmap == null) {
-            nSetBitmap(mNativeCanvasWrapper, null);
+            nSetBitmap(mNativeCanvasWrapper, 0);
             mDensity = Bitmap.DENSITY_NONE;
         } else {
             if (!bitmap.isMutable()) {
@@ -193,7 +193,7 @@ public class Canvas extends BaseCanvas {
             }
             throwIfCannotDraw(bitmap);
 
-            nSetBitmap(mNativeCanvasWrapper, bitmap);
+            nSetBitmap(mNativeCanvasWrapper, bitmap.getNativeInstance());
             mDensity = bitmap.mDensity;
         }
 
@@ -1364,14 +1364,16 @@ public class Canvas extends BaseCanvas {
 
     private static native void nFreeCaches();
     private static native void nFreeTextLayoutCaches();
-    private static native long nInitRaster(Bitmap bitmap);
     private static native long nGetNativeFinalizer();
     private static native void nSetCompatibilityVersion(int apiLevel);
 
     // ---------------- @FastNative -------------------
 
     @FastNative
-    private static native void nSetBitmap(long canvasHandle, Bitmap bitmap);
+    private static native long nInitRaster(long bitmapHandle);
+
+    @FastNative
+    private static native void nSetBitmap(long canvasHandle, long bitmapHandle);
 
     @FastNative
     private static native boolean nGetClipBounds(long nativeCanvas, Rect bounds);
@@ -1683,8 +1685,9 @@ public class Canvas extends BaseCanvas {
      * Fill the entire canvas' bitmap (restricted to the current clip) with the specified color,
      * using srcover porterduff mode.
      *
-     * @param color the color to draw onto the canvas
-     * @throws IllegalArgumentException if the color space encoded in the long
+     * @param color the {@code ColorLong} to draw onto the canvas. See the {@link Color}
+     *              class for details about {@code ColorLong}s.
+     * @throws IllegalArgumentException if the color space encoded in the {@code ColorLong}
      *                                  is invalid or unknown.
      */
     public void drawColor(@ColorLong long color) {
@@ -1695,7 +1698,7 @@ public class Canvas extends BaseCanvas {
      * Fill the entire canvas' bitmap (restricted to the current clip) with the specified color and
      * porter-duff xfermode.
      *
-     * @param color the color to draw with
+     * @param color the color to draw onto the canvas
      * @param mode the porter-duff mode to apply to the color
      *
      * @deprecated use {@link #drawColor(int, BlendMode)} instead
@@ -1709,7 +1712,7 @@ public class Canvas extends BaseCanvas {
      * Fill the entire canvas' bitmap (restricted to the current clip) with the specified color and
      * blendmode.
      *
-     * @param color the color to draw with
+     * @param color the color to draw onto the canvas
      * @param mode the blendmode to apply to the color
      */
     public void drawColor(@ColorInt int color, @NonNull BlendMode mode) {
@@ -1720,9 +1723,10 @@ public class Canvas extends BaseCanvas {
      * Fill the entire canvas' bitmap (restricted to the current clip) with the specified color and
      * blendmode.
      *
-     * @param color the color to draw with
+     * @param color the {@code ColorLong} to draw onto the canvas. See the {@link Color}
+     *              class for details about {@code ColorLong}s.
      * @param mode the blendmode to apply to the color
-     * @throws IllegalArgumentException if the color space encoded in the long
+     * @throws IllegalArgumentException if the color space encoded in the {@code ColorLong}
      *                                  is invalid or unknown.
      */
     public void drawColor(@ColorLong long color, @NonNull BlendMode mode) {

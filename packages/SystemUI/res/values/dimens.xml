@@ -23,8 +23,6 @@
     <dimen name="navigation_bar_size">@*android:dimen/navigation_bar_height</dimen>
     <!-- Minimum swipe distance to catch the swipe gestures to invoke assist or switch tasks. -->
     <dimen name="navigation_bar_min_swipe_distance">48dp</dimen>
-    <!-- The default distance from a side of the device to start an edge swipe from -->
-    <dimen name="navigation_bar_default_edge_width">48dp</dimen>
     <dimen name="navigation_bar_default_edge_height">500dp</dimen>
 
     <!-- thickness (height) of the dead zone at the top of the navigation bar,
@@ -37,7 +35,13 @@
     <dimen name="navigation_handle_radius">1dp</dimen>
     <dimen name="navigation_handle_bottom">6dp</dimen>
     <dimen name="navigation_handle_horizontal_margin">30dp</dimen>
-    <dimen name="navigation_home_handle_width">280dp</dimen>
+    <dimen name="navigation_handle_sample_horizontal_margin">10dp</dimen>
+    <dimen name="navigation_home_handle_width">72dp</dimen>
+
+    <!-- Luminance threshold to determine black/white contrast for the navigation affordances -->
+    <item name="navigation_luminance_threshold" type="dimen" format="float">0.5</item>
+    <!-- Luminance change threshold that allows applying new value if difference was exceeded -->
+    <item name="navigation_luminance_change_threshold" type="dimen" format="float">0.05</item>
 
     <!-- Height of notification icons in the status bar -->
     <dimen name="status_bar_icon_size">@*android:dimen/status_bar_icon_size</dimen>
@@ -334,6 +338,8 @@
     <dimen name="volume_dialog_row_height">252dp</dimen>
 
     <dimen name="volume_dialog_ringer_size">64dp</dimen>
+
+    <dimen name="volume_dialog_ringer_icon_padding">20dp</dimen>
 
     <dimen name="volume_dialog_caption_size">64dp</dimen>
 
@@ -977,10 +983,6 @@
     <!-- How much into a DisplayCutout's bounds we can go, on each side -->
     <dimen name="display_cutout_margin_consumption">0px</dimen>
 
-    <!-- How much we expand the touchable region of the status bar below the notch to catch touches
-         that just start below the notch. -->
-    <dimen name="display_cutout_touchable_region_size">12dp</dimen>
-
     <!-- Padding below Ongoing App Ops dialog title -->
     <dimen name="ongoing_appops_dialog_sep">16dp</dimen>
     <!--Padding around text items in Ongoing App Ops dialog -->
@@ -1023,8 +1025,8 @@
     <dimen name="ongoing_appops_chip_bg_corner_radius">16dp</dimen>
 
 
-    <!-- How much a bubble is elevated -->
-    <dimen name="bubble_elevation">8dp</dimen>
+    <!-- How much each bubble is elevated. -->
+    <dimen name="bubble_elevation">1dp</dimen>
     <!-- Padding around a collapsed bubble -->
     <dimen name="bubble_view_padding">0dp</dimen>
     <!-- Padding between bubbles when displayed in expanded state -->

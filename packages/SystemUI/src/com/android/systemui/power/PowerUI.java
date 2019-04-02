@@ -284,7 +284,8 @@ public class PowerUI extends SystemUI {
                     plugged, bucket, mBatteryStatus, mLowBatteryReminderLevels[1],
                     mLowBatteryReminderLevels[0], estimate.getEstimateMillis(),
                     mEnhancedEstimates.getSevereWarningThreshold(),
-                    mEnhancedEstimates.getLowWarningThreshold(), estimate.isBasedOnUsage());
+                    mEnhancedEstimates.getLowWarningThreshold(), estimate.isBasedOnUsage(),
+                    mEnhancedEstimates.getLowWarningEnabled());
         } else {
             if (DEBUG) {
                 Slog.d(TAG, "using standard");
@@ -351,7 +352,6 @@ public class PowerUI extends SystemUI {
                 Slog.d(TAG, "Low warning marked as shown this cycle");
                 mLowWarningShownThisChargeCycle = true;
             }
-
         } else if (shouldDismissHybridWarning(currentSnapshot)) {
             if (DEBUG) {
                 Slog.d(TAG, "Dismissing warning");
@@ -375,8 +375,9 @@ public class PowerUI extends SystemUI {
             return false;
         }
 
-        // Only show the low warning once per charge cycle & no battery saver
-        final boolean canShowWarning = !mLowWarningShownThisChargeCycle && !snapshot.isPowerSaver()
+        // Only show the low warning if enabled once per charge cycle & no battery saver
+        final boolean canShowWarning = snapshot.isLowWarningEnabled()
+                && !mLowWarningShownThisChargeCycle && !snapshot.isPowerSaver()
                 && (snapshot.getTimeRemainingMillis() < snapshot.getLowThresholdMillis()
                 || snapshot.getBatteryLevel() <= snapshot.getLowLevelThreshold());
 
@@ -386,6 +387,7 @@ public class PowerUI extends SystemUI {
                 || snapshot.getBatteryLevel() <= snapshot.getSevereLevelThreshold());
 
         final boolean canShow = canShowWarning || canShowSevereWarning;
+
         if (DEBUG) {
             Slog.d(TAG, "Enhanced trigger is: " + canShow + "\nwith battery snapshot:"
                     + " mLowWarningShownThisChargeCycle: " + mLowWarningShownThisChargeCycle

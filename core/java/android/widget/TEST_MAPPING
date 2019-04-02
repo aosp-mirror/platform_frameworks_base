@@ -1,12 +1,7 @@
 {
-  "presubmit": [
+  "imports": [
     {
-      "name": "CtsWidgetTestCases",
-      "options": [
-        {
-          "instrumentation-arg": "size:=small"
-        }
-      ]
+      "path": "cts/tests/tests/widget"
     }
   ]
 }

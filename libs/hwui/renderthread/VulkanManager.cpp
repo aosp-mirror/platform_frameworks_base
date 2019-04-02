@@ -170,6 +170,7 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
     VkPhysicalDeviceProperties physDeviceProperties;
     mGetPhysicalDeviceProperties(mPhysicalDevice, &physDeviceProperties);
     LOG_ALWAYS_FATAL_IF(physDeviceProperties.apiVersion < VK_MAKE_VERSION(1, 1, 0));
+    mDriverVersion = physDeviceProperties.driverVersion;
 
     // query to get the initial queue props size
     uint32_t queueCount;
@@ -493,6 +494,12 @@ void VulkanManager::swapBuffers(VulkanSurface* surface, const SkRect& dirtyRect)
         mDeviceWaitIdle(mDevice);
     }
 
+    VulkanSurface::NativeBufferInfo* bufferInfo = surface->getCurrentBufferInfo();
+    if (!bufferInfo) {
+        // If VulkanSurface::dequeueNativeBuffer failed earlier, then swapBuffers is a no-op.
+        return;
+    }
+
     VkExportSemaphoreCreateInfo exportInfo;
     exportInfo.sType = VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO;
     exportInfo.pNext = nullptr;
@@ -508,8 +515,6 @@ void VulkanManager::swapBuffers(VulkanSurface* surface, const SkRect& dirtyRect)
 
     GrBackendSemaphore backendSemaphore;
     backendSemaphore.initVulkan(semaphore);
-
-    VulkanSurface::NativeBufferInfo* bufferInfo = surface->getCurrentBufferInfo();
 
     int fenceFd = -1;
     GrSemaphoresSubmitted submitted =

@@ -20,11 +20,11 @@ import android.annotation.Nullable;
 import android.app.Notification;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.graphics.drawable.InsetDrawable;
-import android.graphics.drawable.LayerDrawable;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
 import android.widget.TextView;
@@ -41,6 +41,9 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 public class BubbleView extends FrameLayout {
     private static final String TAG = "BubbleView";
 
+    private static final int DARK_ICON_ALPHA = 180;
+    private static final double ICON_MIN_CONTRAST = 4.1;
+    private static final int DEFAULT_BACKGROUND_COLOR =  Color.LTGRAY;
     // Same value as Launcher3 badge code
     private static final float WHITE_SCRIM_ALPHA = 0.54f;
     private Context mContext;
@@ -84,7 +87,6 @@ public class BubbleView extends FrameLayout {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        updateViews();
     }
 
     @Override
@@ -206,18 +208,30 @@ public class BubbleView extends FrameLayout {
         }
         Drawable iconDrawable = ic.loadDrawable(mContext);
         if (needsTint) {
-            // Center icon on coloured background
-            iconDrawable.setTint(Color.WHITE); // TODO: dark mode
-            Drawable bg = new ColorDrawable(n.color);
-            InsetDrawable d = new InsetDrawable(iconDrawable, mIconInset);
-            Drawable[] layers = {bg, d};
-            mBadgedImageView.setImageDrawable(new LayerDrawable(layers));
+            mBadgedImageView.setImageDrawable(buildIconWithTint(iconDrawable, n.color));
         } else {
             mBadgedImageView.setImageDrawable(iconDrawable);
         }
         int badgeColor = determineDominateColor(iconDrawable, n.color);
         mBadgedImageView.setDotColor(badgeColor);
         animateDot(mEntry.showInShadeWhenBubble() /* showDot */);
+    }
+
+    private Drawable buildIconWithTint(Drawable iconDrawable, int backgroundColor) {
+        backgroundColor = ColorUtils.setAlphaComponent(backgroundColor, 255 /* alpha */);
+        if (backgroundColor == Color.TRANSPARENT) {
+            // ColorUtils throws exception when background is translucent.
+            backgroundColor = DEFAULT_BACKGROUND_COLOR;
+        }
+        iconDrawable.setTint(Color.WHITE);
+        double contrastRatio = ColorUtils.calculateContrast(Color.WHITE, backgroundColor);
+        if (contrastRatio < ICON_MIN_CONTRAST) {
+            int dark = ColorUtils.setAlphaComponent(Color.BLACK, DARK_ICON_ALPHA);
+            iconDrawable.setTint(dark);
+        }
+        InsetDrawable foreground = new InsetDrawable(iconDrawable, mIconInset);
+        ColorDrawable background = new ColorDrawable(backgroundColor);
+        return new AdaptiveIconDrawable(background, foreground);
     }
 
     private int determineDominateColor(Drawable d, int defaultTint) {

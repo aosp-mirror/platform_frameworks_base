@@ -24,7 +24,6 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
-import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.prediction.AppPredictionContext;
@@ -163,6 +162,8 @@ public class ChooserActivity extends ResolverActivity {
      */
     private static final int NO_DIRECT_SHARE_ANIM_IN_MILLIS = 200;
 
+    private static final float DIRECT_SHARE_EXPANSION_RATE = 0.7f;
+
     // TODO(b/121287224): Re-evaluate this limit
     private static final int SHARE_TARGET_QUERY_PACKAGE_LIMIT = 20;
 
@@ -195,6 +196,11 @@ public class ChooserActivity extends ResolverActivity {
     private static final int CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT = 2;
     private static final int SHORTCUT_MANAGER_SHARE_TARGET_RESULT = 3;
     private static final int SHORTCUT_MANAGER_SHARE_TARGET_RESULT_COMPLETED = 4;
+    private static final int LIST_VIEW_UPDATE_MESSAGE = 5;
+
+    private static final int LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS = 250;
+
+    private boolean mListViewDataChanged = false;
 
     @Retention(SOURCE)
     @IntDef({CONTENT_PREVIEW_FILE, CONTENT_PREVIEW_IMAGE, CONTENT_PREVIEW_TEXT})
@@ -211,10 +217,13 @@ public class ChooserActivity extends ResolverActivity {
     private final Handler mChooserHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
+            if (mChooserListAdapter == null || isDestroyed()) {
+                return;
+            }
+
             switch (msg.what) {
                 case CHOOSER_TARGET_SERVICE_RESULT:
                     if (DEBUG) Log.d(TAG, "CHOOSER_TARGET_SERVICE_RESULT");
-                    if (isDestroyed()) break;
                     final ServiceResultInfo sri = (ServiceResultInfo) msg.obj;
                     if (!mServiceConnections.contains(sri.connection)) {
                         Log.w(TAG, "ChooserTargetServiceConnection " + sri.connection
@@ -238,17 +247,22 @@ public class ChooserActivity extends ResolverActivity {
                     if (DEBUG) {
                         Log.d(TAG, "CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT; unbinding services");
                     }
-                    if (mChooserListAdapter == null || isDestroyed()) {
-                        break;
-                    }
+
                     unbindRemainingServices();
                     sendVoiceChoicesIfNeeded();
                     mChooserListAdapter.completeServiceTargetLoading();
                     break;
 
+                case LIST_VIEW_UPDATE_MESSAGE:
+                    if (DEBUG) {
+                        Log.d(TAG, "LIST_VIEW_UPDATE_MESSAGE; ");
+                    }
+
+                    mChooserListAdapter.refreshListView();
+                    break;
+
                 case SHORTCUT_MANAGER_SHARE_TARGET_RESULT:
                     if (DEBUG) Log.d(TAG, "SHORTCUT_MANAGER_SHARE_TARGET_RESULT");
-                    if (isDestroyed()) break;
                     final ServiceResultInfo resultInfo = (ServiceResultInfo) msg.obj;
                     if (resultInfo.resultTargets != null) {
                         mChooserListAdapter.addServiceResults(resultInfo.originalTarget,
@@ -435,9 +449,13 @@ public class ChooserActivity extends ResolverActivity {
         mChooserRowServiceSpacing = getResources()
                                         .getDimensionPixelSize(R.dimen.chooser_service_spacing);
 
-        // expand/shrink direct share 4 -> 8 viewgroup
-        if (mResolverDrawerLayout != null && isSendAction(target)) {
-            mResolverDrawerLayout.setOnScrollChangeListener(this::handleScroll);
+        if (mResolverDrawerLayout != null) {
+            mResolverDrawerLayout.addOnLayoutChangeListener(this::handleLayoutChange);
+
+            // expand/shrink direct share 4 -> 8 viewgroup
+            if (isSendAction(target)) {
+                mResolverDrawerLayout.setOnScrollChangeListener(this::handleScroll);
+            }
         }
 
         if (DEBUG) {
@@ -823,6 +841,7 @@ public class ChooserActivity extends ResolverActivity {
             mRefinementResultReceiver = null;
         }
         unbindRemainingServices();
+        mChooserHandler.removeMessages(LIST_VIEW_UPDATE_MESSAGE);
         mChooserHandler.removeMessages(CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT);
         mChooserHandler.removeMessages(CHOOSER_TARGET_SERVICE_RESULT);
         if (USE_PREDICTION_MANAGER_FOR_DIRECT_TARGETS) {
@@ -878,18 +897,9 @@ public class ChooserActivity extends ResolverActivity {
             mChooserListAdapter.addServiceResults(null, Lists.newArrayList(mCallerChooserTargets));
         }
         mChooserRowAdapter = new ChooserRowAdapter(mChooserListAdapter);
-        mChooserRowAdapter.registerDataSetObserver(new OffsetDataSetObserver(adapterView));
         if (listView != null) {
             listView.setItemsCanFocus(true);
-            listView.addOnLayoutChangeListener(
-                    (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
-                        if (mChooserRowAdapter.calculateMaxTargetsPerRow(right - left)) {
-                            adapterView.setAdapter(mChooserRowAdapter);
-                        }
-                    });
         }
-
-        adapterView.setAdapter(mChooserRowAdapter);
     }
 
     @Override
@@ -1597,7 +1607,7 @@ public class ChooserActivity extends ResolverActivity {
             if (info == null) return null;
 
             // Now fetch app icon and raster with no badging even in work profile
-            Bitmap appIcon = (new ActivityInfoPresentationGetter(info)).getIconBitmap();
+            Bitmap appIcon = makePresentationGetter(info).getIconBitmap();
 
             // Raster target drawable with appIcon as a badge
             SimpleIconFactory sif = SimpleIconFactory.obtain(ChooserActivity.this);
@@ -1728,6 +1738,66 @@ public class ChooserActivity extends ResolverActivity {
         }
     }
 
+    /*
+     * Need to dynamically adjust how many icons can fit per row before we add them,
+     * which also means setting the correct offset to initially show the content
+     * preview area + 2 rows of targets
+     */
+    private void handleLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft,
+            int oldTop, int oldRight, int oldBottom) {
+        if (mChooserRowAdapter == null || mAdapterView == null) {
+            return;
+        }
+
+        if (mChooserRowAdapter.calculateMaxTargetsPerRow(right - left)
+                || mAdapterView.getAdapter() == null) {
+            mAdapterView.setAdapter(mChooserRowAdapter);
+
+            getMainThreadHandler().post(() -> {
+                if (mResolverDrawerLayout == null || mChooserRowAdapter == null) {
+                    return;
+                }
+
+                int offset = 0;
+                int rowsToShow = mChooserRowAdapter.getContentPreviewRowCount()
+                        + mChooserRowAdapter.getServiceTargetRowCount()
+                        + mChooserRowAdapter.getCallerTargetRowCount();
+
+                // then this is most likely not a SEND_* action, so check
+                // the app target count
+                if (rowsToShow == 0) {
+                    rowsToShow = mChooserRowAdapter.getCount();
+                }
+
+                // still zero? then use a default height and leave, which
+                // can happen when there are no targets to show
+                if (rowsToShow == 0) {
+                    offset = getResources().getDimensionPixelSize(
+                            R.dimen.chooser_max_collapsed_height);
+                    mResolverDrawerLayout.setCollapsibleHeightReserved(offset);
+                    return;
+                }
+
+                int lastHeight = 0;
+                rowsToShow = Math.max(3, rowsToShow);
+                for (int i = 0; i < Math.min(rowsToShow, mAdapterView.getChildCount()); i++) {
+                    lastHeight = mAdapterView.getChildAt(i).getHeight();
+                    offset += lastHeight;
+                }
+
+                if (lastHeight != 0 && isSendAction(getTargetIntent())) {
+                    // make sure to leave room for direct share 4->8 expansion
+                    int expansionArea =
+                            (int) (mResolverDrawerLayout.getUncollapsibleHeight()
+                                    / DIRECT_SHARE_EXPANSION_RATE);
+                    offset = Math.min(offset, bottom - top - lastHeight - expansionArea);
+                }
+
+                mResolverDrawerLayout.setCollapsibleHeightReserved(offset);
+            });
+        }
+    }
+
     public class ChooserListAdapter extends ResolveListAdapter {
         public static final int TARGET_BAD = -1;
         public static final int TARGET_CALLER = 0;
@@ -1808,23 +1878,35 @@ public class ChooserActivity extends ResolverActivity {
                         ri.noResourceId = true;
                         ri.icon = 0;
                     }
+                    ResolveInfoPresentationGetter getter = makePresentationGetter(ri);
                     mCallerTargets.add(new DisplayResolveInfo(ii, ri,
-                            ri.loadLabel(pm), null, ii));
+                            getter.getLabel(), getter.getSubLabel(), ii));
                 }
             }
         }
+
+        @Override
+        public void notifyDataSetChanged() {
+            if (!mListViewDataChanged) {
+                mChooserHandler.sendEmptyMessageDelayed(LIST_VIEW_UPDATE_MESSAGE,
+                        LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS);
+                mListViewDataChanged = true;
+            }
+        }
+
+        private void refreshListView() {
+            if (mListViewDataChanged) {
+                super.notifyDataSetChanged();
+            }
+            mListViewDataChanged = false;
+        }
+
 
         private void createPlaceHolders() {
             mServiceTargets.clear();
             for (int i = 0; i < MAX_SERVICE_TARGETS; i++) {
                 mServiceTargets.add(mPlaceHolderTargetInfo);
             }
-        }
-
-        @Override
-        public boolean showsExtendedInfo(TargetInfo info) {
-            // We have badges so we don't need this text shown.
-            return false;
         }
 
         @Override
@@ -1841,7 +1923,7 @@ public class ChooserActivity extends ResolverActivity {
             }
 
             if (mServiceTargets != null) {
-                if (getDisplayInfoCount() == 0) {
+                if (getDisplayResolveInfoCount() == 0) {
                     // b/109676071: When packages change, onListRebuilt() is called before
                     // ResolverActivity.mDisplayList is re-populated; pruning now would cause the
                     // list to disappear briefly, so instead we detect this case (the
@@ -1854,12 +1936,14 @@ public class ChooserActivity extends ResolverActivity {
                 if (DEBUG) {
                     Log.d(TAG, "querying direct share targets from ShortcutManager");
                 }
+
                 queryDirectShareTargets(this);
             }
             if (USE_CHOOSER_TARGET_SERVICE_FOR_DIRECT_TARGETS) {
                 if (DEBUG) {
                     Log.d(TAG, "List built querying services");
                 }
+
                 queryTargetServices(this);
             }
         }
@@ -1955,7 +2039,7 @@ public class ChooserActivity extends ResolverActivity {
             offset += callerTargetCount;
 
             return filtered ? super.getItem(position - offset)
-                    : getDisplayInfoAt(position - offset);
+                    : getDisplayResolveInfo(position - offset);
         }
 
         public void addServiceResults(DisplayResolveInfo origTarget, List<ChooserTarget> targets) {
@@ -2244,8 +2328,10 @@ public class ChooserActivity extends ResolverActivity {
             final int spec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
             int columnCount = holder.getColumnCount();
 
+            final boolean isDirectShare = holder instanceof DirectShareViewHolder;
+
             for (int i = 0; i < columnCount; i++) {
-                final View v = mChooserListAdapter.createView(holder.getRow(i));
+                final View v = mChooserListAdapter.createView(holder.getRowByIndex(i));
                 final int column = i;
                 v.setOnClickListener(new OnClickListener() {
                     @Override
@@ -2264,32 +2350,46 @@ public class ChooserActivity extends ResolverActivity {
                 });
                 ViewGroup row = holder.addView(i, v);
 
-                // Force height to be a given so we don't have visual disruption during scaling.
-                LayoutParams lp = v.getLayoutParams();
-                v.measure(spec, spec);
-                if (lp == null) {
-                    lp = new LayoutParams(LayoutParams.MATCH_PARENT, v.getMeasuredHeight());
-                    row.setLayoutParams(lp);
-                } else {
-                    lp.height = v.getMeasuredHeight();
+                // Force Direct Share to be 2 lines and auto-wrap to second line via hoz scroll =
+                // false. TextView#setHorizontallyScrolling must be reset after #setLines. Must be
+                // done before measuring.
+                if (isDirectShare) {
+                    final ViewHolder vh = (ViewHolder) v.getTag();
+                    vh.text.setLines(2);
+                    vh.text.setHorizontallyScrolling(false);
+                    vh.text2.setVisibility(View.GONE);
                 }
+
+                // Force height to be a given so we don't have visual disruption during scaling.
+                v.measure(spec, spec);
+                setViewHeight(v, v.getMeasuredHeight());
             }
 
             final ViewGroup viewGroup = holder.getViewGroup();
 
-            // Pre-measure so we can scale later.
+            // Pre-measure and fix height so we can scale later.
             holder.measure();
-            LayoutParams lp = viewGroup.getLayoutParams();
-            if (lp == null) {
-                lp = new LayoutParams(LayoutParams.MATCH_PARENT, holder.getMeasuredRowHeight());
-                viewGroup.setLayoutParams(lp);
-            } else {
-                lp.height = holder.getMeasuredRowHeight();
+            setViewHeight(viewGroup, holder.getMeasuredRowHeight());
+
+            if (isDirectShare) {
+                DirectShareViewHolder dsvh = (DirectShareViewHolder) holder;
+                setViewHeight(dsvh.getRow(0), holder.getMeasuredRowHeight());
+                setViewHeight(dsvh.getRow(1), holder.getMeasuredRowHeight());
             }
 
             viewGroup.setTag(holder);
 
             return holder;
+        }
+
+        private void setViewHeight(View view, int heightPx) {
+            LayoutParams lp = view.getLayoutParams();
+            if (lp == null) {
+                lp = new LayoutParams(LayoutParams.MATCH_PARENT, heightPx);
+                view.setLayoutParams(lp);
+            } else {
+                lp.height = heightPx;
+            }
         }
 
         RowViewHolder createViewHolder(int viewType, ViewGroup parent) {
@@ -2329,7 +2429,7 @@ public class ChooserActivity extends ResolverActivity {
 
             if (startType != lastStartType || rowPosition == getContentPreviewRowCount()) {
                 row.setBackground(mChooserRowLayer);
-                setVertPadding(row, mChooserRowServiceSpacing, 0);
+                setVertPadding(row, 0, 0);
             } else {
                 row.setBackground(null);
                 setVertPadding(row, 0, 0);
@@ -2426,7 +2526,9 @@ public class ChooserActivity extends ResolverActivity {
 
         abstract ViewGroup getViewGroup();
 
-        abstract ViewGroup getRow(int index);
+        abstract ViewGroup getRowByIndex(int index);
+
+        abstract ViewGroup getRow(int rowNumber);
 
         abstract void setViewVisibility(int i, int visibility);
 
@@ -2475,8 +2577,13 @@ public class ChooserActivity extends ResolverActivity {
             return mRow;
         }
 
-        public ViewGroup getRow(int index) {
+        public ViewGroup getRowByIndex(int index) {
             return mRow;
+        }
+
+        public ViewGroup getRow(int rowNumber) {
+            if (rowNumber == 0) return mRow;
+            return null;
         }
 
         public ViewGroup addView(int index, View v) {
@@ -2517,7 +2624,7 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         public ViewGroup addView(int index, View v) {
-            ViewGroup row = getRow(index);
+            ViewGroup row = getRowByIndex(index);
             row.addView(v);
             mCells[index] = v;
 
@@ -2532,8 +2639,12 @@ public class ChooserActivity extends ResolverActivity {
             return mParent;
         }
 
-        public ViewGroup getRow(int index) {
+        public ViewGroup getRowByIndex(int index) {
             return mRows.get(index / mCellCountPerRow);
+        }
+
+        public ViewGroup getRow(int rowNumber) {
+            return mRows.get(rowNumber);
         }
 
         public void measure() {
@@ -2541,7 +2652,6 @@ public class ChooserActivity extends ResolverActivity {
             getRow(0).measure(spec, spec);
             getRow(1).measure(spec, spec);
 
-            // uses ChooserActiivty state variables to track height
             mDirectShareMinHeight = getRow(0).getMeasuredHeight();
             mDirectShareCurrHeight = mDirectShareCurrHeight > 0
                                          ? mDirectShareCurrHeight : mDirectShareMinHeight;
@@ -2574,18 +2684,18 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         public void handleScroll(AbsListView view, int y, int oldy, int maxTargetsPerRow) {
-            // only expand if we have more than 4 targets, and delay that decision until
-            // they start to scroll
             if (mHideDirectShareExpansion) {
                 return;
             }
 
+            // only expand if we have more than maxTargetsPerRow, and delay that decision
+            // until they start to scroll
             if (mChooserListAdapter.getSelectableServiceTargetCount() <= maxTargetsPerRow) {
                 mHideDirectShareExpansion = true;
                 return;
             }
 
-            int yDiff = (int) ((oldy - y) * 0.7f);
+            int yDiff = (int) ((oldy - y) * DIRECT_SHARE_EXPANSION_RATE);
 
             int prevHeight = mDirectShareCurrHeight;
             mDirectShareCurrHeight = Math.min(mDirectShareCurrHeight + yDiff,
@@ -2593,27 +2703,31 @@ public class ChooserActivity extends ResolverActivity {
             mDirectShareCurrHeight = Math.max(mDirectShareCurrHeight, mDirectShareMinHeight);
             yDiff = mDirectShareCurrHeight - prevHeight;
 
-            if (view == null || view.getChildCount() == 0) {
+            if (view == null || view.getChildCount() == 0 || yDiff == 0) {
                 return;
             }
 
-            int index = mChooserRowAdapter.getContentPreviewRowCount();
+            // locate the item to expand, and offset the rows below that one
+            boolean foundExpansion = false;
+            for (int i = 0; i < view.getChildCount(); i++) {
+                View child = view.getChildAt(i);
 
-            ViewGroup expansionGroup = (ViewGroup) view.getChildAt(index);
-            int widthSpec = MeasureSpec.makeMeasureSpec(expansionGroup.getWidth(),
-                    MeasureSpec.EXACTLY);
-            int heightSpec = MeasureSpec.makeMeasureSpec(mDirectShareCurrHeight,
-                    MeasureSpec.EXACTLY);
-            expansionGroup.measure(widthSpec, heightSpec);
-            expansionGroup.getLayoutParams().height = expansionGroup.getMeasuredHeight();
-            expansionGroup.layout(expansionGroup.getLeft(), expansionGroup.getTop(),
-                    expansionGroup.getRight(),
-                    expansionGroup.getTop() + expansionGroup.getMeasuredHeight());
+                if (foundExpansion) {
+                    child.offsetTopAndBottom(yDiff);
+                } else {
+                    if (child.getTag() != null && child.getTag() instanceof DirectShareViewHolder) {
+                        int widthSpec = MeasureSpec.makeMeasureSpec(child.getWidth(),
+                                MeasureSpec.EXACTLY);
+                        int heightSpec = MeasureSpec.makeMeasureSpec(mDirectShareCurrHeight,
+                                MeasureSpec.EXACTLY);
+                        child.measure(widthSpec, heightSpec);
+                        child.getLayoutParams().height = child.getMeasuredHeight();
+                        child.layout(child.getLeft(), child.getTop(), child.getRight(),
+                                child.getTop() + child.getMeasuredHeight());
 
-            // reposition list items
-            int items = view.getChildCount();
-            for (int i = index + 1; i < items; i++) {
-                view.getChildAt(i).offsetTopAndBottom(yDiff);
+                        foundExpansion = true;
+                    }
+                }
             }
         }
     }
@@ -2770,47 +2884,6 @@ public class ChooserActivity extends ResolverActivity {
             mSelectedTarget = null;
         }
     }
-
-    class OffsetDataSetObserver extends DataSetObserver {
-        private final AbsListView mListView;
-        private int mCachedViewType = -1;
-        private View mCachedView;
-
-        public OffsetDataSetObserver(AbsListView listView) {
-            mListView = listView;
-        }
-
-        @Override
-        public void onChanged() {
-            if (mResolverDrawerLayout == null) {
-                return;
-            }
-
-            final int chooserTargetRows = mChooserRowAdapter.getServiceTargetRowCount();
-            int offset = 0;
-            for (int i = 0; i < chooserTargetRows; i++) {
-                final int pos = mChooserRowAdapter.getContentPreviewRowCount() + i;
-                final int vt = mChooserRowAdapter.getItemViewType(pos);
-                if (vt != mCachedViewType) {
-                    mCachedView = null;
-                }
-                final View v = mChooserRowAdapter.getView(pos, mCachedView, mListView);
-                int height = ((RowViewHolder) (v.getTag())).getMeasuredRowHeight();
-
-                offset += (int) (height);
-
-                if (vt >= 0) {
-                    mCachedViewType = vt;
-                    mCachedView = v;
-                } else {
-                    mCachedViewType = -1;
-                }
-            }
-
-            mResolverDrawerLayout.setCollapsibleHeightReserved(offset);
-        }
-    }
-
 
     /**
      * Used internally to round image corners while obeying view padding.

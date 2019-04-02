@@ -747,12 +747,12 @@
         &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to record audio?</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=40]-->
-    <string name="permgrouplab_activityRecognition">Activity recognition</string>
+    <string name="permgrouplab_activityRecognition">Physical activity</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=40]-->
-    <string name="permgroupdesc_activityRecognition">recognize activity</string>
+    <string name="permgroupdesc_activityRecognition">access your physical activity</string>
     <!-- Message shown to the user when the apps requests permission from this group. If ever possible this should stay below 80 characters (assuming the parameters takes 20 characters). Don't abbreviate until the message reaches 120 characters though. [CHAR LIMIT=120] -->
     <string name="permgrouprequest_activityRecognition">Allow
-        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to recognize your physical activity?</string>
+        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to access your physical activity?</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_camera">Camera</string>
@@ -785,24 +785,6 @@
     <!-- Message shown to the user when the apps requests permission from this group. If ever possible this should stay below 80 characters (assuming the parameters takes 20 characters). Don't abbreviate until the message reaches 120 characters though. [CHAR LIMIT=120] -->
     <string name="permgrouprequest_sensors">Allow
         &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to access sensor data about your vital signs?</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_aural">Music</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_aural">access your music</string>
-    <!-- Message shown to the user when the apps requests permission from this group. If ever possible this should stay below 80 characters (assuming the parameters takes 20 characters). Don't abbreviate until the message reaches 120 characters though. [CHAR LIMIT=120] -->
-    <string name="permgrouprequest_aural">Allow
-        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to access your music?</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_visual">Photos &amp; videos</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_visual">access your photos &amp; videos</string>
-    <!-- Message shown to the user when the apps requests permission from this group. If ever possible this should stay below 80 characters (assuming the parameters takes 20 characters). Don't abbreviate until the message reaches 120 characters though. [CHAR LIMIT=120] -->
-    <string name="permgrouprequest_visual">Allow
-        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to access your photos and videos?</string>
-    <!-- Subtitle of the message shown to the user when the apps requests permission to access photos and videos [CHAR LIMIT=150]-->
-    <string name="permgrouprequestdetail_visual">This includes any locations tagged in your photos and videos</string>
 
     <!-- Title for the capability of an accessibility service to retrieve window content. -->
     <string name="capability_title_canRetrieveWindowContent">Retrieve window content</string>
@@ -1432,27 +1414,15 @@
     <string name="permdesc_useFingerprint">Allows the app to use fingerprint hardware for authentication</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_audioRead">read your music collection</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_audioRead">Allows the app to read your music collection.</string>
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_audioWrite">modify your music collection</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_audioWrite">Allows the app to modify your music collection.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_videoRead">read your video collection</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_videoRead">Allows the app to read your video collection.</string>
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_videoWrite">modify your video collection</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_videoWrite">Allows the app to modify your video collection.</string>
 
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_imagesRead">read your photo collection</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_imagesRead">Allows the app to read your photo collection.</string>
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_imagesWrite">modify your photo collection</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -1582,25 +1552,25 @@
     </string-array>
 
     <!-- Error message shown when the face hardware can't be accessed. [CHAR LIMIT=50] -->
-    <string name="face_error_hw_not_available">Face hardware not available.</string>
+    <string name="face_error_hw_not_available">Can\u2019t verify face. Hardware not available.</string>
     <!-- Error message shown when the face hardware timer has expired and the user needs to restart the operation. [CHAR LIMIT=50] -->
     <string name="face_error_timeout">Face timeout reached. Try again.</string>
-    <!-- Error message shown when the face hardware has run out of room for storing faces. [CHAR LIMIT=50] -->
-    <string name="face_error_no_space">Face can\u2019t be stored.</string>
+    <!-- Error message shown when the face hardware has run out of room for storing faces. [CHAR LIMIT=60] -->
+    <string name="face_error_no_space">Can\u2019t store new face data. Delete an old one first.</string>
     <!-- Generic error message shown when the face operation (e.g. enrollment or authentication) is canceled. Generally not shown to the user. [CHAR LIMIT=50] -->
-    <string name="face_error_canceled">Face operation canceled.</string>
+    <string name="face_error_canceled">Face operation canceled</string>
     <!-- Generic error message shown when the face authentication operation is canceled due to user input. Generally not shown to the user [CHAR LIMIT=50] -->
-    <string name="face_error_user_canceled">Face authentication canceled by user.</string>
+    <string name="face_error_user_canceled">Face authentication canceled by user</string>
     <!-- Generic error message shown when the face operation fails because too many attempts have been made. [CHAR LIMIT=50] -->
     <string name="face_error_lockout">Too many attempts. Try again later.</string>
-    <!-- Generic error message shown when the face operation fails because strong authentication is required. [CHAR LIMIT=50] -->
-    <string name="face_error_lockout_permanent">Too many attempts. Facial authentication disabled.</string>
+    <!-- Generic error message shown when the face operation fails because strong authentication is required. [CHAR LIMIT=60] -->
+    <string name="face_error_lockout_permanent">Too many attempts. Face authentication disabled.</string>
     <!-- Generic error message shown when the face hardware can't recognize the face. [CHAR LIMIT=50] -->
     <string name="face_error_unable_to_process">Can\u2019t verify face. Try again.</string>
     <!-- Generic error message shown when the user has no enrolled face. [CHAR LIMIT=50] -->
-    <string name="face_error_not_enrolled">You haven\u2019t set up face authentication.</string>
+    <string name="face_error_not_enrolled">You haven\u2019t set up face authentication</string>
     <!-- Generic error message shown when the app requests face authentication on a device without a sensor. [CHAR LIMIT=60] -->
-    <string name="face_error_hw_not_present">Face authentication is not supported on this device.</string>
+    <string name="face_error_hw_not_present">Face authentication is not supported on this device</string>
 
     <!-- Template to be used to name enrolled faces by default. [CHAR LIMIT=10] -->
     <string name="face_name_template">Face <xliff:g id="faceId" example="1">%d</xliff:g></string>
@@ -3305,13 +3275,13 @@
         <xliff:g id="proc" example="Android System">%1$s</xliff:g> process has exceeded
         its memory limit of <xliff:g id="size" example="350MB">%2$s</xliff:g>. A heap dump is available
         for you to share. Be careful: this heap dump can contain any sensitive personal information
-        that the process has access to.</string>
+        that the process has access to, which may include things you\u2019ve typed.</string>
 
     <!-- Text of dialog prompting the user to share a heap dump that they initiated [CHAR LIMIT=NONE] -->
     <string name="dump_heap_ready_text">A heap dump of
         <xliff:g id="proc" example="com.android.example">%1$s</xliff:g>\u2019s process is available
         for you to share. Be careful: this heap dump may contain any sensitive personal information
-        that the process has access to.</string>
+        that the process has access to, which may include things you\u2019ve typed.</string>
 
     <!-- Displayed in the title of the chooser for things to do with text that
          is to be sent to another application. For example, I can send
@@ -4325,10 +4295,10 @@
 
     <!-- Activity starter -->
     <!-- Toast message for blocking background activity starts feature running in permissive mode -->
-    <string name="activity_starter_block_bg_activity_starts_permissive">This background activity start from <xliff:g id="packageName" example="com.example">%1$s</xliff:g> will be blocked in future Q builds. See go/q-bg-block.</string>
+    <string name="activity_starter_block_bg_activity_starts_permissive">This background activity start from <xliff:g id="packageName" example="com.example">%1$s</xliff:g> will be blocked in future Q builds. See g.co/dev/bgblock.</string>
 
     <!-- Toast message for blocking background activity starts feature running in enforcing mode -->
-    <string name="activity_starter_block_bg_activity_starts_enforcing">Background activity start from <xliff:g id="packageName" example="com.example">%1$s</xliff:g> blocked. See go/q-bg-block. </string>
+    <string name="activity_starter_block_bg_activity_starts_enforcing">Background activity start from <xliff:g id="packageName" example="com.example">%1$s</xliff:g> blocked. See g.co/dev/bgblock. </string>
 
     <!-- Keyguard strings -->
     <!-- Message shown in pattern unlock after some number of unsuccessful attempts -->
@@ -4835,7 +4805,7 @@
     <string name="package_deleted_device_owner">Deleted by your admin</string>
 
     <!-- [CHAR LIMIT=25] String for confirmation button to enable a feature gated by the battery saver warning-->
-    <string name="confirm_battery_saver">Confirm</string>
+    <string name="confirm_battery_saver">OK</string>
 
     <!-- [CHAR_LIMIT=NONE] Battery saver: Feature description, with a "learn more" link. -->
     <string name="battery_saver_description_with_learn_more">Battery Saver turns off or restricts background activity, some visual effects \u0026 other high-power features to extend battery life. <annotation id="url">Learn More</annotation></string>

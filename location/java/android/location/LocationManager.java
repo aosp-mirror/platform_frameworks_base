@@ -2328,9 +2328,27 @@ public class LocationManager {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.LOCATION_HARDWARE)
-    public void setLocationControllerExtraPackage(@NonNull String packageName) {
+    public void setExtraLocationControllerPackage(@Nullable String packageName) {
         try {
-            mService.setLocationControllerExtraPackage(packageName);
+            mService.setExtraLocationControllerPackage(packageName);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set the extra location controller package for location services on the device.
+     *
+     * @removed
+     * @deprecated Use {@link #setExtraLocationControllerPackage} instead.
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
+    @RequiresPermission(Manifest.permission.LOCATION_HARDWARE)
+    public void setLocationControllerExtraPackage(String packageName) {
+        try {
+            mService.setExtraLocationControllerPackage(packageName);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
@@ -2342,12 +2360,30 @@ public class LocationManager {
      * @hide
      */
     @SystemApi
-    public @Nullable String getLocationControllerExtraPackage() {
+    public @Nullable String getExtraLocationControllerPackage() {
         try {
-            return mService.getLocationControllerExtraPackage();
+            return mService.getExtraLocationControllerPackage();
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
             return null;
+        }
+    }
+
+    /**
+     * Set whether the extra location controller package is currently enabled on the device.
+     *
+     * @removed
+     * @deprecated Use {@link #setExtraLocationControllerPackageEnabled} instead.
+     * @hide
+     */
+    @SystemApi
+    @Deprecated
+    @RequiresPermission(Manifest.permission.LOCATION_HARDWARE)
+    public void setLocationControllerExtraPackageEnabled(boolean enabled) {
+        try {
+            mService.setExtraLocationControllerPackageEnabled(enabled);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -2358,9 +2394,9 @@ public class LocationManager {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.LOCATION_HARDWARE)
-    public void setLocationControllerExtraPackageEnabled(boolean enabled) {
+    public void setExtraLocationControllerPackageEnabled(boolean enabled) {
         try {
-            mService.setLocationControllerExtraPackageEnabled(enabled);
+            mService.setExtraLocationControllerPackageEnabled(enabled);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
@@ -2372,9 +2408,9 @@ public class LocationManager {
      * @hide
      */
     @SystemApi
-    public boolean isLocationControllerExtraPackageEnabled() {
+    public boolean isExtraLocationControllerPackageEnabled() {
         try {
-            return mService.isLocationControllerExtraPackageEnabled();
+            return mService.isExtraLocationControllerPackageEnabled();
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
             return false;

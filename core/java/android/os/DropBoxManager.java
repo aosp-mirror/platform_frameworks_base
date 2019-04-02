@@ -69,7 +69,8 @@ public class DropBoxManager {
     /**
      * Broadcast Action: This is broadcast when a new entry is added in the dropbox.
      * You must hold the {@link android.Manifest.permission#READ_LOGS} permission
-     * in order to receive this broadcast.
+     * in order to receive this broadcast. This broadcast can be rate limited for low priority
+     * entries
      *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.

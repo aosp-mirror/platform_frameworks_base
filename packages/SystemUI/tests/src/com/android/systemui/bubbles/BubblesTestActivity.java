@@ -17,6 +17,7 @@
 package com.android.systemui.bubbles;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.android.systemui.R;
@@ -26,9 +27,15 @@ import com.android.systemui.R;
  */
 public class BubblesTestActivity extends Activity {
 
+    public static final String BUBBLE_ACTIVITY_OPENED =
+            "com.android.systemui.bubbles.BUBBLE_ACTIVITY_OPENED";
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+
+        Intent i = new Intent(BUBBLE_ACTIVITY_OPENED);
+        sendBroadcast(i);
     }
 }

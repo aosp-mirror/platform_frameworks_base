@@ -259,6 +259,8 @@ class ProcessRecord implements WindowProcessListener {
     // A set of tokens that currently contribute to this process being temporarily whitelisted
     // to start activities even if it's not in the foreground
     final ArraySet<Binder> mAllowBackgroundActivityStartsTokens = new ArraySet<>();
+    // a set of UIDs of all bound clients
+    private ArraySet<Integer> mBoundClientUids = new ArraySet<>();
 
     String isolatedEntryPoint;  // Class to run on start if this is a special isolated process.
     String[] isolatedEntryPointArgs; // Arguments to pass to isolatedEntryPoint's main().
@@ -559,6 +561,13 @@ class ProcessRecord implements WindowProcessListener {
             pw.print(prefix); pw.println("Receivers:");
             for (int i=0; i<receivers.size(); i++) {
                 pw.print(prefix); pw.print("  - "); pw.println(receivers.valueAt(i));
+            }
+        }
+        if (mAllowBackgroundActivityStartsTokens.size() > 0) {
+            pw.print(prefix); pw.println("Background activity start whitelist tokens:");
+            for (int i = 0; i < mAllowBackgroundActivityStartsTokens.size(); i++) {
+                pw.print(prefix); pw.print("  - ");
+                pw.println(mAllowBackgroundActivityStartsTokens.valueAt(i));
             }
         }
     }
@@ -1184,6 +1193,53 @@ class ProcessRecord implements WindowProcessListener {
         mAllowBackgroundActivityStartsTokens.remove(entity);
         mWindowProcessController.setAllowBackgroundActivityStarts(
                 !mAllowBackgroundActivityStartsTokens.isEmpty());
+    }
+
+    void addBoundClientUids(ArraySet<Integer> clientUids) {
+        mBoundClientUids.addAll(clientUids);
+        mWindowProcessController.setBoundClientUids(mBoundClientUids);
+    }
+
+    void updateBoundClientUids() {
+        if (services.isEmpty()) {
+            clearBoundClientUids();
+            return;
+        }
+        // grab a set of clientUids of all connections of all services
+        ArraySet<Integer> boundClientUids = new ArraySet<>();
+        final int K = services.size();
+        for (int j = 0; j < K; j++) {
+            ArrayMap<IBinder, ArrayList<ConnectionRecord>> conns =
+                    services.valueAt(j).getConnections();
+            final int N = conns.size();
+            for (int conni = 0; conni < N; conni++) {
+                ArrayList<ConnectionRecord> c = conns.valueAt(conni);
+                for (int i = 0; i < c.size(); i++) {
+                    boundClientUids.add(c.get(i).clientUid);
+                }
+            }
+        }
+        mBoundClientUids = boundClientUids;
+        mWindowProcessController.setBoundClientUids(mBoundClientUids);
+    }
+
+    void addBoundClientUidsOfNewService(ServiceRecord sr) {
+        if (sr == null) {
+            return;
+        }
+        ArrayMap<IBinder, ArrayList<ConnectionRecord>> conns = sr.getConnections();
+        for (int conni = conns.size() - 1; conni >= 0; conni--) {
+            ArrayList<ConnectionRecord> c = conns.valueAt(conni);
+            for (int i = 0; i < c.size(); i++) {
+                mBoundClientUids.add(c.get(i).clientUid);
+            }
+        }
+        mWindowProcessController.setBoundClientUids(mBoundClientUids);
+    }
+
+    void clearBoundClientUids() {
+        mBoundClientUids.clear();
+        mWindowProcessController.setBoundClientUids(mBoundClientUids);
     }
 
     void setActiveInstrumentation(ActiveInstrumentation instr) {

@@ -60,6 +60,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Mock
     private KeyguardStatusView mKeyguardStatusView;
     @Mock
+    private KeyguardBottomAreaView mKeyguardBottomArea;
+    @Mock
     private KeyguardStatusBarView mKeyguardStatusBar;
     private NotificationPanelView mNotificationPanelView;
 
@@ -113,6 +115,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
             mNotificationStackScroller = mNotificationStackScrollLayout;
             mKeyguardStatusView = NotificationPanelViewTest.this.mKeyguardStatusView;
             mKeyguardStatusBar = NotificationPanelViewTest.this.mKeyguardStatusBar;
+            mKeyguardBottomArea = NotificationPanelViewTest.this.mKeyguardBottomArea;
         }
     }
 }

@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageParserException;
 import android.os.RemoteException;
@@ -95,7 +96,8 @@ class ApexManager {
                     }
                     try {
                         list.add(PackageParser.generatePackageInfoFromApex(
-                                new File(ai.packagePath), true /* collect certs */));
+                                new File(ai.packagePath), PackageManager.GET_META_DATA
+                                | PackageManager.GET_SIGNING_CERTIFICATES));
                     } catch (PackageParserException pe) {
                         throw new IllegalStateException("Unable to parse: " + ai, pe);
                     }

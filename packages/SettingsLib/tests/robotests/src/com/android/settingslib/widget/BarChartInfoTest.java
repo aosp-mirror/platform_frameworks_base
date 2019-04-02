@@ -39,6 +39,8 @@ public class BarChartInfoTest {
     private final int mDetails = 0x22222222;
     @StringRes
     private final int mEmptyText = 0x33333333;
+    private final CharSequence mTitleStr = "title";
+    private final CharSequence mSummaryStr = "summary";
     private final View.OnClickListener mClickListener = v -> {
     };
 
@@ -72,7 +74,8 @@ public class BarChartInfoTest {
         final BarViewInfo barViewInfo = new BarViewInfo(
                 null /* icon */,
                 50,
-                mTitle,
+                mTitleStr,
+                mSummaryStr,
                 null);
 
         final BarChartInfo mBarChartInfo = new BarChartInfo.Builder()
@@ -92,7 +95,8 @@ public class BarChartInfoTest {
         final BarViewInfo barViewInfo = new BarViewInfo(
                 null /* icon */,
                 50,
-                mTitle,
+                mTitleStr,
+                mSummaryStr,
                 null);
         final BarChartInfo mBarChartInfo = new BarChartInfo.Builder()
                 .setTitle(mTitle)
@@ -115,7 +119,8 @@ public class BarChartInfoTest {
         final BarViewInfo barViewInfo = new BarViewInfo(
                 null /* icon */,
                 50,
-                mTitle,
+                mTitleStr,
+                mSummaryStr,
                 null);
         new BarChartInfo.Builder()
                 .setTitle(mTitle)

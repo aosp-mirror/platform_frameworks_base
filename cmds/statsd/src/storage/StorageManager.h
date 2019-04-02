@@ -29,11 +29,6 @@ namespace statsd {
 
 using android::util::ProtoOutputStream;
 
-struct TrainInfo {
-    int64_t trainVersionCode;
-    std::vector<uint8_t> experimentIds;
-};
-
 class StorageManager : public virtual RefBase {
 public:
     /**
@@ -45,7 +40,7 @@ public:
      * Writes train info.
      */
     static bool writeTrainInfo(int64_t trainVersionCode, const std::string& trainName,
-                               int32_t status, const std::vector<uint8_t>& experimentIds);
+                               int32_t status, const std::vector<int64_t>& experimentIds);
 
     /**
      * Reads train info.

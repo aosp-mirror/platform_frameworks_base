@@ -102,9 +102,9 @@ public class DhcpClient extends StateMachine {
 
     private static final String TAG = "DhcpClient";
     private static final boolean DBG = true;
-    private static final boolean STATE_DBG = false;
-    private static final boolean MSG_DBG = false;
-    private static final boolean PACKET_DBG = false;
+    private static final boolean STATE_DBG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean MSG_DBG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean PACKET_DBG = Log.isLoggable(TAG, Log.DEBUG);
 
     // Metrics events: must be kept in sync with server-side aggregation code.
     /** Represents transitions from DhcpInitState to DhcpBoundState */
@@ -126,6 +126,7 @@ public class DhcpClient extends StateMachine {
     // DhcpClient uses IpClient's handler.
     private static final int PUBLIC_BASE = IpClient.DHCPCLIENT_CMD_BASE;
 
+    // Below constants are picked up by MessageUtils and exempt from ProGuard optimization.
     /* Commands from controller to start/stop DHCP */
     public static final int CMD_START_DHCP                  = PUBLIC_BASE + 1;
     public static final int CMD_STOP_DHCP                   = PUBLIC_BASE + 2;

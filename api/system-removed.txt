@@ -67,6 +67,8 @@ package android.location {
     method @Deprecated public boolean addGpsNavigationMessageListener(android.location.GpsNavigationMessageEvent.Listener);
     method @Deprecated public void removeGpsMeasurementListener(android.location.GpsMeasurementsEvent.Listener);
     method @Deprecated public void removeGpsNavigationMessageListener(android.location.GpsNavigationMessageEvent.Listener);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void setLocationControllerExtraPackage(String);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void setLocationControllerExtraPackageEnabled(boolean);
   }
 
 }

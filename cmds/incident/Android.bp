@@ -29,6 +29,10 @@ cc_binary {
         "libincident",
     ],
 
+    static_libs: [
+        "libplatformprotos",
+    ],
+
     cflags: [
         "-Wall",
         "-Werror",

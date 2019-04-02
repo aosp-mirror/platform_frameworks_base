@@ -53,12 +53,14 @@ import android.app.usage.UsageEvents;
 import android.content.Context;
 import android.os.Binder;
 import android.os.Debug;
+import android.os.IBinder;
 import android.os.PowerManagerInternal;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
@@ -1110,12 +1112,13 @@ public final class OomAdjuster {
                 }
             }
 
-            for (int conni = s.connections.size() - 1;
+            ArrayMap<IBinder, ArrayList<ConnectionRecord>> serviceConnections = s.getConnections();
+            for (int conni = serviceConnections.size() - 1;
                     conni >= 0 && (adj > ProcessList.FOREGROUND_APP_ADJ
                             || schedGroup == ProcessList.SCHED_GROUP_BACKGROUND
                             || procState > ActivityManager.PROCESS_STATE_TOP);
                     conni--) {
-                ArrayList<ConnectionRecord> clist = s.connections.valueAt(conni);
+                ArrayList<ConnectionRecord> clist = serviceConnections.valueAt(conni);
                 for (int i = 0;
                         i < clist.size() && (adj > ProcessList.FOREGROUND_APP_ADJ
                                 || schedGroup == ProcessList.SCHED_GROUP_BACKGROUND

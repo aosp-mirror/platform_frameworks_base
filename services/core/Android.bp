@@ -21,6 +21,7 @@ java_library_static {
         ":gsiservice_aidl",
         "java/com/android/server/EventLogTags.logtags",
         "java/com/android/server/am/EventLogTags.logtags",
+        "java/com/android/server/policy/EventLogTags.logtags",
     ],
 
     libs: [
@@ -50,6 +51,7 @@ java_library_static {
         "android.hardware.configstore-V1.0-java",
         "android.hardware.contexthub-V1.0-java",
         "android.hidl.manager-V1.2-java",
+        "dnsresolver_aidl_interface-java",
         "netd_aidl_interface-java",
         "netd_event_listener_interface-java",
     ],

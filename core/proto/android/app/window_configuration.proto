@@ -20,7 +20,7 @@ option java_multiple_files = true;
 package android.app;
 
 import "frameworks/base/core/proto/android/graphics/rect.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 /** Proto representation for WindowConfiguration.java class. */
 message WindowConfigurationProto {

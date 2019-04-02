@@ -238,9 +238,9 @@ package android.app {
     method public int describeContents();
     method public long getBeginTimeMillis();
     method public long getEndTimeMillis();
-    method public int getUidCount();
+    method @IntRange(from=0) public int getUidCount();
     method @Nullable public android.app.AppOpsManager.HistoricalUidOps getUidOps(int);
-    method @NonNull public android.app.AppOpsManager.HistoricalUidOps getUidOpsAt(int);
+    method @NonNull public android.app.AppOpsManager.HistoricalUidOps getUidOpsAt(@IntRange(from=0) int);
     method public void increaseAccessCount(int, int, @NonNull String, int, int, long);
     method public void increaseAccessDuration(int, int, @NonNull String, int, int, long);
     method public void increaseRejectCount(int, int, @NonNull String, int, int, long);
@@ -264,8 +264,8 @@ package android.app {
   public static final class AppOpsManager.HistoricalPackageOps implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public android.app.AppOpsManager.HistoricalOp getOp(@NonNull String);
-    method @NonNull public android.app.AppOpsManager.HistoricalOp getOpAt(int);
-    method public int getOpCount();
+    method @NonNull public android.app.AppOpsManager.HistoricalOp getOpAt(@IntRange(from=0) int);
+    method @IntRange(from=0) public int getOpCount();
     method @NonNull public String getPackageName();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.HistoricalPackageOps> CREATOR;
@@ -273,9 +273,9 @@ package android.app {
 
   public static final class AppOpsManager.HistoricalUidOps implements android.os.Parcelable {
     method public int describeContents();
-    method public int getPackageCount();
+    method @IntRange(from=0) public int getPackageCount();
     method @Nullable public android.app.AppOpsManager.HistoricalPackageOps getPackageOps(@NonNull String);
-    method @NonNull public android.app.AppOpsManager.HistoricalPackageOps getPackageOpsAt(int);
+    method @NonNull public android.app.AppOpsManager.HistoricalPackageOps getPackageOpsAt(@IntRange(from=0) int);
     method public int getUid();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.HistoricalUidOps> CREATOR;
@@ -315,7 +315,9 @@ package android.app {
   }
 
   public final class NotificationChannel implements android.os.Parcelable {
+    method public boolean isImportanceLockedByCriticalDeviceFunction();
     method public boolean isImportanceLockedByOEM();
+    method public void setImportanceLockedByCriticalDeviceFunction(boolean);
     method public void setImportanceLockedByOEM(boolean);
   }
 
@@ -661,26 +663,27 @@ package android.content.pm {
 
   public abstract class PackageManager {
     method public abstract boolean arePermissionsIndividuallyControlled();
-    method @RequiresPermission("android.permission.INTERACT_ACROSS_USERS_FULL") public abstract String getDefaultBrowserPackageNameAsUser(int);
-    method public String getIncidentReportApproverPackageName();
-    method public abstract int getInstallReason(String, @NonNull android.os.UserHandle);
-    method public abstract java.util.List<android.content.pm.ApplicationInfo> getInstalledApplicationsAsUser(int, int);
-    method @RequiresPermission("android.permission.INTERACT_ACROSS_USERS_FULL") public abstract java.util.List<android.content.pm.PackageInfo> getInstalledPackagesAsUser(int, int);
+    method @Nullable @RequiresPermission("android.permission.INTERACT_ACROSS_USERS_FULL") public abstract String getDefaultBrowserPackageNameAsUser(int);
+    method @Nullable public String getIncidentReportApproverPackageName();
+    method public abstract int getInstallReason(@NonNull String, @NonNull android.os.UserHandle);
+    method @NonNull public abstract java.util.List<android.content.pm.ApplicationInfo> getInstalledApplicationsAsUser(int, int);
+    method @NonNull @RequiresPermission("android.permission.INTERACT_ACROSS_USERS_FULL") public abstract java.util.List<android.content.pm.PackageInfo> getInstalledPackagesAsUser(int, int);
     method @Nullable public abstract String[] getNamesForUids(int[]);
-    method public abstract String getPermissionControllerPackageName();
-    method @RequiresPermission(anyOf={"android.permission.GRANT_RUNTIME_PERMISSIONS", "android.permission.REVOKE_RUNTIME_PERMISSIONS", "android.permission.GET_RUNTIME_PERMISSIONS"}) public abstract int getPermissionFlags(String, String, @NonNull android.os.UserHandle);
+    method @NonNull public abstract String getPermissionControllerPackageName();
+    method @RequiresPermission(anyOf={"android.permission.GRANT_RUNTIME_PERMISSIONS", "android.permission.REVOKE_RUNTIME_PERMISSIONS", "android.permission.GET_RUNTIME_PERMISSIONS"}) public abstract int getPermissionFlags(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
     method @NonNull public abstract String getServicesSystemSharedLibraryPackageName();
     method @NonNull public abstract String getSharedSystemSharedLibraryPackageName();
-    method public String getWellbeingPackageName();
+    method @Nullable public String getWellbeingPackageName();
     method @RequiresPermission("android.permission.GRANT_RUNTIME_PERMISSIONS") public abstract void grantRuntimePermission(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
     method @RequiresPermission("android.permission.REVOKE_RUNTIME_PERMISSIONS") public abstract void revokeRuntimePermission(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
-    method @RequiresPermission(anyOf={"android.permission.GRANT_RUNTIME_PERMISSIONS", "android.permission.REVOKE_RUNTIME_PERMISSIONS"}) public abstract void updatePermissionFlags(String, String, int, int, @NonNull android.os.UserHandle);
+    method @RequiresPermission(anyOf={"android.permission.GRANT_RUNTIME_PERMISSIONS", "android.permission.REVOKE_RUNTIME_PERMISSIONS"}) public abstract void updatePermissionFlags(@NonNull String, @NonNull String, int, int, @NonNull android.os.UserHandle);
     field public static final String FEATURE_ADOPTABLE_STORAGE = "android.software.adoptable_storage";
     field public static final String FEATURE_FILE_BASED_ENCRYPTION = "android.software.file_based_encryption";
-    field public static final int FLAG_PERMISSION_HIDDEN = 1024; // 0x400
+    field public static final int FLAG_PERMISSION_POLICY_FIXED = 4; // 0x4
     field public static final int FLAG_PERMISSION_REVIEW_REQUIRED = 64; // 0x40
     field public static final int FLAG_PERMISSION_REVOKE_ON_UPGRADE = 8; // 0x8
     field public static final int FLAG_PERMISSION_REVOKE_WHEN_REQUESTED = 128; // 0x80
+    field public static final int FLAG_PERMISSION_SYSTEM_FIXED = 16; // 0x10
     field public static final int FLAG_PERMISSION_USER_FIXED = 2; // 0x2
     field public static final int FLAG_PERMISSION_USER_SET = 1; // 0x1
     field public static final int MATCH_FACTORY_ONLY = 2097152; // 0x200000
@@ -1237,7 +1240,7 @@ package android.net {
   }
 
   public final class IpPrefix implements android.os.Parcelable {
-    ctor public IpPrefix(@NonNull java.net.InetAddress, int);
+    ctor public IpPrefix(@NonNull java.net.InetAddress, @IntRange(from=0, to=128) int);
     ctor public IpPrefix(@NonNull String);
   }
 
@@ -1246,8 +1249,8 @@ package android.net {
   }
 
   public class LinkAddress implements android.os.Parcelable {
-    ctor public LinkAddress(java.net.InetAddress, int, int, int);
-    ctor public LinkAddress(@NonNull java.net.InetAddress, int);
+    ctor public LinkAddress(@NonNull java.net.InetAddress, @IntRange(from=0, to=128) int, int, int);
+    ctor public LinkAddress(@NonNull java.net.InetAddress, @IntRange(from=0, to=128) int);
     ctor public LinkAddress(@NonNull String);
     ctor public LinkAddress(@NonNull String, int, int);
     method public boolean isGlobalPreferred();
@@ -1356,8 +1359,8 @@ package android.net.apf {
   public final class ApfCapabilities implements android.os.Parcelable {
     ctor public ApfCapabilities(int, int, int);
     method public int describeContents();
-    method public static boolean getApfDrop8023Frames(@NonNull android.content.Context);
-    method @NonNull public static int[] getApfEthTypeBlackList(@NonNull android.content.Context);
+    method public static boolean getApfDrop8023Frames();
+    method @NonNull public static int[] getApfEtherTypeBlackList();
     method public boolean hasDataAccess();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.net.apf.ApfCapabilities> CREATOR;
@@ -2457,6 +2460,7 @@ package android.service.contentcapture {
     method public void onDestroyContentCaptureSession(@NonNull android.view.contentcapture.ContentCaptureSessionId);
     method public void onDisconnected();
     method public void onUserDataRemovalRequest(@NonNull android.view.contentcapture.UserDataRemovalRequest);
+    method public final void setContentCaptureConditions(@NonNull String, @Nullable java.util.Set<android.view.contentcapture.ContentCaptureCondition>);
     method public final void setContentCaptureWhitelist(@Nullable java.util.Set<java.lang.String>, @Nullable java.util.Set<android.content.ComponentName>);
     field public static final String SERVICE_INTERFACE = "android.service.contentcapture.ContentCaptureService";
     field public static final String SERVICE_META_DATA = "android.content_capture";
@@ -2660,6 +2664,15 @@ package android.telephony {
     method public void setRilDataRadioTechnology(int);
     method public void setRilVoiceRadioTechnology(int);
     method public void setVoiceRoamingType(int);
+  }
+
+  public final class SmsManager {
+    method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public int checkSmsShortCodeDestination(String, String);
+    field public static final int SMS_CATEGORY_FREE_SHORT_CODE = 1; // 0x1
+    field public static final int SMS_CATEGORY_NOT_SHORT_CODE = 0; // 0x0
+    field public static final int SMS_CATEGORY_POSSIBLE_PREMIUM_SHORT_CODE = 3; // 0x3
+    field public static final int SMS_CATEGORY_PREMIUM_SHORT_CODE = 4; // 0x4
+    field public static final int SMS_CATEGORY_STANDARD_SHORT_CODE = 2; // 0x2
   }
 
   public class TelephonyManager {
