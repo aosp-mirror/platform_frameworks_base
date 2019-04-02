@@ -1501,6 +1501,22 @@ public final class Settings {
             = "android.settings.MANAGE_DEFAULT_APPS_SETTINGS";
 
     /**
+     * Activity Action: Show More default apps settings.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @SystemApi
+    public static final String ACTION_MANAGE_MORE_DEFAULT_APPS_SETTINGS =
+            "android.settings.MANAGE_MORE_DEFAULT_APPS_SETTINGS";
+
+    /**
      * Activity Action: Show notification settings.
      *
      * @hide
@@ -7749,15 +7765,6 @@ public final class Settings {
          */
         public static final String CALL_SCREENING_DEFAULT_COMPONENT =
                 "call_screening_default_component";
-
-        /**
-         * Specifies the component name currently configured to be the default application to
-         * perform the user-defined call redirection service with Telecom.
-         * @hide
-         */
-        @UnsupportedAppUsage
-        public static final String CALL_REDIRECTION_DEFAULT_APPLICATION =
-                "call_redirection_default_application";
 
         /**
          * Specifies the package name currently configured to be the emergency assistance application

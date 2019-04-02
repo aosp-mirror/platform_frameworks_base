@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.statusbar.phone.NavBarTintController.DEFAULT_COLOR_ADAPT_TRANSITION_TIME;
+import static com.android.systemui.statusbar.phone.NavBarTintController.MIN_COLOR_ADAPT_TRANSITION_TIME;
+
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.Handler;
@@ -31,7 +34,8 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 
-public final class NavigationBarTransitions extends BarTransitions {
+public final class NavigationBarTransitions extends BarTransitions implements
+        LightBarTransitionsController.DarkIntensityApplier {
 
     private final NavigationBarView mView;
     private final IStatusBarService mBarService;
@@ -59,8 +63,7 @@ public final class NavigationBarTransitions extends BarTransitions {
         mView = view;
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
-        mLightTransitionsController = new LightBarTransitionsController(view.getContext(),
-                this::applyDarkIntensity);
+        mLightTransitionsController = new LightBarTransitionsController(view.getContext(), this);
         mAllowAutoDimWallpaperNotVisible = view.getContext().getResources()
                 .getBoolean(R.bool.config_navigation_bar_enable_auto_dim_no_visible_wallpaper);
 
@@ -169,5 +172,13 @@ public final class NavigationBarTransitions extends BarTransitions {
             applyLightsOut(false, true);
         }
         mView.onDarkIntensityChange(darkIntensity);
+    }
+
+    @Override
+    public int getTintAnimationDuration() {
+        if (NavBarTintController.isEnabled(mView.getContext())) {
+            return Math.max(DEFAULT_COLOR_ADAPT_TRANSITION_TIME, MIN_COLOR_ADAPT_TRANSITION_TIME);
+        }
+        return LightBarTransitionsController.DEFAULT_TINT_ANIMATION_DURATION;
     }
 }

@@ -2552,6 +2552,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 pw.append(", autoclickEnabled=" + userState.mIsAutoclickEnabled);
                 pw.append(", nonInteractiveUiTimeout=" + userState.mNonInteractiveUiTimeout);
                 pw.append(", interactiveUiTimeout=" + userState.mInteractiveUiTimeout);
+                pw.append(", installedServiceCount=" + userState.mInstalledServices.size());
                 if (mUiAutomationManager.isUiAutomationRunningLocked()) {
                     pw.append(", ");
                     mUiAutomationManager.dumpUiAutomationService(fd, pw, args);
@@ -2559,7 +2560,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 }
                 pw.append("}");
                 pw.println();
-                pw.append("           services:{");
+                pw.append("     Bound services:{");
                 final int serviceCount = userState.mBoundServices.size();
                 for (int j = 0; j < serviceCount; j++) {
                     if (j > 0) {
@@ -2569,6 +2570,30 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     }
                     AccessibilityServiceConnection service = userState.mBoundServices.get(j);
                     service.dump(fd, pw, args);
+                }
+                pw.println("}");
+                pw.append("     Enabled services:{");
+                Iterator<ComponentName> it = userState.mEnabledServices.iterator();
+                if (it.hasNext()) {
+                    ComponentName componentName = it.next();
+                    pw.append(componentName.toShortString());
+                    while (it.hasNext()) {
+                        componentName = it.next();
+                        pw.append(", ");
+                        pw.append(componentName.toShortString());
+                    }
+                }
+                pw.println("}");
+                pw.append("     Binding services:{");
+                it = userState.mBindingServices.iterator();
+                if (it.hasNext()) {
+                    ComponentName componentName = it.next();
+                    pw.append(componentName.toShortString());
+                    while (it.hasNext()) {
+                        componentName = it.next();
+                        pw.append(", ");
+                        pw.append(componentName.toShortString());
+                    }
                 }
                 pw.println("}]");
                 pw.println();
@@ -2585,6 +2610,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     pw.append(window.toString());
                     pw.append(']');
                 }
+                pw.println();
             }
         }
     }

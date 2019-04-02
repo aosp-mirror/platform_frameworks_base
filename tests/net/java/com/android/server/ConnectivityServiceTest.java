@@ -499,7 +499,7 @@ public class ConnectivityServiceTest {
             };
 
             try {
-                doAnswer(validateAnswer).when(mNetworkMonitor).notifyNetworkConnected();
+                doAnswer(validateAnswer).when(mNetworkMonitor).notifyNetworkConnected(any(), any());
                 doAnswer(validateAnswer).when(mNetworkMonitor).forceReevaluation(anyInt());
             } catch (RemoteException e) {
                 fail(e.getMessage());

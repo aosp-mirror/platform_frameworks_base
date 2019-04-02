@@ -533,6 +533,9 @@ message WifiLog {
 
   // Network Suggestion API surface metrics.
   optional WifiNetworkSuggestionApiLog wifi_network_suggestion_api_log = 142;
+
+  // WifiLock statistics
+  optional WifiLockStats wifi_lock_stats = 143;
 }
 
 // Information that gets logged for every WiFi connection.
@@ -2460,4 +2463,31 @@ message WifiNetworkSuggestionApiLog {
 
   // Histogram for size of the network lists provided by various apps on the device.
   repeated HistogramBucketInt32 network_list_size_histogram = 4;
+}
+
+// WifiLock metrics
+message WifiLockStats {
+    // Amount of time wifi is actively in HIGH_PERF mode (ms)
+    // This means the lock takes effect and the device takes the actions required for this mode
+    optional int64 high_perf_active_time_ms = 1;
+
+    // Amount of time wifi is actively in LOW_LATENCY mode (ms)
+    // This means the lock takes effect and the device takes the actions required for this mode
+    optional int64 low_latency_active_time_ms = 2;
+
+    // Histogram of HIGH_PERF lock acquisition duration (seconds)
+    // Note that acquiring the lock does not necessarily mean that device is actively in that mode
+    repeated HistogramBucketInt32 high_perf_lock_acq_duration_sec_histogram = 3;
+
+    // Histogram of LOW_LATENCY lock acquisition duration (seconds)
+    // Note that acquiring the lock does not necessarily mean that device is actively in that mode
+    repeated HistogramBucketInt32 low_latency_lock_acq_duration_sec_histogram = 4;
+
+    // Histogram of HIGH_PERF active session duration (seconds)
+    // This means the lock takes effect and the device takes the actions required for this mode
+    repeated HistogramBucketInt32 high_perf_active_session_duration_sec_histogram = 5;
+
+    // Histogram of LOW_LATENCY active session duration (seconds)
+    // This means the lock takes effect and the device takes the actions required for this mode
+    repeated HistogramBucketInt32 low_latency_active_session_duration_sec_histogram = 6;
 }

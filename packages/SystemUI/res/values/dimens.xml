@@ -23,8 +23,6 @@
     <dimen name="navigation_bar_size">@*android:dimen/navigation_bar_height</dimen>
     <!-- Minimum swipe distance to catch the swipe gestures to invoke assist or switch tasks. -->
     <dimen name="navigation_bar_min_swipe_distance">48dp</dimen>
-    <!-- The default distance from a side of the device to start an edge swipe from -->
-    <dimen name="navigation_bar_default_edge_width">48dp</dimen>
     <dimen name="navigation_bar_default_edge_height">500dp</dimen>
 
     <!-- thickness (height) of the dead zone at the top of the navigation bar,
@@ -984,10 +982,6 @@
 
     <!-- How much into a DisplayCutout's bounds we can go, on each side -->
     <dimen name="display_cutout_margin_consumption">0px</dimen>
-
-    <!-- How much we expand the touchable region of the status bar below the notch to catch touches
-         that just start below the notch. -->
-    <dimen name="display_cutout_touchable_region_size">12dp</dimen>
 
     <!-- Padding below Ongoing App Ops dialog title -->
     <dimen name="ongoing_appops_dialog_sep">16dp</dimen>

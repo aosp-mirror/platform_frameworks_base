@@ -27,6 +27,8 @@
 
 namespace aapt {
 
+using CompilerTest = CommandTestFixture;
+
 std::string BuildPath(std::vector<std::string> args) {
   std::string out;
   if (args.empty()) {
@@ -51,7 +53,7 @@ int TestCompile(const std::string& path, const std::string& outDir, bool legacy,
   return CompileCommand(&diag).Execute(args, &std::cerr);
 }
 
-TEST(CompilerTest, MultiplePeriods) {
+TEST_F(CompilerTest, MultiplePeriods) {
   StdErrDiagnostics diag;
   std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
   const std::string kResDir = BuildPath({android::base::Dirname(android::base::GetExecutablePath()),
@@ -108,7 +110,7 @@ TEST(CompilerTest, MultiplePeriods) {
   ASSERT_EQ(::android::base::utf8::unlink(path5_out.c_str()), 0);
 }
 
-TEST(CompilerTest, DirInput) {
+TEST_F(CompilerTest, DirInput) {
   StdErrDiagnostics diag;
   std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
   const std::string kResDir = BuildPath({android::base::Dirname(android::base::GetExecutablePath()),
@@ -138,7 +140,7 @@ TEST(CompilerTest, DirInput) {
   ASSERT_EQ(::android::base::utf8::unlink(kOutputFlata.c_str()), 0);
 }
 
-TEST(CompilerTest, ZipInput) {
+TEST_F(CompilerTest, ZipInput) {
   StdErrDiagnostics diag;
   std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
   const std::string kResZip =
@@ -167,6 +169,88 @@ TEST(CompilerTest, ZipInput) {
     ASSERT_NE(zip->FindFile("values_values.arsc.flat"), nullptr);
   }
   ASSERT_EQ(::android::base::utf8::unlink(kOutputFlata.c_str()), 0);
+}
+
+/*
+ * This tests the "protection" from pseudo-translation of
+ * non-translatable files (starting with 'donotranslate')
+ * and strings (with the translatable="false" attribute)
+ *
+ * We check 4 string files, 2 translatable, and 2 not (based on file name)
+ * Each file contains 2 strings, one translatable, one not (attribute based)
+ * Each of these files are compiled and linked into one .apk, then we load the
+ * strings from the apk and check if there are pseudo-translated strings.
+ */
+
+// Using 000 and 111 because they are not changed by pseudo-translation,
+// making our life easier.
+constexpr static const char sTranslatableXmlContent[] =
+    "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+    "<resources>"
+    "  <string name=\"normal\">000</string>"
+    "  <string name=\"non_translatable\" translatable=\"false\">111</string>"
+    "</resources>";
+
+static void AssertTranslations(CommandTestFixture *ctf, std::string file_name,
+    std::vector<std::string> expected) {
+
+  StdErrDiagnostics diag;
+
+  const std::string source_file = ctf->GetTestPath("/res/values/" + file_name + ".xml");
+  const std::string compiled_files_dir = ctf->GetTestPath("/compiled_" + file_name);
+  const std::string out_apk = ctf->GetTestPath("/" + file_name + ".apk");
+
+  CHECK(ctf->WriteFile(source_file, sTranslatableXmlContent));
+  CHECK(file::mkdirs(compiled_files_dir.data()));
+
+  ASSERT_EQ(CompileCommand(&diag).Execute({
+      source_file,
+      "-o", compiled_files_dir,
+      "-v",
+      "--pseudo-localize"
+  }, &std::cerr), 0);
+
+  ASSERT_TRUE(ctf->Link({
+      "--manifest", ctf->GetDefaultManifest(),
+      "-o", out_apk
+  }, compiled_files_dir, &diag));
+
+  std::unique_ptr<LoadedApk> apk = LoadedApk::LoadApkFromPath(out_apk, &diag);
+
+  ResourceTable* table = apk->GetResourceTable();
+  ASSERT_NE(table, nullptr);
+  table->string_pool.Sort();
+
+  const std::vector<std::unique_ptr<StringPool::Entry>>& pool_strings =
+      table->string_pool.strings();
+
+  // The actual / expected vectors have the same size
+  const size_t pool_size = pool_strings.size();
+  ASSERT_EQ(pool_size, expected.size());
+
+  for (size_t i = 0; i < pool_size; i++) {
+    std::string actual = pool_strings[i]->value;
+    ASSERT_EQ(actual, expected[i]);
+  }
+}
+
+TEST_F(CompilerTest, DoNotTranslateTest) {
+  // The first string (000) is translatable, the second is not
+  // ar-XB uses "\u200F\u202E...\u202C\u200F"
+  std::vector<std::string> expected_translatable = {
+      "000", "111", // default locale
+      "[000 one]", // en-XA
+      "\xE2\x80\x8F\xE2\x80\xAE" "000" "\xE2\x80\xAC\xE2\x80\x8F", // ar-XB
+  };
+  AssertTranslations(this, "foo", expected_translatable);
+  AssertTranslations(this, "foo_donottranslate", expected_translatable);
+
+  // No translatable strings because these are non-translatable files
+  std::vector<std::string> expected_not_translatable = {
+      "000", "111", // default locale
+  };
+  AssertTranslations(this, "donottranslate", expected_not_translatable);
+  AssertTranslations(this, "donottranslate_foo", expected_not_translatable);
 }
 
 }  // namespace aapt

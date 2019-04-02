@@ -2135,6 +2135,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mService.mServices.systemServicesReady();
             } else if (phase == PHASE_ACTIVITY_MANAGER_READY) {
                 mService.startBroadcastObservers();
+            } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
+                mService.mPackageWatchdog.onPackagesReady();
             }
         }
 

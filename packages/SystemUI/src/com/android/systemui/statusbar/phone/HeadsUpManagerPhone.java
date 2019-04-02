@@ -140,7 +140,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
         mHeadsUpInset = mStatusBarHeight + resources.getDimensionPixelSize(
                 R.dimen.heads_up_status_bar_padding);
         mDisplayCutoutTouchableRegionSize = resources.getDimensionPixelSize(
-                R.dimen.display_cutout_touchable_region_size);
+                com.android.internal.R.dimen.display_cutout_touchable_region_size);
     }
 
     @Override

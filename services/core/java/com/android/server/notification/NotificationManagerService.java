@@ -17,7 +17,11 @@
 package com.android.server.notification;
 
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
+import static android.app.Notification.FLAG_AUTOGROUP_SUMMARY;
+import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
+import static android.app.Notification.FLAG_NO_CLEAR;
+import static android.app.Notification.FLAG_ONGOING_EVENT;
 import static android.app.NotificationManager.ACTION_APP_BLOCK_STATE_CHANGED;
 import static android.app.NotificationManager.ACTION_NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED;
 import static android.app.NotificationManager.ACTION_NOTIFICATION_CHANNEL_GROUP_BLOCK_STATE_CHANGED;
@@ -844,7 +848,7 @@ public class NotificationManagerService extends SystemService {
                 }
             }
             cancelNotification(callingUid, callingPid, pkg, tag, id, 0,
-                    Notification.FLAG_ONGOING_EVENT | FLAG_FOREGROUND_SERVICE,
+                    FLAG_ONGOING_EVENT | FLAG_FOREGROUND_SERVICE,
                     true, userId, REASON_CANCEL, nv.rank, nv.count,null);
             nv.recycle();
         }
@@ -2339,7 +2343,7 @@ public class NotificationManagerService extends SystemService {
             // Don't allow client applications to cancel foreground service notis or autobundled
             // summaries.
             final int mustNotHaveFlags = isCallingUidSystem() ? 0 :
-                    (FLAG_FOREGROUND_SERVICE | Notification.FLAG_AUTOGROUP_SUMMARY);
+                    (FLAG_FOREGROUND_SERVICE | FLAG_AUTOGROUP_SUMMARY);
             cancelNotification(Binder.getCallingUid(), Binder.getCallingPid(), pkg, tag, id, 0,
                     mustNotHaveFlags, false, userId, REASON_APP_CANCEL, null);
         }
@@ -3143,7 +3147,7 @@ public class NotificationManagerService extends SystemService {
         private void cancelNotificationFromListenerLocked(ManagedServiceInfo info,
                 int callingUid, int callingPid, String pkg, String tag, int id, int userId) {
             cancelNotification(callingUid, callingPid, pkg, tag, id, 0,
-                    Notification.FLAG_ONGOING_EVENT | FLAG_FOREGROUND_SERVICE,
+                    FLAG_ONGOING_EVENT | FLAG_FOREGROUND_SERVICE | FLAG_BUBBLE,
                     true,
                     userId, REASON_LISTENER_CANCEL, info);
         }
@@ -4234,7 +4238,7 @@ public class NotificationManagerService extends SystemService {
                                 .setGroupSummary(true)
                                 .setGroupAlertBehavior(Notification.GROUP_ALERT_CHILDREN)
                                 .setGroup(GroupHelper.AUTOGROUP_KEY)
-                                .setFlag(Notification.FLAG_AUTOGROUP_SUMMARY, true)
+                                .setFlag(FLAG_AUTOGROUP_SUMMARY, true)
                                 .setFlag(Notification.FLAG_GROUP_SUMMARY, true)
                                 .setColor(adjustedSbn.getNotification().color)
                                 .setLocalOnly(true)
@@ -4763,9 +4767,9 @@ public class NotificationManagerService extends SystemService {
         boolean canBubble = mPreferencesHelper.areBubblesAllowed(pkg, userId)
                 && r.getChannel().canBubble();
         if (notification.getBubbleMetadata() != null && canBubble) {
-            notification.flags |= Notification.FLAG_BUBBLE;
+            notification.flags |= FLAG_BUBBLE;
         } else {
-            notification.flags &= ~Notification.FLAG_BUBBLE;
+            notification.flags &= ~FLAG_BUBBLE;
         }
     }
 
@@ -5228,8 +5232,8 @@ public class NotificationManagerService extends SystemService {
                     // Ensure if this is a foreground service that the proper additional
                     // flags are set.
                     if ((notification.flags & FLAG_FOREGROUND_SERVICE) != 0) {
-                        notification.flags |= Notification.FLAG_ONGOING_EVENT
-                                | Notification.FLAG_NO_CLEAR;
+                        notification.flags |= FLAG_ONGOING_EVENT
+                                | FLAG_NO_CLEAR;
                     }
 
                     mRankingHelper.extractSignals(r);
@@ -6686,8 +6690,11 @@ public class NotificationManagerService extends SystemService {
                             null, userId, 0, 0, reason, listenerName);
 
                     FlagChecker flagChecker = (int flags) -> {
-                        if ((flags & (Notification.FLAG_ONGOING_EVENT | Notification.FLAG_NO_CLEAR))
-                                != 0) {
+                        int flagsToCheck = FLAG_ONGOING_EVENT | FLAG_NO_CLEAR;
+                        if (REASON_LISTENER_CANCEL_ALL == reason) {
+                            flagsToCheck |= FLAG_BUBBLE;
+                        }
+                        if ((flags & flagsToCheck) != 0) {
                             return false;
                         }
                         return true;

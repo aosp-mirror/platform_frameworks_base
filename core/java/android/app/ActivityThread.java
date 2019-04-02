@@ -5885,6 +5885,11 @@ public final class ActivityThread extends ClientTransactionHandler {
     private void handleBindApplication(AppBindData data) {
         // Register the UI Thread as a sensitive thread to the runtime.
         VMRuntime.registerSensitiveThread();
+        // In the case the stack depth property exists, pass it down to the runtime.
+        String property = SystemProperties.get("debug.allocTracker.stackDepth");
+        if (property.length() != 0) {
+            VMDebug.setAllocTrackerStackDepth(Integer.parseInt(property));
+        }
         if (data.trackAllocation) {
             DdmVmInternal.enableRecentAllocations(true);
         }
@@ -6936,9 +6941,6 @@ public final class ActivityThread extends ClientTransactionHandler {
         public static void install() {
             // If feature is disabled, we don't need to install
             if (!DEPRECATE_DATA_COLUMNS) return;
-
-            // If app is modern enough, we don't need to install
-            if (VMRuntime.getRuntime().getTargetSdkVersion() >= Build.VERSION_CODES.Q) return;
 
             // Install interception and make sure it sticks!
             Os def = null;

@@ -43,14 +43,12 @@
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.INSTALL_PACKAGE" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:scheme="file" />
                 <data android:scheme="content" />
                 <data android:mimeType="application/vnd.android.package-archive" />
             </intent-filter>
             <intent-filter android:priority="1">
                 <action android:name="android.intent.action.INSTALL_PACKAGE" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:scheme="file" />
                 <data android:scheme="package" />
                 <data android:scheme="content" />
             </intent-filter>

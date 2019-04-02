@@ -8398,13 +8398,40 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public boolean checkDeviceIdentifierAccess(String packageName, int userHandle, int pid,
-            int uid) {
+    public boolean checkDeviceIdentifierAccess(String packageName, int pid, int uid) {
         // If the caller is not a system app then it should only be able to check its own device
         // identifier access.
-        int callingAppId = UserHandle.getAppId(mInjector.binderGetCallingUid());
-        if (callingAppId >= Process.FIRST_APPLICATION_UID
-                && callingAppId != UserHandle.getAppId(uid)) {
+        int callingUid = mInjector.binderGetCallingUid();
+        int callingPid = mInjector.binderGetCallingPid();
+        if (UserHandle.getAppId(callingUid) >= Process.FIRST_APPLICATION_UID
+                && (callingUid != uid || callingPid != pid)) {
+            String message = String.format(
+                    "Calling uid %d, pid %d cannot check device identifier access for package %s "
+                            + "(uid=%d, pid=%d)", callingUid, callingPid, packageName, uid, pid);
+            Log.w(LOG_TAG, message);
+            throw new SecurityException(message);
+        }
+        // Verify that the specified packages matches the provided uid.
+        int userId = UserHandle.getUserId(uid);
+        try {
+            ApplicationInfo appInfo = mIPackageManager.getApplicationInfo(packageName, 0, userId);
+            // Since this call goes directly to PackageManagerService a NameNotFoundException is not
+            // thrown but null data can be returned; if the appInfo for the specified package cannot
+            // be found then return false to prevent crashing the app.
+            if (appInfo == null) {
+                Log.w(LOG_TAG,
+                        String.format("appInfo could not be found for package %s", packageName));
+                return false;
+            } else if (uid != appInfo.uid) {
+                String message = String.format("Package %s (uid=%d) does not match provided uid %d",
+                        packageName, appInfo.uid, uid);
+                Log.w(LOG_TAG, message);
+                throw new SecurityException(message);
+            }
+        } catch (RemoteException e) {
+            // If an exception is caught obtaining the appInfo just return false to prevent crashing
+            // apps due to an internal error.
+            Log.e(LOG_TAG, "Exception caught obtaining appInfo for package " + packageName, e);
             return false;
         }
         // A device or profile owner must also have the READ_PHONE_STATE permission to access device
@@ -8421,7 +8448,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return true;
         }
         // Allow access to the profile owner for the specified user, or delegate cert installer
-        ComponentName profileOwner = getProfileOwnerAsUser(userHandle);
+        ComponentName profileOwner = getProfileOwnerAsUser(userId);
         if (profileOwner != null && (profileOwner.getPackageName().equals(packageName)
                     || isCallerDelegate(packageName, uid, DELEGATION_CERT_INSTALL))) {
             return true;

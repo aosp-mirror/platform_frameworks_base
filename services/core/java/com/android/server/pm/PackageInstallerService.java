@@ -360,7 +360,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
                         final long age = System.currentTimeMillis() - session.createdMillis;
                         final long timeSinceUpdate =
-                                System.currentTimeMillis() - session.updatedMillis;
+                                System.currentTimeMillis() - session.getUpdatedMillis();
                         final boolean valid;
                         if (session.isStaged()) {
                             if (timeSinceUpdate >= MAX_TIME_SINCE_UPDATE_MILLIS
@@ -498,10 +498,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             }
         }
 
-        if (callingUid == Process.SYSTEM_UID) {
+        if (Build.IS_DEBUGGABLE || isDowngradeAllowedForCaller(callingUid)) {
             params.installFlags |= PackageManager.INSTALL_ALLOW_DOWNGRADE;
         } else {
             params.installFlags &= ~PackageManager.INSTALL_ALLOW_DOWNGRADE;
+            params.installFlags &= ~PackageManager.INSTALL_REQUEST_DOWNGRADE;
         }
 
         boolean isApex = (params.installFlags & PackageManager.INSTALL_APEX) != 0;
@@ -619,6 +620,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         mCallbacks.notifySessionCreated(session.sessionId, session.userId);
         writeSessionsAsync();
         return sessionId;
+    }
+
+    private boolean isDowngradeAllowedForCaller(int callingUid) {
+        return callingUid == Process.SYSTEM_UID || callingUid == Process.ROOT_UID
+                || callingUid == Process.SHELL_UID;
     }
 
     @Override
@@ -813,7 +819,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
         final PackageDeleteObserverAdapter adapter = new PackageDeleteObserverAdapter(mContext,
                 statusReceiver, versionedPackage.getPackageName(),
-                !canSilentlyInstallPackage, userId);
+                canSilentlyInstallPackage, userId);
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DELETE_PACKAGES)
                     == PackageManager.PERMISSION_GRANTED) {
             // Sweet, call straight through!

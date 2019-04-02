@@ -17,6 +17,8 @@
 package android.net.util;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.provider.DeviceConfig;
 import android.util.SparseArray;
 
 import java.io.FileDescriptor;
@@ -80,5 +82,20 @@ public class NetworkStackUtils {
             }
         }
         return false;
+    }
+
+    /**
+     * Look up the value of a property for a particular namespace from {@link DeviceConfig}.
+     * @param namespace The namespace containing the property to look up.
+     * @param name The name of the property to look up.
+     * @param defaultValue The value to return if the property does not exist or has no non-null
+     *                     value.
+     * @return the corresponding value, or defaultValue if none exists.
+     */
+    @Nullable
+    public static String getDeviceConfigProperty(@NonNull String namespace, @NonNull String name,
+            @Nullable String defaultValue) {
+        String value = DeviceConfig.getProperty(namespace, name);
+        return value != null ? value : defaultValue;
     }
 }

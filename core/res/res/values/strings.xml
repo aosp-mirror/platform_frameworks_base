@@ -786,24 +786,6 @@
     <string name="permgrouprequest_sensors">Allow
         &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to access sensor data about your vital signs?</string>
 
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_aural">Music</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_aural">access your music</string>
-    <!-- Message shown to the user when the apps requests permission from this group. If ever possible this should stay below 80 characters (assuming the parameters takes 20 characters). Don't abbreviate until the message reaches 120 characters though. [CHAR LIMIT=120] -->
-    <string name="permgrouprequest_aural">Allow
-        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to access your music?</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_visual">Photos &amp; videos</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_visual">access your photos &amp; videos</string>
-    <!-- Message shown to the user when the apps requests permission from this group. If ever possible this should stay below 80 characters (assuming the parameters takes 20 characters). Don't abbreviate until the message reaches 120 characters though. [CHAR LIMIT=120] -->
-    <string name="permgrouprequest_visual">Allow
-        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to access your photos and videos?</string>
-    <!-- Subtitle of the message shown to the user when the apps requests permission to access photos and videos [CHAR LIMIT=150]-->
-    <string name="permgrouprequestdetail_visual">This includes any locations tagged in your photos and videos</string>
-
     <!-- Title for the capability of an accessibility service to retrieve window content. -->
     <string name="capability_title_canRetrieveWindowContent">Retrieve window content</string>
     <!-- Description for the capability of an accessibility service to retrieve window content. -->
@@ -1432,27 +1414,15 @@
     <string name="permdesc_useFingerprint">Allows the app to use fingerprint hardware for authentication</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_audioRead">read your music collection</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_audioRead">Allows the app to read your music collection.</string>
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_audioWrite">modify your music collection</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_audioWrite">Allows the app to modify your music collection.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_videoRead">read your video collection</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_videoRead">Allows the app to read your video collection.</string>
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_videoWrite">modify your video collection</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_videoWrite">Allows the app to modify your video collection.</string>
 
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_imagesRead">read your photo collection</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_imagesRead">Allows the app to read your photo collection.</string>
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_imagesWrite">modify your photo collection</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -3305,13 +3275,13 @@
         <xliff:g id="proc" example="Android System">%1$s</xliff:g> process has exceeded
         its memory limit of <xliff:g id="size" example="350MB">%2$s</xliff:g>. A heap dump is available
         for you to share. Be careful: this heap dump can contain any sensitive personal information
-        that the process has access to.</string>
+        that the process has access to, which may include things you\u2019ve typed.</string>
 
     <!-- Text of dialog prompting the user to share a heap dump that they initiated [CHAR LIMIT=NONE] -->
     <string name="dump_heap_ready_text">A heap dump of
         <xliff:g id="proc" example="com.android.example">%1$s</xliff:g>\u2019s process is available
         for you to share. Be careful: this heap dump may contain any sensitive personal information
-        that the process has access to.</string>
+        that the process has access to, which may include things you\u2019ve typed.</string>
 
     <!-- Displayed in the title of the chooser for things to do with text that
          is to be sent to another application. For example, I can send

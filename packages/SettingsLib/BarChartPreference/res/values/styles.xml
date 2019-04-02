@@ -16,12 +16,72 @@
   -->
 
 <resources>
-    <style name="BarViewStyle">
+
+    <style name="SettingsBarChart">
+        <item name="android:layout_marginStart">10dp</item>
+        <item name="android:layout_marginEnd">10dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <style name="SettingsBarChartTitle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textAppearance">@style/BarChart.Text.HeaderTitle</item>
+    </style>
+
+    <style name="SettingsBarChartDetailsButton"
+           parent="@android:style/Widget.DeviceDefault.Button.Borderless.Colored">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="SettingsBarViewStyle">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">250dp</item>
         <item name="android:layout_weight">1</item>
         <item name="android:layout_marginStart">8dp</item>
         <item name="android:layout_marginEnd">8dp</item>
+    </style>
+
+    <style name="SettingsBarChartEmptyText">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/settings_bar_view_max_height</item>
+        <item name="android:gravity">center</item>
+        <item name="android:visibility">gone</item>
+        <item name="android:textAppearance">@style/BarChart.Text.Summary</item>
+    </style>
+
+    <style name="SettingsBarChartBar">
+        <item name="android:layout_width">8dp</item>
+    </style>
+
+    <style name="SettingsBarChartBarIcon">
+        <item name="android:layout_width">@dimen/settings_bar_view_icon_size</item>
+        <item name="android:layout_height">@dimen/settings_bar_view_icon_size</item>
+        <item name="android:scaleType">fitCenter</item>
+        <item name="android:layout_marginTop">12dp</item>
+    </style>
+
+    <style name="SettingsBarChartBarTitle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">12dp</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:ellipsize">marquee</item>
+        <item name="android:textAppearance">@style/BarChart.Text.Title</item>
+    </style>
+
+    <style name="SettingsBarChartBarSummary">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">4dp</item>
+        <item name="android:layout_marginBottom">12dp</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:ellipsize">marquee</item>
+        <item name="android:textAppearance">@style/BarChart.Text.Summary</item>
     </style>
 
     <style name="BarChart.Text"

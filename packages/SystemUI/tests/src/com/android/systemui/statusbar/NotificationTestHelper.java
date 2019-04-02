@@ -151,6 +151,16 @@ public class NotificationTestHelper {
 
     /**
      * Returns an {@link ExpandableNotificationRow} that should be shown as a bubble.
+     */
+    public ExpandableNotificationRow createBubble()
+            throws Exception {
+        Notification n = createNotification(false /* isGroupSummary */,
+                null /* groupKey */, makeBubbleMetadata(null));
+        return generateRow(n, PKG, UID, USER_HANDLE, 0 /* extraInflationFlags */, IMPORTANCE_HIGH);
+    }
+
+    /**
+     * Returns an {@link ExpandableNotificationRow} that should be shown as a bubble.
      *
      * @param deleteIntent the intent to assign to {@link BubbleMetadata#deleteIntent}
      */

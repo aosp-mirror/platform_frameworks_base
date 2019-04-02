@@ -1809,6 +1809,10 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     // Native callback.
+    private void onPointerDownOutsideFocus(IBinder touchedToken) {
+    }
+
+    // Native callback.
     private int getVirtualKeyQuietTimeMillis() {
         return mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_virtualKeyQuietTimeMillis);

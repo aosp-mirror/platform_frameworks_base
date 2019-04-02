@@ -1455,7 +1455,8 @@ public final class ViewRootImpl implements ViewParent,
 
     @Override
     public void onDescendantInvalidated(@NonNull View child, @NonNull View descendant) {
-        checkThread();
+        // TODO: Re-enable after camera is fixed or consider targetSdk checking this
+        // checkThread();
         if ((descendant.mPrivateFlags & PFLAG_DRAW_ANIMATION) != 0) {
             mIsAnimating = true;
         }
@@ -1916,16 +1917,10 @@ public final class ViewRootImpl implements ViewParent,
             }
             contentInsets = ensureInsetsNonNegative(contentInsets, "content");
             stableInsets = ensureInsetsNonNegative(stableInsets, "stable");
-            if (sNewInsetsMode != NEW_INSETS_MODE_NONE) {
-                mLastWindowInsets = mInsetsController.calculateInsets(
-                        mContext.getResources().getConfiguration().isScreenRound(),
-                        mAttachInfo.mAlwaysConsumeSystemBars, displayCutout,
-                        contentInsets, stableInsets, mWindowAttributes.softInputMode);
-            } else {
-                mLastWindowInsets = new WindowInsets(contentInsets, stableInsets,
-                        mContext.getResources().getConfiguration().isScreenRound(),
-                        mAttachInfo.mAlwaysConsumeSystemBars, displayCutout);
-            }
+            mLastWindowInsets = mInsetsController.calculateInsets(
+                    mContext.getResources().getConfiguration().isScreenRound(),
+                    mAttachInfo.mAlwaysConsumeSystemBars, displayCutout,
+                    contentInsets, stableInsets, mWindowAttributes.softInputMode);
         }
         return mLastWindowInsets;
     }
@@ -1986,7 +1981,6 @@ public final class ViewRootImpl implements ViewParent,
         mIsInTraversal = true;
         mWillDrawSoon = true;
         boolean windowSizeMayChange = false;
-        boolean newSurface = false;
         boolean surfaceChanged = false;
         WindowManager.LayoutParams lp = mWindowAttributes;
 
@@ -2387,13 +2381,7 @@ public final class ViewRootImpl implements ViewParent,
                 if (!hadSurface) {
                     if (mSurface.isValid()) {
                         // If we are creating a new surface, then we need to
-                        // completely redraw it.  Also, when we get to the
-                        // point of drawing it we will hold off and schedule
-                        // a new traversal instead.  This is so we can tell the
-                        // window manager about all of the windows being displayed
-                        // before actually drawing them, so it can display then
-                        // all at once.
-                        newSurface = true;
+                        // completely redraw it.
                         mFullRedrawNeeded = true;
                         mPreviousTransparentRegion.setEmpty();
 
@@ -2778,7 +2766,7 @@ public final class ViewRootImpl implements ViewParent,
 
         boolean cancelDraw = mAttachInfo.mTreeObserver.dispatchOnPreDraw() || !isViewVisible;
 
-        if (!cancelDraw && !newSurface) {
+        if (!cancelDraw) {
             if (mPendingTransitions != null && mPendingTransitions.size() > 0) {
                 for (int i = 0; i < mPendingTransitions.size(); ++i) {
                     mPendingTransitions.get(i).startChangingAnimations();
@@ -3986,7 +3974,7 @@ public final class ViewRootImpl implements ViewParent,
 
     void systemGestureExclusionChanged() {
         final List<Rect> rectsForWindowManager = mGestureExclusionTracker.computeChangedRects();
-        if (rectsForWindowManager != null) {
+        if (rectsForWindowManager != null && mView != null) {
             try {
                 mWindowSession.reportSystemGestureExclusionChanged(mWindow, rectsForWindowManager);
             } catch (RemoteException e) {

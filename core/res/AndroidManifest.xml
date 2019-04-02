@@ -789,8 +789,7 @@
     <!-- ====================================================================== -->
     <eat-comment />
 
-    <!-- Used for runtime permissions related to the shared external storage.
-         @deprecated replaced by new strongly-typed permission groups in Q. -->
+    <!-- Used for runtime permissions related to the shared external storage. -->
     <permission-group android:name="android.permission-group.STORAGE"
         android:icon="@drawable/perm_group_storage"
         android:label="@string/permgrouplab_storage"
@@ -818,7 +817,6 @@
      grants your app this permission. If you don't need this permission, be sure your <a
      href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
      targetSdkVersion}</a> is 4 or higher.
-     @deprecated replaced by new strongly-typed permission groups in Q.
      -->
     <permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:permissionGroup="android.permission-group.UNDEFINED"
@@ -839,52 +837,11 @@
          read/write files in your application-specific directories returned by
          {@link android.content.Context#getExternalFilesDir} and
          {@link android.content.Context#getExternalCacheDir}.
-         @deprecated replaced by new strongly-typed permission groups in Q.
     -->
     <permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:permissionGroup="android.permission-group.UNDEFINED"
         android:label="@string/permlab_sdcardWrite"
         android:description="@string/permdesc_sdcardWrite"
-        android:protectionLevel="dangerous" />
-
-    <!-- Runtime permission controlling access to the user's shared aural media
-         collection. -->
-    <permission-group android:name="android.permission-group.MEDIA_AURAL"
-        android:icon="@drawable/perm_group_aural"
-        android:label="@string/permgrouplab_aural"
-        android:description="@string/permgroupdesc_aural"
-        android:request="@string/permgrouprequest_aural"
-        android:priority="910" />
-
-    <!-- Allows an application to read the user's shared audio collection. -->
-    <permission android:name="android.permission.READ_MEDIA_AUDIO"
-        android:permissionGroup="android.permission-group.UNDEFINED"
-        android:label="@string/permlab_audioRead"
-        android:description="@string/permdesc_audioRead"
-        android:protectionLevel="dangerous" />
-
-    <!-- Runtime permission controlling access to the user's shared visual media
-         collection, including images and videos. -->
-    <permission-group android:name="android.permission-group.MEDIA_VISUAL"
-        android:icon="@drawable/perm_group_visual"
-        android:label="@string/permgrouplab_visual"
-        android:description="@string/permgroupdesc_visual"
-        android:request="@string/permgrouprequest_visual"
-        android:requestDetail="@string/permgrouprequestdetail_visual"
-        android:priority="920" />
-
-    <!-- Allows an application to read the user's shared images collection. -->
-    <permission android:name="android.permission.READ_MEDIA_IMAGES"
-        android:permissionGroup="android.permission-group.UNDEFINED"
-        android:label="@string/permlab_imagesRead"
-        android:description="@string/permdesc_imagesRead"
-        android:protectionLevel="dangerous" />
-
-    <!-- Allows an application to read the user's shared video collection. -->
-    <permission android:name="android.permission.READ_MEDIA_VIDEO"
-        android:permissionGroup="android.permission-group.UNDEFINED"
-        android:label="@string/permlab_videoRead"
-        android:description="@string/permdesc_videoRead"
         android:protectionLevel="dangerous" />
 
     <!-- Allows an application to access any geographic locations persisted in the
@@ -1014,6 +971,9 @@
          call with the option to redirect the call to a different number or
          abort the call altogether.
          <p>Protection level: dangerous
+
+         @deprecated Applications should use {@link android.telecom.CallRedirectionService} instead
+         of the {@link android.content.Intent#ACTION_NEW_OUTGOING_CALL} broadcast.
     -->
     <permission android:name="android.permission.PROCESS_OUTGOING_CALLS"
         android:permissionGroup="android.permission-group.UNDEFINED"
@@ -1602,6 +1562,14 @@
     -->
     <permission android:name="android.permission.NETWORK_MANAGED_PROVISIONING"
         android:protectionLevel="signature" />
+
+    <!-- Allows Carrier Provisioning to call methods in Networking services
+         <p>Not for use by any other third-party or privileged applications.
+         @SystemApi
+         @hide This should only be used by CarrierProvisioning.
+    -->
+    <permission android:name="android.permission.NETWORK_CARRIER_PROVISIONING"
+        android:protectionLevel="signature|privileged" />
 
     <!-- #SystemApi @hide Allows applications to access information about LoWPAN interfaces.
          <p>Not for use by third-party applications. -->

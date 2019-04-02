@@ -965,7 +965,6 @@ public class UsbPortManager {
 
     private void handlePortLocked(PortInfo portInfo, IndentingPrintWriter pw) {
         sendPortChangedBroadcastLocked(portInfo);
-        enableContaminantDetectionIfNeeded(portInfo, pw);
         logToStatsd(portInfo, pw);
         updateContaminantNotification();
     }
@@ -977,6 +976,7 @@ public class UsbPortManager {
 
     private void handlePortChangedLocked(PortInfo portInfo, IndentingPrintWriter pw) {
         logAndPrint(Log.INFO, pw, "USB port changed: " + portInfo);
+        enableContaminantDetectionIfNeeded(portInfo, pw);
         handlePortLocked(portInfo, pw);
     }
 

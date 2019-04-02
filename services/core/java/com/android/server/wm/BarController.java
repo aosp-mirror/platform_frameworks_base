@@ -51,6 +51,7 @@ public class BarController {
     private static final int MSG_NAV_BAR_VISIBILITY_CHANGED = 1;
 
     protected final String mTag;
+    protected final int mDisplayId;
     private final int mTransientFlag;
     private final int mUnhideFlag;
     private final int mTranslucentFlag;
@@ -74,9 +75,10 @@ public class BarController {
 
     private OnBarVisibilityChangedListener mVisibilityChangeListener;
 
-    BarController(String tag, int transientFlag, int unhideFlag, int translucentFlag,
+    BarController(String tag, int displayId, int transientFlag, int unhideFlag, int translucentFlag,
             int statusBarManagerId, int translucentWmFlag, int transparentFlag) {
         mTag = "BarController." + tag;
+        mDisplayId = displayId;
         mTransientFlag = transientFlag;
         mUnhideFlag = unhideFlag;
         mTranslucentFlag = translucentFlag;
@@ -230,7 +232,7 @@ public class BarController {
                 public void run() {
                     StatusBarManagerInternal statusbar = getStatusBarInternal();
                     if (statusbar != null) {
-                        statusbar.setWindowState(mWin.getDisplayId(), mStatusBarManagerId, state);
+                        statusbar.setWindowState(mDisplayId, mStatusBarManagerId, state);
                     }
                 }
             });

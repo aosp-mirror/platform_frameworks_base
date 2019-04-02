@@ -220,8 +220,6 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
             StatusBarNotification sbn,
             ExpandableNotificationRow row) {
         row.setIsLowPriority(entry.ambient);
-        // bind the click event to the content area
-        checkNotNull(mNotificationClicker).register(row, sbn);
 
         // Extract target SDK version.
         try {
@@ -257,6 +255,9 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         row.setNeedsRedaction(
                 Dependency.get(NotificationLockscreenUserManager.class).needsRedaction(entry));
         row.inflateViews();
+
+        // bind the click event to the content area
+        checkNotNull(mNotificationClicker).register(row, sbn);
     }
 
     private void logNotificationExpansion(String key, boolean userAction, boolean expanded) {

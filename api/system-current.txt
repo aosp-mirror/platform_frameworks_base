@@ -119,6 +119,7 @@ package android {
     field public static final String MODIFY_PARENTAL_CONTROLS = "android.permission.MODIFY_PARENTAL_CONTROLS";
     field public static final String MODIFY_QUIET_MODE = "android.permission.MODIFY_QUIET_MODE";
     field public static final String MOVE_PACKAGE = "android.permission.MOVE_PACKAGE";
+    field public static final String NETWORK_CARRIER_PROVISIONING = "android.permission.NETWORK_CARRIER_PROVISIONING";
     field public static final String NETWORK_MANAGED_PROVISIONING = "android.permission.NETWORK_MANAGED_PROVISIONING";
     field public static final String NETWORK_SCAN = "android.permission.NETWORK_SCAN";
     field public static final String NETWORK_SETUP_WIZARD = "android.permission.NETWORK_SETUP_WIZARD";
@@ -404,9 +405,9 @@ package android.app {
     method public int describeContents();
     method public long getBeginTimeMillis();
     method public long getEndTimeMillis();
-    method public int getUidCount();
+    method @IntRange(from=0) public int getUidCount();
     method @Nullable public android.app.AppOpsManager.HistoricalUidOps getUidOps(int);
-    method @NonNull public android.app.AppOpsManager.HistoricalUidOps getUidOpsAt(int);
+    method @NonNull public android.app.AppOpsManager.HistoricalUidOps getUidOpsAt(@IntRange(from=0) int);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.HistoricalOps> CREATOR;
   }
@@ -426,8 +427,8 @@ package android.app {
   public static final class AppOpsManager.HistoricalPackageOps implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public android.app.AppOpsManager.HistoricalOp getOp(@NonNull String);
-    method @NonNull public android.app.AppOpsManager.HistoricalOp getOpAt(int);
-    method public int getOpCount();
+    method @NonNull public android.app.AppOpsManager.HistoricalOp getOpAt(@IntRange(from=0) int);
+    method @IntRange(from=0) public int getOpCount();
     method @NonNull public String getPackageName();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.HistoricalPackageOps> CREATOR;
@@ -435,9 +436,9 @@ package android.app {
 
   public static final class AppOpsManager.HistoricalUidOps implements android.os.Parcelable {
     method public int describeContents();
-    method public int getPackageCount();
+    method @IntRange(from=0) public int getPackageCount();
     method @Nullable public android.app.AppOpsManager.HistoricalPackageOps getPackageOps(@NonNull String);
-    method @NonNull public android.app.AppOpsManager.HistoricalPackageOps getPackageOpsAt(int);
+    method @NonNull public android.app.AppOpsManager.HistoricalPackageOps getPackageOpsAt(@IntRange(from=0) int);
     method public int getUid();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.HistoricalUidOps> CREATOR;
@@ -1258,9 +1259,9 @@ package android.bluetooth {
   public final class BluetoothDevice implements android.os.Parcelable {
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean cancelBondProcess();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public String getMetadata(int);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean getSilenceMode();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public boolean isConnected();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public boolean isEncrypted();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean isInSilenceMode();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean removeBond();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setMetadata(int, String);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setPhonebookAccessPermission(int);
@@ -1269,7 +1270,6 @@ package android.bluetooth {
     field public static final int ACCESS_REJECTED = 2; // 0x2
     field public static final int ACCESS_UNKNOWN = 0; // 0x0
     field public static final String ACTION_SILENCE_MODE_CHANGED = "android.bluetooth.device.action.SILENCE_MODE_CHANGED";
-    field public static final String EXTRA_SILENCE_ENABLED = "android.bluetooth.device.extra.SILENCE_ENABLED";
     field public static final int METADATA_COMPANION_APP = 4; // 0x4
     field public static final int METADATA_ENHANCED_SETTINGS_UI_URI = 16; // 0x10
     field public static final int METADATA_HARDWARE_VERSION = 3; // 0x3
@@ -1458,14 +1458,14 @@ package android.content.om {
 
   public final class OverlayInfo implements android.os.Parcelable {
     method public int describeContents();
+    method @Nullable public String getCategory();
+    method @NonNull public String getPackageName();
+    method @Nullable public String getTargetOverlayableName();
+    method @Nullable public String getTargetPackageName();
+    method public int getUserId();
     method public boolean isEnabled();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.om.OverlayInfo> CREATOR;
-    field public final String category;
-    field public final String packageName;
-    field public final String targetOverlayableName;
-    field public final String targetPackageName;
-    field public final int userId;
   }
 
   public class OverlayManager {
@@ -1548,6 +1548,18 @@ package android.content.pm {
     method public int getStatus();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.IntentFilterVerificationInfo> CREATOR;
+  }
+
+  public class LauncherApps {
+    method @Nullable public android.content.pm.LauncherApps.AppUsageLimit getAppUsageLimit(@NonNull String, @NonNull android.os.UserHandle);
+  }
+
+  public static final class LauncherApps.AppUsageLimit implements android.os.Parcelable {
+    method public int describeContents();
+    method public long getTotalUsageLimit();
+    method public long getUsageRemaining();
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.LauncherApps.AppUsageLimit> CREATOR;
   }
 
   public class PackageInstaller {
@@ -1639,7 +1651,6 @@ package android.content.pm {
     field public static final String FEATURE_BROADCAST_RADIO = "android.hardware.broadcastradio";
     field public static final String FEATURE_TELEPHONY_CARRIERLOCK = "android.hardware.telephony.carrierlock";
     field public static final int FLAG_PERMISSION_GRANTED_BY_DEFAULT = 32; // 0x20
-    field public static final int FLAG_PERMISSION_HIDDEN = 1024; // 0x400
     field public static final int FLAG_PERMISSION_POLICY_FIXED = 4; // 0x4
     field public static final int FLAG_PERMISSION_REVIEW_REQUIRED = 64; // 0x40
     field public static final int FLAG_PERMISSION_REVOKE_ON_UPGRADE = 8; // 0x8
@@ -1710,7 +1721,7 @@ package android.content.pm {
     method public void onPermissionsChanged(int);
   }
 
-  @IntDef(prefix={"FLAG_PERMISSION_"}, value={android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET, android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_POLICY_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_ON_UPGRADE, android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT, android.content.pm.PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED, android.content.pm.PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED, android.content.pm.PackageManager.FLAG_PERMISSION_HIDDEN}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface PackageManager.PermissionFlags {
+  @IntDef(prefix={"FLAG_PERMISSION_"}, value={android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET, android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_POLICY_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_ON_UPGRADE, android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT, android.content.pm.PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED, android.content.pm.PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface PackageManager.PermissionFlags {
   }
 
   public class PermissionGroupInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
@@ -4061,7 +4072,7 @@ package android.net {
   }
 
   public final class IpPrefix implements android.os.Parcelable {
-    ctor public IpPrefix(@NonNull java.net.InetAddress, int);
+    ctor public IpPrefix(@NonNull java.net.InetAddress, @IntRange(from=0, to=128) int);
     ctor public IpPrefix(@NonNull String);
   }
 
@@ -4082,8 +4093,8 @@ package android.net {
   }
 
   public class LinkAddress implements android.os.Parcelable {
-    ctor public LinkAddress(java.net.InetAddress, int, int, int);
-    ctor public LinkAddress(@NonNull java.net.InetAddress, int);
+    ctor public LinkAddress(@NonNull java.net.InetAddress, @IntRange(from=0, to=128) int, int, int);
+    ctor public LinkAddress(@NonNull java.net.InetAddress, @IntRange(from=0, to=128) int);
     ctor public LinkAddress(@NonNull String);
     ctor public LinkAddress(@NonNull String, int, int);
     method public boolean isGlobalPreferred();
@@ -4264,8 +4275,8 @@ package android.net.apf {
   public final class ApfCapabilities implements android.os.Parcelable {
     ctor public ApfCapabilities(int, int, int);
     method public int describeContents();
-    method public static boolean getApfDrop8023Frames(@NonNull android.content.Context);
-    method @NonNull public static int[] getApfEthTypeBlackList(@NonNull android.content.Context);
+    method public static boolean getApfDrop8023Frames();
+    method @NonNull public static int[] getApfEtherTypeBlackList();
     method public boolean hasDataAccess();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.net.apf.ApfCapabilities> CREATOR;
@@ -6055,6 +6066,7 @@ package android.provider {
     field public static final String ACTION_ENTERPRISE_PRIVACY_SETTINGS = "android.settings.ENTERPRISE_PRIVACY_SETTINGS";
     field public static final String ACTION_LOCATION_CONTROLLER_EXTRA_PACKAGE_SETTINGS = "android.settings.LOCATION_CONTROLLER_EXTRA_PACKAGE_SETTINGS";
     field public static final String ACTION_MANAGE_DOMAIN_URLS = "android.settings.MANAGE_DOMAIN_URLS";
+    field public static final String ACTION_MANAGE_MORE_DEFAULT_APPS_SETTINGS = "android.settings.MANAGE_MORE_DEFAULT_APPS_SETTINGS";
     field public static final String ACTION_NOTIFICATION_POLICY_ACCESS_DETAIL_SETTINGS = "android.settings.NOTIFICATION_POLICY_ACCESS_DETAIL_SETTINGS";
     field public static final String ACTION_REQUEST_ENABLE_CONTENT_CAPTURE = "android.settings.REQUEST_ENABLE_CONTENT_CAPTURE";
     field public static final String ACTION_SHOW_ADMIN_SUPPORT_DETAILS = "android.settings.SHOW_ADMIN_SUPPORT_DETAILS";

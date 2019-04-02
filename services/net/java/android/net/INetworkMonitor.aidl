@@ -15,6 +15,8 @@
  */
 package android.net;
 
+import android.net.LinkProperties;
+import android.net.NetworkCapabilities;
 import android.net.PrivateDnsConfigParcel;
 
 /** @hide */
@@ -46,8 +48,8 @@ oneway interface INetworkMonitor {
     void notifyPrivateDnsChanged(in PrivateDnsConfigParcel config);
     void notifyDnsResponse(int returnCode);
     void notifySystemReady();
-    void notifyNetworkConnected();
+    void notifyNetworkConnected(in LinkProperties lp, in NetworkCapabilities nc);
     void notifyNetworkDisconnected();
-    void notifyLinkPropertiesChanged();
-    void notifyNetworkCapabilitiesChanged();
+    void notifyLinkPropertiesChanged(in LinkProperties lp);
+    void notifyNetworkCapabilitiesChanged(in NetworkCapabilities nc);
 }

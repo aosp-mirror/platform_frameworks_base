@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
@@ -782,8 +783,10 @@ public class LauncherApps {
      * @return an {@link AppUsageLimit} object describing the app time limit containing
      * the given package with the smallest time remaining, or {@code null} if none exist.
      * @throws SecurityException when the caller is not the recents app.
+     * @hide
      */
     @Nullable
+    @SystemApi
     public LauncherApps.AppUsageLimit getAppUsageLimit(@NonNull String packageName,
             @NonNull UserHandle user) {
         try {
@@ -1739,7 +1742,9 @@ public class LauncherApps {
      * in this class.
      *
      * @see #getAppUsageLimit(String, UserHandle)
+     * @hide
      */
+    @SystemApi
     public static final class AppUsageLimit implements Parcelable {
         private final long mTotalUsageLimit;
         private final long mUsageRemaining;

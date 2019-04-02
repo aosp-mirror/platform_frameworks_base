@@ -33,6 +33,13 @@ import android.os.Parcelable;
  */
 @Deprecated
 public final class BluetoothHealthAppConfiguration implements Parcelable {
+
+    /**
+     * Hide auto-created default constructor
+     * @hide
+     */
+    BluetoothHealthAppConfiguration() {}
+
     @Override
     public int describeContents() {
         return 0;

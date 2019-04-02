@@ -129,7 +129,6 @@
 
     <!-- Keyboard shortcuts colors -->
     <color name="ksh_application_group_color">#fff44336</color>
-    <color name="ksh_keyword_color">#d9000000</color>
     <color name="ksh_key_item_color">@color/material_grey_600</color>
     <color name="ksh_key_item_background">@color/material_grey_100</color>
 
