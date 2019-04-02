@@ -439,6 +439,9 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     @Override
     public void onUiModeChanged() {
         mContext.getTheme().applyStyle(mContext.getThemeResId(), true);
+        if (mDialog.isShowing()) {
+            mDialog.refreshDialog();
+        }
     }
 
     public void destroy() {
@@ -1577,7 +1580,9 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
             boolean panelEnabled = initializePanel();
             if (!panelEnabled) {
-                mBackgroundDrawable = new GradientDrawable(mContext);
+                if (mBackgroundDrawable == null) {
+                    mBackgroundDrawable = new GradientDrawable(mContext);
+                }
                 mScrimAlpha = ScrimController.GRADIENT_SCRIM_ALPHA;
             } else {
                 mBackgroundDrawable = mContext.getDrawable(
@@ -1720,10 +1725,14 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             mKeyguardShowing = keyguardShowing;
         }
 
+        public void refreshDialog() {
+            initializeLayout();
+            mGlobalActionsLayout.updateList();
+        }
+
         public void onRotate(int from, int to) {
             if (mShowing && isGridEnabled(mContext)) {
-                initializeLayout();
-                mGlobalActionsLayout.updateList();
+                refreshDialog();
             }
         }
     }
