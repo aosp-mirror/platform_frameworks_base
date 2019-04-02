@@ -132,6 +132,7 @@ public class KeepaliveTracker {
         private static final int NOT_STARTED = 1;
         private static final int STARTING = 2;
         private static final int STARTED = 3;
+        private static final int STOPPING = 4;
         private int mStartedState = NOT_STARTED;
 
         KeepaliveInfo(@NonNull ISocketKeepaliveCallback callback,
@@ -314,6 +315,7 @@ public class KeepaliveTracker {
                 }
             }
             if (NOT_STARTED != mStartedState) {
+                mStartedState = STOPPING;
                 Log.d(TAG, "Stopping keepalive " + mSlot + " on " + mNai.name());
                 if (mType == TYPE_NATT) {
                     mNai.asyncChannel.sendMessage(CMD_STOP_SOCKET_KEEPALIVE, mSlot);
@@ -456,8 +458,8 @@ public class KeepaliveTracker {
             ki = mKeepalives.get(nai).get(slot);
         } catch(NullPointerException e) {}
         if (ki == null) {
-            Log.e(TAG, "Event " + message.what + " for unknown keepalive " + slot + " on "
-                    + nai.name());
+            Log.e(TAG, "Event " + message.what + "," + slot + "," + reason
+                    + " for unknown keepalive " + slot + " on " + nai.name());
             return;
         }
 
@@ -476,27 +478,30 @@ public class KeepaliveTracker {
         // messages in order.
         // TODO : clarify this code and get rid of mStartedState. Using a StateMachine is an
         // option.
-        if (reason == SUCCESS && KeepaliveInfo.STARTING == ki.mStartedState) {
-            // Keepalive successfully started.
-            if (DBG) Log.d(TAG, "Started keepalive " + slot + " on " + nai.name());
-            ki.mStartedState = KeepaliveInfo.STARTED;
-            try {
-                ki.mCallback.onStarted(slot);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Discarded onStarted(" + slot + ") callback");
-            }
-        } else {
-            // Keepalive successfully stopped, or error.
-            if (reason == SUCCESS) {
-                // The message indicated success stopping : don't call handleStopKeepalive.
-                if (DBG) Log.d(TAG, "Successfully stopped keepalive " + slot + " on " + nai.name());
+        if (KeepaliveInfo.STARTING == ki.mStartedState) {
+            if (SUCCESS == reason) {
+                // Keepalive successfully started.
+                if (DBG) Log.d(TAG, "Started keepalive " + slot + " on " + nai.name());
+                ki.mStartedState = KeepaliveInfo.STARTED;
+                try {
+                    ki.mCallback.onStarted(slot);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Discarded onStarted(" + slot + ") callback");
+                }
             } else {
-                // The message indicated some error trying to start or during the course of
-                // keepalive : do call handleStopKeepalive.
+                Log.d(TAG, "Failed to start keepalive " + slot + " on " + nai.name()
+                        + ": " + reason);
+                // The message indicated some error trying to start: do call handleStopKeepalive.
                 handleStopKeepalive(nai, slot, reason);
-                if (DBG) Log.d(TAG, "Keepalive " + slot + " on " + nai.name() + " error " + reason);
             }
+        } else if (KeepaliveInfo.STOPPING == ki.mStartedState) {
+            // The message indicated result of stopping : don't call handleStopKeepalive.
+            Log.d(TAG, "Stopped keepalive " + slot + " on " + nai.name()
+                    + " stopped: " + reason);
             ki.mStartedState = KeepaliveInfo.NOT_STARTED;
+        } else {
+            Log.wtf(TAG, "Event " + message.what + "," + slot + "," + reason
+                    + " for keepalive in wrong state: " + ki.toString());
         }
     }
 
