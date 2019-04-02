@@ -19,10 +19,14 @@ package com.android.server.pm;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.AppGlobals;
 import android.app.admin.DevicePolicyManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageManager;
+import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Process;
@@ -221,14 +225,64 @@ public class UserRestrictionsUtils {
     );
 
     /**
-     * Throws {@link IllegalArgumentException} if the given restriction name is invalid.
+     * Returns whether the given restriction name is valid (and logs it if it isn't).
      */
     public static boolean isValidRestriction(@NonNull String restriction) {
         if (!USER_RESTRICTIONS.contains(restriction)) {
-            Slog.e(TAG, "Unknown restriction: " + restriction);
+            // Log this, with severity depending on the source.
+            final int uid = Binder.getCallingUid();
+            String[] pkgs = null;
+            try {
+                pkgs = AppGlobals.getPackageManager().getPackagesForUid(uid);
+            } catch (RemoteException e) {
+                // Ignore
+            }
+            StringBuilder msg = new StringBuilder("Unknown restriction queried by uid ");
+            msg.append(uid);
+            if (pkgs != null && pkgs.length > 0) {
+                msg.append(" (");
+                msg.append(pkgs[0]);
+                if (pkgs.length > 1) {
+                    msg.append(" et al");
+                }
+                msg.append(")");
+            }
+            msg.append(": ");
+            msg.append(restriction);
+            if (restriction != null && isSystemApp(uid, pkgs)) {
+                Slog.wtf(TAG, msg.toString());
+            } else {
+                Slog.e(TAG, msg.toString());
+            }
             return false;
         }
         return true;
+    }
+
+    /** Returns whether the given uid (or corresponding packageList) is for a System app. */
+    private static boolean isSystemApp(int uid, String[] packageList) {
+        if (UserHandle.isCore(uid)) {
+            return true;
+        }
+        if (packageList == null) {
+            return false;
+        }
+        final IPackageManager pm = AppGlobals.getPackageManager();
+        for (int i = 0; i < packageList.length; i++) {
+            try {
+                final int flags = PackageManager.MATCH_UNINSTALLED_PACKAGES
+                        | PackageManager.MATCH_DIRECT_BOOT_AWARE
+                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
+                final ApplicationInfo appInfo =
+                        pm.getApplicationInfo(packageList[i], flags, UserHandle.getUserId(uid));
+                if (appInfo != null && appInfo.isSystemApp()) {
+                    return true;
+                }
+            } catch (RemoteException e) {
+                // Ignore
+            }
+        }
+        return false;
     }
 
     public static void writeRestrictions(@NonNull XmlSerializer serializer,
