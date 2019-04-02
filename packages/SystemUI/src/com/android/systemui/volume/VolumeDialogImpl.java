@@ -515,11 +515,11 @@ public class VolumeDialogImpl implements VolumeDialog,
 
     private void initODICaptionsH() {
         if (mODICaptionsIcon != null) {
-            mODICaptionsIcon.setOnClickListener(v -> {
+            mODICaptionsIcon.setOnConfirmedTapListener(() -> {
                 onCaptionIconClicked();
                 Events.writeEvent(mContext, Events.EVENT_ODI_CAPTIONS_CLICK);
                 dismissH(DISMISS_REASON_ODI_CAPTIONS_CLICKED);
-            });
+            }, mHandler);
         }
 
         mController.getCaptionsComponentState(false);
