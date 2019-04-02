@@ -18,6 +18,7 @@ package android.net.util;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.provider.DeviceConfig;
 import android.util.SparseArray;
 
 import java.io.FileDescriptor;
@@ -94,7 +95,7 @@ public class NetworkStackUtils {
     @Nullable
     public static String getDeviceConfigProperty(@NonNull String namespace, @NonNull String name,
             @Nullable String defaultValue) {
-        // TODO: Link to DeviceConfig API once it is ready.
-        return defaultValue;
+        String value = DeviceConfig.getProperty(namespace, name);
+        return value != null ? value : defaultValue;
     }
 }
