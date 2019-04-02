@@ -337,6 +337,25 @@ public class GraphicsEnvironment {
     }
 
     /**
+     * Check for ANGLE debug package, but only for apps that can load them (dumpable)
+     */
+    private String getAngleDebugPackage(Context context, Bundle coreSettings) {
+        final boolean appIsDebuggable = isDebuggable(context);
+        final boolean appIsProfileable = isProfileable(context);
+        final boolean deviceIsDebuggable = getCanLoadSystemLibraries() == 1;
+        if (appIsDebuggable || appIsProfileable || deviceIsDebuggable) {
+
+            String debugPackage =
+                    coreSettings.getString(Settings.Global.GLOBAL_SETTINGS_ANGLE_DEBUG_PACKAGE);
+
+            if ((debugPackage != null) && (!debugPackage.isEmpty())) {
+                return debugPackage;
+            }
+        }
+        return "";
+    }
+
+    /**
      * Attempt to setup ANGLE with a temporary rules file.
      * True: Temporary rules file was loaded.
      * False: Temporary rules file was *not* loaded.
@@ -502,11 +521,23 @@ public class GraphicsEnvironment {
         }
 
         final ApplicationInfo angleInfo;
-        try {
-            angleInfo = pm.getApplicationInfo(anglePkgName, PackageManager.MATCH_SYSTEM_ONLY);
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.w(TAG, "ANGLE package '" + anglePkgName + "' not installed");
-            return false;
+        String angleDebugPackage = getAngleDebugPackage(context, bundle);
+        if (!angleDebugPackage.isEmpty()) {
+            Log.i(TAG, "ANGLE debug package enabled: " + angleDebugPackage);
+            try {
+                // Note the debug package does not have to be pre-installed
+                angleInfo = pm.getApplicationInfo(angleDebugPackage, 0);
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.w(TAG, "ANGLE debug package '" + angleDebugPackage + "' not installed");
+                return false;
+            }
+        } else {
+            try {
+                angleInfo = pm.getApplicationInfo(anglePkgName, PackageManager.MATCH_SYSTEM_ONLY);
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.w(TAG, "ANGLE package '" + anglePkgName + "' not installed");
+                return false;
+            }
         }
 
         final String abi = chooseAbi(angleInfo);

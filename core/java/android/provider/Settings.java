@@ -12451,6 +12451,14 @@ public final class Settings {
         public static final String GPU_DEBUG_APP = "gpu_debug_app";
 
         /**
+         * Package containing ANGLE libraries other than system, which are only available
+         * to dumpable apps that opt-in.
+         * @hide
+         */
+        public static final String GLOBAL_SETTINGS_ANGLE_DEBUG_PACKAGE =
+                "angle_debug_package";
+
+        /**
          * Force all PKGs to use ANGLE, regardless of any other settings
          * The value is a boolean (1 or 0).
          * @hide

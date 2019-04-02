@@ -686,6 +686,9 @@ class SettingsProtoDumpUtil {
                 Settings.Global.GPU_DEBUG_LAYERS,
                 GlobalSettingsProto.Gpu.DEBUG_LAYERS);
         dumpSetting(s, p,
+                Settings.Global.GLOBAL_SETTINGS_ANGLE_DEBUG_PACKAGE,
+                GlobalSettingsProto.Gpu.ANGLE_DEBUG_PACKAGE);
+        dumpSetting(s, p,
                 Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_ALL_ANGLE,
                 GlobalSettingsProto.Gpu.ANGLE_GL_DRIVER_ALL_ANGLE);
         dumpSetting(s, p,

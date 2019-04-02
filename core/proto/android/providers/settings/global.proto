@@ -455,6 +455,8 @@ message GlobalSettingsProto {
         optional SettingProto show_angle_in_use_dialog = 15;
         // Game Driver - List of libraries in sphal accessible by Game Driver
         optional SettingProto game_driver_sphal_libraries = 16;
+        // ANGLE - External package containing ANGLE libraries
+        optional SettingProto angle_debug_package = 17;
     }
     optional Gpu gpu = 59;
 
