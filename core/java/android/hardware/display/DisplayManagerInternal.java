@@ -25,6 +25,7 @@ import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Surface;
+import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 
 /**
@@ -64,13 +65,12 @@ public abstract class DisplayManagerInternal {
     public abstract boolean isProximitySensorAvailable();
 
     /**
-     * Take a screenshot of the specified display into the provided {@link Surface}.
+     * Take a screenshot of the specified display and return a buffer.
      *
      * @param displayId The display id to take the screenshot of.
-     * @param outSurface The {@link Surface} to take the screenshot into.
-     * @return True if the screenshot is taken.
+     * @return The buffer or null if we have failed.
      */
-    public abstract boolean screenshot(int displayId, Surface outSurface);
+    public abstract SurfaceControl.ScreenshotGraphicBuffer screenshot(int displayId);
 
     /**
      * Returns information about the specified logical display.
