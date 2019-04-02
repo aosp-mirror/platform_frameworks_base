@@ -15,6 +15,8 @@
  */
 package com.android.internal.colorextraction.types;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -64,6 +66,36 @@ public class TonalTest {
                 normal, new GradientColors(), new GradientColors());
         assertTrue("Should use fallback color if WallpaperColors is too light.",
                 normal.getMainColor() == Tonal.MAIN_COLOR_LIGHT);
+    }
+
+    @Test
+    public void extractInto_fromBitmap() {
+        Tonal tonal = new Tonal(InstrumentationRegistry.getContext());
+        GradientColors normal = new GradientColors();
+        GradientColors dark = new GradientColors();
+        GradientColors extraDark = new GradientColors();
+        WallpaperColors wallColors = new WallpaperColors(Color.valueOf(Color.RED), null, null,
+                WallpaperColors.HINT_FROM_BITMAP);
+
+        // WHEN colors are extracted from a wallpaper with only a red primary color.
+        tonal.extractInto(wallColors, normal, dark, extraDark);
+        // THEN the main extracted color is red
+        assertThat(normal.getMainColor()).isEqualTo(Color.RED);
+    }
+
+    @Test
+    public void extractInto_supportsDarkText() {
+        Tonal tonal = new Tonal(InstrumentationRegistry.getContext());
+        GradientColors normal = new GradientColors();
+        GradientColors dark = new GradientColors();
+        GradientColors extraDark = new GradientColors();
+        WallpaperColors wallColors = new WallpaperColors(Color.valueOf(Color.RED), null, null,
+                WallpaperColors.HINT_SUPPORTS_DARK_TEXT);
+
+        // WHEN colors are extracted from a wallpaper with only a red primary color.
+        tonal.extractInto(wallColors, normal, dark, extraDark);
+        // THEN the main extracted color is red
+        assertThat(normal.getMainColor()).isEqualTo(Color.RED);
     }
 
     @Test
