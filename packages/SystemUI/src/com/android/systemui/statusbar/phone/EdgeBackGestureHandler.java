@@ -46,6 +46,7 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 
 import com.android.systemui.R;
+import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.shared.system.InputChannelCompat.InputEventReceiver;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.WindowManagerWrapper;
@@ -102,6 +103,7 @@ public class EdgeBackGestureHandler implements DisplayListener {
             };
 
     private final Context mContext;
+    private final OverviewProxyService mOverviewProxyService;
 
     private final Point mDisplaySize = new Point();
     private final int mDisplayId;
@@ -137,11 +139,12 @@ public class EdgeBackGestureHandler implements DisplayListener {
     private NavigationBarEdgePanel mEdgePanel;
     private WindowManager.LayoutParams mEdgePanelLp;
 
-    public EdgeBackGestureHandler(Context context) {
+    public EdgeBackGestureHandler(Context context, OverviewProxyService overviewProxyService) {
         mContext = context;
         mDisplayId = context.getDisplayId();
         mMainExecutor = context.getMainExecutor();
         mWm = context.getSystemService(WindowManager.class);
+        mOverviewProxyService = overviewProxyService;
 
         mEdgeWidth = QuickStepContract.getEdgeSensitivityWidth(context);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
@@ -313,11 +316,15 @@ public class EdgeBackGestureHandler implements DisplayListener {
                 float xDiff = ev.getX() - mDownPoint.x;
                 boolean exceedsThreshold = mIsOnLeftEdge
                         ? (xDiff > mSwipeThreshold) : (-xDiff > mSwipeThreshold);
-                if (exceedsThreshold && Math.abs(xDiff) > Math.abs(ev.getY() - mDownPoint.y)) {
+                boolean performAction = exceedsThreshold
+                        && Math.abs(xDiff) > Math.abs(ev.getY() - mDownPoint.y);
+                if (performAction) {
                     // Perform back
                     sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK);
                     sendEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK);
                 }
+                mOverviewProxyService.notifyBackAction(performAction, (int) mDownPoint.x,
+                        (int) mDownPoint.y, false /* isButton */, !mIsOnLeftEdge);
             }
         }
     }

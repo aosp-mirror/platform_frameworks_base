@@ -285,7 +285,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         mButtonDispatchers.put(R.id.menu_container, mContextualButtonGroup);
         mDeadZone = new DeadZone(this);
 
-        mEdgeBackGestureHandler = new EdgeBackGestureHandler(context);
+        mEdgeBackGestureHandler = new EdgeBackGestureHandler(context, mOverviewProxyService);
         mTintController = new NavBarTintController(this, getLightTransitionsController());
 
     }
