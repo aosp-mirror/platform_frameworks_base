@@ -224,6 +224,7 @@ import android.view.IRecentsAnimationRunner;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodSystemProperty;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -6436,6 +6437,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
          */
         @Override
         public void onImeWindowSetOnDisplay(final int pid, final int displayId) {
+            // Update display configuration for IME process only when Single-client IME window
+            // moving to another display.
+            if (!InputMethodSystemProperty.MULTI_CLIENT_IME_ENABLED) return;
+
             if (pid == MY_PID || pid < 0) {
                 if (DEBUG_CONFIGURATION) {
                     Slog.w(TAG,
