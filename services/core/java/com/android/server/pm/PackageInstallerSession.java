@@ -837,17 +837,34 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @Override
     public void commit(@NonNull IntentSender statusReceiver, boolean forTransfer) {
-        if (!markAsCommitted(statusReceiver, forTransfer  /* enforce */)) {
+        if (!markAsCommitted(statusReceiver, forTransfer)) {
             return;
         }
         if (isMultiPackage()) {
-
             final SparseIntArray remainingSessions = mChildSessionIds.clone();
-            final ChildStatusIntentReceiver localIntentReceiver =
-                    new ChildStatusIntentReceiver(remainingSessions, statusReceiver);
-            for (int childSessionId : getChildSessionIds()) {
-                mSessionProvider.getSession(childSessionId)
-                        .markAsCommitted(localIntentReceiver.getIntentSender(), forTransfer);
+            final IntentSender childIntentSender =
+                    new ChildStatusIntentReceiver(remainingSessions, statusReceiver)
+                            .getIntentSender();
+            RuntimeException commitException = null;
+            boolean commitFailed = false;
+            for (int i = mChildSessionIds.size() - 1; i >= 0; --i) {
+                final int childSessionId = mChildSessionIds.keyAt(i);
+                try {
+                    // commit all children, regardless if any of them fail; we'll throw/return
+                    // as appropriate once all children have been processed
+                    if (!mSessionProvider.getSession(childSessionId)
+                            .markAsCommitted(childIntentSender, forTransfer)) {
+                        commitFailed = true;
+                    }
+                } catch (RuntimeException e) {
+                    commitException = e;
+                }
+            }
+            if (commitException != null) {
+                throw commitException;
+            }
+            if (commitFailed) {
+                return;
             }
         }
         mHandler.obtainMessage(MSG_COMMIT).sendToTarget();
