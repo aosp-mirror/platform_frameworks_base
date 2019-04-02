@@ -199,6 +199,7 @@ public class StackAnimationControllerTest extends PhysicsAnimationLayoutTestCase
     }
 
     @Test
+    @Ignore("Flaky")
     public void testRestoredAtRestingPosition() throws InterruptedException {
         mStackController.flingStackThenSpringToEdge(0, 5000, 5000);
 
