@@ -1028,6 +1028,7 @@ void StatsService::Terminate() {
     ALOGI("StatsService::Terminating");
     if (mProcessor != nullptr) {
         mProcessor->WriteDataToDisk(TERMINATION_SIGNAL_RECEIVED, FAST);
+        mProcessor->WriteMetricsActivationToDisk(getElapsedRealtimeNs());
     }
 }
 
