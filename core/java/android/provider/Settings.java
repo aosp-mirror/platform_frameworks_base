@@ -8654,9 +8654,10 @@ public final class Settings {
                 "location_permissions_upgrade_to_q_mode";
 
         /**
-         * Comma separated list of enabled overlay packages for all android.theme.customization.*
-         * categories. If there is no corresponding package included for a category, then all
-         * overlay packages in that category must be disabled.
+         * Map of android.theme.customization.* categories to the enabled overlay package for that
+         * category, formatted as a serialized {@link org.json.JSONObject}. If there is no
+         * corresponding package included for a category, then all overlay packages in that
+         * category must be disabled.
          * @hide
          */
         @SystemApi
@@ -8664,7 +8665,7 @@ public final class Settings {
                 "theme_customization_overlay_packages";
 
         private static final Validator THEME_CUSTOMIZATION_OVERLAY_PACKAGES_VALIDATOR =
-                new SettingsValidators.PackageNameListValidator(",");
+                SettingsValidators.JSON_OBJECT_VALIDATOR;
 
         /**
          * Controls whether aware is enabled.
