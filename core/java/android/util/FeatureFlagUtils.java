@@ -55,7 +55,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put("settings_dynamic_system", "false");
         DEFAULT_FLAGS.put(SEAMLESS_TRANSFER, "false");
         DEFAULT_FLAGS.put(HEARING_AID_SETTINGS, "false");
-        DEFAULT_FLAGS.put(SAFETY_HUB, "false");
+        DEFAULT_FLAGS.put(SAFETY_HUB, "true");
         DEFAULT_FLAGS.put(SCREENRECORD_LONG_PRESS, "false");
         DEFAULT_FLAGS.put(GLOBAL_ACTIONS_GRID_ENABLED, "true");
         DEFAULT_FLAGS.put(GLOBAL_ACTIONS_PANEL_ENABLED, "true");
