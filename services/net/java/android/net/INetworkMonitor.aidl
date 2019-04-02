@@ -47,7 +47,6 @@ oneway interface INetworkMonitor {
     void forceReevaluation(int uid);
     void notifyPrivateDnsChanged(in PrivateDnsConfigParcel config);
     void notifyDnsResponse(int returnCode);
-    void notifySystemReady();
     void notifyNetworkConnected(in LinkProperties lp, in NetworkCapabilities nc);
     void notifyNetworkDisconnected();
     void notifyLinkPropertiesChanged(in LinkProperties lp);

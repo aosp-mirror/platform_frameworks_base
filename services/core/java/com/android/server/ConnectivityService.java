@@ -3738,16 +3738,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     break;
                 }
                 case EVENT_SYSTEM_READY: {
-                    for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
-                        // Might have been called already in handleRegisterNetworkAgent since
-                        // mSystemReady is set before sending EVENT_SYSTEM_READY, but calling
-                        // this several times is fine.
-                        try {
-                            nai.networkMonitor().notifySystemReady();
-                        } catch (RemoteException e) {
-                            e.rethrowFromSystemServer();
-                        }
-                    }
                     mMultipathPolicyTracker.start();
                     break;
                 }
@@ -5415,15 +5405,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mNetworkAgentInfos.put(nai.messenger, nai);
         synchronized (mNetworkForNetId) {
             mNetworkForNetId.put(nai.network.netId, nai);
-        }
-        synchronized (this) {
-            if (mSystemReady) {
-                try {
-                    networkMonitor.notifySystemReady();
-                } catch (RemoteException e) {
-                    e.rethrowFromSystemServer();
-                }
-            }
         }
 
         try {
