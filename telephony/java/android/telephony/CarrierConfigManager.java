@@ -3081,7 +3081,6 @@ public class CarrierConfigManager {
          * 1 - yes. This is default.
          * @hide
          */
-        // TODO(b/119567985): name this key properly
         public static final String KEY_SUPL_ES_STRING = KEY_PREFIX + "supl_es";
 
         /**
