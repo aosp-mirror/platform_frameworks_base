@@ -22,6 +22,7 @@ import static android.net.ipmemorystore.Status.ERROR_ILLEGAL_ARGUMENT;
 import static android.net.ipmemorystore.Status.SUCCESS;
 
 import static com.android.server.connectivity.ipmemorystore.IpMemoryStoreDatabase.EXPIRY_ERROR;
+import static com.android.server.connectivity.ipmemorystore.RegularMaintenanceJobService.InterruptMaintenance;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -43,6 +44,9 @@ import android.net.ipmemorystore.StatusParcelable;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
+
+import java.io.File;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -57,7 +61,16 @@ import java.util.concurrent.Executors;
 public class IpMemoryStoreService extends IIpMemoryStore.Stub {
     private static final String TAG = IpMemoryStoreService.class.getSimpleName();
     private static final int MAX_CONCURRENT_THREADS = 4;
+    private static final int DATABASE_SIZE_THRESHOLD = 10 * 1024 * 1024; //10MB
+    private static final int MAX_DROP_RECORD_TIMES = 500;
+    private static final int MIN_DELETE_NUM = 5;
     private static final boolean DBG = true;
+
+    // Error codes below are internal and used for notifying status beteween IpMemoryStore modules.
+    static final int ERROR_INTERNAL_BASE = -1_000_000_000;
+    // This error code is used for maintenance only to notify RegularMaintenanceJobService that
+    // full maintenance job has been interrupted.
+    static final int ERROR_INTERNAL_INTERRUPTED = ERROR_INTERNAL_BASE - 1;
 
     @NonNull
     final Context mContext;
@@ -111,6 +124,7 @@ public class IpMemoryStoreService extends IIpMemoryStore.Stub {
         // with judicious subclassing of ThreadPoolExecutor, but that's a lot of dangerous
         // complexity for little benefit in this case.
         mExecutor = Executors.newWorkStealingPool(MAX_CONCURRENT_THREADS);
+        RegularMaintenanceJobService.schedule(mContext, this);
     }
 
     /**
@@ -125,6 +139,7 @@ public class IpMemoryStoreService extends IIpMemoryStore.Stub {
         // guarantee the threads can be terminated in any given amount of time.
         mExecutor.shutdownNow();
         if (mDb != null) mDb.close();
+        RegularMaintenanceJobService.unschedule(mContext);
     }
 
     /** Helper function to make a status object */
@@ -393,5 +408,90 @@ public class IpMemoryStoreService extends IIpMemoryStore.Stub {
                 // Client at the other end died
             }
         });
+    }
+
+    /** Get db size threshold. */
+    @VisibleForTesting
+    protected int getDbSizeThreshold() {
+        return DATABASE_SIZE_THRESHOLD;
+    }
+
+    private long getDbSize() {
+        final File dbFile = new File(mDb.getPath());
+        try {
+            return dbFile.length();
+        } catch (final SecurityException e) {
+            if (DBG) Log.e(TAG, "Read db size access deny.", e);
+            // Return zero value if can't get disk usage exactly.
+            return 0;
+        }
+    }
+
+    /** Check if db size is over the threshold. */
+    @VisibleForTesting
+    boolean isDbSizeOverThreshold() {
+        return getDbSize() > getDbSizeThreshold();
+    }
+
+    /**
+     * Full maintenance.
+     *
+     * @param listener A listener to inform of the completion of this call.
+     */
+    void fullMaintenance(@NonNull final IOnStatusListener listener,
+            @NonNull final InterruptMaintenance interrupt) {
+        mExecutor.execute(() -> {
+            try {
+                if (null == mDb) {
+                    listener.onComplete(makeStatus(ERROR_DATABASE_CANNOT_BE_OPENED));
+                    return;
+                }
+
+                // Interrupt maintenance because the scheduling job has been canceled.
+                if (checkForInterrupt(listener, interrupt)) return;
+
+                int result = SUCCESS;
+                // Drop all records whose relevance has decayed to zero.
+                // This is the first step to decrease memory store size.
+                result = IpMemoryStoreDatabase.dropAllExpiredRecords(mDb);
+
+                if (checkForInterrupt(listener, interrupt)) return;
+
+                // Aggregate historical data in passes
+                // TODO : Waiting for historical data implement.
+
+                // Check if db size meets the storage goal(10MB). If not, keep dropping records and
+                // aggregate historical data until the storage goal is met. Use for loop with 500
+                // times restriction to prevent infinite loop (Deleting records always fail and db
+                // size is still over the threshold)
+                for (int i = 0; isDbSizeOverThreshold() && i < MAX_DROP_RECORD_TIMES; i++) {
+                    if (checkForInterrupt(listener, interrupt)) return;
+
+                    final int totalNumber = IpMemoryStoreDatabase.getTotalRecordNumber(mDb);
+                    final long dbSize = getDbSize();
+                    final float decreaseRate = (dbSize == 0)
+                            ? 0 : (float) (dbSize - getDbSizeThreshold()) / (float) dbSize;
+                    final int deleteNumber = Math.max(
+                            (int) (totalNumber * decreaseRate), MIN_DELETE_NUM);
+
+                    result = IpMemoryStoreDatabase.dropNumberOfRecords(mDb, deleteNumber);
+
+                    if (checkForInterrupt(listener, interrupt)) return;
+
+                    // Aggregate historical data
+                    // TODO : Waiting for historical data implement.
+                }
+                listener.onComplete(makeStatus(result));
+            } catch (final RemoteException e) {
+                // Client at the other end died
+            }
+        });
+    }
+
+    private boolean checkForInterrupt(@NonNull final IOnStatusListener listener,
+            @NonNull final InterruptMaintenance interrupt) throws RemoteException {
+        if (!interrupt.isInterrupted()) return false;
+        listener.onComplete(makeStatus(ERROR_INTERNAL_INTERRUPTED));
+        return true;
     }
 }
