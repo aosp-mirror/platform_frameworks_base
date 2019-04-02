@@ -3581,6 +3581,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         updateHideIconsForBouncer(true /* animate */);
         mCommandQueue.recomputeDisableFlags(mDisplayId, true /* animate */);
         updateScrimController();
+        if (!mBouncerShowing) {
+            updatePanelExpansionForKeyguard();
+        }
     }
 
     /**
