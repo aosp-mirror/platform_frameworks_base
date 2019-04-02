@@ -2,8 +2,7 @@
 //
 
 java_binary {
-    name: "hid",
-    wrapper: "hid",
+    name: "telecom",
+    wrapper: "telecom",
     srcs: ["**/*.java"],
-    required: ["libhidcommand_jni"],
 }
