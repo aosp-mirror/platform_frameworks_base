@@ -130,11 +130,12 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
     }
 
     private val errorPaint = Paint(Paint.ANTI_ALIAS_FLAG).also { p ->
-        p.color = Utils.getColorErrorDefaultColor(context)
+        p.color = Utils.getColorStateListDefaultColor(context, R.color.batterymeter_plus_color)
         p.alpha = 255
         p.isDither = true
         p.strokeWidth = 0f
         p.style = Paint.Style.FILL_AND_STROKE
+        p.blendMode = BlendMode.SRC
     }
 
     // Only used if dualTone is set to true
@@ -201,10 +202,6 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
             if (!invertFillIcon) {
                 c.drawPath(scaledBolt, fillPaint)
             }
-        } else if (powerSaveEnabled) {
-            // Clip out the plus shape
-            unifiedPath.op(scaledPlus, Path.Op.DIFFERENCE)
-            c.drawPath(scaledPlus, errorPaint)
         }
 
         if (dualTone) {
@@ -243,10 +240,8 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
         } else if (powerSaveEnabled) {
             // If power save is enabled draw the perimeter path with colorError
             c.drawPath(scaledPerimeter, errorPaint)
-
-            // But always put path protection around the plus sign
-            c.clipOutPath(scaledPlus)
-            c.drawPath(scaledPlus, fillColorStrokeProtection)
+            // And draw the plus sign on top of the fill
+            c.drawPath(scaledPlus, errorPaint)
         }
     }
 
