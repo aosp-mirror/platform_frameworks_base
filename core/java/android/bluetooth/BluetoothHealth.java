@@ -99,6 +99,11 @@ public final class BluetoothHealth implements BluetoothProfile {
     @Deprecated
     public static final int CHANNEL_TYPE_STREAMING = 11;
 
+    /**
+     * Hide auto-created default constructor
+     * @hide
+     */
+    BluetoothHealth() {}
 
     /**
      * Register an application configuration that acts as a Health SINK.
