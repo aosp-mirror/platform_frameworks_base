@@ -299,6 +299,10 @@ VulkanSurface* VulkanSurface::Create(ANativeWindow* window, ColorMode colorMode,
         }
 
         windowInfo.windowUsageFlags = hwbUsage.androidHardwareBufferUsage;
+        if (vkManager.isQualcomm()) {
+            windowInfo.windowUsageFlags =
+                    windowInfo.windowUsageFlags | AHARDWAREBUFFER_USAGE_VENDOR_0;
+        }
 
     } else {
         ALOGE("VulkanSurface::Create() vkmGetPhysicalDeviceImageFormatProperties2 is missing");
