@@ -18,33 +18,23 @@ import unittest
 from generate_hiddenapi_lists import *
 
 class TestHiddenapiListGeneration(unittest.TestCase):
-    def test_init(self):
-        # Check empty lists
-        flags = FlagsDict([], [])
-        self.assertEquals(flags.generate_csv(), [])
-
-        # Check valid input - two public and two private API signatures.
-        flags = FlagsDict(['A', 'B'], ['C', 'D'])
-        self.assertEquals(flags.generate_csv(),
-                          [ 'A,' + FLAG_WHITELIST, 'B,' + FLAG_WHITELIST, 'C', 'D' ])
-
-        # Check invalid input - overlapping public/private API signatures.
-        with self.assertRaises(AssertionError):
-            flags = FlagsDict(['A', 'B'], ['B', 'C', 'D'])
 
     def test_filter_apis(self):
         # Initialize flags so that A and B are put on the whitelist and
         # C, D, E are left unassigned. Try filtering for the unassigned ones.
-        flags = FlagsDict(['A', 'B'], ['C', 'D', 'E'])
+        flags = FlagsDict()
+        flags.parse_and_merge_csv(['A,' + FLAG_WHITELIST, 'B,' + FLAG_WHITELIST,
+                        'C', 'D', 'E'])
         filter_set = flags.filter_apis(lambda api, flags: not flags)
         self.assertTrue(isinstance(filter_set, set))
         self.assertEqual(filter_set, set([ 'C', 'D', 'E' ]))
 
     def test_get_valid_subset_of_unassigned_keys(self):
         # Create flags where only A is unassigned.
-        flags = FlagsDict(['A'], ['B', 'C'])
+        flags = FlagsDict()
+        flags.parse_and_merge_csv(['A,' + FLAG_WHITELIST, 'B', 'C'])
         flags.assign_flag(FLAG_GREYLIST, set(['C']))
-        self.assertEquals(flags.generate_csv(),
+        self.assertEqual(flags.generate_csv(),
             [ 'A,' + FLAG_WHITELIST, 'B', 'C,' + FLAG_GREYLIST ])
 
         # Check three things:
@@ -55,44 +45,30 @@ class TestHiddenapiListGeneration(unittest.TestCase):
             flags.get_valid_subset_of_unassigned_apis(set(['A', 'B', 'D'])), set([ 'B' ]))
 
     def test_parse_and_merge_csv(self):
-        flags = FlagsDict(['A'], ['B'])
-        self.assertEquals(flags.generate_csv(), [ 'A,' + FLAG_WHITELIST, 'B' ])
+        flags = FlagsDict()
 
         # Test empty CSV entry.
-        flags.parse_and_merge_csv(['B'])
-        self.assertEquals(flags.generate_csv(), [ 'A,' + FLAG_WHITELIST, 'B' ])
-
-        # Test assigning an already assigned flag.
-        flags.parse_and_merge_csv(['A,' + FLAG_WHITELIST])
-        self.assertEquals(flags.generate_csv(), [ 'A,' + FLAG_WHITELIST, 'B' ])
+        self.assertEqual(flags.generate_csv(), [])
 
         # Test new additions.
         flags.parse_and_merge_csv([
             'A,' + FLAG_GREYLIST,
             'B,' + FLAG_BLACKLIST + ',' + FLAG_GREYLIST_MAX_O ])
         self.assertEqual(flags.generate_csv(),
-            [ 'A,' + FLAG_GREYLIST + "," + FLAG_WHITELIST,
+            [ 'A,' + FLAG_GREYLIST,
               'B,' + FLAG_BLACKLIST + "," + FLAG_GREYLIST_MAX_O ])
-
-        # Test unknown API signature.
-        with self.assertRaises(AssertionError):
-            flags.parse_and_merge_csv([ 'C' ])
 
         # Test unknown flag.
         with self.assertRaises(AssertionError):
-            flags.parse_and_merge_csv([ 'A,foo' ])
+            flags.parse_and_merge_csv([ 'C,foo' ])
 
     def test_assign_flag(self):
-        flags = FlagsDict(['A'], ['B'])
-        self.assertEquals(flags.generate_csv(), [ 'A,' + FLAG_WHITELIST, 'B' ])
-
-        # Test assigning an already assigned flag.
-        flags.assign_flag(FLAG_WHITELIST, set([ 'A' ]))
-        self.assertEquals(flags.generate_csv(), [ 'A,' + FLAG_WHITELIST, 'B' ])
+        flags = FlagsDict()
+        flags.parse_and_merge_csv(['A,' + FLAG_WHITELIST, 'B'])
 
         # Test new additions.
         flags.assign_flag(FLAG_GREYLIST, set([ 'A', 'B' ]))
-        self.assertEquals(flags.generate_csv(),
+        self.assertEqual(flags.generate_csv(),
             [ 'A,' + FLAG_GREYLIST + "," + FLAG_WHITELIST, 'B,' + FLAG_GREYLIST ])
 
         # Test invalid API signature.
@@ -102,6 +78,19 @@ class TestHiddenapiListGeneration(unittest.TestCase):
         # Test invalid flag.
         with self.assertRaises(AssertionError):
             flags.assign_flag('foo', set([ 'A' ]))
+
+    def test_extract_package(self):
+        signature = 'Lcom/foo/bar/Baz;->method1()Lcom/bar/Baz;'
+        expected_package = 'com.foo.bar'
+        self.assertEqual(extract_package(signature), expected_package)
+
+        signature = 'Lcom/foo1/bar/MyClass;->method2()V'
+        expected_package = 'com.foo1.bar'
+        self.assertEqual(extract_package(signature), expected_package)
+
+        signature = 'Lcom/foo_bar/baz/MyClass;->method3()V'
+        expected_package = 'com.foo_bar.baz'
+        self.assertEqual(extract_package(signature), expected_package)
 
 if __name__ == '__main__':
     unittest.main()

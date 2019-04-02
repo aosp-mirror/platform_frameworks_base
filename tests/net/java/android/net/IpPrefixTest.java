@@ -231,7 +231,6 @@ public class IpPrefixTest {
         assertFalse(p.contains(Address("2001:db8:f00::ace:d00e")));
         assertFalse(p.contains(Address("2001:db8:f00::bad:d00d")));
         assertFalse(p.contains(Address("2001:4868:4860::8888")));
-        assertFalse(p.contains((InetAddress)null));
         assertFalse(p.contains(Address("8.8.8.8")));
 
         p = new IpPrefix("192.0.2.0/23");

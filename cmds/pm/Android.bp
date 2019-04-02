@@ -1,0 +1,7 @@
+// Copyright 2007 The Android Open Source Project
+//
+
+sh_binary {
+    name: "pm",
+    src: "pm",
+}

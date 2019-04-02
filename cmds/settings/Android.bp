@@ -1,0 +1,7 @@
+// Copyright 2011 The Android Open Source Project
+//
+
+sh_binary {
+    name: "settings",
+    src: "settings",
+}
