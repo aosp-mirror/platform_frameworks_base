@@ -267,7 +267,6 @@ public class BootReceiver extends BroadcastReceiver {
                     if (file.isFile() && file.getName().startsWith("tombstone_")) {
                         addFileToDropBox(db, timestamps, headers, file.getPath(), LOG_SIZE,
                                 TAG_TOMBSTONE);
-                        StatsLog.write(StatsLog.TOMB_STONE_OCCURRED);
                     }
                 } catch (IOException e) {
                     Slog.e(TAG, "Can't log tombstone", e);
@@ -307,6 +306,9 @@ public class BootReceiver extends BroadcastReceiver {
         // Create an additional report for system server native crashes, with a special tag.
         if (tag.equals(TAG_TOMBSTONE) && fileContents.contains(">>> system_server <<<")) {
             addTextToDropBox(db, "system_server_native_crash", text, filename, maxSize);
+        }
+        if (tag.equals(TAG_TOMBSTONE)) {
+            StatsLog.write(StatsLog.TOMB_STONE_OCCURRED);
         }
         addTextToDropBox(db, tag, text, filename, maxSize);
     }
