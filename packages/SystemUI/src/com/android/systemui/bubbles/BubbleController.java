@@ -222,14 +222,14 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
     @Override
     public void onUiModeChanged() {
         if (mStackView != null) {
-            mStackView.onConfigChanged();
+            mStackView.onThemeChanged();
         }
     }
 
     @Override
     public void onOverlayChanged() {
         if (mStackView != null) {
-            mStackView.onConfigChanged();
+            mStackView.onThemeChanged();
         }
     }
 

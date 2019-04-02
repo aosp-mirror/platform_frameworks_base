@@ -309,12 +309,12 @@ public class BubbleStackView extends FrameLayout {
     }
 
     /**
-     * Handle config changes.
+     * Handle theme changes.
      */
-    public void onConfigChanged() {
+    public void onThemeChanged() {
         for (Bubble b: mBubbleData.getBubbles()) {
             b.iconView.updateViews();
-            b.expandedView.updateHeaderColor();
+            b.expandedView.updateTheme();
         }
     }
 
