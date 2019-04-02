@@ -257,6 +257,8 @@ message Atom {
         NetworkStackReported network_stack_reported = 182;
         AppMovedStorageReported app_moved_storage_reported = 183;
         BiometricEnrolled biometric_enrolled = 184;
+        SystemServerWatchdogOccurred system_server_watchdog_occurred = 185;
+        TombStoneOccurred tomb_stone_occurred = 186;
     }
 
     // Pulled events will start at field 10000.
@@ -3491,6 +3493,23 @@ message AppMovedStorageReported {
     optional MoveType move_type = 2;
     // The name of the package that was moved.
     optional string package_name = 3;
+}
+
+/**
+ * Logs when system server watchdog occurs.
+ * Logged from:
+ *      frameworks/base/services/core/java/com/android/server/Watchdog.java
+ */
+message SystemServerWatchdogOccurred {
+    optional string subject = 1;
+}
+
+/**
+ * Logs when new file added to tombstones.
+ * Logged from:
+ *      frameworks/base/core/java/com/android/server/BootReceiver.java
+ */
+message TombStoneOccurred {
 }
 
 //////////////////////////////////////////////////////////////////////
