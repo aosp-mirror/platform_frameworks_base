@@ -395,7 +395,7 @@ public class Trampoline extends IBackupManager.Stub {
     @Override
     public boolean isBackupServiceActive(int userId) {
         synchronized (mStateLock) {
-            return isUserReadyForBackup(userId);
+            return mService != null && isBackupActivatedForUser(userId);
         }
     }
 

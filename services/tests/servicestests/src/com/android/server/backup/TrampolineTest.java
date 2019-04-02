@@ -95,6 +95,7 @@ public class TrampolineTest {
             new ComponentName("package2", "class2")
     };
     private static final int NON_USER_SYSTEM = UserHandle.USER_SYSTEM + 1;
+    private static final int UNSTARTED_NON_USER_SYSTEM = UserHandle.USER_SYSTEM + 2;
 
     @UserIdInt
     private int mUserId;
@@ -126,8 +127,6 @@ public class TrampolineTest {
     private TrampolineTestable mTrampoline;
     private File mTestDir;
     private File mSuppressFile;
-    private File mActivatedFile;
-    private File mRememberActivatedFile;
 
     @Before
     public void setUp() throws Exception {
@@ -141,6 +140,7 @@ public class TrampolineTest {
 
         when(mUserManagerMock.getUserInfo(UserHandle.USER_SYSTEM)).thenReturn(mUserInfoMock);
         when(mUserManagerMock.getUserInfo(NON_USER_SYSTEM)).thenReturn(mUserInfoMock);
+        when(mUserManagerMock.getUserInfo(UNSTARTED_NON_USER_SYSTEM)).thenReturn(mUserInfoMock);
 
         TrampolineTestable.sBackupManagerServiceMock = mBackupManagerServiceMock;
         TrampolineTestable.sCallingUserId = UserHandle.USER_SYSTEM;
@@ -154,18 +154,31 @@ public class TrampolineTest {
         mSuppressFile = new File(mTestDir, "suppress");
         TrampolineTestable.sSuppressFile = mSuppressFile;
 
-        mActivatedFile = new File(mTestDir, "activate-" + NON_USER_SYSTEM);
-        TrampolineTestable.sActivatedFiles.append(NON_USER_SYSTEM, mActivatedFile);
-        mRememberActivatedFile = new File(mTestDir, "rem-activate-" + NON_USER_SYSTEM);
-        TrampolineTestable.sRememberActivatedFiles.append(NON_USER_SYSTEM, mRememberActivatedFile);
+        setUpStateFilesForNonSystemUser(NON_USER_SYSTEM);
+        setUpStateFilesForNonSystemUser(UNSTARTED_NON_USER_SYSTEM);
 
         mTrampoline = new TrampolineTestable(mContextMock);
+    }
+
+    private void setUpStateFilesForNonSystemUser(int userId) {
+        File activatedFile = new File(mTestDir, "activate-" + userId);
+        TrampolineTestable.sActivatedFiles.append(userId, activatedFile);
+        File rememberActivatedFile = new File(mTestDir, "rem-activate-" + userId);
+        TrampolineTestable.sRememberActivatedFiles.append(userId, rememberActivatedFile);
     }
 
     @After
     public void tearDown() throws Exception {
         mSuppressFile.delete();
-        mActivatedFile.delete();
+        deleteFiles(TrampolineTestable.sActivatedFiles);
+        deleteFiles(TrampolineTestable.sRememberActivatedFiles);
+    }
+
+    private void deleteFiles(SparseArray<File> files) {
+        int numFiles = files.size();
+        for (int i = 0; i < numFiles; i++) {
+            files.valueAt(i).delete();
+        }
     }
 
     @Test
@@ -242,6 +255,16 @@ public class TrampolineTest {
         mTrampoline.setBackupServiceActive(NON_USER_SYSTEM, true);
 
         assertTrue(mTrampoline.isBackupServiceActive(NON_USER_SYSTEM));
+    }
+
+    @Test
+    public void
+            isBackupServiceActive_forUnstartedNonSystemUser_returnsTrueWhenSystemAndUserActivated()
+            throws Exception {
+        mTrampoline.initializeService();
+        mTrampoline.setBackupServiceActive(UNSTARTED_NON_USER_SYSTEM, true);
+
+        assertTrue(mTrampoline.isBackupServiceActive(UNSTARTED_NON_USER_SYSTEM));
     }
 
     @Test
@@ -421,7 +444,8 @@ public class TrampolineTest {
 
         mTrampoline.setBackupServiceActive(NON_USER_SYSTEM, true);
 
-        assertTrue(RandomAccessFileUtils.readBoolean(mRememberActivatedFile, false));
+        assertTrue(RandomAccessFileUtils.readBoolean(
+                TrampolineTestable.sRememberActivatedFiles.get(NON_USER_SYSTEM), false));
     }
 
     @Test
@@ -430,7 +454,8 @@ public class TrampolineTest {
 
         mTrampoline.setBackupServiceActive(NON_USER_SYSTEM, false);
 
-        assertFalse(RandomAccessFileUtils.readBoolean(mRememberActivatedFile, true));
+        assertFalse(RandomAccessFileUtils.readBoolean(
+                TrampolineTestable.sRememberActivatedFiles.get(NON_USER_SYSTEM), true));
     }
 
     @Test
@@ -440,7 +465,8 @@ public class TrampolineTest {
         mTrampoline.setBackupServiceActive(NON_USER_SYSTEM, true);
         mTrampoline.setBackupServiceActive(NON_USER_SYSTEM, false);
 
-        assertFalse(RandomAccessFileUtils.readBoolean(mRememberActivatedFile, true));
+        assertFalse(RandomAccessFileUtils.readBoolean(
+                TrampolineTestable.sRememberActivatedFiles.get(NON_USER_SYSTEM), true));
     }
 
     @Test
