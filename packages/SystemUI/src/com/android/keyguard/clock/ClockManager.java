@@ -41,6 +41,7 @@ import com.android.systemui.util.InjectionInflationController;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -52,14 +53,9 @@ import javax.inject.Singleton;
 public final class ClockManager {
 
     private static final String TAG = "ClockOptsProvider";
-    private static final String DEFAULT_CLOCK_ID = "default";
 
-    private final List<ClockInfo> mClockInfos = new ArrayList<>();
-    /**
-     * Map from expected value stored in settings to supplier of custom clock face.
-     */
-    private final Map<String, ClockPlugin> mClocks = new ArrayMap<>();
-    @Nullable private ClockPlugin mCurrentClock;
+    private final AvailableClocks mPreviewClocks;
+    private final List<Supplier<ClockPlugin>> mBuiltinClocks = new ArrayList<>();
 
     private final Context mContext;
     private final ContentResolver mContentResolver;
@@ -74,21 +70,6 @@ public final class ClockManager {
                 @Override
                 public void onChange(boolean selfChange) {
                     super.onChange(selfChange);
-                    reload();
-                }
-            };
-
-    private final PluginListener<ClockPlugin> mClockPluginListener =
-            new PluginListener<ClockPlugin>() {
-                @Override
-                public void onPluginConnected(ClockPlugin plugin, Context pluginContext) {
-                    addClockPlugin(plugin);
-                    reload();
-                }
-
-                @Override
-                public void onPluginDisconnected(ClockPlugin plugin) {
-                    removeClockPlugin(plugin);
                     reload();
                 }
             };
@@ -108,13 +89,22 @@ public final class ClockManager {
                 }
             };
     @Nullable private DockManager mDockManager;
+
     /**
      * When docked, the DOCKED_CLOCK_FACE setting will be checked for the custom clock face
      * to show.
      */
     private boolean mIsDocked;
 
-    private final List<ClockChangedListener> mListeners = new ArrayList<>();
+    /**
+     * Listeners for onClockChanged event.
+     *
+     * Each listener must receive a separate clock plugin instance. Otherwise, there could be
+     * problems like attempting to attach a view that already has a parent. To deal with this issue,
+     * each listener is associated with a collection of available clocks. When onClockChanged is
+     * fired the current clock plugin instance is retrieved from that listeners available clocks.
+     */
+    private final Map<ClockChangedListener, AvailableClocks> mListeners = new ArrayMap<>();
 
     private final int mWidth;
     private final int mHeight;
@@ -133,14 +123,16 @@ public final class ClockManager {
         mPluginManager = pluginManager;
         mContentResolver = contentResolver;
         mSettingsWrapper = settingsWrapper;
+        mPreviewClocks = new AvailableClocks();
 
         Resources res = context.getResources();
         LayoutInflater layoutInflater = injectionInflater.injectable(LayoutInflater.from(context));
 
-        addClockPlugin(new DefaultClockController(res, layoutInflater, colorExtractor));
-        addClockPlugin(new BubbleClockController(res, layoutInflater, colorExtractor));
-        addClockPlugin(new StretchAnalogClockController(res, layoutInflater, colorExtractor));
-        addClockPlugin(new TypeClockController(res, layoutInflater, colorExtractor));
+        addBuiltinClock(() -> new DefaultClockController(res, layoutInflater, colorExtractor));
+        addBuiltinClock(() -> new BubbleClockController(res, layoutInflater, colorExtractor));
+        addBuiltinClock(() -> new StretchAnalogClockController(res, layoutInflater,
+                colorExtractor));
+        addBuiltinClock(() -> new TypeClockController(res, layoutInflater, colorExtractor));
 
         // Store the size of the display for generation of clock preview.
         DisplayMetrics dm = res.getDisplayMetrics();
@@ -155,7 +147,12 @@ public final class ClockManager {
         if (mListeners.isEmpty()) {
             register();
         }
-        mListeners.add(listener);
+        AvailableClocks availableClocks = new AvailableClocks();
+        for (int i = 0; i < mBuiltinClocks.size(); i++) {
+            availableClocks.addClockPlugin(mBuiltinClocks.get(i).get());
+        }
+        mListeners.put(listener, availableClocks);
+        mPluginManager.addPluginListener(availableClocks, ClockPlugin.class, true);
         reload();
     }
 
@@ -163,7 +160,8 @@ public final class ClockManager {
      * Remove listener added with {@link addOnClockChangedListener}.
      */
     public void removeOnClockChangedListener(ClockChangedListener listener) {
-        mListeners.remove(listener);
+        AvailableClocks availableClocks = mListeners.remove(listener);
+        mPluginManager.removePluginListener(availableClocks);
         if (mListeners.isEmpty()) {
             unregister();
         }
@@ -173,16 +171,16 @@ public final class ClockManager {
      * Get information about available clock faces.
      */
     List<ClockInfo> getClockInfos() {
-        return mClockInfos;
+        return mPreviewClocks.getInfo();
     }
 
     /**
      * Get the current clock.
-     * @returns current custom clock or null for default.
+     * @return current custom clock or null for default.
      */
     @Nullable
     ClockPlugin getCurrentClock() {
-        return mCurrentClock;
+        return mPreviewClocks.getCurrentClock();
     }
 
     @VisibleForTesting
@@ -195,39 +193,14 @@ public final class ClockManager {
         return mContentObserver;
     }
 
-    private void addClockPlugin(ClockPlugin plugin) {
-        final String id = plugin.getClass().getName();
-        mClocks.put(plugin.getClass().getName(), plugin);
-        mClockInfos.add(ClockInfo.builder()
-                .setName(plugin.getName())
-                .setTitle(plugin.getTitle())
-                .setId(id)
-                .setThumbnail(() -> plugin.getThumbnail())
-                .setPreview(() -> plugin.getPreview(mWidth, mHeight))
-                .build());
-    }
-
-    private void removeClockPlugin(ClockPlugin plugin) {
-        final String id = plugin.getClass().getName();
-        mClocks.remove(id);
-        for (int i = 0; i < mClockInfos.size(); i++) {
-            if (id.equals(mClockInfos.get(i).getId())) {
-                mClockInfos.remove(i);
-                break;
-            }
-        }
-    }
-
-    private void notifyClockChanged(ClockPlugin plugin) {
-        for (int i = 0; i < mListeners.size(); i++) {
-            // It probably doesn't make sense to supply the same plugin instances to multiple
-            // listeners. This should be fine for now since there is only a single listener.
-            mListeners.get(i).onClockChanged(plugin);
-        }
+    private void addBuiltinClock(Supplier<ClockPlugin> pluginSupplier) {
+        ClockPlugin plugin = pluginSupplier.get();
+        mPreviewClocks.addClockPlugin(plugin);
+        mBuiltinClocks.add(pluginSupplier);
     }
 
     private void register() {
-        mPluginManager.addPluginListener(mClockPluginListener, ClockPlugin.class, true);
+        mPluginManager.addPluginListener(mPreviewClocks, ClockPlugin.class, true);
         mContentResolver.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE),
                 false, mContentObserver);
@@ -243,7 +216,7 @@ public final class ClockManager {
     }
 
     private void unregister() {
-        mPluginManager.removePluginListener(mClockPluginListener);
+        mPluginManager.removePluginListener(mPreviewClocks);
         mContentResolver.unregisterContentObserver(mContentObserver);
         if (mDockManager != null) {
             mDockManager.removeListener(mDockEventListener);
@@ -251,30 +224,16 @@ public final class ClockManager {
     }
 
     private void reload() {
-        mCurrentClock = getClockPlugin();
-        if (mCurrentClock instanceof DefaultClockController) {
-            notifyClockChanged(null);
-        } else {
-            notifyClockChanged(mCurrentClock);
-        }
-    }
-
-    private ClockPlugin getClockPlugin() {
-        ClockPlugin plugin = null;
-        if (mIsDocked) {
-            final String name = mSettingsWrapper.getDockedClockFace();
-            if (name != null) {
-                plugin = mClocks.get(name);
-                if (plugin != null) {
-                    return plugin;
-                }
+        mPreviewClocks.reload();
+        mListeners.forEach((listener, clocks) -> {
+            clocks.reload();
+            ClockPlugin clock = clocks.getCurrentClock();
+            if (clock instanceof DefaultClockController) {
+                listener.onClockChanged(null);
+            } else {
+                listener.onClockChanged(clock);
             }
-        }
-        final String name = mSettingsWrapper.getLockScreenCustomClockFace();
-        if (name != null) {
-            plugin = mClocks.get(name);
-        }
-        return plugin;
+        });
     }
 
     /**
@@ -287,5 +246,107 @@ public final class ClockManager {
          * @param clock Custom clock face to use. A null value indicates the default clock face.
          */
         void onClockChanged(ClockPlugin clock);
+    }
+
+    /**
+     * Collection of available clocks.
+     */
+    private final class AvailableClocks implements PluginListener<ClockPlugin> {
+
+        /**
+         * Map from expected value stored in settings to plugin for custom clock face.
+         */
+        private final Map<String, ClockPlugin> mClocks = new ArrayMap<>();
+
+        /**
+         * Metadata about available clocks, such as name and preview images.
+         */
+        private final List<ClockInfo> mClockInfo = new ArrayList<>();
+
+        /**
+         * Active ClockPlugin.
+         */
+        @Nullable private ClockPlugin mCurrentClock;
+
+        @Override
+        public void onPluginConnected(ClockPlugin plugin, Context pluginContext) {
+            addClockPlugin(plugin);
+            reload();
+        }
+
+        @Override
+        public void onPluginDisconnected(ClockPlugin plugin) {
+            removeClockPlugin(plugin);
+            reload();
+        }
+
+        /**
+         * Get the current clock.
+         * @return current custom clock or null for default.
+         */
+        @Nullable
+        ClockPlugin getCurrentClock() {
+            return mCurrentClock;
+        }
+
+        /**
+         * Get information about available clock faces.
+         */
+        List<ClockInfo> getInfo() {
+            return mClockInfo;
+        }
+
+        /**
+         * Adds a clock plugin to the collection of available clocks.
+         *
+         * @param plugin The plugin to add.
+         */
+        void addClockPlugin(ClockPlugin plugin) {
+            final String id = plugin.getClass().getName();
+            mClocks.put(plugin.getClass().getName(), plugin);
+            mClockInfo.add(ClockInfo.builder()
+                    .setName(plugin.getName())
+                    .setTitle(plugin.getTitle())
+                    .setId(id)
+                    .setThumbnail(plugin::getThumbnail)
+                    .setPreview(() -> plugin.getPreview(mWidth, mHeight))
+                    .build());
+        }
+
+        private void removeClockPlugin(ClockPlugin plugin) {
+            final String id = plugin.getClass().getName();
+            mClocks.remove(id);
+            for (int i = 0; i < mClockInfo.size(); i++) {
+                if (id.equals(mClockInfo.get(i).getId())) {
+                    mClockInfo.remove(i);
+                    break;
+                }
+            }
+        }
+
+        /**
+         * Update the current clock.
+         */
+        void reload() {
+            mCurrentClock = getClockPlugin();
+        }
+
+        private ClockPlugin getClockPlugin() {
+            ClockPlugin plugin = null;
+            if (ClockManager.this.isDocked()) {
+                final String name = mSettingsWrapper.getDockedClockFace();
+                if (name != null) {
+                    plugin = mClocks.get(name);
+                    if (plugin != null) {
+                        return plugin;
+                    }
+                }
+            }
+            final String name = mSettingsWrapper.getLockScreenCustomClockFace();
+            if (name != null) {
+                plugin = mClocks.get(name);
+            }
+            return plugin;
+        }
     }
 }
