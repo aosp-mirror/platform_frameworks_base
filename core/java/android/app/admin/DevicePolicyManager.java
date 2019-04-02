@@ -276,6 +276,7 @@ public class DevicePolicyManager {
      * <li>{@link #EXTRA_PROVISIONING_LOGO_URI}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_MAIN_COLOR}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_DISCLAIMERS}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_SKIP_EDUCATION_SCREENS}, optional</li>
      * </ul>
      *
      * <p>When device owner provisioning has completed, an intent of the type
@@ -324,6 +325,33 @@ public class DevicePolicyManager {
      * the device. A device owner has full control over the device. The device owner can not be
      * modified by the user and the only way of resetting the device is via factory reset.
      *
+     * <p>From version {@link android.os.Build.VERSION_CODES#Q}, the admin app can choose
+     * whether to set up a fully managed device or a work profile. For the admin app to support
+     * this, it must have an activity with intent filter {@link #ACTION_GET_PROVISIONING_MODE} and
+     * another one with intent filter {@link #ACTION_ADMIN_POLICY_COMPLIANCE}. For example:
+     * <pre>
+     * &lt;activity
+     *     android:name=".GetProvisioningModeActivity"
+     *     android:label="@string/app_name"
+     *     android:permission="android.permission.BIND_DEVICE_ADMIN"&gt;
+     *     &lt;intent-filter&gt;
+     *         &lt;action
+     *             android:name="android.app.action.GET_PROVISIONING_MODE" /&gt;
+     *         &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+     *     &lt;/intent-filter&gt;
+     * &lt;/activity&gt;
+     *
+     * &lt;activity
+     *     android:name=".PolicyComplianceActivity"
+     *     android:label="@string/app_name"
+     *     android:permission="android.permission.BIND_DEVICE_ADMIN"&gt;
+     *     &lt;intent-filter&gt;
+     *         &lt;action
+     *             android:name="android.app.action.ADMIN_POLICY_COMPLIANCE" /&gt;
+     *         &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+     *     &lt;/intent-filter&gt;
+     * &lt;/activity&gt;</pre>
+     *
      * <p>A typical use case would be a device that is owned by a company, but used by either an
      * employee or client.
      *
@@ -355,7 +383,9 @@ public class DevicePolicyManager {
      * <li>{@link #EXTRA_PROVISIONING_SUPPORT_URL}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_ORGANIZATION_NAME}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}, optional</li>
-     * <li>{@link #EXTRA_PROVISIONING_USE_MOBILE_DATA, optional </li><ul>
+     * <li>{@link #EXTRA_PROVISIONING_USE_MOBILE_DATA}, optional </li>
+     * <li>{@link #EXTRA_PROVISIONING_SKIP_EDUCATION_SCREENS}, optional</li>
+     * </ul>
      *
      * @hide
      */
@@ -394,6 +424,7 @@ public class DevicePolicyManager {
      * <li>{@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_LOGO_URI}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_MAIN_COLOR}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_SKIP_EDUCATION_SCREENS}, optional</li>
      * </ul>
      *
      * <p>When device owner provisioning has completed, an intent of the type
@@ -1114,6 +1145,19 @@ public class DevicePolicyManager {
      */
     public static final String EXTRA_PROVISIONING_SKIP_USER_CONSENT =
             "android.app.extra.PROVISIONING_SKIP_USER_CONSENT";
+
+    /**
+     * A boolean extra indicating if the education screens from the provisioning flow should be
+     * skipped. If unspecified, defaults to {@code false}.
+     *
+     * <p>If the education screens are skipped, it is the admin application's responsibility
+     * to display its own user education screens.
+     *
+     * <p>It can be used when provisioning a fully managed device via
+     * {@link #ACTION_PROVISION_MANAGED_DEVICE}.
+     */
+    public static final String EXTRA_PROVISIONING_SKIP_EDUCATION_SCREENS =
+            "android.app.extra.PROVISIONING_SKIP_EDUCATION_SCREENS";
 
     /**
      * A boolean extra indicating if mobile data should be used during NFC device owner provisioning
