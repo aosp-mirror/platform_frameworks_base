@@ -123,12 +123,12 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         synchronized (mLock) {
             UserState userState = mUserStateWeakReference.get();
             if (userState == null) return;
-            if (userState.mEnabledServices.remove(mComponentName)) {
+            if (userState.getEnabledServicesLocked().remove(mComponentName)) {
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     mSystemSupport.persistComponentNamesToSettingLocked(
                             Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
-                            userState.mEnabledServices, userState.mUserId);
+                            userState.getEnabledServicesLocked(), userState.mUserId);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
@@ -182,6 +182,14 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
                 bindingServices.remove(mComponentName);
                 mWasConnectedAndDied = false;
                 serviceInterface = mServiceInterface;
+            }
+            // There's a chance that service is removed from enabled_accessibility_services setting
+            // key, but skip unbinding because of it's in binding state. Unbinds it if it's
+            // not in enabled service list.
+            if (serviceInterface != null
+                    && !userState.getEnabledServicesLocked().contains(mComponentName)) {
+                mSystemSupport.onClientChangeLocked(false);
+                return;
             }
         }
         if (serviceInterface == null) {

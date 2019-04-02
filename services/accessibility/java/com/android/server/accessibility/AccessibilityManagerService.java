@@ -4085,6 +4085,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             return mBindingServices;
         }
 
+        /**
+         * Returns enabled service list.
+         */
+        public Set<ComponentName> getEnabledServicesLocked() {
+            return mEnabledServices;
+        }
+
         public int getSoftKeyboardShowMode() {
             return mSoftKeyboardShowMode;
         }
