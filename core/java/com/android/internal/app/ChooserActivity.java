@@ -187,7 +187,10 @@ public class ChooserActivity extends ResolverActivity {
     private Drawable mChooserRowLayer;
     private int mChooserRowServiceSpacing;
 
+    /** {@link ChooserActivity#getBaseScore} */
     private static final float CALLER_TARGET_SCORE_BOOST = 900.f;
+    /** {@link ChooserActivity#getBaseScore} */
+    private static final float SHORTCUT_TARGET_SCORE_BOOST = 10.f;
     private static final String TARGET_DETAILS_FRAGMENT_TAG = "targetDetailsFragment";
 
     private final List<ChooserTargetServiceConnection> mServiceConnections = new ArrayList<>();
@@ -233,7 +236,7 @@ public class ChooserActivity extends ResolverActivity {
                     }
                     if (sri.resultTargets != null) {
                         mChooserListAdapter.addServiceResults(sri.originalTarget,
-                                sri.resultTargets);
+                                sri.resultTargets, false);
                     }
                     unbindService(sri.connection);
                     sri.connection.destroy();
@@ -266,7 +269,7 @@ public class ChooserActivity extends ResolverActivity {
                     final ServiceResultInfo resultInfo = (ServiceResultInfo) msg.obj;
                     if (resultInfo.resultTargets != null) {
                         mChooserListAdapter.addServiceResults(resultInfo.originalTarget,
-                                resultInfo.resultTargets);
+                                resultInfo.resultTargets, true);
                     }
                     break;
 
@@ -894,7 +897,8 @@ public class ChooserActivity extends ResolverActivity {
         final ListView listView = adapterView instanceof ListView ? (ListView) adapterView : null;
         mChooserListAdapter = (ChooserListAdapter) adapter;
         if (mCallerChooserTargets != null && mCallerChooserTargets.length > 0) {
-            mChooserListAdapter.addServiceResults(null, Lists.newArrayList(mCallerChooserTargets));
+            mChooserListAdapter.addServiceResults(null, Lists.newArrayList(mCallerChooserTargets),
+                    false);
         }
         mChooserRowAdapter = new ChooserRowAdapter(mChooserListAdapter);
         if (listView != null) {
@@ -1205,7 +1209,7 @@ public class ChooserActivity extends ResolverActivity {
                 null,
                 // The ranking score for this target (0.0-1.0); the system will omit items with low
                 // scores when there are too many Direct Share items.
-                0.5f,
+                1.0f,
                 // The name of the component to be launched if this target is chosen.
                 shareShortcut.getTargetComponent().clone(),
                 // The extra values here will be merged into the Intent when this target is chosen.
@@ -1394,15 +1398,6 @@ public class ChooserActivity extends ResolverActivity {
             }
             return false;
         }
-
-        @Override
-        public float getScore(DisplayResolveInfo target) {
-            if (target == null) {
-                return CALLER_TARGET_SCORE_BOOST;
-            }
-
-            return super.getScore(target);
-        }
     }
 
     @Override
@@ -1491,7 +1486,7 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         public float getModifiedScore() {
-            return 0.1f;
+            return -0.1f;
         }
 
         public ChooserTarget getChooserTarget() {
@@ -1813,8 +1808,6 @@ public class ChooserActivity extends ResolverActivity {
         private final List<TargetInfo> mCallerTargets = new ArrayList<>();
         private boolean mShowServiceTargets;
 
-        private float mLateFee = 1.f;
-
         private boolean mTargetsNeedPruning = false;
 
         private final BaseChooserTargetComparator mBaseTargetComparator
@@ -2040,13 +2033,22 @@ public class ChooserActivity extends ResolverActivity {
                     : getDisplayResolveInfo(position - offset);
         }
 
-        public void addServiceResults(DisplayResolveInfo origTarget, List<ChooserTarget> targets) {
+        /**
+         * Evaluate targets for inclusion in the direct share area. May not be included
+         * if score is too low.
+         */
+        public void addServiceResults(DisplayResolveInfo origTarget, List<ChooserTarget> targets,
+                boolean isShortcutResult) {
             if (DEBUG) {
                 Log.d(TAG, "addServiceResults " + origTarget + ", " + targets.size()
                         + " targets");
             }
 
-            if (mTargetsNeedPruning && targets.size() > 0) {
+            if (targets.size() == 0) {
+                return;
+            }
+
+            if (mTargetsNeedPruning) {
                 // First proper update since we got an onListRebuilt() with (transient) 0 items.
                 // Clear out the target list and rebuild.
                 createPlaceHolders();
@@ -2055,39 +2057,64 @@ public class ChooserActivity extends ResolverActivity {
                 // Add back any app-supplied direct share targets that may have been
                 // wiped by this clear
                 if (mCallerChooserTargets != null) {
-                    addServiceResults(null, Lists.newArrayList(mCallerChooserTargets));
+                    addServiceResults(null, Lists.newArrayList(mCallerChooserTargets), false);
                 }
             }
 
-            final float parentScore = getScore(origTarget);
+            final float baseScore = getBaseScore(origTarget, isShortcutResult);
             Collections.sort(targets, mBaseTargetComparator);
             float lastScore = 0;
+            boolean shouldNotify = false;
             for (int i = 0, N = Math.min(targets.size(), MAX_TARGETS_PER_SERVICE); i < N; i++) {
                 final ChooserTarget target = targets.get(i);
                 float targetScore = target.getScore();
-                targetScore *= parentScore;
-                targetScore *= mLateFee;
+                targetScore *= baseScore;
                 if (i > 0 && targetScore >= lastScore) {
                     // Apply a decay so that the top app can't crowd out everything else.
                     // This incents ChooserTargetServices to define what's truly better.
                     targetScore = lastScore * 0.95f;
                 }
-                insertServiceTarget(new SelectableTargetInfo(origTarget, target, targetScore));
+                shouldNotify |= insertServiceTarget(
+                        new SelectableTargetInfo(origTarget, target, targetScore));
 
                 if (DEBUG) {
                     Log.d(TAG, " => " + target.toString() + " score=" + targetScore
                             + " base=" + target.getScore()
                             + " lastScore=" + lastScore
-                            + " parentScore=" + parentScore
-                            + " lateFee=" + mLateFee);
+                            + " baseScore=" + baseScore);
                 }
 
                 lastScore = targetScore;
             }
 
-            mLateFee *= 0.95f;
+            if (shouldNotify) {
+                notifyDataSetChanged();
+            }
+        }
 
-            notifyDataSetChanged();
+        /**
+          * Use the scoring system along with artificial boosts to create up to 3 distinct buckets:
+          * <ol>
+          *   <li>App-supplied targets
+          *   <li>Prediction manager targets or Shortcut API targets
+          *   <li>Legacy direct share targets
+          * </ol>
+          */
+        private float getBaseScore(DisplayResolveInfo target, boolean isShortcutResult) {
+            if (target == null) {
+                return CALLER_TARGET_SCORE_BOOST;
+            }
+
+            if (USE_PREDICTION_MANAGER_FOR_DIRECT_TARGETS) {
+                return SHORTCUT_TARGET_SCORE_BOOST;
+            }
+
+            float score = super.getScore(target);
+            if (isShortcutResult) {
+                return score * SHORTCUT_TARGET_SCORE_BOOST;
+            }
+
+            return score;
         }
 
         /**
@@ -2103,25 +2130,32 @@ public class ChooserActivity extends ResolverActivity {
             notifyDataSetChanged();
         }
 
-        private void insertServiceTarget(ChooserTargetInfo chooserTargetInfo) {
+        private boolean insertServiceTarget(ChooserTargetInfo chooserTargetInfo) {
             // Avoid inserting any potentially late results
             if (mServiceTargets.size() == 1
                     && mServiceTargets.get(0) instanceof EmptyTargetInfo) {
-                return;
+                return false;
             }
 
             final float newScore = chooserTargetInfo.getModifiedScore();
-            for (int i = 0, N = mServiceTargets.size(); i < N; i++) {
+            int currentSize = mServiceTargets.size();
+            for (int i = 0; i < Math.min(currentSize, MAX_SERVICE_TARGETS); i++) {
                 final ChooserTargetInfo serviceTarget = mServiceTargets.get(i);
                 if (serviceTarget == null) {
                     mServiceTargets.set(i, chooserTargetInfo);
-                    return;
+                    return true;
                 } else if (newScore > serviceTarget.getModifiedScore()) {
                     mServiceTargets.add(i, chooserTargetInfo);
-                    return;
+                    return true;
                 }
             }
-            mServiceTargets.add(chooserTargetInfo);
+
+            if (currentSize < MAX_SERVICE_TARGETS) {
+                mServiceTargets.add(chooserTargetInfo);
+                return true;
+            }
+
+            return false;
         }
     }
 
