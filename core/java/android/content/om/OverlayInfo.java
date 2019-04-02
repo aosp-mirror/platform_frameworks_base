@@ -255,7 +255,7 @@ public final class OverlayInfo implements Parcelable {
      * @hide
      */
     @SystemApi
-    @Nullable
+    @NonNull
     public String getTargetPackageName() {
         return targetPackageName;
     }

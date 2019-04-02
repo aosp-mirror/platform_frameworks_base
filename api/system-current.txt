@@ -1462,7 +1462,7 @@ package android.content.om {
     method @Nullable public String getCategory();
     method @NonNull public String getPackageName();
     method @Nullable public String getTargetOverlayableName();
-    method @Nullable public String getTargetPackageName();
+    method @NonNull public String getTargetPackageName();
     method public int getUserId();
     method public boolean isEnabled();
     method public void writeToParcel(android.os.Parcel, int);
