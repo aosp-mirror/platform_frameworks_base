@@ -316,9 +316,6 @@ public final class LinkProperties implements Parcelable {
     @SystemApi
     @TestApi
     public boolean removeLinkAddress(@NonNull LinkAddress toRemove) {
-        if (toRemove == null) {
-            return false;
-        }
         int i = findLinkAddressIndex(toRemove);
         if (i >= 0) {
             mLinkAddresses.remove(i);
@@ -391,10 +388,7 @@ public final class LinkProperties implements Parcelable {
     @TestApi
     @SystemApi
     public boolean removeDnsServer(@NonNull InetAddress dnsServer) {
-        if (dnsServer != null) {
-            return mDnses.remove(dnsServer);
-        }
-        return false;
+        return mDnses.remove(dnsServer);
     }
 
     /**

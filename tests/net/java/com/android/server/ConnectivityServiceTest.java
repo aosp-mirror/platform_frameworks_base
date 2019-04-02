@@ -3047,6 +3047,47 @@ public class ConnectivityServiceTest {
     }
 
     @Test
+    public void testInvalidSignalStrength() {
+        NetworkRequest r = new NetworkRequest.Builder()
+                .addCapability(NET_CAPABILITY_INTERNET)
+                .addTransportType(TRANSPORT_WIFI)
+                .setSignalStrength(-75)
+                .build();
+        // Registering a NetworkCallback with signal strength but w/o NETWORK_SIGNAL_STRENGTH_WAKEUP
+        // permission should get SecurityException.
+        try {
+            mCm.registerNetworkCallback(r, new NetworkCallback());
+            fail("Expected SecurityException filing a callback with signal strength");
+        } catch (SecurityException expected) {
+            // expected
+        }
+
+        try {
+            mCm.registerNetworkCallback(r, PendingIntent.getService(
+                    mServiceContext, 0, new Intent(), 0));
+            fail("Expected SecurityException filing a callback with signal strength");
+        } catch (SecurityException expected) {
+            // expected
+        }
+
+        // Requesting a Network with signal strength should get IllegalArgumentException.
+        try {
+            mCm.requestNetwork(r, new NetworkCallback());
+            fail("Expected IllegalArgumentException filing a request with signal strength");
+        } catch (IllegalArgumentException expected) {
+            // expected
+        }
+
+        try {
+            mCm.requestNetwork(r, PendingIntent.getService(
+                    mServiceContext, 0, new Intent(), 0));
+            fail("Expected IllegalArgumentException filing a request with signal strength");
+        } catch (IllegalArgumentException expected) {
+            // expected
+        }
+    }
+
+    @Test
     public void testRegisterDefaultNetworkCallback() throws Exception {
         final TestNetworkCallback defaultNetworkCallback = new TestNetworkCallback();
         mCm.registerDefaultNetworkCallback(defaultNetworkCallback);
