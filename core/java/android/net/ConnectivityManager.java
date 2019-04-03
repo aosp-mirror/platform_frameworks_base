@@ -2617,7 +2617,7 @@ public class ConnectivityManager {
 
     /**
      * Start listening to tethering change events. Any new added callback will receive the last
-     * tethering status right away. If callback is registered when tethering loses its upstream or
+     * tethering status right away. If callback is registered when tethering has no upstream or
      * disabled, {@link OnTetheringEventCallback#onUpstreamChanged} will immediately be called
      * with a null argument. The same callback object cannot be registered twice.
      *
