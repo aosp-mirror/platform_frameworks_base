@@ -253,8 +253,10 @@ Asset::Asset(void)
 
     pAsset = new _FileAsset;
     result = pAsset->openChunk(NULL, fd, offset, length);
-    if (result != NO_ERROR)
+    if (result != NO_ERROR) {
+        delete pAsset;
         return NULL;
+    }
 
     pAsset->mAccessMode = mode;
     return pAsset;
@@ -273,8 +275,10 @@ Asset::Asset(void)
     pAsset = new _CompressedAsset;
     result = pAsset->openChunk(fd, offset, compressionMethod,
                 uncompressedLen, compressedLen);
-    if (result != NO_ERROR)
+    if (result != NO_ERROR) {
+        delete pAsset;
         return NULL;
+    }
 
     pAsset->mAccessMode = mode;
     return pAsset;
@@ -328,8 +332,10 @@ Asset::Asset(void)
 
     pAsset = new _CompressedAsset;
     result = pAsset->openChunk(dataMap, uncompressedLen);
-    if (result != NO_ERROR)
+    if (result != NO_ERROR) {
+        delete pAsset;
         return NULL;
+    }
 
     pAsset->mAccessMode = mode;
     return pAsset;
