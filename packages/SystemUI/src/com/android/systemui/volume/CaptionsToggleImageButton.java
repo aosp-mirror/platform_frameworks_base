@@ -17,7 +17,10 @@
 package com.android.systemui.volume;
 
 import android.content.Context;
+import android.os.Handler;
 import android.util.AttributeSet;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 
 import com.android.keyguard.AlphaOptimizedImageButton;
 import com.android.systemui.R;
@@ -27,11 +30,31 @@ public class CaptionsToggleImageButton extends AlphaOptimizedImageButton {
 
     private static final int[] OPTED_OUT_STATE = new int[] { R.attr.optedOut };
 
+    private ConfirmedTapListener mConfirmedTapListener;
     private boolean mComponentEnabled = false;
     private boolean mOptedOut = false;
 
+    private GestureDetector mGestureDetector;
+    private GestureDetector.SimpleOnGestureListener mGestureListener =
+            new GestureDetector.SimpleOnGestureListener() {
+        @Override
+        public boolean onSingleTapConfirmed(MotionEvent e) {
+            if (mConfirmedTapListener != null) {
+                mConfirmedTapListener.onConfirmedTap();
+                return true;
+            }
+            return false;
+        }
+    };
+
     public CaptionsToggleImageButton(Context context, AttributeSet attrs) {
         super(context, attrs);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (mGestureDetector != null) mGestureDetector.onTouchEvent(event);
+        return super.onTouchEvent(event);
     }
 
     @Override
@@ -63,5 +86,18 @@ public class CaptionsToggleImageButton extends AlphaOptimizedImageButton {
 
     boolean getOptedOut() {
         return this.mOptedOut;
+    }
+
+    void setOnConfirmedTapListener(ConfirmedTapListener listener, Handler handler) {
+        mConfirmedTapListener = listener;
+
+        if (mGestureDetector == null) {
+            this.mGestureDetector = new GestureDetector(getContext(), mGestureListener, handler);
+        }
+    }
+
+    /** Listener for confirmed taps rather than normal on click listener. */
+    interface ConfirmedTapListener {
+        void onConfirmedTap();
     }
 }
