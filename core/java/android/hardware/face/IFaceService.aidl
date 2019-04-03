@@ -51,7 +51,7 @@ interface IFaceService {
 
     // Start face enrollment
     void enroll(IBinder token, in byte [] cryptoToken, IFaceServiceReceiver receiver,
-                String opPackageName, in int [] disabledFeatures);
+            String opPackageName, in int [] disabledFeatures);
 
     // Cancel enrollment in progress
     void cancelEnrollment(IBinder token);
@@ -98,9 +98,10 @@ interface IFaceService {
     // Enumerate all faces
     void enumerate(IBinder token, int userId, IFaceServiceReceiver receiver);
 
-    boolean setFeature(int feature, boolean enabled, in byte [] token);
+    void setFeature(int feature, boolean enabled, in byte [] token,
+            IFaceServiceReceiver receiver);
 
-    boolean getFeature(int feature);
+    void getFeature(int feature, IFaceServiceReceiver receiver);
 
     void userActivity();
 }
