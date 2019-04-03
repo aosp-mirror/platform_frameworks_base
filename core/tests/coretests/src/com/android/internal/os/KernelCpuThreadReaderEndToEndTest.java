@@ -125,7 +125,7 @@ public class KernelCpuThreadReaderEndToEndTest {
 
         // Get thread data from KernelCpuThreadReader
         final KernelCpuThreadReader kernelCpuThreadReader =
-                KernelCpuThreadReader.create(8, uid -> uid == Process.myUid(), 0);
+                KernelCpuThreadReader.create(8, uid -> uid == Process.myUid());
         assertNotNull(kernelCpuThreadReader);
         kernelCpuThreadReader.setUidPredicate(uid -> uid == Process.myUid());
         final Optional<ProcessCpuUsage> currentProcessCpuUsage =

@@ -41,6 +41,7 @@ import "frameworks/base/core/proto/android/server/location/enums.proto";
 import "frameworks/base/core/proto/android/service/procstats_enum.proto";
 import "frameworks/base/core/proto/android/service/usb.proto";
 import "frameworks/base/core/proto/android/stats/connectivity/network_stack.proto";
+import "frameworks/base/core/proto/android/stats/connectivity/resolv_stats.proto";
 import "frameworks/base/core/proto/android/stats/enums.proto";
 import "frameworks/base/core/proto/android/stats/docsui/docsui_enums.proto";
 import "frameworks/base/core/proto/android/stats/devicepolicy/device_policy.proto";
@@ -255,6 +256,9 @@ message Atom {
         AppInstallOnExternalStorageReported app_install_on_external_storage_reported = 181;
         NetworkStackReported network_stack_reported = 182;
         AppMovedStorageReported app_moved_storage_reported = 183;
+        BiometricEnrolled biometric_enrolled = 184;
+        SystemServerWatchdogOccurred system_server_watchdog_occurred = 185;
+        TombStoneOccurred tomb_stone_occurred = 186;
     }
 
     // Pulled events will start at field 10000.
@@ -3154,6 +3158,23 @@ message BiometricSystemHealthIssueDetected {
     optional android.hardware.biometrics.IssueEnum issue = 2;
 }
 
+/**
+ * Logs when a biometric enrollment occurs.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/biometrics
+ */
+message BiometricEnrolled {
+    // Biometric modality that was used.
+    optional android.hardware.biometrics.ModalityEnum modality = 1;
+    // The associated user. Eg: 0 for owners, 10+ for others. Defined in android/os/UserHandle.java
+    optional int32 user = 2;
+    // The amount of time the enrollment took in milliseconds.
+    optional int64 latency_millis = 3;
+    // Whether or not the enrollment was successful.
+    optional bool success = 4;
+}
+
 message Notification {
 
     // Type of notification event.
@@ -3280,6 +3301,9 @@ message BinaryPushStateChanged {
         INSTALLER_ROLLBACK_CANCEL_STAGED_DELETE_SESSION_INITIATED = 18;
         INSTALLER_ROLLBACK_CANCEL_STAGED_DELETE_SESSION_SUCCESS = 19;
         INSTALLER_ROLLBACK_CANCEL_STAGED_DELETE_SESSION_FAILURE = 20;
+        INSTALL_STAGED_CANCEL_REQUESTED = 21;
+        INSTALL_STAGED_CANCEL_SUCCESS = 22;
+        INSTALL_STAGED_CANCEL_FAILURE = 23;
     }
     optional State state = 6;
     // Possible experiment ids for monitoring this push.
@@ -3469,6 +3493,23 @@ message AppMovedStorageReported {
     optional MoveType move_type = 2;
     // The name of the package that was moved.
     optional string package_name = 3;
+}
+
+/**
+ * Logs when system server watchdog occurs.
+ * Logged from:
+ *      frameworks/base/services/core/java/com/android/server/Watchdog.java
+ */
+message SystemServerWatchdogOccurred {
+    optional string subject = 1;
+}
+
+/**
+ * Logs when new file added to tombstones.
+ * Logged from:
+ *      frameworks/base/core/java/com/android/server/BootReceiver.java
+ */
+message TombStoneOccurred {
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -4975,52 +5016,38 @@ message AppCompacted {
 }
 
 /**
- * Logs the latency period(in microseconds) and the return code of
- * the DNS(Domain Name System) lookups.
- * These 4 methods(GETADDRINFO,GETHOSTBYNAME,GETHOSTBYADDR,RES_NSEND)
- * to get info(address or hostname) from DNS server(or DNS cache).
- * Logged from:
- *   /system/netd/server/DnsProxyListener.cpp
+ * Logs a DNS lookup operation initiated by the system resolver on behalf of an application
+ * invoking native APIs such as getaddrinfo() or Java APIs such as Network#getAllByName().
+ *
+ * The top-level message represents the entire lookup operation, which may result one or more
+ * queries to the recursive DNS resolvers. Those are individually logged in DnsQueryEvent to
+ * enable computing error rates and network latency and timeouts broken up by query type,
+ * transport, network interface, etc.
  */
 message NetworkDnsEventReported {
-    // The types of the DNS lookups, as defined in
-    //system/netd/server/binder/android/net/metrics/INetdEventListener.aidl
-    enum EventType {
-        EVENT_UNKNOWN = 0;
-        EVENT_GETADDRINFO = 1;
-        EVENT_GETHOSTBYNAME = 2;
-        EVENT_GETHOSTBYADDR = 3;
-        EVENT_RES_NSEND = 4;
-    }
-    optional EventType event_type = 1;
 
-    // The return value of the DNS resolver for each DNS lookups.
-    //bionic/libc/include/netdb.h
-    //system/netd/resolv/include/netd_resolv/resolv.h
-    enum ReturnCode {
-        EAI_NO_ERROR = 0;
-        EAI_ADDRFAMILY = 1;
-        EAI_AGAIN = 2;
-        EAI_BADFLAGS = 3;
-        EAI_FAIL = 4;
-        EAI_FAMILY = 5;
-        EAI_MEMORY = 6;
-        EAI_NODATA = 7;
-        EAI_NONAME = 8;
-        EAI_SERVICE = 9;
-        EAI_SOCKTYPE = 10;
-        EAI_SYSTEM = 11;
-        EAI_BADHINTS = 12;
-        EAI_PROTOCOL = 13;
-        EAI_OVERFLOW = 14;
-        RESOLV_TIMEOUT = 255;
-        EAI_MAX = 256;
-    }
-    optional ReturnCode return_code = 2;
+    optional android.stats.connectivity.EventType event_type = 1;
 
-    // The latency period(in microseconds) it took for this DNS lookup to complete.
+    optional android.stats.connectivity.ReturnCode return_code = 2;
+
+    // The latency in microseconds of the entire DNS lookup operation.
     optional int32 latency_micros = 3;
+
+    optional android.stats.connectivity.DnsQueryEventRe dns_query_event_re = 4 [(log_mode) = MODE_BYTES];
+
+    // ResNSend flags defined in android/multinetwork.h
+    optional int32 flags = 5;
+
+    optional android.net.NetworkCapabilitiesProto.Transport network_type = 6;
+
+    // The DNS over TLS mode on a specific netId.
+    optional android.stats.connectivity.PrivateDnsModes private_dns_modes = 7;
+
+    // Additional pass-through fields opaque to statsd.
+    // The DNS resolver Mainline module can add new fields here without requiring an OS update.
+    optional android.stats.connectivity.DnsCallEvent dns_call_event = 8 [(log_mode) = MODE_BYTES];
 }
+
 
 /**
  * Logs when a data stall event occurs.
@@ -5767,6 +5794,9 @@ message TrainInfo {
         INSTALLER_ROLLBACK_CANCEL_STAGED_DELETE_SESSION_INITIATED = 18;
         INSTALLER_ROLLBACK_CANCEL_STAGED_DELETE_SESSION_SUCCESS = 19;
         INSTALLER_ROLLBACK_CANCEL_STAGED_DELETE_SESSION_FAILURE = 20;
+        INSTALL_STAGED_CANCEL_REQUESTED = 21;
+        INSTALL_STAGED_CANCEL_SUCCESS = 22;
+        INSTALL_STAGED_CANCEL_FAILURE = 23;
     }
     optional Status status = 4;
 }

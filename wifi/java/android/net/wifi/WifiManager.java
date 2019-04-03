@@ -2424,8 +2424,11 @@ public class WifiManager {
      * @throws  {@link java.lang.SecurityException} if the caller is missing required permissions.
      *
      * @deprecated Starting with Build.VERSION_CODES#Q, applications are not allowed to
-     * enable/disable Wi-Fi regardless of application's target SDK. This API will have no effect
-     * and will always return false.
+     * enable/disable Wi-Fi.
+     * <b>Compatibility Note:</b> For applications targeting
+     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will always return {@code false}
+     * and will have no effect. If apps are targeting an older SDK (
+     * {@link android.os.Build.VERSION_CODES#P} or below), they can continue to use this API.
      */
     @Deprecated
     public boolean setWifiEnabled(boolean enabled) {

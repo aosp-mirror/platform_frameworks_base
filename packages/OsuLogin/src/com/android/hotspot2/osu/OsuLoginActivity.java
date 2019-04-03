@@ -64,6 +64,7 @@ public class OsuLoginActivity extends Activity {
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private ProgressBar mProgressBar;
     private boolean mForceDisconnect = true;
+    boolean mRedirectResponseReceived = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -142,7 +143,9 @@ public class OsuLoginActivity extends Activity {
                     Log.d(TAG, "Lost for the current Network, close the browser");
                 }
                 mForceDisconnect = false; // It is already disconnected.
-                showSignUpFailedToast();
+                if (!mRedirectResponseReceived) {
+                    showSignUpFailedToast();
+                }
                 if (mNetwork.equals(network)) {
                     finishAndRemoveTask();
                 }
@@ -238,7 +241,6 @@ public class OsuLoginActivity extends Activity {
 
     private class OsuWebViewClient extends WebViewClient {
         boolean mPageError = false;
-        boolean mRedirectResponseReceived = false;
 
         @Override
         public void onPageStarted(WebView view, String urlString, Bitmap favicon) {

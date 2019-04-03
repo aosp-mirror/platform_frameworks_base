@@ -5571,7 +5571,7 @@ public class Notification implements Parcelable
                     button.setTextColor(R.id.action0, textColor);
                     rippleColor = textColor;
                 } else if (getRawColor(p) != COLOR_DEFAULT && !isColorized(p)
-                        && mTintActionButtons) {
+                        && mTintActionButtons && !mInNightMode) {
                     rippleColor = resolveContrastColor(p);
                     button.setTextColor(R.id.action0, rippleColor);
                 } else {

@@ -11528,15 +11528,6 @@ public final class Settings {
                 "background_activity_starts_enabled";
 
         /**
-         * The packages temporarily whitelisted to be able so start activities from background.
-         * The list of packages is {@code ":"} colon delimited.
-         *
-         * @hide
-         */
-        public static final String BACKGROUND_ACTIVITY_STARTS_PACKAGE_NAMES_WHITELIST =
-                "background_activity_starts_package_names_whitelist";
-
-        /**
          * @hide
          * @see com.android.server.appbinding.AppBindingConstants
          */
@@ -12458,6 +12449,14 @@ public final class Settings {
          * @hide
          */
         public static final String GPU_DEBUG_APP = "gpu_debug_app";
+
+        /**
+         * Package containing ANGLE libraries other than system, which are only available
+         * to dumpable apps that opt-in.
+         * @hide
+         */
+        public static final String GLOBAL_SETTINGS_ANGLE_DEBUG_PACKAGE =
+                "angle_debug_package";
 
         /**
          * Force all PKGs to use ANGLE, regardless of any other settings

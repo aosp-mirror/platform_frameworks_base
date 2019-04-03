@@ -92,23 +92,11 @@ public class KernelCpuThreadReader {
     /** Value returned when there was an error getting an integer ID value (e.g. PID, UID) */
     private static final int ID_ERROR = -1;
 
-    /** Thread ID used when reporting CPU used by other threads */
-    private static final int OTHER_THREADS_ID = -1;
-
-    /** Thread name used when reporting CPU used by other threads */
-    private static final String OTHER_THREADS_NAME = "__OTHER_THREADS";
-
     /**
      * When checking whether to report data for a thread, we check the UID of the thread's owner
      * against this predicate
      */
     private Predicate<Integer> mUidPredicate;
-
-    /**
-     * If a thread has strictly less than {@code minimumTotalCpuUsageMillis} total CPU usage, it
-     * will not be reported
-     */
-    private int mMinimumTotalCpuUsageMillis;
 
     /** Where the proc filesystem is mounted */
     private final Path mProcPath;
@@ -138,13 +126,11 @@ public class KernelCpuThreadReader {
     public KernelCpuThreadReader(
             int numBuckets,
             Predicate<Integer> uidPredicate,
-            int minimumTotalCpuUsageMillis,
             Path procPath,
             Path initialTimeInStatePath,
             Injector injector)
             throws IOException {
         mUidPredicate = uidPredicate;
-        mMinimumTotalCpuUsageMillis = minimumTotalCpuUsageMillis;
         mProcPath = procPath;
         mProcTimeInStateReader = new ProcTimeInStateReader(initialTimeInStatePath);
         mInjector = injector;
@@ -157,13 +143,11 @@ public class KernelCpuThreadReader {
      * @return the reader, null if an exception was thrown during creation
      */
     @Nullable
-    public static KernelCpuThreadReader create(
-            int numBuckets, Predicate<Integer> uidPredicate, int minimumTotalCpuUsageMillis) {
+    public static KernelCpuThreadReader create(int numBuckets, Predicate<Integer> uidPredicate) {
         try {
             return new KernelCpuThreadReader(
                     numBuckets,
                     uidPredicate,
-                    minimumTotalCpuUsageMillis,
                     DEFAULT_PROC_PATH,
                     DEFAULT_INITIAL_TIME_IN_STATE_PATH,
                     new Injector());
@@ -259,18 +243,6 @@ public class KernelCpuThreadReader {
     }
 
     /**
-     * If a thread has strictly less than {@code minimumTotalCpuUsageMillis} total CPU usage, it
-     * will not be reported
-     */
-    void setMinimumTotalCpuUsageMillis(int minimumTotalCpuUsageMillis) {
-        if (minimumTotalCpuUsageMillis < 0) {
-            Slog.w(TAG, "Negative minimumTotalCpuUsageMillis: " + minimumTotalCpuUsageMillis);
-            return;
-        }
-        mMinimumTotalCpuUsageMillis = minimumTotalCpuUsageMillis;
-    }
-
-    /**
      * Read all of the CPU usage statistics for each child thread of a process
      *
      * @param processPath the {@code /proc} path of the thread
@@ -292,21 +264,12 @@ public class KernelCpuThreadReader {
                             + uid);
         }
 
-        int[] filteredThreadsCpuUsage = null;
         final Path allThreadsPath = processPath.resolve("task");
         final ArrayList<ThreadCpuUsage> threadCpuUsages = new ArrayList<>();
         try (DirectoryStream<Path> threadPaths = Files.newDirectoryStream(allThreadsPath)) {
             for (Path threadDirectory : threadPaths) {
                 ThreadCpuUsage threadCpuUsage = getThreadCpuUsage(threadDirectory);
                 if (threadCpuUsage == null) {
-                    continue;
-                }
-                if (mMinimumTotalCpuUsageMillis > totalCpuUsage(threadCpuUsage.usageTimesMillis)) {
-                    if (filteredThreadsCpuUsage == null) {
-                        filteredThreadsCpuUsage = new int[mFrequenciesKhz.length];
-                    }
-                    filteredThreadsCpuUsage =
-                            sumCpuUsage(filteredThreadsCpuUsage, threadCpuUsage.usageTimesMillis);
                     continue;
                 }
                 threadCpuUsages.add(threadCpuUsage);
@@ -320,14 +283,6 @@ public class KernelCpuThreadReader {
         if (threadCpuUsages.isEmpty()) {
             return null;
         }
-
-        // Add the filtered out thread CPU usage under an "other threads" ThreadCpuUsage
-        if (filteredThreadsCpuUsage != null) {
-            threadCpuUsages.add(
-                    new ThreadCpuUsage(
-                            OTHER_THREADS_ID, OTHER_THREADS_NAME, filteredThreadsCpuUsage));
-        }
-
         if (DEBUG) {
             Slog.d(TAG, "Read CPU usage of " + threadCpuUsages.size() + " threads");
         }
@@ -402,25 +357,6 @@ public class KernelCpuThreadReader {
             Slog.w(TAG, "Failed to parse " + fileName + " as process ID", e);
             return ID_ERROR;
         }
-    }
-
-    /** Get the sum of all CPU usage across all frequencies */
-    @SuppressWarnings("ForLoopReplaceableByForEach")
-    private static int totalCpuUsage(int[] cpuUsage) {
-        int total = 0;
-        for (int i = 0; i < cpuUsage.length; i++) {
-            total += cpuUsage[i];
-        }
-        return total;
-    }
-
-    /** Add two CPU frequency usages together */
-    private static int[] sumCpuUsage(int[] a, int[] b) {
-        int[] summed = new int[a.length];
-        for (int i = 0; i < a.length; i++) {
-            summed[i] = a[i] + b[i];
-        }
-        return summed;
     }
 
     /** Puts frequencies and usage times into buckets */
@@ -553,9 +489,10 @@ public class KernelCpuThreadReader {
         public final int processId;
         public final String processName;
         public final int uid;
-        public final ArrayList<ThreadCpuUsage> threadCpuUsages;
+        public ArrayList<ThreadCpuUsage> threadCpuUsages;
 
-        ProcessCpuUsage(
+        @VisibleForTesting
+        public ProcessCpuUsage(
                 int processId,
                 String processName,
                 int uid,
@@ -571,9 +508,10 @@ public class KernelCpuThreadReader {
     public static class ThreadCpuUsage {
         public final int threadId;
         public final String threadName;
-        public final int[] usageTimesMillis;
+        public int[] usageTimesMillis;
 
-        ThreadCpuUsage(int threadId, String threadName, int[] usageTimesMillis) {
+        @VisibleForTesting
+        public ThreadCpuUsage(int threadId, String threadName, int[] usageTimesMillis) {
             this.threadId = threadId;
             this.threadName = threadName;
             this.usageTimesMillis = usageTimesMillis;

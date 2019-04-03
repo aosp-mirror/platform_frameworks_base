@@ -104,32 +104,32 @@ public class ConditionVariable
 
     /**
      * Block the current thread until the condition is opened or until
-     * timeout milliseconds have passed.
+     * timeoutMs milliseconds have passed.
      *
      * <p>
      * If the condition is already opened, return immediately.
      *
-     * @param timeout the maximum time to wait in milliseconds.
+     * @param timeoutMs the maximum time to wait in milliseconds.
      *
      * @return true if the condition was opened, false if the call returns
      * because of the timeout.
      */
-    public boolean block(long timeout)
+    public boolean block(long timeoutMs)
     {
         // Object.wait(0) means wait forever, to mimic this, we just
         // call the other block() method in that case.  It simplifies
         // this code for the common case.
-        if (timeout != 0) {
+        if (timeoutMs != 0) {
             synchronized (this) {
-                long now = System.currentTimeMillis();
-                long end = now + timeout;
+                long now = SystemClock.elapsedRealtime();
+                long end = now + timeoutMs;
                 while (!mCondition && now < end) {
                     try {
                         this.wait(end-now);
                     }
                     catch (InterruptedException e) {
                     }
-                    now = System.currentTimeMillis();
+                    now = SystemClock.elapsedRealtime();
                 }
                 return mCondition;
             }

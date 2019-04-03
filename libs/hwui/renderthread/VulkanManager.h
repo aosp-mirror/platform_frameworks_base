@@ -181,6 +181,13 @@ private:
     SwapBehavior mSwapBehavior = SwapBehavior::Discard;
     GrVkExtensions mExtensions;
     uint32_t mDriverVersion = 0;
+
+    // TODO: Remove once fix has landed. Temporaryly needed for workaround for setting up AHB
+    // surfaces on Qualcomm. Currently if you don't use VkSwapchain Qualcomm is not setting
+    // reporting that we need to use one of their private vendor usage bits which greatly effects
+    // performance if it is not used.
+    bool mIsQualcomm = false;
+    bool isQualcomm() const { return mIsQualcomm; }
 };
 
 } /* namespace renderthread */

@@ -110,6 +110,7 @@ import com.android.internal.os.BatteryStatsHelper;
 import com.android.internal.os.BinderCallsStats.ExportedCallStat;
 import com.android.internal.os.KernelCpuSpeedReader;
 import com.android.internal.os.KernelCpuThreadReader;
+import com.android.internal.os.KernelCpuThreadReaderDiff;
 import com.android.internal.os.KernelCpuThreadReaderSettingsObserver;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidActiveTimeReader;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidClusterTimeReader;
@@ -262,7 +263,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private StoragedUidIoStatsReader mStoragedUidIoStatsReader =
             new StoragedUidIoStatsReader();
     @Nullable
-    private final KernelCpuThreadReader mKernelCpuThreadReader;
+    private final KernelCpuThreadReaderDiff mKernelCpuThreadReader;
 
     private long mDebugElapsedClockPreviousValue = 0;
     private long mDebugElapsedClockPullCount = 0;
@@ -1726,7 +1727,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             throw new IllegalStateException("mKernelCpuThreadReader is null");
         }
         ArrayList<KernelCpuThreadReader.ProcessCpuUsage> processCpuUsages =
-                this.mKernelCpuThreadReader.getProcessCpuUsage();
+                this.mKernelCpuThreadReader.getProcessCpuUsageDiffed();
         if (processCpuUsages == null) {
             throw new IllegalStateException("processCpuUsages is null");
         }

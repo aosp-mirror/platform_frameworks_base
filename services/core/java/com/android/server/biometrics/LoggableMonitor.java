@@ -150,4 +150,23 @@ public abstract class LoggableMonitor {
                 authState,
                 latency);
     }
+
+    protected final void logOnEnrolled(int targetUserId, long latency, boolean enrollSuccessful) {
+        if (DEBUG) {
+            Slog.v(TAG, "Enrolled! Modality: " + statsModality()
+                    + ", User: " + targetUserId
+                    + ", Client: " + statsClient()
+                    + ", Latency: " + latency
+                    + ", Success: " + enrollSuccessful);
+        } else {
+            Slog.v(TAG, "Enroll latency: " + latency);
+        }
+
+        StatsLog.write(StatsLog.BIOMETRIC_ENROLLED,
+                statsModality(),
+                targetUserId,
+                latency,
+                enrollSuccessful);
+    }
+
 }

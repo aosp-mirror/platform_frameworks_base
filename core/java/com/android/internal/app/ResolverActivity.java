@@ -509,10 +509,11 @@ public class ResolverActivity extends Activity {
         @Nullable abstract String getAppSubLabelInternal();
 
         private Context mCtx;
-        protected PackageManager mPm;
-        private final ApplicationInfo mAi;
         private final int mIconDpi;
         private final boolean mHasSubstitutePermission;
+        private final ApplicationInfo mAi;
+
+        protected PackageManager mPm;
 
         TargetPresentationGetter(Context ctx, int iconDpi, ApplicationInfo ai) {
             mCtx = ctx;
@@ -590,10 +591,10 @@ public class ResolverActivity extends Activity {
      * Loads the icon and label for the provided ResolveInfo.
      */
     @VisibleForTesting
-    public static class ResolveInfoPresentationGetter extends TargetPresentationGetter {
+    public static class ResolveInfoPresentationGetter extends ActivityInfoPresentationGetter {
         private final ResolveInfo mRi;
         public ResolveInfoPresentationGetter(Context ctx, int iconDpi, ResolveInfo ri) {
-            super(ctx, iconDpi, ri.activityInfo.applicationInfo);
+            super(ctx, iconDpi, ri.activityInfo);
             mRi = ri;
         }
 
@@ -610,6 +611,9 @@ public class ResolverActivity extends Activity {
                 Log.e(TAG, "SUBSTITUTE_SHARE_TARGET_APP_NAME_AND_ICON permission granted but "
                         + "couldn't find resources for package", e);
             }
+
+            // Fall back to ActivityInfo if no icon is found via ResolveInfo
+            if (dr == null) dr = super.getIconSubstituteInternal();
 
             return dr;
         }

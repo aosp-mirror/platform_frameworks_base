@@ -3212,13 +3212,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 "Proposed new IME target: " + target + " for display: " + getDisplayId());
 
         // Now, a special case -- if the last target's window is in the process of exiting, but
-        // not removed, and the new target is home, keep on the last target to avoid flicker.
-        // Home is a special case since its above other stacks in the ordering list, but layed
-        // out below the others.
+        // not removed, keep on the last target to avoid IME flicker.
         if (curTarget != null && !curTarget.mRemoved && curTarget.isDisplayedLw()
-                && curTarget.isClosing() && (target == null || target.isActivityTypeHome())) {
-            if (DEBUG_INPUT_METHOD) Slog.v(TAG_WM, "New target is home while current target is "
-                    + "closing, not changing");
+                && curTarget.isClosing()) {
+            if (DEBUG_INPUT_METHOD) Slog.v(TAG_WM, "Not changing target till current window is"
+                    + " closing and not removed");
             return curTarget;
         }
 
