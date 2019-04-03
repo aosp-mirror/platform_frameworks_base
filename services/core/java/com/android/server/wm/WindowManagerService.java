@@ -7531,22 +7531,24 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public boolean injectInputAfterTransactionsApplied(InputEvent ev, int mode) {
-        boolean shouldWaitForAnimComplete = false;
+        boolean shouldWaitForAnimToComplete = false;
         if (ev instanceof KeyEvent) {
             KeyEvent keyEvent = (KeyEvent) ev;
-            shouldWaitForAnimComplete = keyEvent.getSource() == InputDevice.SOURCE_MOUSE
+            shouldWaitForAnimToComplete = keyEvent.getSource() == InputDevice.SOURCE_MOUSE
                     || keyEvent.getAction() == KeyEvent.ACTION_DOWN;
         } else if (ev instanceof MotionEvent) {
             MotionEvent motionEvent = (MotionEvent) ev;
-            shouldWaitForAnimComplete = motionEvent.getSource() == InputDevice.SOURCE_MOUSE
+            shouldWaitForAnimToComplete = motionEvent.getSource() == InputDevice.SOURCE_MOUSE
                     || motionEvent.getAction() == MotionEvent.ACTION_DOWN;
         }
 
-        if (shouldWaitForAnimComplete) {
+        if (shouldWaitForAnimToComplete) {
             waitForAnimationsToComplete();
 
             synchronized (mGlobalLock) {
                 mWindowPlacerLocked.performSurfacePlacementIfScheduled();
+                mRoot.forAllDisplays(displayContent ->
+                        displayContent.getInputMonitor().updateInputWindowsImmediately());
             }
 
             new SurfaceControl.Transaction().syncInputWindows().apply(true);
