@@ -981,6 +981,11 @@ class ActivityStarter {
             if (isRealCallingUidPersistentSystemProcess && allowBackgroundActivityStart) {
                 return false;
             }
+            // don't abort if the realCallingUid is an associated companion app
+            if (mService.isAssociatedCompanionApp(UserHandle.getUserId(realCallingUid),
+                    realCallingUid)) {
+                return false;
+            }
         }
         // If we don't have callerApp at this point, no caller was provided to startActivity().
         // That's the case for PendingIntent-based starts, since the creator's process might not be
@@ -1026,7 +1031,7 @@ class ActivityStarter {
         }
         // don't abort if the callingPackage has companion device
         final int callingUserId = UserHandle.getUserId(callingUid);
-        if (mService.isAssociatedCompanionApp(callingUserId, callingPackage)) {
+        if (mService.isAssociatedCompanionApp(callingUserId, callingUid)) {
             return false;
         }
         // don't abort if the callingPackage is temporarily whitelisted

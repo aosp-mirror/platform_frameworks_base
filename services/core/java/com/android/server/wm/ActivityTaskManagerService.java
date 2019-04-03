@@ -443,8 +443,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     // VoiceInteractionManagerService
     ComponentName mActiveVoiceInteractionServiceComponent;
 
-    // A map userId and all its companion app packages
-    private final Map<Integer, Set<String>> mCompanionAppPackageMap = new ArrayMap<>();
+    // A map userId and all its companion app uids
+    private final Map<Integer, Set<Integer>> mCompanionAppUidsMap = new ArrayMap<>();
 
     VrController mVrController;
     KeyguardController mKeyguardController;
@@ -5907,12 +5907,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
-    boolean isAssociatedCompanionApp(int userId, String packageName) {
-        final Set<String> allPackages = mCompanionAppPackageMap.get(userId);
-        if (allPackages == null) {
+    boolean isAssociatedCompanionApp(int userId, int uid) {
+        final Set<Integer> allUids = mCompanionAppUidsMap.get(userId);
+        if (allUids == null) {
             return false;
         }
-        return allPackages.contains(packageName);
+        return allUids.contains(uid);
     }
 
     final class H extends Handler {
@@ -7291,13 +7291,16 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public void setCompanionAppPackages(int userId, Set<String> companionAppPackages) {
-            // Deep copy all content to make sure we do not rely on the source
-            final Set<String> result = new HashSet<>();
+            // Translate package names into UIDs
+            final Set<Integer> result = new HashSet<>();
             for (String pkg : companionAppPackages) {
-                result.add(pkg);
+                final int uid = getPackageManagerInternalLocked().getPackageUid(pkg, 0, userId);
+                if (uid >= 0) {
+                    result.add(uid);
+                }
             }
             synchronized (mGlobalLock) {
-                mCompanionAppPackageMap.put(userId, result);
+                mCompanionAppUidsMap.put(userId, result);
             }
         }
     }
