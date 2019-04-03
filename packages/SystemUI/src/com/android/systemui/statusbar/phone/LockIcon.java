@@ -263,8 +263,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
             return STATE_BIOMETRICS_ERROR;
         } else if (mUnlockMethodCache.canSkipBouncer()) {
             return STATE_LOCK_OPEN;
-        } else if (mUnlockMethodCache.isFaceUnlockRunning()
-                || updateMonitor.isFaceDetectionRunning()) {
+        } else if (updateMonitor.isFaceDetectionRunning()) {
             return STATE_SCANNING_FACE;
         } else {
             return STATE_LOCKED;
