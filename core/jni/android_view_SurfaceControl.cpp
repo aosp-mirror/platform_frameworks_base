@@ -271,8 +271,9 @@ static jobject nativeScreenshot(JNIEnv* env, jclass clazz,
             capturedSecureLayers);
 }
 
-static jobject nativeCaptureLayers(JNIEnv* env, jclass clazz, jobject layerHandleToken,
-        jobject sourceCropObj, jfloat frameScale, jobjectArray excludeArray) {
+static jobject nativeCaptureLayers(JNIEnv* env, jclass clazz, jobject displayTokenObj,
+        jobject layerHandleToken, jobject sourceCropObj, jfloat frameScale,
+        jobjectArray excludeArray) {
 
     sp<IBinder> layerHandle = ibinderForJavaObject(env, layerHandleToken);
     if (layerHandle == NULL) {
@@ -301,7 +302,12 @@ static jobject nativeCaptureLayers(JNIEnv* env, jclass clazz, jobject layerHandl
     }
 
     sp<GraphicBuffer> buffer;
-    const ui::Dataspace dataspace = ui::Dataspace::V0_SRGB;
+    ui::Dataspace dataspace = ui::Dataspace::V0_SRGB;
+    sp<IBinder> displayToken = ibinderForJavaObject(env, displayTokenObj);
+    if (displayToken != nullptr) {
+        const ui::ColorMode colorMode = SurfaceComposerClient::getActiveColorMode(displayToken);
+        dataspace = pickDataspaceFromColorMode(colorMode);
+    }
     status_t res = ScreenshotClient::captureChildLayers(layerHandle, dataspace,
                                                         ui::PixelFormat::RGBA_8888, sourceCrop,
                                                         excludeHandles, frameScale, &buffer);
@@ -1373,7 +1379,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             "Landroid/view/SurfaceControl$ScreenshotGraphicBuffer;",
             (void*)nativeScreenshot },
     {"nativeCaptureLayers",
-            "(Landroid/os/IBinder;Landroid/graphics/Rect;F[Landroid/os/IBinder;)"
+            "(Landroid/os/IBinder;Landroid/os/IBinder;Landroid/graphics/Rect;"
+            "F[Landroid/os/IBinder;)"
             "Landroid/view/SurfaceControl$ScreenshotGraphicBuffer;",
             (void*)nativeCaptureLayers },
     {"nativeSetInputWindowInfo", "(JJLandroid/view/InputWindowHandle;)V",
