@@ -16,15 +16,14 @@
 
 package android.net.ipmemorystore;
 
-import android.net.ipmemorystore.NetworkAttributesParcelable;
+import android.net.ipmemorystore.SameL3NetworkResponseParcelable;
 import android.net.ipmemorystore.StatusParcelable;
 
 /** {@hide} */
-oneway interface IOnNetworkAttributesRetrieved {
+oneway interface IOnSameL3NetworkResponseListener {
     /**
-     * Network attributes were fetched for the specified L2 key. While the L2 key will never
-     * be null, the attributes may be if no data is stored about this L2 key.
+     * The memory store has come up with the answer to a query that was sent.
      */
-     void onNetworkAttributesRetrieved(in StatusParcelable status, in String l2Key,
-             in NetworkAttributesParcelable attributes);
+     void onSameL3NetworkResponse(in StatusParcelable status,
+             in SameL3NetworkResponseParcelable response);
 }
