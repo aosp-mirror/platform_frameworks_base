@@ -153,6 +153,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         UID_STATE_TOP,                  // ActivityManager.PROCESS_STATE_TOP
         UID_STATE_FOREGROUND_SERVICE_LOCATION,
                                         // ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE_LOCATION
+        UID_STATE_FOREGROUND,           // ActivityManager.PROCESS_STATE_BOUND_TOP
         UID_STATE_FOREGROUND_SERVICE,   // ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE
         UID_STATE_FOREGROUND,           // ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
         UID_STATE_FOREGROUND,           // ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
