@@ -1346,6 +1346,10 @@ public class LockSettingsService extends ILockSettings.Stub {
             setSeparateProfileChallengeEnabledLocked(userId, true, null);
             notifyPasswordChanged(userId);
         }
+        if (mUserManager.getUserInfo(userId).isManagedProfile()) {
+            // Make sure the profile doesn't get locked straight after setting work challenge.
+            setDeviceUnlockedForUser(userId);
+        }
         notifySeparateProfileChallengeChanged(userId);
     }
 
@@ -1835,9 +1839,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             unlockUser(userId, response.getPayload(), secretFromCredential(credential));
 
             if (isManagedProfileWithSeparatedLock(userId)) {
-                TrustManager trustManager =
-                        (TrustManager) mContext.getSystemService(Context.TRUST_SERVICE);
-                trustManager.setDeviceLockedForUser(userId, false);
+                setDeviceUnlockedForUser(userId);
             }
             int reEnrollQuality = storedHash.type == CREDENTIAL_TYPE_PATTERN
                     ? DevicePolicyManager.PASSWORD_QUALITY_SOMETHING
@@ -2465,9 +2467,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             activateEscrowTokens(authResult.authToken, userId);
 
             if (isManagedProfileWithSeparatedLock(userId)) {
-                TrustManager trustManager =
-                        (TrustManager) mContext.getSystemService(Context.TRUST_SERVICE);
-                trustManager.setDeviceLockedForUser(userId, false);
+                setDeviceUnlockedForUser(userId);
             }
             mStrongAuth.reportSuccessfulStrongAuthUnlock(userId);
 
@@ -2479,6 +2479,11 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
 
         return response;
+    }
+
+    private void setDeviceUnlockedForUser(int userId) {
+        final TrustManager trustManager = mContext.getSystemService(TrustManager.class);
+        trustManager.setDeviceLockedForUser(userId, false);
     }
 
     /**
