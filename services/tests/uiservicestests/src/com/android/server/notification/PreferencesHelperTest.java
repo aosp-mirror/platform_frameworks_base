@@ -2124,9 +2124,16 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
     @Test
     public void testXml_statusBarIcons_default() throws Exception {
-        ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false, UserHandle.USER_ALL);
+        String preQXml = "<ranking version=\"1\">\n"
+                + "<package name=\"" + PKG_N_MR1 + "\" show_badge=\"true\">\n"
+                + "<channel id=\"something\" name=\"name\" importance=\"2\" "
+                + "show_badge=\"true\" />\n"
+                + "<channel id=\"miscellaneous\" name=\"Uncategorized\" usage=\"5\" "
+                + "content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n"
+                + "</package>\n"
+                + "</ranking>\n";
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper);
-        loadStreamXml(baos, false, UserHandle.USER_ALL);
+        loadByteArrayXml(preQXml.getBytes(), true, UserHandle.USER_SYSTEM);
 
         assertEquals(PreferencesHelper.DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS,
                 mHelper.shouldHideSilentStatusIcons());
