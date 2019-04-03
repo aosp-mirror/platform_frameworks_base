@@ -230,6 +230,34 @@ public class UserLifecycleTests {
         }
     }
 
+    /** Tests starting an already-created, but no-longer-running, profile. */
+    @Test
+    public void managedProfileUnlock_stopped() throws Exception {
+        while (mRunner.keepRunning()) {
+            mRunner.pauseTiming();
+            final UserInfo userInfo = mUm.createProfileForUser("TestUser",
+                    UserInfo.FLAG_MANAGED_PROFILE, mAm.getCurrentUser());
+            // Start the profile initially, then stop it. Similar to setQuietModeEnabled.
+            final CountDownLatch latch1 = new CountDownLatch(1);
+            registerBroadcastReceiver(Intent.ACTION_USER_UNLOCKED, latch1, userInfo.id);
+            mIam.startUserInBackground(userInfo.id);
+            latch1.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
+            stopUser(userInfo.id, true);
+
+            // Now we restart the profile.
+            final CountDownLatch latch2 = new CountDownLatch(1);
+            registerBroadcastReceiver(Intent.ACTION_USER_UNLOCKED, latch2, userInfo.id);
+            mRunner.resumeTiming();
+
+            mIam.startUserInBackground(userInfo.id);
+            latch2.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
+
+            mRunner.pauseTiming();
+            removeUser(userInfo.id);
+            mRunner.resumeTiming();
+        }
+    }
+
     @Test
     public void ephemeralUserStopped() throws Exception {
         while (mRunner.keepRunning()) {
