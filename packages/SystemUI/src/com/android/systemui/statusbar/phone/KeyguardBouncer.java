@@ -334,6 +334,11 @@ public class KeyguardBouncer {
                 && mExpansion == EXPANSION_VISIBLE && !isAnimatingAway();
     }
 
+    public boolean isPartiallyVisible() {
+        return (mShowingSoon || (mRoot != null && mRoot.getVisibility() == View.VISIBLE))
+                && mExpansion != EXPANSION_HIDDEN && !isAnimatingAway();
+    }
+
     /**
      * @return {@code true} when bouncer's pre-hide animation already started but isn't completely
      *         hidden yet, {@code false} otherwise.
