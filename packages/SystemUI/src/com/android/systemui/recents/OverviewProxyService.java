@@ -444,6 +444,17 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
     }
 
+    public void notifyBackAction(boolean completed, int downX, int downY, boolean isButton,
+            boolean gestureSwipeLeft) {
+        try {
+            if (mOverviewProxy != null) {
+                mOverviewProxy.onBackAction(completed, downX, downY, isButton, gestureSwipeLeft);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG_OPS, "Failed to notify back action", e);
+        }
+    }
+
     /**
      * Sets the navbar region which can receive touch inputs
      */
