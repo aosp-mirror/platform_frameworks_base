@@ -501,7 +501,7 @@ public class PermissionMonitorTest {
 
         when(mPackageManager.getPackagesForUid(MOCK_UID1)).thenReturn(new String[]{});
         mObserver.onPackageRemoved(MOCK_PACKAGE1, MOCK_UID1);
-        mNetdServiceMonitor.expectPermission(INetd.NO_PERMISSIONS, new int[]{MOCK_UID1});
+        mNetdServiceMonitor.expectPermission(INetd.PERMISSION_UNINSTALLED, new int[]{MOCK_UID1});
     }
 
     @Test
@@ -515,7 +515,7 @@ public class PermissionMonitorTest {
         // Remove and install the same package to simulate the update action
         when(mPackageManager.getPackagesForUid(MOCK_UID1)).thenReturn(new String[]{});
         mObserver.onPackageRemoved(MOCK_PACKAGE1, MOCK_UID1);
-        mNetdServiceMonitor.expectPermission(INetd.NO_PERMISSIONS, new int[]{MOCK_UID1});
+        mNetdServiceMonitor.expectPermission(INetd.PERMISSION_UNINSTALLED, new int[]{MOCK_UID1});
 
         addPackage(MOCK_PACKAGE1, MOCK_UID1, new String[] {INTERNET});
         mNetdServiceMonitor.expectPermission(INetd.PERMISSION_INTERNET, new int[]{MOCK_UID1});
