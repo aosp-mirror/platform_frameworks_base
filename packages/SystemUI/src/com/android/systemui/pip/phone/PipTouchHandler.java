@@ -795,7 +795,10 @@ public class PipTouchHandler {
                 ? mExpandedMovementBounds
                 : mNormalMovementBounds;
         try {
-            mPinnedStackController.setMinEdgeSize(isMenuExpanded ? mExpandedShortestEdgeSize : 0);
+            if (mPinnedStackController != null) {
+                mPinnedStackController.setMinEdgeSize(
+                        isMenuExpanded ? mExpandedShortestEdgeSize : 0);
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Could not set minimized state", e);
         }
