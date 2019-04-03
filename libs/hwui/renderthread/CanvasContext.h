@@ -32,6 +32,7 @@
 #include <EGL/egl.h>
 #include <SkBitmap.h>
 #include <SkRect.h>
+#include <SkSize.h>
 #include <cutils/compiler.h>
 #include <gui/Surface.h>
 #include <utils/Functor.h>
@@ -112,7 +113,7 @@ public:
     void setSurface(sp<Surface>&& surface);
     bool pauseSurface();
     void setStopped(bool stopped);
-    bool hasSurface() { return mNativeSurface.get(); }
+    bool hasSurface() const { return mNativeSurface.get(); }
     void allocateBuffers();
 
     void setLightAlpha(uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
@@ -205,6 +206,8 @@ public:
     }
 
     void setRenderAheadDepth(int renderAhead);
+
+    SkISize getNextFrameSize() const;
 
 private:
     CanvasContext(RenderThread& thread, bool translucent, RenderNode* rootRenderNode,
