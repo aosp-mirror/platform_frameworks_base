@@ -50,6 +50,10 @@ public abstract class PlayerBase {
     private static final boolean DEBUG = DEBUG_APP_OPS || false;
     private static IAudioService sService; //lazy initialization, use getService()
 
+    /** if true, only use OP_PLAY_AUDIO monitoring for logging, and rely on muting to happen
+     *  in AudioFlinger */
+    private static final boolean USE_AUDIOFLINGER_MUTING_FOR_OP = true;
+
     // parameters of the player that affect AppOps
     protected AudioAttributes mAttributes;
 
@@ -67,13 +71,13 @@ public abstract class PlayerBase {
 
     // for AppOps
     private @Nullable IAppOpsService mAppOps;
-    private IAppOpsCallback mAppOpsCallback;
+    private @Nullable IAppOpsCallback mAppOpsCallback;
     @GuardedBy("mLock")
     private boolean mHasAppOpsPlayAudio = true;
 
     private final int mImplType;
     // uniquely identifies the Player Interface throughout the system (P I Id)
-    private int mPlayerIId = AudioPlaybackConfiguration.PLAYER_PIID_UNASSIGNED;
+    private int mPlayerIId = AudioPlaybackConfiguration.PLAYER_PIID_INVALID;
 
     @GuardedBy("mLock")
     private int mState;
@@ -104,27 +108,27 @@ public abstract class PlayerBase {
      * Call from derived class when instantiation / initialization is successful
      */
     protected void baseRegisterPlayer() {
-        int newPiid = AudioPlaybackConfiguration.PLAYER_PIID_INVALID;
-        IBinder b = ServiceManager.getService(Context.APP_OPS_SERVICE);
-        mAppOps = IAppOpsService.Stub.asInterface(b);
-        // initialize mHasAppOpsPlayAudio
-        updateAppOpsPlayAudio();
-        // register a callback to monitor whether the OP_PLAY_AUDIO is still allowed
-        mAppOpsCallback = new IAppOpsCallbackWrapper(this);
-        try {
-            mAppOps.startWatchingMode(AppOpsManager.OP_PLAY_AUDIO,
-                    ActivityThread.currentPackageName(), mAppOpsCallback);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error registering appOps callback", e);
-            mHasAppOpsPlayAudio = false;
+        if (!USE_AUDIOFLINGER_MUTING_FOR_OP) {
+            IBinder b = ServiceManager.getService(Context.APP_OPS_SERVICE);
+            mAppOps = IAppOpsService.Stub.asInterface(b);
+            // initialize mHasAppOpsPlayAudio
+            updateAppOpsPlayAudio();
+            // register a callback to monitor whether the OP_PLAY_AUDIO is still allowed
+            mAppOpsCallback = new IAppOpsCallbackWrapper(this);
+            try {
+                mAppOps.startWatchingMode(AppOpsManager.OP_PLAY_AUDIO,
+                        ActivityThread.currentPackageName(), mAppOpsCallback);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error registering appOps callback", e);
+                mHasAppOpsPlayAudio = false;
+            }
         }
         try {
-            newPiid = getService().trackPlayer(
+            mPlayerIId = getService().trackPlayer(
                     new PlayerIdCard(mImplType, mAttributes, new IPlayerWrapper(this)));
         } catch (RemoteException e) {
             Log.e(TAG, "Error talking to audio service, player will not be tracked", e);
         }
-        mPlayerIId = newPiid;
     }
 
     /**
@@ -284,6 +288,9 @@ public abstract class PlayerBase {
      * Must be called synchronized on mLock.
      */
     void updateAppOpsPlayAudio_sync(boolean attributesChanged) {
+        if (USE_AUDIOFLINGER_MUTING_FOR_OP) {
+            return;
+        }
         boolean oldHasAppOpsPlayAudio = mHasAppOpsPlayAudio;
         try {
             int mode = AppOpsManager.MODE_IGNORED;
@@ -333,6 +340,9 @@ public abstract class PlayerBase {
      * @return
      */
     boolean isRestricted_sync() {
+        if (USE_AUDIOFLINGER_MUTING_FOR_OP) {
+            return false;
+        }
         // check app ops
         if (mHasAppOpsPlayAudio) {
             return false;
