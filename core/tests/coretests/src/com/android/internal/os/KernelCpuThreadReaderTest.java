@@ -176,10 +176,10 @@ public class KernelCpuThreadReaderTest {
                 frequencies, 4);
         assertArrayEquals(
                 new int[]{1, 3, 1, 3},
-                frequencyBucketCreator.getBucketMinFrequencies(frequencies));
+                frequencyBucketCreator.bucketFrequencies(frequencies));
         assertArrayEquals(
                 new int[]{2, 2, 2, 2},
-                frequencyBucketCreator.getBucketedValues(new long[]{1, 1, 1, 1, 1, 1, 1, 1}));
+                frequencyBucketCreator.bucketValues(new long[]{1, 1, 1, 1, 1, 1, 1, 1}));
     }
 
     @Test
@@ -190,10 +190,10 @@ public class KernelCpuThreadReaderTest {
                 frequencies, 4);
         assertArrayEquals(
                 new int[]{1, 3, 5, 7},
-                frequencyBucketCreator.getBucketMinFrequencies(frequencies));
+                frequencyBucketCreator.bucketFrequencies(frequencies));
         assertArrayEquals(
                 new int[]{2, 2, 2, 2},
-                frequencyBucketCreator.getBucketedValues(new long[]{1, 1, 1, 1, 1, 1, 1, 1}));
+                frequencyBucketCreator.bucketValues(new long[]{1, 1, 1, 1, 1, 1, 1, 1}));
     }
 
     @Test
@@ -204,10 +204,10 @@ public class KernelCpuThreadReaderTest {
                 frequencies, 4);
         assertArrayEquals(
                 new int[]{1, 3, 1, 2},
-                frequencyBucketCreator.getBucketMinFrequencies(frequencies));
+                frequencyBucketCreator.bucketFrequencies(frequencies));
         assertArrayEquals(
                 new int[]{2, 3, 1, 2},
-                frequencyBucketCreator.getBucketedValues(new long[]{1, 1, 1, 1, 1, 1, 1, 1}));
+                frequencyBucketCreator.bucketValues(new long[]{1, 1, 1, 1, 1, 1, 1, 1}));
     }
 
     @Test
@@ -218,10 +218,10 @@ public class KernelCpuThreadReaderTest {
                 frequencies, 4);
         assertArrayEquals(
                 new int[]{1, 2, 1, 3},
-                frequencyBucketCreator.getBucketMinFrequencies(frequencies));
+                frequencyBucketCreator.bucketFrequencies(frequencies));
         assertArrayEquals(
                 new int[]{1, 2, 2, 3},
-                frequencyBucketCreator.getBucketedValues(new long[]{1, 1, 1, 1, 1, 1, 1, 1}));
+                frequencyBucketCreator.bucketValues(new long[]{1, 1, 1, 1, 1, 1, 1, 1}));
     }
 
     @Test
@@ -232,10 +232,10 @@ public class KernelCpuThreadReaderTest {
                 frequencies, 8);
         assertArrayEquals(
                 new int[]{1, 2, 3, 4, 1, 2, 3, 4},
-                frequencyBucketCreator.getBucketMinFrequencies(frequencies));
+                frequencyBucketCreator.bucketFrequencies(frequencies));
         assertArrayEquals(
                 new int[]{1, 1, 1, 1, 1, 1, 1, 1},
-                frequencyBucketCreator.getBucketedValues(new long[]{1, 1, 1, 1, 1, 1, 1, 1}));
+                frequencyBucketCreator.bucketValues(new long[]{1, 1, 1, 1, 1, 1, 1, 1}));
     }
 
     @Test
@@ -246,10 +246,10 @@ public class KernelCpuThreadReaderTest {
                 frequencies, 8);
         assertArrayEquals(
                 new int[]{1, 3, 5, 7, 1, 2, 3},
-                frequencyBucketCreator.getBucketMinFrequencies(frequencies));
+                frequencyBucketCreator.bucketFrequencies(frequencies));
         assertArrayEquals(
                 new int[]{2, 2, 2, 3, 1, 1, 1},
-                frequencyBucketCreator.getBucketedValues(
+                frequencyBucketCreator.bucketValues(
                         new long[]{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}));
     }
 
@@ -261,39 +261,37 @@ public class KernelCpuThreadReaderTest {
                 frequencies, 1);
         assertArrayEquals(
                 new int[]{1},
-                frequencyBucketCreator.getBucketMinFrequencies(frequencies));
+                frequencyBucketCreator.bucketFrequencies(frequencies));
         assertArrayEquals(
                 new int[]{8},
-                frequencyBucketCreator.getBucketedValues(
+                frequencyBucketCreator.bucketValues(
                         new long[]{1, 1, 1, 1, 1, 1, 1, 1}));
     }
 
     @Test
-    public void testGetBigFrequenciesStartIndex_simple() {
-        assertEquals(
-                3, KernelCpuThreadReader.FrequencyBucketCreator.getBigFrequenciesStartIndex(
-                        new long[]{1, 2, 3, 1, 2, 3}));
+    public void testBucketSetup_threeClusters() {
+        long[] frequencies = {1, 2, 3, 4, 2, 3, 4, 5, 3, 4, 5, 6};
+        KernelCpuThreadReader.FrequencyBucketCreator frequencyBucketCreator =
+                new KernelCpuThreadReader.FrequencyBucketCreator(frequencies, 6);
+        assertArrayEquals(
+                new int[] {1, 3, 2, 4, 3, 5},
+                frequencyBucketCreator.bucketFrequencies(frequencies));
+        assertArrayEquals(
+                new int[] {2, 2, 2, 2, 2, 2},
+                frequencyBucketCreator.bucketValues(
+                        new long[] {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}));
     }
 
     @Test
-    public void testGetBigFrequenciesStartIndex_moreLittle() {
-        assertEquals(
-                4, KernelCpuThreadReader.FrequencyBucketCreator.getBigFrequenciesStartIndex(
-                        new long[]{1, 2, 3, 4, 1, 2}));
-    }
-
-    @Test
-    public void testGetBigFrequenciesStartIndex_moreBig() {
-        assertEquals(
-                2, KernelCpuThreadReader.FrequencyBucketCreator.getBigFrequenciesStartIndex(
-                        new long[]{1, 2, 1, 2, 3, 4}));
-    }
-
-    @Test
-    public void testGetBigFrequenciesStartIndex_noBig() {
-        assertEquals(
-                4, KernelCpuThreadReader.FrequencyBucketCreator.getBigFrequenciesStartIndex(
-                        new long[]{1, 2, 3, 4}));
+    public void testBucketSetup_moreClustersThanBuckets() {
+        long[] frequencies = {1, 1, 1, 1, 1, 1, 1, 1};
+        KernelCpuThreadReader.FrequencyBucketCreator frequencyBucketCreator =
+                new KernelCpuThreadReader.FrequencyBucketCreator(frequencies, 4);
+        assertArrayEquals(
+                new int[] {1, 1, 1, 1}, frequencyBucketCreator.bucketFrequencies(frequencies));
+        assertArrayEquals(
+                new int[] {1, 1, 1, 5},
+                frequencyBucketCreator.bucketValues(new long[] {1, 1, 1, 1, 1, 1, 1, 1}));
     }
 
     @Test

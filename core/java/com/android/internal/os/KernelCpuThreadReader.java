@@ -21,6 +21,7 @@ import android.os.Process;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 
 import java.io.IOException;
@@ -29,6 +30,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.function.Predicate;
 
 /**
@@ -233,7 +235,7 @@ public class KernelCpuThreadReader {
         mFrequencyBucketCreator =
                 new FrequencyBucketCreator(mProcTimeInStateReader.getFrequenciesKhz(), numBuckets);
         mFrequenciesKhz =
-                mFrequencyBucketCreator.getBucketMinFrequencies(
+                mFrequencyBucketCreator.bucketFrequencies(
                         mProcTimeInStateReader.getFrequenciesKhz());
     }
 
@@ -317,7 +319,7 @@ public class KernelCpuThreadReader {
         if (cpuUsagesLong == null) {
             return null;
         }
-        int[] cpuUsages = mFrequencyBucketCreator.getBucketedValues(cpuUsagesLong);
+        int[] cpuUsages = mFrequencyBucketCreator.bucketValues(cpuUsagesLong);
 
         return new ThreadCpuUsage(threadId, threadName, cpuUsages);
     }
@@ -359,89 +361,46 @@ public class KernelCpuThreadReader {
         }
     }
 
-    /** Puts frequencies and usage times into buckets */
+    /**
+     * Quantizes a list of N frequencies into a list of M frequencies (where M<=N)
+     *
+     * <p>In order to reduce data sent from the device, we discard precise frequency information for
+     * an approximation. This is done by putting groups of adjacent frequencies into the same
+     * bucket, and then reporting that bucket under the minimum frequency in that bucket.
+     *
+     * <p>Many devices have multiple core clusters. We do not want to report frequencies from
+     * different clusters under the same bucket, so some complication arises.
+     *
+     * <p>Buckets are allocated evenly across all core clusters, i.e. they all have the same number
+     * of buckets regardless of how many frequencies they contain. This is done to reduce code
+     * complexity, and in practice the number of frequencies doesn't vary too much between core
+     * clusters.
+     *
+     * <p>If the number of buckets is not a factor of the number of frequencies, the remainder of
+     * the frequencies are placed into the last bucket.
+     *
+     * <p>It is possible to have less buckets than asked for, so any calling code can't assume that
+     * initializing with N buckets will use return N values. This happens in two scenarios:
+     *
+     * <ul>
+     *   <li>There are less frequencies available than buckets asked for.
+     *   <li>There are less frequencies in a core cluster than buckets allocated to that core
+     *       cluster.
+     * </ul>
+     */
     @VisibleForTesting
     public static class FrequencyBucketCreator {
-        private final int mNumBuckets;
         private final int mNumFrequencies;
-        private final int mBigFrequenciesStartIndex;
-        private final int mLittleNumBuckets;
-        private final int mBigNumBuckets;
-        private final int mLittleBucketSize;
-        private final int mBigBucketSize;
+        private final int mNumBuckets;
+        private final int[] mBucketStartIndices;
 
-        /**
-         * Buckets based of a list of frequencies
-         *
-         * @param frequencies the frequencies to base buckets off
-         * @param numBuckets how many buckets to create
-         */
         @VisibleForTesting
-        public FrequencyBucketCreator(long[] frequencies, int numBuckets) {
-            Preconditions.checkArgument(numBuckets > 0);
-
+        public FrequencyBucketCreator(long[] frequencies, int targetNumBuckets) {
             mNumFrequencies = frequencies.length;
-            mBigFrequenciesStartIndex = getBigFrequenciesStartIndex(frequencies);
-
-            final int littleNumBuckets;
-            final int bigNumBuckets;
-            if (mBigFrequenciesStartIndex < frequencies.length) {
-                littleNumBuckets = numBuckets / 2;
-                bigNumBuckets = numBuckets - littleNumBuckets;
-            } else {
-                // If we've got no big frequencies, set all buckets to little frequencies
-                littleNumBuckets = numBuckets;
-                bigNumBuckets = 0;
-            }
-
-            // Ensure that we don't have more buckets than frequencies
-            mLittleNumBuckets = Math.min(littleNumBuckets, mBigFrequenciesStartIndex);
-            mBigNumBuckets =
-                    Math.min(bigNumBuckets, frequencies.length - mBigFrequenciesStartIndex);
-            mNumBuckets = mLittleNumBuckets + mBigNumBuckets;
-
-            // Set the size of each little and big bucket. If they have no buckets, the size is zero
-            mLittleBucketSize =
-                    mLittleNumBuckets == 0 ? 0 : mBigFrequenciesStartIndex / mLittleNumBuckets;
-            mBigBucketSize =
-                    mBigNumBuckets == 0
-                            ? 0
-                            : (frequencies.length - mBigFrequenciesStartIndex) / mBigNumBuckets;
-        }
-
-        /** Find the index where frequencies change from little core to big core */
-        @VisibleForTesting
-        public static int getBigFrequenciesStartIndex(long[] frequenciesKhz) {
-            for (int i = 0; i < frequenciesKhz.length - 1; i++) {
-                if (frequenciesKhz[i] > frequenciesKhz[i + 1]) {
-                    return i + 1;
-                }
-            }
-
-            return frequenciesKhz.length;
-        }
-
-        /** Get the minimum frequency in each bucket */
-        @VisibleForTesting
-        public int[] getBucketMinFrequencies(long[] frequenciesKhz) {
-            Preconditions.checkArgument(frequenciesKhz.length == mNumFrequencies);
-            // If there's only one bucket, we bucket everything together so the first bucket is the
-            // min frequency
-            if (mNumBuckets == 1) {
-                return new int[] {(int) frequenciesKhz[0]};
-            }
-
-            final int[] bucketMinFrequencies = new int[mNumBuckets];
-            // Initialize little buckets min frequencies
-            for (int i = 0; i < mLittleNumBuckets; i++) {
-                bucketMinFrequencies[i] = (int) frequenciesKhz[i * mLittleBucketSize];
-            }
-            // Initialize big buckets min frequencies
-            for (int i = 0; i < mBigNumBuckets; i++) {
-                final int frequencyIndex = mBigFrequenciesStartIndex + i * mBigBucketSize;
-                bucketMinFrequencies[mLittleNumBuckets + i] = (int) frequenciesKhz[frequencyIndex];
-            }
-            return bucketMinFrequencies;
+            int[] clusterStartIndices = getClusterStartIndices(frequencies);
+            mBucketStartIndices =
+                    getBucketStartIndices(clusterStartIndices, targetNumBuckets, mNumFrequencies);
+            mNumBuckets = mBucketStartIndices.length;
         }
 
         /**
@@ -453,34 +412,105 @@ public class KernelCpuThreadReader {
          * @return the bucketed usage times
          */
         @VisibleForTesting
-        @SuppressWarnings("ForLoopReplaceableByForEach")
-        public int[] getBucketedValues(long[] values) {
+        public int[] bucketValues(long[] values) {
             Preconditions.checkArgument(values.length == mNumFrequencies);
-            final int[] bucketed = new int[mNumBuckets];
-
-            // If there's only one bucket, add all frequencies in
-            if (mNumBuckets == 1) {
-                for (int i = 0; i < values.length; i++) {
-                    bucketed[0] += values[i];
+            int[] buckets = new int[mNumBuckets];
+            for (int bucketIdx = 0; bucketIdx < mNumBuckets; bucketIdx++) {
+                final int bucketStartIdx = getLowerBound(bucketIdx, mBucketStartIndices);
+                final int bucketEndIdx =
+                        getUpperBound(bucketIdx, mBucketStartIndices, values.length);
+                for (int valuesIdx = bucketStartIdx; valuesIdx < bucketEndIdx; valuesIdx++) {
+                    buckets[bucketIdx] += values[valuesIdx];
                 }
-                return bucketed;
+            }
+            return buckets;
+        }
+
+        /** Get the minimum frequency in each bucket */
+        @VisibleForTesting
+        public int[] bucketFrequencies(long[] frequencies) {
+            Preconditions.checkArgument(frequencies.length == mNumFrequencies);
+            int[] buckets = new int[mNumBuckets];
+            for (int i = 0; i < buckets.length; i++) {
+                buckets[i] = (int) frequencies[mBucketStartIndices[i]];
+            }
+            return buckets;
+        }
+
+        /**
+         * Get the index in frequencies where each core cluster starts
+         *
+         * <p>The frequencies for each cluster are given in ascending order, appended to each other.
+         * This means that every time there is a decrease in frequencies (instead of increase) a new
+         * cluster has started.
+         */
+        private static int[] getClusterStartIndices(long[] frequencies) {
+            ArrayList<Integer> indices = new ArrayList<>();
+            indices.add(0);
+            for (int i = 0; i < frequencies.length - 1; i++) {
+                if (frequencies[i] >= frequencies[i + 1]) {
+                    indices.add(i + 1);
+                }
+            }
+            return ArrayUtils.convertToIntArray(indices);
+        }
+
+        /** Get the index in frequencies where each bucket starts */
+        private static int[] getBucketStartIndices(
+                int[] clusterStartIndices, int targetNumBuckets, int numFrequencies) {
+            int numClusters = clusterStartIndices.length;
+
+            // If we haven't got enough buckets for every cluster, we instead have one bucket per
+            // cluster, with the last bucket containing the remaining clusters
+            if (numClusters > targetNumBuckets) {
+                return Arrays.copyOfRange(clusterStartIndices, 0, targetNumBuckets);
             }
 
-            // Initialize the little buckets
-            for (int i = 0; i < mBigFrequenciesStartIndex; i++) {
-                final int bucketIndex = Math.min(i / mLittleBucketSize, mLittleNumBuckets - 1);
-                bucketed[bucketIndex] += values[i];
+            ArrayList<Integer> bucketStartIndices = new ArrayList<>();
+            for (int clusterIdx = 0; clusterIdx < numClusters; clusterIdx++) {
+                final int clusterStartIdx = getLowerBound(clusterIdx, clusterStartIndices);
+                final int clusterEndIdx =
+                        getUpperBound(clusterIdx, clusterStartIndices, numFrequencies);
+
+                final int numBucketsInCluster;
+                if (clusterIdx != numClusters - 1) {
+                    numBucketsInCluster = targetNumBuckets / numClusters;
+                } else {
+                    // If we're in the last cluster, the bucket will contain the remainder of the
+                    // frequencies
+                    int previousBucketsInCluster = targetNumBuckets / numClusters;
+                    numBucketsInCluster =
+                            targetNumBuckets - (previousBucketsInCluster * (numClusters - 1));
+                }
+
+                final int numFrequenciesInCluster = clusterEndIdx - clusterStartIdx;
+                // If there are less frequencies than buckets in a cluster, we have one bucket per
+                // frequency, and do not use the remaining buckets
+                final int numFrequenciesInBucket =
+                        Math.max(1, numFrequenciesInCluster / numBucketsInCluster);
+                for (int bucketIdx = 0; bucketIdx < numBucketsInCluster; bucketIdx++) {
+                    int bucketStartIdx = clusterStartIdx + bucketIdx * numFrequenciesInBucket;
+                    // If we've gone over the end index, ignore the rest of the buckets for this
+                    // cluster
+                    if (bucketStartIdx >= clusterEndIdx) {
+                        break;
+                    }
+                    bucketStartIndices.add(bucketStartIdx);
+                }
             }
-            // Initialize the big buckets
-            for (int i = mBigFrequenciesStartIndex; i < values.length; i++) {
-                final int bucketIndex =
-                        Math.min(
-                                mLittleNumBuckets
-                                        + (i - mBigFrequenciesStartIndex) / mBigBucketSize,
-                                mNumBuckets - 1);
-                bucketed[bucketIndex] += values[i];
+            return ArrayUtils.convertToIntArray(bucketStartIndices);
+        }
+
+        private static int getLowerBound(int index, int[] startIndices) {
+            return startIndices[index];
+        }
+
+        private static int getUpperBound(int index, int[] startIndices, int max) {
+            if (index != startIndices.length - 1) {
+                return startIndices[index + 1];
+            } else {
+                return max;
             }
-            return bucketed;
         }
     }
 
