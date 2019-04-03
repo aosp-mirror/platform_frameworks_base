@@ -9463,7 +9463,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             mDexManager.getPackageUseInfoOrDefault(depPackage.packageName),
                             libraryOptions);
                 } else {
-                    pdo.performDexOpt(info, instructionSets, libraryOptions);
+                    // TODO(ngeoffray): Support dexopting system shared libraries.
                 }
             }
         }

@@ -37,7 +37,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
 import android.net.INetd;
-import android.net.util.NetdService;
 import android.os.Build;
 import android.os.INetworkManagementService;
 import android.os.RemoteException;
@@ -77,7 +76,8 @@ public class PermissionMonitor {
     private final Context mContext;
     private final PackageManager mPackageManager;
     private final UserManager mUserManager;
-    private final INetworkManagementService mNetd;
+    private final INetworkManagementService mNMS;
+    private final INetd mNetd;
 
     // Values are User IDs.
     private final Set<Integer> mUsers = new HashSet<>();
@@ -115,11 +115,12 @@ public class PermissionMonitor {
         }
     }
 
-    public PermissionMonitor(Context context, INetworkManagementService netd) {
+    public PermissionMonitor(Context context, INetworkManagementService nms, INetd netdService) {
         mContext = context;
         mPackageManager = context.getPackageManager();
         mUserManager = UserManager.get(context);
-        mNetd = netd;
+        mNMS = nms;
+        mNetd = netdService;
     }
 
     // Intended to be called only once at startup, after the system is ready. Installs a broadcast
@@ -285,11 +286,11 @@ public class PermissionMonitor {
         }
         try {
             if (add) {
-                mNetd.setPermission("NETWORK", toIntArray(network));
-                mNetd.setPermission("SYSTEM", toIntArray(system));
+                mNMS.setPermission("NETWORK", toIntArray(network));
+                mNMS.setPermission("SYSTEM", toIntArray(system));
             } else {
-                mNetd.clearPermission(toIntArray(network));
-                mNetd.clearPermission(toIntArray(system));
+                mNMS.clearPermission(toIntArray(network));
+                mNMS.clearPermission(toIntArray(system));
             }
         } catch (RemoteException e) {
             loge("Exception when updating permissions: " + e);
@@ -447,7 +448,8 @@ public class PermissionMonitor {
      *
      * @hide
      */
-    private void sendPackagePermissionsForUid(int uid, int permissions) {
+    @VisibleForTesting
+    void sendPackagePermissionsForUid(int uid, int permissions) {
         SparseIntArray netdPermissionsAppIds = new SparseIntArray();
         netdPermissionsAppIds.put(uid, permissions);
         sendPackagePermissionsToNetd(netdPermissionsAppIds);
@@ -462,12 +464,9 @@ public class PermissionMonitor {
      *
      * @hide
      */
-    private void sendPackagePermissionsToNetd(SparseIntArray netdPermissionsAppIds) {
-        INetd netdService = NetdService.getInstance();
-        if (netdService == null) {
-            Log.e(TAG, "Failed to get the netd service");
-            return;
-        }
+    @VisibleForTesting
+    void sendPackagePermissionsToNetd(SparseIntArray netdPermissionsAppIds) {
+
         ArrayList<Integer> allPermissionAppIds = new ArrayList<>();
         ArrayList<Integer> internetPermissionAppIds = new ArrayList<>();
         ArrayList<Integer> updateStatsPermissionAppIds = new ArrayList<>();
@@ -495,20 +494,20 @@ public class PermissionMonitor {
         try {
             // TODO: add a lock inside netd to protect IPC trafficSetNetPermForUids()
             if (allPermissionAppIds.size() != 0) {
-                netdService.trafficSetNetPermForUids(
+                mNetd.trafficSetNetPermForUids(
                         INetd.PERMISSION_INTERNET | INetd.PERMISSION_UPDATE_DEVICE_STATS,
                         ArrayUtils.convertToIntArray(allPermissionAppIds));
             }
             if (internetPermissionAppIds.size() != 0) {
-                netdService.trafficSetNetPermForUids(INetd.PERMISSION_INTERNET,
+                mNetd.trafficSetNetPermForUids(INetd.PERMISSION_INTERNET,
                         ArrayUtils.convertToIntArray(internetPermissionAppIds));
             }
             if (updateStatsPermissionAppIds.size() != 0) {
-                netdService.trafficSetNetPermForUids(INetd.PERMISSION_UPDATE_DEVICE_STATS,
+                mNetd.trafficSetNetPermForUids(INetd.PERMISSION_UPDATE_DEVICE_STATS,
                         ArrayUtils.convertToIntArray(updateStatsPermissionAppIds));
             }
             if (uninstalledAppIds.size() != 0) {
-                netdService.trafficSetNetPermForUids(INetd.NO_PERMISSIONS,
+                mNetd.trafficSetNetPermForUids(INetd.NO_PERMISSIONS,
                         ArrayUtils.convertToIntArray(uninstalledAppIds));
             }
         } catch (RemoteException e) {

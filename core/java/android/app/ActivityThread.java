@@ -5694,6 +5694,10 @@ public final class ActivityThread extends ClientTransactionHandler {
                                                 UserHandle.myUserId());
         VMRuntime.setProcessPackageName(data.appInfo.packageName);
 
+        // Pass data directory path to ART. This is used for caching information and
+        // should be set before any application code is loaded.
+        VMRuntime.setProcessDataDirectory(data.appInfo.dataDir);
+
         if (mProfiler.profileFd != null) {
             mProfiler.startProfiling();
         }

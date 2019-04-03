@@ -122,7 +122,7 @@ public class TetheringConfigurationTest {
         mMockContext = new MockContext(mContext);
     }
 
-    private TetheringConfiguration getTetheringConfiguration(int[] legacyTetherUpstreamTypes) {
+    private TetheringConfiguration getTetheringConfiguration(int... legacyTetherUpstreamTypes) {
         when(mResources.getIntArray(config_tether_upstream_types)).thenReturn(
                 legacyTetherUpstreamTypes);
         return new TetheringConfiguration(mMockContext, mLog, INVALID_SUBSCRIPTION_ID);
@@ -143,13 +143,13 @@ public class TetheringConfigurationTest {
     public void testDunFromTelephonyManagerMeansDun() {
         when(mTelephonyManager.getTetherApnRequired()).thenReturn(true);
 
-        final TetheringConfiguration cfgWifi = getTetheringConfiguration(new int[]{TYPE_WIFI});
+        final TetheringConfiguration cfgWifi = getTetheringConfiguration(TYPE_WIFI);
         final TetheringConfiguration cfgMobileWifiHipri = getTetheringConfiguration(
-                new int[]{TYPE_MOBILE, TYPE_WIFI, TYPE_MOBILE_HIPRI});
+                TYPE_MOBILE, TYPE_WIFI, TYPE_MOBILE_HIPRI);
         final TetheringConfiguration cfgWifiDun = getTetheringConfiguration(
-                new int[]{TYPE_WIFI, TYPE_MOBILE_DUN});
+                TYPE_WIFI, TYPE_MOBILE_DUN);
         final TetheringConfiguration cfgMobileWifiHipriDun = getTetheringConfiguration(
-                new int[]{TYPE_MOBILE, TYPE_WIFI, TYPE_MOBILE_HIPRI, TYPE_MOBILE_DUN});
+                TYPE_MOBILE, TYPE_WIFI, TYPE_MOBILE_HIPRI, TYPE_MOBILE_DUN);
 
         for (TetheringConfiguration cfg : Arrays.asList(cfgWifi, cfgMobileWifiHipri,
                 cfgWifiDun, cfgMobileWifiHipriDun)) {
@@ -167,20 +167,20 @@ public class TetheringConfigurationTest {
     public void testDunNotRequiredFromTelephonyManagerMeansNoDun() {
         when(mTelephonyManager.getTetherApnRequired()).thenReturn(false);
 
-        final TetheringConfiguration cfgWifi = getTetheringConfiguration(new int[]{TYPE_WIFI});
+        final TetheringConfiguration cfgWifi = getTetheringConfiguration(TYPE_WIFI);
         final TetheringConfiguration cfgMobileWifiHipri = getTetheringConfiguration(
-                new int[]{TYPE_MOBILE, TYPE_WIFI, TYPE_MOBILE_HIPRI});
+                TYPE_MOBILE, TYPE_WIFI, TYPE_MOBILE_HIPRI);
         final TetheringConfiguration cfgWifiDun = getTetheringConfiguration(
-                new int[]{TYPE_WIFI, TYPE_MOBILE_DUN});
+                TYPE_WIFI, TYPE_MOBILE_DUN);
         final TetheringConfiguration cfgWifiMobile = getTetheringConfiguration(
-                new int[]{TYPE_WIFI, TYPE_MOBILE});
+                TYPE_WIFI, TYPE_MOBILE);
         final TetheringConfiguration cfgWifiHipri = getTetheringConfiguration(
-                new int[]{TYPE_WIFI, TYPE_MOBILE_HIPRI});
+                TYPE_WIFI, TYPE_MOBILE_HIPRI);
         final TetheringConfiguration cfgMobileWifiHipriDun = getTetheringConfiguration(
-                new int[]{TYPE_MOBILE, TYPE_WIFI, TYPE_MOBILE_HIPRI, TYPE_MOBILE_DUN});
+                TYPE_MOBILE, TYPE_WIFI, TYPE_MOBILE_HIPRI, TYPE_MOBILE_DUN);
 
         String msg;
-        // TYPE_MOBILE_DUN should not be present in all of the combinations.
+        // TYPE_MOBILE_DUN should be present in none of the combinations.
         // TYPE_WIFI should not be affected.
         for (TetheringConfiguration cfg : Arrays.asList(cfgWifi, cfgMobileWifiHipri, cfgWifiDun,
                 cfgWifiMobile, cfgWifiHipri, cfgMobileWifiHipriDun)) {
