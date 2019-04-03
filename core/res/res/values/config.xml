@@ -2442,6 +2442,16 @@
     <!-- Maximum number of users we allow to be running at a time -->
     <integer name="config_multiuserMaxRunningUsers">3</integer>
 
+    <!-- Whether to delay user data locking for background user.
+         If false, user switched-out from user switching will still be in running state until
+         config_multiuserMaxRunningUsers is reached. Once config_multiuserMaxRunningUsers is
+         reached, user will be stopped and user data is locked.
+         If true, user switched out from user switching will always be stopped but its user data
+         is not locked. Total number of unlocked users will be limited by
+         config_multiuserMaxRunningUsers. Once that limit is reached, least recently stopped user
+         will be locked. -->
+    <bool name="config_multiuserDelayUserDataLocking">false</bool>
+
     <!-- Whether UI for multi user should be shown -->
     <bool name="config_enableMultiUserUI">false</bool>
 

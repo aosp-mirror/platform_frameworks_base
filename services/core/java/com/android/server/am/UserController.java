@@ -241,6 +241,20 @@ class UserController implements Handler.Callback {
 
     volatile boolean mBootCompleted;
 
+    /**
+     * In this mode, user is always stopped when switched out but locking of user data is
+     * postponed until total number of unlocked users in the system reaches mMaxRunningUsers.
+     * Once total number of unlocked users reach mMaxRunningUsers, least recentely used user
+     * will be locked.
+     */
+    boolean mDelayUserDataLocking;
+    /**
+     * Keep track of last active users for mDelayUserDataLocking.
+     * The latest stopped user is placed in front while the least recently stopped user in back.
+     */
+    @GuardedBy("mLock")
+    private final ArrayList<Integer> mLastActiveUsers = new ArrayList<>();
+
     UserController(ActivityManagerService service) {
         this(new Injector(service));
     }
@@ -738,7 +752,9 @@ class UserController implements Handler.Callback {
     void finishUserStopped(UserState uss) {
         final int userId = uss.mHandle.getIdentifier();
         final boolean stopped;
+        boolean lockUser = true;
         ArrayList<IStopUserCallback> callbacks;
+        int userIdToLock = userId;
         synchronized (mLock) {
             callbacks = new ArrayList<>(uss.mStopCallbacks);
             if (mStartedUsers.get(userId) != uss || uss.state != UserState.STATE_SHUTDOWN) {
@@ -749,9 +765,12 @@ class UserController implements Handler.Callback {
                 mStartedUsers.remove(userId);
                 mUserLru.remove(Integer.valueOf(userId));
                 updateStartedUserArrayLU();
+                userIdToLock = updateUserToLockLU(userId);
+                if (userIdToLock == UserHandle.USER_NULL) {
+                    lockUser = false;
+                }
             }
         }
-
         if (stopped) {
             mInjector.getUserManagerInternal().removeUserState(userId);
             mInjector.activityManagerOnUserStopped(userId);
@@ -776,23 +795,60 @@ class UserController implements Handler.Callback {
                 mInjector.getUserManager().removeUserEvenWhenDisallowed(userId);
             }
 
+            if (!lockUser) {
+                return;
+            }
+            final int userIdToLockF = userIdToLock;
             // Evict the user's credential encryption key. Performed on FgThread to make it
             // serialized with call to UserManagerService.onBeforeUnlockUser in finishUserUnlocking
             // to prevent data corruption.
             FgThread.getHandler().post(() -> {
                 synchronized (mLock) {
-                    if (mStartedUsers.get(userId) != null) {
+                    if (mStartedUsers.get(userIdToLockF) != null) {
                         Slog.w(TAG, "User was restarted, skipping key eviction");
                         return;
                     }
                 }
                 try {
-                    getStorageManager().lockUserKey(userId);
+                    mInjector.getStorageManager().lockUserKey(userIdToLockF);
                 } catch (RemoteException re) {
                     throw re.rethrowAsRuntimeException();
                 }
             });
         }
+    }
+
+    /**
+     * For mDelayUserDataLocking mode, storage once unlocked is kept unlocked.
+     * Total number of unlocked user storage is limited by mMaxRunningUsers.
+     * If there are more unlocked users, evict and lock the least recently stopped user and
+     * lock that user's data. Regardless of the mode, ephemeral user is always locked
+     * immediately.
+     *
+     * @return user id to lock. UserHandler.USER_NULL will be returned if no user should be locked.
+     */
+    @GuardedBy("mLock")
+    private int updateUserToLockLU(int userId) {
+        int userIdToLock = userId;
+        if (mDelayUserDataLocking && !getUserInfo(userId).isEphemeral()
+                && !hasUserRestriction(UserManager.DISALLOW_RUN_IN_BACKGROUND, userId)) {
+            mLastActiveUsers.remove((Integer) userId); // arg should be object, not index
+            mLastActiveUsers.add(0, userId);
+            int totalUnlockedUsers = mStartedUsers.size() + mLastActiveUsers.size();
+            if (totalUnlockedUsers > mMaxRunningUsers) { // should lock a user
+                userIdToLock = mLastActiveUsers.get(mLastActiveUsers.size() - 1);
+                mLastActiveUsers.remove(mLastActiveUsers.size() - 1);
+                Slog.i(TAG, "finishUserStopped, stopping user:" + userId
+                        + " lock user:" + userIdToLock);
+            } else {
+                Slog.i(TAG, "finishUserStopped, user:" + userId
+                        + ",skip locking");
+                // do not lock
+                userIdToLock = UserHandle.USER_NULL;
+
+            }
+        }
+        return userIdToLock;
     }
 
     /**
@@ -896,9 +952,6 @@ class UserController implements Handler.Callback {
         }
     }
 
-    private IStorageManager getStorageManager() {
-        return IStorageManager.Stub.asInterface(ServiceManager.getService("mount"));
-    }
     boolean startUser(final int userId, final boolean foreground) {
         return startUser(userId, foreground, null);
     }
@@ -1199,7 +1252,7 @@ class UserController implements Handler.Callback {
         UserState uss;
         if (!StorageManager.isUserKeyUnlocked(userId)) {
             final UserInfo userInfo = getUserInfo(userId);
-            final IStorageManager storageManager = getStorageManager();
+            final IStorageManager storageManager = mInjector.getStorageManager();
             try {
                 // We always want to unlock user storage, even user is not started yet
                 storageManager.unlockUserKey(userId, userInfo.serialNumber, token, secret);
@@ -1334,9 +1387,9 @@ class UserController implements Handler.Callback {
         if (oldUserId == UserHandle.USER_SYSTEM) {
             return;
         }
-        // For now, only check for user restriction. Additional checks can be added here
+        // If running in background is disabled or mDelayUserDataLocking mode, stop the user.
         boolean disallowRunInBg = hasUserRestriction(UserManager.DISALLOW_RUN_IN_BACKGROUND,
-                oldUserId);
+                oldUserId) || mDelayUserDataLocking;
         if (!disallowRunInBg) {
             return;
         }
@@ -2033,6 +2086,8 @@ class UserController implements Handler.Callback {
                     pw.println(mUserProfileGroupIds.valueAt(i));
                 }
             }
+            pw.println("  mCurrentUserId:" + mCurrentUserId);
+            pw.println("  mLastActiveUsers:" + mLastActiveUsers);
         }
     }
 
@@ -2325,6 +2380,10 @@ class UserController implements Handler.Callback {
 
         protected boolean isCallerRecents(int callingUid) {
             return mService.mAtmInternal.isCallerRecents(callingUid);
+        }
+
+        protected IStorageManager getStorageManager() {
+            return IStorageManager.Stub.asInterface(ServiceManager.getService("mount"));
         }
     }
 }
