@@ -41,6 +41,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.InputDevice;
 import android.view.InputEvent;
+import android.view.InputMonitor;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
 
@@ -928,6 +929,19 @@ public final class InputManager {
     public void requestPointerCapture(IBinder windowToken, boolean enable) {
         try {
             mIm.requestPointerCapture(windowToken, enable);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Monitor input on the specified display for gestures.
+     *
+     * @hide
+     */
+    public InputMonitor monitorGestureInput(String name, int displayId) {
+        try {
+            return mIm.monitorGestureInput(name, displayId);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }

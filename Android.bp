@@ -375,6 +375,7 @@ java_defaults {
         "core/java/android/view/IDisplayFoldListener.aidl",
         "core/java/android/view/IGraphicsStats.aidl",
         "core/java/android/view/IGraphicsStatsCallback.aidl",
+        "core/java/android/view/IInputMonitorHost.aidl",
         "core/java/android/view/IInputFilter.aidl",
         "core/java/android/view/IInputFilterHost.aidl",
         "core/java/android/view/IOnKeyguardExitResult.aidl",
