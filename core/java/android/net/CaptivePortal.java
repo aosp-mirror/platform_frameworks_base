@@ -137,6 +137,8 @@ public class CaptivePortal implements Parcelable {
 
     /**
      * Log a captive portal login event.
+     * @param eventId one of the CAPTIVE_PORTAL_LOGIN_* constants in metrics_constants.proto.
+     * @param packageName captive portal application package name.
      * @hide
      */
     @SystemApi
