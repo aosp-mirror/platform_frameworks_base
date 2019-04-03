@@ -27,8 +27,10 @@ import androidx.slice.SliceProvider;
 import androidx.slice.SliceSpecs;
 import androidx.slice.builders.ListBuilder;
 
+import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
+import com.android.systemui.util.InjectionInflationController;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -49,7 +51,11 @@ public class KeyguardSliceViewTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         com.android.systemui.util.Assert.sMainLooper = TestableLooper.get(this).getLooper();
-        mKeyguardSliceView = (KeyguardSliceView) LayoutInflater.from(getContext())
+        InjectionInflationController inflationController = new InjectionInflationController(
+                SystemUIFactory.getInstance().getRootComponent());
+        LayoutInflater layoutInflater = inflationController
+                .injectable(LayoutInflater.from(getContext()));
+        mKeyguardSliceView = (KeyguardSliceView) layoutInflater
                 .inflate(R.layout.keyguard_status_area, null);
         mSliceUri = Uri.parse(KeyguardSliceProvider.KEYGUARD_SLICE_URI);
         SliceProvider.setSpecs(new HashSet<>(Collections.singletonList(SliceSpecs.LIST)));
