@@ -2680,10 +2680,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * MAXIMUM resolutions and anything smaller from the list given by
      * {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputSizes } are
      * guaranteed to work.
-     * The mandatory stream combination array will be {@code null} in case the device is a
-     * physical camera not independently exposed in
-     * {@link android.hardware.camera2.CameraManager#getCameraIdList } or is not backward
-     * compatible.</p>
+     * For a physical camera not independently exposed in
+     * {@link android.hardware.camera2.CameraManager#getCameraIdList }, the mandatory stream
+     * combinations for that physical camera Id are also generated, so that the application can
+     * configure them as physical streams via the logical camera.
+     * The mandatory stream combination array will be {@code null} in case the device is not
+     * backward compatible.</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Limited capability</b> -
      * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
@@ -3894,6 +3896,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>In both cases, all images generated for a particular capture request still carry the same
      * timestamps, so that they can be used to look up the matching frame number and
      * onCaptureStarted callback.</p>
+     * <p>This tag is only applicable if the logical camera device supports concurrent physical
+     * streams from different physical cameras.</p>
      * <p><b>Possible values:</b>
      * <ul>
      *   <li>{@link #LOGICAL_MULTI_CAMERA_SENSOR_SYNC_TYPE_APPROXIMATE APPROXIMATE}</li>
