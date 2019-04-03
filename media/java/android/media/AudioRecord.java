@@ -769,6 +769,7 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
         if ( (audioSource < MediaRecorder.AudioSource.DEFAULT) ||
              ((audioSource > MediaRecorder.getAudioSourceMax()) &&
               (audioSource != MediaRecorder.AudioSource.RADIO_TUNER) &&
+              (audioSource != MediaRecorder.AudioSource.ECHO_REFERENCE) &&
               (audioSource != MediaRecorder.AudioSource.HOTWORD)) )  {
             throw new IllegalArgumentException("Invalid audio source " + audioSource);
         }
