@@ -1602,7 +1602,7 @@
     <string name="inline_done_button">Done</string>
 
     <!-- Notification Inline controls: button to dismiss the blocking helper [CHAR_LIMIT=20] -->
-    <string name="inline_ok_button">OK</string>
+    <string name="inline_ok_button">Apply</string>
 
     <!-- Notification Inline controls: continue receiving notifications prompt, channel level -->
     <string name="inline_keep_showing">Keep showing these notifications?</string>
@@ -1623,16 +1623,19 @@
     <string name="inline_minimize_button">Minimize</string>
 
     <!-- Notification inline controls: button to show notifications silently, without alerting the user [CHAR_LIMIT=35] -->
-    <string name="inline_silent_button_silent">Show silently</string>
+    <string name="inline_silent_button_silent">Gentle</string>
 
     <!-- Notification inline controls: button to continue showing notifications silently [CHAR_LIMIT=35] -->
     <string name="inline_silent_button_stay_silent">Stay silent</string>
 
     <!-- Notification inline controls: button to make notifications alert the user [CHAR_LIMIT=35] -->
-    <string name="inline_silent_button_alert">Alert</string>
+    <string name="inline_silent_button_alert">Interruptive</string>
 
     <!-- Notification inline controls: button to continue alerting the user when notifications arrive [CHAR_LIMIT=35] -->
     <string name="inline_silent_button_keep_alerting">Keep alerting</string>
+
+    <!-- Notification inline controls: button to show block screen [CHAR_LIMIT=35] -->
+    <string name="inline_turn_off_notifications">Turn off notifications</string>
 
     <!-- Notification Inline controls: continue receiving notifications prompt, app level -->
     <string name="inline_keep_showing_app">Keep showing notifications from this app?</string>
@@ -1644,10 +1647,13 @@
     <string name="hint_text_silent">Silent notifications appear in the shade, but do not appear on the lock screen, present a banner, or play a sound.</string>
 
     <!-- Hint text for alert button in the interruptiveness settings [CHAR_LIMIT=NONE]-->
-    <string name="hint_text_alert">Alerted notifications appear in the shade, on the lock screen, present a banner, and play a sound.</string>
+    <string name="hint_text_alert">These notifications will make a sound and show in the notification drawer, status bar, and lock screen</string>
 
     <!-- Notification: Control panel: Label that displays when the app's notifications cannot be blocked. -->
     <string name="notification_unblockable_desc">These notifications can\'t be turned off</string>
+
+    <!-- Notification: Control panel: label that displays when viewing settings for a group of notifications posted to multiple channels. -->
+    <string name="notification_multichannel_desc">This group of notifications cannot be configured here</string>
 
     <!-- Notification: Control panel: Label for the app that posted this notification, if it's not the package that the notification was posted for -->
     <string name="notification_delegate_header">via <xliff:g id="app_name" example="YouTube">%1$s</xliff:g></string>
