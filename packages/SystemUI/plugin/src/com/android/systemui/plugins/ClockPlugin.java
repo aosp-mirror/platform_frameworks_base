@@ -28,7 +28,7 @@ import java.util.TimeZone;
 public interface ClockPlugin extends Plugin {
 
     String ACTION = "com.android.systemui.action.PLUGIN_CLOCK";
-    int VERSION = 3;
+    int VERSION = 4;
 
     /**
      * Get the name of the clock face.
@@ -70,6 +70,14 @@ public interface ClockPlugin extends Plugin {
     default View getBigClockView() {
         return null;
     }
+
+    /**
+     * Allows the plugin to clean up resources when no longer needed.
+     *
+     * Called when the view previously created by {@link ClockPlugin#getView()} has been detached
+     * from the view hierarchy.
+     */
+    void onDestroyView();
 
     /**
      * Set clock paint style.
