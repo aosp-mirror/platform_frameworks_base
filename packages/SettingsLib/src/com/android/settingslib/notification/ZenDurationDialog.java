@@ -210,7 +210,6 @@ public class ZenDurationDialog {
     private void setupUi(ConditionTag tag, View row) {
         if (tag.lines == null) {
             tag.lines = row.findViewById(android.R.id.content);
-            tag.lines.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
         }
 
         if (tag.line1 == null) {
