@@ -129,6 +129,7 @@ cc_library_shared {
         // NDK or LLNDK or NDK-compliant
         "libandroid",
         "libbinder_ndk",
+        "libcgrouprc",
         "libmediandk",
         "libmediametrics",
         "libnativehelper_compat_libc++",
