@@ -99,6 +99,14 @@ public class TypeClockController implements ClockPlugin {
     }
 
     @Override
+    public void onDestroyView() {
+        mView = null;
+        mTypeClock = null;
+        mLockClock = null;
+        mDarkController = null;
+    }
+
+    @Override
     public String getName() {
         return "type";
     }

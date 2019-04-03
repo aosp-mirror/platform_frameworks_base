@@ -187,6 +187,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
                 mBigClockContainer.removeAllViews();
                 updateBigClockVisibility();
             }
+            mClockPlugin.onDestroyView();
             mClockPlugin = null;
         }
         if (plugin == null) {

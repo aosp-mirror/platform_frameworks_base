@@ -93,6 +93,13 @@ public class DefaultClockController implements ClockPlugin {
     }
 
     @Override
+    public void onDestroyView() {
+        mView = null;
+        mTextTime = null;
+        mTextDate = null;
+    }
+
+    @Override
     public String getName() {
         return "default";
     }

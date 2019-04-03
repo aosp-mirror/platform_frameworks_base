@@ -101,6 +101,17 @@ public class StretchAnalogClockController implements ClockPlugin {
         mDarkController = new CrossFadeDarkController(mDigitalClock, mLockClock);
     }
 
+
+    @Override
+    public void onDestroyView() {
+        mBigClockView = null;
+        mDigitalClock = null;
+        mAnalogClock = null;
+        mView = null;
+        mLockClock = null;
+        mDarkController = null;
+    }
+
     @Override
     public String getName() {
         return "stretch";
