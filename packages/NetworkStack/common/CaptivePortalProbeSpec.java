@@ -19,16 +19,12 @@ package android.net.captiveportal;
 import static android.net.captiveportal.CaptivePortalProbeResult.PORTAL_CODE;
 import static android.net.captiveportal.CaptivePortalProbeResult.SUCCESS_CODE;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
-
-import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.android.internal.annotations.VisibleForTesting;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -40,8 +36,6 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 /** @hide */
-@SystemApi
-@TestApi
 public abstract class CaptivePortalProbeSpec {
     private static final String TAG = CaptivePortalProbeSpec.class.getSimpleName();
     private static final String REGEX_SEPARATOR = "@@/@@";
@@ -191,5 +185,11 @@ public abstract class CaptivePortalProbeSpec {
     private static boolean safeMatch(@Nullable String value, @Nullable Pattern pattern) {
         // No value is a match ("no location header" passes the location rule for non-redirects)
         return pattern == null || TextUtils.isEmpty(value) || pattern.matcher(value).matches();
+    }
+
+    // Throws NullPointerException if the input is null.
+    private static <T> T checkNotNull(T object) {
+        if (object == null) throw new NullPointerException();
+        return object;
     }
 }
