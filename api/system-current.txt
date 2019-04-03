@@ -5143,10 +5143,6 @@ package android.os {
   }
 
   public class Binder implements android.os.IBinder {
-    method public static final long clearCallingWorkSource();
-    method public static final int getCallingWorkSourceUid();
-    method public static final void restoreCallingWorkSource(long);
-    method public static final long setCallingWorkSourceUid(int);
     method public static void setProxyTransactListener(@Nullable android.os.Binder.ProxyTransactListener);
   }
 
