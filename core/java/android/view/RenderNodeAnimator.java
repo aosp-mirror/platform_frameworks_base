@@ -26,6 +26,7 @@ import android.graphics.RecordingCanvas;
 import android.graphics.RenderNode;
 import android.os.Build;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.SparseIntArray;
 
 import com.android.internal.util.VirtualRefBasePtr;
@@ -191,6 +192,9 @@ public class RenderNodeAnimator extends Animator {
         }
 
         mState = STATE_DELAYED;
+        if (mHandler == null) {
+            mHandler = new Handler(true);
+        }
         applyInterpolator();
 
         if (mNativePtr == null) {
@@ -224,9 +228,6 @@ public class RenderNodeAnimator extends Animator {
     private void moveToRunningState() {
         mState = STATE_RUNNING;
         if (mNativePtr != null) {
-            if (mHandler == null) {
-                mHandler = new Handler();
-            }
             nStart(mNativePtr.get());
         }
         notifyStartListeners();
@@ -503,7 +504,11 @@ public class RenderNodeAnimator extends Animator {
     // Called by native
     @UnsupportedAppUsage
     private static void callOnFinished(RenderNodeAnimator animator) {
-        animator.mHandler.post(animator::onFinished);
+        if (animator.mHandler != null) {
+            animator.mHandler.post(animator::onFinished);
+        } else {
+            new Handler(Looper.getMainLooper(), null, true).post(animator::onFinished);
+        }
     }
 
     @Override
