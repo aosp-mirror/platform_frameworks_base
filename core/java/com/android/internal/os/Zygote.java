@@ -197,9 +197,6 @@ public final class Zygote {
 
     private Zygote() {}
 
-    /** Called for some security initialization before any fork. */
-    static native void nativeSecurityInit();
-
     /**
      * Forks a new VM instance.  The current VM must have been started
      * with the -Xzygote flag. <b>NOTE: new instance keeps all
@@ -384,22 +381,19 @@ public final class Zygote {
     native protected static void nativeInstallSeccompUidGidFilter(int uidGidMin, int uidGidMax);
 
     /**
-     * Zygote unmount storage space on initializing.
-     * This method is called once.
-     */
-    protected static native void nativeUnmountStorageOnInit();
-
-    /**
-     * Get socket file descriptors (opened by init) from the environment and
-     * store them for access from native code later.
+     * Initialize the native state of the Zygote.  This inclues
+     *   - Fetching socket FDs from the environment
+     *   - Initializing security properties
+     *   - Unmounting storage as appropriate
+     *   - Loading necessary performance profile information
      *
      * @param isPrimary  True if this is the zygote process, false if it is zygote_secondary
      */
-    public static void getSocketFDs(boolean isPrimary) {
-        nativeGetSocketFDs(isPrimary);
+    static void initNativeState(boolean isPrimary) {
+        nativeInitNativeState(isPrimary);
     }
 
-    protected static native void nativeGetSocketFDs(boolean isPrimary);
+    protected static native void nativeInitNativeState(boolean isPrimary);
 
     /**
      * Returns the raw string value of a system property.
