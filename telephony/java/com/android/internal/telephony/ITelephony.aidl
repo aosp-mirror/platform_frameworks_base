@@ -1265,6 +1265,11 @@ interface ITelephony {
      */
     int getSubIdForPhoneAccount(in PhoneAccount phoneAccount);
 
+    /**
+     * Returns the PhoneAccountHandle associated with a subscription ID.
+     */
+    PhoneAccountHandle getPhoneAccountHandleForSubscriptionId(int subscriptionId);
+
     void factoryReset(int subId);
 
     /**
