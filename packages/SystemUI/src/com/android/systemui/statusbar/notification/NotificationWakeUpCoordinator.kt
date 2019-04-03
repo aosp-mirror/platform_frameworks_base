@@ -163,6 +163,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
     private fun handleAnimationFinished() {
         if (mLinearDozeAmount == 0.0f || mLinearVisibilityAmount == 0.0f) {
             mEntrySetToClearWhenFinished.forEach { it.setAmbientGoingAway(false) }
+            mEntrySetToClearWhenFinished.clear()
         }
     }
 
