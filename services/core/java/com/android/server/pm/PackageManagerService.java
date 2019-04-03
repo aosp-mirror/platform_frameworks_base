@@ -14849,7 +14849,6 @@ public class PackageManagerService extends IPackageManager.Stub
                         }
                     }
 
-                    // TODO(ruhler) b/112431924: What user? Test for multi-user.
                     Intent enableRollbackIntent = new Intent(Intent.ACTION_PACKAGE_ENABLE_ROLLBACK);
                     enableRollbackIntent.putExtra(
                             PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_TOKEN,
@@ -14871,7 +14870,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     // it will not miss the broadcast.
                     enableRollbackIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
 
-                    mContext.sendOrderedBroadcastAsUser(enableRollbackIntent, getUser(),
+                    mContext.sendOrderedBroadcastAsUser(enableRollbackIntent, UserHandle.SYSTEM,
                             android.Manifest.permission.PACKAGE_ROLLBACK_AGENT,
                             new BroadcastReceiver() {
                                 @Override
