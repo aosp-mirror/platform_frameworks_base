@@ -403,7 +403,7 @@ public class UserSwitcherController implements Dumpable {
         final int N = mUsers.size();
         for (int i = 0; i < N; ++i) {
             UserRecord record = mUsers.get(i);
-            if (record.info != null && record.info.supportsSwitchTo()) {
+            if (record.info != null && record.info.supportsSwitchToByUser()) {
                 count++;
             }
         }
