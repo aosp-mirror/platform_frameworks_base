@@ -657,6 +657,7 @@ public abstract class BiometricServiceBase extends SystemService
         Slog.e(getTag(), "HAL died");
         mMetricsLogger.count(getMetrics().tagHalDied(), 1);
         mHALDeathCount++;
+        mCurrentUserId = UserHandle.USER_NULL;
         handleError(getHalDeviceId(), BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
                 0 /*vendorCode */);
 
