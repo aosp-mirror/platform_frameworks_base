@@ -86,6 +86,7 @@ class BubbleTouchHandler implements View.OnTouchListener {
         }
 
         final boolean isStack = mStack.equals(mTouchedView);
+        final boolean isFlyout = mStack.getFlyoutView().equals(mTouchedView);
         final float rawX = event.getRawX();
         final float rawY = event.getRawY();
 
@@ -104,6 +105,8 @@ class BubbleTouchHandler implements View.OnTouchListener {
                 if (isStack) {
                     mViewPositionOnTouchDown.set(mStack.getStackPosition());
                     mStack.onDragStart();
+                } else if (isFlyout) {
+                    // TODO(b/129768381): Make the flyout dismissable with a gesture.
                 } else {
                     mViewPositionOnTouchDown.set(
                             mTouchedView.getTranslationX(), mTouchedView.getTranslationY());
@@ -123,6 +126,8 @@ class BubbleTouchHandler implements View.OnTouchListener {
                 if (mMovedEnough) {
                     if (isStack) {
                         mStack.onDragged(viewX, viewY);
+                    } else if (isFlyout) {
+                        // TODO(b/129768381): Make the flyout dismissable with a gesture.
                     } else {
                         mStack.onBubbleDragged(mTouchedView, viewX, viewY);
                     }
@@ -141,6 +146,11 @@ class BubbleTouchHandler implements View.OnTouchListener {
                 trackMovement(event);
                 if (mInDismissTarget && isStack) {
                     mController.dismissStack(BubbleController.DISMISS_USER_GESTURE);
+                } else if (isFlyout) {
+                    // TODO(b/129768381): Expand if tapped, dismiss if swiped away.
+                    if (!mStack.isExpanded()) {
+                        mStack.expandStack();
+                    }
                 } else if (mMovedEnough) {
                     mVelocityTracker.computeCurrentVelocity(/* maxVelocity */ 1000);
                     final float velX = mVelocityTracker.getXVelocity();

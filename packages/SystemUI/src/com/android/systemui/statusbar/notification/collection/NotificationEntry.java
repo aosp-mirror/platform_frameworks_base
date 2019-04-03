@@ -41,6 +41,7 @@ import android.os.SystemClock;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.view.View;
 import android.widget.ImageView;
@@ -51,6 +52,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ContrastColorUtil;
+import com.android.systemui.R;
 import com.android.systemui.statusbar.InflationTask;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.InflationException;
@@ -390,6 +392,72 @@ public final class NotificationEntry {
         mCachedContrastColorIsFor = rawColor;
         mCachedContrastColor = contrasted;
         return mCachedContrastColor;
+    }
+
+    /**
+     * Returns our best guess for the most relevant text summary of the latest update to this
+     * notification, based on its type. Returns null if there should not be an update message.
+     */
+    public CharSequence getUpdateMessage(Context context) {
+        final Notification underlyingNotif = notification.getNotification();
+        final Class<? extends Notification.Style> style = underlyingNotif.getNotificationStyle();
+
+        try {
+            if (Notification.BigTextStyle.class.equals(style)) {
+                // Return the big text, it is big so probably important. If it's not there use the
+                // normal text.
+                CharSequence bigText =
+                        underlyingNotif.extras.getCharSequence(Notification.EXTRA_BIG_TEXT);
+                return !TextUtils.isEmpty(bigText)
+                        ? bigText
+                        : underlyingNotif.extras.getCharSequence(Notification.EXTRA_TEXT);
+            } else if (Notification.MessagingStyle.class.equals(style)) {
+                final List<Notification.MessagingStyle.Message> messages =
+                        Notification.MessagingStyle.Message.getMessagesFromBundleArray(
+                                (Parcelable[]) underlyingNotif.extras.get(
+                                        Notification.EXTRA_MESSAGES));
+
+                final Notification.MessagingStyle.Message latestMessage =
+                        Notification.MessagingStyle.findLatestIncomingMessage(messages);
+
+                if (latestMessage != null) {
+                    final CharSequence personName = latestMessage.getSenderPerson() != null
+                            ? latestMessage.getSenderPerson().getName()
+                            : null;
+
+                    // Prepend the sender name if available since group chats also use messaging
+                    // style.
+                    if (!TextUtils.isEmpty(personName)) {
+                        return context.getResources().getString(
+                                R.string.notification_summary_message_format,
+                                personName,
+                                latestMessage.getText());
+                    } else {
+                        return latestMessage.getText();
+                    }
+                }
+            } else if (Notification.InboxStyle.class.equals(style)) {
+                CharSequence[] lines =
+                        underlyingNotif.extras.getCharSequenceArray(Notification.EXTRA_TEXT_LINES);
+
+                // Return the last line since it should be the most recent.
+                if (lines != null && lines.length > 0) {
+                    return lines[lines.length - 1];
+                }
+            } else if (Notification.MediaStyle.class.equals(style)) {
+                // Return nothing, media updates aren't typically useful as a text update.
+                return null;
+            } else {
+                // Default to text extra.
+                return underlyingNotif.extras.getCharSequence(Notification.EXTRA_TEXT);
+            }
+        } catch (ClassCastException | NullPointerException | ArrayIndexOutOfBoundsException e) {
+            // No use crashing, we'll just return null and the caller will assume there's no update
+            // message.
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     /**

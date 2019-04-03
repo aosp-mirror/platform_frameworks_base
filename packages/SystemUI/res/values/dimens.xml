@@ -1035,6 +1035,12 @@
 
     <!-- How much each bubble is elevated. -->
     <dimen name="bubble_elevation">1dp</dimen>
+    <!-- How much the bubble flyout text container is elevated. -->
+    <dimen name="bubble_flyout_elevation">4dp</dimen>
+    <!-- How much padding is around the flyout text. -->
+    <dimen name="bubble_flyout_padding">16dp</dimen>
+    <!-- The maximum width of a bubble flyout. -->
+    <dimen name="bubble_flyout_maxwidth">200dp</dimen>
     <!-- Padding around a collapsed bubble -->
     <dimen name="bubble_view_padding">0dp</dimen>
     <!-- Padding between bubbles when displayed in expanded state -->

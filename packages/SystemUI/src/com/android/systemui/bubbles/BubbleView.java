@@ -27,7 +27,6 @@ import android.graphics.drawable.Icon;
 import android.graphics.drawable.InsetDrawable;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
-import android.widget.TextView;
 
 import com.android.internal.graphics.ColorUtils;
 import com.android.systemui.Interpolators;
@@ -49,7 +48,6 @@ public class BubbleView extends FrameLayout {
     private Context mContext;
 
     private BadgedImageView mBadgedImageView;
-    private TextView mMessageView;
     private int mPadding;
     private int mIconInset;
 
@@ -78,42 +76,12 @@ public class BubbleView extends FrameLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mBadgedImageView = (BadgedImageView) findViewById(R.id.bubble_image);
-        mMessageView = (TextView) findViewById(R.id.message_view);
-        mMessageView.setVisibility(GONE);
-        mMessageView.setPivotX(0);
+        mBadgedImageView = findViewById(R.id.bubble_image);
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-    }
-
-    @Override
-    protected void onMeasure(int widthSpec, int heightSpec) {
-        measureChild(mBadgedImageView, widthSpec, heightSpec);
-        measureChild(mMessageView, widthSpec, heightSpec);
-        boolean messageGone = mMessageView.getVisibility() == GONE;
-        int imageHeight = mBadgedImageView.getMeasuredHeight();
-        int imageWidth = mBadgedImageView.getMeasuredWidth();
-        int messageHeight = messageGone ? 0 : mMessageView.getMeasuredHeight();
-        int messageWidth = messageGone ? 0 : mMessageView.getMeasuredWidth();
-        setMeasuredDimension(
-                getPaddingStart() + imageWidth + mPadding + messageWidth + getPaddingEnd(),
-                getPaddingTop() + Math.max(imageHeight, messageHeight) + getPaddingBottom());
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        left = getPaddingStart();
-        top = getPaddingTop();
-        int imageWidth = mBadgedImageView.getMeasuredWidth();
-        int imageHeight = mBadgedImageView.getMeasuredHeight();
-        int messageWidth = mMessageView.getMeasuredWidth();
-        int messageHeight = mMessageView.getMeasuredHeight();
-        mBadgedImageView.layout(left, top, left + imageWidth, top + imageHeight);
-        mMessageView.layout(left + imageWidth + mPadding, top,
-                left + imageWidth + mPadding + messageWidth, top + messageHeight);
     }
 
     /**
