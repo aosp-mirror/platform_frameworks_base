@@ -435,6 +435,7 @@
     </style>
 
     <style name="TextAppearance.NotificationInfo.Primary">
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
         <item name="android:textSize">16sp</item>
         <item name="android:alpha">0.87</item>
     </style>
@@ -471,16 +472,12 @@
     </style>
 
     <style name="TextAppearance.NotificationInfo.Button">
-        <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
-        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
+        <item name="android:textSize">16sp</item>
         <item name="android:textColor">?android:attr/colorAccent</item>
         <item name="android:background">@drawable/btn_borderless_rect</item>
         <item name="android:gravity">center</item>
         <item name="android:focusable">true</item>
-        <item name="android:paddingTop">@dimen/notification_guts_button_vertical_padding</item>
-        <item name="android:paddingBottom">@dimen/notification_guts_button_vertical_padding</item>
-        <item name="android:paddingLeft">@dimen/notification_guts_button_horizontal_padding</item>
-        <item name="android:paddingRight">@dimen/notification_guts_button_horizontal_padding</item>
     </style>
 
     <style name="TextAppearance.HeadsUpStatusBarText"
