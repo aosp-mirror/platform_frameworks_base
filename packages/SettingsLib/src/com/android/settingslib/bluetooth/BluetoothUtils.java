@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -147,6 +148,12 @@ public class BluetoothUtils {
                     : null;
             final Uri iconUri = uriString != null ? Uri.parse(uriString) : null;
             if (iconUri != null) {
+                try {
+                    context.getContentResolver().takePersistableUriPermission(iconUri,
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                } catch (SecurityException e) {
+                    Log.e(TAG, "Failed to take persistable permission for: " + iconUri);
+                }
                 try {
                     final Bitmap bitmap = MediaStore.Images.Media.getBitmap(
                             context.getContentResolver(), iconUri);
