@@ -153,6 +153,7 @@ public class InsetsSourceConsumer {
             return;
         }
         mVisible = visible;
+        applyHiddenToControl();
         applyLocalVisibilityOverride();
         mController.notifyVisibilityChanged();
     }
