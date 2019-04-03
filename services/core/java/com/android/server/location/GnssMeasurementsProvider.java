@@ -105,15 +105,7 @@ public abstract class GnssMeasurementsProvider
     }
 
     /** Handle GNSS capabilities update from the GNSS HAL implementation. */
-    public void onCapabilitiesUpdated(int capabilities, boolean hasSubHalCapabilityFlags) {
-        // The IGnssCallback.hal@2.0 removed sub-HAL capability flags from the Capabilities enum
-        // and instead uses the sub-HAL non-null handle returned from IGnss.hal@2.0 to indicate
-        // support. Therefore, the 'hasSubHalCapabilityFlags' parameter is needed to tell if the
-        // 'capabilities' parameter includes the sub-HAL capability flags or not. Old HALs
-        // which explicitly set the sub-HAL capability bits must continue to work.
-        final boolean isGnssMeasurementsSupported = hasSubHalCapabilityFlags
-                ? (capabilities & GnssLocationProvider.GPS_CAPABILITY_MEASUREMENTS) != 0
-                : mNative.isMeasurementSupported();
+    public void onCapabilitiesUpdated(boolean isGnssMeasurementsSupported) {
         setSupported(isGnssMeasurementsSupported);
         updateResult();
     }

@@ -52,6 +52,7 @@ import android.location.Address;
 import android.location.Criteria;
 import android.location.GeocoderParams;
 import android.location.Geofence;
+import android.location.GnssCapabilities;
 import android.location.GnssMeasurementCorrections;
 import android.location.IBatchedLocationCallback;
 import android.location.IGnssMeasurementsListener;
@@ -102,6 +103,7 @@ import com.android.server.location.GeocoderProxy;
 import com.android.server.location.GeofenceManager;
 import com.android.server.location.GeofenceProxy;
 import com.android.server.location.GnssBatchingProvider;
+import com.android.server.location.GnssCapabilitiesProvider;
 import com.android.server.location.GnssLocationProvider;
 import com.android.server.location.GnssMeasurementCorrectionsProvider;
 import com.android.server.location.GnssMeasurementsProvider;
@@ -249,8 +251,8 @@ public class LocationManagerService extends ILocationManager.Stub {
     private int[] mCurrentUserProfiles = new int[]{UserHandle.USER_SYSTEM};
 
     private GnssLocationProvider.GnssSystemInfoProvider mGnssSystemInfoProvider;
-
     private GnssLocationProvider.GnssMetricsProvider mGnssMetricsProvider;
+    private GnssCapabilitiesProvider mGnssCapabilitiesProvider;
 
     private GnssBatchingProvider mGnssBatchingProvider;
     @GuardedBy("mLock")
@@ -773,6 +775,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             mGnssSystemInfoProvider = gnssProvider.getGnssSystemInfoProvider();
             mGnssBatchingProvider = gnssProvider.getGnssBatchingProvider();
             mGnssMetricsProvider = gnssProvider.getGnssMetricsProvider();
+            mGnssCapabilitiesProvider = gnssProvider.getGnssCapabilitiesProvider();
             mGnssStatusProvider = gnssProvider.getGnssStatusProvider();
             mNetInitiatedListener = gnssProvider.getNetInitiatedListener();
             mGnssMeasurementsProvider = gnssProvider.getGnssMeasurementsProvider();
@@ -2970,10 +2973,10 @@ public class LocationManagerService extends ILocationManager.Stub {
         mContext.enforceCallingPermission(
                 android.Manifest.permission.LOCATION_HARDWARE,
                 "Location Hardware permission not granted to obtain GNSS chipset capabilities.");
-        if (!hasGnssPermissions(packageName) || mGnssMeasurementCorrectionsProvider == null) {
-            return -1;
+        if (!hasGnssPermissions(packageName) || mGnssCapabilitiesProvider == null) {
+            return GnssCapabilities.INVALID_CAPABILITIES;
         }
-        return mGnssMeasurementCorrectionsProvider.getCapabilities();
+        return mGnssCapabilitiesProvider.getGnssCapabilities();
     }
 
     @Override
