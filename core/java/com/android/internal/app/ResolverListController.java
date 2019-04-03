@@ -253,6 +253,7 @@ public class ResolverListController {
                 isComputed = true;
             }
             Collections.sort(inputList, mResolverComparator);
+
             long afterRank = System.currentTimeMillis();
             if (DEBUG) {
                 Log.d(TAG, "Time Cost: " + Long.toString(afterRank - beforeRank));
@@ -261,6 +262,7 @@ public class ResolverListController {
             Log.e(TAG, "Compute & Sort was interrupted: " + e);
         }
     }
+
 
     private static boolean isSameResolvedComponent(ResolveInfo a,
             ResolverActivity.ResolvedComponentInfo b) {
