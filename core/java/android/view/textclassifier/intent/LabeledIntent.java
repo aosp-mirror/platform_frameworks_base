@@ -56,6 +56,8 @@ public final class LabeledIntent {
     @Nullable
     public final String titleWithEntity;
     public final String description;
+    @Nullable
+    public final String descriptionWithAppName;
     // Do not update this intent.
     public final Intent intent;
     public final int requestCode;
@@ -75,6 +77,7 @@ public final class LabeledIntent {
             @Nullable String titleWithoutEntity,
             @Nullable String titleWithEntity,
             String description,
+            @Nullable String descriptionWithAppName,
             Intent intent,
             int requestCode) {
         if (TextUtils.isEmpty(titleWithEntity) && TextUtils.isEmpty(titleWithoutEntity)) {
@@ -84,6 +87,7 @@ public final class LabeledIntent {
         this.titleWithoutEntity = titleWithoutEntity;
         this.titleWithEntity = titleWithEntity;
         this.description = Preconditions.checkNotNull(description);
+        this.descriptionWithAppName = descriptionWithAppName;
         this.intent = Preconditions.checkNotNull(intent);
         this.requestCode = requestCode;
     }
@@ -141,9 +145,37 @@ public final class LabeledIntent {
             Log.w(TAG, "Custom titleChooser return null, fallback to the default titleChooser");
             title = DEFAULT_TITLE_CHOOSER.chooseTitle(this, resolveInfo);
         }
-        final RemoteAction action = new RemoteAction(icon, title, description, pendingIntent);
+        final RemoteAction action =
+                new RemoteAction(icon, title, resolveDescription(resolveInfo, pm), pendingIntent);
         action.setShouldShowIcon(shouldShowIcon);
         return new Result(resolvedIntent, action);
+    }
+
+    private String resolveDescription(ResolveInfo resolveInfo, PackageManager packageManager) {
+        if (!TextUtils.isEmpty(descriptionWithAppName)) {
+            // Example string format of descriptionWithAppName: "Use %1$s to open map".
+            String applicationName = getApplicationName(resolveInfo, packageManager);
+            if (!TextUtils.isEmpty(applicationName)) {
+                return String.format(descriptionWithAppName, applicationName);
+            }
+        }
+        return description;
+    }
+
+    @Nullable
+    private String getApplicationName(
+            ResolveInfo resolveInfo, PackageManager packageManager) {
+        if (resolveInfo.activityInfo == null) {
+            return null;
+        }
+        if ("android".equals(resolveInfo.activityInfo.packageName)) {
+            return null;
+        }
+        if (resolveInfo.activityInfo.applicationInfo == null) {
+            return null;
+        }
+        return (String) packageManager.getApplicationLabel(
+                resolveInfo.activityInfo.applicationInfo);
     }
 
     private Bundle getFromTextClassifierExtra(@Nullable Bundle textLanguagesBundle) {

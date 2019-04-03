@@ -41,6 +41,7 @@ public class TemplateIntentFactoryTest {
     private static final String TITLE_WITHOUT_ENTITY = "Map";
     private static final String TITLE_WITH_ENTITY = "Map NW14D1";
     private static final String DESCRIPTION = "Check the map";
+    private static final String DESCRIPTION_WITH_APP_NAME = "Use %1$s to open map";
     private static final String ACTION = Intent.ACTION_VIEW;
     private static final String DATA = Uri.parse("http://www.android.com").toString();
     private static final String TYPE = "text/html";
@@ -73,6 +74,7 @@ public class TemplateIntentFactoryTest {
                 TITLE_WITHOUT_ENTITY,
                 TITLE_WITH_ENTITY,
                 DESCRIPTION,
+                DESCRIPTION_WITH_APP_NAME,
                 ACTION,
                 DATA,
                 TYPE,
@@ -91,6 +93,7 @@ public class TemplateIntentFactoryTest {
         assertThat(labeledIntent.titleWithoutEntity).isEqualTo(TITLE_WITHOUT_ENTITY);
         assertThat(labeledIntent.titleWithEntity).isEqualTo(TITLE_WITH_ENTITY);
         assertThat(labeledIntent.description).isEqualTo(DESCRIPTION);
+        assertThat(labeledIntent.descriptionWithAppName).isEqualTo(DESCRIPTION_WITH_APP_NAME);
         assertThat(labeledIntent.requestCode).isEqualTo(REQUEST_CODE);
         Intent intent = labeledIntent.intent;
         assertThat(intent.getAction()).isEqualTo(ACTION);
@@ -109,6 +112,7 @@ public class TemplateIntentFactoryTest {
                 TITLE_WITHOUT_ENTITY,
                 TITLE_WITH_ENTITY,
                 DESCRIPTION,
+                DESCRIPTION_WITH_APP_NAME,
                 ACTION,
                 "HTTp://www.android.com",
                 TYPE,
@@ -132,6 +136,7 @@ public class TemplateIntentFactoryTest {
                 TITLE_WITHOUT_ENTITY,
                 null,
                 DESCRIPTION,
+                null,
                 ACTION,
                 null,
                 null,
@@ -177,6 +182,7 @@ public class TemplateIntentFactoryTest {
                 TITLE_WITHOUT_ENTITY,
                 TITLE_WITH_ENTITY,
                 DESCRIPTION,
+                DESCRIPTION_WITH_APP_NAME,
                 ACTION,
                 DATA,
                 TYPE,
@@ -199,6 +205,7 @@ public class TemplateIntentFactoryTest {
                 null,
                 null,
                 DESCRIPTION,
+                DESCRIPTION_WITH_APP_NAME,
                 ACTION,
                 null,
                 null,
@@ -220,6 +227,7 @@ public class TemplateIntentFactoryTest {
         RemoteActionTemplate remoteActionTemplate = new RemoteActionTemplate(
                 TITLE_WITHOUT_ENTITY,
                 TITLE_WITH_ENTITY,
+                null,
                 null,
                 ACTION,
                 null,
@@ -243,6 +251,7 @@ public class TemplateIntentFactoryTest {
                 TITLE_WITHOUT_ENTITY,
                 TITLE_WITH_ENTITY,
                 DESCRIPTION,
+                DESCRIPTION_WITH_APP_NAME,
                 null,
                 null,
                 null,
