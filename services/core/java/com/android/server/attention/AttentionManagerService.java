@@ -19,6 +19,7 @@ package com.android.server.attention;
 import static android.provider.DeviceConfig.NAMESPACE_ATTENTION_MANAGER_SERVICE;
 import static android.provider.Settings.System.ADAPTIVE_SLEEP;
 import static android.service.attention.AttentionService.ATTENTION_FAILURE_CANCELLED;
+import static android.service.attention.AttentionService.ATTENTION_FAILURE_UNKNOWN;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -249,6 +250,7 @@ public class AttentionManagerService extends SystemService {
                 if (userState.mPendingAttentionCheck != null
                         && userState.mPendingAttentionCheck.mCallbackInternal.equals(
                         callbackInternal)) {
+                    userState.mPendingAttentionCheck.cancel(ATTENTION_FAILURE_UNKNOWN);
                     userState.mPendingAttentionCheck = null;
                 }
                 return;
@@ -624,7 +626,7 @@ public class AttentionManagerService extends SystemService {
             if (userState == null) {
                 return;
             }
-            cancel(userState, AttentionService.ATTENTION_FAILURE_UNKNOWN);
+            cancel(userState, ATTENTION_FAILURE_UNKNOWN);
 
             mContext.unbindService(userState.mConnection);
             userState.mConnection.cleanupService();
