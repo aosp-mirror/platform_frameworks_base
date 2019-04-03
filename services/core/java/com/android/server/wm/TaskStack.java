@@ -388,7 +388,9 @@ public class TaskStack extends WindowContainer<Task> implements
      * @return true if bounds were updated to some non-empty value.
      */
     boolean calculatePinnedBoundsForConfigChange(Rect inOutBounds) {
+        boolean animating = false;
         if ((mBoundsAnimatingRequested || mBoundsAnimating) && !mBoundsAnimationTarget.isEmpty()) {
+            animating = true;
             getFinalAnimationBounds(mTmpRect2);
         } else {
             mTmpRect2.set(inOutBounds);
@@ -398,6 +400,13 @@ public class TaskStack extends WindowContainer<Task> implements
         if (updated) {
             inOutBounds.set(mTmpRect3);
 
+            // The final boundary is updated while there is an existing boundary animation. Let's
+            // cancel this animation to prevent the obsolete animation overwritten updated bounds.
+            if (animating && !inOutBounds.equals(mBoundsAnimationTarget)) {
+                final DisplayContent displayContent = getDisplayContent();
+                displayContent.mBoundsAnimationController.getHandler().post(() ->
+                        displayContent.mBoundsAnimationController.cancel(this));
+            }
             // Once we've set the bounds based on the rotation of the old bounds in the new
             // orientation, clear the animation target bounds since they are obsolete, and
             // cancel any currently running animations
@@ -1585,7 +1594,6 @@ public class TaskStack extends WindowContainer<Task> implements
 
             mBoundsAnimatingRequested = false;
             mBoundsAnimating = true;
-            mCancelCurrentBoundsAnimation = false;
             mAnimationType = animationType;
 
             // If we are changing UI mode, as in the PiP to fullscreen
@@ -1645,7 +1653,7 @@ public class TaskStack extends WindowContainer<Task> implements
                         mBoundsAnimationTarget, false /* forceUpdate */);
             }
 
-            if (finalStackSize != null) {
+            if (finalStackSize != null && !mCancelCurrentBoundsAnimation) {
                 setPinnedStackSize(finalStackSize, null);
             } else {
                 // We have been canceled, so the final stack size is null, still run the
@@ -1758,6 +1766,7 @@ public class TaskStack extends WindowContainer<Task> implements
         }
 
         final @BoundsAnimationController.AnimationType int animationType = intendedAnimationType;
+        mCancelCurrentBoundsAnimation = false;
         displayContent.mBoundsAnimationController.getHandler().post(() -> {
             displayContent.mBoundsAnimationController.animateBounds(this, fromBounds,
                     finalToBounds, animationDuration, finalSchedulePipModeChangedState,

@@ -435,6 +435,18 @@ public class BoundsAnimationController {
                 moveFromFullscreen, moveToFullscreen, animationType);
     }
 
+    /**
+     * Cancel existing animation if the destination was modified.
+     */
+    void cancel(final BoundsAnimationTarget target) {
+        final BoundsAnimator existing = mRunningAnimations.get(target);
+        if (existing != null) {
+            // Cancel animation. Since its already started, send animation end to client.
+            if (DEBUG) Slog.d(TAG, "cancel: mTarget= " + target);
+            existing.cancelAndCallAnimationEnd();
+        }
+    }
+
     @VisibleForTesting
     BoundsAnimator animateBoundsImpl(final BoundsAnimationTarget target, Rect from, Rect to,
             int animationDuration, @SchedulePipModeChangedState int schedulePipModeChangedState,
