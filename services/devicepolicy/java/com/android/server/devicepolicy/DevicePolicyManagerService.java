@@ -14123,6 +14123,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public void installUpdateFromFile(ComponentName admin,
             ParcelFileDescriptor updateFileDescriptor, StartInstallingUpdateCallback callback) {
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.INSTALL_SYSTEM_UPDATE)
+                .setAdmin(admin)
+                .setBoolean(isDeviceAB())
+                .write();
         enforceDeviceOwner(admin);
         final long id = mInjector.binderClearCallingIdentity();
         try {
@@ -14135,11 +14140,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         mContext, updateFileDescriptor, callback, mInjector, mConstants);
             }
             updateInstaller.startInstallUpdate();
-            DevicePolicyEventLogger
-                    .createEvent(DevicePolicyEnums.INSTALL_SYSTEM_UPDATE)
-                    .setAdmin(admin)
-                    .setBoolean(isDeviceAB())
-                    .write();
         } finally {
             mInjector.binderRestoreCallingIdentity(id);
         }
