@@ -4423,7 +4423,7 @@ public abstract class PackageManager {
      *         {@link #resolveActivity}. If there are no matching activities, an
      *         empty list is returned.
      */
-    @Nullable
+    @NonNull
     public abstract List<ResolveInfo> queryIntentActivities(@NonNull Intent intent,
             @ResolveInfoFlags int flags);
 
@@ -4444,7 +4444,7 @@ public abstract class PackageManager {
      *         empty list is returned.
      * @hide
      */
-    @Nullable
+    @NonNull
     @UnsupportedAppUsage
     public abstract List<ResolveInfo> queryIntentActivitiesAsUser(@NonNull Intent intent,
             @ResolveInfoFlags int flags, @UserIdInt int userId);
