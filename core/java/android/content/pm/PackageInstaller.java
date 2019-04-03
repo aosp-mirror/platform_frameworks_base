@@ -17,6 +17,7 @@
 package android.content.pm;
 
 import android.Manifest;
+import android.annotation.CurrentTimeMillisLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -1817,6 +1818,9 @@ public class PackageInstaller {
         public boolean isCommitted;
 
         /** {@hide} */
+        public long updatedMillis;
+
+        /** {@hide} */
         @UnsupportedAppUsage
         public SessionInfo() {
         }
@@ -2235,6 +2239,15 @@ public class PackageInstaller {
          */
         public boolean isCommitted() {
             return isCommitted;
+        }
+
+        /**
+         * The timestamp of the last update that occurred to the session, including changing of
+         * states in case of staged sessions.
+         */
+        @CurrentTimeMillisLong
+        public long getUpdatedMillis() {
+            return updatedMillis;
         }
 
         @Override
