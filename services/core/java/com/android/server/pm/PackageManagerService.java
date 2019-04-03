@@ -3236,6 +3236,8 @@ public class PackageManagerService extends IPackageManager.Stub
         // once we have a booted system.
         mInstaller.setWarnIfHeld(mPackages);
 
+        PackageParser.readConfigUseRoundIcon(mContext.getResources());
+
         mServiceStartWithDelay = SystemClock.uptimeMillis() + (60 * 1000L);
 
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
@@ -20907,6 +20909,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 mContext.getContentResolver(),
                 android.provider.Settings.Global.COMPATIBILITY_MODE, 1) == 1;
         PackageParser.setCompatibilityModeEnabled(compatibilityModeEnabled);
+
         if (DEBUG_SETTINGS) {
             Log.d(TAG, "compatibility mode:" + compatibilityModeEnabled);
         }

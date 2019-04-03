@@ -1101,6 +1101,18 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public String appComponentFactory;
 
     /**
+     * Resource id of {@link com.android.internal.R.styleable.AndroidManifestProvider_icon}
+     * @hide
+     */
+    public int iconRes;
+
+    /**
+     * Resource id of {@link com.android.internal.R.styleable.AndroidManifestProvider_roundIcon}
+     * @hide
+     */
+    public int roundIconRes;
+
+    /**
      * The category of this app. Categories are used to cluster multiple apps
      * together into meaningful groups, such as when summarizing battery,
      * network, or disk usage. Apps should only define this value when they fit
@@ -1579,6 +1591,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         classLoaderName = orig.classLoaderName;
         splitClassLoaderNames = orig.splitClassLoaderNames;
         appComponentFactory = orig.appComponentFactory;
+        iconRes = orig.iconRes;
+        roundIconRes = orig.roundIconRes;
         compileSdkVersion = orig.compileSdkVersion;
         compileSdkVersionCodename = orig.compileSdkVersionCodename;
         mHiddenApiPolicy = orig.mHiddenApiPolicy;
@@ -1658,6 +1672,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(compileSdkVersion);
         dest.writeString(compileSdkVersionCodename);
         dest.writeString(appComponentFactory);
+        dest.writeInt(iconRes);
+        dest.writeInt(roundIconRes);
         dest.writeInt(mHiddenApiPolicy);
         dest.writeInt(hiddenUntilInstalled ? 1 : 0);
         dest.writeString(zygotePreloadName);
@@ -1732,6 +1748,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         compileSdkVersion = source.readInt();
         compileSdkVersionCodename = source.readString();
         appComponentFactory = source.readString();
+        iconRes = source.readInt();
+        roundIconRes = source.readInt();
         mHiddenApiPolicy = source.readInt();
         hiddenUntilInstalled = source.readInt() != 0;
         zygotePreloadName = source.readString();

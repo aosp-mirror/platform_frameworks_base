@@ -213,6 +213,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManagerInternal.CheckPermissionDelegate;
+import android.content.pm.PackageParser;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PathPermission;
 import android.content.pm.PermissionInfo;
@@ -18474,7 +18475,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     void updateApplicationInfoLocked(@NonNull List<String> packagesToUpdate, int userId) {
         final boolean updateFrameworkRes = packagesToUpdate.contains("android");
-
+        if (updateFrameworkRes) {
+            PackageParser.readConfigUseRoundIcon(null);
+        }
         mProcessList.updateApplicationInfoLocked(packagesToUpdate, userId, updateFrameworkRes);
 
         if (updateFrameworkRes) {
