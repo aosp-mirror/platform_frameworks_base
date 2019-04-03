@@ -382,7 +382,13 @@ public class ServiceWatcher implements ServiceConnection {
     /**
      * Runs the given function synchronously if currently connected, and returns the default value
      * if not currently connected or if any exception is thrown.
+     *
+     * @deprecated Using this function is an indication that your AIDL API is broken. Calls from
+     * system server to outside MUST be one-way, and so cannot return any result, and this
+     * method should not be needed or used. Use a separate callback interface to allow outside
+     * components to return results back to the system server.
      */
+    @Deprecated
     public final <T> T runOnBinderBlocking(BlockingBinderRunner<T> runner, T defaultValue) {
         try {
             return runOnHandlerBlocking(() -> {
