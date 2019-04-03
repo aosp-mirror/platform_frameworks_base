@@ -1037,8 +1037,9 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
                 //       it's closed.
                 // TODO: Keep controller as well for better readability
                 //       because the GC behavior isn't straightforward.
-                MediaController2 controller = new MediaController2(mContext, sessionToken,
-                        new HandlerExecutor(mHandler), callback);
+                MediaController2 controller = new MediaController2.Builder(mContext, sessionToken)
+                        .setControllerCallback(new HandlerExecutor(mHandler), callback)
+                        .build();
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

@@ -28,6 +28,7 @@ class MediaConstants {
     static final String KEY_ALLOWED_COMMANDS = "android.media.key.ALLOWED_COMMANDS";
     static final String KEY_PLAYBACK_ACTIVE = "android.media.key.PLAYBACK_ACTIVE";
     static final String KEY_TOKEN_EXTRAS = "android.media.key.TOKEN_EXTRAS";
+    static final String KEY_CONNECTION_HINTS = "android.media.key.CONNECTION_HINTS";
 
     private MediaConstants() {
     }
