@@ -46,6 +46,7 @@ import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockSettingsInternal;
 import com.android.server.LocalServices;
+import com.android.server.locksettings.recoverablekeystore.RecoverableKeyStoreManager;
 import com.android.server.wm.WindowManagerInternal;
 
 import org.mockito.invocation.InvocationOnMock;
@@ -89,6 +90,7 @@ public abstract class BaseLockSettingsServiceTests extends AndroidTestCase {
     WindowManagerInternal mMockWindowManager;
     FakeGsiService mGsiService;
     PasswordSlotManagerTestable mPasswordSlotManager;
+    RecoverableKeyStoreManager mRecoverableKeyStoreManager;
     protected boolean mHasSecureLockScreen;
 
     @Override
@@ -105,6 +107,7 @@ public abstract class BaseLockSettingsServiceTests extends AndroidTestCase {
         mMockWindowManager = mock(WindowManagerInternal.class);
         mGsiService = new FakeGsiService();
         mPasswordSlotManager = new PasswordSlotManagerTestable();
+        mRecoverableKeyStoreManager = mock(RecoverableKeyStoreManager.class);
 
         LocalServices.removeServiceForTest(LockSettingsInternal.class);
         LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
@@ -141,12 +144,14 @@ public abstract class BaseLockSettingsServiceTests extends AndroidTestCase {
         mAuthSecretService = mock(IAuthSecret.class);
         mService = new LockSettingsServiceTestable(mContext, mLockPatternUtils, mStorage,
                 mGateKeeperService, mKeyStore, setUpStorageManagerMock(), mActivityManager,
-                mSpManager, mAuthSecretService, mGsiService);
+                mSpManager, mAuthSecretService, mGsiService, mRecoverableKeyStoreManager);
         when(mUserManager.getUserInfo(eq(PRIMARY_USER_ID))).thenReturn(PRIMARY_USER_INFO);
         mPrimaryUserProfiles.add(PRIMARY_USER_INFO);
         installChildProfile(MANAGED_PROFILE_USER_ID);
         installAndTurnOffChildProfile(TURNED_OFF_PROFILE_USER_ID);
-        when(mUserManager.getProfiles(eq(PRIMARY_USER_ID))).thenReturn(mPrimaryUserProfiles);
+        for (UserInfo profile : mPrimaryUserProfiles) {
+            when(mUserManager.getProfiles(eq(profile.id))).thenReturn(mPrimaryUserProfiles);
+        }
         when(mUserManager.getUserInfo(eq(SECONDARY_USER_ID))).thenReturn(SECONDARY_USER_INFO);
 
         final ArrayList<UserInfo> allUsers = new ArrayList<>(mPrimaryUserProfiles);
@@ -173,6 +178,7 @@ public abstract class BaseLockSettingsServiceTests extends AndroidTestCase {
     private UserInfo installChildProfile(int profileId) {
         final UserInfo userInfo = new UserInfo(
             profileId, null, null, UserInfo.FLAG_INITIALIZED | UserInfo.FLAG_MANAGED_PROFILE);
+        userInfo.profileGroupId = PRIMARY_USER_ID;
         mPrimaryUserProfiles.add(userInfo);
         when(mUserManager.getUserInfo(eq(profileId))).thenReturn(userInfo);
         when(mUserManager.getProfileParent(eq(profileId))).thenReturn(PRIMARY_USER_INFO);
