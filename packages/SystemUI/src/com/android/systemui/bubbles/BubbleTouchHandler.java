@@ -97,10 +97,12 @@ class BubbleTouchHandler implements View.OnTouchListener {
             case MotionEvent.ACTION_DOWN:
                 trackMovement(event);
 
-                mDismissViewController.createDismissTarget();
-                mHandler.postDelayed(mShowDismissAffordance, SHOW_TARGET_DELAY);
-
                 mTouchDown.set(rawX, rawY);
+
+                if (!isFlyout) {
+                    mDismissViewController.createDismissTarget();
+                    mHandler.postDelayed(mShowDismissAffordance, SHOW_TARGET_DELAY);
+                }
 
                 if (isStack) {
                     mViewPositionOnTouchDown.set(mStack.getStackPosition());
@@ -148,7 +150,7 @@ class BubbleTouchHandler implements View.OnTouchListener {
                     mController.dismissStack(BubbleController.DISMISS_USER_GESTURE);
                 } else if (isFlyout) {
                     // TODO(b/129768381): Expand if tapped, dismiss if swiped away.
-                    if (!mStack.isExpanded()) {
+                    if (!mStack.isExpanded() && !mMovedEnough) {
                         mStack.expandStack();
                     }
                 } else if (mMovedEnough) {
