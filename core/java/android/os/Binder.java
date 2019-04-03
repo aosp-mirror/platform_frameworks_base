@@ -444,24 +444,20 @@ public class Binder implements IBinder {
      *
      * @param workSource The original UID responsible for the binder call.
      * @return token to restore original work source.
-     * @hide
      **/
     @CriticalNative
-    @SystemApi
     public static final native long setCallingWorkSourceUid(int workSource);
 
     /**
      * Returns the work source set by the caller.
      *
      * Unlike {@link Binder#getCallingUid()}, this result of this method cannot be trusted. The
-     * caller can set the value to whatever he wants. Only use this value if you trust the calling
+     * caller can set the value to whatever they want. Only use this value if you trust the calling
      * uid.
      *
      * @return The original UID responsible for the binder transaction.
-     * @hide
      */
     @CriticalNative
-    @SystemApi
     public static final native int getCallingWorkSourceUid();
 
     /**
@@ -484,10 +480,8 @@ public class Binder implements IBinder {
      * </pre>
      *
      * @return token to restore original work source.
-     * @hide
      **/
     @CriticalNative
-    @SystemApi
     public static final native long clearCallingWorkSource();
 
     /**
@@ -503,11 +497,8 @@ public class Binder implements IBinder {
      *   Binder.restoreCallingWorkSource(token);
      * }
      * </pre>
-     *
-     * @hide
      **/
     @CriticalNative
-    @SystemApi
     public static final native void restoreCallingWorkSource(long token);
 
     /**
