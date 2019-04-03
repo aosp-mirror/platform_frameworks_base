@@ -19,5 +19,5 @@
         android:versionCode="1"
         android:versionName="1.0">
         <application android:hasCode="false" />
-        <overlay android:targetPackage="com.android.overlaytest" android:priority="1" />
+        <overlay android:targetPackage="com.android.overlaytest" />
 </manifest>

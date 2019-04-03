@@ -716,6 +716,11 @@ package android.content.pm {
 
 package android.content.res {
 
+  public final class AssetManager implements java.lang.AutoCloseable {
+    method @NonNull public String[] getApkPaths();
+    method @Nullable public java.util.Map<java.lang.String,java.lang.String> getOverlayableMap(String);
+  }
+
   public final class Configuration implements java.lang.Comparable<android.content.res.Configuration> android.os.Parcelable {
     field public int assetsSeq;
     field public final android.app.WindowConfiguration windowConfiguration;

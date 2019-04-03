@@ -11532,17 +11532,44 @@ public class PackageManagerService extends IPackageManager.Stub
                                 " is static but not pre-installed.");
                     }
 
-                    // The only case where we allow installation of a non-system overlay is when
-                    // its signature is signed with the platform certificate.
-                    PackageSetting platformPkgSetting = mSettings.getPackageLPr("android");
-                    if ((platformPkgSetting.signatures.mSigningDetails
-                            != PackageParser.SigningDetails.UNKNOWN)
-                            && (compareSignatures(
-                                    platformPkgSetting.signatures.mSigningDetails.signatures,
-                                    pkg.mSigningDetails.signatures)
-                                            != PackageManager.SIGNATURE_MATCH)) {
-                        throw new PackageManagerException("Overlay " + pkg.packageName +
-                                " must be signed with the platform certificate.");
+                    // A non-preloaded overlay packages must have targetSdkVersion >= Q, or be
+                    // signed with the platform certificate. Check this in increasing order of
+                    // computational cost.
+                    if (pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.Q) {
+                        final PackageSetting platformPkgSetting =
+                                mSettings.getPackageLPr("android");
+                        if ((platformPkgSetting.signatures.mSigningDetails
+                                    != PackageParser.SigningDetails.UNKNOWN)
+                                && (compareSignatures(
+                                        platformPkgSetting.signatures.mSigningDetails.signatures,
+                                        pkg.mSigningDetails.signatures)
+                                    != PackageManager.SIGNATURE_MATCH)) {
+                            throw new PackageManagerException("Overlay " + pkg.packageName
+                                    + " must target Q or later, "
+                                    + "or be signed with the platform certificate");
+                        }
+                    }
+
+                    // A non-preloaded overlay package, without <overlay android:targetName>, will
+                    // only be used if it is signed with the same certificate as its target. If the
+                    // target is already installed, check this here to augment the last line of
+                    // defence which is OMS.
+                    if (pkg.mOverlayTargetName == null) {
+                        final PackageSetting targetPkgSetting =
+                                mSettings.getPackageLPr(pkg.mOverlayTarget);
+                        if (targetPkgSetting != null) {
+                            if ((targetPkgSetting.signatures.mSigningDetails
+                                        != PackageParser.SigningDetails.UNKNOWN)
+                                    && (compareSignatures(
+                                            targetPkgSetting.signatures.mSigningDetails.signatures,
+                                            pkg.mSigningDetails.signatures)
+                                        != PackageManager.SIGNATURE_MATCH)) {
+                                throw new PackageManagerException("Overlay " + pkg.packageName
+                                        + " and target " + pkg.mOverlayTarget + " signed with"
+                                        + " different certificates, and the overlay lacks"
+                                        + " <overlay android:targetName>");
+                            }
+                        }
                     }
                 }
             }

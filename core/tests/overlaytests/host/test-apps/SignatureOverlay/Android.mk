@@ -18,7 +18,7 @@ my_package_prefix := com.android.server.om.hosttest.signature_overlay
 
 include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
-LOCAL_PACKAGE_NAME := OverlayHostTests_BadSignatureOverlay
+LOCAL_PACKAGE_NAME := OverlayHostTests_NonPlatformSignatureOverlay
 LOCAL_SDK_VERSION := current
 LOCAL_COMPATIBILITY_SUITE := general-tests
 LOCAL_AAPT_FLAGS := --custom-package $(my_package_prefix)_bad
