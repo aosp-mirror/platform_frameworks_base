@@ -476,6 +476,7 @@ public class PackageManagerService extends IPackageManager.Stub
     static final int SCAN_AS_VENDOR = 1 << 20;
     static final int SCAN_AS_PRODUCT = 1 << 21;
     static final int SCAN_AS_PRODUCT_SERVICES = 1 << 22;
+    static final int SCAN_AS_ODM = 1 << 23;
 
     @IntDef(flag = true, prefix = { "SCAN_" }, value = {
             SCAN_NO_DEX,
@@ -593,6 +594,8 @@ public class PackageManagerService extends IPackageManager.Stub
     private static final String PRODUCT_OVERLAY_DIR = "/product/overlay";
 
     private static final String PRODUCT_SERVICES_OVERLAY_DIR = "/product_services/overlay";
+
+    private static final String ODM_OVERLAY_DIR = "/odm/overlay";
 
     /** Canonical intent used to identify what counts as a "web browser" app */
     private static final Intent sBrowserIntent;
@@ -2522,6 +2525,13 @@ public class PackageManagerService extends IPackageManager.Stub
                     scanFlags
                     | SCAN_AS_SYSTEM
                     | SCAN_AS_PRODUCT_SERVICES,
+                    0);
+            scanDirTracedLI(new File(ODM_OVERLAY_DIR),
+                    mDefParseFlags
+                    | PackageParser.PARSE_IS_SYSTEM_DIR,
+                    scanFlags
+                    | SCAN_AS_SYSTEM
+                    | SCAN_AS_ODM,
                     0);
 
             mParallelPackageParserCallback.findStaticOverlayPackages();
@@ -10399,6 +10409,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * <li>{@link #SCAN_AS_PRODUCT_SERVICES}</li>
      * <li>{@link #SCAN_AS_INSTANT_APP}</li>
      * <li>{@link #SCAN_AS_VIRTUAL_PRELOAD}</li>
+     * <li>{@link #SCAN_AS_ODM}</li>
      * </ul>
      */
     private @ScanFlags int adjustScanFlags(@ScanFlags int scanFlags,
@@ -10434,6 +10445,10 @@ public class PackageManagerService extends IPackageManager.Stub
             if ((systemPkgSetting.pkgPrivateFlags
                     & ApplicationInfo.PRIVATE_FLAG_PRODUCT_SERVICES) != 0) {
                 scanFlags |= SCAN_AS_PRODUCT_SERVICES;
+            }
+            if ((systemPkgSetting.pkgPrivateFlags
+                    & ApplicationInfo.PRIVATE_FLAG_ODM) != 0) {
+                scanFlags |= SCAN_AS_ODM;
             }
         }
         if (pkgSetting != null) {
@@ -11204,6 +11219,10 @@ public class PackageManagerService extends IPackageManager.Stub
 
         if ((scanFlags & SCAN_AS_PRODUCT_SERVICES) != 0) {
             pkg.applicationInfo.privateFlags |= ApplicationInfo.PRIVATE_FLAG_PRODUCT_SERVICES;
+        }
+
+        if ((scanFlags & SCAN_AS_ODM) != 0) {
+            pkg.applicationInfo.privateFlags |= ApplicationInfo.PRIVATE_FLAG_ODM;
         }
 
         // Check if the package is signed with the same key as the platform package.
@@ -12155,6 +12174,8 @@ public class PackageManagerService extends IPackageManager.Stub
             codeRoot = Environment.getProductDirectory();
         } else if (FileUtils.contains(Environment.getProductServicesDirectory(), codePath)) {
             codeRoot = Environment.getProductServicesDirectory();
+        } else if (FileUtils.contains(Environment.getOdmDirectory(), codePath)) {
+            codeRoot = Environment.getOdmDirectory();
         } else {
             // Unrecognized code path; take its top real segment as the apk root:
             // e.g. /something/app/blah.apk => /something
@@ -17242,13 +17263,15 @@ public class PackageManagerService extends IPackageManager.Stub
                     final boolean oem = isOemApp(oldPackage);
                     final boolean vendor = isVendorApp(oldPackage);
                     final boolean product = isProductApp(oldPackage);
+                    final boolean odm = isOdmApp(oldPackage);
                     final @ParseFlags int systemParseFlags = parseFlags;
                     final @ScanFlags int systemScanFlags = scanFlags
                             | SCAN_AS_SYSTEM
                             | (privileged ? SCAN_AS_PRIVILEGED : 0)
                             | (oem ? SCAN_AS_OEM : 0)
                             | (vendor ? SCAN_AS_VENDOR : 0)
-                            | (product ? SCAN_AS_PRODUCT : 0);
+                            | (product ? SCAN_AS_PRODUCT : 0)
+                            | (odm ? SCAN_AS_ODM : 0);
 
                     if (DEBUG_INSTALL) {
                         Slog.d(TAG, "replaceSystemPackageLI: new=" + pkg
@@ -17577,6 +17600,10 @@ public class PackageManagerService extends IPackageManager.Stub
     private static boolean isProductServicesApp(PackageParser.Package pkg) {
         return (pkg.applicationInfo.privateFlags
                 & ApplicationInfo.PRIVATE_FLAG_PRODUCT_SERVICES) != 0;
+    }
+
+    private static boolean isOdmApp(PackageParser.Package pkg) {
+        return (pkg.applicationInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_ODM) != 0;
     }
 
     private static boolean hasDomainURLs(PackageParser.Package pkg) {
@@ -18353,6 +18380,15 @@ public class PackageManagerService extends IPackageManager.Stub
         return false;
     }
 
+    static boolean locationIsOdm(String path) {
+        try {
+            return path.startsWith(Environment.getOdmDirectory().getCanonicalPath() + "/");
+        } catch (IOException e) {
+            Slog.e(TAG, "Unable to access code path " + path);
+        }
+        return false;
+    }
+
     /*
      * Tries to delete system package.
      */
@@ -18465,6 +18501,9 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         if (locationIsProductServices(codePathString)) {
             scanFlags |= SCAN_AS_PRODUCT_SERVICES;
+        }
+        if (locationIsOdm(codePathString)) {
+            scanFlags |= SCAN_AS_ODM;
         }
 
         final File codePath = new File(codePathString);
