@@ -1320,11 +1320,17 @@ package android.net {
     method @Nullable public java.net.InetAddress getGateway();
     method @Nullable public android.net.LinkAddress getIpAddress();
     method @NonNull public java.util.List<android.net.RouteInfo> getRoutes(@Nullable String);
-    method public void setDomains(@Nullable String);
-    method public void setGateway(@Nullable java.net.InetAddress);
-    method public void setIpAddress(@Nullable android.net.LinkAddress);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.StaticIpConfiguration> CREATOR;
+  }
+
+  public static final class StaticIpConfiguration.Builder {
+    ctor public StaticIpConfiguration.Builder();
+    method @NonNull public android.net.StaticIpConfiguration build();
+    method @NonNull public android.net.StaticIpConfiguration.Builder setDnsServers(@NonNull Iterable<java.net.InetAddress>);
+    method @NonNull public android.net.StaticIpConfiguration.Builder setDomains(@Nullable String);
+    method @NonNull public android.net.StaticIpConfiguration.Builder setGateway(@Nullable java.net.InetAddress);
+    method @NonNull public android.net.StaticIpConfiguration.Builder setIpAddress(@Nullable android.net.LinkAddress);
   }
 
   public final class TestNetworkInterface implements android.os.Parcelable {
