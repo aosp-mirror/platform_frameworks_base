@@ -1,0 +1,40 @@
+<!--
+Copyright (C) 2019 The Android Open Source Project
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:width="108dp"
+        android:height="108dp"
+        android:viewportWidth="108.0"
+        android:viewportHeight="108.0">
+    <group
+        android:name="scale"
+        android:pivotX="54" android:pivotY="54"
+        android:scaleX="0.9"
+        android:scaleY="0.9">
+        <group
+            android:name="nudge"
+            android:translateX="24"
+            android:translateY="23.5">
+            <path
+                android:name="tail"
+                android:fillColor="#FFFFFF"
+                android:pathData="M21.749674,34.122784l-9.431964,9.529709l-6.31771,-6.2529106l15.736504,-15.899582l64.765724,65.16436l-6.3046494,6.266083z"/>
+            <path
+                android:name="counter"
+                android:fillColor="#FFFFFF"
+                android:pathData="M30,9.32352941 C41.6954418,9.32352941 51.1764706,18.8045582 51.1764706,30.5 C51.1764706,42.1954418 41.6954418,51.6764706 30,51.6764706 C18.3045582,51.6764706 8.82352941,42.1954418 8.82352941,30.5 C8.82352941,18.8045582 18.3045582,9.32352941 30,9.32352941 L30,9.32352941 Z M30,0.5 C13.4314575,0.5 -5.53805368e-15,13.9314575 -7.10542736e-15,30.5 C-1.02401747e-14,47.0685425 13.4314575,60.5 30,60.5 C46.5685425,60.5 60,47.0685425 60,30.5 C59.9805514,13.9395201 46.5604799,0.519448617 30,0.5 Z"/>
+        </group>
+    </group>
+</vector>
