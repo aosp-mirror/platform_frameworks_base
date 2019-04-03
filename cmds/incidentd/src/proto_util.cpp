@@ -33,11 +33,10 @@ using google::protobuf::io::FileOutputStream;
 // special section ids
 const int FIELD_ID_INCIDENT_HEADER = 1;
 
-status_t write_header_section(int fd, const vector<uint8_t>& buf) {
+status_t write_header_section(int fd, const uint8_t* buf, size_t bufSize) {
     status_t err;
-    const size_t bufSize = buf.size();
 
-    if (buf.empty()) {
+    if (bufSize == 0) {
         return NO_ERROR;
     }
 
@@ -46,7 +45,7 @@ status_t write_header_section(int fd, const vector<uint8_t>& buf) {
         return err;
     }
 
-    err = WriteFully(fd, (uint8_t const*)buf.data(), bufSize);
+    err = WriteFully(fd, buf, bufSize);
     if (err != NO_ERROR) {
         return err;
     }
