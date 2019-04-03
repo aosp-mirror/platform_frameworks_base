@@ -35,7 +35,6 @@ import android.media.projection.MediaProjectionInfo;
 import android.media.projection.MediaProjectionManager;
 import android.os.Binder;
 import android.os.Build;
-import android.os.Build.VERSION_CODES;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -63,7 +62,7 @@ import java.util.Map;
  */
 public final class MediaProjectionManagerService extends SystemService
         implements Watchdog.Monitor {
-    private static final boolean REQUIRE_FG_SERVICE_FOR_PROJECTION = false;
+    private static final boolean REQUIRE_FG_SERVICE_FOR_PROJECTION = true;
     private static final String TAG = "MediaProjectionManagerService";
 
     private final Object mLock = new Object(); // Protects the list of media projections
@@ -146,7 +145,7 @@ public final class MediaProjectionManagerService extends SystemService
                 return;
             }
 
-            if (mProjectionGrant.targetSdkVersion < VERSION_CODES.Q) {
+            if (!mProjectionGrant.requiresForegroundService()) {
                 return;
             }
 
@@ -294,7 +293,8 @@ public final class MediaProjectionManagerService extends SystemService
                     throw new IllegalArgumentException("No package matching :" + packageName);
                 }
 
-                projection = new MediaProjection(type, uid, packageName, ai.targetSdkVersion);
+                projection = new MediaProjection(type, uid, packageName, ai.targetSdkVersion,
+                        ai.isPrivilegedApp());
                 if (isPermanentGrant) {
                     mAppOps.setMode(AppOpsManager.OP_PROJECT_MEDIA,
                             projection.uid, projection.packageName, AppOpsManager.MODE_ALLOWED);
@@ -396,19 +396,22 @@ public final class MediaProjectionManagerService extends SystemService
         public final int uid;
         public final String packageName;
         public final UserHandle userHandle;
-        public final int targetSdkVersion;
+        private final int mTargetSdkVersion;
+        private final boolean mIsPrivileged;
 
         private IMediaProjectionCallback mCallback;
         private IBinder mToken;
         private IBinder.DeathRecipient mDeathEater;
         private int mType;
 
-        MediaProjection(int type, int uid, String packageName, int targetSdkVersion) {
+        MediaProjection(int type, int uid, String packageName, int targetSdkVersion,
+                boolean isPrivileged) {
             mType = type;
             this.uid = uid;
             this.packageName = packageName;
             userHandle = new UserHandle(UserHandle.getUserId(uid));
-            this.targetSdkVersion = targetSdkVersion;
+            mTargetSdkVersion = targetSdkVersion;
+            mIsPrivileged = isPrivileged;
         }
 
         @Override // Binder call
@@ -466,7 +469,7 @@ public final class MediaProjectionManagerService extends SystemService
                 }
 
                 if (REQUIRE_FG_SERVICE_FOR_PROJECTION
-                        && targetSdkVersion >= Build.VERSION_CODES.Q
+                        && requiresForegroundService()
                         && !mActivityManagerInternal.hasRunningForegroundService(
                                 uid, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION)) {
                     throw new SecurityException("Media projections require a foreground service"
@@ -529,6 +532,10 @@ public final class MediaProjectionManagerService extends SystemService
 
         public MediaProjectionInfo getProjectionInfo() {
             return new MediaProjectionInfo(packageName, userHandle);
+        }
+
+        boolean requiresForegroundService() {
+            return mTargetSdkVersion >= Build.VERSION_CODES.Q && !mIsPrivileged;
         }
 
         public void dump(PrintWriter pw) {
