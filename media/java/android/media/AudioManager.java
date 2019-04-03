@@ -1479,12 +1479,21 @@ public class AudioManager {
      }
 
     /**
-     * Specifying if this audio may or may not be captured by other apps or the system.
+     * Specifies wheather the audio played by this app may or may not be captured by other apps or
+     * the system.
      *
      * The default is {@link AudioAttributes#ALLOW_CAPTURE_BY_ALL}.
      *
-     * Note that each audio track can also set its policy, in which case the most
-     * restrictive policy is always applied.
+     * There are multiple ways to set this policy:
+     *  - for each tracks independently, see
+     *    {@link AudioAttributes.Builder#setAllowedCapturePolicy(int)}
+     *  - application wide at runtime, with this method
+     *  - application wide at build time, see {@code allowAudioPlaybackCapture} in the application
+     *  manifest.
+     * The most restrictive policy is always applied.
+     *
+     * See {@link AudioPlaybackCaptureConfiguration} for more details on the restrictions
+     * which audio signals can be captured.
      *
      * @param capturePolicy one of
      *     {@link AudioAttributes#ALLOW_CAPTURE_BY_ALL},
