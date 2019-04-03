@@ -119,4 +119,8 @@ oneway interface IOverviewProxy {
      */
     void onAssistantAvailable(boolean available) = 13;
 
+    /**
+     * Sent when the assistant changes how visible it is to the user.
+     */
+    void onAssistantVisibilityChanged(float visibility) = 14;
 }
