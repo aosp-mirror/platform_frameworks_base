@@ -46,9 +46,9 @@ import android.os.RemoteException;
 import android.os.SELinux;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.service.restricted_image.RestrictedImagesDumpProto;
 import android.service.restricted_image.RestrictedImageProto;
 import android.service.restricted_image.RestrictedImageSetProto;
+import android.service.restricted_image.RestrictedImagesDumpProto;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
@@ -383,6 +383,12 @@ public class FaceService extends BiometricServiceBase {
         @Override // Binder call
         public void resetLockout(byte[] token) {
             checkPermission(MANAGE_BIOMETRIC);
+
+            if (!FaceService.this.hasEnrolledBiometrics(mCurrentUserId)) {
+                Slog.w(TAG, "Ignoring lockout reset, no templates enrolled");
+                return;
+            }
+
             try {
                 mDaemonWrapper.resetLockout(token);
             } catch (RemoteException e) {
