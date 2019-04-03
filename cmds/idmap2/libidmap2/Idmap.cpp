@@ -269,12 +269,10 @@ Result<std::unique_ptr<const Idmap>> Idmap::FromBinaryStream(std::istream& strea
 std::string ConcatPolicies(const std::vector<std::string>& policies) {
   std::string message;
   for (const std::string& policy : policies) {
-    if (message.empty()) {
-      message.append(policy);
-    } else {
-      message.append(policy);
+    if (!message.empty()) {
       message.append("|");
     }
+    message.append(policy);
   }
 
   return message;
