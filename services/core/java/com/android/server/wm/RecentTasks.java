@@ -653,10 +653,10 @@ class RecentTasks {
         }
     }
 
-    void removeAllVisibleTasks() {
+    void removeAllVisibleTasks(int userId) {
         for (int i = mTasks.size() - 1; i >= 0; --i) {
             final TaskRecord tr = mTasks.get(i);
-            if (isVisibleRecentTask(tr)) {
+            if (tr.userId == userId && isVisibleRecentTask(tr)) {
                 mTasks.remove(i);
                 notifyTaskRemoved(tr, true /* wasTrimmed */, true /* killProcess */);
             }

@@ -2084,7 +2084,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             final long ident = Binder.clearCallingIdentity();
             try {
-                getRecentTasks().removeAllVisibleTasks();
+                getRecentTasks().removeAllVisibleTasks(mAmInternal.getCurrentUserId());
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
