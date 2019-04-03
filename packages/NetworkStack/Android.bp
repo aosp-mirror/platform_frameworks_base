@@ -14,6 +14,15 @@
 // limitations under the License.
 //
 
+java_library {
+    name: "captiveportal-lib",
+    srcs: ["common/**/*.java"],
+    libs: [
+        "androidx.annotation_annotation",
+    ],
+    sdk_version: "system_current",
+}
+
 java_defaults {
     name: "NetworkStackCommon",
     sdk_version: "system_current",
@@ -35,6 +44,7 @@ android_library {
         "networkstack-aidl-interfaces-java",
         "datastallprotosnano",
         "networkstackprotosnano",
+        "captiveportal-lib",
     ],
     manifest: "AndroidManifestBase.xml",
 }
