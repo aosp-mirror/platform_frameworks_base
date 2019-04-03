@@ -1945,10 +1945,10 @@ interface ITelephony {
     void switchMultiSimConfig(int numOfSims);
 
     /**
-     * Get if reboot is required upon altering modems configurations
+     * Get if altering modems configurations will trigger reboot.
      * @hide
      */
-    boolean isRebootRequiredForModemConfigChange();
+    boolean doesSwitchMultiSimConfigTriggerReboot(int subId, String callingPackage);
 
     /**
      * Get the mapping from logical slots to physical slots.

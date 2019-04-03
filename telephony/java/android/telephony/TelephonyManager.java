@@ -10850,24 +10850,28 @@ public class TelephonyManager {
     }
 
     /**
-     * Get whether reboot is required or not after making changes to modem configurations.
+     * Get whether making changes to modem configurations by {@link #switchMultiSimConfig(int)} will
+     * trigger device reboot.
      * The modem configuration change refers to switching from single SIM configuration to DSDS
      * or the other way around.
-     * @Return {@code true} if reboot is required after making changes to modem configurations,
-     * otherwise return {@code false}.
      *
-     * @hide
+     *  <p>Requires Permission:
+     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE} or that the
+     * calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
+     * @return {@code true} if reboot will be triggered after making changes to modem
+     * configurations, otherwise return {@code false}.
      */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public boolean isRebootRequiredForModemConfigChange() {
+    @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
+    public boolean doesSwitchMultiSimConfigTriggerReboot() {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                return service.isRebootRequiredForModemConfigChange();
+                return service.doesSwitchMultiSimConfigTriggerReboot(getSubId(),
+                        getOpPackageName());
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "isRebootRequiredForModemConfigChange RemoteException", e);
+            Log.e(TAG, "doesSwitchMultiSimConfigTriggerReboot RemoteException", e);
         }
         return false;
     }
