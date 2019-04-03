@@ -159,6 +159,16 @@ public class DynamicSystemManager {
         }
     }
 
+    /** @return {@code true} if the device has a dynamic system enabled */
+    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
+    public boolean isEnabled() {
+        try {
+            return mService.isEnabled();
+        } catch (RemoteException e) {
+            throw new RuntimeException(e.toString());
+        }
+    }
+
     /**
      * Remove DynamicSystem installation if present
      *
@@ -174,14 +184,13 @@ public class DynamicSystemManager {
     }
 
     /**
-     * Enable DynamicSystem when it's not enabled, otherwise, disable it.
-     *
+     * Enable or disable DynamicSystem.
      * @return {@code true} if the call succeeds. {@code false} if there is no installed image.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
-    public boolean toggle() {
+    public boolean setEnable(boolean enable) {
         try {
-            return mService.toggle();
+            return mService.setEnable(enable);
         } catch (RemoteException e) {
             throw new RuntimeException(e.toString());
         }
