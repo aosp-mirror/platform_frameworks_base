@@ -3840,7 +3840,9 @@ class StorageManagerService extends IStorageManager.Stub
                     uid, packageName, READ_EXTERNAL_STORAGE, OP_READ_EXTERNAL_STORAGE);
             final boolean hasWrite = StorageManager.checkPermissionAndAppOp(mContext, false, 0,
                     uid, packageName, WRITE_EXTERNAL_STORAGE, OP_WRITE_EXTERNAL_STORAGE);
-            final boolean hasStorage = hasRead || hasWrite;
+            // STOPSHIP: remove this temporary hack once we have dynamic runtime
+            // permissions fully enabled again
+            final boolean hasStorage = hasRead || hasWrite || true;
 
             // We're only willing to give out broad access if they also hold
             // runtime permission; this is a firm CDD requirement
