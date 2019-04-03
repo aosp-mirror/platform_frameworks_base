@@ -2484,6 +2484,14 @@ public class StatusBar extends SystemUI implements DemoMode,
                 options.setRotationAnimationHint(
                         WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS);
             }
+            if (intent.getAction() == Settings.Panel.ACTION_VOLUME) {
+                // Settings Panel is implemented as activity(not a dialog), so
+                // underlying app is paused and may enter picture-in-picture mode
+                // as a result.
+                // So we need to disable picture-in-picture mode here
+                // if it is volume panel.
+                options.setDisallowEnterPictureInPictureWhileLaunching(true);
+            }
             try {
                 result = ActivityTaskManager.getService().startActivityAsUser(
                         null, mContext.getBasePackageName(),
