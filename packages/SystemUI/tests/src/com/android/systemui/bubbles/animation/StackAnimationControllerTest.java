@@ -57,6 +57,7 @@ public class StackAnimationControllerTest extends PhysicsAnimationLayoutTestCase
      * direction is correct.
      */
     @Test
+    @Ignore("Flaking")
     public void testMoveFirstBubbleWithStackFollowing() throws InterruptedException {
         mStackController.moveFirstBubbleWithStackFollowing(200, 100);
 
