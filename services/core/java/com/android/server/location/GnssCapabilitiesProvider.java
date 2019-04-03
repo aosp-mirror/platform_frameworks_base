@@ -75,9 +75,7 @@ public class GnssCapabilitiesProvider {
     /**
      * Updates the general capabilities exposed through {@link android.location.GnssCapabilities}.
      */
-    void setTopHalCapabilities(int topHalCapabilities,
-            boolean hasGeofencingCapability, boolean hasMeasurementsCapability,
-            boolean hasNavMessagesCapability) {
+    void setTopHalCapabilities(int topHalCapabilities) {
         long gnssCapabilities = 0;
         if (hasCapability(topHalCapabilities,
                 GnssLocationProvider.GPS_CAPABILITY_LOW_POWER_MODE)) {
@@ -87,13 +85,13 @@ public class GnssCapabilitiesProvider {
                 GnssLocationProvider.GPS_CAPABILITY_SATELLITE_BLACKLIST)) {
             gnssCapabilities |= GNSS_CAPABILITY_SATELLITE_BLACKLIST;
         }
-        if (hasGeofencingCapability) {
+        if (hasCapability(topHalCapabilities, GnssLocationProvider.GPS_CAPABILITY_GEOFENCING)) {
             gnssCapabilities |= GNSS_CAPABILITY_GEOFENCING;
         }
-        if (hasMeasurementsCapability) {
+        if (hasCapability(topHalCapabilities, GnssLocationProvider.GPS_CAPABILITY_MEASUREMENTS)) {
             gnssCapabilities |= GNSS_CAPABILITY_MEASUREMENTS;
         }
-        if (hasNavMessagesCapability) {
+        if (hasCapability(topHalCapabilities, GnssLocationProvider.GPS_CAPABILITY_NAV_MESSAGES)) {
             gnssCapabilities |= GNSS_CAPABILITY_NAV_MESSAGES;
         }
 
