@@ -26,8 +26,8 @@ import static java.util.stream.Collectors.toList;
 
 import android.platform.test.annotations.Presubmit;
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;
@@ -208,6 +208,73 @@ public class KernelCpuThreadReaderDiffTest {
                 kernelCpuThreadReaderDiff.getProcessCpuUsageDiffed();
         assertThat(cpuUsages(processes2)).containsExactly(Collections.singletonList(2));
         assertThat(threadNames(processes2)).containsExactly("thread0");
+    }
+
+    @Test
+    public void test_nonNegativeOtherThreads() {
+        when(mMockReader.getProcessCpuUsage())
+                .thenReturn(createProcess(new int[] {0}, new int[] {0}))
+                .thenReturn(createProcess(new int[] {4}, new int[] {4}))
+                .thenReturn(createProcess(new int[] {10}, new int[] {7}))
+                .thenReturn(createProcess(new int[] {20}, new int[] {15}));
+        KernelCpuThreadReaderDiff kernelCpuThreadReaderDiff =
+                new KernelCpuThreadReaderDiff(mMockReader, 5);
+        assertThat(kernelCpuThreadReaderDiff.getProcessCpuUsageDiffed()).isNull();
+
+        ArrayList<KernelCpuThreadReader.ProcessCpuUsage> processes1 =
+                kernelCpuThreadReaderDiff.getProcessCpuUsageDiffed();
+        assertThat(cpuUsages(processes1)).containsExactly(Collections.singletonList(8));
+        assertThat(threadNames(processes1)).containsExactly("__OTHER_THREADS");
+
+        ArrayList<KernelCpuThreadReader.ProcessCpuUsage> processes2 =
+                kernelCpuThreadReaderDiff.getProcessCpuUsageDiffed();
+        assertThat(cpuUsages(processes2))
+                .containsExactly(Collections.singletonList(6), Collections.singletonList(3));
+        assertThat(threadNames(processes2)).containsExactly("thread0", "__OTHER_THREADS");
+
+        ArrayList<KernelCpuThreadReader.ProcessCpuUsage> processes3 =
+                kernelCpuThreadReaderDiff.getProcessCpuUsageDiffed();
+        assertThat(cpuUsages(processes3))
+                .containsExactly(Collections.singletonList(10), Collections.singletonList(8));
+        assertThat(threadNames(processes3)).containsExactly("thread0", "thread1");
+    }
+
+    @Test
+    public void test_otherThreadsOnZeroDiff() {
+        when(mMockReader.getProcessCpuUsage())
+                .thenReturn(createProcess(new int[] {0}))
+                .thenReturn(createProcess(new int[] {0}));
+        KernelCpuThreadReaderDiff kernelCpuThreadReaderDiff =
+                new KernelCpuThreadReaderDiff(mMockReader, 5);
+        assertThat(kernelCpuThreadReaderDiff.getProcessCpuUsageDiffed()).isNull();
+
+        ArrayList<KernelCpuThreadReader.ProcessCpuUsage> processes1 =
+                kernelCpuThreadReaderDiff.getProcessCpuUsageDiffed();
+        assertThat(cpuUsages(processes1)).containsExactly(Collections.singletonList(0));
+        assertThat(threadNames(processes1)).containsExactly("__OTHER_THREADS");
+    }
+
+    @Test
+    public void test_failureAndNewThread() {
+        when(mMockReader.getProcessCpuUsage())
+                .thenReturn(createProcess(new int[] {0}))
+                .thenThrow(new RuntimeException())
+                .thenReturn(createProcess(new int[] {1}, new int[] {10}))
+                .thenReturn(createProcess(new int[] {2}, new int[] {12}));
+        KernelCpuThreadReaderDiff kernelCpuThreadReaderDiff =
+                new KernelCpuThreadReaderDiff(mMockReader, 0);
+        assertThat(kernelCpuThreadReaderDiff.getProcessCpuUsageDiffed()).isNull();
+
+        assertThrows(
+                RuntimeException.class,
+                () -> cpuUsages(kernelCpuThreadReaderDiff.getProcessCpuUsageDiffed()));
+        assertThat(kernelCpuThreadReaderDiff.getProcessCpuUsageDiffed()).isNull();
+
+        ArrayList<KernelCpuThreadReader.ProcessCpuUsage> processes1 =
+                kernelCpuThreadReaderDiff.getProcessCpuUsageDiffed();
+        assertThat(cpuUsages(processes1))
+                .containsExactly(Collections.singletonList(1), Collections.singletonList(2));
+        assertThat(threadNames(processes1)).containsExactly("thread0", "thread1");
     }
 
     private ArrayList<KernelCpuThreadReader.ProcessCpuUsage> createProcess(
