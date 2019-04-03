@@ -20,10 +20,10 @@ import static android.system.OsConstants.S_IRWXG;
 import static android.system.OsConstants.S_IRWXO;
 
 import android.annotation.UnsupportedAppUsage;
-import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.app.ApplicationLoaders;
 import android.content.pm.SharedLibraryInfo;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.os.Build;
 import android.os.Environment;
 import android.os.IInstalld;
@@ -863,8 +863,6 @@ public class ZygoteInit {
                 throw new RuntimeException("No ABI list supplied.");
             }
 
-            Zygote.getSocketFDs(isPrimaryZygote);
-
             // In some configurations, we avoid preloading resources and classes eagerly.
             // In such cases, we will preload things prior to our first fork.
             if (!enableLazyPreload) {
@@ -889,10 +887,8 @@ public class ZygoteInit {
             // Zygote.
             Trace.setTracingEnabled(false, 0);
 
-            Zygote.nativeSecurityInit();
 
-            // Zygote process unmounts root storage spaces.
-            Zygote.nativeUnmountStorageOnInit();
+            Zygote.initNativeState(isPrimaryZygote);
 
             ZygoteHooks.stopZygoteNoThreadCreation();
 
