@@ -52,7 +52,6 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.telephony.CarrierConfigManager;
 import android.util.ArraySet;
-import android.util.Log;
 import android.util.SparseIntArray;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -231,7 +230,7 @@ public class EntitlementManager {
 
     private void handleNotifyUpstream(boolean isCellular) {
         if (DBG) {
-            Log.d(TAG, "notifyUpstream: " + isCellular
+            mLog.i("notifyUpstream: " + isCellular
                     + ", mCellularUpstreamPermitted: " + mCellularUpstreamPermitted
                     + ", mNeedReRunProvisioningUi: " + mNeedReRunProvisioningUi);
         }
@@ -294,7 +293,7 @@ public class EntitlementManager {
      * masterHandler to avoid race conditions.
      */
     public void reevaluateSimCardProvisioning() {
-        if (DBG) Log.d(TAG, "reevaluateSimCardProvisioning");
+        if (DBG) mLog.i("reevaluateSimCardProvisioning");
 
         if (!mHandler.getLooper().isCurrentThread()) {
             // Except for test, this log should not appear in normal flow.
@@ -351,7 +350,7 @@ public class EntitlementManager {
      * @param type tethering type from ConnectivityManager.TETHERING_{@code *}
      */
     protected void runSilentTetherProvisioning(int type) {
-        if (DBG) Log.d(TAG, "runSilentTetherProvisioning: " + type);
+        if (DBG) mLog.i("runSilentTetherProvisioning: " + type);
         // For silent provisioning, settings would stop tethering when entitlement fail.
         ResultReceiver receiver = buildProxyReceiver(type,
                 false/* notifyFail */, null);
@@ -382,7 +381,7 @@ public class EntitlementManager {
 
     @VisibleForTesting
     protected void runUiTetherProvisioning(int type, ResultReceiver receiver) {
-        if (DBG) Log.d(TAG, "runUiTetherProvisioning: " + type);
+        if (DBG) mLog.i("runUiTetherProvisioning: " + type);
 
         Intent intent = new Intent(Settings.ACTION_TETHER_PROVISIONING);
         intent.putExtra(EXTRA_ADD_TETHER_TYPE, type);
@@ -428,7 +427,7 @@ public class EntitlementManager {
                 || mCellularPermitted.indexOfValue(TETHER_ERROR_NO_ERROR) > -1);
 
         if (DBG) {
-            Log.d(TAG, "Cellular permission change from " + oldPermitted
+            mLog.i("Cellular permission change from " + oldPermitted
                     + " to " + mCellularUpstreamPermitted);
         }
 
@@ -453,10 +452,8 @@ public class EntitlementManager {
      * @param resultCode Provisioning result
      */
     protected void addDownstreamMapping(int type, int resultCode) {
-        if (DBG) {
-            Log.d(TAG, "addDownstreamMapping: " + type + ", result: " + resultCode
-                    + " ,TetherTypeRequested: " + mCurrentTethers.contains(type));
-        }
+        mLog.i("addDownstreamMapping: " + type + ", result: " + resultCode
+                + " ,TetherTypeRequested: " + mCurrentTethers.contains(type));
         if (!mCurrentTethers.contains(type)) return;
 
         mCellularPermitted.put(type, resultCode);
@@ -468,7 +465,7 @@ public class EntitlementManager {
      * @param type tethering type from ConnectivityManager.TETHERING_{@code *}
      */
     protected void removeDownstreamMapping(int type) {
-        if (DBG) Log.d(TAG, "removeDownstreamMapping: " + type);
+        mLog.i("removeDownstreamMapping: " + type);
         mCellularPermitted.delete(type);
         evaluateCellularPermission();
     }
@@ -617,7 +614,7 @@ public class EntitlementManager {
      */
     private int updateEntitlementCacheValue(int type, int resultCode) {
         if (DBG) {
-            Log.d(TAG, "updateEntitlementCacheValue: " + type + ", result: " + resultCode);
+            mLog.i("updateEntitlementCacheValue: " + type + ", result: " + resultCode);
         }
         if (resultCode == TETHER_ERROR_NO_ERROR) {
             mEntitlementCacheValue.put(type, resultCode);
