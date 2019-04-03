@@ -37,16 +37,10 @@
         android:paddingStart="@dimen/navigation_key_padding"
         android:paddingEnd="@dimen/navigation_key_padding"
     />
-    <com.android.systemui.statusbar.policy.KeyButtonView
-        android:id="@+id/ime_switcher"
+    <include layout="@layout/ime_switcher"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="0"
-        android:scaleType="center"
         android:visibility="invisible"
-        android:contentDescription="@string/accessibility_ime_switch_button"
-        android:paddingStart="@dimen/navigation_key_padding"
-        android:paddingEnd="@dimen/navigation_key_padding"
     />
     <com.android.systemui.statusbar.policy.KeyButtonView
         android:id="@+id/rotate_suggestion"

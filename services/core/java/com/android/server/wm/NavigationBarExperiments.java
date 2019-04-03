@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_BOTTOM;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_LEFT;
@@ -91,7 +90,7 @@ public class NavigationBarExperiments {
      * @param w the window that is being offset by experiment
      */
     public void offsetWindowFramesForNavBar(int navPosition, WindowState w) {
-        if (w.getAttrs().type != TYPE_INPUT_METHOD && w.getActivityType() != ACTIVITY_TYPE_HOME) {
+        if (w.getAttrs().type != TYPE_INPUT_METHOD) {
             return;
         }
 
@@ -102,6 +101,7 @@ public class NavigationBarExperiments {
                 int navHeight = getNavigationBarFrameHeight() - getNavigationBarHeight();
                 if (navHeight > 0) {
                     cf.bottom -= navHeight;
+                    windowFrames.mStableFrame.bottom -= navHeight;
                 }
                 break;
             case NAV_BAR_LEFT:
