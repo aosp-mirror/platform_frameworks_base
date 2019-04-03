@@ -68,6 +68,7 @@ public class NavigationBarInflaterView extends FrameLayout
     public static final String LEFT = "left";
     public static final String RIGHT = "right";
     public static final String CONTEXTUAL = "contextual";
+    public static final String IME_SWITCHER = "ime_switcher";
 
     public static final String GRAVITY_SEPARATOR = ";";
     public static final String BUTTON_SEPARATOR = ",";
@@ -164,14 +165,18 @@ public class NavigationBarInflaterView extends FrameLayout
     @Override
     public void onTuningChanged(String key, String newValue) {
         if (NAV_BAR_VIEWS.equals(key)) {
-            if (!Objects.equals(mCurrentLayout, newValue)) {
-                mUsingCustomLayout = newValue != null;
-                clearViews();
-                inflateLayout(newValue);
-            }
+            setNavigationBarLayout(newValue);
         } else if (NAV_BAR_LEFT.equals(key) || NAV_BAR_RIGHT.equals(key)) {
             clearViews();
             inflateLayout(mCurrentLayout);
+        }
+    }
+
+    public void setNavigationBarLayout(String layoutValue) {
+        if (!Objects.equals(mCurrentLayout, layoutValue)) {
+            mUsingCustomLayout = layoutValue != null;
+            clearViews();
+            inflateLayout(layoutValue);
         }
     }
 
@@ -401,6 +406,8 @@ public class NavigationBarInflaterView extends FrameLayout
             v = inflater.inflate(R.layout.contextual, parent, false);
         } else if (HOME_HANDLE.equals(button)) {
             v = inflater.inflate(R.layout.home_handle, parent, false);
+        } else if (IME_SWITCHER.equals(button)) {
+            v = inflater.inflate(R.layout.ime_switcher, parent, false);
         } else if (button.startsWith(KEY)) {
             String uri = extractImage(button);
             int code = extractKeycode(button);
