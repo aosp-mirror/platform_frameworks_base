@@ -6761,6 +6761,12 @@ public class AudioService extends IAudioService.Stub
             if (mix.getRule().allowPrivilegedPlaybackCapture()) {
                 // then it must have CAPTURE_MEDIA_OUTPUT or CAPTURE_AUDIO_OUTPUT permission
                 requireCaptureAudioOrMediaOutputPerm |= true;
+                // and its format must be low quality enough
+                String error = mix.canBeUsedForPrivilegedCapture(mix.getFormat());
+                if (error != null) {
+                    Log.e(TAG, error);
+                    return false;
+                }
             }
 
             // If mix is RENDER|LOOPBACK, then an audio MediaProjection is enough
