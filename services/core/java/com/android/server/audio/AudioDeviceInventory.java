@@ -207,7 +207,7 @@ public final class AudioDeviceInventory {
                     mDeviceBroker.setDeviceVolume(
                             streamState, AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP);
                 }
-                makeA2dpDeviceAvailable(address, btDevice.getName(),
+                makeA2dpDeviceAvailable(address, BtHelper.getName(btDevice),
                         "onSetA2dpSinkConnectionState", a2dpCodec);
             }
         }
@@ -257,7 +257,7 @@ public final class AudioDeviceInventory {
             if (isConnected && state != BluetoothProfile.STATE_CONNECTED) {
                 makeHearingAidDeviceUnavailable(address);
             } else if (!isConnected && state == BluetoothProfile.STATE_CONNECTED) {
-                makeHearingAidDeviceAvailable(address, btDevice.getName(),
+                makeHearingAidDeviceAvailable(address, BtHelper.getName(btDevice),
                         "onSetHearingAidConnectionState");
             }
         }
@@ -318,7 +318,7 @@ public final class AudioDeviceInventory {
                 }
             }
             if (AudioSystem.handleDeviceConfigChange(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, address,
-                    btDevice.getName(), a2dpCodec) != AudioSystem.AUDIO_STATUS_OK) {
+                    BtHelper.getName(btDevice), a2dpCodec) != AudioSystem.AUDIO_STATUS_OK) {
                 int musicDevice = mDeviceBroker.getDeviceForStream(AudioSystem.STREAM_MUSIC);
                 // force A2DP device disconnection in case of error so that AudioService state is
                 // consistent with audio policy manager state
@@ -603,10 +603,9 @@ public final class AudioDeviceInventory {
                 }
                 // A2DP device exists, handle active device change
                 final String existingDevicekey = mConnectedDevices.keyAt(i);
-                final String deviceName = device.getName();
                 mConnectedDevices.remove(existingDevicekey);
                 mConnectedDevices.put(deviceKey, new DeviceInfo(
-                        AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, deviceName,
+                        AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, BtHelper.getName(device),
                         address, a2dpCodec));
                 mDeviceBroker.postA2dpActiveDeviceChange(
                         new BtHelper.BluetoothA2dpDeviceInfo(
