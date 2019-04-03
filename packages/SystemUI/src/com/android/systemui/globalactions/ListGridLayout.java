@@ -109,7 +109,10 @@ public class ListGridLayout extends LinearLayout {
         }
     }
 
-    private int getRowCount() {
+    /**
+     * Get the number of rows which will be used to render children.
+     */
+    public int getRowCount() {
         // special case for 3 to use a single row
         if (mExpectedCount == 3) {
             return 1;
@@ -117,7 +120,10 @@ public class ListGridLayout extends LinearLayout {
         return (int) Math.round(Math.sqrt(mExpectedCount));
     }
 
-    private int getColumnCount() {
+    /**
+     * Get the number of columns which will be used to render children.
+     */
+    public int getColumnCount() {
         // special case for 3 to use a single row
         if (mExpectedCount == 3) {
             return 3;

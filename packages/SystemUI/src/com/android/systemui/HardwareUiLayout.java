@@ -561,4 +561,29 @@ public class HardwareUiLayout extends MultiListLayout implements Tunable {
         inoutInfo.contentInsets.set(mList.getLeft(), mList.getTop(),
                 0, getBottom() - mList.getBottom());
     };
+
+    private float getAnimationDistance() {
+        return getContext().getResources().getDimension(
+                com.android.systemui.R.dimen.global_actions_panel_width) / 2;
+    }
+
+    @Override
+    public float getAnimationOffsetX() {
+        if (RotationUtils.getRotation(mContext) == ROTATION_NONE) {
+            return getAnimationDistance();
+        }
+        return 0;
+    }
+
+    @Override
+    public float getAnimationOffsetY() {
+        switch (RotationUtils.getRotation(getContext())) {
+            case RotationUtils.ROTATION_LANDSCAPE:
+                return -getAnimationDistance();
+            case RotationUtils.ROTATION_SEASCAPE:
+                return getAnimationDistance();
+            default: // Portrait
+                return 0;
+        }
+    }
 }
