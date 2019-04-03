@@ -16,6 +16,6 @@
   -->
 
 <resources>
-    <dimen name="settings_bar_view_max_height">106dp</dimen>
+    <dimen name="settings_bar_view_max_height">72dp</dimen>
     <dimen name="settings_bar_view_icon_size">24dp</dimen>
 </resources>
