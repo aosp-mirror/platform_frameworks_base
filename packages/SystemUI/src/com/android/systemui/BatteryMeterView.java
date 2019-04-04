@@ -176,10 +176,6 @@ public class BatteryMeterView extends LinearLayout implements
         setClipChildren(false);
         setClipToPadding(false);
         Dependency.get(ConfigurationController.class).observe(viewAttachLifecycle(this), this);
-
-        // Needed for PorderDuff.Mode.CLEAR operations to work properly, but redraws don't happen
-        // enough to justify a hardware layer.
-        setLayerType(LAYER_TYPE_SOFTWARE, null);
     }
 
     private void setupLayoutTransition() {
