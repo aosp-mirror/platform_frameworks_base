@@ -159,7 +159,7 @@ public class BubbleView extends FrameLayout {
         }
     }
 
-    private void updateViews() {
+    void updateViews() {
         if (mEntry == null) {
             return;
         }
@@ -186,6 +186,13 @@ public class BubbleView extends FrameLayout {
     }
 
     private Drawable buildIconWithTint(Drawable iconDrawable, int backgroundColor) {
+        iconDrawable = checkTint(iconDrawable, backgroundColor);
+        InsetDrawable foreground = new InsetDrawable(iconDrawable, mIconInset);
+        ColorDrawable background = new ColorDrawable(backgroundColor);
+        return new AdaptiveIconDrawable(background, foreground);
+    }
+
+    private Drawable checkTint(Drawable iconDrawable, int backgroundColor) {
         backgroundColor = ColorUtils.setAlphaComponent(backgroundColor, 255 /* alpha */);
         if (backgroundColor == Color.TRANSPARENT) {
             // ColorUtils throws exception when background is translucent.
@@ -197,9 +204,7 @@ public class BubbleView extends FrameLayout {
             int dark = ColorUtils.setAlphaComponent(Color.BLACK, DARK_ICON_ALPHA);
             iconDrawable.setTint(dark);
         }
-        InsetDrawable foreground = new InsetDrawable(iconDrawable, mIconInset);
-        ColorDrawable background = new ColorDrawable(backgroundColor);
-        return new AdaptiveIconDrawable(background, foreground);
+        return iconDrawable;
     }
 
     private int determineDominateColor(Drawable d, int defaultTint) {
