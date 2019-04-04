@@ -248,6 +248,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private final LocalLog mLocalLog = new LocalLog(100);
 
+    private final LocalLog mListenLog = new LocalLog(100);
+
     private PreciseDataConnectionState mPreciseDataConnectionState =
                 new PreciseDataConnectionState();
 
@@ -305,6 +307,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     }
                     mDefaultSubId = newDefaultSubId;
                     mDefaultPhoneId = newDefaultPhoneId;
+                    mLocalLog.log("Default subscription updated: mDefaultPhoneId="
+                            + mDefaultPhoneId + ", mDefaultSubId" + mDefaultSubId);
                 }
             }
         }
@@ -598,10 +602,12 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             boolean notifyNow, int subId) {
         int callerUserId = UserHandle.getCallingUserId();
         mAppOps.checkPackage(Binder.getCallingUid(), callingPackage);
-        if (VDBG) {
-            log("listen: E pkg=" + callingPackage + " events=0x" + Integer.toHexString(events)
+        String str = "listen: E pkg=" + callingPackage + " events=0x" + Integer.toHexString(events)
                 + " notifyNow=" + notifyNow + " subId=" + subId + " myUserId="
-                + UserHandle.myUserId() + " callerUserId=" + callerUserId);
+                + UserHandle.myUserId() + " callerUserId=" + callerUserId;
+        mListenLog.log(str);
+        if (VDBG) {
+            log(str);
         }
 
         if (events != PhoneStateListener.LISTEN_NONE) {
@@ -1399,8 +1405,10 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 if (PhoneConstants.APN_TYPE_DEFAULT.equals(apnType)
                         && (mDataConnectionState[phoneId] != state
                         || mDataConnectionNetworkType[phoneId] != networkType)) {
-                    String str = "onDataConnectionStateChanged(" + state
-                            + ", " + networkType + ")";
+                    String str = "onDataConnectionStateChanged("
+                            + TelephonyManager.dataStateToString(state)
+                            + ", " + TelephonyManager.getNetworkTypeName(networkType)
+                            + ") subId=" + subId + ", phoneId=" + phoneId;
                     log(str);
                     mLocalLog.log(str);
                     for (Record r : mRecords) {
@@ -1916,12 +1924,16 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             pw.println("mEmergencyNumberList=" + mEmergencyNumberList);
             pw.println("mCallQuality=" + mCallQuality);
             pw.println("mCallAttributes=" + mCallAttributes);
+            pw.println("mDefaultPhoneId" + mDefaultPhoneId);
+            pw.println("mDefaultSubId" + mDefaultSubId);
 
             pw.decreaseIndent();
 
             pw.println("local logs:");
             pw.increaseIndent();
             mLocalLog.dump(fd, pw, args);
+            pw.println("listen logs:");
+            mListenLog.dump(fd, pw, args);
             pw.decreaseIndent();
             pw.println("registrations: count=" + recordCount);
             pw.increaseIndent();
