@@ -318,6 +318,16 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
         }
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append('[');
+        sb.append("locInScreen=(" + mLocInScreen[0] + ", " + mLocInScreen[1] + ")");
+        sb.append(", iconView=" + mIcon.toString());
+        sb.append(", tileState=" + mTileState);
+        sb.append("]");
+        return sb.toString();
+    }
+
     private class H extends Handler {
         private static final int STATE_CHANGED = 1;
 

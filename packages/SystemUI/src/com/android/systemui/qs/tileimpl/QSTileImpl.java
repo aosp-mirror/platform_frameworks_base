@@ -52,6 +52,7 @@ import com.android.settingslib.RestrictedLockUtils;
 import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
+import com.android.systemui.Dumpable;
 import com.android.systemui.Prefs;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
@@ -63,6 +64,8 @@ import com.android.systemui.qs.PagedTileLayout.TilePage;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QuickStatusBarHeader;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /**
@@ -74,7 +77,7 @@ import java.util.ArrayList;
  *
  * @param <TState> see above
  */
-public abstract class QSTileImpl<TState extends State> implements QSTile, LifecycleOwner {
+public abstract class QSTileImpl<TState extends State> implements QSTile, LifecycleOwner, Dumpable {
     protected final String TAG = "Tile." + getClass().getSimpleName();
     protected static final boolean DEBUG = Log.isLoggable("Tile", Log.DEBUG);
 
@@ -591,5 +594,11 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
             // workaround: get a clean state for every new AVD
             return context.getDrawable(mAnimatedResId).getConstantState().newDrawable();
         }
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println(this.getClass().getSimpleName() + ":");
+        pw.print("    "); pw.println(getState().toString());
     }
 }

@@ -30,6 +30,8 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.systemui.Dependency;
+import com.android.systemui.DumpController;
+import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.plugins.PluginListener;
@@ -47,6 +49,8 @@ import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -61,7 +65,7 @@ import javax.inject.Singleton;
 
 /** Platform implementation of the quick settings tile host **/
 @Singleton
-public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory> {
+public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, Dumpable {
     private static final String TAG = "QSTileHost";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -73,6 +77,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory> {
     private final TileServices mServices;
     private final TunerService mTunerService;
     private final PluginManager mPluginManager;
+    private final DumpController mDumpController;
 
     private final List<Callback> mCallbacks = new ArrayList<>();
     private AutoTileManager mAutoTiles;
@@ -89,17 +94,20 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory> {
             @Named(Dependency.BG_LOOPER_NAME) Looper bgLooper,
             PluginManager pluginManager,
             TunerService tunerService,
-            Provider<AutoTileManager> autoTiles) {
+            Provider<AutoTileManager> autoTiles,
+            DumpController dumpController) {
         mIconController = iconController;
         mContext = context;
         mTunerService = tunerService;
         mPluginManager = pluginManager;
+        mDumpController = dumpController;
 
         mServices = new TileServices(this, bgLooper);
 
         defaultFactory.setHost(this);
         mQsFactories.add(defaultFactory);
         pluginManager.addPluginListener(this, QSFactory.class, true);
+        mDumpController.addListener(this);
 
         mainHandler.post(() -> {
             // This is technically a hack to avoid circular dependency of
@@ -121,6 +129,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory> {
         mTunerService.removeTunable(this);
         mServices.destroy();
         mPluginManager.removePluginListener(this);
+        mDumpController.removeListener(this);
     }
 
     @Override
@@ -362,5 +371,12 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory> {
             }
         }
         return tiles;
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("QSTileHost:");
+        mTiles.values().stream().filter(obj -> obj instanceof Dumpable)
+                .forEach(o -> ((Dumpable) o).dump(fd, pw, args));
     }
 }
