@@ -92,7 +92,6 @@ import android.media.audiopolicy.AudioPolicy;
 import android.media.audiopolicy.AudioPolicyConfig;
 import android.media.audiopolicy.AudioProductStrategy;
 import android.media.audiopolicy.AudioVolumeGroup;
-import android.media.audiopolicy.AudioVolumeGroups;
 import android.media.audiopolicy.IAudioPolicyCallback;
 import android.media.projection.IMediaProjection;
 import android.media.projection.IMediaProjectionManager;
@@ -280,9 +279,6 @@ public class AudioService extends IAudioService.Stub
     }
 
     private SettingsObserver mSettingsObserver;
-
-    /** @see AudioVolumeGroups */
-    private static AudioVolumeGroups sAudioVolumeGroups;
 
     private int mMode = AudioSystem.MODE_NORMAL;
     // protects mRingerMode
@@ -633,8 +629,6 @@ public class AudioService extends IAudioService.Stub
 
         mVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         mHasVibrator = mVibrator == null ? false : mVibrator.hasVibrator();
-
-        sAudioVolumeGroups = new AudioVolumeGroups();
 
         // Initialize volume
         // Priority 1 - Android Property
@@ -1030,11 +1024,12 @@ public class AudioService extends IAudioService.Stub
     }
 
     /**
-     * @return the {@link android.media.audiopolicy.AudioVolumeGroups} discovered from the
+     * @return the List of {@link android.media.audiopolicy.AudioVolumeGroup} discovered from the
      * platform configuration file.
      */
-    public @NonNull AudioVolumeGroups listAudioVolumeGroups() {
-        return sAudioVolumeGroups;
+    @NonNull
+    public List<AudioVolumeGroup> getAudioVolumeGroups() {
+        return AudioVolumeGroup.getAudioVolumeGroups();
     }
 
     private void checkAllAliasStreamVolumes() {
@@ -1954,7 +1949,7 @@ public class AudioService extends IAudioService.Stub
         AudioSystem.setVolumeIndexForAttributes(attr, index, device);
 
         final int volumeGroup = getVolumeGroupIdForAttributes(attr);
-        final AudioVolumeGroup avg = sAudioVolumeGroups.getById(volumeGroup);
+        final AudioVolumeGroup avg = getAudioVolumeGroupById(volumeGroup);
         if (avg == null) {
             return;
         }
@@ -1962,6 +1957,18 @@ public class AudioService extends IAudioService.Stub
             setStreamVolume(groupedStream, index, flags, callingPackage, callingPackage,
                             Binder.getCallingUid());
         }
+    }
+
+    @Nullable
+    private AudioVolumeGroup getAudioVolumeGroupById(int volumeGroupId) {
+        for (final AudioVolumeGroup avg : AudioVolumeGroup.getAudioVolumeGroups()) {
+            if (avg.getId() == volumeGroupId) {
+                return avg;
+            }
+        }
+
+        Log.e(TAG, ": invalid volume group id: " + volumeGroupId + " requested");
+        return null;
     }
 
     /** @see AudioManager#getVolumeIndexForAttributes(attr) */
@@ -2148,7 +2155,7 @@ public class AudioService extends IAudioService.Stub
     private int getVolumeGroupIdForAttributes(@NonNull AudioAttributes attributes) {
         Preconditions.checkNotNull(attributes, "attributes must not be null");
         int volumeGroupId = getVolumeGroupIdForAttributesInt(attributes);
-        if (volumeGroupId != AudioVolumeGroups.DEFAULT_VOLUME_GROUP) {
+        if (volumeGroupId != AudioVolumeGroup.DEFAULT_VOLUME_GROUP) {
             return volumeGroupId;
         }
         // The default volume group is the one hosted by default product strategy, i.e.
@@ -2161,11 +2168,11 @@ public class AudioService extends IAudioService.Stub
         for (final AudioProductStrategy productStrategy :
                 AudioProductStrategy.getAudioProductStrategies()) {
             int volumeGroupId = productStrategy.getVolumeGroupIdForAudioAttributes(attributes);
-            if (volumeGroupId != AudioVolumeGroups.DEFAULT_VOLUME_GROUP) {
+            if (volumeGroupId != AudioVolumeGroup.DEFAULT_VOLUME_GROUP) {
                 return volumeGroupId;
             }
         }
-        return AudioVolumeGroups.DEFAULT_VOLUME_GROUP;
+        return AudioVolumeGroup.DEFAULT_VOLUME_GROUP;
     }
 
 

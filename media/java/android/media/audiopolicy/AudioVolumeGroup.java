@@ -19,11 +19,15 @@ package android.media.audiopolicy;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.media.AudioAttributes;
+import android.media.AudioSystem;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -34,6 +38,12 @@ import java.util.List;
  */
 @SystemApi
 public final class AudioVolumeGroup implements Parcelable {
+    private static final String TAG = "AudioVolumeGroup";
+    /**
+     * Volume group value to use when introspection API fails.
+     */
+    public static final int DEFAULT_VOLUME_GROUP = -1;
+
     /**
      * Unique identifier of a volume group.
      */
@@ -45,6 +55,39 @@ public final class AudioVolumeGroup implements Parcelable {
 
     private final AudioAttributes[] mAudioAttributes;
     private int[] mLegacyStreamTypes;
+
+    private static final Object sLock = new Object();
+
+    @GuardedBy("sLock")
+    private static List<AudioVolumeGroup> sAudioVolumeGroups;
+
+    /**
+     * @hide
+     * @return the List of AudioVolumeGroup discovered from platform configuration file.
+     */
+    @NonNull
+    public static List<AudioVolumeGroup> getAudioVolumeGroups() {
+        if (sAudioVolumeGroups == null) {
+            synchronized (sLock) {
+                if (sAudioVolumeGroups == null) {
+                    sAudioVolumeGroups = initializeAudioVolumeGroups();
+                }
+            }
+        }
+        return sAudioVolumeGroups;
+    }
+
+    private static List<AudioVolumeGroup> initializeAudioVolumeGroups() {
+        ArrayList<AudioVolumeGroup> avgList = new ArrayList<>();
+        int status = native_list_audio_volume_groups(avgList);
+        if (status != AudioSystem.SUCCESS) {
+            Log.w(TAG, ": listAudioVolumeGroups failed");
+        }
+        return avgList;
+    }
+
+    private static native int native_list_audio_volume_groups(
+            ArrayList<AudioVolumeGroup> groups);
 
     /**
      * @param name of the volume group

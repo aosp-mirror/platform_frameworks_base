@@ -236,7 +236,7 @@ public final class AudioProductStrategy implements Parcelable {
      * @hide
      * @param streamType legacy stream type used for volume operation only
      * @return the volume group id relevant for the given streamType.
-     *         If none is found, {@link AudioVolumeGroups#DEFAULT_VOLUME_GROUP} is returned.
+     *         If none is found, {@link AudioVolumeGroup#DEFAULT_VOLUME_GROUP} is returned.
      */
     public int getVolumeGroupIdForLegacyStreamType(int streamType) {
         for (final AudioAttributesGroup aag : mAudioAttributesGroups) {
@@ -244,14 +244,14 @@ public final class AudioProductStrategy implements Parcelable {
                 return aag.getVolumeGroupId();
             }
         }
-        return AudioVolumeGroups.DEFAULT_VOLUME_GROUP;
+        return AudioVolumeGroup.DEFAULT_VOLUME_GROUP;
     }
 
     /**
      * @hide
      * @param aa the {@link AudioAttributes} to be considered
      * @return the volume group id associated with the given audio attributes if found,
-     *         {@link AudioVolumeGroups#DEFAULT_VOLUME_GROUP} otherwise.
+     *         {@link AudioVolumeGroup#DEFAULT_VOLUME_GROUP} otherwise.
      */
     public int getVolumeGroupIdForAudioAttributes(@NonNull AudioAttributes aa) {
         Preconditions.checkNotNull(aa, "AudioAttributes must not be null");
@@ -260,7 +260,7 @@ public final class AudioProductStrategy implements Parcelable {
                 return aag.getVolumeGroupId();
             }
         }
-        return AudioVolumeGroups.DEFAULT_VOLUME_GROUP;
+        return AudioVolumeGroup.DEFAULT_VOLUME_GROUP;
     }
 
     @Override

@@ -38,8 +38,8 @@ import android.content.Intent;
 import android.media.audiopolicy.AudioPolicy;
 import android.media.audiopolicy.AudioPolicy.AudioPolicyFocusListener;
 import android.media.audiopolicy.AudioProductStrategy;
+import android.media.audiopolicy.AudioVolumeGroup;
 import android.media.audiopolicy.AudioVolumeGroupChangeHandler;
-import android.media.audiopolicy.AudioVolumeGroups;
 import android.media.projection.MediaProjection;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
@@ -5422,15 +5422,16 @@ public class AudioManager {
      * Introspection API to retrieve audio volume groups.
      * When implementing {Car|Oem}AudioManager, use this method  to retrieve the collection of
      * audio volume groups.
-     * @return a (possibly zero-length) array of
-     *         {@see android.media.audiopolicy.AudioVolumeGroups} objects.
+     * @return a (possibly zero-length) List of
+     *         {@see android.media.audiopolicy.AudioVolumeGroup} objects.
      */
     @SystemApi
+    @NonNull
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-    public @NonNull AudioVolumeGroups getAudioVolumeGroups() {
+    public static List<AudioVolumeGroup> getAudioVolumeGroups() {
         final IAudioService service = getService();
         try {
-            return service.listAudioVolumeGroups();
+            return service.getAudioVolumeGroups();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

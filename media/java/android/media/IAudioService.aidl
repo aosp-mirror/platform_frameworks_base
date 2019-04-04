@@ -34,7 +34,7 @@ import android.media.PlayerBase;
 import android.media.VolumePolicy;
 import android.media.audiopolicy.AudioPolicyConfig;
 import android.media.audiopolicy.AudioProductStrategy;
-import android.media.audiopolicy.AudioVolumeGroups;
+import android.media.audiopolicy.AudioVolumeGroup;
 import android.media.audiopolicy.IAudioPolicyCallback;
 import android.media.projection.IMediaProjection;
 import android.net.Uri;
@@ -86,7 +86,7 @@ interface IAudioService {
     @UnsupportedAppUsage
     int getStreamMaxVolume(int streamType);
 
-    AudioVolumeGroups listAudioVolumeGroups();
+    List<AudioVolumeGroup> getAudioVolumeGroups();
 
     void setVolumeIndexForAttributes(in AudioAttributes aa, int index, int flags, String callingPackage);
 
