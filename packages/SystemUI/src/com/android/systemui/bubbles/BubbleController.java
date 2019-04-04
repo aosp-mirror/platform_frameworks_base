@@ -34,6 +34,7 @@ import android.app.INotificationManager;
 import android.app.Notification;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -134,6 +135,9 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
 
     // Used for determining view rect for touch interaction
     private Rect mTempRect = new Rect();
+
+    /** Last known orientation, used to detect orientation changes in {@link #onConfigChanged}. */
+    private int mOrientation = Configuration.ORIENTATION_UNDEFINED;
 
     /**
      * Listener to be notified when some states of the bubbles change.
@@ -251,6 +255,14 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
     public void onOverlayChanged() {
         if (mStackView != null) {
             mStackView.onThemeChanged();
+        }
+    }
+
+    @Override
+    public void onConfigChanged(Configuration newConfig) {
+        if (mStackView != null && newConfig != null && newConfig.orientation != mOrientation) {
+            mStackView.onOrientationChanged();
+            mOrientation = newConfig.orientation;
         }
     }
 

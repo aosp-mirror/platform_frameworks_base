@@ -138,6 +138,16 @@ public class BubbleStackView extends FrameLayout {
     private Runnable mHideFlyout =
             () -> mFlyout.animate().alpha(0f).withEndAction(() -> mFlyout.setVisibility(GONE));
 
+    /** Layout change listener that moves the stack to the nearest valid position on rotation. */
+    private OnLayoutChangeListener mMoveStackToValidPositionOnLayoutListener;
+    /** Whether the stack was on the left side of the screen prior to rotation. */
+    private boolean mWasOnLeftBeforeRotation = false;
+    /**
+     * How far down the screen the stack was before rotation, in terms of percentage of the way down
+     * the allowable region. Defaults to -1 if not set.
+     */
+    private float mVerticalPosPercentBeforeRotation = -1;
+
     private int mBubbleSize;
     private int mBubblePadding;
     private int mExpandedAnimateXDistance;
@@ -304,6 +314,15 @@ public class BubbleStackView extends FrameLayout {
             return view.onApplyWindowInsets(insets);
         });
 
+        mMoveStackToValidPositionOnLayoutListener =
+                (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+                    if (mVerticalPosPercentBeforeRotation >= 0) {
+                        mStackAnimationController.moveStackToSimilarPositionAfterRotation(
+                                mWasOnLeftBeforeRotation, mVerticalPosPercentBeforeRotation);
+                    }
+                    removeOnLayoutChangeListener(mMoveStackToValidPositionOnLayoutListener);
+                };
+
         // This must be a separate OnDrawListener since it should be called for every draw.
         getViewTreeObserver().addOnDrawListener(mSystemGestureExcludeUpdater);
     }
@@ -316,6 +335,18 @@ public class BubbleStackView extends FrameLayout {
             b.iconView.updateViews();
             b.expandedView.updateTheme();
         }
+    }
+
+    /** Respond to the phone being rotated by repositioning the stack and hiding any flyouts. */
+    public void onOrientationChanged() {
+        final RectF allowablePos = mStackAnimationController.getAllowableStackPositionRegion();
+        mWasOnLeftBeforeRotation = mStackAnimationController.isStackOnLeftSide();
+        mVerticalPosPercentBeforeRotation =
+                (mStackAnimationController.getStackPosition().y - allowablePos.top)
+                        / (allowablePos.bottom - allowablePos.top);
+        addOnLayoutChangeListener(mMoveStackToValidPositionOnLayoutListener);
+
+        hideFlyoutImmediate();
     }
 
     @Override
