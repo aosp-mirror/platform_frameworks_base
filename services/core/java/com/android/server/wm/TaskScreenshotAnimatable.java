@@ -93,6 +93,7 @@ class TaskScreenshotAnimatable implements SurfaceAnimator.Animatable {
     @Override
     public void onAnimationLeashDestroyed(SurfaceControl.Transaction t) {
         t.remove(mSurfaceControl);
+        mSurfaceControl = null;
     }
 
     @Override
