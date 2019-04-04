@@ -202,7 +202,9 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         @Override
         public void onBackButtonAlphaChanged(float alpha, boolean animate) {
             final ButtonDispatcher backButton = mNavigationBarView.getBackButton();
-            if (QuickStepContract.isGesturalMode(getContext())) {
+            final boolean useAltBack =
+                    (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0;
+            if (QuickStepContract.isGesturalMode(getContext()) && !useAltBack) {
                 // If property was changed to hide/show back button, going home will trigger
                 // launcher to to change the back button alpha to reflect property change
                 backButton.setVisibility(View.GONE);
