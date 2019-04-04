@@ -599,6 +599,14 @@ public class Location implements Parcelable {
      * ElapsedRealtimeNanos timestamp, with the reported measurements in
      * nanoseconds (68% confidence).
      *
+     * This means that we have 68% confidence that the true timestamp of the
+     * event is within ElapsedReatimeNanos +/- uncertainty.
+     *
+     * Example :
+     *   - getElapsedRealtimeNanos() returns 10000000
+     *   - getElapsedRealtimeUncertaintyNanos() returns 1000000 (equivalent to 1millisecond)
+     *   This means that the event most likely happened between 9000000 and 11000000.
+     *
      * @return uncertainty of elapsed real-time of fix, in nanoseconds.
      */
     public long getElapsedRealtimeUncertaintyNanos() {
