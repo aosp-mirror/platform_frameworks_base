@@ -31,7 +31,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATIO
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
 
 import android.annotation.NonNull;
 import android.annotation.UnsupportedAppUsage;
@@ -2469,8 +2469,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 setFlags(FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
                         FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS & ~getForcedWindowFlags());
             }
-            if (mDecor.mForceWindowDrawsStatusBarBackground) {
-                params.privateFlags |= PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND;
+            if (mDecor.mForceWindowDrawsBarBackgrounds) {
+                params.privateFlags |= PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
             }
         }
         if (a.getBoolean(R.styleable.Window_windowLightStatusBar, false)) {
