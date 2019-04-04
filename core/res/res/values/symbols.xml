@@ -1717,8 +1717,6 @@
   <java-symbol type="bool" name="config_enableCarDockHomeLaunch" />
   <java-symbol type="bool" name="config_enableLockBeforeUnlockScreen" />
   <java-symbol type="bool" name="config_enableLockScreenRotation" />
-  <java-symbol type="bool" name="config_enableLockScreenTranslucentDecor" />
-  <java-symbol type="bool" name="config_enableTranslucentDecor" />
   <java-symbol type="bool" name="config_forceShowSystemBars" />
   <java-symbol type="bool" name="config_lidControlsScreenLock" />
   <java-symbol type="bool" name="config_lidControlsSleep" />

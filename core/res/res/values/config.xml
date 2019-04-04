@@ -1302,12 +1302,6 @@
     <!-- Disable lockscreen rotation by default -->
     <bool name="config_enableLockScreenRotation">false</bool>
 
-    <!-- Enable lockscreen translucent decor by default -->
-    <bool name="config_enableLockScreenTranslucentDecor">true</bool>
-
-    <!-- Enable translucent decor by default -->
-    <bool name="config_enableTranslucentDecor">true</bool>
-
     <!-- Is the device capable of hot swapping an UICC Card -->
     <bool name="config_hotswapCapable">false</bool>
 
