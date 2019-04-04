@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar;
 
+import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 
@@ -152,8 +153,9 @@ public class NotificationTestHelper {
     /**
      * Returns an {@link ExpandableNotificationRow} that should be shown as a bubble.
      */
-    public ExpandableNotificationRow createBubble() throws Exception {
-        return createBubble(null);
+    public ExpandableNotificationRow createBubble()
+            throws Exception {
+        return createBubble(makeBubbleMetadata(null), PKG);
     }
 
     /**
@@ -163,9 +165,20 @@ public class NotificationTestHelper {
      */
     public ExpandableNotificationRow createBubble(@Nullable PendingIntent deleteIntent)
             throws Exception {
+        return createBubble(makeBubbleMetadata(deleteIntent), PKG);
+    }
+
+    /**
+     * Returns an {@link ExpandableNotificationRow} that should be shown as a bubble.
+     *
+     * @param bubbleMetadata the {@link BubbleMetadata} to use
+     */
+    public ExpandableNotificationRow createBubble(BubbleMetadata bubbleMetadata, String pkg)
+            throws Exception {
         Notification n = createNotification(false /* isGroupSummary */,
-                null /* groupKey */, true /* isBubble */, deleteIntent);
-        return generateRow(n, PKG, UID, USER_HANDLE, 0 /* extraInflationFlags */, IMPORTANCE_HIGH);
+                null /* groupKey */, bubbleMetadata);
+        n.flags |= FLAG_BUBBLE;
+        return generateRow(n, pkg, UID, USER_HANDLE, 0 /* extraInflationFlags */, IMPORTANCE_HIGH);
     }
 
     /**
@@ -195,7 +208,7 @@ public class NotificationTestHelper {
      *
      * @return a notification with no special properties
      */
-    private Notification createNotification() {
+    public Notification createNotification() {
         return createNotification(false /* isGroupSummary */, null /* groupKey */);
     }
 
@@ -207,8 +220,7 @@ public class NotificationTestHelper {
      * @return a notification that is in the group specified or standalone if unspecified
      */
     private Notification createNotification(boolean isGroupSummary, @Nullable String groupKey) {
-        return createNotification(isGroupSummary, groupKey, false /* isBubble */,
-                null /* bubbleDeleteIntent */);
+        return createNotification(isGroupSummary, groupKey, null /* bubble metadata */);
     }
 
     /**
@@ -216,12 +228,11 @@ public class NotificationTestHelper {
      *
      * @param isGroupSummary whether the notification is a group summary
      * @param groupKey the group key for the notification group used across notifications
-     * @param isBubble whether this notification should bubble
+     * @param bubbleMetadata the bubble metadata to use for this notification if it exists.
      * @return a notification that is in the group specified or standalone if unspecified
      */
     private Notification createNotification(boolean isGroupSummary,
-            @Nullable String groupKey, boolean isBubble,
-            @Nullable PendingIntent bubbleDeleteIntent) {
+            @Nullable String groupKey, @Nullable BubbleMetadata bubbleMetadata) {
         Notification publicVersion = new Notification.Builder(mContext).setSmallIcon(
                 R.drawable.ic_person)
                 .setCustomContentView(new RemoteViews(mContext.getPackageName(),
@@ -239,9 +250,8 @@ public class NotificationTestHelper {
         if (!TextUtils.isEmpty(groupKey)) {
             notificationBuilder.setGroup(groupKey);
         }
-        if (isBubble) {
-            BubbleMetadata metadata = makeBubbleMetadata(bubbleDeleteIntent);
-            notificationBuilder.setBubbleMetadata(metadata);
+        if (bubbleMetadata != null) {
+            notificationBuilder.setBubbleMetadata(bubbleMetadata);
         }
         return notificationBuilder.build();
     }
@@ -312,8 +322,7 @@ public class NotificationTestHelper {
         return new BubbleMetadata.Builder()
                 .setIntent(bubbleIntent)
                 .setDeleteIntent(deleteIntent)
-                .setTitle("bubble title")
-                .setIcon(Icon.createWithResource(mContext, 1))
+                .setIcon(Icon.createWithResource(mContext, R.drawable.android))
                 .setDesiredHeight(314)
                 .build();
     }

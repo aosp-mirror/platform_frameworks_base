@@ -26,6 +26,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -58,6 +59,7 @@ public class ConfigParserTest {
     }
 
     @Test
+    @Ignore // TODO: Re-enable once ConfigParser#ENABLE_DEVICE_CONFIG is finalized
     public void getBoolean_deviceConfig() {
         DeviceConfig.setProperty(
                 DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
@@ -77,6 +79,7 @@ public class ConfigParserTest {
     }
 
     @Test
+    @Ignore // TODO: Re-enable once ConfigParser#ENABLE_DEVICE_CONFIG is finalized
     public void getInt_deviceConfig() {
         DeviceConfig.setProperty(
                 DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
@@ -94,6 +97,7 @@ public class ConfigParserTest {
     }
 
     @Test
+    @Ignore // TODO: Re-enable once ConfigParser#ENABLE_DEVICE_CONFIG is finalized
     public void getFloat_deviceConfig() {
         DeviceConfig.setProperty(
                 DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
@@ -111,6 +115,7 @@ public class ConfigParserTest {
     }
 
     @Test
+    @Ignore // TODO: Re-enable once ConfigParser#ENABLE_DEVICE_CONFIG is finalized
     public void getString_deviceConfig() {
         DeviceConfig.setProperty(
                 DeviceConfig.NAMESPACE_TEXTCLASSIFIER,

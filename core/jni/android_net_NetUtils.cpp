@@ -470,6 +470,7 @@ static jbyteArray android_net_utils_resNetworkResult(JNIEnv *env, jobject thiz, 
     std::vector<uint8_t> buf(MAXPACKETSIZE, 0);
 
     int res = resNetworkResult(fd, &rcode, buf.data(), MAXPACKETSIZE);
+    jniSetFileDescriptorOfFD(env, javaFd, -1);
     if (res < 0) {
         throwErrnoException(env, "resNetworkResult", -res);
         return nullptr;
@@ -485,6 +486,12 @@ static jbyteArray android_net_utils_resNetworkResult(JNIEnv *env, jobject thiz, 
     }
 
     return answer;
+}
+
+static void android_net_utils_resNetworkCancel(JNIEnv *env, jobject thiz, jobject javaFd) {
+    int fd = jniGetFDFromFileDescriptor(env, javaFd);
+    resNetworkCancel(fd);
+    jniSetFileDescriptorOfFD(env, javaFd, -1);
 }
 
 static jobject android_net_utils_getTcpRepairWindow(JNIEnv *env, jobject thiz, jobject javaFd) {
@@ -546,6 +553,7 @@ static const JNINativeMethod gNetworkUtilMethods[] = {
     { "resNetworkSend", "(I[BII)Ljava/io/FileDescriptor;", (void*) android_net_utils_resNetworkSend },
     { "resNetworkQuery", "(ILjava/lang/String;III)Ljava/io/FileDescriptor;", (void*) android_net_utils_resNetworkQuery },
     { "resNetworkResult", "(Ljava/io/FileDescriptor;)[B", (void*) android_net_utils_resNetworkResult },
+    { "resNetworkCancel", "(Ljava/io/FileDescriptor;)V", (void*) android_net_utils_resNetworkCancel },
 };
 
 int register_android_net_NetworkUtils(JNIEnv* env)

@@ -19,7 +19,7 @@ option java_multiple_files = true;
 
 package android.os;
 
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 // Dump of statsd report data (dumpsys stats --proto).
 message StatsDataDumpProto {

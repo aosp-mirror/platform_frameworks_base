@@ -67,6 +67,8 @@ package android.location {
     method @Deprecated public boolean addGpsNavigationMessageListener(android.location.GpsNavigationMessageEvent.Listener);
     method @Deprecated public void removeGpsMeasurementListener(android.location.GpsMeasurementsEvent.Listener);
     method @Deprecated public void removeGpsNavigationMessageListener(android.location.GpsNavigationMessageEvent.Listener);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void setLocationControllerExtraPackage(String);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void setLocationControllerExtraPackageEnabled(boolean);
   }
 
 }
@@ -137,6 +139,14 @@ package android.telephony {
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void answerRingingCall();
     method @Deprecated @RequiresPermission(android.Manifest.permission.CALL_PHONE) public boolean endCall();
     method @Deprecated public void silenceRinger();
+  }
+
+}
+
+package android.telephony.data {
+
+  public final class DataCallResponse implements android.os.Parcelable {
+    ctor public DataCallResponse(int, int, int, int, int, @Nullable String, @Nullable java.util.List<android.net.LinkAddress>, @Nullable java.util.List<java.net.InetAddress>, @Nullable java.util.List<java.net.InetAddress>, @Nullable java.util.List<java.net.InetAddress>, int);
   }
 
 }

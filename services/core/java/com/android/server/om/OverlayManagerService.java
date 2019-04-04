@@ -345,7 +345,7 @@ public final class OverlayManagerService extends SystemService {
             switch (action) {
                 case ACTION_PACKAGE_ADDED:
                     if (replacing) {
-                        onPackageUpgraded(packageName, userIds);
+                        onPackageReplaced(packageName, userIds);
                     } else {
                         onPackageAdded(packageName, userIds);
                     }
@@ -355,7 +355,7 @@ public final class OverlayManagerService extends SystemService {
                     break;
                 case ACTION_PACKAGE_REMOVED:
                     if (replacing) {
-                        onPackageUpgrading(packageName, userIds);
+                        onPackageReplacing(packageName, userIds);
                     } else {
                         onPackageRemoved(packageName, userIds);
                     }
@@ -374,7 +374,7 @@ public final class OverlayManagerService extends SystemService {
                     synchronized (mLock) {
                         final PackageInfo pi = mPackageManager.getPackageInfo(packageName, userId,
                                 false);
-                        if (pi != null) {
+                        if (pi != null && !pi.applicationInfo.isInstantApp()) {
                             mPackageManager.cachePackageInfo(packageName, userId, pi);
                             if (pi.isOverlayPackage()) {
                                 mImpl.onOverlayPackageAdded(packageName, userId);
@@ -397,7 +397,7 @@ public final class OverlayManagerService extends SystemService {
                     synchronized (mLock) {
                         final PackageInfo pi = mPackageManager.getPackageInfo(packageName, userId,
                                 false);
-                        if (pi != null) {
+                        if (pi != null && pi.applicationInfo.isInstantApp()) {
                             mPackageManager.cachePackageInfo(packageName, userId, pi);
                             if (pi.isOverlayPackage()) {
                                 mImpl.onOverlayPackageChanged(packageName, userId);
@@ -412,18 +412,16 @@ public final class OverlayManagerService extends SystemService {
             }
         }
 
-        private void onPackageUpgrading(@NonNull final String packageName,
+        private void onPackageReplacing(@NonNull final String packageName,
                 @NonNull final int[] userIds) {
             try {
-                traceBegin(TRACE_TAG_RRO, "OMS#onPackageUpgrading " + packageName);
+                traceBegin(TRACE_TAG_RRO, "OMS#onPackageReplacing " + packageName);
                 for (int userId : userIds) {
                     synchronized (mLock) {
                         mPackageManager.forgetPackageInfo(packageName, userId);
                         final OverlayInfo oi = mImpl.getOverlayInfo(packageName, userId);
                         if (oi != null) {
-                            mImpl.onOverlayPackageUpgrading(packageName, userId);
-                        } else {
-                            mImpl.onTargetPackageUpgrading(packageName, userId);
+                            mImpl.onOverlayPackageReplacing(packageName, userId);
                         }
                     }
                 }
@@ -432,20 +430,20 @@ public final class OverlayManagerService extends SystemService {
             }
         }
 
-        private void onPackageUpgraded(@NonNull final String packageName,
+        private void onPackageReplaced(@NonNull final String packageName,
                 @NonNull final int[] userIds) {
             try {
-                traceBegin(TRACE_TAG_RRO, "OMS#onPackageUpgraded " + packageName);
+                traceBegin(TRACE_TAG_RRO, "OMS#onPackageReplaced " + packageName);
                 for (int userId : userIds) {
                     synchronized (mLock) {
                         final PackageInfo pi = mPackageManager.getPackageInfo(packageName, userId,
                                 false);
-                        if (pi != null) {
+                        if (pi != null && !pi.applicationInfo.isInstantApp()) {
                             mPackageManager.cachePackageInfo(packageName, userId, pi);
                             if (pi.isOverlayPackage()) {
-                                mImpl.onOverlayPackageUpgraded(packageName, userId);
+                                mImpl.onOverlayPackageReplaced(packageName, userId);
                             } else {
-                                mImpl.onTargetPackageUpgraded(packageName, userId);
+                                mImpl.onTargetPackageReplaced(packageName, userId);
                             }
                         }
                     }

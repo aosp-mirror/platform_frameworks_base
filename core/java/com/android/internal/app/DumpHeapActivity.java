@@ -37,6 +37,10 @@ public class DumpHeapActivity extends Activity {
     public static final String KEY_PROCESS = "process";
     /** The size limit the process reached */
     public static final String KEY_SIZE = "size";
+    /** Whether the user initiated the dump or not. */
+    public static final String KEY_IS_USER_INITIATED = "is_user_initiated";
+    /** Whether the process is a system process (eg: Android System) or not. */
+    public static final String KEY_IS_SYSTEM_PROCESS = "is_system_process";
     /** Optional name of package to directly launch */
     public static final String KEY_DIRECT_LAUNCH = "direct_launch";
 
@@ -59,6 +63,8 @@ public class DumpHeapActivity extends Activity {
 
         mProcess = getIntent().getStringExtra(KEY_PROCESS);
         mSize = getIntent().getLongExtra(KEY_SIZE, 0);
+        final boolean isUserInitiated = getIntent().getBooleanExtra(KEY_IS_USER_INITIATED, false);
+        final boolean isSystemProcess = getIntent().getBooleanExtra(KEY_IS_SYSTEM_PROCESS, false);
 
         String directLaunch = getIntent().getStringExtra(KEY_DIRECT_LAUNCH);
         if (directLaunch != null) {
@@ -81,11 +87,19 @@ public class DumpHeapActivity extends Activity {
             }
         }
 
+        final int messageId;
+        if (isUserInitiated) {
+            messageId = com.android.internal.R.string.dump_heap_ready_text;
+        } else if (isSystemProcess) {
+            messageId = com.android.internal.R.string.dump_heap_system_text;
+        } else {
+            messageId = com.android.internal.R.string.dump_heap_text;
+        }
         AlertDialog.Builder b = new AlertDialog.Builder(this,
                 android.R.style.Theme_Material_Light_Dialog_Alert);
         b.setTitle(com.android.internal.R.string.dump_heap_title);
-        b.setMessage(getString(com.android.internal.R.string.dump_heap_text,
-                mProcess, DebugUtils.sizeValueToString(mSize, null)));
+        b.setMessage(getString(
+                messageId, mProcess, DebugUtils.sizeValueToString(mSize, null)));
         b.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {

@@ -126,6 +126,41 @@ static struct {
     jfieldID white;
 } gDisplayPrimariesClassInfo;
 
+static struct {
+    jclass clazz;
+    jmethodID builder;
+} gScreenshotGraphicBufferClassInfo;
+
+class JNamedColorSpace {
+public:
+    // ColorSpace.Named.SRGB.ordinal() = 0;
+    static constexpr jint SRGB = 0;
+
+    // ColorSpace.Named.DISPLAY_P3.ordinal() = 6;
+    static constexpr jint DISPLAY_P3 = 6;
+};
+
+constexpr jint fromDataspaceToNamedColorSpaceValue(const ui::Dataspace dataspace) {
+    switch (dataspace) {
+        case ui::Dataspace::DISPLAY_P3:
+            return JNamedColorSpace::DISPLAY_P3;
+        default:
+            return JNamedColorSpace::SRGB;
+    }
+}
+
+constexpr ui::Dataspace pickDataspaceFromColorMode(const ui::ColorMode colorMode) {
+    switch (colorMode) {
+        case ui::ColorMode::DISPLAY_P3:
+        case ui::ColorMode::BT2100_PQ:
+        case ui::ColorMode::BT2100_HLG:
+        case ui::ColorMode::DISPLAY_BT2020:
+            return ui::Dataspace::DISPLAY_P3;
+        default:
+            return ui::Dataspace::V0_SRGB;
+    }
+}
+
 // ----------------------------------------------------------------------------
 
 static jlong nativeCreateTransaction(JNIEnv* env, jclass clazz) {
@@ -210,9 +245,12 @@ static jobject nativeScreenshot(JNIEnv* env, jclass clazz,
     if (displayToken == NULL) {
         return NULL;
     }
+    const ui::ColorMode colorMode = SurfaceComposerClient::getActiveColorMode(displayToken);
+    const ui::Dataspace dataspace = pickDataspaceFromColorMode(colorMode);
+
     Rect sourceCrop = rectFromObj(env, sourceCropObj);
     sp<GraphicBuffer> buffer;
-    status_t res = ScreenshotClient::capture(displayToken, ui::Dataspace::V0_SRGB,
+    status_t res = ScreenshotClient::capture(displayToken, dataspace,
             ui::PixelFormat::RGBA_8888,
             sourceCrop, width, height,
             useIdentityTransform, rotation, captureSecureLayers, &buffer);
@@ -220,13 +258,15 @@ static jobject nativeScreenshot(JNIEnv* env, jclass clazz,
         return NULL;
     }
 
-    return env->CallStaticObjectMethod(gGraphicBufferClassInfo.clazz,
-            gGraphicBufferClassInfo.builder,
+    const jint namedColorSpace = fromDataspaceToNamedColorSpaceValue(dataspace);
+    return env->CallStaticObjectMethod(gScreenshotGraphicBufferClassInfo.clazz,
+            gScreenshotGraphicBufferClassInfo.builder,
             buffer->getWidth(),
             buffer->getHeight(),
             buffer->getPixelFormat(),
             (jint)buffer->getUsage(),
-            (jlong)buffer.get());
+            (jlong)buffer.get(),
+            namedColorSpace);
 }
 
 static jobject nativeCaptureLayers(JNIEnv* env, jclass clazz, jobject layerHandleToken,
@@ -243,20 +283,23 @@ static jobject nativeCaptureLayers(JNIEnv* env, jclass clazz, jobject layerHandl
     }
 
     sp<GraphicBuffer> buffer;
-    status_t res = ScreenshotClient::captureChildLayers(layerHandle, ui::Dataspace::V0_SRGB,
+    const ui::Dataspace dataspace = ui::Dataspace::V0_SRGB;
+    status_t res = ScreenshotClient::captureChildLayers(layerHandle, dataspace,
                                                         ui::PixelFormat::RGBA_8888, sourceCrop,
                                                         frameScale, &buffer);
     if (res != NO_ERROR) {
         return NULL;
     }
 
-    return env->CallStaticObjectMethod(gGraphicBufferClassInfo.clazz,
-                                       gGraphicBufferClassInfo.builder,
+    const jint namedColorSpace = fromDataspaceToNamedColorSpaceValue(dataspace);
+    return env->CallStaticObjectMethod(gScreenshotGraphicBufferClassInfo.clazz,
+                                       gScreenshotGraphicBufferClassInfo.builder,
                                        buffer->getWidth(),
                                        buffer->getHeight(),
                                        buffer->getPixelFormat(),
                                        (jint)buffer->getUsage(),
-                                       (jlong)buffer.get());
+                                       (jlong)buffer.get(),
+                                       namedColorSpace);
 }
 
 static void nativeApplyTransaction(JNIEnv* env, jclass clazz, jlong transactionObj, jboolean sync) {
@@ -1306,9 +1349,13 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetOverrideScalingMode },
     {"nativeGetHandle", "(J)Landroid/os/IBinder;",
             (void*)nativeGetHandle },
-    {"nativeScreenshot", "(Landroid/os/IBinder;Landroid/graphics/Rect;IIZIZ)Landroid/graphics/GraphicBuffer;",
+    {"nativeScreenshot",
+            "(Landroid/os/IBinder;Landroid/graphics/Rect;IIZIZ)"
+            "Landroid/view/SurfaceControl$ScreenshotGraphicBuffer;",
             (void*)nativeScreenshot },
-    {"nativeCaptureLayers", "(Landroid/os/IBinder;Landroid/graphics/Rect;F)Landroid/graphics/GraphicBuffer;",
+    {"nativeCaptureLayers",
+            "(Landroid/os/IBinder;Landroid/graphics/Rect;F)"
+            "Landroid/view/SurfaceControl$ScreenshotGraphicBuffer;",
             (void*)nativeCaptureLayers },
     {"nativeSetInputWindowInfo", "(JJLandroid/view/InputWindowHandle;)V",
             (void*)nativeSetInputWindowInfo },
@@ -1385,6 +1432,14 @@ int register_android_view_SurfaceControl(JNIEnv* env)
     gGraphicBufferClassInfo.clazz = MakeGlobalRefOrDie(env, graphicsBufferClazz);
     gGraphicBufferClassInfo.builder = GetStaticMethodIDOrDie(env, graphicsBufferClazz,
             "createFromExisting", "(IIIIJ)Landroid/graphics/GraphicBuffer;");
+
+    jclass screenshotGraphicsBufferClazz = FindClassOrDie(env,
+            "android/view/SurfaceControl$ScreenshotGraphicBuffer");
+    gScreenshotGraphicBufferClassInfo.clazz =
+            MakeGlobalRefOrDie(env, screenshotGraphicsBufferClazz);
+    gScreenshotGraphicBufferClassInfo.builder = GetStaticMethodIDOrDie(env,
+            screenshotGraphicsBufferClazz,
+            "createFromNative", "(IIIIJI)Landroid/view/SurfaceControl$ScreenshotGraphicBuffer;");
 
     jclass displayedContentSampleClazz = FindClassOrDie(env,
             "android/hardware/display/DisplayedContentSample");

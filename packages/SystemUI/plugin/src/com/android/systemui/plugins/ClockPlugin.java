@@ -28,7 +28,7 @@ import java.util.TimeZone;
 public interface ClockPlugin extends Plugin {
 
     String ACTION = "com.android.systemui.action.PLUGIN_CLOCK";
-    int VERSION = 2;
+    int VERSION = 4;
 
     /**
      * Get the name of the clock face.
@@ -48,6 +48,17 @@ public interface ClockPlugin extends Plugin {
     Bitmap getThumbnail();
 
     /**
+     * Get preview images of clock face to be shown in the picker app.
+     *
+     * Preview image should be realistic and show what the clock face will look like on AOD and lock
+     * screen.
+     *
+     * @param width width of the preview image, should be the same as device width in pixels.
+     * @param height height of the preview image, should be the same as device height in pixels.
+     */
+    Bitmap getPreview(int width, int height);
+
+    /**
      * Get clock view.
      * @return clock view from plugin.
      */
@@ -59,6 +70,14 @@ public interface ClockPlugin extends Plugin {
     default View getBigClockView() {
         return null;
     }
+
+    /**
+     * Allows the plugin to clean up resources when no longer needed.
+     *
+     * Called when the view previously created by {@link ClockPlugin#getView()} has been detached
+     * from the view hierarchy.
+     */
+    void onDestroyView();
 
     /**
      * Set clock paint style.

@@ -368,6 +368,11 @@ public class BatteryStatsHelper {
 
     public void refreshStats(int statsType, SparseArray<UserHandle> asUsers, long rawRealtimeUs,
             long rawUptimeUs) {
+        if (statsType != BatteryStats.STATS_SINCE_CHARGED) {
+            Log.w(TAG, "refreshStats called for statsType " + statsType + " but only "
+                    + "STATS_SINCE_CHARGED is supported. Using STATS_SINCE_CHARGED instead.");
+        }
+
         // Initialize mStats if necessary.
         getStats();
 

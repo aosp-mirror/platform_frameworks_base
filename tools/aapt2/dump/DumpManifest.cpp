@@ -2314,7 +2314,7 @@ std::unique_ptr<ManifestExtractor::Element> ManifestExtractor::Visit(xml::Elemen
 int DumpManifest(LoadedApk* apk, DumpManifestOptions& options, text::Printer* printer,
                  IDiagnostics* diag) {
   ManifestExtractor extractor(apk, options);
-  return extractor.Dump(printer, diag);
+  return extractor.Dump(printer, diag) ? 0 : 1;
 }
 
 } // namespace aapt

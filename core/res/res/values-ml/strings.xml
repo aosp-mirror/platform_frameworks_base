@@ -141,8 +141,10 @@
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"വൈഫൈ കോളിംഗ്"</string>
     <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"Voവൈഫൈ"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ഓഫ്"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"വൈഫൈ തിരഞ്ഞെടുത്തിരിക്കുന്നു"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"മൊബൈൽ ഡാറ്റ ഉപയോഗിക്കാൻ താൽപ്പര്യപ്പെടുന്നു"</string>
+    <!-- no translation found for wfc_mode_wifi_preferred_summary (7335489823608689868) -->
+    <skip />
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (7081742743152286290) -->
+    <skip />
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"വൈഫൈ മാത്രം"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: കൈമാറിയില്ല"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -228,7 +230,8 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"ബഗ് റിപ്പോർട്ട്"</string>
     <string name="global_action_logout" msgid="935179188218826050">"സെഷൻ അവസാനിപ്പിക്കുക"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"സ്‌ക്രീൻഷോട്ട്"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"ബഗ് റിപ്പോർട്ട് എടുക്കുക"</string>
+    <!-- no translation found for bugreport_title (5981047024855257269) -->
+    <skip />
     <string name="bugreport_message" msgid="398447048750350456">"ഒരു ഇമെയിൽ സന്ദേശമായി അയയ്‌ക്കുന്നതിന്, ഇത് നിങ്ങളുടെ നിലവിലെ ഉപകരണ നിലയെക്കുറിച്ചുള്ള വിവരങ്ങൾ ശേഖരിക്കും. ബഗ് റിപ്പോർട്ട് ആരംഭിക്കുന്നതിൽ നിന്ന് ഇത് അയയ്‌ക്കാനായി തയ്യാറാകുന്നതുവരെ അൽപ്പസമയമെടുക്കും; ക്ഷമയോടെ കാത്തിരിക്കുക."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"ഇന്റരാക്റ്റീവ് റിപ്പോർട്ട്"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"മിക്ക സാഹചര്യങ്ങളിലും ഇത് ഉപയോഗിക്കുക. റിപ്പോർട്ടിന്റെ പുരോഗതി കാണാനും പ്രശ്നത്തെ കുറിച്ചുള്ള കൂടുതൽ വിശദാംശങ്ങൾ നൽകാനും സ്ക്രീൻഷോട്ടുകൾ എടുക്കാനും ഇത് അനുവദിക്കുന്നു. റിപ്പോർട്ടുചെയ്യാൻ നീണ്ട സമയം എടുക്കുന്നതും നിങ്ങൾ കുറച്ച് ഉപയോഗിക്കുന്നതുമായ ചില വിഭാഗങ്ങളെ ഇത് വിട്ടുകളഞ്ഞേക്കാം."</string>
@@ -281,9 +284,12 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"ലൊക്കേഷൻ"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"ഈ ഉപകരണത്തിന്റെ ലൊക്കേഷൻ ആക്സസ് ചെയ്യാൻ"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"ഈ ഉപകരണത്തിന്റെ ലൊക്കേഷൻ ആക്‌സസ് ചെയ്യാൻ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ആപ്പിനെ അനുവദിക്കണോ?"</string>
-    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"നിങ്ങൾ ഉപയോഗിക്കുമ്പോൾ മാത്രം ആപ്പ് ലൊക്കേഷൻ ആക്‌സസ് ചെയ്യും."</string>
-    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"ഈ ഉപകരണത്തിന്റെ ലൊക്കേഷൻ ആക്‌സസ് ചെയ്യാൻ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; എപ്പോഴും ആപ്പിനെ അനുവദിക്കണോ?"</string>
-    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"നിങ്ങൾ ആപ്പ് ഉപയോഗിക്കാത്തപ്പോൾ പോലും, ഏതുസമയത്തും ആപ്പ് ലൊക്കേഷൻ ആക്‌സസ് ചെയ്യും."</string>
+    <!-- no translation found for permgrouprequestdetail_location (1347189607421252902) -->
+    <skip />
+    <!-- no translation found for permgroupbackgroundrequest_location (5039063878675613235) -->
+    <skip />
+    <!-- no translation found for permgroupbackgroundrequestdetail_location (4597006851453417387) -->
+    <skip />
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"കലണ്ടർ"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"നിങ്ങളുടെ കലണ്ടർ ആക്‌സസ്സ് ചെയ്യുക"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"നിങ്ങളുടെ കലണ്ടർ ആക്‌സസ് ചെയ്യാൻ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ആപ്പിനെ അനുവദിക്കണോ?"</string>
@@ -316,7 +322,10 @@
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; എന്നതിനെ നിങ്ങളുടെ സംഗീതം ആക്‌സസ് ചെയ്യാൻ അനുവദിക്കണോ?"</string>
     <string name="permgrouplab_visual" msgid="6477382108771145134">"ഫോട്ടോകളും വീഡിയോകളും"</string>
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"നിങ്ങളുടെ ഫോട്ടോകളും &amp; വീഡിയോകളും"</string>
-    <string name="permgrouprequest_visual" msgid="3043752127595243314">"ടാഗ് ചെയ്‌ത ലൊക്കേഷനുകൾ ഉൾപ്പെടെ നിങ്ങളുടെ ഫോട്ടോകളും വീഡിയോകളും ആക്‌സസ് ചെയ്യാൻ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-നെ അനുവദിക്കണോ?"</string>
+    <!-- no translation found for permgrouprequest_visual (4926581398380334943) -->
+    <skip />
+    <!-- no translation found for permgrouprequestdetail_visual (3827237829805228971) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"വിൻഡോ ഉള്ളടക്കം വീണ്ടെടുക്കുക"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"നിങ്ങൾ സംവദിക്കുന്ന ഒരു വിൻഡോയുടെ ഉള്ളടക്കം പരിശോധിക്കുക."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"സ്‌പർശനം വഴി പര്യവേക്ഷണം ചെയ്യുക, ഓണാക്കുക"</string>
@@ -509,8 +518,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"നിയർ ഫീൽഡ് കമ്മ്യൂണിക്കേഷൻ (NFC) ടാഗുകളുമായും കാർഡുകളുമായും റീഡറുകളുമായുള്ള ആശയവിനിമയത്തിന് അപ്ലിക്കേഷനുകളെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"നിങ്ങളുടെ സ്‌ക്രീൻ ലോക്ക് പ്രവർത്തനരഹിതമാക്കുക"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"കീലോക്കും ഏതെങ്കിലും അനുബന്ധ പാസ്‌വേഡ് സുരക്ഷയും പ്രവർത്തനരഹിതമാക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഉദാഹരണത്തിന്, ഒരു ഇൻകമിംഗ് കോൾ സ്വീകരിക്കുമ്പോൾ ഫോൺ കീലോക്ക് പ്രവർത്തനരഹിതമാക്കുന്നു, കോൾ അവസാനിക്കുമ്പോൾ കീലോക്ക് വീണ്ടും പ്രവർത്തനക്ഷമമാകുന്നു."</string>
-    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"സ്‌ക്രീൻ ലോക്ക് സങ്കീർണ്ണത അഭ്യർത്ഥിക്കുക"</string>
-    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"സ്ക്രീൻ ലോക്കിന്റെ സാധ്യമായ നീളവും തരവും സൂചിപ്പിക്കുന്ന, അതിന്റെ സങ്കീർണ്ണത നില (ഉയർന്നത്, ഇടത്തരം, കുറഞ്ഞത് അല്ലെങ്കിൽ ഒന്നുമില്ല) മനസിലാക്കാൻ ആപ്പിനെ അനുവദിക്കുന്നു. സ്‌ക്രീൻ ലോക്ക് ഒരു പ്രത്യേക തലത്തിലേക്ക് അപ്ഡേറ്റ് ചെയ്യുന്ന ഉപയോക്താക്കൾക്ക് നിർദ്ദേശിക്കാനും ആപ്പിനാവും, മാത്രമല്ല ഉപയോക്താക്കൾക്ക് എളുപ്പത്തിൽ അവഗണിക്കാനും മറ്റൊന്നിലേക്ക് നാവിഗേറ്റ് ചെയ്യാനുമാവും. പ്ലെയിൻടെക്‌സ്‌റ്റിൽ സ്ക്രീൻ ലോക്ക് സംഭരിക്കപ്പെട്ടിട്ടില്ലെന്ന കാര്യം ശ്രദ്ധിക്കുക, അതിനാൽ ആപ്പിന് കൃത്യമായ പാസ്‌വേഡ് അറിയില്ല."</string>
+    <!-- no translation found for permlab_requestPasswordComplexity (202650535669249674) -->
+    <skip />
+    <!-- no translation found for permdesc_requestPasswordComplexity (4730994229754212347) -->
+    <skip />
     <string name="permlab_useBiometric" msgid="8837753668509919318">"ബയോമെട്രിക് ഹാർ‌ഡ്‌വെയർ ഉപയോഗിക്കുക"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"പരിശോധിച്ചുറപ്പിക്കുന്നതിനായി, ബയോമെട്രിക് ഹാർഡ്‌വെയർ ഉപയോഗിക്കാൻ ആപ്പിനെ അനുവദിക്കുക"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"ഫിംഗർപ്രിന്റ് ഹാർഡ്‌വെയർ നിയന്ത്രിക്കുക"</string>
@@ -565,37 +576,59 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"ഉപയോഗിക്കാനായി, മുഖത്തിന്റെ ടെംപ്ലേറ്റുകൾ ചേർക്കാനും ഇല്ലാതാക്കാനുമുള്ള രീതികൾ അഭ്യർത്ഥിക്കാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"മുഖം തിരിച്ചറിയൽ ഹാർഡ്‌വെയർ ഉപയോഗിക്കുക"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"പരിശോധിച്ചുറപ്പിക്കലിനായി മുഖം തിരിച്ചറിയൽ ഹാർഡ്‌വെയർ  ഉപയോഗിക്കാൻ ആപ്പിനെ അനുവദിക്കുന്നു"</string>
-    <string name="face_acquired_insufficient" msgid="5901287247766106330">"മുഖം പ്രോസസ്സ് ചെയ്യാനായില്ല. വീണ്ടും ശ്രമിക്കുക."</string>
-    <string name="face_acquired_too_bright" msgid="610606792381297174">"മുഖം വളരെ തെളിച്ചമുള്ളതാണ്. കുറഞ്ഞ വെളിച്ചത്തിൽ ശ്രമിക്കുക."</string>
-    <string name="face_acquired_too_dark" msgid="7229162716976778371">"മുഖം വളരെ ഇരുണ്ടതാണ്. പ്രകാശ ലഭ്യത ഉറപ്പാക്കി ശ്രമിക്കുക."</string>
-    <string name="face_acquired_too_close" msgid="1980310037427755293">"മുഖത്തിനടുത്തുനിന്ന് സെൻസർ അകലേയ്ക്ക് നീക്കുക."</string>
-    <string name="face_acquired_too_far" msgid="4494571381828850007">"സെൻസർ മുഖത്തിനടുത്തേയ്ക്ക് കൊണ്ടുവരിക."</string>
-    <string name="face_acquired_too_high" msgid="228411096134808372">"സെൻസർ മുകളിലേക്ക് നീക്കുക."</string>
-    <string name="face_acquired_too_low" msgid="4539774649296349109">"സെൻസർ താഴേയ്ക്ക് നീക്കുക."</string>
-    <string name="face_acquired_too_right" msgid="1650292067226118760">"സെൻസർ വലത്തേയ്ക്ക് നീക്കുക."</string>
-    <string name="face_acquired_too_left" msgid="2712489669456176505">"സെൻസർ ഇടത്തേയ്ക്ക് നീക്കുക."</string>
-    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"സെൻസറിലേക്ക് നോക്കുക."</string>
-    <string name="face_acquired_not_detected" msgid="5707782294589511391">"മുഖം കണ്ടെത്താനായില്ല."</string>
-    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"ഉപകരണം വളരെയധികം ഇളകുന്നു."</string>
+    <!-- no translation found for face_acquired_insufficient (2767330364802375742) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_bright (5005650874582450967) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_dark (1966194696381394616) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_close (1401011882624272753) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_far (1210969240069012510) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_high (3362395713403348013) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_low (488983581737550912) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_right (941726879175375970) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_left (5873592047381190672) -->
+    <skip />
+    <!-- no translation found for face_acquired_poor_gaze (8471716624377228327) -->
+    <skip />
+    <!-- no translation found for face_acquired_not_detected (4885504661626728809) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_much_motion (3149332171102108851) -->
+    <skip />
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"നിങ്ങളുടെ മുഖം വീണ്ടും എൻറോൾ ചെയ്യുക."</string>
-    <string name="face_acquired_too_different" msgid="5553210341111255124">"മറ്റൊരു മുഖം തിരിച്ചറിഞ്ഞു."</string>
+    <!-- no translation found for face_acquired_too_different (7663983770123789694) -->
+    <skip />
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"വളരെയധികം സമാനത, നിങ്ങളുടെ പോസ് മാറ്റുക."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"അൽപ്പം കൂടി ക്യാമറയ്‌ക്ക് നേരെ നോക്കൂ."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"അൽപ്പം കൂടി ക്യാമറയ്‌ക്ക് നേരെ നോക്കൂ."</string>
+    <!-- no translation found for face_acquired_pan_too_extreme (1852495480382773759) -->
+    <skip />
+    <!-- no translation found for face_acquired_tilt_too_extreme (1290820400317982049) -->
+    <skip />
     <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"നിങ്ങളുടെ തല ലംബമായി നേരെയാക്കുക"</string>
-    <string name="face_acquired_obscured" msgid="3055077697850272097">"നിങ്ങളുടെ മുഖം വ്യക്തമാക്കുക."</string>
+    <!-- no translation found for face_acquired_obscured (5747521031647744553) -->
+    <skip />
+    <!-- no translation found for face_acquired_sensor_dirty (364493868630891300) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"മുഖത്തിന്റെ ഹാർഡ്‌വെയർ ലഭ്യമല്ല."</string>
-    <string name="face_error_timeout" msgid="4014326147867150054">"മുഖം നൽകേണ്ട സമയം കഴിഞ്ഞു. വീണ്ടും ശ്രമിക്കുക."</string>
+    <!-- no translation found for face_error_timeout (2605673935810019129) -->
+    <skip />
     <string name="face_error_no_space" msgid="8224993703466381314">"മുഖം സൂക്ഷിക്കാനാവില്ല."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"മുഖത്തിന്റെ പ്രവർത്തനം റദ്ദാക്കി."</string>
     <string name="face_error_user_canceled" msgid="8943921120862164539">"മുഖം പരിശോധിച്ചുറപ്പിക്കൽ ഉപയോക്താവ് റദ്ദാക്കി."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"നിരവധി തവണ ശ്രമിച്ചു. പിന്നീട് വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"നിരവധി തവണ ശ്രമിച്ചു. മുഖം തിരിച്ചറിയൽ പ്രവർത്തനരഹിതമാക്കി."</string>
-    <string name="face_error_unable_to_process" msgid="238761109287767270">"വീണ്ടും ശ്രമിക്കുക."</string>
-    <string name="face_error_not_enrolled" msgid="9166792142679691323">"ഒരു മുഖവും എൻറോൾ ചെയ്‌തിട്ടില്ല."</string>
-    <string name="face_error_hw_not_present" msgid="916085883581450331">"ഈ ഉപകരണത്തിൽ മുഖം പരിശോധിച്ചുറപ്പിക്കാനുള്ള സെൻസറില്ല."</string>
+    <!-- no translation found for face_error_unable_to_process (4940944939691171539) -->
+    <skip />
+    <!-- no translation found for face_error_not_enrolled (4245760276260427472) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (5296043240874659926) -->
+    <skip />
     <string name="face_name_template" msgid="7004562145809595384">"മുഖം <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1213,9 +1246,16 @@
     <string name="new_app_action" msgid="6694851182870774403">"<xliff:g id="NEW_APP">%1$s</xliff:g> തുറക്കുക"</string>
     <string name="new_app_description" msgid="5894852887817332322">"<xliff:g id="OLD_APP">%1$s</xliff:g> സംരക്ഷിക്കാതെ അവസാനിപ്പിക്കും"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> മെമ്മറി പരിധി കവിഞ്ഞു"</string>
+    <!-- no translation found for dump_heap_ready_notification (1162196579925048701) -->
+    <skip />
     <string name="dump_heap_notification_detail" msgid="3993078784053054141">"ഹീപ്പ് ഡംപ് ശേഖരിച്ചു. പങ്കിടാൻ ടാപ്പ് ചെയ്യുക"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"ഹീപ്പ് ഡംപ് പങ്കിടണോ?"</string>
-    <string name="dump_heap_text" msgid="4809417337240334941">"<xliff:g id="PROC">%1$s</xliff:g> പ്രോസസ്സ് അതിന്റെ മെമ്മറി പരിധിയായ <xliff:g id="SIZE">%2$s</xliff:g> കവിഞ്ഞു. അതിന്റെ ഡവലപ്പറുമായി പങ്കിടാൻ ഒരു ഹീപ്പ് ഡംപ് നിങ്ങൾക്ക് ലഭ്യമാണ്. ശ്രദ്ധിക്കുക: ഈ ഹീപ്പ് ഡംപിൽ അപ്ലിക്കേഷന് ആക്‌സസ്സുള്ള ഏതെങ്കിലും സ്വകാര്യ വിവരങ്ങൾ അടങ്ങിയിരിക്കാം."</string>
+    <!-- no translation found for dump_heap_text (8546022920319781701) -->
+    <skip />
+    <!-- no translation found for dump_heap_system_text (1205466256312104134) -->
+    <skip />
+    <!-- no translation found for dump_heap_ready_text (6759394977904051000) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"വാചകസന്ദേശത്തിനായി ഒരു പ്രവർത്തനം തിരഞ്ഞെടുക്കുക"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"റിംഗർ വോളിയം"</string>
     <string name="volume_music" msgid="5421651157138628171">"മീഡിയ വോളിയം"</string>
@@ -1254,8 +1294,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"എല്ലാ നെറ്റ്‌വർക്കുകളും കാണാൻ ടാപ്പുചെയ്യുക"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"കണക്റ്റുചെയ്യുക"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"എല്ലാ നെറ്റ്‌വർക്കുകളും"</string>
-    <string name="wifi_suggestion_title" msgid="8951405130379148709">"<xliff:g id="NAME">%s</xliff:g> നിർദ്ദേശിച്ച വൈഫൈ നെറ്റ്‌വർക്ക് ലഭ്യമാണ്"</string>
-    <string name="wifi_suggestion_content" msgid="2658317015552324848">"<xliff:g id="NAME">%s</xliff:g> നിർദ്ദേശിച്ച നെറ്റ്‌വർക്കുകളിലേക്ക് കണക്‌റ്റ് ചെയ്യണോ?"</string>
+    <!-- no translation found for wifi_suggestion_title (9099832833531486167) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (5883181205841582873) -->
+    <skip />
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"ഉവ്വ്"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"ഇല്ല"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"വൈഫൈ സ്വമേധയാ ഓണാകും"</string>
@@ -1267,9 +1309,14 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"നെറ്റ്‌വർക്കിലേക്ക് സൈൻ ഇൻ ചെയ്യുക"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"വൈഫൈയ്ക്ക് ഇന്റർനെറ്റ് ആക്‌സസ് ഇല്ല"</string>
+    <!-- no translation found for wifi_no_internet (5198100389964214865) -->
+    <skip />
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"ഓപ്ഷനുകൾക്ക് ടാപ്പുചെയ്യുക"</string>
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"കണക്‌റ്റ് ചെയ്‌തു"</string>
+    <!-- no translation found for network_partial_connectivity (7774883385494762741) -->
+    <skip />
+    <!-- no translation found for network_partial_connectivity_detailed (1959697814165325217) -->
+    <skip />
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"നിങ്ങളുടെ ഹോട്ട്‌സ്‌പോട്ട് ക്രമീകരണത്തിൽ വരുത്തിയ മാറ്റങ്ങൾ"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"നിങ്ങളുടെ ഹോട്ട്‌സ്‌പോട്ട് ബാൻഡ് മാറി."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"നിങ്ങളുടെ മുൻഗണനയനുസരിച്ചുള്ള, 5GHz മാത്രം എന്നത് ഈ ഉപകരണം പിന്തുണയ്ക്കുന്നില്ല. പകരം, 5GHz ബാൻഡ് ലഭ്യമാകുമ്പോൾ അത് ഉപയോഗിക്കും."</string>
@@ -1355,6 +1402,10 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ഡീബഗ്ഗിംഗ് കണക്റ്റ് ചെയ്തു"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"USB ഡീബഗ്ഗിംഗ് ഓഫാക്കാൻ ടാപ്പ് ചെയ്യുക"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB ഡീബഗ്ഗുചെയ്യൽ പ്രവർത്തനരഹിതമാക്കാൻ തിരഞ്ഞെടുക്കുക."</string>
+    <!-- no translation found for test_harness_mode_notification_title (2216359742631914387) -->
+    <skip />
+    <!-- no translation found for test_harness_mode_notification_message (1343197173054407119) -->
+    <skip />
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB പോർട്ടിൽ ദ്രാവകമോ പൊടിയോ കണ്ടെത്തി"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB പോർട്ടർ സ്വയമേവ പ്രവർത്തനരഹിതമായി. കൂടുതലറിയാൻ ടാപ്പ് ചെയ്യുക."</string>
     <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"USB പോർട്ട് ഇപ്പോൾ സുരക്ഷിതമായി ഉപയോഗിക്കാം"</string>
@@ -1906,8 +1957,6 @@
     <string name="profile_encrypted_message" msgid="6964994232310195874">"ഔദ്യോഗിക പ്രൊഫൈൽ അൺലോക്കുചെയ്യാൻ ടാപ്പുചെയ്യുക"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> എന്നതിലേക്ക് കണക്റ്റുചെയ്തു"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"ഫയലുകൾ കാണുന്നതിന് ടാപ്പുചെയ്യുക"</string>
-    <string name="pin_target" msgid="3052256031352291362">"പിൻ ചെയ്യുക"</string>
-    <string name="unpin_target" msgid="3556545602439143442">"അൺപിൻ ചെയ്യുക"</string>
     <string name="app_info" msgid="6856026610594615344">"ആപ്പ് വിവരം"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"ഡെമോ ആരംഭിക്കുന്നു…"</string>
@@ -1998,6 +2047,22 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"ദിനചര്യ മോഡ് വിവരത്തെ കുറിച്ചുള്ള അറിയിപ്പ്"</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"സാധാരണയുള്ളതിലും നേരത്തെ ബാറ്ററിയുടെ ചാർജ് തീർന്നേക്കാം"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"ബാറ്ററി ലൈഫ് വര്‍ദ്ധിപ്പിക്കാൻ, ബാറ്ററി ലാഭിക്കൽ സജീവമാക്കി"</string>
+    <!-- no translation found for battery_saver_notification_channel_name (2083316159716201806) -->
+    <skip />
+    <!-- no translation found for battery_saver_sticky_disabled_notification_title (6376147579378764641) -->
+    <skip />
+    <!-- no translation found for battery_saver_sticky_disabled_notification_summary (8090192609249817945) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (2960978289873161288) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (7555713825806482451) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (5954873381559605660) -->
+    <skip />
+    <!-- no translation found for battery_saver_off_notification_summary (1374222493681267143) -->
+    <skip />
+    <!-- no translation found for battery_saver_off_alternative_notification_summary (4340727818546508436) -->
+    <skip />
     <string name="mime_type_folder" msgid="7111951698626315204">"ഫോള്‍ഡര്‍"</string>
     <string name="mime_type_apk" msgid="5518003630972506900">"Android ആപ്പ്"</string>
     <string name="mime_type_generic" msgid="6833871596845900027">"ഫയൽ"</string>

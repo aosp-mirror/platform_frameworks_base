@@ -27,7 +27,7 @@
     </xs:element>
     <xs:complexType name="exception">
         <xs:sequence>
-            <xs:element name="permission" type="permission"/>
+            <xs:element name="permission" type="permission" maxOccurs="unbounded"/>
         </xs:sequence>
         <xs:attribute name="package" type="xs:string"/>
         <xs:attribute name="sha256-cert-digest" type="xs:string"/>

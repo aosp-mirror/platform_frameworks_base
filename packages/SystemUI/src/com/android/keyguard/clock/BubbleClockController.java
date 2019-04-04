@@ -15,15 +15,19 @@
  */
 package com.android.keyguard.clock;
 
+import android.app.WallpaperManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Paint.Style;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextClock;
 
+import com.android.internal.colorextraction.ColorExtractor;
 import com.android.keyguard.R;
+import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.plugins.ClockPlugin;
 
 import java.util.TimeZone;
@@ -42,6 +46,16 @@ public class BubbleClockController implements ClockPlugin {
      * LayoutInflater used to inflate custom clock views.
      */
     private final LayoutInflater mLayoutInflater;
+
+    /**
+     * Extracts accent color from wallpaper.
+     */
+    private final SysuiColorExtractor mColorExtractor;
+
+    /**
+     * Renders preview from clock view.
+     */
+    private final ViewPreviewer mRenderer = new ViewPreviewer();
 
     /**
      * Custom clock shown on AOD screen and behind stack scroller on lock.
@@ -64,11 +78,15 @@ public class BubbleClockController implements ClockPlugin {
     /**
      * Create a BubbleClockController instance.
      *
-     * @param layoutInflater Inflater used to inflate custom clock views.
+     * @param res Resources contains title and thumbnail.
+     * @param inflater Inflater used to inflate custom clock views.
+     * @param colorExtractor Extracts accent color from wallpaper.
      */
-    public BubbleClockController(Resources res, LayoutInflater inflater) {
+    public BubbleClockController(Resources res, LayoutInflater inflater,
+            SysuiColorExtractor colorExtractor) {
         mResources = res;
         mLayoutInflater = inflater;
+        mColorExtractor = colorExtractor;
     }
 
     private void createViews() {
@@ -84,6 +102,16 @@ public class BubbleClockController implements ClockPlugin {
     }
 
     @Override
+    public void onDestroyView() {
+        mView = null;
+        mDigitalClock = null;
+        mAnalogClock = null;
+        mLockClockContainer = null;
+        mLockClock = null;
+        mDarkController = null;
+    }
+
+    @Override
     public String getName() {
         return "bubble";
     }
@@ -96,6 +124,23 @@ public class BubbleClockController implements ClockPlugin {
     @Override
     public Bitmap getThumbnail() {
         return BitmapFactory.decodeResource(mResources, R.drawable.bubble_thumbnail);
+    }
+
+    @Override
+    public Bitmap getPreview(int width, int height) {
+
+        // Use the big clock view for the preview
+        View view = getBigClockView();
+
+        // Initialize state of plugin before generating preview.
+        setDarkAmount(1f);
+        setTextColor(Color.WHITE);
+        ColorExtractor.GradientColors colors = mColorExtractor.getColors(
+                WallpaperManager.FLAG_LOCK, true);
+        setColorPalette(colors.supportsDarkText(), colors.getColorPalette());
+        onTimeTick();
+
+        return mRenderer.createPreview(view, width, height);
     }
 
     @Override
@@ -141,6 +186,8 @@ public class BubbleClockController implements ClockPlugin {
     @Override
     public void onTimeTick() {
         mAnalogClock.onTimeChanged();
+        mDigitalClock.refresh();
+        mLockClock.refresh();
     }
 
     @Override

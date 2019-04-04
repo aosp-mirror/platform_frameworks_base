@@ -169,66 +169,13 @@
     <item msgid="2233497913571137419">"Mười"</item>
     <item msgid="5621554266768657830">"Mười một"</item>
   </string-array>
-  <string-array name="type_clock_minutes">
-    <item msgid="8322049385467207985">"Giờ"</item>
-    <item msgid="8837126587669001578">"Một"</item>
-    <item msgid="4294343372940455660">"Hai"</item>
-    <item msgid="7129166637707421536">"Ba"</item>
-    <item msgid="7579404865008788673">"Bốn"</item>
-    <item msgid="3873924689207380586">"Năm"</item>
-    <item msgid="4849565597850069377">"Sáu"</item>
-    <item msgid="4404219424523572364">"Bảy"</item>
-    <item msgid="8740481214764087329">"Tám"</item>
-    <item msgid="1713216865806811237">"Chín"</item>
-    <item msgid="3508406095411245038">"Mười"</item>
-    <item msgid="7161996337755311711">"Mười một"</item>
-    <item msgid="4044549963329624197">"Mười hai"</item>
-    <item msgid="333373157917379088">"Mười ba"</item>
-    <item msgid="2631202907124819385">"Mười bốn"</item>
-    <item msgid="6472396076858033453">"Mười lăm"</item>
-    <item msgid="8656981856181581643">"Mười sáu"</item>
-    <item msgid="7289026608562030619">"Mười bảy"</item>
-    <item msgid="3881477602692646573">"Mười tám"</item>
-    <item msgid="3358129827772984226">"Mười chín"</item>
-    <item msgid="3308575407402865807">"Hai mươi"</item>
-    <item msgid="5346560955382229629">"Hai mươi\nmốt"</item>
-    <item msgid="226750304761473436">"Hai mươi\nhai"</item>
-    <item msgid="616811325336838734">"Hai mươi\nba"</item>
-    <item msgid="616346116869053440">"Hai mươi\nbốn"</item>
-    <item msgid="4642996410384042830">"Hai mươi\nlăm"</item>
-    <item msgid="7506092849993571465">"Hai mươi\nsáu"</item>
-    <item msgid="1915078191101042031">"Hai mươi\nbảy"</item>
-    <item msgid="4292378641900520252">"Hai mươi\ntám"</item>
-    <item msgid="5339513901773103696">"Hai mươi\nchín"</item>
-    <item msgid="3574673250891657607">"Ba mươi"</item>
-    <item msgid="5796923836589110940">"Ba mươi\nmốt"</item>
-    <item msgid="5859323597571702052">"Ba mươi\nhai"</item>
-    <item msgid="5133326723148876507">"Ba mươi\nba"</item>
-    <item msgid="2693999494655663096">"Ba mươi\ntư"</item>
-    <item msgid="3316754944962836197">"Ba mươi\nlăm"</item>
-    <item msgid="816891008836796723">"Ba mươi\nsáu"</item>
-    <item msgid="9158890488666520078">"Ba mươi\nbảy"</item>
-    <item msgid="1894769703213894011">"Ba mươi\ntám"</item>
-    <item msgid="5638820345598572399">"Ba mươi\nchín"</item>
-    <item msgid="8838304023017895439">"Bốn mươi"</item>
-    <item msgid="1834742948932559597">"Bốn mươi\nmốt"</item>
-    <item msgid="6573707308847773944">"Bốn mươi\nhai"</item>
-    <item msgid="2450149950652678001">"Bốn mươi\nba"</item>
-    <item msgid="2874667401318178036">"Bốn mươi\nbốn"</item>
-    <item msgid="3391101532763048862">"Bốn mươi\nlăm"</item>
-    <item msgid="1671489330863254362">"Bốn mươi\nsáu"</item>
-    <item msgid="5916017359554531038">"Bốn mươi\nbảy"</item>
-    <item msgid="8205413177993059967">"Bốn mươi\ntám"</item>
-    <item msgid="6607867415142171302">"Bốn mươi\nchín"</item>
-    <item msgid="8358850748472089162">"Năm mươi"</item>
-    <item msgid="3551313125255080234">"Năm mươi\nmốt"</item>
-    <item msgid="1559678130725716542">"Năm mươi\nhai"</item>
-    <item msgid="431441994725492377">"Năm mươi\nba"</item>
-    <item msgid="6345774640539623024">"Năm mươi\nbốn"</item>
-    <item msgid="8018192990793931120">"Năm mươi\nlăm"</item>
-    <item msgid="6187650843754604534">"Năm mươi\nsáu"</item>
-    <item msgid="8727240174015993259">"Năm mươi\nbảy"</item>
-    <item msgid="848339003778952950">"Năm mươi\ntám"</item>
-    <item msgid="5798985802835423618">"Năm mươi\nchín"</item>
-  </string-array>
+    <!-- no translation found for type_clock_minutes:1 (2091812961809760681) -->
+    <!-- no translation found for type_clock_minutes:2 (1496435384877290709) -->
+    <!-- no translation found for type_clock_minutes:3 (881846472976674129) -->
+    <!-- no translation found for type_clock_minutes:4 (2784477043911540584) -->
+    <!-- no translation found for type_clock_minutes:5 (1610928853656700614) -->
+    <!-- no translation found for type_clock_minutes:6 (2317806244043886658) -->
+    <!-- no translation found for type_clock_minutes:7 (3318687539120971327) -->
+    <!-- no translation found for type_clock_minutes:8 (5701600693712102348) -->
+    <!-- no translation found for type_clock_minutes:9 (3247381605947372495) -->
 </resources>

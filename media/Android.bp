@@ -90,7 +90,6 @@ filegroup {
         "apex/java/android/media/DataSourceDesc.java",
         "apex/java/android/media/UriDataSourceDesc.java",
         "apex/java/android/media/FileDataSourceDesc.java",
-        "apex/java/android/media/CallbackDataSourceDesc.java",
         "apex/java/android/media/Media2Utils.java",
         "apex/java/android/media/MediaPlayer2Utils.java",
         "apex/java/android/media/MediaPlayer2.java",
@@ -98,6 +97,7 @@ filegroup {
         "apex/java/android/media/Media2HTTPConnection.java",
         "apex/java/android/media/RoutingDelegate.java",
         "apex/java/android/media/BufferingParams.java",
+        "apex/java/android/media/ProxyDataSourceCallback.java",
     ],
 }
 

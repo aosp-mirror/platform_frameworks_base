@@ -23,7 +23,7 @@ import static android.view.WindowManager.TRANSIT_UNSET;
 import static com.android.server.wm.TaskSnapshotController.SNAPSHOT_MODE_APP_THEME;
 import static com.android.server.wm.TaskSnapshotController.SNAPSHOT_MODE_REAL;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;

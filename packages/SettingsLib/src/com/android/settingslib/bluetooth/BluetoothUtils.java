@@ -1,18 +1,30 @@
 package com.android.settingslib.bluetooth;
 
 import android.bluetooth.BluetoothClass;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
+import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.provider.MediaStore;
+import android.util.Log;
 import android.util.Pair;
 
 import androidx.annotation.DrawableRes;
 
 import com.android.settingslib.R;
+import com.android.settingslib.widget.AdaptiveIcon;
+import com.android.settingslib.widget.AdaptiveOutlineDrawable;
 
+import java.io.IOException;
 import java.util.List;
 
 public class BluetoothUtils {
+    private static final String TAG = "BluetoothUtils";
+
     public static final boolean V = false; // verbose logging
     public static final boolean D = true;  // regular logging
 
@@ -111,5 +123,75 @@ public class BluetoothUtils {
      */
     public static Drawable getBluetoothDrawable(Context context, @DrawableRes int resId) {
         return context.getDrawable(resId);
+    }
+
+    /**
+     * Get colorful bluetooth icon with description
+     */
+    public static Pair<Drawable, String> getBtRainbowDrawableWithDescription(Context context,
+            CachedBluetoothDevice cachedDevice) {
+        final Pair<Drawable, String> pair = BluetoothUtils.getBtClassDrawableWithDescription(
+                context, cachedDevice);
+        final BluetoothDevice bluetoothDevice = cachedDevice.getDevice();
+        final boolean untetheredHeadset = bluetoothDevice != null
+                ? Boolean.parseBoolean(bluetoothDevice.getMetadata(
+                BluetoothDevice.METADATA_IS_UNTHETHERED_HEADSET))
+                : false;
+        final int iconSize = context.getResources().getDimensionPixelSize(
+                R.dimen.bt_nearby_icon_size);
+        final Resources resources = context.getResources();
+
+        // Deal with untethered headset
+        if (untetheredHeadset) {
+            final String uriString = bluetoothDevice != null
+                    ? bluetoothDevice.getMetadata(BluetoothDevice.METADATA_MAIN_ICON)
+                    : null;
+            final Uri iconUri = uriString != null ? Uri.parse(uriString) : null;
+            if (iconUri != null) {
+                try {
+                    context.getContentResolver().takePersistableUriPermission(iconUri,
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                } catch (SecurityException e) {
+                    Log.e(TAG, "Failed to take persistable permission for: " + iconUri);
+                }
+                try {
+                    final Bitmap bitmap = MediaStore.Images.Media.getBitmap(
+                            context.getContentResolver(), iconUri);
+                    if (bitmap != null) {
+                        final Bitmap resizedBitmap = Bitmap.createScaledBitmap(bitmap, iconSize,
+                                iconSize, false);
+                        bitmap.recycle();
+                        final AdaptiveOutlineDrawable drawable = new AdaptiveOutlineDrawable(
+                                resources, resizedBitmap);
+                        return new Pair<>(drawable, pair.second);
+                    }
+                } catch (IOException e) {
+                    Log.e(TAG, "Failed to get drawable for: " + iconUri, e);
+                }
+            }
+        }
+
+        return new Pair<>(buildBtRainbowDrawable(context,
+                pair.first, cachedDevice.getAddress().hashCode()), pair.second);
+    }
+
+    /**
+     * Build Bluetooth device icon with rainbow
+     */
+    public static Drawable buildBtRainbowDrawable(Context context, Drawable drawable,
+            int hashCode) {
+        final Resources resources = context.getResources();
+
+        // Deal with normal headset
+        final int[] iconFgColors = resources.getIntArray(R.array.bt_icon_fg_colors);
+        final int[] iconBgColors = resources.getIntArray(R.array.bt_icon_bg_colors);
+
+        // get color index based on mac address
+        final int index = Math.abs(hashCode % iconBgColors.length);
+        drawable.setTint(iconFgColors[index]);
+        final Drawable adaptiveIcon = new AdaptiveIcon(context, drawable);
+        ((AdaptiveIcon) adaptiveIcon).setBackgroundColor(iconBgColors[index]);
+
+        return adaptiveIcon;
     }
 }

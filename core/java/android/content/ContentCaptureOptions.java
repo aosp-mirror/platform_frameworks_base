@@ -72,9 +72,29 @@ public final class ContentCaptureOptions implements Parcelable {
     @Nullable
     public final ArraySet<ComponentName> whitelistedComponents;
 
+    /**
+     * Used to enable just a small set of APIs so it can used by activities belonging to the
+     * content capture service APK.
+     */
+    public final boolean lite;
+
+    public ContentCaptureOptions(int loggingLevel) {
+        this(/* lite= */ true, loggingLevel, /* maxBufferSize= */ 0,
+                /* idleFlushingFrequencyMs= */ 0, /* textChangeFlushingFrequencyMs= */ 0,
+                /* logHistorySize= */ 0, /* whitelistedComponents= */ null);
+    }
+
     public ContentCaptureOptions(int loggingLevel, int maxBufferSize, int idleFlushingFrequencyMs,
             int textChangeFlushingFrequencyMs, int logHistorySize,
             @Nullable ArraySet<ComponentName> whitelistedComponents) {
+        this(/* lite= */ false, loggingLevel, maxBufferSize, idleFlushingFrequencyMs,
+                textChangeFlushingFrequencyMs, logHistorySize, whitelistedComponents);
+    }
+
+    private ContentCaptureOptions(boolean lite, int loggingLevel, int maxBufferSize,
+            int idleFlushingFrequencyMs, int textChangeFlushingFrequencyMs, int logHistorySize,
+            @Nullable ArraySet<ComponentName> whitelistedComponents) {
+        this.lite = lite;
         this.loggingLevel = loggingLevel;
         this.maxBufferSize = maxBufferSize;
         this.idleFlushingFrequencyMs = idleFlushingFrequencyMs;
@@ -115,16 +135,28 @@ public final class ContentCaptureOptions implements Parcelable {
 
     @Override
     public String toString() {
-        return "ContentCaptureOptions [loggingLevel=" + loggingLevel + ", maxBufferSize="
-                + maxBufferSize + ", idleFlushingFrequencyMs=" + idleFlushingFrequencyMs
-                + ", textChangeFlushingFrequencyMs=" + textChangeFlushingFrequencyMs
-                + ", logHistorySize=" + logHistorySize + ", whitelistedComponents="
-                + whitelistedComponents + "]";
+        if (lite) {
+            return "ContentCaptureOptions [loggingLevel=" + loggingLevel + " (lite)]";
+        }
+        final StringBuilder string = new StringBuilder("ContentCaptureOptions [");
+        string.append("loggingLevel=").append(loggingLevel)
+            .append(", maxBufferSize=").append(maxBufferSize)
+            .append(", idleFlushingFrequencyMs=").append(idleFlushingFrequencyMs)
+            .append(", textChangeFlushingFrequencyMs=").append(textChangeFlushingFrequencyMs)
+            .append(", logHistorySize=").append(logHistorySize);
+        if (whitelistedComponents != null) {
+            string.append(", whitelisted=").append(whitelistedComponents);
+        }
+        return string.append(']').toString();
     }
 
     /** @hide */
     public void dumpShort(@NonNull PrintWriter pw) {
         pw.print("logLvl="); pw.print(loggingLevel);
+        if (lite) {
+            pw.print(", lite");
+            return;
+        }
         pw.print(", bufferSize="); pw.print(maxBufferSize);
         pw.print(", idle="); pw.print(idleFlushingFrequencyMs);
         pw.print(", textIdle="); pw.print(textChangeFlushingFrequencyMs);
@@ -141,7 +173,10 @@ public final class ContentCaptureOptions implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeBoolean(lite);
         parcel.writeInt(loggingLevel);
+        if (lite) return;
+
         parcel.writeInt(maxBufferSize);
         parcel.writeInt(idleFlushingFrequencyMs);
         parcel.writeInt(textChangeFlushingFrequencyMs);
@@ -154,7 +189,11 @@ public final class ContentCaptureOptions implements Parcelable {
 
                 @Override
                 public ContentCaptureOptions createFromParcel(Parcel parcel) {
+                    final boolean lite = parcel.readBoolean();
                     final int loggingLevel = parcel.readInt();
+                    if (lite) {
+                        return new ContentCaptureOptions(loggingLevel);
+                    }
                     final int maxBufferSize = parcel.readInt();
                     final int idleFlushingFrequencyMs = parcel.readInt();
                     final int textChangeFlushingFrequencyMs = parcel.readInt();
@@ -171,6 +210,5 @@ public final class ContentCaptureOptions implements Parcelable {
                 public ContentCaptureOptions[] newArray(int size) {
                     return new ContentCaptureOptions[size];
                 }
-
     };
 }

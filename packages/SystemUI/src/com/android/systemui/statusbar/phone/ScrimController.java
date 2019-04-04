@@ -92,7 +92,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     /**
      * Scrim opacity when the phone is about to wake-up.
      */
-    public static final float AOD2_SCRIM_ALPHA = 0.6f;
+    public static final float WAKE_SENSOR_SCRIM_ALPHA = 0.6f;
     /**
      * A scrim varies its opacity based on a busyness factor, for example
      * how many notifications are currently visible.
@@ -456,6 +456,23 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         }
 
         mState.AOD.setAodFrontScrimAlpha(alpha);
+    }
+
+    /**
+     * If the lock screen sensor is active.
+     */
+    public void setWakeLockScreenSensorActive(boolean active) {
+        for (ScrimState state : ScrimState.values()) {
+            state.setWakeLockScreenSensorActive(active);
+        }
+
+        if (mState == ScrimState.PULSING) {
+            float newBehindAlpha = mState.getBehindAlpha();
+            if (mCurrentBehindAlpha != newBehindAlpha) {
+                mCurrentBehindAlpha = newBehindAlpha;
+                updateScrims();
+            }
+        }
     }
 
     protected void scheduleUpdate() {
@@ -902,10 +919,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         for (ScrimState state : ScrimState.values()) {
             state.setLaunchingAffordanceWithPreview(launchingAffordanceWithPreview);
         }
-    }
-
-    public void setPulseReason(int pulseReason) {
-        ScrimState.PULSING.setPulseReason(pulseReason);
     }
 
     public interface Callback {

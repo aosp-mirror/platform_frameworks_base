@@ -47,7 +47,8 @@ public class RemoteAppPredictionService extends
             RemoteAppPredictionServiceCallbacks callback, boolean bindInstantServiceAllowed,
             boolean verbose) {
         super(context, serviceInterface, componentName, userId, callback,
-                context.getMainThreadHandler(), bindInstantServiceAllowed,
+                context.getMainThreadHandler(),
+                bindInstantServiceAllowed ? Context.BIND_ALLOW_INSTANT : 0,
                 verbose, /* initialCapacity= */ 1);
     }
 
@@ -85,9 +86,10 @@ public class RemoteAppPredictionService extends
     /**
      * Records when a launch location is shown.
      */
-    public void notifyLocationShown(@NonNull AppPredictionSessionId sessionId,
+    public void notifyLaunchLocationShown(@NonNull AppPredictionSessionId sessionId,
             @NonNull String launchLocation, @NonNull ParceledListSlice targetIds) {
-        scheduleAsyncRequest((s) -> s.notifyLocationShown(sessionId, launchLocation, targetIds));
+        scheduleAsyncRequest((s)
+                -> s.notifyLaunchLocationShown(sessionId, launchLocation, targetIds));
     }
 
     /**

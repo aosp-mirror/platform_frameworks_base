@@ -24,6 +24,7 @@ import android.content.pm.ApplicationInfo;
 import android.net.Credentials;
 import android.net.LocalServerSocket;
 import android.net.LocalSocket;
+import android.os.Build;
 import android.os.FactoryTest;
 import android.os.IVold;
 import android.os.Process;
@@ -196,9 +197,6 @@ public final class Zygote {
 
     private Zygote() {}
 
-    /** Called for some security initialization before any fork. */
-    static native void nativeSecurityInit();
-
     /**
      * Forks a new VM instance.  The current VM must have been started
      * with the -Xzygote flag. <b>NOTE: new instance keeps all
@@ -236,7 +234,7 @@ public final class Zygote {
     public static int forkAndSpecialize(int uid, int gid, int[] gids, int runtimeFlags,
             int[][] rlimits, int mountExternal, String seInfo, String niceName, int[] fdsToClose,
             int[] fdsToIgnore, boolean startChildZygote, String instructionSet, String appDataDir,
-            String packageName, String[] packagesForUID, String sandboxId) {
+            String packageName, String[] packagesForUID, String sandboxId, int targetSdkVersion) {
         ZygoteHooks.preFork();
         // Resets nice priority for zygote process.
         resetNicePriority();
@@ -246,6 +244,7 @@ public final class Zygote {
                 packagesForUID, sandboxId);
         // Enable tracing as soon as possible for the child process.
         if (pid == 0) {
+            Zygote.disableExecuteOnly(targetSdkVersion);
             Trace.setTracingEnabled(true, runtimeFlags);
 
             // Note that this event ends at the end of handleChildProc,
@@ -382,22 +381,19 @@ public final class Zygote {
     native protected static void nativeInstallSeccompUidGidFilter(int uidGidMin, int uidGidMax);
 
     /**
-     * Zygote unmount storage space on initializing.
-     * This method is called once.
-     */
-    protected static native void nativeUnmountStorageOnInit();
-
-    /**
-     * Get socket file descriptors (opened by init) from the environment and
-     * store them for access from native code later.
+     * Initialize the native state of the Zygote.  This inclues
+     *   - Fetching socket FDs from the environment
+     *   - Initializing security properties
+     *   - Unmounting storage as appropriate
+     *   - Loading necessary performance profile information
      *
      * @param isPrimary  True if this is the zygote process, false if it is zygote_secondary
      */
-    public static void getSocketFDs(boolean isPrimary) {
-        nativeGetSocketFDs(isPrimary);
+    static void initNativeState(boolean isPrimary) {
+        nativeInitNativeState(isPrimary);
     }
 
-    protected static native void nativeGetSocketFDs(boolean isPrimary);
+    protected static native void nativeInitNativeState(boolean isPrimary);
 
     /**
      * Returns the raw string value of a system property.
@@ -514,6 +510,7 @@ public final class Zygote {
     private static Runnable usapMain(LocalServerSocket usapPoolSocket,
                                      FileDescriptor writePipe) {
         final int pid = Process.myPid();
+        Process.setArgV0(Process.is64Bit() ? "usap64" : "usap32");
 
         LocalSocket sessionSocket = null;
         DataOutputStream usapOutputStream = null;
@@ -599,6 +596,8 @@ public final class Zygote {
                            args.mInstructionSet, args.mAppDataDir, args.mPackageName,
                            args.mPackagesForUid, args.mSandboxId);
 
+        disableExecuteOnly(args.mTargetSdkVersion);
+
         if (args.mNiceName != null) {
             Process.setArgV0(args.mNiceName);
         }
@@ -648,6 +647,17 @@ public final class Zygote {
                 + ", effective=0x" + Long.toHexString(args.mEffectiveCapabilities));
         }
     }
+
+    /**
+     * Mark execute-only segments of libraries read+execute for apps with targetSdkVersion<Q.
+     */
+    protected static void disableExecuteOnly(int targetSdkVersion) {
+        if ((targetSdkVersion < Build.VERSION_CODES.Q) && !nativeDisableExecuteOnly()) {
+            Log.e("Zygote", "Failed to set libraries to read+execute.");
+        }
+    }
+
+    private static native boolean nativeDisableExecuteOnly();
 
     /**
      * @return  Raw file descriptors for the read-end of USAP reporting pipes.

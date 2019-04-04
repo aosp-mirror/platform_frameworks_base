@@ -34,6 +34,7 @@ import android.util.Log;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * This class can be used to query the state of
@@ -48,6 +49,7 @@ import java.util.List;
  * on the device.
  */
 public final class CardEmulation {
+    private static final Pattern AID_PATTERN = Pattern.compile("[0-9A-Fa-f]{10,32}\\*?\\#?");
     static final String TAG = "CardEmulation";
 
     /**
@@ -732,7 +734,7 @@ public final class CardEmulation {
         }
 
         // Verify hex characters
-        if (!aid.matches("[0-9A-Fa-f]{10,32}\\*?\\#?")) {
+        if (!AID_PATTERN.matcher(aid).matches()) {
             Log.e(TAG, "AID " + aid + " is not a valid AID.");
             return false;
         }

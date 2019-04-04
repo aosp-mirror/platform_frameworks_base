@@ -439,6 +439,9 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     @Override
     public void onUiModeChanged() {
         mContext.getTheme().applyStyle(mContext.getThemeResId(), true);
+        if (mDialog.isShowing()) {
+            mDialog.refreshDialog();
+        }
     }
 
     public void destroy() {
@@ -1124,10 +1127,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
 
         protected int getActionLayoutId(Context context) {
-            if (isGridEnabled(context)) {
-                return com.android.systemui.R.layout.global_actions_grid_item;
-            }
-            return com.android.systemui.R.layout.global_actions_item;
+            return com.android.systemui.R.layout.global_actions_grid_item;
         }
 
         public View create(
@@ -1537,26 +1537,28 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             initializeLayout();
         }
 
-        private boolean initializePanel() {
+        private boolean shouldUsePanel() {
             if (!isPanelEnabled(mContext) || mPanelController == null) {
                 return false;
             }
-            View panelView = mPanelController.getPanelContent();
-            if (panelView == null) {
+            if (mPanelController.getPanelContent() == null) {
                 return false;
             }
+            return true;
+        }
+
+        private void initializePanel() {
             FrameLayout panelContainer = new FrameLayout(mContext);
             FrameLayout.LayoutParams panelParams =
                     new FrameLayout.LayoutParams(
                             FrameLayout.LayoutParams.MATCH_PARENT,
                             FrameLayout.LayoutParams.WRAP_CONTENT);
-            panelContainer.addView(panelView, panelParams);
+            panelContainer.addView(mPanelController.getPanelContent(), panelParams);
             addContentView(
                     panelContainer,
                     new ViewGroup.LayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT,
                             ViewGroup.LayoutParams.MATCH_PARENT));
-            return true;
         }
 
         private void initializeLayout() {
@@ -1575,21 +1577,22 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             mGlobalActionsLayout.setRotationListener(this::onRotate);
             mGlobalActionsLayout.setAdapter(mAdapter);
 
-            boolean panelEnabled = initializePanel();
-            if (!panelEnabled) {
-                mBackgroundDrawable = new GradientDrawable(mContext);
+            if (!shouldUsePanel()) {
+                if (mBackgroundDrawable == null) {
+                    mBackgroundDrawable = new GradientDrawable(mContext);
+                }
                 mScrimAlpha = ScrimController.GRADIENT_SCRIM_ALPHA;
             } else {
                 mBackgroundDrawable = mContext.getDrawable(
                         com.android.systemui.R.drawable.global_action_panel_scrim);
                 mScrimAlpha = 1f;
             }
-            mGlobalActionsLayout.setSnapToEdge(panelEnabled);
+            mGlobalActionsLayout.setSnapToEdge(true);
             getWindow().setBackgroundDrawable(mBackgroundDrawable);
         }
 
         private int getGlobalActionsLayoutId(Context context) {
-            if (isGridEnabled(context)) {
+            if (isForceGridEnabled(context) || shouldUsePanel()) {
                 if (RotationUtils.getRotation(context) == RotationUtils.ROTATION_SEASCAPE) {
                     return com.android.systemui.R.layout.global_actions_grid_seascape;
                 }
@@ -1648,11 +1651,13 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             super.show();
             mShowing = true;
             mBackgroundDrawable.setAlpha(0);
-            mGlobalActionsLayout.setTranslationX(getAnimTranslation());
+            mGlobalActionsLayout.setTranslationX(mGlobalActionsLayout.getAnimationOffsetX());
+            mGlobalActionsLayout.setTranslationY(mGlobalActionsLayout.getAnimationOffsetY());
             mGlobalActionsLayout.setAlpha(0);
             mGlobalActionsLayout.animate()
                     .alpha(1)
                     .translationX(0)
+                    .translationY(0)
                     .setDuration(300)
                     .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                     .setUpdateListener(animation -> {
@@ -1670,10 +1675,12 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             }
             mShowing = false;
             mGlobalActionsLayout.setTranslationX(0);
+            mGlobalActionsLayout.setTranslationY(0);
             mGlobalActionsLayout.setAlpha(1);
             mGlobalActionsLayout.animate()
                     .alpha(0)
-                    .translationX(getAnimTranslation())
+                    .translationX(mGlobalActionsLayout.getAnimationOffsetX())
+                    .translationY(mGlobalActionsLayout.getAnimationOffsetY())
                     .setDuration(300)
                     .withEndAction(super::dismiss)
                     .setInterpolator(new LogAccelerateInterpolator())
@@ -1696,11 +1703,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             }
         }
 
-        private float getAnimTranslation() {
-            return getContext().getResources().getDimension(
-                    com.android.systemui.R.dimen.global_actions_panel_width) / 2;
-        }
-
         @Override
         public void onColorsChanged(ColorExtractor extractor, int which) {
             if (mKeyguardShowing) {
@@ -1720,19 +1722,25 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             mKeyguardShowing = keyguardShowing;
         }
 
+        public void refreshDialog() {
+            initializeLayout();
+            mGlobalActionsLayout.updateList();
+        }
+
         public void onRotate(int from, int to) {
-            if (mShowing && isGridEnabled(mContext)) {
-                initializeLayout();
-                mGlobalActionsLayout.updateList();
+            if (mShowing && (shouldUsePanel() || isForceGridEnabled(mContext))) {
+                refreshDialog();
             }
         }
     }
 
     /**
-     * Determines whether or not the Global Actions menu should use the newer grid-style layout.
+     * Determines whether or not the Global Actions menu should be forced to
+     * use the newer grid-style layout.
      */
-    private static boolean isGridEnabled(Context context) {
-        return FeatureFlagUtils.isEnabled(context, FeatureFlagUtils.GLOBAL_ACTIONS_GRID_ENABLED);
+    private static boolean isForceGridEnabled(Context context) {
+        return FeatureFlagUtils.isEnabled(context,
+                FeatureFlagUtils.FORCE_GLOBAL_ACTIONS_GRID_ENABLED);
     }
 
     /**

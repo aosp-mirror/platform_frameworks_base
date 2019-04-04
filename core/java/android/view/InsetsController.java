@@ -134,7 +134,7 @@ public class InsetsController implements WindowInsetsController {
             }
 
             WindowInsets insets = state.calculateInsets(mFrame, mLastInsets.isRound(),
-                    mLastInsets.shouldAlwaysConsumeNavBar(), mLastInsets.getDisplayCutout(),
+                    mLastInsets.shouldAlwaysConsumeSystemBars(), mLastInsets.getDisplayCutout(),
                     mLastLegacyContentInsets, mLastLegacyStableInsets, mLastLegacySoftInputMode,
                     null /* typeSideMap */);
             mViewRoot.mView.dispatchWindowInsetsAnimationProgress(insets);
@@ -177,12 +177,12 @@ public class InsetsController implements WindowInsetsController {
      */
     @VisibleForTesting
     public WindowInsets calculateInsets(boolean isScreenRound,
-            boolean alwaysConsumeNavBar, DisplayCutout cutout, Rect legacyContentInsets,
+            boolean alwaysConsumeSystemBars, DisplayCutout cutout, Rect legacyContentInsets,
             Rect legacyStableInsets, int legacySoftInputMode) {
         mLastLegacyContentInsets.set(legacyContentInsets);
         mLastLegacyStableInsets.set(legacyStableInsets);
         mLastLegacySoftInputMode = legacySoftInputMode;
-        mLastInsets = mState.calculateInsets(mFrame, isScreenRound, alwaysConsumeNavBar, cutout,
+        mLastInsets = mState.calculateInsets(mFrame, isScreenRound, alwaysConsumeSystemBars, cutout,
                 legacyContentInsets, legacyStableInsets, legacySoftInputMode,
                 null /* typeSideMap */);
         return mLastInsets;

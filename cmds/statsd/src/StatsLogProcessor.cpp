@@ -407,12 +407,12 @@ void StatsLogProcessor::onDumpReport(const ConfigKey& key, const int64_t dumpTim
         outData->clear();
         outData->resize(proto.size());
         size_t pos = 0;
-        auto iter = proto.data();
-        while (iter.readBuffer() != NULL) {
-            size_t toRead = iter.currentToRead();
-            std::memcpy(&((*outData)[pos]), iter.readBuffer(), toRead);
+        sp<android::util::ProtoReader> reader = proto.data();
+        while (reader->readBuffer() != NULL) {
+            size_t toRead = reader->currentToRead();
+            std::memcpy(&((*outData)[pos]), reader->readBuffer(), toRead);
             pos += toRead;
-            iter.rp()->move(toRead);
+            reader->move(toRead);
         }
     }
 
@@ -602,6 +602,19 @@ void StatsLogProcessor::WriteDataToDiskLocked(const ConfigKey& key,
 
 void StatsLogProcessor::WriteMetricsActivationToDisk(int64_t currentTimeNs) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
+
+    const int64_t timeNs = getElapsedRealtimeNs();
+    // Do not write to disk if we already have in the last few seconds.
+    // This is to avoid overwriting files that would have the same name if we
+    //   write twice in the same second.
+    if (static_cast<unsigned long long> (timeNs) <
+            mLastActiveMetricsWriteNs + WRITE_DATA_COOL_DOWN_SEC * NS_PER_SEC) {
+        ALOGI("Statsd skipping writing active metrics to disk. Already wrote data in last %d seconds",
+                WRITE_DATA_COOL_DOWN_SEC);
+        return;
+    }
+    mLastActiveMetricsWriteNs = timeNs;
+
     ProtoOutputStream proto;
 
     for (const auto& pair : mMetricsManagers) {

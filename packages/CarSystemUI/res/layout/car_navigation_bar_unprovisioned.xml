@@ -28,12 +28,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:paddingStart="@dimen/car_padding_5"
-        android:paddingEnd="@dimen/car_padding_5">
+        android:paddingStart="@*android:dimen/car_padding_5"
+        android:paddingEnd="@*android:dimen/car_padding_5">
 
         <com.android.systemui.statusbar.car.CarNavigationButton
             android:id="@+id/home"
-            android:layout_width="@dimen/car_touch_target_size"
+            android:layout_width="@*android:dimen/car_touch_target_size"
             android:layout_height="match_parent"
             android:background="?android:attr/selectableItemBackground"
             android:src="@drawable/car_ic_overview"

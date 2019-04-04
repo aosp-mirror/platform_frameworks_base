@@ -769,6 +769,9 @@ public final class ProcessList {
             case ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE_LOCATION:
                 procState = "FGSL";
                 break;
+            case ActivityManager.PROCESS_STATE_BOUND_TOP:
+                procState = "BTOP";
+                break;
             case ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE:
                 procState = "FGS ";
                 break;
@@ -836,6 +839,9 @@ public final class ProcessList {
             case ActivityManager.PROCESS_STATE_TOP:
                 return AppProtoEnums.PROCESS_STATE_TOP;
             case ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE_LOCATION:
+                return AppProtoEnums.PROCESS_STATE_FOREGROUND_SERVICE;
+            case ActivityManager.PROCESS_STATE_BOUND_TOP:
+                return AppProtoEnums.PROCESS_STATE_BOUND_TOP;
             case ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE:
                 return AppProtoEnums.PROCESS_STATE_FOREGROUND_SERVICE;
             case ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE:
@@ -966,6 +972,7 @@ public final class ProcessList {
         PROC_MEM_TOP,                   // ActivityManager.PROCESS_STATE_TOP
         PROC_MEM_IMPORTANT,             // ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE_LOCATION
         PROC_MEM_IMPORTANT,             // ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE
+        PROC_MEM_TOP,                   // ActivityManager.PROCESS_STATE_BOUND_TOP
         PROC_MEM_IMPORTANT,             // ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
         PROC_MEM_IMPORTANT,             // ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
         PROC_MEM_IMPORTANT,             // ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND

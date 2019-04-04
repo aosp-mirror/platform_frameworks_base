@@ -23,7 +23,10 @@ import android.annotation.UnsupportedAppUsage;
  * that can be passed to {@link PorterDuffXfermode}, a specialized implementation
  * of {@link Paint}'s {@link Paint#setXfermode(Xfermode) transfer mode}.
  * All the available modes can be found in the {@link Mode} enum.</p>
+ *
+ * @deprecated Use {@link BlendMode} with {@link Paint#setBlendMode(BlendMode)} instead
  */
+@Deprecated
 public class PorterDuff {
     /**
      * {@usesMathJax}

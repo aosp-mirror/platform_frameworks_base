@@ -44,6 +44,7 @@ import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -64,6 +65,8 @@ import com.android.internal.util.Protocol;
 import libcore.net.event.NetworkEventDispatcher;
 
 import java.io.FileDescriptor;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.net.InetAddress;
@@ -1345,12 +1348,15 @@ public class ConnectivityManager {
     }
 
     /**
-     * Gets the URL that should be used for resolving whether a captive portal is present.
+     * Gets a URL that can be used for resolving whether a captive portal is present.
      * 1. This URL should respond with a 204 response to a GET request to indicate no captive
      *    portal is present.
      * 2. This URL must be HTTP as redirect responses are used to find captive portal
      *    sign-in pages. Captive portals cannot respond to HTTPS requests with redirects.
      *
+     * The system network validation may be using different strategies to detect captive portals,
+     * so this method does not necessarily return a URL used by the system. It only returns a URL
+     * that may be relevant for other components trying to detect captive portals.
      * @hide
      */
     @SystemApi
@@ -1920,14 +1926,24 @@ public class ConnectivityManager {
      * @return A {@link SocketKeepalive} object that can be used to control the keepalive on the
      *         given socket.
      **/
-    public SocketKeepalive createSocketKeepalive(@NonNull Network network,
+    public @NonNull SocketKeepalive createSocketKeepalive(@NonNull Network network,
             @NonNull UdpEncapsulationSocket socket,
             @NonNull InetAddress source,
             @NonNull InetAddress destination,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull Callback callback) {
-        return new NattSocketKeepalive(mService, network, socket.getFileDescriptor(),
-            socket.getResourceId(), source, destination, executor, callback);
+        ParcelFileDescriptor dup;
+        try {
+            // Dup is needed here as the pfd inside the socket is owned by the IpSecService,
+            // which cannot be obtained by the app process.
+            dup = ParcelFileDescriptor.dup(socket.getFileDescriptor());
+        } catch (IOException ignored) {
+            // Construct an invalid fd, so that if the user later calls start(), it will fail with
+            // ERROR_INVALID_SOCKET.
+            dup = new ParcelFileDescriptor(new FileDescriptor());
+        }
+        return new NattSocketKeepalive(mService, network, dup, socket.getResourceId(), source,
+                destination, executor, callback);
     }
 
     /**
@@ -1935,9 +1951,9 @@ public class ConnectivityManager {
      * by system apps which don't use IpSecService to create {@link UdpEncapsulationSocket}.
      *
      * @param network The {@link Network} the socket is on.
-     * @param fd The {@link FileDescriptor} that needs to be kept alive. The provided
-     *        {@link FileDescriptor} must be bound to a port and the keepalives will be sent from
-     *        that port.
+     * @param pfd The {@link ParcelFileDescriptor} that needs to be kept alive. The provided
+     *        {@link ParcelFileDescriptor} must be bound to a port and the keepalives will be sent
+     *        from that port.
      * @param source The source address of the {@link UdpEncapsulationSocket}.
      * @param destination The destination address of the {@link UdpEncapsulationSocket}. The
      *        keepalive packets will always be sent to port 4500 of the given {@code destination}.
@@ -1953,14 +1969,23 @@ public class ConnectivityManager {
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.PACKET_KEEPALIVE_OFFLOAD)
-    public SocketKeepalive createNattKeepalive(@NonNull Network network,
-            @NonNull FileDescriptor fd,
+    public @NonNull SocketKeepalive createNattKeepalive(@NonNull Network network,
+            @NonNull ParcelFileDescriptor pfd,
             @NonNull InetAddress source,
             @NonNull InetAddress destination,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull Callback callback) {
-        return new NattSocketKeepalive(mService, network, fd, INVALID_RESOURCE_ID /* Unused */,
-                source, destination, executor, callback);
+        ParcelFileDescriptor dup;
+        try {
+            // TODO: Consider remove unnecessary dup.
+            dup = pfd.dup();
+        } catch (IOException ignored) {
+            // Construct an invalid fd, so that if the user later calls start(), it will fail with
+            // ERROR_INVALID_SOCKET.
+            dup = new ParcelFileDescriptor(new FileDescriptor());
+        }
+        return new NattSocketKeepalive(mService, network, dup,
+                INVALID_RESOURCE_ID /* Unused */, source, destination, executor, callback);
     }
 
     /**
@@ -1984,11 +2009,19 @@ public class ConnectivityManager {
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.PACKET_KEEPALIVE_OFFLOAD)
-    public SocketKeepalive createSocketKeepalive(@NonNull Network network,
+    public @NonNull SocketKeepalive createSocketKeepalive(@NonNull Network network,
             @NonNull Socket socket,
             @NonNull Executor executor,
             @NonNull Callback callback) {
-        return new TcpSocketKeepalive(mService, network, socket, executor, callback);
+        ParcelFileDescriptor dup;
+        try {
+            dup = ParcelFileDescriptor.fromSocket(socket);
+        } catch (UncheckedIOException ignored) {
+            // Construct an invalid fd, so that if the user later calls start(), it will fail with
+            // ERROR_INVALID_SOCKET.
+            dup = new ParcelFileDescriptor(new FileDescriptor());
+        }
+        return new TcpSocketKeepalive(mService, network, dup, executor, callback);
     }
 
     /**
@@ -2584,7 +2617,7 @@ public class ConnectivityManager {
 
     /**
      * Start listening to tethering change events. Any new added callback will receive the last
-     * tethering status right away. If callback is registered when tethering loses its upstream or
+     * tethering status right away. If callback is registered when tethering has no upstream or
      * disabled, {@link OnTetheringEventCallback#onUpstreamChanged} will immediately be called
      * with a null argument. The same callback object cannot be registered twice.
      *
@@ -3201,7 +3234,7 @@ public class ConnectivityManager {
          *
          * @hide
          */
-        public void onPreCheck(Network network) {}
+        public void onPreCheck(@NonNull Network network) {}
 
         /**
          * Called when the framework connects and has declared a new network ready for use.
@@ -3214,8 +3247,9 @@ public class ConnectivityManager {
          * @param blocked Whether access to the {@link Network} is blocked due to system policy.
          * @hide
          */
-        public void onAvailable(Network network, NetworkCapabilities networkCapabilities,
-                LinkProperties linkProperties, boolean blocked) {
+        public void onAvailable(@NonNull Network network,
+                @NonNull NetworkCapabilities networkCapabilities,
+                @NonNull LinkProperties linkProperties, boolean blocked) {
             // Internally only this method is called when a new network is available, and
             // it calls the callback in the same way and order that older versions used
             // to call so as not to change the behavior.
@@ -3239,7 +3273,7 @@ public class ConnectivityManager {
          *
          * @param network The {@link Network} of the satisfying network.
          */
-        public void onAvailable(Network network) {}
+        public void onAvailable(@NonNull Network network) {}
 
         /**
          * Called when the network is about to be disconnected.  Often paired with an
@@ -3255,7 +3289,7 @@ public class ConnectivityManager {
          *                     network connected.  Note that the network may suffer a
          *                     hard loss at any time.
          */
-        public void onLosing(Network network, int maxMsToLive) {}
+        public void onLosing(@NonNull Network network, int maxMsToLive) {}
 
         /**
          * Called when the framework has a hard loss of the network or when the
@@ -3263,7 +3297,7 @@ public class ConnectivityManager {
          *
          * @param network The {@link Network} lost.
          */
-        public void onLost(Network network) {}
+        public void onLost(@NonNull Network network) {}
 
         /**
          * Called if no network is found in the timeout time specified in
@@ -3283,8 +3317,8 @@ public class ConnectivityManager {
          * @param networkCapabilities The new {@link android.net.NetworkCapabilities} for this
          *                            network.
          */
-        public void onCapabilitiesChanged(Network network,
-                NetworkCapabilities networkCapabilities) {}
+        public void onCapabilitiesChanged(@NonNull Network network,
+                @NonNull NetworkCapabilities networkCapabilities) {}
 
         /**
          * Called when the network the framework connected to for this request
@@ -3293,7 +3327,8 @@ public class ConnectivityManager {
          * @param network The {@link Network} whose link properties have changed.
          * @param linkProperties The new {@link LinkProperties} for this network.
          */
-        public void onLinkPropertiesChanged(Network network, LinkProperties linkProperties) {}
+        public void onLinkPropertiesChanged(@NonNull Network network,
+                @NonNull LinkProperties linkProperties) {}
 
         /**
          * Called when the network the framework connected to for this request
@@ -3304,7 +3339,7 @@ public class ConnectivityManager {
          * a tunnel, etc.
          * @hide
          */
-        public void onNetworkSuspended(Network network) {}
+        public void onNetworkSuspended(@NonNull Network network) {}
 
         /**
          * Called when the network the framework connected to for this request
@@ -3312,7 +3347,7 @@ public class ConnectivityManager {
          * preceded by a matching {@link NetworkCallback#onNetworkSuspended} call.
          * @hide
          */
-        public void onNetworkResumed(Network network) {}
+        public void onNetworkResumed(@NonNull Network network) {}
 
         /**
          * Called when access to the specified network is blocked or unblocked.
@@ -3320,7 +3355,7 @@ public class ConnectivityManager {
          * @param network The {@link Network} whose blocked status has changed.
          * @param blocked The blocked status of this {@link Network}.
          */
-        public void onBlockedStatusChanged(Network network, boolean blocked) {}
+        public void onBlockedStatusChanged(@NonNull Network network, boolean blocked) {}
 
         private NetworkRequest networkRequest;
     }
@@ -4088,7 +4123,7 @@ public class ConnectivityManager {
     @SystemApi
     @TestApi
     @RequiresPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK)
-    public void startCaptivePortalApp(Network network, Bundle appExtras) {
+    public void startCaptivePortalApp(@NonNull Network network, @NonNull Bundle appExtras) {
         try {
             mService.startCaptivePortalAppInternal(network, appExtras);
         } catch (RemoteException e) {
@@ -4101,9 +4136,12 @@ public class ConnectivityManager {
      * @hide
      */
     @SystemApi
-    public boolean getAvoidBadWifi() {
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_STACK})
+    public boolean shouldAvoidBadWifi() {
         try {
-            return mService.getAvoidBadWifi();
+            return mService.shouldAvoidBadWifi();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

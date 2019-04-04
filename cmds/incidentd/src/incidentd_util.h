@@ -78,6 +78,8 @@ uint64_t Nanotime();
 status_t kill_child(pid_t pid);
 status_t wait_child(pid_t pid);
 
+status_t start_detached_thread(const function<void ()>& func);
+
 }  // namespace incidentd
 }  // namespace os
 }  // namespace android

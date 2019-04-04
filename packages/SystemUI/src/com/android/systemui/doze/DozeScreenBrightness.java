@@ -56,6 +56,7 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
     private boolean mRegistered;
     private int mDefaultDozeBrightness;
     private boolean mPaused = false;
+    private boolean mScreenOff = false;
     private int mLastSensorValue = -1;
 
     /**
@@ -118,6 +119,7 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
                 break;
         }
         if (newState != DozeMachine.State.FINISH) {
+            setScreenOff(newState == DozeMachine.State.DOZE);
             setPaused(newState == DozeMachine.State.DOZE_AOD_PAUSED);
         }
     }
@@ -135,15 +137,15 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
         try {
             if (mRegistered) {
                 mLastSensorValue = (int) event.values[0];
-                updateBrightnessAndReady();
+                updateBrightnessAndReady(false /* force */);
             }
         } finally {
             Trace.endSection();
         }
     }
 
-    private void updateBrightnessAndReady() {
-        if (mRegistered || mDebugBrightnessBucket != -1) {
+    private void updateBrightnessAndReady(boolean force) {
+        if (force || mRegistered || mDebugBrightnessBucket != -1) {
             int sensorValue = mDebugBrightnessBucket == -1
                     ? mLastSensorValue : mDebugBrightnessBucket;
             int brightness = computeBrightness(sensorValue);
@@ -153,7 +155,7 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
             }
 
             int scrimOpacity = -1;
-            if (mPaused) {
+            if (mPaused || mScreenOff) {
                 // If AOD is paused, force the screen black until the
                 // sensor reports a new brightness. This ensures that when the screen comes on
                 // again, it will only show after the brightness sensor has stabilized,
@@ -216,13 +218,20 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
     private void setPaused(boolean paused) {
         if (mPaused != paused) {
             mPaused = paused;
-            updateBrightnessAndReady();
+            updateBrightnessAndReady(false /* force */);
+        }
+    }
+
+    private void setScreenOff(boolean screenOff) {
+        if (mScreenOff != screenOff) {
+            mScreenOff = screenOff;
+            updateBrightnessAndReady(true /* force */);
         }
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
         mDebugBrightnessBucket = intent.getIntExtra(BRIGHTNESS_BUCKET, -1);
-        updateBrightnessAndReady();
+        updateBrightnessAndReady(false /* force */);
     }
 }

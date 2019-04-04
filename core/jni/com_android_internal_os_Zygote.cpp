@@ -46,6 +46,7 @@
 #include <fcntl.h>
 #include <grp.h>
 #include <inttypes.h>
+#include <link.h>
 #include <malloc.h>
 #include <mntent.h>
 #include <paths.h>
@@ -54,6 +55,7 @@
 #include <sys/capability.h>
 #include <sys/cdefs.h>
 #include <sys/eventfd.h>
+#include <sys/mman.h>
 #include <sys/personality.h>
 #include <sys/prctl.h>
 #include <sys/resource.h>
@@ -69,6 +71,7 @@
 #include <android-base/properties.h>
 #include <android-base/file.h>
 #include <android-base/stringprintf.h>
+#include <android-base/strings.h>
 #include <android-base/unique_fd.h>
 #include <cutils/fs.h>
 #include <cutils/multiuser.h>
@@ -123,7 +126,7 @@ static constexpr const char* kZygoteInitClassName = "com/android/internal/os/Zyg
 static jclass gZygoteInitClass;
 static jmethodID gCreateSystemServerClassLoader;
 
-static bool g_is_security_enforced = true;
+static bool gIsSecurityEnforced = true;
 
 /**
  * The maximum number of characters (not including a null terminator) that a
@@ -507,7 +510,7 @@ static void PreApplicationInit() {
 }
 
 static void SetUpSeccompFilter(uid_t uid, bool is_child_zygote) {
-  if (!g_is_security_enforced) {
+  if (!gIsSecurityEnforced) {
     ALOGI("seccomp disabled by setenforce 0");
     return;
   }
@@ -1623,15 +1626,47 @@ std::vector<int> MakeUsapPipeReadFDVector() {
   return fd_vec;
 }
 
+static void UnmountStorageOnInit(JNIEnv* env) {
+  // Zygote process unmount root storage space initially before every child processes are forked.
+  // Every forked child processes (include SystemServer) only mount their own root storage space
+  // and no need unmount storage operation in MountEmulatedStorage method.
+  // Zygote process does not utilize root storage spaces and unshares its mount namespace below.
+
+  // See storage config details at http://source.android.com/tech/storage/
+  // Create private mount namespace shared by all children
+  if (unshare(CLONE_NEWNS) == -1) {
+    RuntimeAbort(env, __LINE__, "Failed to unshare()");
+    return;
+  }
+
+  // Mark rootfs as being a slave so that changes from default
+  // namespace only flow into our children.
+  if (mount("rootfs", "/", nullptr, (MS_SLAVE | MS_REC), nullptr) == -1) {
+    RuntimeAbort(env, __LINE__, "Failed to mount() rootfs as MS_SLAVE");
+    return;
+  }
+
+  // Create a staging tmpfs that is shared by our children; they will
+  // bind mount storage into their respective private namespaces, which
+  // are isolated from each other.
+  const char* target_base = getenv("EMULATED_STORAGE_TARGET");
+  if (target_base != nullptr) {
+#define STRINGIFY_UID(x) __STRING(x)
+    if (mount("tmpfs", target_base, "tmpfs", MS_NOSUID | MS_NODEV,
+              "uid=0,gid=" STRINGIFY_UID(AID_SDCARD_R) ",mode=0751") == -1) {
+      ALOGE("Failed to mount tmpfs to %s", target_base);
+      RuntimeAbort(env, __LINE__, "Failed to mount tmpfs");
+      return;
+    }
+#undef STRINGIFY_UID
+  }
+
+  UnmountTree("/storage");
+}
+
 }  // anonymous namespace
 
 namespace android {
-
-static void com_android_internal_os_Zygote_nativeSecurityInit(JNIEnv*, jclass) {
-  // security_getenforce is not allowed on app process. Initialize and cache
-  // the value before zygote forks.
-  g_is_security_enforced = security_getenforce();
-}
 
 static void com_android_internal_os_Zygote_nativePreApplicationInit(JNIEnv*, jclass) {
   PreApplicationInit();
@@ -1786,47 +1821,9 @@ static void com_android_internal_os_Zygote_nativeAllowFileAcrossFork(
     FileDescriptorWhitelist::Get()->Allow(path_cstr);
 }
 
-static void com_android_internal_os_Zygote_nativeUnmountStorageOnInit(JNIEnv* env, jclass) {
-    // Zygote process unmount root storage space initially before every child processes are forked.
-    // Every forked child processes (include SystemServer) only mount their own root storage space
-    // and no need unmount storage operation in MountEmulatedStorage method.
-    // Zygote process does not utilize root storage spaces and unshares its mount namespace below.
-
-    // See storage config details at http://source.android.com/tech/storage/
-    // Create private mount namespace shared by all children
-    if (unshare(CLONE_NEWNS) == -1) {
-        RuntimeAbort(env, __LINE__, "Failed to unshare()");
-        return;
-    }
-
-    // Mark rootfs as being a slave so that changes from default
-    // namespace only flow into our children.
-    if (mount("rootfs", "/", nullptr, (MS_SLAVE | MS_REC), nullptr) == -1) {
-        RuntimeAbort(env, __LINE__, "Failed to mount() rootfs as MS_SLAVE");
-        return;
-    }
-
-    // Create a staging tmpfs that is shared by our children; they will
-    // bind mount storage into their respective private namespaces, which
-    // are isolated from each other.
-    const char* target_base = getenv("EMULATED_STORAGE_TARGET");
-    if (target_base != nullptr) {
-#define STRINGIFY_UID(x) __STRING(x)
-        if (mount("tmpfs", target_base, "tmpfs", MS_NOSUID | MS_NODEV,
-                  "uid=0,gid=" STRINGIFY_UID(AID_SDCARD_R) ",mode=0751") == -1) {
-            ALOGE("Failed to mount tmpfs to %s", target_base);
-            RuntimeAbort(env, __LINE__, "Failed to mount tmpfs");
-            return;
-        }
-#undef STRINGIFY_UID
-    }
-
-    UnmountTree("/storage");
-}
-
 static void com_android_internal_os_Zygote_nativeInstallSeccompUidGidFilter(
         JNIEnv* env, jclass, jint uidGidMin, jint uidGidMax) {
-  if (!g_is_security_enforced) {
+  if (!gIsSecurityEnforced) {
     ALOGI("seccomp disabled by setenforce 0");
     return;
   }
@@ -1878,8 +1875,12 @@ static void com_android_internal_os_Zygote_nativeSpecializeAppProcess(
  * @param is_primary  If this process is the primary or secondary Zygote; used to compute the name
  * of the environment variable storing the file descriptors.
  */
-static void com_android_internal_os_Zygote_nativeGetSocketFDs(JNIEnv* env, jclass,
-                                                              jboolean is_primary) {
+static void com_android_internal_os_Zygote_nativeInitNativeState(JNIEnv* env, jclass,
+                                                                 jboolean is_primary) {
+  /*
+   * Obtain file descriptors created by init from the environment.
+   */
+
   std::string android_socket_prefix(ANDROID_SOCKET_PREFIX);
   std::string env_var_name = android_socket_prefix + (is_primary ? "zygote" : "zygote_secondary");
   char* env_var_val = getenv(env_var_name.c_str());
@@ -1899,6 +1900,30 @@ static void com_android_internal_os_Zygote_nativeGetSocketFDs(JNIEnv* env, jclas
     ALOGV("Zygote:usapPoolSocketFD = %d", gUsapPoolSocketFD);
   } else {
     ALOGE("Unable to fetch USAP pool socket file descriptor");
+  }
+
+  /*
+   * Security Initialization
+   */
+
+  // security_getenforce is not allowed on app process. Initialize and cache
+  // the value before zygote forks.
+  gIsSecurityEnforced = security_getenforce();
+
+  selinux_android_seapp_context_init();
+
+  /*
+   * Storage Initialization
+   */
+
+  UnmountStorageOnInit(env);
+
+  /*
+   * Performance Initialization
+   */
+
+  if (!SetTaskProfiles(0, {})) {
+    ZygoteFailure(env, "zygote", nullptr, "Zygote SetTaskProfiles failed");
   }
 }
 
@@ -1975,9 +2000,27 @@ static void com_android_internal_os_Zygote_nativeEmptyUsapPool(JNIEnv* env, jcla
   }
 }
 
+static int disable_execute_only(struct dl_phdr_info *info, size_t size, void *data) {
+  // Search for any execute-only segments and mark them read+execute.
+  for (int i = 0; i < info->dlpi_phnum; i++) {
+    if ((info->dlpi_phdr[i].p_type == PT_LOAD) && (info->dlpi_phdr[i].p_flags == PF_X)) {
+      mprotect(reinterpret_cast<void*>(info->dlpi_addr + info->dlpi_phdr[i].p_vaddr),
+              info->dlpi_phdr[i].p_memsz, PROT_READ | PROT_EXEC);
+    }
+  }
+  // Return non-zero to exit dl_iterate_phdr.
+  return 0;
+}
+
+/**
+ * @param env  Managed runtime environment
+ * @return  True if disable was successful.
+ */
+static jboolean com_android_internal_os_Zygote_nativeDisableExecuteOnly(JNIEnv* env, jclass) {
+  return dl_iterate_phdr(disable_execute_only, nullptr) == 0;
+}
+
 static const JNINativeMethod gMethods[] = {
-    { "nativeSecurityInit", "()V",
-      (void *) com_android_internal_os_Zygote_nativeSecurityInit },
     { "nativeForkAndSpecialize",
       "(II[II[[IILjava/lang/String;Ljava/lang/String;[I[IZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;)I",
       (void *) com_android_internal_os_Zygote_nativeForkAndSpecialize },
@@ -1985,8 +2028,6 @@ static const JNINativeMethod gMethods[] = {
       (void *) com_android_internal_os_Zygote_nativeForkSystemServer },
     { "nativeAllowFileAcrossFork", "(Ljava/lang/String;)V",
       (void *) com_android_internal_os_Zygote_nativeAllowFileAcrossFork },
-    { "nativeUnmountStorageOnInit", "()V",
-      (void *) com_android_internal_os_Zygote_nativeUnmountStorageOnInit },
     { "nativePreApplicationInit", "()V",
       (void *) com_android_internal_os_Zygote_nativePreApplicationInit },
     { "nativeInstallSeccompUidGidFilter", "(II)V",
@@ -1996,8 +2037,8 @@ static const JNINativeMethod gMethods[] = {
     { "nativeSpecializeAppProcess",
       "(II[II[[IILjava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;)V",
       (void *) com_android_internal_os_Zygote_nativeSpecializeAppProcess },
-    { "nativeGetSocketFDs", "(Z)V",
-      (void *) com_android_internal_os_Zygote_nativeGetSocketFDs },
+    { "nativeInitNativeState", "(Z)V",
+      (void *) com_android_internal_os_Zygote_nativeInitNativeState },
     { "nativeGetUsapPipeFDs", "()[I",
       (void *) com_android_internal_os_Zygote_nativeGetUsapPipeFDs },
     { "nativeRemoveUsapTableEntry", "(I)Z",
@@ -2007,7 +2048,9 @@ static const JNINativeMethod gMethods[] = {
     { "nativeGetUsapPoolCount", "()I",
       (void *) com_android_internal_os_Zygote_nativeGetUsapPoolCount },
     { "nativeEmptyUsapPool", "()V",
-      (void *) com_android_internal_os_Zygote_nativeEmptyUsapPool }
+      (void *) com_android_internal_os_Zygote_nativeEmptyUsapPool },
+    { "nativeDisableExecuteOnly", "()Z",
+      (void *) com_android_internal_os_Zygote_nativeDisableExecuteOnly }
 };
 
 int register_com_android_internal_os_Zygote(JNIEnv* env) {

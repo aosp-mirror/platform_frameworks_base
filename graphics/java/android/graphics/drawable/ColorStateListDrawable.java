@@ -21,10 +21,10 @@ import android.annotation.Nullable;
 import android.content.pm.ActivityInfo;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
+import android.graphics.BlendMode;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.PixelFormat;
-import android.graphics.PorterDuff;
 import android.util.MathUtils;
 
 /**
@@ -114,9 +114,9 @@ public class ColorStateListDrawable extends Drawable implements Drawable.Callbac
     }
 
     @Override
-    public void setTintMode(@NonNull PorterDuff.Mode tintMode) {
-        mState.mTintMode = tintMode;
-        mColorDrawable.setTintMode(tintMode);
+    public void setTintMode(@NonNull BlendMode blendMode) {
+        mState.mBlendMode = blendMode;
+        mColorDrawable.setTintMode(blendMode);
         onStateChange(getState());
     }
 
@@ -236,7 +236,7 @@ public class ColorStateListDrawable extends Drawable implements Drawable.Callbac
         ColorStateList mColor = null;
         ColorStateList mTint = null;
         int mAlpha = -1;
-        PorterDuff.Mode mTintMode = DEFAULT_TINT_MODE;
+        BlendMode mBlendMode = DEFAULT_BLEND_MODE;
         @ActivityInfo.Config int mChangingConfigurations = 0;
 
         ColorStateListDrawableState() {
@@ -246,7 +246,7 @@ public class ColorStateListDrawable extends Drawable implements Drawable.Callbac
             mColor = state.mColor;
             mTint = state.mTint;
             mAlpha = state.mAlpha;
-            mTintMode = state.mTintMode;
+            mBlendMode = state.mBlendMode;
             mChangingConfigurations = state.mChangingConfigurations;
         }
 
@@ -292,8 +292,8 @@ public class ColorStateListDrawable extends Drawable implements Drawable.Callbac
             mColorDrawable.setTintList(mState.mTint);
         }
 
-        if (mState.mTintMode != DEFAULT_TINT_MODE) {
-            mColorDrawable.setTintMode(mState.mTintMode);
+        if (mState.mBlendMode != DEFAULT_BLEND_MODE) {
+            mColorDrawable.setTintMode(mState.mBlendMode);
         }
     }
 }

@@ -94,10 +94,10 @@ public class AppPredictionManagerService extends
         }
 
         @Override
-        public void notifyLocationShown(@NonNull AppPredictionSessionId sessionId,
+        public void notifyLaunchLocationShown(@NonNull AppPredictionSessionId sessionId,
                 @NonNull String launchLocation, @NonNull ParceledListSlice targetIds) {
             runForUserLocked((service) ->
-                    service.notifyLocationShownLocked(sessionId, launchLocation, targetIds));
+                    service.notifyLaunchLocationShownLocked(sessionId, launchLocation, targetIds));
         }
 
         @Override

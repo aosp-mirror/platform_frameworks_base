@@ -16,6 +16,7 @@
 
 package android.telecom;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
@@ -97,6 +98,7 @@ public class Log {
         }
     }
 
+    @UnsupportedAppUsage
     public static void i(String prefix, String format, Object... args) {
         if (INFO) {
             android.util.Slog.i(TAG, buildMessage(prefix, format, args));
@@ -127,6 +129,7 @@ public class Log {
         }
     }
 
+    @UnsupportedAppUsage
     public static void w(String prefix, String format, Object... args) {
         if (WARN) {
             android.util.Slog.w(TAG, buildMessage(prefix, format, args));

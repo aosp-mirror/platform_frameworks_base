@@ -19,6 +19,9 @@ package com.android.internal.os;
 import static android.system.OsConstants.S_IRWXG;
 import static android.system.OsConstants.S_IRWXO;
 
+import android.annotation.UnsupportedAppUsage;
+import android.app.ApplicationLoaders;
+import android.content.pm.SharedLibraryInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.os.Build;
@@ -102,6 +105,7 @@ public class ZygoteInit {
     /**
      * Used to pre-load resources.
      */
+    @UnsupportedAppUsage
     private static Resources mResources;
 
     /**
@@ -136,6 +140,9 @@ public class ZygoteInit {
         bootTimingsTraceLog.traceBegin("PreloadClasses");
         preloadClasses();
         bootTimingsTraceLog.traceEnd(); // PreloadClasses
+        bootTimingsTraceLog.traceBegin("CacheNonBootClasspathClassLoaders");
+        cacheNonBootClasspathClassLoaders();
+        bootTimingsTraceLog.traceEnd(); // CacheNonBootClasspathClassLoaders
         bootTimingsTraceLog.traceBegin("PreloadResources");
         preloadResources();
         bootTimingsTraceLog.traceEnd(); // PreloadResources
@@ -339,6 +346,32 @@ public class ZygoteInit {
                 }
             }
         }
+    }
+
+    /**
+     * Load in things which are used by many apps but which cannot be put in the boot
+     * classpath.
+     */
+    private static void cacheNonBootClasspathClassLoaders() {
+        // These libraries used to be part of the bootclasspath, but had to be removed.
+        // Old system applications still get them for backwards compatibility reasons,
+        // so they are cached here in order to preserve performance characteristics.
+        SharedLibraryInfo hidlBase = new SharedLibraryInfo(
+                "/system/framework/android.hidl.base-V1.0-java.jar", null /*packageName*/,
+                null /*codePaths*/, null /*name*/, 0 /*version*/, SharedLibraryInfo.TYPE_BUILTIN,
+                null /*declaringPackage*/, null /*dependentPackages*/, null /*dependencies*/);
+        SharedLibraryInfo hidlManager = new SharedLibraryInfo(
+                "/system/framework/android.hidl.manager-V1.0-java.jar", null /*packageName*/,
+                null /*codePaths*/, null /*name*/, 0 /*version*/, SharedLibraryInfo.TYPE_BUILTIN,
+                null /*declaringPackage*/, null /*dependentPackages*/, null /*dependencies*/);
+        hidlManager.addDependency(hidlBase);
+
+        ApplicationLoaders.getDefault().createAndCacheNonBootclasspathSystemClassLoaders(
+                new SharedLibraryInfo[]{
+                    // ordered dependencies first
+                    hidlBase,
+                    hidlManager,
+                });
     }
 
     /**
@@ -777,6 +810,7 @@ public class ZygoteInit {
         return result;
     }
 
+    @UnsupportedAppUsage
     public static void main(String argv[]) {
         ZygoteServer zygoteServer = null;
 
@@ -829,8 +863,6 @@ public class ZygoteInit {
                 throw new RuntimeException("No ABI list supplied.");
             }
 
-            Zygote.getSocketFDs(isPrimaryZygote);
-
             // In some configurations, we avoid preloading resources and classes eagerly.
             // In such cases, we will preload things prior to our first fork.
             if (!enableLazyPreload) {
@@ -855,10 +887,8 @@ public class ZygoteInit {
             // Zygote.
             Trace.setTracingEnabled(false, 0);
 
-            Zygote.nativeSecurityInit();
 
-            // Zygote process unmounts root storage spaces.
-            Zygote.nativeUnmountStorageOnInit();
+            Zygote.initNativeState(isPrimaryZygote);
 
             ZygoteHooks.stopZygoteNoThreadCreation();
 

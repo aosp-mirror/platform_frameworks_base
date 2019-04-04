@@ -654,6 +654,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     private static final int VIRTUAL_DESCENDANT_ID_SHIFT = 32;
 
+    // TODO(b/129300068): Remove sNumInstancesInUse.
     private static AtomicInteger sNumInstancesInUse;
 
     /**
@@ -764,6 +765,11 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     private AccessibilityNodeInfo() {
         /* do nothing */
+    }
+
+    /** @hide */
+    AccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        init(info);
     }
 
     /**
@@ -1676,17 +1682,29 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
-     * Gets the node bounds in parent coordinates.
+     * Gets the node bounds in the viewParent's coordinates.
+     * {@link #getParent()} does not represent the source's viewParent.
+     * Instead it represents the result of {@link View#getParentForAccessibility()},
+     * which returns the closest ancestor where {@link View#isImportantForAccessibility()} is true.
+     * So this method is not reliable.
      *
      * @param outBounds The output node bounds.
+     * @deprecated Use {@link #getBoundsInScreen(Rect)} instead.
+     *
      */
+    @Deprecated
     public void getBoundsInParent(Rect outBounds) {
         outBounds.set(mBoundsInParent.left, mBoundsInParent.top,
                 mBoundsInParent.right, mBoundsInParent.bottom);
     }
 
     /**
-     * Sets the node bounds in parent coordinates.
+     * Sets the node bounds in the viewParent's coordinates.
+     * {@link #getParent()} does not represent the source's viewParent.
+     * Instead it represents the result of {@link View#getParentForAccessibility()},
+     * which returns the closest ancestor where {@link View#isImportantForAccessibility()} is true.
+     * So this method is not reliable.
+     *
      * <p>
      *   <strong>Note:</strong> Cannot be called from an
      *   {@link android.accessibilityservice.AccessibilityService}.
@@ -1696,7 +1714,9 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param bounds The node bounds.
      *
      * @throws IllegalStateException If called from an AccessibilityService.
+     * @deprecated Accessibility services should not care about these bounds.
      */
+    @Deprecated
     public void setBoundsInParent(Rect bounds) {
         enforceNotSealed();
         mBoundsInParent.set(bounds.left, bounds.top, bounds.right, bounds.bottom);

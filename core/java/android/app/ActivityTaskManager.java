@@ -19,6 +19,7 @@ package android.app;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -146,6 +147,7 @@ public class ActivityTaskManager {
         return IActivityTaskManagerSingleton.get();
     }
 
+    @UnsupportedAppUsage(trackingBug = 129726065)
     private static final Singleton<IActivityTaskManager> IActivityTaskManagerSingleton =
             new Singleton<IActivityTaskManager>() {
                 @Override

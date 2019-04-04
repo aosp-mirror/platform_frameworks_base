@@ -18,6 +18,7 @@ package android.app;
 import static android.Manifest.permission.DUMP;
 import static android.Manifest.permission.PACKAGE_USAGE_STATS;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
@@ -295,7 +296,7 @@ public final class StatsManager {
      * @throws StatsUnavailableException if unsuccessful due to failing to connect to stats service
      */
     @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
-    public long[] setActiveConfigsChangedOperation(@Nullable PendingIntent pendingIntent)
+    public @NonNull long[] setActiveConfigsChangedOperation(@Nullable PendingIntent pendingIntent)
             throws StatsUnavailableException {
         synchronized (this) {
             try {
@@ -406,6 +407,36 @@ public final class StatsManager {
             return getStatsMetadata();
         } catch (StatsUnavailableException e) {
             return null;
+        }
+    }
+
+    /**
+     * Returns the experiments IDs registered with statsd, or an empty array if there aren't any.
+     *
+     * @throws StatsUnavailableException if unsuccessful due to failing to connect to stats service
+     * @hide
+     */
+    @RequiresPermission(allOf = {DUMP, PACKAGE_USAGE_STATS})
+    public long[] getRegisteredExperimentIds()
+            throws StatsUnavailableException {
+        synchronized (this) {
+            try {
+                IStatsManager service = getIStatsManagerLocked();
+                if (service == null) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Failed to find statsd when getting experiment IDs");
+                    }
+                    return new long[0];
+                }
+                return service.getRegisteredExperimentIds();
+            } catch (RemoteException e) {
+                if (DEBUG) {
+                    Slog.d(TAG,
+                            "Failed to connect to StatsCompanionService when getting "
+                                    + "registered experiment IDs");
+                }
+                return new long[0];
+            }
         }
     }
 

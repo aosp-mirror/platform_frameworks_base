@@ -47,14 +47,15 @@ final class RemoteContentCaptureService
             ContentCapturePerUserService perUserService, boolean bindInstantServiceAllowed,
             boolean verbose, int idleUnbindTimeoutMs) {
         super(context, serviceInterface, serviceComponentName, userId, perUserService,
-                context.getMainThreadHandler(), bindInstantServiceAllowed, verbose,
+                context.getMainThreadHandler(),
+                bindInstantServiceAllowed ? Context.BIND_ALLOW_INSTANT : 0, verbose,
                 /* initialCapacity= */ 2);
         mPerUserService = perUserService;
         mServerCallback = callback.asBinder();
         mIdleUnbindTimeoutMs = idleUnbindTimeoutMs;
 
         // Bind right away, which will trigger a onConnected() on service's
-        scheduleBind();
+        ensureBoundLocked();
     }
 
     @Override // from AbstractRemoteService
@@ -89,13 +90,16 @@ final class RemoteContentCaptureService
         }
     }
 
+    public void ensureBoundLocked() {
+        scheduleBind();
+    }
+
     /**
      * Called by {@link ContentCaptureServerSession} to generate a call to the
      * {@link RemoteContentCaptureService} to indicate the session was created.
      */
-    public void onSessionStarted(@Nullable ContentCaptureContext context,
-            @NonNull String sessionId, int uid, @NonNull IResultReceiver clientReceiver,
-            int initialState) {
+    public void onSessionStarted(@Nullable ContentCaptureContext context, int sessionId, int uid,
+            @NonNull IResultReceiver clientReceiver, int initialState) {
         scheduleAsyncRequest(
                 (s) -> s.onSessionStarted(context, sessionId, uid, clientReceiver, initialState));
     }
@@ -104,15 +108,14 @@ final class RemoteContentCaptureService
      * Called by {@link ContentCaptureServerSession} to generate a call to the
      * {@link RemoteContentCaptureService} to indicate the session was finished.
      */
-    public void onSessionFinished(@NonNull String sessionId) {
+    public void onSessionFinished(int sessionId) {
         scheduleAsyncRequest((s) -> s.onSessionFinished(sessionId));
     }
 
     /**
      * Called by {@link ContentCaptureServerSession} to send snapshot data to the service.
      */
-    public void onActivitySnapshotRequest(@NonNull String sessionId,
-            @NonNull SnapshotData snapshotData) {
+    public void onActivitySnapshotRequest(int sessionId, @NonNull SnapshotData snapshotData) {
         scheduleAsyncRequest((s) -> s.onActivitySnapshot(sessionId, snapshotData));
     }
 

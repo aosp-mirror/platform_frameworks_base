@@ -113,6 +113,13 @@ public final class CellIdentityLte extends CellIdentity {
                 cid.mMncStr, cid.mAlphaLong, cid.mAlphaShort);
     }
 
+    /** @hide */
+    public CellIdentityLte sanitizeLocationInfo() {
+        return new CellIdentityLte(CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE,
+                CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE,
+                mMccStr, mMncStr, mAlphaLong, mAlphaShort);
+    }
+
     CellIdentityLte copy() {
         return new CellIdentityLte(this);
     }

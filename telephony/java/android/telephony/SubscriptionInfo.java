@@ -32,6 +32,7 @@ import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Parcel;
+import android.os.ParcelUuid;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
@@ -154,11 +155,11 @@ public class SubscriptionInfo implements Parcelable {
     private boolean mIsOpportunistic;
 
     /**
-     * A UUID assigned to the subscription group. It returns
-     * null if not assigned.
+     * A UUID assigned to the subscription group. It returns null if not assigned.
+     * Check {@link SubscriptionManager#createSubscriptionGroup(List)} for more details.
      */
     @Nullable
-    private String mGroupUUID;
+    private ParcelUuid mGroupUUID;
 
     /**
      * Whether group of the subscription is disabled.
@@ -237,7 +238,7 @@ public class SubscriptionInfo implements Parcelable {
         this.mCardString = cardString;
         this.mCardId = cardId;
         this.mIsOpportunistic = isOpportunistic;
-        this.mGroupUUID = groupUUID;
+        this.mGroupUUID = groupUUID == null ? null : ParcelUuid.fromString(groupUUID);
         this.mIsGroupDisabled = isGroupDisabled;
         this.mCarrierId = carrierId;
         this.mProfileClass = profileClass;
@@ -461,7 +462,7 @@ public class SubscriptionInfo implements Parcelable {
      * @return group UUID a String of group UUID if it belongs to a group. Otherwise
      * it will return null.
      */
-    public @Nullable String getGroupUuid() {
+    public @Nullable ParcelUuid getGroupUuid() {
         return mGroupUUID;
     }
 
@@ -643,7 +644,7 @@ public class SubscriptionInfo implements Parcelable {
         dest.writeString(mCardString);
         dest.writeInt(mCardId);
         dest.writeBoolean(mIsOpportunistic);
-        dest.writeString(mGroupUUID);
+        dest.writeString(mGroupUUID == null ? null : mGroupUUID.toString());
         dest.writeBoolean(mIsGroupDisabled);
         dest.writeInt(mCarrierId);
         dest.writeInt(mProfileClass);

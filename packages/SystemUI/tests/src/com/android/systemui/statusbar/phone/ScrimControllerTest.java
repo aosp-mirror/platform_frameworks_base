@@ -46,7 +46,6 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.internal.util.function.TriConsumer;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.doze.DozeLog;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.util.wakelock.WakeLock;
 import com.android.systemui.utils.os.FakeHandler;
@@ -140,7 +139,6 @@ public class ScrimControllerTest extends SysuiTestCase {
         assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_TRANSPARENT);
 
         // Pulsing notification should conserve AOD wallpaper.
-        mScrimController.setPulseReason(DozeLog.PULSE_REASON_NOTIFICATION);
         mScrimController.transitionTo(ScrimState.PULSING);
         mScrimController.finishAnimationsImmediately();
         assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_TRANSPARENT);
@@ -225,14 +223,17 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.finishAnimationsImmediately();
         assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_OPAQUE);
 
-        mScrimController.setPulseReason(DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN);
         mScrimController.transitionTo(ScrimState.PULSING);
         mScrimController.finishAnimationsImmediately();
         // Front scrim should be transparent
         // Back scrim should be semi-transparent so the user can see the wallpaper
         // Pulse callback should have been invoked
-        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_SEMI_TRANSPARENT);
+        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_OPAQUE);
         assertScrimTint(mScrimBehind, true /* tinted */);
+
+        mScrimController.setWakeLockScreenSensorActive(true);
+        mScrimController.finishAnimationsImmediately();
+        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_SEMI_TRANSPARENT);
     }
 
     @Test
@@ -486,7 +487,6 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Test
     public void testHoldsPulsingWallpaperAnimationLock() {
         // Pre-conditions
-        mScrimController.setPulseReason(DozeLog.PULSE_REASON_NOTIFICATION);
         mScrimController.transitionTo(ScrimState.PULSING);
         mScrimController.finishAnimationsImmediately();
         reset(mWakeLock);
@@ -505,30 +505,6 @@ public class ScrimControllerTest extends SysuiTestCase {
         verify(mAlarmManager).setExact(anyInt(), anyLong(), any(), any(), any());
         mScrimController.transitionTo(ScrimState.KEYGUARD);
         verify(mAlarmManager).cancel(any(AlarmManager.OnAlarmListener.class));
-    }
-
-    @Test
-    public void testWillHidePulsingWallpaper_whenNotification() {
-        mScrimController.setWallpaperSupportsAmbientMode(false);
-        mScrimController.transitionTo(ScrimState.AOD);
-        mScrimController.finishAnimationsImmediately();
-        mScrimController.setPulseReason(DozeLog.PULSE_REASON_NOTIFICATION);
-        mScrimController.transitionTo(ScrimState.PULSING);
-        mScrimController.finishAnimationsImmediately();
-        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_OPAQUE);
-        assertScrimTint(mScrimBehind, true);
-    }
-
-    @Test
-    public void testWillHidePulsingWallpaper_whenDocking() {
-        mScrimController.setWallpaperSupportsAmbientMode(false);
-        mScrimController.transitionTo(ScrimState.AOD);
-        mScrimController.finishAnimationsImmediately();
-        mScrimController.setPulseReason(DozeLog.PULSE_REASON_DOCKING);
-        mScrimController.transitionTo(ScrimState.PULSING);
-        mScrimController.finishAnimationsImmediately();
-        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_OPAQUE);
-        assertScrimTint(mScrimBehind, true);
     }
 
     @Test

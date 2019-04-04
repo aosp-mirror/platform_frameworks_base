@@ -536,6 +536,19 @@ public class ApplicationPackageManager extends PackageManager {
         }
     }
 
+    @NonNull
+    @Override
+    public List<SharedLibraryInfo> getDeclaredSharedLibraries(@NonNull String packageName,
+            @InstallFlags int flags) {
+        try {
+            ParceledListSlice<SharedLibraryInfo> sharedLibraries = mPM.getDeclaredSharedLibraries(
+                    packageName, flags, mContext.getUserId());
+            return sharedLibraries != null ? sharedLibraries.getList() : Collections.emptyList();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     /** @hide */
     @Override
     public @NonNull String getServicesSystemSharedLibraryPackageName() {
@@ -3030,6 +3043,15 @@ public class ApplicationPackageManager extends PackageManager {
     public String getSystemTextClassifierPackageName() {
         try {
             return mPM.getSystemTextClassifierPackageName();
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    @Override
+    public String getAttentionServicePackageName() {
+        try {
+            return mPM.getAttentionServicePackageName();
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }

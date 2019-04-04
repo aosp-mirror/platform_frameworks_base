@@ -42,6 +42,7 @@ import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
+import android.service.notification.Adjustment;
 import android.service.notification.Condition;
 import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenModeConfig;
@@ -314,7 +315,8 @@ public class NotificationManager {
      * This tag should contain a localized name of the type of the zen rule provided by the
      * activity.
      */
-    public static final String META_DATA_AUTOMATIC_RULE_TYPE = "android.app.automatic.ruleType";
+    public static final String META_DATA_AUTOMATIC_RULE_TYPE =
+            "android.service.zen.automatic.ruleType";
 
     /**
      * An optional {@code meta-data} tag for activities that handle
@@ -324,7 +326,7 @@ public class NotificationManager {
      * can be created for this rule type. Omit or enter a value <= 0 to allow unlimited instances.
      */
     public static final String META_DATA_RULE_INSTANCE_LIMIT =
-            "android.app.zen.automatic.ruleInstanceLimit";
+            "android.service.zen.automatic.ruleInstanceLimit";
 
     /** Value signifying that the user has not expressed a per-app visibility override value.
      * @hide */
@@ -715,12 +717,16 @@ public class NotificationManager {
     /**
      * Returns the notification channel settings for a given channel id.
      *
-     * The channel must belong to your package, or it will not be returned.
+     * <p>The channel must belong to your package, or to a package you are an approved notification
+     * delegate for (see {@link #canNotifyAsPackage(String)}), or it will not be returned. To query
+     * a channel as a notification delegate, call this method from a context created for that
+     * package (see {@link Context#createPackageContext(String, int)}).</p>
      */
     public NotificationChannel getNotificationChannel(String channelId) {
         INotificationManager service = getService();
         try {
-            return service.getNotificationChannel(mContext.getPackageName(), channelId);
+            return service.getNotificationChannel(mContext.getOpPackageName(),
+                    mContext.getUserId(), mContext.getPackageName(), channelId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -728,11 +734,17 @@ public class NotificationManager {
 
     /**
      * Returns all notification channels belonging to the calling package.
+     *
+     * <p>Approved notification delegates (see {@link #canNotifyAsPackage(String)}) can query
+     * notification channels belonging to packages they are the delegate for. To do so, call this
+     * method from a context created for that package (see
+     * {@link Context#createPackageContext(String, int)}).</p>
      */
     public List<NotificationChannel> getNotificationChannels() {
         INotificationManager service = getService();
         try {
-            return service.getNotificationChannels(mContext.getPackageName()).getList();
+            return service.getNotificationChannels(mContext.getOpPackageName(),
+                    mContext.getPackageName(), mContext.getUserId()).getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1177,6 +1189,25 @@ public class NotificationManager {
         INotificationManager service = getService();
         try {
             return service.shouldHideSilentStatusIcons(mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the list of {@link android.service.notification.Adjustment adjustment keys} that can
+     * be modified by the current {@link android.service.notification.NotificationAssistantService}.
+     *
+     * <p>Only callable by the current
+     * {@link android.service.notification.NotificationAssistantService}.
+     * See {@link #isNotificationAssistantAccessGranted(ComponentName)}</p>
+     * @hide
+     */
+    @SystemApi
+    public @NonNull @Adjustment.Keys List<String> getAllowedAssistantCapabilities() {
+        INotificationManager service = getService();
+        try {
+            return service.getAllowedAssistantCapabilities(mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

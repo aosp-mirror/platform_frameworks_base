@@ -1150,16 +1150,6 @@ public class SystemConfig {
                 XmlUtils.skipCurrentTag(parser);
             }
         }
-        // If the storage model feature flag is disabled, we need to fiddle
-        // around with permission definitions to return us to pre-Q behavior.
-        // STOPSHIP(b/112545973): remove once feature enabled by default
-        if (!StorageManager.hasIsolatedStorage()) {
-            if (newPermissions.contains(android.Manifest.permission.READ_MEDIA_AUDIO) ||
-                    newPermissions.contains(android.Manifest.permission.READ_MEDIA_VIDEO) ||
-                    newPermissions.contains(android.Manifest.permission.READ_MEDIA_IMAGES)) {
-                return;
-            }
-        }
         if (!newPermissions.isEmpty()) {
             mSplitPermissions.add(new SplitPermissionInfo(splitPerm, newPermissions, targetSdk));
         }

@@ -242,27 +242,6 @@ interface INetworkManagementService
     void tetherLimitReached(ITetheringStatsProvider provider);
 
     /**
-     ** PPPD
-     **/
-
-    /**
-     * Returns the list of currently known TTY devices on the system
-     */
-    String[] listTtys();
-
-    /**
-     * Attaches a PPP server daemon to the specified TTY with the specified
-     * local/remote addresses.
-     */
-    void attachPppd(String tty, String localAddr, String remoteAddr, String dns1Addr,
-            String dns2Addr);
-
-    /**
-     * Detaches a PPP server daemon from the specified TTY.
-     */
-    void detachPppd(String tty);
-
-    /**
      ** DATA USAGE RELATED
      **/
 
@@ -351,12 +330,6 @@ interface INetworkManagementService
      */
     void removeIdleTimer(String iface);
 
-    /**
-     * Configure name servers, search paths, and resolver parameters for the given network.
-     */
-    void setDnsConfigurationForNetwork(int netId, in String[] servers, in String[] domains,
-            in int[] params, String tlsHostname, in String[] tlsServers);
-
     void setFirewallEnabled(boolean enabled);
     boolean isFirewallEnabled();
     void setFirewallInterfaceRule(String iface, boolean allow);
@@ -400,11 +373,6 @@ interface INetworkManagementService
      * Setup a new VPN.
      */
     void createVirtualNetwork(int netId, boolean secure);
-
-    /**
-     * Remove a network.
-     */
-    void removeNetwork(int netId);
 
     /**
      * Add an interface to a network.

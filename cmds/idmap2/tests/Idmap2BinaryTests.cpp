@@ -100,13 +100,12 @@ TEST_F(Idmap2BinaryTests, Create) {
   struct stat st;
   ASSERT_EQ(stat(GetIdmapPath().c_str(), &st), 0);
 
-  std::stringstream error;
   std::ifstream fin(GetIdmapPath());
-  std::unique_ptr<const Idmap> idmap = Idmap::FromBinaryStream(fin, error);
+  const auto idmap = Idmap::FromBinaryStream(fin);
   fin.close();
 
-  ASSERT_THAT(idmap, NotNull());
-  ASSERT_IDMAP(*idmap, GetTargetApkPath(), GetOverlayApkPath());
+  ASSERT_TRUE(idmap);
+  ASSERT_IDMAP(**idmap, GetTargetApkPath(), GetOverlayApkPath());
 
   unlink(GetIdmapPath().c_str());
 }
@@ -193,24 +192,23 @@ TEST_F(Idmap2BinaryTests, Scan) {
   expected << idmap_static_2_path << std::endl;
   ASSERT_EQ(result->stdout, expected.str());
 
-  std::stringstream error;
   auto idmap_static_no_name_raw_string = utils::ReadFile(idmap_static_no_name_path);
   auto idmap_static_no_name_raw_stream = std::istringstream(*idmap_static_no_name_raw_string);
-  auto idmap_static_no_name = Idmap::FromBinaryStream(idmap_static_no_name_raw_stream, error);
-  ASSERT_THAT(idmap_static_no_name, NotNull());
-  ASSERT_IDMAP(*idmap_static_no_name, GetTargetApkPath(), overlay_static_no_name_apk_path);
+  auto idmap_static_no_name = Idmap::FromBinaryStream(idmap_static_no_name_raw_stream);
+  ASSERT_TRUE(idmap_static_no_name);
+  ASSERT_IDMAP(**idmap_static_no_name, GetTargetApkPath(), overlay_static_no_name_apk_path);
 
   auto idmap_static_1_raw_string = utils::ReadFile(idmap_static_1_path);
   auto idmap_static_1_raw_stream = std::istringstream(*idmap_static_1_raw_string);
-  auto idmap_static_1 = Idmap::FromBinaryStream(idmap_static_1_raw_stream, error);
-  ASSERT_THAT(idmap_static_1, NotNull());
-  ASSERT_IDMAP(*idmap_static_1, GetTargetApkPath(), overlay_static_1_apk_path);
+  auto idmap_static_1 = Idmap::FromBinaryStream(idmap_static_1_raw_stream);
+  ASSERT_TRUE(idmap_static_1);
+  ASSERT_IDMAP(**idmap_static_1, GetTargetApkPath(), overlay_static_1_apk_path);
 
   auto idmap_static_2_raw_string = utils::ReadFile(idmap_static_2_path);
   auto idmap_static_2_raw_stream = std::istringstream(*idmap_static_2_raw_string);
-  auto idmap_static_2 = Idmap::FromBinaryStream(idmap_static_2_raw_stream, error);
-  ASSERT_THAT(idmap_static_2, NotNull());
-  ASSERT_IDMAP(*idmap_static_2, GetTargetApkPath(), overlay_static_2_apk_path);
+  auto idmap_static_2 = Idmap::FromBinaryStream(idmap_static_2_raw_stream);
+  ASSERT_TRUE(idmap_static_2);
+  ASSERT_IDMAP(**idmap_static_2, GetTargetApkPath(), overlay_static_2_apk_path);
 
   unlink(idmap_static_no_name_path.c_str());
   unlink(idmap_static_2_path.c_str());

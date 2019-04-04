@@ -19,7 +19,8 @@ import android.testing.LeakCheck;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.Callback;
 
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FakeCastController extends BaseLeakChecker<Callback> implements CastController {
     public FakeCastController(LeakCheck test) {
@@ -37,8 +38,8 @@ public class FakeCastController extends BaseLeakChecker<Callback> implements Cas
     }
 
     @Override
-    public Set<CastDevice> getCastDevices() {
-        return null;
+    public List<CastDevice> getCastDevices() {
+        return new ArrayList<>();
     }
 
     @Override

@@ -155,8 +155,9 @@ public class DependencyProvider {
 
     @Singleton
     @Provides
-    public NightDisplayListener provideNightDisplayListener(Context context) {
-        return new NightDisplayListener(context);
+    public NightDisplayListener provideNightDisplayListener(Context context,
+            @Named(BG_HANDLER_NAME) Handler bgHandler) {
+        return new NightDisplayListener(context, bgHandler);
     }
 
     @Singleton

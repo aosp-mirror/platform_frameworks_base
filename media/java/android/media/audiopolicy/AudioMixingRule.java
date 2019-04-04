@@ -16,6 +16,7 @@
 
 package android.media.audiopolicy;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.media.AudioAttributes;
@@ -43,9 +44,11 @@ import java.util.Objects;
 @SystemApi
 public class AudioMixingRule {
 
-    private AudioMixingRule(int mixType, ArrayList<AudioMixMatchCriterion> criteria) {
+    private AudioMixingRule(int mixType, ArrayList<AudioMixMatchCriterion> criteria,
+                            boolean allowPrivilegedPlaybackCapture) {
         mCriteria = criteria;
         mTargetMixType = mixType;
+        mAllowPrivilegedPlaybackCapture = allowPrivilegedPlaybackCapture;
     }
 
     /**
@@ -161,6 +164,13 @@ public class AudioMixingRule {
     @UnsupportedAppUsage
     private final ArrayList<AudioMixMatchCriterion> mCriteria;
     ArrayList<AudioMixMatchCriterion> getCriteria() { return mCriteria; }
+    @UnsupportedAppUsage
+    private boolean mAllowPrivilegedPlaybackCapture = false;
+
+    /** @hide */
+    public boolean allowPrivilegedPlaybackCapture() {
+        return mAllowPrivilegedPlaybackCapture;
+    }
 
     /** @hide */
     @Override
@@ -170,12 +180,13 @@ public class AudioMixingRule {
 
         final AudioMixingRule that = (AudioMixingRule) o;
         return (this.mTargetMixType == that.mTargetMixType)
-                && (areCriteriaEquivalent(this.mCriteria, that.mCriteria));
+                && (areCriteriaEquivalent(this.mCriteria, that.mCriteria)
+                && this.mAllowPrivilegedPlaybackCapture == that.mAllowPrivilegedPlaybackCapture);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mTargetMixType, mCriteria);
+        return Objects.hash(mTargetMixType, mCriteria, mAllowPrivilegedPlaybackCapture);
     }
 
     private static boolean isValidSystemApiRule(int rule) {
@@ -239,6 +250,7 @@ public class AudioMixingRule {
     public static class Builder {
         private ArrayList<AudioMixMatchCriterion> mCriteria;
         private int mTargetMixType = AudioMix.MIX_TYPE_INVALID;
+        private boolean mAllowPrivilegedPlaybackCapture = false;
 
         /**
          * Constructs a new Builder with no rules.
@@ -343,6 +355,21 @@ public class AudioMixingRule {
         }
 
         /**
+         * Set if the audio of app that opted out of audio playback capture should be captured.
+         *
+         * The permission {@link CAPTURE_AUDIO_OUTPUT} or {@link CAPTURE_MEDIA_OUTPUT} is needed
+         * to ignore the opt-out.
+         *
+         * Only affects LOOPBACK|RENDER mix.
+         *
+         * @return the same Builder instance.
+         */
+        public @NonNull Builder allowPrivilegedPlaybackCapture(boolean allow) {
+            mAllowPrivilegedPlaybackCapture = allow;
+            return this;
+        }
+
+        /**
          * Add or exclude a rule for the selection of which streams are mixed together.
          * Does error checking on the parameters.
          * @param rule
@@ -409,6 +436,10 @@ public class AudioMixingRule {
                 final int match_rule = rule & ~RULE_EXCLUSION_MASK;
                 while (crIterator.hasNext()) {
                     final AudioMixMatchCriterion criterion = crIterator.next();
+
+                    if ((criterion.mRule & ~RULE_EXCLUSION_MASK) != match_rule) {
+                        continue; // The two rules are not of the same type
+                    }
                     switch (match_rule) {
                         case RULE_MATCH_ATTRIBUTE_USAGE:
                             // "usage"-based rule
@@ -503,7 +534,7 @@ public class AudioMixingRule {
          * @return a new {@link AudioMixingRule} object
          */
         public AudioMixingRule build() {
-            return new AudioMixingRule(mTargetMixType, mCriteria);
+            return new AudioMixingRule(mTargetMixType, mCriteria, mAllowPrivilegedPlaybackCapture);
         }
     }
 }

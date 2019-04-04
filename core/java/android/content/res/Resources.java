@@ -1721,8 +1721,6 @@ public class Resources {
          * Rebases the theme against the parent Resource object's current
          * configuration by re-applying the styles passed to
          * {@link #applyStyle(int, boolean)}.
-         *
-         * @hide
          */
         public void rebase() {
             mThemeImpl.rebase();

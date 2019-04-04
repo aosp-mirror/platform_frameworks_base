@@ -17,6 +17,7 @@
 package android.net;
 
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.net.NetworkCapabilities.NetCapability;
@@ -343,11 +344,15 @@ public class NetworkRequest implements Parcelable {
          * current value. A value of {@code SIGNAL_STRENGTH_UNSPECIFIED} means no value when
          * received and has no effect when requesting a callback.
          *
+         * <p>This method requires the caller to hold the
+         * {@link android.Manifest.permission#NETWORK_SIGNAL_STRENGTH_WAKEUP} permission
+         *
          * @param signalStrength the bearer-specific signal strength.
          * @hide
          */
         @SystemApi
-        public Builder setSignalStrength(int signalStrength) {
+        @RequiresPermission(android.Manifest.permission.NETWORK_SIGNAL_STRENGTH_WAKEUP)
+        public @NonNull Builder setSignalStrength(int signalStrength) {
             mNetworkCapabilities.setSignalStrength(signalStrength);
             return this;
         }

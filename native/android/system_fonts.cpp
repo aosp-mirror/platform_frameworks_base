@@ -16,6 +16,8 @@
 
 #include <jni.h>
 
+#include <android/font.h>
+#include <android/font_matcher.h>
 #include <android/system_fonts.h>
 
 #include <memory>
@@ -53,7 +55,7 @@ struct ASystemFontIterator {
     XmlDocUniquePtr mCustomizationXmlDoc;
 };
 
-struct ASystemFont {
+struct AFont {
     std::string mFilePath;
     std::unique_ptr<std::string> mLocale;
     uint16_t mWeight;
@@ -61,6 +63,19 @@ struct ASystemFont {
     uint32_t mCollectionIndex;
     std::vector<std::pair<uint32_t, float>> mAxes;
 };
+
+struct AFontMatcher {
+    minikin::FontStyle mFontStyle;
+    uint32_t mLocaleListId = 0;  // 0 is reserved for empty locale ID.
+    bool mFamilyVariant = AFAMILY_VARIANT_DEFAULT;
+};
+
+static_assert(static_cast<uint32_t>(AFAMILY_VARIANT_DEFAULT) ==
+              static_cast<uint32_t>(minikin::FamilyVariant::DEFAULT));
+static_assert(static_cast<uint32_t>(AFAMILY_VARIANT_COMPACT) ==
+              static_cast<uint32_t>(minikin::FamilyVariant::COMPACT));
+static_assert(static_cast<uint32_t>(AFAMILY_VARIANT_ELEGANT) ==
+              static_cast<uint32_t>(minikin::FamilyVariant::ELEGANT));
 
 namespace {
 
@@ -101,7 +116,7 @@ xmlNode* nextSibling(xmlNode* node, const xmlChar* tag) {
     return nullptr;
 }
 
-void copyFont(const XmlDocUniquePtr& xmlDoc, xmlNode* fontNode, ASystemFont* out,
+void copyFont(const XmlDocUniquePtr& xmlDoc, xmlNode* fontNode, AFont* out,
               const std::string& pathPrefix) {
     const xmlChar* LOCALE_ATTR_NAME = BAD_CAST("lang");
     XmlCharUniquePtr filePathStr(
@@ -197,24 +212,48 @@ void ASystemFontIterator_close(ASystemFontIterator* ite) {
     delete ite;
 }
 
-ASystemFont* ASystemFont_matchFamilyStyleCharacter(
-        const char* _Nonnull familyName,
+AFontMatcher* _Nonnull AFontMatcher_create() {
+    return new AFontMatcher();
+}
+
+void AFontMatcher_destroy(AFontMatcher* matcher) {
+    delete matcher;
+}
+
+void AFontMatcher_setStyle(
+        AFontMatcher* _Nonnull matcher,
         uint16_t weight,
-        bool italic,
-        const char* _Nonnull languageTags,
+        bool italic) {
+    matcher->mFontStyle = minikin::FontStyle(
+            weight, static_cast<minikin::FontStyle::Slant>(italic));
+}
+
+void AFontMatcher_setLocales(
+        AFontMatcher* _Nonnull matcher,
+        const char* _Nonnull languageTags) {
+    matcher->mLocaleListId = minikin::registerLocaleList(languageTags);
+}
+
+void AFontMatcher_setFamilyVariant(AFontMatcher* _Nonnull matcher, uint32_t familyVariant) {
+    matcher->mFamilyVariant = familyVariant;
+}
+
+AFont* _Nonnull AFontMatcher_match(
+        const AFontMatcher* _Nonnull matcher,
+        const char* _Nonnull familyName,
         const uint16_t* _Nonnull text,
-        uint32_t textLength,
+        const uint32_t textLength,
         uint32_t* _Nullable runLength) {
     std::shared_ptr<minikin::FontCollection> fc =
             minikin::SystemFonts::findFontCollection(familyName);
-    std::vector<minikin::FontCollection::Run> runs =
-            fc->itemize(minikin::U16StringPiece(text, textLength),
-                        minikin::FontStyle(weight, static_cast<minikin::FontStyle::Slant>(italic)),
-                        minikin::registerLocaleList(languageTags),
-                        minikin::FamilyVariant::DEFAULT);
+    std::vector<minikin::FontCollection::Run> runs = fc->itemize(
+                minikin::U16StringPiece(text, textLength),
+                matcher->mFontStyle,
+                matcher->mLocaleListId,
+                static_cast<minikin::FamilyVariant>(matcher->mFamilyVariant));
 
     const minikin::Font* font = runs[0].fakedFont.font;
-    std::unique_ptr<ASystemFont> result = std::make_unique<ASystemFont>();
+    std::unique_ptr<AFont> result = std::make_unique<AFont>();
     const android::MinikinFontSkia* minikinFontSkia =
             reinterpret_cast<android::MinikinFontSkia*>(font->typeface().get());
     result->mFilePath = minikinFontSkia->getFilePath();
@@ -253,7 +292,7 @@ xmlNode* findNextFontNode(const XmlDocUniquePtr& xmlDoc, xmlNode* fontNode) {
     }
 }
 
-ASystemFont* ASystemFontIterator_next(ASystemFontIterator* ite) {
+AFont* ASystemFontIterator_next(ASystemFontIterator* ite) {
     LOG_ALWAYS_FATAL_IF(ite == nullptr, "nullptr has passed as iterator argument");
     if (ite->mXmlDoc) {
         ite->mFontNode = findNextFontNode(ite->mXmlDoc, ite->mFontNode);
@@ -262,7 +301,7 @@ ASystemFont* ASystemFontIterator_next(ASystemFontIterator* ite) {
             ite->mXmlDoc.reset();
             ite->mFontNode = nullptr;
         } else {
-            std::unique_ptr<ASystemFont> font = std::make_unique<ASystemFont>();
+            std::unique_ptr<AFont> font = std::make_unique<AFont>();
             copyFont(ite->mXmlDoc, ite->mFontNode, font.get(), "/system/fonts/");
             if (!isFontFileAvailable(font->mFilePath)) {
                 return ASystemFontIterator_next(ite);
@@ -279,7 +318,7 @@ ASystemFont* ASystemFontIterator_next(ASystemFontIterator* ite) {
             ite->mFontNode = nullptr;
             return nullptr;
         } else {
-            std::unique_ptr<ASystemFont> font = std::make_unique<ASystemFont>();
+            std::unique_ptr<AFont> font = std::make_unique<AFont>();
             copyFont(ite->mCustomizationXmlDoc, ite->mFontNode, font.get(), "/product/fonts/");
             if (!isFontFileAvailable(font->mFilePath)) {
                 return ASystemFontIterator_next(ite);
@@ -290,48 +329,48 @@ ASystemFont* ASystemFontIterator_next(ASystemFontIterator* ite) {
     return nullptr;
 }
 
-void ASystemFont_close(ASystemFont* font) {
+void AFont_close(AFont* font) {
     delete font;
 }
 
-const char* ASystemFont_getFontFilePath(const ASystemFont* font) {
+const char* AFont_getFontFilePath(const AFont* font) {
     LOG_ALWAYS_FATAL_IF(font == nullptr, "nullptr has passed as font argument");
     return font->mFilePath.c_str();
 }
 
-uint16_t ASystemFont_getWeight(const ASystemFont* font) {
+uint16_t AFont_getWeight(const AFont* font) {
     LOG_ALWAYS_FATAL_IF(font == nullptr, "nullptr has passed as font argument");
     return font->mWeight;
 }
 
-bool ASystemFont_isItalic(const ASystemFont* font) {
+bool AFont_isItalic(const AFont* font) {
     LOG_ALWAYS_FATAL_IF(font == nullptr, "nullptr has passed as font argument");
     return font->mItalic;
 }
 
-const char* ASystemFont_getLocale(const ASystemFont* font) {
+const char* AFont_getLocale(const AFont* font) {
     LOG_ALWAYS_FATAL_IF(font == nullptr, "nullptr has passed to font argument");
     return font->mLocale ? nullptr : font->mLocale->c_str();
 }
 
-size_t ASystemFont_getCollectionIndex(const ASystemFont* font) {
+size_t AFont_getCollectionIndex(const AFont* font) {
     LOG_ALWAYS_FATAL_IF(font == nullptr, "nullptr has passed to font argument");
     return font->mCollectionIndex;
 }
 
-size_t ASystemFont_getAxisCount(const ASystemFont* font) {
+size_t AFont_getAxisCount(const AFont* font) {
     LOG_ALWAYS_FATAL_IF(font == nullptr, "nullptr has passed to font argument");
     return font->mAxes.size();
 }
 
-uint32_t ASystemFont_getAxisTag(const ASystemFont* font, uint32_t axisIndex) {
+uint32_t AFont_getAxisTag(const AFont* font, uint32_t axisIndex) {
     LOG_ALWAYS_FATAL_IF(font == nullptr, "nullptr has passed to font argument");
     LOG_ALWAYS_FATAL_IF(axisIndex >= font->mAxes.size(),
                         "given axis index is out of bounds. (< %zd", font->mAxes.size());
     return font->mAxes[axisIndex].first;
 }
 
-float ASystemFont_getAxisValue(const ASystemFont* font, uint32_t axisIndex) {
+float AFont_getAxisValue(const AFont* font, uint32_t axisIndex) {
     LOG_ALWAYS_FATAL_IF(font == nullptr, "nullptr has passed to font argument");
     LOG_ALWAYS_FATAL_IF(axisIndex >= font->mAxes.size(),
                         "given axis index is out of bounds. (< %zd", font->mAxes.size());

@@ -364,7 +364,7 @@ public abstract class ActivityTaskManagerInternal {
      *  - Use the secondary home defined in the config.
      */
     public abstract boolean startHomeOnDisplay(int userId, String reason, int displayId,
-            boolean fromHomeKey);
+            boolean allowInstrumenting, boolean fromHomeKey);
     /** Start home activities on all displays that support system decorations. */
     public abstract boolean startHomeOnAllDisplays(int userId, String reason);
     /** @return true if the given process is the factory test process. */
@@ -510,4 +510,7 @@ public abstract class ActivityTaskManagerInternal {
      * Called by DevicePolicyManagerService to set the package name of the device owner.
      */
     public abstract void setDeviceOwnerPackageName(String deviceOwnerPkg);
+
+    /** Set all associated companion app that belongs to an userId. */
+    public abstract void setCompanionAppPackages(int userId, Set<String> companionAppPackages);
 }

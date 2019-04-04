@@ -17,10 +17,10 @@
 package android.view;
 
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
-import static android.view.ViewRootImpl.NEW_INSETS_MODE_IME;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_NONE;
-import static android.view.WindowInsets.Type.IME;
+import static android.view.WindowInsets.Type.MANDATORY_SYSTEM_GESTURES;
 import static android.view.WindowInsets.Type.SIZE;
+import static android.view.WindowInsets.Type.SYSTEM_GESTURES;
 import static android.view.WindowInsets.Type.indexOf;
 
 import android.annotation.IntDef;
@@ -31,7 +31,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetType;
@@ -40,7 +39,6 @@ import android.view.WindowManager.LayoutParams;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
 import java.util.Objects;
 
 /**
@@ -60,6 +58,12 @@ public class InsetsState implements Parcelable {
             TYPE_SIDE_BAR_1,
             TYPE_SIDE_BAR_2,
             TYPE_SIDE_BAR_3,
+            TYPE_TOP_GESTURES,
+            TYPE_BOTTOM_GESTURES,
+            TYPE_LEFT_GESTURES,
+            TYPE_RIGHT_GESTURES,
+            TYPE_TOP_TAPPABLE_ELEMENT,
+            TYPE_BOTTOM_TAPPABLE_ELEMENT,
             TYPE_IME
     })
     public @interface InternalInsetType {}
@@ -78,8 +82,16 @@ public class InsetsState implements Parcelable {
     public static final int TYPE_SIDE_BAR_2 = 2;
     public static final int TYPE_SIDE_BAR_3 = 3;
 
+    public static final int TYPE_TOP_GESTURES = 4;
+    public static final int TYPE_BOTTOM_GESTURES = 5;
+    public static final int TYPE_LEFT_GESTURES = 6;
+    public static final int TYPE_RIGHT_GESTURES = 7;
+    public static final int TYPE_TOP_TAPPABLE_ELEMENT = 8;
+    public static final int TYPE_BOTTOM_TAPPABLE_ELEMENT = 9;
+
     /** Input method window. */
-    public static final int TYPE_IME = 4;
+    public static final int TYPE_IME = 10;
+
     static final int LAST_TYPE = TYPE_IME;
 
     // Derived types
@@ -130,7 +142,7 @@ public class InsetsState implements Parcelable {
      * @return The calculated insets.
      */
     public WindowInsets calculateInsets(Rect frame, boolean isScreenRound,
-            boolean alwaysConsumeNavBar, DisplayCutout cutout,
+            boolean alwaysConsumeSystemBars, DisplayCutout cutout,
             @Nullable Rect legacyContentInsets, @Nullable Rect legacyStableInsets,
             int legacySoftInputMode, @Nullable @InsetSide SparseIntArray typeSideMap) {
         Insets[] typeInsetsMap = new Insets[Type.SIZE];
@@ -142,17 +154,6 @@ public class InsetsState implements Parcelable {
                 && legacyContentInsets != null && legacyStableInsets != null) {
             WindowInsets.assignCompatInsets(typeInsetsMap, legacyContentInsets);
             WindowInsets.assignCompatInsets(typeMaxInsetsMap, legacyStableInsets);
-
-            // TODO: set system gesture insets based on actual system gesture area.
-            typeInsetsMap[Type.indexOf(Type.systemGestures())] = Insets.of(legacyContentInsets);
-            typeInsetsMap[Type.indexOf(Type.mandatorySystemGestures())] =
-                    Insets.of(legacyContentInsets);
-            typeInsetsMap[Type.indexOf(Type.tappableElement())] = Insets.of(legacyContentInsets);
-
-            typeMaxInsetsMap[Type.indexOf(Type.systemGestures())] = Insets.of(legacyStableInsets);
-            typeMaxInsetsMap[Type.indexOf(Type.mandatorySystemGestures())] =
-                    Insets.of(legacyStableInsets);
-            typeMaxInsetsMap[Type.indexOf(Type.tappableElement())] = Insets.of(legacyStableInsets);
         }
         for (int type = FIRST_TYPE; type <= LAST_TYPE; type++) {
             InsetsSource source = mSources.get(type);
@@ -164,7 +165,9 @@ public class InsetsState implements Parcelable {
                     && (type == TYPE_TOP_BAR || type == TYPE_NAVIGATION_BAR);
             boolean skipIme = source.getType() == TYPE_IME
                     && (legacySoftInputMode & LayoutParams.SOFT_INPUT_ADJUST_RESIZE) == 0;
-            if (skipSystemBars || skipIme) {
+            boolean skipLegacyTypes = ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_NONE
+                    && (toPublicType(type) & Type.compatSystemInsets()) != 0;
+            if (skipSystemBars || skipIme || skipLegacyTypes) {
                 typeVisibilityMap[indexOf(toPublicType(type))] = source.isVisible();
                 continue;
             }
@@ -180,7 +183,7 @@ public class InsetsState implements Parcelable {
             }
         }
         return new WindowInsets(typeInsetsMap, typeMaxInsetsMap, typeVisibilityMap, isScreenRound,
-                alwaysConsumeNavBar, cutout);
+                alwaysConsumeSystemBars, cutout);
     }
 
     private void processSource(InsetsSource source, Rect relativeFrame, boolean ignoreVisibility,
@@ -188,7 +191,25 @@ public class InsetsState implements Parcelable {
             @Nullable boolean[] typeVisibilityMap) {
         Insets insets = source.calculateInsets(relativeFrame, ignoreVisibility);
 
-        int index = indexOf(toPublicType(source.getType()));
+        int type = toPublicType(source.getType());
+        processSourceAsPublicType(source, typeInsetsMap, typeSideMap, typeVisibilityMap,
+                insets, type);
+
+        if (type == MANDATORY_SYSTEM_GESTURES) {
+            // Mandatory system gestures are also system gestures.
+            // TODO: find a way to express this more generally. One option would be to define
+            //       Type.systemGestureInsets() as NORMAL | MANDATORY, but then we lose the
+            //       ability to set systemGestureInsets() independently from
+            //       mandatorySystemGestureInsets() in the Builder.
+            processSourceAsPublicType(source, typeInsetsMap, typeSideMap, typeVisibilityMap,
+                    insets, SYSTEM_GESTURES);
+        }
+    }
+
+    private void processSourceAsPublicType(InsetsSource source, Insets[] typeInsetsMap,
+            @InsetSide @Nullable SparseIntArray typeSideMap,
+            @Nullable boolean[] typeVisibilityMap, Insets insets, int type) {
+        int index = indexOf(type);
         Insets existing = typeInsetsMap[index];
         if (existing == null) {
             typeInsetsMap[index] = insets;
@@ -305,6 +326,15 @@ public class InsetsState implements Parcelable {
                 return Type.SIDE_BARS;
             case TYPE_IME:
                 return Type.IME;
+            case TYPE_TOP_GESTURES:
+            case TYPE_BOTTOM_GESTURES:
+                return Type.MANDATORY_SYSTEM_GESTURES;
+            case TYPE_LEFT_GESTURES:
+            case TYPE_RIGHT_GESTURES:
+                return Type.SYSTEM_GESTURES;
+            case TYPE_TOP_TAPPABLE_ELEMENT:
+            case TYPE_BOTTOM_TAPPABLE_ELEMENT:
+                return Type.TAPPABLE_ELEMENT;
             default:
                 throw new IllegalArgumentException("Unknown type: " + type);
         }
@@ -341,10 +371,20 @@ public class InsetsState implements Parcelable {
                 return "TYPE_SIDE_BAR_2";
             case TYPE_SIDE_BAR_3:
                 return "TYPE_SIDE_BAR_3";
-            case TYPE_IME:
-                return "TYPE_IME";
+            case TYPE_TOP_GESTURES:
+                return "TYPE_TOP_GESTURES";
+            case TYPE_BOTTOM_GESTURES:
+                return "TYPE_BOTTOM_GESTURES";
+            case TYPE_LEFT_GESTURES:
+                return "TYPE_LEFT_GESTURES";
+            case TYPE_RIGHT_GESTURES:
+                return "TYPE_RIGHT_GESTURES";
+            case TYPE_TOP_TAPPABLE_ELEMENT:
+                return "TYPE_TOP_TAPPABLE_ELEMENT";
+            case TYPE_BOTTOM_TAPPABLE_ELEMENT:
+                return "TYPE_BOTTOM_TAPPABLE_ELEMENT";
             default:
-                return "TYPE_UNKNOWN";
+                return "TYPE_UNKNOWN_" + type;
         }
     }
 

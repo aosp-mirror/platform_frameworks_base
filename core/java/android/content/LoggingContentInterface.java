@@ -48,37 +48,43 @@ public class LoggingContentInterface implements ContentInterface {
         this.delegate = delegate;
     }
 
-    private void log(String method, Object res, Object... args) {
-        // First, force-unparcel any bundles so we can log them
-        for (Object arg : args) {
-            if (arg instanceof Bundle) {
-                ((Bundle) arg).size();
+    private class Logger implements AutoCloseable {
+        private final StringBuilder sb = new StringBuilder();
+
+        public Logger(String method, Object... args) {
+            // First, force-unparcel any bundles so we can log them
+            for (Object arg : args) {
+                if (arg instanceof Bundle) {
+                    ((Bundle) arg).size();
+                }
+            }
+
+            sb.append("callingUid=").append(Binder.getCallingUid()).append(' ');
+            sb.append(method);
+            sb.append('(').append(deepToString(args)).append(')');
+        }
+
+        private String deepToString(Object value) {
+            if (value != null && value.getClass().isArray()) {
+                return Arrays.deepToString((Object[]) value);
+            } else {
+                return String.valueOf(value);
             }
         }
 
-        final StringBuilder sb = new StringBuilder();
-        sb.append("callingUid=").append(Binder.getCallingUid()).append(' ');
-        sb.append(method);
-        sb.append('(').append(deepToString(args)).append(')');
-        if (res instanceof Cursor) {
-            sb.append('\n');
-            DatabaseUtils.dumpCursor((Cursor) res, sb);
-        } else {
-            sb.append(" = ").append(deepToString(res));
+        public <T> T setResult(T res) {
+            if (res instanceof Cursor) {
+                sb.append('\n');
+                DatabaseUtils.dumpCursor((Cursor) res, sb);
+            } else {
+                sb.append(" = ").append(deepToString(res));
+            }
+            return res;
         }
 
-        if (res instanceof Exception) {
-            Log.e(tag, sb.toString());
-        } else {
+        @Override
+        public void close() {
             Log.v(tag, sb.toString());
-        }
-    }
-
-    private String deepToString(Object value) {
-        if (value != null && value.getClass().isArray()) {
-            return Arrays.deepToString((Object[]) value);
-        } else {
-            return String.valueOf(value);
         }
     }
 
@@ -86,153 +92,153 @@ public class LoggingContentInterface implements ContentInterface {
     public @Nullable Cursor query(@NonNull Uri uri, @Nullable String[] projection,
             @Nullable Bundle queryArgs, @Nullable CancellationSignal cancellationSignal)
             throws RemoteException {
-        try {
-            final Cursor res = delegate.query(uri, projection, queryArgs, cancellationSignal);
-            log("query", res, uri, projection, queryArgs, cancellationSignal);
-            return res;
-        } catch (Exception res) {
-            log("query", res, uri, projection, queryArgs, cancellationSignal);
-            throw res;
+        try (Logger l = new Logger("query", uri, projection, queryArgs, cancellationSignal)) {
+            try {
+                return l.setResult(delegate.query(uri, projection, queryArgs, cancellationSignal));
+            } catch (Exception res) {
+                l.setResult(res);
+                throw res;
+            }
         }
     }
 
     @Override
     public @Nullable String getType(@NonNull Uri uri) throws RemoteException {
-        try {
-            final String res = delegate.getType(uri);
-            log("getType", res, uri);
-            return res;
-        } catch (Exception res) {
-            log("getType", res, uri);
-            throw res;
+        try (Logger l = new Logger("getType", uri)) {
+            try {
+                return l.setResult(delegate.getType(uri));
+            } catch (Exception res) {
+                l.setResult(res);
+                throw res;
+            }
         }
     }
 
     @Override
     public @Nullable String[] getStreamTypes(@NonNull Uri uri, @NonNull String mimeTypeFilter)
             throws RemoteException {
-        try {
-            final String[] res = delegate.getStreamTypes(uri, mimeTypeFilter);
-            log("getStreamTypes", res, uri, mimeTypeFilter);
-            return res;
-        } catch (Exception res) {
-            log("getStreamTypes", res, uri, mimeTypeFilter);
-            throw res;
+        try (Logger l = new Logger("getStreamTypes", uri, mimeTypeFilter)) {
+            try {
+                return l.setResult(delegate.getStreamTypes(uri, mimeTypeFilter));
+            } catch (Exception res) {
+                l.setResult(res);
+                throw res;
+            }
         }
     }
 
     @Override
     public @Nullable Uri canonicalize(@NonNull Uri uri) throws RemoteException {
-        try {
-            final Uri res = delegate.canonicalize(uri);
-            log("canonicalize", res, uri);
-            return res;
-        } catch (Exception res) {
-            log("canonicalize", res, uri);
-            throw res;
+        try (Logger l = new Logger("canonicalize", uri)) {
+            try {
+                return l.setResult(delegate.canonicalize(uri));
+            } catch (Exception res) {
+                l.setResult(res);
+                throw res;
+            }
         }
     }
 
     @Override
     public @Nullable Uri uncanonicalize(@NonNull Uri uri) throws RemoteException {
-        try {
-            final Uri res = delegate.uncanonicalize(uri);
-            log("uncanonicalize", res, uri);
-            return res;
-        } catch (Exception res) {
-            log("uncanonicalize", res, uri);
-            throw res;
+        try (Logger l = new Logger("uncanonicalize", uri)) {
+            try {
+                return l.setResult(delegate.uncanonicalize(uri));
+            } catch (Exception res) {
+                l.setResult(res);
+                throw res;
+            }
         }
     }
 
     @Override
     public boolean refresh(@NonNull Uri uri, @Nullable Bundle args,
             @Nullable CancellationSignal cancellationSignal) throws RemoteException {
-        try {
-            final boolean res = delegate.refresh(uri, args, cancellationSignal);
-            log("refresh", res, uri, args, cancellationSignal);
-            return res;
-        } catch (Exception res) {
-            log("refresh", res, uri, args, cancellationSignal);
-            throw res;
+        try (Logger l = new Logger("refresh", uri, args, cancellationSignal)) {
+            try {
+                return l.setResult(delegate.refresh(uri, args, cancellationSignal));
+            } catch (Exception res) {
+                l.setResult(res);
+                throw res;
+            }
         }
     }
 
     @Override
     public @Nullable Uri insert(@NonNull Uri uri, @Nullable ContentValues initialValues)
             throws RemoteException {
-        try {
-            final Uri res = delegate.insert(uri, initialValues);
-            log("insert", res, uri, initialValues);
-            return res;
-        } catch (Exception res) {
-            log("insert", res, uri, initialValues);
-            throw res;
+        try (Logger l = new Logger("insert", uri, initialValues)) {
+            try {
+                return l.setResult(delegate.insert(uri, initialValues));
+            } catch (Exception res) {
+                l.setResult(res);
+                throw res;
+            }
         }
     }
 
     @Override
     public int bulkInsert(@NonNull Uri uri, @NonNull ContentValues[] initialValues)
             throws RemoteException {
-        try {
-            final int res = delegate.bulkInsert(uri, initialValues);
-            log("bulkInsert", res, uri, initialValues);
-            return res;
-        } catch (Exception res) {
-            log("bulkInsert", res, uri, initialValues);
-            throw res;
+        try (Logger l = new Logger("bulkInsert", uri, initialValues)) {
+            try {
+                return l.setResult(delegate.bulkInsert(uri, initialValues));
+            } catch (Exception res) {
+                l.setResult(res);
+                throw res;
+            }
         }
     }
 
     @Override
     public int delete(@NonNull Uri uri, @Nullable String selection,
             @Nullable String[] selectionArgs) throws RemoteException {
-        try {
-            final int res = delegate.delete(uri, selection, selectionArgs);
-            log("delete", res, uri, selection, selectionArgs);
-            return res;
-        } catch (Exception res) {
-            log("delete", res, uri, selection, selectionArgs);
-            throw res;
+        try (Logger l = new Logger("delete", uri, selection, selectionArgs)) {
+            try {
+                return l.setResult(delegate.delete(uri, selection, selectionArgs));
+            } catch (Exception res) {
+                l.setResult(res);
+                throw res;
+            }
         }
     }
 
     @Override
     public int update(@NonNull Uri uri, @Nullable ContentValues values, @Nullable String selection,
             @Nullable String[] selectionArgs) throws RemoteException {
-        try {
-            final int res = delegate.update(uri, values, selection, selectionArgs);
-            log("update", res, uri, values, selection, selectionArgs);
-            return res;
-        } catch (Exception res) {
-            log("update", res, uri, values, selection, selectionArgs);
-            throw res;
+        try (Logger l = new Logger("update", uri, values, selection, selectionArgs)) {
+            try {
+                return l.setResult(delegate.update(uri, values, selection, selectionArgs));
+            } catch (Exception res) {
+                l.setResult(res);
+                throw res;
+            }
         }
     }
 
     @Override
     public @Nullable ParcelFileDescriptor openFile(@NonNull Uri uri, @NonNull String mode,
             @Nullable CancellationSignal signal) throws RemoteException, FileNotFoundException {
-        try {
-            final ParcelFileDescriptor res = delegate.openFile(uri, mode, signal);
-            log("openFile", res, uri, mode, signal);
-            return res;
-        } catch (Exception res) {
-            log("openFile", res, uri, mode, signal);
-            throw res;
+        try (Logger l = new Logger("openFile", uri, mode, signal)) {
+            try {
+                return l.setResult(delegate.openFile(uri, mode, signal));
+            } catch (Exception res) {
+                l.setResult(res);
+                throw res;
+            }
         }
     }
 
     @Override
     public @Nullable AssetFileDescriptor openAssetFile(@NonNull Uri uri, @NonNull String mode,
             @Nullable CancellationSignal signal) throws RemoteException, FileNotFoundException {
-        try {
-            final AssetFileDescriptor res = delegate.openAssetFile(uri, mode, signal);
-            log("openAssetFile", res, uri, mode, signal);
-            return res;
-        } catch (Exception res) {
-            log("openAssetFile", res, uri, mode, signal);
-            throw res;
+        try (Logger l = new Logger("openAssetFile", uri, mode, signal)) {
+            try {
+                return l.setResult(delegate.openAssetFile(uri, mode, signal));
+            } catch (Exception res) {
+                l.setResult(res);
+                throw res;
+            }
         }
     }
 
@@ -240,13 +246,13 @@ public class LoggingContentInterface implements ContentInterface {
     public @Nullable AssetFileDescriptor openTypedAssetFile(@NonNull Uri uri,
             @NonNull String mimeTypeFilter, @Nullable Bundle opts,
             @Nullable CancellationSignal signal) throws RemoteException, FileNotFoundException {
-        try {
-            final AssetFileDescriptor res = delegate.openTypedAssetFile(uri, mimeTypeFilter, opts, signal);
-            log("openTypedAssetFile", res, uri, mimeTypeFilter, opts, signal);
-            return res;
-        } catch (Exception res) {
-            log("openTypedAssetFile", res, uri, mimeTypeFilter, opts, signal);
-            throw res;
+        try (Logger l = new Logger("openTypedAssetFile", uri, mimeTypeFilter, opts, signal)) {
+            try {
+                return l.setResult(delegate.openTypedAssetFile(uri, mimeTypeFilter, opts, signal));
+            } catch (Exception res) {
+                l.setResult(res);
+                throw res;
+            }
         }
     }
 
@@ -254,26 +260,26 @@ public class LoggingContentInterface implements ContentInterface {
     public @NonNull ContentProviderResult[] applyBatch(@NonNull String authority,
             @NonNull ArrayList<ContentProviderOperation> operations)
             throws RemoteException, OperationApplicationException {
-        try {
-            final ContentProviderResult[] res = delegate.applyBatch(authority, operations);
-            log("applyBatch", res, authority, operations);
-            return res;
-        } catch (Exception res) {
-            log("applyBatch", res, authority, operations);
-            throw res;
+        try (Logger l = new Logger("applyBatch", authority, operations)) {
+            try {
+                return l.setResult(delegate.applyBatch(authority, operations));
+            } catch (Exception res) {
+                l.setResult(res);
+                throw res;
+            }
         }
     }
 
     @Override
     public @Nullable Bundle call(@NonNull String authority, @NonNull String method,
             @Nullable String arg, @Nullable Bundle extras) throws RemoteException {
-        try {
-            final Bundle res = delegate.call(authority, method, arg, extras);
-            log("call", res, authority, method, arg, extras);
-            return res;
-        } catch (Exception res) {
-            log("call", res, authority, method, arg, extras);
-            throw res;
+        try (Logger l = new Logger("call", authority, method, arg, extras)) {
+            try {
+                return l.setResult(delegate.call(authority, method, arg, extras));
+            } catch (Exception res) {
+                l.setResult(res);
+                throw res;
+            }
         }
     }
 }

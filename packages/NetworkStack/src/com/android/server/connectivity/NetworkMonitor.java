@@ -78,11 +78,13 @@ import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.RingBufferIndices;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
+import com.android.networkstack.R;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -220,19 +222,31 @@ public class NetworkMonitor extends StateMachine {
      * Message to self indicating captive portal detection is completed.
      * obj = CaptivePortalProbeResult for detection result;
      */
-    public static final int CMD_PROBE_COMPLETE = 16;
+    private static final int CMD_PROBE_COMPLETE = 16;
 
     /**
      * ConnectivityService notifies NetworkMonitor of DNS query responses event.
      * arg1 = returncode in OnDnsEvent which indicates the response code for the DNS query.
      */
-    public static final int EVENT_DNS_NOTIFICATION = 17;
+    private static final int EVENT_DNS_NOTIFICATION = 17;
 
     /**
      * ConnectivityService notifies NetworkMonitor that the user accepts partial connectivity and
      * NetworkMonitor should ignore the https probe.
      */
-    public static final int EVENT_ACCEPT_PARTIAL_CONNECTIVITY = 18;
+    private static final int EVENT_ACCEPT_PARTIAL_CONNECTIVITY = 18;
+
+    /**
+     * ConnectivityService notifies NetworkMonitor of changed LinkProperties.
+     * obj = new LinkProperties.
+     */
+    private static final int EVENT_LINK_PROPERTIES_CHANGED = 19;
+
+    /**
+     * ConnectivityService notifies NetworkMonitor of changed NetworkCapabilities.
+     * obj = new NetworkCapabilities.
+     */
+    private static final int EVENT_NETWORK_CAPABILITIES_CHANGED = 20;
 
     // Start mReevaluateDelayMs at this value and double.
     private static final int INITIAL_REEVALUATE_DELAY_MS = 1000;
@@ -284,8 +298,6 @@ public class NetworkMonitor extends StateMachine {
     // Avoids surfacing "Sign in to network" notification.
     private boolean mDontDisplaySigninNotification = false;
 
-    private volatile boolean mSystemReady = false;
-
     private final State mDefaultState = new DefaultState();
     private final State mValidatedState = new ValidatedState();
     private final State mMaybeNotifyState = new MaybeNotifyState();
@@ -319,7 +331,8 @@ public class NetworkMonitor extends StateMachine {
     private final DnsStallDetector mDnsStallDetector;
     private long mLastProbeTime;
     // Set to true if data stall is suspected and reset to false after metrics are sent to statsd.
-    private boolean mCollectDataStallMetrics = false;
+    private boolean mCollectDataStallMetrics;
+    private boolean mAcceptPartialConnectivity;
 
     public NetworkMonitor(Context context, INetworkMonitorCallbacks cb, Network network,
             SharedLog validationLog) {
@@ -377,19 +390,18 @@ public class NetworkMonitor extends StateMachine {
         mDataStallValidDnsTimeThreshold = getDataStallValidDnsTimeThreshold();
         mDataStallEvaluationType = getDataStallEvalutionType();
 
-        // mLinkProperties and mNetworkCapbilities must never be null or we will NPE.
-        // Provide empty objects in case we are started and the network disconnects before
-        // we can ever fetch them.
-        // TODO: Delete ASAP.
+        // Provide empty LinkProperties and NetworkCapabilities to make sure they are never null,
+        // even before notifyNetworkConnected.
         mLinkProperties = new LinkProperties();
         mNetworkCapabilities = new NetworkCapabilities(null);
     }
 
     /**
-     * ConnectivityService notifies NetworkMonitor that the user accepts partial connectivity and
-     * NetworkMonitor should ignore the https probe.
+     * ConnectivityService notifies NetworkMonitor that the user already accepted partial
+     * connectivity previously, so NetworkMonitor can validate the network even if it has partial
+     * connectivity.
      */
-    public void notifyAcceptPartialConnectivity() {
+    public void setAcceptPartialConnectivity() {
         sendMessage(EVENT_ACCEPT_PARTIAL_CONNECTIVITY);
     }
 
@@ -420,19 +432,18 @@ public class NetworkMonitor extends StateMachine {
     }
 
     /**
-     * Send a notification to NetworkMonitor indicating that the system is ready.
-     */
-    public void notifySystemReady() {
-        // No need to run on the handler thread: mSystemReady is volatile and read only once on the
-        // isCaptivePortal() thread.
-        mSystemReady = true;
-    }
-
-    /**
      * Send a notification to NetworkMonitor indicating that the network is now connected.
      */
-    public void notifyNetworkConnected() {
-        sendMessage(CMD_NETWORK_CONNECTED);
+    public void notifyNetworkConnected(LinkProperties lp, NetworkCapabilities nc) {
+        sendMessage(CMD_NETWORK_CONNECTED, new Pair<>(
+                new LinkProperties(lp), new NetworkCapabilities(nc)));
+    }
+
+    private void updateConnectedNetworkAttributes(Message connectedMsg) {
+        final Pair<LinkProperties, NetworkCapabilities> attrs =
+                (Pair<LinkProperties, NetworkCapabilities>) connectedMsg.obj;
+        mLinkProperties = attrs.first;
+        mNetworkCapabilities = attrs.second;
     }
 
     /**
@@ -445,37 +456,15 @@ public class NetworkMonitor extends StateMachine {
     /**
      * Send a notification to NetworkMonitor indicating that link properties have changed.
      */
-    public void notifyLinkPropertiesChanged() {
-        getHandler().post(() -> {
-            updateLinkProperties();
-        });
-    }
-
-    private void updateLinkProperties() {
-        final LinkProperties lp = mCm.getLinkProperties(mNetwork);
-        // If null, we should soon get a message that the network was disconnected, and will stop.
-        if (lp != null) {
-            // TODO: send LinkProperties parceled in notifyLinkPropertiesChanged() and start().
-            mLinkProperties = lp;
-        }
+    public void notifyLinkPropertiesChanged(final LinkProperties lp) {
+        sendMessage(EVENT_LINK_PROPERTIES_CHANGED, new LinkProperties(lp));
     }
 
     /**
      * Send a notification to NetworkMonitor indicating that network capabilities have changed.
      */
-    public void notifyNetworkCapabilitiesChanged() {
-        getHandler().post(() -> {
-            updateNetworkCapabilities();
-        });
-    }
-
-    private void updateNetworkCapabilities() {
-        final NetworkCapabilities nc = mCm.getNetworkCapabilities(mNetwork);
-        // If null, we should soon get a message that the network was disconnected, and will stop.
-        if (nc != null) {
-            // TODO: send NetworkCapabilities parceled in notifyNetworkCapsChanged() and start().
-            mNetworkCapabilities = nc;
-        }
+    public void notifyNetworkCapabilitiesChanged(final NetworkCapabilities nc) {
+        sendMessage(EVENT_NETWORK_CAPABILITIES_CHANGED, new NetworkCapabilities(nc));
     }
 
     /**
@@ -544,16 +533,10 @@ public class NetworkMonitor extends StateMachine {
     // does not entail any real state (hence no enter() or exit() routines).
     private class DefaultState extends State {
         @Override
-        public void enter() {
-            // TODO: have those passed parceled in start() and remove this
-            updateLinkProperties();
-            updateNetworkCapabilities();
-        }
-
-        @Override
         public boolean processMessage(Message message) {
             switch (message.what) {
                 case CMD_NETWORK_CONNECTED:
+                    updateConnectedNetworkAttributes(message);
                     logNetworkEvent(NetworkEvent.NETWORK_CONNECTED);
                     transitionTo(mEvaluatingState);
                     return HANDLED;
@@ -651,9 +634,17 @@ public class NetworkMonitor extends StateMachine {
                 case EVENT_DNS_NOTIFICATION:
                     mDnsStallDetector.accumulateConsecutiveDnsTimeoutCount(message.arg1);
                     break;
+                // Set mAcceptPartialConnectivity to true and if network start evaluating or
+                // re-evaluating and get the result of partial connectivity, ProbingState will
+                // disable HTTPS probe and transition to EvaluatingPrivateDnsState.
                 case EVENT_ACCEPT_PARTIAL_CONNECTIVITY:
-                    mUseHttps = false;
-                    transitionTo(mEvaluatingPrivateDnsState);
+                    mAcceptPartialConnectivity = true;
+                    break;
+                case EVENT_LINK_PROPERTIES_CHANGED:
+                    mLinkProperties = (LinkProperties) message.obj;
+                    break;
+                case EVENT_NETWORK_CAPABILITIES_CHANGED:
+                    mNetworkCapabilities = (NetworkCapabilities) message.obj;
                     break;
                 default:
                     break;
@@ -679,6 +670,7 @@ public class NetworkMonitor extends StateMachine {
         public boolean processMessage(Message message) {
             switch (message.what) {
                 case CMD_NETWORK_CONNECTED:
+                    updateConnectedNetworkAttributes(message);
                     transitionTo(mValidatedState);
                     break;
                 case CMD_EVALUATE_PRIVATE_DNS:
@@ -849,6 +841,14 @@ public class NetworkMonitor extends StateMachine {
                     // ignore any re-evaluation requests. After, restart the
                     // evaluation process via EvaluatingState#enter.
                     return (mEvaluateAttempts < IGNORE_REEVALUATE_ATTEMPTS) ? HANDLED : NOT_HANDLED;
+                // Disable HTTPS probe and transition to EvaluatingPrivateDnsState because:
+                // 1. Network is connected and finish the network validation.
+                // 2. NetworkMonitor detects network is partial connectivity and user accepts it.
+                case EVENT_ACCEPT_PARTIAL_CONNECTIVITY:
+                    mAcceptPartialConnectivity = true;
+                    mUseHttps = false;
+                    transitionTo(mEvaluatingPrivateDnsState);
+                    return HANDLED;
                 default:
                     return NOT_HANDLED;
             }
@@ -1081,7 +1081,12 @@ public class NetworkMonitor extends StateMachine {
                         logNetworkEvent(NetworkEvent.NETWORK_PARTIAL_CONNECTIVITY);
                         notifyNetworkTested(NETWORK_TEST_RESULT_PARTIAL_CONNECTIVITY,
                                 probeResult.redirectUrl);
-                        transitionTo(mWaitingForNextProbeState);
+                        if (mAcceptPartialConnectivity) {
+                            mUseHttps = false;
+                            transitionTo(mEvaluatingPrivateDnsState);
+                        } else {
+                            transitionTo(mWaitingForNextProbeState);
+                        }
                     } else {
                         logNetworkEvent(NetworkEvent.NETWORK_VALIDATION_FAILED);
                         notifyNetworkTested(NETWORK_TEST_RESULT_INVALID, probeResult.redirectUrl);
@@ -1576,10 +1581,6 @@ public class NetworkMonitor extends StateMachine {
      */
     private void sendNetworkConditionsBroadcast(boolean responseReceived, boolean isCaptivePortal,
             long requestTimestampMs, long responseTimestampMs) {
-        if (!mSystemReady) {
-            return;
-        }
-
         Intent latencyBroadcast =
                 new Intent(NetworkMonitorUtils.ACTION_NETWORK_CONDITIONS_MEASURED);
         if (mNetworkCapabilities.hasTransport(TRANSPORT_WIFI)) {
@@ -1693,9 +1694,15 @@ public class NetworkMonitor extends StateMachine {
 
         /**
          * Get the captive portal server HTTP URL that is configured on the device.
+         *
+         * NetworkMonitor does not use {@link ConnectivityManager#getCaptivePortalServerUrl()} as
+         * it has its own updatable strategies to detect captive portals. The framework only advises
+         * on one URL that can be used, while  NetworkMonitor may implement more complex logic.
          */
         public String getCaptivePortalServerHttpUrl(Context context) {
-            return NetworkMonitorUtils.getCaptivePortalServerHttpUrl(context);
+            final String defaultUrl =
+                    context.getResources().getString(R.string.config_captive_portal_http_url);
+            return NetworkMonitorUtils.getCaptivePortalServerHttpUrl(context, defaultUrl);
         }
 
         /**

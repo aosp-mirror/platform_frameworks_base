@@ -512,7 +512,7 @@ public final class ViewRootImpl implements ViewParent,
     final Rect mPendingBackDropFrame = new Rect();
     final DisplayCutout.ParcelableWrapper mPendingDisplayCutout =
             new DisplayCutout.ParcelableWrapper(DisplayCutout.NO_CUTOUT);
-    boolean mPendingAlwaysConsumeNavBar;
+    boolean mPendingAlwaysConsumeSystemBars;
     private InsetsState mTempInsets = new InsetsState();
     final ViewTreeObserver.InternalInsetsInfo mLastGivenInsets
             = new ViewTreeObserver.InternalInsetsInfo();
@@ -921,9 +921,9 @@ public final class ViewRootImpl implements ViewParent,
                 mPendingStableInsets.set(mAttachInfo.mStableInsets);
                 mPendingDisplayCutout.set(mAttachInfo.mDisplayCutout);
                 mPendingVisibleInsets.set(0, 0, 0, 0);
-                mAttachInfo.mAlwaysConsumeNavBar =
-                        (res & WindowManagerGlobal.ADD_FLAG_ALWAYS_CONSUME_NAV_BAR) != 0;
-                mPendingAlwaysConsumeNavBar = mAttachInfo.mAlwaysConsumeNavBar;
+                mAttachInfo.mAlwaysConsumeSystemBars =
+                        (res & WindowManagerGlobal.ADD_FLAG_ALWAYS_CONSUME_SYSTEM_BARS) != 0;
+                mPendingAlwaysConsumeSystemBars = mAttachInfo.mAlwaysConsumeSystemBars;
                 mInsetsController.onStateChanged(mTempInsets);
                 if (DEBUG_LAYOUT) Log.v(mTag, "Added window " + mWindow);
                 if (res < WindowManagerGlobal.ADD_OKAY) {
@@ -1455,6 +1455,8 @@ public final class ViewRootImpl implements ViewParent,
 
     @Override
     public void onDescendantInvalidated(@NonNull View child, @NonNull View descendant) {
+        // TODO: Re-enable after camera is fixed or consider targetSdk checking this
+        // checkThread();
         if ((descendant.mPrivateFlags & PFLAG_DRAW_ANIMATION) != 0) {
             mIsAnimating = true;
         }
@@ -1915,16 +1917,10 @@ public final class ViewRootImpl implements ViewParent,
             }
             contentInsets = ensureInsetsNonNegative(contentInsets, "content");
             stableInsets = ensureInsetsNonNegative(stableInsets, "stable");
-            if (sNewInsetsMode != NEW_INSETS_MODE_NONE) {
-                mLastWindowInsets = mInsetsController.calculateInsets(
-                        mContext.getResources().getConfiguration().isScreenRound(),
-                        mAttachInfo.mAlwaysConsumeNavBar, displayCutout,
-                        contentInsets, stableInsets, mWindowAttributes.softInputMode);
-            } else {
-                mLastWindowInsets = new WindowInsets(contentInsets, stableInsets,
-                        mContext.getResources().getConfiguration().isScreenRound(),
-                        mAttachInfo.mAlwaysConsumeNavBar, displayCutout);
-            }
+            mLastWindowInsets = mInsetsController.calculateInsets(
+                    mContext.getResources().getConfiguration().isScreenRound(),
+                    mAttachInfo.mAlwaysConsumeSystemBars, displayCutout,
+                    contentInsets, stableInsets, mWindowAttributes.softInputMode);
         }
         return mLastWindowInsets;
     }
@@ -1985,7 +1981,6 @@ public final class ViewRootImpl implements ViewParent,
         mIsInTraversal = true;
         mWillDrawSoon = true;
         boolean windowSizeMayChange = false;
-        boolean newSurface = false;
         boolean surfaceChanged = false;
         WindowManager.LayoutParams lp = mWindowAttributes;
 
@@ -2126,7 +2121,7 @@ public final class ViewRootImpl implements ViewParent,
                 if (!mPendingOutsets.equals(mAttachInfo.mOutsets)) {
                     insetsChanged = true;
                 }
-                if (mPendingAlwaysConsumeNavBar != mAttachInfo.mAlwaysConsumeNavBar) {
+                if (mPendingAlwaysConsumeSystemBars != mAttachInfo.mAlwaysConsumeSystemBars) {
                     insetsChanged = true;
                 }
                 if (lp.width == ViewGroup.LayoutParams.WRAP_CONTENT
@@ -2326,8 +2321,8 @@ public final class ViewRootImpl implements ViewParent,
                 final boolean surfaceSizeChanged = (relayoutResult
                         & WindowManagerGlobal.RELAYOUT_RES_SURFACE_RESIZED) != 0;
                 surfaceChanged |= surfaceSizeChanged;
-                final boolean alwaysConsumeNavBarChanged =
-                        mPendingAlwaysConsumeNavBar != mAttachInfo.mAlwaysConsumeNavBar;
+                final boolean alwaysConsumeSystemBarsChanged =
+                        mPendingAlwaysConsumeSystemBars != mAttachInfo.mAlwaysConsumeSystemBars;
                 final boolean colorModeChanged = hasColorModeChanged(lp.getColorMode());
                 if (contentInsetsChanged) {
                     mAttachInfo.mContentInsets.set(mPendingContentInsets);
@@ -2356,8 +2351,8 @@ public final class ViewRootImpl implements ViewParent,
                     // Need to relayout with content insets.
                     contentInsetsChanged = true;
                 }
-                if (alwaysConsumeNavBarChanged) {
-                    mAttachInfo.mAlwaysConsumeNavBar = mPendingAlwaysConsumeNavBar;
+                if (alwaysConsumeSystemBarsChanged) {
+                    mAttachInfo.mAlwaysConsumeSystemBars = mPendingAlwaysConsumeSystemBars;
                     contentInsetsChanged = true;
                 }
                 if (contentInsetsChanged || mLastSystemUiVisibility !=
@@ -2386,13 +2381,7 @@ public final class ViewRootImpl implements ViewParent,
                 if (!hadSurface) {
                     if (mSurface.isValid()) {
                         // If we are creating a new surface, then we need to
-                        // completely redraw it.  Also, when we get to the
-                        // point of drawing it we will hold off and schedule
-                        // a new traversal instead.  This is so we can tell the
-                        // window manager about all of the windows being displayed
-                        // before actually drawing them, so it can display then
-                        // all at once.
-                        newSurface = true;
+                        // completely redraw it.
                         mFullRedrawNeeded = true;
                         mPreviousTransparentRegion.setEmpty();
 
@@ -2777,7 +2766,7 @@ public final class ViewRootImpl implements ViewParent,
 
         boolean cancelDraw = mAttachInfo.mTreeObserver.dispatchOnPreDraw() || !isViewVisible;
 
-        if (!cancelDraw && !newSurface) {
+        if (!cancelDraw) {
             if (mPendingTransitions != null && mPendingTransitions.size() > 0) {
                 for (int i = 0; i < mPendingTransitions.size(); ++i) {
                     mPendingTransitions.get(i).startChangingAnimations();
@@ -2811,8 +2800,7 @@ public final class ViewRootImpl implements ViewParent,
             MainContentCaptureSession mainSession = mAttachInfo.mContentCaptureManager
                     .getMainContentCaptureSession();
             for (int i = 0; i < mAttachInfo.mContentCaptureEvents.size(); i++) {
-                String sessionId = mAttachInfo.mContentCaptureEvents
-                        .keyAt(i);
+                int sessionId = mAttachInfo.mContentCaptureEvents.keyAt(i);
                 mainSession.notifyViewTreeEvent(sessionId, /* started= */ true);
                 ArrayList<Object> events = mAttachInfo.mContentCaptureEvents
                         .valueAt(i);
@@ -2827,8 +2815,8 @@ public final class ViewRootImpl implements ViewParent,
                             Log.w(mTag, "no content capture session on view: " + view);
                             continue for_each_event;
                         }
-                        String actualId = session.getId().toString();
-                        if (!actualId.equals(sessionId)) {
+                        int actualId = session.getId();
+                        if (actualId != sessionId) {
                             Log.w(mTag, "content capture session mismatch for view (" + view
                                     + "): was " + sessionId + " before, it's " + actualId + " now");
                             continue for_each_event;
@@ -3986,7 +3974,7 @@ public final class ViewRootImpl implements ViewParent,
 
     void systemGestureExclusionChanged() {
         final List<Rect> rectsForWindowManager = mGestureExclusionTracker.computeChangedRects();
-        if (rectsForWindowManager != null) {
+        if (rectsForWindowManager != null && mView != null) {
             try {
                 mWindowSession.reportSystemGestureExclusionChanged(mWindow, rectsForWindowManager);
             } catch (RemoteException e) {
@@ -4633,7 +4621,7 @@ public final class ViewRootImpl implements ViewParent,
                         mPendingOutsets.set((Rect) args.arg7);
                         mPendingBackDropFrame.set((Rect) args.arg8);
                         mForceNextWindowRelayout = args.argi1 != 0;
-                        mPendingAlwaysConsumeNavBar = args.argi2 != 0;
+                        mPendingAlwaysConsumeSystemBars = args.argi2 != 0;
 
                         args.recycle();
 
@@ -7084,8 +7072,8 @@ public final class ViewRootImpl implements ViewParent,
             destroySurface();
         }
 
-        mPendingAlwaysConsumeNavBar =
-                (relayoutResult & WindowManagerGlobal.RELAYOUT_RES_CONSUME_ALWAYS_NAV_BAR) != 0;
+        mPendingAlwaysConsumeSystemBars =
+                (relayoutResult & WindowManagerGlobal.RELAYOUT_RES_CONSUME_ALWAYS_SYSTEM_BARS) != 0;
 
         if (restore) {
             params.restore();
@@ -7374,7 +7362,7 @@ public final class ViewRootImpl implements ViewParent,
     private void dispatchResized(Rect frame, Rect overscanInsets, Rect contentInsets,
             Rect visibleInsets, Rect stableInsets, Rect outsets, boolean reportDraw,
             MergedConfiguration mergedConfiguration, Rect backDropFrame, boolean forceLayout,
-            boolean alwaysConsumeNavBar, int displayId,
+            boolean alwaysConsumeSystemBars, int displayId,
             DisplayCutout.ParcelableWrapper displayCutout) {
         if (DEBUG_LAYOUT) Log.v(mTag, "Resizing " + this + ": frame=" + frame.toShortString()
                 + " contentInsets=" + contentInsets.toShortString()
@@ -7414,7 +7402,7 @@ public final class ViewRootImpl implements ViewParent,
         args.arg8 = sameProcessCall ? new Rect(backDropFrame) : backDropFrame;
         args.arg9 = displayCutout.get(); // DisplayCutout is immutable.
         args.argi1 = forceLayout ? 1 : 0;
-        args.argi2 = alwaysConsumeNavBar ? 1 : 0;
+        args.argi2 = alwaysConsumeSystemBars ? 1 : 0;
         args.argi3 = displayId;
         msg.obj = args;
         mHandler.sendMessage(msg);
@@ -8498,13 +8486,14 @@ public final class ViewRootImpl implements ViewParent,
         public void resized(Rect frame, Rect overscanInsets, Rect contentInsets,
                 Rect visibleInsets, Rect stableInsets, Rect outsets, boolean reportDraw,
                 MergedConfiguration mergedConfiguration, Rect backDropFrame, boolean forceLayout,
-                boolean alwaysConsumeNavBar, int displayId,
+                boolean alwaysConsumeSystemBars, int displayId,
                 DisplayCutout.ParcelableWrapper displayCutout) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
                 viewAncestor.dispatchResized(frame, overscanInsets, contentInsets,
                         visibleInsets, stableInsets, outsets, reportDraw, mergedConfiguration,
-                        backDropFrame, forceLayout, alwaysConsumeNavBar, displayId, displayCutout);
+                        backDropFrame, forceLayout, alwaysConsumeSystemBars, displayId,
+                        displayCutout);
             }
         }
 

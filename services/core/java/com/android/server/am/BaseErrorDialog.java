@@ -16,6 +16,8 @@
 
 package com.android.server.am;
 
+import com.android.internal.R;
+
 import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Handler;
@@ -23,8 +25,6 @@ import android.os.Message;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 import android.widget.Button;
-
-import com.android.internal.R;
 
 public class BaseErrorDialog extends AlertDialog {
     private static final int ENABLE_BUTTONS = 0;
@@ -36,7 +36,7 @@ public class BaseErrorDialog extends AlertDialog {
         super(context, com.android.internal.R.style.Theme_DeviceDefault_Dialog_AppError);
         context.assertRuntimeOverlayThemable();
 
-        getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
+        getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
                 WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
         WindowManager.LayoutParams attrs = getWindow().getAttributes();

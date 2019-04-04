@@ -170,6 +170,9 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
     VkPhysicalDeviceProperties physDeviceProperties;
     mGetPhysicalDeviceProperties(mPhysicalDevice, &physDeviceProperties);
     LOG_ALWAYS_FATAL_IF(physDeviceProperties.apiVersion < VK_MAKE_VERSION(1, 1, 0));
+    mDriverVersion = physDeviceProperties.driverVersion;
+
+    mIsQualcomm = physDeviceProperties.vendorID == 20803;
 
     // query to get the initial queue props size
     uint32_t queueCount;
@@ -439,34 +442,47 @@ Frame VulkanManager::dequeueNextBuffer(VulkanSurface* surface) {
     LOG_ALWAYS_FATAL_IF(!bufferInfo->dequeued);
 
     if (bufferInfo->dequeue_fence != -1) {
-        int fence_clone = dup(bufferInfo->dequeue_fence);
-        if (fence_clone == -1) {
-            ALOGE("dup(fence) failed, stalling until signalled: %s (%d)", strerror(errno), errno);
-            sync_wait(bufferInfo->dequeue_fence, -1 /* forever */);
-        } else {
-            VkSemaphoreCreateInfo semaphoreInfo;
-            semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-            semaphoreInfo.pNext = nullptr;
-            semaphoreInfo.flags = 0;
-            VkSemaphore semaphore;
-            VkResult err = mCreateSemaphore(mDevice, &semaphoreInfo, nullptr, &semaphore);
-            LOG_ALWAYS_FATAL_IF(VK_SUCCESS != err, "Failed to create import semaphore, err: %d",
-                                err);
+        struct sync_file_info* finfo = sync_file_info(bufferInfo->dequeue_fence);
+        bool isSignalPending = false;
+        if (finfo != NULL) {
+            isSignalPending = finfo->status != 1;
+            sync_file_info_free(finfo);
+        }
+        if (isSignalPending) {
+            int fence_clone = dup(bufferInfo->dequeue_fence);
+            if (fence_clone == -1) {
+                ALOGE("dup(fence) failed, stalling until signalled: %s (%d)", strerror(errno),
+                      errno);
+                sync_wait(bufferInfo->dequeue_fence, -1 /* forever */);
+            } else {
+                VkSemaphoreCreateInfo semaphoreInfo;
+                semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+                semaphoreInfo.pNext = nullptr;
+                semaphoreInfo.flags = 0;
+                VkSemaphore semaphore;
+                VkResult err = mCreateSemaphore(mDevice, &semaphoreInfo, nullptr, &semaphore);
+                LOG_ALWAYS_FATAL_IF(VK_SUCCESS != err, "Failed to create import semaphore, err: %d",
+                                    err);
 
-            VkImportSemaphoreFdInfoKHR importInfo;
-            importInfo.sType = VK_STRUCTURE_TYPE_IMPORT_SEMAPHORE_FD_INFO_KHR;
-            importInfo.pNext = nullptr;
-            importInfo.semaphore = semaphore;
-            importInfo.flags = VK_SEMAPHORE_IMPORT_TEMPORARY_BIT;
-            importInfo.handleType = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_SYNC_FD_BIT;
-            importInfo.fd = fence_clone;
+                VkImportSemaphoreFdInfoKHR importInfo;
+                importInfo.sType = VK_STRUCTURE_TYPE_IMPORT_SEMAPHORE_FD_INFO_KHR;
+                importInfo.pNext = nullptr;
+                importInfo.semaphore = semaphore;
+                importInfo.flags = VK_SEMAPHORE_IMPORT_TEMPORARY_BIT;
+                importInfo.handleType = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_SYNC_FD_BIT;
+                importInfo.fd = fence_clone;
 
-            err = mImportSemaphoreFdKHR(mDevice, &importInfo);
-            LOG_ALWAYS_FATAL_IF(VK_SUCCESS != err, "Failed to import semaphore, err: %d", err);
+                err = mImportSemaphoreFdKHR(mDevice, &importInfo);
+                LOG_ALWAYS_FATAL_IF(VK_SUCCESS != err, "Failed to import semaphore, err: %d", err);
 
-            GrBackendSemaphore backendSemaphore;
-            backendSemaphore.initVulkan(semaphore);
-            bufferInfo->skSurface->wait(1, &backendSemaphore);
+                GrBackendSemaphore backendSemaphore;
+                backendSemaphore.initVulkan(semaphore);
+                bufferInfo->skSurface->wait(1, &backendSemaphore);
+                // The following flush blocks the GPU immediately instead of waiting for other
+                // drawing ops. It seems dequeue_fence is not respected otherwise.
+                //TODO: remove the flush after finding why backendSemaphore is not working.
+                bufferInfo->skSurface->flush();
+            }
         }
     }
 
@@ -478,6 +494,12 @@ void VulkanManager::swapBuffers(VulkanSurface* surface, const SkRect& dirtyRect)
     if (CC_UNLIKELY(Properties::waitForGpuCompletion)) {
         ATRACE_NAME("Finishing GPU work");
         mDeviceWaitIdle(mDevice);
+    }
+
+    VulkanSurface::NativeBufferInfo* bufferInfo = surface->getCurrentBufferInfo();
+    if (!bufferInfo) {
+        // If VulkanSurface::dequeueNativeBuffer failed earlier, then swapBuffers is a no-op.
+        return;
     }
 
     VkExportSemaphoreCreateInfo exportInfo;
@@ -495,8 +517,6 @@ void VulkanManager::swapBuffers(VulkanSurface* surface, const SkRect& dirtyRect)
 
     GrBackendSemaphore backendSemaphore;
     backendSemaphore.initVulkan(semaphore);
-
-    VulkanSurface::NativeBufferInfo* bufferInfo = surface->getCurrentBufferInfo();
 
     int fenceFd = -1;
     GrSemaphoresSubmitted submitted =

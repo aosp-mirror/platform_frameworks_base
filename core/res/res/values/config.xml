@@ -58,6 +58,7 @@
         <item><xliff:g id="id">@string/status_bar_mobile</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_airplane</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_battery</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_sensors_off</xliff:g></item>
     </string-array>
 
     <string translatable="false" name="status_bar_rotate">rotate</string>
@@ -92,6 +93,7 @@
     <string translatable="false" name="status_bar_microphone">microphone</string>
     <string translatable="false" name="status_bar_camera">camera</string>
     <string translatable="false" name="status_bar_airplane">airplane</string>
+    <string translatable="false" name="status_bar_sensors_off">sensors_off</string>
 
     <!-- Flag indicating whether the surface flinger has limited
          alpha compositing functionality in hardware.  If set, the window
@@ -310,6 +312,15 @@
          Internet access. Actual device behaviour is controlled by
          Settings.Global.NETWORK_AVOID_BAD_WIFI. This is the default value of that setting. -->
     <integer translatable="false" name="config_networkAvoidBadWifi">1</integer>
+
+    <!-- The URL returned by ConnectivityManager#getCaptivePortalServerUrl. The actual returned
+         value is controlled by Settings.Global.CAPTIVE_PORTAL_HTTP_URL. This is the default value
+         used if that setting is unset.
+         This is *NOT* a URL that will always be used by the system network validation to detect
+         captive portals: NetworkMonitor may use different strategies and will not necessarily use
+         this URL. NetworkMonitor behaviour should be configured with NetworkStack resource overlays
+         instead. -->
+    <string translatable="false" name="config_networkDefaultCaptivePortalServerUrl">http://connectivitycheck.gstatic.com/generate_204</string>
 
     <!-- If the hardware supports specially marking packets that caused a wakeup of the
          main CPU, set this value to the mark used. -->
@@ -913,6 +924,11 @@
           enabled. But in environments like real car, default home app may be enough, and in that
           case, this can be disabled (set to false). -->
     <bool name="config_enableCarDockHomeLaunch">true</bool>
+
+    <!-- Control whether to force the display of System UI Bars at all times regardless of
+         System Ui Flags. This can be useful in the Automotive case if there's a requirement for
+         a UI element to be on screen at all times. -->
+    <bool name="config_forceShowSystemBars">false</bool>
 
     <!-- HDMI behavior -->
 
@@ -2426,6 +2442,16 @@
     <!-- Maximum number of users we allow to be running at a time -->
     <integer name="config_multiuserMaxRunningUsers">3</integer>
 
+    <!-- Whether to delay user data locking for background user.
+         If false, user switched-out from user switching will still be in running state until
+         config_multiuserMaxRunningUsers is reached. Once config_multiuserMaxRunningUsers is
+         reached, user will be stopped and user data is locked.
+         If true, user switched out from user switching will always be stopped but its user data
+         is not locked. Total number of unlocked users will be limited by
+         config_multiuserMaxRunningUsers. Once that limit is reached, least recently stopped user
+         will be locked. -->
+    <bool name="config_multiuserDelayUserDataLocking">false</bool>
+
     <!-- Whether UI for multi user should be shown -->
     <bool name="config_enableMultiUserUI">false</bool>
 
@@ -3215,6 +3241,22 @@
          -->
     <integer name="config_navBarOpacityMode">0</integer>
 
+    <!-- Controls the navigation bar interaction mode:
+         0: 3 button mode (back, home, overview buttons)
+         1: 2 button mode (back, home buttons + swipe up for overview)
+         2: gestures only for back, home and overview -->
+    <integer name="config_navBarInteractionMode">0</integer>
+
+    <!-- Controls whether the nav bar can move from the bottom to the side in landscape.
+         Only applies if the device display is not square. -->
+    <bool name="config_navBarCanMove">true</bool>
+
+    <!-- Controls whether the navigation bar lets through taps. -->
+    <bool name="config_navBarTapThrough">false</bool>
+
+    <!-- Controls the size of the back gesture inset. -->
+    <dimen name="config_backGestureInset">0dp</dimen>
+
     <!-- Default insets [LEFT/RIGHTxTOP/BOTTOM] from the screen edge for picture-in-picture windows.
          These values are in DPs and will be converted to pixel sizes internally. -->
     <string translatable="false" name="config_defaultPictureInPictureScreenEdgeInsets">16x16</string>
@@ -3738,9 +3780,6 @@
     <!-- Package name for ManagedProvisioning which is responsible for provisioning work profiles. -->
     <string name="config_managed_provisioning_package" translatable="false">com.android.managedprovisioning</string>
 
-    <!-- Whether or not swipe up gesture is enabled by default -->
-    <bool name="config_swipe_up_gesture_default">false</bool>
-
     <!-- Whether or not swipe up gesture's opt-in setting is available on this device -->
     <bool name="config_swipe_up_gesture_setting_available">false</bool>
 
@@ -3942,7 +3981,7 @@
         M5,17.5 V12 H3 L7,4.5 V10 h2 L5,17.5 z
     </string>
     <string name="config_batterymeterPowersavePath" translatable="false">
-		M9.75,10l-2.5,0l0,-2.5l-2.5,0l0,2.5l-2.5,0l0,2.5l2.5,0l0,2.5l2.5,0l0,-2.5l2.5,0z
+        M9,10l-2,0l0,-2l-2,0l0,2l-2,0l0,2l2,0l0,2l2,0l0,-2l2,0z
     </string>
 
     <!-- A dual tone battery meter draws the perimeter path twice - once to define the shape
@@ -3956,4 +3995,33 @@
     <!-- The type of the light sensor to be used by the display framework for things like
          auto-brightness. If unset, then it just gets the default sensor of type TYPE_LIGHT. -->
     <string name="config_displayLightSensorType" translatable="false" />
+
+    <!-- Whether or not to enable automatic heap dumps for the system server on debuggable builds. -->
+    <bool name="config_debugEnableAutomaticSystemServerHeapDumps">false</bool>
+
+    <!-- Trigger a heap dump if the system server pss usage exceeds this threshold. 400 MB -->
+    <integer name="config_debugSystemServerPssThresholdBytes">419430400</integer>
+
+    <!-- See DropBoxManagerService.
+         The minimum period in milliseconds between broadcasts for entries with low priority
+         dropbox tags. -->
+    <integer name="config_dropboxLowPriorityBroadcastRateLimitPeriod">2000</integer>
+
+    <!-- See DropBoxManagerService.
+         An array of dropbox entry tags to marked as low priority. Low priority broadcasts will be
+         rated limited to a period defined by config_dropboxLowPriorityBroadcastRateLimitPeriod
+         (high frequency broadcasts for the tag will be dropped) -->
+    <string-array name="config_dropboxLowPriorityTags" translatable="false">
+        <item>data_app_strictmode</item>
+        <item>data_app_wtf</item>
+        <item>keymaster</item>
+        <item>netstats</item>
+        <item>system_app_strictmode</item>
+        <item>system_app_wtf</item>
+        <item>system_server_strictmode</item>
+        <item>system_server_wtf</item>
+    </string-array>
+
+    <!-- Which binder services to include in incident reports containing restricted images. -->
+    <string-array name="config_restrictedImagesServices" translatable="false"/>
 </resources>

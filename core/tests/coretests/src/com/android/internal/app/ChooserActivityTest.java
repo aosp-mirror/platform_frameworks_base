@@ -39,6 +39,7 @@ import android.app.usage.UsageStatsManager;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ClipboardManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
@@ -47,8 +48,10 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.drawable.Icon;
 import android.metrics.LogMaker;
 import android.net.Uri;
+import android.service.chooser.ChooserTarget;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -735,6 +738,120 @@ public class ChooserActivityTest {
         onView(withId(R.id.content_preview_file_icon)).check(matches(isDisplayed()));
     }
 
+    // This test is too long and too slow and should not be taken as an example for future tests.
+    // This is necessary because it tests that multiple calls result in the same result but
+    // normally a test this long should be broken into smaller tests testing individual components.
+    @Test
+    public void testDirectTargetSelectionLogging() throws InterruptedException {
+        Intent sendIntent = createSendTextIntent();
+        // We need app targets for direct targets to get displayed
+        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
+        when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+
+        // Set up resources
+        MetricsLogger mockLogger = sOverrides.metricsLogger;
+        ArgumentCaptor<LogMaker> logMakerCaptor = ArgumentCaptor.forClass(LogMaker.class);
+        // Create direct share target
+        List<ChooserTarget> serviceTargets = createDirectShareTargets(1);
+        ResolveInfo ri = ResolverDataProvider.createResolveInfo(3, 0);
+
+        // Start activity
+        final ChooserWrapperActivity activity = mActivityRule
+                .launchActivity(Intent.createChooser(sendIntent, null));
+
+        // Insert the direct share target
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(
+                () -> activity.getAdapter().addServiceResults(
+                        activity.createTestDisplayResolveInfo(sendIntent,
+                                ri,
+                                "testLabel",
+                                "testInfo",
+                                sendIntent),
+                        serviceTargets,
+                        false)
+        );
+        // Thread.sleep shouldn't be a thing in an integration test but it's
+        // necessary here because of the way the code is structured
+        // TODO: restructure the tests b/129870719
+        Thread.sleep(ChooserActivity.LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS);
+
+        assertThat("Chooser should have 3 targets (2apps, 1 direct)",
+                activity.getAdapter().getCount(), is(3));
+        assertThat("Chooser should have exactly one selectable direct target",
+                activity.getAdapter().getSelectableServiceTargetCount(), is(1));
+        assertThat("The resolver info must match the resolver info used to create the target",
+                activity.getAdapter().getItem(0).getResolveInfo(), is(ri));
+
+        // Click on the direct target
+        String name = serviceTargets.get(0).getTitle().toString();
+        onView(withText(name))
+                .perform(click());
+        waitForIdle();
+
+        // Currently we're seeing 3 invocations
+        //      1. ChooserActivity.onCreate()
+        //      2. ChooserActivity$ChooserRowAdapter.createContentPreviewView()
+        //      3. ChooserActivity.startSelected -- which is the one we're after
+        verify(mockLogger, Mockito.times(3)).write(logMakerCaptor.capture());
+        assertThat(logMakerCaptor.getAllValues().get(2).getCategory(),
+                is(MetricsEvent.ACTION_ACTIVITY_CHOOSER_PICKED_SERVICE_TARGET));
+        String hashedName = (String) logMakerCaptor
+                .getAllValues().get(2).getTaggedData(MetricsEvent.FIELD_HASHED_TARGET_NAME);
+        assertThat("Hash is not predictable but must be obfuscated",
+                hashedName, is(not(name)));
+
+        // Running the same again to check if the hashed name is the same as before.
+
+        Intent sendIntent2 = createSendTextIntent();
+
+        // Start activity
+        final ChooserWrapperActivity activity2 = mActivityRule
+                .launchActivity(Intent.createChooser(sendIntent2, null));
+        waitForIdle();
+
+        // Insert the direct share target
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(
+                () -> activity2.getAdapter().addServiceResults(
+                        activity2.createTestDisplayResolveInfo(sendIntent,
+                                ri,
+                                "testLabel",
+                                "testInfo",
+                                sendIntent),
+                        serviceTargets,
+                        false)
+        );
+        // Thread.sleep shouldn't be a thing in an integration test but it's
+        // necessary here because of the way the code is structured
+        // TODO: restructure the tests b/129870719
+        Thread.sleep(ChooserActivity.LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS);
+
+        assertThat("Chooser should have 3 targets (2apps, 1 direct)",
+                activity2.getAdapter().getCount(), is(3));
+        assertThat("Chooser should have exactly one selectable direct target",
+                activity2.getAdapter().getSelectableServiceTargetCount(), is(1));
+        assertThat("The resolver info must match the resolver info used to create the target",
+                activity2.getAdapter().getItem(0).getResolveInfo(), is(ri));
+
+        // Click on the direct target
+        onView(withText(name))
+                .perform(click());
+        waitForIdle();
+
+        // Currently we're seeing 6 invocations (3 from above, doubled up)
+        //      4. ChooserActivity.onCreate()
+        //      5. ChooserActivity$ChooserRowAdapter.createContentPreviewView()
+        //      6. ChooserActivity.startSelected -- which is the one we're after
+        verify(mockLogger, Mockito.times(6)).write(logMakerCaptor.capture());
+        assertThat(logMakerCaptor.getAllValues().get(5).getCategory(),
+                is(MetricsEvent.ACTION_ACTIVITY_CHOOSER_PICKED_SERVICE_TARGET));
+        String hashedName2 = (String) logMakerCaptor
+                .getAllValues().get(5).getTaggedData(MetricsEvent.FIELD_HASHED_TARGET_NAME);
+        assertThat("Hashing the same name should result in the same hashed value",
+                hashedName2, is(hashedName));
+    }
+
     private Intent createSendTextIntent() {
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
@@ -796,6 +913,23 @@ public class ChooserActivityTest {
             }
         }
         return infoList;
+    }
+
+    private List<ChooserTarget> createDirectShareTargets(int numberOfResults) {
+        Icon icon = Icon.createWithBitmap(createBitmap());
+        String testTitle = "testTitle";
+        List<ChooserTarget> targets = new ArrayList<>();
+        for (int i = 0; i < numberOfResults; i++) {
+            ComponentName componentName = ResolverDataProvider.createComponentName(i);
+            ChooserTarget tempTarget = new ChooserTarget(
+                    testTitle + i,
+                    icon,
+                    (float) (1 - ((i + 1) / 10.0)),
+                    componentName,
+                    null);
+            targets.add(tempTarget);
+        }
+        return targets;
     }
 
     private void waitForIdle() {

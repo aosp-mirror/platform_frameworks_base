@@ -20,14 +20,13 @@ import android.annotation.Nullable;
 import android.app.Notification;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.graphics.drawable.InsetDrawable;
-import android.graphics.drawable.LayerDrawable;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
-import android.widget.TextView;
 
 import com.android.internal.graphics.ColorUtils;
 import com.android.systemui.Interpolators;
@@ -41,12 +40,14 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 public class BubbleView extends FrameLayout {
     private static final String TAG = "BubbleView";
 
+    private static final int DARK_ICON_ALPHA = 180;
+    private static final double ICON_MIN_CONTRAST = 4.1;
+    private static final int DEFAULT_BACKGROUND_COLOR =  Color.LTGRAY;
     // Same value as Launcher3 badge code
     private static final float WHITE_SCRIM_ALPHA = 0.54f;
     private Context mContext;
 
     private BadgedImageView mBadgedImageView;
-    private TextView mMessageView;
     private int mPadding;
     private int mIconInset;
 
@@ -75,43 +76,12 @@ public class BubbleView extends FrameLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mBadgedImageView = (BadgedImageView) findViewById(R.id.bubble_image);
-        mMessageView = (TextView) findViewById(R.id.message_view);
-        mMessageView.setVisibility(GONE);
-        mMessageView.setPivotX(0);
+        mBadgedImageView = findViewById(R.id.bubble_image);
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        updateViews();
-    }
-
-    @Override
-    protected void onMeasure(int widthSpec, int heightSpec) {
-        measureChild(mBadgedImageView, widthSpec, heightSpec);
-        measureChild(mMessageView, widthSpec, heightSpec);
-        boolean messageGone = mMessageView.getVisibility() == GONE;
-        int imageHeight = mBadgedImageView.getMeasuredHeight();
-        int imageWidth = mBadgedImageView.getMeasuredWidth();
-        int messageHeight = messageGone ? 0 : mMessageView.getMeasuredHeight();
-        int messageWidth = messageGone ? 0 : mMessageView.getMeasuredWidth();
-        setMeasuredDimension(
-                getPaddingStart() + imageWidth + mPadding + messageWidth + getPaddingEnd(),
-                getPaddingTop() + Math.max(imageHeight, messageHeight) + getPaddingBottom());
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        left = getPaddingStart();
-        top = getPaddingTop();
-        int imageWidth = mBadgedImageView.getMeasuredWidth();
-        int imageHeight = mBadgedImageView.getMeasuredHeight();
-        int messageWidth = mMessageView.getMeasuredWidth();
-        int messageHeight = mMessageView.getMeasuredHeight();
-        mBadgedImageView.layout(left, top, left + imageWidth, top + imageHeight);
-        mMessageView.layout(left + imageWidth + mPadding, top,
-                left + imageWidth + mPadding + messageWidth, top + messageHeight);
     }
 
     /**
@@ -193,23 +163,43 @@ public class BubbleView extends FrameLayout {
         if (mEntry == null) {
             return;
         }
+        Notification.BubbleMetadata metadata = mEntry.getBubbleMetadata();
         Notification n = mEntry.notification.getNotification();
-        boolean isLarge = n.getLargeIcon() != null;
-        Icon ic = isLarge ? n.getLargeIcon() : n.getSmallIcon();
+        Icon ic;
+        boolean needsTint;
+        if (metadata != null) {
+            ic = metadata.getIcon();
+            needsTint = ic.getType() != Icon.TYPE_ADAPTIVE_BITMAP;
+        } else {
+            needsTint = n.getLargeIcon() == null;
+            ic = needsTint ? n.getSmallIcon() : n.getLargeIcon();
+        }
         Drawable iconDrawable = ic.loadDrawable(mContext);
-        if (!isLarge) {
-            // Center icon on coloured background
-            iconDrawable.setTint(Color.WHITE); // TODO: dark mode
-            Drawable bg = new ColorDrawable(n.color);
-            InsetDrawable d = new InsetDrawable(iconDrawable, mIconInset);
-            Drawable[] layers = {bg, d};
-            mBadgedImageView.setImageDrawable(new LayerDrawable(layers));
+        if (needsTint) {
+            mBadgedImageView.setImageDrawable(buildIconWithTint(iconDrawable, n.color));
         } else {
             mBadgedImageView.setImageDrawable(iconDrawable);
         }
         int badgeColor = determineDominateColor(iconDrawable, n.color);
         mBadgedImageView.setDotColor(badgeColor);
         animateDot(mEntry.showInShadeWhenBubble() /* showDot */);
+    }
+
+    private Drawable buildIconWithTint(Drawable iconDrawable, int backgroundColor) {
+        backgroundColor = ColorUtils.setAlphaComponent(backgroundColor, 255 /* alpha */);
+        if (backgroundColor == Color.TRANSPARENT) {
+            // ColorUtils throws exception when background is translucent.
+            backgroundColor = DEFAULT_BACKGROUND_COLOR;
+        }
+        iconDrawable.setTint(Color.WHITE);
+        double contrastRatio = ColorUtils.calculateContrast(Color.WHITE, backgroundColor);
+        if (contrastRatio < ICON_MIN_CONTRAST) {
+            int dark = ColorUtils.setAlphaComponent(Color.BLACK, DARK_ICON_ALPHA);
+            iconDrawable.setTint(dark);
+        }
+        InsetDrawable foreground = new InsetDrawable(iconDrawable, mIconInset);
+        ColorDrawable background = new ColorDrawable(backgroundColor);
+        return new AdaptiveIconDrawable(background, foreground);
     }
 
     private int determineDominateColor(Drawable d, int defaultTint) {

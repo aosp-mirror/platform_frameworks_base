@@ -1543,6 +1543,21 @@ public class CarrierConfigManager {
             "allow_non_emergency_calls_in_ecm_bool";
 
     /**
+     * Time that the telephony framework stays in "emergency SMS mode" after an emergency SMS is
+     * sent to the network. This is used by carriers to configure the time
+     * {@link TelephonyManager#isInEmergencySmsMode()} will be true after an emergency SMS is sent.
+     * This is used by GNSS to override user location permissions so that the carrier network can
+     * get the user's location for emergency services.
+     *
+     * The default is 0, which means that this feature is disabled. The maximum value for this timer
+     * is 300000 mS (5 minutes).
+     *
+     * @hide
+     */
+    public static final String KEY_EMERGENCY_SMS_MODE_TIMER_MS_INT =
+            "emergency_sms_mode_timer_ms_int";
+
+    /**
      * Flag indicating whether to allow carrier video calls to emergency numbers.
      * When {@code true}, video calls to emergency numbers will be allowed.  When {@code false},
      * video calls to emergency numbers will be initiated as audio-only calls instead.
@@ -1837,6 +1852,14 @@ public class CarrierConfigManager {
             "editable_wfc_roaming_mode_bool";
 
     /**
+     * Flag specifying wether to show blocking pay phone option in blocked numbers screen. Only show
+     * the option if payphone call presentation represents in the carrier's region.
+     * @hide
+     */
+    public static final java.lang.String KEY_SHOW_BLOCKING_PAY_PHONE_OPTION_BOOL =
+            "show_blocking_pay_phone_option_bool";
+
+    /**
      * Flag specifying whether the carrier will use the WFC home network mode in roaming network.
      * {@code false} - roaming preference can be selected separately from the home preference.
      * {@code true}  - roaming preference is the same as home preference and
@@ -1847,10 +1870,40 @@ public class CarrierConfigManager {
             "use_wfc_home_network_mode_in_roaming_network_bool";
 
     /**
+     * Flag specifying whether the carrier is allowed to use metered network to download a
+     * certificate of Carrier-WiFi.
+     * {@code false} - default value.
+     *
+     * @hide
+     */
+    public static final String KEY_ALLOW_METERED_NETWORK_FOR_CERT_DOWNLOAD_BOOL =
+            "allow_metered_network_for_cert_download_bool";
+
+    /**
      * Carrier specified WiFi networks.
      * @hide
      */
     public static final String KEY_CARRIER_WIFI_STRING_ARRAY = "carrier_wifi_string_array";
+
+    /**
+     * Base64 Encoding method the carrier will use for encoding encrypted IMSI and SSID.
+     * The value set as below:
+     * 2045 - RFC2045 (default value)
+     * 4648 - RFC4648
+     *
+     * @hide
+     */
+    public static final String KEY_IMSI_ENCODING_METHOD_INT = "imsi_encoding_method_int";
+
+    /**
+     * Defines the sequence of sending an encrypted IMSI identity for EAP-SIM/AKA authentication.
+     * The value set as below:
+     * 1 - encrypted IMSI as EAP-RESPONSE/IDENTITY (default one).
+     * 2 - anonymous as EAP-RESPONSE/IDENTITY -> encrypted IMSI as EAP-RESPONSE/AKA|SIM-IDENTITY.
+     *
+     * @hide
+     */
+    public static final String KEY_EAP_IDENTITY_SEQUENCE_INT = "imsi_eap_identity_sequence_int";
 
     /**
      * Time delay (in ms) after which we show the notification to switch the preferred
@@ -2528,6 +2581,22 @@ public class CarrierConfigManager {
             "emergency_number_prefix_string_array";
 
     /**
+     * Smart forwarding config. Smart forwarding is a feature to configure call forwarding to a
+     * different SIM in the device when one SIM is not reachable. The config here specifies a smart
+     * forwarding component that will launch UI for changing the configuration. An empty string
+     * indicates that no smart forwarding component is specified.
+     *
+     * Currently, only one non-empty configuration of smart forwarding component within system will
+     * be used when multiple SIMs are inserted.
+     *
+     * Empty string by default.
+     *
+     * @hide
+     */
+    public static final String KEY_SMART_FORWARDING_CONFIG_COMPONENT_NAME_STRING =
+            "smart_forwarding_config_component_name_string";
+
+    /**
      * Indicates when a carrier has a primary subscription and an opportunistic subscription active,
      * and when Internet data is switched to opportunistic network, whether to still show
      * signal bar of primary network. By default it will be false, meaning whenever data
@@ -2667,6 +2736,14 @@ public class CarrierConfigManager {
             "cdma_enhanced_roaming_indicator_for_home_network_int_array";
 
     /**
+     * Determines whether wifi calling location privacy policy is shown.
+     *
+     * @hide
+     */
+    public static final String KEY_SHOW_WFC_LOCATION_PRIVACY_POLICY_BOOL =
+            "show_wfc_location_privacy_policy_bool";
+
+    /**
      * Indicates use 3GPP application to replace 3GPP2 application even if it's a CDMA/CDMA-LTE
      * phone, becasue some carriers's CSIM application is present but not supported.
      * @hide
@@ -2723,7 +2800,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CARRIER_FORCE_DISABLE_ETWS_CMAS_TEST_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_UT_PROVISIONING_REQUIRED_BOOL, false);
-        sDefaults.putBoolean(KEY_CARRIER_SUPPORTS_SS_OVER_UT_BOOL, true);
+        sDefaults.putBoolean(KEY_CARRIER_SUPPORTS_SS_OVER_UT_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_OVERRIDE_WFC_PROVISIONING_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL, true);
         sDefaults.putBoolean(KEY_CARRIER_ALLOW_TURNOFF_IMS_BOOL, true);
@@ -2917,6 +2994,7 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_MMS_UA_PROF_URL_STRING, "");
         sDefaults.putString(KEY_MMS_USER_AGENT_STRING, "");
         sDefaults.putBoolean(KEY_ALLOW_NON_EMERGENCY_CALLS_IN_ECM_BOOL, true);
+        sDefaults.putInt(KEY_EMERGENCY_SMS_MODE_TIMER_MS_INT, 0);
         sDefaults.putBoolean(KEY_USE_RCS_PRESENCE_BOOL, false);
         sDefaults.putBoolean(KEY_FORCE_IMEI_BOOL, false);
         sDefaults.putInt(
@@ -2980,9 +3058,13 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_NOTIFY_VT_HANDOVER_TO_WIFI_FAILURE_BOOL, false);
         sDefaults.putStringArray(KEY_FILTERED_CNAP_NAMES_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_EDITABLE_WFC_ROAMING_MODE_BOOL, false);
+        sDefaults.putBoolean(KEY_SHOW_BLOCKING_PAY_PHONE_OPTION_BOOL, false);
         sDefaults.putBoolean(KEY_USE_WFC_HOME_NETWORK_MODE_IN_ROAMING_NETWORK_BOOL, false);
         sDefaults.putBoolean(KEY_STK_DISABLE_LAUNCH_BROWSER_BOOL, false);
+        sDefaults.putBoolean(KEY_ALLOW_METERED_NETWORK_FOR_CERT_DOWNLOAD_BOOL, false);
         sDefaults.putStringArray(KEY_CARRIER_WIFI_STRING_ARRAY, null);
+        sDefaults.putInt(KEY_IMSI_ENCODING_METHOD_INT, 2045);
+        sDefaults.putInt(KEY_EAP_IDENTITY_SEQUENCE_INT, 1);
         sDefaults.putInt(KEY_PREF_NETWORK_NOTIFICATION_DELAY_INT, -1);
         sDefaults.putInt(KEY_EMERGENCY_NOTIFICATION_DELAY_INT, -1);
         sDefaults.putBoolean(KEY_ALLOW_USSD_REQUESTS_VIA_TELEPHONY_MANAGER_BOOL, true);
@@ -3073,7 +3155,9 @@ public class CarrierConfigManager {
                 });
         sDefaults.putStringArray(KEY_EMERGENCY_NUMBER_PREFIX_STRING_ARRAY, new String[0]);
         sDefaults.putBoolean(KEY_USE_USIM_BOOL, false);
+        sDefaults.putBoolean(KEY_SHOW_WFC_LOCATION_PRIVACY_POLICY_BOOL, true);
         sDefaults.putBoolean(KEY_AUTO_CANCEL_CS_REJECT_NOTIFICATION, false);
+        sDefaults.putString(KEY_SMART_FORWARDING_CONFIG_COMPONENT_NAME_STRING, "");
         sDefaults.putBoolean(KEY_ALWAYS_SHOW_PRIMARY_SIGNAL_BAR_IN_OPPORTUNISTIC_NETWORK_BOOLEAN,
                 false);
     }

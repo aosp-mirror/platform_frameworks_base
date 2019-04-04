@@ -22,6 +22,6 @@ package android.service.attention;
  * @hide
  */
 oneway interface IAttentionCallback {
-    void onSuccess(int requestCode, int result, long timestamp);
-    void onFailure(int requestCode, int error);
+    void onSuccess(int result, long timestamp);
+    void onFailure(int error);
 }

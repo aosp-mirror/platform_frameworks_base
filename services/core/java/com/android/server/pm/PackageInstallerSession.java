@@ -202,7 +202,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     /** Timestamp of the last time this session changed state  */
     @GuardedBy("mLock")
-    long updatedMillis;
+    private long updatedMillis;
 
     /** Uid of the creator of this session. */
     private final int mOriginalInstallerUid;
@@ -230,6 +230,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private boolean mPrepared = false;
     @GuardedBy("mLock")
     private boolean mSealed = false;
+    @GuardedBy("mLock")
+    private boolean mShouldBeSealed = false;
     @GuardedBy("mLock")
     private boolean mCommitted = false;
     @GuardedBy("mLock")
@@ -430,6 +432,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         this.updatedMillis = createdMillis;
         this.stageDir = stageDir;
         this.stageCid = stageCid;
+        this.mShouldBeSealed = sealed;
         if (childSessionIds != null) {
             for (int childSessionId : childSessionIds) {
                 mChildSessionIds.put(childSessionId, 0);
@@ -450,16 +453,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mStagedSessionErrorCode = stagedSessionErrorCode;
         mStagedSessionErrorMessage =
                 stagedSessionErrorMessage != null ? stagedSessionErrorMessage : "";
-        if (sealed) {
-            synchronized (mLock) {
-                try {
-                    sealAndValidateLocked();
-                } catch (PackageManagerException | IOException e) {
-                    destroyInternal();
-                    throw new IllegalArgumentException(e);
-                }
-            }
-        }
     }
 
     public SessionInfo generateInfo() {
@@ -476,6 +469,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     mResolvedBaseFile.getAbsolutePath() : null;
             info.progress = mProgress;
             info.sealed = mSealed;
+            info.isCommitted = mCommitted;
             info.active = mActiveCount.get() > 0;
 
             info.mode = params.mode;
@@ -504,6 +498,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             info.isStagedSessionReady = mStagedSessionReady;
             info.isStagedSessionFailed = mStagedSessionFailed;
             info.setStagedSessionErrorCode(mStagedSessionErrorCode, mStagedSessionErrorMessage);
+            info.updatedMillis = updatedMillis;
         }
         return info;
     }
@@ -843,17 +838,34 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @Override
     public void commit(@NonNull IntentSender statusReceiver, boolean forTransfer) {
-        if (!markAsCommitted(statusReceiver, forTransfer  /* enforce */)) {
+        if (!markAsCommitted(statusReceiver, forTransfer)) {
             return;
         }
         if (isMultiPackage()) {
-
             final SparseIntArray remainingSessions = mChildSessionIds.clone();
-            final ChildStatusIntentReceiver localIntentReceiver =
-                    new ChildStatusIntentReceiver(remainingSessions, statusReceiver);
-            for (int childSessionId : getChildSessionIds()) {
-                mSessionProvider.getSession(childSessionId)
-                        .markAsCommitted(localIntentReceiver.getIntentSender(), forTransfer);
+            final IntentSender childIntentSender =
+                    new ChildStatusIntentReceiver(remainingSessions, statusReceiver)
+                            .getIntentSender();
+            RuntimeException commitException = null;
+            boolean commitFailed = false;
+            for (int i = mChildSessionIds.size() - 1; i >= 0; --i) {
+                final int childSessionId = mChildSessionIds.keyAt(i);
+                try {
+                    // commit all children, regardless if any of them fail; we'll throw/return
+                    // as appropriate once all children have been processed
+                    if (!mSessionProvider.getSession(childSessionId)
+                            .markAsCommitted(childIntentSender, forTransfer)) {
+                        commitFailed = true;
+                    }
+                } catch (RuntimeException e) {
+                    commitException = e;
+                }
+            }
+            if (commitException != null) {
+                throw commitException;
+            }
+            if (commitFailed) {
+                return;
             }
         }
         mHandler.obtainMessage(MSG_COMMIT).sendToTarget();
@@ -931,6 +943,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             @NonNull IntentSender statusReceiver, boolean forTransfer) {
         Preconditions.checkNotNull(statusReceiver);
 
+        List<PackageInstallerSession> childSessions = getChildSessions();
+
         final boolean wasSealed;
         synchronized (mLock) {
             assertCallerIsOwnerOrRootLocked();
@@ -962,7 +976,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             wasSealed = mSealed;
             if (!mSealed) {
                 try {
-                    sealAndValidateLocked();
+                    sealAndValidateLocked(childSessions);
                 } catch (IOException e) {
                     throw new IllegalArgumentException(e);
                 } catch (PackageManagerException e) {
@@ -993,20 +1007,90 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         return true;
     }
 
+    /** Return a list of child sessions or null if the session is not multipackage
+     *
+     * <p> This method is handy to prevent potential deadlocks (b/123391593)
+     */
+    private @Nullable List<PackageInstallerSession> getChildSessions() {
+        List<PackageInstallerSession> childSessions = null;
+        if (isMultiPackage()) {
+            final int[] childSessionIds = getChildSessionIds();
+            childSessions = new ArrayList<>(childSessionIds.length);
+            for (int childSessionId : childSessionIds) {
+                childSessions.add(mSessionProvider.getSession(childSessionId));
+            }
+        }
+        return childSessions;
+    }
+
+    /**
+     * Assert multipackage install has consistent sessions.
+     *
+     * @throws PackageManagerException if child sessions don't match parent session
+     *                                  in respect to staged and enable rollback parameters.
+     */
+    @GuardedBy("mLock")
+    private void assertMultiPackageConsistencyLocked(
+            @NonNull List<PackageInstallerSession> childSessions) throws PackageManagerException {
+        for (PackageInstallerSession childSession : childSessions) {
+            // It might be that the parent session is loaded before all of it's child sessions are,
+            // e.g. when reading sessions from XML. Those sessions will be null here, and their
+            // conformance with the multipackage params will be checked when they're loaded.
+            if (childSession == null) {
+                continue;
+            }
+            assertConsistencyWithLocked(childSession);
+        }
+    }
+
+    /**
+     * Assert consistency with the given session.
+     *
+     * @throws PackageManagerException if other sessions doesn't match this session
+     *                                  in respect to staged and enable rollback parameters.
+     */
+    @GuardedBy("mLock")
+    private void assertConsistencyWithLocked(PackageInstallerSession other)
+            throws PackageManagerException {
+        // Session groups must be consistent wrt to isStaged parameter. Non-staging session
+        // cannot be grouped with staging sessions.
+        if (this.params.isStaged != other.params.isStaged) {
+            throw new PackageManagerException(
+                PackageManager.INSTALL_FAILED_MULTIPACKAGE_INCONSISTENCY,
+                "Multipackage Inconsistency: session " + other.sessionId
+                    + " and session " + sessionId
+                    + " have inconsistent staged settings");
+        }
+        if (this.params.getEnableRollback() != other.params.getEnableRollback()) {
+            throw new PackageManagerException(
+                PackageManager.INSTALL_FAILED_MULTIPACKAGE_INCONSISTENCY,
+                "Multipackage Inconsistency: session " + other.sessionId
+                    + " and session " + sessionId
+                    + " have inconsistent rollback settings");
+        }
+    }
+
     /**
      * Seal the session to prevent further modification and validate the contents of it.
      *
      * <p>The session will be sealed after calling this method even if it failed.
      *
+     * @param childSessions the child sessions of a multipackage that will be checked for
+     *                      consistency. Can be null if session is not multipackage.
      * @throws PackageManagerException if the session was sealed but something went wrong. If the
      *                                 session was sealed this is the only possible exception.
      */
     @GuardedBy("mLock")
-    private void sealAndValidateLocked() throws PackageManagerException, IOException {
+    private void sealAndValidateLocked(List<PackageInstallerSession> childSessions)
+            throws PackageManagerException, IOException {
         assertNoWriteFileTransfersOpenLocked();
         assertPreparedAndNotDestroyedLocked("sealing of session");
 
         mSealed = true;
+
+        if (childSessions != null) {
+            assertMultiPackageConsistencyLocked(childSessions);
+        }
 
         if (params.isStaged) {
             final PackageInstallerSession activeSession = mStagingManager.getActiveSession();
@@ -1047,6 +1131,38 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    /**
+     * If session should be sealed, then it's sealed to prevent further modification
+     * and then it's validated.
+     *
+     * If the session was sealed but something went wrong then it's destroyed.
+     *
+     * <p> This is meant to be called after all of the sessions are loaded and added to
+     * PackageInstallerService
+     */
+    void sealAndValidateIfNecessary() {
+        synchronized (mLock) {
+            if (!mShouldBeSealed) {
+                return;
+            }
+        }
+        List<PackageInstallerSession> childSessions = getChildSessions();
+        synchronized (mLock) {
+            try {
+                sealAndValidateLocked(childSessions);
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
+            } catch (PackageManagerException e) {
+                Slog.e(TAG, "Package not valid", e);
+                // Session is sealed but could not be verified, we need to destroy it.
+                destroyInternal();
+                // Dispatch message to remove session from PackageInstallerService
+                dispatchSessionFinished(
+                        e.error, ExceptionUtils.getCompleteMessage(e), null);
+            }
+        }
+    }
+
     /** Update the timestamp of when the staged session last changed state */
     public void markUpdated() {
         synchronized (mLock) {
@@ -1075,12 +1191,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             throw new SecurityException("Can only transfer sessions that use public options");
         }
 
+        List<PackageInstallerSession> childSessions = getChildSessions();
+
         synchronized (mLock) {
             assertCallerIsOwnerOrRootLocked();
             assertPreparedAndNotSealedLocked("transfer");
 
             try {
-                sealAndValidateLocked();
+                sealAndValidateLocked(childSessions);
             } catch (IOException e) {
                 throw new IllegalStateException(e);
             } catch (PackageManagerException e) {
@@ -1131,14 +1249,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // outside of the lock, because reading the child
         // sessions with the lock held could lead to deadlock
         // (b/123391593).
-        List<PackageInstallerSession> childSessions = null;
-        if (isMultiPackage()) {
-            final int[] childSessionIds = getChildSessionIds();
-            childSessions = new ArrayList<>(childSessionIds.length);
-            for (int childSessionId : childSessionIds) {
-                childSessions.add(mSessionProvider.getSession(childSessionId));
-            }
-        }
+        List<PackageInstallerSession> childSessions = getChildSessions();
 
         try {
             synchronized (mLock) {
@@ -1740,6 +1851,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    /**
+     * @return the timestamp of when this session last changed state
+     */
+    public long getUpdatedMillis() {
+        synchronized (mLock) {
+            return updatedMillis;
+        }
+    }
+
     String getInstallerPackageName() {
         synchronized (mLock) {
             return mInstallerPackageName;
@@ -1963,15 +2083,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     new PackageManagerException("Child session " + childSessionId
                             + " does not exist"),
                     false, true).rethrowAsRuntimeException();
-        }
-        // Session groups must be consistent wrt to isStaged parameter. Non-staging session
-        // cannot be grouped with staging sessions.
-        if (this.params.isStaged ^ childSession.params.isStaged) {
-            throw new RemoteException("Unable to add child.",
-                    new PackageManagerException("Child session " + childSessionId
-                            + " and parent session " + this.sessionId + " do not have consistent"
-                            + " staging session settings."),
-                    false, true);
         }
         synchronized (mLock) {
             assertCallerIsOwnerOrRootLocked();

@@ -36,7 +36,8 @@ import javax.inject.Singleton;
 /**
  */
 @Singleton
-public class DarkIconDispatcherImpl implements SysuiDarkIconDispatcher {
+public class DarkIconDispatcherImpl implements SysuiDarkIconDispatcher,
+        LightBarTransitionsController.DarkIntensityApplier {
 
     private final LightBarTransitionsController mTransitionsController;
     private final Rect mTintArea = new Rect();
@@ -54,8 +55,7 @@ public class DarkIconDispatcherImpl implements SysuiDarkIconDispatcher {
         mDarkModeIconColorSingleTone = context.getColor(R.color.dark_mode_icon_color_single_tone);
         mLightModeIconColorSingleTone = context.getColor(R.color.light_mode_icon_color_single_tone);
 
-        mTransitionsController = new LightBarTransitionsController(context,
-                this::setIconTintInternal);
+        mTransitionsController = new LightBarTransitionsController(context, this);
     }
 
     public LightBarTransitionsController getTransitionsController() {
@@ -104,11 +104,17 @@ public class DarkIconDispatcherImpl implements SysuiDarkIconDispatcher {
         applyIconTint();
     }
 
-    private void setIconTintInternal(float darkIntensity) {
+    @Override
+    public void applyDarkIntensity(float darkIntensity) {
         mDarkIntensity = darkIntensity;
         mIconTint = (int) ArgbEvaluator.getInstance().evaluate(darkIntensity,
                 mLightModeIconColorSingleTone, mDarkModeIconColorSingleTone);
         applyIconTint();
+    }
+
+    @Override
+    public int getTintAnimationDuration() {
+        return LightBarTransitionsController.DEFAULT_TINT_ANIMATION_DURATION;
     }
 
     private void applyIconTint() {

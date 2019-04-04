@@ -16,6 +16,7 @@
 
 package android.net.metrics;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
@@ -51,13 +52,14 @@ public final class DhcpClientEvent implements IpConnectivityLog.Event {
     /**
      * Utility to create an instance of {@link ApfProgramEvent}.
      */
-    public static class Builder {
+    public static final class Builder {
         private String mMsg;
         private int mDurationMs;
 
         /**
          * Set the message of the event.
          */
+        @NonNull
         public Builder setMsg(String msg) {
             mMsg = msg;
             return this;
@@ -66,6 +68,7 @@ public final class DhcpClientEvent implements IpConnectivityLog.Event {
         /**
          * Set the duration of the event in milliseconds.
          */
+        @NonNull
         public Builder setDurationMs(int durationMs) {
             mDurationMs = durationMs;
             return this;
@@ -74,6 +77,7 @@ public final class DhcpClientEvent implements IpConnectivityLog.Event {
         /**
          * Create a new {@link DhcpClientEvent}.
          */
+        @NonNull
         public DhcpClientEvent build() {
             return new DhcpClientEvent(mMsg, mDurationMs);
         }

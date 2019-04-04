@@ -23,4 +23,9 @@ public interface EnhancedEstimates {
      * show a severe warning to the user.
      */
     long getSevereWarningThreshold();
+
+    /**
+     * Returns a boolean indicating if the low warning should be shown at all or not.
+     */
+    boolean getLowWarningEnabled();
 }

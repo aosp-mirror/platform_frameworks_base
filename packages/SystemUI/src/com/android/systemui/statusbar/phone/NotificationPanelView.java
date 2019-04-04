@@ -92,6 +92,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.util.InjectionInflationController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -141,6 +142,7 @@ public class NotificationPanelView extends PanelView implements
     private static final AnimationProperties CLOCK_ANIMATION_PROPERTIES = new AnimationProperties()
             .setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
 
+    private final InjectionInflationController mInjectionInflationController;
     private final PowerManager mPowerManager;
     private final AccessibilityManager mAccessibilityManager;
     private final NotificationWakeUpCoordinator mWakeUpCoordinator;
@@ -150,9 +152,11 @@ public class NotificationPanelView extends PanelView implements
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
     @VisibleForTesting
     protected KeyguardStatusBarView mKeyguardStatusBar;
-    private ViewGroup mBigClockContainer;
+    @VisibleForTesting
+    protected ViewGroup mBigClockContainer;
     private QS mQs;
-    private FrameLayout mQsFrame;
+    @VisibleForTesting
+    protected FrameLayout mQsFrame;
     @VisibleForTesting
     protected KeyguardStatusView mKeyguardStatusView;
     private View mQsNavbarScrim;
@@ -264,6 +268,7 @@ public class NotificationPanelView extends PanelView implements
     private int mIndicationBottomPadding;
     private int mAmbientIndicationBottomPadding;
     private boolean mIsFullWidth;
+    private boolean mBlockingExpansionForCurrentTouch;
 
     /**
      * Current dark amount that follows regular interpolation curve of animation.
@@ -336,10 +341,12 @@ public class NotificationPanelView extends PanelView implements
 
     @Inject
     public NotificationPanelView(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
+            InjectionInflationController injectionInflationController,
             NotificationWakeUpCoordinator coordinator,
             PulseExpansionHandler pulseExpansionHandler) {
         super(context, attrs);
         setWillNotDraw(!DEBUG);
+        mInjectionInflationController = injectionInflationController;
         mFalsingManager = FalsingManager.getInstance(context);
         mPowerManager = context.getSystemService(PowerManager.class);
         mWakeUpCoordinator = coordinator;
@@ -475,10 +482,11 @@ public class NotificationPanelView extends PanelView implements
         // Re-inflate the status view group.
         int index = indexOfChild(mKeyguardStatusView);
         removeView(mKeyguardStatusView);
-        mKeyguardStatusView = (KeyguardStatusView) LayoutInflater.from(mContext).inflate(
-                R.layout.keyguard_status_view,
-                this,
-                false);
+        mKeyguardStatusView = (KeyguardStatusView) mInjectionInflationController
+                .injectable(LayoutInflater.from(mContext)).inflate(
+                    R.layout.keyguard_status_view,
+                    this,
+                    false);
         addView(mKeyguardStatusView, index);
 
         // Re-associate the clock container with the keyguard clock switch.
@@ -490,10 +498,11 @@ public class NotificationPanelView extends PanelView implements
         index = indexOfChild(mKeyguardBottomArea);
         removeView(mKeyguardBottomArea);
         KeyguardBottomAreaView oldBottomArea = mKeyguardBottomArea;
-        mKeyguardBottomArea = (KeyguardBottomAreaView) LayoutInflater.from(mContext).inflate(
-                R.layout.keyguard_bottom_area,
-                this,
-                false);
+        mKeyguardBottomArea = (KeyguardBottomAreaView) mInjectionInflationController
+                .injectable(LayoutInflater.from(mContext)).inflate(
+                    R.layout.keyguard_bottom_area,
+                    this,
+                    false);
         mKeyguardBottomArea.initFrom(oldBottomArea);
         addView(mKeyguardBottomArea, index);
         initBottomArea();
@@ -629,6 +638,7 @@ public class NotificationPanelView extends PanelView implements
         }
         mNotificationStackScroller.setIntrinsicPadding(stackScrollerPadding);
         mNotificationStackScroller.setAntiBurnInOffsetX(mClockPositionResult.clockX);
+        mKeyguardBottomArea.setAntiBurnInOffsetX(mClockPositionResult.clockX);
 
         mStackScrollerMeasuringPass++;
         requestScrollerTopPaddingUpdate(animate);
@@ -976,6 +986,11 @@ public class NotificationPanelView extends PanelView implements
             return false;
         }
         initDownStates(event);
+        // Make sure the next touch won't the blocked after the current ends.
+        if (event.getAction() == MotionEvent.ACTION_UP
+                || event.getAction() == MotionEvent.ACTION_CANCEL) {
+            mBlockingExpansionForCurrentTouch = false;
+        }
         if (!mIsExpanding && mPulseExpansionHandler.onTouchEvent(event)) {
             // We're expanding all the other ones shouldn't get this anymore
             return true;
@@ -1655,7 +1670,7 @@ public class NotificationPanelView extends PanelView implements
         if (!mQsExpansionEnabled || mCollapsedOnDown) {
             return false;
         }
-        View header = mKeyguardShowing ? mKeyguardStatusBar : mQs.getHeader();
+        View header = mKeyguardShowing || mQs == null ? mKeyguardStatusBar : mQs.getHeader();
         final boolean onHeader = x >= mQsFrame.getX()
                 && x <= mQsFrame.getX() + mQsFrame.getWidth()
                 && y >= header.getTop() && y <= header.getBottom();
@@ -1880,7 +1895,7 @@ public class NotificationPanelView extends PanelView implements
         float newAlpha = Math.min(getKeyguardContentsAlpha(), alphaQsExpansion)
                 * mKeyguardStatusBarAnimateAlpha;
         mKeyguardStatusBar.setAlpha(newAlpha);
-        mKeyguardStatusBar.setVisibility(newAlpha != 0f ? VISIBLE : INVISIBLE);
+        mKeyguardStatusBar.setVisibility(newAlpha != 0f && !mDozing ? VISIBLE : INVISIBLE);
     }
 
     private void updateKeyguardBottomAreaAlpha() {
@@ -2330,7 +2345,7 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     protected boolean isTrackingBlocked() {
-        return mConflictingQsExpansionGesture && mQsExpanded;
+        return mConflictingQsExpansionGesture && mQsExpanded || mBlockingExpansionForCurrentTouch;
     }
 
     public boolean isQsExpanded() {
@@ -2367,12 +2382,11 @@ public class NotificationPanelView extends PanelView implements
         positionClockAndNotifications();
     }
 
-    private static float interpolate(float t, float start, float end) {
-        return (1 - t) * start + t * end;
-    }
-
     private void updateDozingVisibilities(boolean animate) {
         mKeyguardBottomArea.setDozing(mDozing, animate);
+        if (!mDozing && animate) {
+            animateKeyguardStatusBarIn(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+        }
     }
 
     @Override
@@ -2808,7 +2822,7 @@ public class NotificationPanelView extends PanelView implements
         if (mDozing) {
             mNotificationStackScroller.setShowDarkShelf(!hasCustomClock());
         }
-        mKeyguardStatusBar.setDozing(mDozing);
+        mKeyguardBottomArea.setDozing(mDozing, animate);
 
         if (mBarState == StatusBarState.KEYGUARD
                 || mBarState == StatusBarState.SHADE_LOCKED) {
@@ -2823,7 +2837,6 @@ public class NotificationPanelView extends PanelView implements
     public void onDozeAmountChanged(float linearAmount, float amount) {
         mInterpolatedDarkAmount = amount;
         mLinearDarkAmount = linearAmount;
-        mKeyguardStatusBar.setDarkAmount(mInterpolatedDarkAmount);
         mKeyguardStatusView.setDarkAmount(mInterpolatedDarkAmount);
         mKeyguardBottomArea.setDarkAmount(mInterpolatedDarkAmount);
         positionClockAndNotifications();
@@ -2855,7 +2868,7 @@ public class NotificationPanelView extends PanelView implements
     }
 
     public void dozeTimeTick() {
-        mKeyguardStatusBar.dozeTimeTick();
+        mKeyguardBottomArea.dozeTimeTick();
         mKeyguardStatusView.dozeTimeTick();
         if (mInterpolatedDarkAmount > 0) {
             positionClockAndNotifications();
@@ -2930,6 +2943,14 @@ public class NotificationPanelView extends PanelView implements
         setKeyguardStatusViewVisibility(mBarState, true /* keyguardFadingAway */,
                 false /* goingToFullShade */);
         updateLockIcon();
+    }
+
+    /**
+     * Do not let the user drag the shade up and down for the current touch session.
+     * This is necessary to avoid shade expansion while/after the bouncer is dismissed.
+     */
+    public void blockExpansionForCurrentTouch() {
+        mBlockingExpansionForCurrentTouch = mTracking;
     }
 
     @Override
@@ -3034,6 +3055,7 @@ public class NotificationPanelView extends PanelView implements
         }
 
         ViewGroup bouncerContainer = mBouncer.getLockIconContainer();
+        ViewGroup bottomContainer = mKeyguardBottomArea.getLockIconContainer();
         LockIcon lockIcon = mKeyguardBottomArea.getLockIcon();
 
         if (mBouncer.isAnimatingAway()) {
@@ -3045,9 +3067,21 @@ public class NotificationPanelView extends PanelView implements
             return;
         }
 
+        // Lock icon needs to be re-parented in case of a scrimmed bouncer,
+        // otherwise it would be under the scrim.
+        if (mBouncer.isScrimmed() && bouncerContainer != null
+                && lockIcon.getParent() != bouncerContainer) {
+            ((ViewGroup) lockIcon.getParent()).removeView(lockIcon);
+            bouncerContainer.addView(lockIcon);
+        } else if (!mBouncer.isScrimmed() && bottomContainer != null
+                && lockIcon.getParent() != bottomContainer) {
+            ((ViewGroup) lockIcon.getParent()).removeView(lockIcon);
+            bottomContainer.addView(lockIcon);
+        }
+
         float translation = 0;
-        if (bouncerContainer != null) {
-            float bottomAreaContainerY = getCommonTop(lockIcon);
+        if (bouncerContainer != null && bottomContainer != null && !mBouncer.isScrimmed()) {
+            float bottomAreaContainerY = getCommonTop(bottomContainer);
             float bouncerLockY = getCommonTop(bouncerContainer);
             if (bouncerLockY < bottomAreaContainerY) {
                 translation = bouncerLockY - bottomAreaContainerY;
@@ -3063,7 +3097,7 @@ public class NotificationPanelView extends PanelView implements
     private static float getCommonTop(View view) {
         float y = view.getTop();
         ViewGroup parent = (ViewGroup) view.getParent();
-        while (!(parent instanceof StatusBarWindowView)) {
+        while (!(parent instanceof StatusBarWindowView) && parent != null) {
             y += parent.getY();
             parent = (ViewGroup) parent.getParent();
         }

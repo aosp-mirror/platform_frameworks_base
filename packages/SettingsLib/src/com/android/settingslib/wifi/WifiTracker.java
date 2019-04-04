@@ -84,7 +84,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
     private static final long DEFAULT_MAX_CACHED_SCORE_AGE_MILLIS = 20 * DateUtils.MINUTE_IN_MILLIS;
 
     /** Maximum age of scan results to hold onto while actively scanning. **/
-    private static final long MAX_SCAN_RESULT_AGE_MILLIS = 15000;
+    @VisibleForTesting static final long MAX_SCAN_RESULT_AGE_MILLIS = 15000;
 
     private static final String TAG = "WifiTracker";
     private static final boolean DBG() {
@@ -141,6 +141,13 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
      * update the UI with stale data / clear out existing UI elements prematurely.
      */
     private boolean mStaleScanResults = true;
+
+    /**
+     * Tracks whether the latest SCAN_RESULTS_AVAILABLE_ACTION contained new scans. If not, then
+     * we treat the last scan as an aborted scan and increase the eviction timeout window to avoid
+     * completely flushing the AP list before the next successful scan completes.
+     */
+    private boolean mLastScanSucceeded = true;
 
     // Does not need to be locked as it only updated on the worker thread, with the exception of
     // during onStart, which occurs before the receiver is registered on the work handler.
@@ -478,17 +485,22 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
     }
 
     /**
-     * Remove old scan results from the cache.
+     * Remove old scan results from the cache. If {@link #mLastScanSucceeded} is false, then
+     * increase the timeout window to avoid completely flushing the AP list before the next
+     * successful scan completes.
      *
      * <p>Should only ever be invoked from {@link #updateScanResultCache(List)} when
      * {@link #mStaleScanResults} is false.
      */
     private void evictOldScans() {
+        long evictionTimeoutMillis = mLastScanSucceeded ? MAX_SCAN_RESULT_AGE_MILLIS
+                : MAX_SCAN_RESULT_AGE_MILLIS * 2;
+
         long nowMs = SystemClock.elapsedRealtime();
         for (Iterator<ScanResult> iter = mScanResultCache.values().iterator(); iter.hasNext(); ) {
             ScanResult result = iter.next();
             // result timestamp is in microseconds
-            if (nowMs - result.timestamp / 1000 > MAX_SCAN_RESULT_AGE_MILLIS) {
+            if (nowMs - result.timestamp / 1000 > evictionTimeoutMillis) {
                 iter.remove();
             }
         }
@@ -840,6 +852,8 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                                 WifiManager.WIFI_STATE_UNKNOWN));
             } else if (WifiManager.SCAN_RESULTS_AVAILABLE_ACTION.equals(action)) {
                 mStaleScanResults = false;
+                mLastScanSucceeded =
+                        intent.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, true);
 
                 fetchScansAndConfigsAndUpdateAccessPoints();
             } else if (WifiManager.CONFIGURED_NETWORKS_CHANGED_ACTION.equals(action)

@@ -225,6 +225,22 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     public ParceledListSlice getAvailableRollbacks() {
         enforceManageRollbacks("getAvailableRollbacks");
 
+        // Wait for the handler thread to get the list of available rollbacks
+        // to get the most up-to-date results. This is intended to reduce test
+        // flakiness when checking available rollbacks immediately after
+        // installing a package with rollback enabled.
+        final LinkedBlockingQueue<Boolean> result = new LinkedBlockingQueue<>();
+        getHandler().post(() -> result.offer(true));
+
+        try {
+            result.take();
+        } catch (InterruptedException ie) {
+            // We may not get the most up-to-date information, but whatever we
+            // can get now is better than nothing, so log but otherwise ignore
+            // the exception.
+            Log.w(TAG, "Interrupted while waiting for handler thread in getAvailableRollbacks");
+        }
+
         synchronized (mLock) {
             ensureRollbackDataLoadedLocked();
             List<RollbackInfo> rollbacks = new ArrayList<>();
@@ -1015,6 +1031,9 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
     @Override
     public boolean notifyStagedSession(int sessionId) {
+        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+            throw new SecurityException("notifyStagedSession may only be called by the system.");
+        }
         final LinkedBlockingQueue<Boolean> result = new LinkedBlockingQueue<>();
 
         // NOTE: We post this runnable on the RollbackManager's binder thread because we'd prefer
@@ -1066,6 +1085,9 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
     @Override
     public void notifyStagedApkSession(int originalSessionId, int apkSessionId) {
+        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+            throw new SecurityException("notifyStagedApkSession may only be called by the system.");
+        }
         getHandler().post(() -> {
             RollbackData rd = null;
             synchronized (mLock) {

@@ -22,12 +22,9 @@ import static android.view.PointerIcon.TYPE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW;
 import static android.view.PointerIcon.TYPE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW;
 import static android.view.PointerIcon.TYPE_VERTICAL_DOUBLE_ARROW;
 
-import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
-
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.input.InputManager;
-import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
 
@@ -40,67 +37,15 @@ import com.android.server.wm.WindowManagerService.H;
 public class TaskTapPointerEventListener implements PointerEventListener {
 
     private final Region mTouchExcludeRegion = new Region();
-    private final Region mTmpRegion = new Region();
     private final WindowManagerService mService;
     private final DisplayContent mDisplayContent;
-    private final Handler mHandler;
-    private final Runnable mMoveDisplayToTop;
     private final Rect mTmpRect = new Rect();
     private int mPointerIconType = TYPE_NOT_SPECIFIED;
-    private int mLastDownX;
-    private int mLastDownY;
 
     public TaskTapPointerEventListener(WindowManagerService service,
             DisplayContent displayContent) {
         mService = service;
         mDisplayContent = displayContent;
-        mHandler = new Handler(mService.mH.getLooper());
-        mMoveDisplayToTop = () -> {
-            int x;
-            int y;
-            synchronized (this) {
-                x = mLastDownX;
-                y = mLastDownY;
-            }
-            synchronized (mService.mGlobalLock) {
-                if (!mService.mPerDisplayFocusEnabled
-                        && mService.mRoot.getTopFocusedDisplayContent() != mDisplayContent
-                        && inputMethodWindowContains(x, y)) {
-                    // In a single focus system, if the input method window and the input method
-                    // target window are on the different displays, when the user is tapping on the
-                    // input method window, we don't move its display to top. Otherwise, the input
-                    // method target window will lose the focus.
-                    return;
-                }
-                final Region windowTapExcludeRegion = Region.obtain();
-                mDisplayContent.amendWindowTapExcludeRegion(windowTapExcludeRegion);
-                if (windowTapExcludeRegion.contains(x, y)) {
-                    windowTapExcludeRegion.recycle();
-                    // The user is tapping on the window tap exclude region. We don't move this
-                    // display to top. A window tap exclude region, for example, may be set by an
-                    // ActivityView, and the region would match the bounds of both the ActivityView
-                    // and the virtual display in it. In this case, we would take the tap that is on
-                    // the embedded virtual display instead of this display.
-                    return;
-                }
-                windowTapExcludeRegion.recycle();
-                WindowContainer parent = mDisplayContent.getParent();
-                if (parent != null && parent.getTopChild() != mDisplayContent) {
-                    parent.positionChildAt(WindowContainer.POSITION_TOP, mDisplayContent,
-                            true /* includingParents */);
-                    // For compatibility, only the topmost activity is allowed to be resumed for
-                    // pre-Q app. Ensure the topmost activities are resumed whenever a display is
-                    // moved to top.
-                    // TODO(b/123761773): Investigate whether we can move this into
-                    // RootActivityContainer#updateTopResumedActivityIfNeeded(). Currently, it is
-                    // risky to do so because it seems possible to resume activities as part of a
-                    // larger transaction and it's too early to resume based on current order
-                    // when performing updateTopResumedActivityIfNeeded().
-                    mDisplayContent.mAcitvityDisplay.ensureActivitiesVisible(null /* starting */,
-                            0 /* configChanges */, !PRESERVE_WINDOWS, true /* notifyClients */);
-                }
-            }
-        };
     }
 
     @Override
@@ -115,9 +60,6 @@ public class TaskTapPointerEventListener implements PointerEventListener {
                         mService.mTaskPositioningController.handleTapOutsideTask(
                                 mDisplayContent, x, y);
                     }
-                    mLastDownX = x;
-                    mLastDownY = y;
-                    mHandler.post(mMoveDisplayToTop);
                 }
             }
             break;
@@ -177,18 +119,5 @@ public class TaskTapPointerEventListener implements PointerEventListener {
         synchronized (this) {
            mTouchExcludeRegion.set(newRegion);
         }
-    }
-
-    private int getDisplayId() {
-        return mDisplayContent.getDisplayId();
-    }
-
-    private boolean inputMethodWindowContains(int x, int y) {
-        final WindowState inputMethodWindow = mDisplayContent.mInputMethodWindow;
-        if (inputMethodWindow == null || !inputMethodWindow.isVisibleLw()) {
-            return false;
-        }
-        inputMethodWindow.getTouchableRegion(mTmpRegion);
-        return mTmpRegion.contains(x, y);
     }
 }

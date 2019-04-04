@@ -230,7 +230,8 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
 
     /**
      * Callback from {@code system_server} after call to
-     * {@link IContentCaptureManager#startSession(IBinder, ComponentName, String, int, IBinder)}
+     * {@link IContentCaptureManager#startSession(IBinder, ComponentName, String, int,
+     * IResultReceiver)}.
      *
      * @param resultCode session state
      * @param binder handle to {@code IContentCaptureDirectManager}
@@ -317,7 +318,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         if (!mEvents.isEmpty() && eventType == TYPE_VIEW_DISAPPEARED) {
             final ContentCaptureEvent lastEvent = mEvents.get(mEvents.size() - 1);
             if (lastEvent.getType() == TYPE_VIEW_DISAPPEARED
-                    && event.getSessionId().equals(lastEvent.getSessionId())) {
+                    && event.getSessionId() == lastEvent.getSessionId()) {
                 if (sVerbose) {
                     Log.v(TAG, "Buffering TYPE_VIEW_DISAPPEARED events for session "
                             + lastEvent.getSessionId());
@@ -580,37 +581,35 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     // TODO(b/122454205): refactor "notifyXXXX" methods below to a common "Buffer" object that is
     // shared between ActivityContentCaptureSession and ChildContentCaptureSession objects. Such
     // change should also get get rid of the "internalNotifyXXXX" methods above
-    void notifyChildSessionStarted(@NonNull String parentSessionId,
-            @NonNull String childSessionId, @NonNull ContentCaptureContext clientContext) {
+    void notifyChildSessionStarted(int parentSessionId, int childSessionId,
+            @NonNull ContentCaptureContext clientContext) {
         sendEvent(new ContentCaptureEvent(childSessionId, TYPE_SESSION_STARTED)
                 .setParentSessionId(parentSessionId).setClientContext(clientContext),
                 FORCE_FLUSH);
     }
 
-    void notifyChildSessionFinished(@NonNull String parentSessionId,
-            @NonNull String childSessionId) {
+    void notifyChildSessionFinished(int parentSessionId, int childSessionId) {
         sendEvent(new ContentCaptureEvent(childSessionId, TYPE_SESSION_FINISHED)
                 .setParentSessionId(parentSessionId), FORCE_FLUSH);
     }
 
-    void notifyViewAppeared(@NonNull String sessionId, @NonNull ViewStructureImpl node) {
+    void notifyViewAppeared(int sessionId, @NonNull ViewStructureImpl node) {
         sendEvent(new ContentCaptureEvent(sessionId, TYPE_VIEW_APPEARED)
                 .setViewNode(node.mNode));
     }
 
     /** Public because is also used by ViewRootImpl */
-    public void notifyViewDisappeared(@NonNull String sessionId, @NonNull AutofillId id) {
+    public void notifyViewDisappeared(int sessionId, @NonNull AutofillId id) {
         sendEvent(new ContentCaptureEvent(sessionId, TYPE_VIEW_DISAPPEARED).setAutofillId(id));
     }
 
-    void notifyViewTextChanged(@NonNull String sessionId, @NonNull AutofillId id,
-            @Nullable CharSequence text) {
+    void notifyViewTextChanged(int sessionId, @NonNull AutofillId id, @Nullable CharSequence text) {
         sendEvent(new ContentCaptureEvent(sessionId, TYPE_VIEW_TEXT_CHANGED).setAutofillId(id)
                 .setText(text));
     }
 
     /** Public because is also used by ViewRootImpl */
-    public void notifyViewTreeEvent(@NonNull String sessionId, boolean started) {
+    public void notifyViewTreeEvent(int sessionId, boolean started) {
         final int type = started ? TYPE_VIEW_TREE_APPEARING : TYPE_VIEW_TREE_APPEARED;
         sendEvent(new ContentCaptureEvent(sessionId, type), FORCE_FLUSH);
     }
@@ -621,8 +620,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         sendEvent(new ContentCaptureEvent(mId, type), FORCE_FLUSH);
     }
 
-    void notifyContextUpdated(@NonNull String sessionId,
-            @Nullable ContentCaptureContext context) {
+    void notifyContextUpdated(int sessionId, @Nullable ContentCaptureContext context) {
         sendEvent(new ContentCaptureEvent(sessionId, TYPE_CONTEXT_UPDATED)
                 .setClientContext(context));
     }

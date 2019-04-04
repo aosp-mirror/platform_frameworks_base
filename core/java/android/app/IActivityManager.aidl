@@ -346,6 +346,9 @@ interface IActivityManager {
     void unregisterUserSwitchObserver(in IUserSwitchObserver observer);
     int[] getRunningUserIds();
 
+    // Request a heap dump for the system server.
+    void requestSystemServerHeapDump();
+
     // Deprecated - This method is only used by a few internal components and it will soon be
     // replaced by a proper bug report API (which will be restricted to a few, pre-defined apps).
     // No new code should be calling it.

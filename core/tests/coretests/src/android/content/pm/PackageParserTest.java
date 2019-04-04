@@ -499,19 +499,21 @@ public class PackageParserTest {
     public void testApexPackageInfoGeneration() throws Exception {
         File apexFile = copyRawResourceToFile("com.android.tzdata.apex",
                 R.raw.com_android_tzdata);
-        PackageInfo pi = PackageParser.generatePackageInfoFromApex(apexFile, false);
-        assertEquals("com.google.android.tzdata", pi.packageName);
+        int flags = PackageManager.GET_META_DATA | PackageManager.GET_SIGNING_CERTIFICATES;
+        PackageInfo pi = PackageParser.generatePackageInfoFromApex(apexFile, flags);
         assertEquals("com.google.android.tzdata", pi.applicationInfo.packageName);
-        assertEquals(1, pi.getLongVersionCode());
-        assertEquals(1, pi.applicationInfo.longVersionCode);
-        assertNull(pi.signingInfo);
+        assertTrue(pi.applicationInfo.enabled);
+        assertEquals(28, pi.applicationInfo.targetSdkVersion);
+        assertEquals(191000070, pi.applicationInfo.longVersionCode);
+        assertNotNull(pi.applicationInfo.metaData);
+        assertEquals(apexFile.getPath(), pi.applicationInfo.sourceDir);
+        assertEquals("Bundle[{com.android.vending.derived.apk.id=1}]",
+                pi.applicationInfo.metaData.toString());
 
-        pi = PackageParser.generatePackageInfoFromApex(apexFile, true);
         assertEquals("com.google.android.tzdata", pi.packageName);
-        assertEquals("com.google.android.tzdata", pi.applicationInfo.packageName);
-        assertEquals(1, pi.getLongVersionCode());
-        assertEquals(1, pi.applicationInfo.longVersionCode);
+        assertEquals(191000070, pi.getLongVersionCode());
         assertNotNull(pi.signingInfo);
         assertTrue(pi.signingInfo.getApkContentsSigners().length > 0);
+        assertTrue(pi.isApex);
     }
 }

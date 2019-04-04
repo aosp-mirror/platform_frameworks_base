@@ -284,7 +284,7 @@ public class TransportManager {
      * @throws TransportNotRegisteredException if the transport is not registered.
      */
     @Nullable
-    public String getTransportDataManagementLabel(String transportName)
+    public CharSequence getTransportDataManagementLabel(String transportName)
             throws TransportNotRegisteredException {
         synchronized (mTransportLock) {
             return getRegisteredTransportDescriptionOrThrowLocked(transportName)
@@ -327,7 +327,7 @@ public class TransportManager {
             @Nullable Intent configurationIntent,
             String currentDestinationString,
             @Nullable Intent dataManagementIntent,
-            @Nullable String dataManagementLabel) {
+            @Nullable CharSequence dataManagementLabel) {
         synchronized (mTransportLock) {
             TransportDescription description =
                     mRegisteredTransportsDescriptionMap.get(transportComponent);
@@ -678,7 +678,7 @@ public class TransportManager {
                         transport.configurationIntent(),
                         transport.currentDestinationString(),
                         transport.dataManagementIntent(),
-                        transport.dataManagementLabel());
+                        transport.dataManagementIntentLabel());
         synchronized (mTransportLock) {
             mRegisteredTransportsDescriptionMap.put(transportComponent, description);
         }
@@ -707,7 +707,7 @@ public class TransportManager {
         @Nullable private Intent configurationIntent;
         private String currentDestinationString;
         @Nullable private Intent dataManagementIntent;
-        @Nullable private String dataManagementLabel;
+        @Nullable private CharSequence dataManagementLabel;
 
         private TransportDescription(
                 String name,
@@ -715,7 +715,7 @@ public class TransportManager {
                 @Nullable Intent configurationIntent,
                 String currentDestinationString,
                 @Nullable Intent dataManagementIntent,
-                @Nullable String dataManagementLabel) {
+                @Nullable CharSequence dataManagementLabel) {
             this.name = name;
             this.transportDirName = transportDirName;
             this.configurationIntent = configurationIntent;

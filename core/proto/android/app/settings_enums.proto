@@ -590,6 +590,13 @@ enum Action {
     // OS: P
     DIALOG_SWITCH_HFP_DEVICES = 1416;
 
+    // OPEN: QS Sensor Privacy Mode tile shown
+    // ACTION: QS Sensor Privacy Mode tile tapped
+    // SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: QUICK_SETTINGS
+    // OS: Q
+    QS_SENSOR_PRIVACY = 1598;
+
     // ACTION: Tap & Pay -> Default Application Setting -> Use Forground
     ACTION_NFC_PAYMENT_FOREGROUND_SETTING = 1622;
 
@@ -2309,4 +2316,24 @@ enum PageId {
     // OPEN: Settings > Face > Remove face
     // OS: Q
     DIALOG_FACE_REMOVE = 1693;
+
+    // Settings > Display > Theme
+    DARK_UI_SETTINGS = 1698;
+
+    // Settings > global bubble settings
+    BUBBLE_SETTINGS = 1699;
+
+    // Settings > app > bubble settings
+    APP_BUBBLE_SETTINGS = 1700;
+
+    // OPEN: Settings > System > Aware > Info dialog
+    DIALOG_AWARE_STATUS = 1701;
+
+    // Open: Settings > app > bubble settings > confirmation dialog
+    DIALOG_APP_BUBBLE_SETTINGS = 1702;
+
+    // ACTION: Display white balance setting enabled or disabled.
+    // CATEGORY: SETTINGS
+    // OS: Q
+    ACTION_DISPLAY_WHITE_BALANCE_SETTING_CHANGED = 1703;
 }

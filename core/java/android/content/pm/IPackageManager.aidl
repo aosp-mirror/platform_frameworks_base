@@ -714,6 +714,8 @@ interface IPackageManager {
 
     ParceledListSlice getSharedLibraries(in String packageName, int flags, int userId);
 
+    ParceledListSlice getDeclaredSharedLibraries(in String packageName, int flags, int userId);
+
     boolean canRequestPackageInstalls(String packageName, int userId);
 
     void deletePreloadsFileCache();
@@ -737,6 +739,8 @@ interface IPackageManager {
     boolean hasUidSigningCertificate(int uid, in byte[] signingCertificate, int flags);
 
     String getSystemTextClassifierPackageName();
+
+    String getAttentionServicePackageName();
 
     String getWellbeingPackageName();
 

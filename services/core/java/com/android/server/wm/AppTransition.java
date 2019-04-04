@@ -484,6 +484,10 @@ public class AppTransition implements Dump {
         mListeners.add(listener);
     }
 
+    void unregisterListener(AppTransitionListener listener) {
+        mListeners.remove(listener);
+    }
+
     public void notifyAppTransitionFinishedLocked(IBinder token) {
         for (int i = 0; i < mListeners.size(); i++) {
             mListeners.get(i).onAppTransitionFinishedLocked(token);

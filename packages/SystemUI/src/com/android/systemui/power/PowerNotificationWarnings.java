@@ -31,6 +31,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.UserHandle;
+import android.provider.Settings.Secure;
 import android.text.Annotation;
 import android.text.Layout;
 import android.text.SpannableString;
@@ -70,6 +71,7 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class PowerNotificationWarnings implements PowerUI.WarningsUI {
+
     private static final String TAG = PowerUI.TAG + ".Notification";
     private static final boolean DEBUG = PowerUI.DEBUG;
 
@@ -119,6 +121,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
             .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
             .build();
+    public static final String EXTRA_CONFIRM_ONLY = "extra_confirm_only";
 
     private final Context mContext;
     private final NotificationManager mNoMan;
@@ -544,10 +547,9 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         updateNotification();
     }
 
-    private void showStartSaverConfirmation() {
+    private void showStartSaverConfirmation(boolean confirmOnly) {
         if (mSaverConfirmation != null) return;
         final SystemUIDialog d = new SystemUIDialog(mContext);
-        d.setTitle(R.string.battery_saver_confirmation_title);
         d.setMessage(getBatterySaverDescription());
 
         // Sad hack for http://b/78261259 and http://b/78298335. Otherwise "Battery" may be split
@@ -558,9 +560,19 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         // We need to set LinkMovementMethod to make the link clickable.
         d.setMessageMovementMethod(LinkMovementMethod.getInstance());
 
-        d.setNegativeButton(android.R.string.cancel, null);
-        d.setPositiveButton(R.string.battery_saver_confirmation_ok,
+        if (confirmOnly) {
+            d.setTitle(R.string.battery_saver_confirmation_title_generic);
+            d.setPositiveButton(com.android.internal.R.string.confirm_battery_saver,
+                    (dialog, which) -> Secure.putInt(
+                            mContext.getContentResolver(),
+                            Secure.LOW_POWER_WARNING_ACKNOWLEDGED,
+                            1));
+        } else {
+            d.setTitle(R.string.battery_saver_confirmation_title);
+            d.setPositiveButton(R.string.battery_saver_confirmation_ok,
                 (dialog, which) -> setSaverMode(true, false));
+            d.setNegativeButton(android.R.string.cancel, null);
+        }
         d.setShowForAllUsers(true);
         d.setOnDismissListener((dialog) -> mSaverConfirmation = null);
         d.show();
@@ -719,7 +731,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                 dismissLowBatteryNotification();
             } else if (action.equals(ACTION_SHOW_START_SAVER_CONFIRMATION)) {
                 dismissLowBatteryNotification();
-                showStartSaverConfirmation();
+                showStartSaverConfirmation(intent.getBooleanExtra(EXTRA_CONFIRM_ONLY, false));
             } else if (action.equals(ACTION_DISMISSED_WARNING)) {
                 dismissLowBatteryWarning();
             } else if (ACTION_CLICKED_TEMP_WARNING.equals(action)) {

@@ -42,7 +42,9 @@ public:
                                   const VulkanManager& vkManager);
     ~VulkanSurface();
 
-    sk_sp<SkSurface> getCurrentSkSurface() { return mNativeBuffers[mDequeuedIndex].skSurface; }
+    sk_sp<SkSurface> getCurrentSkSurface() {
+        return mCurrentBufferInfo ? mCurrentBufferInfo->skSurface : nullptr;
+    }
     const SkMatrix& getCurrentPreTransform() { return mWindowInfo.preTransform; }
 
 private:
@@ -65,7 +67,7 @@ private:
     };
 
     NativeBufferInfo* dequeueNativeBuffer();
-    NativeBufferInfo* getCurrentBufferInfo() { return &mNativeBuffers[mDequeuedIndex]; }
+    NativeBufferInfo* getCurrentBufferInfo() { return mCurrentBufferInfo; }
     bool presentCurrentBuffer(const SkRect& dirtyRect, int semaphoreFd);
 
     // The width and height are are the logical width and height for when submitting draws to the
@@ -81,14 +83,19 @@ private:
      * as private to this class.
      *
      */
-    static constexpr int sMaxBufferCount = 3;
+
+    // How many buffers we want to be able to use ourselves. We want 1 in active rendering with
+    // 1 more queued, so 2. This will be added to NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS, which is
+    // how many buffers the consumer needs (eg, 1 for SurfaceFlinger), getting to a typically
+    // triple-buffered queue as a result.
+    static constexpr uint32_t sTargetBufferCount = 2;
 
     struct WindowInfo {
         SkISize size;
         PixelFormat pixelFormat;
         android_dataspace dataspace;
         int transform;
-        int bufferCount;
+        size_t bufferCount;
         uint64_t windowUsageFlags;
 
         // size of the ANativeWindow if the inverse of transform requires us to swap width/height
@@ -109,14 +116,15 @@ private:
                                               const SkISize& maxSize);
     void releaseBuffers();
 
-    NativeBufferInfo mNativeBuffers[VulkanSurface::sMaxBufferCount];
+    // TODO: Just use a vector?
+    NativeBufferInfo mNativeBuffers[android::BufferQueueDefs::NUM_BUFFER_SLOTS];
 
     sp<ANativeWindow> mNativeWindow;
     WindowInfo mWindowInfo;
     GrContext* mGrContext;
 
-    int mDequeuedIndex = -1;
     uint32_t mPresentCount = 0;
+    NativeBufferInfo* mCurrentBufferInfo = nullptr;
 
     const SkISize mMinWindowSize;
     const SkISize mMaxWindowSize;

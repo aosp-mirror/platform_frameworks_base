@@ -21,7 +21,7 @@ package android.content;
 
 import "frameworks/base/core/proto/android/app/window_configuration.proto";
 import "frameworks/base/core/proto/android/content/locale.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 /**
  * An android Configuration object.

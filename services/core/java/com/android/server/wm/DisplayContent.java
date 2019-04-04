@@ -28,6 +28,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_PRIVATE;
 import static android.view.Display.FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS;
@@ -655,7 +656,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (DEBUG_LAYOUT && !w.mLayoutAttached) {
             Slog.v(TAG, "1ST PASS " + w + ": gone=" + gone + " mHaveFrame=" + w.mHaveFrame
                     + " mLayoutAttached=" + w.mLayoutAttached
-                    + " screen changed=" + w.isConfigChanged());
+                    + " config reported=" + w.isLastConfigReportedToClient());
             final AppWindowToken atoken = w.mAppToken;
             if (gone) Slog.v(TAG, "  GONE: mViewVisibility=" + w.mViewVisibility
                     + " mRelayoutCalled=" + w.mRelayoutCalled + " hidden=" + w.mToken.isHidden()
@@ -670,42 +671,34 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         // If this view is GONE, then skip it -- keep the current frame, and let the caller know
         // so they can ignore it if they want.  (We do the normal layout for INVISIBLE windows,
         // since that means "perform layout as normal, just don't display").
-        if (!gone || !w.mHaveFrame || w.mLayoutNeeded
-                || ((w.isConfigChanged() || w.setReportResizeHints())
-                && !w.isGoneForLayoutLw() &&
-                ((w.mAttrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0 ||
-                        (w.mHasSurface && w.mAppToken != null &&
-                                w.mAppToken.layoutConfigChanges)))) {
-            if (!w.mLayoutAttached) {
-                if (mTmpInitial) {
-                    //Slog.i(TAG, "Window " + this + " clearing mContentChanged - initial");
-                    w.resetContentChanged();
-                }
-                if (w.mAttrs.type == TYPE_DREAM) {
-                    // Don't layout windows behind a dream, so that if it does stuff like hide
-                    // the status bar we won't get a bad transition when it goes away.
-                    mTmpWindow = w;
-                }
-                w.mLayoutNeeded = false;
-                w.prelayout();
-                final boolean firstLayout = !w.isLaidOut();
-                getDisplayPolicy().layoutWindowLw(w, null, mDisplayFrames);
-                w.mLayoutSeq = mLayoutSeq;
-
-                // If this is the first layout, we need to initialize the last inset values as
-                // otherwise we'd immediately cause an unnecessary resize.
-                if (firstLayout) {
-                    w.updateLastInsetValues();
-                }
-
-                if (w.mAppToken != null) {
-                    w.mAppToken.layoutLetterbox(w);
-                }
-
-                if (DEBUG_LAYOUT) Slog.v(TAG, "  LAYOUT: mFrame=" + w.getFrameLw()
-                        + " mContainingFrame=" + w.getContainingFrame()
-                        + " mDisplayFrame=" + w.getDisplayFrameLw());
+        if ((!gone || !w.mHaveFrame || w.mLayoutNeeded) && !w.mLayoutAttached) {
+            if (mTmpInitial) {
+                w.resetContentChanged();
             }
+            if (w.mAttrs.type == TYPE_DREAM) {
+                // Don't layout windows behind a dream, so that if it does stuff like hide
+                // the status bar we won't get a bad transition when it goes away.
+                mTmpWindow = w;
+            }
+            w.mLayoutNeeded = false;
+            w.prelayout();
+            final boolean firstLayout = !w.isLaidOut();
+            getDisplayPolicy().layoutWindowLw(w, null, mDisplayFrames);
+            w.mLayoutSeq = mLayoutSeq;
+
+            // If this is the first layout, we need to initialize the last inset values as
+            // otherwise we'd immediately cause an unnecessary resize.
+            if (firstLayout) {
+                w.updateLastInsetValues();
+            }
+
+            if (w.mAppToken != null) {
+                w.mAppToken.layoutLetterbox(w);
+            }
+
+            if (DEBUG_LAYOUT) Slog.v(TAG, "  LAYOUT: mFrame=" + w.getFrameLw()
+                    + " mContainingFrame=" + w.getContainingFrame()
+                    + " mDisplayFrame=" + w.getDisplayFrameLw());
         }
     };
 
@@ -1525,7 +1518,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final int shortSizeDp = shortSize * DisplayMetrics.DENSITY_DEFAULT / mBaseDisplayDensity;
         final int longSizeDp = longSize * DisplayMetrics.DENSITY_DEFAULT / mBaseDisplayDensity;
 
-        mDisplayPolicy.configure(width, height, shortSizeDp);
+        mDisplayPolicy.updateConfigurationAndScreenSizeDependentBehaviors();
         mDisplayRotation.configure(width, height, shortSizeDp, longSizeDp);
 
         mDisplayFrames.onDisplayInfoUpdated(mDisplayInfo,
@@ -1734,7 +1727,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mWmService.mH.sendEmptyMessage(REPORT_HARD_KEYBOARD_STATUS_CHANGE);
         }
 
-        mDisplayPolicy.updateConfigurationDependentBehaviors();
+        mDisplayPolicy.updateConfigurationAndScreenSizeDependentBehaviors();
 
         // Let the policy update hidden states.
         config.keyboardHidden = Configuration.KEYBOARDHIDDEN_NO;
@@ -3094,7 +3087,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     /** Updates the layer assignment of windows on this display. */
     void assignWindowLayers(boolean setLayoutNeeded) {
-        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "assignWindowLayers");
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "assignWindowLayers");
         assignChildLayers(getPendingTransaction());
         if (setLayoutNeeded) {
             setLayoutNeeded();
@@ -3105,7 +3098,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         // prepareSurfaces. This allows us to synchronize Z-ordering changes with
         // the hiding and showing of surfaces.
         scheduleAnimation();
-        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
     // TODO: This should probably be called any time a visual change is made to the hierarchy like
@@ -3219,13 +3212,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 "Proposed new IME target: " + target + " for display: " + getDisplayId());
 
         // Now, a special case -- if the last target's window is in the process of exiting, but
-        // not removed, and the new target is home, keep on the last target to avoid flicker.
-        // Home is a special case since its above other stacks in the ordering list, but layed
-        // out below the others.
+        // not removed, keep on the last target to avoid IME flicker.
         if (curTarget != null && !curTarget.mRemoved && curTarget.isDisplayedLw()
-                && curTarget.isClosing() && (target == null || target.isActivityTypeHome())) {
-            if (DEBUG_INPUT_METHOD) Slog.v(TAG_WM, "New target is home while current target is "
-                    + "closing, not changing");
+                && curTarget.isClosing()) {
+            if (DEBUG_INPUT_METHOD) Slog.v(TAG_WM, "Not changing target till current window is"
+                    + " closing and not removed");
             return curTarget;
         }
 
@@ -3659,9 +3650,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             // FIRST AND ONE HALF LOOP: Make WindowManagerPolicy think it is animating.
             pendingLayoutChanges = 0;
 
-            mDisplayPolicy.beginPostLayoutPolicyLw();
-            forAllWindows(mApplyPostLayoutPolicy, true /* traverseTopToBottom */);
-            pendingLayoutChanges |= mDisplayPolicy.finishPostLayoutPolicyLw();
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "applyPostLayoutPolicy");
+            try {
+                mDisplayPolicy.beginPostLayoutPolicyLw();
+                forAllWindows(mApplyPostLayoutPolicy, true /* traverseTopToBottom */);
+                pendingLayoutChanges |= mDisplayPolicy.finishPostLayoutPolicyLw();
+            } finally {
+                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+            }
             if (DEBUG_LAYOUT_REPEATS) surfacePlacer.debugLayoutRepeats(
                     "after finishPostLayoutPolicyLw", pendingLayoutChanges);
                 mInsetsStateController.onPostLayout();
@@ -3670,7 +3666,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mTmpApplySurfaceChangesTransactionState.reset();
 
         mTmpRecoveringMemory = recoveringMemory;
-        forAllWindows(mApplySurfaceChangesTransaction, true /* traverseTopToBottom */);
+
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "applyWindowSurfaceChanges");
+        try {
+            forAllWindows(mApplySurfaceChangesTransaction, true /* traverseTopToBottom */);
+        } finally {
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+        }
         prepareSurfaces();
 
         mLastHasContent = mTmpApplySurfaceChangesTransactionState.displayHasContent;
@@ -3720,11 +3722,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         out.set(left, top, left + width, top + height);
     }
 
-    @Override
-    public void getBounds(Rect out) {
-        calculateBounds(mDisplayInfo, out);
-    }
-
     private void getBounds(Rect out, int orientation) {
         getBounds(out);
 
@@ -3746,6 +3743,15 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     void performLayout(boolean initial, boolean updateInputWindows) {
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "performLayout");
+        try {
+            performLayoutNoTrace(initial, updateInputWindows);
+        } finally {
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+        }
+    }
+
+    private void performLayoutNoTrace(boolean initial, boolean updateInputWindows) {
         if (!isLayoutNeeded()) {
             return;
         }
@@ -3755,13 +3761,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final int dh = mDisplayInfo.logicalHeight;
         if (DEBUG_LAYOUT) {
             Slog.v(TAG, "-------------------------------------");
-            Slog.v(TAG, "performLayout: needed=" + isLayoutNeeded() + " dw=" + dw + " dh=" + dh);
+            Slog.v(TAG, "performLayout: needed=" + isLayoutNeeded() + " dw=" + dw
+                    + " dh=" + dh);
         }
 
         mDisplayFrames.onDisplayInfoUpdated(mDisplayInfo,
                 calculateDisplayCutoutForRotation(mDisplayInfo.rotation));
-        // TODO: Not sure if we really need to set the rotation here since we are updating from the
-        // display info above...
+        // TODO: Not sure if we really need to set the rotation here since we are updating from
+        // the display info above...
         mDisplayFrames.mRotation = mRotation;
         mDisplayPolicy.beginLayoutLw(mDisplayFrames, getConfiguration().uiMode);
 
@@ -4801,20 +4808,25 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     @Override
     void prepareSurfaces() {
-        final ScreenRotationAnimation screenRotationAnimation =
-                mWmService.mAnimator.getScreenRotationAnimationLocked(mDisplayId);
-        if (screenRotationAnimation != null && screenRotationAnimation.isAnimating()) {
-            screenRotationAnimation.getEnterTransformation().getMatrix().getValues(mTmpFloats);
-            mPendingTransaction.setMatrix(mWindowingLayer,
-                    mTmpFloats[Matrix.MSCALE_X], mTmpFloats[Matrix.MSKEW_Y],
-                    mTmpFloats[Matrix.MSKEW_X], mTmpFloats[Matrix.MSCALE_Y]);
-            mPendingTransaction.setPosition(mWindowingLayer,
-                    mTmpFloats[Matrix.MTRANS_X], mTmpFloats[Matrix.MTRANS_Y]);
-            mPendingTransaction.setAlpha(mWindowingLayer,
-                    screenRotationAnimation.getEnterTransformation().getAlpha());
-        }
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "prepareSurfaces");
+        try {
+            final ScreenRotationAnimation screenRotationAnimation =
+                    mWmService.mAnimator.getScreenRotationAnimationLocked(mDisplayId);
+            if (screenRotationAnimation != null && screenRotationAnimation.isAnimating()) {
+                screenRotationAnimation.getEnterTransformation().getMatrix().getValues(mTmpFloats);
+                mPendingTransaction.setMatrix(mWindowingLayer,
+                        mTmpFloats[Matrix.MSCALE_X], mTmpFloats[Matrix.MSKEW_Y],
+                        mTmpFloats[Matrix.MSKEW_X], mTmpFloats[Matrix.MSCALE_Y]);
+                mPendingTransaction.setPosition(mWindowingLayer,
+                        mTmpFloats[Matrix.MTRANS_X], mTmpFloats[Matrix.MTRANS_Y]);
+                mPendingTransaction.setAlpha(mWindowingLayer,
+                        screenRotationAnimation.getEnterTransformation().getAlpha());
+            }
 
-        super.prepareSurfaces();
+            super.prepareSurfaces();
+        } finally {
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+        }
     }
 
     void assignStackOrdering() {

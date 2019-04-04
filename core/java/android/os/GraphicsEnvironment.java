@@ -63,7 +63,7 @@ public class GraphicsEnvironment {
     private static final long SYSTEM_DRIVER_VERSION_CODE = 0;
     private static final String PROPERTY_GFX_DRIVER = "ro.gfx.driver.0";
     private static final String PROPERTY_GFX_DRIVER_BUILD_TIME = "ro.gfx.driver_build_time";
-    private static final String METADATA_DRIVER_BUILD_TIME = "driver_build_time";
+    private static final String METADATA_DRIVER_BUILD_TIME = "com.android.gamedriver.build_time";
     private static final String ANGLE_RULES_FILE = "a4a_rules.json";
     private static final String ANGLE_TEMP_RULES = "debug.angle.rules";
     private static final String ACTION_ANGLE_FOR_ANDROID = "android.app.action.ANGLE_FOR_ANDROID";
@@ -101,6 +101,13 @@ public class GraphicsEnvironment {
      */
     private static boolean isDebuggable(Context context) {
         return (context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) > 0;
+    }
+
+    /**
+     * Check whether application is profileable
+     */
+    private static boolean isProfileable(Context context) {
+        return context.getApplicationInfo().isProfileableByShell();
     }
 
     /**
@@ -153,11 +160,11 @@ public class GraphicsEnvironment {
         String layerPaths = "";
 
         // Only enable additional debug functionality if the following conditions are met:
-        // 1. App is debuggable or device is rooted
+        // 1. App is debuggable, profileable, or device is rooted
         // 2. ENABLE_GPU_DEBUG_LAYERS is true
         // 3. Package name is equal to GPU_DEBUG_APP
 
-        if (isDebuggable(context) || (getCanLoadSystemLibraries() == 1)) {
+        if (isDebuggable(context) || isProfileable(context) || (getCanLoadSystemLibraries() == 1)) {
 
             final int enable = coreSettings.getInt(Settings.Global.ENABLE_GPU_DEBUG_LAYERS, 0);
 
@@ -330,6 +337,25 @@ public class GraphicsEnvironment {
     }
 
     /**
+     * Check for ANGLE debug package, but only for apps that can load them (dumpable)
+     */
+    private String getAngleDebugPackage(Context context, Bundle coreSettings) {
+        final boolean appIsDebuggable = isDebuggable(context);
+        final boolean appIsProfileable = isProfileable(context);
+        final boolean deviceIsDebuggable = getCanLoadSystemLibraries() == 1;
+        if (appIsDebuggable || appIsProfileable || deviceIsDebuggable) {
+
+            String debugPackage =
+                    coreSettings.getString(Settings.Global.GLOBAL_SETTINGS_ANGLE_DEBUG_PACKAGE);
+
+            if ((debugPackage != null) && (!debugPackage.isEmpty())) {
+                return debugPackage;
+            }
+        }
+        return "";
+    }
+
+    /**
      * Attempt to setup ANGLE with a temporary rules file.
      * True: Temporary rules file was loaded.
      * False: Temporary rules file was *not* loaded.
@@ -495,11 +521,23 @@ public class GraphicsEnvironment {
         }
 
         final ApplicationInfo angleInfo;
-        try {
-            angleInfo = pm.getApplicationInfo(anglePkgName, PackageManager.MATCH_SYSTEM_ONLY);
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.w(TAG, "ANGLE package '" + anglePkgName + "' not installed");
-            return false;
+        String angleDebugPackage = getAngleDebugPackage(context, bundle);
+        if (!angleDebugPackage.isEmpty()) {
+            Log.i(TAG, "ANGLE debug package enabled: " + angleDebugPackage);
+            try {
+                // Note the debug package does not have to be pre-installed
+                angleInfo = pm.getApplicationInfo(angleDebugPackage, 0);
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.w(TAG, "ANGLE debug package '" + angleDebugPackage + "' not installed");
+                return false;
+            }
+        } else {
+            try {
+                angleInfo = pm.getApplicationInfo(anglePkgName, PackageManager.MATCH_SYSTEM_ONLY);
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.w(TAG, "ANGLE package '" + anglePkgName + "' not installed");
+                return false;
+            }
         }
 
         final String abi = chooseAbi(angleInfo);
@@ -702,7 +740,7 @@ public class GraphicsEnvironment {
 
         final String driverBuildTime = driverAppInfo.metaData.getString(METADATA_DRIVER_BUILD_TIME);
         if (driverBuildTime == null || driverBuildTime.isEmpty()) {
-            throw new IllegalArgumentException("driver_build_time meta-data is not set");
+            throw new IllegalArgumentException("com.android.gamedriver.build_time is not set");
         }
         // driver_build_time in the meta-data is in "L<Unix epoch timestamp>" format. e.g. L123456.
         // Long.parseLong will throw if the meta-data "driver_build_time" is not set properly.

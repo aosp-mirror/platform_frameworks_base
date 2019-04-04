@@ -347,7 +347,8 @@ class RootActivityContainer extends ConfigurationContainer
     }
 
     boolean startHomeOnDisplay(int userId, String reason, int displayId) {
-        return startHomeOnDisplay(userId, reason, displayId, false /*fromHomeKey*/);
+        return startHomeOnDisplay(userId, reason, displayId, false /* allowInstrumenting */,
+                false /* fromHomeKey */);
     }
 
     /**
@@ -361,7 +362,8 @@ class RootActivityContainer extends ConfigurationContainer
      *    If there are multiple activities matched, use first one.
      *  - Use the secondary home defined in the config.
      */
-    boolean startHomeOnDisplay(int userId, String reason, int displayId, boolean fromHomeKey) {
+    boolean startHomeOnDisplay(int userId, String reason, int displayId, boolean allowInstrumenting,
+            boolean fromHomeKey) {
         // Fallback to top focused display if the displayId is invalid.
         if (displayId == INVALID_DISPLAY) {
             displayId = getTopDisplayFocusedStack().mDisplayId;
@@ -383,7 +385,7 @@ class RootActivityContainer extends ConfigurationContainer
             return false;
         }
 
-        if (!canStartHomeOnDisplay(aInfo, displayId, false /* allowInstrumenting */)) {
+        if (!canStartHomeOnDisplay(aInfo, displayId, allowInstrumenting)) {
             return false;
         }
 

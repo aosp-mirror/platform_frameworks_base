@@ -15,15 +15,19 @@
  */
 package com.android.keyguard.clock;
 
+import android.app.WallpaperManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Paint.Style;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
+import com.android.internal.colorextraction.ColorExtractor;
 import com.android.keyguard.R;
+import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.plugins.ClockPlugin;
 
 import java.util.TimeZone;
@@ -44,6 +48,16 @@ public class DefaultClockController implements ClockPlugin {
     private final LayoutInflater mLayoutInflater;
 
     /**
+     * Extracts accent color from wallpaper.
+     */
+    private final SysuiColorExtractor mColorExtractor;
+
+    /**
+     * Renders preview from clock view.
+     */
+    private final ViewPreviewer mRenderer = new ViewPreviewer();
+
+    /**
      * Root view of preview.
      */
     private View mView;
@@ -61,17 +75,28 @@ public class DefaultClockController implements ClockPlugin {
     /**
      * Create a DefaultClockController instance.
      *
+     * @param res Resources contains title and thumbnail.
      * @param inflater Inflater used to inflate custom clock views.
+     * @param colorExtractor Extracts accent color from wallpaper.
      */
-    public DefaultClockController(Resources res, LayoutInflater inflater) {
+    public DefaultClockController(Resources res, LayoutInflater inflater,
+            SysuiColorExtractor colorExtractor) {
         mResources = res;
         mLayoutInflater = inflater;
+        mColorExtractor = colorExtractor;
     }
 
     private void createViews() {
         mView = mLayoutInflater.inflate(R.layout.default_clock_preview, null);
         mTextTime = mView.findViewById(R.id.time);
         mTextDate = mView.findViewById(R.id.date);
+    }
+
+    @Override
+    public void onDestroyView() {
+        mView = null;
+        mTextTime = null;
+        mTextDate = null;
     }
 
     @Override
@@ -87,6 +112,23 @@ public class DefaultClockController implements ClockPlugin {
     @Override
     public Bitmap getThumbnail() {
         return BitmapFactory.decodeResource(mResources, R.drawable.default_thumbnail);
+    }
+
+    @Override
+    public Bitmap getPreview(int width, int height) {
+
+        // Use the big clock view for the preview
+        View view = getBigClockView();
+
+        // Initialize state of plugin before generating preview.
+        setDarkAmount(1f);
+        setTextColor(Color.WHITE);
+        ColorExtractor.GradientColors colors = mColorExtractor.getColors(
+                WallpaperManager.FLAG_LOCK, true);
+        setColorPalette(colors.supportsDarkText(), colors.getColorPalette());
+        onTimeTick();
+
+        return mRenderer.createPreview(view, width, height);
     }
 
     @Override

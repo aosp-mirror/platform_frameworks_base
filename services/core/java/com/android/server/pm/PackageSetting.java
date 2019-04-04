@@ -152,6 +152,10 @@ public final class PackageSetting extends PackageSettingBase {
         return (pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_PRODUCT_SERVICES) != 0;
     }
 
+    public boolean isOdm() {
+        return (pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_ODM) != 0;
+    }
+
     public boolean isSystem() {
         return (pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0;
     }

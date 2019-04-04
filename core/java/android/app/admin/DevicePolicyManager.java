@@ -54,7 +54,6 @@ import android.net.NetworkUtils;
 import android.net.PrivateDnsConnectivityChecker;
 import android.net.ProxyInfo;
 import android.net.Uri;
-import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
@@ -2148,8 +2147,8 @@ public class DevicePolicyManager {
         public static final int UPDATE_ERROR_INCORRECT_OS_VERSION = 2;
 
         /**
-         * Represents the update file being wrong, i.e. payloads are mismatched, wrong compressions
-         * method.
+         * Represents the update file being wrong; e.g. payloads are mismatched, or the wrong
+         * compression method is used.
          */
         public static final int UPDATE_ERROR_UPDATE_FILE_INVALID = 3;
 
@@ -2166,7 +2165,7 @@ public class DevicePolicyManager {
          * reported back to the IT admin to be read.
          */
         public void onInstallUpdateError(
-                @InstallUpdateCallbackErrorConstants int errorCode, String errorMessage) {
+                @InstallUpdateCallbackErrorConstants int errorCode, @NonNull String errorMessage) {
         }
     }
 
@@ -2226,7 +2225,6 @@ public class DevicePolicyManager {
      * <ul>
      *     <li>{@link #PROVISIONING_MODE_FULLY_MANAGED_DEVICE}</li>
      *     <li>{@link #PROVISIONING_MODE_MANAGED_PROFILE}</li>
-     *     <li>{@link #PROVISIONING_MODE_MANAGED_PROFILE_ON_FULLY_MANAGED_DEVICE}</li>
      * </ul>
      *
      * <p>The target activity may also return the account that needs to be migrated from primary
@@ -2253,7 +2251,6 @@ public class DevicePolicyManager {
      * <ul>
      *     <li>{@link #PROVISIONING_MODE_FULLY_MANAGED_DEVICE}</li>
      *     <li>{@link #PROVISIONING_MODE_MANAGED_PROFILE}</li>
-     *     <li>{@link #PROVISIONING_MODE_MANAGED_PROFILE_ON_FULLY_MANAGED_DEVICE}</li>
      * </ul>
      */
     public static final String EXTRA_PROVISIONING_MODE =
@@ -2268,11 +2265,6 @@ public class DevicePolicyManager {
      * The provisioning mode for managed profile.
      */
     public static final int PROVISIONING_MODE_MANAGED_PROFILE = 2;
-
-    /**
-     * The provisioning mode for managed profile on a fully managed device.
-     */
-    public static final int PROVISIONING_MODE_MANAGED_PROFILE_ON_FULLY_MANAGED_DEVICE = 3;
 
     /**
      * Activity action: Starts the administrator to show policy compliance for the provisioning.
@@ -4358,6 +4350,7 @@ public class DevicePolicyManager {
 
     /**
      * Disable text entry into notifications on secure keyguard screens (e.g. PIN/Pattern/Password).
+     * This flag has no effect starting from version {@link android.os.Build.VERSION_CODES#N}
      */
     public static final int KEYGUARD_DISABLE_REMOTE_INPUT = 1 << 6;
 
@@ -5446,13 +5439,14 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device or profile owner to set whether auto time is required. If auto time is
-     * required, no user will be able set the date and time and network date and time will be used.
+     * Called by a device owner, or alternatively a profile owner from Android 8.0 (API level 26) or
+     * higher, to set whether auto time is required. If auto time is required, no user will be able
+     * set the date and time and network date and time will be used.
      * <p>
      * Note: if auto time is required the user can still manually set the time zone.
      * <p>
-     * The calling device admin must be a device or profile owner. If it is not, a security
-     * exception will be thrown.
+     * The calling device admin must be a device owner, or alternatively a profile owner from
+     * Android 8.0 (API level 26) or higher. If it is not, a security exception will be thrown.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param required Whether auto time is set required or not.
@@ -6415,27 +6409,20 @@ public class DevicePolicyManager {
      * Returns whether the specified package can read the device identifiers.
      *
      * @param packageName The package name of the app to check for device identifier access.
+     * @param pid The process id of the package to be checked.
+     * @param uid The uid of the package to be checked.
      * @return whether the package can read the device identifiers.
      *
      * @hide
      */
-    public boolean checkDeviceIdentifierAccess(String packageName) {
-        return checkDeviceIdentifierAccessAsUser(packageName, myUserId());
-    }
-
-    /**
-     * @hide
-     */
-    @RequiresPermission(value = android.Manifest.permission.MANAGE_USERS, conditional = true)
-    public boolean checkDeviceIdentifierAccessAsUser(String packageName, int userId) {
-        throwIfParentInstance("checkDeviceIdentifierAccessAsUser");
+    public boolean checkDeviceIdentifierAccess(String packageName, int pid, int uid) {
+        throwIfParentInstance("checkDeviceIdentifierAccess");
         if (packageName == null) {
             return false;
         }
         if (mService != null) {
             try {
-                return mService.checkDeviceIdentifierAccess(packageName, userId,
-                        Binder.getCallingPid(), Binder.getCallingUid());
+                return mService.checkDeviceIdentifierAccess(packageName, pid, uid);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
@@ -10795,8 +10782,8 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Returns whether the device is being used as a managed kiosk, as defined in the CDD. As of
-     * this release, these requirements are as follows:
+     * Returns whether the device is being used as a managed kiosk. These requirements are as
+     * follows:
      * <ul>
      *     <li>The device is in Lock Task (therefore there is also a Device Owner app on the
      *     device)</li>
@@ -10835,11 +10822,11 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Returns whether the device is being used as an unattended managed kiosk, as defined in the
-     * CDD. As of this release, these requirements are as follows:
+     * Returns whether the device is being used as an unattended managed kiosk. These requirements
+     * are as follows:
      * <ul>
-     *     <li>The device is being used as a managed kiosk, as defined in the CDD and verified at
-     *     {@link #isManagedKiosk()}</li>
+     *     <li>The device is being used as a managed kiosk, as defined at {@link
+     *     #isManagedKiosk()}</li>
      *     <li>The device has not received user input for at least 30 minutes</li>
      * </ul>
      *

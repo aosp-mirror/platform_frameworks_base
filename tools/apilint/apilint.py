@@ -2147,6 +2147,8 @@ def show_deprecations_at_birth(cur, prev):
             del cur[prev_clazz.fullname]
 
     for clazz in cur.values():
+        if not is_interesting(clazz): continue
+
         if "deprecated" in clazz.split and not clazz.fullname in prev:
             error(clazz, None, None, "Found API deprecation at birth")
 

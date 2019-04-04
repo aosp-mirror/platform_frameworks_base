@@ -19,11 +19,15 @@ package com.android.systemui.statusbar.phone;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Handler;
-import android.provider.Settings;
 import android.view.CompositionSamplingListener;
 import android.view.View;
+
+import com.android.systemui.R;
+import com.android.systemui.shared.system.QuickStepContract;
 
 import java.io.PrintWriter;
 
@@ -36,9 +40,6 @@ public class NavBarTintController implements View.OnAttachStateChangeListener,
     public static final int MIN_COLOR_ADAPT_TRANSITION_TIME = 400;
     public static final int DEFAULT_COLOR_ADAPT_TRANSITION_TIME = 1700;
 
-    // Passing the threshold of this luminance value will make the button black otherwise white
-    private static final float LUMINANCE_THRESHOLD = 0.3f;
-
     private final Handler mHandler = new Handler();
     private final NavigationBarView mNavigationBarView;
     private final LightBarTransitionsController mLightBarController;
@@ -49,8 +50,16 @@ public class NavBarTintController implements View.OnAttachStateChangeListener,
     private boolean mSamplingEnabled = false;
     private boolean mSamplingListenerRegistered = false;
 
-    private float mLastMediaLuma;
+    private float mLastMedianLuma;
+    private float mCurrentMedianLuma;
     private boolean mUpdateOnNextDraw;
+
+    private final int mNavBarHeight;
+    private final int mNavColorSampleMargin;
+
+    // Passing the threshold of this luminance value will make the button black otherwise white
+    private final float mLuminanceThreshold;
+    private final float mLuminanceChangeThreshold;
 
     public NavBarTintController(NavigationBarView navigationBarView,
             LightBarTransitionsController lightBarController) {
@@ -65,6 +74,13 @@ public class NavBarTintController implements View.OnAttachStateChangeListener,
         mNavigationBarView.addOnAttachStateChangeListener(this);
         mNavigationBarView.addOnLayoutChangeListener(this);
         mLightBarController = lightBarController;
+
+        final Resources res = navigationBarView.getResources();
+        mNavBarHeight = res.getDimensionPixelSize(R.dimen.navigation_bar_height);
+        mNavColorSampleMargin =
+                res.getDimensionPixelSize(R.dimen.navigation_handle_sample_horizontal_margin);
+        mLuminanceThreshold = res.getFloat(R.dimen.navigation_luminance_threshold);
+        mLuminanceChangeThreshold = res.getFloat(R.dimen.navigation_luminance_change_threshold);
     }
 
     void onDraw() {
@@ -108,8 +124,11 @@ public class NavBarTintController implements View.OnAttachStateChangeListener,
         if (view != null) {
             int[] pos = new int[2];
             view.getLocationOnScreen(pos);
-            final Rect samplingBounds = new Rect(pos[0], pos[1],
-                    pos[0] + view.getWidth(), pos[1] + view.getHeight());
+            Point displaySize = new Point();
+            view.getContext().getDisplay().getRealSize(displaySize);
+            final Rect samplingBounds = new Rect(pos[0] - mNavColorSampleMargin,
+                    displaySize.y - mNavBarHeight, pos[0] + view.getWidth() + mNavColorSampleMargin,
+                    displaySize.y);
             if (!samplingBounds.equals(mSamplingBounds)) {
                 mSamplingBounds.set(samplingBounds);
                 requestUpdateSamplingListener();
@@ -143,13 +162,19 @@ public class NavBarTintController implements View.OnAttachStateChangeListener,
     }
 
     private void updateTint(float medianLuma) {
-        mLastMediaLuma = medianLuma;
-        if (medianLuma > LUMINANCE_THRESHOLD) {
-            // Black
-            mLightBarController.setIconsDark(true /* dark */, true /* animate */);
-        } else {
-            // White
-            mLightBarController.setIconsDark(false /* dark */, true /* animate */);
+        mLastMedianLuma = medianLuma;
+
+        // If the difference between the new luma and the current luma is larger than threshold
+        // then apply the current luma, this is to prevent small changes causing colors to flicker
+        if (Math.abs(mCurrentMedianLuma - mLastMedianLuma) > mLuminanceChangeThreshold) {
+            if (medianLuma > mLuminanceThreshold) {
+                // Black
+                mLightBarController.setIconsDark(true /* dark */, true /* animate */);
+            } else {
+                // White
+                mLightBarController.setIconsDark(false /* dark */, true /* animate */);
+            }
+            mCurrentMedianLuma = medianLuma;
         }
     }
 
@@ -161,14 +186,12 @@ public class NavBarTintController implements View.OnAttachStateChangeListener,
                 : "false"));
         pw.println("  mSamplingListenerRegistered: " + mSamplingListenerRegistered);
         pw.println("  mSamplingBounds: " + mSamplingBounds);
-        pw.println("  mLastMediaLuma: " + mLastMediaLuma);
+        pw.println("  mLastMedianLuma: " + mLastMedianLuma);
+        pw.println("  mCurrentMedianLuma: " + mCurrentMedianLuma);
     }
 
     public static boolean isEnabled(Context context) {
         return context.getDisplayId() == DEFAULT_DISPLAY
-                && Settings.Global.getInt(context.getContentResolver(),
-                        NavigationPrototypeController.NAV_COLOR_ADAPT_ENABLE_SETTING, 0) == 1
-                && Settings.Global.getInt(context.getContentResolver(),
-                        NavigationPrototypeController.SHOW_HOME_HANDLE_SETTING, 0) == 1;
+                && QuickStepContract.isGesturalMode(context);
     }
 }

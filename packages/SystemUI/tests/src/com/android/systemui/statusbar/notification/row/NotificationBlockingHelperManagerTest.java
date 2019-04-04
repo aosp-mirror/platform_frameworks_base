@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_POSITIVE;
@@ -24,11 +25,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.NotificationChannel;
 import android.content.Context;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -130,6 +133,21 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
         verify(mGutsManager).openGuts(row, 0, 0, mMenuItem);
     }
 
+    @Test
+    public void testPerhapsShowBlockingHelper_notShownForMultiChannelGroup() throws Exception {
+        ExpandableNotificationRow groupRow = createBlockableGroupRowSpy(10);
+        int i = 0;
+        for (ExpandableNotificationRow childRow : groupRow.getNotificationChildren()) {
+            childRow.getEntry().channel =
+                    new NotificationChannel(Integer.toString(i++), "", IMPORTANCE_DEFAULT);
+        }
+
+        groupRow.getEntry().userSentiment = USER_SENTIMENT_NEGATIVE;
+
+        assertFalse(mBlockingHelperManager.perhapsShowBlockingHelper(groupRow, mMenuRow));
+
+        verify(mGutsManager, never()).openGuts(groupRow, 0, 0, mMenuItem);
+    }
 
     @Test
     public void testPerhapsShowBlockingHelper_shownForLargeGroup() throws Exception {

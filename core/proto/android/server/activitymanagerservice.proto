@@ -34,7 +34,7 @@ import "frameworks/base/core/proto/android/os/powermanager.proto";
 import "frameworks/base/core/proto/android/server/intentresolver.proto";
 import "frameworks/base/core/proto/android/server/windowmanagerservice.proto";
 import "frameworks/base/core/proto/android/util/common.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 option java_multiple_files = true;
 
@@ -756,6 +756,7 @@ message ActivityManagerServiceDumpProcessesProto {
             optional string file = 2 [ (.android.privacy).dest = DEST_EXPLICIT ];
             optional int32 pid = 3;
             optional int32 uid = 4;
+            optional bool is_user_initiated = 5;
         }
         optional Dump dump = 2;
     }

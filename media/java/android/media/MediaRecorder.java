@@ -18,6 +18,7 @@ package android.media;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.FloatRange;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -42,6 +43,8 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -355,6 +358,22 @@ public class MediaRecorder implements AudioRouting,
         public static final int HOTWORD = 1999;
     }
 
+    /** @hide */
+    @IntDef({
+        AudioSource.DEFAULT,
+        AudioSource.MIC,
+        AudioSource.VOICE_UPLINK,
+        AudioSource.VOICE_DOWNLINK,
+        AudioSource.VOICE_CALL,
+        AudioSource.CAMCORDER,
+        AudioSource.VOICE_RECOGNITION,
+        AudioSource.VOICE_COMMUNICATION,
+        AudioSource.UNPROCESSED,
+        AudioSource.VOICE_PERFORMANCE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Source {}
+
     // TODO make AudioSource static (API change) and move this method inside the AudioSource class
     /**
      * @hide
@@ -547,11 +566,11 @@ public class MediaRecorder implements AudioRouting,
      * to be specified before setting recording-parameters or encoders. Call
      * this only before setOutputFormat().
      *
-     * @param audio_source the audio source to use
+     * @param audioSource the audio source to use
      * @throws IllegalStateException if it is called after setOutputFormat()
      * @see android.media.MediaRecorder.AudioSource
      */
-    public native void setAudioSource(int audio_source)
+    public native void setAudioSource(@Source int audioSource)
             throws IllegalStateException;
 
     /**
@@ -1537,8 +1556,8 @@ public class MediaRecorder implements AudioRouting,
      * @param direction Direction constant.
      * @return true if sucessful.
      */
-    public boolean setMicrophoneDirection(@DirectionMode int direction) {
-        return native_setMicrophoneDirection(direction) == 0;
+    public boolean setPreferredMicrophoneDirection(@DirectionMode int direction) {
+        return native_setPreferredMicrophoneDirection(direction) == 0;
     }
 
     /**
@@ -1549,14 +1568,15 @@ public class MediaRecorder implements AudioRouting,
      * though 0 (no zoom) to 1 (maximum zoom).
      * @return true if sucessful.
      */
-    public boolean setMicrophoneFieldDimension(@FloatRange(from = -1.0, to = 1.0) float zoom) {
+    public boolean setPreferredMicrophoneFieldDimension(
+                            @FloatRange(from = -1.0, to = 1.0) float zoom) {
         Preconditions.checkArgument(
                 zoom >= -1 && zoom <= 1, "Argument must fall between -1 & 1 (inclusive)");
-        return native_setMicrophoneFieldDimension(zoom) == 0;
+        return native_setPreferredMicrophoneFieldDimension(zoom) == 0;
     }
 
-    private native int native_setMicrophoneDirection(int direction);
-    private native int native_setMicrophoneFieldDimension(float zoom);
+    private native int native_setPreferredMicrophoneDirection(int direction);
+    private native int native_setPreferredMicrophoneFieldDimension(float zoom);
 
     //--------------------------------------------------------------------------
     // Implementation of AudioRecordingMonitor interface

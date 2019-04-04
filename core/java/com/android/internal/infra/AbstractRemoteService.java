@@ -82,7 +82,7 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
     private final VultureCallback<S> mVultureCallback;
     private final int mUserId;
     private final ServiceConnection mServiceConnection = new RemoteServiceConnection();
-    private final boolean mBindInstantServiceAllowed;
+    private final int mBindingFlags;
     protected I mService;
 
     private boolean mBinding;
@@ -113,7 +113,7 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
     // NOTE: must be package-protected so this class is not extended outside
     AbstractRemoteService(@NonNull Context context, @NonNull String serviceInterface,
             @NonNull ComponentName componentName, int userId, @NonNull VultureCallback<S> callback,
-            @NonNull Handler handler, boolean bindInstantServiceAllowed, boolean verbose) {
+            @NonNull Handler handler, int bindingFlags, boolean verbose) {
         mContext = context;
         mVultureCallback = callback;
         mVerbose = verbose;
@@ -121,7 +121,7 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
         mIntent = new Intent(serviceInterface).setComponent(mComponentName);
         mUserId = userId;
         mHandler = new Handler(handler.getLooper());
-        mBindInstantServiceAllowed = bindInstantServiceAllowed;
+        mBindingFlags = bindingFlags;
     }
 
     /**
@@ -264,7 +264,7 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
             }
         }
         pw.println();
-        pw.append(prefix).append("mBindInstantServiceAllowed=").println(mBindInstantServiceAllowed);
+        pw.append(prefix).append("mBindingFlags=").println(mBindingFlags);
         pw.append(prefix).append("idleTimeout=")
             .append(Long.toString(idleTimeout / 1000)).append("s\n");
         pw.append(prefix).append("requestTimeout=");
@@ -407,10 +407,8 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
         if (mVerbose) Slog.v(mTag, "ensureBound()");
         mBinding = true;
 
-        int flags = Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE;
-        if (mBindInstantServiceAllowed) {
-            flags |= Context.BIND_ALLOW_INSTANT;
-        }
+        final int flags = Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE
+                | mBindingFlags;
 
         final boolean willBind = mContext.bindServiceAsUser(mIntent, mServiceConnection, flags,
                 mHandler, new UserHandle(mUserId));
@@ -481,7 +479,11 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "[" + mComponentName + "]";
+        return getClass().getSimpleName() + "[" + mComponentName
+                + " " + System.identityHashCode(this)
+                + (mService != null ? " (bound)" : " (unbound)")
+                + (mDestroyed ? " (destroyed)" : "")
+                + "]";
     }
 
     /**

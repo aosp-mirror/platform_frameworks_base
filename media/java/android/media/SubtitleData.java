@@ -17,10 +17,7 @@
 package android.media;
 
 import android.annotation.NonNull;
-import android.annotation.SystemApi;
 import android.os.Parcel;
-
-import java.util.Arrays;
 
 /**
  * Class encapsulating subtitle data, as received through the
@@ -82,12 +79,23 @@ public final class SubtitleData
         }
     }
 
-    /** @hide */
+    /**
+     * Constructor.
+     *
+     * @param trackIndex the index of the media player track which contains this subtitle data.
+     * @param startTimeUs the start time in microsecond for the subtitle data
+     * @param durationUs the duration in microsecond for the subtitle data
+     * @param data the data array for the subtitle data. It should not be null.
+     *            No data copying is made.
+     */
     public SubtitleData(int trackIndex, long startTimeUs, long durationUs, @NonNull byte[] data) {
+        if (data == null) {
+            throw new IllegalArgumentException("null data is not allowed");
+        }
         mTrackIndex = trackIndex;
         mStartTimeUs = startTimeUs;
         mDurationUs = durationUs;
-        mData = (data != null ? data : new byte[0]);
+        mData = data;
     }
 
     /**
@@ -140,81 +148,5 @@ public final class SubtitleData
         parcel.readByteArray(mData);
 
         return true;
-    }
-
-    /**
-     * Builder class for {@link SubtitleData} objects.
-     * <p> Here is an example where <code>Builder</code> is used to define the
-     * {@link SubtitleData}:
-     *
-     * <pre class="prettyprint">
-     * SubtitleData sd = new SubtitleData.Builder()
-     *         .setSubtitleData(trackIndex, startTime, duration, data)
-     *         .build();
-     * </pre>
-     * @hide
-     */
-    @SystemApi
-    public static final class Builder {
-        private int mTrackIndex;
-        private long mStartTimeUs;
-        private long mDurationUs;
-        private byte[] mData = new byte[0];
-
-        /**
-         * Constructs a new Builder with the defaults.
-         */
-        public Builder() {
-        }
-
-        /**
-         * Constructs a new Builder from a given {@link SubtitleData} instance
-         * @param sd the {@link SubtitleData} object whose data will be reused
-         * in the new Builder. It should not be null. The data array is copied.
-         */
-        public Builder(@NonNull SubtitleData sd) {
-            if (sd == null) {
-                throw new IllegalArgumentException("null SubtitleData is not allowed");
-            }
-            mTrackIndex = sd.mTrackIndex;
-            mStartTimeUs = sd.mStartTimeUs;
-            mDurationUs = sd.mDurationUs;
-            if (sd.mData != null) {
-                mData = Arrays.copyOf(sd.mData, sd.mData.length);
-            }
-        }
-
-        /**
-         * Combines all of the fields that have been set and return a new
-         * {@link SubtitleData} object. <code>IllegalStateException</code> will be
-         * thrown if there is conflict between fields.
-         *
-         * @return a new {@link SubtitleData} object
-         */
-        public @NonNull SubtitleData build() {
-            return new SubtitleData(mTrackIndex, mStartTimeUs, mDurationUs, mData);
-        }
-
-        /**
-         * Sets the info of subtitle data.
-         *
-         * @param trackIndex the index of the media player track which contains this subtitle data.
-         * @param startTimeUs the start time in microsecond for the subtile data
-         * @param durationUs the duration in microsecond for the subtile data
-         * @param data the data array for the subtile data. It should not be null.
-         *     No data copying is made.
-         * @return the same Builder instance.
-         */
-        public @NonNull Builder setSubtitleData(
-                int trackIndex, long startTimeUs, long durationUs, @NonNull byte[] data) {
-            if (data == null) {
-                throw new IllegalArgumentException("null data is not allowed");
-            }
-            mTrackIndex = trackIndex;
-            mStartTimeUs = startTimeUs;
-            mDurationUs = durationUs;
-            mData = data;
-            return this;
-        }
     }
 }

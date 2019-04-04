@@ -19,6 +19,7 @@ package com.android.internal.widget;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -78,7 +79,9 @@ public class LockPatternView extends View {
 
     private boolean mDrawingProfilingStarted = false;
 
+    @UnsupportedAppUsage
     private final Paint mPaint = new Paint();
+    @UnsupportedAppUsage
     private final Paint mPathPaint = new Paint();
 
     /**
@@ -98,6 +101,7 @@ public class LockPatternView extends View {
     private static final String TAG = "LockPatternView";
 
     private OnPatternListener mOnPatternListener;
+    @UnsupportedAppUsage
     private final ArrayList<Cell> mPattern = new ArrayList<Cell>(9);
 
     /**
@@ -119,16 +123,21 @@ public class LockPatternView extends View {
     private long mAnimatingPeriodStart;
     private long[] mLineFadeStart = new long[9];
 
+    @UnsupportedAppUsage
     private DisplayMode mPatternDisplayMode = DisplayMode.Correct;
     private boolean mInputEnabled = true;
+    @UnsupportedAppUsage
     private boolean mInStealthMode = false;
     private boolean mEnableHapticFeedback = true;
+    @UnsupportedAppUsage
     private boolean mPatternInProgress = false;
     private boolean mFadePattern = true;
 
     private float mHitFactor = 0.6f;
 
+    @UnsupportedAppUsage
     private float mSquareWidth;
+    @UnsupportedAppUsage
     private float mSquareHeight;
 
     private final Path mCurrentPath = new Path();
@@ -153,7 +162,9 @@ public class LockPatternView extends View {
      * Represents a cell in the 3 X 3 matrix of the unlock pattern view.
      */
     public static final class Cell {
+        @UnsupportedAppUsage
         final int row;
+        @UnsupportedAppUsage
         final int column;
 
         // keep # objects limited to 9
@@ -231,16 +242,19 @@ public class LockPatternView extends View {
         /**
          * The pattern drawn is correct (i.e draw it in a friendly color)
          */
+        @UnsupportedAppUsage
         Correct,
 
         /**
          * Animate the pattern (for demo, and help).
          */
+        @UnsupportedAppUsage
         Animate,
 
         /**
          * The pattern is wrong (i.e draw a foreboding color)
          */
+        @UnsupportedAppUsage
         Wrong
     }
 
@@ -276,6 +290,7 @@ public class LockPatternView extends View {
         this(context, null);
     }
 
+    @UnsupportedAppUsage
     public LockPatternView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
@@ -347,6 +362,7 @@ public class LockPatternView extends View {
         a.recycle();
     }
 
+    @UnsupportedAppUsage
     public CellState[][] getCellStates() {
         return mCellStates;
     }
@@ -371,6 +387,7 @@ public class LockPatternView extends View {
      *
      * @param inStealthMode Whether in stealth mode.
      */
+    @UnsupportedAppUsage
     public void setInStealthMode(boolean inStealthMode) {
         mInStealthMode = inStealthMode;
     }
@@ -389,6 +406,7 @@ public class LockPatternView extends View {
      *
      * @param tactileFeedbackEnabled Whether tactile feedback is enabled
      */
+    @UnsupportedAppUsage
     public void setTactileFeedbackEnabled(boolean tactileFeedbackEnabled) {
         mEnableHapticFeedback = tactileFeedbackEnabled;
     }
@@ -397,6 +415,7 @@ public class LockPatternView extends View {
      * Set the call back for pattern detection.
      * @param onPatternListener The call back.
      */
+    @UnsupportedAppUsage
     public void setOnPatternListener(
             OnPatternListener onPatternListener) {
         mOnPatternListener = onPatternListener;
@@ -425,6 +444,7 @@ public class LockPatternView extends View {
      * in progress result to correct or wrong.
      * @param displayMode The display mode.
      */
+    @UnsupportedAppUsage
     public void setDisplayMode(DisplayMode displayMode) {
         mPatternDisplayMode = displayMode;
         if (displayMode == DisplayMode.Animate) {
@@ -564,6 +584,7 @@ public class LockPatternView extends View {
         }
     }
 
+    @UnsupportedAppUsage
     private void notifyPatternDetected() {
         sendAccessEvent(R.string.lockscreen_access_pattern_detected);
         if (mOnPatternListener != null) {
@@ -581,6 +602,7 @@ public class LockPatternView extends View {
     /**
      * Clear the pattern.
      */
+    @UnsupportedAppUsage
     public void clearPattern() {
         resetPattern();
     }
@@ -621,6 +643,7 @@ public class LockPatternView extends View {
      * Disable input (for instance when displaying a message that will
      * timeout so user doesn't get view into messy state).
      */
+    @UnsupportedAppUsage
     public void disableInput() {
         mInputEnabled = false;
     }
@@ -628,6 +651,7 @@ public class LockPatternView extends View {
     /**
      * Enable input.
      */
+    @UnsupportedAppUsage
     public void enableInput() {
         mInputEnabled = true;
     }
@@ -1308,6 +1332,7 @@ public class LockPatternView extends View {
         /**
          * Constructor called from {@link LockPatternView#onSaveInstanceState()}
          */
+        @UnsupportedAppUsage
         private SavedState(Parcelable superState, String serializedPattern, int displayMode,
                 boolean inputEnabled, boolean inStealthMode, boolean tactileFeedbackEnabled) {
             super(superState);
@@ -1321,6 +1346,7 @@ public class LockPatternView extends View {
         /**
          * Constructor called from {@link #CREATOR}
          */
+        @UnsupportedAppUsage
         private SavedState(Parcel in) {
             super(in);
             mSerializedPattern = in.readString();

@@ -886,13 +886,20 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
 
     public boolean getUserCanSkipBouncer(int userId) {
-        boolean fingerprintOrFace = mUserFingerprintAuthenticated.get(userId)
-                || mUserFaceAuthenticated.get(userId);
-        return getUserHasTrust(userId) || (fingerprintOrFace && isUnlockingWithBiometricAllowed());
+        return getUserHasTrust(userId) || getUserUnlockedWithBiometric(userId);
     }
 
     public boolean getUserHasTrust(int userId) {
         return !isTrustDisabled(userId) && mUserHasTrust.get(userId);
+    }
+
+    /**
+     * Returns whether the user is unlocked with biometrics.
+     */
+    public boolean getUserUnlockedWithBiometric(int userId) {
+        boolean fingerprintOrFace = mUserFingerprintAuthenticated.get(userId)
+                || mUserFaceAuthenticated.get(userId);
+        return fingerprintOrFace && isUnlockingWithBiometricAllowed();
     }
 
     public boolean getUserTrustIsManaged(int userId) {

@@ -60,7 +60,7 @@ public:
 
         mBootAction = new BootAction();
         if (!mBootAction->init(library_path, mBootParameters)) {
-            mBootAction = NULL;
+            mBootAction = nullptr;
         }
     };
 

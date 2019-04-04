@@ -186,41 +186,10 @@ public final class DefaultPermissionGrantPolicy {
         SENSORS_PERMISSIONS.add(Manifest.permission.BODY_SENSORS);
     }
 
-    @Deprecated
     private static final Set<String> STORAGE_PERMISSIONS = new ArraySet<>();
     static {
-        // STOPSHIP(b/112545973): remove once feature enabled by default
-        if (!StorageManager.hasIsolatedStorage()) {
-            STORAGE_PERMISSIONS.add(Manifest.permission.READ_EXTERNAL_STORAGE);
-            STORAGE_PERMISSIONS.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        }
-    }
-
-    private static final Set<String> MEDIA_AURAL_PERMISSIONS = new ArraySet<>();
-    static {
-        // STOPSHIP(b/112545973): remove once feature enabled by default
-        if (StorageManager.hasIsolatedStorage()) {
-            MEDIA_AURAL_PERMISSIONS.add(Manifest.permission.READ_MEDIA_AUDIO);
-
-            // STOPSHIP(b/124466734): remove these manual grants once the legacy
-            // permission logic is unified with PermissionController
-            MEDIA_AURAL_PERMISSIONS.add(Manifest.permission.READ_EXTERNAL_STORAGE);
-            MEDIA_AURAL_PERMISSIONS.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        }
-    }
-
-    private static final Set<String> MEDIA_VISUAL_PERMISSIONS = new ArraySet<>();
-    static {
-        // STOPSHIP(b/112545973): remove once feature enabled by default
-        if (StorageManager.hasIsolatedStorage()) {
-            MEDIA_VISUAL_PERMISSIONS.add(Manifest.permission.READ_MEDIA_VIDEO);
-            MEDIA_VISUAL_PERMISSIONS.add(Manifest.permission.READ_MEDIA_IMAGES);
-
-            // STOPSHIP(b/124466734): remove these manual grants once the legacy
-            // permission logic is unified with PermissionController
-            MEDIA_VISUAL_PERMISSIONS.add(Manifest.permission.READ_EXTERNAL_STORAGE);
-            MEDIA_VISUAL_PERMISSIONS.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        }
+        STORAGE_PERMISSIONS.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+        STORAGE_PERMISSIONS.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
     }
 
     private static final int MSG_READ_DEFAULT_PERMISSION_EXCEPTIONS = 1;
@@ -477,8 +446,7 @@ public final class DefaultPermissionGrantPolicy {
         // Media provider
         grantSystemFixedPermissionsToSystemPackage(
                 getDefaultProviderAuthorityPackage(MediaStore.AUTHORITY, userId), userId,
-                STORAGE_PERMISSIONS, MEDIA_AURAL_PERMISSIONS, MEDIA_VISUAL_PERMISSIONS,
-                PHONE_PERMISSIONS);
+                STORAGE_PERMISSIONS, PHONE_PERMISSIONS);
 
         // Downloads provider
         grantSystemFixedPermissionsToSystemPackage(
@@ -600,7 +568,7 @@ public final class DefaultPermissionGrantPolicy {
         grantPermissionsToSystemPackage(
                 getDefaultSystemHandlerActivityPackageForCategory(
                         Intent.CATEGORY_APP_GALLERY, userId),
-                userId, STORAGE_PERMISSIONS, MEDIA_VISUAL_PERMISSIONS);
+                userId, STORAGE_PERMISSIONS);
 
         // Email
         grantPermissionsToSystemPackage(
@@ -650,7 +618,7 @@ public final class DefaultPermissionGrantPolicy {
                 grantPermissionsToSystemPackage(packageName, userId,
                         CONTACTS_PERMISSIONS, CALENDAR_PERMISSIONS, MICROPHONE_PERMISSIONS,
                         PHONE_PERMISSIONS, SMS_PERMISSIONS, CAMERA_PERMISSIONS,
-                        SENSORS_PERMISSIONS, STORAGE_PERMISSIONS, MEDIA_AURAL_PERMISSIONS);
+                        SENSORS_PERMISSIONS, STORAGE_PERMISSIONS);
                 grantSystemFixedPermissionsToSystemPackage(packageName, userId,
                         ALWAYS_LOCATION_PERMISSIONS, ACTIVITY_RECOGNITION_PERMISSIONS);
             }
@@ -668,7 +636,7 @@ public final class DefaultPermissionGrantPolicy {
                 .setDataAndType(Uri.fromFile(new File("foo.mp3")), AUDIO_MIME_TYPE);
         grantPermissionsToSystemPackage(
                 getDefaultSystemHandlerActivityPackage(musicIntent, userId), userId,
-                STORAGE_PERMISSIONS, MEDIA_AURAL_PERMISSIONS);
+                STORAGE_PERMISSIONS);
 
         // Home
         Intent homeIntent = new Intent(Intent.ACTION_MAIN)
@@ -732,7 +700,7 @@ public final class DefaultPermissionGrantPolicy {
         grantSystemFixedPermissionsToSystemPackage(
                 getDefaultSystemHandlerActivityPackage(
                         RingtoneManager.ACTION_RINGTONE_PICKER, userId),
-                userId, STORAGE_PERMISSIONS, MEDIA_AURAL_PERMISSIONS);
+                userId, STORAGE_PERMISSIONS);
 
         // TextClassifier Service
         String textClassifierPackageName =
@@ -741,6 +709,14 @@ public final class DefaultPermissionGrantPolicy {
             grantPermissionsToSystemPackage(textClassifierPackageName, userId,
                     PHONE_PERMISSIONS, SMS_PERMISSIONS, CALENDAR_PERMISSIONS,
                     LOCATION_PERMISSIONS, CONTACTS_PERMISSIONS);
+        }
+
+        // Atthention Service
+        String attentionServicePackageName =
+                mContext.getPackageManager().getAttentionServicePackageName();
+        if (!TextUtils.isEmpty(attentionServicePackageName)) {
+            grantPermissionsToSystemPackage(attentionServicePackageName, userId,
+                    CAMERA_PERMISSIONS);
         }
 
         // There is no real "marker" interface to identify the shared storage backup, it is
@@ -1092,6 +1068,8 @@ public final class DefaultPermissionGrantPolicy {
     private void grantRuntimePermissions(PackageInfo pkg,
             Set<String> permissionsWithoutSplits, boolean systemFixed, boolean ignoreSystemPackage,
             int userId) {
+        UserHandle user = UserHandle.of(userId);
+
         if (pkg == null) {
             return;
         }
@@ -1112,7 +1090,14 @@ public final class DefaultPermissionGrantPolicy {
         }
         requestedPermissions = ArrayUtils.filterNotNull(requestedPermissions, String[]::new);
 
-        PackageManager pm = mContext.getPackageManager();
+        PackageManager pm;
+        try {
+            pm = mContext.createPackageContextAsUser(mContext.getPackageName(), 0,
+                    user).getPackageManager();
+        } catch (NameNotFoundException doesNotHappen) {
+            throw new IllegalStateException(doesNotHappen);
+        }
+
         final ArraySet<String> permissions = new ArraySet<>(permissionsWithoutSplits);
         ApplicationInfo applicationInfo = pkg.applicationInfo;
 
@@ -1190,7 +1175,6 @@ public final class DefaultPermissionGrantPolicy {
             }
 
             if (permissions.contains(permission)) {
-                UserHandle user = UserHandle.of(userId);
                 final int flags = mContext.getPackageManager().getPermissionFlags(
                         permission, pkg.packageName, user);
 
@@ -1213,8 +1197,11 @@ public final class DefaultPermissionGrantPolicy {
                             UserHandle.getAppId(pkg.applicationInfo.uid));
                     String op = AppOpsManager.permissionToOp(permission);
 
-                    mContext.getPackageManager()
-                            .grantRuntimePermission(pkg.packageName, permission, user);
+                    if (pm.checkPermission(permission, pkg.packageName)
+                            != PackageManager.PERMISSION_GRANTED) {
+                        mContext.getPackageManager()
+                                .grantRuntimePermission(pkg.packageName, permission, user);
+                    }
 
                     mContext.getPackageManager().updatePermissionFlags(permission, pkg.packageName,
                             newFlags, newFlags, user);

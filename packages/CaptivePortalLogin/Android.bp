@@ -23,6 +23,7 @@ android_app {
     static_libs: [
         "androidx.legacy_legacy-support-v4",
         "metrics-constants-protos",
+        "captiveportal-lib",
     ],
     manifest: "AndroidManifest.xml",
 }

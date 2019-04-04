@@ -215,6 +215,7 @@ public class ActionsSuggestionsHelperTest {
                         ConversationAction.TYPE_OPEN_URL,
                         1.0f,
                         null,
+                        null,
                         null
                 );
 
@@ -234,6 +235,7 @@ public class ActionsSuggestionsHelperTest {
                         "text",
                         ConversationAction.TYPE_OPEN_URL,
                         1.0f,
+                        null,
                         null,
                         new RemoteActionTemplate[0]
                 );
@@ -255,11 +257,13 @@ public class ActionsSuggestionsHelperTest {
                         ConversationAction.TYPE_OPEN_URL,
                         1.0f,
                         null,
+                        null,
                         new RemoteActionTemplate[]{
                                 new RemoteActionTemplate(
                                         "title",
                                         null,
                                         "description",
+                                        null,
                                         Intent.ACTION_VIEW,
                                         Uri.parse("http://www.android.com").toString(),
                                         null,

@@ -61,6 +61,7 @@ public final class TemplateIntentFactory {
                             remoteActionTemplate.titleWithoutEntity,
                             remoteActionTemplate.titleWithEntity,
                             remoteActionTemplate.description,
+                            remoteActionTemplate.descriptionWithAppName,
                             createIntent(remoteActionTemplate),
                             remoteActionTemplate.requestCode == null
                                     ? LabeledIntent.DEFAULT_REQUEST_CODE

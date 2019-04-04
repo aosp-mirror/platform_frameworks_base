@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
+import android.media.audiopolicy.AudioProductStrategies;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -370,9 +371,10 @@ public final class AudioAttributes implements Parcelable {
 
     /**
      * @hide
-     * Flag specifying that the audio shall not be captured by other apps.
+     * Flag specifying that the audio shall not be captured by third-party apps
+     * with a MediaProjection.
      */
-    public static final int FLAG_NO_CAPTURE = 0x1 << 10;
+    public static final int FLAG_NO_MEDIA_PROJECTION = 0x1 << 10;
 
     /**
      * @hide
@@ -380,11 +382,63 @@ public final class AudioAttributes implements Parcelable {
      */
     public static final int FLAG_MUTE_HAPTIC = 0x1 << 11;
 
-    private final static int FLAG_ALL = FLAG_AUDIBILITY_ENFORCED | FLAG_SECURE | FLAG_SCO |
-            FLAG_BEACON | FLAG_HW_AV_SYNC | FLAG_HW_HOTWORD | FLAG_BYPASS_INTERRUPTION_POLICY |
-            FLAG_BYPASS_MUTE | FLAG_LOW_LATENCY | FLAG_DEEP_BUFFER | FLAG_MUTE_HAPTIC;
+    /**
+     * @hide
+     * Flag specifying that the audio shall not be captured by any apps, not even system apps.
+     */
+    public static final int FLAG_NO_SYSTEM_CAPTURE = 0x1 << 12;
+
+    private static final int FLAG_ALL = FLAG_AUDIBILITY_ENFORCED | FLAG_SECURE | FLAG_SCO
+            | FLAG_BEACON | FLAG_HW_AV_SYNC | FLAG_HW_HOTWORD | FLAG_BYPASS_INTERRUPTION_POLICY
+            | FLAG_BYPASS_MUTE | FLAG_LOW_LATENCY | FLAG_DEEP_BUFFER | FLAG_NO_MEDIA_PROJECTION
+            | FLAG_MUTE_HAPTIC | FLAG_NO_SYSTEM_CAPTURE;
     private final static int FLAG_ALL_PUBLIC = FLAG_AUDIBILITY_ENFORCED |
             FLAG_HW_AV_SYNC | FLAG_LOW_LATENCY;
+
+    /**
+     * Indicates that the audio may be captured by any app.
+     *
+     * For privacy, the following usages can not be recorded: VOICE_COMMUNICATION*,
+     * USAGE_NOTIFICATION*, USAGE_ASSISTANCE* and USAGE_ASSISTANT.
+     *
+     * On {@link android.os.Build.VERSION_CODES#Q}, this means only {@link #USAGE_UNKNOWN},
+     * {@link #USAGE_MEDIA} and {@link #USAGE_GAME} may be captured.
+     *
+     * See {@link android.media.projection.MediaProjection} and
+     * {@link Builder#setAllowedCapturePolicy}.
+     */
+    public static final int ALLOW_CAPTURE_BY_ALL = 1;
+    /**
+     * Indicates that the audio may only be captured by system apps.
+     *
+     * System apps can capture for many purposes like accessibility, user guidance...
+     * but abide to the following restrictions:
+     *  - the audio can not leave the device
+     *  - the audio can not be passed to a third party app
+     *  - the audio can not be recorded at a higher quality then 16kHz 16bit mono
+     *
+     * See {@link Builder#setAllowedCapturePolicy}.
+     */
+    public static final int ALLOW_CAPTURE_BY_SYSTEM = 2;
+    /**
+     * Indicates that the audio is not to be recorded by any app, even if it is a system app.
+     *
+     * It is encouraged to use {@link #ALLOW_CAPTURE_BY_SYSTEM} instead of this value as system apps
+     * provide significant and useful features for the user (such as live captioning
+     * and accessibility).
+     *
+     * See {@link Builder#setAllowedCapturePolicy}.
+     */
+    public static final int ALLOW_CAPTURE_BY_NONE = 3;
+
+    /** @hide */
+    @IntDef({
+        ALLOW_CAPTURE_BY_ALL,
+        ALLOW_CAPTURE_BY_SYSTEM,
+        ALLOW_CAPTURE_BY_NONE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CapturePolicy {}
 
     @UnsupportedAppUsage
     private int mUsage = USAGE_UNKNOWN;
@@ -593,10 +647,10 @@ public final class AudioAttributes implements Parcelable {
                 case USAGE_GAME:
                 case USAGE_VIRTUAL_SOURCE:
                 case USAGE_ASSISTANT:
-                     mUsage = usage;
-                     break;
+                    mUsage = usage;
+                    break;
                 default:
-                     mUsage = USAGE_UNKNOWN;
+                    mUsage = USAGE_UNKNOWN;
             }
             return this;
         }
@@ -642,18 +696,22 @@ public final class AudioAttributes implements Parcelable {
         }
 
         /**
-         * Specifying if audio shall or shall not be captured by other apps.
-         * By default, capture is allowed.
-         * @param allowCapture false to forbid capture of the audio by any apps,
-         *                     true to allow apps to capture the audio
+         * Specifying if audio may or may not be captured by other apps or the system.
+         *
+         * The default is {@link AudioAttributes#ALLOW_CAPTURE_BY_ALL}.
+         *
+         * Note that an application can also set its global policy, in which case the most
+         * restrictive policy is always applied.
+         *
+         * @param capturePolicy one of
+         *     {@link #ALLOW_CAPTURE_BY_ALL},
+         *     {@link #ALLOW_CAPTURE_BY_SYSTEM},
+         *     {@link #ALLOW_CAPTURE_BY_NONE}.
          * @return the same Builder instance
+         * @throws IllegalArgumentException if the argument is not a valid value.
          */
-        public @NonNull Builder setAllowCapture(boolean allowCapture) {
-            if (allowCapture) {
-                mFlags &= ~FLAG_NO_CAPTURE;
-            } else {
-                mFlags |= FLAG_NO_CAPTURE;
-            }
+        public @NonNull Builder setAllowedCapturePolicy(@CapturePolicy int capturePolicy) {
+            mFlags = capturePolicyToFlags(capturePolicy, mFlags);
             return this;
         }
 
@@ -725,6 +783,13 @@ public final class AudioAttributes implements Parcelable {
          */
         @UnsupportedAppUsage
         public Builder setInternalLegacyStreamType(int streamType) {
+            final AudioProductStrategies ps = new AudioProductStrategies();
+            if (ps.size() > 0) {
+                AudioAttributes attributes = ps.getAudioAttributesForLegacyStreamType(streamType);
+                if (attributes != null) {
+                    return new Builder(attributes);
+                }
+            }
             switch(streamType) {
                 case AudioSystem.STREAM_VOICE_CALL:
                     mContentType = CONTENT_TYPE_SPEECH;
@@ -1100,6 +1165,10 @@ public final class AudioAttributes implements Parcelable {
                     AudioSystem.STREAM_MUSIC : AudioSystem.STREAM_TTS;
         }
 
+        final AudioProductStrategies ps = new AudioProductStrategies();
+        if (ps.size() > 0) {
+            return ps.getLegacyStreamTypeForAudioAttributes(aa);
+        }
         // usage to stream type mapping
         switch (aa.getUsage()) {
             case USAGE_MEDIA:
@@ -1136,6 +1205,24 @@ public final class AudioAttributes implements Parcelable {
                     return AudioSystem.STREAM_MUSIC;
                 }
         }
+    }
+
+    static int capturePolicyToFlags(@CapturePolicy int capturePolicy, int flags) {
+        switch (capturePolicy) {
+            case ALLOW_CAPTURE_BY_NONE:
+                flags |= FLAG_NO_MEDIA_PROJECTION | FLAG_NO_SYSTEM_CAPTURE;
+                break;
+            case ALLOW_CAPTURE_BY_SYSTEM:
+                flags |= FLAG_NO_MEDIA_PROJECTION;
+                flags &= ~FLAG_NO_SYSTEM_CAPTURE;
+                break;
+            case ALLOW_CAPTURE_BY_ALL:
+                flags &= ~FLAG_NO_SYSTEM_CAPTURE & ~FLAG_NO_MEDIA_PROJECTION;
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown allow playback capture policy");
+        }
+        return flags;
     }
 
     /** @hide */

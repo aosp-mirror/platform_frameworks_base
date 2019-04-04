@@ -74,6 +74,9 @@ message MetricsEvent {
     // The view switched to summary mode (most relevant for notifications)
     TYPE_COLLAPSE = 14;
 
+    // The action results an error.
+    TYPE_ERROR = 15;
+
     // The notification was adjusted by the assistant. Enum value is
     // out of sequence due to b/122737498.
     TYPE_NOTIFICATION_ASSISTANT_ADJUSTMENT = 1573;
@@ -7131,6 +7134,46 @@ message MetricsEvent {
     // FIELD - Detailed reason in screen sleep. One of GO_TO_SLEEP_REASON_* in PowerManager.
     // OS: Q
     FIELD_SCREEN_SLEEP_REASON = 1695;
+
+    // UPDATE: The screen changed policy
+    //   SUBTYPE: The applied policy. One of the DISPLAY_POLICY_* constants in
+    //   DisplayManagerInternal.
+    // OS: Q
+    DISPLAY_POLICY = 1696;
+
+    // Biometric authentication.
+    //    TYPE: SUCCESS, FAILURE or ERROR
+    //    SUBTYPE: 0 is fingerprint, 1 is face, 2 is iris and 3 is unknown.
+    // OS: Q
+    BIOMETRIC_AUTH = 1697;
+
+    // Settings > Display > Theme
+    DARK_UI_SETTINGS = 1698;
+
+    // Settings > global bubble settings
+    BUBBLE_SETTINGS = 1699;
+
+    // Settings > app > bubble settings
+    APP_BUBBLE_SETTINGS = 1700;
+
+    // OPEN: Settings > System > Aware > Info dialog
+    DIALOG_AWARE_STATUS = 1701;
+
+    // Open: Settings > app > bubble settings > confirmation dialog
+    DIALOG_APP_BUBBLE_SETTINGS = 1702;
+
+    // ACTION: Display white balance setting enabled or disabled.
+    // CATEGORY: SETTINGS
+    // OS: Q
+    ACTION_DISPLAY_WHITE_BALANCE_SETTING_CHANGED = 1703;
+
+    // Action: ACTION_ACTIVITY_CHOOSER_PICKED_SERVICE_TARGET
+    // Direct share target hashed with rotating salt
+    FIELD_HASHED_TARGET_NAME = 1704;
+
+    // Action: ACTION_ACTIVITY_CHOOSER_PICKED_SERVICE_TARGET
+    // Salt generation for the above hashed direct share target
+    FIELD_HASHED_TARGET_SALT_GEN = 1705;
 
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.

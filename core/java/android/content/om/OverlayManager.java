@@ -18,6 +18,7 @@ package android.content.om;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
@@ -61,40 +62,57 @@ public class OverlayManager {
      * Request that an overlay package is enabled and any other overlay packages with the same
      * target package and category are disabled.
      *
+     * If a set of overlay packages share the same category, single call to this method is
+     * equivalent to multiple calls to {@link #setEnabled(String, boolean, UserHandle)}.
+     *
      * @param packageName the name of the overlay package to enable.
-     * @param userId The user for which to change the overlay.
-     * @return true if the system successfully registered the request, false otherwise.
+     * @param user The user for which to change the overlay.
      *
      * @hide
      */
     @SystemApi
-    public boolean setEnabledExclusiveInCategory(@Nullable final String packageName,
-            int userId) {
+    @RequiresPermission(anyOf = {
+            "android.permission.INTERACT_ACROSS_USERS",
+            "android.permission.INTERACT_ACROSS_USERS_FULL"
+    })
+    public void setEnabledExclusiveInCategory(@NonNull final String packageName,
+            @NonNull UserHandle user) {
         try {
-            return mService.setEnabledExclusiveInCategory(packageName, userId);
+            if (!mService.setEnabledExclusiveInCategory(packageName, user.getIdentifier())) {
+                throw new IllegalStateException("setEnabledExclusiveInCategory failed");
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Request that an overlay package is enabled.
+     * Request that an overlay package is enabled or disabled.
+     *
+     * While {@link #setEnabledExclusiveInCategory(String, UserHandle)} doesn't support disabling
+     * every overlay in a category, this method allows you to disable everything.
      *
      * @param packageName the name of the overlay package to enable.
      * @param enable {@code false} if the overlay should be turned off.
-     * @param userId The user for which to change the overlay.
-     * @return true if the system successfully registered the request, false otherwise.
+     * @param user The user for which to change the overlay.
      *
      * @hide
      */
     @SystemApi
-    public boolean setEnabled(@Nullable final String packageName, final boolean enable,
-            int userId) {
+    @RequiresPermission(anyOf = {
+            "android.permission.INTERACT_ACROSS_USERS",
+            "android.permission.INTERACT_ACROSS_USERS_FULL"
+    })
+    public void setEnabled(@NonNull final String packageName, final boolean enable,
+            @NonNull UserHandle user) {
         try {
-            return mService.setEnabled(packageName, enable, userId);
+            if (!mService.setEnabled(packageName, enable, user.getIdentifier())) {
+                throw new IllegalStateException("setEnabled failed");
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+        return;
     }
 
     /**
@@ -113,7 +131,7 @@ public class OverlayManager {
     public OverlayInfo getOverlayInfo(@NonNull final String packageName,
             @NonNull final UserHandle userHandle) {
         try {
-            return mService.getOverlayInfo(packageName, userHandle.myUserId());
+            return mService.getOverlayInfo(packageName, userHandle.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -125,17 +143,22 @@ public class OverlayManager {
      * overlay priority with the highest priority at the end of the list.
      *
      * @param targetPackageName The name of the target package.
-     * @param userId The user to get the OverlayInfos for.
+     * @param user The user to get the OverlayInfos for.
      * @return A list of OverlayInfo objects; if no overlays exist for the
      *         requested package, an empty list is returned.
      *
      * @hide
      */
     @SystemApi
-    public List<OverlayInfo> getOverlayInfosForTarget(@Nullable final String targetPackageName,
-            int userId) {
+    @RequiresPermission(anyOf = {
+            "android.permission.INTERACT_ACROSS_USERS",
+            "android.permission.INTERACT_ACROSS_USERS_FULL"
+    })
+    @NonNull
+    public List<OverlayInfo> getOverlayInfosForTarget(@NonNull final String targetPackageName,
+            @NonNull UserHandle user) {
         try {
-            return mService.getOverlayInfosForTarget(targetPackageName, userId);
+            return mService.getOverlayInfosForTarget(targetPackageName, user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

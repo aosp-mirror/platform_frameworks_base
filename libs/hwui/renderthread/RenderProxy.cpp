@@ -162,6 +162,7 @@ void RenderProxy::buildLayer(RenderNode* node) {
 }
 
 bool RenderProxy::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap& bitmap) {
+    ATRACE_NAME("TextureView#getBitmap");
     auto& thread = RenderThread::getInstance();
     return thread.queue().runSync([&]() -> bool {
         return thread.readback().copyLayerInto(layer, &bitmap) == CopyResult::Success;
@@ -347,6 +348,7 @@ void RenderProxy::prepareToDraw(Bitmap& bitmap) {
 }
 
 int RenderProxy::copyHWBitmapInto(Bitmap* hwBitmap, SkBitmap* bitmap) {
+    ATRACE_NAME("HardwareBitmap readback");
     RenderThread& thread = RenderThread::getInstance();
     if (gettid() == thread.getTid()) {
         // TODO: fix everything that hits this. We should never be triggering a readback ourselves.

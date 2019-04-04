@@ -1,34 +1,22 @@
-<!--
-/**
- * Copyright (c) 2019, The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- * * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
--->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="24dp"
-    android:height="24dp"
-    android:viewportWidth="24"
-    android:viewportHeight="24">
 
-    <path
-        android:pathData="M 0 0 H 24 V 24 H 0 V 0 Z" />
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M15.46,16.46h0A1,1,0,0,0,17,16.35,5.9,5.9,0,0,0,18,13,6,6,0,1,0,7,16.35a1,1,0,0,0,1.51 0.11 h0a1,1,0,0,0,0.11-1.29A3.9,3.9,0,0,1,8,12.44a4,4,0,1,1,7.32,2.73A1,1,0,0,0,15.46,16.46Z" />
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M10.86,3.06A10,10,0,0,0,4.19,19.25a1,1,0,0,0,1.49 0.07 A1,1,0,0,0,5.75,18a8.05,8.05,0,0,1-1.59-6.61A8,8,0,0,1,20,13a7.89,7.89,0,0,1-1.77,5,1,1,0,0,0,0.08,1.31h0a1,1,0,0,0,1.49-0.07A9.9,9.9,0,0,0,22,13,10,10,0,0,0,10.86,3.06Z" />
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M10,13a2,2,0,1,0,2-2A2,2,0,0,0,10,13Z" />
+<!--
+   Copyright (C) 2019 The Android Open Source Project
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+
+<vector android:height="24dp" android:tint="?android:attr/colorControlNormal" android:viewportHeight="24" android:viewportWidth="24" android:width="24dp" xmlns:android="http://schemas.android.com/apk/res/android">
+  <path android:fillColor="@android:color/white" android:pathData="M15.46,16.46L15.46,16.46c0.44,0.44,1.17,0.4,1.51-0.1C17.62,15.4,18,14.25,18,13c0-3.75-3.45-6.7-7.34-5.86 c-2.24,0.48-4.04,2.3-4.52,4.54c-0.37,1.75,0.02,3.38,0.89,4.67c0.34,0.51,1.08,0.54,1.51,0.11l0.01-0.01 c0.34-0.34,0.37-0.88,0.1-1.28c-0.5-0.76-0.75-1.71-0.61-2.74c0.23-1.74,1.67-3.17,3.41-3.4C13.9,8.71,16,10.61,16,13 c0,0.8-0.24,1.54-0.64,2.17C15.09,15.58,15.11,16.11,15.46,16.46z"/>
+  <path android:fillColor="@android:color/white" android:pathData="M10.86,3.06c-4.65,0.51-8.39,4.34-8.82,9c-0.25,2.72,0.6,5.25,2.15,7.18c0.37,0.46,1.07,0.49,1.49,0.07 C6.04,18.96,6.07,18.4,5.75,18c-1.4-1.75-2.09-4.1-1.6-6.61c0.61-3.13,3.14-5.65,6.28-6.24C15.54,4.18,20,8.07,20,13 c0,1.9-0.66,3.63-1.77,5c-0.32,0.39-0.28,0.96,0.08,1.31l0,0c0.42,0.42,1.12,0.39,1.49-0.08c1.38-1.7,2.2-3.88,2.2-6.24 C22,7.1,16.89,2.4,10.86,3.06z"/>
+  <path android:fillColor="@android:color/white" android:pathData="M 12 11 C 13.1045694997 11 14 11.8954305003 14 13 C 14 14.1045694997 13.1045694997 15 12 15 C 10.8954305003 15 10 14.1045694997 10 13 C 10 11.8954305003 10.8954305003 11 12 11 Z"/>
 </vector>

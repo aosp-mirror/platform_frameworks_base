@@ -78,6 +78,8 @@ import android.media.IPlaybackConfigDispatcher;
 import android.media.IRecordingConfigDispatcher;
 import android.media.IRingtonePlayer;
 import android.media.IVolumeController;
+import android.media.MediaExtractor;
+import android.media.MediaFormat;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
@@ -94,6 +96,7 @@ import android.media.audiopolicy.AudioVolumeGroups;
 import android.media.audiopolicy.IAudioPolicyCallback;
 import android.media.projection.IMediaProjection;
 import android.media.projection.IMediaProjectionManager;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -637,6 +640,26 @@ public class AudioService extends IAudioService.Stub
         sAudioVolumeGroups = new AudioVolumeGroups();
 
         // Initialize volume
+        // Priority 1 - Android Property
+        // Priority 2 - Audio Policy Service
+        // Priority 3 - Default Value
+        if (sAudioProductStrategies.size() > 0) {
+            int numStreamTypes = AudioSystem.getNumStreamTypes();
+
+            for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
+                AudioAttributes attr =
+                        sAudioProductStrategies.getAudioAttributesForLegacyStreamType(streamType);
+                int maxVolume = AudioSystem.getMaxVolumeIndexForAttributes(attr);
+                if (maxVolume != -1) {
+                    MAX_STREAM_VOLUME[streamType] = maxVolume;
+                }
+                int minVolume = AudioSystem.getMinVolumeIndexForAttributes(attr);
+                if (minVolume != -1) {
+                    MIN_STREAM_VOLUME[streamType] = minVolume;
+                }
+            }
+        }
+
         int maxCallVolume = SystemProperties.getInt("ro.config.vc_call_vol_steps", -1);
         if (maxCallVolume != -1) {
             MAX_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL] = maxCallVolume;
@@ -1465,6 +1488,11 @@ public class AudioService extends IAudioService.Stub
     }
 
     private int rescaleIndex(int index, int srcStream, int dstStream) {
+        int max = mStreamStates[srcStream].getMaxIndex();
+        if (max == 0) {
+            Log.e(TAG, "rescaleIndex : Max index should not be zero");
+            return mStreamStates[srcStream].getMinIndex();
+        }
         final int rescaled =
                 (index * mStreamStates[dstStream].getMaxIndex()
                         + mStreamStates[srcStream].getMaxIndex() / 2)
@@ -4146,6 +4174,26 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
+    /**
+     * See AudioManager.hasHapticChannels(Uri).
+     */
+    public boolean hasHapticChannels(Uri uri) {
+        MediaExtractor extractor = new MediaExtractor();
+        try {
+            extractor.setDataSource(mContext, uri, null);
+            for (int i = 0; i < extractor.getTrackCount(); i++) {
+                MediaFormat format = extractor.getTrackFormat(i);
+                if (format.containsKey(MediaFormat.KEY_HAPTIC_CHANNEL_COUNT)
+                        && format.getInteger(MediaFormat.KEY_HAPTIC_CHANNEL_COUNT) > 0) {
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "hasHapticChannels failure:" + e);
+        }
+        return false;
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // Inner classes
     ///////////////////////////////////////////////////////////////////////////
@@ -6290,8 +6338,8 @@ public class AudioService extends IAudioService.Stub
     // Audio policy management
     //==========================================================================================
     public String registerAudioPolicy(AudioPolicyConfig policyConfig, IAudioPolicyCallback pcb,
-            boolean hasFocusListener, boolean isFocusPolicy, boolean isVolumeController,
-            IMediaProjection projection) {
+            boolean hasFocusListener, boolean isFocusPolicy, boolean isTestFocusPolicy,
+            boolean isVolumeController, IMediaProjection projection) {
         AudioSystem.setDynamicPolicyCallback(mDynPolicyCallback);
 
         if (!isPolicyRegisterAllowed(policyConfig, projection)) {
@@ -6312,7 +6360,7 @@ public class AudioService extends IAudioService.Stub
                     return null;
                 }
                 AudioPolicyProxy app = new AudioPolicyProxy(policyConfig, pcb, hasFocusListener,
-                        isFocusPolicy, isVolumeController);
+                        isFocusPolicy, isTestFocusPolicy, isVolumeController);
                 pcb.asBinder().linkToDeath(app, 0/*flags*/);
                 regId = app.getRegistrationId();
                 mAudioPolicies.put(pcb.asBinder(), app);
@@ -6337,9 +6385,20 @@ public class AudioService extends IAudioService.Stub
         boolean isLoopbackRenderPolicy = policyConfig.getMixes().stream().allMatch(
                 mix -> mix.getRouteFlags() == (mix.ROUTE_FLAG_RENDER | mix.ROUTE_FLAG_LOOP_BACK));
 
-        // Policy that do not modify the audio routing only need an audio projection
-        if (isLoopbackRenderPolicy && canProjectAudio(projection)) {
-            return true;
+        if (isLoopbackRenderPolicy) {
+            boolean allowPrivilegedPlaybackCapture = policyConfig.getMixes().stream().anyMatch(
+                    mix -> mix.getRule().allowPrivilegedPlaybackCapture());
+            if (allowPrivilegedPlaybackCapture
+                    && !(hasPermission(android.Manifest.permission.CAPTURE_AUDIO_OUTPUT)
+                    || hasPermission(android.Manifest.permission.CAPTURE_MEDIA_OUTPUT))) {
+                // Opt-out can not be bypassed without a system permission
+                return false;
+            }
+
+            if (canProjectAudio(projection)) {
+                // Policy that do not modify the audio routing only need an audio projection
+                return true;
+            }
         }
 
         boolean hasPermissionModifyAudioRouting =
@@ -6349,6 +6408,9 @@ public class AudioService extends IAudioService.Stub
             return true;
         }
         return false;
+    }
+    private boolean hasPermission(String permission) {
+        return PackageManager.PERMISSION_GRANTED == mContext.checkCallingPermission(permission);
     }
 
     /** @return true if projection is a valid MediaProjection that can project audio. */
@@ -6730,9 +6792,11 @@ public class AudioService extends IAudioService.Stub
          */
         int mFocusDuckBehavior = AudioPolicy.FOCUS_POLICY_DUCKING_DEFAULT;
         boolean mIsFocusPolicy = false;
+        boolean mIsTestFocusPolicy = false;
 
         AudioPolicyProxy(AudioPolicyConfig config, IAudioPolicyCallback token,
-                boolean hasFocusListener, boolean isFocusPolicy, boolean isVolumeController) {
+                boolean hasFocusListener, boolean isFocusPolicy, boolean isTestFocusPolicy,
+                boolean isVolumeController) {
             super(config);
             setRegistration(new String(config.hashCode() + ":ap:" + mAudioPolicyCounter++));
             mPolicyCallback = token;
@@ -6743,7 +6807,8 @@ public class AudioService extends IAudioService.Stub
                 // can only ever be true if there is a focus listener
                 if (isFocusPolicy) {
                     mIsFocusPolicy = true;
-                    mMediaFocusControl.setFocusPolicy(mPolicyCallback);
+                    mIsTestFocusPolicy = isTestFocusPolicy;
+                    mMediaFocusControl.setFocusPolicy(mPolicyCallback, mIsTestFocusPolicy);
                 }
             }
             if (mIsVolumeController) {
@@ -6771,7 +6836,7 @@ public class AudioService extends IAudioService.Stub
 
         void release() {
             if (mIsFocusPolicy) {
-                mMediaFocusControl.unsetFocusPolicy(mPolicyCallback);
+                mMediaFocusControl.unsetFocusPolicy(mPolicyCallback, mIsTestFocusPolicy);
             }
             if (mFocusDuckBehavior == AudioPolicy.FOCUS_POLICY_DUCKING_IN_POLICY) {
                 mMediaFocusControl.setDuckingInExtPolicyAvailable(false);

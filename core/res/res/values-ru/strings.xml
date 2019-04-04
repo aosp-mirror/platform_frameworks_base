@@ -143,8 +143,10 @@
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Звонки по Wi-Fi"</string>
     <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Отключено"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Приоритет Wi-Fi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Приоритет мобильного Интернета"</string>
+    <!-- no translation found for wfc_mode_wifi_preferred_summary (7335489823608689868) -->
+    <skip />
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (7081742743152286290) -->
+    <skip />
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Только Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: не переадресовано"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -232,7 +234,8 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"Отчет об ошибке"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Закончить сеанс"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Скриншот"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"Отчет об ошибке"</string>
+    <!-- no translation found for bugreport_title (5981047024855257269) -->
+    <skip />
     <string name="bugreport_message" msgid="398447048750350456">"Информация о текущем состоянии вашего устройства будет собрана и отправлена по электронной почте. Подготовка отчета займет некоторое время."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Интерактивный отчет"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Рекомендуем этот вариант в большинстве случаев, чтобы отслеживать статус отчета, указывать дополнительные данные о проблеме и делать скриншоты. Некоторые разделы могут быть исключены, чтобы сократить время подготовки отчета."</string>
@@ -287,9 +290,12 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Местоположение"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"доступ к данным о местоположении устройства"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"Разрешить приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ к данным о местоположении устройства?"</string>
-    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"Доступ будет открыт, только когда вы пользуетесь приложением."</string>
-    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"Всегда разрешать приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ к геоданным устройства?"</string>
-    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"Доступ будет открыт, даже когда вы не пользуетесь приложением."</string>
+    <!-- no translation found for permgrouprequestdetail_location (1347189607421252902) -->
+    <skip />
+    <!-- no translation found for permgroupbackgroundrequest_location (5039063878675613235) -->
+    <skip />
+    <!-- no translation found for permgroupbackgroundrequestdetail_location (4597006851453417387) -->
+    <skip />
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Календарь"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"доступ к календарю"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Разрешить приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ к календарю?"</string>
@@ -322,7 +328,10 @@
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"Разрешить приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ к музыке?"</string>
     <string name="permgrouplab_visual" msgid="6477382108771145134">"Фото и видео"</string>
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"доступ к фото и видео"</string>
-    <string name="permgrouprequest_visual" msgid="3043752127595243314">"Открыть приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ к вашим фото и видео, а также к данным о местах съемки?"</string>
+    <!-- no translation found for permgrouprequest_visual (4926581398380334943) -->
+    <skip />
+    <!-- no translation found for permgrouprequestdetail_visual (3827237829805228971) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Получать содержимое окна"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Анализировать содержимое активного окна."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Включать Изучение касанием"</string>
@@ -515,8 +524,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Приложение сможет обмениваться данными с NFC-метками, картами и устройствами считывания, используя NFC."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"Отключение функции блокировки экрана"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Приложение сможет отключать блокировку экрана и другие функции защиты. Например, блокировка экрана будет отключаться при получении входящего вызова и включаться после завершения разговора."</string>
-    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"Запрос данных об уровне сложности блокировки экрана"</string>
-    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"Приложение получит доступ к сведениям об уровне сложности блокировки экрана (высокий, средний, низкий или не задан), в том числе о типе блокировки и длине пароля. Кроме того, оно сможет предлагать пользователям повысить уровень сложности блокировки. Эти рекомендации необязательны. Обратите внимание, что пароль не хранится в виде открытого текста и недоступен приложению."</string>
+    <!-- no translation found for permlab_requestPasswordComplexity (202650535669249674) -->
+    <skip />
+    <!-- no translation found for permdesc_requestPasswordComplexity (4730994229754212347) -->
+    <skip />
     <string name="permlab_useBiometric" msgid="8837753668509919318">"Использование биометрического оборудования"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Приложение сможет использовать биометрическое оборудование для аутентификации"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"управление сканером отпечатков"</string>
@@ -571,37 +582,59 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Приложение сможет добавлять и удалять шаблоны лиц."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"Использовать оборудование для распознавания лиц"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Приложение сможет использовать распознающее оборудование для аутентификации."</string>
-    <string name="face_acquired_insufficient" msgid="5901287247766106330">"Не удалось распознать лицо. Повторите попытку."</string>
-    <string name="face_acquired_too_bright" msgid="610606792381297174">"Лицо слишком яркое. Притушите свет."</string>
-    <string name="face_acquired_too_dark" msgid="7229162716976778371">"Лицо слишком темное. Сделайте свет ярче."</string>
-    <string name="face_acquired_too_close" msgid="1980310037427755293">"Уберите устройство дальше от лица"</string>
-    <string name="face_acquired_too_far" msgid="4494571381828850007">"Поднесите устройство ближе к лицу"</string>
-    <string name="face_acquired_too_high" msgid="228411096134808372">"Поднимите устройство выше"</string>
-    <string name="face_acquired_too_low" msgid="4539774649296349109">"Опустите устройство ниже"</string>
-    <string name="face_acquired_too_right" msgid="1650292067226118760">"Сдвиньте устройство правее"</string>
-    <string name="face_acquired_too_left" msgid="2712489669456176505">"Сдвиньте устройство левее"</string>
-    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Посмотрите в камеру устройства"</string>
-    <string name="face_acquired_not_detected" msgid="5707782294589511391">"Лица не обнаружены"</string>
-    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"Не перемещайте устройство."</string>
+    <!-- no translation found for face_acquired_insufficient (2767330364802375742) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_bright (5005650874582450967) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_dark (1966194696381394616) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_close (1401011882624272753) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_far (1210969240069012510) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_high (3362395713403348013) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_low (488983581737550912) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_right (941726879175375970) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_left (5873592047381190672) -->
+    <skip />
+    <!-- no translation found for face_acquired_poor_gaze (8471716624377228327) -->
+    <skip />
+    <!-- no translation found for face_acquired_not_detected (4885504661626728809) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_much_motion (3149332171102108851) -->
+    <skip />
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Повторите попытку."</string>
-    <string name="face_acquired_too_different" msgid="5553210341111255124">"Обнаружено другое лицо."</string>
+    <!-- no translation found for face_acquired_too_different (7663983770123789694) -->
+    <skip />
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"Слишком похожее выражение лица. Измените позу."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"Смотрите прямо в камеру."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"Смотрите прямо в камеру."</string>
+    <!-- no translation found for face_acquired_pan_too_extreme (1852495480382773759) -->
+    <skip />
+    <!-- no translation found for face_acquired_tilt_too_extreme (1290820400317982049) -->
+    <skip />
     <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Выровняйте голову по вертикали."</string>
-    <string name="face_acquired_obscured" msgid="3055077697850272097">"Откройте лицо."</string>
+    <!-- no translation found for face_acquired_obscured (5747521031647744553) -->
+    <skip />
+    <!-- no translation found for face_acquired_sensor_dirty (364493868630891300) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"Оборудование для распознавания лица недоступно"</string>
-    <string name="face_error_timeout" msgid="4014326147867150054">"Превышено время ожидания. Повторите попытку."</string>
+    <!-- no translation found for face_error_timeout (2605673935810019129) -->
+    <skip />
     <string name="face_error_no_space" msgid="8224993703466381314">"Невозможно сохранить распознанное лицо"</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Распознавание отменено"</string>
     <string name="face_error_user_canceled" msgid="8943921120862164539">"Распознавание лица отменено пользователем."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Слишком много попыток. Повторите позже."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Слишком много попыток. Сканер отключен."</string>
-    <string name="face_error_unable_to_process" msgid="238761109287767270">"Попробуйте ещё раз"</string>
-    <string name="face_error_not_enrolled" msgid="9166792142679691323">"Нет зарегистрированных лиц"</string>
-    <string name="face_error_hw_not_present" msgid="916085883581450331">"На этом устройстве нет сканера для распознавания лица."</string>
+    <!-- no translation found for face_error_unable_to_process (4940944939691171539) -->
+    <skip />
+    <!-- no translation found for face_error_not_enrolled (4245760276260427472) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (5296043240874659926) -->
+    <skip />
     <string name="face_name_template" msgid="7004562145809595384">"Лицо <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1253,9 +1286,16 @@
     <string name="new_app_action" msgid="6694851182870774403">"Открыть приложение \"<xliff:g id="NEW_APP">%1$s</xliff:g>\""</string>
     <string name="new_app_description" msgid="5894852887817332322">"Приложение \"<xliff:g id="OLD_APP">%1$s</xliff:g>\" будет закрыто без сохранения."</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"Объем памяти процесса \"<xliff:g id="PROC">%1$s</xliff:g>\" превышен"</string>
+    <!-- no translation found for dump_heap_ready_notification (1162196579925048701) -->
+    <skip />
     <string name="dump_heap_notification_detail" msgid="3993078784053054141">"Создан дамп кучи. Нажмите, чтобы отправить его."</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Отправить дамп кучи?"</string>
-    <string name="dump_heap_text" msgid="4809417337240334941">"Процесс \"<xliff:g id="PROC">%1$s</xliff:g>\" превысил объем памяти (<xliff:g id="SIZE">%2$s</xliff:g>). При необходимости отправьте созданный дамп кучи разработчику. Обратите внимание, что файл может содержать личные данные, доступные приложению."</string>
+    <!-- no translation found for dump_heap_text (8546022920319781701) -->
+    <skip />
+    <!-- no translation found for dump_heap_system_text (1205466256312104134) -->
+    <skip />
+    <!-- no translation found for dump_heap_ready_text (6759394977904051000) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"Выберите действие для текста"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Громкость звонка"</string>
     <string name="volume_music" msgid="5421651157138628171">"Громкость мультимедиа"</string>
@@ -1298,8 +1338,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Нажмите, чтобы увидеть список сетей"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Подключиться"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Все сети"</string>
-    <string name="wifi_suggestion_title" msgid="8951405130379148709">"Доступна сеть Wi-Fi, найденная приложением \"<xliff:g id="NAME">%s</xliff:g>\""</string>
-    <string name="wifi_suggestion_content" msgid="2658317015552324848">"Подключиться к сетям, найденным приложением \"<xliff:g id="NAME">%s</xliff:g>\"?"</string>
+    <!-- no translation found for wifi_suggestion_title (9099832833531486167) -->
+    <skip />
+    <!-- no translation found for wifi_suggestion_content (5883181205841582873) -->
+    <skip />
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Да"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Нет"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi-Fi включится автоматически"</string>
@@ -1311,9 +1353,14 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Регистрация в сети"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Сеть Wi-Fi не подключена к Интернету"</string>
+    <!-- no translation found for wifi_no_internet (5198100389964214865) -->
+    <skip />
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Нажмите, чтобы показать варианты."</string>
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Подключено"</string>
+    <!-- no translation found for network_partial_connectivity (7774883385494762741) -->
+    <skip />
+    <!-- no translation found for network_partial_connectivity_detailed (1959697814165325217) -->
+    <skip />
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Изменения в настройках точки доступа"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Частота точки доступа изменена."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Устройство не может работать только на частоте 5 ГГц. Эта частота будет использоваться, когда это возможно."</string>
@@ -1398,6 +1445,10 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Отладка по USB разрешена"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"Нажмите, чтобы отключить отладку по USB."</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Нажмите, чтобы отключить отладку по USB."</string>
+    <!-- no translation found for test_harness_mode_notification_title (2216359742631914387) -->
+    <skip />
+    <!-- no translation found for test_harness_mode_notification_message (1343197173054407119) -->
+    <skip />
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"В USB-порт попала вода или грязь"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB-порт был автоматически отключен. Нажмите, чтобы узнать подробности."</string>
     <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"Можно использовать USB-порт"</string>
@@ -1440,8 +1491,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"Настроить"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Извлечь"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Обзор"</string>
-    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
-    <skip />
+    <string name="ext_media_seamless_action" msgid="6575980560886881233">"Сменить устройство вывода"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> не найден"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"Подключите накопитель снова."</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"Перенос приложения <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1974,8 +2024,6 @@
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Нажмите, чтобы разблокировать раб. профиль"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Подключено к <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Нажмите, чтобы просмотреть файлы"</string>
-    <string name="pin_target" msgid="3052256031352291362">"Закрепить"</string>
-    <string name="unpin_target" msgid="3556545602439143442">"Открепить"</string>
     <string name="app_info" msgid="6856026610594615344">"О приложении"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"Запуск деморежима…"</string>
@@ -2068,6 +2116,22 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"Уведомление о батарее"</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Батарея может разрядиться"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Чтобы увеличить время работы от батареи, был включен режим энергосбережения."</string>
+    <!-- no translation found for battery_saver_notification_channel_name (2083316159716201806) -->
+    <skip />
+    <!-- no translation found for battery_saver_sticky_disabled_notification_title (6376147579378764641) -->
+    <skip />
+    <!-- no translation found for battery_saver_sticky_disabled_notification_summary (8090192609249817945) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (2960978289873161288) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (7555713825806482451) -->
+    <skip />
+    <!-- no translation found for battery_saver_charged_notification_title (5954873381559605660) -->
+    <skip />
+    <!-- no translation found for battery_saver_off_notification_summary (1374222493681267143) -->
+    <skip />
+    <!-- no translation found for battery_saver_off_alternative_notification_summary (4340727818546508436) -->
+    <skip />
     <string name="mime_type_folder" msgid="7111951698626315204">"Папка"</string>
     <string name="mime_type_apk" msgid="5518003630972506900">"Приложение Android"</string>
     <string name="mime_type_generic" msgid="6833871596845900027">"Файл"</string>

@@ -62,9 +62,9 @@ public class BitmapShader extends Shader {
 
     @Override
     long createNativeInstance(long nativeMatrix) {
-        return nativeCreate(nativeMatrix, mBitmap, mTileX, mTileY);
+        return nativeCreate(nativeMatrix, mBitmap.getNativeInstance(), mTileX, mTileY);
     }
 
-    private static native long nativeCreate(long nativeMatrix, Bitmap bitmap,
+    private static native long nativeCreate(long nativeMatrix, long bitmapHandle,
             int shaderTileModeX, int shaderTileModeY);
 }

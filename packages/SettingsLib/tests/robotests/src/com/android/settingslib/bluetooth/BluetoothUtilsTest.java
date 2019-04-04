@@ -15,14 +15,19 @@
  */
 package com.android.settingslib.bluetooth;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.bluetooth.BluetoothClass;
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.Pair;
+
+import com.android.settingslib.widget.AdaptiveIcon;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -38,6 +43,9 @@ public class BluetoothUtilsTest {
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private CachedBluetoothDevice mCachedBluetoothDevice;
+    @Mock
+    private BluetoothDevice mBluetoothDevice;
+
     private Context mContext;
 
     @Before
@@ -65,5 +73,17 @@ public class BluetoothUtilsTest {
                 mContext, mCachedBluetoothDevice);
 
         verify(mContext).getDrawable(com.android.internal.R.drawable.ic_bt_laptop);
+    }
+
+    @Test
+    public void getBtRainbowDrawableWithDescription_normalHeadset_returnAdaptiveIcon() {
+        when(mBluetoothDevice.getMetadata(
+                BluetoothDevice.METADATA_IS_UNTHETHERED_HEADSET)).thenReturn("false");
+        when(mCachedBluetoothDevice.getDevice()).thenReturn(mBluetoothDevice);
+        when(mCachedBluetoothDevice.getAddress()).thenReturn("1f:aa:bb");
+
+        assertThat(BluetoothUtils.getBtRainbowDrawableWithDescription(
+                RuntimeEnvironment.application,
+                mCachedBluetoothDevice).first).isInstanceOf(AdaptiveIcon.class);
     }
 }

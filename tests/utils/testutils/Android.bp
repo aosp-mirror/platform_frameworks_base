@@ -19,7 +19,10 @@ java_library {
 
     srcs: ["java/**/*.java"],
 
-    static_libs: ["junit"],
+    static_libs: [
+        "junit",
+        "hamcrest-library",
+    ],
 
     libs: [
         "android.test.runner",

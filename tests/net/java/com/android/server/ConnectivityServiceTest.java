@@ -104,6 +104,7 @@ import android.net.ConnectivityManager.PacketKeepalive;
 import android.net.ConnectivityManager.PacketKeepaliveCallback;
 import android.net.ConnectivityManager.TooManyRequestsException;
 import android.net.ConnectivityThread;
+import android.net.IDnsResolver;
 import android.net.INetd;
 import android.net.INetworkMonitor;
 import android.net.INetworkMonitorCallbacks;
@@ -144,12 +145,14 @@ import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
+import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.system.Os;
 import android.test.mock.MockContentResolver;
 import android.text.TextUtils;
 import android.util.ArraySet;
@@ -188,6 +191,8 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.stubbing.Answer;
 
+import java.io.IOException;
+import java.net.DatagramSocket;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -208,7 +213,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
@@ -237,6 +241,7 @@ public class ConnectivityServiceTest {
     private static final String CLAT_PREFIX = "v4-";
     private static final String MOBILE_IFNAME = "test_rmnet_data0";
     private static final String WIFI_IFNAME = "test_wlan0";
+    private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
     private MockContext mServiceContext;
     private WrappedConnectivityService mService;
@@ -253,6 +258,7 @@ public class ConnectivityServiceTest {
     @Mock INetworkManagementService mNetworkManagementService;
     @Mock INetworkStatsService mStatsService;
     @Mock INetworkPolicyManager mNpm;
+    @Mock IDnsResolver mMockDnsResolver;
     @Mock INetd mMockNetd;
     @Mock NetworkStackClient mNetworkStack;
 
@@ -421,7 +427,7 @@ public class ConnectivityServiceTest {
         private final ConditionVariable mPreventReconnectReceived = new ConditionVariable();
         private int mScore;
         private NetworkAgent mNetworkAgent;
-        private int mStartKeepaliveError = SocketKeepalive.ERROR_HARDWARE_UNSUPPORTED;
+        private int mStartKeepaliveError = SocketKeepalive.ERROR_UNSUPPORTED;
         private int mStopKeepaliveError = SocketKeepalive.NO_KEEPALIVE;
         private Integer mExpectedKeepaliveSlot = null;
         // Contains the redirectUrl from networkStatus(). Before reading, wait for
@@ -493,9 +499,8 @@ public class ConnectivityServiceTest {
             };
 
             try {
-                doAnswer(validateAnswer).when(mNetworkMonitor).notifyNetworkConnected();
+                doAnswer(validateAnswer).when(mNetworkMonitor).notifyNetworkConnected(any(), any());
                 doAnswer(validateAnswer).when(mNetworkMonitor).forceReevaluation(anyInt());
-                doAnswer(validateAnswer).when(mNetworkMonitor).notifyAcceptPartialConnectivity();
             } catch (RemoteException e) {
                 fail(e.getMessage());
             }
@@ -1051,8 +1056,8 @@ public class ConnectivityServiceTest {
 
         public WrappedConnectivityService(Context context, INetworkManagementService netManager,
                 INetworkStatsService statsService, INetworkPolicyManager policyManager,
-                IpConnectivityLog log, INetd netd) {
-            super(context, netManager, statsService, policyManager, log);
+                IpConnectivityLog log, INetd netd, IDnsResolver dnsResolver) {
+            super(context, netManager, statsService, policyManager, dnsResolver, log);
             mNetd = netd;
             mLingerDelayMs = TEST_LINGER_DELAY_MS;
         }
@@ -1216,7 +1221,8 @@ public class ConnectivityServiceTest {
                 mStatsService,
                 mNpm,
                 mock(IpConnectivityLog.class),
-                mMockNetd);
+                mMockNetd,
+                mMockDnsResolver);
 
         final ArgumentCaptor<INetworkPolicyListener> policyListenerCaptor =
                 ArgumentCaptor.forClass(INetworkPolicyListener.class);
@@ -2550,8 +2556,7 @@ public class ConnectivityServiceTest {
         verifyActiveNetwork(TRANSPORT_CELLULAR);
     }
 
-    // TODO: deflake and re-enable
-    // @Test
+    @Test
     public void testPartialConnectivity() {
         // Register network callback.
         NetworkRequest request = new NetworkRequest.Builder()
@@ -2575,20 +2580,24 @@ public class ConnectivityServiceTest {
         assertEquals(mCellNetworkAgent.getNetwork(), mCm.getActiveNetwork());
         callback.assertNoCallback();
 
+        // With HTTPS probe disabled, NetworkMonitor should pass the network validation with http
+        // probe.
+        mWiFiNetworkAgent.setNetworkValid();
         // If the user chooses yes to use this partial connectivity wifi, switch the default
         // network to wifi and check if wifi becomes valid or not.
         mCm.setAcceptPartialConnectivity(mWiFiNetworkAgent.getNetwork(), true /* accept */,
                 false /* always */);
-        // With https probe disabled, NetworkMonitor should pass the network validation with http
-        // probe.
-        mWiFiNetworkAgent.setNetworkValid();
+        // If user accepts partial connectivity network,
+        // NetworkMonitor#setAcceptPartialConnectivity() should be called too.
         waitForIdle();
         try {
-            verify(mWiFiNetworkAgent.mNetworkMonitor,
-                    timeout(TIMEOUT_MS).times(1)).notifyAcceptPartialConnectivity();
+            verify(mWiFiNetworkAgent.mNetworkMonitor, times(1)).setAcceptPartialConnectivity();
         } catch (RemoteException e) {
             fail(e.getMessage());
         }
+        // Need a trigger point to let NetworkMonitor tell ConnectivityService that network is
+        // validated.
+        mCm.reportNetworkConnectivity(mWiFiNetworkAgent.getNetwork(), true);
         callback.expectCallback(CallbackState.LOSING, mCellNetworkAgent);
         NetworkCapabilities nc = callback.expectCapabilitiesWith(NET_CAPABILITY_VALIDATED,
                 mWiFiNetworkAgent);
@@ -2618,6 +2627,15 @@ public class ConnectivityServiceTest {
         // acceptUnvalidated is also used as setting for accepting partial networks.
         mWiFiNetworkAgent.explicitlySelected(true /* acceptUnvalidated */);
         mWiFiNetworkAgent.connect(true);
+        // If user accepted partial connectivity network before,
+        // NetworkMonitor#setAcceptPartialConnectivity() will be called in
+        // ConnectivityService#updateNetworkInfo().
+        waitForIdle();
+        try {
+            verify(mWiFiNetworkAgent.mNetworkMonitor, times(1)).setAcceptPartialConnectivity();
+        } catch (RemoteException e) {
+            fail(e.getMessage());
+        }
         callback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
         callback.expectCallback(CallbackState.LOSING, mCellNetworkAgent);
         nc = callback.expectCapabilitiesWith(NET_CAPABILITY_VALIDATED, mWiFiNetworkAgent);
@@ -2632,23 +2650,33 @@ public class ConnectivityServiceTest {
         // NET_CAPABILITY_PARTIAL_CONNECTIVITY.
         mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
         mWiFiNetworkAgent.explicitlySelected(true /* acceptUnvalidated */);
+        // Current design cannot send multi-testResult from NetworkMonitor to ConnectivityService.
+        // So, if user accepts partial connectivity, NetworkMonitor will send PARTIAL_CONNECTIVITY
+        // to ConnectivityService first then send VALID. Once NetworkMonitor support
+        // multi-testResult, this test case also need to be changed to meet the new design.
         mWiFiNetworkAgent.connectWithPartialConnectivity();
-        callback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
-        // TODO: If the user accepted partial connectivity, we shouldn't switch to wifi until
-        // NetworkMonitor detects partial connectivity
-        assertEquals(mWiFiNetworkAgent.getNetwork(), mCm.getActiveNetwork());
-        mWiFiNetworkAgent.setNetworkValid();
+        // If user accepted partial connectivity network before,
+        // NetworkMonitor#setAcceptPartialConnectivity() will be called in
+        // ConnectivityService#updateNetworkInfo().
         waitForIdle();
         try {
-            verify(mWiFiNetworkAgent.mNetworkMonitor,
-                    timeout(TIMEOUT_MS).times(1)).notifyAcceptPartialConnectivity();
+            verify(mWiFiNetworkAgent.mNetworkMonitor, times(1)).setAcceptPartialConnectivity();
         } catch (RemoteException e) {
             fail(e.getMessage());
         }
+        callback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
         callback.expectCallback(CallbackState.LOSING, mCellNetworkAgent);
-        callback.expectCapabilitiesWith(NET_CAPABILITY_PARTIAL_CONNECTIVITY, mWiFiNetworkAgent);
-        // Wifi should be the default network.
+        // TODO: If the user accepted partial connectivity, we shouldn't switch to wifi until
+        // NetworkMonitor detects partial connectivity
         assertEquals(mWiFiNetworkAgent.getNetwork(), mCm.getActiveNetwork());
+        callback.expectCapabilitiesWith(NET_CAPABILITY_PARTIAL_CONNECTIVITY, mWiFiNetworkAgent);
+        mWiFiNetworkAgent.setNetworkValid();
+        // Need a trigger point to let NetworkMonitor tell ConnectivityService that network is
+        // validated.
+        mCm.reportNetworkConnectivity(mWiFiNetworkAgent.getNetwork(), true);
+        callback.expectCapabilitiesWith(NET_CAPABILITY_VALIDATED, mWiFiNetworkAgent);
+        mWiFiNetworkAgent.disconnect();
+        callback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
     }
 
     @Test
@@ -3014,6 +3042,47 @@ public class ConnectivityServiceTest {
             mCm.requestNetwork(networkRequest, networkCallback);
             fail("Network request with spoofed UID did not throw a SecurityException");
         } catch (SecurityException e) {
+            // expected
+        }
+    }
+
+    @Test
+    public void testInvalidSignalStrength() {
+        NetworkRequest r = new NetworkRequest.Builder()
+                .addCapability(NET_CAPABILITY_INTERNET)
+                .addTransportType(TRANSPORT_WIFI)
+                .setSignalStrength(-75)
+                .build();
+        // Registering a NetworkCallback with signal strength but w/o NETWORK_SIGNAL_STRENGTH_WAKEUP
+        // permission should get SecurityException.
+        try {
+            mCm.registerNetworkCallback(r, new NetworkCallback());
+            fail("Expected SecurityException filing a callback with signal strength");
+        } catch (SecurityException expected) {
+            // expected
+        }
+
+        try {
+            mCm.registerNetworkCallback(r, PendingIntent.getService(
+                    mServiceContext, 0, new Intent(), 0));
+            fail("Expected SecurityException filing a callback with signal strength");
+        } catch (SecurityException expected) {
+            // expected
+        }
+
+        // Requesting a Network with signal strength should get IllegalArgumentException.
+        try {
+            mCm.requestNetwork(r, new NetworkCallback());
+            fail("Expected IllegalArgumentException filing a request with signal strength");
+        } catch (IllegalArgumentException expected) {
+            // expected
+        }
+
+        try {
+            mCm.requestNetwork(r, PendingIntent.getService(
+                    mServiceContext, 0, new Intent(), 0));
+            fail("Expected IllegalArgumentException filing a request with signal strength");
+        } catch (IllegalArgumentException expected) {
             // expected
         }
     }
@@ -4018,8 +4087,13 @@ public class ConnectivityServiceTest {
         callback3.expectStopped();
     }
 
+    @FunctionalInterface
+    private interface ThrowingConsumer<T> {
+        void accept(T t) throws Exception;
+    }
+
     // Helper method to prepare the executor and run test
-    private void runTestWithSerialExecutors(Consumer<Executor> functor) {
+    private void runTestWithSerialExecutors(ThrowingConsumer<Executor> functor) throws Exception {
         final ExecutorService executorSingleThread = Executors.newSingleThreadExecutor();
         final Executor executorInline = (Runnable r) -> r.run();
         functor.accept(executorSingleThread);
@@ -4028,20 +4102,15 @@ public class ConnectivityServiceTest {
     }
 
     @Test
-    public void testNattSocketKeepalives() {
-        runTestWithSerialExecutors(executor -> {
-            try {
-                doTestNattSocketKeepalivesWithExecutor(executor);
-            } catch (Exception e) {
-                fail(e.getMessage());
-            }
-        });
+    public void testNattSocketKeepalives() throws Exception {
+        runTestWithSerialExecutors(executor -> doTestNattSocketKeepalivesWithExecutor(executor));
+        runTestWithSerialExecutors(executor -> doTestNattSocketKeepalivesFdWithExecutor(executor));
     }
 
     private void doTestNattSocketKeepalivesWithExecutor(Executor executor) throws Exception {
         // TODO: 1. Move this outside of ConnectivityServiceTest.
         //       2. Make test to verify that Nat-T keepalive socket is created by IpSecService.
-        final int srcPort = 12345;
+        //       3. Mock ipsec service.
         final InetAddress myIPv4 = InetAddress.getByName("192.0.2.129");
         final InetAddress notMyIPv4 = InetAddress.getByName("192.0.2.35");
         final InetAddress myIPv6 = InetAddress.getByName("2001:db8::1");
@@ -4052,7 +4121,8 @@ public class ConnectivityServiceTest {
         final int invalidKaInterval = 9;
 
         final IpSecManager mIpSec = (IpSecManager) mContext.getSystemService(Context.IPSEC_SERVICE);
-        final UdpEncapsulationSocket testSocket = mIpSec.openUdpEncapsulationSocket(srcPort);
+        final UdpEncapsulationSocket testSocket = mIpSec.openUdpEncapsulationSocket();
+        final int srcPort = testSocket.getPort();
 
         LinkProperties lp = new LinkProperties();
         lp.setInterfaceName("wlan12");
@@ -4065,89 +4135,106 @@ public class ConnectivityServiceTest {
         Network myNet = connectKeepaliveNetwork(lp);
 
         TestSocketKeepaliveCallback callback = new TestSocketKeepaliveCallback(executor);
-        SocketKeepalive ka;
 
         // Attempt to start keepalives with invalid parameters and check for errors.
         // Invalid network.
-        ka = mCm.createSocketKeepalive(notMyNet, testSocket, myIPv4, dstIPv4, executor, callback);
-        ka.start(validKaInterval);
-        callback.expectError(SocketKeepalive.ERROR_INVALID_NETWORK);
+        try (SocketKeepalive ka = mCm.createSocketKeepalive(
+                notMyNet, testSocket, myIPv4, dstIPv4, executor, callback)) {
+            ka.start(validKaInterval);
+            callback.expectError(SocketKeepalive.ERROR_INVALID_NETWORK);
+        }
 
         // Invalid interval.
-        ka = mCm.createSocketKeepalive(myNet, testSocket, myIPv4, dstIPv4, executor, callback);
-        ka.start(invalidKaInterval);
-        callback.expectError(SocketKeepalive.ERROR_INVALID_INTERVAL);
+        try (SocketKeepalive ka = mCm.createSocketKeepalive(
+                myNet, testSocket, myIPv4, dstIPv4, executor, callback)) {
+            ka.start(invalidKaInterval);
+            callback.expectError(SocketKeepalive.ERROR_INVALID_INTERVAL);
+        }
 
         // Invalid destination.
-        ka = mCm.createSocketKeepalive(myNet, testSocket, myIPv4, dstIPv6, executor, callback);
-        ka.start(validKaInterval);
-        callback.expectError(SocketKeepalive.ERROR_INVALID_IP_ADDRESS);
+        try (SocketKeepalive ka = mCm.createSocketKeepalive(
+                myNet, testSocket, myIPv4, dstIPv6, executor, callback)) {
+            ka.start(validKaInterval);
+            callback.expectError(SocketKeepalive.ERROR_INVALID_IP_ADDRESS);
+        }
 
         // Invalid source;
-        ka = mCm.createSocketKeepalive(myNet, testSocket, myIPv6, dstIPv4, executor, callback);
-        ka.start(validKaInterval);
-        callback.expectError(SocketKeepalive.ERROR_INVALID_IP_ADDRESS);
+        try (SocketKeepalive ka = mCm.createSocketKeepalive(
+                myNet, testSocket, myIPv6, dstIPv4, executor, callback)) {
+            ka.start(validKaInterval);
+            callback.expectError(SocketKeepalive.ERROR_INVALID_IP_ADDRESS);
+        }
 
         // NAT-T is only supported for IPv4.
-        ka = mCm.createSocketKeepalive(myNet, testSocket, myIPv6, dstIPv6, executor, callback);
-        ka.start(validKaInterval);
-        callback.expectError(SocketKeepalive.ERROR_INVALID_IP_ADDRESS);
+        try (SocketKeepalive ka = mCm.createSocketKeepalive(
+                myNet, testSocket, myIPv6, dstIPv6, executor, callback)) {
+            ka.start(validKaInterval);
+            callback.expectError(SocketKeepalive.ERROR_INVALID_IP_ADDRESS);
+        }
 
         // Sanity check before testing started keepalive.
-        ka = mCm.createSocketKeepalive(myNet, testSocket, myIPv4, dstIPv4, executor, callback);
-        ka.start(validKaInterval);
-        callback.expectError(SocketKeepalive.ERROR_HARDWARE_UNSUPPORTED);
+        try (SocketKeepalive ka = mCm.createSocketKeepalive(
+                myNet, testSocket, myIPv4, dstIPv4, executor, callback)) {
+            ka.start(validKaInterval);
+            callback.expectError(SocketKeepalive.ERROR_UNSUPPORTED);
+        }
 
         // Check that a started keepalive can be stopped.
         mWiFiNetworkAgent.setStartKeepaliveError(SocketKeepalive.SUCCESS);
-        ka = mCm.createSocketKeepalive(myNet, testSocket, myIPv4, dstIPv4, executor, callback);
-        ka.start(validKaInterval);
-        callback.expectStarted();
-        mWiFiNetworkAgent.setStopKeepaliveError(SocketKeepalive.SUCCESS);
-        ka.stop();
-        callback.expectStopped();
+        try (SocketKeepalive ka = mCm.createSocketKeepalive(
+                myNet, testSocket, myIPv4, dstIPv4, executor, callback)) {
+            ka.start(validKaInterval);
+            callback.expectStarted();
+            mWiFiNetworkAgent.setStopKeepaliveError(SocketKeepalive.SUCCESS);
+            ka.stop();
+            callback.expectStopped();
 
-        // Check that keepalive could be restarted.
-        ka.start(validKaInterval);
-        callback.expectStarted();
-        ka.stop();
-        callback.expectStopped();
+            // Check that keepalive could be restarted.
+            ka.start(validKaInterval);
+            callback.expectStarted();
+            ka.stop();
+            callback.expectStopped();
 
-        // Check that keepalive can be restarted without waiting for callback.
-        ka.start(validKaInterval);
-        callback.expectStarted();
-        ka.stop();
-        ka.start(validKaInterval);
-        callback.expectStopped();
-        callback.expectStarted();
-        ka.stop();
-        callback.expectStopped();
+            // Check that keepalive can be restarted without waiting for callback.
+            ka.start(validKaInterval);
+            callback.expectStarted();
+            ka.stop();
+            ka.start(validKaInterval);
+            callback.expectStopped();
+            callback.expectStarted();
+            ka.stop();
+            callback.expectStopped();
+        }
 
         // Check that deleting the IP address stops the keepalive.
         LinkProperties bogusLp = new LinkProperties(lp);
-        ka = mCm.createSocketKeepalive(myNet, testSocket, myIPv4, dstIPv4, executor, callback);
-        ka.start(validKaInterval);
-        callback.expectStarted();
-        bogusLp.removeLinkAddress(new LinkAddress(myIPv4, 25));
-        bogusLp.addLinkAddress(new LinkAddress(notMyIPv4, 25));
-        mWiFiNetworkAgent.sendLinkProperties(bogusLp);
-        callback.expectError(SocketKeepalive.ERROR_INVALID_IP_ADDRESS);
-        mWiFiNetworkAgent.sendLinkProperties(lp);
+        try (SocketKeepalive ka = mCm.createSocketKeepalive(
+                myNet, testSocket, myIPv4, dstIPv4, executor, callback)) {
+            ka.start(validKaInterval);
+            callback.expectStarted();
+            bogusLp.removeLinkAddress(new LinkAddress(myIPv4, 25));
+            bogusLp.addLinkAddress(new LinkAddress(notMyIPv4, 25));
+            mWiFiNetworkAgent.sendLinkProperties(bogusLp);
+            callback.expectError(SocketKeepalive.ERROR_INVALID_IP_ADDRESS);
+            mWiFiNetworkAgent.sendLinkProperties(lp);
+        }
 
         // Check that a started keepalive is stopped correctly when the network disconnects.
-        ka = mCm.createSocketKeepalive(myNet, testSocket, myIPv4, dstIPv4, executor, callback);
-        ka.start(validKaInterval);
-        callback.expectStarted();
-        mWiFiNetworkAgent.disconnect();
-        waitFor(mWiFiNetworkAgent.getDisconnectedCV());
-        callback.expectError(SocketKeepalive.ERROR_INVALID_NETWORK);
+        try (SocketKeepalive ka = mCm.createSocketKeepalive(
+                myNet, testSocket, myIPv4, dstIPv4, executor, callback)) {
+            ka.start(validKaInterval);
+            callback.expectStarted();
+            mWiFiNetworkAgent.disconnect();
+            waitFor(mWiFiNetworkAgent.getDisconnectedCV());
+            callback.expectError(SocketKeepalive.ERROR_INVALID_NETWORK);
 
-        // ... and that stopping it after that has no adverse effects.
-        waitForIdle();
-        final Network myNetAlias = myNet;
-        assertNull(mCm.getNetworkCapabilities(myNetAlias));
-        ka.stop();
-        callback.assertNoCallback();
+            // ... and that stopping it after that has no adverse effects.
+            waitForIdle();
+            final Network myNetAlias = myNet;
+            assertNull(mCm.getNetworkCapabilities(myNetAlias));
+            ka.stop();
+            callback.assertNoCallback();
+        }
 
         // Reconnect.
         myNet = connectKeepaliveNetwork(lp);
@@ -4155,27 +4242,36 @@ public class ConnectivityServiceTest {
 
         // Check that keepalive slots start from 1 and increment. The first one gets slot 1.
         mWiFiNetworkAgent.setExpectedKeepaliveSlot(1);
-        ka = mCm.createSocketKeepalive(myNet, testSocket, myIPv4, dstIPv4, executor, callback);
-        ka.start(validKaInterval);
-        callback.expectStarted();
+        int srcPort2 = 0;
+        try (SocketKeepalive ka = mCm.createSocketKeepalive(
+                myNet, testSocket, myIPv4, dstIPv4, executor, callback)) {
+            ka.start(validKaInterval);
+            callback.expectStarted();
 
-        // The second one gets slot 2.
-        mWiFiNetworkAgent.setExpectedKeepaliveSlot(2);
-        final UdpEncapsulationSocket testSocket2 = mIpSec.openUdpEncapsulationSocket(6789);
-        TestSocketKeepaliveCallback callback2 = new TestSocketKeepaliveCallback(executor);
-        SocketKeepalive ka2 =
-                mCm.createSocketKeepalive(myNet, testSocket2, myIPv4, dstIPv4, executor, callback2);
-        ka2.start(validKaInterval);
-        callback2.expectStarted();
+            // The second one gets slot 2.
+            mWiFiNetworkAgent.setExpectedKeepaliveSlot(2);
+            final UdpEncapsulationSocket testSocket2 = mIpSec.openUdpEncapsulationSocket();
+            srcPort2 = testSocket2.getPort();
+            TestSocketKeepaliveCallback callback2 = new TestSocketKeepaliveCallback(executor);
+            try (SocketKeepalive ka2 = mCm.createSocketKeepalive(
+                    myNet, testSocket2, myIPv4, dstIPv4, executor, callback2)) {
+                ka2.start(validKaInterval);
+                callback2.expectStarted();
 
-        ka.stop();
-        callback.expectStopped();
+                ka.stop();
+                callback.expectStopped();
 
-        ka2.stop();
-        callback2.expectStopped();
+                ka2.stop();
+                callback2.expectStopped();
 
-        testSocket.close();
-        testSocket2.close();
+                testSocket.close();
+                testSocket2.close();
+            }
+        }
+
+        // Check that there is no port leaked after all keepalives and sockets are closed.
+        assertFalse(isUdpPortInUse(srcPort));
+        assertFalse(isUdpPortInUse(srcPort2));
 
         mWiFiNetworkAgent.disconnect();
         waitFor(mWiFiNetworkAgent.getDisconnectedCV());
@@ -4183,14 +4279,8 @@ public class ConnectivityServiceTest {
     }
 
     @Test
-    public void testTcpSocketKeepalives() {
-        runTestWithSerialExecutors(executor -> {
-            try {
-                doTestTcpSocketKeepalivesWithExecutor(executor);
-            } catch (Exception e) {
-                fail(e.getMessage());
-            }
-        });
+    public void testTcpSocketKeepalives() throws Exception {
+        runTestWithSerialExecutors(executor -> doTestTcpSocketKeepalivesWithExecutor(executor));
     }
 
     private void doTestTcpSocketKeepalivesWithExecutor(Executor executor) throws Exception {
@@ -4200,7 +4290,6 @@ public class ConnectivityServiceTest {
         final InetAddress myIPv6 = InetAddress.getByName("::1");
 
         final int validKaInterval = 15;
-        final int invalidKaInterval = 9;
 
         final LinkProperties lp = new LinkProperties();
         lp.setInterfaceName("wlan12");
@@ -4216,37 +4305,46 @@ public class ConnectivityServiceTest {
         final Socket testSocketV6 = new Socket();
 
         TestSocketKeepaliveCallback callback = new TestSocketKeepaliveCallback(executor);
-        SocketKeepalive ka;
 
         // Attempt to start Tcp keepalives with invalid parameters and check for errors.
         // Invalid network.
-        ka = mCm.createSocketKeepalive(notMyNet, testSocketV4, executor, callback);
-        ka.start(validKaInterval);
-        callback.expectError(SocketKeepalive.ERROR_INVALID_NETWORK);
+        try (SocketKeepalive ka = mCm.createSocketKeepalive(
+            notMyNet, testSocketV4, executor, callback)) {
+            ka.start(validKaInterval);
+            callback.expectError(SocketKeepalive.ERROR_INVALID_NETWORK);
+        }
 
         // Invalid Socket (socket is not bound with IPv4 address).
-        ka = mCm.createSocketKeepalive(myNet, testSocketV4, executor, callback);
-        ka.start(validKaInterval);
-        callback.expectError(SocketKeepalive.ERROR_INVALID_SOCKET);
+        try (SocketKeepalive ka = mCm.createSocketKeepalive(
+            myNet, testSocketV4, executor, callback)) {
+            ka.start(validKaInterval);
+            callback.expectError(SocketKeepalive.ERROR_INVALID_SOCKET);
+        }
 
         // Invalid Socket (socket is not bound with IPv6 address).
-        ka = mCm.createSocketKeepalive(myNet, testSocketV6, executor, callback);
-        ka.start(validKaInterval);
-        callback.expectError(SocketKeepalive.ERROR_INVALID_SOCKET);
+        try (SocketKeepalive ka = mCm.createSocketKeepalive(
+            myNet, testSocketV6, executor, callback)) {
+            ka.start(validKaInterval);
+            callback.expectError(SocketKeepalive.ERROR_INVALID_SOCKET);
+        }
 
         // Bind the socket address
         testSocketV4.bind(new InetSocketAddress(myIPv4, srcPortV4));
         testSocketV6.bind(new InetSocketAddress(myIPv6, srcPortV6));
 
         // Invalid Socket (socket is bound with IPv4 address).
-        ka = mCm.createSocketKeepalive(myNet, testSocketV4, executor, callback);
-        ka.start(validKaInterval);
-        callback.expectError(SocketKeepalive.ERROR_INVALID_SOCKET);
+        try (SocketKeepalive ka = mCm.createSocketKeepalive(
+            myNet, testSocketV4, executor, callback)) {
+            ka.start(validKaInterval);
+            callback.expectError(SocketKeepalive.ERROR_INVALID_SOCKET);
+        }
 
         // Invalid Socket (socket is bound with IPv6 address).
-        ka = mCm.createSocketKeepalive(myNet, testSocketV6, executor, callback);
-        ka.start(validKaInterval);
-        callback.expectError(SocketKeepalive.ERROR_INVALID_SOCKET);
+        try (SocketKeepalive ka = mCm.createSocketKeepalive(
+            myNet, testSocketV6, executor, callback)) {
+            ka.start(validKaInterval);
+            callback.expectError(SocketKeepalive.ERROR_INVALID_SOCKET);
+        }
 
         testSocketV4.close();
         testSocketV6.close();
@@ -4254,6 +4352,66 @@ public class ConnectivityServiceTest {
         mWiFiNetworkAgent.disconnect();
         waitFor(mWiFiNetworkAgent.getDisconnectedCV());
         mWiFiNetworkAgent = null;
+    }
+
+    private void doTestNattSocketKeepalivesFdWithExecutor(Executor executor) throws Exception {
+        final InetAddress myIPv4 = InetAddress.getByName("192.0.2.129");
+        final InetAddress anyIPv4 = InetAddress.getByName("0.0.0.0");
+        final InetAddress dstIPv4 = InetAddress.getByName("8.8.8.8");
+        final int validKaInterval = 15;
+
+        // Prepare the target network.
+        LinkProperties lp = new LinkProperties();
+        lp.setInterfaceName("wlan12");
+        lp.addLinkAddress(new LinkAddress(myIPv4, 25));
+        lp.addRoute(new RouteInfo(InetAddress.getByName("192.0.2.254")));
+        Network myNet = connectKeepaliveNetwork(lp);
+        mWiFiNetworkAgent.setStartKeepaliveError(SocketKeepalive.SUCCESS);
+        mWiFiNetworkAgent.setStopKeepaliveError(SocketKeepalive.SUCCESS);
+
+        TestSocketKeepaliveCallback callback = new TestSocketKeepaliveCallback(executor);
+
+        // Prepare the target file descriptor, keep only one instance.
+        final IpSecManager mIpSec = (IpSecManager) mContext.getSystemService(Context.IPSEC_SERVICE);
+        final UdpEncapsulationSocket testSocket = mIpSec.openUdpEncapsulationSocket();
+        final int srcPort = testSocket.getPort();
+        final ParcelFileDescriptor testPfd =
+                ParcelFileDescriptor.dup(testSocket.getFileDescriptor());
+        testSocket.close();
+        assertTrue(isUdpPortInUse(srcPort));
+
+        // Start keepalive and explicit make the variable goes out of scope with try-with-resources
+        // block.
+        try (SocketKeepalive ka = mCm.createNattKeepalive(
+                myNet, testPfd, myIPv4, dstIPv4, executor, callback)) {
+            ka.start(validKaInterval);
+            callback.expectStarted();
+            ka.stop();
+            callback.expectStopped();
+        }
+
+        // Check that the ParcelFileDescriptor is still valid after keepalive stopped,
+        // ErrnoException with EBADF will be thrown if the socket is closed when checking local
+        // address.
+        assertTrue(isUdpPortInUse(srcPort));
+        final InetSocketAddress sa =
+                (InetSocketAddress) Os.getsockname(testPfd.getFileDescriptor());
+        assertEquals(anyIPv4, sa.getAddress());
+
+        testPfd.close();
+        assertFalse(isUdpPortInUse(srcPort));
+
+        mWiFiNetworkAgent.disconnect();
+        waitFor(mWiFiNetworkAgent.getDisconnectedCV());
+        mWiFiNetworkAgent = null;
+    }
+
+    private static boolean isUdpPortInUse(int port) {
+        try (DatagramSocket ignored = new DatagramSocket(port)) {
+            return false;
+        } catch (IOException ignored) {
+            return true;
+        }
     }
 
     @Test
@@ -4664,14 +4822,14 @@ public class ConnectivityServiceTest {
         ArgumentCaptor<String[]> tlsServers = ArgumentCaptor.forClass(String[].class);
 
         // Clear any interactions that occur as a result of CS starting up.
-        reset(mNetworkManagementService);
+        reset(mMockDnsResolver);
 
-        final String[] EMPTY_STRING_ARRAY = new String[0];
         mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
         waitForIdle();
-        verify(mNetworkManagementService, never()).setDnsConfigurationForNetwork(
-                anyInt(), eq(EMPTY_STRING_ARRAY), any(), any(), eq(""), eq(EMPTY_STRING_ARRAY));
-        verifyNoMoreInteractions(mNetworkManagementService);
+        verify(mMockDnsResolver, never()).setResolverConfiguration(
+                anyInt(), eq(EMPTY_STRING_ARRAY), any(), any(), eq(""),
+                eq(EMPTY_STRING_ARRAY), eq(EMPTY_STRING_ARRAY));
+        verifyNoMoreInteractions(mMockDnsResolver);
 
         final LinkProperties cellLp = new LinkProperties();
         cellLp.setInterfaceName(MOBILE_IFNAME);
@@ -4688,28 +4846,29 @@ public class ConnectivityServiceTest {
         mCellNetworkAgent.connect(false);
         waitForIdle();
         // CS tells netd about the empty DNS config for this network.
-        verify(mNetworkManagementService, atLeastOnce()).setDnsConfigurationForNetwork(
-                anyInt(), eq(EMPTY_STRING_ARRAY), any(), any(), eq(""), eq(EMPTY_STRING_ARRAY));
-        reset(mNetworkManagementService);
+        verify(mMockDnsResolver, atLeastOnce()).setResolverConfiguration(
+                anyInt(), eq(EMPTY_STRING_ARRAY), any(), any(), eq(""),
+                eq(EMPTY_STRING_ARRAY), eq(EMPTY_STRING_ARRAY));
+        reset(mMockDnsResolver);
 
         cellLp.addDnsServer(InetAddress.getByName("2001:db8::1"));
         mCellNetworkAgent.sendLinkProperties(cellLp);
         waitForIdle();
-        verify(mNetworkManagementService, atLeastOnce()).setDnsConfigurationForNetwork(
+        verify(mMockDnsResolver, atLeastOnce()).setResolverConfiguration(
                 anyInt(), mStringArrayCaptor.capture(), any(), any(),
-                eq(""), tlsServers.capture());
+                eq(""), tlsServers.capture(), eq(EMPTY_STRING_ARRAY));
         assertEquals(1, mStringArrayCaptor.getValue().length);
         assertTrue(ArrayUtils.contains(mStringArrayCaptor.getValue(), "2001:db8::1"));
         // Opportunistic mode.
         assertTrue(ArrayUtils.contains(tlsServers.getValue(), "2001:db8::1"));
-        reset(mNetworkManagementService);
+        reset(mMockDnsResolver);
 
         cellLp.addDnsServer(InetAddress.getByName("192.0.2.1"));
         mCellNetworkAgent.sendLinkProperties(cellLp);
         waitForIdle();
-        verify(mNetworkManagementService, atLeastOnce()).setDnsConfigurationForNetwork(
+        verify(mMockDnsResolver, atLeastOnce()).setResolverConfiguration(
                 anyInt(), mStringArrayCaptor.capture(), any(), any(),
-                eq(""), tlsServers.capture());
+                eq(""), tlsServers.capture(), eq(EMPTY_STRING_ARRAY));
         assertEquals(2, mStringArrayCaptor.getValue().length);
         assertTrue(ArrayUtils.containsAll(mStringArrayCaptor.getValue(),
                 new String[]{"2001:db8::1", "192.0.2.1"}));
@@ -4717,7 +4876,7 @@ public class ConnectivityServiceTest {
         assertEquals(2, tlsServers.getValue().length);
         assertTrue(ArrayUtils.containsAll(tlsServers.getValue(),
                 new String[]{"2001:db8::1", "192.0.2.1"}));
-        reset(mNetworkManagementService);
+        reset(mMockDnsResolver);
 
         final String TLS_SPECIFIER = "tls.example.com";
         final String TLS_SERVER6 = "2001:db8:53::53";
@@ -4727,22 +4886,21 @@ public class ConnectivityServiceTest {
                 new PrivateDnsConfig(TLS_SPECIFIER, TLS_IPS).toParcel());
 
         waitForIdle();
-        verify(mNetworkManagementService, atLeastOnce()).setDnsConfigurationForNetwork(
+        verify(mMockDnsResolver, atLeastOnce()).setResolverConfiguration(
                 anyInt(), mStringArrayCaptor.capture(), any(), any(),
-                eq(TLS_SPECIFIER), eq(TLS_SERVERS));
+                eq(TLS_SPECIFIER), eq(TLS_SERVERS), eq(EMPTY_STRING_ARRAY));
         assertEquals(2, mStringArrayCaptor.getValue().length);
         assertTrue(ArrayUtils.containsAll(mStringArrayCaptor.getValue(),
                 new String[]{"2001:db8::1", "192.0.2.1"}));
-        reset(mNetworkManagementService);
+        reset(mMockDnsResolver);
     }
 
     @Test
     public void testPrivateDnsSettingsChange() throws Exception {
-        final String[] EMPTY_STRING_ARRAY = new String[0];
         ArgumentCaptor<String[]> tlsServers = ArgumentCaptor.forClass(String[].class);
 
         // Clear any interactions that occur as a result of CS starting up.
-        reset(mNetworkManagementService);
+        reset(mMockDnsResolver);
 
         // The default on Android is opportunistic mode ("Automatic").
         setPrivateDnsSettings(PRIVATE_DNS_MODE_OPPORTUNISTIC, "ignored.example.com");
@@ -4755,9 +4913,10 @@ public class ConnectivityServiceTest {
         mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
         waitForIdle();
         // CS tells netd about the empty DNS config for this network.
-        verify(mNetworkManagementService, never()).setDnsConfigurationForNetwork(
-                anyInt(), eq(EMPTY_STRING_ARRAY), any(), any(), eq(""), eq(EMPTY_STRING_ARRAY));
-        verifyNoMoreInteractions(mNetworkManagementService);
+        verify(mMockDnsResolver, never()).setResolverConfiguration(
+                anyInt(), eq(EMPTY_STRING_ARRAY), any(), any(), eq(""),
+                eq(EMPTY_STRING_ARRAY), eq(EMPTY_STRING_ARRAY));
+        verifyNoMoreInteractions(mMockDnsResolver);
 
         final LinkProperties cellLp = new LinkProperties();
         cellLp.setInterfaceName(MOBILE_IFNAME);
@@ -4776,9 +4935,9 @@ public class ConnectivityServiceTest {
         mCellNetworkAgent.sendLinkProperties(cellLp);
         mCellNetworkAgent.connect(false);
         waitForIdle();
-        verify(mNetworkManagementService, atLeastOnce()).setDnsConfigurationForNetwork(
+        verify(mMockDnsResolver, atLeastOnce()).setResolverConfiguration(
                 anyInt(), mStringArrayCaptor.capture(), any(), any(),
-                eq(""), tlsServers.capture());
+                eq(""), tlsServers.capture(), eq(EMPTY_STRING_ARRAY));
         assertEquals(2, mStringArrayCaptor.getValue().length);
         assertTrue(ArrayUtils.containsAll(mStringArrayCaptor.getValue(),
                 new String[]{"2001:db8::1", "192.0.2.1"}));
@@ -4786,7 +4945,7 @@ public class ConnectivityServiceTest {
         assertEquals(2, tlsServers.getValue().length);
         assertTrue(ArrayUtils.containsAll(tlsServers.getValue(),
                 new String[]{"2001:db8::1", "192.0.2.1"}));
-        reset(mNetworkManagementService);
+        reset(mMockDnsResolver);
         cellNetworkCallback.expectCallback(CallbackState.AVAILABLE, mCellNetworkAgent);
         cellNetworkCallback.expectCallback(CallbackState.NETWORK_CAPABILITIES,
                 mCellNetworkAgent);
@@ -4798,26 +4957,26 @@ public class ConnectivityServiceTest {
         assertNull(((LinkProperties)cbi.arg).getPrivateDnsServerName());
 
         setPrivateDnsSettings(PRIVATE_DNS_MODE_OFF, "ignored.example.com");
-        verify(mNetworkManagementService, times(1)).setDnsConfigurationForNetwork(
+        verify(mMockDnsResolver, times(1)).setResolverConfiguration(
                 anyInt(), mStringArrayCaptor.capture(), any(), any(),
-                eq(""), eq(EMPTY_STRING_ARRAY));
+                eq(""), eq(EMPTY_STRING_ARRAY), eq(EMPTY_STRING_ARRAY));
         assertEquals(2, mStringArrayCaptor.getValue().length);
         assertTrue(ArrayUtils.containsAll(mStringArrayCaptor.getValue(),
                 new String[]{"2001:db8::1", "192.0.2.1"}));
-        reset(mNetworkManagementService);
+        reset(mMockDnsResolver);
         cellNetworkCallback.assertNoCallback();
 
         setPrivateDnsSettings(PRIVATE_DNS_MODE_OPPORTUNISTIC, "ignored.example.com");
-        verify(mNetworkManagementService, atLeastOnce()).setDnsConfigurationForNetwork(
+        verify(mMockDnsResolver, atLeastOnce()).setResolverConfiguration(
                 anyInt(), mStringArrayCaptor.capture(), any(), any(),
-                eq(""), tlsServers.capture());
+                eq(""), tlsServers.capture(), eq(EMPTY_STRING_ARRAY));
         assertEquals(2, mStringArrayCaptor.getValue().length);
         assertTrue(ArrayUtils.containsAll(mStringArrayCaptor.getValue(),
                 new String[]{"2001:db8::1", "192.0.2.1"}));
         assertEquals(2, tlsServers.getValue().length);
         assertTrue(ArrayUtils.containsAll(tlsServers.getValue(),
                 new String[]{"2001:db8::1", "192.0.2.1"}));
-        reset(mNetworkManagementService);
+        reset(mMockDnsResolver);
         cellNetworkCallback.assertNoCallback();
 
         setPrivateDnsSettings(PRIVATE_DNS_MODE_PROVIDER_HOSTNAME, "strict.example.com");
@@ -5648,6 +5807,7 @@ public class ConnectivityServiceTest {
         cellLp.addRoute(new RouteInfo((IpPrefix) null, myIpv6.getAddress(), MOBILE_IFNAME));
         cellLp.addRoute(new RouteInfo(myIpv6, null, MOBILE_IFNAME));
         reset(mNetworkManagementService);
+        reset(mMockDnsResolver);
         when(mNetworkManagementService.getInterfaceConfig(CLAT_PREFIX + MOBILE_IFNAME))
                 .thenReturn(getClatInterfaceConfig(myIpv4));
 
@@ -5655,7 +5815,7 @@ public class ConnectivityServiceTest {
         mCellNetworkAgent.sendLinkProperties(cellLp);
         mCellNetworkAgent.connect(true);
         networkCallback.expectAvailableThenValidatedCallbacks(mCellNetworkAgent);
-        verify(mMockNetd, times(1)).resolverStartPrefix64Discovery(cellNetId);
+        verify(mMockDnsResolver, times(1)).startPrefix64Discovery(cellNetId);
 
         // Switching default network updates TCP buffer sizes.
         verifyTcpBufferSizeChange(ConnectivityService.DEFAULT_TCP_BUFFER_SIZES);
@@ -5665,17 +5825,22 @@ public class ConnectivityServiceTest {
         cellLp.addLinkAddress(myIpv4);
         mCellNetworkAgent.sendLinkProperties(cellLp);
         networkCallback.expectCallback(CallbackState.LINK_PROPERTIES, mCellNetworkAgent);
-        verify(mMockNetd, times(1)).resolverStopPrefix64Discovery(cellNetId);
+        verify(mMockDnsResolver, times(1)).stopPrefix64Discovery(cellNetId);
+        verify(mMockDnsResolver, atLeastOnce()).setResolverConfiguration(
+                eq(cellNetId), eq(EMPTY_STRING_ARRAY), any(), any(),
+                eq(""), eq(EMPTY_STRING_ARRAY), eq(EMPTY_STRING_ARRAY));
 
         verifyNoMoreInteractions(mMockNetd);
+        verifyNoMoreInteractions(mMockDnsResolver);
         reset(mMockNetd);
+        reset(mMockDnsResolver);
 
         // Remove IPv4 address. Expect prefix discovery to be started again.
         cellLp.removeLinkAddress(myIpv4);
         cellLp.removeRoute(new RouteInfo(myIpv4, null, MOBILE_IFNAME));
         mCellNetworkAgent.sendLinkProperties(cellLp);
         networkCallback.expectCallback(CallbackState.LINK_PROPERTIES, mCellNetworkAgent);
-        verify(mMockNetd, times(1)).resolverStartPrefix64Discovery(cellNetId);
+        verify(mMockDnsResolver, times(1)).startPrefix64Discovery(cellNetId);
 
         // When NAT64 prefix discovery succeeds, LinkProperties are updated and clatd is started.
         Nat464Xlat clat = mService.getNat464Xlat(mCellNetworkAgent);
@@ -5705,6 +5870,12 @@ public class ConnectivityServiceTest {
         assertNotEquals(stackedLpsAfterChange, Collections.EMPTY_LIST);
         assertEquals(makeClatLinkProperties(myIpv4), stackedLpsAfterChange.get(0));
 
+        verify(mMockDnsResolver, times(1)).setResolverConfiguration(
+                eq(cellNetId), mStringArrayCaptor.capture(), any(), any(),
+                eq(""), eq(EMPTY_STRING_ARRAY), eq(EMPTY_STRING_ARRAY));
+        assertEquals(1, mStringArrayCaptor.getValue().length);
+        assertTrue(ArrayUtils.contains(mStringArrayCaptor.getValue(), "8.8.8.8"));
+
         // Add ipv4 address, expect that clatd and prefix discovery are stopped and stacked
         // linkproperties are cleaned up.
         cellLp.addLinkAddress(myIpv4);
@@ -5712,7 +5883,7 @@ public class ConnectivityServiceTest {
         mCellNetworkAgent.sendLinkProperties(cellLp);
         networkCallback.expectCallback(CallbackState.LINK_PROPERTIES, mCellNetworkAgent);
         verify(mMockNetd, times(1)).clatdStop(MOBILE_IFNAME);
-        verify(mMockNetd, times(1)).resolverStopPrefix64Discovery(cellNetId);
+        verify(mMockDnsResolver, times(1)).stopPrefix64Discovery(cellNetId);
 
         // As soon as stop is called, the linkproperties lose the stacked interface.
         networkCallback.expectCallback(CallbackState.LINK_PROPERTIES, mCellNetworkAgent);
@@ -5727,7 +5898,9 @@ public class ConnectivityServiceTest {
         networkCallback.assertNoCallback();
 
         verifyNoMoreInteractions(mMockNetd);
+        verifyNoMoreInteractions(mMockDnsResolver);
         reset(mMockNetd);
+        reset(mMockDnsResolver);
 
         // Stopping prefix discovery causes netd to tell us that the NAT64 prefix is gone.
         mService.mNetdEventCallback.onNat64PrefixEvent(cellNetId, false /* added */,
@@ -5741,7 +5914,7 @@ public class ConnectivityServiceTest {
         cellLp.removeDnsServer(InetAddress.getByName("8.8.8.8"));
         mCellNetworkAgent.sendLinkProperties(cellLp);
         networkCallback.expectCallback(CallbackState.LINK_PROPERTIES, mCellNetworkAgent);
-        verify(mMockNetd, times(1)).resolverStartPrefix64Discovery(cellNetId);
+        verify(mMockDnsResolver, times(1)).startPrefix64Discovery(cellNetId);
         mService.mNetdEventCallback.onNat64PrefixEvent(cellNetId, true /* added */,
                 kNat64PrefixString, 96);
         networkCallback.expectCallback(CallbackState.LINK_PROPERTIES, mCellNetworkAgent);
@@ -5824,6 +5997,7 @@ public class ConnectivityServiceTest {
 
         // Disconnect cell
         reset(mNetworkManagementService);
+        reset(mMockNetd);
         mCellNetworkAgent.disconnect();
         networkCallback.expectCallback(CallbackState.LOST, mCellNetworkAgent);
         // LOST callback is triggered earlier than removing idle timer. Broadcast should also be
@@ -5831,8 +6005,9 @@ public class ConnectivityServiceTest {
         // unexpectedly before network being removed.
         waitForIdle();
         verify(mNetworkManagementService, times(0)).removeIdleTimer(eq(MOBILE_IFNAME));
-        verify(mNetworkManagementService, times(1)).removeNetwork(
-                eq(mCellNetworkAgent.getNetwork().netId));
+        verify(mMockNetd, times(1)).networkDestroy(eq(mCellNetworkAgent.getNetwork().netId));
+        verify(mMockDnsResolver, times(1))
+                .clearResolverConfiguration(eq(mCellNetworkAgent.getNetwork().netId));
 
         // Disconnect wifi
         ConditionVariable cv = waitForConnectivityBroadcasts(1);

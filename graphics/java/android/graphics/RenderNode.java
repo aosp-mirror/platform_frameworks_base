@@ -284,9 +284,10 @@ public final class RenderNode {
 
     private static final class CompositePositionUpdateListener implements PositionUpdateListener {
         private final PositionUpdateListener[] mListeners;
+        private static final PositionUpdateListener[] sEmpty = new PositionUpdateListener[0];
 
         CompositePositionUpdateListener(PositionUpdateListener... listeners) {
-            mListeners = listeners;
+            mListeners = listeners != null ? listeners : sEmpty;
         }
 
         public CompositePositionUpdateListener with(PositionUpdateListener listener) {

@@ -84,6 +84,15 @@ public final class CellInfoGsm extends CellInfo implements Parcelable {
     public CellSignalStrengthGsm getCellSignalStrength() {
         return mCellSignalStrengthGsm;
     }
+
+    /** @hide */
+    @Override
+    public CellInfo sanitizeLocationInfo() {
+        CellInfoGsm result = new CellInfoGsm(this);
+        result.mCellIdentityGsm = mCellIdentityGsm.sanitizeLocationInfo();
+        return result;
+    }
+
     /** @hide */
     public void setCellSignalStrength(CellSignalStrengthGsm css) {
         mCellSignalStrengthGsm = css;

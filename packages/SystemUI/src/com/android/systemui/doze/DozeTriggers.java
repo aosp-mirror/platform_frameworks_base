@@ -16,6 +16,7 @@
 
 package com.android.systemui.doze;
 
+import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.app.UiModeManager;
 import android.content.BroadcastReceiver;
@@ -147,7 +148,7 @@ public class DozeTriggers implements DozeMachine.Part {
         boolean wakeEvent = rawValues != null && rawValues.length > 0 && rawValues[0] != 0;
 
         if (isWakeDisplay) {
-            onWakeScreen(wakeEvent, mMachine.getState());
+            onWakeScreen(wakeEvent, mMachine.isExecutingTransition() ? null : mMachine.getState());
         } else if (isLongPress) {
             requestPulse(pulseReason, sensorPerformedProxCheck);
         } else if (isWakeLockScreen) {
@@ -164,18 +165,11 @@ public class DozeTriggers implements DozeMachine.Part {
                     if (screenX != -1 && screenY != -1) {
                         mDozeHost.onSlpiTap(screenX, screenY);
                     }
-                    // Logs screen wake up reason of either single or double tap.
-                    mMetricsLogger.write(new LogMaker(MetricsEvent.DOZING)
-                            .setType(MetricsEvent.TYPE_UPDATE).setSubtype(pulseReason));
-                    mMachine.wakeUp();
+                    gentleWakeUp(pulseReason);
                 } else if (isPickup) {
-                    // Logs screen wake up reason of lift.
-                    mMetricsLogger.write(new LogMaker(MetricsEvent.DOZING)
-                            .setType(MetricsEvent.TYPE_UPDATE)
-                            .setSubtype(DozeLog.REASON_SENSOR_PICKUP));
-                    mMachine.wakeUp();
+                    gentleWakeUp(pulseReason);
                 } else {
-                    mDozeHost.extendPulse();
+                    mDozeHost.extendPulse(pulseReason);
                 }
             }, sensorPerformedProxCheck
                     || (mDockManager != null && mDockManager.isDocked()), pulseReason);
@@ -190,14 +184,37 @@ public class DozeTriggers implements DozeMachine.Part {
         }
     }
 
+    private void gentleWakeUp(int reason) {
+        // Log screen wake up reason (lift/pickup, tap, double-tap)
+        mMetricsLogger.write(new LogMaker(MetricsEvent.DOZING)
+                .setType(MetricsEvent.TYPE_UPDATE)
+                .setSubtype(reason));
+        if (mDozeParameters.getDisplayNeedsBlanking()) {
+            // Let's prepare the display to wake-up by drawing black.
+            // This will cover the hardware wake-up sequence, where the display
+            // becomes black for a few frames.
+            mDozeHost.setAodDimmingScrim(255f);
+        }
+        mMachine.wakeUp();
+    }
+
     private void onProximityFar(boolean far) {
+        // Proximity checks are asynchronous and the user might have interacted with the phone
+        // when a new event is arriving. This means that a state transition might have happened
+        // and the proximity check is now obsolete.
+        if (mMachine.isExecutingTransition()) {
+            Log.w(TAG, "onProximityFar called during transition. Ignoring sensor response.");
+            return;
+        }
+
         final boolean near = !far;
         final DozeMachine.State state = mMachine.getState();
         final boolean paused = (state == DozeMachine.State.DOZE_AOD_PAUSED);
         final boolean pausing = (state == DozeMachine.State.DOZE_AOD_PAUSING);
         final boolean aod = (state == DozeMachine.State.DOZE_AOD);
 
-        if (state == DozeMachine.State.DOZE_PULSING) {
+        if (state == DozeMachine.State.DOZE_PULSING
+                || state == DozeMachine.State.DOZE_PULSING_BRIGHT) {
             boolean ignoreTouch = near;
             if (DEBUG) Log.i(TAG, "Prox changed, ignore touch = " + ignoreTouch);
             mDozeHost.onIgnoreTouchWhilePulsing(ignoreTouch);
@@ -212,10 +229,14 @@ public class DozeTriggers implements DozeMachine.Part {
         }
     }
 
-    private void onWakeScreen(boolean wake, DozeMachine.State state) {
+    /**
+     * When a wake screen event is received from a sensor
+     * @param wake {@code true} when it's time to wake up, {@code false} when we should sleep.
+     * @param state The current state, or null if the state could not be determined due to enqueued
+     *              transitions.
+     */
+    private void onWakeScreen(boolean wake, @Nullable DozeMachine.State state) {
         DozeLog.traceWakeDisplay(wake);
-        boolean paused = (state == DozeMachine.State.DOZE_AOD_PAUSED);
-        boolean pausing = (state == DozeMachine.State.DOZE_AOD_PAUSING);
         sWakeDisplaySensorState = wake;
 
         if (wake) {
@@ -229,6 +250,8 @@ public class DozeTriggers implements DozeMachine.Part {
                 }
             }, false /* alreadyPerformedProxCheck */, DozeLog.REASON_SENSOR_WAKE_UP);
         } else {
+            boolean paused = (state == DozeMachine.State.DOZE_AOD_PAUSED);
+            boolean pausing = (state == DozeMachine.State.DOZE_AOD_PAUSING);
             if (!pausing && !paused) {
                 mMachine.requestState(DozeMachine.State.DOZE);
             }
@@ -261,6 +284,7 @@ public class DozeTriggers implements DozeMachine.Part {
                 mDozeSensors.setListening(false);
                 break;
             case DOZE_PULSING:
+            case DOZE_PULSING_BRIGHT:
                 mDozeSensors.setTouchscreenSensorsListening(false);
                 mDozeSensors.setProxListening(true);
                 break;
@@ -291,7 +315,16 @@ public class DozeTriggers implements DozeMachine.Part {
 
     private void requestPulse(final int reason, boolean performedProxCheck) {
         Assert.isMainThread();
-        mDozeHost.extendPulse();
+        mDozeHost.extendPulse(reason);
+
+        // When already pulsing we're allowed to show the wallpaper directly without
+        // requesting a new pulse.
+        if (mMachine.getState() == DozeMachine.State.DOZE_PULSING
+                && reason == DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN) {
+            mMachine.requestState(DozeMachine.State.DOZE_PULSING_BRIGHT);
+            return;
+        }
+
         if (mPulsePending || !mAllowPulseTriggers || !canPulse()) {
             if (mAllowPulseTriggers) {
                 DozeLog.tracePulseDropped(mContext, mPulsePending, mMachine.getState(),

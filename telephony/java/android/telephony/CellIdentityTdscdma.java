@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.telephony.gsm.GsmCellLocation;
@@ -87,6 +88,12 @@ public final class CellIdentityTdscdma extends CellIdentity {
     public CellIdentityTdscdma(android.hardware.radio.V1_2.CellIdentityTdscdma cid) {
         this(cid.base.mcc, cid.base.mnc, cid.base.lac, cid.base.cid, cid.base.cpid,
                 cid.uarfcn, cid.operatorNames.alphaLong, cid.operatorNames.alphaShort);
+    }
+
+    /** @hide */
+    public CellIdentityTdscdma sanitizeLocationInfo() {
+        return new CellIdentityTdscdma(mMccStr, mMncStr, CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE,
+                CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE, mAlphaLong, mAlphaShort);
     }
 
     CellIdentityTdscdma copy() {
@@ -205,6 +212,12 @@ public final class CellIdentityTdscdma extends CellIdentity {
 
     /** Implement the Parcelable interface */
     @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    /** Implement the Parcelable interface */
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
         if (DBG) log("writeToParcel(Parcel, int): " + toString());
         super.writeToParcel(dest, CellInfo.TYPE_TDSCDMA);
@@ -226,16 +239,17 @@ public final class CellIdentityTdscdma extends CellIdentity {
 
     /** Implement the Parcelable interface */
     @SuppressWarnings("hiding")
-    public static final @android.annotation.NonNull Creator<CellIdentityTdscdma> CREATOR =
+    @NonNull
+    public static final Creator<CellIdentityTdscdma> CREATOR =
             new Creator<CellIdentityTdscdma>() {
                 @Override
-                public CellIdentityTdscdma createFromParcel(Parcel in) {
+                public @NonNull CellIdentityTdscdma createFromParcel(Parcel in) {
                     in.readInt();   // skip
                     return createFromParcelBody(in);
                 }
 
                 @Override
-                public CellIdentityTdscdma[] newArray(int size) {
+                public @NonNull CellIdentityTdscdma[] newArray(int size) {
                     return new CellIdentityTdscdma[size];
                 }
             };

@@ -868,6 +868,13 @@ public class ResolverDrawerLayout extends ViewGroup {
         setMeasuredDimension(sourceWidth, heightSize);
     }
 
+    /**
+      * @return The space reserved by views with 'alwaysShow=true'
+      */
+    public int getUncollapsibleHeight() {
+        return mUncollapsibleHeight;
+    }
+
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         final int width = getWidth();

@@ -413,7 +413,18 @@ public final class MediaFormat {
     */
     public static final String KEY_INTRA_REFRESH_PERIOD = "intra-refresh-period";
 
-   /**
+    /**
+     * An optional key describing whether encoders prepend headers to sync frames (e.g.
+     * SPS and PPS to IDR frames for H.264). This is an optional parameter that applies only
+     * to video encoders. A video encoder may not support this feature; check the output
+     * format to verify that this feature was enabled.
+     *
+     * The value is an integer, with 1 indicating to prepend headers to every sync frames,
+     * or 0 otherwise. The default value is 0.
+     */
+    public static final String KEY_PREPEND_HEADER_TO_SYNC_FRAMES = "prepend-sps-pps-to-idr-frames";
+
+    /**
      * A key describing the temporal layering schema.  This is an optional parameter
      * that applies only to video encoders.  Use {@link MediaCodec#getOutputFormat}
      * after {@link MediaCodec#configure configure} to query if the encoder supports
@@ -863,6 +874,12 @@ public final class MediaFormat {
      */
     public static final String KEY_IS_FORCED_SUBTITLE = "is-forced-subtitle";
 
+    /**
+     * A key describing the number of haptic channels in an audio format.
+     * The associated value is an integer.
+     */
+    public static final String KEY_HAPTIC_CHANNEL_COUNT = "haptic-channel-count";
+
     /** @hide */
     public static final String KEY_IS_TIMED_TEXT = "is-timed-text";
 
@@ -1043,7 +1060,7 @@ public final class MediaFormat {
      * that no B frames are allowed. Note that non-zero value does not guarantee
      * B frames; it's up to the encoder to decide.
      */
-    public static final String KEY_MAX_BFRAMES = "max-bframes";
+    public static final String KEY_MAX_B_FRAMES = "max-bframes";
 
     /* package private */ MediaFormat(@NonNull Map<String, Object> map) {
         mMap = map;

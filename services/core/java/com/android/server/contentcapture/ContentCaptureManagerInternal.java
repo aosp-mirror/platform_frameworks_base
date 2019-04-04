@@ -49,6 +49,9 @@ public abstract class ContentCaptureManagerInternal {
     /**
      * Gets the content capture options for the given user and package, or {@code null} if the
      * package is not whitelisted by the service.
+     *
+     * <p><b>NOTE: </b>this method is called by the {@code ActivityManager} service and hence cannot
+     * hold the main service lock.
      */
     @Nullable
     public abstract ContentCaptureOptions getOptionsForPackage(@UserIdInt int userId,

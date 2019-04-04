@@ -760,9 +760,9 @@ android_media_MediaRecord_getActiveMicrophones(JNIEnv *env,
     return jStatus;
 }
 
-static jint android_media_MediaRecord_setMicrophoneDirection(
+static jint android_media_MediaRecord_setPreferredMicrophoneDirection(
         JNIEnv *env, jobject thiz, jint direction) {
-    ALOGV("setMicrophoneDirection(%d)", direction);
+    ALOGV("setPreferredMicrophoneDirection(%d)", direction);
     sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
     if (mr == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
@@ -771,7 +771,7 @@ static jint android_media_MediaRecord_setMicrophoneDirection(
 
     jint jStatus = AUDIO_JAVA_SUCCESS;
     status_t status =
-        mr->setMicrophoneDirection(static_cast<audio_microphone_direction_t>(direction));
+        mr->setPreferredMicrophoneDirection(static_cast<audio_microphone_direction_t>(direction));
     if (status != NO_ERROR) {
         jStatus = nativeToJavaStatus(status);
     }
@@ -779,9 +779,9 @@ static jint android_media_MediaRecord_setMicrophoneDirection(
     return jStatus;
 }
 
-static jint  android_media_MediaRecord_setMicrophoneFieldDimension(
+static jint  android_media_MediaRecord_setPreferredMicrophoneFieldDimension(
         JNIEnv *env, jobject thiz, jfloat zoom) {
-    ALOGV("setMicrophoneFieldDimension(%f)", zoom);
+    ALOGV("setPreferredMicrophoneFieldDimension(%f)", zoom);
     sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
     if (mr == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
@@ -789,7 +789,7 @@ static jint  android_media_MediaRecord_setMicrophoneFieldDimension(
     }
 
     jint jStatus = AUDIO_JAVA_SUCCESS;
-    status_t status = mr->setMicrophoneFieldDimension(zoom);
+    status_t status = mr->setPreferredMicrophoneFieldDimension(zoom);
     if (status != NO_ERROR) {
         jStatus = nativeToJavaStatus(status);
     }
@@ -850,8 +850,10 @@ static const JNINativeMethod gMethods[] = {
 
     {"native_getActiveMicrophones", "(Ljava/util/ArrayList;)I", (void *)android_media_MediaRecord_getActiveMicrophones},
     {"native_getPortId", "()I", (void *)android_media_MediaRecord_getPortId},
-    {"native_setMicrophoneDirection", "(I)I", (void *)android_media_MediaRecord_setMicrophoneDirection},
-    {"native_setMicrophoneFieldDimension", "(F)I", (void *)android_media_MediaRecord_setMicrophoneFieldDimension},
+    {"native_setPreferredMicrophoneDirection", "(I)I",
+            (void *)android_media_MediaRecord_setPreferredMicrophoneDirection},
+    {"native_setPreferredMicrophoneFieldDimension", "(F)I",
+            (void *)android_media_MediaRecord_setPreferredMicrophoneFieldDimension},
 };
 
 // This function only registers the native methods, and is called from

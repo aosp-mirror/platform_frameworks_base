@@ -109,42 +109,20 @@ public class Tonal implements ExtractionType {
         final int mainColorsSize = mainColors.size();
         final int hints = inWallpaperColors.getColorHints();
         final boolean supportsDarkText = (hints & WallpaperColors.HINT_SUPPORTS_DARK_TEXT) != 0;
-        final boolean generatedFromBitmap = (hints & WallpaperColors.HINT_FROM_BITMAP) != 0;
 
         if (mainColorsSize == 0) {
             return false;
         }
 
-        // Decide what's the best color to use.
-        // We have 2 options:
-        // • Just pick the primary color
-        // • Filter out blacklisted colors. This is useful when palette is generated
-        //   automatically from a bitmap.
-        Color bestColor = null;
-        final float[] hsl = new float[3];
-        for (int i = 0; i < mainColorsSize; i++) {
-            final Color color = mainColors.get(i);
-            final int colorValue = color.toArgb();
-            ColorUtils.RGBToHSL(Color.red(colorValue), Color.green(colorValue),
-                    Color.blue(colorValue), hsl);
-
-            // Stop when we find a color that meets our criteria
-            if (!generatedFromBitmap) {
-                bestColor = color;
-                break;
-            }
-        }
-
-        // Fail if not found
-        if (bestColor == null) {
-            return false;
-        }
+        // Pick the primary color as the best color to use.
+        final Color bestColor = mainColors.get(0);
 
         // Tonal is not really a sort, it takes a color from the extracted
         // palette and finds a best fit amongst a collection of pre-defined
         // palettes. The best fit is tweaked to be closer to the source color
         // and replaces the original palette.
         int colorValue = bestColor.toArgb();
+        final float[] hsl = new float[3];
         ColorUtils.RGBToHSL(Color.red(colorValue), Color.green(colorValue), Color.blue(colorValue),
                 hsl);
 

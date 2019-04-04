@@ -65,6 +65,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Notification assistant that provides guidance on notification channel blocking
@@ -80,6 +82,7 @@ public class Assistant extends NotificationAssistantService {
     private static final String ATT_KEY = "key";
     private static final int DB_VERSION = 1;
     private static final String ATTR_VERSION = "version";
+    private final ExecutorService mSingleThreadExecutor = Executors.newSingleThreadExecutor();
 
     private static final ArrayList<Integer> PREJUDICAL_DISMISSALS = new ArrayList<>();
     static {
@@ -233,15 +236,20 @@ public class Assistant extends NotificationAssistantService {
         if (!isForCurrentUser(sbn)) {
             return null;
         }
-        NotificationEntry entry =
-                new NotificationEntry(mPackageManager, sbn, channel, mSmsHelper);
-        SmartActionsHelper.SmartSuggestions suggestions = mSmartActionsHelper.suggest(entry);
-        if (DEBUG) {
-            Log.d(TAG, String.format("Creating Adjustment for %s, with %d actions, and %d replies.",
-                    sbn.getKey(), suggestions.actions.size(), suggestions.replies.size()));
-        }
-        return createEnqueuedNotificationAdjustment(
-                entry, suggestions.actions, suggestions.replies);
+        mSingleThreadExecutor.submit(() -> {
+            NotificationEntry entry =
+                    new NotificationEntry(mPackageManager, sbn, channel, mSmsHelper);
+            SmartActionsHelper.SmartSuggestions suggestions = mSmartActionsHelper.suggest(entry);
+            if (DEBUG) {
+                Log.d(TAG, String.format(
+                        "Creating Adjustment for %s, with %d actions, and %d replies.",
+                        sbn.getKey(), suggestions.actions.size(), suggestions.replies.size()));
+            }
+            Adjustment adjustment = createEnqueuedNotificationAdjustment(
+                    entry, suggestions.actions, suggestions.replies);
+            adjustNotification(adjustment);
+        });
+        return null;
     }
 
     /** A convenience helper for creating an adjustment for an SBN. */
@@ -386,15 +394,15 @@ public class Assistant extends NotificationAssistantService {
         NotificationEntry entry = mLiveNotifications.get(key);
 
         if (entry != null) {
-            entry.setExpanded(isExpanded);
-            mSmartActionsHelper.onNotificationExpansionChanged(entry, isUserAction, isExpanded);
+            mSingleThreadExecutor.submit(
+                    () -> mSmartActionsHelper.onNotificationExpansionChanged(entry, isExpanded));
         }
     }
 
     @Override
     public void onNotificationDirectReplied(@NonNull String key) {
         if (DEBUG) Log.i(TAG, "onNotificationDirectReplied " + key);
-        mSmartActionsHelper.onNotificationDirectReplied(key);
+        mSingleThreadExecutor.submit(() -> mSmartActionsHelper.onNotificationDirectReplied(key));
     }
 
     @Override
@@ -404,7 +412,8 @@ public class Assistant extends NotificationAssistantService {
             Log.d(TAG, "onSuggestedReplySent() called with: key = [" + key + "], reply = [" + reply
                     + "], source = [" + source + "]");
         }
-        mSmartActionsHelper.onSuggestedReplySent(key, reply, source);
+        mSingleThreadExecutor.submit(
+                () -> mSmartActionsHelper.onSuggestedReplySent(key, reply, source));
     }
 
     @Override
@@ -415,7 +424,8 @@ public class Assistant extends NotificationAssistantService {
                     "onActionInvoked() called with: key = [" + key + "], action = [" + action.title
                             + "], source = [" + source + "]");
         }
-        mSmartActionsHelper.onActionClicked(key, action, source);
+        mSingleThreadExecutor.submit(
+                () -> mSmartActionsHelper.onActionClicked(key, action, source));
     }
 
     @Override
@@ -491,11 +501,6 @@ public class Assistant extends NotificationAssistantService {
     @VisibleForTesting
     public void setPackageManager(IPackageManager pm) {
         mPackageManager = pm;
-    }
-
-    @VisibleForTesting
-    public void setSmartActionsHelper(SmartActionsHelper smartActionsHelper) {
-        mSmartActionsHelper = smartActionsHelper;
     }
 
     @VisibleForTesting

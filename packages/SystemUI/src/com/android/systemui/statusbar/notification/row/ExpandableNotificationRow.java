@@ -552,6 +552,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mEntry.mIsSystemNotification = isSystemNotification(mContext, mStatusBarNotification);
         }
 
+        isNonblockable |= mEntry.channel.isImportanceLockedByOEM();
+        isNonblockable |= mEntry.channel.isImportanceLockedByCriticalDeviceFunction();
+
         if (!isNonblockable && mEntry != null && mEntry.mIsSystemNotification != null) {
             if (mEntry.mIsSystemNotification) {
                 if (mEntry.channel != null
@@ -2432,7 +2435,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         int intrinsicBefore = getIntrinsicHeight();
         super.onLayout(changed, left, top, right, bottom);
-        if (intrinsicBefore != getIntrinsicHeight()) {
+        if (intrinsicBefore != getIntrinsicHeight() && intrinsicBefore != 0) {
             notifyHeightChanged(true  /* needsAnimation */);
         }
         if (mMenuRow.getMenuView() != null) {

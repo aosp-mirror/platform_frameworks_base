@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.phone;
 
 import static com.android.systemui.ScreenDecorations.DisplayCutoutView.boundsFromDirection;
-import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
 
 import android.annotation.ColorInt;
 import android.content.Context;
@@ -102,19 +101,6 @@ public class KeyguardStatusBarView extends RelativeLayout
      */
     private int mCutoutSideNudge = 0;
 
-    /**
-     * How much to move icons to avoid burn in.
-     */
-    private int mBurnInOffset;
-    private int mCurrentBurnInOffsetX;
-    private int mCurrentBurnInOffsetY;
-
-    /**
-     * Ratio representing being in ambient mode or not.
-     */
-    private float mDarkAmount;
-    private boolean mDozing;
-
     public KeyguardStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -186,8 +172,6 @@ public class KeyguardStatusBarView extends RelativeLayout
                 R.dimen.system_icons_super_container_avatarless_margin_end);
         mCutoutSideNudge = getResources().getDimensionPixelSize(
                 R.dimen.display_cutout_margin_consumption);
-        mBurnInOffset = getResources().getDimensionPixelSize(
-                R.dimen.default_burn_in_prevention_offset);
         mShowPercentAvailable = getContext().getResources().getBoolean(
                 com.android.internal.R.bool.config_battery_percentage_setting_available);
     }
@@ -203,15 +187,15 @@ public class KeyguardStatusBarView extends RelativeLayout
         }
         if (mKeyguardUserSwitcher == null) {
             // If we have no keyguard switcher, the screen width is under 600dp. In this case,
-            // we don't show the multi-user avatar unless there is more than 1 user on the device.
-            if (mUserSwitcherController != null
-                    && mUserSwitcherController.getSwitchableUserCount() > 1) {
+            // we only show the multi-user switch if it's enabled through UserManager as well as
+            // by the user.
+            if (mMultiUserSwitch.isMultiUserEnabled()) {
                 mMultiUserSwitch.setVisibility(View.VISIBLE);
             } else {
                 mMultiUserSwitch.setVisibility(View.GONE);
             }
         }
-        mBatteryView.setForceShowPercent(mBatteryCharging && mShowPercentAvailable || mDozing);
+        mBatteryView.setForceShowPercent(mBatteryCharging && mShowPercentAvailable);
     }
 
     private void updateSystemIconsLayoutParams() {
@@ -348,7 +332,6 @@ public class KeyguardStatusBarView extends RelativeLayout
         mIconManager = new TintedIconManager(findViewById(R.id.statusIcons));
         Dependency.get(StatusBarIconController.class).addIconGroup(mIconManager);
         onThemeChanged();
-        updateDarkState();
     }
 
     @Override
@@ -468,6 +451,11 @@ public class KeyguardStatusBarView extends RelativeLayout
     }
 
     @Override
+    public void onDensityOrFontScaleChanged() {
+        loadDimens();
+    }
+
+    @Override
     public void onOverlayChanged() {
         mCarrierLabel.setTextAppearance(
                 Utils.getThemeAttr(mContext, com.android.internal.R.attr.textAppearanceSmall));
@@ -487,7 +475,7 @@ public class KeyguardStatusBarView extends RelativeLayout
             mIconManager.setTint(iconColor);
         }
 
-        applyDarkness(R.id.battery, mEmptyRect, intensity * (1f - mDarkAmount), iconColor);
+        applyDarkness(R.id.battery, mEmptyRect, intensity, iconColor);
         applyDarkness(R.id.clock, mEmptyRect, intensity, iconColor);
     }
 
@@ -508,46 +496,4 @@ public class KeyguardStatusBarView extends RelativeLayout
             mBatteryView.dump(fd, pw, args);
         }
     }
-
-    public void setDozing(boolean dozing) {
-        if (mDozing == dozing) {
-            return;
-        }
-        mDozing = dozing;
-        updateVisibilities();
-    }
-
-    public void setDarkAmount(float darkAmount) {
-        mDarkAmount = darkAmount;
-        if (darkAmount == 0) {
-            dozeTimeTick();
-        }
-        updateDarkState();
-    }
-
-    public void dozeTimeTick() {
-        mCurrentBurnInOffsetX = getBurnInOffset(mBurnInOffset, true /* xAxis */);
-        mCurrentBurnInOffsetY = getBurnInOffset(mBurnInOffset, false /* xAxis */);
-        updateDarkState();
-    }
-
-    private void updateDarkState() {
-        float alpha = 1f - mDarkAmount;
-        int visibility = alpha != 0f ? VISIBLE : INVISIBLE;
-        mCarrierLabel.setAlpha(alpha * alpha);
-        mStatusIconContainer.setAlpha(alpha);
-        mStatusIconContainer.setVisibility(visibility);
-
-        float iconsX = -mCurrentBurnInOffsetX;
-        if (mMultiUserSwitch.getVisibility() == VISIBLE) {
-            // Squared alpha to add a nice easing curve and avoid overlap during animation.
-            mMultiUserAvatar.setAlpha(alpha * alpha);
-            iconsX += mMultiUserAvatar.getPaddingLeft() + mMultiUserAvatar.getWidth()
-                    + mMultiUserAvatar.getPaddingRight();
-        }
-        mSystemIconsContainer.setTranslationX(iconsX * mDarkAmount);
-        mSystemIconsContainer.setTranslationY(mCurrentBurnInOffsetY * mDarkAmount);
-        updateIconsAndTextColors();
-    }
-
 }

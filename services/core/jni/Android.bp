@@ -50,7 +50,9 @@ cc_library_static {
         "com_android_server_VibratorService.cpp",
         "com_android_server_PersistentDataBlockService.cpp",
         "com_android_server_GraphicsStatsService.cpp",
+        "com_android_server_am_AppCompactor.cpp",
         "onload.cpp",
+        ":lib_networkStatsFactory_native",
     ],
 
     include_dirs: [
@@ -149,4 +151,11 @@ cc_defaults {
             ],
         }
     }
+}
+
+filegroup {
+    name: "lib_networkStatsFactory_native",
+    srcs: [
+        "com_android_server_net_NetworkStatsFactory.cpp",
+    ],
 }

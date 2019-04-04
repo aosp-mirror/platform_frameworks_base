@@ -84,13 +84,13 @@ public:
         delete[] patch;
     }
 
-    static jlong getTransparentRegion(JNIEnv* env, jobject, jobject jbitmap,
+    static jlong getTransparentRegion(JNIEnv* env, jobject, jlong bitmapPtr,
             jlong chunkHandle, jobject dstRect) {
         Res_png_9patch* chunk = reinterpret_cast<Res_png_9patch*>(chunkHandle);
         SkASSERT(chunk);
 
         SkBitmap bitmap;
-        GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
+        bitmap::toBitmap(bitmapPtr).getSkBitmap(&bitmap);
         SkRect dst;
         GraphicsJNI::jrect_to_rect(env, dstRect, &dst);
 
@@ -156,7 +156,7 @@ static const JNINativeMethod gNinePatchMethods[] = {
     { "validateNinePatchChunk", "([B)J",
             (void*) SkNinePatchGlue::validateNinePatchChunk },
     { "nativeFinalize", "(J)V", (void*) SkNinePatchGlue::finalize },
-    { "nativeGetTransparentRegion", "(Landroid/graphics/Bitmap;JLandroid/graphics/Rect;)J",
+    { "nativeGetTransparentRegion", "(JJLandroid/graphics/Rect;)J",
             (void*) SkNinePatchGlue::getTransparentRegion }
 };
 

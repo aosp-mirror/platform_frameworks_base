@@ -39,7 +39,8 @@ public interface ServiceNameResolver {
         /**
          * The name change callback.
          */
-        void onNameResolved(@UserIdInt int userId, @Nullable String serviceName);
+        void onNameResolved(@UserIdInt int userId, @Nullable String serviceName,
+                boolean isTemporary);
     }
 
     /**

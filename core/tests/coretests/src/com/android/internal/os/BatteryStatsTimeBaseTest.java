@@ -282,12 +282,6 @@ public class BatteryStatsTimeBaseTest extends TestCase {
 
         Assert.assertEquals(100+300+666-400,
                 tb.computeUptime(666, BatteryStats.STATS_SINCE_CHARGED));
-        Assert.assertEquals(300+666-400,
-                tb.computeUptime(666, BatteryStats.STATS_CURRENT));
-        Assert.assertEquals(300+666-400-50,
-                tb.computeUptime(666, BatteryStats.STATS_SINCE_UNPLUGGED));
-
-        Assert.assertEquals(0, tb.computeUptime(666, 6000));
     }
 
     /**
@@ -301,12 +295,6 @@ public class BatteryStatsTimeBaseTest extends TestCase {
 
         Assert.assertEquals(200+500+6666-600,
                 tb.computeRealtime(6666, BatteryStats.STATS_SINCE_CHARGED));
-        Assert.assertEquals(500+6666-600,
-                tb.computeRealtime(6666, BatteryStats.STATS_CURRENT));
-        Assert.assertEquals(500+6666-600-60,
-                tb.computeRealtime(6666, BatteryStats.STATS_SINCE_UNPLUGGED));
-
-        Assert.assertEquals(0, tb.computeUptime(666, 6000));
     }
 
     /**

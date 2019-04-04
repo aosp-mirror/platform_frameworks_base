@@ -129,8 +129,8 @@ import java.util.Map;
  */
 public class IpReachabilityMonitor {
     private static final String TAG = "IpReachabilityMonitor";
-    private static final boolean DBG = false;
-    private static final boolean VDBG = false;
+    private static final boolean DBG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean VDBG = Log.isLoggable(TAG, Log.VERBOSE);
 
     public interface Callback {
         // This callback function must execute as quickly as possible as it is
@@ -316,8 +316,8 @@ public class IpReachabilityMonitor {
         }
 
         final boolean lostProvisioning =
-                (mLinkProperties.isIPv4Provisioned() && !whatIfLp.isIPv4Provisioned())
-                || (mLinkProperties.isIPv6Provisioned() && !whatIfLp.isIPv6Provisioned());
+                (mLinkProperties.isIpv4Provisioned() && !whatIfLp.isIpv4Provisioned())
+                || (mLinkProperties.isIpv6Provisioned() && !whatIfLp.isIpv6Provisioned());
 
         if (lostProvisioning) {
             final String logMsg = "FAILURE: LOST_PROVISIONING, " + event;
@@ -332,7 +332,7 @@ public class IpReachabilityMonitor {
     }
 
     private boolean avoidingBadLinks() {
-        return !mUsingMultinetworkPolicyTracker || mCm.getAvoidBadWifi();
+        return !mUsingMultinetworkPolicyTracker || mCm.shouldAvoidBadWifi();
     }
 
     public void probeAll() {

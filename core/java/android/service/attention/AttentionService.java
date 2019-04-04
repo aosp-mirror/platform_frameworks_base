@@ -21,11 +21,13 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.Service;
+import android.attention.AttentionManagerInternal;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteException;
 
 import com.android.internal.util.Preconditions;
+import com.android.server.LocalServices;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -38,7 +40,7 @@ import java.lang.annotation.RetentionPolicy;
  * The system's default AttentionService implementation is configured in
  * {@code config_AttentionComponent}. If this config has no value, a stub is returned.
  *
- * See: {@link AttentionManagerService}.
+ * See: {@link com.android.server.attention.AttentionManagerService}.
  *
  * <pre>
  * {@literal
@@ -65,14 +67,20 @@ public abstract class AttentionService extends Service {
     /** Attention is present. */
     public static final int ATTENTION_SUCCESS_PRESENT = 1;
 
+    /** Unknown reasons for failing to determine the attention. */
+    public static final int ATTENTION_FAILURE_UNKNOWN = 2;
+
+    /** Request has been cancelled. */
+    public static final int ATTENTION_FAILURE_CANCELLED = 3;
+
     /** Preempted by other client. */
-    public static final int ATTENTION_FAILURE_PREEMPTED = 2;
+    public static final int ATTENTION_FAILURE_PREEMPTED = 4;
 
     /** Request timed out. */
-    public static final int ATTENTION_FAILURE_TIMED_OUT = 3;
+    public static final int ATTENTION_FAILURE_TIMED_OUT = 5;
 
-    /** Unknown reasons for failing to determine the attention. */
-    public static final int ATTENTION_FAILURE_UNKNOWN = 4;
+    /** Camera permission is not granted. */
+    public static final int ATTENTION_FAILURE_CAMERA_PERMISSION_ABSENT = 6;
 
     /**
      * Result codes for when attention check was successful.
@@ -90,8 +98,9 @@ public abstract class AttentionService extends Service {
      *
      * @hide
      */
-    @IntDef(prefix = {"ATTENTION_FAILURE_"}, value = {ATTENTION_FAILURE_PREEMPTED,
-            ATTENTION_FAILURE_TIMED_OUT, ATTENTION_FAILURE_UNKNOWN})
+    @IntDef(prefix = {"ATTENTION_FAILURE_"}, value = {ATTENTION_FAILURE_UNKNOWN,
+            ATTENTION_FAILURE_CANCELLED, ATTENTION_FAILURE_PREEMPTED, ATTENTION_FAILURE_TIMED_OUT,
+            ATTENTION_FAILURE_CAMERA_PERMISSION_ABSENT})
     @Retention(RetentionPolicy.SOURCE)
     public @interface AttentionFailureCodes {
     }
@@ -100,15 +109,16 @@ public abstract class AttentionService extends Service {
 
         /** {@inheritDoc} */
         @Override
-        public void checkAttention(int requestCode, IAttentionCallback callback) {
+        public void checkAttention(IAttentionCallback callback) {
             Preconditions.checkNotNull(callback);
-            AttentionService.this.onCheckAttention(requestCode, new AttentionCallback(callback));
+            AttentionService.this.onCheckAttention(new AttentionCallback(callback));
         }
 
         /** {@inheritDoc} */
         @Override
-        public void cancelAttentionCheck(int requestCode) {
-            AttentionService.this.onCancelAttentionCheck(requestCode);
+        public void cancelAttentionCheck(IAttentionCallback callback) {
+            Preconditions.checkNotNull(callback);
+            AttentionService.this.onCancelAttentionCheck(new AttentionCallback(callback));
         }
     };
 
@@ -122,38 +132,58 @@ public abstract class AttentionService extends Service {
     }
 
     /**
+     * Disables the dependants.
+     *
+     * Example: called if the service does not have sufficient permissions to perform the task.
+     */
+    public final void disableSelf() {
+        AttentionManagerInternal attentionManager = LocalServices.getService(
+                AttentionManagerInternal.class);
+        if (attentionManager != null) {
+            attentionManager.disableSelf();
+        }
+    }
+
+    /**
      * Checks the user attention and calls into the provided callback.
      *
-     * @param requestCode an identifier that could be used to cancel the request
-     * @param callback    the callback to return the result to
+     * @param callback the callback to return the result to
      */
-    public abstract void onCheckAttention(int requestCode, @NonNull AttentionCallback callback);
+    public abstract void onCheckAttention(@NonNull AttentionCallback callback);
 
-    /** Cancels the attention check for a given request code. */
-    public abstract void onCancelAttentionCheck(int requestCode);
-
+    /**
+     * Cancels pending work for a given callback.
+     *
+     * Implementation must call back with a failure code of {@link #ATTENTION_FAILURE_CANCELLED}.
+     */
+    public abstract void onCancelAttentionCheck(@NonNull AttentionCallback callback);
 
     /** Callbacks for AttentionService results. */
     public static final class AttentionCallback {
-        private final IAttentionCallback mCallback;
+        @NonNull private final IAttentionCallback mCallback;
 
-        private AttentionCallback(IAttentionCallback callback) {
+        private AttentionCallback(@NonNull IAttentionCallback callback) {
             mCallback = callback;
         }
 
-        /** Returns the result. */
-        public void onSuccess(int requestCode, @AttentionSuccessCodes int result, long timestamp) {
+        /**
+         * Signals a success and provides the result code.
+         *
+         * @param timestamp of when the attention signal was computed; system throttles the requests
+         *                  so this is useful to know how fresh the result is.
+         */
+        public void onSuccess(@AttentionSuccessCodes int result, long timestamp) {
             try {
-                mCallback.onSuccess(requestCode, result, timestamp);
+                mCallback.onSuccess(result, timestamp);
             } catch (RemoteException e) {
                 e.rethrowFromSystemServer();
             }
         }
 
-        /** Signals a failure. */
-        public void onFailure(int requestCode, @AttentionFailureCodes int error) {
+        /** Signals a failure and provides the error code. */
+        public void onFailure(@AttentionFailureCodes int error) {
             try {
-                mCallback.onFailure(requestCode, error);
+                mCallback.onFailure(error);
             } catch (RemoteException e) {
                 e.rethrowFromSystemServer();
             }

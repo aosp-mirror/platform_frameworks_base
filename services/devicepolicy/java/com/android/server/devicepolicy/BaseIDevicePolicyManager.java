@@ -15,16 +15,9 @@
  */
 package com.android.server.devicepolicy;
 
-import android.app.admin.DevicePolicyManager;
 import android.app.admin.IDevicePolicyManager;
-import android.app.admin.StartInstallingUpdateCallback;
-import android.content.ComponentName;
-import android.os.ParcelFileDescriptor;
 
 import com.android.server.SystemService;
-
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Defines the required interface for IDevicePolicyManager implemenation.
@@ -62,84 +55,5 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     abstract void handleStopUser(int userId);
 
     public void clearSystemUpdatePolicyFreezePeriodRecord() {
-    }
-
-    @Override
-    public long forceNetworkLogs() {
-        return 0;
-    }
-
-    @Override
-    public long forceSecurityLogs() {
-        return 0;
-    }
-
-    @Override
-    public boolean checkDeviceIdentifierAccess(String packageName, int userHandle, int pid,
-            int uid) {
-        return false;
-    }
-
-    @Override
-    public int setGlobalPrivateDns(ComponentName who, int mode, String privateDnsHost) {
-        return DevicePolicyManager.PRIVATE_DNS_SET_ERROR_FAILURE_SETTING;
-    }
-
-    @Override
-    public int getGlobalPrivateDnsMode(ComponentName who) {
-        return DevicePolicyManager.PRIVATE_DNS_MODE_UNKNOWN;
-    }
-
-    @Override
-    public String getGlobalPrivateDnsHost(ComponentName who) {
-        return null;
-    }
-
-    @Override
-    public void grantDeviceIdsAccessToProfileOwner(ComponentName who, int userId) { }
-
-    @Override
-    public int getPasswordComplexity() {
-        return DevicePolicyManager.PASSWORD_COMPLEXITY_NONE;
-    }
-
-    @Override
-    public void installUpdateFromFile(ComponentName admin,
-            ParcelFileDescriptor updateFileDescriptor, StartInstallingUpdateCallback listener) {}
-
-    @Override
-    public void setCrossProfileCalendarPackages(ComponentName admin, List<String> packageNames) {
-    }
-
-    @Override
-    public List<String> getCrossProfileCalendarPackages(ComponentName admin) {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public boolean isPackageAllowedToAccessCalendarForUser(String packageName,
-            int userHandle) {
-        return false;
-    }
-
-    @Override
-    public List<String> getCrossProfileCalendarPackagesForUser(int userHandle) {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public boolean isManagedKiosk() {
-        return false;
-    }
-
-    @Override
-    public boolean isUnattendedManagedKiosk() {
-        return false;
-    }
-
-    @Override
-    public boolean startViewCalendarEventInManagedProfile(String packageName, long eventId,
-            long start, long end, boolean allDay, int flags) {
-        return false;
     }
 }

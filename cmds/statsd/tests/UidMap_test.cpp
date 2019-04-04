@@ -33,6 +33,7 @@ namespace os {
 namespace statsd {
 
 using android::util::ProtoOutputStream;
+using android::util::ProtoReader;
 
 #ifdef __ANDROID__
 const string kApp1 = "app1.sharing.1";
@@ -179,12 +180,12 @@ static void protoOutputStreamToUidMapping(ProtoOutputStream* proto, UidMapping* 
     vector<uint8_t> bytes;
     bytes.resize(proto->size());
     size_t pos = 0;
-    auto iter = proto->data();
-    while (iter.readBuffer() != NULL) {
-        size_t toRead = iter.currentToRead();
-        std::memcpy(&((bytes)[pos]), iter.readBuffer(), toRead);
+    sp<ProtoReader> reader = proto->data();
+    while (reader->readBuffer() != NULL) {
+        size_t toRead = reader->currentToRead();
+        std::memcpy(&((bytes)[pos]), reader->readBuffer(), toRead);
         pos += toRead;
-        iter.rp()->move(toRead);
+        reader->move(toRead);
     }
     results->ParseFromArray(bytes.data(), bytes.size());
 }

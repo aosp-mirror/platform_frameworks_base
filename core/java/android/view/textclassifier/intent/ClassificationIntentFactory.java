@@ -48,6 +48,7 @@ public interface ClassificationIntentFactory {
                 context.getString(com.android.internal.R.string.translate),
                 /* titleWithEntity */ null,
                 context.getString(com.android.internal.R.string.translate_desc),
+                /* descriptionWithAppName */ null,
                 new Intent(Intent.ACTION_TRANSLATE)
                         // TODO: Probably better to introduce a "translate" scheme instead of
                         // using EXTRA_TEXT.

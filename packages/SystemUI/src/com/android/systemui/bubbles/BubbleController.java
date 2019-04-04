@@ -26,6 +26,7 @@ import static com.android.systemui.statusbar.notification.NotificationAlertingMa
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
@@ -64,6 +65,7 @@ import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import java.lang.annotation.Retention;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -80,8 +82,6 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
 
     private static final String TAG = "BubbleController";
 
-    private static final int MAX_BUBBLES = 5; // TODO: actually enforce this
-
     @Retention(SOURCE)
     @IntDef({DISMISS_USER_GESTURE, DISMISS_AGED, DISMISS_TASK_FINISHED, DISMISS_BLOCKED,
             DISMISS_NOTIF_CANCEL, DISMISS_ACCESSIBILITY_ACTION})
@@ -93,6 +93,8 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
     static final int DISMISS_BLOCKED = 4;
     static final int DISMISS_NOTIF_CANCEL = 5;
     static final int DISMISS_ACCESSIBILITY_ACTION = 6;
+
+    static final int MAX_BUBBLES = 5; // TODO: actually enforce this
 
     // Enables some subset of notifs to automatically become bubbles
     private static final boolean DEBUG_ENABLE_AUTO_BUBBLE = false;
@@ -291,6 +293,17 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
     }
 
     /**
+     * Request the stack expand if needed, then select the specified Bubble as current.
+     *
+     * @param notificationKey the notification key for the bubble to be selected
+     */
+    public void expandStackAndSelectBubble(String notificationKey) {
+        if (mStackView != null && mBubbleData.getBubble(notificationKey) != null) {
+            mStackView.setExpandedBubble(notificationKey);
+        }
+    }
+
+    /**
      * Tell the stack of bubbles to be dismissed, this will remove all of the bubbles in the stack.
      */
     void dismissStack(@DismissReason int reason) {
@@ -340,6 +353,9 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
             // It's new
             mStackView.addBubble(notif);
         }
+        if (shouldAutoExpand(notif)) {
+            mStackView.setExpandedBubble(notif);
+        }
         updateVisibility();
     }
 
@@ -379,9 +395,10 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
             }
             if (shouldAutoBubbleForFlags(mContext, entry) || shouldBubble(entry)) {
                 // TODO: handle group summaries
-                // It's a new notif, it shows in the shade and as a bubble
-                entry.setIsBubble(true);
-                entry.setShowInShadeWhenBubble(true);
+                boolean suppressNotification = entry.getBubbleMetadata() != null
+                        && entry.getBubbleMetadata().getSuppressInitialNotification()
+                        && isForegroundApp(entry.notification.getPackageName());
+                entry.setShowInShadeWhenBubble(!suppressNotification);
             }
         }
 
@@ -520,6 +537,23 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
         return (((isMessageType && hasRemoteInput) || isMessageStyle) && autoBubbleMessages)
                 || (isImportantOngoing && autoBubbleOngoing)
                 || autoBubbleAll;
+    }
+
+    private boolean shouldAutoExpand(NotificationEntry entry) {
+        Notification.BubbleMetadata metadata = entry.getBubbleMetadata();
+        return metadata != null && metadata.getAutoExpandBubble()
+                && isForegroundApp(entry.notification.getPackageName());
+    }
+
+    /**
+     * Return true if the applications with the package name is running in foreground.
+     *
+     * @param pkgName application package name.
+     */
+    private boolean isForegroundApp(String pkgName) {
+        ActivityManager am = mContext.getSystemService(ActivityManager.class);
+        List<RunningTaskInfo> tasks = am.getRunningTasks(1 /* maxNum */);
+        return !tasks.isEmpty() && pkgName.equals(tasks.get(0).topActivity.getPackageName());
     }
 
     /**

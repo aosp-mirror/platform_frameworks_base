@@ -21,6 +21,7 @@
 
 #include "frameworks/base/libs/protoutil/tests/test.pb.h"
 
+using android::sp;
 using namespace android::base;
 using namespace android::util;
 using ::testing::StrEq;
@@ -38,9 +39,9 @@ static std::string flushToString(ProtoOutputStream* proto) {
 static std::string iterateToString(ProtoOutputStream* proto) {
     std::string content;
     content.reserve(proto->size());
-    auto iter = proto->data();
-    while (iter.hasNext()) {
-        content.push_back(iter.next());
+    sp<ProtoReader> reader = proto->data();
+    while (reader->hasNext()) {
+        content.push_back(reader->next());
     }
     return content;
 }
@@ -198,7 +199,6 @@ TEST(ProtoOutputStreamTest, NoEndCalled) {
     // no proto.end called
     EXPECT_NE(proto.bytesWritten(), 0);
     EXPECT_EQ(proto.size(), 0);
-    EXPECT_EQ(proto.data().size(), 0);
     EXPECT_FALSE(proto.flush(STDOUT_FILENO));
 }
 
@@ -211,7 +211,6 @@ TEST(ProtoOutputStreamTest, TwoEndCalled) {
     proto.end(token);
     EXPECT_NE(proto.bytesWritten(), 0);
     EXPECT_EQ(proto.size(), 0);
-    EXPECT_EQ(proto.data().size(), 0);
     EXPECT_FALSE(proto.flush(STDOUT_FILENO));
 }
 
@@ -223,6 +222,5 @@ TEST(ProtoOutputStreamTest, NoStartCalled) {
     proto.end(wrongToken);
     EXPECT_NE(proto.bytesWritten(), 0);
     EXPECT_EQ(proto.size(), 0);
-    EXPECT_EQ(proto.data().size(), 0);
     EXPECT_FALSE(proto.flush(STDOUT_FILENO));
 }

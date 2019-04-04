@@ -46,6 +46,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.app.WindowConfiguration;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -210,18 +211,22 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     private final BackgroundFallback mBackgroundFallback = new BackgroundFallback();
 
     private int mLastTopInset = 0;
+    @UnsupportedAppUsage
     private int mLastBottomInset = 0;
+    @UnsupportedAppUsage
     private int mLastRightInset = 0;
+    @UnsupportedAppUsage
     private int mLastLeftInset = 0;
     private boolean mLastHasTopStableInset = false;
     private boolean mLastHasBottomStableInset = false;
     private boolean mLastHasRightStableInset = false;
     private boolean mLastHasLeftStableInset = false;
     private int mLastWindowFlags = 0;
-    private boolean mLastShouldAlwaysConsumeNavBar = false;
+    private boolean mLastShouldAlwaysConsumeSystemBars = false;
 
     private int mRootScrollY = 0;
 
+    @UnsupportedAppUsage
     private PhoneWindow mWindow;
 
     ViewGroup mContentRoot;
@@ -1102,7 +1107,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 disallowAnimate |= (hasLeftStableInset != mLastHasLeftStableInset);
                 mLastHasLeftStableInset = hasLeftStableInset;
 
-                mLastShouldAlwaysConsumeNavBar = insets.shouldAlwaysConsumeNavBar();
+                mLastShouldAlwaysConsumeSystemBars = insets.shouldAlwaysConsumeSystemBars();
             }
 
             boolean navBarToRightEdge = isNavBarToRightEdge(mLastBottomInset, mLastRightInset);
@@ -1133,16 +1138,16 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 (attrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0
                         && (sysUiVisibility & SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) == 0
                         && (sysUiVisibility & SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0
-                || mLastShouldAlwaysConsumeNavBar;
+                || mLastShouldAlwaysConsumeSystemBars;
 
         // If we didn't request fullscreen layout, but we still got it because of the
         // mForceWindowDrawsStatusBarBackground flag, also consume top inset.
         boolean consumingStatusBar = (sysUiVisibility & SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN) == 0
-                && (sysUiVisibility & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0
                 && (attrs.flags & FLAG_LAYOUT_IN_SCREEN) == 0
                 && (attrs.flags & FLAG_LAYOUT_INSET_DECOR) == 0
                 && mForceWindowDrawsStatusBarBackground
-                && mLastTopInset != 0;
+                && mLastTopInset != 0
+                || mLastShouldAlwaysConsumeSystemBars;
 
         int consumedTop = consumingStatusBar ? mLastTopInset : 0;
         int consumedRight = consumingNavBar ? mLastRightInset : 0;

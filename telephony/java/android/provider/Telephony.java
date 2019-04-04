@@ -35,6 +35,7 @@ import android.database.Cursor;
 import android.database.sqlite.SqliteWrapper;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Parcel;
 import android.telephony.Rlog;
 import android.telephony.ServiceState;
 import android.telephony.SmsMessage;
@@ -4130,30 +4131,22 @@ public final class Telephony {
          */
         public static ContentValues getContentValuesForServiceState(ServiceState state) {
             ContentValues values = new ContentValues();
-            values.put(VOICE_REG_STATE, state.getVoiceRegState());
-            values.put(DATA_REG_STATE, state.getDataRegState());
-            values.put(VOICE_ROAMING_TYPE, state.getVoiceRoamingType());
-            values.put(DATA_ROAMING_TYPE, state.getDataRoamingType());
-            values.put(VOICE_OPERATOR_ALPHA_LONG, state.getVoiceOperatorAlphaLong());
-            values.put(VOICE_OPERATOR_ALPHA_SHORT, state.getVoiceOperatorAlphaShort());
-            values.put(VOICE_OPERATOR_NUMERIC, state.getVoiceOperatorNumeric());
-            values.put(DATA_OPERATOR_ALPHA_LONG, state.getDataOperatorAlphaLong());
-            values.put(DATA_OPERATOR_ALPHA_SHORT, state.getDataOperatorAlphaShort());
-            values.put(DATA_OPERATOR_NUMERIC, state.getDataOperatorNumeric());
-            values.put(IS_MANUAL_NETWORK_SELECTION, state.getIsManualSelection());
-            values.put(RIL_VOICE_RADIO_TECHNOLOGY, state.getRilVoiceRadioTechnology());
-            values.put(RIL_DATA_RADIO_TECHNOLOGY, state.getRilDataRadioTechnology());
-            values.put(CSS_INDICATOR, state.getCssIndicator());
-            values.put(NETWORK_ID, state.getCdmaNetworkId());
-            values.put(SYSTEM_ID, state.getCdmaSystemId());
-            values.put(CDMA_ROAMING_INDICATOR, state.getCdmaRoamingIndicator());
-            values.put(CDMA_DEFAULT_ROAMING_INDICATOR, state.getCdmaDefaultRoamingIndicator());
-            values.put(CDMA_ERI_ICON_INDEX, state.getCdmaEriIconIndex());
-            values.put(CDMA_ERI_ICON_MODE, state.getCdmaEriIconMode());
-            values.put(IS_EMERGENCY_ONLY, state.isEmergencyOnly());
-            values.put(IS_USING_CARRIER_AGGREGATION, state.isUsingCarrierAggregation());
+            final Parcel p = Parcel.obtain();
+            state.writeToParcel(p, 0);
+            // Turn the parcel to byte array. Safe to do this because the content values were never
+            // written into a persistent storage. ServiceStateProvider keeps values in the memory.
+            values.put(SERVICE_STATE, p.marshall());
             return values;
         }
+
+        /**
+         * The current service state.
+         *
+         * This is the entire {@link ServiceState} object in byte array.
+         *
+         * @hide
+         */
+        public static final String SERVICE_STATE = "service_state";
 
         /**
          * An integer value indicating the current voice service state.

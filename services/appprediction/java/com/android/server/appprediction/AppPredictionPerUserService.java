@@ -111,11 +111,11 @@ public class AppPredictionPerUserService extends
      * Records when a launch location is shown.
      */
     @GuardedBy("mLock")
-    public void notifyLocationShownLocked(@NonNull AppPredictionSessionId sessionId,
+    public void notifyLaunchLocationShownLocked(@NonNull AppPredictionSessionId sessionId,
             @NonNull String launchLocation, @NonNull ParceledListSlice targetIds) {
         final RemoteAppPredictionService service = getRemoteServiceLocked();
         if (service != null) {
-            service.notifyLocationShown(sessionId, launchLocation, targetIds);
+            service.notifyLaunchLocationShown(sessionId, launchLocation, targetIds);
         }
     }
 

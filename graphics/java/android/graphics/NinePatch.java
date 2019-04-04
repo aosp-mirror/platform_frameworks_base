@@ -261,7 +261,8 @@ public class NinePatch {
      * that are transparent.
      */
     public final Region getTransparentRegion(Rect bounds) {
-        long r = nativeGetTransparentRegion(mBitmap, mNativeChunk, bounds);
+        long r = nativeGetTransparentRegion(mBitmap.getNativeInstance(),
+                mNativeChunk, bounds);
         return r != 0 ? new Region(r) : null;
     }
 
@@ -282,5 +283,6 @@ public class NinePatch {
      */
     private static native long validateNinePatchChunk(byte[] chunk);
     private static native void nativeFinalize(long chunk);
-    private static native long nativeGetTransparentRegion(Bitmap bitmap, long chunk, Rect location);
+    private static native long nativeGetTransparentRegion(long bitmapHandle, long chunk,
+        Rect location);
 }

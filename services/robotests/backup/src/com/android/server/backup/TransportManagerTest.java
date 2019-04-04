@@ -554,7 +554,7 @@ public class TransportManagerTest {
                 transportManager.getTransportCurrentDestinationString(mTransportA1.transportName);
         Intent dataManagementIntent =
                 transportManager.getTransportDataManagementIntent(mTransportA1.transportName);
-        String dataManagementLabel =
+        CharSequence dataManagementLabel =
                 transportManager.getTransportDataManagementLabel(mTransportA1.transportName);
         String transportDirName = transportManager.getTransportDirName(mTransportA1.transportName);
         String transportDirNameByComponent =

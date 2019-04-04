@@ -167,7 +167,6 @@ import android.service.dreams.IDreamManager;
 import android.service.vr.IPersistentVrStateCallbacks;
 import android.speech.RecognizerIntent;
 import android.telecom.TelecomManager;
-import android.util.EventLog;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.MutableBoolean;
@@ -207,7 +206,6 @@ import com.android.internal.policy.IShortcutService;
 import com.android.internal.policy.PhoneWindow;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.ScreenshotHelper;
 import com.android.server.ExtconStateObserver;
 import com.android.server.ExtconUEventObserver;
 import com.android.server.GestureLauncherService;
@@ -378,7 +376,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     BurnInProtectionHelper mBurnInProtectionHelper;
     private DisplayFoldController mDisplayFoldController;
     AppOpsManager mAppOpsManager;
-    private ScreenshotHelper mScreenshotHelper;
     private boolean mHasFeatureWatch;
     private boolean mHasFeatureLeanback;
     private boolean mHasFeatureHdmiCec;
@@ -917,9 +914,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         mWindowManagerFuncs.onPowerKeyDown(interactive);
 
-        // Abort possibly stuck animations.
-        mHandler.post(mWindowManagerFuncs::triggerAnimationFailsafe);
-
         // Latch power key state to detect screenshot chord.
         if (interactive && !mScreenshotChordPowerKeyTriggered
                 && (event.getFlags() & KeyEvent.FLAG_FALLBACK) == 0) {
@@ -1026,6 +1020,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         cancelPendingPowerKeyAction();
 
         if (!handled) {
+            if ((event.getFlags() & KeyEvent.FLAG_LONG_PRESS) == 0) {
+                // Abort possibly stuck animations only when power key up without long press case.
+                mHandler.post(mWindowManagerFuncs::triggerAnimationFailsafe);
+            }
+
             // Figure out how to handle the key now that it has been released.
             mPowerKeyPressCounter += 1;
 
@@ -1600,7 +1599,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return -1;
                 }
 
-                handleShortPressOnHome(mDisplayId);
+                // Post to main thread to avoid blocking input pipeline.
+                mHandler.post(() -> handleShortPressOnHome(mDisplayId));
                 return -1;
             }
 
@@ -1637,7 +1637,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             } else if ((event.getFlags() & KeyEvent.FLAG_LONG_PRESS) != 0) {
                 if (!keyguardOn) {
-                    handleLongPressOnHome(event.getDeviceId());
+                    // Post to main thread to avoid blocking input pipeline.
+                    mHandler.post(() -> handleLongPressOnHome(event.getDeviceId()));
                 }
             }
             return -1;
@@ -1922,7 +1923,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         mWindowManagerFuncs.onKeyguardShowingAndNotOccludedChanged();
                     }
                 });
-        mScreenshotHelper = new ScreenshotHelper(mContext);
     }
 
     /**
@@ -2225,6 +2225,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public boolean canBeHiddenByKeyguardLw(WindowState win) {
+
+        // Keyguard visibility of window from activities are determined over activity visibility.
+        if (win.getAppToken() != null) {
+            return false;
+        }
         switch (win.getAttrs().type) {
             case TYPE_STATUS_BAR:
             case TYPE_NAVIGATION_BAR:
@@ -2238,19 +2243,30 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private boolean shouldBeHiddenByKeyguard(WindowState win, WindowState imeTarget) {
+        final LayoutParams attrs = win.getAttrs();
 
-        // Keyguard visibility of window from activities are determined over activity visibility.
-        if (win.getAppToken() != null) {
-            return false;
+        boolean hideDockDivider = attrs.type == TYPE_DOCK_DIVIDER
+                && !mWindowManagerInternal.isStackVisibleLw(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+        if (hideDockDivider) {
+            return true;
         }
 
-        final LayoutParams attrs = win.getAttrs();
+        // If AOD is showing, the IME should be hidden. However, sometimes the AOD is considered
+        // hidden because it's in the process of hiding, but it's still being shown on screen.
+        // In that case, we want to continue hiding the IME until the windows have completed
+        // drawing. This way, we know that the IME can be safely shown since the other windows are
+        // now shown.
+        final boolean hideIme = win.isInputMethodWindow()
+                && (mAodShowing || !mDefaultDisplayPolicy.isWindowManagerDrawComplete());
+        if (hideIme) {
+            return true;
+        }
+
         final boolean showImeOverKeyguard = imeTarget != null && imeTarget.isVisibleLw()
                 && (imeTarget.canShowWhenLocked() || !canBeHiddenByKeyguardLw(imeTarget));
 
         // Show IME over the keyguard if the target allows it
-        boolean allowWhenLocked = (win.isInputMethodWindow() || imeTarget == this)
-                && showImeOverKeyguard;
+        boolean allowWhenLocked = win.isInputMethodWindow() && showImeOverKeyguard;
 
         final boolean isKeyguardShowing = mKeyguardDelegate.isShowing();
 
@@ -2261,17 +2277,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     || (attrs.privateFlags & PRIVATE_FLAG_SYSTEM_ERROR) != 0;
         }
 
-        boolean hideDockDivider = attrs.type == TYPE_DOCK_DIVIDER
-                && !mWindowManagerInternal.isStackVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
-        // If AOD is showing, the IME should be hidden. However, sometimes the AOD is considered
-        // hidden because it's in the process of hiding, but it's still being shown on screen.
-        // In that case, we want to continue hiding the IME until the windows have completed
-        // drawing. This way, we know that the IME can be safely shown since the other windows are
-        // now shown.
-        final boolean hideIme = win.isInputMethodWindow()
-                && (mAodShowing || !mDefaultDisplayPolicy.isWindowManagerDrawComplete());
-        return (isKeyguardShowing && !allowWhenLocked && win.getDisplayId() == DEFAULT_DISPLAY)
-                || hideDockDivider || hideIme;
+        return isKeyguardShowing && !allowWhenLocked && win.getDisplayId() == DEFAULT_DISPLAY;
     }
 
     /** {@inheritDoc} */
@@ -2520,7 +2526,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private static final int[] WINDOW_TYPES_WHERE_HOME_DOESNT_WORK = {
-            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             WindowManager.LayoutParams.TYPE_SYSTEM_ALERT,
             WindowManager.LayoutParams.TYPE_SYSTEM_ERROR,
         };
@@ -3362,9 +3367,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      */
     void launchHomeFromHotKey(int displayId, final boolean awakenFromDreams,
             final boolean respectKeyguard) {
-        // Abort possibly stuck animations.
-        mHandler.post(mWindowManagerFuncs::triggerAnimationFailsafe);
-
         if (respectKeyguard) {
             if (isKeyguardShowingAndNotOccluded()) {
                 // don't launch home if keyguard showing
@@ -3809,6 +3811,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
 
             case KeyEvent.KEYCODE_POWER: {
+                EventLogTags.writeInterceptPower(
+                        KeyEvent.actionToString(event.getAction()),
+                        mPowerKeyHandled ? 1 : 0, mPowerKeyPressCounter);
                 // Any activity on the power button stops the accessibility shortcut
                 cancelPendingAccessibilityShortcutAction();
                 result &= ~ACTION_PASS_TO_USER;
@@ -4358,7 +4363,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // Called on the PowerManager's Notifier thread.
     @Override
     public void finishedGoingToSleep(int why) {
-        EventLog.writeEvent(70000, 0);
+        EventLogTags.writeScreenToggled(0);
         if (DEBUG_WAKEUP) {
             Slog.i(TAG, "Finished going to sleep... (why="
                     + WindowManagerPolicyConstants.offReasonToString(why) + ")");
@@ -4390,7 +4395,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // Called on the PowerManager's Notifier thread.
     @Override
     public void startedWakingUp(@OnReason int why) {
-        EventLog.writeEvent(70000, 1);
+        EventLogTags.writeScreenToggled(1);
         if (DEBUG_WAKEUP) {
             Slog.i(TAG, "Started waking up... (why="
                     + WindowManagerPolicyConstants.onReasonToString(why) + ")");
@@ -5128,7 +5133,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // Start home.
         mActivityTaskManagerInternal.startHomeOnDisplay(mCurrentUserId, "startDockOrHome",
-                displayId, fromHomeKey);
+                displayId, true /* allowInstrumenting */, fromHomeKey);
     }
 
     /**
@@ -5216,13 +5221,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private VibrationEffect getVibrationEffect(int effectId) {
         long[] pattern;
         switch (effectId) {
-            case HapticFeedbackConstants.CLOCK_TICK:
             case HapticFeedbackConstants.CONTEXT_CLICK:
                 return VibrationEffect.get(VibrationEffect.EFFECT_TICK);
             case HapticFeedbackConstants.TEXT_HANDLE_MOVE:
                 if (!mHapticTextHandleEnabled) {
                     return null;
                 }
+                // fallthrough
+            case HapticFeedbackConstants.CLOCK_TICK:
+                return VibrationEffect.get(VibrationEffect.EFFECT_TEXTURE_TICK);
             case HapticFeedbackConstants.KEYBOARD_RELEASE:
             case HapticFeedbackConstants.VIRTUAL_KEY_RELEASE:
             case HapticFeedbackConstants.ENTRY_BUMP:

@@ -60,6 +60,7 @@ import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.RotationLockController;
 import com.android.systemui.statusbar.policy.RotationLockController.RotationLockControllerCallback;
+import com.android.systemui.statusbar.policy.SensorPrivacyController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 
@@ -100,6 +101,7 @@ public class PhoneStatusBarPolicy
     private final String mSlotLocation;
     private final String mSlotMicrophone;
     private final String mSlotCamera;
+    private final String mSlotSensorsOff;
 
     private final Context mContext;
     private final Handler mHandler = new Handler();
@@ -118,6 +120,7 @@ public class PhoneStatusBarPolicy
     private final LocationController mLocationController;
     private final PrivacyItemController mPrivacyItemController;
     private final UiOffloadThread mUiOffloadThread = Dependency.get(UiOffloadThread.class);
+    private final SensorPrivacyController mSensorPrivacyController;
 
     // Assume it's all good unless we hear otherwise.  We don't always seem
     // to get broadcasts that it *is* there.
@@ -149,6 +152,7 @@ public class PhoneStatusBarPolicy
         mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
         mLocationController = Dependency.get(LocationController.class);
         mPrivacyItemController = Dependency.get(PrivacyItemController.class);
+        mSensorPrivacyController = Dependency.get(SensorPrivacyController.class);
 
         mSlotCast = context.getString(com.android.internal.R.string.status_bar_cast);
         mSlotHotspot = context.getString(com.android.internal.R.string.status_bar_hotspot);
@@ -165,6 +169,7 @@ public class PhoneStatusBarPolicy
         mSlotLocation = context.getString(com.android.internal.R.string.status_bar_location);
         mSlotMicrophone = context.getString(com.android.internal.R.string.status_bar_microphone);
         mSlotCamera = context.getString(com.android.internal.R.string.status_bar_camera);
+        mSlotSensorsOff = context.getString(com.android.internal.R.string.status_bar_sensors_off);
 
         // listen for broadcasts
         IntentFilter filter = new IntentFilter();
@@ -196,7 +201,7 @@ public class PhoneStatusBarPolicy
         mIconController.setIconVisibility(mSlotAlarmClock, false);
 
         // zen
-        mIconController.setIcon(mSlotZen, R.drawable.stat_sys_zen_important, null);
+        mIconController.setIcon(mSlotZen, R.drawable.stat_sys_dnd, null);
         mIconController.setIconVisibility(mSlotZen, false);
 
         // volume
@@ -232,6 +237,11 @@ public class PhoneStatusBarPolicy
                 mContext.getString(R.string.accessibility_location_active));
         mIconController.setIconVisibility(mSlotLocation, false);
 
+        // sensors off
+        mIconController.setIcon(mSlotSensorsOff, R.drawable.stat_sys_sensors_off, null);
+        mIconController.setIconVisibility(mSlotSensorsOff,
+                mSensorPrivacyController.isSensorPrivacyEnabled());
+
         mRotationLockController.addCallback(this);
         mBluetooth.addCallback(this);
         mProvisionedController.addCallback(this);
@@ -242,6 +252,7 @@ public class PhoneStatusBarPolicy
         mDataSaver.addCallback(this);
         mKeyguardMonitor.addCallback(this);
         mPrivacyItemController.addCallback(this);
+        mSensorPrivacyController.addCallback(mSensorPrivacyListener);
 
         SysUiServiceProvider.getComponent(mContext, CommandQueue.class).addCallback(this);
     }
@@ -328,11 +339,11 @@ public class PhoneStatusBarPolicy
             zenDescription = mContext.getString(R.string.quick_settings_dnd_label);
         } else if (zen == Global.ZEN_MODE_NO_INTERRUPTIONS) {
             zenVisible = true;
-            zenIconId = R.drawable.stat_sys_zen_none;
+            zenIconId = R.drawable.stat_sys_dnd;
             zenDescription = mContext.getString(R.string.interruption_level_none);
         } else if (zen == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS) {
             zenVisible = true;
-            zenIconId = R.drawable.stat_sys_zen_important;
+            zenIconId = R.drawable.stat_sys_dnd;
             zenDescription = mContext.getString(R.string.interruption_level_priority);
         }
 
@@ -377,13 +388,12 @@ public class PhoneStatusBarPolicy
     }
 
     private final void updateBluetooth() {
-        int iconId = R.drawable.stat_sys_data_bluetooth;
+        int iconId = R.drawable.stat_sys_data_bluetooth_connected;
         String contentDescription =
                 mContext.getString(R.string.accessibility_quick_settings_bluetooth_on);
         boolean bluetoothVisible = false;
         if (mBluetooth != null) {
             if (mBluetooth.isBluetoothConnected()) {
-                iconId = R.drawable.stat_sys_data_bluetooth_connected;
                 contentDescription = mContext.getString(R.string.accessibility_bluetooth_connected);
                 bluetoothVisible = mBluetooth.isBluetoothEnabled();
             }
@@ -514,6 +524,16 @@ public class PhoneStatusBarPolicy
                 }
             };
 
+    private final SensorPrivacyController.OnSensorPrivacyChangedListener mSensorPrivacyListener =
+            new SensorPrivacyController.OnSensorPrivacyChangedListener() {
+                @Override
+                public void onSensorPrivacyChanged(boolean enabled) {
+                    mHandler.post(() -> {
+                        mIconController.setIconVisibility(mSlotSensorsOff, enabled);
+                    });
+                }
+            };
+
     @Override
     public void appTransitionStarting(int displayId, long startTime, long duration,
             boolean forced) {
@@ -561,8 +581,8 @@ public class PhoneStatusBarPolicy
             String contentDescription = mContext.getString(hasMic
                     ? R.string.accessibility_status_bar_headset
                     : R.string.accessibility_status_bar_headphones);
-            mIconController.setIcon(mSlotHeadset, hasMic ? R.drawable.ic_headset_mic
-                    : R.drawable.ic_headset, contentDescription);
+            mIconController.setIcon(mSlotHeadset, hasMic ? R.drawable.stat_sys_headset_mic
+                    : R.drawable.stat_sys_headset, contentDescription);
             mIconController.setIconVisibility(mSlotHeadset, true);
         } else {
             mIconController.setIconVisibility(mSlotHeadset, false);

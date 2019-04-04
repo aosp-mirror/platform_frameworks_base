@@ -18,11 +18,10 @@ package com.android.server.wm;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
-import static junit.framework.Assert.assertNull;
-import static junit.framework.Assert.assertSame;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import android.os.SystemClock;

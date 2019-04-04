@@ -84,6 +84,7 @@ CopyResult Readback::copyHWBitmapInto(Bitmap* hwBitmap, SkBitmap* bitmap) {
 }
 
 CopyResult Readback::copyLayerInto(DeferredLayerUpdater* deferredLayer, SkBitmap* bitmap) {
+    ATRACE_CALL();
     if (!mRenderThread.getGrContext()) {
         return CopyResult::UnknownError;
     }
@@ -104,6 +105,7 @@ CopyResult Readback::copyLayerInto(DeferredLayerUpdater* deferredLayer, SkBitmap
 
 CopyResult Readback::copyImageInto(const sk_sp<SkImage>& image, Matrix4& texTransform,
                                    const Rect& srcRect, SkBitmap* bitmap) {
+    ATRACE_CALL();
     if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaGL) {
         mRenderThread.requireGlContext();
     } else {

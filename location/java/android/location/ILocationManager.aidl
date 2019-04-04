@@ -29,6 +29,7 @@ import android.location.IGnssNavigationMessageListener;
 import android.location.ILocationListener;
 import android.location.Location;
 import android.location.LocationRequest;
+import android.location.LocationTime;
 import android.os.Bundle;
 
 import com.android.internal.location.ProviderProperties;
@@ -92,10 +93,10 @@ interface ILocationManager
     ProviderProperties getProviderProperties(String provider);
     boolean isProviderPackage(String packageName);
 
-    void setLocationControllerExtraPackage(String packageName);
-    String getLocationControllerExtraPackage();
-    void setLocationControllerExtraPackageEnabled(boolean enabled);
-    boolean isLocationControllerExtraPackageEnabled();
+    void setExtraLocationControllerPackage(String packageName);
+    String getExtraLocationControllerPackage();
+    void setExtraLocationControllerPackageEnabled(boolean enabled);
+    boolean isExtraLocationControllerPackageEnabled();
 
     boolean isProviderEnabledForUser(String provider, int userId);
     boolean isLocationEnabledForUser(int userId);
@@ -104,6 +105,7 @@ interface ILocationManager
     void setTestProviderLocation(String provider, in Location loc, String opPackageName);
     void setTestProviderEnabled(String provider, boolean enabled, String opPackageName);
     List<LocationRequest> getTestProviderCurrentRequests(String provider, String opPackageName);
+    LocationTime getGnssTimeMillis();
 
     // --- deprecated ---
     void setTestProviderStatus(String provider, int status, in Bundle extras, long updateTime,

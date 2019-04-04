@@ -18,6 +18,9 @@ package com.android.server.am;
 
 import static android.os.Process.THREAD_PRIORITY_FOREGROUND;
 
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_COMPACTION;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
+
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.os.Debug;
@@ -30,6 +33,7 @@ import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.OnPropertyChangedListener;
 import android.text.TextUtils;
 import android.util.EventLog;
+import android.util.Slog;
 import android.util.StatsLog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -39,7 +43,12 @@ import com.android.server.ServiceThread;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 public final class AppCompactor {
 
@@ -51,8 +60,16 @@ public final class AppCompactor {
     @VisibleForTesting static final String KEY_COMPACT_THROTTLE_2 = "compact_throttle_2";
     @VisibleForTesting static final String KEY_COMPACT_THROTTLE_3 = "compact_throttle_3";
     @VisibleForTesting static final String KEY_COMPACT_THROTTLE_4 = "compact_throttle_4";
+    @VisibleForTesting static final String KEY_COMPACT_THROTTLE_5 = "compact_throttle_5";
+    @VisibleForTesting static final String KEY_COMPACT_THROTTLE_6 = "compact_throttle_6";
     @VisibleForTesting static final String KEY_COMPACT_STATSD_SAMPLE_RATE =
             "compact_statsd_sample_rate";
+    @VisibleForTesting static final String KEY_COMPACT_FULL_RSS_THROTTLE_KB =
+            "compact_full_rss_throttle_kb";
+    @VisibleForTesting static final String KEY_COMPACT_FULL_DELTA_RSS_THROTTLE_KB =
+            "compact_full_delta_rss_throttle_kb";
+    @VisibleForTesting static final String KEY_COMPACT_PROC_STATE_THROTTLE =
+            "compact_proc_state_throttle";
 
     // Phenotype sends int configurations and we map them to the strings we'll use on device,
     // preventing a weird string value entering the kernel.
@@ -73,8 +90,15 @@ public final class AppCompactor {
     @VisibleForTesting static final long DEFAULT_COMPACT_THROTTLE_2 = 10_000;
     @VisibleForTesting static final long DEFAULT_COMPACT_THROTTLE_3 = 500;
     @VisibleForTesting static final long DEFAULT_COMPACT_THROTTLE_4 = 10_000;
+    @VisibleForTesting static final long DEFAULT_COMPACT_THROTTLE_5 = 10 * 60 * 1000;
+    @VisibleForTesting static final long DEFAULT_COMPACT_THROTTLE_6 = 10 * 60 * 1000;
     // The sampling rate to push app compaction events into statsd for upload.
     @VisibleForTesting static final float DEFAULT_STATSD_SAMPLE_RATE = 0.1f;
+    @VisibleForTesting static final long DEFAULT_COMPACT_FULL_RSS_THROTTLE_KB = 12_000L;
+    @VisibleForTesting static final long DEFAULT_COMPACT_FULL_DELTA_RSS_THROTTLE_KB = 8_000L;
+    // Format of this string should be a comma separated list of integers.
+    @VisibleForTesting static final String DEFAULT_COMPACT_PROC_STATE_THROTTLE =
+            String.valueOf(ActivityManager.PROCESS_STATE_RECEIVER);
 
     @VisibleForTesting
     interface PropertyChangedCallbackForTest {
@@ -85,7 +109,10 @@ public final class AppCompactor {
     // Handler constants.
     static final int COMPACT_PROCESS_SOME = 1;
     static final int COMPACT_PROCESS_FULL = 2;
+    static final int COMPACT_PROCESS_PERSISTENT = 3;
+    static final int COMPACT_PROCESS_BFGS = 4;
     static final int COMPACT_PROCESS_MSG = 1;
+    static final int COMPACT_SYSTEM_MSG = 2;
 
     /**
      * This thread must be moved to the system background cpuset.
@@ -116,6 +143,12 @@ public final class AppCompactor {
                             updateCompactionThrottles();
                         } else if (KEY_COMPACT_STATSD_SAMPLE_RATE.equals(name)) {
                             updateStatsdSampleRate();
+                        } else if (KEY_COMPACT_FULL_RSS_THROTTLE_KB.equals(name)) {
+                            updateFullRssThrottle();
+                        } else if (KEY_COMPACT_FULL_DELTA_RSS_THROTTLE_KB.equals(name)) {
+                            updateFullDeltaRssThrottle();
+                        } else if (KEY_COMPACT_PROC_STATE_THROTTLE.equals(name)) {
+                            updateProcStateThrottle();
                         }
                     }
                     if (mTestCallback != null) {
@@ -142,19 +175,47 @@ public final class AppCompactor {
     @GuardedBy("mPhenotypeFlagLock")
     @VisibleForTesting volatile long mCompactThrottleFullFull = DEFAULT_COMPACT_THROTTLE_4;
     @GuardedBy("mPhenotypeFlagLock")
+    @VisibleForTesting volatile long mCompactThrottleBFGS = DEFAULT_COMPACT_THROTTLE_5;
+    @GuardedBy("mPhenotypeFlagLock")
+    @VisibleForTesting volatile long mCompactThrottlePersistent = DEFAULT_COMPACT_THROTTLE_6;
+    @GuardedBy("mPhenotypeFlagLock")
     private volatile boolean mUseCompaction = DEFAULT_USE_COMPACTION;
-
     private final Random mRandom = new Random();
     @GuardedBy("mPhenotypeFlagLock")
     @VisibleForTesting volatile float mStatsdSampleRate = DEFAULT_STATSD_SAMPLE_RATE;
+    @GuardedBy("mPhenotypeFlagLock")
+    @VisibleForTesting volatile long mFullAnonRssThrottleKb =
+            DEFAULT_COMPACT_FULL_RSS_THROTTLE_KB;
+    @GuardedBy("mPhenoypeFlagLock")
+    @VisibleForTesting volatile long mFullDeltaRssThrottleKb =
+            DEFAULT_COMPACT_FULL_DELTA_RSS_THROTTLE_KB;
+    @GuardedBy("mPhenoypeFlagLock")
+    @VisibleForTesting final Set<Integer> mProcStateThrottle;
 
     // Handler on which compaction runs.
     private Handler mCompactionHandler;
+
+    // Maps process ID to last compaction statistics for processes that we've fully compacted. Used
+    // when evaluating throttles that we only consider for "full" compaction, so we don't store
+    // data for "some" compactions.
+    private Map<Integer, LastCompactionStats> mLastCompactionStats =
+            new LinkedHashMap<Integer, LastCompactionStats>() {
+                @Override
+                protected boolean removeEldestEntry(Map.Entry eldest) {
+                    return size() > 100;
+                }
+    };
+
+    private int mSomeCompactionCount;
+    private int mFullCompactionCount;
+    private int mPersistentCompactionCount;
+    private int mBfgsCompactionCount;
 
     public AppCompactor(ActivityManagerService am) {
         mAm = am;
         mCompactionThread = new ServiceThread("CompactionThread",
                 THREAD_PRIORITY_FOREGROUND, true);
+        mProcStateThrottle = new HashSet<>();
     }
 
     @VisibleForTesting
@@ -175,10 +236,12 @@ public final class AppCompactor {
             updateCompactionActions();
             updateCompactionThrottles();
             updateStatsdSampleRate();
+            updateFullRssThrottle();
+            updateFullDeltaRssThrottle();
+            updateProcStateThrottle();
         }
         Process.setThreadGroupAndCpuset(mCompactionThread.getThreadId(),
                 Process.THREAD_GROUP_SYSTEM);
-
     }
 
     /**
@@ -201,7 +264,33 @@ public final class AppCompactor {
             pw.println("  " + KEY_COMPACT_THROTTLE_2 + "=" + mCompactThrottleSomeFull);
             pw.println("  " + KEY_COMPACT_THROTTLE_3 + "=" + mCompactThrottleFullSome);
             pw.println("  " + KEY_COMPACT_THROTTLE_4 + "=" + mCompactThrottleFullFull);
+            pw.println("  " + KEY_COMPACT_THROTTLE_5 + "=" + mCompactThrottleBFGS);
+            pw.println("  " + KEY_COMPACT_THROTTLE_6 + "=" + mCompactThrottlePersistent);
             pw.println("  " + KEY_COMPACT_STATSD_SAMPLE_RATE + "=" + mStatsdSampleRate);
+            pw.println("  " + KEY_COMPACT_FULL_RSS_THROTTLE_KB + "="
+                    + mFullAnonRssThrottleKb);
+            pw.println("  " + KEY_COMPACT_FULL_DELTA_RSS_THROTTLE_KB + "="
+                    + mFullDeltaRssThrottleKb);
+            pw.println("  "  + KEY_COMPACT_PROC_STATE_THROTTLE + "="
+                    + Arrays.toString(mProcStateThrottle.toArray(new Integer[0])));
+
+            pw.println("  " + mSomeCompactionCount + " some, " + mFullCompactionCount
+                    + " full, " + mPersistentCompactionCount + " persistent, "
+                    + mBfgsCompactionCount + " BFGS compactions.");
+
+            if (mLastCompactionStats != null) {
+                pw.println("  Tracking last compaction stats for " + mLastCompactionStats.size()
+                        + " processes.");
+                if (DEBUG_COMPACTION) {
+                    for (Map.Entry<Integer, LastCompactionStats> entry
+                            : mLastCompactionStats.entrySet()) {
+                        int pid = entry.getKey();
+                        LastCompactionStats stats = entry.getValue();
+                        pw.println("    " + pid + ": "
+                                + Arrays.toString(stats.getRssAfterCompaction()));
+                    }
+                }
+            }
         }
     }
 
@@ -224,9 +313,49 @@ public final class AppCompactor {
 
     }
 
+    @GuardedBy("mAm")
+    void compactAppPersistent(ProcessRecord app) {
+        app.reqCompactAction = COMPACT_PROCESS_PERSISTENT;
+        mPendingCompactionProcesses.add(app);
+        mCompactionHandler.sendMessage(
+                mCompactionHandler.obtainMessage(
+                    COMPACT_PROCESS_MSG, app.curAdj, app.setProcState));
+    }
+
+    @GuardedBy("mAm")
+    boolean shouldCompactPersistent(ProcessRecord app, long now) {
+        return (app.lastCompactTime == 0
+                || (now - app.lastCompactTime) > mCompactThrottlePersistent);
+    }
+
+    @GuardedBy("mAm")
+    void compactAppBfgs(ProcessRecord app) {
+        app.reqCompactAction = COMPACT_PROCESS_BFGS;
+        mPendingCompactionProcesses.add(app);
+        mCompactionHandler.sendMessage(
+                mCompactionHandler.obtainMessage(
+                    COMPACT_PROCESS_MSG, app.curAdj, app.setProcState));
+    }
+
+    @GuardedBy("mAm")
+    boolean shouldCompactBFGS(ProcessRecord app, long now) {
+        return (app.lastCompactTime == 0
+                || (now - app.lastCompactTime) > mCompactThrottleBFGS);
+    }
+
+    @GuardedBy("mAm")
+    void compactAllSystem() {
+        if (mUseCompaction) {
+            mCompactionHandler.sendMessage(mCompactionHandler.obtainMessage(
+                                              COMPACT_SYSTEM_MSG));
+        }
+    }
+
+    private native void compactSystem();
+
     /**
      * Reads the flag value from DeviceConfig to determine whether app compaction
-     * should be enabled, and starts/stops the compaction thread as needed.
+     * should be enabled, and starts the compaction thread if needed.
      */
     @GuardedBy("mPhenotypeFlagLock")
     private void updateUseCompaction() {
@@ -265,10 +394,18 @@ public final class AppCompactor {
         String throttleFullFullFlag =
                 DeviceConfig.getProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     KEY_COMPACT_THROTTLE_4);
+        String throttleBFGSFlag =
+                DeviceConfig.getProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    KEY_COMPACT_THROTTLE_5);
+        String throttlePersistentFlag =
+                DeviceConfig.getProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    KEY_COMPACT_THROTTLE_6);
 
         if (TextUtils.isEmpty(throttleSomeSomeFlag) || TextUtils.isEmpty(throttleSomeFullFlag)
                 || TextUtils.isEmpty(throttleFullSomeFlag)
-                || TextUtils.isEmpty(throttleFullFullFlag)) {
+                || TextUtils.isEmpty(throttleFullFullFlag)
+                || TextUtils.isEmpty(throttleBFGSFlag)
+                || TextUtils.isEmpty(throttlePersistentFlag)) {
             // Set defaults for all if any are not set.
             useThrottleDefaults = true;
         } else {
@@ -277,6 +414,8 @@ public final class AppCompactor {
                 mCompactThrottleSomeFull = Integer.parseInt(throttleSomeFullFlag);
                 mCompactThrottleFullSome = Integer.parseInt(throttleFullSomeFlag);
                 mCompactThrottleFullFull = Integer.parseInt(throttleFullFullFlag);
+                mCompactThrottleBFGS = Integer.parseInt(throttleBFGSFlag);
+                mCompactThrottlePersistent = Integer.parseInt(throttlePersistentFlag);
             } catch (NumberFormatException e) {
                 useThrottleDefaults = true;
             }
@@ -287,6 +426,8 @@ public final class AppCompactor {
             mCompactThrottleSomeFull = DEFAULT_COMPACT_THROTTLE_2;
             mCompactThrottleFullSome = DEFAULT_COMPACT_THROTTLE_3;
             mCompactThrottleFullFull = DEFAULT_COMPACT_THROTTLE_4;
+            mCompactThrottleBFGS = DEFAULT_COMPACT_THROTTLE_5;
+            mCompactThrottlePersistent = DEFAULT_COMPACT_THROTTLE_6;
         }
     }
 
@@ -295,6 +436,58 @@ public final class AppCompactor {
         mStatsdSampleRate = DeviceConfig.getFloat(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 KEY_COMPACT_STATSD_SAMPLE_RATE, DEFAULT_STATSD_SAMPLE_RATE);
         mStatsdSampleRate = Math.min(1.0f, Math.max(0.0f, mStatsdSampleRate));
+    }
+
+    @GuardedBy("mPhenotypeFlagLock")
+    private void updateFullRssThrottle() {
+        mFullAnonRssThrottleKb = DeviceConfig.getLong(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_COMPACT_FULL_RSS_THROTTLE_KB, DEFAULT_COMPACT_FULL_RSS_THROTTLE_KB);
+
+        // Don't allow negative values. 0 means don't apply the throttle.
+        if (mFullAnonRssThrottleKb < 0) {
+            mFullAnonRssThrottleKb = DEFAULT_COMPACT_FULL_RSS_THROTTLE_KB;
+        }
+    }
+
+    @GuardedBy("mPhenotypeFlagLock")
+    private void updateFullDeltaRssThrottle() {
+        mFullDeltaRssThrottleKb = DeviceConfig.getLong(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_COMPACT_FULL_DELTA_RSS_THROTTLE_KB, DEFAULT_COMPACT_FULL_DELTA_RSS_THROTTLE_KB);
+
+        if (mFullDeltaRssThrottleKb < 0) {
+            mFullDeltaRssThrottleKb = DEFAULT_COMPACT_FULL_DELTA_RSS_THROTTLE_KB;
+        }
+    }
+
+    @GuardedBy("mPhenotypeFlagLock")
+    private void updateProcStateThrottle() {
+        String procStateThrottleString = DeviceConfig.getString(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER, KEY_COMPACT_PROC_STATE_THROTTLE,
+                DEFAULT_COMPACT_PROC_STATE_THROTTLE);
+        if (!parseProcStateThrottle(procStateThrottleString)) {
+            Slog.w(TAG_AM, "Unable to parse app compact proc state throttle \""
+                    + procStateThrottleString + "\" falling back to default.");
+            if (!parseProcStateThrottle(DEFAULT_COMPACT_PROC_STATE_THROTTLE)) {
+                Slog.wtf(TAG_AM,
+                        "Unable to parse default app compact proc state throttle "
+                                + DEFAULT_COMPACT_PROC_STATE_THROTTLE);
+            }
+        }
+    }
+
+    private boolean parseProcStateThrottle(String procStateThrottleString) {
+        String[] procStates = TextUtils.split(procStateThrottleString, ",");
+        mProcStateThrottle.clear();
+        for (String procState : procStates) {
+            try {
+                mProcStateThrottle.add(Integer.parseInt(procState));
+            } catch (NumberFormatException e) {
+                Slog.e(TAG_AM, "Failed to parse default app compaction proc state: "
+                        + procState);
+                return false;
+            }
+        }
+        return true;
     }
 
     @VisibleForTesting
@@ -310,6 +503,22 @@ public final class AppCompactor {
                 return COMPACT_ACTION_FULL;
             default:
                 return COMPACT_ACTION_NONE;
+        }
+    }
+
+    @VisibleForTesting static String procStateListToString(Integer... processStates) {
+        return Arrays.toString(processStates);
+    }
+
+    private static final class LastCompactionStats {
+        private final long[] mRssAfterCompaction;
+
+        LastCompactionStats(long[] rss) {
+            mRssAfterCompaction = rss;
+        }
+
+        long[] getRssAfterCompaction() {
+            return mRssAfterCompaction;
         }
     }
 
@@ -329,19 +538,34 @@ public final class AppCompactor {
                     final String name;
                     int pendingAction, lastCompactAction;
                     long lastCompactTime;
+                    LastCompactionStats lastCompactionStats;
+                    int lastOomAdj = msg.arg1;
+                    int procState = msg.arg2;
                     synchronized (mAm) {
                         proc = mPendingCompactionProcesses.remove(0);
 
+                        pendingAction = proc.reqCompactAction;
+                        pid = proc.pid;
+                        name = proc.processName;
+
                         // don't compact if the process has returned to perceptible
-                        if (proc.setAdj <= ProcessList.PERCEPTIBLE_APP_ADJ) {
+                        // and this is only a cached/home/prev compaction
+                        if ((pendingAction == COMPACT_PROCESS_SOME
+                                || pendingAction == COMPACT_PROCESS_FULL)
+                                && (proc.setAdj <= ProcessList.PERCEPTIBLE_APP_ADJ)) {
+                            if (DEBUG_COMPACTION) {
+                                Slog.d(TAG_AM,
+                                        "Skipping compaction as process " + name + " is "
+                                        + "now perceptible.");
+                            }
                             return;
                         }
 
-                        pid = proc.pid;
-                        name = proc.processName;
-                        pendingAction = proc.reqCompactAction;
                         lastCompactAction = proc.lastCompactAction;
                         lastCompactTime = proc.lastCompactTime;
+                        // remove rather than get so that insertion order will be updated when we
+                        // put the post-compaction stats back into the map.
+                        lastCompactionStats = mLastCompactionStats.remove(pid);
                     }
 
                     if (pid == 0) {
@@ -356,32 +580,139 @@ public final class AppCompactor {
                     // Note that we explicitly don't take mPhenotypeFlagLock here as the flags
                     // should very seldom change, and taking the risk of using the wrong action is
                     // preferable to taking the lock for every single compaction action.
-                    if (pendingAction == COMPACT_PROCESS_SOME) {
-                        if ((lastCompactAction == COMPACT_PROCESS_SOME
-                                  && (start - lastCompactTime < mCompactThrottleSomeSome))
-                                  || (lastCompactAction == COMPACT_PROCESS_FULL
-                                      && (start - lastCompactTime
-                                          < mCompactThrottleSomeFull))) {
-                            return;
-                        }
-                    } else {
-                        if ((lastCompactAction == COMPACT_PROCESS_SOME
-                                  && (start - lastCompactTime < mCompactThrottleFullSome))
-                                  || (lastCompactAction == COMPACT_PROCESS_FULL
-                                      && (start - lastCompactTime
-                                          < mCompactThrottleFullFull))) {
-                            return;
+                    if (lastCompactTime != 0) {
+                        if (pendingAction == COMPACT_PROCESS_SOME) {
+                            if ((lastCompactAction == COMPACT_PROCESS_SOME
+                                    && (start - lastCompactTime < mCompactThrottleSomeSome))
+                                    || (lastCompactAction == COMPACT_PROCESS_FULL
+                                        && (start - lastCompactTime
+                                                < mCompactThrottleSomeFull))) {
+                                if (DEBUG_COMPACTION) {
+                                    Slog.d(TAG_AM, "Skipping some compaction for " + name
+                                            + ": too soon. throttle=" + mCompactThrottleSomeSome
+                                            + "/" + mCompactThrottleSomeFull + " last="
+                                            + (start - lastCompactTime) + "ms ago");
+                                }
+                                return;
+                            }
+                        } else if (pendingAction == COMPACT_PROCESS_FULL) {
+                            if ((lastCompactAction == COMPACT_PROCESS_SOME
+                                    && (start - lastCompactTime < mCompactThrottleFullSome))
+                                    || (lastCompactAction == COMPACT_PROCESS_FULL
+                                        && (start - lastCompactTime
+                                                < mCompactThrottleFullFull))) {
+                                if (DEBUG_COMPACTION) {
+                                    Slog.d(TAG_AM, "Skipping full compaction for " + name
+                                            + ": too soon. throttle=" + mCompactThrottleFullSome
+                                            + "/" + mCompactThrottleFullFull + " last="
+                                            + (start - lastCompactTime) + "ms ago");
+                                }
+                                return;
+                            }
+                        } else if (pendingAction == COMPACT_PROCESS_PERSISTENT) {
+                            if (start - lastCompactTime < mCompactThrottlePersistent) {
+                                if (DEBUG_COMPACTION) {
+                                    Slog.d(TAG_AM, "Skipping persistent compaction for " + name
+                                            + ": too soon. throttle=" + mCompactThrottlePersistent
+                                            + " last=" + (start - lastCompactTime) + "ms ago");
+                                }
+                                return;
+                            }
+                        } else if (pendingAction == COMPACT_PROCESS_BFGS) {
+                            if (start - lastCompactTime < mCompactThrottleBFGS) {
+                                if (DEBUG_COMPACTION) {
+                                    Slog.d(TAG_AM, "Skipping bfgs compaction for " + name
+                                            + ": too soon. throttle=" + mCompactThrottleBFGS
+                                            + " last=" + (start - lastCompactTime) + "ms ago");
+                                }
+                                return;
+                            }
                         }
                     }
 
-                    if (pendingAction == COMPACT_PROCESS_SOME) {
-                        action = mCompactActionSome;
-                    } else {
-                        action = mCompactActionFull;
+                    switch (pendingAction) {
+                        case COMPACT_PROCESS_SOME:
+                            action = mCompactActionSome;
+                            break;
+                        // For the time being, treat these as equivalent.
+                        case COMPACT_PROCESS_FULL:
+                        case COMPACT_PROCESS_PERSISTENT:
+                        case COMPACT_PROCESS_BFGS:
+                            action = mCompactActionFull;
+                            break;
+                        default:
+                            action = COMPACT_ACTION_NONE;
+                            break;
                     }
 
-                    if (action.equals(COMPACT_ACTION_NONE)) {
+                    if (COMPACT_ACTION_NONE.equals(action)) {
                         return;
+                    }
+
+                    if (mProcStateThrottle.contains(procState)) {
+                        if (DEBUG_COMPACTION) {
+                            Slog.d(TAG_AM, "Skipping full compaction for process " + name
+                                    + "; proc state is " + procState);
+                        }
+                        return;
+                    }
+
+                    long[] rssBefore = Process.getRss(pid);
+                    long anonRssBefore = rssBefore[2];
+
+                    if (rssBefore[0] == 0 && rssBefore[1] == 0 && rssBefore[2] == 0
+                            && rssBefore[3] == 0) {
+                        if (DEBUG_COMPACTION) {
+                            Slog.d(TAG_AM, "Skipping compaction for" + "process " + pid
+                                    + " with no memory usage. Dead?");
+                        }
+                        return;
+                    }
+
+                    if (action.equals(COMPACT_ACTION_FULL) || action.equals(COMPACT_ACTION_ANON)) {
+                        if (mFullAnonRssThrottleKb > 0L
+                                && anonRssBefore < mFullAnonRssThrottleKb) {
+                            if (DEBUG_COMPACTION) {
+                                Slog.d(TAG_AM, "Skipping full compaction for process "
+                                        + name + "; anon RSS is too small: " + anonRssBefore
+                                        + "KB.");
+                            }
+                            return;
+                        }
+
+                        if (lastCompactionStats != null && mFullDeltaRssThrottleKb > 0L) {
+                            long[] lastRss = lastCompactionStats.getRssAfterCompaction();
+                            long absDelta = Math.abs(rssBefore[1] - lastRss[1])
+                                    + Math.abs(rssBefore[2] - lastRss[2])
+                                    + Math.abs(rssBefore[3] - lastRss[3]);
+                            if (absDelta <= mFullDeltaRssThrottleKb) {
+                                if (DEBUG_COMPACTION) {
+                                    Slog.d(TAG_AM, "Skipping full compaction for process "
+                                            + name + "; abs delta is too small: " + absDelta
+                                            + "KB.");
+                                }
+                                return;
+                            }
+                        }
+                    }
+
+                    // Now we've passed through all the throttles and are going to compact, update
+                    // bookkeeping.
+                    switch (pendingAction) {
+                        case COMPACT_PROCESS_SOME:
+                            mSomeCompactionCount++;
+                            break;
+                        case COMPACT_PROCESS_FULL:
+                            mFullCompactionCount++;
+                            break;
+                        case COMPACT_PROCESS_PERSISTENT:
+                            mPersistentCompactionCount++;
+                            break;
+                        case COMPACT_PROCESS_BFGS:
+                            mBfgsCompactionCount++;
+                            break;
+                        default:
+                            break;
                     }
 
                     try {
@@ -389,7 +720,6 @@ public final class AppCompactor {
                                 + ((pendingAction == COMPACT_PROCESS_SOME) ? "some" : "full")
                                 + ": " + name);
                         long zramFreeKbBefore = Debug.getZramFreeKb();
-                        long[] rssBefore = Process.getRss(pid);
                         FileOutputStream fos = new FileOutputStream("/proc/" + pid + "/reclaim");
                         fos.write(action.getBytes());
                         fos.close();
@@ -399,9 +729,11 @@ public final class AppCompactor {
                         long zramFreeKbAfter = Debug.getZramFreeKb();
                         EventLog.writeEvent(EventLogTags.AM_COMPACT, pid, name, action,
                                 rssBefore[0], rssBefore[1], rssBefore[2], rssBefore[3],
-                                rssAfter[0], rssAfter[1], rssAfter[2], rssAfter[3], time,
-                                lastCompactAction, lastCompactTime, msg.arg1, msg.arg2,
-                                zramFreeKbBefore, zramFreeKbAfter);
+                                rssAfter[0] - rssBefore[0], rssAfter[1] - rssBefore[1],
+                                rssAfter[2] - rssBefore[2], rssAfter[3] - rssBefore[3], time,
+                                lastCompactAction, lastCompactTime, lastOomAdj, procState,
+                                zramFreeKbBefore, zramFreeKbAfter - zramFreeKbBefore);
+
                         // Note that as above not taking mPhenoTypeFlagLock here to avoid locking
                         // on every single compaction for a flag that will seldom change and the
                         // impact of reading the wrong value here is low.
@@ -409,19 +741,32 @@ public final class AppCompactor {
                             StatsLog.write(StatsLog.APP_COMPACTED, pid, name, pendingAction,
                                     rssBefore[0], rssBefore[1], rssBefore[2], rssBefore[3],
                                     rssAfter[0], rssAfter[1], rssAfter[2], rssAfter[3], time,
-                                    lastCompactAction, lastCompactTime, msg.arg1,
-                                    ActivityManager.processStateAmToProto(msg.arg2),
+                                    lastCompactAction, lastCompactTime, lastOomAdj,
+                                    ActivityManager.processStateAmToProto(procState),
                                     zramFreeKbBefore, zramFreeKbAfter);
                         }
+
                         synchronized (mAm) {
                             proc.lastCompactTime = end;
                             proc.lastCompactAction = pendingAction;
                         }
-                        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+
+                        if (action.equals(COMPACT_ACTION_FULL)
+                                || action.equals(COMPACT_ACTION_ANON)) {
+                            mLastCompactionStats.put(pid, new LastCompactionStats(rssAfter));
+                        }
                     } catch (Exception e) {
                         // nothing to do, presumably the process died
+                    } finally {
                         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     }
+                    break;
+                }
+                case COMPACT_SYSTEM_MSG: {
+                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "compactSystem");
+                    compactSystem();
+                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                    break;
                 }
             }
         }

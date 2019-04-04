@@ -16,10 +16,11 @@
 
 package android.util;
 
+import android.annotation.UnsupportedAppUsage;
+
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 
-import android.annotation.UnsupportedAppUsage;
 import libcore.util.EmptyArray;
 
 /**
@@ -171,6 +172,10 @@ public class SparseArray<E> implements Cloneable {
      * the behavior is undefined.</p>
      */
     public void removeAt(int index) {
+        if (index >= mSize) {
+            // The array might be slightly bigger than mSize, in which case, indexing won't fail.
+            throw new ArrayIndexOutOfBoundsException(index);
+        }
         if (mValues[index] != DELETED) {
             mValues[index] = DELETED;
             mGarbage = true;
@@ -279,6 +284,10 @@ public class SparseArray<E> implements Cloneable {
      * the behavior is undefined.</p>
      */
     public int keyAt(int index) {
+        if (index >= mSize) {
+            // The array might be slightly bigger than mSize, in which case, indexing won't fail.
+            throw new ArrayIndexOutOfBoundsException(index);
+        }
         if (mGarbage) {
             gc();
         }
@@ -302,6 +311,10 @@ public class SparseArray<E> implements Cloneable {
      */
     @SuppressWarnings("unchecked")
     public E valueAt(int index) {
+        if (index >= mSize) {
+            // The array might be slightly bigger than mSize, in which case, indexing won't fail.
+            throw new ArrayIndexOutOfBoundsException(index);
+        }
         if (mGarbage) {
             gc();
         }
@@ -317,6 +330,10 @@ public class SparseArray<E> implements Cloneable {
      * <p>For indices outside of the range <code>0...size()-1</code>, the behavior is undefined.</p>
      */
     public void setValueAt(int index, E value) {
+        if (index >= mSize) {
+            // The array might be slightly bigger than mSize, in which case, indexing won't fail.
+            throw new ArrayIndexOutOfBoundsException(index);
+        }
         if (mGarbage) {
             gc();
         }

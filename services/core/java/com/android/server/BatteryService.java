@@ -127,6 +127,7 @@ public final class BatteryService extends SystemService {
     // discharge stats before the device dies.
     private int mCriticalBatteryLevel;
 
+    // TODO: Current args don't work since "--unplugged" flag was purposefully removed.
     private static final String[] DUMPSYS_ARGS = new String[] { "--checkin", "--unplugged" };
 
     private static final String DUMPSYS_DATA_PATH = "/data/system/";
@@ -356,10 +357,27 @@ public final class BatteryService extends SystemService {
                 && (oldPlugged || mLastBatteryLevel > mLowBatteryWarningLevel);
     }
 
+    private boolean shouldShutdownLocked() {
+        if (mHealthInfo.batteryLevel > 0) {
+            return false;
+        }
+
+        // Battery-less devices should not shutdown.
+        if (!mHealthInfo.batteryPresent) {
+            return false;
+        }
+
+        // If battery state is not CHARGING, shutdown.
+        // - If battery present and state == unknown, this is an unexpected error state.
+        // - If level <= 0 and state == full, this is also an unexpected state
+        // - All other states (NOT_CHARGING, DISCHARGING) means it is not charging.
+        return mHealthInfo.batteryStatus != BatteryManager.BATTERY_STATUS_CHARGING;
+    }
+
     private void shutdownIfNoPowerLocked() {
         // shut down gracefully if our battery is critically low and we are not powered.
         // wait until the system has booted before attempting to display the shutdown dialog.
-        if (mHealthInfo.batteryLevel == 0 && !isPoweredLocked(BatteryManager.BATTERY_PLUGGED_ANY)) {
+        if (shouldShutdownLocked()) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -734,6 +752,7 @@ public final class BatteryService extends SystemService {
         mLastBatteryLevelChangedSentMs = SystemClock.elapsedRealtime();
     }
 
+    // TODO: Current code doesn't work since "--unplugged" flag in BSS was purposefully removed.
     private void logBatteryStatsLocked() {
         IBinder batteryInfoService = ServiceManager.getService(BatteryStats.SERVICE_NAME);
         if (batteryInfoService == null) return;

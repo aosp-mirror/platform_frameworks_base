@@ -19,11 +19,12 @@ package com.android.systemui.qs.tiles;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_QS_MODE;
 
 import android.annotation.Nullable;
-import android.app.ActivityManager;
 import android.content.Intent;
 import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.NightDisplayListener;
 import android.metrics.LogMaker;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.text.TextUtils;
@@ -66,7 +67,7 @@ public class NightDisplayTile extends QSTileImpl<BooleanState> implements
     public NightDisplayTile(QSHost host) {
         super(host);
         mManager = mContext.getSystemService(ColorDisplayManager.class);
-        mListener = new NightDisplayListener(mContext, ActivityManager.getCurrentUser());
+        mListener = new NightDisplayListener(mContext, new Handler(Looper.myLooper()));
     }
 
     @Override
@@ -102,7 +103,7 @@ public class NightDisplayTile extends QSTileImpl<BooleanState> implements
         }
 
         // Make a new controller for the new user.
-        mListener = new NightDisplayListener(mContext, newUserId);
+        mListener = new NightDisplayListener(mContext, newUserId, new Handler(Looper.myLooper()));
         if (mIsListening) {
             mListener.setCallback(this);
         }

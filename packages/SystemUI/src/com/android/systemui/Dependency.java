@@ -97,6 +97,7 @@ import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.RotationLockController;
 import com.android.systemui.statusbar.policy.SecurityController;
+import com.android.systemui.statusbar.policy.SensorPrivacyController;
 import com.android.systemui.statusbar.policy.SmartReplyConstants;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
@@ -291,6 +292,7 @@ public class Dependency extends SystemUI {
     @Inject Lazy<ActivityManagerWrapper> mActivityManagerWrapper;
     @Inject Lazy<DevicePolicyManagerWrapper> mDevicePolicyManagerWrapper;
     @Inject Lazy<PackageManagerWrapper> mPackageManagerWrapper;
+    @Inject Lazy<SensorPrivacyController> mSensorPrivacyController;
 
     @Inject
     public Dependency() {
@@ -461,6 +463,7 @@ public class Dependency extends SystemUI {
         mProviders.put(ActivityManagerWrapper.class, mActivityManagerWrapper::get);
         mProviders.put(DevicePolicyManagerWrapper.class, mDevicePolicyManagerWrapper::get);
         mProviders.put(PackageManagerWrapper.class, mPackageManagerWrapper::get);
+        mProviders.put(SensorPrivacyController.class, mSensorPrivacyController::get);
 
 
         // TODO(b/118592525): to support multi-display , we start to add something which is

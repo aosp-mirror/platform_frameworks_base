@@ -16,14 +16,17 @@
 
 package com.android.systemui.usb;
 
+import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.hardware.usb.ParcelableUsbPort;
 import android.hardware.usb.UsbManager;
 import android.hardware.usb.UsbPort;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import com.android.internal.app.AlertActivity;
 import com.android.internal.app.AlertController;
@@ -36,7 +39,6 @@ public class UsbContaminantActivity extends AlertActivity
                                   implements DialogInterface.OnClickListener {
     private static final String TAG = "UsbContaminantActivity";
 
-    private UsbDisconnectedReceiver mDisconnectedReceiver;
     private UsbPort mUsbPort;
 
     @Override
@@ -55,8 +57,10 @@ public class UsbContaminantActivity extends AlertActivity
         final AlertController.AlertParams ap = mAlertParams;
         ap.mTitle = getString(R.string.usb_contaminant_title);
         ap.mMessage = getString(R.string.usb_contaminant_message);
-        ap.mPositiveButtonText = getString(android.R.string.ok);
-        ap.mPositiveButtonListener = this;
+        ap.mNegativeButtonText = getString(android.R.string.ok);
+        ap.mNeutralButtonText = getString(R.string.usb_disable_contaminant_detection);
+        ap.mNegativeButtonListener = this;
+        ap.mNeutralButtonListener = this;
 
         setupAlert();
     }
@@ -68,6 +72,15 @@ public class UsbContaminantActivity extends AlertActivity
 
     @Override
     public void onClick(DialogInterface dialog, int which) {
+        if (which == AlertDialog.BUTTON_NEUTRAL) {
+            try {
+                mUsbPort.enableContaminantDetection(false);
+                Toast.makeText(this, R.string.usb_port_enabled,
+                    Toast.LENGTH_SHORT).show();
+            } catch (Exception e) {
+                Log.e(TAG, "Unable to notify Usb service", e);
+            }
+        }
         finish();
     }
 }

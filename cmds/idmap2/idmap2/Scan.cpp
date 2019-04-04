@@ -196,13 +196,7 @@ Result<Unit> Scan(const std::vector<std::string>& args) {
 
   std::stringstream stream;
   for (const auto& overlay : interesting_apks) {
-    std::vector<std::string> verify_args = {"--idmap-path", overlay.idmap_path};
-    for (const std::string& policy : overlay.policies) {
-      verify_args.emplace_back("--policy");
-      verify_args.emplace_back(policy);
-    }
-
-    if (!Verify(std::vector<std::string>(verify_args))) {
+    if (!Verify(std::vector<std::string>({"--idmap-path", overlay.idmap_path}))) {
       std::vector<std::string> create_args = {"--target-apk-path",  target_apk_path,
                                               "--overlay-apk-path", overlay.apk_path,
                                               "--idmap-path",       overlay.idmap_path};

@@ -15,8 +15,10 @@
  */
 package android.content.pm;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -565,6 +567,7 @@ public class ShortcutManager {
      */
     @NonNull
     @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_APP_PREDICTIONS)
     public List<ShareShortcutInfo> getShareTargets(@NonNull IntentFilter filter) {
         try {
             return mService.getShareTargets(mContext.getPackageName(), filter,

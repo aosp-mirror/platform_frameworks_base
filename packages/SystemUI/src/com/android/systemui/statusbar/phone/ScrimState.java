@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.phone;
 import android.graphics.Color;
 import android.os.Trace;
 
-import com.android.systemui.doze.DozeLog;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 
@@ -129,15 +128,14 @@ public enum ScrimState {
         @Override
         public void prepare(ScrimState previousState) {
             mCurrentInFrontAlpha = 0f;
-            if (mPulseReason == DozeLog.PULSE_REASON_NOTIFICATION
-                    || mPulseReason == DozeLog.PULSE_REASON_DOCKING
-                    || mPulseReason == DozeLog.PULSE_REASON_INTENT) {
-                mCurrentBehindAlpha = previousState.getBehindAlpha();
-            } else {
-                mCurrentBehindAlpha = ScrimController.AOD2_SCRIM_ALPHA;
-            }
             mCurrentBehindTint = Color.BLACK;
             mBlankScreen = mDisplayRequiresBlanking;
+        }
+
+        @Override
+        public float getBehindAlpha() {
+            return mWakeLockScreenSensorActive ? ScrimController.WAKE_SENSOR_SCRIM_ALPHA
+                    : AOD.getBehindAlpha();
         }
     },
 
@@ -199,7 +197,7 @@ public enum ScrimState {
     int mIndex;
     boolean mHasBackdrop;
     boolean mLaunchingAffordanceWithPreview;
-    int mPulseReason;
+    boolean mWakeLockScreenSensorActive;
 
     ScrimState(int index) {
         mIndex = index;
@@ -264,10 +262,6 @@ public enum ScrimState {
         mAodFrontScrimAlpha = aodFrontScrimAlpha;
     }
 
-    public void setPulseReason(int pulseReason) {
-        mPulseReason = pulseReason;
-    }
-
     public void setScrimBehindAlphaKeyguard(float scrimBehindAlphaKeyguard) {
         mScrimBehindAlphaKeyguard = scrimBehindAlphaKeyguard;
     }
@@ -286,5 +280,9 @@ public enum ScrimState {
 
     public void setHasBackdrop(boolean hasBackdrop) {
         mHasBackdrop = hasBackdrop;
+    }
+
+    public void setWakeLockScreenSensorActive(boolean active) {
+        mWakeLockScreenSensorActive = active;
     }
 }

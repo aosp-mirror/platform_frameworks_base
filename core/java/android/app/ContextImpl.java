@@ -1090,7 +1090,6 @@ class ContextImpl extends Context {
     @Override
     public void sendBroadcastAsUserMultiplePermissions(Intent intent, UserHandle user,
             String[] receiverPermissions) {
-        warnIfCallingFromSystemProcess();
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
         try {
             intent.prepareToLeaveProcess(this);
@@ -2123,8 +2122,7 @@ class ContextImpl extends Context {
     }
 
     private static Resources createResources(IBinder activityToken, LoadedApk pi, String splitName,
-            int displayId, Configuration overrideConfig, CompatibilityInfo compatInfo,
-            String[] overlayDirs) {
+            int displayId, Configuration overrideConfig, CompatibilityInfo compatInfo) {
         final String[] splitResDirs;
         final ClassLoader classLoader;
         try {
@@ -2136,7 +2134,7 @@ class ContextImpl extends Context {
         return ResourcesManager.getInstance().getResources(activityToken,
                 pi.getResDir(),
                 splitResDirs,
-                overlayDirs,
+                pi.getOverlayDirs(),
                 pi.getApplicationInfo().sharedLibraryFiles,
                 displayId,
                 overrideConfig,
@@ -2154,11 +2152,9 @@ class ContextImpl extends Context {
                     new UserHandle(UserHandle.getUserId(application.uid)), flags, null, null);
 
             final int displayId = getDisplayId();
-            // overlayDirs is retrieved directly from ApplicationInfo since ActivityThread may have
-            // a LoadedApk containing Resources with stale overlays for a remote application.
-            final String[] overlayDirs = application.resourceDirs;
+
             c.setResources(createResources(mActivityToken, pi, null, displayId, null,
-                    getDisplayAdjustments(displayId).getCompatibilityInfo(), overlayDirs));
+                    getDisplayAdjustments(displayId).getCompatibilityInfo()));
             if (c.mResources != null) {
                 return c;
             }
@@ -2193,7 +2189,7 @@ class ContextImpl extends Context {
             final int displayId = getDisplayId();
 
             c.setResources(createResources(mActivityToken, pi, null, displayId, null,
-                    getDisplayAdjustments(displayId).getCompatibilityInfo(), pi.getOverlayDirs()));
+                    getDisplayAdjustments(displayId).getCompatibilityInfo()));
             if (c.mResources != null) {
                 return c;
             }
@@ -2243,8 +2239,7 @@ class ContextImpl extends Context {
 
         final int displayId = getDisplayId();
         context.setResources(createResources(mActivityToken, mPackageInfo, mSplitName, displayId,
-                overrideConfiguration, getDisplayAdjustments(displayId).getCompatibilityInfo(),
-                mPackageInfo.getOverlayDirs()));
+                overrideConfiguration, getDisplayAdjustments(displayId).getCompatibilityInfo()));
         return context;
     }
 
@@ -2259,8 +2254,7 @@ class ContextImpl extends Context {
 
         final int displayId = display.getDisplayId();
         context.setResources(createResources(mActivityToken, mPackageInfo, mSplitName, displayId,
-                null, getDisplayAdjustments(displayId).getCompatibilityInfo(),
-                mPackageInfo.getOverlayDirs()));
+                null, getDisplayAdjustments(displayId).getCompatibilityInfo()));
         context.mDisplay = display;
         return context;
     }
@@ -2442,7 +2436,7 @@ class ContextImpl extends Context {
         ContextImpl context = new ContextImpl(null, systemContext.mMainThread, packageInfo, null,
                 null, null, 0, null, null);
         context.setResources(createResources(null, packageInfo, null, displayId, null,
-                packageInfo.getCompatibilityInfo(), packageInfo.getOverlayDirs()));
+                packageInfo.getCompatibilityInfo()));
         context.updateDisplay(displayId);
         return context;
     }

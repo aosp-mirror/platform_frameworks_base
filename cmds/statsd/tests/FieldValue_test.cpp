@@ -24,6 +24,8 @@
 
 #ifdef __ANDROID__
 
+using android::util::ProtoReader;
+
 namespace android {
 namespace os {
 namespace statsd {
@@ -252,12 +254,12 @@ TEST(AtomMatcherTest, TestWriteDimensionPath) {
         vector<uint8_t> outData;
         outData.resize(protoOut.size());
         size_t pos = 0;
-        auto iter = protoOut.data();
-        while (iter.readBuffer() != NULL) {
-            size_t toRead = iter.currentToRead();
-            std::memcpy(&(outData[pos]), iter.readBuffer(), toRead);
+        sp<ProtoReader> reader = protoOut.data();
+        while (reader->readBuffer() != NULL) {
+            size_t toRead = reader->currentToRead();
+            std::memcpy(&(outData[pos]), reader->readBuffer(), toRead);
             pos += toRead;
-            iter.rp()->move(toRead);
+            reader->move(toRead);
         }
 
         DimensionsValue result;
@@ -343,12 +345,12 @@ TEST(AtomMatcherTest, TestWriteDimensionToProto) {
     vector<uint8_t> outData;
     outData.resize(protoOut.size());
     size_t pos = 0;
-    auto iter = protoOut.data();
-    while (iter.readBuffer() != NULL) {
-        size_t toRead = iter.currentToRead();
-        std::memcpy(&(outData[pos]), iter.readBuffer(), toRead);
+    sp<ProtoReader> reader = protoOut.data();
+    while (reader->readBuffer() != NULL) {
+        size_t toRead = reader->currentToRead();
+        std::memcpy(&(outData[pos]), reader->readBuffer(), toRead);
         pos += toRead;
-        iter.rp()->move(toRead);
+        reader->move(toRead);
     }
 
     DimensionsValue result;
@@ -405,12 +407,12 @@ TEST(AtomMatcherTest, TestWriteDimensionLeafNodesToProto) {
     vector<uint8_t> outData;
     outData.resize(protoOut.size());
     size_t pos = 0;
-    auto iter = protoOut.data();
-    while (iter.readBuffer() != NULL) {
-        size_t toRead = iter.currentToRead();
-        std::memcpy(&(outData[pos]), iter.readBuffer(), toRead);
+    sp<ProtoReader> reader = protoOut.data();
+    while (reader->readBuffer() != NULL) {
+        size_t toRead = reader->currentToRead();
+        std::memcpy(&(outData[pos]), reader->readBuffer(), toRead);
         pos += toRead;
-        iter.rp()->move(toRead);
+        reader->move(toRead);
     }
 
     DimensionsValueTuple result;
@@ -458,12 +460,12 @@ TEST(AtomMatcherTest, TestWriteAtomToProto) {
     vector<uint8_t> outData;
     outData.resize(protoOutput.size());
     size_t pos = 0;
-    auto iter = protoOutput.data();
-    while (iter.readBuffer() != NULL) {
-        size_t toRead = iter.currentToRead();
-        std::memcpy(&(outData[pos]), iter.readBuffer(), toRead);
+    sp<ProtoReader> reader = protoOutput.data();
+    while (reader->readBuffer() != NULL) {
+        size_t toRead = reader->currentToRead();
+        std::memcpy(&(outData[pos]), reader->readBuffer(), toRead);
         pos += toRead;
-        iter.rp()->move(toRead);
+        reader->move(toRead);
     }
 
     Atom result;

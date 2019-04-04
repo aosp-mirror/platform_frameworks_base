@@ -18,6 +18,8 @@ package com.android.keyguard.clock;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.ContentResolver;
@@ -31,6 +33,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManagerFake;
+import com.android.systemui.plugins.ClockPlugin;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.util.InjectionInflationController;
 
@@ -38,6 +41,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -57,7 +61,8 @@ public final class ClockManagerTest extends SysuiTestCase {
     @Mock SysuiColorExtractor mMockColorExtractor;
     @Mock ContentResolver mMockContentResolver;
     @Mock SettingsWrapper mMockSettingsWrapper;
-    @Mock ClockManager.ClockChangedListener mMockListener;
+    @Mock ClockManager.ClockChangedListener mMockListener1;
+    @Mock ClockManager.ClockChangedListener mMockListener2;
 
     @Before
     public void setUp() {
@@ -67,17 +72,23 @@ public final class ClockManagerTest extends SysuiTestCase {
         when(mMockInjectionInflationController.injectable(any())).thenReturn(inflater);
 
         mFakeDockManager = new DockManagerFake();
+        getContext().putComponent(DockManager.class, mFakeDockManager);
+
         mClockManager = new ClockManager(getContext(), mMockInjectionInflationController,
-                mMockPluginManager, mFakeDockManager, mMockColorExtractor, mMockContentResolver,
+                mMockPluginManager, mMockColorExtractor, mMockContentResolver,
                 mMockSettingsWrapper);
 
-        mClockManager.addOnClockChangedListener(mMockListener);
+        mClockManager.addOnClockChangedListener(mMockListener1);
+        mClockManager.addOnClockChangedListener(mMockListener2);
+        reset(mMockListener1, mMockListener2);
+
         mContentObserver = mClockManager.getContentObserver();
     }
 
     @After
     public void tearDown() {
-        mClockManager.removeOnClockChangedListener(mMockListener);
+        mClockManager.removeOnClockChangedListener(mMockListener1);
+        mClockManager.removeOnClockChangedListener(mMockListener2);
     }
 
     @Test
@@ -111,6 +122,34 @@ public final class ClockManagerTest extends SysuiTestCase {
         mContentObserver.onChange(false);
         // THEN the plugin is the bubble clock face.
         assertThat(mClockManager.getCurrentClock()).isInstanceOf(BUBBLE_CLOCK_CLASS);
+    }
+
+    @Test
+    public void onClockChanged_customClock() {
+        // GIVEN that settings is set to the bubble clock face
+        when(mMockSettingsWrapper.getLockScreenCustomClockFace()).thenReturn(BUBBLE_CLOCK);
+        // WHEN settings change event is fired
+        mContentObserver.onChange(false);
+        // THEN the plugin is the bubble clock face.
+        ArgumentCaptor<ClockPlugin> captor = ArgumentCaptor.forClass(ClockPlugin.class);
+        verify(mMockListener1).onClockChanged(captor.capture());
+        assertThat(captor.getValue()).isInstanceOf(BUBBLE_CLOCK_CLASS);
+    }
+
+    @Test
+    public void onClockChanged_uniqueInstances() {
+        // GIVEN that settings is set to the bubble clock face
+        when(mMockSettingsWrapper.getLockScreenCustomClockFace()).thenReturn(BUBBLE_CLOCK);
+        // WHEN settings change event is fired
+        mContentObserver.onChange(false);
+        // THEN the listeners receive separate instances of the Bubble clock plugin.
+        ArgumentCaptor<ClockPlugin> captor1 = ArgumentCaptor.forClass(ClockPlugin.class);
+        ArgumentCaptor<ClockPlugin> captor2 = ArgumentCaptor.forClass(ClockPlugin.class);
+        verify(mMockListener1).onClockChanged(captor1.capture());
+        verify(mMockListener2).onClockChanged(captor2.capture());
+        assertThat(captor1.getValue()).isInstanceOf(BUBBLE_CLOCK_CLASS);
+        assertThat(captor2.getValue()).isInstanceOf(BUBBLE_CLOCK_CLASS);
+        assertThat(captor1.getValue()).isNotSameAs(captor2.getValue());
     }
 
     @Test

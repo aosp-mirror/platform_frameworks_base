@@ -842,7 +842,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                             && status.isRoleCombinationSupported(POWER_ROLE_SINK, DATA_ROLE_HOST)
                             && status.isRoleCombinationSupported(POWER_ROLE_SOURCE,
                             DATA_ROLE_DEVICE)
-                            && status.isRoleCombinationSupported(POWER_ROLE_SINK, DATA_ROLE_HOST);
+                            && status.isRoleCombinationSupported(POWER_ROLE_SINK, DATA_ROLE_DEVICE);
 
                     args.recycle();
                     updateUsbNotification(false);

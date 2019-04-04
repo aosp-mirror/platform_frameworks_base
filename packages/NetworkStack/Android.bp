@@ -14,11 +14,25 @@
 // limitations under the License.
 //
 
+java_library {
+    name: "captiveportal-lib",
+    srcs: ["common/**/*.java"],
+    libs: [
+        "androidx.annotation_annotation",
+    ],
+    sdk_version: "system_current",
+}
+
+java_defaults {
+    name: "NetworkStackCommon",
+    sdk_version: "system_current",
+    min_sdk_version: "28",
+}
+
 // Library including the network stack, used to compile both variants of the network stack
 android_library {
     name: "NetworkStackBase",
-    sdk_version: "system_current",
-    min_sdk_version: "28",
+    defaults: ["NetworkStackCommon"],
     srcs: [
         "src/**/*.java",
         ":framework-networkstack-shared-srcs",
@@ -29,38 +43,41 @@ android_library {
         "netd_aidl_interface-java",
         "networkstack-aidl-interfaces-java",
         "datastallprotosnano",
+        "networkstackprotosnano",
+        "captiveportal-lib",
     ],
     manifest: "AndroidManifestBase.xml",
 }
 
-// Non-updatable in-process network stack for devices not using the module
-android_app {
-    name: "InProcessNetworkStack",
-    sdk_version: "system_current",
-    min_sdk_version: "28",
-    certificate: "platform",
+java_defaults {
+    name: "NetworkStackAppCommon",
+    defaults: ["NetworkStackCommon"],
     privileged: true,
     static_libs: [
         "NetworkStackBase",
     ],
+    // Resources already included in NetworkStackBase
+    resource_dirs: [],
     jarjar_rules: "jarjar-rules-shared.txt",
+    optimize: {
+        proguard_flags_files: ["proguard.flags"],
+    },
     // The permission configuration *must* be included to ensure security of the device
-    required: ["NetworkStackPermissionStub"],
+    required: ["NetworkPermissionConfig"],
+}
+
+// Non-updatable network stack running in the system server process for devices not using the module
+android_app {
+    name: "InProcessNetworkStack",
+    defaults: ["NetworkStackAppCommon"],
+    certificate: "platform",
     manifest: "AndroidManifest_InProcess.xml",
 }
 
 // Updatable network stack packaged as an application
 android_app {
     name: "NetworkStack",
-    sdk_version: "system_current",
-    min_sdk_version: "28",
+    defaults: ["NetworkStackAppCommon"],
     certificate: "networkstack",
-    privileged: true,
-    static_libs: [
-        "NetworkStackBase"
-    ],
-    jarjar_rules: "jarjar-rules-shared.txt",
-    // The permission configuration *must* be included to ensure security of the device
-    required: ["NetworkStackPermissionStub"],
     manifest: "AndroidManifest.xml",
 }

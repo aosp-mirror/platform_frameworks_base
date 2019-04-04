@@ -92,15 +92,7 @@ public abstract class GnssNavigationMessageProvider
     }
 
     /** Handle GNSS capabilities update from the GNSS HAL implementation */
-    public void onCapabilitiesUpdated(int capabilities, boolean hasSubHalCapabilityFlags) {
-        // The IGnssCallback.hal@2.0 removed sub-HAL capability flags from the Capabilities enum
-        // and instead uses the sub-HAL non-null handle returned from IGnss.hal@2.0 to indicate
-        // support. Therefore, the 'hasSubHalCapabilityFlags' parameter is needed to tell if the
-        // 'capabilities' parameter includes the sub-HAL capability flags or not. Old HALs
-        // which explicitly set the sub-HAL capability bits must continue to work.
-        final boolean isGnssNavigationMessageSupported = hasSubHalCapabilityFlags
-                ? (capabilities & GnssLocationProvider.GPS_CAPABILITY_NAV_MESSAGES) != 0
-                : mNative.isNavigationMessageSupported();
+    public void onCapabilitiesUpdated(boolean isGnssNavigationMessageSupported) {
         setSupported(isGnssNavigationMessageSupported);
         updateResult();
     }

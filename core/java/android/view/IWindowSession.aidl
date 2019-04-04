@@ -255,12 +255,11 @@ interface IWindowSession {
     void updatePointerIcon(IWindow window);
 
     /**
-     * Update a tap exclude region with a rectangular area identified by provided id in the window.
-     * Touches on this region will not switch focus to this window. Passing an empty rect will
-     * remove the area from the exclude region of this window.
+     * Update a tap exclude region identified by provided id in the window. Touches on this region
+     * will neither be dispatched to this window nor change the focus to this window. Passing an
+     * invalid region will remove the area from the exclude region of this window.
      */
-    void updateTapExcludeRegion(IWindow window, int regionId, int left, int top, int width,
-            int height);
+    void updateTapExcludeRegion(IWindow window, int regionId, in Region region);
 
     /**
      * Called when the client has changed the local insets state, and now the server should reflect

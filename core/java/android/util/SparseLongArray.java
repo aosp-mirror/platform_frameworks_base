@@ -182,6 +182,10 @@ public class SparseLongArray implements Cloneable {
      * key.</p>
      */
     public int keyAt(int index) {
+        if (index >= mSize) {
+            // The array might be slightly bigger than mSize, in which case, indexing won't fail.
+            throw new ArrayIndexOutOfBoundsException(index);
+        }
         return mKeys[index];
     }
 
@@ -197,6 +201,10 @@ public class SparseLongArray implements Cloneable {
      * associated with the largest key.</p>
      */
     public long valueAt(int index) {
+        if (index >= mSize) {
+            // The array might be slightly bigger than mSize, in which case, indexing won't fail.
+            throw new ArrayIndexOutOfBoundsException(index);
+        }
         return mValues[index];
     }
 

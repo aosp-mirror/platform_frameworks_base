@@ -376,6 +376,11 @@ public class NetworkControllerImpl extends BroadcastReceiver
         return controller != null ? controller.getState().networkNameData : "";
     }
 
+    @Override
+    public int getNumberSubscriptions() {
+        return mMobileSignalControllers.size();
+    }
+
     public boolean isEmergencyOnly() {
         if (mMobileSignalControllers.size() == 0) {
             // When there are no active subscriptions, determine emengency state from last
@@ -987,6 +992,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                             datatype.equals("lte") ? TelephonyIcons.LTE :
                             datatype.equals("lte+") ? TelephonyIcons.LTE_PLUS :
                             datatype.equals("dis") ? TelephonyIcons.DATA_DISABLED :
+                            datatype.equals("not") ? TelephonyIcons.NOT_DEFAULT_DATA :
                             TelephonyIcons.UNKNOWN;
                 }
                 if (args.containsKey("roam")) {

@@ -42,7 +42,7 @@ import libcore.util.NativeAllocationRegistry;
  * String text = "Hello, Android.";
  * MeasuredText mt = new MeasuredText.Builder(text.toCharArray())
  *      .appendStyleRun(paint, 7, false)  // Use paint for "Hello, "
- *      .appendStyleRun(bigPaint, 8, false)  // Use bigPaint for "Hello, "
+ *      .appendStyleRun(bigPaint, 8, false)  // Use bigPaint for "Android."
  *      .build();
  * </code>
  * </pre>

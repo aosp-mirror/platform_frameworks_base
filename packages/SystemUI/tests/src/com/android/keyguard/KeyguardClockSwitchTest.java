@@ -39,10 +39,12 @@ import android.widget.FrameLayout;
 import android.widget.TextClock;
 
 import com.android.keyguard.clock.ClockManager;
+import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ClockPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.util.InjectionInflationController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -70,7 +72,10 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
-        LayoutInflater layoutInflater = LayoutInflater.from(getContext());
+        InjectionInflationController inflationController = new InjectionInflationController(
+                SystemUIFactory.getInstance().getRootComponent());
+        LayoutInflater layoutInflater = inflationController
+                .injectable(LayoutInflater.from(getContext()));
         mKeyguardClockSwitch =
                 (KeyguardClockSwitch) layoutInflater.inflate(R.layout.keyguard_clock_switch, null);
         mClockContainer = mKeyguardClockSwitch.findViewById(R.id.clock_view);
@@ -203,6 +208,19 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
         verify(mClockView).setVisibility(VISIBLE);
         assertThat(plugin1.getView().getParent()).isNull();
         assertThat(plugin2.getView().getParent()).isNull();
+    }
+
+    @Test
+    public void onPluginDisconnected_onDestroyView() {
+        // GIVEN a plugin is connected
+        ClockPlugin clockPlugin = mock(ClockPlugin.class);
+        when(clockPlugin.getView()).thenReturn(new TextClock(getContext()));
+        ClockManager.ClockChangedListener listener = mKeyguardClockSwitch.getClockChangedListener();
+        listener.onClockChanged(clockPlugin);
+        // WHEN the plugin is disconnected
+        listener.onClockChanged(null);
+        // THEN onDestroyView is called on the plugin
+        verify(clockPlugin).onDestroyView();
     }
 
     @Test

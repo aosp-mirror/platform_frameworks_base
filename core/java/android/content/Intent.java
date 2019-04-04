@@ -29,6 +29,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
+import android.app.AppGlobals;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ComponentInfo;
@@ -43,6 +44,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.IncidentManager;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
@@ -51,6 +53,7 @@ import android.os.ResultReceiver;
 import android.os.ShellCommand;
 import android.os.StrictMode;
 import android.os.UserHandle;
+import android.os.storage.StorageManager;
 import android.provider.ContactsContract.QuickContact;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsProvider;
@@ -68,6 +71,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
@@ -632,6 +636,8 @@ import java.util.Set;
  * of all possible flags.
  */
 public class Intent implements Parcelable, Cloneable {
+    private static final String TAG = "Intent";
+
     private static final String ATTR_ACTION = "action";
     private static final String TAG_CATEGORIES = "categories";
     private static final String ATTR_CATEGORY = "category";
@@ -2078,6 +2084,9 @@ public class Intent implements Parcelable, Cloneable {
      * <p>
      * Output: Nothing.
      * </p>
+     * <p class="note">
+     * This requires {@link android.Manifest.permission#GRANT_RUNTIME_PERMISSIONS} permission.
+     * </p>
      *
      * @see #EXTRA_PERMISSION_NAME
      * @see #EXTRA_PERMISSION_GROUP_NAME
@@ -2086,15 +2095,16 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS)
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_REVIEW_PERMISSION_USAGE =
             "android.intent.action.REVIEW_PERMISSION_USAGE";
 
     /**
-     * Activity action: Launch UI to review uses of permissions for a single app.
+     * Activity action: Launch UI to review ongoing app uses of permissions.
      * <p>
-     * Input: {@link #EXTRA_PACKAGE_NAME} specifies the package whose
-     * permissions will be reviewed (mandatory).
+     * Input: {@link #EXTRA_DURATION_MILLIS} specifies the minimum number of milliseconds of recent
+     * activity to show (optional).  Must be non-negative.
      * </p>
      * <p>
      * Output: Nothing.
@@ -2103,15 +2113,15 @@ public class Intent implements Parcelable, Cloneable {
      * This requires {@link android.Manifest.permission#GRANT_RUNTIME_PERMISSIONS} permission.
      * </p>
      *
-     * @see #EXTRA_PACKAGE_NAME
+     * @see #EXTRA_DURATION_MILLIS
      *
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS)
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_REVIEW_APP_PERMISSION_USAGE =
-            "android.intent.action.REVIEW_APP_PERMISSION_USAGE";
+    public static final String ACTION_REVIEW_ONGOING_PERMISSION_USAGE =
+            "android.intent.action.REVIEW_ONGOING_PERMISSION_USAGE";
 
     /**
      * Activity action: Launch UI to review running accessibility services.
@@ -3105,20 +3115,13 @@ public class Intent implements Parcelable, Cloneable {
      * <p>
      * The path to the file is contained in {@link Intent#getData()}.
      *
-     * @deprecated Starting in the {@link android.os.Build.VERSION_CODES#Q}
-     *             release, shared storage paths are sandboxed per application,
-     *             and this broadcast cannot correctly translate those sandboxed
-     *             paths. Callers will need to instead migrate to using
-     *             {@link MediaScannerConnection}.
+     * @deprecated Callers should migrate to inserting items directly into
+     *             {@link MediaStore}, where they will be automatically scanned
+     *             after each mutation.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     @Deprecated
     public static final String ACTION_MEDIA_SCANNER_SCAN_FILE = "android.intent.action.MEDIA_SCANNER_SCAN_FILE";
-
-    /** @hide */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    @Deprecated
-    public static final String ACTION_MEDIA_SCANNER_SCAN_VOLUME = "android.intent.action.MEDIA_SCANNER_SCAN_VOLUME";
 
    /**
      * Broadcast Action:  The "Media Button" was pressed.  Includes a single
@@ -3473,6 +3476,7 @@ public class Intent implements Parcelable, Cloneable {
      * {@link android.Manifest.permission#MANAGE_USERS} to receive this broadcast.
      * @hide
      */
+    @SystemApi
     public static final String ACTION_USER_ADDED =
             "android.intent.action.USER_ADDED";
 
@@ -9802,7 +9806,7 @@ public class Intent implements Parcelable, Cloneable {
                 // may fail.  We really should handle this (i.e., the Bundle
                 // impl shouldn't be on top of a plain map), but for now just
                 // ignore it and keep the original contents. :(
-                Log.w("Intent", "Failure filling in extras", e);
+                Log.w(TAG, "Failure filling in extras", e);
             }
         }
         if (mayHaveCopiedUris && mContentUserHint == UserHandle.USER_CURRENT
@@ -10518,7 +10522,7 @@ public class Intent implements Parcelable, Cloneable {
             } else if (ATTR_FLAGS.equals(attrName)) {
                 intent.setFlags(Integer.parseInt(attrValue, 16));
             } else {
-                Log.e("Intent", "restoreFromXml: unknown attribute=" + attrName);
+                Log.e(TAG, "restoreFromXml: unknown attribute=" + attrName);
             }
         }
 
@@ -10534,7 +10538,7 @@ public class Intent implements Parcelable, Cloneable {
                         intent.addCategory(in.getAttributeValue(attrNdx));
                     }
                 } else {
-                    Log.w("Intent", "restoreFromXml: unknown name=" + name);
+                    Log.w(TAG, "restoreFromXml: unknown name=" + name);
                     XmlUtils.skipCurrentTag(in);
                 }
             }
@@ -10646,6 +10650,20 @@ public class Intent implements Parcelable, Cloneable {
                     break;
                 default:
                     mData.checkContentUriWithoutPermission("Intent.getData()", getFlags());
+            }
+        }
+
+        // Translate raw filesystem paths out of storage sandbox
+        if (ACTION_MEDIA_SCANNER_SCAN_FILE.equals(mAction) && mData != null
+                && ContentResolver.SCHEME_FILE.equals(mData.getScheme()) && leavingPackage) {
+            final StorageManager sm = AppGlobals.getInitialApplication()
+                    .getSystemService(StorageManager.class);
+            final File before = new File(mData.getPath());
+            final File after = sm.translateAppToSystem(before,
+                    android.os.Process.myPid(), android.os.Process.myUid());
+            if (!Objects.equals(before, after)) {
+                Log.v(TAG, "Translated " + before + " to " + after);
+                mData = Uri.fromFile(after);
             }
         }
     }

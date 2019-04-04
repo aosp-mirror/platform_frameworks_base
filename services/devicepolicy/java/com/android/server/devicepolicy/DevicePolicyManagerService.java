@@ -58,7 +58,14 @@ import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_HOME;
 import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_NOTIFICATIONS;
 import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_OVERVIEW;
 import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_NONE;
+import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC;
+import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC;
+import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
+import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_MANAGED;
+import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
+import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX;
+import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
 import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_MODE_OFF;
 import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_MODE_OPPORTUNISTIC;
@@ -3475,15 +3482,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     static void validateQualityConstant(int quality) {
         switch (quality) {
-            case DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED:
-            case DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK:
-            case DevicePolicyManager.PASSWORD_QUALITY_SOMETHING:
-            case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
-            case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX:
-            case DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC:
-            case DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC:
-            case DevicePolicyManager.PASSWORD_QUALITY_COMPLEX:
-            case DevicePolicyManager.PASSWORD_QUALITY_MANAGED:
+            case PASSWORD_QUALITY_UNSPECIFIED:
+            case PASSWORD_QUALITY_BIOMETRIC_WEAK:
+            case PASSWORD_QUALITY_SOMETHING:
+            case PASSWORD_QUALITY_NUMERIC:
+            case PASSWORD_QUALITY_NUMERIC_COMPLEX:
+            case PASSWORD_QUALITY_ALPHABETIC:
+            case PASSWORD_QUALITY_ALPHANUMERIC:
+            case PASSWORD_QUALITY_COMPLEX:
+            case PASSWORD_QUALITY_MANAGED:
                 return;
         }
         throw new IllegalArgumentException("Invalid quality constant: 0x"
@@ -4747,41 +4754,36 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             // setActivePasswordState has never been called for it.
             metrics = new PasswordMetrics();
         }
+
         return isPasswordSufficientForUserWithoutCheckpointLocked(metrics, userHandle, parent);
     }
 
     /**
-     * Returns {@code true} if the password represented by the {@code passwordMetrics} argument
+     * Returns {@code true} if the password represented by the {@code metrics} argument
      * sufficiently fulfills the password requirements for the user corresponding to
-     * {@code userHandle} (or its parent, if {@code parent} is set to {@code true}).
+     * {@code userId} (or its parent, if {@code parent} is set to {@code true}).
      */
     private boolean isPasswordSufficientForUserWithoutCheckpointLocked(
-            PasswordMetrics passwordMetrics, int userHandle, boolean parent) {
-        final int requiredPasswordQuality = getPasswordQuality(null, userHandle, parent);
+            PasswordMetrics metrics, @UserIdInt int userId, boolean parent) {
+        final int requiredQuality = getPasswordQuality(null, userId, parent);
 
-        if (passwordMetrics.quality < requiredPasswordQuality) {
+        if (requiredQuality >= PASSWORD_QUALITY_NUMERIC
+                && metrics.length < getPasswordMinimumLength(null, userId, parent)) {
             return false;
         }
-        if (requiredPasswordQuality >= DevicePolicyManager.PASSWORD_QUALITY_NUMERIC
-                && passwordMetrics.length < getPasswordMinimumLength(
-                        null, userHandle, parent)) {
-            return false;
+
+        // PASSWORD_QUALITY_COMPLEX doesn't represent actual password quality, it means that number
+        // of characters of each class should be checked instead of quality itself.
+        if (requiredQuality == PASSWORD_QUALITY_COMPLEX) {
+            return metrics.upperCase >= getPasswordMinimumUpperCase(null, userId, parent)
+                    && metrics.lowerCase >= getPasswordMinimumLowerCase(null, userId, parent)
+                    && metrics.letters >= getPasswordMinimumLetters(null, userId, parent)
+                    && metrics.numeric >= getPasswordMinimumNumeric(null, userId, parent)
+                    && metrics.symbols >= getPasswordMinimumSymbols(null, userId, parent)
+                    && metrics.nonLetter >= getPasswordMinimumNonLetter(null, userId, parent);
+        } else {
+            return metrics.quality >= requiredQuality;
         }
-        if (requiredPasswordQuality != DevicePolicyManager.PASSWORD_QUALITY_COMPLEX) {
-            return true;
-        }
-        return passwordMetrics.upperCase >= getPasswordMinimumUpperCase(
-                    null, userHandle, parent)
-                && passwordMetrics.lowerCase >= getPasswordMinimumLowerCase(
-                        null, userHandle, parent)
-                && passwordMetrics.letters >= getPasswordMinimumLetters(
-                        null, userHandle, parent)
-                && passwordMetrics.numeric >= getPasswordMinimumNumeric(
-                        null, userHandle, parent)
-                && passwordMetrics.symbols >= getPasswordMinimumSymbols(
-                        null, userHandle, parent)
-                && passwordMetrics.nonLetter >= getPasswordMinimumNonLetter(
-                        null, userHandle, parent);
     }
 
     @Override
@@ -5042,14 +5044,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         int quality;
         synchronized (getLockObject()) {
             quality = getPasswordQuality(null, userHandle, /* parent */ false);
-            if (quality == DevicePolicyManager.PASSWORD_QUALITY_MANAGED) {
+            if (quality == PASSWORD_QUALITY_MANAGED) {
                 quality = PASSWORD_QUALITY_UNSPECIFIED;
             }
             // TODO(b/120484642): remove getBytes() below
             final PasswordMetrics metrics = PasswordMetrics.computeForPassword(password.getBytes());
             final int realQuality = metrics.quality;
-            if (realQuality < quality
-                    && quality != DevicePolicyManager.PASSWORD_QUALITY_COMPLEX) {
+            if (realQuality < quality && quality != PASSWORD_QUALITY_COMPLEX) {
                 Slog.w(LOG_TAG, "resetPassword: password quality 0x"
                         + Integer.toHexString(realQuality)
                         + " does not meet required quality 0x"
@@ -5063,7 +5064,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         + " does not meet required length " + length);
                 return false;
             }
-            if (quality == DevicePolicyManager.PASSWORD_QUALITY_COMPLEX) {
+            if (quality == PASSWORD_QUALITY_COMPLEX) {
                 int neededLetters = getPasswordMinimumLetters(null, userHandle, /* parent */ false);
                 if(metrics.letters < neededLetters) {
                     Slog.w(LOG_TAG, "resetPassword: number of letters " + metrics.letters
@@ -5132,11 +5133,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final boolean result;
         try {
             if (token == null) {
+                // This is the legacy reset password for DPM. Here we want to be able to override
+                // the old device password without necessarily knowing it.
                 if (!TextUtils.isEmpty(password)) {
                     mLockPatternUtils.saveLockPassword(password.getBytes(), null, quality,
-                            userHandle);
+                            userHandle, /*allowUntrustedChange */true);
                 } else {
-                    mLockPatternUtils.clearLock(null, userHandle);
+                    mLockPatternUtils.clearLock(null, userHandle,
+                            /*allowUntrustedChange */ true);
                 }
                 result = true;
             } else {
@@ -5245,12 +5249,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 // would allow bypassing of the maximum time to lock.
                 mInjector.settingsGlobalPutInt(Settings.Global.STAY_ON_WHILE_PLUGGED_IN, 0);
             }
+            getPowerManagerInternal().setMaximumScreenOffTimeoutFromDeviceAdmin(
+                    UserHandle.USER_SYSTEM, timeMs);
         } finally {
             mInjector.binderRestoreCallingIdentity(ident);
         }
-
-        getPowerManagerInternal().setMaximumScreenOffTimeoutFromDeviceAdmin(
-                UserHandle.USER_SYSTEM, timeMs);
     }
 
     private void updateProfileLockTimeoutLocked(@UserIdInt int userId) {
@@ -5268,8 +5271,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         policy.mLastMaximumTimeToLock = timeMs;
 
-        getPowerManagerInternal().setMaximumScreenOffTimeoutFromDeviceAdmin(
-                userId, policy.mLastMaximumTimeToLock);
+        final long ident = mInjector.binderClearCallingIdentity();
+        try {
+            getPowerManagerInternal().setMaximumScreenOffTimeoutFromDeviceAdmin(
+                    userId, policy.mLastMaximumTimeToLock);
+        } finally {
+            mInjector.binderRestoreCallingIdentity(ident);
+        }
     }
 
     @Override
@@ -8390,13 +8398,40 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public boolean checkDeviceIdentifierAccess(String packageName, int userHandle, int pid,
-            int uid) {
+    public boolean checkDeviceIdentifierAccess(String packageName, int pid, int uid) {
         // If the caller is not a system app then it should only be able to check its own device
         // identifier access.
-        int callingAppId = UserHandle.getAppId(mInjector.binderGetCallingUid());
-        if (callingAppId >= Process.FIRST_APPLICATION_UID
-                && callingAppId != UserHandle.getAppId(uid)) {
+        int callingUid = mInjector.binderGetCallingUid();
+        int callingPid = mInjector.binderGetCallingPid();
+        if (UserHandle.getAppId(callingUid) >= Process.FIRST_APPLICATION_UID
+                && (callingUid != uid || callingPid != pid)) {
+            String message = String.format(
+                    "Calling uid %d, pid %d cannot check device identifier access for package %s "
+                            + "(uid=%d, pid=%d)", callingUid, callingPid, packageName, uid, pid);
+            Log.w(LOG_TAG, message);
+            throw new SecurityException(message);
+        }
+        // Verify that the specified packages matches the provided uid.
+        int userId = UserHandle.getUserId(uid);
+        try {
+            ApplicationInfo appInfo = mIPackageManager.getApplicationInfo(packageName, 0, userId);
+            // Since this call goes directly to PackageManagerService a NameNotFoundException is not
+            // thrown but null data can be returned; if the appInfo for the specified package cannot
+            // be found then return false to prevent crashing the app.
+            if (appInfo == null) {
+                Log.w(LOG_TAG,
+                        String.format("appInfo could not be found for package %s", packageName));
+                return false;
+            } else if (uid != appInfo.uid) {
+                String message = String.format("Package %s (uid=%d) does not match provided uid %d",
+                        packageName, appInfo.uid, uid);
+                Log.w(LOG_TAG, message);
+                throw new SecurityException(message);
+            }
+        } catch (RemoteException e) {
+            // If an exception is caught obtaining the appInfo just return false to prevent crashing
+            // apps due to an internal error.
+            Log.e(LOG_TAG, "Exception caught obtaining appInfo for package " + packageName, e);
             return false;
         }
         // A device or profile owner must also have the READ_PHONE_STATE permission to access device
@@ -8413,7 +8448,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return true;
         }
         // Allow access to the profile owner for the specified user, or delegate cert installer
-        ComponentName profileOwner = getProfileOwnerAsUser(userHandle);
+        ComponentName profileOwner = getProfileOwnerAsUser(userId);
         if (profileOwner != null && (profileOwner.getPackageName().equals(packageName)
                     || isCallerDelegate(packageName, uid, DELEGATION_CERT_INSTALL))) {
             return true;
@@ -11172,47 +11207,50 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         @Override
         public Intent createUserRestrictionSupportIntent(int userId, String userRestriction) {
-            int source;
-            long ident = mInjector.binderClearCallingIdentity();
+            final long ident = mInjector.binderClearCallingIdentity();
             try {
-                source = mUserManager.getUserRestrictionSource(userRestriction,
-                        UserHandle.of(userId));
+                final List<UserManager.EnforcingUser> sources = mUserManager
+                        .getUserRestrictionSources(userRestriction, UserHandle.of(userId));
+                if (sources == null || sources.isEmpty()) {
+                    // The restriction is not enforced.
+                    return null;
+                } else if (sources.size() > 1) {
+                    // In this case, we'll show an admin support dialog that does not
+                    // specify the admin.
+                    // TODO(b/128928355): if this restriction is enforced by multiple DPCs, return
+                    // the admin for the calling user.
+                    return DevicePolicyManagerService.this.createShowAdminSupportIntent(
+                            null, userId);
+                }
+                final UserManager.EnforcingUser enforcingUser = sources.get(0);
+                final int sourceType = enforcingUser.getUserRestrictionSource();
+                final int enforcingUserId = enforcingUser.getUserHandle().getIdentifier();
+                if (sourceType == UserManager.RESTRICTION_SOURCE_PROFILE_OWNER) {
+                    // Restriction was enforced by PO
+                    final ComponentName profileOwner = mOwners.getProfileOwnerComponent(
+                            enforcingUserId);
+                    if (profileOwner != null) {
+                        return DevicePolicyManagerService.this.createShowAdminSupportIntent(
+                                profileOwner, enforcingUserId);
+                    }
+                } else if (sourceType == UserManager.RESTRICTION_SOURCE_DEVICE_OWNER) {
+                    // Restriction was enforced by DO
+                    final Pair<Integer, ComponentName> deviceOwner =
+                            mOwners.getDeviceOwnerUserIdAndComponent();
+                    if (deviceOwner != null) {
+                        return DevicePolicyManagerService.this.createShowAdminSupportIntent(
+                                deviceOwner.second, deviceOwner.first);
+                    }
+                } else if (sourceType == UserManager.RESTRICTION_SOURCE_SYSTEM) {
+                    /*
+                     * In this case, the user restriction is enforced by the system.
+                     * So we won't show an admin support intent, even if it is also
+                     * enforced by a profile/device owner.
+                     */
+                    return null;
+                }
             } finally {
                 mInjector.binderRestoreCallingIdentity(ident);
-            }
-            if ((source & UserManager.RESTRICTION_SOURCE_SYSTEM) != 0) {
-                /*
-                 * In this case, the user restriction is enforced by the system.
-                 * So we won't show an admin support intent, even if it is also
-                 * enforced by a profile/device owner.
-                 */
-                return null;
-            }
-            boolean enforcedByDo = (source & UserManager.RESTRICTION_SOURCE_DEVICE_OWNER) != 0;
-            boolean enforcedByPo = (source & UserManager.RESTRICTION_SOURCE_PROFILE_OWNER) != 0;
-            if (enforcedByDo && enforcedByPo) {
-                // In this case, we'll show an admin support dialog that does not
-                // specify the admin.
-                return DevicePolicyManagerService.this.createShowAdminSupportIntent(null, userId);
-            } else if (enforcedByPo) {
-                final ComponentName profileOwner = mOwners.getProfileOwnerComponent(userId);
-                if (profileOwner != null) {
-                    return DevicePolicyManagerService.this
-                            .createShowAdminSupportIntent(profileOwner, userId);
-                }
-                // This could happen if another thread has changed the profile owner since we called
-                // getUserRestrictionSource
-                return null;
-            } else if (enforcedByDo) {
-                final Pair<Integer, ComponentName> deviceOwner
-                        = mOwners.getDeviceOwnerUserIdAndComponent();
-                if (deviceOwner != null) {
-                    return DevicePolicyManagerService.this
-                            .createShowAdminSupportIntent(deviceOwner.second, deviceOwner.first);
-                }
-                // This could happen if another thread has changed the device owner since we called
-                // getUserRestrictionSource
-                return null;
             }
             return null;
         }
@@ -14085,6 +14123,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public void installUpdateFromFile(ComponentName admin,
             ParcelFileDescriptor updateFileDescriptor, StartInstallingUpdateCallback callback) {
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.INSTALL_SYSTEM_UPDATE)
+                .setAdmin(admin)
+                .setBoolean(isDeviceAB())
+                .write();
         enforceDeviceOwner(admin);
         final long id = mInjector.binderClearCallingIdentity();
         try {
@@ -14097,11 +14140,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         mContext, updateFileDescriptor, callback, mInjector, mConstants);
             }
             updateInstaller.startInstallUpdate();
-            DevicePolicyEventLogger
-                    .createEvent(DevicePolicyEnums.INSTALL_SYSTEM_UPDATE)
-                    .setAdmin(admin)
-                    .setBoolean(isDeviceAB())
-                    .write();
         } finally {
             mInjector.binderRestoreCallingIdentity(id);
         }

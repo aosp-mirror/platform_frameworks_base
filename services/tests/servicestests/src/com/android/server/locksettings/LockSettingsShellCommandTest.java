@@ -21,7 +21,7 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
 
 import static com.android.internal.widget.LockPatternUtils.stringToPattern;
 
-import static junit.framework.Assert.*;
+import static junit.framework.Assert.assertEquals;
 
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.any;
@@ -29,6 +29,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+
+import static java.io.FileDescriptor.err;
+import static java.io.FileDescriptor.in;
+import static java.io.FileDescriptor.out;
 
 import android.app.ActivityManager;
 import android.content.Context;
@@ -50,8 +54,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import static java.io.FileDescriptor.*;
 
 /**
  * Test class for {@link LockSettingsShellCommand}.

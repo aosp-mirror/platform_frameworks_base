@@ -18,13 +18,13 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_pressed="true">
         <shape android:shape="rectangle">
-            <corners android:radius="@dimen/car_button_radius"/>
+            <corners android:radius="@*android:dimen/car_button_radius"/>
             <solid android:color="#131315"/>
         </shape>
     </item>
     <item>
         <shape android:shape="rectangle">
-            <corners android:radius="@dimen/car_button_radius"/>
+            <corners android:radius="@*android:dimen/car_button_radius"/>
             <solid android:color="@color/button_background"/>
         </shape>
     </item>

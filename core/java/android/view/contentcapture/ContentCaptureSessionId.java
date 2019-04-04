@@ -27,7 +27,7 @@ import java.io.PrintWriter;
  */
 public final class ContentCaptureSessionId implements Parcelable {
 
-    private final @NonNull String mValue;
+    private final @NonNull int mValue;
 
     /**
      * Creates a new instance.
@@ -36,14 +36,14 @@ public final class ContentCaptureSessionId implements Parcelable {
      *
      * @hide
      */
-    public ContentCaptureSessionId(@NonNull String value) {
+    public ContentCaptureSessionId(@NonNull int value) {
         mValue = value;
     }
 
     /**
      * @hide
      */
-    public String getValue() {
+    public int getValue() {
         return mValue;
     }
 
@@ -51,7 +51,7 @@ public final class ContentCaptureSessionId implements Parcelable {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((mValue == null) ? 0 : mValue.hashCode());
+        result = prime * result + mValue;
         return result;
     }
 
@@ -61,11 +61,7 @@ public final class ContentCaptureSessionId implements Parcelable {
         if (obj == null) return false;
         if (getClass() != obj.getClass()) return false;
         final ContentCaptureSessionId other = (ContentCaptureSessionId) obj;
-        if (mValue == null) {
-            if (other.mValue != null) return false;
-        } else if (!mValue.equals(other.mValue)) {
-            return false;
-        }
+        if (mValue != other.mValue) return false;
         return true;
     }
 
@@ -77,8 +73,9 @@ public final class ContentCaptureSessionId implements Parcelable {
      */
     @Override
     public String toString() {
-        return mValue;
+        return Integer.toString(mValue);
     }
+
 
     /** @hide */
     // TODO(b/111276913): dump to proto as well
@@ -93,16 +90,16 @@ public final class ContentCaptureSessionId implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeString(mValue);
+        parcel.writeInt(mValue);
     }
 
-    public static final @android.annotation.NonNull Parcelable.Creator<ContentCaptureSessionId> CREATOR =
+    public static final @NonNull Parcelable.Creator<ContentCaptureSessionId> CREATOR =
             new Parcelable.Creator<ContentCaptureSessionId>() {
 
         @Override
         @NonNull
         public ContentCaptureSessionId createFromParcel(Parcel parcel) {
-            return new ContentCaptureSessionId(parcel.readString());
+            return new ContentCaptureSessionId(parcel.readInt());
         }
 
         @Override

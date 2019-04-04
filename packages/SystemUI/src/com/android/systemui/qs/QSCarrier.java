@@ -89,14 +89,20 @@ public class QSCarrier extends LinearLayout {
                         .append(", ");
             }
             // TODO: show mobile data off/no internet text for 5 seconds before carrier text
-            if (TextUtils.equals(state.typeContentDescription,
-                    mContext.getString(R.string.data_connection_no_internet))
-                    || TextUtils.equals(state.typeContentDescription,
-                    mContext.getString(R.string.cell_data_off_content_description))) {
+            if (hasValidTypeContentDescription(state.typeContentDescription)) {
                 contentDescription.append(state.typeContentDescription);
             }
             mMobileSignal.setContentDescription(contentDescription);
         }
+    }
+
+    private boolean hasValidTypeContentDescription(String typeContentDescription) {
+        return TextUtils.equals(typeContentDescription,
+                mContext.getString(R.string.data_connection_no_internet))
+                || TextUtils.equals(typeContentDescription,
+                mContext.getString(R.string.cell_data_off_content_description))
+                || TextUtils.equals(typeContentDescription,
+                mContext.getString(R.string.not_default_data_content_description));
     }
 
     public void setCarrierText(CharSequence text) {

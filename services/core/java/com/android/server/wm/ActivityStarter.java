@@ -114,6 +114,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.service.voice.IVoiceInteractionSession;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.Pools.SynchronizedPool;
 import android.util.Slog;
@@ -607,6 +608,7 @@ class ActivityStarter {
             boolean ignoreTargetSecurity, boolean componentSpecified, ActivityRecord[] outActivity,
             TaskRecord inTask, boolean allowPendingRemoteAnimationRegistryLookup,
             PendingIntentRecord originatingPendingIntent, boolean allowBackgroundActivityStart) {
+        mSupervisor.getActivityMetricsLogger().notifyActivityLaunching(intent);
         int err = ActivityManager.START_SUCCESS;
         // Pull the optional Ephemeral Installer-only bundle out of the options early.
         final Bundle verificationBundle
@@ -927,8 +929,10 @@ class ActivityStarter {
         mService.onStartActivitySetDidAppSwitch();
         mController.doPendingActivityLaunches(false);
 
-        return startActivity(r, sourceRecord, voiceSession, voiceInteractor, startFlags,
+        final int res = startActivity(r, sourceRecord, voiceSession, voiceInteractor, startFlags,
                 true /* doResume */, checkedOptions, inTask, outActivity);
+        mSupervisor.getActivityMetricsLogger().notifyActivityLaunched(res, outActivity[0]);
+        return res;
     }
 
     private boolean shouldAbortBackgroundActivityStart(int callingUid, int callingPid,
@@ -945,7 +949,8 @@ class ActivityStarter {
         final boolean callingUidHasAnyVisibleWindow =
                 mService.mWindowManager.mRoot.isAnyNonToastWindowVisibleForUid(callingUid);
         final boolean isCallingUidForeground = callingUidHasAnyVisibleWindow
-                || callingUidProcState == ActivityManager.PROCESS_STATE_TOP;
+                || callingUidProcState == ActivityManager.PROCESS_STATE_TOP
+                || callingUidProcState == ActivityManager.PROCESS_STATE_BOUND_TOP;
         final boolean isCallingUidPersistentSystemProcess = (callingUid == Process.SYSTEM_UID)
                 || callingUidProcState <= ActivityManager.PROCESS_STATE_PERSISTENT_UI;
         if (isCallingUidForeground || isCallingUidPersistentSystemProcess) {
@@ -976,6 +981,11 @@ class ActivityStarter {
             if (isRealCallingUidPersistentSystemProcess && allowBackgroundActivityStart) {
                 return false;
             }
+            // don't abort if the realCallingUid is an associated companion app
+            if (mService.isAssociatedCompanionApp(UserHandle.getUserId(realCallingUid),
+                    realCallingUid)) {
+                return false;
+            }
         }
         // If we don't have callerApp at this point, no caller was provided to startActivity().
         // That's the case for PendingIntent-based starts, since the creator's process might not be
@@ -997,6 +1007,14 @@ class ActivityStarter {
             if (callerApp.areBackgroundActivityStartsAllowed()) {
                 return false;
             }
+            // don't abort if the caller has an activity in any foreground task
+            if (callerApp.hasActivityInVisibleTask()) {
+                return false;
+            }
+            // don't abort if the caller is bound by a UID that's currently foreground
+            if (isBoundByForegroundUid(callerApp)) {
+                return false;
+            }
         }
         // don't abort if the callingUid has START_ACTIVITIES_FROM_BACKGROUND permission
         if (mService.checkPermission(START_ACTIVITIES_FROM_BACKGROUND, callingPid, callingUid)
@@ -1009,6 +1027,11 @@ class ActivityStarter {
         }
         // don't abort if the callingPackage is the device owner
         if (mService.isDeviceOwner(callingPackage)) {
+            return false;
+        }
+        // don't abort if the callingPackage has companion device
+        final int callingUserId = UserHandle.getUserId(callingUid);
+        if (mService.isAssociatedCompanionApp(callingUserId, callingUid)) {
             return false;
         }
         // don't abort if the callingPackage is temporarily whitelisted
@@ -1039,6 +1062,18 @@ class ActivityStarter {
                     (originatingPendingIntent != null));
         }
         return true;
+    }
+
+    private boolean isBoundByForegroundUid(WindowProcessController callerApp) {
+        final ArraySet<Integer> boundClientUids = callerApp.getBoundClientUids();
+        for (int i = boundClientUids.size() - 1; i >= 0; --i) {
+            final int uid = boundClientUids.valueAt(i);
+            if (mService.mWindowManager.mRoot.isAnyNonToastWindowVisibleForUid(uid)
+                    || mService.getUidState(uid) == ActivityManager.PROCESS_STATE_TOP) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -1538,10 +1573,13 @@ class ActivityStarter {
                 if (!mAddingToTask && mReuseTask == null) {
                     // We didn't do anything...  but it was needed (a.k.a., client don't use that
                     // intent!)  And for paranoia, make sure we have correctly resumed the top activity.
-
                     resumeTargetStackIfNeeded();
                     if (outActivity != null && outActivity.length > 0) {
-                        outActivity[0] = reusedActivity;
+                        // The reusedActivity could be finishing, for example of starting an
+                        // activity with FLAG_ACTIVITY_CLEAR_TOP flag. In that case, return the
+                        // top running activity in the task instead.
+                        outActivity[0] = reusedActivity.finishing
+                                ? reusedActivity.getTaskRecord().getTopActivity() : reusedActivity;
                     }
 
                     return mMovedToFront ? START_TASK_TO_FRONT : START_DELIVERED_TO_TOP;

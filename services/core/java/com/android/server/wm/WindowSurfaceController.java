@@ -56,6 +56,7 @@ class WindowSurfaceController {
     private float mSurfaceY = 0;
     private int mSurfaceW = 0;
     private int mSurfaceH = 0;
+    private Rect mSurfaceCrop = new Rect(0, 0, -1, -1);
 
     // Initialize to the identity matrix.
     private float mLastDsdx = 1;
@@ -171,26 +172,15 @@ class WindowSurfaceController {
         }
     }
 
-    void disconnectInTransaction() {
-        if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
-            Slog.i(TAG, "Disconnecting client: " + this);
-        }
-
-        try {
-            if (mSurfaceControl != null) {
-                mSurfaceControl.disconnect();
-            }
-        } catch (RuntimeException e) {
-            Slog.w(TAG, "Error disconnecting surface in: " + this, e);
-        }
-    }
-
     void setCropInTransaction(Rect clipRect, boolean recoveringMemory) {
         if (SHOW_TRANSACTIONS) logSurface(
                 "CROP " + clipRect.toShortString(), null);
         try {
             if (clipRect.width() > 0 && clipRect.height() > 0) {
-                mSurfaceControl.setWindowCrop(clipRect);
+                if (!clipRect.equals(mSurfaceCrop)) {
+                    mSurfaceControl.setWindowCrop(clipRect);
+                    mSurfaceCrop.set(clipRect);
+                }
                 mHiddenForCrop = false;
                 updateVisibility();
             } else {
@@ -212,18 +202,16 @@ class WindowSurfaceController {
                 "CLEAR CROP", null);
         try {
             Rect clipRect = new Rect(0, 0, -1, -1);
+            if (mSurfaceCrop.equals(clipRect)) {
+                return;
+            }
             mSurfaceControl.setWindowCrop(clipRect);
+            mSurfaceCrop.set(clipRect);
         } catch (RuntimeException e) {
             Slog.w(TAG, "Error setting clearing crop of " + this, e);
             if (!recoveringMemory) {
                 mAnimator.reclaimSomeSurfaceMemory("crop", true);
             }
-        }
-    }
-
-    void setLayerStackInTransaction(int layerStack) {
-        if (mSurfaceControl != null) {
-            mSurfaceControl.setLayerStack(layerStack);
         }
     }
 

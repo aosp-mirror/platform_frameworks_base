@@ -21,4 +21,9 @@ public class EnhancedEstimatesImpl implements EnhancedEstimates {
     public long getSevereWarningThreshold() {
         return 0;
     }
+
+    @Override
+    public boolean getLowWarningEnabled() {
+        return true;
+    }
 }

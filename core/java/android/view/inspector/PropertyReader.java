@@ -133,10 +133,11 @@ public interface PropertyReader {
     void readColor(int id, @ColorInt int value);
 
     /**
-     * Read a color packed into a {@link ColorLong} as a property.
+     * Read a color packed into a {@code ColorLong} as a property.
      *
      * @param id Identifier of the property from a {@link PropertyMapper}
-     * @param value Value of the property
+     * @param value Value of the property packed as a {@code ColorLong}. See the
+     *              {@link Color} class for details of the packing.
      * @throws PropertyTypeMismatchException If the property ID is not mapped as a color
      */
     void readColor(int id, @ColorLong long value);

@@ -25,11 +25,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
-import android.text.SpannableString;
-import android.text.SpannableStringBuilder;
-import android.text.Spanned;
 import android.text.TextUtils;
-import android.text.style.TextAppearanceSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,7 +45,6 @@ import com.android.systemui.qs.CellTileView;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
-import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
@@ -66,15 +61,13 @@ public class CellularTile extends QSTileImpl<SignalState> {
 
     private final CellSignalCallback mSignalCallback = new CellSignalCallback();
     private final ActivityStarter mActivityStarter;
-    private final KeyguardMonitor mKeyguardMonitor;
 
     @Inject
     public CellularTile(QSHost host, NetworkController networkController,
-            ActivityStarter activityStarter, KeyguardMonitor keyguardMonitor) {
+            ActivityStarter activityStarter) {
         super(host);
         mController = networkController;
         mActivityStarter = activityStarter;
-        mKeyguardMonitor = keyguardMonitor;
         mDataController = mController.getMobileDataController();
         mDetailAdapter = new CellularDetailAdapter();
         mController.observe(getLifecycle(), mSignalCallback);
@@ -110,11 +103,7 @@ public class CellularTile extends QSTileImpl<SignalState> {
             return;
         }
         if (mDataController.isMobileDataEnabled()) {
-            if (mKeyguardMonitor.isSecure() && !mKeyguardMonitor.canSkipBouncer()) {
-                mActivityStarter.postQSRunnableDismissingKeyguard(this::maybeShowDisableDialog);
-            } else {
-                mUiHandler.post(this::maybeShowDisableDialog);
-            }
+            maybeShowDisableDialog();
         } else {
             mDataController.setMobileDataEnabled(true);
         }
@@ -192,8 +181,10 @@ public class CellularTile extends QSTileImpl<SignalState> {
             state.secondaryLabel = r.getString(R.string.status_bar_airplane);
         } else if (mobileDataEnabled) {
             state.state = Tile.STATE_ACTIVE;
-            state.secondaryLabel = appendMobileDataType(getMobileDataSubscriptionName(cb),
-                    cb.dataContentDescription);
+            state.secondaryLabel = appendMobileDataType(
+                    // Only show carrier name if there are more than 1 subscription
+                    cb.multipleSubs ? cb.dataSubscriptionName : "",
+                    getMobileDataContentName(cb));
         } else {
             state.state = Tile.STATE_INACTIVE;
             state.secondaryLabel = r.getString(R.string.cell_data_off);
@@ -216,24 +207,22 @@ public class CellularTile extends QSTileImpl<SignalState> {
         if (TextUtils.isEmpty(dataType)) {
             return current;
         }
-        SpannableString type = new SpannableString(dataType);
-        SpannableStringBuilder builder = new SpannableStringBuilder(current);
-        builder.append(" ");
-        builder.append(type, new TextAppearanceSpan(mContext, R.style.TextAppearance_RATBadge),
-                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        return builder;
+        if (TextUtils.isEmpty(current)) {
+            return dataType;
+        }
+        return mContext.getString(R.string.mobile_carrier_text_format, current, dataType);
     }
 
-    private CharSequence getMobileDataSubscriptionName(CallbackInfo cb) {
-        if (cb.roaming && !TextUtils.isEmpty(cb.dataSubscriptionName)) {
+    private CharSequence getMobileDataContentName(CallbackInfo cb) {
+        if (cb.roaming && !TextUtils.isEmpty(cb.dataContentDescription)) {
             String roaming = mContext.getString(R.string.data_connection_roaming);
-            String dataDescription = cb.dataSubscriptionName.toString();
+            String dataDescription = cb.dataContentDescription.toString();
             return mContext.getString(R.string.mobile_data_text_format, roaming, dataDescription);
         }
         if (cb.roaming) {
             return mContext.getString(R.string.data_connection_roaming);
         }
-        return cb.dataSubscriptionName;
+        return cb.dataContentDescription;
     }
 
     @Override
@@ -254,6 +243,7 @@ public class CellularTile extends QSTileImpl<SignalState> {
         boolean activityOut;
         boolean noSim;
         boolean roaming;
+        boolean multipleSubs;
     }
 
     private final class CellSignalCallback implements SignalCallback {
@@ -272,6 +262,7 @@ public class CellularTile extends QSTileImpl<SignalState> {
             mInfo.activityIn = activityIn;
             mInfo.activityOut = activityOut;
             mInfo.roaming = roaming;
+            mInfo.multipleSubs = mController.getNumberSubscriptions() > 1;
             refreshState(mInfo);
         }
 

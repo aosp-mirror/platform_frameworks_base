@@ -20,17 +20,23 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.atLeast;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verifyNoMoreInteractions;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_ORIGINAL_POSITION;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 
 import android.os.Binder;
@@ -67,7 +73,11 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-
+        synchronized (mWm.mGlobalLock) {
+            // Hold the lock to protect the stubbing from being accessed by other threads.
+            spyOn(mWm.mRoot);
+            doNothing().when(mWm.mRoot).performSurfacePlacement(anyBoolean());
+        }
         when(mMockRunner.asBinder()).thenReturn(new Binder());
         mController = new RecentsAnimationController(mWm, mMockRunner, mAnimationCallbacks,
                 DEFAULT_DISPLAY);
@@ -88,7 +98,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         // Verify that the finish callback to reparent the leash is called
         verify(mFinishedCallback).onAnimationFinished(eq(adapter));
         // Verify the animation canceled callback to the app was made
-        verify(mMockRunner).onAnimationCanceled();
+        verify(mMockRunner).onAnimationCanceled(false);
         verifyNoMoreInteractionsExceptAsBinder(mMockRunner);
     }
 
@@ -129,6 +139,31 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         assertTrue(mController.isAnimatingTask(homeAppWindow.getTask()));
         assertTrue(mController.isAnimatingTask(appWindow.getTask()));
         assertFalse(mController.isAnimatingTask(hiddenAppWindow.getTask()));
+    }
+
+    @Test
+    public void testCancelAnimationWithScreenShot() throws Exception {
+        mWm.setRecentsAnimationController(mController);
+        final AppWindowToken appWindow = createAppWindowToken(mDisplayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        final WindowState win1 = createWindow(null, TYPE_BASE_APPLICATION, appWindow, "win1");
+        appWindow.addWindow(win1);
+        assertEquals(appWindow.getTask().getTopVisibleAppToken(), appWindow);
+        assertEquals(appWindow.findMainWindow(), win1);
+
+        mController.addAnimation(appWindow.getTask(), false /* isRecentTaskInvisible */);
+        assertTrue(mController.isAnimatingTask(appWindow.getTask()));
+
+        mController.setCancelWithDeferredScreenshotLocked(true);
+        mController.cancelAnimationWithScreenShot();
+        verify(mMockRunner).onAnimationCanceled(true /* deferredWithScreenshot */);
+        assertNotNull(mController.mRecentScreenshotAnimator);
+        assertTrue(mController.mRecentScreenshotAnimator.isAnimating());
+
+        // Assume IRecentsAnimationController#cleanupScreenshot called to finish screenshot
+        // animation.
+        mController.mRecentScreenshotAnimator.cancelAnimation();
+        verify(mAnimationCallbacks).onAnimationFinished(REORDER_KEEP_IN_PLACE, true);
     }
 
     private static void verifyNoMoreInteractionsExceptAsBinder(IInterface binder) {

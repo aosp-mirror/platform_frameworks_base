@@ -347,6 +347,17 @@ public class MediaRouter {
             return mDisplayService.getDisplays(DisplayManager.DISPLAY_CATEGORY_PRESENTATION);
         }
 
+        void setControlCategories(List<String> categories) {
+            if (mClient != null) {
+                try {
+                    mMediaRouterService.setControlCategories(mClient,
+                            categories);
+                } catch (RemoteException ex) {
+                    Log.e(TAG, "Unable to set control categories.", ex);
+                }
+            }
+        }
+
         private void updatePresentationDisplays(int changedDisplayId) {
             final int count = mRoutes.size();
             for (int i = 0; i < count; i++) {
@@ -918,6 +929,25 @@ public class MediaRouter {
         }
         return -1;
     }
+
+    //TODO: Remove @hide when it is ready.
+    //TODO: Provide pre-defined categories for app developers.
+    /**
+     * Sets control categories of the client application.
+     * Control categories can be used to filter out media routes
+     * that don't correspond with the client application.
+     * The only routes that match any of the categories will be shown on other applications.
+     *
+     * @hide
+     * @param categories Categories to set
+     */
+    public void setControlCategories(@NonNull List<String> categories) {
+        if (categories == null) {
+            throw new IllegalArgumentException("Categories must not be null");
+        }
+        sStatic.setControlCategories(categories);
+    }
+
 
     /**
      * Select the specified route to use for output of the given media types.

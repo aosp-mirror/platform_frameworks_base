@@ -533,6 +533,9 @@ message WifiLog {
 
   // Network Suggestion API surface metrics.
   optional WifiNetworkSuggestionApiLog wifi_network_suggestion_api_log = 142;
+
+  // WifiLock statistics
+  optional WifiLockStats wifi_lock_stats = 143;
 }
 
 // Information that gets logged for every WiFi connection.
@@ -703,8 +706,8 @@ message ConnectionEvent {
     // External scorer
     NOMINATOR_EXTERNAL_SCORED = 6;
 
-    // Netrec
-    NOMINATOR_NETREC = 7;
+    // Network Specifier
+    NOMINATOR_SPECIFIER = 7;
 
     // User connected choice override
     NOMINATOR_SAVED_USER_CONNECT_CHOICE = 8;
@@ -1752,6 +1755,9 @@ message WifiIsUnusableEvent {
 
     // Firmware generated an alert
     TYPE_FIRMWARE_ALERT = 4;
+
+    // IP Manager lost reachability to network neighbors
+    TYPE_IP_REACHABILITY_LOST = 5;
   }
 
   // What event triggered WifiIsUnusableEvent.
@@ -2012,6 +2018,10 @@ message WifiUsabilityStatsEntry {
 
   // Whether the primary registered cell of current entry is same as that of previous entry
   optional bool is_same_registered_cell = 33;
+
+  // The device mobility state
+  optional DeviceMobilityStatePnoScanStats.DeviceMobilityState
+          device_mobility_state = 34;
 }
 
 message WifiUsabilityStats {
@@ -2041,6 +2051,9 @@ message WifiUsabilityStats {
 
     // Firmware generated an alert
     TYPE_FIRMWARE_ALERT = 4;
+
+    // IP Manager lost reachability to network neighbors
+    TYPE_IP_REACHABILITY_LOST = 5;
   }
 
   // The current wifi usability state
@@ -2051,6 +2064,10 @@ message WifiUsabilityStats {
 
   // What event triggered WifiUsabilityStats.
   optional UsabilityStatsTriggerType trigger_type = 3;
+
+  // Firmware alert code. Only valid when the stats was triggered by a firmware
+  // alert, otherwise -1.
+  optional int32 firmware_alert_code = 4 [default = -1];
 }
 
 message DeviceMobilityStatePnoScanStats {
@@ -2450,4 +2467,31 @@ message WifiNetworkSuggestionApiLog {
 
   // Histogram for size of the network lists provided by various apps on the device.
   repeated HistogramBucketInt32 network_list_size_histogram = 4;
+}
+
+// WifiLock metrics
+message WifiLockStats {
+    // Amount of time wifi is actively in HIGH_PERF mode (ms)
+    // This means the lock takes effect and the device takes the actions required for this mode
+    optional int64 high_perf_active_time_ms = 1;
+
+    // Amount of time wifi is actively in LOW_LATENCY mode (ms)
+    // This means the lock takes effect and the device takes the actions required for this mode
+    optional int64 low_latency_active_time_ms = 2;
+
+    // Histogram of HIGH_PERF lock acquisition duration (seconds)
+    // Note that acquiring the lock does not necessarily mean that device is actively in that mode
+    repeated HistogramBucketInt32 high_perf_lock_acq_duration_sec_histogram = 3;
+
+    // Histogram of LOW_LATENCY lock acquisition duration (seconds)
+    // Note that acquiring the lock does not necessarily mean that device is actively in that mode
+    repeated HistogramBucketInt32 low_latency_lock_acq_duration_sec_histogram = 4;
+
+    // Histogram of HIGH_PERF active session duration (seconds)
+    // This means the lock takes effect and the device takes the actions required for this mode
+    repeated HistogramBucketInt32 high_perf_active_session_duration_sec_histogram = 5;
+
+    // Histogram of LOW_LATENCY active session duration (seconds)
+    // This means the lock takes effect and the device takes the actions required for this mode
+    repeated HistogramBucketInt32 low_latency_active_session_duration_sec_histogram = 6;
 }

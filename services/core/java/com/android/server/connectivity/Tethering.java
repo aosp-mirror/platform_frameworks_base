@@ -82,7 +82,6 @@ import android.os.Handler;
 import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Parcel;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -230,8 +229,15 @@ public class Tethering extends BaseNetworkObserver {
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_CARRIER_CONFIG_CHANGED);
-        mEntitlementMgr = mDeps.getEntitlementManager(mContext, mTetherMasterSM,
-                mLog, systemProperties);
+        // EntitlementManager will send EVENT_UPSTREAM_PERMISSION_CHANGED when cellular upstream
+        // permission is changed according to entitlement check result.
+        mEntitlementMgr = mDeps.getEntitlementManager(mContext, mTetherMasterSM, mLog,
+                TetherMasterSM.EVENT_UPSTREAM_PERMISSION_CHANGED, systemProperties);
+        mEntitlementMgr.setOnUiEntitlementFailedListener((int downstream) -> {
+            mLog.log("OBSERVED UiEnitlementFailed");
+            stopTethering(downstream);
+        });
+
         mCarrierConfigChange = new VersionedBroadcastListener(
                 "CarrierConfigChangeListener", mContext, mHandler, filter,
                 (Intent ignored) -> {
@@ -247,7 +253,14 @@ public class Tethering extends BaseNetworkObserver {
                 (Intent ignored) -> {
                     mLog.log("OBSERVED default data subscription change");
                     updateConfiguration();
-                    mEntitlementMgr.reevaluateSimCardProvisioning();
+                    // To avoid launch unexpected provisioning checks, ignore re-provisioning when
+                    // no CarrierConfig loaded yet. Assume reevaluateSimCardProvisioning() will be
+                    // triggered again when CarrierConfig is loaded.
+                    if (mEntitlementMgr.getCarrierConfig() != null) {
+                        mEntitlementMgr.reevaluateSimCardProvisioning();
+                    } else {
+                        mLog.log("IGNORED reevaluate provisioning due to no carrier config loaded");
+                    }
                 });
         mStateReceiver = new StateReceiver();
 
@@ -356,55 +369,28 @@ public class Tethering extends BaseNetworkObserver {
     }
 
     public void startTethering(int type, ResultReceiver receiver, boolean showProvisioningUi) {
-        mEntitlementMgr.startTethering(type);
-        if (!mEntitlementMgr.isTetherProvisioningRequired()) {
-            enableTetheringInternal(type, true, receiver);
-            return;
-        }
-
-        final ResultReceiver proxyReceiver = getProxyReceiver(type, receiver);
-        if (showProvisioningUi) {
-            mEntitlementMgr.runUiTetherProvisioningAndEnable(type, proxyReceiver);
-        } else {
-            mEntitlementMgr.runSilentTetherProvisioningAndEnable(type, proxyReceiver);
-        }
+        mEntitlementMgr.startProvisioningIfNeeded(type, showProvisioningUi);
+        enableTetheringInternal(type, true /* enabled */, receiver);
     }
 
     public void stopTethering(int type) {
-        enableTetheringInternal(type, false, null);
-        mEntitlementMgr.stopTethering(type);
-        if (mEntitlementMgr.isTetherProvisioningRequired()) {
-            // There are lurking bugs where the notion of "provisioning required" or
-            // "tethering supported" may change without notifying tethering properly, then
-            // tethering can't shutdown correctly.
-            // TODO: cancel re-check all the time
-            if (mDeps.isTetheringSupported()) {
-                mEntitlementMgr.cancelTetherProvisioningRechecks(type);
-            }
-        }
+        enableTetheringInternal(type, false /* disabled */, null);
+        mEntitlementMgr.stopProvisioningIfNeeded(type);
     }
 
     /**
-     * Enables or disables tethering for the given type. This should only be called once
-     * provisioning has succeeded or is not necessary. It will also schedule provisioning rechecks
-     * for the specified interface.
+     * Enables or disables tethering for the given type. If provisioning is required, it will
+     * schedule provisioning rechecks for the specified interface.
      */
     private void enableTetheringInternal(int type, boolean enable, ResultReceiver receiver) {
-        boolean isProvisioningRequired = enable && mEntitlementMgr.isTetherProvisioningRequired();
         int result;
         switch (type) {
             case TETHERING_WIFI:
                 result = setWifiTethering(enable);
-                if (isProvisioningRequired && result == TETHER_ERROR_NO_ERROR) {
-                    mEntitlementMgr.scheduleProvisioningRechecks(type);
-                }
                 sendTetherResult(receiver, result);
                 break;
             case TETHERING_USB:
                 result = setUsbTethering(enable);
-                if (isProvisioningRequired && result == TETHER_ERROR_NO_ERROR) {
-                    mEntitlementMgr.scheduleProvisioningRechecks(type);
-                }
                 sendTetherResult(receiver, result);
                 break;
             case TETHERING_BLUETOOTH:
@@ -423,21 +409,25 @@ public class Tethering extends BaseNetworkObserver {
     }
 
     private int setWifiTethering(final boolean enable) {
-        int rval = TETHER_ERROR_MASTER_ERROR;
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mPublicSync) {
-                mWifiTetherRequested = enable;
                 final WifiManager mgr = getWifiManager();
+                if (mgr == null) {
+                    mLog.e("setWifiTethering: failed to get WifiManager!");
+                    return TETHER_ERROR_SERVICE_UNAVAIL;
+                }
                 if ((enable && mgr.startSoftAp(null /* use existing wifi config */)) ||
                     (!enable && mgr.stopSoftAp())) {
-                    rval = TETHER_ERROR_NO_ERROR;
+                    mWifiTetherRequested = enable;
+                    return TETHER_ERROR_NO_ERROR;
                 }
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
-        return rval;
+
+        return TETHER_ERROR_MASTER_ERROR;
     }
 
     private void setBluetoothTethering(final boolean enable, final ResultReceiver receiver) {
@@ -462,44 +452,9 @@ public class Tethering extends BaseNetworkObserver {
                         ? TETHER_ERROR_NO_ERROR
                         : TETHER_ERROR_MASTER_ERROR;
                 sendTetherResult(receiver, result);
-                if (enable && mEntitlementMgr.isTetherProvisioningRequired()) {
-                    mEntitlementMgr.scheduleProvisioningRechecks(TETHERING_BLUETOOTH);
-                }
                 adapter.closeProfileProxy(BluetoothProfile.PAN, proxy);
             }
         }, BluetoothProfile.PAN);
-    }
-
-    /**
-     * Creates a proxy {@link ResultReceiver} which enables tethering if the provisioning result
-     * is successful before firing back up to the wrapped receiver.
-     *
-     * @param type The type of tethering being enabled.
-     * @param receiver A ResultReceiver which will be called back with an int resultCode.
-     * @return The proxy receiver.
-     */
-    private ResultReceiver getProxyReceiver(final int type, final ResultReceiver receiver) {
-        ResultReceiver rr = new ResultReceiver(null) {
-            @Override
-            protected void onReceiveResult(int resultCode, Bundle resultData) {
-                // If provisioning is successful, enable tethering, otherwise just send the error.
-                if (resultCode == TETHER_ERROR_NO_ERROR) {
-                    enableTetheringInternal(type, true, receiver);
-                } else {
-                    sendTetherResult(receiver, resultCode);
-                }
-                mEntitlementMgr.updateEntitlementCacheValue(type, resultCode);
-            }
-        };
-
-        // The following is necessary to avoid unmarshalling issues when sending the receiver
-        // across processes.
-        Parcel parcel = Parcel.obtain();
-        rr.writeToParcel(parcel,0);
-        parcel.setDataPosition(0);
-        ResultReceiver receiverForSending = ResultReceiver.CREATOR.createFromParcel(parcel);
-        parcel.recycle();
-        return receiverForSending;
     }
 
     public int tether(String iface) {
@@ -780,6 +735,7 @@ public class Tethering extends BaseNetworkObserver {
                 if (!usbConnected && mRndisEnabled) {
                     // Turn off tethering if it was enabled and there is a disconnect.
                     tetherMatchingInterfaces(IpServer.STATE_AVAILABLE, TETHERING_USB);
+                    mEntitlementMgr.stopProvisioningIfNeeded(TETHERING_USB);
                 } else if (usbConfigured && rndisEnabled) {
                     // Tether if rndis is enabled and usb is configured.
                     tetherMatchingInterfaces(IpServer.STATE_TETHERED, TETHERING_USB);
@@ -806,6 +762,7 @@ public class Tethering extends BaseNetworkObserver {
                     case WifiManager.WIFI_AP_STATE_FAILED:
                     default:
                         disableWifiIpServingLocked(ifname, curState);
+                        mEntitlementMgr.stopProvisioningIfNeeded(TETHERING_WIFI);
                         break;
                 }
             }
@@ -989,6 +946,11 @@ public class Tethering extends BaseNetworkObserver {
     public int setUsbTethering(boolean enable) {
         if (VDBG) Log.d(TAG, "setUsbTethering(" + enable + ")");
         UsbManager usbManager = (UsbManager) mContext.getSystemService(Context.USB_SERVICE);
+        if (usbManager == null) {
+            mLog.e("setUsbTethering: failed to get UsbManager!");
+            return TETHER_ERROR_SERVICE_UNAVAIL;
+        }
+
         synchronized (mPublicSync) {
             usbManager.setCurrentFunctions(enable ? UsbManager.FUNCTION_RNDIS
                     : UsbManager.FUNCTION_NONE);
@@ -1083,6 +1045,8 @@ public class Tethering extends BaseNetworkObserver {
         // we treated the error and want now to clear it
         static final int CMD_CLEAR_ERROR                        = BASE_MASTER + 6;
         static final int EVENT_IFACE_UPDATE_LINKPROPERTIES      = BASE_MASTER + 7;
+        // Events from EntitlementManager to choose upstream again.
+        static final int EVENT_UPSTREAM_PERMISSION_CHANGED      = BASE_MASTER + 8;
 
         private final State mInitialState;
         private final State mTetherModeAliveState;
@@ -1497,6 +1461,7 @@ public class Tethering extends BaseNetworkObserver {
                         }
                         break;
                     }
+                    case EVENT_UPSTREAM_PERMISSION_CHANGED:
                     case CMD_UPSTREAM_CHANGED:
                         updateUpstreamWanted();
                         if (!mUpstreamWanted) break;
@@ -1687,7 +1652,8 @@ public class Tethering extends BaseNetworkObserver {
     }
 
     public void systemReady() {
-        mUpstreamNetworkMonitor.startTrackDefaultNetwork(mDeps.getDefaultNetworkRequest());
+        mUpstreamNetworkMonitor.startTrackDefaultNetwork(mDeps.getDefaultNetworkRequest(),
+                mEntitlementMgr);
     }
 
     /** Get the latest value of the tethering entitlement check. */
@@ -1746,6 +1712,11 @@ public class Tethering extends BaseNetworkObserver {
         pw.increaseIndent();
         final TetheringConfiguration cfg = mConfig;
         cfg.dump(pw);
+        pw.decreaseIndent();
+
+        pw.println("Entitlement:");
+        pw.increaseIndent();
+        mEntitlementMgr.dump(pw);
         pw.decreaseIndent();
 
         synchronized (mPublicSync) {

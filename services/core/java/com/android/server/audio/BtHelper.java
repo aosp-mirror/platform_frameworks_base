@@ -152,6 +152,14 @@ public class BtHelper {
         }
     }
 
+    /*package*/ @NonNull static String getName(@NonNull BluetoothDevice device) {
+        final String deviceName = device.getName();
+        if (deviceName == null) {
+            return "";
+        }
+        return deviceName;
+    }
+
     //----------------------------------------------------------------------
     // Interface for AudioDeviceBroker
 
@@ -515,7 +523,7 @@ public class BtHelper {
         if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             address = "";
         }
-        String btDeviceName =  btDevice.getName();
+        String btDeviceName =  getName(btDevice);
         boolean result = false;
         if (isActive) {
             result |= mDeviceBroker.handleDeviceConnection(

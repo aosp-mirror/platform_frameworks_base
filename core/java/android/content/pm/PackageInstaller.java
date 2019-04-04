@@ -17,6 +17,7 @@
 package android.content.pm;
 
 import android.Manifest;
+import android.annotation.CurrentTimeMillisLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -494,6 +495,36 @@ public class PackageInstaller {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Returns an active staged session, or {@code null} if there is none.
+     *
+     * <p>Staged session is active iff:
+     * <ul>
+     *     <li>It is committed.
+     *     <li>It is not applied.
+     *     <li>It is not failed.
+     * </ul>
+     *
+     * <p>In case of a multi-apk session, parent session will be returned.
+     */
+    public @Nullable SessionInfo getActiveStagedSession() {
+        final List<SessionInfo> stagedSessions = getStagedSessions();
+        for (SessionInfo s : stagedSessions) {
+            if (s.isStagedSessionApplied() || s.isStagedSessionFailed()) {
+                // Finalized session.
+                continue;
+            }
+            if (s.getParentSessionId() != SessionInfo.INVALID_ID) {
+                // Child session.
+                continue;
+            }
+            if (s.isCommitted()) {
+                return s;
+            }
+        }
+        return null;
     }
 
     /**
@@ -1181,6 +1212,9 @@ public class PackageInstaller {
          * Adds a session ID to the set of sessions that will be committed atomically
          * when this session is committed.
          *
+         * <p>If the parent is staged or has rollback enabled, all children must have
+         * the same properties.
+         *
          * @param sessionId the session ID to add to this multi-package session.
          */
         public void addChildSessionId(int sessionId) {
@@ -1450,6 +1484,9 @@ public class PackageInstaller {
         /**
          * Request that rollbacks be enabled or disabled for the given upgrade.
          *
+         * <p>If the parent session is staged or has rollback enabled, all children sessions
+         * must have the same properties.
+         *
          * @param enable set to {@code true} to enable, {@code false} to disable
          * @hide
          */
@@ -1577,6 +1614,9 @@ public class PackageInstaller {
          * multi-package. In that case, if any of the children sessions fail to install at reboot,
          * all the other children sessions are aborted as well.
          *
+         * <p>If the parent session is staged or has rollback enabled, all children sessions
+         * must have the same properties.
+         *
          * {@hide}
          */
         @SystemApi @TestApi
@@ -1594,6 +1634,11 @@ public class PackageInstaller {
         @RequiresPermission(Manifest.permission.INSTALL_PACKAGES)
         public void setInstallAsApex() {
             installFlags |= PackageManager.INSTALL_APEX;
+        }
+
+        /** @hide */
+        public boolean getEnableRollback() {
+            return (installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) != 0;
         }
 
         /** {@hide} */
@@ -1770,6 +1815,12 @@ public class PackageInstaller {
         private String mStagedSessionErrorMessage;
 
         /** {@hide} */
+        public boolean isCommitted;
+
+        /** {@hide} */
+        public long updatedMillis;
+
+        /** {@hide} */
         @UnsupportedAppUsage
         public SessionInfo() {
         }
@@ -1809,6 +1860,7 @@ public class PackageInstaller {
             isStagedSessionFailed = source.readBoolean();
             mStagedSessionErrorCode = source.readInt();
             mStagedSessionErrorMessage = source.readString();
+            isCommitted = source.readBoolean();
         }
 
         /**
@@ -2118,6 +2170,7 @@ public class PackageInstaller {
          * Returns the set of session IDs that will be committed when this session is commited if
          * this session is a multi-package session.
          */
+        @NonNull
         public int[] getChildSessionIds() {
             return childSessionIds;
         }
@@ -2181,6 +2234,22 @@ public class PackageInstaller {
             mStagedSessionErrorMessage = errorMessage;
         }
 
+        /**
+         * Whenever this session was committed.
+         */
+        public boolean isCommitted() {
+            return isCommitted;
+        }
+
+        /**
+         * The timestamp of the last update that occurred to the session, including changing of
+         * states in case of staged sessions.
+         */
+        @CurrentTimeMillisLong
+        public long getUpdatedMillis() {
+            return updatedMillis;
+        }
+
         @Override
         public int describeContents() {
             return 0;
@@ -2218,6 +2287,7 @@ public class PackageInstaller {
             dest.writeBoolean(isStagedSessionFailed);
             dest.writeInt(mStagedSessionErrorCode);
             dest.writeString(mStagedSessionErrorMessage);
+            dest.writeBoolean(isCommitted);
         }
 
         public static final Parcelable.Creator<SessionInfo>

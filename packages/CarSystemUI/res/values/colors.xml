@@ -45,4 +45,6 @@
     <color name="keyguard_button_text_color">@android:color/black</color>
 
     <color name="list_divider_color">@*android:color/car_list_divider_light</color>
+    <color name="car_volume_item_divider_color">@*android:color/car_list_divider</color>
+    <color name="car_volume_item_background_color">@*android:color/car_card_dark</color>
 </resources>

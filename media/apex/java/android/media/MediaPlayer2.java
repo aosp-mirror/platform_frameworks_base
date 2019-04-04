@@ -274,8 +274,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * successful transition. Any other value will be an error. Call {@link #getState()} to
  * determine the current state. </p>
  */
-public class MediaPlayer2 implements AutoCloseable
-                                            , AudioRouting {
+public class MediaPlayer2 implements AutoCloseable, AudioRouting {
     static {
         System.loadLibrary("media2_jni");
         native_init();
@@ -879,27 +878,32 @@ public class MediaPlayer2 implements AutoCloseable
             throws IOException {
         Media2Utils.checkArgument(dsd != null, "the DataSourceDesc cannot be null");
 
-        if (dsd instanceof CallbackDataSourceDesc) {
-            CallbackDataSourceDesc cbDSD = (CallbackDataSourceDesc) dsd;
-            handleDataSource(isCurrent,
-                             srcId,
-                             cbDSD.getDataSourceCallback(),
-                             cbDSD.getStartPosition(),
-                             cbDSD.getEndPosition());
-        } else if (dsd instanceof FileDataSourceDesc) {
+        if (dsd instanceof FileDataSourceDesc) {
             FileDataSourceDesc fileDSD = (FileDataSourceDesc) dsd;
-            handleDataSource(isCurrent,
-                             srcId,
-                             fileDSD.getParcelFileDescriptor(),
-                             fileDSD.getOffset(),
-                             fileDSD.getLength(),
-                             fileDSD.getStartPosition(),
-                             fileDSD.getEndPosition());
+            ParcelFileDescriptor pfd = fileDSD.getParcelFileDescriptor();
+            if (pfd.getStatSize() == -1) {
+                // Underlying pipeline doesn't understand '-1' size. Create a wrapper for
+                // translation.
+                // TODO: Make native code handle '-1' size.
+                handleDataSource(isCurrent,
+                        srcId,
+                        new ProxyDataSourceCallback(pfd),
+                        fileDSD.getStartPosition(),
+                        fileDSD.getEndPosition());
+            } else {
+                handleDataSource(isCurrent,
+                        srcId,
+                        pfd,
+                        fileDSD.getOffset(),
+                        fileDSD.getLength(),
+                        fileDSD.getStartPosition(),
+                        fileDSD.getEndPosition());
+            }
         } else if (dsd instanceof UriDataSourceDesc) {
             UriDataSourceDesc uriDSD = (UriDataSourceDesc) dsd;
             handleDataSource(isCurrent,
                              srcId,
-                             uriDSD.getContext(),
+                             mContext,
                              uriDSD.getUri(),
                              uriDSD.getHeaders(),
                              uriDSD.getCookies(),
@@ -1542,7 +1546,7 @@ public class MediaPlayer2 implements AutoCloseable
      * Returns the size of the video.
      *
      * @return the size of the video. The width and height of size could be 0 if there is no video,
-     * no display surface was set, or the size has not been determined yet.
+     * or the size has not been determined yet.
      * The {@code EventCallback} can be registered via
      * {@link #registerEventCallback(Executor, EventCallback)} to provide a
      * notification {@code EventCallback.onVideoSizeChanged} when the size
@@ -1810,12 +1814,10 @@ public class MediaPlayer2 implements AutoCloseable
     public MediaTimestamp getTimestamp() {
         try {
             // TODO: get the timestamp from native side
-            return new MediaTimestamp.Builder()
-                    .setMediaTimestamp(
-                        getCurrentPosition() * 1000L,
-                        System.nanoTime(),
-                        getState() == PLAYER_STATE_PLAYING ? getPlaybackParams().getSpeed() : 0.f)
-                    .build();
+            return new MediaTimestamp(
+                    getCurrentPosition() * 1000L,
+                    System.nanoTime(),
+                    getState() == PLAYER_STATE_PLAYING ? getPlaybackParams().getSpeed() : 0.f);
         } catch (IllegalStateException e) {
             return null;
         }
@@ -1966,6 +1968,17 @@ public class MediaPlayer2 implements AutoCloseable
     private native byte[] native_invoke(byte[] request);
 
     /**
+     * @hide
+     */
+    @IntDef(flag = false, prefix = "MEDIA_TRACK_TYPE", value = {
+            TrackInfo.MEDIA_TRACK_TYPE_VIDEO,
+            TrackInfo.MEDIA_TRACK_TYPE_AUDIO,
+            TrackInfo.MEDIA_TRACK_TYPE_SUBTITLE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface TrackType {}
+
+    /**
      * Class for MediaPlayer2 to return each audio/video/subtitle track's metadata.
      *
      * @see MediaPlayer2#getTrackInfo
@@ -2012,10 +2025,11 @@ public class MediaPlayer2 implements AutoCloseable
         public static final int MEDIA_TRACK_TYPE_SUBTITLE = 4;
         public static final int MEDIA_TRACK_TYPE_METADATA = 5;
 
+        final int mId;
         final int mTrackType;
         final MediaFormat mFormat;
 
-        static TrackInfo create(Iterator<Value> in) {
+        static TrackInfo create(int idx, Iterator<Value> in) {
             int trackType = in.next().getInt32Value();
             // TODO: build the full MediaFormat; currently we are using createSubtitleFormat
             // even for audio/video tracks, meaning we only set the mime and language.
@@ -2028,11 +2042,12 @@ public class MediaPlayer2 implements AutoCloseable
                 format.setInteger(MediaFormat.KEY_IS_DEFAULT, in.next().getInt32Value());
                 format.setInteger(MediaFormat.KEY_IS_FORCED_SUBTITLE, in.next().getInt32Value());
             }
-            return new TrackInfo(trackType, format);
+            return new TrackInfo(idx, trackType, format);
         }
 
         /** @hide */
-        TrackInfo(int type, MediaFormat format) {
+        TrackInfo(int id, int type, MediaFormat format) {
+            mId = id;
             mTrackType = type;
             mFormat = format;
         }
@@ -2119,7 +2134,7 @@ public class MediaPlayer2 implements AutoCloseable
         }
         TrackInfo[] trackInfo = new TrackInfo[size];
         for (int i = 0; i < size; ++i) {
-            trackInfo[i] = TrackInfo.create(in);
+            trackInfo[i] = TrackInfo.create(i, in);
         }
         return trackInfo;
     }
@@ -2127,54 +2142,56 @@ public class MediaPlayer2 implements AutoCloseable
     /**
      * Returns the index of the audio, video, or subtitle track currently selected for playback.
      * The return value is an index into the array returned by {@link #getTrackInfo}, and can
-     * be used in calls to {@link #selectTrack(int)} or {@link #deselectTrack(int)}.
+     * be used in calls to {@link #selectTrack(TrackInfo)} or {@link #deselectTrack(TrackInfo)}.
      * Same as {@link #getSelectedTrack(DataSourceDesc, int)} with
      * {@code dsd = getCurrentDataSource()}.
      *
      * @param trackType should be one of {@link TrackInfo#MEDIA_TRACK_TYPE_VIDEO},
      * {@link TrackInfo#MEDIA_TRACK_TYPE_AUDIO}, or
      * {@link TrackInfo#MEDIA_TRACK_TYPE_SUBTITLE}
-     * @return index of the audio, video, or subtitle track currently selected for playback;
-     * a negative integer is returned when there is no selected track for {@code trackType} or
+     * @return metadata corresponding to the audio, video, or subtitle track currently selected for
+     * playback; {@code null} is returned when there is no selected track for {@code trackType} or
      * when {@code trackType} is not one of audio, video, or subtitle.
      * @throws IllegalStateException if called after {@link #close()}
      * @throws NullPointerException if current data source is null
      *
      * @see #getTrackInfo()
-     * @see #selectTrack(int)
-     * @see #deselectTrack(int)
+     * @see #selectTrack(TrackInfo)
+     * @see #deselectTrack(TrackInfo)
      */
-    public int getSelectedTrack(int trackType) {
+    @Nullable
+    public TrackInfo getSelectedTrack(@TrackType int trackType) {
         return getSelectedTrack(getCurrentDataSource(), trackType);
     }
 
     /**
      * Returns the index of the audio, video, or subtitle track currently selected for playback.
      * The return value is an index into the array returned by {@link #getTrackInfo}, and can
-     * be used in calls to {@link #selectTrack(DataSourceDesc, int)} or
-     * {@link #deselectTrack(DataSourceDesc, int)}.
+     * be used in calls to {@link #selectTrack(DataSourceDesc, TrackInfo)} or
+     * {@link #deselectTrack(DataSourceDesc, TrackInfo)}.
      *
      * @param dsd the descriptor of data source of which you want to get selected track
      * @param trackType should be one of {@link TrackInfo#MEDIA_TRACK_TYPE_VIDEO},
      * {@link TrackInfo#MEDIA_TRACK_TYPE_AUDIO}, or
      * {@link TrackInfo#MEDIA_TRACK_TYPE_SUBTITLE}
-     * @return index of the audio, video, or subtitle track currently selected for playback;
-     * a negative integer is returned when there is no selected track for {@code trackType} or
+     * @return metadata corresponding to the audio, video, or subtitle track currently selected for
+     * playback; {@code null} is returned when there is no selected track for {@code trackType} or
      * when {@code trackType} is not one of audio, video, or subtitle.
      * @throws IllegalStateException if called after {@link #close()}
      * @throws NullPointerException if dsd is null
      *
      * @see #getTrackInfo(DataSourceDesc)
-     * @see #selectTrack(DataSourceDesc, int)
-     * @see #deselectTrack(DataSourceDesc, int)
+     * @see #selectTrack(DataSourceDesc, TrackInfo)
+     * @see #deselectTrack(DataSourceDesc, TrackInfo)
      */
-    public int getSelectedTrack(@NonNull DataSourceDesc dsd, int trackType) {
+    @Nullable
+    public TrackInfo getSelectedTrack(@NonNull DataSourceDesc dsd, @TrackType int trackType) {
         if (dsd == null) {
             throw new NullPointerException("non-null dsd is expected");
         }
         SourceInfo sourceInfo = getSourceInfo(dsd);
         if (sourceInfo == null) {
-            return -1;
+            return null;
         }
 
         PlayerMessage request = PlayerMessage.newBuilder()
@@ -2184,26 +2201,30 @@ public class MediaPlayer2 implements AutoCloseable
                 .build();
         PlayerMessage response = invoke(request);
         if (response == null) {
-            return -1;
+            return null;
         }
-        return response.getValues(0).getInt32Value();
+        // TODO: return full TrackInfo data from native player instead of index
+        final int idx = response.getValues(0).getInt32Value();
+        final List<TrackInfo> trackInfos = getTrackInfo(dsd);
+        return trackInfos.isEmpty() ? null : trackInfos.get(idx);
     }
 
     /**
      * Selects a track of current data source.
-     * Same as {@link #selectTrack(DataSourceDesc, int)} with
+     * Same as {@link #selectTrack(DataSourceDesc, TrackInfo)} with
      * {@code dsd = getCurrentDataSource()}.
      *
-     * @param index the index of the track to be selected. The valid range of the index
-     * is 0..total number of track - 1. The total number of tracks as well as the type of
-     * each individual track can be found by calling {@link #getTrackInfo()} method.
+     * @param trackInfo metadata corresponding to the track to be selected. A {@code trackInfo}
+     * object can be obtained from {@link #getTrackInfo()}.
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
+     *
+     * This is an asynchronous call.
      *
      * @see MediaPlayer2#getTrackInfo()
      */
-    // This is an asynchronous call.
-    public @NonNull Object selectTrack(int index) {
-        return selectTrack(getCurrentDataSource(), index);
+    @NonNull
+    public Object selectTrack(@NonNull TrackInfo trackInfo) {
+        return selectTrack(getCurrentDataSource(), trackInfo);
     }
 
     /**
@@ -2228,38 +2249,40 @@ public class MediaPlayer2 implements AutoCloseable
      * in that an audio track can only be selected in the <em>Prepared</em> state.
      * </p>
      * @param dsd the descriptor of data source of which you want to select track
-     * @param index the index of the track to be selected. The valid range of the index
-     * is 0..total number of track - 1. The total number of tracks as well as the type of
-     * each individual track can be found by calling {@link #getTrackInfo(DataSourceDesc)} method.
+     * @param trackInfo metadata corresponding to the track to be selected. A {@code trackInfo}
+     * object can be obtained from {@link #getTrackInfo()}.
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
+     *
+     * This is an asynchronous call.
      *
      * @see MediaPlayer2#getTrackInfo(DataSourceDesc)
      */
-    // This is an asynchronous call.
-    public @NonNull Object selectTrack(@NonNull DataSourceDesc dsd, int index) {
+    @NonNull
+    public Object selectTrack(@NonNull DataSourceDesc dsd, @NonNull TrackInfo trackInfo) {
         return addTask(new Task(CALL_COMPLETED_SELECT_TRACK, false) {
             @Override
             void process() {
-                selectOrDeselectTrack(dsd, index, true /* select */);
+                selectOrDeselectTrack(dsd, trackInfo.mId, true /* select */);
             }
         });
     }
 
     /**
      * Deselect a track of current data source.
-     * Same as {@link #deselectTrack(DataSourceDesc, int)} with
+     * Same as {@link #deselectTrack(DataSourceDesc, TrackInfo)} with
      * {@code dsd = getCurrentDataSource()}.
      *
-     * @param index the index of the track to be deselected. The valid range of the index
-     * is 0..total number of tracks - 1. The total number of tracks as well as the type of
-     * each individual track can be found by calling {@link #getTrackInfo()} method.
+     * @param trackInfo metadata corresponding to the track to be selected. A {@code trackInfo}
+     * object can be obtained from {@link #getTrackInfo()}.
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
+     *
+     * This is an asynchronous call.
      *
      * @see MediaPlayer2#getTrackInfo()
      */
-    // This is an asynchronous call.
-    public @NonNull Object deselectTrack(int index) {
-        return deselectTrack(getCurrentDataSource(), index);
+    @NonNull
+    public Object deselectTrack(@NonNull TrackInfo trackInfo) {
+        return deselectTrack(getCurrentDataSource(), trackInfo);
     }
 
     /**
@@ -2270,19 +2293,20 @@ public class MediaPlayer2 implements AutoCloseable
      * selected before, it throws an exception.
      * </p>
      * @param dsd the descriptor of data source of which you want to deselect track
-     * @param index the index of the track to be deselected. The valid range of the index
-     * is 0..total number of tracks - 1. The total number of tracks as well as the type of
-     * each individual track can be found by calling {@link #getTrackInfo} method.
+     * @param trackInfo metadata corresponding to the track to be selected. A {@code trackInfo}
+     * object can be obtained from {@link #getTrackInfo()}.
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
+     *
+     * This is an asynchronous call.
      *
      * @see MediaPlayer2#getTrackInfo(DataSourceDesc)
      */
-    // This is an asynchronous call.
-    public @NonNull Object deselectTrack(@NonNull DataSourceDesc dsd, int index) {
+    @NonNull
+    public Object deselectTrack(@NonNull DataSourceDesc dsd, @NonNull TrackInfo trackInfo) {
         return addTask(new Task(CALL_COMPLETED_DESELECT_TRACK, false) {
             @Override
             void process() {
-                selectOrDeselectTrack(dsd, index, false /* select */);
+                selectOrDeselectTrack(dsd, trackInfo.mId, false /* select */);
             }
         });
     }
@@ -2643,13 +2667,13 @@ public class MediaPlayer2 implements AutoCloseable
                             return;
                         }
                         Iterator<Value> in = playerMsg.getValuesList().iterator();
-                        SubtitleData data = new SubtitleData.Builder()
-                                .setSubtitleData(
-                                    in.next().getInt32Value(),  // trackIndex
-                                    in.next().getInt64Value(),  // startTimeUs
-                                    in.next().getInt64Value(),  // durationUs
-                                    in.next().getBytesValue().toByteArray())  // data
-                                .build();
+                        final int trackIndex = in.next().getInt32Value();
+                        TrackInfo trackInfo = getTrackInfo(dsd).get(trackIndex);
+                        final long startTimeUs = in.next().getInt64Value();
+                        final long durationTimeUs = in.next().getInt64Value();
+                        final byte[] subData = in.next().getBytesValue().toByteArray();
+                        SubtitleData data = new SubtitleData(trackInfo,
+                                startTimeUs, durationTimeUs, subData);
                         sendEvent(new EventNotifier() {
                             @Override
                             public void notify(EventCallback callback) {
@@ -2673,11 +2697,9 @@ public class MediaPlayer2 implements AutoCloseable
                             return;
                         }
                         Iterator<Value> in = playerMsg.getValuesList().iterator();
-                        data = new TimedMetaData.Builder()
-                                .setTimedMetaData(
-                                    in.next().getInt64Value(),  // timestampUs
-                                    in.next().getBytesValue().toByteArray())  // metaData
-                                .build();
+                        data = new TimedMetaData(
+                                in.next().getInt64Value(),  // timestampUs
+                                in.next().getBytesValue().toByteArray());  // metaData
                     } else {
                         data = null;
                     }
@@ -2772,6 +2794,74 @@ public class MediaPlayer2 implements AutoCloseable
     }
 
     /**
+     * Class encapsulating subtitle data, as received through the
+     * {@link EventCallback#onSubtitleData} interface.
+     * <p>
+     * A {@link SubtitleData} object includes:
+     * <ul>
+     * <li> track metadadta in a {@link TrackInfo} object</li>
+     * <li> the start time (in microseconds) of the data</li>
+     * <li> the duration (in microseconds) of the data</li>
+     * <li> the actual data.</li>
+     * </ul>
+     * The data is stored in a byte-array, and is encoded in one of the supported in-band
+     * subtitle formats. The subtitle encoding is determined by the MIME type of the
+     * {@link TrackInfo} of the subtitle track, one of
+     * {@link MediaFormat#MIMETYPE_TEXT_CEA_608}, {@link MediaFormat#MIMETYPE_TEXT_CEA_708},
+     * {@link MediaFormat#MIMETYPE_TEXT_VTT}.
+     */
+    public static final class SubtitleData {
+
+        private TrackInfo mTrackInfo;
+        private long mStartTimeUs;
+        private long mDurationUs;
+        private byte[] mData;
+
+        private SubtitleData(TrackInfo trackInfo, long startTimeUs, long durationUs, byte[] data) {
+            mTrackInfo = trackInfo;
+            mStartTimeUs = startTimeUs;
+            mDurationUs = durationUs;
+            mData = (data != null ? data : new byte[0]);
+        }
+
+        /**
+         * @return metadata of track which contains this subtitle data
+         */
+        @NonNull
+        public TrackInfo getTrackInfo() {
+            return mTrackInfo;
+        }
+
+        /**
+         * @return media time at which the subtitle should start to be displayed in microseconds
+         */
+        public long getStartTimeUs() {
+            return mStartTimeUs;
+        }
+
+        /**
+         * @return the duration in microsecond during which the subtitle should be displayed
+         */
+        public long getDurationUs() {
+            return mDurationUs;
+        }
+
+        /**
+         * Returns the encoded data for the subtitle content.
+         * Encoding format depends on the subtitle type, refer to
+         * <a href="https://en.wikipedia.org/wiki/CEA-708">CEA 708</a>,
+         * <a href="https://en.wikipedia.org/wiki/EIA-608">CEA/EIA 608</a> and
+         * <a href="https://www.w3.org/TR/webvtt1/">WebVTT</a>, defined by the MIME type
+         * of the subtitle track.
+         * @return the encoded subtitle data
+         */
+        @NonNull
+        public byte[] getData() {
+            return mData;
+        }
+    }
+
+    /**
      * Interface definition for callbacks to be invoked when the player has the corresponding
      * events.
      */
@@ -2780,7 +2870,7 @@ public class MediaPlayer2 implements AutoCloseable
          * Called to indicate the video size
          *
          * The video size (width and height) could be 0 if there was no video,
-         * no display surface was set, or the value was not determined yet.
+         * or the value was not determined yet.
          *
          * @param mp the MediaPlayer2 associated with this callback
          * @param dsd the DataSourceDesc of this data source
@@ -3446,10 +3536,18 @@ public class MediaPlayer2 implements AutoCloseable
 
         /**
          * Mutable builder to create a {@link MediaPlayer2.DrmPreparationInfo} object.
+         *
+         * {@link Builder#Builder(UUID) UUID} must not be null; {@link #setKeyType keyType}
+         * must be one of {@link MediaDrm#KEY_TYPE_STREAMING} or {@link MediaDrm#KEY_TYPE_OFFLINE}.
+         * <p>
+         * When {@link #setKeyType keyType} is {@link MediaDrm#KEY_TYPE_STREAMING},
+         * {@link #setInitData(byte[]) initData} and {@link #setMimeType(String) mimeType}
+         * must not be null; When {@link #setKeyType keyType} is {@link MediaDrm#KEY_TYPE_OFFLINE},
+         * {@link #setKeySetId(byte[]) keySetId} must not be null.
          */
         public static final class Builder {
 
-            private UUID mUUID;
+            private final UUID mUUID;
             private byte[] mKeySetId;
             private byte[] mInitData;
             private String mMimeType;
@@ -3457,15 +3555,11 @@ public class MediaPlayer2 implements AutoCloseable
             private Map<String, String> mOptionalParameters;
 
             /**
-             * Set UUID of the crypto scheme selected to decrypt content. An UUID can be retrieved
-             * from the source listening to {@link MediaPlayer2.DrmEventCallback#onDrmInfo}.
-             *
-             * @param uuid of selected crypto scheme
-             * @return this
+             * @param uuid UUID of the crypto scheme selected to decrypt content. An UUID can be
+             * retrieved from the source listening to {@link DrmEventCallback#onDrmInfo}.
              */
-            public @NonNull Builder setUuid(@NonNull UUID uuid) {
+            public Builder(@NonNull UUID uuid) {
                 this.mUUID = uuid;
-                return this;
             }
 
             /**
@@ -3538,12 +3632,16 @@ public class MediaPlayer2 implements AutoCloseable
             }
 
             /**
-             * @return an immutable {@link MediaPlayer2.DrmPreparationInfo} representing the
-             *         settings of this builder
+             * @return an immutable {@link DrmPreparationInfo} based on settings of this builder
              */
-            public @NonNull MediaPlayer2.DrmPreparationInfo build() {
-                return new MediaPlayer2.DrmPreparationInfo(mUUID, mKeySetId, mInitData, mMimeType,
-                        mKeyType, mOptionalParameters);
+            @NonNull
+            public DrmPreparationInfo build() {
+                final DrmPreparationInfo info = new DrmPreparationInfo(mUUID, mKeySetId, mInitData,
+                        mMimeType, mKeyType, mOptionalParameters);
+                if (!info.isValid()) {
+                    throw new IllegalArgumentException("invalid DrmPreparationInfo");
+                }
+                return info;
             }
 
         }
@@ -3579,13 +3677,61 @@ public class MediaPlayer2 implements AutoCloseable
             }
             return false;
         }
+
+        /**
+         * @return UUID of the crypto scheme selected to decrypt content.
+         */
+        @NonNull
+        public UUID getUuid() {
+            return mUUID;
+        }
+
+        /**
+         * @return identifier of the persisted offline key.
+         */
+        @Nullable
+        public byte[] getKeySetId() {
+            return mKeySetId;
+        }
+
+        /**
+         * @return container-specific DRM initialization data.
+         */
+        @Nullable
+        public byte[] getInitData() {
+            return mInitData;
+        }
+
+        /**
+         * @return mime type of the content
+         */
+        @Nullable
+        public String getMimeType() {
+            return mMimeType;
+        }
+
+        /**
+         * @return type of the key request.
+         */
+        @MediaPlayer2.MediaDrmKeyType
+        public int getKeyType() {
+            return mKeyType;
+        }
+
+        /**
+         * @return optional parameters to be included in the {@link MediaDrm.KeyRequest}.
+         */
+        @Nullable
+        public Map<String, String> getOptionalParameters() {
+            return mOptionalParameters;
+        }
     }
 
     /**
      * Interface definition for callbacks to be invoked when the player has the corresponding
      * DRM events.
      */
-    public static class DrmEventCallback {
+    public static abstract class DrmEventCallback {
 
         /**
          * Called to indicate DRM info is available. Return a {@link DrmPreparationInfo} object that
@@ -3598,10 +3744,9 @@ public class MediaPlayer2 implements AutoCloseable
          * @return a {@link DrmPreparationInfo} object to initialize DRM playback, or null to skip
          *         DRM initialization
          */
-        public @Nullable DrmPreparationInfo onDrmInfo(@NonNull MediaPlayer2 mp,
-                @NonNull DataSourceDesc dsd, @NonNull DrmInfo drmInfo) {
-            return null;
-        }
+        @Nullable
+        public abstract DrmPreparationInfo onDrmInfo(@NonNull MediaPlayer2 mp,
+                @NonNull DataSourceDesc dsd, @NonNull DrmInfo drmInfo);
 
         /**
          * Called to give the app the opportunity to configure DRM before the session is created.
@@ -3636,10 +3781,9 @@ public class MediaPlayer2 implements AutoCloseable
          *         throwing an {@link RuntimeException} from this callback would trigger an
          *         {@link EventCallback#onError}.
          */
-        public @NonNull byte[] onDrmKeyRequest(@NonNull MediaPlayer2 mp,
-                @NonNull DataSourceDesc dsd, @NonNull MediaDrm.KeyRequest request) {
-            return new byte[0];
-        }
+        @NonNull
+        public abstract byte[] onDrmKeyRequest(@NonNull MediaPlayer2 mp,
+                @NonNull DataSourceDesc dsd, @NonNull MediaDrm.KeyRequest request);
 
         /**
          * Called to notify the client that {@code mp} is ready to decrypt DRM protected data source
@@ -3664,10 +3808,11 @@ public class MediaPlayer2 implements AutoCloseable
     /**
      * Registers the callback to be invoked for various DRM events.
      *
+     * This is a synchronous call.
+     *
      * @param eventCallback the callback that will be run
      * @param executor the executor through which the callback should be invoked
      */
-    // This is a synchronous call.
     public void setDrmEventCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull DrmEventCallback eventCallback) {
         if (eventCallback == null) {
@@ -3684,8 +3829,9 @@ public class MediaPlayer2 implements AutoCloseable
 
     /**
      * Clear the {@link DrmEventCallback}.
+     *
+     * This is a synchronous call.
      */
-    // This is a synchronous call.
     public void clearDrmEventCallback() {
         synchronized (mDrmEventCallbackLock) {
             mDrmEventCallback = null;

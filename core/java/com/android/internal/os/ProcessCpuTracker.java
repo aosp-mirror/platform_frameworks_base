@@ -18,6 +18,7 @@ package com.android.internal.os;
 
 import static android.os.Process.*;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.FileUtils;
 import android.os.Process;
 import android.os.StrictMode;
@@ -191,6 +192,7 @@ public class ProcessCpuTracker {
         public boolean interesting;
 
         public String baseName;
+        @UnsupportedAppUsage
         public String name;
         public int nameWidth;
 
@@ -206,6 +208,7 @@ public class ProcessCpuTracker {
         /**
          * Time in milliseconds.
          */
+        @UnsupportedAppUsage
         public long rel_uptime;
 
         /**
@@ -221,11 +224,13 @@ public class ProcessCpuTracker {
         /**
          * Time in milliseconds.
          */
+        @UnsupportedAppUsage
         public int rel_utime;
 
         /**
          * Time in milliseconds.
          */
+        @UnsupportedAppUsage
         public int rel_stime;
 
         public long base_minfaults;
@@ -286,6 +291,7 @@ public class ProcessCpuTracker {
     };
 
 
+    @UnsupportedAppUsage
     public ProcessCpuTracker(boolean includeThreads) {
         mIncludeThreads = includeThreads;
         long jiffyHz = Os.sysconf(OsConstants._SC_CLK_TCK);
@@ -305,6 +311,7 @@ public class ProcessCpuTracker {
         update();
     }
 
+    @UnsupportedAppUsage
     public void update() {
         if (DEBUG) Slog.v(TAG, "Update: " + this);
 
@@ -707,11 +714,13 @@ public class ProcessCpuTracker {
         return statses;
     }
 
+    @UnsupportedAppUsage
     final public int countWorkingStats() {
         buildWorkingProcs();
         return mWorkingProcs.size();
     }
 
+    @UnsupportedAppUsage
     final public Stats getWorkingStats(int index) {
         return mWorkingProcs.get(index);
     }

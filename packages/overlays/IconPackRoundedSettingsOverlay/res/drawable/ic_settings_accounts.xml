@@ -1,31 +1,21 @@
-<!--
-/**
- * Copyright (c) 2019, The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- * * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
--->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="24dp"
-    android:height="24dp"
-    android:viewportWidth="24"
-    android:viewportHeight="24">
 
-    <path
-        android:pathData="M 0 0 H 24 V 24 H 0 V 0 Z" />
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M6.21,20.14l0.08 0.06 A10,10,0,0,0,12,22h0a10,10,0,0,0,5.76-1.84h0A10,10,0,0,0,22,12v0A10,10,0,1,0,6.21,20.14Zm5.8 0.36 h0a8.45,8.45,0,0,1-4.5-1.3V15.75A0.76 0.76 ,0,0,1,8.25,15h7.5a0.76 0.76 ,0,0,1,0.75 0.75 V19.2A8.39,8.39,0,0,1,12,20.5Zm0-17A8.51,8.51,0,0,1,20.5,12h0.75l-0.75,0A8.47,8.47,0,0,1,18,18V15.75a2.25,2.25,0,0,0-2.25-2.25H8.25A2.25,2.25,0,0,0,6,15.75V18A8.49,8.49,0,0,1,12,3.5Z" />
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M12,12h0A3,3,0,1,0,9,9H9A3,3,0,0,0,12,12ZM10.5,9A1.5,1.5,0,1,1,12,10.5h0A1.5,1.5,0,0,1,10.5,9Z" />
+<!--
+   Copyright (C) 2019 The Android Open Source Project
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+
+<vector android:height="24dp" android:viewportHeight="24" android:viewportWidth="24" android:width="24dp" xmlns:android="http://schemas.android.com/apk/res/android">
+  <path android:fillColor="@android:color/white" android:pathData="M12,2C6.49,2,2,6.49,2,12c0,3.36,1.67,6.33,4.21,8.14c0.02,0.02,0.05,0.04,0.07,0.06C7.91,21.33,9.88,22,12,22 c0,0,0.01,0,0.01,0c2.15,0,4.13-0.69,5.76-1.84c0,0,0.01,0,0.01-0.01c2.55-1.81,4.22-4.77,4.22-8.13V12C22,6.49,17.51,2,12,2z M16.5,19.2c-1.3,0.82-2.84,1.3-4.49,1.3c0,0-0.01,0-0.01,0c-1.65,0-3.19-0.48-4.5-1.3v-3.45C7.5,15.34,7.84,15,8.25,15h7.5 c0.41,0,0.75,0.34,0.75,0.75V19.2z M20.5,12.02c0,2.34-0.96,4.47-2.5,6v-2.27c0-1.24-1.01-2.25-2.25-2.25h-7.5 C7.01,13.5,6,14.51,6,15.75v2.26C4.46,16.47,3.5,14.35,3.5,12c0-4.69,3.81-8.5,8.5-8.5s8.5,3.81,8.5,8.5V12.02z"/>
+  <path android:fillColor="@android:color/white" android:pathData="M12,6c-1.65,0-3,1.35-3,3v0.01C9,10.66,10.35,12,11.99,12c0,0,0,0,0.01,0c1.65,0,3-1.35,3-3S13.65,6,12,6z M12,10.5 C12,10.5,12,10.5,12,10.5c-0.83,0-1.5-0.67-1.5-1.49V9c0-0.83,0.67-1.5,1.5-1.5s1.5,0.67,1.5,1.5S12.83,10.5,12,10.5z"/>
 </vector>

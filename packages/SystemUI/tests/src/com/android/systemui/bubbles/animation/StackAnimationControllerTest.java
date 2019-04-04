@@ -57,6 +57,7 @@ public class StackAnimationControllerTest extends PhysicsAnimationLayoutTestCase
      * direction is correct.
      */
     @Test
+    @Ignore("Flaking")
     public void testMoveFirstBubbleWithStackFollowing() throws InterruptedException {
         mStackController.moveFirstBubbleWithStackFollowing(200, 100);
 
@@ -199,6 +200,7 @@ public class StackAnimationControllerTest extends PhysicsAnimationLayoutTestCase
     }
 
     @Test
+    @Ignore("Flaky")
     public void testRestoredAtRestingPosition() throws InterruptedException {
         mStackController.flingStackThenSpringToEdge(0, 5000, 5000);
 
@@ -209,6 +211,9 @@ public class StackAnimationControllerTest extends PhysicsAnimationLayoutTestCase
         final PointF prevStackPos = mStackController.getStackPosition();
 
         mLayout.removeAllViews();
+
+        waitForLayoutMessageQueue();
+
         mLayout.addView(new FrameLayout(getContext()));
 
         waitForLayoutMessageQueue();

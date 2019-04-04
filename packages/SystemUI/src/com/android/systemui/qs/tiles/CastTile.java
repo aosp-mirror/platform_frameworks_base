@@ -21,7 +21,7 @@ import static android.media.MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.media.projection.MediaProjectionInfo;
+import android.media.MediaRouter.RouteInfo;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.util.Log;
@@ -48,8 +48,9 @@ import com.android.systemui.statusbar.policy.CastController.CastDevice;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.NetworkController;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.Set;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -128,35 +129,30 @@ public class CastTile extends QSTileImpl<BooleanState> {
             return;
         }
 
-        CastDevice activeProjection = getActiveDeviceMediaProjection();
-        if (activeProjection == null) {
-            if (mKeyguard.isSecure() && !mKeyguard.canSkipBouncer()) {
-                mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
-                    showDetail(true);
-                });
-            } else {
+        List<CastDevice> activeDevices = getActiveDevices();
+        // We want to pop up the media route selection dialog if we either have no active devices
+        // (neither routes nor projection), or if we have an active route. In other cases, we assume
+        // that a projection is active. This is messy, but this tile never correctly handled the
+        // case where multiple devices were active :-/.
+        if (activeDevices.isEmpty() || (activeDevices.get(0).tag instanceof RouteInfo)) {
+            mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
                 showDetail(true);
-            }
+            });
         } else {
-            mController.stopCasting(activeProjection);
+            mController.stopCasting(activeDevices.get(0));
         }
     }
 
-    private CastDevice getActiveDeviceMediaProjection() {
-        CastDevice activeDevice = null;
+    private List<CastDevice> getActiveDevices() {
+        ArrayList<CastDevice> activeDevices = new ArrayList<>();
         for (CastDevice device : mController.getCastDevices()) {
             if (device.state == CastDevice.STATE_CONNECTED
                     || device.state == CastDevice.STATE_CONNECTING) {
-                activeDevice = device;
-                break;
+                activeDevices.add(device);
             }
         }
 
-        if (activeDevice != null && activeDevice.tag instanceof MediaProjectionInfo) {
-            return activeDevice;
-        }
-
-        return null;
+        return activeDevices;
     }
 
     @Override
@@ -187,14 +183,18 @@ public class CastTile extends QSTileImpl<BooleanState> {
         state.label = mContext.getString(R.string.quick_settings_cast_title);
         state.contentDescription = state.label;
         state.value = false;
-        final Set<CastDevice> devices = mController.getCastDevices();
+        final List<CastDevice> devices = mController.getCastDevices();
         boolean connecting = false;
+        // We always choose the first device that's in the CONNECTED state in the case where
+        // multiple devices are CONNECTED at the same time.
         for (CastDevice device : devices) {
             if (device.state == CastDevice.STATE_CONNECTED) {
                 state.value = true;
                 state.secondaryLabel = getDeviceName(device);
                 state.contentDescription = state.contentDescription + "," +
                         mContext.getString(R.string.accessibility_cast_name, state.label);
+                connecting = false;
+                break;
             } else if (device.state == CastDevice.STATE_CONNECTING) {
                 connecting = true;
             }
@@ -202,8 +202,8 @@ public class CastTile extends QSTileImpl<BooleanState> {
         if (connecting && !state.value) {
             state.secondaryLabel = mContext.getString(R.string.quick_settings_connecting);
         }
-        state.icon = ResourceIcon.get(state.value ? R.drawable.ic_qs_cast_on
-                : R.drawable.ic_qs_cast_off);
+        state.icon = ResourceIcon.get(state.value ? R.drawable.ic_cast_connected
+                : R.drawable.ic_cast);
         if (mWifiConnected || state.value) {
             state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
             if (!state.value) {
@@ -326,7 +326,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
             return mItems;
         }
 
-        private void updateItems(Set<CastDevice> devices) {
+        private void updateItems(List<CastDevice> devices) {
             if (mItems == null) return;
             Item[] items = null;
             if (devices != null && !devices.isEmpty()) {
@@ -334,7 +334,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
                 for (CastDevice device : devices) {
                     if (device.state == CastDevice.STATE_CONNECTED) {
                         final Item item = new Item();
-                        item.iconResId = R.drawable.ic_qs_cast_on;
+                        item.iconResId = R.drawable.ic_cast_connected;
                         item.line1 = getDeviceName(device);
                         item.line2 = mContext.getString(R.string.quick_settings_connected);
                         item.tag = device;
@@ -354,7 +354,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
                         final CastDevice device = mVisibleOrder.get(id);
                         if (!devices.contains(device)) continue;
                         final Item item = new Item();
-                        item.iconResId = R.drawable.ic_qs_cast_off;
+                        item.iconResId = R.drawable.ic_cast;
                         item.line1 = getDeviceName(device);
                         if (device.state == CastDevice.STATE_CONNECTING) {
                             item.line2 = mContext.getString(R.string.quick_settings_connecting);

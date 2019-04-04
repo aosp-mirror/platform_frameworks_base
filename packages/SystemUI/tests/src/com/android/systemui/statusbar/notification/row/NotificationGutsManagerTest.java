@@ -325,7 +325,6 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(false),
                 eq(false),
                 eq(true) /* isForBlockingHelper */,
-                eq(true) /* isUserSentimentNegative */,
                 eq(0),
                 eq(false) /* wasShownHighPriority */);
     }
@@ -354,7 +353,6 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(false),
                 eq(false),
                 eq(false) /* isForBlockingHelper */,
-                eq(true) /* isUserSentimentNegative */,
                 eq(0),
                 eq(false) /* wasShownHighPriority */);
     }
@@ -385,7 +383,6 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(false),
                 eq(false),
                 eq(true) /* isForBlockingHelper */,
-                eq(true) /* isUserSentimentNegative */,
                 eq(IMPORTANCE_DEFAULT),
                 eq(true) /* wasShownHighPriority */);
     }
@@ -415,7 +412,6 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(true),
                 eq(false),
                 eq(false) /* isForBlockingHelper */,
-                eq(true) /* isUserSentimentNegative */,
                 eq(0),
                 eq(false) /* wasShownHighPriority */);
     }
@@ -444,7 +440,6 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(false),
                 eq(false),
                 eq(true) /* isForBlockingHelper */,
-                eq(true) /* isUserSentimentNegative */,
                 eq(0),
                 eq(false) /* wasShownHighPriority */);
     }

@@ -35,7 +35,9 @@ import android.net.INetd;
 import android.net.INetworkMonitor;
 import android.net.INetworkMonitorCallbacks;
 import android.net.INetworkStackConnector;
+import android.net.LinkProperties;
 import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.net.PrivateDnsConfigParcel;
 import android.net.dhcp.DhcpServer;
 import android.net.dhcp.DhcpServingParams;
@@ -277,9 +279,9 @@ public class NetworkStackService extends Service {
         }
 
         @Override
-        public void notifyAcceptPartialConnectivity() {
+        public void setAcceptPartialConnectivity() {
             checkNetworkStackCallingPermission();
-            mNm.notifyAcceptPartialConnectivity();
+            mNm.setAcceptPartialConnectivity();
         }
 
         @Override
@@ -301,15 +303,9 @@ public class NetworkStackService extends Service {
         }
 
         @Override
-        public void notifySystemReady() {
+        public void notifyNetworkConnected(LinkProperties lp, NetworkCapabilities nc) {
             checkNetworkStackCallingPermission();
-            mNm.notifySystemReady();
-        }
-
-        @Override
-        public void notifyNetworkConnected() {
-            checkNetworkStackCallingPermission();
-            mNm.notifyNetworkConnected();
+            mNm.notifyNetworkConnected(lp, nc);
         }
 
         @Override
@@ -319,15 +315,15 @@ public class NetworkStackService extends Service {
         }
 
         @Override
-        public void notifyLinkPropertiesChanged() {
+        public void notifyLinkPropertiesChanged(LinkProperties lp) {
             checkNetworkStackCallingPermission();
-            mNm.notifyLinkPropertiesChanged();
+            mNm.notifyLinkPropertiesChanged(lp);
         }
 
         @Override
-        public void notifyNetworkCapabilitiesChanged() {
+        public void notifyNetworkCapabilitiesChanged(NetworkCapabilities nc) {
             checkNetworkStackCallingPermission();
-            mNm.notifyNetworkCapabilitiesChanged();
+            mNm.notifyNetworkCapabilitiesChanged(nc);
         }
     }
 }

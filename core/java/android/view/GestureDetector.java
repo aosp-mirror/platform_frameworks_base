@@ -875,6 +875,11 @@ public class GestureDetector {
             // Only record the first classification for an event stream.
             return;
         }
+        if (mCurrentDownEvent == null || mCurrentMotionEvent == null) {
+            // If the complete event stream wasn't seen, don't record anything.
+            mHasRecordedClassification = true;
+            return;
+        }
         StatsLog.write(
                 StatsLog.TOUCH_GESTURE_CLASSIFIED,
                 getClass().getName(),

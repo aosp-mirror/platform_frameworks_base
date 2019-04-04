@@ -788,12 +788,13 @@ interface ITelephony {
     int getPreferredNetworkType(int subId);
 
     /**
-     * Check whether DUN APN is required for tethering.
+     * Check whether DUN APN is required for tethering with subId.
      *
+     * @param subId the id of the subscription to require tethering.
      * @return {@code true} if DUN APN is required for tethering.
      * @hide
      */
-    boolean getTetherApnRequired();
+    boolean getTetherApnRequiredForSubscriber(int subId);
 
     /**
     * Enables framework IMS and triggers IMS Registration.
@@ -1707,6 +1708,11 @@ interface ITelephony {
      */
      int getNetworkSelectionMode(int subId);
 
+     /**
+     * Return true if the device is in emergency sms mode, false otherwise.
+     */
+     boolean isInEmergencySmsMode();
+
     /**
      * Get a list of SMS apps on a user.
      */
@@ -1919,15 +1925,18 @@ interface ITelephony {
      * Indicate if the enablement of multi SIM functionality is restricted.
      * @hide
      */
-    void setMultisimCarrierRestriction(boolean isMultisimCarrierRestricted);
+    void setMultiSimCarrierRestriction(boolean isMultiSimCarrierRestricted);
 
     /**
      * Returns if the usage of multiple SIM cards at the same time is supported.
      *
      * @param callingPackage The package making the call.
-     * @return true if multisim is supported, false otherwise.
+     * @return {@link #MULTISIM_ALLOWED} if the device supports multiple SIMs.
+     * {@link #MULTISIM_NOT_SUPPORTED_BY_HARDWARE} if the device does not support multiple SIMs.
+     * {@link #MULTISIM_NOT_SUPPORTED_BY_CARRIER} in the device supports multiple SIMs, but the
+     * functionality is restricted by the carrier.
      */
-    boolean isMultisimSupported(String callingPackage);
+    int isMultiSimSupported(String callingPackage);
 
     /**
      * Switch configs to enable multi-sim or switch back to single-sim
@@ -1936,10 +1945,10 @@ interface ITelephony {
     void switchMultiSimConfig(int numOfSims);
 
     /**
-     * Get if reboot is required upon altering modems configurations
+     * Get if altering modems configurations will trigger reboot.
      * @hide
      */
-    boolean isRebootRequiredForModemConfigChange();
+    boolean doesSwitchMultiSimConfigTriggerReboot(int subId, String callingPackage);
 
     /**
      * Get the mapping from logical slots to physical slots.
@@ -1949,5 +1958,7 @@ interface ITelephony {
     /**
      * Get the IRadio HAL Version encoded as 100 * MAJOR_VERSION + MINOR_VERSION or -1 if unknown
      */
-     int getRadioHalVersion();
+    int getRadioHalVersion();
+
+    boolean isModemEnabledForSlot(int slotIndex, String callingPackage);
 }

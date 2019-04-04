@@ -1813,21 +1813,22 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
-     * Fills the bitmap's pixels with the specified {@link Color}.
+     * Fills the bitmap's pixels with the specified {@code ColorLong}.
      *
+     * @param color The color to fill as packed by the {@link Color} class.
      * @throws IllegalStateException if the bitmap is not mutable.
-     * @throws IllegalArgumentException if the color space encoded in the long
-     *                                  is invalid or unknown.
+     * @throws IllegalArgumentException if the color space encoded in the
+     *                                  {@code ColorLong} is invalid or unknown.
      *
      */
-    public void eraseColor(@ColorLong long c) {
+    public void eraseColor(@ColorLong long color) {
         checkRecycled("Can't erase a recycled bitmap");
         if (!isMutable()) {
             throw new IllegalStateException("cannot erase immutable bitmaps");
         }
 
-        ColorSpace cs = Color.colorSpace(c);
-        nativeErase(mNativePtr, cs.getNativeInstance(), c);
+        ColorSpace cs = Color.colorSpace(color);
+        nativeErase(mNativePtr, cs.getNativeInstance(), color);
     }
 
     /**

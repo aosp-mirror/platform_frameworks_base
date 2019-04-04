@@ -39,12 +39,16 @@ import android.hardware.face.FaceManager;
 import android.hardware.face.IFaceService;
 import android.hardware.face.IFaceServiceReceiver;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SELinux;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.service.restricted_image.RestrictedImageProto;
+import android.service.restricted_image.RestrictedImageSetProto;
+import android.service.restricted_image.RestrictedImagesDumpProto;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
@@ -281,7 +285,9 @@ public class FaceService extends BiometricServiceBase {
 
             final long ident = Binder.clearCallingIdentity();
             try {
-                if (args.length > 0 && "--proto".equals(args[0])) {
+                if (args.length == 1 && "--restricted_image".equals(args[0])) {
+                    dumpRestrictedImage(fd);
+                } else if (args.length > 0 && "--proto".equals(args[0])) {
                     dumpProto(fd);
                 } else {
                     dumpInternal(pw);
@@ -377,6 +383,12 @@ public class FaceService extends BiometricServiceBase {
         @Override // Binder call
         public void resetLockout(byte[] token) {
             checkPermission(MANAGE_BIOMETRIC);
+
+            if (!FaceService.this.hasEnrolledBiometrics(mCurrentUserId)) {
+                Slog.w(TAG, "Ignoring lockout reset, no templates enrolled");
+                return;
+            }
+
             try {
                 mDaemonWrapper.resetLockout(token);
             } catch (RemoteException e) {
@@ -385,61 +397,62 @@ public class FaceService extends BiometricServiceBase {
         }
 
         @Override
-        public boolean setFeature(int feature, boolean enabled, final byte[] token) {
+        public void setFeature(int feature, boolean enabled, final byte[] token,
+                IFaceServiceReceiver receiver) {
             checkPermission(MANAGE_BIOMETRIC);
 
-            if (!FaceService.this.hasEnrolledBiometrics(mCurrentUserId)) {
-                Slog.e(TAG, "No enrolled biometrics while setting feature: " + feature);
-                return false;
-            }
-
-            final ArrayList<Byte> byteToken = new ArrayList<>();
-            for (int i = 0; i < token.length; i++) {
-                byteToken.add(token[i]);
-            }
-
-            // TODO: Support multiple faces
-            final int faceId = getFirstTemplateForUser(mCurrentUserId);
-
-            if (mDaemon != null) {
-                try {
-                    return mDaemon.setFeature(feature, enabled, byteToken, faceId) == Status.OK;
-                } catch (RemoteException e) {
-                    Slog.e(getTag(), "Unable to set feature: " + feature + " to enabled:" + enabled,
-                            e);
+            mHandler.post(() -> {
+                if (!FaceService.this.hasEnrolledBiometrics(mCurrentUserId)) {
+                    Slog.e(TAG, "No enrolled biometrics while setting feature: " + feature);
+                    return;
                 }
-            }
-            return false;
+
+                final ArrayList<Byte> byteToken = new ArrayList<>();
+                for (int i = 0; i < token.length; i++) {
+                    byteToken.add(token[i]);
+                }
+
+                // TODO: Support multiple faces
+                final int faceId = getFirstTemplateForUser(mCurrentUserId);
+
+                if (mDaemon != null) {
+                    try {
+                        final int result = mDaemon.setFeature(feature, enabled, byteToken, faceId);
+                        receiver.onFeatureSet(result == Status.OK, feature);
+                    } catch (RemoteException e) {
+                        Slog.e(getTag(), "Unable to set feature: " + feature
+                                        + " to enabled:" + enabled, e);
+                    }
+                }
+            });
+
         }
 
         @Override
-        public boolean getFeature(int feature) {
+        public void getFeature(int feature, IFaceServiceReceiver receiver) {
             checkPermission(MANAGE_BIOMETRIC);
 
-            // This should ideally return tri-state, but the user isn't shown settings unless
-            // they are enrolled so it's fine for now.
-            if (!FaceService.this.hasEnrolledBiometrics(mCurrentUserId)) {
-                Slog.e(TAG, "No enrolled biometrics while getting feature: " + feature);
-                return false;
-            }
-
-            // TODO: Support multiple faces
-            final int faceId = getFirstTemplateForUser(mCurrentUserId);
-
-            if (mDaemon != null) {
-                try {
-                    OptionalBool result = mDaemon.getFeature(feature, faceId);
-                    if (result.status == Status.OK) {
-                        return result.value;
-                    } else {
-                        // Same tri-state comment applies here.
-                        return false;
-                    }
-                } catch (RemoteException e) {
-                    Slog.e(getTag(), "Unable to getRequireAttention", e);
+            mHandler.post(() -> {
+                // This should ideally return tri-state, but the user isn't shown settings unless
+                // they are enrolled so it's fine for now.
+                if (!FaceService.this.hasEnrolledBiometrics(mCurrentUserId)) {
+                    Slog.e(TAG, "No enrolled biometrics while getting feature: " + feature);
+                    return;
                 }
-            }
-            return false;
+
+                // TODO: Support multiple faces
+                final int faceId = getFirstTemplateForUser(mCurrentUserId);
+
+                if (mDaemon != null) {
+                    try {
+                        OptionalBool result = mDaemon.getFeature(feature, faceId);
+                        receiver.onFeatureGet(result.status == Status.OK, feature, result.value);
+                    } catch (RemoteException e) {
+                        Slog.e(getTag(), "Unable to getRequireAttention", e);
+                    }
+                }
+            });
+
         }
 
         @Override
@@ -1062,5 +1075,75 @@ public class FaceService extends BiometricServiceBase {
         proto.flush();
         mPerformanceMap.clear();
         mCryptoPerformanceMap.clear();
+    }
+
+    private void dumpRestrictedImage(FileDescriptor fd) {
+        // WARNING: CDD restricts image data from leaving TEE unencrypted on
+        //          production devices:
+        // [C-1-10] MUST not allow unencrypted access to identifiable biometric
+        //          data or any data derived from it (such as embeddings) to the
+        //         Application Processor outside the context of the TEE.
+        //  As such, this API should only be enabled for testing purposes on
+        //  engineering and userdebug builds.  All modules in the software stack
+        //  MUST enforce final build products do NOT have this functionality.
+        //  Additionally, the following check MUST NOT be removed.
+        if (!(Build.IS_ENG || Build.IS_USERDEBUG)) {
+            return;
+        }
+
+        final ProtoOutputStream proto = new ProtoOutputStream(fd);
+
+        final long setToken = proto.start(RestrictedImagesDumpProto.SETS);
+
+        // Name of the service
+        proto.write(RestrictedImageSetProto.CATEGORY, "face");
+
+        // Individual images
+        for (int i = 0; i < 5; i++) {
+            final long imageToken = proto.start(RestrictedImageSetProto.IMAGES);
+            proto.write(RestrictedImageProto.MIME_TYPE, "image/png");
+            proto.write(RestrictedImageProto.IMAGE_DATA, new byte[] {
+                    // png image data
+                    -119,   80,   78,   71,   13,   10,   26,   10,
+                       0,    0,    0,   13,   73,   72,   68,   82,
+                       0,    0,    0,  100,    0,    0,    0,  100,
+                       1,    3,    0,    0,    0,   74,   44,    7,
+                      23,    0,    0,    0,    4,  103,   65,   77,
+                      65,    0,    0,  -79, -113,   11,   -4,   97,
+                       5,    0,    0,    0,    1,  115,   82,   71,
+                      66,    0,  -82,  -50,   28,  -23,    0,    0,
+                       0,    6,   80,   76,   84,   69,   -1,   -1,
+                      -1,    0,    0,    0,   85,  -62,  -45,  126,
+                       0,    0,    0, -115,   73,   68,   65,   84,
+                      56,  -53,  -19,  -46,  -79,   17, -128,   32,
+                      12,    5,  -48,  120,   22, -106, -116,  -32,
+                      40,  -84,  101, -121,  -93,   57,   10,   35,
+                      88,   82,  112,  126,    3,  -60,  104,    6,
+                    -112,   70,  127,  -59,  -69,  -53,   29,   33,
+                    -127,  -24,   79,  -49,  -52,  -15,   41,   36,
+                      34, -105,   85,  124,  -14,   88,   27,    6,
+                      28,   68,    1,   82,   62,   22,  -95, -108,
+                      55,  -95,   40,   -9, -110,  -12,   98, -107,
+                      76,  -41, -105,  -62,  -50,  111,  -60,   46,
+                     -14,   -4,   24,  -89,   42, -103,   16,   63,
+                     -72,  -11,  -15,   48,  -62,  102,  -44,  102,
+                     -73,  -56,   56,  -21, -128,   92,  -70, -124,
+                     117,  -46,  -67,  -77,   82,   80,  121,  -44,
+                     -56,  116,   93,  -45,  -90,   -5,  -29,  -24,
+                     -83,  -75,   52,  -34,   55,  -22,  102,  -21,
+                    -105, -124,  -23,   71,   87,   -7,  -25,  -59,
+                    -100,  -73,  -92, -122,   -7, -109,  -49,  -80,
+                     -89,    0,    0,    0,    0,   73,   69,   78,
+                      68,  -82,   66,   96, -126
+            });
+            // proto.write(RestrictedImageProto.METADATA, flattened_protobuf);
+            proto.end(imageToken);
+        }
+
+        // Face service metadata
+        // proto.write(RestrictedImageSetProto.METADATA, flattened_protobuf);
+
+        proto.end(setToken);
+        proto.flush();
     }
 }

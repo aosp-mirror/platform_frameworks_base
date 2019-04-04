@@ -682,8 +682,8 @@ public class HardwareRenderer {
 
     /** @hide */
     public boolean copyLayerInto(final TextureLayer layer, final Bitmap bitmap) {
-        return nCopyLayerInto(mNativeProxy,
-                layer.getDeferredLayerUpdater(), bitmap);
+        return nCopyLayerInto(mNativeProxy, layer.getDeferredLayerUpdater(),
+            bitmap.getNativeInstance());
     }
 
     /**
@@ -910,10 +910,10 @@ public class HardwareRenderer {
     public static int copySurfaceInto(Surface surface, Rect srcRect, Bitmap bitmap) {
         if (srcRect == null) {
             // Empty rect means entire surface
-            return nCopySurfaceInto(surface, 0, 0, 0, 0, bitmap);
+            return nCopySurfaceInto(surface, 0, 0, 0, 0, bitmap.getNativeInstance());
         } else {
             return nCopySurfaceInto(surface, srcRect.left, srcRect.top,
-                    srcRect.right, srcRect.bottom, bitmap);
+                    srcRect.right, srcRect.bottom, bitmap.getNativeInstance());
         }
     }
 
@@ -1115,7 +1115,7 @@ public class HardwareRenderer {
 
     private static native void nBuildLayer(long nativeProxy, long node);
 
-    private static native boolean nCopyLayerInto(long nativeProxy, long layer, Bitmap bitmap);
+    private static native boolean nCopyLayerInto(long nativeProxy, long layer, long bitmapHandle);
 
     private static native void nPushLayerUpdate(long nativeProxy, long layer);
 
@@ -1162,7 +1162,7 @@ public class HardwareRenderer {
     private static native void nRemoveFrameMetricsObserver(long nativeProxy, long nativeObserver);
 
     private static native int nCopySurfaceInto(Surface surface,
-            int srcLeft, int srcTop, int srcRight, int srcBottom, Bitmap bitmap);
+            int srcLeft, int srcTop, int srcRight, int srcBottom, long bitmapHandle);
 
     private static native Bitmap nCreateHardwareBitmap(long renderNode, int width, int height);
 

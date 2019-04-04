@@ -325,7 +325,7 @@ public class BatteryStatsImplTest {
 
         // Get the total acquisition time
         long totalTime = u.getWifiMulticastTime(currentTimeMs*1000,
-                BatteryStats.STATS_SINCE_UNPLUGGED);
+                BatteryStats.STATS_SINCE_CHARGED);
         assertEquals("Miscalculations of Multicast wakelock acquisition time",
                 (releaseTimeMs - acquireTimeMs) * 1000, totalTime);
     }
@@ -347,7 +347,7 @@ public class BatteryStatsImplTest {
 
         // Get the total acquisition time
         long totalTime =  u.getWifiMulticastTime(currentTimeMs*1000,
-                BatteryStats.STATS_SINCE_UNPLUGGED);
+                BatteryStats.STATS_SINCE_CHARGED);
         assertEquals("Miscalculations of Multicast wakelock acquisition time",
                 (currentTimeMs - acquireTimeMs) * 1000, totalTime);
     }
@@ -377,7 +377,7 @@ public class BatteryStatsImplTest {
 
         // Get the total acquisition time
         long totalTime =  u.getWifiMulticastTime(currentTimeMs*1000,
-                BatteryStats.STATS_SINCE_UNPLUGGED);
+                BatteryStats.STATS_SINCE_CHARGED);
         assertEquals("Miscalculations of Multicast wakelock acquisition time",
                 (releaseTimeMs_2 - acquireTimeMs_1) * 1000, totalTime);
     }
@@ -407,7 +407,7 @@ public class BatteryStatsImplTest {
 
         // Get the total acquisition time
         long totalTime =  u.getWifiMulticastTime(currentTimeMs*1000,
-                BatteryStats.STATS_SINCE_UNPLUGGED);
+                BatteryStats.STATS_SINCE_CHARGED);
         assertEquals("Miscalculations of Multicast wakelock acquisition time",
                 ((releaseTimeMs_1 - acquireTimeMs_1) + (releaseTimeMs_2 - acquireTimeMs_2))
                 * 1000, totalTime);

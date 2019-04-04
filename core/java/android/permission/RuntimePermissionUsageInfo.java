@@ -35,7 +35,7 @@ import android.os.Parcelable;
  */
 @SystemApi
 public final class RuntimePermissionUsageInfo implements Parcelable {
-    private final @NonNull CharSequence mName;
+    private final @NonNull String mName;
     private final int mNumUsers;
 
     /**
@@ -44,7 +44,7 @@ public final class RuntimePermissionUsageInfo implements Parcelable {
      * @param name The permission group name.
      * @param numUsers The number of apps that have used this permission.
      */
-    public RuntimePermissionUsageInfo(@NonNull CharSequence name, int numUsers) {
+    public RuntimePermissionUsageInfo(@NonNull String name, int numUsers) {
         checkNotNull(name);
         checkArgumentNonnegative(numUsers);
 
@@ -53,7 +53,7 @@ public final class RuntimePermissionUsageInfo implements Parcelable {
     }
 
     private RuntimePermissionUsageInfo(Parcel parcel) {
-        this(parcel.readCharSequence(), parcel.readInt());
+        this(parcel.readString(), parcel.readInt());
     }
 
     /**
@@ -68,7 +68,7 @@ public final class RuntimePermissionUsageInfo implements Parcelable {
      *
      * @return The name.
      */
-    public @NonNull CharSequence getName() {
+    public @NonNull String getName() {
         return mName;
     }
 
@@ -79,7 +79,7 @@ public final class RuntimePermissionUsageInfo implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeCharSequence(mName);
+        parcel.writeString(mName);
         parcel.writeInt(mNumUsers);
     }
 

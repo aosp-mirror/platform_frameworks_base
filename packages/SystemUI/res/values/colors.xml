@@ -88,6 +88,10 @@
     <!-- The "inside" of a notification, reached via longpress -->
     <color name="notification_guts_bg_color">@color/GM2_grey_50</color>
 
+    <color name="notification_guts_selection_bg">#FFFFFF</color>
+    <color name="notification_guts_selection_border">#4285F4</color>
+    <color name="notification_guts_link_icon_tint">@color/GM2_grey_900</color>
+
     <color name="assist_orb_color">#ffffff</color>
 
     <color name="keyguard_user_switcher_background_gradient_color">#77000000</color>
@@ -129,7 +133,6 @@
 
     <!-- Keyboard shortcuts colors -->
     <color name="ksh_application_group_color">#fff44336</color>
-    <color name="ksh_keyword_color">#d9000000</color>
     <color name="ksh_key_item_color">@color/material_grey_600</color>
     <color name="ksh_key_item_background">@color/material_grey_100</color>
 
@@ -164,4 +167,7 @@
 
     <color name="GM2_red_300">#F28B82</color>
     <color name="GM2_red_500">#B71C1C</color>
+
+    <color name="GM2_yellow_500">#FFFBBC04</color>
+    <color name="GM2_green_500">#FF34A853</color>
 </resources>

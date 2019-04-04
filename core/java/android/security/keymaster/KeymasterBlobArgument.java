@@ -16,14 +16,17 @@
 
 package android.security.keymaster;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 
 /**
  * @hide
  */
 class KeymasterBlobArgument extends KeymasterArgument {
+    @UnsupportedAppUsage
     public final byte[] blob;
 
+    @UnsupportedAppUsage
     public KeymasterBlobArgument(int tag, byte[] blob) {
         super(tag);
         switch (KeymasterDefs.getTagType(tag)) {
@@ -36,6 +39,7 @@ class KeymasterBlobArgument extends KeymasterArgument {
         this.blob = blob;
     }
 
+    @UnsupportedAppUsage
     public KeymasterBlobArgument(int tag, Parcel in) {
         super(tag);
         blob = in.createByteArray();

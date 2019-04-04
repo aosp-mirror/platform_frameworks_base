@@ -1321,7 +1321,7 @@ public class TelephonyManager {
 
     /**
      * An int extra used with {@link #ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED} to indicate the
-     * subscription which has changed.
+     * subscription which has changed; or in general whenever a subscription ID needs specified.
      */
     public static final String EXTRA_SUBSCRIPTION_ID = "android.telephony.extra.SUBSCRIPTION_ID";
 
@@ -1427,6 +1427,72 @@ public class TelephonyManager {
     @SystemApi
     public static final String EXTRA_ANOMALY_DESCRIPTION =
             "android.telephony.extra.ANOMALY_DESCRIPTION";
+
+    /**
+     * Broadcast intent sent to indicate primary (non-opportunistic) subscription list has changed.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_PRIMARY_SUBSCRIPTION_LIST_CHANGED =
+            "android.telephony.action.PRIMARY_SUBSCRIPTION_LIST_CHANGED";
+
+    /**
+     * Integer intent extra to be used with {@link #ACTION_PRIMARY_SUBSCRIPTION_LIST_CHANGED}
+     * to indicate what type of SIM selection is needed.
+     *
+     * @hide
+     */
+    public static final String EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE =
+            "android.telephony.extra.DEFAULT_SUBSCRIPTION_SELECT_TYPE";
+
+    /** @hide */
+    @IntDef({
+            EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_NONE,
+            EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_DATA,
+            EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_VOICE,
+            EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_SMS,
+            EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_ALL
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DefaultSubscriptionSelectType{}
+
+    /**
+     * Used as an int value for {@link #EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE}
+     * to indicate there's no need to re-select any default subscription.
+     * @hide
+     */
+    public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_NONE = 0;
+
+    /**
+     * Used as an int value for {@link #EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE}
+     * to indicate there's a need to select default data subscription.
+     * @hide
+     */
+    public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_DATA = 1;
+
+    /**
+     * Used as an int value for {@link #EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE}
+     * to indicate there's a need to select default voice call subscription.
+     * @hide
+     */
+    public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_VOICE = 2;
+
+    /**
+     * Used as an int value for {@link #EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE}
+     * to indicate there's a need to select default sms subscription.
+     * @hide
+     */
+    public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_SMS = 3;
+
+    /**
+     * Used as an int value for {@link #EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE}
+     * to indicate user to decide whether current SIM should be preferred for all
+     * data / voice / sms. {@link #EXTRA_SUBSCRIPTION_ID} will specified to indicate
+     * which subscription should be the default subscription.
+     * @hide
+     */
+    public static final int EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE_ALL = 4;
 
     //
     //
@@ -4779,22 +4845,18 @@ public class TelephonyManager {
      * Registers a listener object to receive notification of changes
      * in specified telephony states.
      * <p>
-     * To register a listener, pass a {@link PhoneStateListener} and specify at least one telephony
-     * state of interest in the events argument.
+     * To register a listener, pass a {@link PhoneStateListener}
+     * and specify at least one telephony state of interest in
+     * the events argument.
      *
-     * At registration, and when a specified telephony state changes, the telephony manager invokes
-     * the appropriate callback method on the listener object and passes the current (updated)
-     * values.
+     * At registration, and when a specified telephony state
+     * changes, the telephony manager invokes the appropriate
+     * callback method on the listener object and passes the
+     * current (updated) values.
      * <p>
-     * To un-register a listener, pass the listener object and set the events argument to
+     * To unregister a listener, pass the listener object and set the
+     * events argument to
      * {@link PhoneStateListener#LISTEN_NONE LISTEN_NONE} (0).
-     *
-     * If this TelephonyManager object has been created with {@link #createForSubscriptionId},
-     * applies to the given subId. Otherwise, applies to
-     * {@link SubscriptionManager#getDefaultSubscriptionId()}. To listen events for multiple subIds,
-     * pass a separate listener object to each TelephonyManager object created with
-     * {@link #createForSubscriptionId}.
-     *
      * Note: if you call this method while in the middle of a binder transaction, you <b>must</b>
      * call {@link android.os.Binder#clearCallingIdentity()} before calling this method. A
      * {@link SecurityException} will be thrown otherwise.
@@ -4809,18 +4871,17 @@ public class TelephonyManager {
         if (mContext == null) return;
         try {
             boolean notifyNow = (getITelephony() != null);
+            // If the listener has not explicitly set the subId (for example, created with the
+            // default constructor), replace the subId so it will listen to the account the
+            // telephony manager is created with.
+            if (listener.mSubId == null) {
+                listener.mSubId = mSubId;
+            }
+
             ITelephonyRegistry registry = getTelephonyRegistry();
             if (registry != null) {
-                // listen to the subId the telephony manager is created with. Ignore subId in
-                // PhoneStateListener.
-                registry.listenForSubscriber(mSubId, getOpPackageName(),
+                registry.listenForSubscriber(listener.mSubId, getOpPackageName(),
                         listener.callback, events, notifyNow);
-                // TODO: remove this once we remove PhoneStateListener constructor with subId.
-                if (events == PhoneStateListener.LISTEN_NONE) {
-                    listener.mSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
-                } else {
-                    listener.mSubId = mSubId;
-                }
             } else {
                 Rlog.w(TAG, "telephony registry not ready.");
             }
@@ -5296,7 +5357,6 @@ public class TelephonyManager {
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     @SystemApi
-    @Nullable
     public boolean iccCloseLogicalChannelBySlot(int slotIndex, int channel) {
         try {
             ITelephony telephony = getITelephony();
@@ -5373,8 +5433,8 @@ public class TelephonyManager {
      * @param p3 P3 value of the APDU command. If p3 is negative a 4 byte APDU
      *            is sent to the SIM.
      * @param data Data to be sent with the APDU.
-     * @return The APDU response from the ICC card with the status appended at
-     *            the end.
+     * @return The APDU response from the ICC card with the status appended at the end, or null if
+     * there is an issue connecting to the Telephony service.
      * @hide
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
@@ -6894,6 +6954,17 @@ public class TelephonyManager {
      * app has carrier privileges (see {@link #hasCarrierPrivileges})
      * and {@link android.Manifest.permission#ACCESS_FINE_LOCATION}.
      *
+     * If the system-wide location switch is off, apps may still call this API, with the
+     * following constraints:
+     * <ol>
+     *     <li>The app must hold the {@code android.permission.NETWORK_SCAN} permission.</li>
+     *     <li>The app must not supply any specific bands or channels to scan.</li>
+     *     <li>The app must only specify MCC/MNC pairs that are
+     *     associated to a SIM in the device.</li>
+     *     <li>Returned results will have no meaningful info other than signal strength
+     *     and MCC/MNC info.</li>
+     * </ol>
+     *
      * @param request Contains all the RAT with bands/channels that need to be scanned.
      * @param executor The executor through which the callback should be invoked. Since the scan
      *        request may trigger multiple callbacks and they must be invoked in the same order as
@@ -7019,6 +7090,35 @@ public class TelephonyManager {
     }
 
     /**
+     * Query Telephony to see if there has recently been an emergency SMS sent to the network by the
+     * user and we are still within the time interval after the emergency SMS was sent that we are
+     * considered in Emergency SMS mode.
+     *
+     * <p>This mode is used by other applications to allow them to perform special functionality,
+     * such as allow the GNSS service to provide user location to the carrier network for emergency
+     * when an emergency SMS is sent. This interval is set by
+     * {@link CarrierConfigManager#KEY_EMERGENCY_SMS_MODE_TIMER_MS_INT}. If
+     * the carrier does not support this mode, this function will always return false.
+     *
+     * @return true if this device is in emergency SMS mode, false otherwise.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public boolean isInEmergencySmsMode() {
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.isInEmergencySmsMode();
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getNetworkSelectionMode RemoteException", ex);
+        }
+        return false;
+    }
+
+    /**
      * Set the preferred network type.
      *
      * <p>Requires Permission:
@@ -7103,10 +7203,21 @@ public class TelephonyManager {
      * @hide
      */
     public boolean getTetherApnRequired() {
+        return getTetherApnRequired(getSubId(SubscriptionManager.getDefaultDataSubscriptionId()));
+    }
+
+    /**
+     * Check whether DUN APN is required for tethering with subId.
+     *
+     * @param subId the id of the subscription to require tethering.
+     * @return {@code true} if DUN APN is required for tethering.
+     * @hide
+     */
+    public boolean getTetherApnRequired(int subId) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.getTetherApnRequired();
+                return telephony.getTetherApnRequiredForSubscriber(subId);
         } catch (RemoteException ex) {
             Rlog.e(TAG, "hasMatchedTetherApnSetting RemoteException", ex);
         } catch (NullPointerException ex) {
@@ -10193,6 +10304,24 @@ public class TelephonyManager {
     }
 
     /**
+     * Determine whether the emergency assistance feature is available on the device.
+     * <p>
+     * Requires permission: {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE}
+     *
+     * @return whether the emergency assistance feature is available on the device
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @SystemApi
+    public boolean isEmergencyAssistanceEnabled() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+                "isEmergencyAssistanceEnabled");
+        return EMERGENCY_ASSISTANCE_ENABLED;
+    }
+
+    /**
      * Get the emergency number list based on current locale, sim, default, modem and network.
      *
      * <p>In each returned list, the emergency number {@link EmergencyNumber} coming from higher
@@ -10429,6 +10558,9 @@ public class TelephonyManager {
     /**
      * Set preferred opportunistic data subscription id.
      *
+     * Switch internet data to preferred opportunistic data subscription id. This api
+     * can result in lose of internet connectivity for short period of time while internet data
+     * is handed over.
      * <p>Requires that the calling app has carrier privileges on both primary and
      * secondary subscriptions (see
      * {@link #hasCarrierPrivileges}), or has permission
@@ -10507,9 +10639,11 @@ public class TelephonyManager {
      *
      * This api should be called to inform OpportunisticNetwork Service about the availability
      * of a network at the current location. This information will be used by OpportunisticNetwork
-     * service to decide to attach to the network opportunistically. If an empty list is passed,
+     * service to enable modem stack and to attach to the network. If an empty list is passed,
      * it is assumed that no network is available and will result in disabling the modem stack
-     * to save power.
+     * to save power. This api do not switch internet data once network attach is completed.
+     * Use {@link TelephonyManager#setPreferredOpportunisticDataSubscription}
+     * to switch internet data after network attach is complete.
      * Requires that the calling app has carrier privileges on both primary and
      * secondary subscriptions (see {@link #hasCarrierPrivileges}), or has permission
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
@@ -10580,6 +10714,25 @@ public class TelephonyManager {
     }
 
     /**
+     * It indicates whether modem is enabled or not per slot.
+     * It's the corresponding status of {@link #enableModemForSlot}.
+     *
+     * @param slotIndex which slot it's checking.
+     * @hide
+     */
+    public boolean isModemEnabledForSlot(int slotIndex) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.isModemEnabledForSlot(slotIndex, mContext.getOpPackageName());
+            }
+        } catch (RemoteException ex) {
+            Log.e(TAG, "enableModem RemoteException", ex);
+        }
+        return false;
+    }
+
+    /**
      * Broadcast intent action for network country code changes.
      *
      * <p>
@@ -10609,23 +10762,51 @@ public class TelephonyManager {
      * <p>Note: the API does not prevent access to the SIM cards for operations that don't require
      * access to the network.
      *
-     * @param isMultisimCarrierRestricted true if usage of multiple SIMs is restricted, false
+     * @param isMultiSimCarrierRestricted true if usage of multiple SIMs is restricted, false
      * otherwise.
      *
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    public void setMultisimCarrierRestriction(boolean isMultisimCarrierRestricted) {
+    public void setMultiSimCarrierRestriction(boolean isMultiSimCarrierRestricted) {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                service.setMultisimCarrierRestriction(isMultisimCarrierRestricted);
+                service.setMultiSimCarrierRestriction(isMultiSimCarrierRestricted);
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "setMultisimCarrierRestriction RemoteException", e);
+            Log.e(TAG, "setMultiSimCarrierRestriction RemoteException", e);
         }
     }
+
+    /**
+     * The usage of multiple SIM cards at the same time to register on the network (e.g. Dual
+     * Standby or Dual Active) is supported.
+     */
+    public static final int MULTISIM_ALLOWED = 0;
+
+    /**
+     * The usage of multiple SIM cards at the same time to register on the network (e.g. Dual
+     * Standby or Dual Active) is not supported by the hardware.
+     */
+    public static final int MULTISIM_NOT_SUPPORTED_BY_HARDWARE = 1;
+
+    /**
+     * The usage of multiple SIM cards at the same time to register on the network (e.g. Dual
+     * Standby or Dual Active) is supported by the hardware, but restricted by the carrier.
+     */
+    public static final int MULTISIM_NOT_SUPPORTED_BY_CARRIER = 2;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"MULTISIM_"},
+            value = {
+                    MULTISIM_ALLOWED,
+                    MULTISIM_NOT_SUPPORTED_BY_HARDWARE,
+                    MULTISIM_NOT_SUPPORTED_BY_CARRIER
+            })
+    public @interface IsMultiSimSupportedResult {}
 
     /**
      * Returns if the usage of multiple SIM cards at the same time to register on the network
@@ -10634,20 +10815,24 @@ public class TelephonyManager {
      * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
-     * @return true if usage of multiple SIMs is supported, false otherwise.
+     * @return {@link #MULTISIM_ALLOWED} if the device supports multiple SIMs.
+     * {@link #MULTISIM_NOT_SUPPORTED_BY_HARDWARE} if the device does not support multiple SIMs.
+     * {@link #MULTISIM_NOT_SUPPORTED_BY_CARRIER} in the device supports multiple SIMs, but the
+     * functionality is restricted by the carrier.
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    public boolean isMultisimSupported() {
+    @IsMultiSimSupportedResult
+    public int isMultiSimSupported() {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                return service.isMultisimSupported(getOpPackageName());
+                return service.isMultiSimSupported(getOpPackageName());
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "isMultisimSupported RemoteException", e);
+            Log.e(TAG, "isMultiSimSupported RemoteException", e);
         }
-        return false;
+        return MULTISIM_NOT_SUPPORTED_BY_HARDWARE;
     }
 
     /**
@@ -10676,24 +10861,28 @@ public class TelephonyManager {
     }
 
     /**
-     * Get whether reboot is required or not after making changes to modem configurations.
+     * Get whether making changes to modem configurations by {@link #switchMultiSimConfig(int)} will
+     * trigger device reboot.
      * The modem configuration change refers to switching from single SIM configuration to DSDS
      * or the other way around.
-     * @Return {@code true} if reboot is required after making changes to modem configurations,
-     * otherwise return {@code false}.
      *
-     * @hide
+     *  <p>Requires Permission:
+     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE} or that the
+     * calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
+     * @return {@code true} if reboot will be triggered after making changes to modem
+     * configurations, otherwise return {@code false}.
      */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public boolean isRebootRequiredForModemConfigChange() {
+    @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
+    public boolean doesSwitchMultiSimConfigTriggerReboot() {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                return service.isRebootRequiredForModemConfigChange();
+                return service.doesSwitchMultiSimConfigTriggerReboot(getSubId(),
+                        getOpPackageName());
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "isRebootRequiredForModemConfigChange RemoteException", e);
+            Log.e(TAG, "doesSwitchMultiSimConfigTriggerReboot RemoteException", e);
         }
         return false;
     }

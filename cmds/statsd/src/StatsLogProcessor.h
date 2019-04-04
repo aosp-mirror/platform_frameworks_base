@@ -66,7 +66,7 @@ public:
 
     void onDumpReport(const ConfigKey& key, const int64_t dumpTimeNs,
                       const bool include_current_partial_bucket, const bool erase_data,
-                      const DumpReportReason dumpReportReason, 
+                      const DumpReportReason dumpReportReason,
                       const DumpLatency dumpLatency,
                       vector<uint8_t>* outData);
     void onDumpReport(const ConfigKey& key, const int64_t dumpTimeNs,
@@ -207,6 +207,9 @@ private:
     // Last time we wrote data to disk.
     int64_t mLastWriteTimeNs = 0;
 
+    // Last time we wrote active metrics to disk.
+    int64_t mLastActiveMetricsWriteNs = 0;
+
 #ifdef VERY_VERBOSE_PRINTING
     bool mPrintAllLogs = false;
 #endif
@@ -257,6 +260,9 @@ private:
     FRIEND_TEST(AlarmE2eTest, TestMultipleAlarms);
     FRIEND_TEST(ConfigTtlE2eTest, TestCountMetric);
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetric);
+    FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation);
+    FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations);
+    FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations);
 };
 
 }  // namespace statsd

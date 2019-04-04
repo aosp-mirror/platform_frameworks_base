@@ -116,16 +116,11 @@ public class TileTest {
     }
 
     @Test
-    public void isIconTintable_noMetadata_shouldReturnPackageNameCheck() {
-        final Tile tile1 = new Tile(mActivityInfo, "category");
-        assertThat(tile1.isIconTintable(RuntimeEnvironment.application)).isFalse();
+    public void isIconTintable_noTintableMetadata_shouldReturnFalse() {
+        final Tile tile = new Tile(mActivityInfo, "category");
+        mActivityInfo.metaData.putInt(META_DATA_PREFERENCE_ICON, android.R.drawable.ic_info);
 
-        final ActivityInfo activityInfo = new ActivityInfo();
-        activityInfo.packageName = "blah";
-        activityInfo.name = "abc";
-
-        final Tile tile2 = new Tile(activityInfo, "category");
-        assertThat(tile2.isIconTintable(RuntimeEnvironment.application)).isTrue();
+        assertThat(tile.isIconTintable(RuntimeEnvironment.application)).isFalse();
     }
 
     @Test

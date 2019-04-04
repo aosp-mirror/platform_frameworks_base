@@ -127,6 +127,7 @@ extern int register_android_app_admin_SecurityLog(JNIEnv* env);
 extern int register_android_content_AssetManager(JNIEnv* env);
 extern int register_android_util_EventLog(JNIEnv* env);
 extern int register_android_util_StatsLog(JNIEnv* env);
+extern int register_android_util_StatsLogInternal(JNIEnv* env);
 extern int register_android_util_Log(JNIEnv* env);
 extern int register_android_util_MemoryIntArray(JNIEnv* env);
 extern int register_android_util_PathParser(JNIEnv* env);
@@ -226,7 +227,6 @@ extern int register_android_content_res_Configuration(JNIEnv* env);
 extern int register_android_animation_PropertyValuesHolder(JNIEnv *env);
 extern int register_android_security_Scrypt(JNIEnv *env);
 extern int register_com_android_internal_content_NativeLibraryHelper(JNIEnv *env);
-extern int register_com_android_internal_net_NetworkStatsFactory(JNIEnv *env);
 extern int register_com_android_internal_os_AtomicDirectory(JNIEnv *env);
 extern int register_com_android_internal_os_ClassLoaderFactory(JNIEnv* env);
 extern int register_com_android_internal_os_FuseAppLoop(JNIEnv* env);
@@ -1126,6 +1126,12 @@ void AndroidRuntime::start(const char* className, const Vector<String8>& options
         return;
     }
 
+    const char* tzdataRootDir = getenv("ANDROID_TZDATA_ROOT");
+    if (tzdataRootDir == NULL) {
+        LOG_FATAL("No tz data directory specified with ANDROID_TZDATA_ROOT environment variable.");
+        return;
+    }
+
     //const char* kernelHack = getenv("LD_ASSUME_KERNEL");
     //ALOGD("Found LD_ASSUME_KERNEL='%s'\n", kernelHack);
 
@@ -1394,6 +1400,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_util_MemoryIntArray),
     REG_JNI(register_android_util_PathParser),
     REG_JNI(register_android_util_StatsLog),
+    REG_JNI(register_android_util_StatsLogInternal),
     REG_JNI(register_android_app_admin_SecurityLog),
     REG_JNI(register_android_content_AssetManager),
     REG_JNI(register_android_content_StringBlock),
@@ -1561,7 +1568,6 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_animation_PropertyValuesHolder),
     REG_JNI(register_android_security_Scrypt),
     REG_JNI(register_com_android_internal_content_NativeLibraryHelper),
-    REG_JNI(register_com_android_internal_net_NetworkStatsFactory),
     REG_JNI(register_com_android_internal_os_AtomicDirectory),
     REG_JNI(register_com_android_internal_os_FuseAppLoop),
 };

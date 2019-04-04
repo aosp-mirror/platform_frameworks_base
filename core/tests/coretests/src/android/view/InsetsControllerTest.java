@@ -19,13 +19,13 @@ package android.view;
 import static android.view.InsetsState.TYPE_IME;
 import static android.view.InsetsState.TYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.TYPE_TOP_BAR;
-
 import static android.view.WindowInsets.Type.topBar;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNull;
-import static junit.framework.Assert.assertTrue;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
@@ -53,6 +53,15 @@ import org.mockito.ArgumentCaptor;
 
 import java.util.concurrent.CountDownLatch;
 
+/**
+ * Tests for {@link InsetsController}.
+ *
+ * <p>Build/Install/Run:
+ *  atest FrameworksCoreTests:InsetsControllerTest
+ *
+ * <p>This test class is a part of Window Manager Service tests and specified in
+ * {@link com.android.server.wm.test.filters.FrameworksTestsFilter}.
+ */
 @Presubmit
 @FlakyTest(detail = "Promote once confirmed non-flaky")
 @RunWith(AndroidJUnit4.class)

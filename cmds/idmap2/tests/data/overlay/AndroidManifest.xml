@@ -16,6 +16,7 @@
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
     package="test.overlay">
+    <application android:hasCode="false"/>
     <overlay
         android:targetPackage="test.target"
         android:targetName="TestResources"/>

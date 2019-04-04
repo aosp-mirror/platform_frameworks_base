@@ -34,10 +34,12 @@ import android.util.Pair;
 
 import com.android.internal.util.IndentingPrintWriter;
 
+import libcore.io.IoUtils;
+
 import java.io.Closeable;
 import java.io.FileDescriptor;
-import java.io.InterruptedIOException;
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -48,17 +50,13 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-
-import libcore.io.IoUtils;
-
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * NetworkDiagnostics
@@ -186,7 +184,7 @@ public class NetworkDiagnostics {
         // TODO: we could use mLinkProperties.isReachable(TEST_DNS6) here, because we won't set any
         // DNS servers for which isReachable() is false, but since this is diagnostic code, be extra
         // careful.
-        if (mLinkProperties.hasGlobalIPv6Address() || mLinkProperties.hasIPv6DefaultRoute()) {
+        if (mLinkProperties.hasGlobalIpv6Address() || mLinkProperties.hasIpv6DefaultRoute()) {
             mLinkProperties.addDnsServer(TEST_DNS6);
         }
 

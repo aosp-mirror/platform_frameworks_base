@@ -153,7 +153,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     /** @see WindowContainer#fillsParent() */
     private boolean mFillsParent;
-    boolean layoutConfigChanges;
     boolean mShowForAllUsers;
     int mTargetSdk;
 
@@ -337,7 +336,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     AppWindowToken(WindowManagerService service, IApplicationToken token,
             ComponentName activityComponent, boolean voiceInteraction, DisplayContent dc,
             long inputDispatchingTimeoutNanos, boolean fullscreen, boolean showForAllUsers,
-            int targetSdk, int orientation, int rotationAnimationHint, int configChanges,
+            int targetSdk, int orientation, int rotationAnimationHint,
             boolean launchTaskBehind, boolean alwaysFocusable,
             ActivityRecord activityRecord) {
         this(service, token, activityComponent, voiceInteraction, dc, fullscreen);
@@ -348,7 +347,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         mShowForAllUsers = showForAllUsers;
         mTargetSdk = targetSdk;
         mOrientation = orientation;
-        layoutConfigChanges = (configChanges & (CONFIG_SCREEN_SIZE | CONFIG_ORIENTATION)) != 0;
         mLaunchTaskBehind = launchTaskBehind;
         mAlwaysFocusable = alwaysFocusable;
         mRotationAnimationHint = rotationAnimationHint;
@@ -1627,7 +1625,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 // If the changes come from change-listener, the incoming parent configuration is
                 // still the old one. Make sure their orientations are the same to reduce computing
                 // the compatibility bounds for the intermediate state.
-                && getResolvedOverrideConfiguration().orientation == newParentConfig.orientation) {
+                && (task.mTaskRecord == null || task.mTaskRecord
+                        .getConfiguration().orientation == newParentConfig.orientation)) {
             final Rect taskBounds = task.getBounds();
             // Since we only center the activity horizontally, if only the fixed height is smaller
             // than its container, the override bounds don't need to take effect.
@@ -1763,7 +1762,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         final Rect parentAppBounds = newParentConfig.windowConfiguration.getAppBounds();
         final Rect viewportBounds = parentAppBounds != null
                 ? parentAppBounds : newParentConfig.windowConfiguration.getBounds();
-        final Rect contentBounds = getResolvedOverrideBounds();
+        final Rect appBounds = getWindowConfiguration().getAppBounds();
+        final Rect contentBounds = appBounds != null ? appBounds : getResolvedOverrideBounds();
         final float contentW = contentBounds.width();
         final float contentH = contentBounds.height();
         final float viewportW = viewportBounds.width();
@@ -1780,6 +1780,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         mSizeCompatBounds.set(contentBounds);
         mSizeCompatBounds.offsetTo(0, 0);
         mSizeCompatBounds.scale(mSizeCompatScale);
+        // The decor inset is included in height.
+        mSizeCompatBounds.bottom += viewportBounds.top;
         mSizeCompatBounds.left += offsetX;
         mSizeCompatBounds.right += offsetX;
     }
@@ -1972,7 +1974,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         final boolean surfaceReady = w.isDrawnLw()  // Regular case
                 || w.mWinAnimator.mSurfaceDestroyDeferred  // The preserved surface is still ready.
                 || w.isDragResizeChanged();  // Waiting for relayoutWindow to call preserveSurface.
-        final boolean needsLetterbox = w.isLetterboxedAppWindow() && fillsParent() && surfaceReady;
+        final boolean needsLetterbox = surfaceReady && w.isLetterboxedAppWindow() && fillsParent();
         if (needsLetterbox) {
             if (mLetterbox == null) {
                 mLetterbox = new Letterbox(() -> makeChildSurface(null));
@@ -2435,6 +2437,12 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         final boolean isSplitScreenPrimary =
                 getWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
         final boolean allowSplitScreenPrimaryAnimation = transit != TRANSIT_WALLPAPER_OPEN;
+
+        // Don't animate when the task runs recents animation.
+        final RecentsAnimationController controller = mWmService.getRecentsAnimationController();
+        if (controller != null && controller.isAnimatingTask(getTask())) {
+            return false;
+        }
 
         // We animate always if it's not split screen primary, and only some special cases in split
         // screen primary because it causes issues with stack clipping when we run an un-minimize
@@ -3122,8 +3130,17 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
     }
 
+    /** Gets the inner bounds of letterbox. The bounds will be empty if there is no letterbox. */
+    void getLetterboxInnerBounds(Rect outBounds) {
+        if (mLetterbox != null) {
+            outBounds.set(mLetterbox.getInnerFrame());
+        } else {
+            outBounds.setEmpty();
+        }
+    }
+
     /**
-     * @eturn true if there is a letterbox and any part of that letterbox overlaps with
+     * @return {@code true} if there is a letterbox and any part of that letterbox overlaps with
      * the given {@code rect}.
      */
     boolean isLetterboxOverlappingWith(Rect rect) {

@@ -74,7 +74,8 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
             timeBaseNs, currentTimeNs, mTagIds, mAllAtomMatchers, mAllConditionTrackers,
             mAllMetricProducers, mAllAnomalyTrackers, mAllPeriodicAlarmTrackers,
             mConditionToMetricMap, mTrackerToMetricMap, mTrackerToConditionMap,
-            mActivationAtomTrackerToMetricMap, mMetricIndexesWithActivation, mNoReportMetricIds);
+            mActivationAtomTrackerToMetricMap, mDeactivationAtomTrackerToMetricMap,
+            mMetricIndexesWithActivation, mNoReportMetricIds);
 
     mHashStringsInReport = config.hash_strings_in_metric_report();
     mVersionStringsInReport = config.version_strings_in_metric_report();
@@ -255,7 +256,7 @@ void MetricsManager::onDumpReport(const int64_t dumpTimeStampNs,
 
 bool MetricsManager::checkLogCredentials(const LogEvent& event) {
     if (android::util::AtomsInfo::kWhitelistedAtoms.find(event.GetTagId()) !=
-      android::util::AtomsInfo::kWhitelistedAtoms.end()) 
+      android::util::AtomsInfo::kWhitelistedAtoms.end())
     {
         return true;
     }
@@ -344,24 +345,61 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
     int64_t eventTimeNs = event.GetElapsedTimestampNs();
 
     bool isActive = mIsAlwaysActive;
-    for (int metric : mMetricIndexesWithActivation) {
-        mAllMetricProducers[metric]->flushIfExpire(eventTimeNs);
-        isActive |= mAllMetricProducers[metric]->isActive();
+
+    // Set of metrics that are still active after flushing.
+    unordered_set<int> activeMetricsIndices;
+
+    // Update state of all metrics w/ activation conditions as of eventTimeNs.
+    for (int metricIndex : mMetricIndexesWithActivation) {
+        const sp<MetricProducer>& metric = mAllMetricProducers[metricIndex];
+        metric->flushIfExpire(eventTimeNs);
+        if (metric->isActive()) {
+            // If this metric w/ activation condition is still active after
+            // flushing, remember it.
+            activeMetricsIndices.insert(metricIndex);
+        }
     }
 
-    mIsActive = isActive;
+    mIsActive = isActive || !activeMetricsIndices.empty();
 
     if (mTagIds.find(tagId) == mTagIds.end()) {
-        // not interesting...
+        // Not interesting...
         return;
     }
 
     vector<MatchingState> matcherCache(mAllAtomMatchers.size(), MatchingState::kNotComputed);
 
+    // Evaluate all atom matchers.
     for (auto& matcher : mAllAtomMatchers) {
         matcher->onLogEvent(event, mAllAtomMatchers, matcherCache);
     }
 
+    // Set of metrics that received an activation cancellation.
+    unordered_set<int> metricIndicesWithCanceledActivations;
+
+    // Determine which metric activations received a cancellation and cancel them.
+    for (const auto& it : mDeactivationAtomTrackerToMetricMap) {
+        if (matcherCache[it.first] == MatchingState::kMatched) {
+            for (int metricIndex : it.second) {
+                mAllMetricProducers[metricIndex]->cancelEventActivation(it.first);
+                metricIndicesWithCanceledActivations.insert(metricIndex);
+            }
+        }
+    }
+
+    // Determine whether any metrics are no longer active after cancelling metric activations.
+    for (const int metricIndex : metricIndicesWithCanceledActivations) {
+        const sp<MetricProducer>& metric = mAllMetricProducers[metricIndex];
+        metric->flushIfExpire(eventTimeNs);
+        if (!metric->isActive()) {
+            activeMetricsIndices.erase(metricIndex);
+        }
+    }
+
+    isActive |= !activeMetricsIndices.empty();
+
+
+    // Determine which metric activations should be turned on and turn them on
     for (const auto& it : mActivationAtomTrackerToMetricMap) {
         if (matcherCache[it.first] == MatchingState::kMatched) {
             for (int metricIndex : it.second) {
@@ -406,12 +444,12 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
         if (pair != mConditionToMetricMap.end()) {
             auto& metricList = pair->second;
             for (auto metricIndex : metricList) {
-                // metric cares about non sliced condition, and it's changed.
+                // Metric cares about non sliced condition, and it's changed.
                 // Push the new condition to it directly.
                 if (!mAllMetricProducers[metricIndex]->isConditionSliced()) {
                     mAllMetricProducers[metricIndex]->onConditionChanged(conditionCache[i],
                                                                          eventTimeNs);
-                    // metric cares about sliced conditions, and it may have changed. Send
+                    // Metric cares about sliced conditions, and it may have changed. Send
                     // notification, and the metric can query the sliced conditions that are
                     // interesting to it.
                 } else {

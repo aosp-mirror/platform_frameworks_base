@@ -28,7 +28,7 @@ import "frameworks/base/core/proto/android/os/worksource.proto";
 import "frameworks/base/core/proto/android/providers/settings.proto";
 import "frameworks/base/core/proto/android/server/wirelesschargerdetector.proto";
 import "frameworks/base/core/proto/android/view/enums.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 message PowerManagerServiceDumpProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;

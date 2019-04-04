@@ -21,6 +21,7 @@
     <string name="config_systemUIFactoryComponent" translatable="false">
         com.android.systemui.CarSystemUIFactory
     </string>
+
     <bool name="config_enableFullscreenUserSwitcher">true</bool>
 
     <!-- configure which system ui bars should be displayed -->
@@ -28,30 +29,12 @@
     <bool name="config_enableRightNavigationBar">false</bool>
     <bool name="config_enableBottomNavigationBar">true</bool>
 
-    <!-- SystemUI Services: The classes of the stuff to start. This is duplicated from core
-         SystemUi b/c it can't be overlayed at this level for now
-    -->
-    <string-array name="config_systemUIServiceComponents" translatable="false">
-        <item>com.android.systemui.Dependency$DependencyCreator</item>
-        <item>com.android.systemui.util.NotificationChannels</item>
-        <item>com.android.systemui.notifications.NotificationsUI</item>
-        <item>com.android.systemui.statusbar.CommandQueue$CommandQueueStart</item>
-        <item>com.android.systemui.keyguard.KeyguardViewMediator</item>
-        <item>com.android.systemui.recents.Recents</item>
-        <item>com.android.systemui.volume.VolumeUI</item>
-        <item>com.android.systemui.stackdivider.Divider</item>
-        <item>com.android.systemui.SystemBars</item>
-        <item>com.android.systemui.usb.StorageNotification</item>
-        <item>com.android.systemui.power.PowerUI</item>
-        <item>com.android.systemui.media.RingtonePlayer</item>
-        <item>com.android.systemui.keyboard.KeyboardUI</item>
-        <item>com.android.systemui.pip.PipUI</item>
-        <item>com.android.systemui.shortcut.ShortcutKeyDispatcher</item>
-        <item>@string/config_systemUIVendorServiceComponent</item>
-        <item>com.android.systemui.util.leak.GarbageMonitor$Service</item>
-        <item>com.android.systemui.LatencyTester</item>
-        <item>com.android.systemui.globalactions.GlobalActionsComponent</item>
-        <item>com.android.systemui.ScreenDecorations</item>
-        <item>com.android.systemui.SliceBroadcastRelayHandler</item>
-    </string-array>
+    <bool name="config_hideNavWhenKeyguardBouncerShown">true</bool>
+    <bool name="config_enablePersistentDockedActivity">false</bool>
+    <string name="config_persistentDockedActivityIntentUri" translatable="false"></string>
+
+    <!-- How many icons may be shown at once in the system bar. Includes any
+         slots that may be reused for things like IME control. -->
+    <integer name="config_maxNotificationIcons">0</integer>
+
 </resources>

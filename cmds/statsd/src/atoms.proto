@@ -40,6 +40,8 @@ import "frameworks/base/core/proto/android/server/job/enums.proto";
 import "frameworks/base/core/proto/android/server/location/enums.proto";
 import "frameworks/base/core/proto/android/service/procstats_enum.proto";
 import "frameworks/base/core/proto/android/service/usb.proto";
+import "frameworks/base/core/proto/android/stats/connectivity/network_stack.proto";
+import "frameworks/base/core/proto/android/stats/connectivity/resolv_stats.proto";
 import "frameworks/base/core/proto/android/stats/enums.proto";
 import "frameworks/base/core/proto/android/stats/docsui/docsui_enums.proto";
 import "frameworks/base/core/proto/android/stats/devicepolicy/device_policy.proto";
@@ -186,7 +188,7 @@ message Atom {
         WifiEnabledStateChanged wifi_enabled_state_changed = 113;
         WifiRunningStateChanged wifi_running_state_changed = 114;
         AppCompacted app_compacted = 115;
-        NetworkDnsEventReported network_dns_event_reported = 116;
+        NetworkDnsEventReported network_dns_event_reported = 116 [(log_from_module) = "resolv"];
         DocsUIPickerLaunchedFromReported docs_ui_picker_launched_from_reported = 117;
         DocsUIPickResultReported docs_ui_pick_result_reported = 118;
         DocsUISearchModeReported docs_ui_search_mode_reported = 119;
@@ -252,10 +254,16 @@ message Atom {
         StyleUIChanged style_ui_changed = 179;
         PrivacyIndicatorsInteracted privacy_indicators_interacted = 180;
         AppInstallOnExternalStorageReported app_install_on_external_storage_reported = 181;
+        NetworkStackReported network_stack_reported = 182;
+        AppMovedStorageReported app_moved_storage_reported = 183;
+        BiometricEnrolled biometric_enrolled = 184;
+        SystemServerWatchdogOccurred system_server_watchdog_occurred = 185;
+        TombStoneOccurred tomb_stone_occurred = 186;
+        BluetoothClassOfDeviceReported bluetooth_class_of_device_reported = 187;
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10057
+    // Next: 10058
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000;
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001;
@@ -314,6 +322,7 @@ message Atom {
         GpuStatsGlobalInfo gpu_stats_global_info = 10054;
         GpuStatsAppInfo gpu_stats_app_info = 10055;
         SystemIonHeapSize system_ion_heap_size = 10056;
+        AppsOnExternalStorageInfo apps_on_external_storage_info = 10057;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -1397,7 +1406,7 @@ message BluetoothConnectionStateChanged {
     // Currently is last two bytes of a hash of a device level ID and
     // the mac address of the bluetooth device that is connected.
     // Deprecated: use obfuscated_id instead, this one is always 0 for Q+
-    optional int32 OBSOLETE_obfuscated_id = 2 [deprecated = true];
+    optional int32 obfuscated_id = 2 [deprecated = true];
     // The profile that is connected. Eg. GATT, A2DP, HEADSET.
     // From android.bluetooth.BluetoothAdapter.java
     // Default: 0 when not used
@@ -1408,7 +1417,7 @@ message BluetoothConnectionStateChanged {
     // Hash algorithm: HMAC-SHA256
     // Size: 32 byte
     // Default: null or empty if the device identifier is not known
-    optional bytes obfuscated_id = 4 [(android.os.statsd.log_mode) = MODE_BYTES];
+    optional bytes new_obfuscated_id = 4 [(android.os.statsd.log_mode) = MODE_BYTES];
 }
 
 /**
@@ -2065,6 +2074,9 @@ message BluetoothClassicPairingEventReported {
     // HCI reason code associated with this event
     // Default: STATUS_UNKNOWN
     optional android.bluetooth.hci.StatusEnum reason_code = 6;
+    // A status value related to this specific event
+    // Default: 0
+    optional int64 event_value = 7;
 }
 
 /**
@@ -2128,6 +2140,29 @@ message BluetoothSocketConnectionStateChanged {
     optional int32 server_port = 8;
     // Whether this is a server listener socket
     optional android.bluetooth.SocketRoleEnum is_server = 9;
+}
+
+/**
+ * Logs when Class of Device (CoD) value is learnt for a device during pairing or connection
+ *
+ * Logged from:
+ *   packages/apps/Bluetooth/src/com/android/bluetooth/btservice/BondStateMachine.java
+ *   packages/apps/Bluetooth/src/com/android/bluetooth/btservice/RemoteDevices.java
+ *
+ */
+message BluetoothClassOfDeviceReported {
+    // An identifier that can be used to match events for this device.
+    // Currently, this is a salted hash of the MAC address of this Bluetooth device.
+    // Salt: Randomly generated 256 bit value
+    // Hash algorithm: HMAC-SHA256
+    // Size: 32 byte
+    // Default: null or empty if this is a server listener socket
+    optional bytes obfuscated_id = 1 [(android.os.statsd.log_mode) = MODE_BYTES];
+    // Class of Device (CoD) value including both Major, Minor device class and service class
+    // Defined in: https://www.bluetooth.com/specifications/assigned-numbers/baseband
+    // Also defined in: https://developer.android.com/reference/android/bluetooth/BluetoothClass
+    // Default: 0
+    optional int32 class_of_device = 2;
 }
 
 /**
@@ -2428,6 +2463,8 @@ message TouchEventReported {
     optional float latency_mean_micros = 3;
     // Standard deviation
     optional float latency_stdev_micros = 4;
+    // Number of touch events (input_event) in this report
+    optional int32 count = 5;
 }
 
 /**
@@ -3145,6 +3182,23 @@ message BiometricSystemHealthIssueDetected {
     optional android.hardware.biometrics.IssueEnum issue = 2;
 }
 
+/**
+ * Logs when a biometric enrollment occurs.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/biometrics
+ */
+message BiometricEnrolled {
+    // Biometric modality that was used.
+    optional android.hardware.biometrics.ModalityEnum modality = 1;
+    // The associated user. Eg: 0 for owners, 10+ for others. Defined in android/os/UserHandle.java
+    optional int32 user = 2;
+    // The amount of time the enrollment took in milliseconds.
+    optional int64 latency_millis = 3;
+    // Whether or not the enrollment was successful.
+    optional bool success = 4;
+}
+
 message Notification {
 
     // Type of notification event.
@@ -3271,6 +3325,9 @@ message BinaryPushStateChanged {
         INSTALLER_ROLLBACK_CANCEL_STAGED_DELETE_SESSION_INITIATED = 18;
         INSTALLER_ROLLBACK_CANCEL_STAGED_DELETE_SESSION_SUCCESS = 19;
         INSTALLER_ROLLBACK_CANCEL_STAGED_DELETE_SESSION_FAILURE = 20;
+        INSTALL_STAGED_CANCEL_REQUESTED = 21;
+        INSTALL_STAGED_CANCEL_SUCCESS = 22;
+        INSTALL_STAGED_CANCEL_FAILURE = 23;
     }
     optional State state = 6;
     // Possible experiment ids for monitoring this push.
@@ -3419,7 +3476,6 @@ message HiddenApiUsed {
  * - When user clicks privacy chip
  * - How does the user exit the Privacy Dialog
  * Logged from:
- *   packages/SystemUI/src/com/android/systemui/privacy/OngoingPrivacyDialog.kt
  *   packages/SystemUI/src/com/android/systemui/qs/QuickStatusBarHeader.java
  */
 message PrivacyIndicatorsInteracted {
@@ -3437,6 +3493,47 @@ message PrivacyIndicatorsInteracted {
 
     // Used if the type is LINE_ITEM
     optional string package_name = 2;
+}
+
+/**
+ * Logs information about a package that is moved from the internal to external storage and vice
+ * versa.
+ * It logs the package name, the type of the external storage where the package is installed
+ * (if moved to external storage, or UNKNOWN if moved to internal storage),
+ * and the move type: if it's from internal to external or the other way around.
+ *
+ * Logged from:
+        frameworks/base/services/core/java/com/android/server/pm/PackageManagerService.java
+ */
+message AppMovedStorageReported {
+    enum MoveType {
+        UNKNOWN = 0;
+        TO_EXTERNAL = 1;
+        TO_INTERNAL = 2;
+    }
+    // The type of the external storage.
+    optional android.stats.storage.ExternalStorageType external_storage_type = 1;
+    // The type of move.
+    optional MoveType move_type = 2;
+    // The name of the package that was moved.
+    optional string package_name = 3;
+}
+
+/**
+ * Logs when system server watchdog occurs.
+ * Logged from:
+ *      frameworks/base/services/core/java/com/android/server/Watchdog.java
+ */
+message SystemServerWatchdogOccurred {
+    optional string subject = 1;
+}
+
+/**
+ * Logs when new file added to tombstones.
+ * Logged from:
+ *      frameworks/base/core/java/com/android/server/BootReceiver.java
+ */
+message TombStoneOccurred {
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -4943,52 +5040,38 @@ message AppCompacted {
 }
 
 /**
- * Logs the latency period(in microseconds) and the return code of
- * the DNS(Domain Name System) lookups.
- * These 4 methods(GETADDRINFO,GETHOSTBYNAME,GETHOSTBYADDR,RES_NSEND)
- * to get info(address or hostname) from DNS server(or DNS cache).
- * Logged from:
- *   /system/netd/server/DnsProxyListener.cpp
+ * Logs a DNS lookup operation initiated by the system resolver on behalf of an application
+ * invoking native APIs such as getaddrinfo() or Java APIs such as Network#getAllByName().
+ *
+ * The top-level message represents the entire lookup operation, which may result one or more
+ * queries to the recursive DNS resolvers. Those are individually logged in DnsQueryEvent to
+ * enable computing error rates and network latency and timeouts broken up by query type,
+ * transport, network interface, etc.
  */
 message NetworkDnsEventReported {
-    // The types of the DNS lookups, as defined in
-    //system/netd/server/binder/android/net/metrics/INetdEventListener.aidl
-    enum EventType {
-        EVENT_UNKNOWN = 0;
-        EVENT_GETADDRINFO = 1;
-        EVENT_GETHOSTBYNAME = 2;
-        EVENT_GETHOSTBYADDR = 3;
-        EVENT_RES_NSEND = 4;
-    }
-    optional EventType event_type = 1;
 
-    // The return value of the DNS resolver for each DNS lookups.
-    //bionic/libc/include/netdb.h
-    //system/netd/resolv/include/netd_resolv/resolv.h
-    enum ReturnCode {
-        EAI_NO_ERROR = 0;
-        EAI_ADDRFAMILY = 1;
-        EAI_AGAIN = 2;
-        EAI_BADFLAGS = 3;
-        EAI_FAIL = 4;
-        EAI_FAMILY = 5;
-        EAI_MEMORY = 6;
-        EAI_NODATA = 7;
-        EAI_NONAME = 8;
-        EAI_SERVICE = 9;
-        EAI_SOCKTYPE = 10;
-        EAI_SYSTEM = 11;
-        EAI_BADHINTS = 12;
-        EAI_PROTOCOL = 13;
-        EAI_OVERFLOW = 14;
-        RESOLV_TIMEOUT = 255;
-        EAI_MAX = 256;
-    }
-    optional ReturnCode return_code = 2;
+    optional android.stats.connectivity.EventType event_type = 1;
 
-    // The latency period(in microseconds) it took for this DNS lookup to complete.
+    optional android.stats.connectivity.ReturnCode return_code = 2;
+
+    // The latency in microseconds of the entire DNS lookup operation.
     optional int32 latency_micros = 3;
+
+    optional android.stats.connectivity.DnsQueryEventRe dns_query_event_re = 4 [(log_mode) = MODE_BYTES];
+
+    // ResNSend flags defined in android/multinetwork.h
+    optional int32 flags = 5;
+
+    optional android.net.NetworkCapabilitiesProto.Transport network_type = 6;
+
+    // The DNS over TLS mode on a specific netId.
+    optional android.stats.connectivity.PrivateDnsModes private_dns_modes = 7;
+
+    // Additional pass-through fields opaque to statsd.
+    // The DNS resolver Mainline module can add new fields here without requiring an OS update.
+    optional android.stats.connectivity.DnsCallEvent dns_call_event = 8 [(log_mode) = MODE_BYTES];
 }
+
 
 /**
  * Logs when a data stall event occurs.
@@ -5550,6 +5633,9 @@ message BubbleUIChanged {
     // Normalized screen position of the bubble stack. The range is between 0 and 1.
     optional float normalized_x_position = 7;
     optional float normalized_y_position = 8;
+
+    // Whether the bubble is unread. If it is unread, a dot is shown in the bubble stack icon.
+    optional bool is_unread = 9;
 }
 
 /**
@@ -5732,6 +5818,9 @@ message TrainInfo {
         INSTALLER_ROLLBACK_CANCEL_STAGED_DELETE_SESSION_INITIATED = 18;
         INSTALLER_ROLLBACK_CANCEL_STAGED_DELETE_SESSION_SUCCESS = 19;
         INSTALLER_ROLLBACK_CANCEL_STAGED_DELETE_SESSION_FAILURE = 20;
+        INSTALL_STAGED_CANCEL_REQUESTED = 21;
+        INSTALL_STAGED_CANCEL_SUCCESS = 22;
+        INSTALL_STAGED_CANCEL_FAILURE = 23;
     }
     optional Status status = 4;
 }
@@ -5848,4 +5937,29 @@ message GpuStatsAppInfo {
 message SystemIonHeapSize {
     // Size of the system ion heap in bytes.
     optional int64 size_in_bytes = 1;
+}
+
+/**
+ * Push network stack events.
+ *
+ * Log from:
+ *     frameworks/base/packages/NetworkStack/
+ */
+message NetworkStackReported {
+    // The id that indicates the event reported from NetworkStack.
+    optional int32 event_id = 1;
+    // The data for the reported events.
+    optional android.stats.connectivity.NetworkStackEventData network_stack_event = 2 [(log_mode) = MODE_BYTES];
+}
+
+/**
+ * Logs the apps that are installed on the external storage.
+ * Pulled from:
+ *   StatsCompanionService
+ */
+message AppsOnExternalStorageInfo {
+    // The type of the external storage.
+    optional android.stats.storage.ExternalStorageType external_storage_type = 1;
+    // The name of the package that is installed on the external storage.
+    optional string package_name = 2;
 }

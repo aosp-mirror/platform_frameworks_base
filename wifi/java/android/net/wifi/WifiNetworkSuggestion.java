@@ -283,10 +283,10 @@ public final class WifiNetworkSuggestion implements Parcelable {
 
         /**
          * Specify the priority of this network among other network suggestions provided by the same
-         * app (priorities have no impact on suggestions by different apps). The lower the number,
-         * the higher the priority (i.e value of 0 = highest priority).
+         * app (priorities have no impact on suggestions by different apps). The higher the number,
+         * the higher the priority (i.e value of 0 = lowest priority).
          * <p>
-         * <li>If not set, defaults to -1 (i.e unassigned priority).</li>
+         * <li>If not set, defaults a lower priority than any assigned priority.</li>
          *
          * @param priority Integer number representing the priority among suggestions by the app.
          * @return Instance of {@link Builder} to enable chaining of the builder method.
@@ -374,12 +374,11 @@ public final class WifiNetworkSuggestion implements Parcelable {
         }
 
         /**
-         * Create a network suggestion object use in
+         * Create a network suggestion object for use in
          * {@link WifiManager#addNetworkSuggestions(List)}.
          *
-         * See {@link WifiNetworkSuggestion}.
-         *<p>
-         * Note: Apps can set a combination of SSID using {@link #setSsid(String)} and BSSID
+         *<p class="note">
+         * <b>Note:</b> Apps can set a combination of SSID using {@link #setSsid(String)} and BSSID
          * using {@link #setBssid(MacAddress)} to provide more fine grained network suggestions to
          * the platform.
          * </p>
@@ -387,7 +386,8 @@ public final class WifiNetworkSuggestion implements Parcelable {
          * For example:
          * To provide credentials for one open, one WPA2 and one WPA3 network with their
          * corresponding SSID's:
-         * {@code
+         *
+         * <pre>{@code
          * final WifiNetworkSuggestion suggestion1 =
          *      new Builder()
          *      .setSsid("test111111")
@@ -403,19 +403,20 @@ public final class WifiNetworkSuggestion implements Parcelable {
          *      .setWpa3Passphrase("test6789")
          *      .build()
          * final List<WifiNetworkSuggestion> suggestionsList =
-         *      new ArrayList<WifiNetworkSuggestion> &#123;{
+         *      new ArrayList<WifiNetworkSuggestion> { {
          *          add(suggestion1);
          *          add(suggestion2);
          *          add(suggestion3);
-         *      }};
+         *      } };
          * final WifiManager wifiManager =
          *      context.getSystemService(Context.WIFI_SERVICE);
          * wifiManager.addNetworkSuggestions(suggestionsList);
-         * ...
-         * }
+         * // ...
+         * }</pre>
          *
-         * @return Instance of {@link WifiNetworkSuggestion}.
-         * @throws IllegalStateException on invalid params set.
+         * @return Instance of {@link WifiNetworkSuggestion}
+         * @throws IllegalStateException on invalid params set
+         * @see WifiNetworkSuggestion
          */
         public @NonNull WifiNetworkSuggestion build() {
             if (mSsid == null) {

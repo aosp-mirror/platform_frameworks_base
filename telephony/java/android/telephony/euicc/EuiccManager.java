@@ -118,9 +118,9 @@ public class EuiccManager {
     /**
      * Intent action sent by system apps (such as the Settings app) to the Telephony framework to
      * enable or disable a subscription. Must be accompanied with {@link #EXTRA_SUBSCRIPTION_ID} and
-     * {@link #EXTRA_ENABLE_SUBSCRIPTION}.
+     * {@link #EXTRA_ENABLE_SUBSCRIPTION}, and optionally {@link #EXTRA_FROM_SUBSCRIPTION_ID}.
      *
-     * Requires the caller to be a privileged process with the
+     * <p>Requires the caller to be a privileged process with the
      * {@link android.permission#CALL_PRIVILEGED} permission for the intent to reach the Telephony
      * stack.
      *
@@ -143,7 +143,7 @@ public class EuiccManager {
      * Intent action sent by system apps (such as the Settings app) to the Telephony framework to
      * delete a subscription. Must be accompanied with {@link #EXTRA_SUBSCRIPTION_ID}.
      *
-     * Requires the caller to be a privileged process with the
+     * <p>Requires the caller to be a privileged process with the
      * {@link android.permission#CALL_PRIVILEGED} permission for the intent to reach the Telephony
      * stack.
      *
@@ -167,7 +167,7 @@ public class EuiccManager {
      * rename a subscription. Must be accompanied with {@link #EXTRA_SUBSCRIPTION_ID} and
      * {@link #EXTRA_SUBSCRIPTION_NICKNAME}.
      *
-     * Requires the caller to be a privileged process with the
+     * <p>Requires the caller to be a privileged process with the
      * {@link android.permission#CALL_PRIVILEGED} permission for the intent to reach the Telephony
      * stack.
      *
@@ -316,6 +316,22 @@ public class EuiccManager {
     @SystemApi
     public static final String EXTRA_SUBSCRIPTION_NICKNAME =
             "android.telephony.euicc.extra.SUBSCRIPTION_NICKNAME";
+
+    /**
+     * Key for an extra set on {@link #ACTION_TOGGLE_SUBSCRIPTION_PRIVILEGED} providing the ID of
+     * the subscription we're toggling from. This extra is optional and is only used for UI
+     * purposes by the underlying eUICC service (i.e. the LPA app), such as displaying a dialog
+     * titled "Switch X with Y". If set, the provided subscription will be used as the "from"
+     * subscription in UI (the "X" in the dialog example). Otherwise, the currently active
+     * subscription that will be disabled is the "from" subscription.
+     *
+     * <p>Expected type of the extra data: int
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_FROM_SUBSCRIPTION_ID =
+            "android.telephony.euicc.extra.FROM_SUBSCRIPTION_ID";
 
     /**
      * Optional meta-data attribute for a carrier app providing an icon to use to represent the
@@ -469,7 +485,7 @@ public class EuiccManager {
     public boolean isEnabled() {
         // In the future, this may reach out to IEuiccController (if non-null) to check any dynamic
         // restrictions.
-        return getIEuiccController() != null;
+        return getIEuiccController() != null && refreshCardIdIfUninitialized();
     }
 
     /**
@@ -483,7 +499,7 @@ public class EuiccManager {
      */
     @Nullable
     public String getEid() {
-        if (!refreshCardIdIfUninitialized()) {
+        if (!isEnabled()) {
             return null;
         }
         try {
@@ -506,7 +522,7 @@ public class EuiccManager {
     @SystemApi
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public int getOtaStatus() {
-        if (!refreshCardIdIfUninitialized()) {
+        if (!isEnabled()) {
             return EUICC_OTA_STATUS_UNAVAILABLE;
         }
         try {
@@ -541,7 +557,7 @@ public class EuiccManager {
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void downloadSubscription(DownloadableSubscription subscription,
             boolean switchAfterDownload, PendingIntent callbackIntent) {
-        if (!refreshCardIdIfUninitialized()) {
+        if (!isEnabled()) {
             sendUnavailableError(callbackIntent);
             return;
         }
@@ -603,7 +619,7 @@ public class EuiccManager {
     @SystemApi
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void continueOperation(Intent resolutionIntent, Bundle resolutionExtras) {
-        if (!refreshCardIdIfUninitialized()) {
+        if (!isEnabled()) {
             PendingIntent callbackIntent =
                     resolutionIntent.getParcelableExtra(
                             EuiccManager.EXTRA_EMBEDDED_SUBSCRIPTION_RESOLUTION_CALLBACK_INTENT);
@@ -640,7 +656,7 @@ public class EuiccManager {
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void getDownloadableSubscriptionMetadata(
             DownloadableSubscription subscription, PendingIntent callbackIntent) {
-        if (!refreshCardIdIfUninitialized()) {
+        if (!isEnabled()) {
             sendUnavailableError(callbackIntent);
             return;
         }
@@ -670,7 +686,7 @@ public class EuiccManager {
     @SystemApi
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void getDefaultDownloadableSubscriptionList(PendingIntent callbackIntent) {
-        if (!refreshCardIdIfUninitialized()) {
+        if (!isEnabled()) {
             sendUnavailableError(callbackIntent);
             return;
         }
@@ -689,7 +705,7 @@ public class EuiccManager {
      */
     @Nullable
     public EuiccInfo getEuiccInfo() {
-        if (!refreshCardIdIfUninitialized()) {
+        if (!isEnabled()) {
             return null;
         }
         try {
@@ -714,7 +730,7 @@ public class EuiccManager {
      */
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void deleteSubscription(int subscriptionId, PendingIntent callbackIntent) {
-        if (!refreshCardIdIfUninitialized()) {
+        if (!isEnabled()) {
             sendUnavailableError(callbackIntent);
             return;
         }
@@ -754,7 +770,7 @@ public class EuiccManager {
      */
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void switchToSubscription(int subscriptionId, PendingIntent callbackIntent) {
-        if (!refreshCardIdIfUninitialized()) {
+        if (!isEnabled()) {
             sendUnavailableError(callbackIntent);
             return;
         }
@@ -780,7 +796,7 @@ public class EuiccManager {
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void updateSubscriptionNickname(
             int subscriptionId, @Nullable String nickname, @NonNull PendingIntent callbackIntent) {
-        if (!refreshCardIdIfUninitialized()) {
+        if (!isEnabled()) {
             sendUnavailableError(callbackIntent);
             return;
         }
@@ -804,7 +820,7 @@ public class EuiccManager {
     @SystemApi
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void eraseSubscriptions(PendingIntent callbackIntent) {
-        if (!refreshCardIdIfUninitialized()) {
+        if (!isEnabled()) {
             sendUnavailableError(callbackIntent);
             return;
         }
@@ -834,7 +850,7 @@ public class EuiccManager {
      * @hide
      */
     public void retainSubscriptionsForFactoryReset(PendingIntent callbackIntent) {
-        if (!refreshCardIdIfUninitialized()) {
+        if (!isEnabled()) {
             sendUnavailableError(callbackIntent);
             return;
         }

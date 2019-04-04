@@ -17,7 +17,6 @@
 package android.accessibilityservice;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -76,13 +75,16 @@ public final class AccessibilityButtonController {
      * available to the calling service, {@code false} otherwise
      */
     public boolean isAccessibilityButtonAvailable() {
-        try {
-            return mServiceConnection.isAccessibilityButtonAvailable();
-        } catch (RemoteException re) {
-            Slog.w(LOG_TAG, "Failed to get accessibility button availability.", re);
-            re.rethrowFromSystemServer();
-            return false;
+        if (mServiceConnection != null) {
+            try {
+                return mServiceConnection.isAccessibilityButtonAvailable();
+            } catch (RemoteException re) {
+                Slog.w(LOG_TAG, "Failed to get accessibility button availability.", re);
+                re.rethrowFromSystemServer();
+                return false;
+            }
         }
+        return false;
     }
 
     /**

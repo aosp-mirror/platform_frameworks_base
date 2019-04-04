@@ -77,15 +77,20 @@
         android:contentDescription="@string/accessibility_phone_button"
         android:tint="?attr/wallpaperTextColor" />
 
-    <com.android.systemui.statusbar.phone.LockIcon
-        android:id="@+id/lock_icon"
+    <FrameLayout
+        android:id="@+id/lock_icon_container"
         android:layout_width="@dimen/keyguard_lock_width"
         android:layout_height="@dimen/keyguard_lock_height"
         android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="@dimen/keyguard_lock_padding"
-        android:src="@*android:drawable/ic_lock"
-        android:contentDescription="@string/accessibility_unlock_button"
-        android:scaleType="center" />
+        android:layout_marginBottom="@dimen/keyguard_lock_padding">
+        <com.android.systemui.statusbar.phone.LockIcon
+            android:id="@+id/lock_icon"
+            android:layout_width="@dimen/keyguard_lock_width"
+            android:layout_height="@dimen/keyguard_lock_height"
+            android:src="@*android:drawable/ic_lock"
+            android:contentDescription="@string/accessibility_unlock_button"
+            android:scaleType="center" />
+    </FrameLayout>
 
     <FrameLayout
         android:id="@+id/overlay_container"

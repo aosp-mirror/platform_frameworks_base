@@ -1301,6 +1301,7 @@ public class StateMachine {
      *
      * @param name of the state machine
      */
+    @UnsupportedAppUsage
     protected StateMachine(String name) {
         mSmThread = new HandlerThread(name);
         mSmThread.start();
@@ -1314,6 +1315,7 @@ public class StateMachine {
      *
      * @param name of the state machine
      */
+    @UnsupportedAppUsage
     protected StateMachine(String name, Looper looper) {
         initStateMachine(name, looper);
     }
@@ -1323,6 +1325,7 @@ public class StateMachine {
      *
      * @param name of the state machine
      */
+    @UnsupportedAppUsage
     protected StateMachine(String name, Handler handler) {
         initStateMachine(name, handler.getLooper());
     }
@@ -1678,6 +1681,7 @@ public class StateMachine {
      * @param arg2  is assigned to Message.arg2
      * @return  A Message object from the global pool
      */
+    @UnsupportedAppUsage
     public final Message obtainMessage(int what, int arg1, int arg2) {
         return Message.obtain(mSmHandler, what, arg1, arg2);
     }
@@ -1697,6 +1701,7 @@ public class StateMachine {
      * @param obj is assigned to Message.obj
      * @return  A Message object from the global pool
      */
+    @UnsupportedAppUsage
     public final Message obtainMessage(int what, int arg1, int arg2, Object obj) {
         return Message.obtain(mSmHandler, what, arg1, arg2, obj);
     }
@@ -1706,6 +1711,7 @@ public class StateMachine {
      *
      * Message is ignored if state machine has quit.
      */
+    @UnsupportedAppUsage
     public void sendMessage(int what) {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
@@ -1719,6 +1725,7 @@ public class StateMachine {
      *
      * Message is ignored if state machine has quit.
      */
+    @UnsupportedAppUsage
     public void sendMessage(int what, Object obj) {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
@@ -1732,6 +1739,7 @@ public class StateMachine {
      *
      * Message is ignored if state machine has quit.
      */
+    @UnsupportedAppUsage
     public void sendMessage(int what, int arg1) {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
@@ -1758,6 +1766,7 @@ public class StateMachine {
      *
      * Message is ignored if state machine has quit.
      */
+    @UnsupportedAppUsage
     public void sendMessage(int what, int arg1, int arg2, Object obj) {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
@@ -1771,6 +1780,7 @@ public class StateMachine {
      *
      * Message is ignored if state machine has quit.
      */
+    @UnsupportedAppUsage
     public void sendMessage(Message msg) {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
@@ -2074,6 +2084,7 @@ public class StateMachine {
      * @param pw
      * @param args
      */
+    @UnsupportedAppUsage
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println(getName() + ":");
         pw.println(" total records=" + getLogRecCount());

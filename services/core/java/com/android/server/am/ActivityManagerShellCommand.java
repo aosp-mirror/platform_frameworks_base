@@ -16,7 +16,7 @@
 
 package com.android.server.am;
 
-import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
+import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ActivityTaskManager.RESIZE_MODE_SYSTEM;
 import static android.app.ActivityTaskManager.RESIZE_MODE_USER;
@@ -306,9 +306,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         mSamplingInterval = 0;
         mAutoStop = false;
         mStreaming = false;
-        mUserId = mInternal.mUserController.handleIncomingUser(Binder.getCallingPid(),
-            Binder.getCallingUid(), defUser, false, ALLOW_FULL_ONLY,
-            "ActivityManagerShellCommand", null);
+        mUserId = defUser;
         mDisplayId = INVALID_DISPLAY;
         mWindowingMode = WINDOWING_MODE_UNDEFINED;
         mActivityType = ACTIVITY_TYPE_UNDEFINED;
@@ -430,8 +428,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 if (intent.getComponent() != null) {
                     packageName = intent.getComponent().getPackageName();
                 } else {
+                    // queryIntentActivities does not convert user id, so we convert it here first
+                    int userIdForQuery = mInternal.mUserController.handleIncomingUser(
+                            Binder.getCallingPid(), Binder.getCallingUid(), mUserId, false,
+                            ALLOW_NON_FULL, "ActivityManagerShellCommand", null);
                     List<ResolveInfo> activities = mPm.queryIntentActivities(intent, mimeType, 0,
-                            mUserId).getList();
+                            userIdForQuery).getList();
                     if (activities == null || activities.size() <= 0) {
                         getErrPrintWriter().println("Error: Intent does not match any activities: "
                                 + intent);

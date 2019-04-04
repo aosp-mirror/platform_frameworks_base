@@ -29,6 +29,8 @@ namespace android {
 namespace os {
 namespace statsd {
 
+using android::util::ProtoReader;
+
 GpuStatsPuller::GpuStatsPuller(const int tagId) : StatsPuller(tagId) {
 }
 
@@ -116,11 +118,11 @@ static std::string protoOutputStreamToByteString(ProtoOutputStream& proto) {
     if (!proto.size()) return "";
 
     std::string byteString;
-    auto iter = proto.data();
-    while (iter.readBuffer() != nullptr) {
-        const size_t toRead = iter.currentToRead();
-        byteString.append((char*)iter.readBuffer(), toRead);
-        iter.rp()->move(toRead);
+    sp<ProtoReader> reader = proto.data();
+    while (reader->readBuffer() != nullptr) {
+        const size_t toRead = reader->currentToRead();
+        byteString.append((char*)reader->readBuffer(), toRead);
+        reader->move(toRead);
     }
 
     if (byteString.size() != proto.size()) return "";

@@ -18,8 +18,8 @@ package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNull;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import android.platform.test.annotations.Presubmit;
 

@@ -197,7 +197,9 @@ public final class TextClassificationManager {
             if (mSettingsObserver != null) {
                 getApplicationContext().getContentResolver()
                         .unregisterContentObserver(mSettingsObserver);
-                DeviceConfig.removeOnPropertyChangedListener(mSettingsObserver);
+                if (ConfigParser.ENABLE_DEVICE_CONFIG) {
+                    DeviceConfig.removeOnPropertyChangedListener(mSettingsObserver);
+                }
             }
         } finally {
             super.finalize();
@@ -292,10 +294,12 @@ public final class TextClassificationManager {
                     Settings.Global.getUriFor(Settings.Global.TEXT_CLASSIFIER_CONSTANTS),
                     false /* notifyForDescendants */,
                     this);
-            DeviceConfig.addOnPropertyChangedListener(
-                    DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
-                    ActivityThread.currentApplication().getMainExecutor(),
-                    this);
+            if (ConfigParser.ENABLE_DEVICE_CONFIG) {
+                DeviceConfig.addOnPropertyChangedListener(
+                        DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
+                        ActivityThread.currentApplication().getMainExecutor(),
+                        this);
+            }
         }
 
         @Override

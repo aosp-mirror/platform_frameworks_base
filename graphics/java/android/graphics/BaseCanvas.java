@@ -112,14 +112,14 @@ public abstract class BaseCanvas {
     public void drawBitmap(@NonNull Bitmap bitmap, float left, float top, @Nullable Paint paint) {
         throwIfCannotDraw(bitmap);
         throwIfHasHwBitmapInSwMode(paint);
-        nDrawBitmap(mNativeCanvasWrapper, bitmap, left, top,
+        nDrawBitmap(mNativeCanvasWrapper, bitmap.getNativeInstance(), left, top,
                 paint != null ? paint.getNativeInstance() : 0, mDensity, mScreenDensity,
                 bitmap.mDensity);
     }
 
     public void drawBitmap(@NonNull Bitmap bitmap, @NonNull Matrix matrix, @Nullable Paint paint) {
         throwIfHasHwBitmapInSwMode(paint);
-        nDrawBitmapMatrix(mNativeCanvasWrapper, bitmap, matrix.ni(),
+        nDrawBitmapMatrix(mNativeCanvasWrapper, bitmap.getNativeInstance(), matrix.ni(),
                 paint != null ? paint.getNativeInstance() : 0);
     }
 
@@ -144,7 +144,7 @@ public abstract class BaseCanvas {
             bottom = src.bottom;
         }
 
-        nDrawBitmap(mNativeCanvasWrapper, bitmap, left, top, right, bottom,
+        nDrawBitmap(mNativeCanvasWrapper, bitmap.getNativeInstance(), left, top, right, bottom,
                 dst.left, dst.top, dst.right, dst.bottom, nativePaint, mScreenDensity,
                 bitmap.mDensity);
     }
@@ -170,7 +170,7 @@ public abstract class BaseCanvas {
             bottom = src.bottom;
         }
 
-        nDrawBitmap(mNativeCanvasWrapper, bitmap, left, top, right, bottom,
+        nDrawBitmap(mNativeCanvasWrapper, bitmap.getNativeInstance(), left, top, right, bottom,
                 dst.left, dst.top, dst.right, dst.bottom, nativePaint, mScreenDensity,
                 bitmap.mDensity);
     }
@@ -229,7 +229,7 @@ public abstract class BaseCanvas {
             // no mul by 2, since we need only 1 color per vertex
             checkRange(colors.length, colorOffset, count);
         }
-        nDrawBitmapMesh(mNativeCanvasWrapper, bitmap, meshWidth, meshHeight,
+        nDrawBitmapMesh(mNativeCanvasWrapper, bitmap.getNativeInstance(), meshWidth, meshHeight,
                 verts, vertOffset, colors, colorOffset,
                 paint != null ? paint.getNativeInstance() : 0);
     }
@@ -240,7 +240,7 @@ public abstract class BaseCanvas {
     }
 
     public void drawColor(@ColorInt int color) {
-        nDrawColor(mNativeCanvasWrapper, color, PorterDuff.Mode.SRC_OVER.nativeInt);
+        nDrawColor(mNativeCanvasWrapper, color, BlendMode.SRC_OVER.getXfermode().porterDuffMode);
     }
 
     /**
@@ -664,10 +664,11 @@ public abstract class BaseCanvas {
         }
     }
 
-    private static native void nDrawBitmap(long nativeCanvas, Bitmap bitmap, float left, float top,
-            long nativePaintOrZero, int canvasDensity, int screenDensity, int bitmapDensity);
+    private static native void nDrawBitmap(long nativeCanvas, long bitmapHandle, float left,
+            float top, long nativePaintOrZero, int canvasDensity, int screenDensity,
+            int bitmapDensity);
 
-    private static native void nDrawBitmap(long nativeCanvas, Bitmap bitmap, float srcLeft,
+    private static native void nDrawBitmap(long nativeCanvas, long bitmapHandle, float srcLeft,
             float srcTop,
             float srcRight, float srcBottom, float dstLeft, float dstTop, float dstRight,
             float dstBottom, long nativePaintOrZero, int screenDensity, int bitmapDensity);
@@ -726,10 +727,10 @@ public abstract class BaseCanvas {
             float dstLeft, float dstTop, float dstRight, float dstBottom, long nativePaintOrZero,
             int screenDensity, int bitmapDensity);
 
-    private static native void nDrawBitmapMatrix(long nativeCanvas, Bitmap bitmap,
+    private static native void nDrawBitmapMatrix(long nativeCanvas, long bitmapHandle,
             long nativeMatrix, long nativePaint);
 
-    private static native void nDrawBitmapMesh(long nativeCanvas, Bitmap bitmap, int meshWidth,
+    private static native void nDrawBitmapMesh(long nativeCanvas, long bitmapHandle, int meshWidth,
             int meshHeight, float[] verts, int vertOffset, int[] colors, int colorOffset,
             long nativePaint);
 

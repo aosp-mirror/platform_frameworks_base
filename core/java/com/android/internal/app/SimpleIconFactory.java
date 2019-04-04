@@ -16,11 +16,13 @@
 
 package com.android.internal.app;
 
+import static android.content.Context.ACTIVITY_SERVICE;
 import static android.graphics.Paint.DITHER_FLAG;
 import static android.graphics.Paint.FILTER_BITMAP_FLAG;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -42,6 +44,7 @@ import android.graphics.drawable.DrawableWrapper;
 import android.os.Process;
 import android.os.UserHandle;
 import android.util.AttributeSet;
+import android.util.Pools.SynchronizedPool;
 
 import com.android.internal.R;
 
@@ -57,6 +60,9 @@ import java.nio.ByteBuffer;
  */
 @Deprecated
 public class SimpleIconFactory {
+
+    private static final SynchronizedPool<SimpleIconFactory> sPool =
+            new SynchronizedPool<>(Runtime.getRuntime().availableProcessors());
 
     private static final int DEFAULT_WRAPPER_BACKGROUND = Color.WHITE;
     private static final float BLUR_FACTOR = 0.5f / 48;
@@ -74,10 +80,45 @@ public class SimpleIconFactory {
     private final Rect mOldBounds = new Rect();
 
     /**
+     * Obtain a SimpleIconFactory from a pool objects.
+     *
      * @deprecated Do not use, functionality will be replaced by iconloader lib eventually.
      */
     @Deprecated
-    SimpleIconFactory(Context context, int fillResIconDpi, int iconBitmapSize,
+    public static SimpleIconFactory obtain(Context ctx) {
+        SimpleIconFactory instance = sPool.acquire();
+        if (instance == null) {
+            final ActivityManager am = (ActivityManager) ctx.getSystemService(ACTIVITY_SERVICE);
+            final int iconDpi = (am == null) ? 0 : am.getLauncherLargeIconDensity();
+
+            final Resources r = ctx.getResources();
+            final int iconSize = r.getDimensionPixelSize(R.dimen.resolver_icon_size);
+            final int badgeSize = r.getDimensionPixelSize(R.dimen.resolver_badge_size);
+
+            instance = new SimpleIconFactory(ctx, iconDpi, iconSize, badgeSize);
+            instance.setWrapperBackgroundColor(Color.WHITE);
+        }
+
+        return instance;
+    }
+
+    /**
+     * Recycles the SimpleIconFactory so others may use it.
+     *
+     * @deprecated Do not use, functionality will be replaced by iconloader lib eventually.
+     */
+    @Deprecated
+    public void recycle() {
+        // Return to default background color
+        setWrapperBackgroundColor(Color.WHITE);
+        sPool.release(this);
+    }
+
+    /**
+     * @deprecated Do not use, functionality will be replaced by iconloader lib eventually.
+     */
+    @Deprecated
+    private SimpleIconFactory(Context context, int fillResIconDpi, int iconBitmapSize,
             int badgeBitmapSize) {
         mContext = context.getApplicationContext();
         mPm = mContext.getPackageManager();
@@ -170,7 +211,7 @@ public class SimpleIconFactory {
      * @deprecated Do not use, functionality will be replaced by iconloader lib eventually.
      */
     @Deprecated
-    public Bitmap createAppBadgedIconBitmap(@Nullable Drawable icon, Bitmap renderedAppIcon) {
+    Bitmap createAppBadgedIconBitmap(@Nullable Drawable icon, Bitmap renderedAppIcon) {
         // Flatten the passed in icon
         float [] scale = new float[1];
 

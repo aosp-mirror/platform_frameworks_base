@@ -348,4 +348,47 @@ public class WifiConfigurationTest {
         }
         assertTrue(exceptionThrown);
     }
+
+    /**
+     * Verifies that getSsidAndSecurityTypeString returns the correct String for networks of
+     * various different security types
+     */
+    @Test
+    public void testGetSsidAndSecurityTypeString() {
+        WifiConfiguration config = new WifiConfiguration();
+        final String mSsid = "TestAP";
+        config.SSID = mSsid;
+
+        // Test various combinations
+        config.allowedKeyManagement.set(KeyMgmt.WPA_PSK);
+        assertEquals(mSsid + KeyMgmt.strings[KeyMgmt.WPA_PSK],
+                config.getSsidAndSecurityTypeString());
+
+        config.allowedKeyManagement.clear();
+        config.allowedKeyManagement.set(KeyMgmt.WPA_EAP);
+        assertEquals(mSsid + KeyMgmt.strings[KeyMgmt.WPA_EAP],
+                config.getSsidAndSecurityTypeString());
+
+        config.wepKeys[0] = "TestWep";
+        config.allowedKeyManagement.clear();
+        assertEquals(mSsid + "WEP", config.getSsidAndSecurityTypeString());
+
+        config.wepKeys[0] = null;
+        config.allowedKeyManagement.clear();
+        config.allowedKeyManagement.set(KeyMgmt.OWE);
+        assertEquals(mSsid + KeyMgmt.strings[KeyMgmt.OWE], config.getSsidAndSecurityTypeString());
+
+        config.allowedKeyManagement.clear();
+        config.allowedKeyManagement.set(KeyMgmt.SAE);
+        assertEquals(mSsid + KeyMgmt.strings[KeyMgmt.SAE], config.getSsidAndSecurityTypeString());
+
+        config.allowedKeyManagement.clear();
+        config.allowedKeyManagement.set(KeyMgmt.SUITE_B_192);
+        assertEquals(mSsid + KeyMgmt.strings[KeyMgmt.SUITE_B_192],
+                config.getSsidAndSecurityTypeString());
+
+        config.allowedKeyManagement.clear();
+        config.allowedKeyManagement.set(KeyMgmt.NONE);
+        assertEquals(mSsid + KeyMgmt.strings[KeyMgmt.NONE], config.getSsidAndSecurityTypeString());
+    }
 }

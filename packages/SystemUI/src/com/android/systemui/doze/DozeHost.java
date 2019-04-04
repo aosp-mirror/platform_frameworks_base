@@ -33,7 +33,11 @@ public interface DozeHost {
     boolean isProvisioned();
     boolean isBlockingDoze();
 
-    void extendPulse();
+    /**
+     * Makes a current pulse last for twice as long.
+     * @param reason why we're extending it.
+     */
+    void extendPulse(int reason);
 
     void setAnimateWakeup(boolean animateWakeup);
     void setAnimateScreenOff(boolean animateScreenOff);

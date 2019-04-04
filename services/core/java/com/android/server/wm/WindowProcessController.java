@@ -149,6 +149,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     // Set to true if this process is currently temporarily whitelisted to start activities even if
     // it's not in the foreground
     private volatile boolean mAllowBackgroundActivityStarts;
+    // Set of UIDs of clients currently bound to this process
+    private volatile ArraySet<Integer> mBoundClientUids = new ArraySet<Integer>();
 
     // Thread currently set for VR scheduling
     int mVrThreadTid;
@@ -297,6 +299,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         return mPendingUiClean;
     }
 
+    /** @return {@code true} if the process registered to a display as a config listener. */
+    boolean registeredForDisplayConfigChanges() {
+        return mDisplayId != INVALID_DISPLAY;
+    }
+
     void postPendingUiCleanMsg(boolean pendingUiClean) {
         if (mListener == null) return;
         // Posting on handler so WM lock isn't held when we call into AM.
@@ -366,6 +373,14 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     public boolean areBackgroundActivityStartsAllowed() {
         return mAllowBackgroundActivityStarts;
+    }
+
+    public void setBoundClientUids(ArraySet<Integer> boundClientUids) {
+        mBoundClientUids = boundClientUids;
+    }
+
+    public ArraySet<Integer> getBoundClientUids() {
+        return mBoundClientUids;
     }
 
     public void setInstrumenting(boolean instrumenting,
@@ -469,6 +484,20 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         synchronized (mAtm.mGlobalLockWithoutBoost) {
             return !mActivities.isEmpty() || !mRecentTasks.isEmpty();
         }
+    }
+
+    boolean hasActivityInVisibleTask() {
+        for (int i = mActivities.size() - 1; i >= 0; --i) {
+            TaskRecord task = mActivities.get(i).getTaskRecord();
+            if (task == null) {
+                continue;
+            }
+            ActivityRecord topActivity = task.getTopActivity();
+            if (topActivity != null && topActivity.visible) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

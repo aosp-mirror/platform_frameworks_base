@@ -139,6 +139,7 @@ public final class ContentCaptureServiceInfo {
         mSettingsActivity = settingsActivity;
     }
 
+    @NonNull
     public ServiceInfo getServiceInfo() {
         return mServiceInfo;
     }

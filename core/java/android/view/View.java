@@ -54,6 +54,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.BlendMode;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Insets;
@@ -89,7 +90,6 @@ import android.os.Trace;
 import android.sysprop.DisplayProperties;
 import android.text.InputType;
 import android.text.TextUtils;
-import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
 import android.util.LayoutDirection;
@@ -4067,11 +4067,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }, formatToHexString = true)
 
     /* @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123769414)
     public int mPrivateFlags;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123768943)
     int mPrivateFlags2;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 129147060)
     int mPrivateFlags3;
 
     private int mPrivateFlags4;
@@ -4511,7 +4511,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     static class TintInfo {
         ColorStateList mTintList;
-        PorterDuff.Mode mTintMode;
+        BlendMode mBlendMode;
         boolean mHasTintMode;
         boolean mHasTintList;
     }
@@ -5692,7 +5692,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     if (mBackgroundTint == null) {
                         mBackgroundTint = new TintInfo();
                     }
-                    mBackgroundTint.mTintMode = Drawable.parseTintMode(a.getInt(
+                    mBackgroundTint.mBlendMode = Drawable.parseBlendMode(a.getInt(
                             R.styleable.View_backgroundTintMode, -1), null);
                     mBackgroundTint.mHasTintMode = true;
                     break;
@@ -5712,7 +5712,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     break;
                 case R.styleable.View_foregroundTintMode:
                     if (targetSdkVersion >= Build.VERSION_CODES.M || this instanceof FrameLayout) {
-                        setForegroundTintMode(Drawable.parseTintMode(a.getInt(attr, -1), null));
+                        setForegroundTintMode(Drawable.parseBlendMode(a.getInt(attr, -1), null));
                     }
                     break;
                 case R.styleable.View_foregroundTint:
@@ -7960,6 +7960,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *                               View is not a pane.
      *
      * {@see AccessibilityNodeInfo#setPaneTitle(CharSequence)}
+     *
+     * @attr ref android.R.styleable#View_accessibilityPaneTitle
      */
     public void setAccessibilityPaneTitle(@Nullable CharSequence accessibilityPaneTitle) {
         if (!TextUtils.equals(accessibilityPaneTitle, mAccessibilityPaneTitle)) {
@@ -7975,6 +7977,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return The current pane title.
      *
      * {@see #setAccessibilityPaneTitle}.
+     *
+     * @attr ref android.R.styleable#View_accessibilityPaneTitle
      */
     @InspectableProperty
     @Nullable
@@ -8529,11 +8533,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Populates a {@link ViewStructure} for Content Capture.
+     * Populates a {@link ViewStructure} for content capture.
      *
-     * <p>This method is called after a view is that is eligible for Content Capture
+     * <p>This method is called after a view is that is eligible for content capture
      * (for example, if it {@link #isImportantForAutofill()}, an intelligence service is enabled for
-     * the user, and the activity rendering the view is enabled for Content Capture) is laid out and
+     * the user, and the activity rendering the view is enabled for content capture) is laid out and
      * is visible.
      *
      * <p>The populated structure is then passed to the service through
@@ -8551,6 +8555,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@code autofillId} for a child can be obtained either through
      * {@code childStructure.getAutofillId()} or
      * {@link ContentCaptureSession#newAutofillId(AutofillId, long)}.
+     *
+     * <p>When the virtual view hierarchy represents a web page, you should also:
+     *
+     * <ul>
+     *   <li>Call {@link ContentCaptureManager#getContentCaptureConditions()} to infer content
+     *   capture events should be generate for that URL.
+     *   <li>Create a new {@link ContentCaptureSession} child for every HTML element that
+     *   renders a new URL (like an {@code IFRAME}) and use that session to notify events from
+     *   that subtree.
+     * </ul>
      *
      * <p><b>Note: </b>the following methods of the {@code structure} will be ignored:
      * <ul>
@@ -9268,11 +9282,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Hints the Android System whether this view is considered important for Content Capture, based
+     * Hints the Android System whether this view is considered important for content capture, based
      * on the value explicitly set by {@link #setImportantForContentCapture(int)} and heuristics
      * when it's {@link #IMPORTANT_FOR_CONTENT_CAPTURE_AUTO}.
      *
-     * @return whether the view is considered important for autofill.
+     * <p>See {@link ContentCaptureManager} for more info about content capture.
+     *
+     * @return whether the view is considered important for content capture.
      *
      * @see #setImportantForContentCapture(int)
      * @see #IMPORTANT_FOR_CONTENT_CAPTURE_AUTO
@@ -9471,7 +9487,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Sets the (optional) {@link ContentCaptureSession} associated with this view.
      *
      * <p>This method should be called when you need to associate a {@link ContentCaptureContext} to
-     * the Content Capture events associated with this view or its view hierarchy (if it's a
+     * the content capture events associated with this view or its view hierarchy (if it's a
      * {@link ViewGroup}).
      *
      * <p>For example, if your activity is associated with a web domain, first you would need to
@@ -9502,7 +9518,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Gets the session used to notify Content Capture events.
+     * Gets the session used to notify content capture events.
      *
      * @return session explicitly set by {@link #setContentCaptureSession(ContentCaptureSession)},
      * inherited by ancestors, default session or {@code null} if content capture is disabled for
@@ -9723,7 +9739,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Dispatches the initial Content Capture events for a view structure.
+     * Dispatches the initial content capture events for a view structure.
      *
      * @hide
      */
@@ -12105,6 +12121,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #setScreenReaderFocusable(boolean)
      *
      * @return Whether the view should be treated as a focusable unit by screen reader.
+     *
+     * @attr ref android.R.styleable#View_screenReaderFocusable
      */
     @InspectableProperty
     public boolean isScreenReaderFocusable() {
@@ -12123,6 +12141,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @param screenReaderFocusable Whether the view should be treated as a unit by screen reader
      *                              accessibility tools.
+     *
+     * @attr ref android.R.styleable#View_screenReaderFocusable
      */
     public void setScreenReaderFocusable(boolean screenReaderFocusable) {
         updatePflags3AndNotifyA11yIfChanged(PFLAG3_SCREEN_READER_FOCUSABLE, screenReaderFocusable);
@@ -13901,6 +13921,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     boolean isAccessibilityFocusedViewOrHost() {
         return isAccessibilityFocused() || (getViewRootImpl() != null && getViewRootImpl()
                 .getAccessibilityFocusedHost() == this);
+    }
+
+    /**
+     * Returns whether this view can receive pointer events.
+     *
+     * @return {@code true} if this view can receive pointer events.
+     * @hide
+     */
+    protected boolean canReceivePointerEvents() {
+        return (mViewFlags & VISIBILITY_MASK) == VISIBLE || getAnimation() != null;
     }
 
     /**
@@ -17964,7 +17994,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final int scrollX = mScrollX;
         final int scrollY = mScrollY;
         invalidateInternal(dirty.left - scrollX, dirty.top - scrollY,
-                dirty.right - scrollX, dirty.bottom - scrollY, true, false);
+                dirty.right - scrollX, dirty.bottom - scrollY, true);
     }
 
     /**
@@ -17990,7 +18020,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public void invalidate(int l, int t, int r, int b) {
         final int scrollX = mScrollX;
         final int scrollY = mScrollY;
-        invalidateInternal(l - scrollX, t - scrollY, r - scrollX, b - scrollY, true, false);
+        invalidateInternal(l - scrollX, t - scrollY, r - scrollX, b - scrollY, true);
     }
 
     /**
@@ -18020,11 +18050,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @UnsupportedAppUsage
     public void invalidate(boolean invalidateCache) {
-        invalidateInternal(0, 0, mRight - mLeft, mBottom - mTop, invalidateCache, true);
+        invalidateInternal(0, 0, mRight - mLeft, mBottom - mTop, invalidateCache);
     }
 
-    void invalidateInternal(int l, int t, int r, int b, boolean invalidateCache,
-            boolean fullInvalidate) {
+    void invalidateInternal(int l, int t, int r, int b, boolean invalidateCache) {
         if (mGhostView != null) {
             mGhostView.invalidate(true);
             return;
@@ -18041,11 +18070,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if ((mPrivateFlags & (PFLAG_DRAWN | PFLAG_HAS_BOUNDS)) == (PFLAG_DRAWN | PFLAG_HAS_BOUNDS)
                 || (invalidateCache && (mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) == PFLAG_DRAWING_CACHE_VALID)
                 || (mPrivateFlags & PFLAG_INVALIDATED) != PFLAG_INVALIDATED
-                || (fullInvalidate && isOpaque() != mLastIsOpaque)) {
-            if (fullInvalidate) {
-                mLastIsOpaque = isOpaque();
-                mPrivateFlags &= ~PFLAG_DRAWN;
-            }
+                || isOpaque() != mLastIsOpaque) {
+            mLastIsOpaque = isOpaque();
+            mPrivateFlags &= ~PFLAG_DRAWN;
 
             mPrivateFlags |= PFLAG_DIRTY;
 
@@ -22590,12 +22617,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @Override
     public void invalidateDrawable(@NonNull Drawable drawable) {
         if (verifyDrawable(drawable)) {
-            final Rect dirty = drawable.getDirtyBounds();
-            final int scrollX = mScrollX;
-            final int scrollY = mScrollY;
-
-            invalidate(dirty.left + scrollX, dirty.top + scrollY,
-                    dirty.right + scrollX, dirty.bottom + scrollY);
+            invalidate();
             rebuildOutline();
         }
     }
@@ -23292,7 +23314,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Applies a tint to the background drawable. Does not modify the current tint
-     * mode, which is {@link PorterDuff.Mode#SRC_IN} by default.
+     * mode, which is {@link BlendMode#SRC_IN} by default.
      * <p>
      * Subsequent calls to {@link #setBackground(Drawable)} will automatically
      * mutate the drawable and apply the specified tint and tint mode using
@@ -23337,12 +23359,36 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @attr ref android.R.styleable#View_backgroundTintMode
      * @see #getBackgroundTintMode()
      * @see Drawable#setTintMode(PorterDuff.Mode)
+     *
+     * @deprecated use @setBackgroundTintMode(BlendMode) instead
      */
+    @Deprecated
     public void setBackgroundTintMode(@Nullable PorterDuff.Mode tintMode) {
+        BlendMode mode = null;
+        if (tintMode != null) {
+            mode = BlendMode.fromValue(tintMode.nativeInt);
+        }
+
+        setBackgroundTintMode(mode);
+    }
+
+    /**
+     * Specifies the blending mode used to apply the tint specified by
+     * {@link #setBackgroundTintList(ColorStateList)}} to the background
+     * drawable. The default mode is {@link BlendMode#SRC_IN}.
+     *
+     * @param blendMode the blending mode used to apply the tint, may be
+     *                 {@code null} to clear tint
+     * @attr ref android.R.styleable#View_backgroundTintMode
+     * @see #getBackgroundTintMode()
+     * @see Drawable#setTintMode(BlendMode)
+     */
+    public void setBackgroundTintMode(@Nullable BlendMode blendMode) {
         if (mBackgroundTint == null) {
             mBackgroundTint = new TintInfo();
         }
-        mBackgroundTint.mTintMode = tintMode;
+
+        mBackgroundTint.mBlendMode = blendMode;
         mBackgroundTint.mHasTintMode = true;
 
         applyBackgroundTint();
@@ -23355,12 +23401,34 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return the blending mode used to apply the tint to the background
      *         drawable
      * @attr ref android.R.styleable#View_backgroundTintMode
-     * @see #setBackgroundTintMode(PorterDuff.Mode)
+     * @see #setBackgroundTintMode(BlendMode)
+     *
+     * @deprecated use #getBackgroundBlendMode() instead
      */
     @Nullable
     @InspectableProperty
+    @Deprecated
     public PorterDuff.Mode getBackgroundTintMode() {
-        return mBackgroundTint != null ? mBackgroundTint.mTintMode : null;
+        PorterDuff.Mode porterDuffMode;
+        if (mBackgroundTint != null && mBackgroundTint.mBlendMode != null) {
+            porterDuffMode = BlendMode.blendModeToPorterDuffMode(mBackgroundTint.mBlendMode);
+        } else {
+            porterDuffMode = null;
+        }
+        return porterDuffMode;
+    }
+
+    /**
+     * Return the blending mode used to apply the tint to the background
+     * drawable, if specified.
+     *
+     * @return the blending mode used to apply the tint to the background
+     *         drawable, null if no blend has previously been configured
+     * @attr ref android.R.styleable#View_backgroundTintMode
+     * @see #setBackgroundTintMode(BlendMode)
+     */
+    public @Nullable BlendMode getBackgroundBlendMode() {
+        return mBackgroundTint != null ? mBackgroundTint.mBlendMode : null;
     }
 
     private void applyBackgroundTint() {
@@ -23374,7 +23442,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 }
 
                 if (tintInfo.mHasTintMode) {
-                    mBackground.setTintMode(tintInfo.mTintMode);
+                    mBackground.setTintMode(tintInfo.mBlendMode);
                 }
 
                 // The drawable (or one of its children) may not have been
@@ -23558,15 +23626,37 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @attr ref android.R.styleable#View_foregroundTintMode
      * @see #getForegroundTintMode()
      * @see Drawable#setTintMode(PorterDuff.Mode)
+     *
+     * @deprecated use #setForegroundTintMode(BlendMode)
      */
+    @Deprecated
     public void setForegroundTintMode(@Nullable PorterDuff.Mode tintMode) {
+        BlendMode mode = null;
+        if (tintMode != null) {
+            mode = BlendMode.fromValue(tintMode.nativeInt);
+        }
+        setForegroundTintMode(mode);
+    }
+
+    /**
+     * Specifies the blending mode used to apply the tint specified by
+     * {@link #setForegroundTintList(ColorStateList)}} to the background
+     * drawable. The default mode is {@link BlendMode#SRC_IN}.
+     *
+     * @param blendMode the blending mode used to apply the tint, may be
+     *                 {@code null} to clear tint
+     * @attr ref android.R.styleable#View_foregroundTintMode
+     * @see #getForegroundTintMode()
+     * @see Drawable#setTintMode(BlendMode)
+     */
+    public void setForegroundTintMode(@Nullable BlendMode blendMode) {
         if (mForegroundInfo == null) {
             mForegroundInfo = new ForegroundInfo();
         }
         if (mForegroundInfo.mTintInfo == null) {
             mForegroundInfo.mTintInfo = new TintInfo();
         }
-        mForegroundInfo.mTintInfo.mTintMode = tintMode;
+        mForegroundInfo.mTintInfo.mBlendMode = blendMode;
         mForegroundInfo.mTintInfo.mHasTintMode = true;
 
         applyForegroundTint();
@@ -23580,12 +23670,35 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *         drawable
      * @attr ref android.R.styleable#View_foregroundTintMode
      * @see #setForegroundTintMode(PorterDuff.Mode)
+     *
+     * @deprecated use #getForegroundBlendMode() instead
      */
     @InspectableProperty
     @Nullable
+    @Deprecated
     public PorterDuff.Mode getForegroundTintMode() {
+        BlendMode blendMode = mForegroundInfo != null && mForegroundInfo.mTintInfo != null
+                ? mForegroundInfo.mTintInfo.mBlendMode : null;
+        if (blendMode != null) {
+            return BlendMode.blendModeToPorterDuffMode(blendMode);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Return the blending mode used to apply the tint to the foreground
+     * drawable, if specified.
+     *
+     * @return the blending mode used to apply the tint to the foreground
+     *         drawable
+     * @attr ref android.R.styleable#View_foregroundTintMode
+     * @see #setForegroundTintMode(BlendMode)
+     *
+     */
+    public @Nullable BlendMode getForegroundBlendMode() {
         return mForegroundInfo != null && mForegroundInfo.mTintInfo != null
-                ? mForegroundInfo.mTintInfo.mTintMode : null;
+                ? mForegroundInfo.mTintInfo.mBlendMode : null;
     }
 
     private void applyForegroundTint() {
@@ -23600,7 +23713,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 }
 
                 if (tintInfo.mHasTintMode) {
-                    mForegroundInfo.mDrawable.setTintMode(tintInfo.mTintMode);
+                    mForegroundInfo.mDrawable.setTintMode(tintInfo.mBlendMode);
                 }
 
                 // The drawable (or one of its children) may not have been
@@ -28248,11 +28361,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final Rect mOutsets = new Rect();
 
         /**
-         * In multi-window we force show the navigation bar. Because we don't want that the surface
-         * size changes in this mode, we instead have a flag whether the navigation bar size should
-         * always be consumed, so the app is treated like there is no virtual navigation bar at all.
+         * In multi-window we force show the system bars. Because we don't want that the surface
+         * size changes in this mode, we instead have a flag whether the system bars sizes should
+         * always be consumed, so the app is treated like there are no virtual system bars at all.
          */
-        boolean mAlwaysConsumeNavBar;
+        boolean mAlwaysConsumeSystemBars;
 
         /**
          * The internal insets given by this window.  This value is
@@ -28534,8 +28647,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * hierarchy is traversed: value is either the view itself for appearead events, or its
          * autofill id for disappeared.
          */
-        // TODO(b/121197119): use SparseArray once session id becomes integer
-        ArrayMap<String, ArrayList<Object>> mContentCaptureEvents;
+        SparseArray<ArrayList<Object>> mContentCaptureEvents;
 
         /**
          * Cached reference to the {@link ContentCaptureManager}.
@@ -28565,9 +28677,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 @NonNull View view, boolean appeared) {
             if (mContentCaptureEvents == null) {
                 // Most of the time there will be just one session, so intial capacity is 1
-                mContentCaptureEvents = new ArrayMap<>(1);
+                mContentCaptureEvents = new SparseArray<>(1);
             }
-            String sessionId = session.getId();
+            int sessionId = session.getId();
             // TODO: life would be much easier if we provided a MultiMap implementation somwhere...
             ArrayList<Object> events = mContentCaptureEvents.get(sessionId);
             if (events == null) {

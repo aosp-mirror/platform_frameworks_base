@@ -17,7 +17,6 @@
 package com.android.server.connectivity.tethering;
 
 import android.net.ConnectivityManager;
-import android.net.ip.IpServer;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
@@ -25,6 +24,7 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkState;
 import android.net.RouteInfo;
+import android.net.ip.IpServer;
 import android.net.util.NetworkConstants;
 import android.net.util.SharedLog;
 import android.util.Log;
@@ -191,7 +191,7 @@ public class IPv6TetheringCoordinator {
         if (currentActive != null && currentActive.ipServer == ipServer) {
             final LinkProperties lp = getIPv6OnlyLinkProperties(
                     mUpstreamNetworkState.linkProperties);
-            if (lp.hasIPv6DefaultRoute() && lp.hasGlobalIPv6Address()) {
+            if (lp.hasIpv6DefaultRoute() && lp.hasGlobalIpv6Address()) {
                 return lp;
             }
         }

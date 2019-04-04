@@ -18,18 +18,15 @@ package android.view;
 
 import static android.view.InsetsState.TYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.TYPE_TOP_BAR;
-
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.WindowInsets.Type.sideBars;
 import static android.view.WindowInsets.Type.systemBars;
-import static android.view.WindowInsets.Type.topBar;
-import static junit.framework.Assert.assertEquals;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -55,6 +52,15 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.List;
 
+/**
+ * Tests for {@link InsetsAnimationControlImpl}.
+ *
+ * <p>Build/Install/Run:
+ *  atest FrameworksCoreTests:InsetsAnimationControlImplTest
+ *
+ * <p>This test class is a part of Window Manager Service tests and specified in
+ * {@link com.android.server.wm.test.filters.FrameworksTestsFilter}.
+ */
 @Presubmit
 @FlakyTest(detail = "Promote once confirmed non-flaky")
 @RunWith(AndroidJUnit4.class)

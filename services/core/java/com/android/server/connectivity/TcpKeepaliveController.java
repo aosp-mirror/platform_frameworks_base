@@ -16,20 +16,25 @@
 package com.android.server.connectivity;
 
 import static android.net.SocketKeepalive.DATA_RECEIVED;
-import static android.net.SocketKeepalive.ERROR_HARDWARE_UNSUPPORTED;
 import static android.net.SocketKeepalive.ERROR_INVALID_SOCKET;
 import static android.net.SocketKeepalive.ERROR_SOCKET_NOT_IDLE;
+import static android.net.SocketKeepalive.ERROR_UNSUPPORTED;
 import static android.os.MessageQueue.OnFileDescriptorEventListener.EVENT_ERROR;
 import static android.os.MessageQueue.OnFileDescriptorEventListener.EVENT_INPUT;
 import static android.system.OsConstants.ENOPROTOOPT;
 import static android.system.OsConstants.FIONREAD;
+import static android.system.OsConstants.IPPROTO_IP;
 import static android.system.OsConstants.IPPROTO_TCP;
+import static android.system.OsConstants.IP_TOS;
+import static android.system.OsConstants.IP_TTL;
 import static android.system.OsConstants.TIOCOUTQ;
 
 import android.annotation.NonNull;
 import android.net.NetworkUtils;
+import android.net.SocketKeepalive.InvalidPacketException;
 import android.net.SocketKeepalive.InvalidSocketException;
-import android.net.TcpKeepalivePacketData.TcpSocketInfo;
+import android.net.TcpKeepalivePacketData;
+import android.net.TcpKeepalivePacketDataParcelable;
 import android.net.TcpRepairWindow;
 import android.os.Handler;
 import android.os.MessageQueue;
@@ -44,7 +49,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.server.connectivity.KeepaliveTracker.KeepaliveInfo;
 
 import java.io.FileDescriptor;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
@@ -103,26 +107,30 @@ public class TcpKeepaliveController {
         mFdHandlerQueue = connectivityServiceHandler.getLooper().getQueue();
     }
 
+    /** Build tcp keepalive packet. */
+    public static TcpKeepalivePacketData getTcpKeepalivePacket(@NonNull FileDescriptor fd)
+            throws InvalidPacketException, InvalidSocketException {
+        try {
+            final TcpKeepalivePacketDataParcelable tcpDetails = switchToRepairMode(fd);
+            return TcpKeepalivePacketData.tcpKeepalivePacket(tcpDetails);
+        } catch (InvalidPacketException | InvalidSocketException e) {
+            switchOutOfRepairMode(fd);
+            throw e;
+        }
+    }
     /**
-     * Switch the tcp socket to repair mode and query tcp socket information.
+     * Switch the tcp socket to repair mode and query detail tcp information.
      *
-     * @param fd the fd of socket on which to use keepalive offload
-     * @return a {@link TcpKeepalivePacketData#TcpSocketInfo} object for current
+     * @param fd the fd of socket on which to use keepalive offload.
+     * @return a {@link TcpKeepalivePacketData#TcpKeepalivePacketDataParcelable} object for current
      * tcp/ip information.
      */
-    // TODO : make this private. It's far too confusing that this gets called from outside
-    // at a time that nobody can understand.
-    public static TcpSocketInfo switchToRepairMode(FileDescriptor fd)
+    private static TcpKeepalivePacketDataParcelable switchToRepairMode(FileDescriptor fd)
             throws InvalidSocketException {
         if (DBG) Log.i(TAG, "switchToRepairMode to start tcp keepalive : " + fd);
+        final TcpKeepalivePacketDataParcelable tcpDetails = new TcpKeepalivePacketDataParcelable();
         final SocketAddress srcSockAddr;
         final SocketAddress dstSockAddr;
-        final InetAddress srcAddress;
-        final InetAddress dstAddress;
-        final int srcPort;
-        final int dstPort;
-        int seq;
-        final int ack;
         final TcpRepairWindow trw;
 
         // Query source address and port.
@@ -133,8 +141,8 @@ public class TcpKeepaliveController {
             throw new InvalidSocketException(ERROR_INVALID_SOCKET, e);
         }
         if (srcSockAddr instanceof InetSocketAddress) {
-            srcAddress = getAddress((InetSocketAddress) srcSockAddr);
-            srcPort = getPort((InetSocketAddress) srcSockAddr);
+            tcpDetails.srcAddress = getAddress((InetSocketAddress) srcSockAddr);
+            tcpDetails.srcPort = getPort((InetSocketAddress) srcSockAddr);
         } else {
             Log.e(TAG, "Invalid or mismatched SocketAddress");
             throw new InvalidSocketException(ERROR_INVALID_SOCKET);
@@ -147,8 +155,8 @@ public class TcpKeepaliveController {
             throw new InvalidSocketException(ERROR_INVALID_SOCKET, e);
         }
         if (dstSockAddr instanceof InetSocketAddress) {
-            dstAddress = getAddress((InetSocketAddress) dstSockAddr);
-            dstPort = getPort((InetSocketAddress) dstSockAddr);
+            tcpDetails.dstAddress = getAddress((InetSocketAddress) dstSockAddr);
+            tcpDetails.dstPort = getPort((InetSocketAddress) dstSockAddr);
         } else {
             Log.e(TAG, "Invalid or mismatched peer SocketAddress");
             throw new InvalidSocketException(ERROR_INVALID_SOCKET);
@@ -157,34 +165,49 @@ public class TcpKeepaliveController {
         // Query sequence and ack number
         dropAllIncomingPackets(fd, true);
         try {
-            // Enter tcp repair mode.
+            // Switch to tcp repair mode.
             Os.setsockoptInt(fd, IPPROTO_TCP, TCP_REPAIR, TCP_REPAIR_ON);
+
             // Check if socket is idle.
             if (!isSocketIdle(fd)) {
+                Log.e(TAG, "Socket is not idle");
                 throw new InvalidSocketException(ERROR_SOCKET_NOT_IDLE);
             }
             // Query write sequence number from SEND_QUEUE.
             Os.setsockoptInt(fd, IPPROTO_TCP, TCP_REPAIR_QUEUE, TCP_SEND_QUEUE);
-            seq = Os.getsockoptInt(fd, IPPROTO_TCP, TCP_QUEUE_SEQ);
+            tcpDetails.seq = Os.getsockoptInt(fd, IPPROTO_TCP, TCP_QUEUE_SEQ);
             // Query read sequence number from RECV_QUEUE.
             Os.setsockoptInt(fd, IPPROTO_TCP, TCP_REPAIR_QUEUE, TCP_RECV_QUEUE);
-            ack = Os.getsockoptInt(fd, IPPROTO_TCP, TCP_QUEUE_SEQ);
+            tcpDetails.ack = Os.getsockoptInt(fd, IPPROTO_TCP, TCP_QUEUE_SEQ);
             // Switch to NO_QUEUE to prevent illegal socket read/write in repair mode.
             Os.setsockoptInt(fd, IPPROTO_TCP, TCP_REPAIR_QUEUE, TCP_NO_QUEUE);
             // Finally, check if socket is still idle. TODO : this check needs to move to
             // after starting polling to prevent a race.
-            if (!isSocketIdle(fd)) {
+            if (!isReceiveQueueEmpty(fd)) {
+                Log.e(TAG, "Fatal: receive queue of this socket is not empty");
                 throw new InvalidSocketException(ERROR_INVALID_SOCKET);
+            }
+            if (!isSendQueueEmpty(fd)) {
+                Log.e(TAG, "Socket is not idle");
+                throw new InvalidSocketException(ERROR_SOCKET_NOT_IDLE);
             }
 
             // Query tcp window size.
             trw = NetworkUtils.getTcpRepairWindow(fd);
+            tcpDetails.rcvWnd = trw.rcvWnd;
+            tcpDetails.rcvWndScale = trw.rcvWndScale;
+            if (tcpDetails.srcAddress.length == 4 /* V4 address length */) {
+                // Query TOS.
+                tcpDetails.tos = Os.getsockoptInt(fd, IPPROTO_IP, IP_TOS);
+                // Query TTL.
+                tcpDetails.ttl = Os.getsockoptInt(fd, IPPROTO_IP, IP_TTL);
+            }
         } catch (ErrnoException e) {
             Log.e(TAG, "Exception reading TCP state from socket", e);
             if (e.errno == ENOPROTOOPT) {
                 // ENOPROTOOPT may happen in kernel version lower than 4.8.
-                // Treat it as ERROR_HARDWARE_UNSUPPORTED.
-                throw new InvalidSocketException(ERROR_HARDWARE_UNSUPPORTED, e);
+                // Treat it as ERROR_UNSUPPORTED.
+                throw new InvalidSocketException(ERROR_UNSUPPORTED, e);
             } else {
                 throw new InvalidSocketException(ERROR_INVALID_SOCKET, e);
             }
@@ -194,10 +217,9 @@ public class TcpKeepaliveController {
 
         // Keepalive sequence number is last sequence number - 1. If it couldn't be retrieved,
         // then it must be set to -1, so decrement in all cases.
-        seq = seq - 1;
+        tcpDetails.seq = tcpDetails.seq - 1;
 
-        return new TcpSocketInfo(srcAddress, srcPort, dstAddress, dstPort, seq, ack, trw.rcvWnd,
-                trw.rcvWndScale);
+        return tcpDetails;
     }
 
     /**
@@ -205,10 +227,13 @@ public class TcpKeepaliveController {
      *
      * @param fd the fd of socket to switch back to normal.
      */
-    // TODO : make this private.
-    public static void switchOutOfRepairMode(@NonNull final FileDescriptor fd)
-            throws ErrnoException {
-        Os.setsockoptInt(fd, IPPROTO_TCP, TCP_REPAIR, TCP_REPAIR_OFF);
+    private static void switchOutOfRepairMode(@NonNull final FileDescriptor fd) {
+        try {
+            Os.setsockoptInt(fd, IPPROTO_TCP, TCP_REPAIR, TCP_REPAIR_OFF);
+        } catch (ErrnoException e) {
+            Log.e(TAG, "Cannot switch socket out of repair mode", e);
+            // Well, there is not much to do here to recover
+        }
     }
 
     /**
@@ -262,17 +287,12 @@ public class TcpKeepaliveController {
             mListeners.remove(slot);
         }
         mFdHandlerQueue.removeOnFileDescriptorEventListener(fd);
-        try {
-            if (DBG) Log.d(TAG, "Moving socket out of repair mode for stop : " + fd);
-            switchOutOfRepairMode(fd);
-        } catch (ErrnoException e) {
-            Log.e(TAG, "Cannot switch socket out of repair mode", e);
-            // Well, there is not much to do here to recover
-        }
+        if (DBG) Log.d(TAG, "Moving socket out of repair mode for stop : " + fd);
+        switchOutOfRepairMode(fd);
     }
 
-    private static InetAddress getAddress(InetSocketAddress inetAddr) {
-        return inetAddr.getAddress();
+    private static byte [] getAddress(InetSocketAddress inetAddr) {
+        return inetAddr.getAddress().getAddress();
     }
 
     private static int getPort(InetSocketAddress inetAddr) {

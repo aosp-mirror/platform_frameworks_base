@@ -58,7 +58,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:text="@string/bubbles_prompt"
-        style="@*android:style/TextAppearance.Material.Body1" />
+        style="@*android:style/TextAppearance.DeviceDefault.Notification.Title"/>
 
     <!-- Buttons -->
     <LinearLayout

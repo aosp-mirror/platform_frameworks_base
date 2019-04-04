@@ -16,10 +16,13 @@
 
 package android.net;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.net.shared.InetAddressUtils;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -31,20 +34,19 @@ import java.util.Objects;
 /**
  * Class that describes static IP configuration.
  *
- * This class is different from LinkProperties because it represents
+ * <p>This class is different from {@link LinkProperties} because it represents
  * configuration intent. The general contract is that if we can represent
  * a configuration here, then we should be able to configure it on a network.
  * The intent is that it closely match the UI we have for configuring networks.
  *
- * In contrast, LinkProperties represents current state. It is much more
+ * <p>In contrast, {@link LinkProperties} represents current state. It is much more
  * expressive. For example, it supports multiple IP addresses, multiple routes,
  * stacked interfaces, and so on. Because LinkProperties is so expressive,
  * using it to represent configuration intent as well as current state causes
  * problems. For example, we could unknowingly save a configuration that we are
  * not in fact capable of applying, or we could save a configuration that the
  * UI cannot display, which has the potential for malicious code to hide
- * hostile or unexpected configuration from the user: see, for example,
- * http://b/12663469 and http://b/16893413 .
+ * hostile or unexpected configuration from the user.
  *
  * @hide
  */
@@ -52,23 +54,27 @@ import java.util.Objects;
 @TestApi
 public final class StaticIpConfiguration implements Parcelable {
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    @Nullable
     public LinkAddress ipAddress;
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    @Nullable
     public InetAddress gateway;
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    @NonNull
     public final ArrayList<InetAddress> dnsServers;
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    @Nullable
     public String domains;
 
     public StaticIpConfiguration() {
-        dnsServers = new ArrayList<InetAddress>();
+        dnsServers = new ArrayList<>();
     }
 
-    public StaticIpConfiguration(StaticIpConfiguration source) {
+    public StaticIpConfiguration(@Nullable StaticIpConfiguration source) {
         this();
         if (source != null) {
             // All of these except dnsServers are immutable, so no need to make copies.
@@ -86,53 +92,118 @@ public final class StaticIpConfiguration implements Parcelable {
         domains = null;
     }
 
-    public LinkAddress getIpAddress() {
+    /**
+     * Get the static IP address included in the configuration.
+     */
+    public @Nullable LinkAddress getIpAddress() {
         return ipAddress;
     }
 
-    public void setIpAddress(LinkAddress ipAddress) {
-        this.ipAddress = ipAddress;
-    }
-
-    public InetAddress getGateway() {
+    /**
+     * Get the gateway included in the configuration.
+     */
+    public @Nullable InetAddress getGateway() {
         return gateway;
     }
 
-    public void setGateway(InetAddress gateway) {
-        this.gateway = gateway;
-    }
-
-    public List<InetAddress> getDnsServers() {
+    /**
+     * Get the DNS servers included in the configuration.
+     */
+    public @NonNull List<InetAddress> getDnsServers() {
         return dnsServers;
     }
 
-    public String getDomains() {
+    /**
+     * Get a {@link String} listing in priority order of the comma separated domains to search when
+     * resolving host names on the link.
+     */
+    public @Nullable String getDomains() {
         return domains;
     }
 
-    public void setDomains(String newDomains) {
-        domains = newDomains;
+    /**
+     * Helper class to build a new instance of {@link StaticIpConfiguration}.
+     */
+    public static final class Builder {
+        private LinkAddress mIpAddress;
+        private InetAddress mGateway;
+        private Iterable<InetAddress> mDnsServers;
+        private String mDomains;
+
+        /**
+         * Set the IP address to be included in the configuration; null by default.
+         * @return The {@link Builder} for chaining.
+         */
+        public @NonNull Builder setIpAddress(@Nullable LinkAddress ipAddress) {
+            mIpAddress = ipAddress;
+            return this;
+        }
+
+        /**
+         * Set the address of the gateway to be included in the configuration; null by default.
+         * @return The {@link Builder} for chaining.
+         */
+        public @NonNull Builder setGateway(@Nullable InetAddress gateway) {
+            mGateway = gateway;
+            return this;
+        }
+
+        /**
+         * Set the addresses of the DNS servers included in the configuration; empty by default.
+         * @return The {@link Builder} for chaining.
+         */
+        public @NonNull Builder setDnsServers(@NonNull Iterable<InetAddress> dnsServers) {
+            mDnsServers = dnsServers;
+            return this;
+        }
+
+        /**
+         * Sets the DNS domain search path to be used on the link; null by default.
+         * @param newDomains A {@link String} containing the comma separated domains to search when
+         *                   resolving host names on this link, in priority order.
+         * @return The {@link Builder} for chaining.
+         */
+        public @NonNull Builder setDomains(@Nullable String newDomains) {
+            mDomains = newDomains;
+            return this;
+        }
+
+        /**
+         * Create a {@link StaticIpConfiguration} from the parameters in this {@link Builder}.
+         * @return The newly created StaticIpConfiguration.
+         */
+        public @NonNull StaticIpConfiguration build() {
+            final StaticIpConfiguration config = new StaticIpConfiguration();
+            config.ipAddress = mIpAddress;
+            config.gateway = mGateway;
+            for (InetAddress server : mDnsServers) {
+                config.dnsServers.add(server);
+            }
+            config.domains = mDomains;
+            return config;
+        }
     }
 
     /**
      * Add a DNS server to this configuration.
      */
-    public void addDnsServer(InetAddress server) {
+    public void addDnsServer(@NonNull InetAddress server) {
         dnsServers.add(server);
     }
 
     /**
      * Returns the network routes specified by this object. Will typically include a
-     * directly-connected route for the IP address's local subnet and a default route. If the
-     * default gateway is not covered by the directly-connected route, it will also contain a host
-     * route to the gateway as well. This configuration is arguably invalid, but it used to work
-     * in K and earlier, and other OSes appear to accept it.
+     * directly-connected route for the IP address's local subnet and a default route.
+     * @param iface Interface to include in the routes.
      */
-    public List<RouteInfo> getRoutes(String iface) {
+    public @NonNull List<RouteInfo> getRoutes(@Nullable String iface) {
         List<RouteInfo> routes = new ArrayList<RouteInfo>(3);
         if (ipAddress != null) {
             RouteInfo connectedRoute = new RouteInfo(ipAddress, null, iface);
             routes.add(connectedRoute);
+            // If the default gateway is not covered by the directly-connected route, also add a
+            // host route to the gateway as well. This configuration is arguably invalid, but it
+            // used to work in K and earlier, and other OSes appear to accept it.
             if (gateway != null && !connectedRoute.matches(gateway)) {
                 routes.add(RouteInfo.makeHostRoute(gateway, iface));
             }
@@ -150,7 +221,7 @@ public final class StaticIpConfiguration implements Parcelable {
      * IPv6 configuration) will not be included.
      * @hide
      */
-    public LinkProperties toLinkProperties(String iface) {
+    public @NonNull LinkProperties toLinkProperties(String iface) {
         LinkProperties lp = new LinkProperties();
         lp.setInterfaceName(iface);
         if (ipAddress != null) {

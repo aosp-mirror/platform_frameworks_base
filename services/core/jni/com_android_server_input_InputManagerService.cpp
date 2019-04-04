@@ -47,6 +47,7 @@
 
 #include <input/PointerController.h>
 #include <input/SpriteController.h>
+#include <ui/Region.h>
 
 #include <inputflinger/InputManager.h>
 
@@ -96,6 +97,7 @@ static struct {
     jmethodID interceptKeyBeforeDispatching;
     jmethodID dispatchUnhandledKey;
     jmethodID checkInjectEventsPermission;
+    jmethodID onPointerDownOutsideFocus;
     jmethodID getVirtualKeyQuietTimeMillis;
     jmethodID getExcludedDeviceNames;
     jmethodID getInputPortAssociations;
@@ -135,8 +137,6 @@ static struct {
     jclass clazz;
     jmethodID getAffineTransform;
 } gTouchCalibrationClassInfo;
-
-
 
 // --- Global functions ---
 
@@ -187,7 +187,6 @@ static std::string getStringElementFromJavaArray(JNIEnv* env, jobjectArray array
     return result;
 }
 
-
 // --- NativeInputManager ---
 
 class NativeInputManager : public virtual RefBase,
@@ -206,8 +205,12 @@ public:
 
     void setDisplayViewports(JNIEnv* env, jobjectArray viewportObjArray);
 
-    status_t registerInputChannel(JNIEnv* env, const sp<InputChannel>& inputChannel, int32_t displayId);
+    status_t registerInputChannel(JNIEnv* env, const sp<InputChannel>& inputChannel,
+            int32_t displayId);
+    status_t registerInputMonitor(JNIEnv* env, const sp<InputChannel>& inputChannel,
+            int32_t displayId, bool isGestureMonitor);
     status_t unregisterInputChannel(JNIEnv* env, const sp<InputChannel>& inputChannel);
+    status_t pilferPointers(const sp<IBinder>& token);
 
     void setInputWindows(JNIEnv* env, jobjectArray windowHandleObjArray, int32_t displayId);
     void setFocusedApplication(JNIEnv* env, int32_t displayId, jobject applicationHandleObj);
@@ -228,7 +231,7 @@ public:
 
     virtual void getReaderConfiguration(InputReaderConfiguration* outConfig);
     virtual sp<PointerControllerInterface> obtainPointerController(int32_t deviceId);
-    virtual void notifyInputDevicesChanged(const Vector<InputDeviceInfo>& inputDevices);
+    virtual void notifyInputDevicesChanged(const std::vector<InputDeviceInfo>& inputDevices);
     virtual sp<KeyCharacterMap> getKeyboardLayoutOverlay(const InputDeviceIdentifier& identifier);
     virtual std::string getDeviceAlias(const InputDeviceIdentifier& identifier);
     virtual TouchAffineTransformation getTouchAffineTransformation(JNIEnv *env,
@@ -259,6 +262,7 @@ public:
     virtual void pokeUserActivity(nsecs_t eventTime, int32_t eventType);
     virtual bool checkInjectEventsPermissionNonReentrant(
             int32_t injectorPid, int32_t injectorUid);
+    virtual void onPointerDownOutsideFocus(const sp<IBinder>& touchedToken);
 
     /* --- PointerControllerPolicyInterface implementation --- */
 
@@ -441,10 +445,22 @@ status_t NativeInputManager::registerInputChannel(JNIEnv* /* env */,
             inputChannel, displayId);
 }
 
+status_t NativeInputManager::registerInputMonitor(JNIEnv* /* env */,
+        const sp<InputChannel>& inputChannel, int32_t displayId, bool isGestureMonitor) {
+    ATRACE_CALL();
+    return mInputManager->getDispatcher()->registerInputMonitor(
+            inputChannel, displayId, isGestureMonitor);
+}
+
 status_t NativeInputManager::unregisterInputChannel(JNIEnv* /* env */,
         const sp<InputChannel>& inputChannel) {
     ATRACE_CALL();
     return mInputManager->getDispatcher()->unregisterInputChannel(inputChannel);
+}
+
+status_t NativeInputManager::pilferPointers(const sp<IBinder>& token) {
+    ATRACE_CALL();
+    return mInputManager->getDispatcher()->pilferPointers(token);
 }
 
 void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outConfig) {
@@ -598,7 +614,7 @@ void NativeInputManager::ensureSpriteControllerLocked() REQUIRES(mLock) {
     }
 }
 
-void NativeInputManager::notifyInputDevicesChanged(const Vector<InputDeviceInfo>& inputDevices) {
+void NativeInputManager::notifyInputDevicesChanged(const std::vector<InputDeviceInfo>& inputDevices) {
     ATRACE_CALL();
     JNIEnv* env = jniEnv();
 
@@ -608,7 +624,7 @@ void NativeInputManager::notifyInputDevicesChanged(const Vector<InputDeviceInfo>
     if (inputDevicesObjArray) {
         bool error = false;
         for (size_t i = 0; i < count; i++) {
-            jobject inputDeviceObj = android_view_InputDevice_create(env, inputDevices.itemAt(i));
+            jobject inputDeviceObj = android_view_InputDevice_create(env, inputDevices[i]);
             if (!inputDeviceObj) {
                 error = true;
                 break;
@@ -775,7 +791,7 @@ void NativeInputManager::getDispatcherConfiguration(InputDispatcherConfiguration
 
 void NativeInputManager::setInputWindows(JNIEnv* env, jobjectArray windowHandleObjArray,
          int32_t displayId) {
-    Vector<sp<InputWindowHandle> > windowHandles;
+    std::vector<sp<InputWindowHandle> > windowHandles;
 
     if (windowHandleObjArray) {
         jsize length = env->GetArrayLength(windowHandleObjArray);
@@ -788,7 +804,7 @@ void NativeInputManager::setInputWindows(JNIEnv* env, jobjectArray windowHandleO
             sp<InputWindowHandle> windowHandle =
                     android_view_InputWindowHandle_getHandle(env, windowHandleObj);
             if (windowHandle != nullptr) {
-                windowHandles.push(windowHandle);
+                windowHandles.push_back(windowHandle);
             }
             env->DeleteLocalRef(windowHandleObj);
         }
@@ -800,7 +816,7 @@ void NativeInputManager::setInputWindows(JNIEnv* env, jobjectArray windowHandleO
     bool newPointerGesturesEnabled = true;
     size_t numWindows = windowHandles.size();
     for (size_t i = 0; i < numWindows; i++) {
-        const sp<InputWindowHandle>& windowHandle = windowHandles.itemAt(i);
+        const sp<InputWindowHandle>& windowHandle = windowHandles[i];
         const InputWindowInfo* windowInfo = windowHandle->getInfo();
         if (windowInfo && windowInfo->hasFocus && (windowInfo->inputFeatures
                 & InputWindowInfo::INPUT_FEATURE_DISABLE_TOUCH_PAD_GESTURES)) {
@@ -1205,6 +1221,15 @@ bool NativeInputManager::checkInjectEventsPermissionNonReentrant(
     return result;
 }
 
+void NativeInputManager::onPointerDownOutsideFocus(const sp<IBinder>& touchedToken) {
+    ATRACE_CALL();
+    JNIEnv* env = jniEnv();
+
+    jobject touchedTokenObj = javaObjectForIBinder(env, touchedToken);
+    env->CallVoidMethod(mServiceObj, gServiceClassInfo.onPointerDownOutsideFocus, touchedTokenObj);
+    checkAndClearExceptionFromCallback(env, "onPointerDownOutsideFocus");
+}
+
 void NativeInputManager::loadPointerIcon(SpriteIcon* icon, int32_t displayId) {
     ATRACE_CALL();
     JNIEnv* env = jniEnv();
@@ -1385,7 +1410,6 @@ static void nativeRegisterInputChannel(JNIEnv* env, jclass /* clazz */,
         throwInputChannelNotInitialized(env);
         return;
     }
-    bool monitor = inputChannel->getToken() == nullptr && displayId != ADISPLAY_ID_NONE;
 
     status_t status = im->registerInputChannel(env, inputChannel, displayId);
 
@@ -1396,10 +1420,33 @@ static void nativeRegisterInputChannel(JNIEnv* env, jclass /* clazz */,
         return;
     }
 
-    // If inputWindowHandle is null and displayId >= 0, treat inputChannel as monitor.
-    if (!monitor) {
-        android_view_InputChannel_setDisposeCallback(env, inputChannelObj,
-                handleInputChannelDisposed, im);
+    android_view_InputChannel_setDisposeCallback(env, inputChannelObj,
+            handleInputChannelDisposed, im);
+}
+
+static void nativeRegisterInputMonitor(JNIEnv* env, jclass /* clazz */,
+        jlong ptr, jobject inputChannelObj, jint displayId, jboolean isGestureMonitor) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+
+    sp<InputChannel> inputChannel = android_view_InputChannel_getInputChannel(env,
+            inputChannelObj);
+    if (inputChannel == nullptr) {
+        throwInputChannelNotInitialized(env);
+        return;
+    }
+
+    if (displayId == ADISPLAY_ID_NONE) {
+        std::string message = "InputChannel used as a monitor must be associated with a display";
+        jniThrowRuntimeException(env, message.c_str());
+        return;
+    }
+
+    status_t status = im->registerInputMonitor(env, inputChannel, displayId, isGestureMonitor);
+
+    if (status) {
+        std::string message = StringPrintf("Failed to register input channel.  status=%d", status);
+        jniThrowRuntimeException(env, message.c_str());
+        return;
     }
 }
 
@@ -1423,6 +1470,13 @@ static void nativeUnregisterInputChannel(JNIEnv* env, jclass /* clazz */,
         jniThrowRuntimeException(env, message.c_str());
     }
 }
+
+static void nativePilferPointers(JNIEnv* env, jclass /* clazz */, jlong ptr, jobject tokenObj) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+    sp<IBinder> token = ibinderForJavaObject(env, tokenObj);
+    im->pilferPointers(token);
+}
+
 
 static void nativeSetInputFilterEnabled(JNIEnv* /* env */, jclass /* clazz */,
         jlong ptr, jboolean enabled) {
@@ -1686,8 +1740,13 @@ static const JNINativeMethod gInputManagerMethods[] = {
     { "nativeRegisterInputChannel",
             "(JLandroid/view/InputChannel;I)V",
             (void*) nativeRegisterInputChannel },
+    { "nativeRegisterInputMonitor",
+            "(JLandroid/view/InputChannel;IZ)V",
+            (void*) nativeRegisterInputMonitor},
     { "nativeUnregisterInputChannel", "(JLandroid/view/InputChannel;)V",
             (void*) nativeUnregisterInputChannel },
+    { "nativePilferPointers", "(JLandroid/os/IBinder;)V",
+            (void*) nativePilferPointers },
     { "nativeSetInputFilterEnabled", "(JZ)V",
             (void*) nativeSetInputFilterEnabled },
     { "nativeInjectInputEvent", "(JLandroid/view/InputEvent;IIIII)I",
@@ -1781,7 +1840,7 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gServiceClassInfo.notifyInputChannelBroken, clazz,
             "notifyInputChannelBroken", "(Landroid/os/IBinder;)V");
-    
+
     GET_METHOD_ID(gServiceClassInfo.notifyFocusChanged, clazz,
             "notifyFocusChanged", "(Landroid/os/IBinder;Landroid/os/IBinder;)V");
 
@@ -1808,6 +1867,9 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gServiceClassInfo.checkInjectEventsPermission, clazz,
             "checkInjectEventsPermission", "(II)Z");
+
+    GET_METHOD_ID(gServiceClassInfo.onPointerDownOutsideFocus, clazz,
+            "onPointerDownOutsideFocus", "(Landroid/os/IBinder;)V");
 
     GET_METHOD_ID(gServiceClassInfo.getVirtualKeyQuietTimeMillis, clazz,
             "getVirtualKeyQuietTimeMillis", "()I");

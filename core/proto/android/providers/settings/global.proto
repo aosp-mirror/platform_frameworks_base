@@ -20,7 +20,7 @@ package android.providers.settings;
 option java_multiple_files = true;
 
 import "frameworks/base/core/proto/android/providers/settings/common.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 // Note: it's a conscious decision to add each setting as a separate field. This
 // allows annotating each setting with its own privacy tag.
@@ -455,6 +455,8 @@ message GlobalSettingsProto {
         optional SettingProto show_angle_in_use_dialog = 15;
         // Game Driver - List of libraries in sphal accessible by Game Driver
         optional SettingProto game_driver_sphal_libraries = 16;
+        // ANGLE - External package containing ANGLE libraries
+        optional SettingProto angle_debug_package = 17;
     }
     optional Gpu gpu = 59;
 

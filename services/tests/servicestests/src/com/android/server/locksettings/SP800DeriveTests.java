@@ -16,10 +16,15 @@
 
 package com.android.server.locksettings;
 
+import android.platform.test.annotations.Presubmit;
 import android.test.AndroidTestCase;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.internal.util.HexDump;
 
+@SmallTest
+@Presubmit
 public class SP800DeriveTests extends AndroidTestCase {
     public void testFixedInput() throws Exception {
         // CAVP: https://csrc.nist.gov/projects/cryptographic-algorithm-validation-program/key-derivation

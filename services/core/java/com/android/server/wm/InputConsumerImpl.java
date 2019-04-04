@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
@@ -43,6 +44,9 @@ class InputConsumerImpl implements IBinder.DeathRecipient {
 
     final SurfaceControl mInputSurface;
     Rect mTmpClipRect = new Rect();
+    private final Rect mTmpRect = new Rect();
+    private final Point mOldPosition = new Point();
+    private final Rect mOldWindowCrop = new Rect();
 
     InputConsumerImpl(WindowManagerService service, IBinder token, String name,
             InputChannel inputChannel, int clientPid, UserHandle clientUser, int displayId) {
@@ -112,16 +116,22 @@ class InputConsumerImpl implements IBinder.DeathRecipient {
     }
 
     void layout(SurfaceControl.Transaction t, int dw, int dh) {
-        t.setPosition(mInputSurface, 0, 0);
-
-        mTmpClipRect.set(0, 0, dw, dh);
-        t.setWindowCrop(mInputSurface, mTmpClipRect);
+        mTmpRect.set(0, 0, dw, dh);
+        layout(t, mTmpRect);
     }
 
     void layout(SurfaceControl.Transaction t, Rect r) {
-        t.setPosition(mInputSurface, r.left, r.top);
         mTmpClipRect.set(0, 0, r.width(), r.height());
+
+        if (mOldPosition.equals(r.left, r.top) && mOldWindowCrop.equals(mTmpClipRect)) {
+            return;
+        }
+
+        t.setPosition(mInputSurface, r.left, r.top);
         t.setWindowCrop(mInputSurface, mTmpClipRect);
+
+        mOldPosition.set(r.left, r.top);
+        mOldWindowCrop.set(mTmpClipRect);
     }
 
     void hide(SurfaceControl.Transaction t) {

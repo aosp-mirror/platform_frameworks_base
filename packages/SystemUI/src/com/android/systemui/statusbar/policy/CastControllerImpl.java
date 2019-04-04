@@ -29,7 +29,6 @@ import android.media.projection.MediaProjectionManager;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
@@ -40,8 +39,8 @@ import com.android.systemui.R;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -150,8 +149,31 @@ public class CastControllerImpl implements CastController {
     }
 
     @Override
-    public Set<CastDevice> getCastDevices() {
-        final ArraySet<CastDevice> devices = new ArraySet<CastDevice>();
+    public List<CastDevice> getCastDevices() {
+        final ArrayList<CastDevice> devices = new ArrayList<>();
+        synchronized(mRoutes) {
+            for (RouteInfo route : mRoutes.values()) {
+                final CastDevice device = new CastDevice();
+                device.id = route.getTag().toString();
+                final CharSequence name = route.getName(mContext);
+                device.name = name != null ? name.toString() : null;
+                final CharSequence description = route.getDescription();
+                device.description = description != null ? description.toString() : null;
+
+                int statusCode = route.getStatusCode();
+                if (statusCode == RouteInfo.STATUS_CONNECTING) {
+                    device.state = CastDevice.STATE_CONNECTING;
+                } else if (route.isSelected() || statusCode == RouteInfo.STATUS_CONNECTED) {
+                    device.state = CastDevice.STATE_CONNECTED;
+                } else {
+                    device.state = CastDevice.STATE_DISCONNECTED;
+                }
+
+                device.tag = route;
+                devices.add(device);
+            }
+        }
+
         synchronized (mProjectionLock) {
             if (mProjection != null) {
                 final CastDevice device = new CastDevice();
@@ -161,24 +183,9 @@ public class CastControllerImpl implements CastController {
                 device.state = CastDevice.STATE_CONNECTED;
                 device.tag = mProjection;
                 devices.add(device);
-                return devices;
             }
         }
-        synchronized(mRoutes) {
-            for (RouteInfo route : mRoutes.values()) {
-                final CastDevice device = new CastDevice();
-                device.id = route.getTag().toString();
-                final CharSequence name = route.getName(mContext);
-                device.name = name != null ? name.toString() : null;
-                final CharSequence description = route.getDescription();
-                device.description = description != null ? description.toString() : null;
-                device.state = route.isConnecting() ? CastDevice.STATE_CONNECTING
-                        : route.isSelected() ? CastDevice.STATE_CONNECTED
-                        : CastDevice.STATE_DISCONNECTED;
-                device.tag = route;
-                devices.add(device);
-            }
-        }
+
         return devices;
     }
 

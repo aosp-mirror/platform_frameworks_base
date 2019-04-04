@@ -1,0 +1,58 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package android.service.restricted_image;
+
+option java_multiple_files = true;
+option java_outer_classname = "RestrictedImage";
+
+import "frameworks/base/core/proto/android/privacy.proto";
+
+// Restricted Image proto is for collecting images from the user with their
+// permission for the purpose of debugging photos.
+message RestrictedImagesDumpProto {
+    option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+    repeated RestrictedImageSetProto sets = 1;
+}
+
+message RestrictedImageSetProto {
+    option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+    // Name of the service producing the data.
+    optional string category = 1;
+
+    // The images
+    repeated RestrictedImageProto images = 2;
+
+    // Additional metadata
+    optional bytes metadata = 3;
+}
+
+message RestrictedImageProto {
+    option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+    // Type of image data
+    optional string mime_type = 1;
+
+    // The image data
+    optional bytes image_data = 2;
+
+    // Metadata about the image.  Typically this has another proto schema,
+    // but it is undefined exactly what that is in AOSP code.
+    optional bytes metadata = 3;
+}

@@ -914,8 +914,9 @@ public class AudioTrack extends PlayerBase
         /**
          * Sets whether this track will play through the offloaded audio path.
          * When set to true, at build time, the audio format will be checked against
-         * {@link AudioManager#isOffloadedPlaybackSupported(AudioFormat)} to verify the audio format
-         * used by this track is supported on the device's offload path (if any).
+         * {@link AudioManager#isOffloadedPlaybackSupported(AudioFormat,AudioAttributes)}
+         * to verify the audio format used by this track is supported on the device's offload
+         * path (if any).
          * <br>Offload is only supported for media audio streams, and therefore requires that
          * the usage be {@link AudioAttributes#USAGE_MEDIA}.
          * @param offload true to require the offload path for playback.
@@ -979,7 +980,7 @@ public class AudioTrack extends PlayerBase
                     throw new UnsupportedOperationException(
                             "Cannot create AudioTrack, offload requires USAGE_MEDIA");
                 }
-                if (!AudioSystem.isOffloadSupported(mFormat)) {
+                if (!AudioSystem.isOffloadSupported(mFormat, mAttributes)) {
                     throw new UnsupportedOperationException(
                             "Cannot create AudioTrack, offload format not supported");
                 }
@@ -3177,7 +3178,8 @@ public class AudioTrack extends PlayerBase
      * Registers a callback for the notification of stream events.
      * This callback can only be registered for instances operating in offloaded mode
      * (see {@link AudioTrack.Builder#setOffloadedPlayback(boolean)} and
-     * {@link AudioManager#isOffloadedPlaybackSupported(AudioFormat)} for more details).
+     * {@link AudioManager#isOffloadedPlaybackSupported(AudioFormat,AudioAttributes)} for
+     * more details).
      * @param executor {@link Executor} to handle the callbacks.
      * @param eventCallback the callback to receive the stream event notifications.
      */
