@@ -293,6 +293,7 @@ public class Dependency extends SystemUI {
     @Inject Lazy<DevicePolicyManagerWrapper> mDevicePolicyManagerWrapper;
     @Inject Lazy<PackageManagerWrapper> mPackageManagerWrapper;
     @Inject Lazy<SensorPrivacyController> mSensorPrivacyController;
+    @Inject Lazy<DumpController> mDumpController;
 
     @Inject
     public Dependency() {
@@ -464,7 +465,7 @@ public class Dependency extends SystemUI {
         mProviders.put(DevicePolicyManagerWrapper.class, mDevicePolicyManagerWrapper::get);
         mProviders.put(PackageManagerWrapper.class, mPackageManagerWrapper::get);
         mProviders.put(SensorPrivacyController.class, mSensorPrivacyController::get);
-
+        mProviders.put(DumpController.class, mDumpController::get);
 
         // TODO(b/118592525): to support multi-display , we start to add something which is
         //                    per-display, while others may be global. I think it's time to add
@@ -478,6 +479,11 @@ public class Dependency extends SystemUI {
     @Override
     public synchronized void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         super.dump(fd, pw, args);
+
+        // Make sure that the DumpController gets added to mDependencies, as they are only added
+        // with Dependency#get.
+        getDependency(DumpController.class);
+
         pw.println("Dumping existing controllers:");
         mDependencies.values().stream().filter(obj -> obj instanceof Dumpable)
                 .forEach(o -> ((Dumpable) o).dump(fd, pw, args));
