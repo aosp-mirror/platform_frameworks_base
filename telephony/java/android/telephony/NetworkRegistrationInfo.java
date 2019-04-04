@@ -368,6 +368,13 @@ public final class NetworkRegistrationInfo implements Parcelable {
      * @hide
      */
     public void setAccessNetworkTechnology(@NetworkType int tech) {
+        if (tech == TelephonyManager.NETWORK_TYPE_LTE_CA) {
+            // For old device backward compatibility support
+            tech = TelephonyManager.NETWORK_TYPE_LTE;
+            if (mDataSpecificInfo != null) {
+                mDataSpecificInfo.setIsUsingCarrierAggregation(true);
+            }
+        }
         mAccessNetworkTechnology = tech;
     }
 
