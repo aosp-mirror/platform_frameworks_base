@@ -87,6 +87,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
 
 /**
  * Service for role management.
@@ -787,19 +788,21 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
         }
 
         @Override
-        public void setDefaultHomeAsync(@Nullable String packageName, @UserIdInt int userId) {
-            RemoteCallback callback = new RemoteCallback(result -> {
+        public void setDefaultHomeAsync(@Nullable String packageName, @UserIdInt int userId,
+                @NonNull Consumer<Boolean> callback) {
+            RemoteCallback remoteCallback = new RemoteCallback(result -> {
                 boolean successful = result != null;
                 if (!successful) {
                     Slog.e(LOG_TAG, "Failed to set default home: " + packageName);
                 }
+                callback.accept(successful);
             });
             if (packageName != null) {
                 getOrCreateControllerService(userId).onAddRoleHolder(RoleManager.ROLE_HOME,
-                        packageName, 0, callback);
+                        packageName, 0, remoteCallback);
             } else {
                 getOrCreateControllerService(userId).onClearRoleHolders(RoleManager.ROLE_HOME, 0,
-                        callback);
+                        remoteCallback);
             }
         }
     }

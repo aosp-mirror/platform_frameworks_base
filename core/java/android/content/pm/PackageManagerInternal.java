@@ -191,8 +191,10 @@ public abstract class PackageManagerInternal {
          *
          * @param packageName package name of the default home, or {@code null} to remove
          * @param userId the user id
+         * @param callback the callback made after the default home as been updated
          */
-        void setDefaultHomeAsync(@Nullable String packageName, @UserIdInt int userId);
+        void setDefaultHomeAsync(@Nullable String packageName, @UserIdInt int userId,
+                @NonNull Consumer<Boolean> callback);
     }
 
     /**

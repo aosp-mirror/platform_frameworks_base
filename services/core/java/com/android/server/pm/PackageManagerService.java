@@ -19473,8 +19473,9 @@ public class PackageManagerService extends IPackageManager.Stub
             filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
             pir.addFilter(new PreferredActivity(filter, match, set, activity, always));
             scheduleWritePackageRestrictionsLocked(userId);
-            postPreferredActivityChangedBroadcast(userId);
-            updateDefaultHomeLPw(userId);
+            if (!updateDefaultHomeLPw(userId)) {
+                postPreferredActivityChangedBroadcast(userId);
+            }
         }
     }
 
@@ -20253,7 +20254,10 @@ public class PackageManagerService extends IPackageManager.Stub
         return null;
     }
 
-    private void updateDefaultHomeLPw(int userId) {
+    /**
+     * @return Whether the ACTION_PREFERRED_ACTIVITY_CHANGED broadcast has been scheduled.
+     */
+    private boolean updateDefaultHomeLPw(int userId) {
         Intent intent = getHomeIntent();
         List<ResolveInfo> resolveInfos = queryIntentActivitiesInternal(intent, null,
                 PackageManager.GET_META_DATA, userId);
@@ -20264,15 +20268,20 @@ public class PackageManagerService extends IPackageManager.Stub
                 ? preferredResolveInfo.activityInfo.packageName : null;
         String currentPackageName = mDefaultHomeProvider.getDefaultHome(userId);
         if (TextUtils.equals(currentPackageName, packageName)) {
-            return;
+            return false;
         }
         String[] callingPackages = getPackagesForUid(Binder.getCallingUid());
         if (callingPackages != null && ArrayUtils.contains(callingPackages,
                 mRequiredPermissionControllerPackage)) {
             // PermissionController manages default home directly.
-            return;
+            return false;
         }
-        mDefaultHomeProvider.setDefaultHomeAsync(packageName, userId);
+        mDefaultHomeProvider.setDefaultHomeAsync(packageName, userId, (successful) -> {
+            if (successful) {
+                postPreferredActivityChangedBroadcast(userId);
+            }
+        });
+        return true;
     }
 
     @Override
