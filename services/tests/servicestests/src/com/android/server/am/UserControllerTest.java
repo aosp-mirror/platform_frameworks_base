@@ -484,9 +484,6 @@ public class UserControllerTest {
 
     private void waitForHandlerToComplete(Handler handler, long waitTimeMs)
             throws InterruptedException {
-        if (!handler.hasMessagesOrCallbacks()) { // if nothing queued, do not wait.
-            return;
-        }
         final Object lock = new Object();
         synchronized (lock) {
             handler.post(() -> {
