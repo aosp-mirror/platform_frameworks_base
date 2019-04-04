@@ -596,9 +596,9 @@ public class VolumeDialogImpl implements VolumeDialog,
     }
 
     private void updateCaptionsIcon() {
-        boolean componentEnabled = mController.areCaptionsEnabled();
-        if (mODICaptionsIcon.getComponentEnabled() != componentEnabled) {
-            mHandler.post(mODICaptionsIcon.setComponentEnabled(componentEnabled));
+        boolean captionsEnabled = mController.areCaptionsEnabled();
+        if (mODICaptionsIcon.getCaptionsEnabled() != captionsEnabled) {
+            mHandler.post(mODICaptionsIcon.setCaptionsEnabled(captionsEnabled));
         }
 
         boolean isOptedOut = mController.isCaptionStreamOptedOut();
@@ -878,7 +878,6 @@ public class VolumeDialogImpl implements VolumeDialog,
         }
 
         view.setContentDescription(mContext.getString(currStateResId));
-
         view.setAccessibilityDelegate(new AccessibilityDelegate() {
             public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
                 super.onInitializeAccessibilityNodeInfo(host, info);
