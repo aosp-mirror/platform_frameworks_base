@@ -78,7 +78,7 @@ public final class DataSpecificRegistrationInfo implements Parcelable {
      *
      * @hide
      */
-    public final boolean isUsingCarrierAggregation;
+    public boolean mIsUsingCarrierAggregation;
 
     /**
      * @hide
@@ -92,7 +92,7 @@ public final class DataSpecificRegistrationInfo implements Parcelable {
         this.isNrAvailable = isNrAvailable;
         this.isEnDcAvailable = isEnDcAvailable;
         this.mLteVopsSupportInfo = lteVops;
-        this.isUsingCarrierAggregation = isUsingCarrierAggregation;
+        this.mIsUsingCarrierAggregation = isUsingCarrierAggregation;
     }
 
     private DataSpecificRegistrationInfo(Parcel source) {
@@ -101,7 +101,7 @@ public final class DataSpecificRegistrationInfo implements Parcelable {
         isNrAvailable = source.readBoolean();
         isEnDcAvailable = source.readBoolean();
         mLteVopsSupportInfo = LteVopsSupportInfo.CREATOR.createFromParcel(source);
-        isUsingCarrierAggregation = source.readBoolean();
+        mIsUsingCarrierAggregation = source.readBoolean();
     }
 
     @Override
@@ -111,7 +111,7 @@ public final class DataSpecificRegistrationInfo implements Parcelable {
         dest.writeBoolean(isNrAvailable);
         dest.writeBoolean(isEnDcAvailable);
         mLteVopsSupportInfo.writeToParcel(dest, flags);
-        dest.writeBoolean(isUsingCarrierAggregation);
+        dest.writeBoolean(mIsUsingCarrierAggregation);
     }
 
     @Override
@@ -128,7 +128,7 @@ public final class DataSpecificRegistrationInfo implements Parcelable {
                 .append(" isNrAvailable = " + isNrAvailable)
                 .append(" isEnDcAvailable = " + isEnDcAvailable)
                 .append(" " + mLteVopsSupportInfo.toString())
-                .append(" isUsingCarrierAggregation = " + isUsingCarrierAggregation)
+                .append(" mIsUsingCarrierAggregation = " + mIsUsingCarrierAggregation)
                 .append(" }")
                 .toString();
     }
@@ -136,7 +136,7 @@ public final class DataSpecificRegistrationInfo implements Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(maxDataCalls, isDcNrRestricted, isNrAvailable, isEnDcAvailable,
-                mLteVopsSupportInfo, isUsingCarrierAggregation);
+                mLteVopsSupportInfo, mIsUsingCarrierAggregation);
     }
 
     @Override
@@ -151,7 +151,7 @@ public final class DataSpecificRegistrationInfo implements Parcelable {
                 && this.isNrAvailable == other.isNrAvailable
                 && this.isEnDcAvailable == other.isEnDcAvailable
                 && this.mLteVopsSupportInfo.equals(other.mLteVopsSupportInfo)
-                && this.isUsingCarrierAggregation == other.isUsingCarrierAggregation;
+                && this.mIsUsingCarrierAggregation == other.mIsUsingCarrierAggregation;
     }
 
     public static final @NonNull Parcelable.Creator<DataSpecificRegistrationInfo> CREATOR =
@@ -173,5 +173,23 @@ public final class DataSpecificRegistrationInfo implements Parcelable {
     @NonNull
     public LteVopsSupportInfo getLteVopsSupportInfo() {
         return mLteVopsSupportInfo;
+    }
+
+    /**
+     * Set the flag indicating if using carrier aggregation.
+     *
+     * @param isUsingCarrierAggregation {@code true} if using carrier aggregation.
+     * @hide
+     */
+    public void setIsUsingCarrierAggregation(boolean isUsingCarrierAggregation) {
+        mIsUsingCarrierAggregation = isUsingCarrierAggregation;
+    }
+
+    /**
+     * @return {@code true} if using carrier aggregation.
+     * @hide
+     */
+    public boolean isUsingCarrierAggregation() {
+        return mIsUsingCarrierAggregation;
     }
 }
