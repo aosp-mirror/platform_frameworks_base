@@ -333,7 +333,9 @@ public class AppOpsManager {
     public static int resolveFirstUnrestrictedUidState(int op) {
         switch (op) {
             case OP_FINE_LOCATION:
-            case OP_COARSE_LOCATION: {
+            case OP_COARSE_LOCATION:
+            case OP_MONITOR_LOCATION:
+            case OP_MONITOR_HIGH_POWER_LOCATION: {
                 return UID_STATE_FOREGROUND_SERVICE_LOCATION;
             }
         }
