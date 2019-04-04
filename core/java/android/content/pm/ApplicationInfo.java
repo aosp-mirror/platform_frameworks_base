@@ -687,6 +687,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public static final int PRIVATE_FLAG_ALLOW_EXTERNAL_STORAGE_SANDBOX = 1 << 29;
 
+    /**
+     * Value for {@link #privateFlags}: whether this app is pre-installed on the
+     * ODM partition of the system image.
+     * @hide
+     */
+    public static final int PRIVATE_FLAG_ODM = 1 << 30;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "PRIVATE_FLAG_" }, value = {
             PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE,
@@ -717,6 +724,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             PRIVATE_FLAG_ALLOW_CLEAR_USER_DATA_ON_FAILED_RESTORE,
             PRIVATE_FLAG_ALLOW_AUDIO_PLAYBACK_CAPTURE,
             PRIVATE_FLAG_ALLOW_EXTERNAL_STORAGE_SANDBOX,
+            PRIVATE_FLAG_ODM,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ApplicationInfoPrivateFlags {}
@@ -1091,6 +1099,18 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * attribute.
      */
     public String appComponentFactory;
+
+    /**
+     * Resource id of {@link com.android.internal.R.styleable.AndroidManifestProvider_icon}
+     * @hide
+     */
+    public int iconRes;
+
+    /**
+     * Resource id of {@link com.android.internal.R.styleable.AndroidManifestProvider_roundIcon}
+     * @hide
+     */
+    public int roundIconRes;
 
     /**
      * The category of this app. Categories are used to cluster multiple apps
@@ -1571,6 +1591,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         classLoaderName = orig.classLoaderName;
         splitClassLoaderNames = orig.splitClassLoaderNames;
         appComponentFactory = orig.appComponentFactory;
+        iconRes = orig.iconRes;
+        roundIconRes = orig.roundIconRes;
         compileSdkVersion = orig.compileSdkVersion;
         compileSdkVersionCodename = orig.compileSdkVersionCodename;
         mHiddenApiPolicy = orig.mHiddenApiPolicy;
@@ -1650,6 +1672,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(compileSdkVersion);
         dest.writeString(compileSdkVersionCodename);
         dest.writeString(appComponentFactory);
+        dest.writeInt(iconRes);
+        dest.writeInt(roundIconRes);
         dest.writeInt(mHiddenApiPolicy);
         dest.writeInt(hiddenUntilInstalled ? 1 : 0);
         dest.writeString(zygotePreloadName);
@@ -1724,6 +1748,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         compileSdkVersion = source.readInt();
         compileSdkVersionCodename = source.readString();
         appComponentFactory = source.readString();
+        iconRes = source.readInt();
+        roundIconRes = source.readInt();
         mHiddenApiPolicy = source.readInt();
         hiddenUntilInstalled = source.readInt() != 0;
         zygotePreloadName = source.readString();
@@ -1967,6 +1993,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /** @hide */
     public boolean isOem() {
         return (privateFlags & ApplicationInfo.PRIVATE_FLAG_OEM) != 0;
+    }
+
+    /** @hide */
+    public boolean isOdm() {
+        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_ODM) != 0;
     }
 
     /** @hide */

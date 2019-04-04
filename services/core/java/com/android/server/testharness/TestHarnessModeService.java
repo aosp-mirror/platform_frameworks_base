@@ -71,7 +71,6 @@ public class TestHarnessModeService extends SystemService {
     private static final String TEST_HARNESS_MODE_PROPERTY = "persist.sys.test_harness";
 
     private PersistentDataBlockManagerInternal mPersistentDataBlockManagerInternal;
-    private boolean mShouldSetUpTestHarnessMode;
 
     public TestHarnessModeService(Context context) {
         super(context);
@@ -89,9 +88,8 @@ public class TestHarnessModeService extends SystemService {
                 setUpTestHarnessMode();
                 break;
             case PHASE_BOOT_COMPLETED:
-                disableAutoSync();
-                configureSettings();
-                showNotification();
+                completeTestHarnessModeSetup();
+                showNotificationIfEnabled();
                 break;
         }
         super.onBootPhase(phase);
@@ -104,47 +102,45 @@ public class TestHarnessModeService extends SystemService {
             // There's no data to apply, so leave it as-is.
             return;
         }
-        PersistentData persistentData;
-        try {
-            persistentData = PersistentData.fromBytes(testHarnessModeData);
-        } catch (SetUpTestHarnessModeException e) {
-            Slog.e(TAG, "Failed to set up Test Harness Mode. Bad data.", e);
-            return;
-        } finally {
-            // Clear out the Test Harness Mode data. It's now in memory if successful or we should
-            // skip setting up.
-            getPersistentDataBlock().clearTestHarnessModeData();
-        }
-        mShouldSetUpTestHarnessMode = true;
-        setUpAdb(persistentData);
+        // If there is data, we should set the device as provisioned, so that we skip the setup
+        // wizard.
         setDeviceProvisioned();
+        SystemProperties.set(TEST_HARNESS_MODE_PROPERTY, "1");
     }
 
-    private void setUpAdb(PersistentData persistentData) {
-        ContentResolver cr = getContext().getContentResolver();
-
-        // Disable the TTL for ADB keys before enabling ADB
-        Settings.Global.putLong(cr, Settings.Global.ADB_ALLOWED_CONNECTION_TIME, 0);
-
-        SystemProperties.set(TEST_HARNESS_MODE_PROPERTY, "1");
-        writeAdbKeysFile(persistentData);
+    private void completeTestHarnessModeSetup() {
+        Slog.d(TAG, "Completing Test Harness Mode setup.");
+        byte[] testHarnessModeData = getPersistentDataBlock().getTestHarnessModeData();
+        if (testHarnessModeData == null || testHarnessModeData.length == 0) {
+            // There's no data to apply, so leave it as-is.
+            return;
+        }
+        try {
+            setUpAdbFiles(PersistentData.fromBytes(testHarnessModeData));
+            disableAutoSync();
+            configureSettings();
+        } catch (SetUpTestHarnessModeException e) {
+            Slog.e(TAG, "Failed to set up Test Harness Mode. Bad data.", e);
+        } finally {
+            // Clear out the Test Harness Mode data so that we don't repeat the setup. If it failed
+            // to set up, then retrying without enabling Test Harness Mode should allow it to boot.
+            // If we succeeded setting up, we shouldn't be re-applying the THM steps every boot
+            // anyway.
+            getPersistentDataBlock().clearTestHarnessModeData();
+        }
     }
 
     private void disableAutoSync() {
-        if (!mShouldSetUpTestHarnessMode) {
-            return;
-        }
         UserInfo primaryUser = UserManager.get(getContext()).getPrimaryUser();
         ContentResolver
             .setMasterSyncAutomaticallyAsUser(false, primaryUser.getUserHandle().getIdentifier());
     }
 
     private void configureSettings() {
-        if (!mShouldSetUpTestHarnessMode) {
-            return;
-        }
         ContentResolver cr = getContext().getContentResolver();
 
+        // Disable the TTL for ADB keys before enabling ADB
+        Settings.Global.putLong(cr, Settings.Global.ADB_ALLOWED_CONNECTION_TIME, 0);
         Settings.Global.putInt(cr, Settings.Global.ADB_ENABLED, 1);
         Settings.Global.putInt(cr, Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 1);
         Settings.Global.putInt(cr, Settings.Global.PACKAGE_VERIFIER_ENABLE, 0);
@@ -155,7 +151,7 @@ public class TestHarnessModeService extends SystemService {
         Settings.Global.putInt(cr, Settings.Global.OTA_DISABLE_AUTOMATIC_UPDATE, 1);
     }
 
-    private void writeAdbKeysFile(PersistentData persistentData) {
+    private void setUpAdbFiles(PersistentData persistentData) {
         AdbManagerInternal adbManager = LocalServices.getService(AdbManagerInternal.class);
 
         writeBytesToFile(persistentData.mAdbKeys, adbManager.getAdbKeysFile().toPath());
@@ -189,7 +185,7 @@ public class TestHarnessModeService extends SystemService {
                 UserHandle.USER_CURRENT);
     }
 
-    private void showNotification() {
+    private void showNotificationIfEnabled() {
         if (!SystemProperties.getBoolean(TEST_HARNESS_MODE_PROPERTY, false)) {
             return;
         }

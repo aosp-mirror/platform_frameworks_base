@@ -25,6 +25,7 @@ import static android.system.OsConstants.EPIPE;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
+import android.app.ActivityThread;
 import android.media.AudioFormat;
 import android.os.Handler;
 import android.os.Parcel;
@@ -1440,6 +1441,17 @@ public class SoundTrigger {
     public static final int SERVICE_STATE_DISABLED = 1;
 
     /**
+     * @return returns current package name.
+     */
+    static String getCurrentOpPackageName() {
+        String packageName = ActivityThread.currentOpPackageName();
+        if (packageName == null) {
+            return "";
+        }
+        return packageName;
+    }
+
+    /**
      * Returns a list of descriptors for all hardware modules loaded.
      * @param modules A ModuleProperties array where the list will be returned.
      * @return - {@link #STATUS_OK} in case of success
@@ -1452,7 +1464,23 @@ public class SoundTrigger {
      * @hide
      */
     @UnsupportedAppUsage
-    public static native int listModules(ArrayList <ModuleProperties> modules);
+    public static int listModules(ArrayList<ModuleProperties> modules) {
+        return listModules(getCurrentOpPackageName(), modules);
+    }
+
+    /**
+     * Returns a list of descriptors for all hardware modules loaded.
+     * @param opPackageName
+     * @param modules A ModuleProperties array where the list will be returned.
+     * @return - {@link #STATUS_OK} in case of success
+     *         - {@link #STATUS_ERROR} in case of unspecified error
+     *         - {@link #STATUS_PERMISSION_DENIED} if the caller does not have system permission
+     *         - {@link #STATUS_NO_INIT} if the native service cannot be reached
+     *         - {@link #STATUS_BAD_VALUE} if modules is null
+     *         - {@link #STATUS_DEAD_OBJECT} if the binder transaction to the native service fails
+     */
+    private static native int listModules(String opPackageName,
+                                          ArrayList<ModuleProperties> modules);
 
     /**
      * Get an interface on a hardware module to control sound models and recognition on

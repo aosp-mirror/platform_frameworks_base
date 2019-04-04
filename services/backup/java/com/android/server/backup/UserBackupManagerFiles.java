@@ -49,8 +49,13 @@ final class UserBackupManagerFiles {
         return new File(Environment.getDownloadCacheDirectory(), BACKUP_STAGING_DIR);
     }
 
-    /** Stored in the system user's directory and the file is indexed by the user it refers to. */
-    static File getStateFileInSystemDir(String prefix, int userId) {
-        return new File(getBaseStateDir(UserHandle.USER_SYSTEM), prefix + "-" + userId);
+    /** A user specific dir within the system user's directory. */
+    static File getStateDirInSystemDir(int userId) {
+        return new File(getBaseStateDir(UserHandle.USER_SYSTEM), "" + userId);
+    }
+
+    /** Stored in a user specific dir within the system user's directory. */
+    static File getStateFileInSystemDir(String filename, int userId) {
+        return new File(getStateDirInSystemDir(userId), filename);
     }
 }

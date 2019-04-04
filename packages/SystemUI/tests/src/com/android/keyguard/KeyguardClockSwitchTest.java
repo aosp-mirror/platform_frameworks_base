@@ -211,6 +211,19 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
     }
 
     @Test
+    public void onPluginDisconnected_onDestroyView() {
+        // GIVEN a plugin is connected
+        ClockPlugin clockPlugin = mock(ClockPlugin.class);
+        when(clockPlugin.getView()).thenReturn(new TextClock(getContext()));
+        ClockManager.ClockChangedListener listener = mKeyguardClockSwitch.getClockChangedListener();
+        listener.onClockChanged(clockPlugin);
+        // WHEN the plugin is disconnected
+        listener.onClockChanged(null);
+        // THEN onDestroyView is called on the plugin
+        verify(clockPlugin).onDestroyView();
+    }
+
+    @Test
     public void setTextColor_defaultClockSetTextColor() {
         mKeyguardClockSwitch.setTextColor(Color.YELLOW);
 

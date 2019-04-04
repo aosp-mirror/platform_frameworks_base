@@ -20,8 +20,8 @@ import android.net.ipmemorystore.Blob;
 import android.net.ipmemorystore.NetworkAttributesParcelable;
 import android.net.ipmemorystore.IOnBlobRetrievedListener;
 import android.net.ipmemorystore.IOnL2KeyResponseListener;
-import android.net.ipmemorystore.IOnNetworkAttributesRetrieved;
-import android.net.ipmemorystore.IOnSameNetworkResponseListener;
+import android.net.ipmemorystore.IOnNetworkAttributesRetrievedListener;
+import android.net.ipmemorystore.IOnSameL3NetworkResponseListener;
 import android.net.ipmemorystore.IOnStatusListener;
 
 /** {@hide} */
@@ -84,7 +84,7 @@ oneway interface IIpMemoryStore {
      * @param listener The listener that will be invoked to return the answer.
      * @return (through the listener) A SameL3NetworkResponse containing the answer and confidence.
      */
-    void isSameNetwork(String l2Key1, String l2Key2, IOnSameNetworkResponseListener listener);
+    void isSameNetwork(String l2Key1, String l2Key2, IOnSameL3NetworkResponseListener listener);
 
     /**
      * Retrieve the network attributes for a key.
@@ -95,7 +95,7 @@ oneway interface IIpMemoryStore {
      * @return (through the listener) The network attributes and the L2 key associated with
      *         the query.
      */
-    void retrieveNetworkAttributes(String l2Key, IOnNetworkAttributesRetrieved listener);
+    void retrieveNetworkAttributes(String l2Key, IOnNetworkAttributesRetrievedListener listener);
 
     /**
      * Retrieve previously stored private data.

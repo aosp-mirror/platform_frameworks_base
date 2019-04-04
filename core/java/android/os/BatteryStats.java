@@ -16,6 +16,7 @@
 
 package android.os;
 
+import static android.app.ActivityManager.PROCESS_STATE_BOUND_TOP;
 import static android.app.ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE_LOCATION;
 
 import android.annotation.UnsupportedAppUsage;
@@ -859,7 +860,8 @@ public abstract class BatteryStats implements Parcelable {
          */
         public static final int[] CRITICAL_PROC_STATES = {
                 PROCESS_STATE_TOP,
-                PROCESS_STATE_FOREGROUND_SERVICE_LOCATION, PROCESS_STATE_FOREGROUND_SERVICE,
+                PROCESS_STATE_FOREGROUND_SERVICE_LOCATION,
+                PROCESS_STATE_BOUND_TOP, PROCESS_STATE_FOREGROUND_SERVICE,
                 PROCESS_STATE_FOREGROUND
         };
 

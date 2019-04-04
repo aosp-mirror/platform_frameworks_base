@@ -157,6 +157,15 @@ public class StackAnimationController extends
         return mStackPosition;
     }
 
+    /** Whether the stack is on the left side of the screen. */
+    public boolean isStackOnLeftSide() {
+        if (mLayout != null) {
+            return mStackPosition.x - mIndividualBubbleSize / 2 < mLayout.getWidth() / 2;
+        } else {
+            return false;
+        }
+    }
+
     /**
      * Flings the stack starting with the given velocities, springing it to the nearest edge
      * afterward.

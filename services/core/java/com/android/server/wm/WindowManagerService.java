@@ -73,6 +73,7 @@ import static com.android.internal.util.LatencyTracker.ACTION_ROTATE_SCREEN;
 import static com.android.server.LockGuard.INDEX_WINDOW;
 import static com.android.server.LockGuard.installLock;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_BOOT;
@@ -4519,6 +4520,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int SET_RUNNING_REMOTE_ANIMATION = 59;
         public static final int ANIMATION_FAILSAFE = 60;
         public static final int RECOMPUTE_FOCUS = 61;
+        public static final int ON_POINTER_DOWN_OUTSIDE_FOCUS = 62;
 
         /**
          * Used to denote that an integer field in a message will not be used.
@@ -4907,6 +4909,13 @@ public class WindowManagerService extends IWindowManager.Stub
                     synchronized (mGlobalLock) {
                         updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL,
                                 true /* updateInputWindows */);
+                    }
+                    break;
+                }
+                case ON_POINTER_DOWN_OUTSIDE_FOCUS: {
+                    synchronized (mGlobalLock) {
+                        final IBinder touchedToken = (IBinder) msg.obj;
+                        onPointerDownOutsideFocusLocked(touchedToken);
                     }
                     break;
                 }
@@ -7522,22 +7531,24 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public boolean injectInputAfterTransactionsApplied(InputEvent ev, int mode) {
-        boolean shouldWaitForAnimComplete = false;
+        boolean shouldWaitForAnimToComplete = false;
         if (ev instanceof KeyEvent) {
             KeyEvent keyEvent = (KeyEvent) ev;
-            shouldWaitForAnimComplete = keyEvent.getSource() == InputDevice.SOURCE_MOUSE
+            shouldWaitForAnimToComplete = keyEvent.getSource() == InputDevice.SOURCE_MOUSE
                     || keyEvent.getAction() == KeyEvent.ACTION_DOWN;
         } else if (ev instanceof MotionEvent) {
             MotionEvent motionEvent = (MotionEvent) ev;
-            shouldWaitForAnimComplete = motionEvent.getSource() == InputDevice.SOURCE_MOUSE
+            shouldWaitForAnimToComplete = motionEvent.getSource() == InputDevice.SOURCE_MOUSE
                     || motionEvent.getAction() == MotionEvent.ACTION_DOWN;
         }
 
-        if (shouldWaitForAnimComplete) {
+        if (shouldWaitForAnimToComplete) {
             waitForAnimationsToComplete();
 
             synchronized (mGlobalLock) {
                 mWindowPlacerLocked.performSurfacePlacementIfScheduled();
+                mRoot.forAllDisplays(displayContent ->
+                        displayContent.getInputMonitor().updateInputWindowsImmediately());
             }
 
             new SurfaceControl.Transaction().syncInputWindows().apply(true);
@@ -7567,6 +7578,39 @@ public class WindowManagerService extends IWindowManager.Stub
     void onAnimationFinished() {
         synchronized (mGlobalLock) {
             mGlobalLock.notifyAll();
+        }
+    }
+
+    private void onPointerDownOutsideFocusLocked(IBinder touchedToken) {
+        final WindowState touchedWindow = windowForClientLocked(null, touchedToken, false);
+        if (touchedWindow == null) {
+            return;
+        }
+
+        final DisplayContent displayContent = touchedWindow.getDisplayContent();
+        if (displayContent == null) {
+            return;
+        }
+
+        if (!touchedWindow.canReceiveKeys()) {
+            // If the window that received the input event cannot receive keys, don't move the
+            // display it's on to the top since that window won't be able to get focus anyway.
+            return;
+        }
+
+        final WindowContainer parent = displayContent.getParent();
+        if (parent != null && parent.getTopChild() != displayContent) {
+            parent.positionChildAt(WindowContainer.POSITION_TOP, displayContent,
+                    true /* includingParents */);
+            // For compatibility, only the topmost activity is allowed to be resumed for pre-Q
+            // app. Ensure the topmost activities are resumed whenever a display is moved to top.
+            // TODO(b/123761773): Investigate whether we can move this into
+            // RootActivityContainer#updateTopResumedActivityIfNeeded(). Currently, it is risky
+            // to do so because it seems possible to resume activities as part of a larger
+            // transaction and it's too early to resume based on current order when performing
+            // updateTopResumedActivityIfNeeded().
+            displayContent.mAcitvityDisplay.ensureActivitiesVisible(null /* starting */,
+                    0 /* configChanges */, !PRESERVE_WINDOWS, true /* notifyClients */);
         }
     }
 }

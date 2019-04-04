@@ -625,7 +625,7 @@ public class RecentTasksTest extends ActivityTestsBase {
         // excludedTask is not trimmed.
         assertTrimmed(mTasks.get(0));
 
-        mRecentTasks.removeAllVisibleTasks();
+        mRecentTasks.removeAllVisibleTasks(TEST_USER_0_ID);
 
         // Only visible tasks removed.
         assertTrimmed(mTasks.get(0), mTasks.get(1), mTasks.get(2), mTasks.get(3));
@@ -849,8 +849,28 @@ public class RecentTasksTest extends ActivityTestsBase {
         mRecentTasks.add(t7);
 
         // Remove all the visible tasks and ensure that they are removed
-        mRecentTasks.removeAllVisibleTasks();
+        mRecentTasks.removeAllVisibleTasks(TEST_USER_0_ID);
         assertTrimmed(t1, t2, t3, t4, t5, t6, t7);
+    }
+
+    @Test
+    public void testRemoveAllVisibleTasksPerUser() {
+        mRecentTasks.setParameters(-1 /* min */, 3 /* max */, 100 /* ms */);
+
+        // Create a visible task per user
+        TaskRecord t1 = createTaskBuilder(".Task1")
+                .setUserId(TEST_USER_0_ID)
+                .build();
+        mRecentTasks.add(t1);
+
+        TaskRecord t2 = createTaskBuilder(".Task1")
+                .setUserId(TEST_USER_1_ID)
+                .build();
+        mRecentTasks.add(t2);
+
+        // Remove all the visible tasks and ensure that they are removed
+        mRecentTasks.removeAllVisibleTasks(TEST_USER_0_ID);
+        assertTrimmed(t1);
     }
 
     @Test

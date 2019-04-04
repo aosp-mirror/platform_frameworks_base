@@ -90,7 +90,11 @@ public class AnnouncementAggregator extends ICloseHandle.Stub {
             for (ModuleWatcher watcher : mModuleWatchers) {
                 combined.addAll(watcher.currentList);
             }
-            TunerCallback.dispatch(() -> mListener.onListUpdated(combined));
+            try {
+                mListener.onListUpdated(combined);
+            } catch (RemoteException ex) {
+                Slog.e(TAG, "mListener.onListUpdated() failed: ", ex);
+            }
         }
     }
 

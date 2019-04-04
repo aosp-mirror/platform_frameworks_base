@@ -38,6 +38,14 @@
     <dimen name="navigation_handle_sample_horizontal_margin">10dp</dimen>
     <dimen name="navigation_home_handle_width">72dp</dimen>
 
+
+    <!-- Size of the nav bar edge panels, should be greater to the
+         edge sensitivity + the drag threshold -->
+    <dimen name="navigation_edge_panel_width">52dp</dimen>
+    <dimen name="navigation_edge_panel_height">52dp</dimen>
+    <!-- The threshold to drag to trigger the edge action -->
+    <dimen name="navigation_edge_action_drag_threshold">16dp</dimen>
+
     <!-- Luminance threshold to determine black/white contrast for the navigation affordances -->
     <item name="navigation_luminance_threshold" type="dimen" format="float">0.5</item>
     <!-- Luminance change threshold that allows applying new value if difference was exceeded -->
@@ -171,7 +179,7 @@
     <dimen name="notification_menu_icon_padding">20dp</dimen>
 
     <!-- The vertical space around the buttons in the inline settings -->
-    <dimen name="notification_guts_button_spacing">6dp</dimen>
+    <dimen name="notification_guts_button_spacing">12dp</dimen>
 
     <!-- Extra horizontal space for properly aligning guts buttons with the notification content -->
     <dimen name="notification_guts_button_side_margin">8dp</dimen>
@@ -187,6 +195,18 @@
 
     <!-- The height of the header in inline settings -->
     <dimen name="notification_guts_header_height">24dp</dimen>
+
+    <!-- The text size of the header in inline settings -->
+    <dimen name="notification_guts_header_text_size">16sp</dimen>
+
+    <!-- The horizontal space between items in the alert selections in the inline settings -->
+    <dimen name="notification_guts_option_horizontal_padding">15dp</dimen>
+
+    <!-- The vertical space between items in the alert selections in the inline settings -->
+    <dimen name="notification_guts_option_vertical_padding">15dp</dimen>
+
+    <!-- The vertical space between the alert selections in the inline settings -->
+    <dimen name="notification_guts_option_vertical_margin">6dp</dimen>
 
     <!-- The minimum height for the snackbar shown after the snooze option has been chosen. -->
     <dimen name="snooze_snackbar_min_height">56dp</dimen>
@@ -1027,6 +1047,12 @@
 
     <!-- How much each bubble is elevated. -->
     <dimen name="bubble_elevation">1dp</dimen>
+    <!-- How much the bubble flyout text container is elevated. -->
+    <dimen name="bubble_flyout_elevation">4dp</dimen>
+    <!-- How much padding is around the flyout text. -->
+    <dimen name="bubble_flyout_padding">16dp</dimen>
+    <!-- The maximum width of a bubble flyout. -->
+    <dimen name="bubble_flyout_maxwidth">200dp</dimen>
     <!-- Padding around a collapsed bubble -->
     <dimen name="bubble_view_padding">0dp</dimen>
     <!-- Padding between bubbles when displayed in expanded state -->

@@ -50,6 +50,7 @@ public class TemplateClassificationIntentFactoryTest {
     private static final String TEXT = "text";
     private static final String TITLE_WITHOUT_ENTITY = "Map";
     private static final String DESCRIPTION = "Opens in Maps";
+    private static final String DESCRIPTION_WITH_APP_NAME = "Use %1$s to open Map";
     private static final String ACTION = Intent.ACTION_VIEW;
 
     @Mock
@@ -219,6 +220,7 @@ public class TemplateClassificationIntentFactoryTest {
                         TITLE_WITHOUT_ENTITY,
                         null,
                         DESCRIPTION,
+                        DESCRIPTION_WITH_APP_NAME,
                         ACTION,
                         null,
                         null,

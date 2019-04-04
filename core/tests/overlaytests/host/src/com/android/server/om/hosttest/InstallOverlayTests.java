@@ -67,10 +67,10 @@ public class InstallOverlayTests extends BaseHostJUnit4Test {
     }
 
     @Test
-    public void failToInstallNonPlatformSignedOverlay() throws Exception {
+    public void failToInstallNonPlatformSignedOverlayTargetPreQ() throws Exception {
         try {
-            installPackage("OverlayHostTests_BadSignatureOverlay.apk");
-            fail("installed a non-platform signed overlay");
+            installPackage("OverlayHostTests_NonPlatformSignatureOverlay.apk");
+            fail("installed a non-platform signed overlay with targetSdkVersion < Q");
         } catch (Exception e) {
             // Expected.
         }
@@ -155,9 +155,17 @@ public class InstallOverlayTests extends BaseHostJUnit4Test {
         }
     }
 
+    @Test
+    public void instantAppsNotVisibleToOMS() throws Exception {
+        installInstantPackage("OverlayHostTests_AppOverlayV1.apk");
+        assertFalse(overlayManagerContainsPackage(APP_OVERLAY_PACKAGE_NAME));
+        installConvertExistingInstantPackageToFull(APP_OVERLAY_PACKAGE_NAME);
+        assertTrue(overlayManagerContainsPackage(APP_OVERLAY_PACKAGE_NAME));
+    }
+
     private void delay() {
         try {
-            Thread.sleep(100);
+            Thread.sleep(1000);
         } catch (InterruptedException e) {
         }
     }
@@ -165,6 +173,15 @@ public class InstallOverlayTests extends BaseHostJUnit4Test {
     private void installPackage(String pkg) throws Exception {
         super.installPackage(pkg);
         delay();
+    }
+
+    private void installInstantPackage(String pkg) throws Exception {
+        super.installPackage(pkg, "--instant");
+        delay();
+    }
+
+    private void installConvertExistingInstantPackageToFull(String pkg) throws Exception {
+        getDevice().executeShellCommand("cmd package install-existing --wait --full " + pkg);
     }
 
     private void setPackageEnabled(String pkg, boolean enabled) throws Exception {

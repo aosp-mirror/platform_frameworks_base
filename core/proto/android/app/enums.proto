@@ -38,6 +38,7 @@ enum AppTransitionReasonEnum {
 }
 
 // ActivityManager.java PROCESS_STATEs
+// Next tag: 1021
 enum ProcessStateEnum {
     // Unlike the ActivityManager PROCESS_STATE values, the ordering and numerical values
     // here are completely fixed and arbitrary. Order is irrelevant.
@@ -56,9 +57,11 @@ enum ProcessStateEnum {
     // Process is hosting the current top activities. Note that this covers
     // all activities that are visible to the user.
     PROCESS_STATE_TOP = 1002;
+    // Process is bound to a TOP app.
+    PROCESS_STATE_BOUND_TOP = 1020;
     // Process is hosting a foreground service.
     PROCESS_STATE_FOREGROUND_SERVICE = 1003;
-    // Process is hosting a foreground service due to a system binding.
+    // Process is hosting a service bound by the system or another foreground app.
     PROCESS_STATE_BOUND_FOREGROUND_SERVICE = 1004;
     // Process is important to the user, and something they are aware of.
     PROCESS_STATE_IMPORTANT_FOREGROUND = 1005;

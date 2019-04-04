@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar;
 
+import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 
@@ -154,9 +155,7 @@ public class NotificationTestHelper {
      */
     public ExpandableNotificationRow createBubble()
             throws Exception {
-        Notification n = createNotification(false /* isGroupSummary */,
-                null /* groupKey */, makeBubbleMetadata(null));
-        return generateRow(n, PKG, UID, USER_HANDLE, 0 /* extraInflationFlags */, IMPORTANCE_HIGH);
+        return createBubble(makeBubbleMetadata(null), PKG);
     }
 
     /**
@@ -166,21 +165,7 @@ public class NotificationTestHelper {
      */
     public ExpandableNotificationRow createBubble(@Nullable PendingIntent deleteIntent)
             throws Exception {
-        Notification n = createNotification(false /* isGroupSummary */,
-                null /* groupKey */, makeBubbleMetadata(deleteIntent));
-        return generateRow(n, PKG, UID, USER_HANDLE, 0 /* extraInflationFlags */, IMPORTANCE_HIGH);
-    }
-
-    /**
-     * Returns an {@link ExpandableNotificationRow} that should be shown as a bubble.
-     *
-     * @param bubbleMetadata the {@link BubbleMetadata} to use
-     */
-    public ExpandableNotificationRow createBubble(BubbleMetadata bubbleMetadata)
-            throws Exception {
-        Notification n = createNotification(false /* isGroupSummary */,
-                null /* groupKey */, bubbleMetadata);
-        return generateRow(n, PKG, UID, USER_HANDLE, 0 /* extraInflationFlags */, IMPORTANCE_HIGH);
+        return createBubble(makeBubbleMetadata(deleteIntent), PKG);
     }
 
     /**
@@ -192,6 +177,7 @@ public class NotificationTestHelper {
             throws Exception {
         Notification n = createNotification(false /* isGroupSummary */,
                 null /* groupKey */, bubbleMetadata);
+        n.flags |= FLAG_BUBBLE;
         return generateRow(n, pkg, UID, USER_HANDLE, 0 /* extraInflationFlags */, IMPORTANCE_HIGH);
     }
 

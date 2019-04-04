@@ -551,7 +551,7 @@ void Reporter::runReport(size_t* reportByteSize) {
              buf++) {
             // If there was an error now, there will be an error later and we will remove
             // it from the list then.
-            write_header_section(request->getFd(), *buf);
+            write_header_section(request->getFd(), buf->data(), buf->size());
         }
     });
 

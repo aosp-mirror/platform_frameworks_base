@@ -43,7 +43,6 @@ public class UnlockMethodCache {
     /** Whether the unlock method is currently insecure (insecure method or trusted environment) */
     private boolean mCanSkipBouncer;
     private boolean mTrustManaged;
-    private boolean mFaceUnlockRunning;
     private boolean mTrusted;
 
     private UnlockMethodCache(Context ctx) {
@@ -93,16 +92,13 @@ public class UnlockMethodCache {
         boolean canSkipBouncer = !secure ||  mKeyguardUpdateMonitor.getUserCanSkipBouncer(user);
         boolean trustManaged = mKeyguardUpdateMonitor.getUserTrustIsManaged(user);
         boolean trusted = mKeyguardUpdateMonitor.getUserHasTrust(user);
-        boolean faceUnlockRunning = mKeyguardUpdateMonitor.isFaceUnlockRunning(user)
-                && trustManaged;
         boolean changed = secure != mSecure || canSkipBouncer != mCanSkipBouncer ||
-                trustManaged != mTrustManaged  || faceUnlockRunning != mFaceUnlockRunning;
+                trustManaged != mTrustManaged;
         if (changed || updateAlways) {
             mSecure = secure;
             mCanSkipBouncer = canSkipBouncer;
             mTrusted = trusted;
             mTrustManaged = trustManaged;
-            mFaceUnlockRunning = faceUnlockRunning;
             notifyListeners();
         }
         Trace.endSection();
@@ -169,10 +165,6 @@ public class UnlockMethodCache {
 
     public boolean isTrustManaged() {
         return mTrustManaged;
-    }
-
-    public boolean isFaceUnlockRunning() {
-        return mFaceUnlockRunning;
     }
 
     public static interface OnUnlockMethodChangedListener {

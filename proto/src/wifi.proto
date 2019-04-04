@@ -2064,6 +2064,10 @@ message WifiUsabilityStats {
 
   // What event triggered WifiUsabilityStats.
   optional UsabilityStatsTriggerType trigger_type = 3;
+
+  // Firmware alert code. Only valid when the stats was triggered by a firmware
+  // alert, otherwise -1.
+  optional int32 firmware_alert_code = 4 [default = -1];
 }
 
 message DeviceMobilityStatePnoScanStats {

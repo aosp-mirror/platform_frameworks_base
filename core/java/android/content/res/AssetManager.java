@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.annotation.StyleRes;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration.NativeConfig;
@@ -355,6 +356,22 @@ public final class AssetManager implements AutoCloseable {
             }
         }
         return sEmptyApkAssets;
+    }
+
+    /** @hide */
+    @TestApi
+    public @NonNull String[] getApkPaths() {
+        synchronized (this) {
+            if (mOpen) {
+                String[] paths = new String[mApkAssets.length];
+                final int count = mApkAssets.length;
+                for (int i = 0; i < count; i++) {
+                    paths[i] = mApkAssets[i].getAssetPath();
+                }
+                return paths;
+            }
+        }
+        return new String[0];
     }
 
     /**
@@ -1356,6 +1373,7 @@ public final class AssetManager implements AutoCloseable {
     /**
      * @hide
      */
+    @TestApi
     @GuardedBy("this")
     public @Nullable Map<String, String> getOverlayableMap(String packageName) {
         synchronized (this) {

@@ -380,6 +380,7 @@ message Subscription {
 message EventActivation {
   optional int64 atom_matcher_id = 1;
   optional int64 ttl_seconds = 2;
+  optional int64 deactivation_atom_matcher_id = 3;
 }
 
 message MetricActivation {

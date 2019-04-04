@@ -395,7 +395,6 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
             }
             if (shouldAutoBubbleForFlags(mContext, entry) || shouldBubble(entry)) {
                 // TODO: handle group summaries
-                entry.setIsBubble(true);
                 boolean suppressNotification = entry.getBubbleMetadata() != null
                         && entry.getBubbleMetadata().getSuppressInitialNotification()
                         && isForegroundApp(entry.notification.getPackageName());

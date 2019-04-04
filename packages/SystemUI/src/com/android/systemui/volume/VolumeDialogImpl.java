@@ -419,8 +419,9 @@ public class VolumeDialogImpl implements VolumeDialog,
             row.header.setFilters(new InputFilter[] {new InputFilter.LengthFilter(13)});
         }
         row.dndIcon = row.view.findViewById(R.id.dnd_icon);
-        row.slider =  row.view.findViewById(R.id.volume_row_slider);
+        row.slider = row.view.findViewById(R.id.volume_row_slider);
         row.slider.setOnSeekBarChangeListener(new VolumeSeekBarChangeListener(row));
+
         row.anim = null;
 
         row.icon = row.view.findViewById(R.id.volume_row_icon);
@@ -515,11 +516,11 @@ public class VolumeDialogImpl implements VolumeDialog,
 
     private void initODICaptionsH() {
         if (mODICaptionsIcon != null) {
-            mODICaptionsIcon.setOnClickListener(v -> {
+            mODICaptionsIcon.setOnConfirmedTapListener(() -> {
                 onCaptionIconClicked();
                 Events.writeEvent(mContext, Events.EVENT_ODI_CAPTIONS_CLICK);
                 dismissH(DISMISS_REASON_ODI_CAPTIONS_CLICKED);
-            });
+            }, mHandler);
         }
 
         mController.getCaptionsComponentState(false);
@@ -1393,6 +1394,7 @@ public class VolumeDialogImpl implements VolumeDialog,
             if (mRow.ss.level != userLevel || mRow.ss.muted && userLevel > 0) {
                 mRow.userAttempt = SystemClock.uptimeMillis();
                 if (mRow.requestedLevel != userLevel) {
+                    mController.setActiveStream(mRow.stream);
                     mController.setStreamVolume(mRow.stream, userLevel);
                     mRow.requestedLevel = userLevel;
                     Events.writeEvent(mContext, Events.EVENT_TOUCH_LEVEL_CHANGED, mRow.stream,

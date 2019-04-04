@@ -19,8 +19,12 @@ package android.provider;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.net.Uri;
+import android.text.TextUtils;
 
 import com.android.internal.util.ArrayUtils;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.Locale;
 
@@ -158,6 +162,19 @@ public class SettingsValidators {
                     return true;
                 }
             }
+            return false;
+        }
+    };
+
+    /** {@link Validator} that checks whether a value is a valid {@link JSONObject}. */
+    public static final Validator JSON_OBJECT_VALIDATOR = (value) -> {
+        if (TextUtils.isEmpty(value)) {
+            return false;
+        }
+        try {
+            new JSONObject(value);
+            return true;
+        } catch (JSONException e) {
             return false;
         }
     };

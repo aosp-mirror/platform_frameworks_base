@@ -164,6 +164,20 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     }
 
     @Override
+    public void onUnlockUser(int userHandle) {
+        Set<Association> associations = readAllAssociations(userHandle);
+        Set<String> companionAppPackages = new HashSet<>();
+        for (Association association : associations) {
+            companionAppPackages.add(association.companionAppPackage);
+        }
+        ActivityTaskManagerInternal atmInternal = LocalServices.getService(
+                ActivityTaskManagerInternal.class);
+        if (atmInternal != null) {
+            atmInternal.setCompanionAppPackages(userHandle, companionAppPackages);
+        }
+    }
+
+    @Override
     public void binderDied() {
         Handler.getMain().post(this::cleanup);
     }

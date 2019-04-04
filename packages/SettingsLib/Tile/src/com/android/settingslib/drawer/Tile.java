@@ -33,6 +33,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -299,7 +300,15 @@ public class Tile implements Parcelable {
             }
         }
         if (iconResId != 0) {
-            return Icon.createWithResource(activityInfo.packageName, iconResId);
+            final Icon icon = Icon.createWithResource(activityInfo.packageName, iconResId);
+            if (isIconTintable(context)) {
+                final TypedArray a = context.obtainStyledAttributes(new int[] {
+                        android.R.attr.colorControlNormal});
+                final int tintColor = a.getColor(0, 0);
+                a.recycle();
+                icon.setTint(tintColor);
+            }
+            return icon;
         } else {
             return null;
         }
@@ -309,16 +318,12 @@ public class Tile implements Parcelable {
      * Whether the icon can be tinted. This is true when icon needs to be monochrome (single-color)
      */
     public boolean isIconTintable(Context context) {
+        ensureMetadataNotStale(context);
         if (mMetaData != null
                 && mMetaData.containsKey(TileUtils.META_DATA_PREFERENCE_ICON_TINTABLE)) {
             return mMetaData.getBoolean(TileUtils.META_DATA_PREFERENCE_ICON_TINTABLE);
         }
-        ensureMetadataNotStale(context);
-        final String pkgName = context.getPackageName();
-        // If this drawable is coming from outside Settings, tint it to match the color.
-        final ActivityInfo activityInfo = getActivityInfo(context);
-        return activityInfo != null
-                && !TextUtils.equals(pkgName, activityInfo.packageName);
+        return false;
     }
 
     /**

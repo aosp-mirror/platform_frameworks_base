@@ -92,4 +92,9 @@ interface ISystemUiProxy {
      * Start the assistant.
      */
     void startAssistant(in Bundle bundle) = 13;
+
+    /**
+     * Creates a new gesture monitor
+     */
+    Bundle monitorGestureInput(String name, int displayId) = 14;
 }

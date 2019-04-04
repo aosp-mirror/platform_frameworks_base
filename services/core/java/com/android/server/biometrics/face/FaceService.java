@@ -46,9 +46,9 @@ import android.os.RemoteException;
 import android.os.SELinux;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.service.restricted_image.RestrictedImagesDumpProto;
 import android.service.restricted_image.RestrictedImageProto;
 import android.service.restricted_image.RestrictedImageSetProto;
+import android.service.restricted_image.RestrictedImagesDumpProto;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
@@ -383,6 +383,12 @@ public class FaceService extends BiometricServiceBase {
         @Override // Binder call
         public void resetLockout(byte[] token) {
             checkPermission(MANAGE_BIOMETRIC);
+
+            if (!FaceService.this.hasEnrolledBiometrics(mCurrentUserId)) {
+                Slog.w(TAG, "Ignoring lockout reset, no templates enrolled");
+                return;
+            }
+
             try {
                 mDaemonWrapper.resetLockout(token);
             } catch (RemoteException e) {
@@ -391,61 +397,62 @@ public class FaceService extends BiometricServiceBase {
         }
 
         @Override
-        public boolean setFeature(int feature, boolean enabled, final byte[] token) {
+        public void setFeature(int feature, boolean enabled, final byte[] token,
+                IFaceServiceReceiver receiver) {
             checkPermission(MANAGE_BIOMETRIC);
 
-            if (!FaceService.this.hasEnrolledBiometrics(mCurrentUserId)) {
-                Slog.e(TAG, "No enrolled biometrics while setting feature: " + feature);
-                return false;
-            }
-
-            final ArrayList<Byte> byteToken = new ArrayList<>();
-            for (int i = 0; i < token.length; i++) {
-                byteToken.add(token[i]);
-            }
-
-            // TODO: Support multiple faces
-            final int faceId = getFirstTemplateForUser(mCurrentUserId);
-
-            if (mDaemon != null) {
-                try {
-                    return mDaemon.setFeature(feature, enabled, byteToken, faceId) == Status.OK;
-                } catch (RemoteException e) {
-                    Slog.e(getTag(), "Unable to set feature: " + feature + " to enabled:" + enabled,
-                            e);
+            mHandler.post(() -> {
+                if (!FaceService.this.hasEnrolledBiometrics(mCurrentUserId)) {
+                    Slog.e(TAG, "No enrolled biometrics while setting feature: " + feature);
+                    return;
                 }
-            }
-            return false;
+
+                final ArrayList<Byte> byteToken = new ArrayList<>();
+                for (int i = 0; i < token.length; i++) {
+                    byteToken.add(token[i]);
+                }
+
+                // TODO: Support multiple faces
+                final int faceId = getFirstTemplateForUser(mCurrentUserId);
+
+                if (mDaemon != null) {
+                    try {
+                        final int result = mDaemon.setFeature(feature, enabled, byteToken, faceId);
+                        receiver.onFeatureSet(result == Status.OK, feature);
+                    } catch (RemoteException e) {
+                        Slog.e(getTag(), "Unable to set feature: " + feature
+                                        + " to enabled:" + enabled, e);
+                    }
+                }
+            });
+
         }
 
         @Override
-        public boolean getFeature(int feature) {
+        public void getFeature(int feature, IFaceServiceReceiver receiver) {
             checkPermission(MANAGE_BIOMETRIC);
 
-            // This should ideally return tri-state, but the user isn't shown settings unless
-            // they are enrolled so it's fine for now.
-            if (!FaceService.this.hasEnrolledBiometrics(mCurrentUserId)) {
-                Slog.e(TAG, "No enrolled biometrics while getting feature: " + feature);
-                return false;
-            }
-
-            // TODO: Support multiple faces
-            final int faceId = getFirstTemplateForUser(mCurrentUserId);
-
-            if (mDaemon != null) {
-                try {
-                    OptionalBool result = mDaemon.getFeature(feature, faceId);
-                    if (result.status == Status.OK) {
-                        return result.value;
-                    } else {
-                        // Same tri-state comment applies here.
-                        return false;
-                    }
-                } catch (RemoteException e) {
-                    Slog.e(getTag(), "Unable to getRequireAttention", e);
+            mHandler.post(() -> {
+                // This should ideally return tri-state, but the user isn't shown settings unless
+                // they are enrolled so it's fine for now.
+                if (!FaceService.this.hasEnrolledBiometrics(mCurrentUserId)) {
+                    Slog.e(TAG, "No enrolled biometrics while getting feature: " + feature);
+                    return;
                 }
-            }
-            return false;
+
+                // TODO: Support multiple faces
+                final int faceId = getFirstTemplateForUser(mCurrentUserId);
+
+                if (mDaemon != null) {
+                    try {
+                        OptionalBool result = mDaemon.getFeature(feature, faceId);
+                        receiver.onFeatureGet(result.status == Status.OK, feature, result.value);
+                    } catch (RemoteException e) {
+                        Slog.e(getTag(), "Unable to getRequireAttention", e);
+                    }
+                }
+            });
+
         }
 
         @Override

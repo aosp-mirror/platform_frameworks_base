@@ -388,9 +388,10 @@ public final class AudioAttributes implements Parcelable {
      */
     public static final int FLAG_NO_SYSTEM_CAPTURE = 0x1 << 12;
 
-    private final static int FLAG_ALL = FLAG_AUDIBILITY_ENFORCED | FLAG_SECURE | FLAG_SCO |
-            FLAG_BEACON | FLAG_HW_AV_SYNC | FLAG_HW_HOTWORD | FLAG_BYPASS_INTERRUPTION_POLICY |
-            FLAG_BYPASS_MUTE | FLAG_LOW_LATENCY | FLAG_DEEP_BUFFER | FLAG_MUTE_HAPTIC;
+    private static final int FLAG_ALL = FLAG_AUDIBILITY_ENFORCED | FLAG_SECURE | FLAG_SCO
+            | FLAG_BEACON | FLAG_HW_AV_SYNC | FLAG_HW_HOTWORD | FLAG_BYPASS_INTERRUPTION_POLICY
+            | FLAG_BYPASS_MUTE | FLAG_LOW_LATENCY | FLAG_DEEP_BUFFER | FLAG_NO_MEDIA_PROJECTION
+            | FLAG_MUTE_HAPTIC | FLAG_NO_SYSTEM_CAPTURE;
     private final static int FLAG_ALL_PUBLIC = FLAG_AUDIBILITY_ENFORCED |
             FLAG_HW_AV_SYNC | FLAG_LOW_LATENCY;
 
@@ -557,7 +558,7 @@ public final class AudioAttributes implements Parcelable {
         private int mContentType = CONTENT_TYPE_UNKNOWN;
         private int mSource = MediaRecorder.AudioSource.AUDIO_SOURCE_INVALID;
         private int mFlags = 0x0;
-        private boolean mMuteHapticChannels = true;
+        private boolean mMuteHapticChannels = false;
         private HashSet<String> mTags = new HashSet<String>();
         private Bundle mBundle;
 
@@ -888,7 +889,7 @@ public final class AudioAttributes implements Parcelable {
 
         /**
          * Specifying if haptic should be muted or not when playing audio-haptic coupled data.
-         * By default, haptic channels are disabled.
+         * By default, haptic channels are enabled.
          * @param muted true to force muting haptic channels.
          * @return the same Builder instance.
          */

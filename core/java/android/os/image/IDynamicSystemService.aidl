@@ -58,6 +58,11 @@ interface IDynamicSystemService
     boolean isInstalled();
 
     /**
+     * @return true if the device has an DynamicSystem image enabled
+     */
+    boolean isEnabled();
+
+    /**
      * Remove DynamicSystem installation if present
      *
      * @return true if the call succeeds
@@ -65,11 +70,11 @@ interface IDynamicSystemService
     boolean remove();
 
     /**
-     * Enable DynamicSystem when it's not enabled, otherwise, disable it.
+     * Enable or disable DynamicSystem.
      *
      * @return true if the call succeeds
      */
-    boolean toggle();
+    boolean setEnable(boolean enable);
 
     /**
      * Write a chunk of the DynamicSystem system image

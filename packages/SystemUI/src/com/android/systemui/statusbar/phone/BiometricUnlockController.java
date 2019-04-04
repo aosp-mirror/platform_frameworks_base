@@ -414,7 +414,9 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
             return MODE_WAKE_AND_UNLOCK_FROM_DREAM;
         }
         if (mStatusBarKeyguardViewManager.isShowing()) {
-            if (mStatusBarKeyguardViewManager.isBouncerShowing() && unlockingAllowed) {
+            if ((mStatusBarKeyguardViewManager.isBouncerShowing()
+                    || mStatusBarKeyguardViewManager.isBouncerPartiallyVisible())
+                    && unlockingAllowed) {
                 return MODE_DISMISS_BOUNCER;
             } else if (unlockingAllowed) {
                 return faceStayingOnKeyguard ? MODE_ONLY_WAKE : MODE_UNLOCK;

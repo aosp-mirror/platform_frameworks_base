@@ -47,7 +47,6 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.DumpUtils;
-import com.android.server.backup.utils.FileUtils;
 import com.android.server.backup.utils.RandomAccessFileUtils;
 
 import java.io.File;
@@ -95,7 +94,7 @@ public class Trampoline extends IBackupManager.Stub {
      * Name of file for non-system users that remembers whether backup was explicitly activated or
      * deactivated with a call to setBackupServiceActive.
      */
-    private static final String REMEMBER_ACTIVATED_FILENAME_PREFIX = "backup-remember-activated";
+    private static final String REMEMBER_ACTIVATED_FILENAME = "backup-remember-activated";
 
     // Product-level suppression of backup/restore.
     private static final String BACKUP_DISABLE_PROPERTY = "ro.backup.disable";
@@ -143,8 +142,7 @@ public class Trampoline extends IBackupManager.Stub {
 
     /** Stored in the system user's directory and the file is indexed by the user it refers to. */
     protected File getRememberActivatedFileForNonSystemUser(int userId) {
-        return FileUtils.createNewFile(UserBackupManagerFiles.getStateFileInSystemDir(
-                REMEMBER_ACTIVATED_FILENAME_PREFIX, userId));
+        return UserBackupManagerFiles.getStateFileInSystemDir(REMEMBER_ACTIVATED_FILENAME, userId);
     }
 
     /** Stored in the system user's directory and the file is indexed by the user it refers to. */
@@ -336,8 +334,13 @@ public class Trampoline extends IBackupManager.Stub {
         // action since we need to remember that a permissioned call was made irrespective of
         // whether the call changes the state or not.
         if (userId != UserHandle.USER_SYSTEM) {
-            RandomAccessFileUtils.writeBoolean(getRememberActivatedFileForNonSystemUser(userId),
-                    makeActive);
+            try {
+                File rememberFile = getRememberActivatedFileForNonSystemUser(userId);
+                createFile(rememberFile);
+                RandomAccessFileUtils.writeBoolean(rememberFile, makeActive);
+            } catch (IOException e) {
+                Slog.e(TAG, "Unable to persist backup service activity", e);
+            }
         }
 
         if (mGlobalDisable) {

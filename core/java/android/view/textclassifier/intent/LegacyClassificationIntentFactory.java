@@ -46,6 +46,7 @@ import java.util.concurrent.TimeUnit;
  * Creates intents based on the classification type.
  * @hide
  */
+// TODO: Consider to support {@code descriptionWithAppName}.
 public final class LegacyClassificationIntentFactory implements ClassificationIntentFactory {
 
     private static final String TAG = "LegacyClassificationIntentFactory";
@@ -108,6 +109,7 @@ public final class LegacyClassificationIntentFactory implements ClassificationIn
                 context.getString(com.android.internal.R.string.email),
                 /* titleWithEntity */ null,
                 context.getString(com.android.internal.R.string.email_desc),
+                /* descriptionWithAppName */ null,
                 new Intent(Intent.ACTION_SENDTO)
                         .setData(Uri.parse(String.format("mailto:%s", text))),
                 LabeledIntent.DEFAULT_REQUEST_CODE));
@@ -115,6 +117,7 @@ public final class LegacyClassificationIntentFactory implements ClassificationIn
                 context.getString(com.android.internal.R.string.add_contact),
                 /* titleWithEntity */ null,
                 context.getString(com.android.internal.R.string.add_contact_desc),
+                /* descriptionWithAppName */ null,
                 new Intent(Intent.ACTION_INSERT_OR_EDIT)
                         .setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE)
                         .putExtra(ContactsContract.Intents.Insert.EMAIL, text),
@@ -133,6 +136,7 @@ public final class LegacyClassificationIntentFactory implements ClassificationIn
                     context.getString(com.android.internal.R.string.dial),
                     /* titleWithEntity */ null,
                     context.getString(com.android.internal.R.string.dial_desc),
+                    /* descriptionWithAppName */ null,
                     new Intent(Intent.ACTION_DIAL).setData(
                             Uri.parse(String.format("tel:%s", text))),
                     LabeledIntent.DEFAULT_REQUEST_CODE));
@@ -141,6 +145,7 @@ public final class LegacyClassificationIntentFactory implements ClassificationIn
                 context.getString(com.android.internal.R.string.add_contact),
                 /* titleWithEntity */ null,
                 context.getString(com.android.internal.R.string.add_contact_desc),
+                /* descriptionWithAppName */ null,
                 new Intent(Intent.ACTION_INSERT_OR_EDIT)
                         .setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE)
                         .putExtra(ContactsContract.Intents.Insert.PHONE, text),
@@ -150,6 +155,7 @@ public final class LegacyClassificationIntentFactory implements ClassificationIn
                     context.getString(com.android.internal.R.string.sms),
                     /* titleWithEntity */ null,
                     context.getString(com.android.internal.R.string.sms_desc),
+                    /* descriptionWithAppName */ null,
                     new Intent(Intent.ACTION_SENDTO)
                             .setData(Uri.parse(String.format("smsto:%s", text))),
                     LabeledIntent.DEFAULT_REQUEST_CODE));
@@ -166,6 +172,7 @@ public final class LegacyClassificationIntentFactory implements ClassificationIn
                     context.getString(com.android.internal.R.string.map),
                     /* titleWithEntity */ null,
                     context.getString(com.android.internal.R.string.map_desc),
+                    /* descriptionWithAppName */ null,
                     new Intent(Intent.ACTION_VIEW)
                             .setData(Uri.parse(String.format("geo:0,0?q=%s", encText))),
                     LabeledIntent.DEFAULT_REQUEST_CODE));
@@ -185,6 +192,7 @@ public final class LegacyClassificationIntentFactory implements ClassificationIn
                 context.getString(com.android.internal.R.string.browse),
                 /* titleWithEntity */ null,
                 context.getString(com.android.internal.R.string.browse_desc),
+                /* descriptionWithAppName */ null,
                 new Intent(Intent.ACTION_VIEW)
                         .setDataAndNormalize(Uri.parse(text))
                         .putExtra(Browser.EXTRA_APPLICATION_ID, context.getPackageName()),
@@ -216,6 +224,7 @@ public final class LegacyClassificationIntentFactory implements ClassificationIn
                 context.getString(com.android.internal.R.string.view_flight),
                 /* titleWithEntity */ null,
                 context.getString(com.android.internal.R.string.view_flight_desc),
+                /* descriptionWithAppName */ null,
                 new Intent(Intent.ACTION_WEB_SEARCH)
                         .putExtra(SearchManager.QUERY, text),
                 text.hashCode()));
@@ -231,6 +240,7 @@ public final class LegacyClassificationIntentFactory implements ClassificationIn
                 context.getString(com.android.internal.R.string.view_calendar),
                 /* titleWithEntity */ null,
                 context.getString(com.android.internal.R.string.view_calendar_desc),
+                /* descriptionWithAppName */ null,
                 new Intent(Intent.ACTION_VIEW).setData(builder.build()),
                 LabeledIntent.DEFAULT_REQUEST_CODE);
     }
@@ -243,6 +253,7 @@ public final class LegacyClassificationIntentFactory implements ClassificationIn
                 context.getString(com.android.internal.R.string.add_calendar_event),
                 /* titleWithEntity */ null,
                 context.getString(com.android.internal.R.string.add_calendar_event_desc),
+                /* descriptionWithAppName */ null,
                 new Intent(Intent.ACTION_INSERT)
                         .setData(CalendarContract.Events.CONTENT_URI)
                         .putExtra(CalendarContract.EXTRA_EVENT_ALL_DAY, isAllDay)
@@ -260,6 +271,7 @@ public final class LegacyClassificationIntentFactory implements ClassificationIn
                 context.getString(com.android.internal.R.string.define),
                 /* titleWithEntity */ null,
                 context.getString(com.android.internal.R.string.define_desc),
+                /* descriptionWithAppName */ null,
                 new Intent(Intent.ACTION_DEFINE)
                         .putExtra(Intent.EXTRA_TEXT, text),
                 text.hashCode()));

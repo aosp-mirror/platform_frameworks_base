@@ -102,6 +102,16 @@ public class BubbleClockController implements ClockPlugin {
     }
 
     @Override
+    public void onDestroyView() {
+        mView = null;
+        mDigitalClock = null;
+        mAnalogClock = null;
+        mLockClockContainer = null;
+        mLockClock = null;
+        mDarkController = null;
+    }
+
+    @Override
     public String getName() {
         return "bubble";
     }

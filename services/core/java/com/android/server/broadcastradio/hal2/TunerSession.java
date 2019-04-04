@@ -43,7 +43,7 @@ class TunerSession extends ITuner.Stub {
 
     private final RadioModule mModule;
     private final ITunerSession mHwSession;
-    private final TunerCallback mCallback;
+    final android.hardware.radio.ITunerCallback mCallback;
     private boolean mIsClosed = false;
     private boolean mIsMuted = false;
 
@@ -51,7 +51,7 @@ class TunerSession extends ITuner.Stub {
     private RadioManager.BandConfig mDummyConfig = null;
 
     TunerSession(@NonNull RadioModule module, @NonNull ITunerSession hwSession,
-            @NonNull TunerCallback callback) {
+            @NonNull android.hardware.radio.ITunerCallback callback) {
         mModule = Objects.requireNonNull(module);
         mHwSession = Objects.requireNonNull(hwSession);
         mCallback = Objects.requireNonNull(callback);
@@ -73,9 +73,14 @@ class TunerSession extends ITuner.Stub {
         synchronized (mLock) {
             if (mIsClosed) return;
             if (error != null) {
-                TunerCallback.dispatch(() -> mCallback.mClientCb.onError(error));
+                try {
+                    mCallback.onError(error);
+                } catch (RemoteException ex) {
+                    Slog.w(TAG, "mCallback.onError() failed: ", ex);
+                }
             }
             mIsClosed = true;
+            mModule.onTunerSessionClosed(this);
         }
     }
 
@@ -96,7 +101,7 @@ class TunerSession extends ITuner.Stub {
             checkNotClosedLocked();
             mDummyConfig = Objects.requireNonNull(config);
             Slog.i(TAG, "Ignoring setConfiguration - not applicable for broadcastradio HAL 2.x");
-            TunerCallback.dispatch(() -> mCallback.mClientCb.onConfigurationChanged(config));
+            mModule.fanoutAidlCallback(cb -> cb.onConfigurationChanged(config));
         }
     }
 
@@ -174,7 +179,7 @@ class TunerSession extends ITuner.Stub {
     @Override
     public boolean startBackgroundScan() {
         Slog.i(TAG, "Explicit background scan trigger is not supported with HAL 2.x");
-        TunerCallback.dispatch(() -> mCallback.mClientCb.onBackgroundScanComplete());
+        mModule.fanoutAidlCallback(cb -> cb.onBackgroundScanComplete());
         return true;
     }
 

@@ -85,11 +85,13 @@ public class NotificationBlockingHelperManager {
         // - User sentiment is negative (DEBUG flag can bypass)
         // - The notification shade is fully expanded (guarantees we're not touching a HUN).
         // - The row is blockable (i.e. not non-blockable)
-        // - The dismissed row is a valid group (>1 or 0 children) or the only child in the group
+        // - The dismissed row is a valid group (>1 or 0 children from the same channel)
+        // or the only child in the group
         if ((row.getEntry().userSentiment == USER_SENTIMENT_NEGATIVE || DEBUG)
                 && mIsShadeExpanded
                 && !row.getIsNonblockable()
-                && (!row.isChildInGroup() || row.isOnlyChildInGroup())) {
+                && ((!row.isChildInGroup() || row.isOnlyChildInGroup())
+                        && row.getNumUniqueChannels() <= 1)) {
             // Dismiss any current blocking helper before continuing forward (only one can be shown
             // at a given time).
             dismissCurrentBlockingHelper();

@@ -24,6 +24,8 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.view.WindowManagerPolicyConstants;
 
+import com.android.internal.policy.ScreenDecorationsUtils;
+
 /**
  * Various shared constants between Launcher and SysUI as part of quickstep
  */
@@ -31,6 +33,7 @@ public class QuickStepContract {
 
     public static final String KEY_EXTRA_SYSUI_PROXY = "extra_sysui_proxy";
     public static final String KEY_EXTRA_INPUT_CHANNEL = "extra_input_channel";
+    public static final String KEY_EXTRA_INPUT_MONITOR = "extra_input_monitor";
     public static final String KEY_EXTRA_WINDOW_CORNER_RADIUS = "extra_window_corner_radius";
     public static final String KEY_EXTRA_SUPPORTS_WINDOW_CORNERS = "extra_supports_window_corners";
 
@@ -129,5 +132,19 @@ public class QuickStepContract {
                 com.android.internal.R.dimen.config_backGestureInset);
     }
 
+    /**
+     * Corner radius that should be used on windows in order to cover the display.
+     * These values are expressed in pixels because they should not respect display or font
+     * scaling, this means that we don't have to reload them on config changes.
+     */
+    public static float getWindowCornerRadius(Resources resources) {
+        return ScreenDecorationsUtils.getWindowCornerRadius(resources);
+    }
 
+    /**
+     * If live rounded corners are supported on windows.
+     */
+    public static boolean supportsRoundedCornersOnWindows(Resources resources) {
+        return ScreenDecorationsUtils.supportsRoundedCornersOnWindows(resources);
+    }
 }

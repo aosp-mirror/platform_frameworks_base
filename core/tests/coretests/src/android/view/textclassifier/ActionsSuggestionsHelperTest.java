@@ -263,6 +263,7 @@ public class ActionsSuggestionsHelperTest {
                                         "title",
                                         null,
                                         "description",
+                                        null,
                                         Intent.ACTION_VIEW,
                                         Uri.parse("http://www.android.com").toString(),
                                         null,

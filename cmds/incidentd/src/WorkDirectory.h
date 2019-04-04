@@ -135,14 +135,14 @@ public:
     void closeDataFile();
 
     /**
-     * Spawn a thread to start writing and filtering data to a pipe, the read end of which
-     * will be returned in fd.  This thread will be detached and run until somebody finishes
-     * reading from the fd or closes it.  If there is an error, returns it and you will not
-     * get an fd.
+     * Use the privacy and section configuration from the args parameter to filter data, write
+     * to [writeFd] and take the ownership of [writeFd].
      *
-     * Use the privacy and section configuraiton from the args parameter.
+     * Note: this call is blocking. When the writeFd is a pipe fd for IPC, caller should make sure
+     * it's called on a separate thread so that reader can start to read without waiting for writer
+     * to finish writing (which may not happen due to pipe buffer overflow).
      */
-    status_t startFilteringData(int* fd, const IncidentReportArgs& args);
+    status_t startFilteringData(int writeFd, const IncidentReportArgs& args);
 
     /**
      * Get the name of the data file on disk.

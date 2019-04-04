@@ -18,6 +18,7 @@
 
 #include "WorkDirectory.h"
 
+#include "proto_util.h"
 #include "PrivacyFilter.h"
 
 #include <google/protobuf/io/zero_copy_stream_impl.h>
@@ -63,6 +64,9 @@ static const string EXTENSION_DATA(".data");
  * Send these reports to dropbox.
  */
 const ComponentName DROPBOX_SENTINEL("android", "DROPBOX");
+
+/** metadata field id in IncidentProto */
+const int FIELD_ID_INCIDENT_METADATA = 2;
 
 /**
  * Read a protobuf from disk into the message.
@@ -386,65 +390,53 @@ void ReportFile::closeDataFile() {
     }
 }
 
-status_t ReportFile::startFilteringData(int* fd, const IncidentReportArgs& args) {
+status_t ReportFile::startFilteringData(int writeFd, const IncidentReportArgs& args) {
     // Open data file.
     int dataFd = open(mDataFileName.c_str(), O_RDONLY | O_CLOEXEC);
     if (dataFd < 0) {
+        ALOGW("Error opening incident report '%s' %s", getDataFileName().c_str(), strerror(-errno));
+        close(writeFd);
         return -errno;
     }
 
     // Check that the size on disk is what we thought we wrote.
     struct stat st;
     if (fstat(dataFd, &st) != 0) {
+        ALOGW("Error running fstat incident report '%s' %s", getDataFileName().c_str(),
+              strerror(-errno));
+        close(writeFd);
         return -errno;
     }
     if (st.st_size != mEnvelope.data_file_size()) {
         ALOGW("File size mismatch. Envelope says %" PRIi64 " bytes but data file is %" PRIi64
-                " bytes: %s", (int64_t)mEnvelope.data_file_size(), st.st_size,
-                mDataFileName.c_str());
+              " bytes: %s",
+              (int64_t)mEnvelope.data_file_size(), st.st_size, mDataFileName.c_str());
         ALOGW("Removing incident report");
         mWorkDirectory->remove(this);
+        close(writeFd);
         return BAD_VALUE;
     }
 
-    // Create pipe
-    int fds[2];
-    if (pipe(fds) != 0) {
-        ALOGW("Error opening pipe to filter incident report: %s", getDataFileName().c_str());
-        return -errno;
+    status_t err;
+
+    for (const auto& report : mEnvelope.report()) {
+        for (const auto& header : report.header()) {
+           write_header_section(writeFd,
+               reinterpret_cast<const uint8_t*>(header.c_str()), header.size());
+        }
     }
 
-    *fd = fds[0];
-    int writeFd = fds[1];
+    if (mEnvelope.has_metadata()) {
+        write_section(writeFd, FIELD_ID_INCIDENT_METADATA, mEnvelope.metadata());
+    }
 
-    // Spawn off a thread to do the filtering and writing
-    thread th([this, dataFd, writeFd, args]() {
-        ALOGD("worker thread started dataFd=%d writeFd=%d", dataFd, writeFd);
-        status_t err;
+    err = filter_and_write_report(writeFd, dataFd, mEnvelope.privacy_policy(), args);
+    if (err != NO_ERROR) {
+        ALOGW("Error writing incident report '%s' to dropbox: %s", getDataFileName().c_str(),
+                strerror(-err));
+    }
 
-        err = filter_and_write_report(writeFd, dataFd, mEnvelope.privacy_policy(), args);
-        close(writeFd);
-
-        if (err != NO_ERROR) {
-            ALOGW("Error writing incident report '%s' to dropbox: %s", getDataFileName().c_str(),
-                    strerror(-err));
-            // If there's an error here, there will also be an error returned from
-            // addFile, so we'll use that error to reschedule the send_to_dropbox.
-            // If the file is corrupted, we will put some logs in logcat, but won't
-            // actually return an error.
-            return;
-        }
-    });
-
-    // Better would be to join this thread after write is back, but there is no
-    // timeout parameter for that, which means we can't clean up if system server
-    // is stuck. Better is to leak the thread, which will eventually clean itself
-    // up after system server eventually dies, which it probably will.
-    th.detach();
-
-    // If the thread fails to start, we should return an error, but the thread
-    // class doesn't give us a good way to determine that.  Just pretend everything
-    // is ok.
+    close(writeFd);
     return NO_ERROR;
 }
 
@@ -501,7 +493,7 @@ status_t ReportFile::load_envelope_impl(bool cleanup) {
 
 
 // ================================================================================
-// 
+//
 
 WorkDirectory::WorkDirectory()
         :mDirectory("/data/misc/incidents"),

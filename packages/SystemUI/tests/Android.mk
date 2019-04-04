@@ -71,8 +71,8 @@ local_space := $(local_empty) $(local_empty)
 # This appends a * to all classes and replace the space separators with commas.
 jacoco_exclude := $(subst $(space),$(comma),$(patsubst %,%*,$(local_classes)))
 
-LOCAL_JACK_COVERAGE_INCLUDE_FILTER := com.android.systemui.*
-LOCAL_JACK_COVERAGE_EXCLUDE_FILTER := com.android.systemui.tests.*,$(jacoco_exclude)
+LOCAL_JACK_COVERAGE_INCLUDE_FILTER := com.android.systemui.*,com.android.keyguard.*
+LOCAL_JACK_COVERAGE_EXCLUDE_FILTER := $(jacoco_exclude)
 
 ifeq ($(EXCLUDE_SYSTEMUI_TESTS),)
     include $(BUILD_PACKAGE)

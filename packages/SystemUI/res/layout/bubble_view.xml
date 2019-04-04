@@ -27,12 +27,4 @@
         android:padding="@dimen/bubble_view_padding"
         android:clipToPadding="false"/>
 
-    <TextView
-        android:id="@+id/message_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:minWidth="@dimen/bubble_message_min_width"
-        android:maxWidth="@dimen/bubble_message_max_width"
-        android:padding="@dimen/bubble_message_padding"/>
-
 </com.android.systemui.bubbles.BubbleView>

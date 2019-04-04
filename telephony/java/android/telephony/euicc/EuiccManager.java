@@ -485,7 +485,7 @@ public class EuiccManager {
     public boolean isEnabled() {
         // In the future, this may reach out to IEuiccController (if non-null) to check any dynamic
         // restrictions.
-        return getIEuiccController() != null;
+        return getIEuiccController() != null && refreshCardIdIfUninitialized();
     }
 
     /**
@@ -499,7 +499,7 @@ public class EuiccManager {
      */
     @Nullable
     public String getEid() {
-        if (!refreshCardIdIfUninitialized()) {
+        if (!isEnabled()) {
             return null;
         }
         try {
@@ -522,7 +522,7 @@ public class EuiccManager {
     @SystemApi
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public int getOtaStatus() {
-        if (!refreshCardIdIfUninitialized()) {
+        if (!isEnabled()) {
             return EUICC_OTA_STATUS_UNAVAILABLE;
         }
         try {
@@ -557,7 +557,7 @@ public class EuiccManager {
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void downloadSubscription(DownloadableSubscription subscription,
             boolean switchAfterDownload, PendingIntent callbackIntent) {
-        if (!refreshCardIdIfUninitialized()) {
+        if (!isEnabled()) {
             sendUnavailableError(callbackIntent);
             return;
         }
@@ -619,7 +619,7 @@ public class EuiccManager {
     @SystemApi
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void continueOperation(Intent resolutionIntent, Bundle resolutionExtras) {
-        if (!refreshCardIdIfUninitialized()) {
+        if (!isEnabled()) {
             PendingIntent callbackIntent =
                     resolutionIntent.getParcelableExtra(
                             EuiccManager.EXTRA_EMBEDDED_SUBSCRIPTION_RESOLUTION_CALLBACK_INTENT);
@@ -656,7 +656,7 @@ public class EuiccManager {
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void getDownloadableSubscriptionMetadata(
             DownloadableSubscription subscription, PendingIntent callbackIntent) {
-        if (!refreshCardIdIfUninitialized()) {
+        if (!isEnabled()) {
             sendUnavailableError(callbackIntent);
             return;
         }
@@ -686,7 +686,7 @@ public class EuiccManager {
     @SystemApi
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void getDefaultDownloadableSubscriptionList(PendingIntent callbackIntent) {
-        if (!refreshCardIdIfUninitialized()) {
+        if (!isEnabled()) {
             sendUnavailableError(callbackIntent);
             return;
         }
@@ -705,7 +705,7 @@ public class EuiccManager {
      */
     @Nullable
     public EuiccInfo getEuiccInfo() {
-        if (!refreshCardIdIfUninitialized()) {
+        if (!isEnabled()) {
             return null;
         }
         try {
@@ -730,7 +730,7 @@ public class EuiccManager {
      */
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void deleteSubscription(int subscriptionId, PendingIntent callbackIntent) {
-        if (!refreshCardIdIfUninitialized()) {
+        if (!isEnabled()) {
             sendUnavailableError(callbackIntent);
             return;
         }
@@ -770,7 +770,7 @@ public class EuiccManager {
      */
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void switchToSubscription(int subscriptionId, PendingIntent callbackIntent) {
-        if (!refreshCardIdIfUninitialized()) {
+        if (!isEnabled()) {
             sendUnavailableError(callbackIntent);
             return;
         }
@@ -796,7 +796,7 @@ public class EuiccManager {
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void updateSubscriptionNickname(
             int subscriptionId, @Nullable String nickname, @NonNull PendingIntent callbackIntent) {
-        if (!refreshCardIdIfUninitialized()) {
+        if (!isEnabled()) {
             sendUnavailableError(callbackIntent);
             return;
         }
@@ -820,7 +820,7 @@ public class EuiccManager {
     @SystemApi
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void eraseSubscriptions(PendingIntent callbackIntent) {
-        if (!refreshCardIdIfUninitialized()) {
+        if (!isEnabled()) {
             sendUnavailableError(callbackIntent);
             return;
         }
@@ -850,7 +850,7 @@ public class EuiccManager {
      * @hide
      */
     public void retainSubscriptionsForFactoryReset(PendingIntent callbackIntent) {
-        if (!refreshCardIdIfUninitialized()) {
+        if (!isEnabled()) {
             sendUnavailableError(callbackIntent);
             return;
         }

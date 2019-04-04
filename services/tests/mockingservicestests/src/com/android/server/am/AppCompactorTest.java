@@ -25,6 +25,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.platform.test.annotations.Presubmit;
 import android.provider.DeviceConfig;
+import android.text.TextUtils;
 
 import com.android.server.appop.AppOpsService;
 import com.android.server.testables.TestableDeviceConfig;
@@ -38,6 +39,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -103,6 +106,22 @@ public final class AppCompactorTest {
                 AppCompactor.DEFAULT_COMPACT_THROTTLE_4);
         assertThat(mCompactorUnderTest.mStatsdSampleRate).isEqualTo(
                 AppCompactor.DEFAULT_STATSD_SAMPLE_RATE);
+        assertThat(mCompactorUnderTest.mFullAnonRssThrottleKb).isEqualTo(
+                AppCompactor.DEFAULT_COMPACT_FULL_RSS_THROTTLE_KB);
+        assertThat(mCompactorUnderTest.mCompactThrottleBFGS).isEqualTo(
+                AppCompactor.DEFAULT_COMPACT_THROTTLE_5);
+        assertThat(mCompactorUnderTest.mCompactThrottlePersistent).isEqualTo(
+                AppCompactor.DEFAULT_COMPACT_THROTTLE_6);
+        assertThat(mCompactorUnderTest.mFullAnonRssThrottleKb).isEqualTo(
+                AppCompactor.DEFAULT_COMPACT_FULL_RSS_THROTTLE_KB);
+        assertThat(mCompactorUnderTest.mFullDeltaRssThrottleKb).isEqualTo(
+                AppCompactor.DEFAULT_COMPACT_FULL_DELTA_RSS_THROTTLE_KB);
+
+        Set<Integer> expected = new HashSet<>();
+        for (String s : TextUtils.split(AppCompactor.DEFAULT_COMPACT_PROC_STATE_THROTTLE, ",")) {
+            expected.add(Integer.parseInt(s));
+        }
+        assertThat(mCompactorUnderTest.mProcStateThrottle).containsExactlyElementsIn(expected);
     }
 
     @Test
@@ -139,6 +158,14 @@ public final class AppCompactorTest {
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 AppCompactor.KEY_COMPACT_STATSD_SAMPLE_RATE,
                 Float.toString(AppCompactor.DEFAULT_STATSD_SAMPLE_RATE + 0.1f), false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_FULL_RSS_THROTTLE_KB,
+                Long.toString(AppCompactor.DEFAULT_COMPACT_FULL_RSS_THROTTLE_KB + 1), false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_FULL_DELTA_RSS_THROTTLE_KB,
+                Long.toString(AppCompactor.DEFAULT_COMPACT_FULL_DELTA_RSS_THROTTLE_KB + 1), false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_PROC_STATE_THROTTLE, "1,2,3", false);
 
         // Then calling init will read and set that flag.
         mCompactorUnderTest.init();
@@ -157,12 +184,19 @@ public final class AppCompactorTest {
                 AppCompactor.DEFAULT_COMPACT_THROTTLE_3 + 1);
         assertThat(mCompactorUnderTest.mCompactThrottleFullFull).isEqualTo(
                 AppCompactor.DEFAULT_COMPACT_THROTTLE_4 + 1);
+        assertThat(mCompactorUnderTest.mCompactThrottleBFGS).isEqualTo(
+                AppCompactor.DEFAULT_COMPACT_THROTTLE_5 + 1);
+        assertThat(mCompactorUnderTest.mCompactThrottlePersistent).isEqualTo(
+                AppCompactor.DEFAULT_COMPACT_THROTTLE_6 + 1);
         assertThat(mCompactorUnderTest.mStatsdSampleRate).isEqualTo(
                 AppCompactor.DEFAULT_STATSD_SAMPLE_RATE + 0.1f);
         assertThat(mCompactorUnderTest.mCompactThrottleBFGS).isEqualTo(
                 AppCompactor.DEFAULT_COMPACT_THROTTLE_5 + 1);
         assertThat(mCompactorUnderTest.mCompactThrottlePersistent).isEqualTo(
                 AppCompactor.DEFAULT_COMPACT_THROTTLE_6 + 1);
+        assertThat(mCompactorUnderTest.mFullAnonRssThrottleKb).isEqualTo(
+                AppCompactor.DEFAULT_COMPACT_FULL_RSS_THROTTLE_KB + 1);
+        assertThat(mCompactorUnderTest.mProcStateThrottle).containsExactly(1, 2, 3);
     }
 
     @Test
@@ -321,6 +355,10 @@ public final class AppCompactorTest {
                 AppCompactor.DEFAULT_COMPACT_THROTTLE_3);
         assertThat(mCompactorUnderTest.mCompactThrottleFullFull).isEqualTo(
                 AppCompactor.DEFAULT_COMPACT_THROTTLE_4);
+        assertThat(mCompactorUnderTest.mCompactThrottleBFGS).isEqualTo(
+                AppCompactor.DEFAULT_COMPACT_THROTTLE_5);
+        assertThat(mCompactorUnderTest.mCompactThrottlePersistent).isEqualTo(
+                AppCompactor.DEFAULT_COMPACT_THROTTLE_6);
 
         // Repeat for each of the throttle keys.
         mCountDown = new CountDownLatch(1);
@@ -335,6 +373,10 @@ public final class AppCompactorTest {
                 AppCompactor.DEFAULT_COMPACT_THROTTLE_3);
         assertThat(mCompactorUnderTest.mCompactThrottleFullFull).isEqualTo(
                 AppCompactor.DEFAULT_COMPACT_THROTTLE_4);
+        assertThat(mCompactorUnderTest.mCompactThrottleBFGS).isEqualTo(
+                AppCompactor.DEFAULT_COMPACT_THROTTLE_5);
+        assertThat(mCompactorUnderTest.mCompactThrottlePersistent).isEqualTo(
+                AppCompactor.DEFAULT_COMPACT_THROTTLE_6);
 
         mCountDown = new CountDownLatch(1);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
@@ -348,6 +390,10 @@ public final class AppCompactorTest {
                 AppCompactor.DEFAULT_COMPACT_THROTTLE_3);
         assertThat(mCompactorUnderTest.mCompactThrottleFullFull).isEqualTo(
                 AppCompactor.DEFAULT_COMPACT_THROTTLE_4);
+        assertThat(mCompactorUnderTest.mCompactThrottleBFGS).isEqualTo(
+                AppCompactor.DEFAULT_COMPACT_THROTTLE_5);
+        assertThat(mCompactorUnderTest.mCompactThrottlePersistent).isEqualTo(
+                AppCompactor.DEFAULT_COMPACT_THROTTLE_6);
 
         mCountDown = new CountDownLatch(1);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
@@ -361,13 +407,51 @@ public final class AppCompactorTest {
                 AppCompactor.DEFAULT_COMPACT_THROTTLE_3);
         assertThat(mCompactorUnderTest.mCompactThrottleFullFull).isEqualTo(
                 AppCompactor.DEFAULT_COMPACT_THROTTLE_4);
+        assertThat(mCompactorUnderTest.mCompactThrottleBFGS).isEqualTo(
+                AppCompactor.DEFAULT_COMPACT_THROTTLE_5);
+        assertThat(mCompactorUnderTest.mCompactThrottlePersistent).isEqualTo(
+                AppCompactor.DEFAULT_COMPACT_THROTTLE_6);
+
+        mCountDown = new CountDownLatch(1);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_THROTTLE_5, "foo", false);
+        assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
+        assertThat(mCompactorUnderTest.mCompactThrottleSomeSome).isEqualTo(
+                AppCompactor.DEFAULT_COMPACT_THROTTLE_1);
+        assertThat(mCompactorUnderTest.mCompactThrottleSomeFull).isEqualTo(
+                AppCompactor.DEFAULT_COMPACT_THROTTLE_2);
+        assertThat(mCompactorUnderTest.mCompactThrottleFullSome).isEqualTo(
+                AppCompactor.DEFAULT_COMPACT_THROTTLE_3);
+        assertThat(mCompactorUnderTest.mCompactThrottleFullFull).isEqualTo(
+                AppCompactor.DEFAULT_COMPACT_THROTTLE_4);
+        assertThat(mCompactorUnderTest.mCompactThrottleBFGS).isEqualTo(
+                AppCompactor.DEFAULT_COMPACT_THROTTLE_5);
+        assertThat(mCompactorUnderTest.mCompactThrottlePersistent).isEqualTo(
+                AppCompactor.DEFAULT_COMPACT_THROTTLE_6);
+
+        mCountDown = new CountDownLatch(1);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_THROTTLE_6, "foo", false);
+        assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
+        assertThat(mCompactorUnderTest.mCompactThrottleSomeSome).isEqualTo(
+                AppCompactor.DEFAULT_COMPACT_THROTTLE_1);
+        assertThat(mCompactorUnderTest.mCompactThrottleSomeFull).isEqualTo(
+                AppCompactor.DEFAULT_COMPACT_THROTTLE_2);
+        assertThat(mCompactorUnderTest.mCompactThrottleFullSome).isEqualTo(
+                AppCompactor.DEFAULT_COMPACT_THROTTLE_3);
+        assertThat(mCompactorUnderTest.mCompactThrottleFullFull).isEqualTo(
+                AppCompactor.DEFAULT_COMPACT_THROTTLE_4);
+        assertThat(mCompactorUnderTest.mCompactThrottleBFGS).isEqualTo(
+                AppCompactor.DEFAULT_COMPACT_THROTTLE_5);
+        assertThat(mCompactorUnderTest.mCompactThrottlePersistent).isEqualTo(
+                AppCompactor.DEFAULT_COMPACT_THROTTLE_6);
     }
 
     @Test
     public void statsdSampleRate_listensToDeviceConfigChanges() throws InterruptedException {
         mCompactorUnderTest.init();
 
-        // When we override mStatsdSampleRate with a reasonable values ...
+        // When we override mStatsdSampleRate with a reasonable value ...
         mCountDown = new CountDownLatch(1);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 AppCompactor.KEY_COMPACT_STATSD_SAMPLE_RATE,
@@ -380,11 +464,11 @@ public final class AppCompactorTest {
     }
 
     @Test
-    public void statsdSanokeRate_listensToDeviceConfigChangesBadValues()
+    public void statsdSampleRate_listensToDeviceConfigChangesBadValues()
             throws InterruptedException {
         mCompactorUnderTest.init();
 
-        // When we override mStatsdSampleRate with a reasonable values ...
+        // When we override mStatsdSampleRate with an unreasonable value ...
         mCountDown = new CountDownLatch(1);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 AppCompactor.KEY_COMPACT_STATSD_SAMPLE_RATE, "foo", false);
@@ -396,7 +480,7 @@ public final class AppCompactorTest {
     }
 
     @Test
-    public void statsdSanokeRate_listensToDeviceConfigChangesOutOfRangeValues()
+    public void statsdSampleRate_listensToDeviceConfigChangesOutOfRangeValues()
             throws InterruptedException {
         mCompactorUnderTest.init();
 
@@ -418,6 +502,147 @@ public final class AppCompactorTest {
 
         // Then the values is capped in the range.
         assertThat(mCompactorUnderTest.mStatsdSampleRate).isEqualTo(1.0f);
+    }
+
+    @Test
+    public void fullCompactionRssThrottleKb_listensToDeviceConfigChanges()
+            throws InterruptedException {
+        mCompactorUnderTest.init();
+
+        // When we override mStatsdSampleRate with a reasonable value ...
+        mCountDown = new CountDownLatch(1);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_FULL_RSS_THROTTLE_KB,
+                Long.toString(AppCompactor.DEFAULT_COMPACT_FULL_RSS_THROTTLE_KB + 1), false);
+        assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
+
+        // Then that override is reflected in the compactor.
+        assertThat(mCompactorUnderTest.mFullAnonRssThrottleKb).isEqualTo(
+                AppCompactor.DEFAULT_COMPACT_FULL_RSS_THROTTLE_KB + 1);
+    }
+
+    @Test
+    public void fullCompactionRssThrottleKb_listensToDeviceConfigChangesBadValues()
+            throws InterruptedException {
+        mCompactorUnderTest.init();
+
+        // When we override mStatsdSampleRate with an unreasonable value ...
+        mCountDown = new CountDownLatch(1);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_FULL_RSS_THROTTLE_KB, "foo", false);
+        assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
+
+        // Then that override is reflected in the compactor.
+        assertThat(mCompactorUnderTest.mFullAnonRssThrottleKb).isEqualTo(
+                AppCompactor.DEFAULT_COMPACT_FULL_RSS_THROTTLE_KB);
+
+        mCountDown = new CountDownLatch(1);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_FULL_RSS_THROTTLE_KB, "-100", false);
+        assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
+
+        // Then that override is reflected in the compactor.
+        assertThat(mCompactorUnderTest.mFullAnonRssThrottleKb).isEqualTo(
+                AppCompactor.DEFAULT_COMPACT_FULL_RSS_THROTTLE_KB);
+    }
+
+    @Test
+    public void fullCompactionDeltaRssThrottleKb_listensToDeviceConfigChanges()
+            throws InterruptedException {
+        mCompactorUnderTest.init();
+
+        // When we override mStatsdSampleRate with a reasonable value ...
+        mCountDown = new CountDownLatch(1);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_FULL_DELTA_RSS_THROTTLE_KB,
+                Long.toString(AppCompactor.DEFAULT_COMPACT_FULL_DELTA_RSS_THROTTLE_KB + 1), false);
+        assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
+
+        // Then that override is reflected in the compactor.
+        assertThat(mCompactorUnderTest.mFullDeltaRssThrottleKb).isEqualTo(
+                AppCompactor.DEFAULT_COMPACT_FULL_DELTA_RSS_THROTTLE_KB + 1);
+    }
+
+    @Test
+    public void fullCompactionDeltaRssThrottleKb_listensToDeviceConfigChangesBadValues()
+            throws InterruptedException {
+        mCompactorUnderTest.init();
+
+        // When we override mStatsdSampleRate with an unreasonable value ...
+        mCountDown = new CountDownLatch(1);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_FULL_DELTA_RSS_THROTTLE_KB, "foo", false);
+        assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
+
+        // Then that override is reflected in the compactor.
+        assertThat(mCompactorUnderTest.mFullDeltaRssThrottleKb).isEqualTo(
+                AppCompactor.DEFAULT_COMPACT_FULL_DELTA_RSS_THROTTLE_KB);
+
+        mCountDown = new CountDownLatch(1);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_FULL_DELTA_RSS_THROTTLE_KB, "-100", false);
+        assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
+
+        // Then that override is reflected in the compactor.
+        assertThat(mCompactorUnderTest.mFullDeltaRssThrottleKb).isEqualTo(
+                AppCompactor.DEFAULT_COMPACT_FULL_DELTA_RSS_THROTTLE_KB);
+    }
+
+    @Test
+    public void procStateThrottle_listensToDeviceConfigChanges()
+            throws InterruptedException {
+        mCompactorUnderTest.init();
+        mCountDown = new CountDownLatch(1);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_PROC_STATE_THROTTLE, "1,2,3", false);
+        assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
+        assertThat(mCompactorUnderTest.mProcStateThrottle).containsExactly(1, 2, 3);
+
+        mCountDown = new CountDownLatch(1);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_PROC_STATE_THROTTLE, "", false);
+        assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
+        assertThat(mCompactorUnderTest.mProcStateThrottle).isEmpty();
+    }
+
+    @Test
+    public void procStateThrottle_listensToDeviceConfigChangesBadValues()
+            throws InterruptedException {
+        mCompactorUnderTest.init();
+
+        Set<Integer> expected = new HashSet<>();
+        for (String s : TextUtils.split(AppCompactor.DEFAULT_COMPACT_PROC_STATE_THROTTLE, ",")) {
+            expected.add(Integer.parseInt(s));
+        }
+
+        // Not numbers
+        mCountDown = new CountDownLatch(1);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_PROC_STATE_THROTTLE, "foo", false);
+        assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
+        assertThat(mCompactorUnderTest.mProcStateThrottle).containsExactlyElementsIn(expected);
+        mCountDown = new CountDownLatch(1);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_PROC_STATE_THROTTLE, "1,foo", false);
+        assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
+        assertThat(mCompactorUnderTest.mProcStateThrottle).containsExactlyElementsIn(expected);
+
+        // Empty splits
+        mCountDown = new CountDownLatch(1);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_PROC_STATE_THROTTLE, ",", false);
+        assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
+        assertThat(mCompactorUnderTest.mProcStateThrottle).containsExactlyElementsIn(expected);
+        mCountDown = new CountDownLatch(1);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_PROC_STATE_THROTTLE, ",,3", false);
+        assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
+        assertThat(mCompactorUnderTest.mProcStateThrottle).containsExactlyElementsIn(expected);
+        mCountDown = new CountDownLatch(1);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_PROC_STATE_THROTTLE, "1,,3", false);
+        assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
+        assertThat(mCompactorUnderTest.mProcStateThrottle).containsExactlyElementsIn(expected);
     }
 
     private class TestInjector extends Injector {

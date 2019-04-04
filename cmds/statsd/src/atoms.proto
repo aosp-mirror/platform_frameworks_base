@@ -259,6 +259,7 @@ message Atom {
         BiometricEnrolled biometric_enrolled = 184;
         SystemServerWatchdogOccurred system_server_watchdog_occurred = 185;
         TombStoneOccurred tomb_stone_occurred = 186;
+        BluetoothClassOfDeviceReported bluetooth_class_of_device_reported = 187;
     }
 
     // Pulled events will start at field 10000.
@@ -1405,7 +1406,7 @@ message BluetoothConnectionStateChanged {
     // Currently is last two bytes of a hash of a device level ID and
     // the mac address of the bluetooth device that is connected.
     // Deprecated: use obfuscated_id instead, this one is always 0 for Q+
-    optional int32 OBSOLETE_obfuscated_id = 2 [deprecated = true];
+    optional int32 obfuscated_id = 2 [deprecated = true];
     // The profile that is connected. Eg. GATT, A2DP, HEADSET.
     // From android.bluetooth.BluetoothAdapter.java
     // Default: 0 when not used
@@ -1416,7 +1417,7 @@ message BluetoothConnectionStateChanged {
     // Hash algorithm: HMAC-SHA256
     // Size: 32 byte
     // Default: null or empty if the device identifier is not known
-    optional bytes obfuscated_id = 4 [(android.os.statsd.log_mode) = MODE_BYTES];
+    optional bytes new_obfuscated_id = 4 [(android.os.statsd.log_mode) = MODE_BYTES];
 }
 
 /**
@@ -2139,6 +2140,29 @@ message BluetoothSocketConnectionStateChanged {
     optional int32 server_port = 8;
     // Whether this is a server listener socket
     optional android.bluetooth.SocketRoleEnum is_server = 9;
+}
+
+/**
+ * Logs when Class of Device (CoD) value is learnt for a device during pairing or connection
+ *
+ * Logged from:
+ *   packages/apps/Bluetooth/src/com/android/bluetooth/btservice/BondStateMachine.java
+ *   packages/apps/Bluetooth/src/com/android/bluetooth/btservice/RemoteDevices.java
+ *
+ */
+message BluetoothClassOfDeviceReported {
+    // An identifier that can be used to match events for this device.
+    // Currently, this is a salted hash of the MAC address of this Bluetooth device.
+    // Salt: Randomly generated 256 bit value
+    // Hash algorithm: HMAC-SHA256
+    // Size: 32 byte
+    // Default: null or empty if this is a server listener socket
+    optional bytes obfuscated_id = 1 [(android.os.statsd.log_mode) = MODE_BYTES];
+    // Class of Device (CoD) value including both Major, Minor device class and service class
+    // Defined in: https://www.bluetooth.com/specifications/assigned-numbers/baseband
+    // Also defined in: https://developer.android.com/reference/android/bluetooth/BluetoothClass
+    // Default: 0
+    optional int32 class_of_device = 2;
 }
 
 /**

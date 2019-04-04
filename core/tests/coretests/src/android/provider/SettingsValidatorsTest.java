@@ -16,6 +16,8 @@
 
 package android.provider;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -26,6 +28,8 @@ import android.provider.SettingsValidators.Validator;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -215,6 +219,31 @@ public class SettingsValidatorsTest {
     @Test
     public void dateFormatValidator_onNullValue_returnsFalse() {
         assertFalse(Settings.System.DATE_FORMAT_VALIDATOR.validate(null));
+    }
+
+    @Test
+    public void testJSONObjectValidator() throws JSONException {
+        Validator v = SettingsValidators.JSON_OBJECT_VALIDATOR;
+
+        assertThat(v.validate(new JSONObject().toString())).isTrue();
+        assertThat(v.validate("{}")).isTrue();
+        assertThat(v.validate(new JSONObject().put("foo", "bar").toString()))
+                .isTrue();
+        assertThat(v.validate("{\"foo\": \"bar\"}")).isTrue();
+
+        assertThat(v.validate("random string")).isFalse();
+        assertThat(v.validate("random: string")).isFalse();
+        assertThat(v.validate("{random: }")).isFalse();
+    }
+
+    @Test
+    public void testJSONObjectValidator_onNullValue_returnsFalse() {
+        assertThat(SettingsValidators.JSON_OBJECT_VALIDATOR.validate(null)).isFalse();
+    }
+
+    @Test
+    public void testJSONObjectValidator_onEmptyString_returnsFalse() {
+        assertThat(SettingsValidators.JSON_OBJECT_VALIDATOR.validate("")).isFalse();
     }
 
     @Test

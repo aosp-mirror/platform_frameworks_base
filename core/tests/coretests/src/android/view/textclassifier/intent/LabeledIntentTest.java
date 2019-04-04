@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.testng.Assert.assertThrows;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -40,17 +41,21 @@ public final class LabeledIntentTest {
     private static final String TITLE_WITHOUT_ENTITY = "Map";
     private static final String TITLE_WITH_ENTITY = "Map NW14D1";
     private static final String DESCRIPTION = "Check the map";
+    private static final String DESCRIPTION_WITH_APP_NAME = "Use %1$s to open map";
     private static final Intent INTENT =
             new Intent(Intent.ACTION_VIEW).setDataAndNormalize(Uri.parse("http://www.android.com"));
     private static final int REQUEST_CODE = 42;
     private static final Bundle TEXT_LANGUAGES_BUNDLE = Bundle.EMPTY;
+    private static final String APP_LABEL = "fake";
 
     private Context mContext;
 
     @Before
     public void setup() {
+        final ComponentName component = FakeContextBuilder.DEFAULT_COMPONENT;
         mContext = new FakeContextBuilder()
-                .setIntentComponent(Intent.ACTION_VIEW, FakeContextBuilder.DEFAULT_COMPONENT)
+                .setIntentComponent(Intent.ACTION_VIEW, component)
+                .setAppLabel(component.getPackageName(), APP_LABEL)
                 .build();
     }
 
@@ -60,6 +65,7 @@ public final class LabeledIntentTest {
                 TITLE_WITHOUT_ENTITY,
                 TITLE_WITH_ENTITY,
                 DESCRIPTION,
+                null,
                 INTENT,
                 REQUEST_CODE
         );
@@ -82,6 +88,7 @@ public final class LabeledIntentTest {
                 TITLE_WITHOUT_ENTITY,
                 null,
                 DESCRIPTION,
+                null,
                 INTENT,
                 REQUEST_CODE
         );
@@ -103,6 +110,7 @@ public final class LabeledIntentTest {
                 TITLE_WITHOUT_ENTITY,
                 null,
                 DESCRIPTION,
+                null,
                 INTENT,
                 REQUEST_CODE
         );
@@ -124,6 +132,7 @@ public final class LabeledIntentTest {
                 TITLE_WITHOUT_ENTITY,
                 null,
                 DESCRIPTION,
+                null,
                 INTENT,
                 REQUEST_CODE
         );
@@ -148,6 +157,7 @@ public final class LabeledIntentTest {
                                 null,
                                 null,
                                 DESCRIPTION,
+                                null,
                                 INTENT,
                                 REQUEST_CODE
                         ));
@@ -161,11 +171,30 @@ public final class LabeledIntentTest {
                 TITLE_WITHOUT_ENTITY,
                 null,
                 DESCRIPTION,
+                null,
                 unresolvableIntent,
                 REQUEST_CODE);
 
         LabeledIntent.Result result = labeledIntent.resolve(mContext, null, null);
 
         assertThat(result).isNull();
+    }
+
+    @Test
+    public void resolve_descriptionWithAppName() {
+        LabeledIntent labeledIntent = new LabeledIntent(
+                TITLE_WITHOUT_ENTITY,
+                TITLE_WITH_ENTITY,
+                DESCRIPTION,
+                DESCRIPTION_WITH_APP_NAME,
+                INTENT,
+                REQUEST_CODE
+        );
+
+        LabeledIntent.Result result = labeledIntent.resolve(
+                mContext, /*titleChooser*/ null, TEXT_LANGUAGES_BUNDLE);
+
+        assertThat(result).isNotNull();
+        assertThat(result.remoteAction.getContentDescription()).isEqualTo("Use fake to open map");
     }
 }

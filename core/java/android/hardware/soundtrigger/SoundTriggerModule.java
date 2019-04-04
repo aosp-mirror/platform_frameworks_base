@@ -46,9 +46,10 @@ public class SoundTriggerModule {
     SoundTriggerModule(int moduleId, SoundTrigger.StatusListener listener, Handler handler) {
         mId = moduleId;
         mEventHandlerDelegate = new NativeEventHandlerDelegate(listener, handler);
-        native_setup(new WeakReference<SoundTriggerModule>(this));
+        native_setup(SoundTrigger.getCurrentOpPackageName(),
+                new WeakReference<SoundTriggerModule>(this));
     }
-    private native void native_setup(Object module_this);
+    private native void native_setup(String opPackageName, Object moduleThis);
 
     @Override
     protected void finalize() {

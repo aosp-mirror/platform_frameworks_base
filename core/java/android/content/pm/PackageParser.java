@@ -49,6 +49,8 @@ import android.annotation.StringRes;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityTaskManager;
+import android.app.ActivityThread;
+import android.app.ResourcesManager;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -69,6 +71,7 @@ import android.os.FileUtils;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PatternMatcher;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
@@ -92,6 +95,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.util.apk.ApkSignatureVerifier;
+import android.view.Display;
 import android.view.Gravity;
 
 import com.android.internal.R;
@@ -320,6 +324,8 @@ public class PackageParser {
     private int mParseError = PackageManager.INSTALL_SUCCEEDED;
 
     private static boolean sCompatibilityModeEnabled = true;
+    private static boolean sUseRoundIcon = false;
+
     private static final int PARSE_DEFAULT_INSTALL_LOCATION =
             PackageInfo.INSTALL_LOCATION_UNSPECIFIED;
     private static final int PARSE_DEFAULT_TARGET_SANDBOX = 1;
@@ -3437,6 +3443,11 @@ public class PackageParser {
         TypedArray sa = res.obtainAttributes(parser,
                 com.android.internal.R.styleable.AndroidManifestApplication);
 
+        ai.iconRes = sa.getResourceId(
+            com.android.internal.R.styleable.AndroidManifestApplication_icon, 0);
+        ai.roundIconRes = sa.getResourceId(
+            com.android.internal.R.styleable.AndroidManifestApplication_roundIcon, 0);
+
         if (!parsePackageItemInfo(owner, ai, outError,
                 "<application>", sa, false /*nameRequired*/,
                 com.android.internal.R.styleable.AndroidManifestApplication_name,
@@ -4240,9 +4251,7 @@ public class PackageParser {
             }
         }
 
-        final boolean useRoundIcon =
-                Resources.getSystem().getBoolean(com.android.internal.R.bool.config_useRoundIcon);
-        int roundIconVal = useRoundIcon ? sa.getResourceId(roundIconRes, 0) : 0;
+        int roundIconVal = sUseRoundIcon ? sa.getResourceId(roundIconRes, 0) : 0;
         if (roundIconVal != 0) {
             outInfo.icon = roundIconVal;
             outInfo.nonLocalizedLabel = null;
@@ -5750,9 +5759,7 @@ public class PackageParser {
             outInfo.nonLocalizedLabel = v.coerceToString();
         }
 
-        final boolean useRoundIcon =
-                Resources.getSystem().getBoolean(com.android.internal.R.bool.config_useRoundIcon);
-        int roundIconVal = useRoundIcon ? sa.getResourceId(
+        int roundIconVal = sUseRoundIcon ? sa.getResourceId(
                 com.android.internal.R.styleable.AndroidManifestIntentFilter_roundIcon, 0) : 0;
         if (roundIconVal != 0) {
             outInfo.icon = roundIconVal;
@@ -6920,6 +6927,11 @@ public class PackageParser {
         }
 
         /** @hide */
+        public boolean isOdm() {
+            return applicationInfo.isOdm();
+        }
+
+        /** @hide */
         public boolean isPrivileged() {
             return applicationInfo.isPrivilegedApp();
         }
@@ -7739,6 +7751,7 @@ public class PackageParser {
         }
         ai.seInfoUser = SELinuxUtil.assignSeinfoUser(state);
         ai.resourceDirs = state.overlayPaths;
+        ai.icon = (sUseRoundIcon && ai.roundIconRes != 0) ? ai.roundIconRes : ai.iconRes;
     }
 
     @UnsupportedAppUsage
@@ -8342,6 +8355,39 @@ public class PackageParser {
     @UnsupportedAppUsage
     public static void setCompatibilityModeEnabled(boolean compatibilityModeEnabled) {
         sCompatibilityModeEnabled = compatibilityModeEnabled;
+    }
+
+    /**
+     * @hide
+     */
+    public static void readConfigUseRoundIcon(Resources r) {
+        if (r != null) {
+            sUseRoundIcon = r.getBoolean(com.android.internal.R.bool.config_useRoundIcon);
+            return;
+        }
+
+        ApplicationInfo androidAppInfo;
+        try {
+            androidAppInfo = ActivityThread.getPackageManager().getApplicationInfo(
+                    "android", 0 /* flags */,
+                UserHandle.myUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        Resources systemResources = Resources.getSystem();
+
+        // Create in-flight as this overlayable resource is only used when config changes
+        Resources overlayableRes = ResourcesManager.getInstance().getResources(null,
+                null,
+                null,
+                androidAppInfo.resourceDirs,
+                androidAppInfo.sharedLibraryFiles,
+                Display.DEFAULT_DISPLAY,
+                null,
+                systemResources.getCompatibilityInfo(),
+                systemResources.getClassLoader());
+
+        sUseRoundIcon = overlayableRes.getBoolean(com.android.internal.R.bool.config_useRoundIcon);
     }
 
     public static class PackageParserException extends Exception {

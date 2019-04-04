@@ -64,9 +64,7 @@ class UiAutomationManager {
                 public void binderDied() {
                     mUiAutomationServiceOwner.unlinkToDeath(this, 0);
                     mUiAutomationServiceOwner = null;
-                    if (mUiAutomationService != null) {
-                        destroyUiAutomationService();
-                    }
+                    destroyUiAutomationService();
                 }
             };
 
@@ -201,17 +199,20 @@ class UiAutomationManager {
 
     private void destroyUiAutomationService() {
         synchronized (mLock) {
-            mUiAutomationService.mServiceInterface.asBinder().unlinkToDeath(mUiAutomationService,
-                    0);
-            mUiAutomationService.onRemoved();
-            mUiAutomationService.resetLocked();
-            mUiAutomationService = null;
-            mUiAutomationFlags = 0;
-            if (mUiAutomationServiceOwner != null) {
-                mUiAutomationServiceOwner.unlinkToDeath(mUiAutomationServiceOwnerDeathRecipient, 0);
-                mUiAutomationServiceOwner = null;
+            if (mUiAutomationService != null) {
+                mUiAutomationService.mServiceInterface.asBinder().unlinkToDeath(
+                        mUiAutomationService, 0);
+                mUiAutomationService.onRemoved();
+                mUiAutomationService.resetLocked();
+                mUiAutomationService = null;
+                mUiAutomationFlags = 0;
+                if (mUiAutomationServiceOwner != null) {
+                    mUiAutomationServiceOwner.unlinkToDeath(
+                            mUiAutomationServiceOwnerDeathRecipient, 0);
+                    mUiAutomationServiceOwner = null;
+                }
+                mSystemSupport.onClientChangeLocked(false);
             }
-            mSystemSupport.onClientChangeLocked(false);
         }
     }
 

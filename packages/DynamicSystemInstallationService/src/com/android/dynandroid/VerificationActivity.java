@@ -25,8 +25,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.image.DynamicSystemClient;
+import android.util.FeatureFlagUtils;
 import android.util.Log;
 
 
@@ -48,6 +50,12 @@ public class VerificationActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (!featureFlagEnabled()) {
+            Log.w(TAG, FeatureFlagUtils.DYNAMIC_SYSTEM + " not enabled; activity aborted.");
+            finish();
+            return;
+        }
 
         KeyguardManager km = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
 
@@ -96,6 +104,11 @@ public class VerificationActivity extends Activity {
 
         Log.d(TAG, "Starting Installation Service");
         startServiceAsUser(intent, UserHandle.SYSTEM);
+    }
+
+    private boolean featureFlagEnabled() {
+        return SystemProperties.getBoolean(
+                FeatureFlagUtils.PERSIST_PREFIX + FeatureFlagUtils.DYNAMIC_SYSTEM, false);
     }
 
     static boolean isVerified(String url) {

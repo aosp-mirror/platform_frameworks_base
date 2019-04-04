@@ -98,7 +98,7 @@ public class PreferencesHelper implements RankingConfig {
     private static final int DEFAULT_VISIBILITY = NotificationManager.VISIBILITY_NO_OVERRIDE;
     private static final int DEFAULT_IMPORTANCE = NotificationManager.IMPORTANCE_UNSPECIFIED;
     @VisibleForTesting
-    static final boolean DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS = false;
+    static final boolean DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS = true;
     private static final boolean DEFAULT_SHOW_BADGE = true;
     private static final boolean DEFAULT_ALLOW_BUBBLE = true;
     private static final boolean DEFAULT_OEM_LOCKED_IMPORTANCE  = false;
@@ -132,7 +132,7 @@ public class PreferencesHelper implements RankingConfig {
     private SparseBooleanArray mBadgingEnabled;
     private SparseBooleanArray mBubblesEnabled;
     private boolean mAreChannelsBypassingDnd;
-    private boolean mHideSilentStatusBarIcons;
+    private boolean mHideSilentStatusBarIcons = DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS;
 
     public PreferencesHelper(Context context, PackageManager pm, RankingHandler rankingHandler,
             ZenModeHelper zenHelper) {

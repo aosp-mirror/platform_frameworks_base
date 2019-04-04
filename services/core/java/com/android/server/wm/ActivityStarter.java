@@ -949,7 +949,8 @@ class ActivityStarter {
         final boolean callingUidHasAnyVisibleWindow =
                 mService.mWindowManager.mRoot.isAnyNonToastWindowVisibleForUid(callingUid);
         final boolean isCallingUidForeground = callingUidHasAnyVisibleWindow
-                || callingUidProcState == ActivityManager.PROCESS_STATE_TOP;
+                || callingUidProcState == ActivityManager.PROCESS_STATE_TOP
+                || callingUidProcState == ActivityManager.PROCESS_STATE_BOUND_TOP;
         final boolean isCallingUidPersistentSystemProcess = (callingUid == Process.SYSTEM_UID)
                 || callingUidProcState <= ActivityManager.PROCESS_STATE_PERSISTENT_UI;
         if (isCallingUidForeground || isCallingUidPersistentSystemProcess) {
@@ -978,6 +979,11 @@ class ActivityStarter {
             // if the realCallingUid is a persistent system process, abort if the IntentSender
             // wasn't whitelisted to start an activity
             if (isRealCallingUidPersistentSystemProcess && allowBackgroundActivityStart) {
+                return false;
+            }
+            // don't abort if the realCallingUid is an associated companion app
+            if (mService.isAssociatedCompanionApp(UserHandle.getUserId(realCallingUid),
+                    realCallingUid)) {
                 return false;
             }
         }
@@ -1025,7 +1031,7 @@ class ActivityStarter {
         }
         // don't abort if the callingPackage has companion device
         final int callingUserId = UserHandle.getUserId(callingUid);
-        if (mService.isAssociatedCompanionApp(callingUserId, callingPackage)) {
+        if (mService.isAssociatedCompanionApp(callingUserId, callingUid)) {
             return false;
         }
         // don't abort if the callingPackage is temporarily whitelisted

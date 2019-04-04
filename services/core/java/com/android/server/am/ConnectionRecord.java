@@ -109,6 +109,14 @@ final class ConnectionRecord {
         clientPackageName = _clientPackageName;
     }
 
+    public boolean hasFlag(final int flag) {
+        return (flags & flag) != 0;
+    }
+
+    public boolean notHasFlag(final int flag) {
+        return (flags & flag) == 0;
+    }
+
     public void startAssociationIfNeeded() {
         // If we don't already have an active association, create one...  but only if this
         // is an association between two different processes.

@@ -34,9 +34,9 @@ public class GnssMeasurementCorrectionsProvider {
     private static final String TAG = "GnssMeasurementCorrectionsProvider";
 
     // These must match with the Capabilities enum in IMeasurementCorrectionsCallback.hal.
-    private static final int CAPABILITY_LOS_SATS = 0x0000001;
-    private static final int CAPABILITY_EXCESS_PATH_LENGTH = 0x0000002;
-    private static final int CAPABILITY_REFLECTING_PLANE = 0x0000004;
+    static final int CAPABILITY_LOS_SATS = 0x0000001;
+    static final int CAPABILITY_EXCESS_PATH_LENGTH = 0x0000002;
+    static final int CAPABILITY_REFLECTING_PLANE = 0x0000004;
 
     private static final int INVALID_CAPABILITIES = 1 << 31;
 
@@ -83,21 +83,23 @@ public class GnssMeasurementCorrectionsProvider {
     }
 
     /** Handle measurement corrections capabilities update from the GNSS HAL implementation. */
-    void onCapabilitiesUpdated(int capabilities) {
+    boolean onCapabilitiesUpdated(int capabilities) {
         if (hasCapability(capabilities, CAPABILITY_LOS_SATS) || hasCapability(capabilities,
                 CAPABILITY_EXCESS_PATH_LENGTH)) {
             mCapabilities = capabilities;
+            return true;
         } else {
             Log.e(TAG, "Failed to set capabilities. Received capabilities 0x"
                     + Integer.toHexString(capabilities) + " does not contain the mandatory "
                     + "LOS_SATS or the EXCESS_PATH_LENGTH capability.");
+            return false;
         }
     }
 
     /**
      * Returns the measurement corrections specific capabilities of the GNSS HAL implementation.
      */
-    public int getCapabilities() {
+    int getCapabilities() {
         return mCapabilities;
     }
 
@@ -122,12 +124,12 @@ public class GnssMeasurementCorrectionsProvider {
         return s.toString();
     }
 
-    private boolean isCapabilitiesReceived() {
-        return mCapabilities != INVALID_CAPABILITIES;
-    }
-
     private static  boolean hasCapability(int halCapabilities, int capability) {
         return (halCapabilities & capability) != 0;
+    }
+
+    private boolean isCapabilitiesReceived() {
+        return mCapabilities != INVALID_CAPABILITIES;
     }
 
     @VisibleForTesting

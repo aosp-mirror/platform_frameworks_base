@@ -18,9 +18,12 @@ package com.android.systemui.bubbles;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -42,7 +45,6 @@ import android.widget.FrameLayout;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.NotificationTestHelper;
@@ -96,9 +98,9 @@ public class BubbleControllerTest extends SysuiTestCase {
     private NotificationTestHelper mNotificationTestHelper;
     private ExpandableNotificationRow mRow;
     private ExpandableNotificationRow mRow2;
-    private ExpandableNotificationRow mNoChannelRow;
     private ExpandableNotificationRow mAutoExpandRow;
     private ExpandableNotificationRow mSuppressNotifRow;
+    private ExpandableNotificationRow mNonBubbleNotifRow;
 
     @Mock
     private NotificationData mNotificationData;
@@ -106,9 +108,6 @@ public class BubbleControllerTest extends SysuiTestCase {
     private BubbleController.BubbleStateChangeListener mBubbleStateChangeListener;
     @Mock
     private BubbleController.BubbleExpandListener mBubbleExpandListener;
-    @Mock
-    NotificationVisibility mNotificationVisibility;
-
     @Mock
     private PendingIntent mDeleteIntent;
 
@@ -129,7 +128,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         mNotificationTestHelper = new NotificationTestHelper(mContext);
         mRow = mNotificationTestHelper.createBubble(mDeleteIntent);
         mRow2 = mNotificationTestHelper.createBubble(mDeleteIntent);
-        mNoChannelRow = mNotificationTestHelper.createBubble(mDeleteIntent);
+        mNonBubbleNotifRow = mNotificationTestHelper.createRow();
 
         // Some bubbles want to auto expand
         Notification.BubbleMetadata autoExpandMetadata =
@@ -146,7 +145,6 @@ public class BubbleControllerTest extends SysuiTestCase {
         // Return non-null notification data from the NEM
         when(mNotificationEntryManager.getNotificationData()).thenReturn(mNotificationData);
         when(mNotificationData.getChannel(mRow.getEntry().key)).thenReturn(mRow.getEntry().channel);
-        when(mNotificationData.getChannel(mNoChannelRow.getEntry().key)).thenReturn(null);
 
         mBubbleData = new BubbleData();
         mBubbleController = new TestableBubbleController(mContext, mStatusBarWindowController,
@@ -391,8 +389,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         mEntryListener.onPendingEntryAdded(mSuppressNotifRow.getEntry());
         mBubbleController.updateBubble(mSuppressNotifRow.getEntry(), true /* updatePosition */);
 
-        // Should be a bubble & should show in shade because we weren't forground
-        assertTrue(mSuppressNotifRow.getEntry().isBubble());
+        // Should show in shade because we weren't forground
         assertTrue(mSuppressNotifRow.getEntry().showInShadeWhenBubble());
 
         // # of bubbles should change
@@ -428,8 +425,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         mEntryListener.onPendingEntryAdded(mSuppressNotifRow.getEntry());
         mBubbleController.updateBubble(mSuppressNotifRow.getEntry(), true /* updatePosition */);
 
-        // Should be a bubble & should NOT show in shade because we were foreground
-        assertTrue(mSuppressNotifRow.getEntry().isBubble());
+        // Should NOT show in shade because we were foreground
         assertFalse(mSuppressNotifRow.getEntry().showInShadeWhenBubble());
 
         // # of bubbles should change
@@ -444,8 +440,6 @@ public class BubbleControllerTest extends SysuiTestCase {
         mEntryListener.onPendingEntryAdded(mRow.getEntry());
         mBubbleController.updateBubble(mRow.getEntry(), true /* updatePosition */);
 
-        assertTrue(mRow.getEntry().isBubble());
-
         // Simulate notification cancellation.
         mEntryListener.onEntryRemoved(mRow.getEntry(), null /* notificationVisibility (unused) */,
                 false /* removedbyUser */);
@@ -454,15 +448,18 @@ public class BubbleControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testMarkNewNotificationAsBubble() {
-        mEntryListener.onPendingEntryAdded(mRow.getEntry());
-        assertTrue(mRow.getEntry().isBubble());
-    }
-
-    @Test
     public void testMarkNewNotificationAsShowInShade() {
         mEntryListener.onPendingEntryAdded(mRow.getEntry());
         assertTrue(mRow.getEntry().showInShadeWhenBubble());
+    }
+
+    @Test
+    public void testAddNotif_notBubble() {
+        mEntryListener.onPendingEntryAdded(mNonBubbleNotifRow.getEntry());
+        mEntryListener.onPreEntryUpdated(mNonBubbleNotifRow.getEntry());
+
+        verify(mBubbleStateChangeListener, never()).onHasBubblesChanged(anyBoolean());
+        assertThat(mBubbleController.hasBubbles()).isFalse();
     }
 
     @Test

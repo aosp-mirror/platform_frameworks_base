@@ -63,6 +63,7 @@ import com.android.systemui.statusbar.policy.RemoteInputView;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -142,7 +143,7 @@ public class NotificationRemoteInputManager implements Dumpable {
             if (DEBUG) {
                 Log.v(TAG, "Notification click handler invoked for intent: " + pendingIntent);
             }
-            logActionClick(view);
+            logActionClick(view, pendingIntent);
             // The intent we are sending is for the application, which
             // won't have permission to immediately start an activity after
             // the user switches to home.  We know it is safe to do at this
@@ -159,11 +160,11 @@ public class NotificationRemoteInputManager implements Dumpable {
             });
         }
 
-        private void logActionClick(View view) {
+        private void logActionClick(View view, PendingIntent actionIntent) {
             Integer actionIndex = (Integer)
                     view.getTag(com.android.internal.R.id.notification_action_index_tag);
             if (actionIndex == null) {
-                Log.e(TAG, "Couldn't retrieve the actionIndex from the clicked button");
+                // Custom action button, not logging.
                 return;
             }
             ViewParent parent = view.getParent();
@@ -182,8 +183,20 @@ public class NotificationRemoteInputManager implements Dumpable {
             }
             final int count = mEntryManager.getNotificationData().getActiveNotifications().size();
             final int rank = mEntryManager.getNotificationData().getRank(key);
+
+            // Notification may be updated before this function is executed, and thus play safe
+            // here and verify that the action object is still the one that where the click happens.
+            Notification.Action[] actions = statusBarNotification.getNotification().actions;
+            if (actions == null || actionIndex >= actions.length) {
+                Log.w(TAG, "statusBarNotification.getNotification().actions is null or invalid");
+                return;
+            }
             final Notification.Action action =
                     statusBarNotification.getNotification().actions[actionIndex];
+            if (Objects.equals(action.actionIntent, actionIntent)) {
+                Log.w(TAG, "actionIntent does not match");
+                return;
+            }
             NotificationVisibility.NotificationLocation location =
                     NotificationLogger.getNotificationLocation(
                             mEntryManager.getNotificationData().get(key));

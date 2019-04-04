@@ -27,6 +27,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.provider.Telephony.Carriers;
+import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
@@ -591,13 +592,25 @@ class GnssNetworkConnectivityHandler {
         }
         TelephonyManager phone = (TelephonyManager)
                 mContext.getSystemService(Context.TELEPHONY_SERVICE);
+        ServiceState serviceState = phone.getServiceState();
+        String projection = null;
+        String selection = null;
+
         // Carrier configuration may override framework roaming state, we need to use the actual
         // modem roaming state instead of the framework roaming state.
-        boolean isDataRoamingFromRegistration = phone.getServiceState()
-                .getDataRoamingFromRegistration();
-        String projection = isDataRoamingFromRegistration ? Carriers.ROAMING_PROTOCOL :
-                Carriers.PROTOCOL;
-        String selection = String.format("current = 1 and apn = '%s' and carrier_enabled = 1", apn);
+        if (serviceState != null && serviceState.getDataRoamingFromRegistration()) {
+            projection = Carriers.ROAMING_PROTOCOL;
+        } else {
+            projection = Carriers.PROTOCOL;
+        }
+        // No SIM case for emergency
+        if (TelephonyManager.NETWORK_TYPE_UNKNOWN == phone.getNetworkType()
+                && AGPS_TYPE_EIMS == mAGpsType) {
+            selection = String.format(
+                "type like '%%emergency%%' and apn = '%s' and carrier_enabled = 1", apn);
+        } else {
+            selection = String.format("current = 1 and apn = '%s' and carrier_enabled = 1", apn);
+        }
         try (Cursor cursor = mContext.getContentResolver().query(
                 Carriers.CONTENT_URI,
                 new String[]{projection},
@@ -613,7 +626,7 @@ class GnssNetworkConnectivityHandler {
             Log.e(TAG, "Error encountered on APN query for: " + apn, e);
         }
 
-        return APN_INVALID;
+        return APN_IPV4V6;
     }
 
     private int translateToApnIpType(String ipProtocol, String apn) {
@@ -630,7 +643,7 @@ class GnssNetworkConnectivityHandler {
         // we hit the default case so the ipProtocol is not recognized
         String message = String.format("Unknown IP Protocol: %s, for APN: %s", ipProtocol, apn);
         Log.e(TAG, message);
-        return APN_INVALID;
+        return APN_IPV4V6;
     }
 
     // AGPS support

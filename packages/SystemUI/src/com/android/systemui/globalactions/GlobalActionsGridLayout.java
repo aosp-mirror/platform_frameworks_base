@@ -16,6 +16,10 @@
 
 package com.android.systemui.globalactions;
 
+import static com.android.systemui.util.leak.RotationUtils.ROTATION_LANDSCAPE;
+import static com.android.systemui.util.leak.RotationUtils.ROTATION_NONE;
+import static com.android.systemui.util.leak.RotationUtils.ROTATION_SEASCAPE;
+
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -85,8 +89,8 @@ public class GlobalActionsGridLayout extends MultiListLayout {
         int rotation = RotationUtils.getRotation(mContext);
 
         boolean reverse = false; // should we add items to parents in the reverse order?
-        if (rotation == RotationUtils.ROTATION_NONE
-                || rotation == RotationUtils.ROTATION_SEASCAPE) {
+        if (rotation == ROTATION_NONE
+                || rotation == ROTATION_SEASCAPE) {
             reverse = !reverse; // if we're in portrait or seascape, reverse items
         }
         if (TextUtils.getLayoutDirectionFromLocale(Locale.getDefault())
@@ -125,9 +129,9 @@ public class GlobalActionsGridLayout extends MultiListLayout {
     private void updateSnapPosition() {
         if (mSnapToEdge) {
             setPadding(0, 0, 0, 0);
-            if (mRotation == RotationUtils.ROTATION_LANDSCAPE) {
+            if (mRotation == ROTATION_LANDSCAPE) {
                 setGravity(Gravity.RIGHT);
-            } else if (mRotation == RotationUtils.ROTATION_SEASCAPE) {
+            } else if (mRotation == ROTATION_SEASCAPE) {
                 setGravity(Gravity.LEFT);
             } else {
                 setGravity(Gravity.BOTTOM);
@@ -157,9 +161,9 @@ public class GlobalActionsGridLayout extends MultiListLayout {
             return getSeparatedView();
         } else {
             switch (rotation) {
-                case RotationUtils.ROTATION_LANDSCAPE:
+                case ROTATION_LANDSCAPE:
                     return getListView().getParentView(index, false, true);
-                case RotationUtils.ROTATION_SEASCAPE:
+                case ROTATION_SEASCAPE:
                     return getListView().getParentView(index, true, true);
                 default:
                     return getListView().getParentView(index, false, false);
@@ -173,5 +177,32 @@ public class GlobalActionsGridLayout extends MultiListLayout {
     @Override
     public void setDivisionView(View v) {
         // do nothing
+    }
+
+    private float getAnimationDistance() {
+        int rows = getListView().getRowCount();
+        float gridItemSize = getContext().getResources().getDimension(
+                com.android.systemui.R.dimen.global_actions_grid_item_height);
+        return rows * gridItemSize / 2;
+    }
+
+    @Override
+    public float getAnimationOffsetX() {
+        switch (RotationUtils.getRotation(getContext())) {
+            case ROTATION_LANDSCAPE:
+                return getAnimationDistance();
+            case ROTATION_SEASCAPE:
+                return -getAnimationDistance();
+            default: // Portrait
+                return 0;
+        }
+    }
+
+    @Override
+    public float getAnimationOffsetY() {
+        if (RotationUtils.getRotation(mContext) == ROTATION_NONE) {
+            return getAnimationDistance();
+        }
+        return 0;
     }
 }

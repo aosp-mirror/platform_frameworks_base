@@ -1567,7 +1567,7 @@
     <string name="face_error_lockout_permanent">Too many attempts. Face authentication disabled.</string>
     <!-- Generic error message shown when the face hardware can't recognize the face. [CHAR LIMIT=50] -->
     <string name="face_error_unable_to_process">Can\u2019t verify face. Try again.</string>
-    <!-- Generic error message shown when the user has no enrolled face. [CHAR LIMIT=50] -->
+    <!-- Generic error message shown when the user has no enrolled face. [CHAR LIMIT=52] -->
     <string name="face_error_not_enrolled">You haven\u2019t set up face authentication</string>
     <!-- Generic error message shown when the app requests face authentication on a device without a sensor. [CHAR LIMIT=60] -->
     <string name="face_error_hw_not_present">Face authentication is not supported on this device</string>

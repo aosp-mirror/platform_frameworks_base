@@ -213,6 +213,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManagerInternal.CheckPermissionDelegate;
+import android.content.pm.PackageParser;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PathPermission;
 import android.content.pm.PermissionInfo;
@@ -8772,6 +8773,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     com.android.internal.R.bool.config_customUserSwitchUi);
             mUserController.mMaxRunningUsers = res.getInteger(
                     com.android.internal.R.integer.config_multiuserMaxRunningUsers);
+            mUserController.mDelayUserDataLocking = res.getBoolean(
+                    com.android.internal.R.bool.config_multiuserDelayUserDataLocking);
 
             mWaitForNetworkTimeoutMs = waitForNetworkTimeoutMs;
         }
@@ -15333,17 +15336,19 @@ public class ActivityManagerService extends IActivityManager.Stub
             final ProcessRecord callerApp = getRecordForAppLocked(caller);
             final int callingPid = Binder.getCallingPid();
             final int callingUid = Binder.getCallingUid();
+
             final long origId = Binder.clearCallingIdentity();
-            int res = broadcastIntentLocked(callerApp,
-                    callerApp != null ? callerApp.info.packageName : null,
-                    intent, resolvedType, resultTo, resultCode, resultData, resultExtras,
-                    requiredPermissions, appOp, bOptions, serialized, sticky,
-                    callingPid, callingUid, callingUid, callingPid, userId);
-            Binder.restoreCallingIdentity(origId);
-            return res;
+            try {
+                return broadcastIntentLocked(callerApp,
+                        callerApp != null ? callerApp.info.packageName : null,
+                        intent, resolvedType, resultTo, resultCode, resultData, resultExtras,
+                        requiredPermissions, appOp, bOptions, serialized, sticky,
+                        callingPid, callingUid, callingUid, callingPid, userId);
+            } finally {
+                Binder.restoreCallingIdentity(origId);
+            }
         }
     }
-
 
     int broadcastIntentInPackage(String packageName, int uid, int realCallingUid,
             int realCallingPid, Intent intent, String resolvedType, IIntentReceiver resultTo,
@@ -15356,13 +15361,15 @@ public class ActivityManagerService extends IActivityManager.Stub
             final long origId = Binder.clearCallingIdentity();
             String[] requiredPermissions = requiredPermission == null ? null
                     : new String[] {requiredPermission};
-            int res = broadcastIntentLocked(null, packageName, intent, resolvedType,
-                    resultTo, resultCode, resultData, resultExtras,
-                    requiredPermissions, OP_NONE, bOptions, serialized,
-                    sticky, -1, uid, realCallingUid, realCallingPid, userId,
-                    allowBackgroundActivityStarts);
-            Binder.restoreCallingIdentity(origId);
-            return res;
+            try {
+                return broadcastIntentLocked(null, packageName, intent, resolvedType,
+                        resultTo, resultCode, resultData, resultExtras,
+                        requiredPermissions, OP_NONE, bOptions, serialized,
+                        sticky, -1, uid, realCallingUid, realCallingPid, userId,
+                        allowBackgroundActivityStarts);
+            } finally {
+                Binder.restoreCallingIdentity(origId);
+            }
         }
     }
 
@@ -18468,7 +18475,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     void updateApplicationInfoLocked(@NonNull List<String> packagesToUpdate, int userId) {
         final boolean updateFrameworkRes = packagesToUpdate.contains("android");
-
+        if (updateFrameworkRes) {
+            PackageParser.readConfigUseRoundIcon(null);
+        }
         mProcessList.updateApplicationInfoLocked(packagesToUpdate, userId, updateFrameworkRes);
 
         if (updateFrameworkRes) {

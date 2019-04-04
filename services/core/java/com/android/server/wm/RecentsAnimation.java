@@ -17,8 +17,6 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
-import static android.app.AppOpsManager.OP_ASSIST_STRUCTURE;
-import static android.app.AppOpsManager.OP_NONE;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
@@ -34,24 +32,15 @@ import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_T
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_RECENTS_ANIMATIONS;
 
 import android.app.ActivityOptions;
-import android.app.AppOpsManager;
 import android.app.IAssistDataReceiver;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.Trace;
 import android.util.Slog;
 import android.view.IRecentsAnimationRunner;
 
-import com.android.server.LocalServices;
-import com.android.server.am.AssistDataRequester;
-import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.wm.RecentsAnimationController.RecentsAnimationCallbacks;
-
-import java.util.List;
 
 /**
  * Manages the recents animation, including the reordering of the stacks for the transition and
@@ -70,7 +59,6 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
     private final int mCallingPid;
 
     private int mTargetActivityType;
-    private AssistDataRequester mAssistDataRequester;
 
     // The stack to restore the target stack behind when the animation is finished
     private ActivityStack mRestoreTargetBehindStack;
@@ -135,9 +123,6 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
 
         mWindowManager.deferSurfaceLayout();
         try {
-            // Kick off the assist data request in the background before showing the target activity
-            requestAssistData(recentsComponent, recentsUid, assistDataReceiver);
-
             if (hasExistingActivity) {
                 // Move the recents activity into place for the animation if it is not top most
                 mDefaultDisplay.moveStackBehindBottomMostVisibleStack(targetStack);
@@ -216,77 +201,11 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
         }
     }
 
-    /**
-     * Requests assist data for the top visible activities.
-     */
-    private void requestAssistData(ComponentName recentsComponent, int recentsUid,
-            @Deprecated IAssistDataReceiver assistDataReceiver) {
-        final AppOpsManager appOpsManager = (AppOpsManager)
-                mService.mContext.getSystemService(Context.APP_OPS_SERVICE);
-        final List<IBinder> topActivities =
-                mService.mRootActivityContainer.getTopVisibleActivities();
-        final AssistDataRequester.AssistDataRequesterCallbacks assistDataCallbacks;
-        if (assistDataReceiver != null) {
-            assistDataCallbacks = new AssistDataReceiverProxy(assistDataReceiver,
-                    recentsComponent.getPackageName()) {
-                @Override
-                public void onAssistDataReceivedLocked(Bundle data, int activityIndex,
-                        int activityCount) {
-                    // Try to notify the intelligence service first
-                    final ContentCaptureManagerInternal imService =
-                            LocalServices.getService(ContentCaptureManagerInternal.class);
-                    final IBinder activityToken = topActivities.get(activityIndex);
-                    final ActivityRecord r = ActivityRecord.forTokenLocked(activityToken);
-                    if (r != null && (imService == null
-                            || !imService.sendActivityAssistData(r.mUserId, activityToken, data))) {
-                        // Otherwise, use the provided assist data receiver
-                        super.onAssistDataReceivedLocked(data, activityIndex, activityCount);
-                    }
-                }
-            };
-        } else {
-            final ContentCaptureManagerInternal imService =
-                    LocalServices.getService(ContentCaptureManagerInternal.class);
-            if (imService == null) {
-                // There is no intelligence service, so there is no point requesting assist data
-                return;
-            }
-
-            assistDataCallbacks = new AssistDataRequester.AssistDataRequesterCallbacks() {
-                @Override
-                public boolean canHandleReceivedAssistDataLocked() {
-                    return true;
-                }
-
-                @Override
-                public void onAssistDataReceivedLocked(Bundle data, int activityIndex,
-                        int activityCount) {
-                    // Try to notify the intelligence service
-                    final IBinder activityToken = topActivities.get(activityIndex);
-                    final ActivityRecord r = ActivityRecord.forTokenLocked(activityToken);
-                    if (r != null) {
-                        imService.sendActivityAssistData(r.mUserId, activityToken, data);
-                    }
-                }
-            };
-        }
-        mAssistDataRequester = new AssistDataRequester(mService.mContext, mWindowManager,
-                appOpsManager, assistDataCallbacks, this, OP_ASSIST_STRUCTURE, OP_NONE);
-        mAssistDataRequester.requestAutofillData(topActivities,
-                recentsUid, recentsComponent.getPackageName());
-    }
-
     private void finishAnimation(@RecentsAnimationController.ReorderMode int reorderMode) {
         synchronized (mService.mGlobalLock) {
             if (DEBUG) Slog.d(TAG, "onAnimationFinished(): controller="
                     + mWindowManager.getRecentsAnimationController()
                     + " reorderMode=" + reorderMode);
-
-            // Cancel the associated assistant data request
-            if (mAssistDataRequester != null) {
-                mAssistDataRequester.cancel();
-                mAssistDataRequester = null;
-            }
 
             // Unregister for stack order changes
             mDefaultDisplay.unregisterStackOrderChangedListener(this);

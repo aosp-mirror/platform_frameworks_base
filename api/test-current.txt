@@ -716,6 +716,11 @@ package android.content.pm {
 
 package android.content.res {
 
+  public final class AssetManager implements java.lang.AutoCloseable {
+    method @NonNull public String[] getApkPaths();
+    method @Nullable public java.util.Map<java.lang.String,java.lang.String> getOverlayableMap(String);
+  }
+
   public final class Configuration implements java.lang.Comparable<android.content.res.Configuration> android.os.Parcelable {
     field public int assetsSeq;
     field public final android.app.WindowConfiguration windowConfiguration;
@@ -1320,11 +1325,17 @@ package android.net {
     method @Nullable public java.net.InetAddress getGateway();
     method @Nullable public android.net.LinkAddress getIpAddress();
     method @NonNull public java.util.List<android.net.RouteInfo> getRoutes(@Nullable String);
-    method public void setDomains(@Nullable String);
-    method public void setGateway(@Nullable java.net.InetAddress);
-    method public void setIpAddress(@Nullable android.net.LinkAddress);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.StaticIpConfiguration> CREATOR;
+  }
+
+  public static final class StaticIpConfiguration.Builder {
+    ctor public StaticIpConfiguration.Builder();
+    method @NonNull public android.net.StaticIpConfiguration build();
+    method @NonNull public android.net.StaticIpConfiguration.Builder setDnsServers(@NonNull Iterable<java.net.InetAddress>);
+    method @NonNull public android.net.StaticIpConfiguration.Builder setDomains(@Nullable String);
+    method @NonNull public android.net.StaticIpConfiguration.Builder setGateway(@Nullable java.net.InetAddress);
+    method @NonNull public android.net.StaticIpConfiguration.Builder setIpAddress(@Nullable android.net.LinkAddress);
   }
 
   public final class TestNetworkInterface implements android.os.Parcelable {
@@ -1367,37 +1378,6 @@ package android.net.apf {
     field public final int apfPacketFormat;
     field public final int apfVersionSupported;
     field public final int maximumApfProgramSize;
-  }
-
-}
-
-package android.net.captiveportal {
-
-  public final class CaptivePortalProbeResult {
-    ctor public CaptivePortalProbeResult(int);
-    ctor public CaptivePortalProbeResult(int, @Nullable String, @Nullable String);
-    ctor public CaptivePortalProbeResult(int, @Nullable String, @Nullable String, @Nullable android.net.captiveportal.CaptivePortalProbeSpec);
-    method public boolean isFailed();
-    method public boolean isPartialConnectivity();
-    method public boolean isPortal();
-    method public boolean isSuccessful();
-    field @NonNull public static final android.net.captiveportal.CaptivePortalProbeResult FAILED;
-    field public static final int FAILED_CODE = 599; // 0x257
-    field public static final android.net.captiveportal.CaptivePortalProbeResult PARTIAL;
-    field public static final int PORTAL_CODE = 302; // 0x12e
-    field @NonNull public static final android.net.captiveportal.CaptivePortalProbeResult SUCCESS;
-    field public static final int SUCCESS_CODE = 204; // 0xcc
-    field @Nullable public final String detectUrl;
-    field @Nullable public final android.net.captiveportal.CaptivePortalProbeSpec probeSpec;
-    field @Nullable public final String redirectUrl;
-  }
-
-  public abstract class CaptivePortalProbeSpec {
-    method @NonNull public String getEncodedSpec();
-    method @NonNull public abstract android.net.captiveportal.CaptivePortalProbeResult getResult(int, @Nullable String);
-    method @NonNull public java.net.URL getUrl();
-    method @NonNull public static java.util.Collection<android.net.captiveportal.CaptivePortalProbeSpec> parseCaptivePortalProbeSpecs(@NonNull String);
-    method @Nullable public static android.net.captiveportal.CaptivePortalProbeSpec parseSpecOrNull(@Nullable String);
   }
 
 }

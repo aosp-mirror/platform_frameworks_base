@@ -112,6 +112,11 @@ public class Bmgr {
             return;
         }
 
+        if ("activated".equals(op)) {
+            doActivated(userId);
+            return;
+        }
+
         if (!isBackupActive(userId)) {
             return;
         }
@@ -198,6 +203,21 @@ public class Bmgr {
         }
 
         return true;
+    }
+
+    private String activatedToString(boolean activated) {
+        return activated ? "activated" : "deactivated";
+    }
+
+    private void doActivated(@UserIdInt int userId) {
+        try {
+            System.out.println("Backup Manager currently "
+                    + activatedToString(mBmgr.isBackupServiceActive(userId)));
+        } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(BMGR_NOT_RUNNING_ERR);
+        }
+
     }
 
     private String enableToString(boolean enabled) {
@@ -907,6 +927,7 @@ public class Bmgr {
         System.err.println("       bmgr cancel backups");
         System.err.println("       bmgr init TRANSPORT...");
         System.err.println("       bmgr activate BOOL");
+        System.err.println("       bmgr activated");
         System.err.println("");
         System.err.println("The '--user' option specifies the user on which the operation is run.");
         System.err.println("It must be the first argument before the operation.");
@@ -978,6 +999,9 @@ public class Bmgr {
         System.err.println("If the argument is 'true' it will be activated, otherwise it will be");
         System.err.println("deactivated. When deactivated, the service will not be running and no");
         System.err.println("operations can be performed until activation.");
+        System.err.println("");
+        System.err.println("The 'activated' command reports the current activated/deactivated");
+        System.err.println("state of the backup mechanism.");
     }
 
     private static class BackupMonitor extends IBackupManagerMonitor.Stub {

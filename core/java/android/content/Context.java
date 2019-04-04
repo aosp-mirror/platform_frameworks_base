@@ -427,7 +427,7 @@ public abstract class Context {
      * invisible background activities.  This will impact the number of
      * recent activities the user can switch between without having them
      * restart.  There is no guarantee this will be respected, as the system
-     * tries to balance such requests from one app vs. the importantance of
+     * tries to balance such requests from one app vs. the importance of
      * keeping other apps around.
      */
     public static final int BIND_VISIBLE = 0x10000000;

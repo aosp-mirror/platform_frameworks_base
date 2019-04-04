@@ -63,6 +63,7 @@ final class InputMonitor {
     // When true, need to call updateInputWindowsLw().
     private boolean mUpdateInputWindowsNeeded = true;
     private boolean mUpdateInputWindowsPending;
+    private boolean mApplyImmediately;
 
     // Currently focused input window handle.
     private InputWindowHandle mFocusedInputWindowHandle;
@@ -152,7 +153,7 @@ final class InputMonitor {
         mService = service;
         mDisplayContent = mService.mRoot.getDisplayContent(displayId);
         mDisplayId = displayId;
-        mInputTransaction = mDisplayContent.getPendingTransaction();
+        mInputTransaction = mService.mTransactionFactory.make();
         mHandler = AnimationThread.getHandler();
         mUpdateInputForAllWindowsConsumer = new UpdateInputForAllWindowsConsumer();
     }
@@ -319,6 +320,14 @@ final class InputMonitor {
         }
     }
 
+    void updateInputWindowsImmediately() {
+        if (mUpdateInputWindowsPending) {
+            mApplyImmediately = true;
+            mUpdateInputWindows.run();
+            mApplyImmediately = false;
+        }
+    }
+
     /* Called when the current input focus changes.
      * Layer assignment is assumed to be complete by the time this is called.
      */
@@ -433,7 +442,12 @@ final class InputMonitor {
                 wallpaperInputConsumer.show(mInputTransaction, 0);
             }
 
-            mDisplayContent.scheduleAnimation();
+            if (mApplyImmediately) {
+                mInputTransaction.apply();
+            } else {
+                mDisplayContent.getPendingTransaction().merge(mInputTransaction);
+                mDisplayContent.scheduleAnimation();
+            }
 
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }

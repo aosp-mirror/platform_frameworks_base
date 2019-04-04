@@ -566,7 +566,7 @@ public abstract class LayoutInflater {
         String layout = res.getResourceEntryName(resource);
 
         try {
-            Class clazz = mPrecompiledClassLoader.loadClass("" + pkg + ".CompiledView");
+            Class clazz = Class.forName("" + pkg + ".CompiledView", false, mPrecompiledClassLoader);
             Method inflater = clazz.getMethod(layout, Context.class, int.class);
             View view = (View) inflater.invoke(null, mContext, resource);
 
@@ -827,8 +827,8 @@ public abstract class LayoutInflater {
 
             if (constructor == null) {
                 // Class not found in the cache, see if it's real, and try to add it
-                clazz = mContext.getClassLoader().loadClass(
-                        prefix != null ? (prefix + name) : name).asSubclass(View.class);
+                clazz = Class.forName(prefix != null ? (prefix + name) : name, false,
+                        mContext.getClassLoader()).asSubclass(View.class);
 
                 if (mFilter != null && clazz != null) {
                     boolean allowed = mFilter.onLoadClass(clazz);
@@ -846,8 +846,8 @@ public abstract class LayoutInflater {
                     Boolean allowedState = mFilterMap.get(name);
                     if (allowedState == null) {
                         // New class -- remember whether it is allowed
-                        clazz = mContext.getClassLoader().loadClass(
-                                prefix != null ? (prefix + name) : name).asSubclass(View.class);
+                        clazz = Class.forName(prefix != null ? (prefix + name) : name, false,
+                                mContext.getClassLoader()).asSubclass(View.class);
 
                         boolean allowed = clazz != null && mFilter.onLoadClass(clazz);
                         mFilterMap.put(name, allowed);
