@@ -44,6 +44,7 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SELinux;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.service.restricted_image.RestrictedImageProto;
@@ -1088,6 +1089,13 @@ public class FaceService extends BiometricServiceBase {
         //  MUST enforce final build products do NOT have this functionality.
         //  Additionally, the following check MUST NOT be removed.
         if (!(Build.IS_ENG || Build.IS_USERDEBUG)) {
+            return;
+        }
+
+        // Additionally, this flag allows turning off face for a device
+        // (either permanently through the build or on an individual device).
+        if (SystemProperties.getBoolean("ro.face.disable_debug_data", false)
+                || SystemProperties.getBoolean("persist.face.disable_debug_data", false)) {
             return;
         }
 
