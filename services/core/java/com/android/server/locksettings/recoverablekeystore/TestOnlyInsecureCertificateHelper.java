@@ -84,10 +84,30 @@ public class TestOnlyInsecureCertificateHelper {
                 || isTestOnlyCertificateAlias(rootCertificateAlias);
     }
 
-    public boolean doesCredentialSupportInsecureMode(int credentialType, String credential) {
-        return (credentialType == LockPatternUtils.CREDENTIAL_TYPE_PASSWORD)
-            && (credential != null)
-            && credential.startsWith(TrustedRootCertificates.INSECURE_PASSWORD_PREFIX);
+    /**
+     * Checks whether a password is in "Insecure mode"
+     * @param credentialType the type of credential, e.g. pattern and password
+     * @param credential the pattern or password
+     * @return true, if the credential is in "Insecure mode"
+     */
+    public boolean doesCredentialSupportInsecureMode(int credentialType, byte[] credential) {
+        if (credential == null) {
+            return false;
+        }
+        if (credentialType != LockPatternUtils.CREDENTIAL_TYPE_PASSWORD) {
+            return false;
+        }
+        byte[] insecurePasswordPrefixBytes =
+                TrustedRootCertificates.INSECURE_PASSWORD_PREFIX.getBytes();
+        if (credential.length < insecurePasswordPrefixBytes.length) {
+            return false;
+        }
+        for (int i = 0; i < insecurePasswordPrefixBytes.length; i++) {
+            if (credential[i] != insecurePasswordPrefixBytes[i]) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public Map<String, SecretKey> keepOnlyWhitelistedInsecureKeys(Map<String, SecretKey> rawKeys) {

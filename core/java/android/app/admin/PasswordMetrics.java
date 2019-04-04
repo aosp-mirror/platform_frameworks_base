@@ -107,7 +107,10 @@ public class PasswordMetrics implements Parcelable {
         }
     };
 
-    public static PasswordMetrics computeForPassword(@NonNull String password) {
+    /**
+     * Returns the {@code PasswordMetrics} for a given password
+     */
+    public static PasswordMetrics computeForPassword(@NonNull byte[] password) {
         // Analyse the characters used
         int letters = 0;
         int upperCase = 0;
@@ -115,9 +118,9 @@ public class PasswordMetrics implements Parcelable {
         int numeric = 0;
         int symbols = 0;
         int nonLetter = 0;
-        final int length = password.length();
+        final int length = password.length;
         for (int i = 0; i < length; i++) {
-            switch (categoryChar(password.charAt(i))) {
+            switch (categoryChar((char) password[i])) {
                 case CHAR_LOWER_CASE:
                     letters++;
                     lowerCase++;
@@ -173,7 +176,7 @@ public class PasswordMetrics implements Parcelable {
                 && this.nonLetter == o.nonLetter;
     }
 
-    /*
+    /**
      * Returns the maximum length of a sequential characters. A sequence is defined as
      * monotonically increasing characters with a constant interval or the same character repeated.
      *
@@ -187,19 +190,19 @@ public class PasswordMetrics implements Parcelable {
      * maxLengthSequence(";;;;") == 4 (anything that repeats)
      * maxLengthSequence(":;<=>") == 1  (ordered, but not composed of alphas or digits)
      *
-     * @param string the pass
+     * @param bytes the pass
      * @return the number of sequential letters or digits
      */
-    public static int maxLengthSequence(@NonNull String string) {
-        if (string.length() == 0) return 0;
-        char previousChar = string.charAt(0);
+    public static int maxLengthSequence(@NonNull byte[] bytes) {
+        if (bytes.length == 0) return 0;
+        char previousChar = (char) bytes[0];
         @CharacterCatagory int category = categoryChar(previousChar); //current sequence category
         int diff = 0; //difference between two consecutive characters
         boolean hasDiff = false; //if we are currently targeting a sequence
         int maxLength = 0; //maximum length of a sequence already found
         int startSequence = 0; //where the current sequence started
-        for (int current = 1; current < string.length(); current++) {
-            char currentChar = string.charAt(current);
+        for (int current = 1; current < bytes.length; current++) {
+            char currentChar = (char) bytes[current];
             @CharacterCatagory int categoryCurrent = categoryChar(currentChar);
             int currentDiff = (int) currentChar - (int) previousChar;
             if (categoryCurrent != category || Math.abs(currentDiff) > maxDiffCategory(category)) {
@@ -218,7 +221,7 @@ public class PasswordMetrics implements Parcelable {
             }
             previousChar = currentChar;
         }
-        maxLength = Math.max(maxLength, string.length() - startSequence);
+        maxLength = Math.max(maxLength, bytes.length - startSequence);
         return maxLength;
     }
 
