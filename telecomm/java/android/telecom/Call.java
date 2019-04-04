@@ -542,7 +542,6 @@ public final class Call {
         private final Bundle mExtras;
         private final Bundle mIntentExtras;
         private final long mCreationTimeMillis;
-        private final CallIdentification mCallIdentification;
         private final @CallDirection int mCallDirection;
 
         /**
@@ -728,8 +727,6 @@ public final class Call {
          * The display name for the caller.
          * <p>
          * This is the name as reported by the {@link ConnectionService} associated with this call.
-         * The name reported by a {@link CallScreeningService} can be retrieved using
-         * {@link CallIdentification#getName()}.
          *
          * @return The display name for the caller.
          */
@@ -847,23 +844,6 @@ public final class Call {
         }
 
         /**
-         * Returns {@link CallIdentification} information provided by a
-         * {@link CallScreeningService} for this call.
-         * <p>
-         * {@link InCallService} implementations should display the {@link CallIdentification} for
-         * calls.  The name of the call screening service is provided in
-         * {@link CallIdentification#getCallScreeningAppName()} and should be used to attribute the
-         * call identification information.
-         *
-         * @return The {@link CallIdentification} if it was provided by a
-         * {@link CallScreeningService}, or {@code null} if no {@link CallScreeningService} has
-         * provided {@link CallIdentification} information for the call.
-         */
-        public @Nullable CallIdentification getCallIdentification() {
-            return mCallIdentification;
-        }
-
-        /**
          * Indicates whether the call is an incoming or outgoing call.
          * @return The call's direction.
          */
@@ -892,7 +872,6 @@ public final class Call {
                         areBundlesEqual(mExtras, d.mExtras) &&
                         areBundlesEqual(mIntentExtras, d.mIntentExtras) &&
                         Objects.equals(mCreationTimeMillis, d.mCreationTimeMillis) &&
-                        Objects.equals(mCallIdentification, d.mCallIdentification) &&
                         Objects.equals(mCallDirection, d.mCallDirection);
             }
             return false;
@@ -915,7 +894,6 @@ public final class Call {
                             mExtras,
                             mIntentExtras,
                             mCreationTimeMillis,
-                            mCallIdentification,
                             mCallDirection);
         }
 
@@ -937,7 +915,6 @@ public final class Call {
                 Bundle extras,
                 Bundle intentExtras,
                 long creationTimeMillis,
-                CallIdentification callIdentification,
                 int callDirection) {
             mTelecomCallId = telecomCallId;
             mHandle = handle;
@@ -955,7 +932,6 @@ public final class Call {
             mExtras = extras;
             mIntentExtras = intentExtras;
             mCreationTimeMillis = creationTimeMillis;
-            mCallIdentification = callIdentification;
             mCallDirection = callDirection;
         }
 
@@ -978,7 +954,6 @@ public final class Call {
                     parcelableCall.getExtras(),
                     parcelableCall.getIntentExtras(),
                     parcelableCall.getCreationTimeMillis(),
-                    parcelableCall.getCallIdentification(),
                     parcelableCall.getCallDirection());
         }
 

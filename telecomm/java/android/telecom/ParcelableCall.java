@@ -64,7 +64,6 @@ public final class ParcelableCall implements Parcelable {
     private final Bundle mIntentExtras;
     private final Bundle mExtras;
     private final long mCreationTimeMillis;
-    private final CallIdentification mCallIdentification;
     private final int mCallDirection;
 
     public ParcelableCall(
@@ -94,7 +93,6 @@ public final class ParcelableCall implements Parcelable {
             Bundle intentExtras,
             Bundle extras,
             long creationTimeMillis,
-            CallIdentification callIdentification,
             int callDirection) {
         mId = id;
         mState = state;
@@ -122,7 +120,6 @@ public final class ParcelableCall implements Parcelable {
         mIntentExtras = intentExtras;
         mExtras = extras;
         mCreationTimeMillis = creationTimeMillis;
-        mCallIdentification = callIdentification;
         mCallDirection = callDirection;
     }
 
@@ -314,15 +311,6 @@ public final class ParcelableCall implements Parcelable {
     }
 
     /**
-     * Contains call identification information returned by a {@link CallScreeningService}.
-     * @return The {@link CallIdentification} for this call, or {@code null} if a
-     * {@link CallScreeningService} did not provide information.
-     */
-    public @Nullable CallIdentification getCallIdentification() {
-        return mCallIdentification;
-    }
-
-    /**
      * Indicates whether the call is an incoming or outgoing call.
      */
     public @CallDirection int getCallDirection() {
@@ -366,7 +354,6 @@ public final class ParcelableCall implements Parcelable {
             boolean isRttCallChanged = source.readByte() == 1;
             ParcelableRttCall rttCall = source.readParcelable(classLoader);
             long creationTimeMillis = source.readLong();
-            CallIdentification callIdentification = source.readParcelable(classLoader);
             int callDirection = source.readInt();
             return new ParcelableCall(
                     id,
@@ -395,7 +382,6 @@ public final class ParcelableCall implements Parcelable {
                     intentExtras,
                     extras,
                     creationTimeMillis,
-                    callIdentification,
                     callDirection);
         }
 
@@ -441,7 +427,6 @@ public final class ParcelableCall implements Parcelable {
         destination.writeByte((byte) (mIsRttCallChanged ? 1 : 0));
         destination.writeParcelable(mRttCall, 0);
         destination.writeLong(mCreationTimeMillis);
-        destination.writeParcelable(mCallIdentification, 0);
         destination.writeInt(mCallDirection);
     }
 
