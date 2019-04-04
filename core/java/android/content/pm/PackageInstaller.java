@@ -80,8 +80,6 @@ import java.util.concurrent.Executor;
  * <ul>
  * <li>the device owner
  * <li>the affiliated profile owner
- * <li>the device owner delegated app with
- *     {@link android.app.admin.DevicePolicyManager#DELEGATION_PACKAGE_INSTALLATION}
  * </ul>
  * <p>
  * Sessions can install brand new apps, upgrade existing apps, or add new splits
@@ -534,8 +532,6 @@ public class PackageInstaller {
      * <li>the current "installer of record" for the package
      * <li>the device owner
      * <li>the affiliated profile owner
-     * <li>the device owner delegated app with
-     *     {@link android.app.admin.DevicePolicyManager#DELEGATION_PACKAGE_INSTALLATION}
      * </ul>
      *
      * @param packageName The package to uninstall.

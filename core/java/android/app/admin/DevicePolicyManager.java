@@ -1686,14 +1686,6 @@ public class DevicePolicyManager {
      */
     public static final String DELEGATION_CERT_SELECTION = "delegation-cert-selection";
 
-
-    /**
-     * Delegation of silent APK installation via {@link android.content.pm.PackageInstaller} APIs.
-     *
-     * <p> Can only be delegated by Device Owner.
-     */
-    public static final String DELEGATION_PACKAGE_INSTALLATION = "delegation-package-installation";
-
     /**
      * No management for current user in-effect. This is the default.
      * @hide
