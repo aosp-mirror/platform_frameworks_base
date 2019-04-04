@@ -17,6 +17,7 @@
 package android.net.ipmemorystore;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 /**
  * A listener for the IpMemoryStore to return a status to a client.
@@ -30,11 +31,13 @@ public interface OnStatusListener {
 
     /** Converts this OnStatusListener to a parcelable object */
     @NonNull
-    static IOnStatusListener toAIDL(final OnStatusListener listener) {
+    static IOnStatusListener toAIDL(@Nullable final OnStatusListener listener) {
         return new IOnStatusListener.Stub() {
             @Override
             public void onComplete(final StatusParcelable statusParcelable) {
-                listener.onComplete(new Status(statusParcelable));
+                if (null != listener) {
+                    listener.onComplete(new Status(statusParcelable));
+                }
             }
         };
     }

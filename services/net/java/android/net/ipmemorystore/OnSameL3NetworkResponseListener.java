@@ -30,14 +30,18 @@ public interface OnSameL3NetworkResponseListener {
 
     /** Converts this OnSameL3NetworkResponseListener to a parcelable object */
     @NonNull
-    static IOnSameL3NetworkResponseListener toAIDL(final OnSameL3NetworkResponseListener listener) {
+    static IOnSameL3NetworkResponseListener toAIDL(
+            @NonNull final OnSameL3NetworkResponseListener listener) {
         return new IOnSameL3NetworkResponseListener.Stub() {
             @Override
             public void onSameL3NetworkResponse(final StatusParcelable statusParcelable,
                     final SameL3NetworkResponseParcelable sameL3NetworkResponseParcelable) {
-                listener.onSameL3NetworkResponse(
-                        new Status(statusParcelable),
-                        new SameL3NetworkResponse(sameL3NetworkResponseParcelable));
+                // NonNull, but still don't crash the system server if null
+                if (null != listener) {
+                    listener.onSameL3NetworkResponse(
+                            new Status(statusParcelable),
+                            new SameL3NetworkResponse(sameL3NetworkResponseParcelable));
+                }
             }
         };
     }

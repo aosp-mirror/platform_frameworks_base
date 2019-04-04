@@ -31,15 +31,18 @@ public interface OnNetworkAttributesRetrievedListener {
     /** Converts this OnNetworkAttributesRetrievedListener to a parcelable object */
     @NonNull
     static IOnNetworkAttributesRetrievedListener toAIDL(
-            final OnNetworkAttributesRetrievedListener listener) {
+            @NonNull final OnNetworkAttributesRetrievedListener listener) {
         return new IOnNetworkAttributesRetrievedListener.Stub() {
             @Override
             public void onNetworkAttributesRetrieved(final StatusParcelable statusParcelable,
                     final String l2Key,
                     final NetworkAttributesParcelable networkAttributesParcelable) {
-                listener.onNetworkAttributesRetrieved(
-                        new Status(statusParcelable), l2Key,
-                        new NetworkAttributes(networkAttributesParcelable));
+                // NonNull, but still don't crash the system server if null
+                if (null != listener) {
+                    listener.onNetworkAttributesRetrieved(
+                            new Status(statusParcelable), l2Key,
+                            new NetworkAttributes(networkAttributesParcelable));
+                }
             }
         };
     }
