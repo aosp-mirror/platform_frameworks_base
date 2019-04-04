@@ -112,23 +112,24 @@ public class ContextualButtonGroup extends ButtonDispatcher {
      * their icons for their buttons.
      */
     public void updateIcons() {
-        if (getCurrentView() == null || !getCurrentView().isAttachedToWindow()) {
-            return;
-        }
         for (ButtonData data : mButtonData) {
             data.button.updateIcon();
         }
     }
 
     public void dump(PrintWriter pw) {
+        View view = getCurrentView();
         pw.println("ContextualButtonGroup {");
         pw.println("      getVisibleContextButton(): " + getVisibleContextButton());
         pw.println("      isVisible(): " + isVisible());
+        pw.println("      attached(): " + (view != null && view.isAttachedToWindow()));
         pw.println("      mButtonData [ ");
         for (int i = mButtonData.size() - 1; i >= 0; --i) {
             final ButtonData data = mButtonData.get(i);
+            view = data.button.getCurrentView();
             pw.println("            " + i + ": markedVisible=" + data.markedVisible
                     + " visible=" + data.button.getVisibility()
+                    + " attached=" + (view != null && view.isAttachedToWindow())
                     + " alpha=" + data.button.getAlpha());
         }
         pw.println("      ]");
