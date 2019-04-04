@@ -39,8 +39,8 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * This service can be implemented by the default dialer (see
  * {@link TelecomManager#getDefaultDialerPackage()}) or a third party app to allow or disallow
- * incoming calls before they are shown to a user.  This service can also provide
- * {@link CallIdentification} information for calls.
+ * incoming calls before they are shown to a user. A {@link CallScreeningService} can also see
+ * outgoing calls for the purpose of providing caller ID services for those calls.
  * <p>
  * Below is an example manifest registration for a {@code CallScreeningService}.
  * <pre>
@@ -58,9 +58,9 @@ import java.lang.annotation.RetentionPolicy;
  * <ol>
  *     <li>Call blocking/screening - the service can choose which calls will ring on the user's
  *     device, and which will be silently sent to voicemail.</li>
- *     <li>Call identification - the service can optionally provide {@link CallIdentification}
- *     information about a {@link Call.Details call} which will be shown to the user in the
- *     Dialer app.</li>
+ *     <li>Call identification - services which provide call identification functionality can
+ *     display a user-interface of their choosing which contains identifying information for a call.
+ *     </li>
  * </ol>
  * <p>
  * <h2>Becoming the {@link CallScreeningService}</h2>
@@ -92,128 +92,6 @@ import java.lang.annotation.RetentionPolicy;
  * </pre>
  */
 public abstract class CallScreeningService extends Service {
-
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(
-            prefix = { "CALL_DURATION_" },
-            value = {CALL_DURATION_VERY_SHORT, CALL_DURATION_SHORT, CALL_DURATION_MEDIUM,
-                    CALL_DURATION_LONG})
-    public @interface CallDuration {}
-
-    /**
-     * Call duration reported with {@link #EXTRA_CALL_DURATION} to indicate to the
-     * {@link CallScreeningService} the duration of a call for which the user reported the nuisance
-     * status (see {@link TelecomManager#reportNuisanceCallStatus(Uri, boolean)}).  The
-     * {@link CallScreeningService} can use this as a signal for training nuisance detection
-     * algorithms.  The call duration is reported in coarse grained buckets to minimize exposure of
-     * identifying call log information to the {@link CallScreeningService}.
-     * <p>
-     * Indicates the call was < 3 seconds in duration.
-     */
-    public static final int CALL_DURATION_VERY_SHORT = 1;
-
-    /**
-     * Call duration reported with {@link #EXTRA_CALL_DURATION} to indicate to the
-     * {@link CallScreeningService} the duration of a call for which the user reported the nuisance
-     * status (see {@link TelecomManager#reportNuisanceCallStatus(Uri, boolean)}).  The
-     * {@link CallScreeningService} can use this as a signal for training nuisance detection
-     * algorithms.  The call duration is reported in coarse grained buckets to minimize exposure of
-     * identifying call log information to the {@link CallScreeningService}.
-     * <p>
-     * Indicates the call was greater than 3 seconds, but less than 60 seconds in duration.
-     */
-    public static final int CALL_DURATION_SHORT = 2;
-
-    /**
-     * Call duration reported with {@link #EXTRA_CALL_DURATION} to indicate to the
-     * {@link CallScreeningService} the duration of a call for which the user reported the nuisance
-     * status (see {@link TelecomManager#reportNuisanceCallStatus(Uri, boolean)}).  The
-     * {@link CallScreeningService} can use this as a signal for training nuisance detection
-     * algorithms.  The call duration is reported in coarse grained buckets to minimize exposure of
-     * identifying call log information to the {@link CallScreeningService}.
-     * <p>
-     * Indicates the call was greater than 60 seconds, but less than 120 seconds in duration.
-     */
-    public static final int CALL_DURATION_MEDIUM = 3;
-
-    /**
-     * Call duration reported with {@link #EXTRA_CALL_DURATION} to indicate to the
-     * {@link CallScreeningService} the duration of a call for which the user reported the nuisance
-     * status (see {@link TelecomManager#reportNuisanceCallStatus(Uri, boolean)}).  The
-     * {@link CallScreeningService} can use this as a signal for training nuisance detection
-     * algorithms.  The call duration is reported in coarse grained buckets to minimize exposure of
-     * identifying call log information to the {@link CallScreeningService}.
-     * <p>
-     * Indicates the call was greater than 120 seconds.
-     */
-    public static final int CALL_DURATION_LONG = 4;
-
-    /**
-     * Telecom sends this intent to the {@link CallScreeningService} which the user has chosen to
-     * fill the call screening role when the user indicates through the default dialer whether a
-     * call is a nuisance call or not (see
-     * {@link TelecomManager#reportNuisanceCallStatus(Uri, boolean)}).
-     * <p>
-     * The following extra values are provided for the call:
-     * <ol>
-     *     <li>{@link #EXTRA_CALL_HANDLE} - the handle of the call.</li>
-     *     <li>{@link #EXTRA_IS_NUISANCE} - {@code true} if the user reported the call as a nuisance
-     *     call, {@code false} otherwise.</li>
-     *     <li>{@link #EXTRA_CALL_TYPE} - reports the type of call (incoming, rejected, missed,
-     *     blocked).</li>
-     *     <li>{@link #EXTRA_CALL_DURATION} - the duration of the call (see
-     *     {@link #EXTRA_CALL_DURATION} for valid values).</li>
-     * </ol>
-     * <p>
-     * {@link CallScreeningService} implementations which want to track whether the user reports
-     * calls are nuisance calls should use declare a broadcast receiver in their manifest for this
-     * intent.
-     * <p>
-     * Note: Only {@link CallScreeningService} implementations which have provided
-     * {@link CallIdentification} information for calls at some point will receive this intent.
-     */
-    public static final String ACTION_NUISANCE_CALL_STATUS_CHANGED =
-            "android.telecom.action.NUISANCE_CALL_STATUS_CHANGED";
-
-    /**
-     * Extra used to provide the handle of the call for
-     * {@link #ACTION_NUISANCE_CALL_STATUS_CHANGED}.  The call handle is reported as a
-     * {@link Uri}.
-     */
-    public static final String EXTRA_CALL_HANDLE = "android.telecom.extra.CALL_HANDLE";
-
-    /**
-     * Boolean extra used to indicate whether the user reported a call as a nuisance call.
-     * When {@code true}, the user reported that a call was a nuisance call, {@code false}
-     * otherwise.  Sent with {@link #ACTION_NUISANCE_CALL_STATUS_CHANGED}.
-     */
-    public static final String EXTRA_IS_NUISANCE = "android.telecom.extra.IS_NUISANCE";
-
-    /**
-     * Integer extra used with {@link #ACTION_NUISANCE_CALL_STATUS_CHANGED} to report the type of
-     * call. Valid values are:
-     * <UL>
-     *   <li>{@link android.provider.CallLog.Calls#MISSED_TYPE}</li>
-     *   <li>{@link android.provider.CallLog.Calls#INCOMING_TYPE}</li>
-     *   <li>{@link android.provider.CallLog.Calls#BLOCKED_TYPE}</li>
-     *   <li>{@link android.provider.CallLog.Calls#REJECTED_TYPE}</li>
-     * </UL>
-     */
-    public static final String EXTRA_CALL_TYPE = "android.telecom.extra.CALL_TYPE";
-
-    /**
-     * Integer extra used to with {@link #ACTION_NUISANCE_CALL_STATUS_CHANGED} to report how long
-     * the call lasted.  Valid values are:
-     * <UL>
-     *     <LI>{@link #CALL_DURATION_VERY_SHORT}</LI>
-     *     <LI>{@link #CALL_DURATION_SHORT}</LI>
-     *     <LI>{@link #CALL_DURATION_MEDIUM}</LI>
-     *     <LI>{@link #CALL_DURATION_LONG}</LI>
-     * </UL>
-     */
-    public static final String EXTRA_CALL_DURATION = "android.telecom.extra.CALL_DURATION";
-
     /**
      * The {@link Intent} that must be declared as handled by the service.
      */
@@ -386,10 +264,6 @@ public abstract class CallScreeningService extends Service {
      * Your app can tell if a call is an incoming call by checking to see if
      * {@link Call.Details#getCallDirection()} is {@link Call.Details#DIRECTION_INCOMING}.
      * <p>
-     * For incoming or outgoing calls, the {@link CallScreeningService} can call
-     * {@link #provideCallIdentification(Call.Details, CallIdentification)} in order to provide
-     * {@link CallIdentification} for the call.
-     * <p>
      * Note: The {@link Call.Details} instance provided to a call screening service will only have
      * the following properties set.  The rest of the {@link Call.Details} properties will be set to
      * their default value or {@code null}.
@@ -439,34 +313,6 @@ public abstract class CallScreeningService extends Service {
             } else {
                 mCallScreeningAdapter.allowCall(callDetails.getTelecomCallId());
             }
-        } catch (RemoteException e) {
-        }
-    }
-
-    /**
-     * Provide {@link CallIdentification} information about a {@link Call.Details call}.
-     * <p>
-     * The {@link CallScreeningService} calls this method to provide information it has identified
-     * about a {@link Call.Details call}.  This information will potentially be shown to the user
-     * in the {@link InCallService dialer} app.  It will be logged to the
-     * {@link android.provider.CallLog}.
-     * <p>
-     * A {@link CallScreeningService} should only call this method for calls for which it is able to
-     * provide some {@link CallIdentification} for.  {@link CallIdentification} instances with no
-     * fields set will be ignored by the system.
-     *
-     * @param callDetails The call to provide information for.
-     *                    <p>
-     *                    Must be the same {@link Call.Details call} which was provided to the
-     *                    {@link CallScreeningService} via {@link #onScreenCall(Call.Details)}.
-     * @param identification An instance of {@link CallIdentification} with information about the
-     *                       {@link Call.Details call}.
-     */
-    public final void provideCallIdentification(@NonNull Call.Details callDetails,
-            @NonNull CallIdentification identification) {
-        try {
-            mCallScreeningAdapter.provideCallIdentification(callDetails.getTelecomCallId(),
-                    identification);
         } catch (RemoteException e) {
         }
     }
