@@ -104,6 +104,7 @@ public abstract class VibrationEffect implements Parcelable {
      * @see #get(int)
      * @hide
      */
+    @TestApi
     public static final int EFFECT_TEXTURE_TICK = Effect.TEXTURE_TICK;
 
     /** {@hide} */
