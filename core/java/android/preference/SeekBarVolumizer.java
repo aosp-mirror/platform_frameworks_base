@@ -16,6 +16,7 @@
 
 package android.preference;
 
+import android.annotation.NonNull;
 import android.annotation.UnsupportedAppUsage;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
@@ -27,7 +28,7 @@ import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
-import android.media.audiopolicy.AudioProductStrategies;
+import android.media.audiopolicy.AudioProductStrategy;
 import android.media.audiopolicy.AudioVolumeGroups;
 import android.net.Uri;
 import android.os.Handler;
@@ -44,6 +45,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.util.Preconditions;
 
 /**
  * Turns a {@link SeekBar} into a volume control.
@@ -67,7 +69,6 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
 
     private static final int MSG_GROUP_VOLUME_CHANGED = 1;
     private final Handler mVolumeHandler = new VolumeHandler();
-    private final AudioProductStrategies mAudioProductStrategies;
     private AudioAttributes mAttributes;
     private int mVolumeGroupId;
 
@@ -161,11 +162,9 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
         }
         mZenMode = mNotificationManager.getZenMode();
 
-        mAudioProductStrategies = mAudioManager.getAudioProductStrategies();
-        if (mAudioProductStrategies.size() > 0) {
-            mVolumeGroupId = mAudioProductStrategies.getVolumeGroupIdForLegacyStreamType(
-                    mStreamType);
-            mAttributes = mAudioProductStrategies.getAudioAttributesForLegacyStreamType(
+        if (AudioManager.getAudioProductStrategies().size() > 0) {
+            mVolumeGroupId = getVolumeGroupIdForLegacyStreamType(mStreamType);
+            mAttributes = getAudioAttributesForLegacyStreamType(
                     mStreamType);
         }
 
@@ -188,6 +187,44 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
             }
         }
         mDefaultUri = defaultUri;
+    }
+
+    private int getVolumeGroupIdForLegacyStreamType(int streamType) {
+        for (final AudioProductStrategy productStrategy :
+                AudioManager.getAudioProductStrategies()) {
+            int volumeGroupId = productStrategy.getVolumeGroupIdForLegacyStreamType(streamType);
+            if (volumeGroupId != AudioVolumeGroups.DEFAULT_VOLUME_GROUP) {
+                return volumeGroupId;
+            }
+        }
+        // The default volume group is the one hosted by default product strategy, i.e.
+        // supporting Default Attributes
+        return getVolumeGroupIdForAttributesInt(AudioProductStrategy.sDefaultAttributes);
+    }
+
+    private int getVolumeGroupIdForAttributesInt(@NonNull AudioAttributes attributes) {
+        Preconditions.checkNotNull(attributes, "attributes must not be null");
+        for (final AudioProductStrategy productStrategy :
+                AudioManager.getAudioProductStrategies()) {
+            int volumeGroupId = productStrategy.getVolumeGroupIdForAudioAttributes(attributes);
+            if (volumeGroupId != AudioVolumeGroups.DEFAULT_VOLUME_GROUP) {
+                return volumeGroupId;
+            }
+        }
+        return AudioVolumeGroups.DEFAULT_VOLUME_GROUP;
+    }
+
+    private @NonNull AudioAttributes getAudioAttributesForLegacyStreamType(int streamType) {
+        for (final AudioProductStrategy productStrategy :
+                AudioManager.getAudioProductStrategies()) {
+            AudioAttributes aa = productStrategy.getAudioAttributesForLegacyStreamType(streamType);
+            if (aa != null) {
+                return aa;
+            }
+        }
+        return new AudioAttributes.Builder()
+                .setContentType(AudioAttributes.CONTENT_TYPE_UNKNOWN)
+                .setUsage(AudioAttributes.USAGE_UNKNOWN).build();
     }
 
     private static boolean isNotificationOrRing(int stream) {
@@ -329,7 +366,7 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
         postStopSample();
         mContext.getContentResolver().unregisterContentObserver(mVolumeObserver);
         mReceiver.setListening(false);
-        if (mAudioProductStrategies.size() > 0) {
+        if (AudioManager.getAudioProductStrategies().size() > 0) {
             unregisterVolumeGroupCb();
         }
         mSeekBar.setOnSeekBarChangeListener(null);
@@ -349,7 +386,7 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
                 System.getUriFor(System.VOLUME_SETTINGS_INT[mStreamType]),
                 false, mVolumeObserver);
         mReceiver.setListening(true);
-        if (mAudioProductStrategies.size() > 0) {
+        if (AudioManager.getAudioProductStrategies().size() > 0) {
             registerVolumeGroupCb();
         }
     }
@@ -507,7 +544,7 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
             if (AudioManager.VOLUME_CHANGED_ACTION.equals(action)) {
                 int streamType = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, -1);
                 int streamValue = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_VALUE, -1);
-                if (mAudioProductStrategies.size() == 0) {
+                if (AudioManager.getAudioProductStrategies().size() == 0) {
                     updateVolumeSlider(streamType, streamValue);
                 }
             } else if (AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION.equals(action)) {
@@ -519,12 +556,11 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
                 }
             } else if (AudioManager.STREAM_DEVICES_CHANGED_ACTION.equals(action)) {
                 int streamType = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, -1);
-                if (mAudioProductStrategies.size() == 0) {
+                if (AudioManager.getAudioProductStrategies().size() == 0) {
                     int streamVolume = mAudioManager.getStreamVolume(streamType);
                     updateVolumeSlider(streamType, streamVolume);
                 } else {
-                    int volumeGroup = mAudioProductStrategies.getVolumeGroupIdForLegacyStreamType(
-                            streamType);
+                    int volumeGroup = getVolumeGroupIdForLegacyStreamType(streamType);
                     if (volumeGroup != AudioVolumeGroups.DEFAULT_VOLUME_GROUP
                             && volumeGroup == mVolumeGroupId) {
                         int streamVolume = mAudioManager.getStreamVolume(streamType);

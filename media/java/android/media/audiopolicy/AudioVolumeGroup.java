@@ -49,7 +49,7 @@ public final class AudioVolumeGroup implements Parcelable {
     /**
      * @param name of the volume group
      * @param id of the volume group
-     * @param followers {@link AudioProductStrategies} strategy following this volume group
+     * @param legacyStreamTypes of volume group
      */
     AudioVolumeGroup(@NonNull String name, int id,
                      @NonNull AudioAttributes[] audioAttributes,

@@ -25,8 +25,13 @@ import android.media.MediaRecorder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @hide
@@ -41,6 +46,9 @@ public final class AudioProductStrategy implements Parcelable {
      */
     public static final int DEFAULT_GROUP = -1;
 
+
+    private static final String TAG = "AudioProductStrategy";
+
     private final AudioAttributesGroup[] mAudioAttributesGroups;
     private final String mName;
     /**
@@ -50,6 +58,86 @@ public final class AudioProductStrategy implements Parcelable {
      * upper layer but was transpiring in the {@link AudioAttributes#getUsage()}.
      */
     private int mId;
+
+    private static final Object sLock = new Object();
+
+    @GuardedBy("sLock")
+    private static List<AudioProductStrategy> sAudioProductStrategies;
+
+    /**
+     * @hide
+     * @return the list of AudioProductStrategy discovered from platform configuration file.
+     */
+    @NonNull
+    public static List<AudioProductStrategy> getAudioProductStrategies() {
+        if (sAudioProductStrategies == null) {
+            synchronized (sLock) {
+                if (sAudioProductStrategies == null) {
+                    sAudioProductStrategies = initializeAudioProductStrategies();
+                }
+            }
+        }
+        return sAudioProductStrategies;
+    }
+
+    /**
+     * @hide
+     * @param streamType to match against AudioProductStrategy
+     * @return the AudioAttributes for the first strategy found with the associated stream type
+     *          If no match is found, returns AudioAttributes with unknown content_type and usage
+     */
+    @NonNull
+    public static AudioAttributes getAudioAttributesForStrategyWithLegacyStreamType(
+            int streamType) {
+        for (final AudioProductStrategy productStrategy :
+                AudioProductStrategy.getAudioProductStrategies()) {
+            AudioAttributes aa = productStrategy.getAudioAttributesForLegacyStreamType(streamType);
+            if (aa != null) {
+                return aa;
+            }
+        }
+        return new AudioAttributes.Builder()
+            .setContentType(AudioAttributes.CONTENT_TYPE_UNKNOWN)
+            .setUsage(AudioAttributes.USAGE_UNKNOWN).build();
+    }
+
+    /**
+     * @hide
+     * @param audioAttributes to identify AudioProductStrategy with
+     * @return legacy stream type associated with matched AudioProductStrategy
+     *              Defaults to STREAM_MUSIC if no match is found, or if matches is STREAM_DEFAULT
+     */
+    public static int getLegacyStreamTypeForStrategyWithAudioAttributes(
+            @NonNull AudioAttributes audioAttributes) {
+        Preconditions.checkNotNull(audioAttributes, "AudioAttributes must not be null");
+        for (final AudioProductStrategy productStrategy :
+                AudioProductStrategy.getAudioProductStrategies()) {
+            if (productStrategy.supportsAudioAttributes(audioAttributes)) {
+                int streamType = productStrategy.getLegacyStreamTypeForAudioAttributes(
+                        audioAttributes);
+                if (streamType == AudioSystem.STREAM_DEFAULT) {
+                    Log.w(TAG, "Attributes " + audioAttributes.toString() + " ported by strategy "
+                            + productStrategy.name() + " has no stream type associated, "
+                            + "DO NOT USE STREAM TO CONTROL THE VOLUME");
+                    return AudioSystem.STREAM_MUSIC;
+                }
+                return streamType;
+            }
+        }
+        return AudioSystem.STREAM_MUSIC;
+    }
+
+    private static List<AudioProductStrategy> initializeAudioProductStrategies() {
+        ArrayList<AudioProductStrategy> apsList = new ArrayList<AudioProductStrategy>();
+        int status = native_list_audio_product_strategies(apsList);
+        if (status != AudioSystem.SUCCESS) {
+            Log.w(TAG, ": initializeAudioProductStrategies failed");
+        }
+        return apsList;
+    }
+
+    private static native int native_list_audio_product_strategies(
+            ArrayList<AudioProductStrategy> strategies);
 
     @Override
     public boolean equals(@Nullable Object o) {
@@ -200,7 +288,8 @@ public final class AudioProductStrategy implements Parcelable {
         }
     }
 
-    public static final @android.annotation.NonNull Parcelable.Creator<AudioProductStrategy> CREATOR =
+    @NonNull
+    public static final Parcelable.Creator<AudioProductStrategy> CREATOR =
             new Parcelable.Creator<AudioProductStrategy>() {
                 @Override
                 public AudioProductStrategy createFromParcel(@NonNull Parcel in) {

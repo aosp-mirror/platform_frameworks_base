@@ -37,7 +37,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.audiopolicy.AudioPolicy;
 import android.media.audiopolicy.AudioPolicy.AudioPolicyFocusListener;
-import android.media.audiopolicy.AudioProductStrategies;
+import android.media.audiopolicy.AudioProductStrategy;
 import android.media.audiopolicy.AudioVolumeGroupChangeHandler;
 import android.media.audiopolicy.AudioVolumeGroups;
 import android.media.projection.MediaProjection;
@@ -5406,8 +5406,9 @@ public class AudioManager {
      *         {@see android.media.audiopolicy.AudioProductStrategy} objects.
      */
     @SystemApi
+    @NonNull
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-    public @NonNull AudioProductStrategies getAudioProductStrategies() {
+    public static List<AudioProductStrategy> getAudioProductStrategies() {
         final IAudioService service = getService();
         try {
             return service.getAudioProductStrategies();
