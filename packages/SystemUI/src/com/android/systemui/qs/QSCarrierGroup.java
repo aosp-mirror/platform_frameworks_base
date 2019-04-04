@@ -19,6 +19,8 @@ package com.android.systemui.qs;
 import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
 
 import android.content.Context;
+import android.content.Intent;
+import android.provider.Settings;
 import android.telephony.SubscriptionManager;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -30,6 +32,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.keyguard.CarrierTextController;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.policy.NetworkController;
 
 import javax.inject.Inject;
@@ -40,7 +43,7 @@ import javax.inject.Named;
  */
 public class QSCarrierGroup extends LinearLayout implements
         CarrierTextController.CarrierTextCallback,
-        NetworkController.SignalCallback {
+        NetworkController.SignalCallback, View.OnClickListener {
 
     private static final String TAG = "QSCarrierGroup";
     /**
@@ -53,20 +56,29 @@ public class QSCarrierGroup extends LinearLayout implements
     private QSCarrier[] mCarrierGroups = new QSCarrier[SIM_SLOTS];
     private final CellSignalState[] mInfos = new CellSignalState[SIM_SLOTS];
     private CarrierTextController mCarrierTextController;
+    private ActivityStarter mActivityStarter;
 
     private boolean mListening;
 
     @Inject
     public QSCarrierGroup(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
-            NetworkController networkController) {
+            NetworkController networkController, ActivityStarter activityStarter) {
         super(context, attrs);
         mNetworkController = networkController;
+        mActivityStarter = activityStarter;
     }
 
     @VisibleForTesting
     public QSCarrierGroup(Context context, AttributeSet attrs) {
         this(context, attrs,
-                Dependency.get(NetworkController.class));
+                Dependency.get(NetworkController.class),
+                Dependency.get(ActivityStarter.class));
+    }
+
+    @Override
+    public void onClick(View v) {
+        mActivityStarter.postStartActivityDismissingKeyguard(new Intent(
+                Settings.ACTION_WIRELESS_SETTINGS), 0);
     }
 
     @Override
@@ -82,6 +94,7 @@ public class QSCarrierGroup extends LinearLayout implements
 
         for (int i = 0; i < SIM_SLOTS; i++) {
             mInfos[i] = new CellSignalState();
+            mCarrierGroups[i].setOnClickListener(this);
         }
 
         CharSequence separator = mContext.getString(
