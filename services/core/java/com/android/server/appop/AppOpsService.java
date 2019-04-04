@@ -782,13 +782,20 @@ public class AppOpsService extends IAppOpsService.Stub {
                 final int[] changedUids = intent.getIntArrayExtra(Intent.EXTRA_CHANGED_UID_LIST);
                 final String[] changedPkgs = intent.getStringArrayExtra(
                         Intent.EXTRA_CHANGED_PACKAGE_LIST);
-                final ArraySet<ModeCallback> callbacks = mOpModeWatchers.get(OP_PLAY_AUDIO);
+                ArraySet<ModeCallback> callbacks;
+                synchronized (AppOpsService.this) {
+                    callbacks = mOpModeWatchers.get(OP_PLAY_AUDIO);
+                    if (callbacks == null) {
+                        return;
+                    }
+                    callbacks = new ArraySet<>(callbacks);
+                }
                 for (int i = 0; i < changedUids.length; i++) {
                     final int changedUid = changedUids[i];
                     final String changedPkg = changedPkgs[i];
-                    // We trust packagemanager to insert matching uid and packageNames in the extras
-                    mHandler.sendMessage(PooledLambda.obtainMessage(AppOpsService::notifyOpChanged,
-                            AppOpsService.this, callbacks, OP_PLAY_AUDIO, changedUid, changedPkg));
+                    // We trust packagemanager to insert matching uid and packageNames in the
+                    // extras
+                    notifyOpChanged(callbacks, OP_PLAY_AUDIO, changedUid, changedPkg);
                 }
             }
         }, packageSuspendFilter);
