@@ -69,6 +69,7 @@
 #include <android-base/file.h>
 #include <android-base/stringprintf.h>
 #include <android-base/unique_fd.h>
+#include <cutils/ashmem.h>
 #include <cutils/fs.h>
 #include <cutils/multiuser.h>
 #include <private/android_filesystem_config.h>
@@ -1486,6 +1487,11 @@ static void com_android_internal_os_Zygote_nativeGetSocketFDs(JNIEnv* env, jclas
   } else {
     ALOGE("Unable to fetch Blastula pool socket file descriptor");
   }
+
+  /*
+   * ashmem initialization to avoid dlopen overhead
+   */
+  ashmem_init();
 }
 
 /**
