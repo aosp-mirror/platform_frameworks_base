@@ -629,7 +629,7 @@ public class BiometricService extends SystemService {
                     mConfirmDeviceCredentialReceiver = receiver;
                     // Use this so we don't need to duplicate logic..
                     final Intent intent = kgm.createConfirmDeviceCredentialIntent(null /* title */,
-                            null /* description */);
+                            null /* description */, userId);
                     // Then give it the bundle to do magic behavior..
                     intent.putExtra(KeyguardManager.EXTRA_BIOMETRIC_PROMPT_BUNDLE, bundle);
                     // Create a new task with this activity located at the root.
