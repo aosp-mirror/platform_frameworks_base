@@ -81,7 +81,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
@@ -123,7 +122,7 @@ import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.internal.statusbar.StatusBarIcon;
+import com.android.internal.statusbar.RegisterStatusBarResult;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
@@ -690,17 +689,11 @@ public class StatusBar extends SystemUI implements DemoMode,
         mCommandQueue = getComponent(CommandQueue.class);
         mCommandQueue.addCallback(this);
 
-        int[] switches = new int[9];
-        ArrayList<IBinder> binders = new ArrayList<>();
-        ArrayList<String> iconSlots = new ArrayList<>();
-        ArrayList<StatusBarIcon> icons = new ArrayList<>();
-        Rect fullscreenStackBounds = new Rect();
-        Rect dockedStackBounds = new Rect();
+        RegisterStatusBarResult result = null;
         try {
-            mBarService.registerStatusBar(mCommandQueue, iconSlots, icons, switches, binders,
-                    fullscreenStackBounds, dockedStackBounds);
+            result = mBarService.registerStatusBar(mCommandQueue);
         } catch (RemoteException ex) {
-            // If the system process isn't there we're doomed anyway.
+            ex.rethrowFromSystemServer();
         }
 
         createAndAddWindows();
@@ -714,28 +707,29 @@ public class StatusBar extends SystemUI implements DemoMode,
         // Set up the initial notification state. This needs to happen before CommandQueue.disable()
         setUpPresenter();
 
-        setSystemUiVisibility(mDisplayId, switches[1], switches[7], switches[8], 0xffffffff,
-                fullscreenStackBounds, dockedStackBounds);
-        topAppWindowChanged(mDisplayId, switches[2] != 0);
+        setSystemUiVisibility(mDisplayId, result.mSystemUiVisibility,
+                result.mFullscreenStackSysUiVisibility, result.mDockedStackSysUiVisibility,
+                0xffffffff, result.mFullscreenStackBounds, result.mDockedStackBounds);
+        topAppWindowChanged(mDisplayId, result.mMenuVisible);
         // StatusBarManagerService has a back up of IME token and it's restored here.
-        setImeWindowStatus(mDisplayId, binders.get(0), switches[3], switches[4], switches[5] != 0);
+        setImeWindowStatus(mDisplayId, result.mImeToken, result.mImeWindowVis,
+                result.mImeBackDisposition, result.mShowImeSwitcher);
 
         // Set up the initial icon state
-        int N = iconSlots.size();
-        for (int i=0; i < N; i++) {
-            mCommandQueue.setIcon(iconSlots.get(i), icons.get(i));
+        int numIcons = result.mIcons.size();
+        for (int i = 0; i < numIcons; i++) {
+            mCommandQueue.setIcon(result.mIcons.keyAt(i), result.mIcons.valueAt(i));
         }
 
 
         if (DEBUG) {
             Log.d(TAG, String.format(
                     "init: icons=%d disabled=0x%08x lights=0x%08x menu=0x%08x imeButton=0x%08x",
-                   icons.size(),
-                   switches[0],
-                   switches[1],
-                   switches[2],
-                   switches[3]
-                   ));
+                    numIcons,
+                    result.mDisabledFlags1,
+                    result.mSystemUiVisibility,
+                    result.mMenuVisible ? 1 : 0,
+                    result.mImeWindowVis));
         }
 
         IntentFilter internalFilter = new IntentFilter();
@@ -774,9 +768,10 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         // set the initial view visibility
         Dependency.get(InitController.class).addPostInitTask(this::updateAreThereNotifications);
-        Dependency.get(InitController.class).addPostInitTask(() -> {
-            setUpDisableFlags(switches[0], switches[6]);
-        });
+        int disabledFlags1 = result.mDisabledFlags1;
+        int disabledFlags2 = result.mDisabledFlags2;
+        Dependency.get(InitController.class).addPostInitTask(
+                () -> setUpDisableFlags(disabledFlags1, disabledFlags2));
 
     }
 
