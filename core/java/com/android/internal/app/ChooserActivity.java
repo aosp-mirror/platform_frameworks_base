@@ -43,6 +43,7 @@ import android.content.IntentSender;
 import android.content.IntentSender.SendIntentException;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.LabeledIntent;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
@@ -947,8 +948,11 @@ public class ChooserActivity extends ResolverActivity {
         // Note that this is only safe because the Intent handled by the ChooserActivity is
         // guaranteed to contain no extras unknown to the local ClassLoader. That is why this
         // method can not be replaced in the ResolverActivity whole hog.
-        return getIntent().getBooleanExtra(Intent.EXTRA_AUTO_LAUNCH_SINGLE_CHOICE,
-                super.shouldAutoLaunchSingleChoice(target));
+        if (!super.shouldAutoLaunchSingleChoice(target)) {
+            return false;
+        }
+
+        return getIntent().getBooleanExtra(Intent.EXTRA_AUTO_LAUNCH_SINGLE_CHOICE, true);
     }
 
     @Override
@@ -973,10 +977,6 @@ public class ChooserActivity extends ResolverActivity {
 
     @Override
     protected boolean onTargetSelected(TargetInfo target, boolean alwaysCheck) {
-        if (target instanceof NotSelectableTargetInfo) {
-            return false;
-        }
-
         if (mRefinementIntentSender != null) {
             final Intent fillIn = new Intent();
             final List<Intent> sourceIntents = target.getAllSourceIntents();
@@ -1009,6 +1009,11 @@ public class ChooserActivity extends ResolverActivity {
 
     @Override
     public void startSelected(int which, boolean always, boolean filtered) {
+        TargetInfo targetInfo = mChooserListAdapter.targetInfoForPosition(which, filtered);
+        if (targetInfo != null && targetInfo instanceof NotSelectableTargetInfo) {
+            return;
+        }
+
         final long selectionCost = System.currentTimeMillis() - mChooserShownTime;
         super.startSelected(which, always, filtered);
 
@@ -1564,6 +1569,10 @@ public class ChooserActivity extends ResolverActivity {
         public ChooserTarget getChooserTarget() {
             return null;
         }
+
+        public boolean isSuspended() {
+            return false;
+        }
     }
 
     final class PlaceHolderTargetInfo extends NotSelectableTargetInfo {
@@ -1589,6 +1598,7 @@ public class ChooserActivity extends ResolverActivity {
         private final Intent mFillInIntent;
         private final int mFillInFlags;
         private final float mModifiedScore;
+        private boolean mIsSuspended;
 
         SelectableTargetInfo(DisplayResolveInfo sourceInfo, ChooserTarget chooserTarget,
                 float modifiedScore) {
@@ -1617,6 +1627,8 @@ public class ChooserActivity extends ResolverActivity {
 
             mFillInIntent = null;
             mFillInFlags = 0;
+            ApplicationInfo ai = sourceInfo.getResolveInfo().activityInfo.applicationInfo;
+            mIsSuspended = (ai.flags & ApplicationInfo.FLAG_SUSPENDED) != 0;
         }
 
         private SelectableTargetInfo(SelectableTargetInfo other, Intent fillInIntent, int flags) {
@@ -1629,6 +1641,10 @@ public class ChooserActivity extends ResolverActivity {
             mFillInIntent = fillInIntent;
             mFillInFlags = flags;
             mModifiedScore = other.mModifiedScore;
+        }
+
+        public boolean isSuspended() {
+            return mIsSuspended;
         }
 
         /**
