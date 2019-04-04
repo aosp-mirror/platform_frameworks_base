@@ -30,12 +30,15 @@ public interface OnL2KeyResponseListener {
 
     /** Converts this OnL2KeyResponseListener to a parcelable object */
     @NonNull
-    static IOnL2KeyResponseListener toAIDL(final OnL2KeyResponseListener listener) {
+    static IOnL2KeyResponseListener toAIDL(@NonNull final OnL2KeyResponseListener listener) {
         return new IOnL2KeyResponseListener.Stub() {
             @Override
             public void onL2KeyResponse(final StatusParcelable statusParcelable,
                     final String l2Key) {
-                listener.onL2KeyResponse(new Status(statusParcelable), l2Key);
+                // NonNull, but still don't crash the system server if null
+                if (null != listener) {
+                    listener.onL2KeyResponse(new Status(statusParcelable), l2Key);
+                }
             }
         };
     }
