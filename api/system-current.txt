@@ -3681,7 +3681,6 @@ package android.media.audiopolicy {
     method public int describeContents();
     method @NonNull public android.media.AudioAttributes getAudioAttributes();
     method public int getId();
-    method @NonNull public String name();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.media.audiopolicy.AudioProductStrategy> CREATOR;
   }

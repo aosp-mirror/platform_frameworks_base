@@ -117,7 +117,7 @@ public final class AudioProductStrategy implements Parcelable {
                         audioAttributes);
                 if (streamType == AudioSystem.STREAM_DEFAULT) {
                     Log.w(TAG, "Attributes " + audioAttributes.toString() + " ported by strategy "
-                            + productStrategy.name() + " has no stream type associated, "
+                            + productStrategy.getId() + " has no stream type associated, "
                             + "DO NOT USE STREAM TO CONTROL THE VOLUME");
                     return AudioSystem.STREAM_MUSIC;
                 }
@@ -153,8 +153,7 @@ public final class AudioProductStrategy implements Parcelable {
     /**
      * @param name of the product strategy
      * @param id of the product strategy
-     * @param audioAttributes {@link AudioAttributes} associated to the given product strategy
-     * @param legacyStreamTypes associated to the given product strategy.
+     * @param aag {@link AudioAttributesGroup} associated to the given product strategy
      */
     private AudioProductStrategy(@NonNull String name, int id,
             @NonNull AudioAttributesGroup[] aag) {
@@ -163,15 +162,6 @@ public final class AudioProductStrategy implements Parcelable {
         mName = name;
         mId = id;
         mAudioAttributesGroups = aag;
-    }
-
-    /**
-     * @hide
-     * @return human-readable name of this product strategy, which is similar to a usage
-     */
-    @SystemApi
-    public @NonNull String name() {
-        return mName;
     }
 
     /**
