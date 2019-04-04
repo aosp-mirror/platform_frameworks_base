@@ -39,7 +39,7 @@ import java.util.Random;
 @SmallTest
 public class IpPrefixTest {
 
-    private static InetAddress Address(String addr) {
+    private static InetAddress address(String addr) {
         return InetAddress.parseNumericAddress(addr);
     }
 
@@ -58,59 +58,59 @@ public class IpPrefixTest {
         try {
             p = new IpPrefix((byte[]) null, 9);
             fail("Expected NullPointerException: null byte array");
-        } catch(RuntimeException expected) {}
+        } catch (RuntimeException expected) { }
 
         try {
             p = new IpPrefix((InetAddress) null, 10);
             fail("Expected NullPointerException: null InetAddress");
-        } catch(RuntimeException expected) {}
+        } catch (RuntimeException expected) { }
 
         try {
             p = new IpPrefix((String) null);
             fail("Expected NullPointerException: null String");
-        } catch(RuntimeException expected) {}
+        } catch (RuntimeException expected) { }
 
 
         try {
             byte[] b2 = {1, 2, 3, 4, 5};
             p = new IpPrefix(b2, 29);
             fail("Expected IllegalArgumentException: invalid array length");
-        } catch(IllegalArgumentException expected) {}
+        } catch (IllegalArgumentException expected) { }
 
         try {
             p = new IpPrefix("1.2.3.4");
             fail("Expected IllegalArgumentException: no prefix length");
-        } catch(IllegalArgumentException expected) {}
+        } catch (IllegalArgumentException expected) { }
 
         try {
             p = new IpPrefix("1.2.3.4/");
             fail("Expected IllegalArgumentException: empty prefix length");
-        } catch(IllegalArgumentException expected) {}
+        } catch (IllegalArgumentException expected) { }
 
         try {
             p = new IpPrefix("foo/32");
             fail("Expected IllegalArgumentException: invalid address");
-        } catch(IllegalArgumentException expected) {}
+        } catch (IllegalArgumentException expected) { }
 
         try {
             p = new IpPrefix("1/32");
             fail("Expected IllegalArgumentException: deprecated IPv4 format");
-        } catch(IllegalArgumentException expected) {}
+        } catch (IllegalArgumentException expected) { }
 
         try {
             p = new IpPrefix("1.2.3.256/32");
             fail("Expected IllegalArgumentException: invalid IPv4 address");
-        } catch(IllegalArgumentException expected) {}
+        } catch (IllegalArgumentException expected) { }
 
         try {
             p = new IpPrefix("foo/32");
             fail("Expected IllegalArgumentException: non-address");
-        } catch(IllegalArgumentException expected) {}
+        } catch (IllegalArgumentException expected) { }
 
         try {
             p = new IpPrefix("f00:::/32");
             fail("Expected IllegalArgumentException: invalid IPv6 address");
-        } catch(IllegalArgumentException expected) {}
+        } catch (IllegalArgumentException expected) { }
     }
 
     @Test
@@ -132,17 +132,17 @@ public class IpPrefixTest {
         try {
             p = new IpPrefix(IPV4_BYTES, 33);
             fail("Expected IllegalArgumentException: invalid prefix length");
-        } catch(RuntimeException expected) {}
+        } catch (RuntimeException expected) { }
 
         try {
             p = new IpPrefix(IPV4_BYTES, 128);
             fail("Expected IllegalArgumentException: invalid prefix length");
-        } catch(RuntimeException expected) {}
+        } catch (RuntimeException expected) { }
 
         try {
             p = new IpPrefix(IPV4_BYTES, -1);
             fail("Expected IllegalArgumentException: negative prefix length");
-        } catch(RuntimeException expected) {}
+        } catch (RuntimeException expected) { }
 
         p = new IpPrefix(IPV6_BYTES, 128);
         assertEquals("2001:db8:dead:beef:f00::a0/128", p.toString());
@@ -162,12 +162,12 @@ public class IpPrefixTest {
         try {
             p = new IpPrefix(IPV6_BYTES, -1);
             fail("Expected IllegalArgumentException: negative prefix length");
-        } catch(RuntimeException expected) {}
+        } catch (RuntimeException expected) { }
 
         try {
             p = new IpPrefix(IPV6_BYTES, 129);
             fail("Expected IllegalArgumentException: negative prefix length");
-        } catch(RuntimeException expected) {}
+        } catch (RuntimeException expected) { }
 
     }
 
@@ -226,28 +226,28 @@ public class IpPrefixTest {
     @Test
     public void testContainsInetAddress() {
         IpPrefix p = new IpPrefix("2001:db8:f00::ace:d00d/127");
-        assertTrue(p.contains(Address("2001:db8:f00::ace:d00c")));
-        assertTrue(p.contains(Address("2001:db8:f00::ace:d00d")));
-        assertFalse(p.contains(Address("2001:db8:f00::ace:d00e")));
-        assertFalse(p.contains(Address("2001:db8:f00::bad:d00d")));
-        assertFalse(p.contains(Address("2001:4868:4860::8888")));
-        assertFalse(p.contains(Address("8.8.8.8")));
+        assertTrue(p.contains(address("2001:db8:f00::ace:d00c")));
+        assertTrue(p.contains(address("2001:db8:f00::ace:d00d")));
+        assertFalse(p.contains(address("2001:db8:f00::ace:d00e")));
+        assertFalse(p.contains(address("2001:db8:f00::bad:d00d")));
+        assertFalse(p.contains(address("2001:4868:4860::8888")));
+        assertFalse(p.contains(address("8.8.8.8")));
 
         p = new IpPrefix("192.0.2.0/23");
-        assertTrue(p.contains(Address("192.0.2.43")));
-        assertTrue(p.contains(Address("192.0.3.21")));
-        assertFalse(p.contains(Address("192.0.0.21")));
-        assertFalse(p.contains(Address("8.8.8.8")));
-        assertFalse(p.contains(Address("2001:4868:4860::8888")));
+        assertTrue(p.contains(address("192.0.2.43")));
+        assertTrue(p.contains(address("192.0.3.21")));
+        assertFalse(p.contains(address("192.0.0.21")));
+        assertFalse(p.contains(address("8.8.8.8")));
+        assertFalse(p.contains(address("2001:4868:4860::8888")));
 
         IpPrefix ipv6Default = new IpPrefix("::/0");
-        assertTrue(ipv6Default.contains(Address("2001:db8::f00")));
-        assertFalse(ipv6Default.contains(Address("192.0.2.1")));
+        assertTrue(ipv6Default.contains(address("2001:db8::f00")));
+        assertFalse(ipv6Default.contains(address("192.0.2.1")));
 
         IpPrefix ipv4Default = new IpPrefix("0.0.0.0/0");
-        assertTrue(ipv4Default.contains(Address("255.255.255.255")));
-        assertTrue(ipv4Default.contains(Address("192.0.2.1")));
-        assertFalse(ipv4Default.contains(Address("2001:db8::f00")));
+        assertTrue(ipv4Default.contains(address("255.255.255.255")));
+        assertTrue(ipv4Default.contains(address("192.0.2.1")));
+        assertFalse(ipv4Default.contains(address("2001:db8::f00")));
     }
 
     @Test
@@ -315,10 +315,10 @@ public class IpPrefixTest {
                 p = new IpPrefix(b, random.nextInt(129));
             }
             if (p.equals(oldP)) {
-              assertEquals(p.hashCode(), oldP.hashCode());
+                assertEquals(p.hashCode(), oldP.hashCode());
             }
             if (p.hashCode() != oldP.hashCode()) {
-              assertNotEquals(p, oldP);
+                assertNotEquals(p, oldP);
             }
         }
     }
@@ -332,9 +332,9 @@ public class IpPrefixTest {
             new IpPrefix("0.0.0.0/0"),
         };
         for (int i = 0; i < prefixes.length; i++) {
-          for (int j = i + 1; j < prefixes.length; j++) {
-            assertNotEquals(prefixes[i].hashCode(), prefixes[j].hashCode());
-          }
+            for (int j = i + 1; j < prefixes.length; j++) {
+                assertNotEquals(prefixes[i].hashCode(), prefixes[j].hashCode());
+            }
         }
     }
 
@@ -371,8 +371,8 @@ public class IpPrefixTest {
     }
 
     public void assertParcelingIsLossless(IpPrefix p) {
-      IpPrefix p2 = passThroughParcel(p);
-      assertEquals(p, p2);
+        IpPrefix p2 = passThroughParcel(p);
+        assertEquals(p, p2);
     }
 
     @Test
