@@ -200,7 +200,7 @@ public class WifiTile extends QSTileImpl<SignalState> {
             state.icon = ResourceIcon.get(R.drawable.ic_qs_wifi_disconnected);
             state.label = r.getString(R.string.quick_settings_wifi_label);
         } else {
-            state.icon = ResourceIcon.get(R.drawable.ic_qs_wifi_no_network);
+            state.icon = ResourceIcon.get(WifiIcons.QS_WIFI_NO_NETWORK);
             state.label = r.getString(R.string.quick_settings_wifi_label);
         }
         minimalContentDescription.append(
@@ -415,14 +415,14 @@ public class WifiTile extends QSTileImpl<SignalState> {
 
             // Wi-Fi is off
             if (!mSignalCallback.mInfo.enabled) {
-                mItems.setEmptyState(R.drawable.ic_qs_wifi_detail_empty,
+                mItems.setEmptyState(WifiIcons.QS_WIFI_NO_NETWORK,
                         R.string.wifi_is_off);
                 mItems.setItems(null);
                 return;
             }
 
             // No available access points
-            mItems.setEmptyState(R.drawable.ic_qs_wifi_detail_empty,
+            mItems.setEmptyState(WifiIcons.QS_WIFI_NO_NETWORK,
                     R.string.quick_settings_wifi_detail_empty_text);
 
             // Build the list
