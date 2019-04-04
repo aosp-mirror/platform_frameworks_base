@@ -7,6 +7,7 @@ android_test {
     // Include all test java files.
     srcs: ["java/**/*.java"],
     static_libs: [
+        "FrameworksNetCommonTests",
         "frameworks-base-testutils",
         "framework-protos",
         "androidx.test.rules",
