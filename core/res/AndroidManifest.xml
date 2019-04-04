@@ -1628,8 +1628,8 @@
         android:label="@string/permlab_bluetooth"
         android:protectionLevel="normal" />
 
-    <!-- @SystemApi Allows an application to suspend other apps, which will prevent the user
-         from using them until they are unsuspended.
+    <!-- @SystemApi @TestApi Allows an application to suspend other apps, which will prevent the
+         user from using them until they are unsuspended.
          @hide
     -->
     <permission android:name="android.permission.SUSPEND_APPS"
