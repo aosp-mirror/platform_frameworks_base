@@ -45,7 +45,6 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.SomeArgs;
-import com.android.internal.util.Preconditions;
 
 /**
  * Turns a {@link SeekBar} into a volume control.
@@ -162,7 +161,7 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
         }
         mZenMode = mNotificationManager.getZenMode();
 
-        if (AudioManager.getAudioProductStrategies().size() > 0) {
+        if (hasAudioProductStrategies()) {
             mVolumeGroupId = getVolumeGroupIdForLegacyStreamType(mStreamType);
             mAttributes = getAudioAttributesForLegacyStreamType(
                     mStreamType);
@@ -189,6 +188,10 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
         mDefaultUri = defaultUri;
     }
 
+    private boolean hasAudioProductStrategies() {
+        return AudioManager.getAudioProductStrategies().size() > 0;
+    }
+
     private int getVolumeGroupIdForLegacyStreamType(int streamType) {
         for (final AudioProductStrategy productStrategy :
                 AudioManager.getAudioProductStrategies()) {
@@ -197,21 +200,13 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
                 return volumeGroupId;
             }
         }
-        // The default volume group is the one hosted by default product strategy, i.e.
-        // supporting Default Attributes
-        return getVolumeGroupIdForAttributesInt(AudioProductStrategy.sDefaultAttributes);
-    }
 
-    private int getVolumeGroupIdForAttributesInt(@NonNull AudioAttributes attributes) {
-        Preconditions.checkNotNull(attributes, "attributes must not be null");
-        for (final AudioProductStrategy productStrategy :
-                AudioManager.getAudioProductStrategies()) {
-            int volumeGroupId = productStrategy.getVolumeGroupIdForAudioAttributes(attributes);
-            if (volumeGroupId != AudioVolumeGroups.DEFAULT_VOLUME_GROUP) {
-                return volumeGroupId;
-            }
-        }
-        return AudioVolumeGroups.DEFAULT_VOLUME_GROUP;
+        return AudioManager.getAudioProductStrategies().stream()
+                .map(strategy -> strategy.getVolumeGroupIdForAudioAttributes(
+                        AudioProductStrategy.sDefaultAttributes))
+                .filter(volumeGroupId -> volumeGroupId != AudioVolumeGroups.DEFAULT_VOLUME_GROUP)
+                .findFirst()
+                .orElse(AudioVolumeGroups.DEFAULT_VOLUME_GROUP);
     }
 
     private @NonNull AudioAttributes getAudioAttributesForLegacyStreamType(int streamType) {
@@ -366,7 +361,7 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
         postStopSample();
         mContext.getContentResolver().unregisterContentObserver(mVolumeObserver);
         mReceiver.setListening(false);
-        if (AudioManager.getAudioProductStrategies().size() > 0) {
+        if (hasAudioProductStrategies()) {
             unregisterVolumeGroupCb();
         }
         mSeekBar.setOnSeekBarChangeListener(null);
@@ -386,7 +381,7 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
                 System.getUriFor(System.VOLUME_SETTINGS_INT[mStreamType]),
                 false, mVolumeObserver);
         mReceiver.setListening(true);
-        if (AudioManager.getAudioProductStrategies().size() > 0) {
+        if (hasAudioProductStrategies()) {
             registerVolumeGroupCb();
         }
     }
@@ -544,7 +539,7 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
             if (AudioManager.VOLUME_CHANGED_ACTION.equals(action)) {
                 int streamType = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, -1);
                 int streamValue = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_VALUE, -1);
-                if (AudioManager.getAudioProductStrategies().size() == 0) {
+                if (hasAudioProductStrategies()) {
                     updateVolumeSlider(streamType, streamValue);
                 }
             } else if (AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION.equals(action)) {
@@ -556,7 +551,7 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
                 }
             } else if (AudioManager.STREAM_DEVICES_CHANGED_ACTION.equals(action)) {
                 int streamType = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, -1);
-                if (AudioManager.getAudioProductStrategies().size() == 0) {
+                if (hasAudioProductStrategies()) {
                     int streamVolume = mAudioManager.getStreamVolume(streamType);
                     updateVolumeSlider(streamType, streamVolume);
                 } else {
