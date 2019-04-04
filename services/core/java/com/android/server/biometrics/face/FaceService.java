@@ -165,7 +165,7 @@ public class FaceService extends BiometricServiceBase {
                 }
             };
 
-            enrollInternal(client, UserHandle.getCallingUserId());
+            enrollInternal(client, mCurrentUserId);
         }
 
         @Override // Binder call
@@ -813,7 +813,7 @@ public class FaceService extends BiometricServiceBase {
                 com.android.internal.R.integer.config_faceMaxTemplatesPerUser);
         final int enrolled = FaceService.this.getEnrolledTemplates(userId).size();
         if (enrolled >= limit) {
-            Slog.w(TAG, "Too many faces registered");
+            Slog.w(TAG, "Too many faces registered, user: " + userId);
             return true;
         }
         return false;
