@@ -257,6 +257,24 @@ public final class RadioMetadata implements Parcelable {
 
     private final Bundle mBundle;
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof RadioMetadata)) return false;
+        Bundle otherBundle = ((RadioMetadata) obj).mBundle;
+        if (!mBundle.keySet().equals(otherBundle.keySet())) {
+            return false;
+        }
+        for (String key : mBundle.keySet()) {
+            // This logic will return a false negative if we ever put Bundles into mBundle. As of
+            // 2019-04-09, we only put ints, Strings, and Parcelables in, so it's fine for now.
+            if (!mBundle.get(key).equals(otherBundle.get(key))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     RadioMetadata() {
         mBundle = new Bundle();
     }

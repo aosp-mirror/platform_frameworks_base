@@ -352,6 +352,8 @@ public final class ProgramList implements AutoCloseable {
         /**
          * Checks, if non-tunable entries that define tree structure on the
          * program list (i.e. DAB ensembles) should be included.
+         *
+         * @see {@link ProgramSelector.Identifier#isCategory()}
          */
         public boolean areCategoriesIncluded() {
             return mIncludeCategories;

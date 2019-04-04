@@ -23,6 +23,7 @@ android_test {
         "compatibility-device-util-axt",
         "androidx.test.rules",
         "testng",
+        "services.core",
     ],
     libs: ["android.test.base"],
     srcs: ["src/**/*.java"],
