@@ -1999,33 +1999,6 @@ public class TelecomManager {
     }
 
     /**
-     * Called by the default dialer to report to Telecom when the user has marked a previous
-     * incoming call as a nuisance call or not.
-     * <p>
-     * Where the user has chosen a {@link CallScreeningService} to fill the call screening role,
-     * Telecom will notify that {@link CallScreeningService} of the user's report.
-     * <p>
-     * Requires that the caller is the default dialer app.
-     *
-     * @param handle The phone number of an incoming call which the user is reporting as either a
-     *               nuisance of non-nuisance call.
-     * @param isNuisanceCall {@code true} if the user is reporting the call as a nuisance call,
-     *                       {@code false} if the user is reporting the call as a non-nuisance call.
-     */
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    public void reportNuisanceCallStatus(@NonNull Uri handle, boolean isNuisanceCall) {
-        ITelecomService service = getTelecomService();
-        if (service != null) {
-            try {
-                service.reportNuisanceCallStatus(handle, isNuisanceCall,
-                        mContext.getOpPackageName());
-            } catch (RemoteException e) {
-                Log.e(TAG, "Error calling ITelecomService#showCallScreen", e);
-            }
-        }
-    }
-
-    /**
      * Handles {@link Intent#ACTION_CALL} intents trampolined from UserCallActivity.
      * @param intent The {@link Intent#ACTION_CALL} intent to handle.
      * @hide
