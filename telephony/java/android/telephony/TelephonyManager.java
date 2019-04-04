@@ -5243,6 +5243,18 @@ public class TelephonyManager {
      * Use this method when no subscriptions are available on the SIM and the operation must be
      * performed using the physical slot index.
      *
+     * This operation wraps two APDU instructions:
+     * <ul>
+     *     <li>MANAGE CHANNEL to open a logical channel</li>
+     *     <li>SELECT the given {@code AID} using the given {@code p2}</li>
+     * </ul>
+     *
+     * Per Open Mobile API Specification v3.2 section 6.2.7.h, only p2 values of 0x00, 0x04, 0x08,
+     * and 0x0C are guaranteed to be supported.
+     *
+     * If the SELECT command's status word is not '9000', '62xx', or '63xx', the status word will be
+     * considered an error and the channel shall not be opened.
+     *
      * Input parameters equivalent to TS 27.007 AT+CCHO command.
      *
      * <p>Requires Permission:
@@ -5274,6 +5286,18 @@ public class TelephonyManager {
     /**
      * Opens a logical channel to the ICC card.
      *
+     * This operation wraps two APDU instructions:
+     * <ul>
+     *     <li>MANAGE CHANNEL to open a logical channel</li>
+     *     <li>SELECT the given {@code AID} using the given {@code p2}</li>
+     * </ul>
+     *
+     * Per Open Mobile API Specification v3.2 section 6.2.7.h, only p2 values of 0x00, 0x04, 0x08,
+     * and 0x0C are guaranteed to be supported.
+     *
+     * If the SELECT command's status word is not '9000', '62xx', or '63xx', the status word will be
+     * considered an error and the channel shall not be opened.
+     *
      * Input parameters equivalent to TS 27.007 AT+CCHO command.
      *
      * <p>Requires Permission:
@@ -5290,6 +5314,18 @@ public class TelephonyManager {
 
     /**
      * Opens a logical channel to the ICC card.
+     *
+     * This operation wraps two APDU instructions:
+     * <ul>
+     *     <li>MANAGE CHANNEL to open a logical channel</li>
+     *     <li>SELECT the given {@code AID} using the given {@code p2}</li>
+     * </ul>
+     *
+     * Per Open Mobile API Specification v3.2 section 6.2.7.h, only p2 values of 0x00, 0x04, 0x08,
+     * and 0x0C are guaranteed to be supported.
+     *
+     * If the SELECT command's status word is not '9000', '62xx', or '63xx', the status word will be
+     * considered an error and the channel shall not be opened.
      *
      * Input parameters equivalent to TS 27.007 AT+CCHO command.
      *
