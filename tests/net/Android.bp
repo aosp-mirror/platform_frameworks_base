@@ -4,6 +4,7 @@
 java_defaults {
     name: "FrameworksNetTests-jni-defaults",
     static_libs: [
+        "FrameworksNetCommonTests",
         "frameworks-base-testutils",
         "framework-protos",
         "androidx.test.rules",
