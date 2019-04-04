@@ -114,7 +114,7 @@ public class NotificationGuts extends FrameLayout {
         public void onHeightChanged(NotificationGuts guts);
     }
 
-    interface OnSettingsClickListener {
+    private interface OnSettingsClickListener {
         void onClick(View v, int appUid);
     }
 
@@ -271,6 +271,8 @@ public class NotificationGuts extends FrameLayout {
                 double horz = Math.max(getWidth() - x, x);
                 double vert = Math.max(getHeight() - y, y);
                 float r = (float) Math.hypot(horz, vert);
+                // Make sure we'll be visible after the circular reveal
+                setAlpha(1f);
                 // Circular reveal originating at (x, y)
                 Animator a = ViewAnimationUtils.createCircularReveal(this, x, y, 0, r);
                 a.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
