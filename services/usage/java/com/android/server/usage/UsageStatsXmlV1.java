@@ -219,7 +219,7 @@ final class UsageStatsXmlV1 {
         try {
             event.mInstanceId = XmlUtils.readIntAttribute(parser, INSTANCE_ID_ATTR);
         } catch (IOException e) {
-            Log.e(TAG, "Failed to parse mInstanceId", e);
+            Log.i(TAG, "Failed to parse mInstanceId");
         }
 
         switch (event.mEventType) {
@@ -390,13 +390,13 @@ final class UsageStatsXmlV1 {
         try {
             statsOut.majorVersion = XmlUtils.readIntAttribute(parser, MAJOR_VERSION_ATTR);
         } catch (IOException e) {
-            Log.e(TAG, "Failed to parse majorVersion", e);
+            Log.i(TAG, "Failed to parse majorVersion");
         }
 
         try {
             statsOut.minorVersion = XmlUtils.readIntAttribute(parser, MINOR_VERSION_ATTR);
         } catch (IOException e) {
-            Log.e(TAG, "Failed to parse minorVersion", e);
+            Log.i(TAG, "Failed to parse minorVersion");
         }
 
         int eventCode;
