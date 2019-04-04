@@ -1746,7 +1746,7 @@ public interface WindowManager extends ViewManager {
          * what the other flags are.
          * @hide
          */
-        public static final int PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND = 0x00020000;
+        public static final int PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS = 0x00020000;
 
         /**
          * Flag to indicate that this window needs Sustained Performance Mode if
@@ -1877,8 +1877,8 @@ public interface WindowManager extends ViewManager {
                         equals = PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME,
                         name = "LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME"),
                 @ViewDebug.FlagToString(
-                        mask = PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND,
-                        equals = PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND,
+                        mask = PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS,
+                        equals = PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS,
                         name = "FORCE_DRAW_STATUS_BAR_BACKGROUND"),
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE,
