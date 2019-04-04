@@ -96,6 +96,7 @@ import android.media.audiopolicy.AudioProductStrategy;
 import android.media.audiopolicy.AudioVolumeGroup;
 import android.media.audiopolicy.IAudioPolicyCallback;
 import android.media.projection.IMediaProjection;
+import android.media.projection.IMediaProjectionCallback;
 import android.media.projection.IMediaProjectionManager;
 import android.net.Uri;
 import android.os.Binder;
@@ -6705,13 +6706,13 @@ public class AudioService extends IAudioService.Stub
 
         String regId = null;
         synchronized (mAudioPolicies) {
+            if (mAudioPolicies.containsKey(pcb.asBinder())) {
+                Slog.e(TAG, "Cannot re-register policy");
+                return null;
+            }
             try {
-                if (mAudioPolicies.containsKey(pcb.asBinder())) {
-                    Slog.e(TAG, "Cannot re-register policy");
-                    return null;
-                }
                 AudioPolicyProxy app = new AudioPolicyProxy(policyConfig, pcb, hasFocusListener,
-                        isFocusPolicy, isTestFocusPolicy, isVolumeController);
+                        isFocusPolicy, isTestFocusPolicy, isVolumeController, projection);
                 pcb.asBinder().linkToDeath(app, 0/*flags*/);
                 regId = app.getRegistrationId();
                 mAudioPolicies.put(pcb.asBinder(), app);
@@ -7161,6 +7162,15 @@ public class AudioService extends IAudioService.Stub
         final boolean mIsVolumeController;
         final HashMap<Integer, AudioDeviceArray> mUidDeviceAffinities =
                 new HashMap<Integer, AudioDeviceArray>();
+
+        final IMediaProjection mProjection;
+        private final class UnregisterOnStopCallback extends IMediaProjectionCallback.Stub {
+            public void onStop() {
+                unregisterAudioPolicyAsync(mPolicyCallback);
+            }
+        };
+        UnregisterOnStopCallback mProjectionCallback;
+
         /**
          * Audio focus ducking behavior for an audio policy.
          * This variable reflects the value that was successfully set in
@@ -7174,12 +7184,13 @@ public class AudioService extends IAudioService.Stub
 
         AudioPolicyProxy(AudioPolicyConfig config, IAudioPolicyCallback token,
                 boolean hasFocusListener, boolean isFocusPolicy, boolean isTestFocusPolicy,
-                boolean isVolumeController) {
+                boolean isVolumeController, IMediaProjection projection) {
             super(config);
             setRegistration(new String(config.hashCode() + ":ap:" + mAudioPolicyCounter++));
             mPolicyCallback = token;
             mHasFocusListener = hasFocusListener;
             mIsVolumeController = isVolumeController;
+            mProjection = projection;
             if (mHasFocusListener) {
                 mMediaFocusControl.addFocusFollower(mPolicyCallback);
                 // can only ever be true if there is a focus listener
@@ -7191,6 +7202,16 @@ public class AudioService extends IAudioService.Stub
             }
             if (mIsVolumeController) {
                 setExtVolumeController(mPolicyCallback);
+            }
+            if (mProjection != null) {
+                mProjectionCallback = new UnregisterOnStopCallback();
+                try {
+                    mProjection.registerCallback(mProjectionCallback);
+                } catch (RemoteException e) {
+                    release();
+                    throw new IllegalStateException("MediaProjection callback registration failed, "
+                            + "could not link to " + projection + " binder death", e);
+                }
             }
             int status = connectMixes();
             if (status != AudioSystem.SUCCESS) {
@@ -7225,6 +7246,13 @@ public class AudioService extends IAudioService.Stub
             }
             if (mHasFocusListener) {
                 mMediaFocusControl.removeFocusFollower(mPolicyCallback);
+            }
+            if (mProjectionCallback != null) {
+                try {
+                    mProjection.unregisterCallback(mProjectionCallback);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Fail to unregister Audiopolicy callback from MediaProjection");
+                }
             }
             final long identity = Binder.clearCallingIdentity();
             AudioSystem.registerPolicyMixes(mMixes, false);
@@ -7320,6 +7348,20 @@ public class AudioService extends IAudioService.Stub
             }
             Log.e(TAG, "AudioSystem. removeUidDeviceAffinities failed");
             return AudioManager.ERROR;
+        }
+
+        /** @return human readable debug informations summarizing the state of the object. */
+        public String toLogFriendlyString() {
+            String textDump = super.toLogFriendlyString();
+            textDump += " Proxy:\n";
+            textDump += "   is focus policy= " + mIsFocusPolicy + "\n";
+            if (mIsFocusPolicy) {
+                textDump += "     focus duck behaviour= " + mFocusDuckBehavior + "\n";
+                textDump += "     is test focus policy= " + mIsTestFocusPolicy + "\n";
+                textDump += "     has focus listener= " + mHasFocusListener  + "\n";
+            }
+            textDump += "   media projection= " + mProjection + "\n";
+            return textDump;
         }
     };
 
