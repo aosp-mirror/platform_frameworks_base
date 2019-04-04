@@ -6147,8 +6147,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public void moveTaskToFront(int taskId, int flags, Bundle bOptions) {
-        mActivityTaskManager.moveTaskToFront(taskId, flags, bOptions);
+    public void moveTaskToFront(IApplicationThread appThread, String callingPackage, int taskId,
+            int flags, Bundle bOptions) {
+        mActivityTaskManager.moveTaskToFront(appThread, callingPackage, taskId, flags, bOptions);
     }
 
     /**
