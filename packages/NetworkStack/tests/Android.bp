@@ -42,6 +42,7 @@ android_test {
         "libbinder",
         "libbinderthreadstate",
         "libc++",
+        "libcgrouprc",
         "libcrypto",
         "libcutils",
         "libdexfile",

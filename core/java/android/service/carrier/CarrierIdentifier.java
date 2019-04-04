@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telephony.Rlog;
 import android.telephony.TelephonyManager;
 
 import com.android.internal.telephony.uicc.IccUtils;
@@ -223,7 +224,7 @@ public class CarrierIdentifier implements Parcelable {
               + "mcc=" + mMcc
               + ",mnc=" + mMnc
               + ",spn=" + mSpn
-              + ",imsi=" + mImsi
+              + ",imsi=" + Rlog.pii(false, mImsi)
               + ",gid1=" + mGid1
               + ",gid2=" + mGid2
               + ",carrierid=" + mCarrierId
