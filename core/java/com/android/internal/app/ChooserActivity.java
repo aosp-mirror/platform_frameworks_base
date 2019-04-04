@@ -74,6 +74,7 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.DeviceConfig;
 import android.provider.DocumentsContract;
 import android.provider.Downloads;
 import android.provider.OpenableColumns;
@@ -83,6 +84,7 @@ import android.service.chooser.IChooserTargetResult;
 import android.service.chooser.IChooserTargetService;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.HashedStringCache;
 import android.util.Log;
 import android.util.Size;
 import android.util.Slog;
@@ -106,6 +108,7 @@ import android.widget.Toast;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.ImageUtils;
@@ -170,6 +173,11 @@ public class ChooserActivity extends ResolverActivity {
     private static final int QUERY_TARGET_SERVICE_LIMIT = 5;
     private static final int WATCHDOG_TIMEOUT_MILLIS = 3000;
 
+    private static final int DEFAULT_SALT_EXPIRATION_DAYS = 7;
+    private int mMaxHashSaltDays = DeviceConfig.getInt(DeviceConfig.NAMESPACE_SYSTEMUI,
+            SystemUiDeviceConfigFlags.HASH_SALT_MAX_DAYS,
+            DEFAULT_SALT_EXPIRATION_DAYS);
+
     private Bundle mReplacementExtras;
     private IntentSender mChosenComponentSender;
     private IntentSender mRefinementIntentSender;
@@ -201,7 +209,8 @@ public class ChooserActivity extends ResolverActivity {
     private static final int SHORTCUT_MANAGER_SHARE_TARGET_RESULT_COMPLETED = 4;
     private static final int LIST_VIEW_UPDATE_MESSAGE = 5;
 
-    private static final int LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS = 250;
+    @VisibleForTesting
+    public static final int LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS = 250;
 
     private boolean mListViewDataChanged = false;
 
@@ -991,6 +1000,7 @@ public class ChooserActivity extends ResolverActivity {
             // Lower values mean the ranking was better.
             int cat = 0;
             int value = which;
+            HashedStringCache.HashResult directTargetHashed = null;
             switch (mChooserListAdapter.getPositionTargetType(which)) {
                 case ChooserListAdapter.TARGET_CALLER:
                     cat = MetricsEvent.ACTION_ACTIVITY_CHOOSER_PICKED_APP_TARGET;
@@ -998,6 +1008,17 @@ public class ChooserActivity extends ResolverActivity {
                     break;
                 case ChooserListAdapter.TARGET_SERVICE:
                     cat = MetricsEvent.ACTION_ACTIVITY_CHOOSER_PICKED_SERVICE_TARGET;
+                    value -= mChooserListAdapter.getCallerTargetCount();
+                    // Log the package name + target name to answer the question if most users
+                    // share to mostly the same person or to a bunch of different people.
+                    ChooserTarget target =
+                            mChooserListAdapter.mServiceTargets.get(value).getChooserTarget();
+                    directTargetHashed = HashedStringCache.getInstance().hashString(
+                            this,
+                            TAG,
+                            target.getComponentName().getPackageName()
+                                    + target.getTitle().toString(),
+                            mMaxHashSaltDays);
                     break;
                 case ChooserListAdapter.TARGET_STANDARD:
                     cat = MetricsEvent.ACTION_ACTIVITY_CHOOSER_PICKED_STANDARD_TARGET;
@@ -1007,6 +1028,15 @@ public class ChooserActivity extends ResolverActivity {
             }
 
             if (cat != 0) {
+                LogMaker targetLogMaker = new LogMaker(cat).setSubtype(value);
+                if (directTargetHashed != null) {
+                    targetLogMaker.addTaggedData(
+                            MetricsEvent.FIELD_HASHED_TARGET_NAME, directTargetHashed.hashedString);
+                    targetLogMaker.addTaggedData(
+                                    MetricsEvent.FIELD_HASHED_TARGET_SALT_GEN,
+                                    directTargetHashed.saltGeneration);
+                }
+                getMetricsLogger().write(targetLogMaker);
                 MetricsLogger.action(this, cat, value);
             }
 

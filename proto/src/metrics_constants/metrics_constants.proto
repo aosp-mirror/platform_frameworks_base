@@ -7167,6 +7167,14 @@ message MetricsEvent {
     // OS: Q
     ACTION_DISPLAY_WHITE_BALANCE_SETTING_CHANGED = 1703;
 
+    // Action: ACTION_ACTIVITY_CHOOSER_PICKED_SERVICE_TARGET
+    // Direct share target hashed with rotating salt
+    FIELD_HASHED_TARGET_NAME = 1704;
+
+    // Action: ACTION_ACTIVITY_CHOOSER_PICKED_SERVICE_TARGET
+    // Salt generation for the above hashed direct share target
+    FIELD_HASHED_TARGET_SALT_GEN = 1705;
+
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
