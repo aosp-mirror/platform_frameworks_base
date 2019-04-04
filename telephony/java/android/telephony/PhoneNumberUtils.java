@@ -2016,7 +2016,16 @@ public class PhoneNumberUtils {
     private static boolean isEmergencyNumberInternal(int subId, String number,
                                                      String defaultCountryIso,
                                                      boolean useExactMatch) {
-        return TelephonyManager.getDefault().isEmergencyNumber(number);
+        try {
+            if (useExactMatch) {
+                return TelephonyManager.getDefault().isEmergencyNumber(number);
+            } else {
+                return TelephonyManager.getDefault().isPotentialEmergencyNumber(number);
+            }
+        } catch (RuntimeException ex) {
+            Rlog.e(LOG_TAG, "isEmergencyNumberInternal: RuntimeException: " + ex);
+        }
+        return false;
     }
 
     /**
