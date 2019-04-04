@@ -138,7 +138,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
         mName = name != null && name.length() != 0 ? name : "<unnamed>";
         mWindowPtr = nativeCreate(mName, (int) windowSizeBytes);
         if (mWindowPtr == 0) {
-            throw new IllegalStateException(); // Shouldn't happen.
+            throw new AssertionError(); // Not possible, the native code won't return it.
         }
         mCloseGuard.open("close");
         recordNewWindow(Binder.getCallingPid(), mWindowPtr);
@@ -166,7 +166,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
         mStartPos = source.readInt();
         mWindowPtr = nativeCreateFromParcel(source);
         if (mWindowPtr == 0) {
-            throw new IllegalStateException(); // Shouldn't happen.
+            throw new AssertionError(); // Not possible, the native code won't return it.
         }
         mName = nativeGetName(mWindowPtr);
         mCloseGuard.open("close");
