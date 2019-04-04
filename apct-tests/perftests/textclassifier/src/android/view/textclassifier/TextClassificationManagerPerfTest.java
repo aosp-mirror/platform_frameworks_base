@@ -52,7 +52,7 @@ public class TextClassificationManagerPerfTest {
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             textClassificationManager.getTextClassifier();
-            textClassificationManager.invalidate();
+            textClassificationManager.invalidateForTesting();
         }
     }
 
@@ -68,7 +68,7 @@ public class TextClassificationManagerPerfTest {
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             textClassificationManager.getTextClassifier();
-            textClassificationManager.invalidate();
+            textClassificationManager.invalidateForTesting();
         }
     }
 }
