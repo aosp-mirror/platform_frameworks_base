@@ -469,7 +469,10 @@ public class PermissionMonitor {
      */
     @VisibleForTesting
     void sendPackagePermissionsToNetd(SparseIntArray netdPermissionsAppIds) {
-
+        if (mNetd == null) {
+            Log.e(TAG, "Failed to get the netd service");
+            return;
+        }
         ArrayList<Integer> allPermissionAppIds = new ArrayList<>();
         ArrayList<Integer> internetPermissionAppIds = new ArrayList<>();
         ArrayList<Integer> updateStatsPermissionAppIds = new ArrayList<>();
