@@ -262,7 +262,7 @@ public final class AudioProductStrategy implements Parcelable {
                 || (attr.getContentType() == refAttr.getContentType()))
             && ((refAttr.getAllFlags() == 0)
                 || (attr.getAllFlags() != 0
-                && (attr.getAllFlags() & refAttr.getAllFlags()) == attr.getAllFlags()))
+                && (attr.getAllFlags() & refAttr.getAllFlags()) == refAttr.getAllFlags()))
             && ((refFormattedTags.length() == 0) || refFormattedTags.equals(cliFormattedTags));
     }
 
