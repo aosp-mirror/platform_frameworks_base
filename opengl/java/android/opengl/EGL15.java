@@ -85,6 +85,19 @@ public final class EGL15 {
         int offset
     );
 
+    /**
+    * C function EGLBoolean eglGetSyncAttrib ( EGLDisplay dpy, EGLSync sync, EGLint attribute,
+    *                                          EGLAttrib *value )
+    */
+
+    public static native boolean eglGetSyncAttrib(
+            EGLDisplay dpy,
+            EGLSync sync,
+            int attribute,
+            long[] value,
+            int offset
+    );
+
     // C function EGLBoolean eglDestroySync ( EGLDisplay dpy, EGLSync sync )
 
     public static native boolean eglDestroySync(
@@ -99,16 +112,6 @@ public final class EGL15 {
         EGLSync sync,
         int flags,
         long timeout
-    );
-
-    // C function EGLBoolean eglGetSyncAttrib ( EGLDisplay dpy, EGLSync sync, EGLint attribute, EGLAttrib *value )
-
-    public static native boolean eglGetSyncAttrib(
-        EGLDisplay dpy,
-        EGLSync sync,
-        int attribute,
-        long[] value,
-        int offset
     );
 
     // C function EGLDisplay eglGetPlatformDisplay ( EGLenum platform, EGLAttrib native_display, const EGLAttrib *attrib_list )
