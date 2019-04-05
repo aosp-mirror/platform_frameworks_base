@@ -1761,16 +1761,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // the caller thread of registerNetworkAgent. Thus, it's not allowed to register netd
             // event callback for certain nai. e.g. cellular. Register here to pass to
             // NetworkMonitor instead.
-            // TODO: Move the Dns Event to NetworkMonitor. Use Binder.clearCallingIdentity() in
-            // registerNetworkAgent to have NetworkMonitor created with system process as design
-            // expectation. Also, NetdEventListenerService only allow one callback from each
-            // caller type. Need to re-factor NetdEventListenerService to allow multiple
-            // NetworkMonitor registrants.
+            // TODO: Move the Dns Event to NetworkMonitor. NetdEventListenerService only allow one
+            // callback from each caller type. Need to re-factor NetdEventListenerService to allow
+            // multiple NetworkMonitor registrants.
             if (nai != null && nai.satisfies(mDefaultRequest)) {
+                final long token = Binder.clearCallingIdentity();
                 try {
                     nai.networkMonitor().notifyDnsResponse(returnCode);
                 } catch (RemoteException e) {
                     e.rethrowFromSystemServer();
+                } finally {
+                    Binder.restoreCallingIdentity(token);
                 }
             }
         }
