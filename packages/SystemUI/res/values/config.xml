@@ -296,6 +296,7 @@
         <item>com.android.systemui.globalactions.GlobalActionsComponent</item>
         <item>com.android.systemui.ScreenDecorations</item>
         <item>com.android.systemui.biometrics.BiometricDialogImpl</item>
+        <item>com.android.systemui.biometrics.FODCircleViewImpl</item>
         <item>com.android.systemui.SliceBroadcastRelayHandler</item>
         <item>com.android.systemui.SizeCompatModeActivityController</item>
         <item>com.android.systemui.statusbar.notification.InstantAppNotifier</item>

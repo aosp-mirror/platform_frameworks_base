@@ -22,4 +22,7 @@
     <!-- Whether device has a big physical display cutout -->
     <java-symbol type="bool" name="config_bigPhysicalDisplayCutout" />
 
+    <!-- In-display Fingerprint -->
+    <java-symbol type="bool" name="config_supportsInDisplayFingerprint" />
+
 </resources>
