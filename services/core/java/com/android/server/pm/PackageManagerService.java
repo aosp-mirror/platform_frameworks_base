@@ -14913,6 +14913,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     enableRollbackIntent.putExtra(
                             PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_INSTALLED_USERS,
                             installedUsers);
+                    enableRollbackIntent.putExtra(
+                            PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_USER,
+                            getUser().getIdentifier());
                     enableRollbackIntent.setDataAndType(Uri.fromFile(new File(origin.resolvedPath)),
                             PACKAGE_MIME_TYPE);
                     enableRollbackIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
