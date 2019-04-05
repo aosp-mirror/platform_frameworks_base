@@ -1,4 +1,4 @@
-
+<?xml version="1.0" encoding="utf-8"?>
 <!--
    Copyright (C) 2019 The Android Open Source Project
 
@@ -14,7 +14,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 -->
-
-<vector android:height="24dp" android:tint="?android:attr/colorControlNormal" android:viewportHeight="24" android:viewportWidth="24" android:width="24dp" xmlns:android="http://schemas.android.com/apk/res/android">
-  <path android:fillColor="@android:color/white" android:pathData="M20.25,11.25h-7.5v-7.5C12.75,3.34,12.41,3,12,3s-0.75,0.34-0.75,0.75v7.5h-7.5C3.34,11.25,3,11.59,3,12 s0.34,0.75,0.75,0.75h7.5v7.5c0,0.41,0.34,0.75,0.75,0.75s0.75-0.34,0.75-0.75v-7.5h7.5c0.41,0,0.75-0.34,0.75-0.75 S20.66,11.25,20.25,11.25z"/>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:height="24dp"
+    android:tint="?android:attr/colorControlNormal"
+    android:viewportHeight="24"
+    android:viewportWidth="24"
+    android:width="24dp" >
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M20.25,11.25h-7.5v-7.5C12.75,3.34,12.41,3,12,3s-0.75,0.34-0.75,0.75v7.5h-7.5C3.34,11.25,3,11.59,3,12 s0.34,0.75,0.75,0.75h7.5v7.5c0,0.41,0.34,0.75,0.75,0.75s0.75-0.34,0.75-0.75v-7.5h7.5c0.41,0,0.75-0.34,0.75-0.75 S20.66,11.25,20.25,11.25z" />
 </vector>
