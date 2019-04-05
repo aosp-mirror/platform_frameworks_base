@@ -22,6 +22,9 @@
     -->
     <integer name="hardware_ui_align">53</integer>
 
+    <!-- Color of the FOD view -->
+    <color name="config_fodColor">#00ff00</color>
+
     <!-- Max visible notification icons -->
     <integer name="config_maxVisibleNotificationIcons">4</integer>
     <integer name="config_maxVisibleNotificationIconsWhenDark">5</integer>
