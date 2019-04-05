@@ -168,7 +168,7 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
         mAudioManagerInternal = LocalServices.getService(AudioManagerInternal.class);
         mActivityManager =
                 (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
-        mAudioPlayerStateMonitor = AudioPlayerStateMonitor.getInstance();
+        mAudioPlayerStateMonitor = AudioPlayerStateMonitor.getInstance(mContext);
         mAudioPlayerStateMonitor.registerListener(
                 (config, isRemoved) -> {
                     if (isRemoved || !config.isActive() || config.getPlayerType()
@@ -183,7 +183,6 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
                         }
                     }
                 }, null /* handler */);
-        mAudioPlayerStateMonitor.registerSelfIntoAudioServiceIfNeeded(mAudioService);
         mContentResolver = mContext.getContentResolver();
         mSettingsObserver = new SettingsObserver();
         mSettingsObserver.observe();
