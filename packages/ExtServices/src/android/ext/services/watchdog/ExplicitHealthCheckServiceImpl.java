@@ -19,6 +19,7 @@ package android.ext.services.watchdog;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.service.watchdog.ExplicitHealthCheckService;
+import android.service.watchdog.PackageInfo;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -67,8 +68,12 @@ public final class ExplicitHealthCheckServiceImpl extends ExplicitHealthCheckSer
     }
 
     @Override
-    public List<String> onGetSupportedPackages() {
-        return new ArrayList<>(mSupportedCheckers.keySet());
+    public List<PackageInfo> onGetSupportedPackages() {
+        List<PackageInfo> packages = new ArrayList<>();
+        for (ExplicitHealthChecker checker : mSupportedCheckers.values()) {
+            packages.add(checker.getSupportedPackage());
+        }
+        return packages;
     }
 
     @Override
@@ -82,7 +87,7 @@ public final class ExplicitHealthCheckServiceImpl extends ExplicitHealthCheckSer
         while (it.hasNext()) {
             ExplicitHealthChecker checker = it.next();
             if (checker.isPending()) {
-                packages.add(checker.getPackageName());
+                packages.add(checker.getSupportedPackage().getPackageName());
             }
         }
         return packages;
