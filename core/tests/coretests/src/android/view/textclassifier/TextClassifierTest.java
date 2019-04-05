@@ -362,6 +362,38 @@ public class TextClassifierTest {
     }
 
     @Test
+    public void testGenerateLinks_entityData() {
+        if (isTextClassifierDisabled()) return;
+        String text = "The number is +12122537077.";
+        Bundle extras = new Bundle();
+        ExtrasUtils.putIsSerializedEntityDataEnabled(extras, true);
+        TextLinks.Request request = new TextLinks.Request.Builder(text).setExtras(extras).build();
+
+        TextLinks textLinks = mClassifier.generateLinks(request);
+
+        Truth.assertThat(textLinks.getLinks()).hasSize(1);
+        TextLinks.TextLink textLink = textLinks.getLinks().iterator().next();
+        List<Bundle> entities = ExtrasUtils.getEntities(textLink.getExtras());
+        Truth.assertThat(entities).hasSize(1);
+        Bundle entity = entities.get(0);
+        Truth.assertThat(ExtrasUtils.getEntityType(entity)).isEqualTo(TextClassifier.TYPE_PHONE);
+    }
+
+    @Test
+    public void testGenerateLinks_entityData_disabled() {
+        if (isTextClassifierDisabled()) return;
+        String text = "The number is +12122537077.";
+        TextLinks.Request request = new TextLinks.Request.Builder(text).build();
+
+        TextLinks textLinks = mClassifier.generateLinks(request);
+
+        Truth.assertThat(textLinks.getLinks()).hasSize(1);
+        TextLinks.TextLink textLink = textLinks.getLinks().iterator().next();
+        List<Bundle> entities = ExtrasUtils.getEntities(textLink.getExtras());
+        Truth.assertThat(entities).isNull();
+    }
+
+    @Test
     public void testDetectLanguage() {
         if (isTextClassifierDisabled()) return;
         String text = "This is English text";

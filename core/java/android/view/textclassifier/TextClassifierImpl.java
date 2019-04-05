@@ -307,6 +307,8 @@ public final class TextClassifierImpl implements TextClassifier {
             final String detectLanguageTags = detectLanguageTagsFromText(request.getText());
             final AnnotatorModel annotatorImpl =
                     getAnnotatorImpl(request.getDefaultLocales());
+            final boolean isSerializedEntityDataEnabled =
+                    ExtrasUtils.isSerializedEntityDataEnabled(request);
             final AnnotatorModel.AnnotatedSpan[] annotations =
                     annotatorImpl.annotate(
                             textString,
@@ -314,7 +316,10 @@ public final class TextClassifierImpl implements TextClassifier {
                                     refTime.toInstant().toEpochMilli(),
                                     refTime.getZone().getId(),
                                     localesString,
-                                    detectLanguageTags));
+                                    detectLanguageTags,
+                                    entitiesToIdentify,
+                                    AnnotatorModel.AnnotationUsecase.SMART.getValue(),
+                                    isSerializedEntityDataEnabled));
             for (AnnotatorModel.AnnotatedSpan span : annotations) {
                 final AnnotatorModel.ClassificationResult[] results =
                         span.getClassification();
@@ -326,7 +331,11 @@ public final class TextClassifierImpl implements TextClassifier {
                 for (int i = 0; i < results.length; i++) {
                     entityScores.put(results[i].getCollection(), results[i].getScore());
                 }
-                builder.addLink(span.getStartIndex(), span.getEndIndex(), entityScores);
+                Bundle extras = new Bundle();
+                if (isSerializedEntityDataEnabled) {
+                    ExtrasUtils.putEntities(extras, results);
+                }
+                builder.addLink(span.getStartIndex(), span.getEndIndex(), entityScores, extras);
             }
             final TextLinks links = builder.build();
             final long endTimeMs = System.currentTimeMillis();

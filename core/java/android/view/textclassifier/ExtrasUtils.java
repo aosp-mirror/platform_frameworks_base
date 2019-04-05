@@ -36,6 +36,7 @@ import java.util.List;
 // TODO: Make this a TestApi for CTS testing.
 public final class ExtrasUtils {
 
+    // Keys for response objects.
     private static final String SERIALIZED_ENTITIES_DATA = "serialized-entities-data";
     private static final String ENTITIES_EXTRAS = "entities-extras";
     private static final String ACTION_INTENT = "action-intent";
@@ -47,6 +48,10 @@ public final class ExtrasUtils {
     private static final String MODEL_NAME = "model-name";
     private static final String TEXT_LANGUAGES = "text-languages";
     private static final String ENTITIES = "entities";
+
+    // Keys for request objects.
+    private static final String IS_SERIALIZED_ENTITY_DATA_ENABLED =
+            "is-serialized-entity-data-enabled";
 
     private ExtrasUtils() {}
 
@@ -308,7 +313,23 @@ public final class ExtrasUtils {
     /**
      * Returns a list of entities contained in the {@code extra}.
      */
+    @Nullable
     public static List<Bundle> getEntities(Bundle container) {
         return container.getParcelableArrayList(ENTITIES);
+    }
+
+    /**
+     * Whether the annotator should populate serialized entity data into the result object.
+     */
+    public static boolean isSerializedEntityDataEnabled(TextLinks.Request request) {
+        return request.getExtras().getBoolean(IS_SERIALIZED_ENTITY_DATA_ENABLED);
+    }
+
+    /**
+     * To indicate whether the annotator should populate serialized entity data in the result
+     * object.
+     */
+    public static void putIsSerializedEntityDataEnabled(Bundle bundle, boolean isEnabled) {
+        bundle.putBoolean(IS_SERIALIZED_ENTITY_DATA_ENABLED, isEnabled);
     }
 }
