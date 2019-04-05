@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.net;
+package com.android.server.net;
 
 import static android.net.NetworkStats.SET_ALL;
 import static android.net.NetworkStats.TAG_ALL;
