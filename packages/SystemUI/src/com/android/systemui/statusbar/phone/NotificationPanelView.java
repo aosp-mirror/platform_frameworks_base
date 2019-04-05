@@ -477,6 +477,15 @@ public class NotificationPanelView extends PanelView implements
         }
         mThemeResId = themeResId;
 
+        reInflateViews();
+    }
+
+    @Override
+    public void onOverlayChanged() {
+        reInflateViews();
+    }
+
+    private void reInflateViews() {
         updateShowEmptyShadeView();
 
         // Re-inflate the status view group.
@@ -484,9 +493,9 @@ public class NotificationPanelView extends PanelView implements
         removeView(mKeyguardStatusView);
         mKeyguardStatusView = (KeyguardStatusView) mInjectionInflationController
                 .injectable(LayoutInflater.from(mContext)).inflate(
-                    R.layout.keyguard_status_view,
-                    this,
-                    false);
+                        R.layout.keyguard_status_view,
+                        this,
+                        false);
         addView(mKeyguardStatusView, index);
 
         // Re-associate the clock container with the keyguard clock switch.
@@ -500,9 +509,9 @@ public class NotificationPanelView extends PanelView implements
         KeyguardBottomAreaView oldBottomArea = mKeyguardBottomArea;
         mKeyguardBottomArea = (KeyguardBottomAreaView) mInjectionInflationController
                 .injectable(LayoutInflater.from(mContext)).inflate(
-                    R.layout.keyguard_bottom_area,
-                    this,
-                    false);
+                        R.layout.keyguard_bottom_area,
+                        this,
+                        false);
         mKeyguardBottomArea.initFrom(oldBottomArea);
         addView(mKeyguardBottomArea, index);
         initBottomArea();
