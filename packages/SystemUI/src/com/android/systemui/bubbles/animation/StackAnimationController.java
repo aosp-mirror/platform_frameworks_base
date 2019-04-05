@@ -57,22 +57,24 @@ public class StackAnimationController extends
     /**
      * Values to use for the default {@link SpringForce} provided to the physics animation layout.
      */
-    private static final float DEFAULT_STIFFNESS = 2500f;
-    private static final float DEFAULT_BOUNCINESS = 0.85f;
+    private static final int DEFAULT_STIFFNESS = 12000;
+    private static final int FLING_FOLLOW_STIFFNESS = 20000;
+    private static final float DEFAULT_BOUNCINESS = 0.9f;
 
     /**
      * Friction applied to fling animations. Since the stack must land on one of the sides of the
      * screen, we want less friction horizontally so that the stack has a better chance of making it
      * to the side without needing a spring.
      */
-    private static final float FLING_FRICTION_X = 1.15f;
-    private static final float FLING_FRICTION_Y = 1.5f;
+    private static final float FLING_FRICTION_X = 2.2f;
+    private static final float FLING_FRICTION_Y = 2.2f;
 
     /**
-     * Damping ratio to use for the stack spring animation used to spring the stack to its final
-     * position after a fling.
+     * Values to use for the stack spring animation used to spring the stack to its final position
+     * after a fling.
      */
-    private static final float SPRING_DAMPING_RATIO = 0.85f;
+    private static final int SPRING_AFTER_FLING_STIFFNESS = 750;
+    private static final float SPRING_AFTER_FLING_DAMPING_RATIO = 0.85f;
 
     /**
      * Minimum fling velocity required to trigger moving the stack from one side of the screen to
@@ -107,6 +109,12 @@ public class StackAnimationController extends
      */
     private HashMap<DynamicAnimation.ViewProperty, DynamicAnimation> mStackPositionAnimations =
             new HashMap<>();
+
+    /**
+     * Whether the current motion of the stack is due to a fling animation (vs. being dragged
+     * manually).
+     */
+    private boolean mIsMovingFromFlinging = false;
 
     /** Horizontal offset of bubbles in the stack. */
     private float mStackOffset;
@@ -147,6 +155,10 @@ public class StackAnimationController extends
 
         moveFirstBubbleWithStackFollowing(DynamicAnimation.TRANSLATION_X, x);
         moveFirstBubbleWithStackFollowing(DynamicAnimation.TRANSLATION_Y, y);
+
+        // This method is called when the stack is being dragged manually, so we're clearly no
+        // longer flinging.
+        mIsMovingFromFlinging = false;
     }
 
     /**
@@ -202,8 +214,8 @@ public class StackAnimationController extends
                 startXVelocity,
                 FLING_FRICTION_X,
                 new SpringForce()
-                        .setStiffness(SpringForce.STIFFNESS_LOW)
-                        .setDampingRatio(SPRING_DAMPING_RATIO),
+                        .setStiffness(SPRING_AFTER_FLING_STIFFNESS)
+                        .setDampingRatio(SPRING_AFTER_FLING_DAMPING_RATIO),
                 destinationRelativeX);
 
         flingThenSpringFirstBubbleWithStackFollowing(
@@ -211,8 +223,8 @@ public class StackAnimationController extends
                 velY,
                 FLING_FRICTION_Y,
                 new SpringForce()
-                        .setStiffness(SpringForce.STIFFNESS_LOW)
-                        .setDampingRatio(SPRING_DAMPING_RATIO),
+                        .setStiffness(SPRING_AFTER_FLING_STIFFNESS)
+                        .setDampingRatio(SPRING_AFTER_FLING_DAMPING_RATIO),
                 /* destination */ null);
 
         mLayout.setEndActionForMultipleProperties(
@@ -223,6 +235,8 @@ public class StackAnimationController extends
                     mLayout.removeEndActionForProperty(DynamicAnimation.TRANSLATION_Y);
                 },
                 DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
+
+        mIsMovingFromFlinging = true;
     }
 
     /**
@@ -432,7 +446,8 @@ public class StackAnimationController extends
                 .setDampingRatio(BubbleController.getBubbleBounciness(
                         mLayout.getContext(), DEFAULT_BOUNCINESS))
                 .setStiffness(BubbleController.getBubbleStiffness(
-                        mLayout.getContext(), (int) DEFAULT_STIFFNESS));
+                        mLayout.getContext(),
+                        mIsMovingFromFlinging ? FLING_FOLLOW_STIFFNESS : DEFAULT_STIFFNESS));
     }
 
     @Override
