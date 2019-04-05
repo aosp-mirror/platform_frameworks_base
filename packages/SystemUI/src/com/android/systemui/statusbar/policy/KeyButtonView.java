@@ -48,10 +48,12 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ImageView;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.plugins.statusbar.phone.NavBarButtonProvider.ButtonInterface;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.shared.system.NavigationBarCompat;
@@ -73,6 +75,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
     private final KeyButtonRipple mRipple;
     private final OverviewProxyService mOverviewProxyService;
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
+    private final InputManager mInputManager;
 
     private final Runnable mCheckLongPress = new Runnable() {
         public void run() {
@@ -96,6 +99,11 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
     }
 
     public KeyButtonView(Context context, AttributeSet attrs, int defStyle) {
+        this(context, attrs, defStyle, InputManager.getInstance());
+    }
+
+    @VisibleForTesting
+    public KeyButtonView(Context context, AttributeSet attrs, int defStyle, InputManager manager) {
         super(context, attrs);
 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.KeyButtonView,
@@ -117,6 +125,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
 
         mRipple = new KeyButtonRipple(context, this);
         mOverviewProxyService = Dependency.get(OverviewProxyService.class);
+        mInputManager = manager;
         setBackground(mRipple);
         forceHasOverlappingRendering(false);
     }
@@ -318,16 +327,23 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                 0, KeyCharacterMap.VIRTUAL_KEYBOARD, 0,
                 flags | KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY,
                 InputDevice.SOURCE_KEYBOARD);
-        //Make KeyEvent work on multi-display environment
-        if (getDisplay() != null) {
-            final int displayId = getDisplay().getDisplayId();
 
-            if (displayId != INVALID_DISPLAY) {
-                ev.setDisplayId(displayId);
-            }
+        int displayId = INVALID_DISPLAY;
+
+        // Make KeyEvent work on multi-display environment
+        if (getDisplay() != null) {
+            displayId = getDisplay().getDisplayId();
         }
-        InputManager.getInstance().injectInputEvent(ev,
-                InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
+        // Bubble controller will give us a valid display id if it should get the back event
+        BubbleController bubbleController = Dependency.get(BubbleController.class);
+        int bubbleDisplayId = bubbleController.getExpandedDisplayId(mContext);
+        if (mCode == KeyEvent.KEYCODE_BACK && bubbleDisplayId != INVALID_DISPLAY) {
+            displayId = bubbleDisplayId;
+        }
+        if (displayId != INVALID_DISPLAY) {
+            ev.setDisplayId(displayId);
+        }
+        mInputManager.injectInputEvent(ev, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
     }
 
     @Override

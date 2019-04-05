@@ -107,6 +107,7 @@ package android.app {
     ctor public ActivityView(android.content.Context, android.util.AttributeSet);
     ctor public ActivityView(android.content.Context, android.util.AttributeSet, int);
     ctor public ActivityView(android.content.Context, android.util.AttributeSet, int, boolean);
+    method public int getVirtualDisplayId();
     method public void onLayout(boolean, int, int, int, int);
     method public void onLocationChanged();
     method public void performBackPress();

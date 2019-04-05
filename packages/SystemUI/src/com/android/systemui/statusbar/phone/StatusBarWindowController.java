@@ -523,10 +523,17 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
     }
 
     /**
-     * The bubble is shown in expanded state for the status bar.
+     * Whether the bubble is shown in expanded state for the status bar.
      */
     public boolean getBubbleExpanded() {
         return mCurrentState.bubbleExpanded;
+    }
+
+    /**
+     * Whether the status bar panel is expanded or not.
+     */
+    public boolean getPanelExpanded() {
+        return mCurrentState.panelExpanded;
     }
 
     public void setStateListener(OtherwisedCollapsedListener listener) {
