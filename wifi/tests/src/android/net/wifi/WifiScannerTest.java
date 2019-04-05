@@ -18,10 +18,14 @@ package android.net.wifi;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.validateMockitoUsage;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -29,7 +33,9 @@ import android.net.wifi.WifiScanner.PnoSettings;
 import android.net.wifi.WifiScanner.PnoSettings.PnoNetwork;
 import android.net.wifi.WifiScanner.ScanData;
 import android.net.wifi.WifiScanner.ScanSettings;
+import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.os.Parcel;
 import android.os.test.TestLooper;
 
@@ -40,6 +46,7 @@ import com.android.internal.util.test.BidirectionalAsyncChannelServer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -229,5 +236,146 @@ public class WifiScannerTest {
         writeScanData.writeToParcel(parcel, 0);
         parcel.setDataPosition(0);    // Rewind data position back to the beginning for read.
         return ScanData.CREATOR.createFromParcel(parcel);
+    }
+
+
+    /**
+     * Test behavior of {@link WifiScanner#startScan(ScanSettings, WifiScanner.ScanListener)}
+     * @throws Exception
+     */
+    @Test
+    public void testStartScan() throws Exception {
+        ScanSettings scanSettings = new ScanSettings();
+        WifiScanner.ScanListener scanListener = mock(WifiScanner.ScanListener.class);
+
+        mWifiScanner.startScan(scanSettings, scanListener);
+        mLooper.dispatchAll();
+
+        ArgumentCaptor<Message> messageArgumentCaptor = ArgumentCaptor.forClass(Message.class);
+        verify(mHandler).handleMessage(messageArgumentCaptor.capture());
+        Message message = messageArgumentCaptor.getValue();
+        assertNotNull(message);
+
+        assertEquals(WifiScanner.CMD_START_SINGLE_SCAN, message.what);
+        assertTrue(message.obj instanceof Bundle);
+        Bundle messageBundle = (Bundle) message.obj;
+        assertEquals(scanSettings,
+                messageBundle.getParcelable(WifiScanner.SCAN_PARAMS_SCAN_SETTINGS_KEY));
+        assertNull(messageBundle.getParcelable(WifiScanner.SCAN_PARAMS_WORK_SOURCE_KEY));
+        assertEquals(mContext.getOpPackageName(),
+                messageBundle.getParcelable(WifiScanner.REQUEST_PACKAGE_NAME_KEY));
+
+    }
+
+    /**
+     * Test behavior of {@link WifiScanner#stopScan(WifiScanner.ScanListener)}
+     * @throws Exception
+     */
+    @Test
+    public void testStopScan() throws Exception {
+        ScanSettings scanSettings = new ScanSettings();
+        WifiScanner.ScanListener scanListener = mock(WifiScanner.ScanListener.class);
+
+        mWifiScanner.startScan(scanSettings, scanListener);
+        mLooper.dispatchAll();
+
+        mWifiScanner.stopScan(scanListener);
+        mLooper.dispatchAll();
+
+        ArgumentCaptor<Message> messageArgumentCaptor = ArgumentCaptor.forClass(Message.class);
+        verify(mHandler, times(2)).handleMessage(messageArgumentCaptor.capture());
+        Message message = messageArgumentCaptor.getValue();
+        assertNotNull(message);
+
+        assertEquals(WifiScanner.CMD_STOP_SINGLE_SCAN, message.what);
+        assertTrue(message.obj instanceof Bundle);
+        Bundle messageBundle = (Bundle) message.obj;
+        assertEquals(mContext.getOpPackageName(),
+                messageBundle.getParcelable(WifiScanner.REQUEST_PACKAGE_NAME_KEY));
+
+    }
+
+    /**
+     * Test behavior of {@link WifiScanner#startDisconnectedPnoScan(ScanSettings, PnoSettings,
+     * WifiScanner.PnoScanListener)}
+     * @throws Exception
+     */
+    @Test
+    public void testStartDisconnectedPnoScan() throws Exception {
+        ScanSettings scanSettings = new ScanSettings();
+        PnoSettings pnoSettings = new PnoSettings();
+        WifiScanner.PnoScanListener pnoScanListener = mock(WifiScanner.PnoScanListener.class);
+
+        mWifiScanner.startDisconnectedPnoScan(scanSettings, pnoSettings, pnoScanListener);
+        mLooper.dispatchAll();
+
+        ArgumentCaptor<Message> messageArgumentCaptor = ArgumentCaptor.forClass(Message.class);
+        verify(mHandler).handleMessage(messageArgumentCaptor.capture());
+        Message message = messageArgumentCaptor.getValue();
+        assertNotNull(message);
+
+        assertEquals(WifiScanner.CMD_START_PNO_SCAN, message.what);
+        assertTrue(message.obj instanceof Bundle);
+        Bundle messageBundle = (Bundle) message.obj;
+        assertEquals(scanSettings,
+                messageBundle.getParcelable(WifiScanner.PNO_PARAMS_SCAN_SETTINGS_KEY));
+        assertTrue(scanSettings.isPnoScan);
+        assertFalse(pnoSettings.isConnected);
+        assertEquals(pnoSettings,
+                messageBundle.getParcelable(WifiScanner.PNO_PARAMS_PNO_SETTINGS_KEY));
+    }
+
+    /**
+     * Test behavior of {@link WifiScanner#startConnectedPnoScan(ScanSettings, PnoSettings,
+     * WifiScanner.PnoScanListener)}
+     * @throws Exception
+     */
+    @Test
+    public void testStartConnectedPnoScan() throws Exception {
+        ScanSettings scanSettings = new ScanSettings();
+        PnoSettings pnoSettings = new PnoSettings();
+        WifiScanner.PnoScanListener pnoScanListener = mock(WifiScanner.PnoScanListener.class);
+
+        mWifiScanner.startConnectedPnoScan(scanSettings, pnoSettings, pnoScanListener);
+        mLooper.dispatchAll();
+
+        ArgumentCaptor<Message> messageArgumentCaptor = ArgumentCaptor.forClass(Message.class);
+        verify(mHandler).handleMessage(messageArgumentCaptor.capture());
+        Message message = messageArgumentCaptor.getValue();
+        assertNotNull(message);
+
+        assertEquals(WifiScanner.CMD_START_PNO_SCAN, message.what);
+        assertTrue(message.obj instanceof Bundle);
+        Bundle messageBundle = (Bundle) message.obj;
+        assertEquals(scanSettings,
+                messageBundle.getParcelable(WifiScanner.PNO_PARAMS_SCAN_SETTINGS_KEY));
+        assertTrue(scanSettings.isPnoScan);
+        assertTrue(pnoSettings.isConnected);
+        assertEquals(pnoSettings,
+                messageBundle.getParcelable(WifiScanner.PNO_PARAMS_PNO_SETTINGS_KEY));
+    }
+
+    /**
+     * Test behavior of {@link WifiScanner#stopPnoScan(WifiScanner.ScanListener)}
+     * WifiScanner.PnoScanListener)}
+     * @throws Exception
+     */
+    @Test
+    public void testStopPnoScan() throws Exception {
+        ScanSettings scanSettings = new ScanSettings();
+        PnoSettings pnoSettings = new PnoSettings();
+        WifiScanner.PnoScanListener pnoScanListener = mock(WifiScanner.PnoScanListener.class);
+
+        mWifiScanner.startDisconnectedPnoScan(scanSettings, pnoSettings, pnoScanListener);
+        mLooper.dispatchAll();
+        mWifiScanner.stopPnoScan(pnoScanListener);
+        mLooper.dispatchAll();
+
+        ArgumentCaptor<Message> messageArgumentCaptor = ArgumentCaptor.forClass(Message.class);
+        verify(mHandler, times(2)).handleMessage(messageArgumentCaptor.capture());
+        Message message = messageArgumentCaptor.getValue();
+        assertNotNull(message);
+
+        assertEquals(WifiScanner.CMD_STOP_PNO_SCAN, message.what);
     }
 }
