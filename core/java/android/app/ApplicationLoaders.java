@@ -145,7 +145,8 @@ public class ApplicationLoaders {
      */
     public void createAndCacheNonBootclasspathSystemClassLoaders(SharedLibraryInfo[] libs) {
         if (mSystemLibsCacheMap != null) {
-            throw new IllegalStateException("Already cached.");
+            Log.wtf(TAG, "Already cached.");
+            return;
         }
 
         mSystemLibsCacheMap = new HashMap<String, CachedClassLoader>();
@@ -158,8 +159,7 @@ public class ApplicationLoaders {
     /**
      * Caches a single non-bootclasspath class loader.
      *
-     * All of this library's dependencies must have previously been cached. Otherwise, an exception
-     * is thrown.
+     * All of this library's dependencies must have previously been cached.
      */
     private void createAndCacheNonBootclasspathSystemClassLoader(SharedLibraryInfo lib) {
         String path = lib.getPath();
@@ -174,8 +174,9 @@ public class ApplicationLoaders {
                 CachedClassLoader cached = mSystemLibsCacheMap.get(dependencyPath);
 
                 if (cached == null) {
-                    throw new IllegalStateException("Failed to find dependency " + dependencyPath
-                            + " of cachedlibrary " + path);
+                    Log.e(TAG, "Failed to find dependency " + dependencyPath
+                            + " of cached library " + path);
+                    return;
                 }
 
                 sharedLibraries.add(cached.loader);
@@ -188,8 +189,8 @@ public class ApplicationLoaders {
                 null /*cacheKey*/, null /*classLoaderName*/, sharedLibraries /*sharedLibraries*/);
 
         if (classLoader == null) {
-            // bad configuration or break in classloading code
-            throw new IllegalStateException("Failed to cache " + path);
+            Log.e(TAG, "Failed to cache " + path);
+            return;
         }
 
         CachedClassLoader cached = new CachedClassLoader();
@@ -214,7 +215,7 @@ public class ApplicationLoaders {
      *
      * If there is an error or the cache is not available, this returns null.
      */
-    public ClassLoader getCachedNonBootclasspathSystemLib(String zip, ClassLoader parent,
+    private ClassLoader getCachedNonBootclasspathSystemLib(String zip, ClassLoader parent,
             String classLoaderName, List<ClassLoader> sharedLibraries) {
         if (mSystemLibsCacheMap == null) {
             return null;
