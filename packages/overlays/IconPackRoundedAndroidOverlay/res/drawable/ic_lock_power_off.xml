@@ -1,4 +1,4 @@
-
+<?xml version="1.0" encoding="utf-8"?>
 <!--
    Copyright (C) 2019 The Android Open Source Project
 
@@ -14,8 +14,16 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 -->
-
-<vector android:height="24dp" android:tint="?android:attr/colorControlNormal" android:viewportHeight="24" android:viewportWidth="24" android:width="24dp" xmlns:android="http://schemas.android.com/apk/res/android">
-  <path android:fillColor="@android:color/white" android:pathData="M12,13c-0.41,0-0.75-0.34-0.75-0.75v-9.5C11.25,2.33,11.59,2,12,2s0.75,0.34,0.75,0.75v9.5C12.75,12.66,12.41,13,12,13z"/>
-  <path android:fillColor="@android:color/white" android:pathData="M12,21c-4.96,0-9-4.02-9-8.96c0-2.5,1.06-4.9,2.91-6.6c0.31-0.28,0.78-0.26,1.06,0.05C7.25,5.8,7.23,6.27,6.92,6.55 C5.38,7.96,4.5,9.96,4.5,12.04c0,4.11,3.36,7.46,7.5,7.46s7.5-3.34,7.5-7.46c0-2.08-0.88-4.08-2.42-5.49 c-0.3-0.28-0.33-0.75-0.05-1.06c0.28-0.3,0.75-0.33,1.06-0.05c1.85,1.69,2.91,4.1,2.91,6.6C21,16.98,16.96,21,12,21z"/>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:height="24dp"
+    android:tint="?android:attr/colorControlNormal"
+    android:viewportHeight="24"
+    android:viewportWidth="24"
+    android:width="24dp" >
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M12,13c-0.41,0-0.75-0.34-0.75-0.75v-9.5C11.25,2.33,11.59,2,12,2s0.75,0.34,0.75,0.75v9.5C12.75,12.66,12.41,13,12,13z" />
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M12,21c-4.96,0-9-4.02-9-8.96c0-2.5,1.06-4.9,2.91-6.6c0.31-0.28,0.78-0.26,1.06,0.05C7.25,5.8,7.23,6.27,6.92,6.55 C5.38,7.96,4.5,9.96,4.5,12.04c0,4.11,3.36,7.46,7.5,7.46s7.5-3.34,7.5-7.46c0-2.08-0.88-4.08-2.42-5.49 c-0.3-0.28-0.33-0.75-0.05-1.06c0.28-0.3,0.75-0.33,1.06-0.05c1.85,1.69,2.91,4.1,2.91,6.6C21,16.98,16.96,21,12,21z" />
 </vector>
