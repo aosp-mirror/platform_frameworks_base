@@ -1808,15 +1808,17 @@ public class ChooserActivity extends ResolverActivity {
                     offset += lastHeight;
                 }
 
-                if (lastHeight != 0 && isSendAction(getTargetIntent())) {
+                boolean isPortrait = getResources().getConfiguration().orientation
+                                         == Configuration.ORIENTATION_PORTRAIT;
+                if (lastHeight != 0 && isSendAction(getTargetIntent()) && isPortrait) {
                     // make sure to leave room for direct share 4->8 expansion
                     int expansionArea =
-                            (int) (mResolverDrawerLayout.getUncollapsibleHeight()
+                            (int) (mResolverDrawerLayout.getAlwaysShowHeight()
                                     / DIRECT_SHARE_EXPANSION_RATE);
                     offset = Math.min(offset, bottom - top - lastHeight - expansionArea);
                 }
 
-                mResolverDrawerLayout.setCollapsibleHeightReserved(offset);
+                mResolverDrawerLayout.setCollapsibleHeightReserved(Math.min(offset, bottom - top));
             });
         }
     }

@@ -75,6 +75,7 @@ public class ResolverDrawerLayout extends ViewGroup {
 
     private int mCollapsibleHeight;
     private int mUncollapsibleHeight;
+    private int mAlwaysShowHeight;
 
     /**
      * The height in pixels of reserved space added to the top of the collapsed UI;
@@ -832,7 +833,7 @@ public class ResolverDrawerLayout extends ViewGroup {
             }
         }
 
-        final int alwaysShowHeight = heightUsed;
+        mAlwaysShowHeight = heightUsed;
 
         // And now the rest.
         for (int i = 0; i < childCount; i++) {
@@ -854,7 +855,7 @@ public class ResolverDrawerLayout extends ViewGroup {
 
         final int oldCollapsibleHeight = mCollapsibleHeight;
         mCollapsibleHeight = Math.max(0,
-                heightUsed - alwaysShowHeight - getMaxCollapsedHeight());
+                heightUsed - mAlwaysShowHeight - getMaxCollapsedHeight());
         mUncollapsibleHeight = heightUsed - mCollapsibleHeight;
 
         updateCollapseOffset(oldCollapsibleHeight, !isDragging());
@@ -871,8 +872,8 @@ public class ResolverDrawerLayout extends ViewGroup {
     /**
       * @return The space reserved by views with 'alwaysShow=true'
       */
-    public int getUncollapsibleHeight() {
-        return mUncollapsibleHeight;
+    public int getAlwaysShowHeight() {
+        return mAlwaysShowHeight;
     }
 
     @Override
