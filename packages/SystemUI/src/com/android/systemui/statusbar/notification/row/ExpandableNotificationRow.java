@@ -1147,9 +1147,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     @Override
     public void onPluginConnected(NotificationMenuRowPlugin plugin, Context pluginContext) {
-        boolean existed = mMenuRow.getMenuView() != null;
+        boolean existed = mMenuRow != null && mMenuRow.getMenuView() != null;
         if (existed) {
             removeView(mMenuRow.getMenuView());
+        }
+        if (plugin == null) {
+            return;
         }
         mMenuRow = plugin;
         if (mMenuRow.shouldUseDefaultMenuItems()) {
@@ -1173,7 +1176,18 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
     }
 
+    /**
+     * Get a handle to a NotificationMenuRowPlugin whose menu view has been added to our hierarchy,
+     * or null if there is no menu row
+     *
+     * @return a {@link NotificationMenuRowPlugin}, or null
+     */
+    @Nullable
     public NotificationMenuRowPlugin createMenu() {
+        if (mMenuRow == null) {
+            return null;
+        }
+
         if (mMenuRow.getMenuView() == null) {
             mMenuRow.createMenu(this, mStatusBarNotification);
             mMenuRow.setAppName(mAppName);
@@ -1184,6 +1198,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return mMenuRow;
     }
 
+    @Nullable
     public NotificationMenuRowPlugin getProvider() {
         return mMenuRow;
     }
@@ -1211,7 +1226,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mGuts.setVisibility(oldGuts.getVisibility());
             addView(mGuts, index);
         }
-        View oldMenu = mMenuRow.getMenuView();
+        View oldMenu = mMenuRow == null ? null : mMenuRow.getMenuView();
         if (oldMenu != null) {
             int menuIndex = indexOfChild(oldMenu);
             removeView(oldMenu);
@@ -1230,7 +1245,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
-        if (mMenuRow.getMenuView() != null) {
+        if (mMenuRow != null && mMenuRow.getMenuView() != null) {
             mMenuRow.onConfigurationChanged();
         }
     }
@@ -1728,7 +1743,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     public void setAppOpsOnClickListener(ExpandableNotificationRow.OnAppOpsClickListener l) {
         mOnAppOpsClickListener = v -> {
             createMenu();
-            MenuItem menuItem = getProvider().getAppOpsMenuItem(mContext);
+            NotificationMenuRowPlugin provider = getProvider();
+            if (provider == null) {
+                return;
+            }
+            MenuItem menuItem = provider.getAppOpsMenuItem(mContext);
             if (menuItem != null) {
                 l.onClick(this, v.getWidth() / 2, v.getHeight() / 2, menuItem);
             }
@@ -1790,7 +1809,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     public void doLongClickCallback(int x, int y) {
         createMenu();
-        MenuItem menuItem = getProvider().getLongpressMenuItem(mContext);
+        NotificationMenuRowPlugin provider = getProvider();
+        MenuItem menuItem = null;
+        if (provider != null) {
+            menuItem = provider.getLongpressMenuItem(mContext);
+        }
         doLongClickCallback(x, y, menuItem);
     }
 
@@ -1844,7 +1867,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             getEntry().expandedIcon.setScrollX(0);
         }
 
-        mMenuRow.resetMenu();
+        if (mMenuRow != null) {
+            mMenuRow.resetMenu();
+        }
     }
 
     void onGutsOpened() {
@@ -1921,7 +1946,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             getEntry().expandedIcon.setScrollX((int) -translationX);
         }
 
-        if (mMenuRow.getMenuView() != null) {
+        if (mMenuRow != null && mMenuRow.getMenuView() != null) {
             mMenuRow.onParentTranslationUpdate(translationX);
         }
     }
@@ -1973,7 +1998,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                     mNotificationTranslationFinished = true;
                 }
                 if (!cancelled && leftTarget == 0) {
-                    mMenuRow.resetMenu();
+                    if (mMenuRow != null) {
+                        mMenuRow.resetMenu();
+                    }
                     mTranslateAnim = null;
                 }
             }
@@ -1982,7 +2009,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return translateAnim;
     }
 
-    public void inflateGuts() {
+    void ensureGutsInflated() {
         if (mGuts == null) {
             mGutsStub.inflate();
         }
@@ -2438,7 +2465,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (intrinsicBefore != getIntrinsicHeight() && intrinsicBefore != 0) {
             notifyHeightChanged(true  /* needsAnimation */);
         }
-        if (mMenuRow.getMenuView() != null) {
+        if (mMenuRow != null && mMenuRow.getMenuView() != null) {
             mMenuRow.onParentHeightUpdate();
         }
         updateContentShiftHeight();
@@ -2641,7 +2668,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     public long performRemoveAnimation(long duration, long delay, float translationDirection,
             boolean isHeadsUpAnimation, float endLocation, Runnable onFinishedRunnable,
             AnimatorListenerAdapter animationListener) {
-        if (mMenuRow.isMenuVisible()) {
+        if (mMenuRow != null && mMenuRow.isMenuVisible()) {
             Animator anim = getTranslateViewAnimator(0f, null /* listener */);
             if (anim != null) {
                 anim.addListener(new AnimatorListenerAdapter() {
@@ -2712,7 +2739,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (mGuts != null) {
             mGuts.setActualHeight(height);
         }
-        if (mMenuRow.getMenuView() != null) {
+        if (mMenuRow != null && mMenuRow.getMenuView() != null) {
             mMenuRow.onParentHeightUpdate();
         }
     }
@@ -2977,8 +3004,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             default:
                 if (action == R.id.action_snooze) {
                     NotificationMenuRowPlugin provider = getProvider();
-                    if (provider == null) {
+                    if (provider == null && mMenuRow != null) {
                         provider = createMenu();
+                    } else {
+                        return false;
                     }
                     MenuItem snoozeMenu = provider.getSnoozeMenuItem(getContext());
                     if (snoozeMenu != null) {
@@ -3109,7 +3138,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     /** Sets whether dismiss gestures are right-to-left (instead of left-to-right). */
     public void setDismissRtl(boolean dismissRtl) {
-        mMenuRow.setDismissRtl(dismissRtl);
+        if (mMenuRow != null) {
+            mMenuRow.setDismissRtl(dismissRtl);
+        }
     }
 
     private static class NotificationViewState extends ExpandableViewState {
