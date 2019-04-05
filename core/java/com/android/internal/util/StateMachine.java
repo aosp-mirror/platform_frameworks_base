@@ -28,7 +28,6 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -2102,7 +2101,7 @@ public class StateMachine {
         try {
             name = mName.toString();
             state = mSmHandler.getCurrentState().getName().toString();
-        } catch (NullPointerException npe) {
+        } catch (NullPointerException | ArrayIndexOutOfBoundsException e) {
             // Will use default(s) initialized above.
         }
         return "name=" + name + " state=" + state;
