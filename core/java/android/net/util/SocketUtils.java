@@ -28,7 +28,6 @@ import android.system.ErrnoException;
 import android.system.NetlinkSocketAddress;
 import android.system.Os;
 import android.system.PacketSocketAddress;
-import android.system.StructTimeval;
 
 import libcore.io.IoBridge;
 
@@ -79,14 +78,6 @@ public final class SocketUtils {
     @NonNull
     public static SocketAddress makePacketSocketAddress(int ifIndex, @NonNull byte[] hwAddr) {
         return new PacketSocketAddress(ifIndex, hwAddr);
-    }
-
-    /**
-     * Set an option on a socket that takes a time value argument.
-     */
-    public static void setSocketTimeValueOption(
-            @NonNull FileDescriptor fd, int level, int option, long millis) throws ErrnoException {
-        Os.setsockoptTimeval(fd, level, option, StructTimeval.fromMillis(millis));
     }
 
     /**
