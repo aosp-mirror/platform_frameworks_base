@@ -22,6 +22,8 @@ import android.os.Environment;
 import android.os.storage.StorageManager;
 import android.text.TextUtils;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.io.File;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
@@ -32,7 +34,6 @@ import java.security.SecureRandom;
  * HashedStringCache provides hashing functionality with an underlying LRUCache and expiring salt.
  * Salt and expiration time are being stored under the tag passed in by the calling package --
  * intended usage is the calling package name.
- * TODO: Add unit tests b/129870147
  * @hide
  */
 public class HashedStringCache {
@@ -40,9 +41,12 @@ public class HashedStringCache {
     private static final Charset UTF_8 = Charset.forName("UTF-8");
     private static final int HASH_CACHE_SIZE = 100;
     private static final int HASH_LENGTH = 8;
-    private static final String HASH_SALT = "_hash_salt";
-    private static final String HASH_SALT_DATE = "_hash_salt_date";
-    private static final String HASH_SALT_GEN = "_hash_salt_gen";
+    @VisibleForTesting
+    static final String HASH_SALT = "_hash_salt";
+    @VisibleForTesting
+    static final String HASH_SALT_DATE = "_hash_salt_date";
+    @VisibleForTesting
+    static final String HASH_SALT_GEN = "_hash_salt_gen";
     // For privacy we need to rotate the salt regularly
     private static final long DAYS_TO_MILLIS = 1000 * 60 * 60 * 24;
     private static final int MAX_SALT_DAYS = 100;
@@ -94,7 +98,8 @@ public class HashedStringCache {
      */
     public HashResult hashString(Context context, String tag, String clearText,
             int saltExpirationDays) {
-        if (TextUtils.isEmpty(clearText) || saltExpirationDays == -1) {
+        if (saltExpirationDays == -1 || context == null
+                || TextUtils.isEmpty(clearText) || TextUtils.isEmpty(tag)) {
             return null;
         }
 
