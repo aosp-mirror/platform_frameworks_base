@@ -166,15 +166,12 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private static final int GPS_CAPABILITY_MSA = 0x0000004;
     private static final int GPS_CAPABILITY_SINGLE_SHOT = 0x0000008;
     private static final int GPS_CAPABILITY_ON_DEMAND_TIME = 0x0000010;
-
-    // The following three capability flags are removed in IGnssCallback.hal@2.0 and their values
-    // are marked reserved and not reused in 2.0 to avoid confusion with prior versions.
     public static final int GPS_CAPABILITY_GEOFENCING = 0x0000020;
     public static final int GPS_CAPABILITY_MEASUREMENTS = 0x0000040;
     public static final int GPS_CAPABILITY_NAV_MESSAGES = 0x0000080;
-
-    static final int GPS_CAPABILITY_LOW_POWER_MODE = 0x0000100;
-    static final int GPS_CAPABILITY_SATELLITE_BLACKLIST = 0x0000200;
+    public static final int GPS_CAPABILITY_LOW_POWER_MODE = 0x0000100;
+    public static final int GPS_CAPABILITY_SATELLITE_BLACKLIST = 0x0000200;
+    public static final int GPS_CAPABILITY_MEASUREMENT_CORRECTIONS = 0x0000400;
 
     // The AGPS SUPL mode
     private static final int AGPS_SUPL_MODE_MSA = 0x02;
@@ -1490,12 +1487,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     }
 
     @NativeEntryPoint
-    private void setTopHalCapabilities(int topHalCapabilities, boolean hasSubHalCapabilityFlags) {
-        // The IGnssCallback.hal@2.0 removed sub-HAL capability flags from the Capabilities enum
-        // and instead uses the sub-HAL non-null handle returned from IGnss.hal@2.0 to indicate
-        // support. Therefore, the 'hasSubHalCapabilityFlags' parameter is needed to tell if the
-        // 'capabilities' parameter includes the sub-HAL capability flags or not. Old HALs
-        // which explicitly set the sub-HAL capability bits must continue to work.
+    private void setTopHalCapabilities(int topHalCapabilities) {
         mHandler.post(() -> {
             mTopHalCapabilities = topHalCapabilities;
 
@@ -1504,25 +1496,13 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 requestUtcTime();
             }
 
-            boolean hasGeofencingCapability;
-            boolean hasMeasurementsCapability;
-            boolean hasNavMessagesCapability;
-            if (hasSubHalCapabilityFlags) {
-                hasGeofencingCapability = hasCapability(GPS_CAPABILITY_GEOFENCING);
-                hasMeasurementsCapability = hasCapability(GPS_CAPABILITY_MEASUREMENTS);
-                hasNavMessagesCapability = hasCapability(GPS_CAPABILITY_NAV_MESSAGES);
-            } else {
-                hasGeofencingCapability = mGnssGeofenceProvider.isHardwareGeofenceSupported();
-                hasMeasurementsCapability = mGnssMeasurementsProvider.isAvailableInPlatform();
-                hasNavMessagesCapability = mGnssNavigationMessageProvider.isAvailableInPlatform();
-            }
-
-            mGnssMeasurementsProvider.onCapabilitiesUpdated(hasMeasurementsCapability);
-            mGnssNavigationMessageProvider.onCapabilitiesUpdated(hasNavMessagesCapability);
+            mGnssMeasurementsProvider.onCapabilitiesUpdated(
+                    hasCapability(GPS_CAPABILITY_MEASUREMENTS));
+            mGnssNavigationMessageProvider.onCapabilitiesUpdated(
+                    hasCapability(GPS_CAPABILITY_NAV_MESSAGES));
             restartRequests();
 
-            mGnssCapabilitiesProvider.setTopHalCapabilities(topHalCapabilities,
-                    hasGeofencingCapability, hasMeasurementsCapability, hasNavMessagesCapability);
+            mGnssCapabilitiesProvider.setTopHalCapabilities(mTopHalCapabilities);
         });
     }
 
@@ -2184,18 +2164,12 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         if (hasCapability(GPS_CAPABILITY_NAV_MESSAGES)) s.append("NAV_MESSAGES ");
         if (hasCapability(GPS_CAPABILITY_LOW_POWER_MODE)) s.append("LOW_POWER_MODE ");
         if (hasCapability(GPS_CAPABILITY_SATELLITE_BLACKLIST)) s.append("SATELLITE_BLACKLIST ");
+        if (hasCapability(GPS_CAPABILITY_MEASUREMENT_CORRECTIONS)) {
+            s.append("MEASUREMENT_CORRECTIONS ");
+        }
         s.append(")\n");
-        if (mGnssGeofenceProvider.isHardwareGeofenceSupported()) {
-            s.append("  hasSubHal=GEOFENCING\n");
-        }
-        if (mGnssMeasurementsProvider.isAvailableInPlatform()) {
-            s.append("  hasSubHal=MEASUREMENTS\n");
-        }
-        if (mGnssNavigationMessageProvider.isAvailableInPlatform()) {
-            s.append("  hasSubHal=NAV_MESSAGES\n");
-        }
         if (mGnssMeasurementCorrectionsProvider.isAvailableInPlatform()) {
-            s.append("  hasSubHal=MEASUREMENT_CORRECTIONS [");
+            s.append("  SubHal=MEASUREMENT_CORRECTIONS[");
             s.append(mGnssMeasurementCorrectionsProvider.toStringCapabilities());
             s.append("]\n");
         }
