@@ -74,10 +74,6 @@ import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 public class BubbleExpandedView extends LinearLayout implements View.OnClickListener {
     private static final String TAG = "BubbleExpandedView";
 
-    // Configurable via bubble settings; just for testing
-    private boolean mUseFooter;
-    private boolean mShowOnTop;
-
     // The triangle pointing to the expanded view
     private View mPointerView;
     private int mPointerMargin;
@@ -185,11 +181,8 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         int bgColor = ta.getColor(0, Color.WHITE);
         ta.recycle();
 
-        mShowOnTop = BubbleController.showBubblesAtTop(getContext());
-        mUseFooter = BubbleController.useFooter(getContext());
-
         ShapeDrawable triangleDrawable = new ShapeDrawable(
-                TriangleShape.create(width, height, mShowOnTop /* pointUp */));
+                TriangleShape.create(width, height, false /* pointUp */));
         triangleDrawable.setTint(bgColor);
         mPointerView.setBackground(triangleDrawable);
 
@@ -238,18 +231,6 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
             }
             return view.onApplyWindowInsets(insets);
         });
-
-        if (!mShowOnTop) {
-            removeView(mPointerView);
-            if (mUseFooter) {
-                View divider = findViewById(R.id.divider);
-                viewWrapper.removeView(divider);
-                removeView(viewWrapper);
-                addView(divider);
-                addView(viewWrapper);
-            }
-            addView(mPointerView);
-        }
     }
 
     @Override
@@ -289,9 +270,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         final float cr = ta2.getDimension(0, 0f);
         ta2.recycle();
 
-        float[] radii = mUseFooter
-                ? new float[] {0, 0, 0, 0, cr, cr, cr, cr}
-                : new float[] {cr, cr, cr, cr, 0, 0, 0, 0};
+        float[] radii = new float[] {cr, cr, cr, cr, 0, 0, 0, 0};
         GradientDrawable chromeBackground = new GradientDrawable();
         chromeBackground.setShape(GradientDrawable.RECTANGLE);
         chromeBackground.setCornerRadii(radii);
@@ -353,11 +332,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                 // Still in the shade... remove it
                 parent.removeView(mNotifRow);
             }
-            if (mShowOnTop) {
-                addView(mNotifRow);
-            } else {
-                addView(mNotifRow, mUseFooter ? 0 : 1);
-            }
+            addView(mNotifRow, 1 /* index */);
         }
     }
 
