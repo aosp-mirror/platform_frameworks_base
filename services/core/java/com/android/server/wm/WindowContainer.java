@@ -1003,7 +1003,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return p.makeChildSurface(child)
                 .setParent(mSurfaceControl);
     }
-
+    /*
+     * @return The SurfaceControl parent for this containers SurfaceControl.
+     *         The SurfaceControl must be valid if non-null.
+     */
     @Override
     public SurfaceControl getParentSurfaceControl() {
         final WindowContainer parent = getParent();
@@ -1210,6 +1213,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
     }
 
+    /**
+     * @return The SurfaceControl for this container.
+     *         The SurfaceControl must be valid if non-null.
+     */
     @Override
     public SurfaceControl getSurfaceControl() {
         return mSurfaceControl;
