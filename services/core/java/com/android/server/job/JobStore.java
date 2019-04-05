@@ -543,6 +543,9 @@ public final class JobStore {
             if (jobStatus.hasBatteryNotLowConstraint()) {
                 out.attribute(null, "battery-not-low", Boolean.toString(true));
             }
+            if (jobStatus.hasStorageNotLowConstraint()) {
+                out.attribute(null, "storage-not-low", Boolean.toString(true));
+            }
             out.endTag(null, XML_TAG_PARAMS_CONSTRAINTS);
         }
 
@@ -903,6 +906,15 @@ public final class JobStore {
             jobBuilder.setExtras(extras);
             parser.nextTag(); // Consume </extras>
 
+            final JobInfo builtJob;
+            try {
+                builtJob = jobBuilder.build();
+            } catch (Exception e) {
+                Slog.w(TAG, "Unable to build job from XML, ignoring: "
+                        + jobBuilder.summarize());
+                return null;
+            }
+
             // Migrate sync jobs forward from earlier, incomplete representation
             if ("android".equals(sourcePackageName)
                     && extras != null
@@ -985,6 +997,14 @@ public final class JobStore {
             val = parser.getAttributeValue(null, "charging");
             if (val != null) {
                 jobBuilder.setRequiresCharging(true);
+            }
+            val = parser.getAttributeValue(null, "battery-not-low");
+            if (val != null) {
+                jobBuilder.setRequiresBatteryNotLow(true);
+            }
+            val = parser.getAttributeValue(null, "storage-not-low");
+            if (val != null) {
+                jobBuilder.setRequiresStorageNotLow(true);
             }
         }
 
