@@ -785,7 +785,7 @@ public class ChooserActivity extends ResolverActivity {
         } else {
             ImageView fileIconView = parent.findViewById(R.id.content_preview_file_icon);
             fileIconView.setVisibility(View.VISIBLE);
-            fileIconView.setImageResource(R.drawable.ic_doc_generic);
+            fileIconView.setImageResource(R.drawable.chooser_file_generic);
         }
     }
 
@@ -834,12 +834,14 @@ public class ChooserActivity extends ResolverActivity {
             }
 
             for (Uri uri : uris) {
-                if (findPreferredContentPreview(uri, resolver) == CONTENT_PREVIEW_IMAGE) {
-                    return CONTENT_PREVIEW_IMAGE;
+                // Defaulting to file preview when there are mixed image/file types is
+                // preferable, as it shows the user the correct number of items being shared
+                if (findPreferredContentPreview(uri, resolver) == CONTENT_PREVIEW_FILE) {
+                    return CONTENT_PREVIEW_FILE;
                 }
             }
 
-            return CONTENT_PREVIEW_FILE;
+            return CONTENT_PREVIEW_IMAGE;
         }
 
         return CONTENT_PREVIEW_TEXT;
