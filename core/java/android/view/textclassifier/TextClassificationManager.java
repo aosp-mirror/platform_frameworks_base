@@ -30,6 +30,7 @@ import android.service.textclassifier.TextClassifierService;
 import android.view.textclassifier.TextClassifier.TextClassifierType;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 
@@ -247,7 +248,9 @@ public final class TextClassificationManager {
                 && TextClassifierService.getServiceComponentName(mContext) != null;
     }
 
-    private void invalidate() {
+    /** @hide */
+    @VisibleForTesting
+    public void invalidate() {
         synchronized (mLock) {
             mSettings = null;
             mLocalTextClassifier = null;
