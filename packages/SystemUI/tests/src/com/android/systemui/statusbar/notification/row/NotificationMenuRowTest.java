@@ -42,6 +42,7 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -63,6 +64,13 @@ public class NotificationMenuRowTest extends LeakCheckedTest {
         entry.channel = mock(NotificationChannel.class);
         when(mRow.getEntry()).thenReturn(entry);
     }
+
+    @After
+    public void tearDown() {
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                NOTIFICATION_NEW_INTERRUPTION_MODEL, 0);
+    }
+
 
     @Test
     public void testAttachDetach() {
