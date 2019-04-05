@@ -18,11 +18,25 @@
 #include "Log.h"
 #include "MetricProducer.h"
 
+using android::util::FIELD_COUNT_REPEATED;
+using android::util::FIELD_TYPE_INT32;
+using android::util::FIELD_TYPE_INT64;
+using android::util::FIELD_TYPE_MESSAGE;
+using android::util::ProtoOutputStream;
+
 namespace android {
 namespace os {
 namespace statsd {
 
 using std::map;
+
+// for ActiveMetric
+const int FIELD_ID_ACTIVE_METRIC_ID = 1;
+const int FIELD_ID_ACTIVE_METRIC_ACTIVATION = 2;
+
+// for ActiveEventActivation
+const int FIELD_ID_ACTIVE_EVENT_ACTIVATION_ATOM_MATCHER_INDEX = 1;
+const int FIELD_ID_ACTIVE_EVENT_ACTIVATION_REMAINING_TTL_NANOS = 2;
 
 void MetricProducer::onMatchedLogEventLocked(const size_t matcherIndex, const LogEvent& event) {
     if (!mIsActive) {
@@ -74,7 +88,7 @@ bool MetricProducer::evaluateActiveStateLocked(int64_t elapsedTimestampNs) {
     bool isActive = mEventActivationMap.empty();
     for (auto& it : mEventActivationMap) {
         if (it.second->state == ActivationState::kActive &&
-            elapsedTimestampNs > it.second->ttl_ns + it.second->activation_ns) {
+            elapsedTimestampNs > it.second->ttl_ns + it.second->start_ns) {
             it.second->state = ActivationState::kNotActive;
         }
         if (it.second->state == ActivationState::kActive) {
@@ -122,7 +136,7 @@ void MetricProducer::activateLocked(int activationTrackerIndex, int64_t elapsedT
         it->second->state = ActivationState::kActiveOnBoot;
         return;
     }
-    it->second->activation_ns = elapsedTimestampNs;
+    it->second->start_ns = elapsedTimestampNs;
     it->second->state = ActivationState::kActive;
     mIsActive = true;
 }
@@ -135,46 +149,55 @@ void MetricProducer::cancelEventActivationLocked(int deactivationTrackerIndex) {
     it->second->state = ActivationState::kNotActive;
 }
 
-void MetricProducer::setActiveLocked(int64_t currentTimeNs, int64_t remainingTtlNs) {
+void MetricProducer::loadActiveMetricLocked(const ActiveMetric& activeMetric,
+                                            int64_t currentTimeNs) {
     if (mEventActivationMap.size() == 0) {
         return;
     }
-    for (auto& pair : mEventActivationMap) {
-        auto& activation = pair.second;
-        if (activation->ttl_ns >= remainingTtlNs) {
-            activation->activation_ns = currentTimeNs + remainingTtlNs - activation->ttl_ns;
-            activation->state = kActive;
-            mIsActive = true;
-            VLOG("setting new activation->time to %lld, %lld, %lld",
-                 (long long)activation->activation_ns, (long long)currentTimeNs,
-                 (long long)remainingTtlNs);
-            return;
+    for (int i = 0; i < activeMetric.activation_size(); i++) {
+        const auto& activeEventActivation = activeMetric.activation(i);
+        auto it = mEventActivationMap.find(activeEventActivation.atom_matcher_index());
+        if (it == mEventActivationMap.end()) {
+            ALOGE("Saved event activation not found");
+            continue;
         }
+        auto& activation = it->second;
+        // We don't want to change the ttl for future activations, so we set the start_ns
+        // such that start_ns + ttl_ns == currentTimeNs + remaining_ttl_nanos
+        activation->start_ns =
+            currentTimeNs + activeEventActivation.remaining_ttl_nanos() - activation->ttl_ns;
+        activation->state = ActivationState::kActive;
+        mIsActive = true;
     }
-    ALOGE("Required ttl is longer than all possible activations.");
 }
 
-int64_t MetricProducer::getRemainingTtlNsLocked(int64_t currentTimeNs) const {
-    int64_t maxTtl = 0;
-    for (const auto& activation : mEventActivationMap) {
-        if (activation.second->state == kActive) {
-            maxTtl = std::max(maxTtl, activation.second->ttl_ns + activation.second->activation_ns -
-                                              currentTimeNs);
-        }
-    }
-    return maxTtl;
-}
+void MetricProducer::writeActiveMetricToProtoOutputStream(
+        int64_t currentTimeNs, ProtoOutputStream* proto) {
+    proto->write(FIELD_TYPE_INT64 | FIELD_ID_ACTIVE_METRIC_ID, (long long)mMetricId);
+    for (auto& it : mEventActivationMap) {
+        const int atom_matcher_index = it.first;
+        const std::shared_ptr<Activation>& activation = it.second;
 
-void MetricProducer::prepActiveForBootIfNecessaryLocked(int64_t currentTimeNs) {
-    if (mActivationType != MetricActivation::ACTIVATE_ON_BOOT) {
-        return;
-    }
-    for (auto& activation : mEventActivationMap) {
-        if (activation.second->state == kActiveOnBoot) {
-            activation.second->state = kActive;
-            activation.second->activation_ns = currentTimeNs;
-            mIsActive = true;
+        if (ActivationState::kNotActive == activation->state ||
+                (ActivationState::kActive == activation->state &&
+                 activation->start_ns + activation->ttl_ns < currentTimeNs)) {
+            continue;
         }
+
+        const uint64_t activationToken = proto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
+                FIELD_ID_ACTIVE_METRIC_ACTIVATION);
+        proto->write(FIELD_TYPE_INT32 | FIELD_ID_ACTIVE_EVENT_ACTIVATION_ATOM_MATCHER_INDEX,
+                atom_matcher_index);
+        if (ActivationState::kActive == activation->state) {
+            const int64_t remainingTtlNs =
+                    activation->start_ns + activation->ttl_ns - currentTimeNs;
+            proto->write(FIELD_TYPE_INT64 | FIELD_ID_ACTIVE_EVENT_ACTIVATION_REMAINING_TTL_NANOS,
+                    (long long)remainingTtlNs);
+        } else if (ActivationState::kActiveOnBoot == activation->state) {
+            proto->write(FIELD_TYPE_INT64 | FIELD_ID_ACTIVE_EVENT_ACTIVATION_REMAINING_TTL_NANOS,
+                    (long long)activation->ttl_ns);
+        }
+        proto->end(activationToken);
     }
 }
 
