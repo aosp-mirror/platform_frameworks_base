@@ -29,6 +29,7 @@ import android.os.ParcelFileDescriptor;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Pair;
+import android.view.textclassifier.ActionsModelParamsSupplier.ActionsModelParams;
 import android.view.textclassifier.intent.ClassificationIntentFactory;
 import android.view.textclassifier.intent.LabeledIntent;
 import android.view.textclassifier.intent.LegacyClassificationIntentFactory;
@@ -57,6 +58,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Supplier;
 
 /**
  * Default implementation of the {@link TextClassifier} interface.
@@ -124,6 +126,7 @@ public final class TextClassifierImpl implements TextClassifier {
 
     private final ClassificationIntentFactory mClassificationIntentFactory;
     private final TemplateIntentFactory mTemplateIntentFactory;
+    private final Supplier<ActionsModelParams> mActionsModelParamsSupplier;
 
     public TextClassifierImpl(
             Context context, TextClassificationConstants settings, TextClassifier fallback) {
@@ -158,6 +161,15 @@ public final class TextClassifierImpl implements TextClassifier {
                 ? new TemplateClassificationIntentFactory(
                 mTemplateIntentFactory, new LegacyClassificationIntentFactory())
                 : new LegacyClassificationIntentFactory();
+        mActionsModelParamsSupplier = new ActionsModelParamsSupplier(mContext,
+                () -> {
+                    synchronized (mLock) {
+                        // Clear mActionsImpl here, so that we will create a new
+                        // ActionsSuggestionsModel object with the new flag in the next request.
+                        mActionsImpl = null;
+                        mActionModelInUse = null;
+                    }
+                });
     }
 
     public TextClassifierImpl(Context context, TextClassificationConstants settings) {
@@ -584,10 +596,14 @@ public final class TextClassifierImpl implements TextClassifier {
                 final ParcelFileDescriptor pfd = ParcelFileDescriptor.open(
                         new File(bestModel.getPath()), ParcelFileDescriptor.MODE_READ_ONLY);
                 try {
-                    if (pfd != null) {
-                        mActionsImpl = new ActionsSuggestionsModel(pfd.getFd());
-                        mActionModelInUse = bestModel;
+                    if (pfd == null) {
+                        Log.d(LOG_TAG, "Failed to read the model file: " + bestModel.getPath());
+                        return null;
                     }
+                    ActionsModelParams params = mActionsModelParamsSupplier.get();
+                    mActionsImpl = new ActionsSuggestionsModel(
+                            pfd.getFd(), params.getSerializedPreconditions(bestModel));
+                    mActionModelInUse = bestModel;
                 } finally {
                     maybeCloseAndLogError(pfd);
                 }
