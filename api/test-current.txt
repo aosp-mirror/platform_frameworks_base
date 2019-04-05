@@ -1547,7 +1547,6 @@ package android.net.util {
     method @NonNull public static java.net.SocketAddress makeNetlinkSocketAddress(int, int);
     method @NonNull public static java.net.SocketAddress makePacketSocketAddress(int, int);
     method @NonNull public static java.net.SocketAddress makePacketSocketAddress(int, @NonNull byte[]);
-    method public static void setSocketTimeValueOption(@NonNull java.io.FileDescriptor, int, int, long) throws android.system.ErrnoException;
   }
 
 }
