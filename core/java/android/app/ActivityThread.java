@@ -5718,14 +5718,18 @@ public final class ActivityThread extends ClientTransactionHandler {
                 if (packages == null) {
                     break;
                 }
+
+                List<String> packagesHandled = new ArrayList<>();
+
                 synchronized (mResourcesManager) {
                     for (int i = packages.length - 1; i >= 0; i--) {
-                        WeakReference<LoadedApk> ref = mPackages.get(packages[i]);
+                        String packageName = packages[i];
+                        WeakReference<LoadedApk> ref = mPackages.get(packageName);
                         LoadedApk pkgInfo = ref != null ? ref.get() : null;
                         if (pkgInfo != null) {
                             hasPkgInfo = true;
                         } else {
-                            ref = mResourcePackages.get(packages[i]);
+                            ref = mResourcePackages.get(packageName);
                             pkgInfo = ref != null ? ref.get() : null;
                             if (pkgInfo != null) {
                                 hasPkgInfo = true;
@@ -5736,8 +5740,8 @@ public final class ActivityThread extends ClientTransactionHandler {
                         // Adjust it's internal references to the application info and
                         // resources.
                         if (pkgInfo != null) {
+                            packagesHandled.add(packageName);
                             try {
-                                final String packageName = packages[i];
                                 final ApplicationInfo aInfo =
                                         sPackageManager.getApplicationInfo(
                                                 packageName,
@@ -5769,6 +5773,13 @@ public final class ActivityThread extends ClientTransactionHandler {
                         }
                     }
                 }
+
+                try {
+                    getPackageManager().notifyPackagesReplacedReceived(
+                            packagesHandled.toArray(new String[0]));
+                } catch (RemoteException ignored) {
+                }
+
                 break;
             }
         }
