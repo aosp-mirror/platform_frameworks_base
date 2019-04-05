@@ -410,11 +410,13 @@ class SurfaceAnimator {
 
         /**
          * @return The surface of the object to be animated.
+         *         This SurfaceControl must be valid if non-null.
          */
         @Nullable SurfaceControl getSurfaceControl();
 
         /**
          * @return The parent of the surface object to be animated.
+         *         This SurfaceControl must be valid if non-null.
          */
         @Nullable SurfaceControl getParentSurfaceControl();
 

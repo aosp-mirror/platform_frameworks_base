@@ -130,6 +130,7 @@ class Dimmer {
             mSurfaceAnimator = new SurfaceAnimator(dimAnimatable, () -> {
                 if (!mDimming) {
                     dimAnimatable.getPendingTransaction().remove(mDimLayer);
+                    mDimLayer = null;
                 }
             }, mHost.mWmService);
         }
