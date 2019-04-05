@@ -159,6 +159,9 @@ std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // temperature
         {android::util::TEMPERATURE,
          {.puller = new StatsCompanionServicePuller(android::util::TEMPERATURE)}},
+        // cooling_device
+        {android::util::COOLING_DEVICE,
+         {.puller = new StatsCompanionServicePuller(android::util::COOLING_DEVICE)}},
         // binder_calls
         {android::util::BINDER_CALLS,
          {.additiveFields = {4, 5, 6, 8, 12},
