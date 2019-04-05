@@ -350,6 +350,11 @@ public class BiometricService extends SystemService {
     }
 
     private final class SettingObserver extends ContentObserver {
+
+        private static final boolean DEFAULT_KEYGUARD_ENABLED = true;
+        private static final boolean DEFAULT_APP_ENABLED = true;
+        private static final boolean DEFAULT_ALWAYS_REQUIRE_CONFIRMATION = false;
+
         private final Uri FACE_UNLOCK_KEYGUARD_ENABLED =
                 Settings.Secure.getUriFor(Settings.Secure.FACE_UNLOCK_KEYGUARD_ENABLED);
         private final Uri FACE_UNLOCK_APP_ENABLED =
@@ -358,9 +363,10 @@ public class BiometricService extends SystemService {
                 Settings.Secure.getUriFor(Settings.Secure.FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION);
 
         private final ContentResolver mContentResolver;
-        private boolean mFaceEnabledOnKeyguard;
-        private boolean mFaceEnabledForApps;
-        private boolean mFaceAlwaysRequireConfirmation;
+
+        private Map<Integer, Boolean> mFaceEnabledOnKeyguard = new HashMap<>();
+        private Map<Integer, Boolean> mFaceEnabledForApps = new HashMap<>();
+        private Map<Integer, Boolean> mFaceAlwaysRequireConfirmation = new HashMap<>();
 
         /**
          * Creates a content observer.
@@ -378,63 +384,61 @@ public class BiometricService extends SystemService {
             mContentResolver.registerContentObserver(FACE_UNLOCK_KEYGUARD_ENABLED,
                     false /* notifyForDescendents */,
                     this /* observer */,
-                    UserHandle.USER_CURRENT);
+                    UserHandle.USER_ALL);
             mContentResolver.registerContentObserver(FACE_UNLOCK_APP_ENABLED,
                     false /* notifyForDescendents */,
                     this /* observer */,
-                    UserHandle.USER_CURRENT);
+                    UserHandle.USER_ALL);
             mContentResolver.registerContentObserver(FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION,
                     false /* notifyForDescendents */,
                     this /* observer */,
-                    UserHandle.USER_CURRENT);
-
-            // Update the value immediately
-            onChange(true /* selfChange */, FACE_UNLOCK_KEYGUARD_ENABLED);
-            onChange(true /* selfChange */, FACE_UNLOCK_APP_ENABLED);
-            onChange(true /* selfChange */, FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION);
+                    UserHandle.USER_ALL);
         }
 
         @Override
-        public void onChange(boolean selfChange, Uri uri) {
+        public void onChange(boolean selfChange, Uri uri, int userId) {
             if (FACE_UNLOCK_KEYGUARD_ENABLED.equals(uri)) {
-                mFaceEnabledOnKeyguard =
-                        Settings.Secure.getIntForUser(
+                mFaceEnabledOnKeyguard.put(userId, Settings.Secure.getIntForUser(
                                 mContentResolver,
                                 Settings.Secure.FACE_UNLOCK_KEYGUARD_ENABLED,
-                                1 /* default */,
-                                UserHandle.USER_CURRENT) != 0;
+                                DEFAULT_KEYGUARD_ENABLED ? 1 : 0 /* default */,
+                                userId) != 0);
 
-                List<EnabledOnKeyguardCallback> callbacks = mEnabledOnKeyguardCallbacks;
-                for (int i = 0; i < callbacks.size(); i++) {
-                    callbacks.get(i).notify(BiometricSourceType.FACE, mFaceEnabledOnKeyguard);
+                if (userId == ActivityManager.getCurrentUser()) {
+                    List<EnabledOnKeyguardCallback> callbacks = mEnabledOnKeyguardCallbacks;
+                    for (int i = 0; i < callbacks.size(); i++) {
+                        callbacks.get(i).notify(BiometricSourceType.FACE,
+                                mFaceEnabledOnKeyguard.getOrDefault(userId,
+                                        DEFAULT_KEYGUARD_ENABLED));
+                    }
                 }
             } else if (FACE_UNLOCK_APP_ENABLED.equals(uri)) {
-                mFaceEnabledForApps =
-                        Settings.Secure.getIntForUser(
+                mFaceEnabledForApps.put(userId, Settings.Secure.getIntForUser(
                                 mContentResolver,
                                 Settings.Secure.FACE_UNLOCK_APP_ENABLED,
-                                1 /* default */,
-                                UserHandle.USER_CURRENT) != 0;
+                                DEFAULT_APP_ENABLED ? 1 : 0 /* default */,
+                                userId) != 0);
             } else if (FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION.equals(uri)) {
-                mFaceAlwaysRequireConfirmation =
-                        Settings.Secure.getIntForUser(
+                mFaceAlwaysRequireConfirmation.put(userId, Settings.Secure.getIntForUser(
                                 mContentResolver,
                                 Settings.Secure.FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION,
-                                0 /* default */,
-                                UserHandle.USER_CURRENT) != 0;
+                                DEFAULT_ALWAYS_REQUIRE_CONFIRMATION ? 1 : 0 /* default */,
+                                userId) != 0);
             }
         }
 
         boolean getFaceEnabledOnKeyguard() {
-            return mFaceEnabledOnKeyguard;
+            return mFaceEnabledOnKeyguard.getOrDefault(
+                    ActivityManager.getCurrentUser(), DEFAULT_KEYGUARD_ENABLED);
         }
 
-        boolean getFaceEnabledForApps() {
-            return mFaceEnabledForApps;
+        boolean getFaceEnabledForApps(int userId) {
+            return mFaceEnabledForApps.getOrDefault(userId, DEFAULT_APP_ENABLED);
         }
 
-        boolean getFaceAlwaysRequireConfirmation() {
-            return mFaceAlwaysRequireConfirmation;
+        boolean getFaceAlwaysRequireConfirmation(int userId) {
+            return mFaceAlwaysRequireConfirmation
+                    .getOrDefault(userId, DEFAULT_ALWAYS_REQUIRE_CONFIRMATION);
         }
     }
 
@@ -603,7 +607,7 @@ public class BiometricService extends SystemService {
                     mConfirmDeviceCredentialReceiver = receiver;
                     // Use this so we don't need to duplicate logic..
                     final Intent intent = kgm.createConfirmDeviceCredentialIntent(null /* title */,
-                            null /* description */);
+                            null /* description */, userId);
                     // Then give it the bundle to do magic behavior..
                     intent.putExtra(KeyguardManager.EXTRA_BIOMETRIC_PROMPT_BUNDLE, bundle);
                     // Create a new task with this activity located at the root.
@@ -862,7 +866,7 @@ public class BiometricService extends SystemService {
                 }
                 if (authenticator.hasEnrolledTemplates(userId)) {
                     hasTemplatesEnrolled = true;
-                    if (isEnabledForApp(modality)) {
+                    if (isEnabledForApp(modality, userId)) {
                         // TODO(b/110907543): When face settings (and other settings) have both a
                         // user toggle as well as a work profile settings page, this needs to be
                         // updated to reflect the correct setting.
@@ -887,14 +891,14 @@ public class BiometricService extends SystemService {
         return new Pair<>(modality, BiometricConstants.BIOMETRIC_SUCCESS);
     }
 
-    private boolean isEnabledForApp(int modality) {
+    private boolean isEnabledForApp(int modality, int userId) {
         switch(modality) {
             case TYPE_FINGERPRINT:
                 return true;
             case TYPE_IRIS:
                 return true;
             case TYPE_FACE:
-                return mSettingObserver.getFaceEnabledForApps();
+                return mSettingObserver.getFaceEnabledForApps(userId);
             default:
                 Slog.w(TAG, "Unsupported modality: " + modality);
                 return false;
@@ -1341,7 +1345,7 @@ public class BiometricService extends SystemService {
             if ((modality & TYPE_FACE) != 0) {
                 // Check if the user has forced confirmation to be required in Settings.
                 requireConfirmation = requireConfirmation
-                        || mSettingObserver.getFaceAlwaysRequireConfirmation();
+                        || mSettingObserver.getFaceAlwaysRequireConfirmation(userId);
             }
             // Generate random cookies to pass to the services that should prepare to start
             // authenticating. Store the cookie here and wait for all services to "ack"
