@@ -136,3 +136,126 @@ TEST(CommonPool, fullQueue) {
         f.get();
     }
 }
+
+struct DestructorObserver {
+    DestructorObserver(int* destroyCount) : mDestroyCount(destroyCount) {}
+    DestructorObserver(const DestructorObserver& other) : mDestroyCount(other.mDestroyCount) {}
+    DestructorObserver(DestructorObserver&& other) {
+        mDestroyCount = other.mDestroyCount;
+        other.mDestroyCount = nullptr;
+    }
+    ~DestructorObserver() {
+        if (mDestroyCount) {
+            (*mDestroyCount)++;
+        }
+    }
+    DestructorObserver& operator=(DestructorObserver&& other) {
+        mDestroyCount = other.mDestroyCount;
+        other.mDestroyCount = nullptr;
+        return *this;
+    }
+    int* mDestroyCount;
+};
+
+struct CopyObserver {
+    CopyObserver(int* copyCount) : mCopyCount(copyCount) {}
+    CopyObserver(CopyObserver&& other) = default;
+    CopyObserver& operator=(CopyObserver&& other) = default;
+
+    CopyObserver(const CopyObserver& other) {
+        mCopyCount = other.mCopyCount;
+        if (mCopyCount) {
+            (*mCopyCount)++;
+        }
+    }
+
+    CopyObserver& operator=(const CopyObserver& other) {
+        mCopyCount = other.mCopyCount;
+        if (mCopyCount) {
+            (*mCopyCount)++;
+        }
+        return *this;
+    }
+
+    int* mCopyCount;
+};
+
+TEST(CommonPool, asyncLifecycleCheck) {
+    std::vector<std::future<void>> mFrameFences;
+    int destroyCount = 0;
+    int runCount = 0;
+    {
+        DestructorObserver observer{&destroyCount};
+        auto func = [observer = std::move(observer), count = &runCount]() {
+            if (observer.mDestroyCount) {
+                (*count)++;
+            }
+        };
+        mFrameFences.push_back(CommonPool::async(std::move(func)));
+    }
+    for (auto& fence : mFrameFences) {
+        EXPECT_TRUE(fence.valid());
+        fence.get();
+        EXPECT_FALSE(fence.valid());
+    }
+    mFrameFences.clear();
+    EXPECT_EQ(1, runCount);
+    EXPECT_EQ(1, destroyCount);
+}
+
+TEST(CommonPool, asyncCopyCheck) {
+    std::vector<std::future<void>> mFrameFences;
+    int copyCount = 0;
+    int runCount = 0;
+    {
+        CopyObserver observer{&copyCount};
+        auto func = [observer = std::move(observer), count = &runCount]() {
+            if (observer.mCopyCount) {
+                (*count)++;
+            }
+        };
+        mFrameFences.push_back(CommonPool::async(std::move(func)));
+    }
+    for (auto& fence : mFrameFences) {
+        EXPECT_TRUE(fence.valid());
+        fence.get();
+        EXPECT_FALSE(fence.valid());
+    }
+    mFrameFences.clear();
+    EXPECT_EQ(1, runCount);
+    // We expect std::move all the way
+    EXPECT_EQ(0, copyCount);
+}
+
+TEST(CommonPool, syncLifecycleCheck) {
+    int destroyCount = 0;
+    int runCount = 0;
+    {
+        DestructorObserver observer{&destroyCount};
+        auto func = [observer = std::move(observer), count = &runCount]() {
+            if (observer.mDestroyCount) {
+                (*count)++;
+            }
+        };
+        CommonPool::runSync(std::move(func));
+    }
+    EXPECT_EQ(1, runCount);
+    EXPECT_EQ(1, destroyCount);
+}
+
+TEST(CommonPool, syncCopyCheck) {
+    int copyCount = 0;
+    int runCount = 0;
+    {
+        CopyObserver observer{&copyCount};
+        auto func = [observer = std::move(observer), count = &runCount]() {
+            if (observer.mCopyCount) {
+                (*count)++;
+            }
+        };
+        CommonPool::runSync(std::move(func));
+    }
+    EXPECT_EQ(1, runCount);
+    // We expect std::move all the way
+    EXPECT_EQ(0, copyCount);
+}
