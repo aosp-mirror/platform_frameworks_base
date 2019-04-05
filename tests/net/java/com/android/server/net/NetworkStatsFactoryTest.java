@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.net;
+package com.android.server.net;
 
 import static android.net.NetworkStats.DEFAULT_NETWORK_NO;
 import static android.net.NetworkStats.METERED_NO;
@@ -70,6 +70,10 @@ public class NetworkStatsFactoryTest {
             IoUtils.deleteContents(mTestProc);
         }
 
+        // The libandroid_servers which have the native method is not available to
+        // applications. So in order to have a test support native library, the native code
+        // related to networkStatsFactory is compiled to a minimal native library and loaded here.
+        System.loadLibrary("networkstatsfactorytestjni");
         mFactory = new NetworkStatsFactory(mTestProc, false);
     }
 

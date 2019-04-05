@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.internal.net;
+package com.android.server.net;
 
 import android.net.NetworkStats;
 import android.os.SystemClock;
+import com.android.server.net.NetworkStatsFactory;
 import com.google.caliper.AfterExperiment;
 import com.google.caliper.BeforeExperiment;
 import java.io.File;

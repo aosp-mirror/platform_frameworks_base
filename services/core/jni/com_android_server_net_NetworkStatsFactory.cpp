@@ -21,9 +21,9 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include <core_jni_helpers.h>
 #include <jni.h>
 
+#include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedUtfChars.h>
 #include <nativehelper/ScopedLocalRef.h>
 #include <nativehelper/ScopedPrimitiveArray.h>
@@ -333,29 +333,27 @@ static const JNINativeMethod gMethods[] = {
                 (void*) readNetworkStatsDev },
 };
 
-int register_com_android_internal_net_NetworkStatsFactory(JNIEnv* env) {
-    int err = RegisterMethodsOrDie(env,
-            "com/android/internal/net/NetworkStatsFactory", gMethods,
+int register_android_server_net_NetworkStatsFactory(JNIEnv* env) {
+    int err = jniRegisterNativeMethods(env, "com/android/server/net/NetworkStatsFactory", gMethods,
             NELEM(gMethods));
+    gStringClass = env->FindClass("java/lang/String");
+    gStringClass = static_cast<jclass>(env->NewGlobalRef(gStringClass));
 
-    gStringClass = FindClassOrDie(env, "java/lang/String");
-    gStringClass = MakeGlobalRefOrDie(env, gStringClass);
-
-    jclass clazz = FindClassOrDie(env, "android/net/NetworkStats");
-    gNetworkStatsClassInfo.size = GetFieldIDOrDie(env, clazz, "size", "I");
-    gNetworkStatsClassInfo.capacity = GetFieldIDOrDie(env, clazz, "capacity", "I");
-    gNetworkStatsClassInfo.iface = GetFieldIDOrDie(env, clazz, "iface", "[Ljava/lang/String;");
-    gNetworkStatsClassInfo.uid = GetFieldIDOrDie(env, clazz, "uid", "[I");
-    gNetworkStatsClassInfo.set = GetFieldIDOrDie(env, clazz, "set", "[I");
-    gNetworkStatsClassInfo.tag = GetFieldIDOrDie(env, clazz, "tag", "[I");
-    gNetworkStatsClassInfo.metered = GetFieldIDOrDie(env, clazz, "metered", "[I");
-    gNetworkStatsClassInfo.roaming = GetFieldIDOrDie(env, clazz, "roaming", "[I");
-    gNetworkStatsClassInfo.defaultNetwork = GetFieldIDOrDie(env, clazz, "defaultNetwork", "[I");
-    gNetworkStatsClassInfo.rxBytes = GetFieldIDOrDie(env, clazz, "rxBytes", "[J");
-    gNetworkStatsClassInfo.rxPackets = GetFieldIDOrDie(env, clazz, "rxPackets", "[J");
-    gNetworkStatsClassInfo.txBytes = GetFieldIDOrDie(env, clazz, "txBytes", "[J");
-    gNetworkStatsClassInfo.txPackets = GetFieldIDOrDie(env, clazz, "txPackets", "[J");
-    gNetworkStatsClassInfo.operations = GetFieldIDOrDie(env, clazz, "operations", "[J");
+    jclass clazz = env->FindClass("android/net/NetworkStats");
+    gNetworkStatsClassInfo.size = env->GetFieldID(clazz, "size", "I");
+    gNetworkStatsClassInfo.capacity = env->GetFieldID(clazz, "capacity", "I");
+    gNetworkStatsClassInfo.iface = env->GetFieldID(clazz, "iface", "[Ljava/lang/String;");
+    gNetworkStatsClassInfo.uid = env->GetFieldID(clazz, "uid", "[I");
+    gNetworkStatsClassInfo.set = env->GetFieldID(clazz, "set", "[I");
+    gNetworkStatsClassInfo.tag = env->GetFieldID(clazz, "tag", "[I");
+    gNetworkStatsClassInfo.metered = env->GetFieldID(clazz, "metered", "[I");
+    gNetworkStatsClassInfo.roaming = env->GetFieldID(clazz, "roaming", "[I");
+    gNetworkStatsClassInfo.defaultNetwork = env->GetFieldID(clazz, "defaultNetwork", "[I");
+    gNetworkStatsClassInfo.rxBytes = env->GetFieldID(clazz, "rxBytes", "[J");
+    gNetworkStatsClassInfo.rxPackets = env->GetFieldID(clazz, "rxPackets", "[J");
+    gNetworkStatsClassInfo.txBytes = env->GetFieldID(clazz, "txBytes", "[J");
+    gNetworkStatsClassInfo.txPackets = env->GetFieldID(clazz, "txPackets", "[J");
+    gNetworkStatsClassInfo.operations = env->GetFieldID(clazz, "operations", "[J");
 
     return err;
 }
