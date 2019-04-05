@@ -28,6 +28,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.AlarmManager;
@@ -40,7 +41,9 @@ import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.MacAddress;
+import android.net.NetworkStackIpMemoryStore;
 import android.net.RouteInfo;
+import android.net.ipmemorystore.NetworkAttributes;
 import android.net.shared.InitialConfiguration;
 import android.net.shared.ProvisioningConfiguration;
 import android.net.util.InterfaceParams;
@@ -81,6 +84,8 @@ public class IpClientTest {
     // See RFC 7042#section-2.1.2 for EUI-48 documentation values.
     private static final MacAddress TEST_MAC = MacAddress.fromString("00:00:5E:00:53:01");
     private static final int TEST_TIMEOUT_MS = 400;
+    private static final String TEST_L2KEY = "some l2key";
+    private static final String TEST_GROUPHINT = "some grouphint";
 
     @Mock private Context mContext;
     @Mock private ConnectivityManager mCm;
@@ -92,6 +97,7 @@ public class IpClientTest {
     @Mock private IpClient.Dependencies mDependencies;
     @Mock private ContentResolver mContentResolver;
     @Mock private NetworkStackService.NetworkStackServiceManager mNetworkStackServiceManager;
+    @Mock private NetworkStackIpMemoryStore mIpMemoryStore;
 
     private NetworkObserver mObserver;
     private InterfaceParams mIfParams;
@@ -141,6 +147,12 @@ public class IpClientTest {
         return empty;
     }
 
+    private void verifyNetworkAttributesStored(final String l2Key,
+            final NetworkAttributes attributes) {
+        // TODO : when storing is implemented, turn this on
+        // verify(mIpMemoryStore).storeNetworkAttributes(eq(l2Key), eq(attributes), any());
+    }
+
     @Test
     public void testNullInterfaceNameMostDefinitelyThrows() throws Exception {
         setTestInterfaceParams(null);
@@ -173,6 +185,7 @@ public class IpClientTest {
         setTestInterfaceParams(TEST_IFNAME);
         final IpClient ipc = new IpClient(mContext, TEST_IFNAME, mCb, mObserverRegistry,
                 mNetworkStackServiceManager, mDependencies);
+        verifyNoMoreInteractions(mIpMemoryStore);
         ipc.shutdown();
     }
 
@@ -183,6 +196,7 @@ public class IpClientTest {
                 mNetworkStackServiceManager, mDependencies);
         ipc.startProvisioning(new ProvisioningConfiguration());
         verify(mCb, times(1)).onProvisioningFailure(any());
+        verify(mIpMemoryStore, never()).storeNetworkAttributes(any(), any(), any());
         ipc.shutdown();
     }
 
@@ -202,6 +216,7 @@ public class IpClientTest {
         verify(mCb, times(1)).setNeighborDiscoveryOffload(true);
         verify(mCb, timeout(TEST_TIMEOUT_MS).times(1)).setFallbackMulticastFilter(false);
         verify(mCb, never()).onProvisioningFailure(any());
+        verify(mIpMemoryStore, never()).storeNetworkAttributes(any(), any(), any());
 
         ipc.shutdown();
         verify(mNetd, timeout(TEST_TIMEOUT_MS).times(1)).interfaceSetEnableIPv6(iface, false);
@@ -214,6 +229,8 @@ public class IpClientTest {
     public void testProvisioningWithInitialConfiguration() throws Exception {
         final String iface = TEST_IFNAME;
         final IpClient ipc = makeIpClient(iface);
+        final String l2Key = TEST_L2KEY;
+        final String groupHint = TEST_GROUPHINT;
 
         String[] addresses = {
             "fe80::a4be:f92:e1f7:22d1/64",
@@ -232,6 +249,7 @@ public class IpClientTest {
         verify(mCb, times(1)).setNeighborDiscoveryOffload(true);
         verify(mCb, timeout(TEST_TIMEOUT_MS).times(1)).setFallbackMulticastFilter(false);
         verify(mCb, never()).onProvisioningFailure(any());
+        ipc.setL2KeyAndGroupHint(l2Key, groupHint);
 
         for (String addr : addresses) {
             String[] parts = addr.split("/");
@@ -253,12 +271,16 @@ public class IpClientTest {
         LinkProperties want = linkproperties(links(addresses), routes(prefixes));
         want.setInterfaceName(iface);
         verify(mCb, timeout(TEST_TIMEOUT_MS).times(1)).onProvisioningSuccess(want);
+        verifyNetworkAttributesStored(l2Key, new NetworkAttributes.Builder()
+                .setGroupHint(groupHint)
+                .build());
 
         ipc.shutdown();
         verify(mNetd, timeout(TEST_TIMEOUT_MS).times(1)).interfaceSetEnableIPv6(iface, false);
         verify(mNetd, timeout(TEST_TIMEOUT_MS).times(1)).interfaceClearAddrs(iface);
         verify(mCb, timeout(TEST_TIMEOUT_MS).times(1))
                 .onLinkPropertiesChange(makeEmptyLinkProperties(iface));
+        verifyNoMoreInteractions(mIpMemoryStore);
     }
 
     @Test
