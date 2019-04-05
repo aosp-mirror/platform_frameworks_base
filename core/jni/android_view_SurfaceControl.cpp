@@ -1361,7 +1361,7 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetInputWindowInfo },
     {"nativeTransferTouchFocus", "(JLandroid/os/IBinder;Landroid/os/IBinder;)V",
             (void*)nativeTransferTouchFocus },
-    {"nativeSetMetadata", "(JILandroid/os/Parcel;)V",
+    {"nativeSetMetadata", "(JJILandroid/os/Parcel;)V",
             (void*)nativeSetMetadata },
     {"nativeGetDisplayedContentSamplingAttributes",
             "(Landroid/os/IBinder;)Landroid/hardware/display/DisplayedContentSamplingAttributes;",

@@ -230,12 +230,12 @@ public class StubTransaction extends SurfaceControl.Transaction {
     }
 
     @Override
-    public SurfaceControl.Transaction setMetadata(int key, int data) {
+    public SurfaceControl.Transaction setMetadata(SurfaceControl sc, int key, int data) {
         return this;
     }
 
     @Override
-    public SurfaceControl.Transaction setMetadata(int key, Parcel data) {
+    public SurfaceControl.Transaction setMetadata(SurfaceControl sc, int key, Parcel data) {
         return this;
     }
 
