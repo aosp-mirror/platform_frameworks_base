@@ -19,7 +19,6 @@ package com.android.server.biometrics;
 import static android.Manifest.permission.USE_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.Manifest.permission.USE_FINGERPRINT;
-import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_IRIS;
@@ -584,30 +583,9 @@ public class BiometricService extends SystemService {
             if (useDefaultTitle) {
                 checkInternalPermission();
                 // Set the default title if necessary
-                try {
-                    final List<ActivityManager.RunningAppProcessInfo> procs =
-                            ActivityManager.getService().getRunningAppProcesses();
-                    for (int i = 0; i < procs.size(); i++) {
-                        final ActivityManager.RunningAppProcessInfo info = procs.get(i);
-                        if (info.uid == callingUid
-                                && info.importance == IMPORTANCE_FOREGROUND) {
-                            PackageManager pm = getContext().getPackageManager();
-                            final CharSequence label = pm.getApplicationLabel(
-                                    pm.getApplicationInfo(info.processName,
-                                            PackageManager.GET_META_DATA));
-                            final String title = getContext()
-                                    .getString(R.string.biometric_dialog_default_title, label);
-                            if (TextUtils.isEmpty(
-                                    bundle.getCharSequence(BiometricPrompt.KEY_TITLE))) {
-                                bundle.putCharSequence(BiometricPrompt.KEY_TITLE, title);
-                            }
-                            break;
-                        }
-                    }
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Remote exception", e);
-                } catch (PackageManager.NameNotFoundException e) {
-                    Slog.e(TAG, "Name not found", e);
+                if (TextUtils.isEmpty(bundle.getCharSequence(BiometricPrompt.KEY_TITLE))) {
+                    bundle.putCharSequence(BiometricPrompt.KEY_TITLE,
+                            getContext().getString(R.string.biometric_dialog_default_title));
                 }
             }
 
