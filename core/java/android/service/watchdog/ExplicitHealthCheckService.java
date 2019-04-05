@@ -61,7 +61,7 @@ public abstract class ExplicitHealthCheckService extends Service {
     private static final String TAG = "ExplicitHealthCheckService";
 
     /**
-     * {@link Bundle} key for a {@link List} of {@link String} value.
+     * {@link Bundle} key for a {@link List} of {@link PackageInfo} value.
      *
      * {@hide}
      */
@@ -130,7 +130,7 @@ public abstract class ExplicitHealthCheckService extends Service {
      *
      * @return all packages supporting explicit health checks
      */
-    @NonNull public abstract List<String> onGetSupportedPackages();
+    @NonNull public abstract List<PackageInfo> onGetSupportedPackages();
 
     /**
      * Called when the system requests for all the packages that it has currently requested
@@ -187,22 +187,26 @@ public abstract class ExplicitHealthCheckService extends Service {
 
         @Override
         public void getSupportedPackages(RemoteCallback callback) throws RemoteException {
-            mHandler.post(() -> sendPackages(callback, EXTRA_SUPPORTED_PACKAGES,
-                    ExplicitHealthCheckService.this.onGetSupportedPackages()));
+            mHandler.post(() -> {
+                List<PackageInfo> packages =
+                        ExplicitHealthCheckService.this.onGetSupportedPackages();
+                Objects.requireNonNull(packages, "Supported package list must be non-null");
+                Bundle bundle = new Bundle();
+                bundle.putParcelableArrayList(EXTRA_SUPPORTED_PACKAGES, new ArrayList<>(packages));
+                callback.sendResult(bundle);
+            });
         }
 
         @Override
         public void getRequestedPackages(RemoteCallback callback) throws RemoteException {
-            mHandler.post(() -> sendPackages(callback, EXTRA_REQUESTED_PACKAGES,
-                    ExplicitHealthCheckService.this.onGetRequestedPackages()));
-        }
-
-        private void sendPackages(RemoteCallback callback, String key, List<String> packages) {
-            Objects.requireNonNull(packages,
-                    "Supported and requested package list must be non-null");
-            Bundle bundle = new Bundle();
-            bundle.putStringArrayList(key, new ArrayList<>(packages));
-            callback.sendResult(bundle);
+            mHandler.post(() -> {
+                List<String> packages =
+                        ExplicitHealthCheckService.this.onGetRequestedPackages();
+                Objects.requireNonNull(packages, "Requested  package list must be non-null");
+                Bundle bundle = new Bundle();
+                bundle.putStringArrayList(EXTRA_REQUESTED_PACKAGES, new ArrayList<>(packages));
+                callback.sendResult(bundle);
+            });
         }
     }
 }
