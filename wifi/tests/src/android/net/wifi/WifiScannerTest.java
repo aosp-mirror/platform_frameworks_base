@@ -22,7 +22,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.validateMockitoUsage;
 import static org.mockito.Mockito.verify;
@@ -36,6 +38,7 @@ import android.net.wifi.WifiScanner.ScanSettings;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Messenger;
 import android.os.Parcel;
 import android.os.test.TestLooper;
 
@@ -78,6 +81,7 @@ public class WifiScannerTest {
     private WifiScanner mWifiScanner;
     private TestLooper mLooper;
     private Handler mHandler;
+    private BidirectionalAsyncChannelServer mBidirectionalAsyncChannelServer;
 
     /**
      * Setup before tests.
@@ -86,10 +90,10 @@ public class WifiScannerTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mLooper = new TestLooper();
-        mHandler = mock(Handler.class);
-        BidirectionalAsyncChannelServer server = new BidirectionalAsyncChannelServer(
+        mHandler = spy(new Handler(mLooper.getLooper()));
+        mBidirectionalAsyncChannelServer = new BidirectionalAsyncChannelServer(
                 mContext, mLooper.getLooper(), mHandler);
-        when(mService.getMessenger()).thenReturn(server.getMessenger());
+        when(mService.getMessenger()).thenReturn(mBidirectionalAsyncChannelServer.getMessenger());
         mWifiScanner = new WifiScanner(mContext, mService, mLooper.getLooper());
         mLooper.dispatchAll();
     }
@@ -293,6 +297,69 @@ public class WifiScannerTest {
         assertEquals(mContext.getOpPackageName(),
                 messageBundle.getParcelable(WifiScanner.REQUEST_PACKAGE_NAME_KEY));
 
+    }
+
+    /**
+     * Test behavior of {@link WifiScanner#startScan(ScanSettings, WifiScanner.ScanListener)}
+     * @throws Exception
+     */
+    @Test
+    public void testStartScanListenerOnSuccess() throws Exception {
+        ScanSettings scanSettings = new ScanSettings();
+        WifiScanner.ScanListener scanListener = mock(WifiScanner.ScanListener.class);
+
+        mWifiScanner.startScan(scanSettings, scanListener);
+        mLooper.dispatchAll();
+
+        ArgumentCaptor<Message> messageArgumentCaptor = ArgumentCaptor.forClass(Message.class);
+        verify(mHandler).handleMessage(messageArgumentCaptor.capture());
+        Message sentMessage = messageArgumentCaptor.getValue();
+        assertNotNull(sentMessage);
+
+        assertEquals(1, mBidirectionalAsyncChannelServer.getClientMessengers().size());
+        Messenger scannerMessenger =
+                mBidirectionalAsyncChannelServer.getClientMessengers().iterator().next();
+
+        Message responseMessage = Message.obtain();
+        responseMessage.what = WifiScanner.CMD_OP_SUCCEEDED;
+        responseMessage.arg2 = sentMessage.arg2;
+        scannerMessenger.send(responseMessage);
+        mLooper.dispatchAll();
+
+        verify(scanListener).onSuccess();
+    }
+
+    /**
+     * Test behavior of {@link WifiScanner#startScan(ScanSettings, WifiScanner.ScanListener)}
+     * @throws Exception
+     */
+    @Test
+    public void testStartScanListenerOnResults() throws Exception {
+        ScanSettings scanSettings = new ScanSettings();
+        WifiScanner.ScanListener scanListener = mock(WifiScanner.ScanListener.class);
+
+        mWifiScanner.startScan(scanSettings, scanListener);
+        mLooper.dispatchAll();
+
+        ArgumentCaptor<Message> messageArgumentCaptor = ArgumentCaptor.forClass(Message.class);
+        verify(mHandler).handleMessage(messageArgumentCaptor.capture());
+        Message sentMessage = messageArgumentCaptor.getValue();
+        assertNotNull(sentMessage);
+
+        assertEquals(1, mBidirectionalAsyncChannelServer.getClientMessengers().size());
+        Messenger scannerMessenger =
+                mBidirectionalAsyncChannelServer.getClientMessengers().iterator().next();
+
+        ScanResult scanResult = new ScanResult();
+        ScanData scanDatas[] = new ScanData[]{new ScanData(0, 0 , new ScanResult[] {scanResult})};
+        Message responseMessage = Message.obtain();
+        responseMessage.what = WifiScanner.CMD_SCAN_RESULT;
+        responseMessage.arg2 = sentMessage.arg2;
+        responseMessage.obj = new WifiScanner.ParcelableScanData(scanDatas);
+        scannerMessenger.send(responseMessage);
+        mLooper.dispatchAll();
+
+        verify(scanListener).onResults(scanDatas);
     }
 
     /**

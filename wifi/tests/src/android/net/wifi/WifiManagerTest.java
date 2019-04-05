@@ -1593,7 +1593,7 @@ i     * Verify that a call to cancel WPS immediately returns a failure.
     }
 
     /**
-     * Test behavior of {@link WifiManager#isDualModeSupported()}
+     * Test behavior of {@link WifiManager#isDualModeSupported()} ()}
      * @throws Exception
      */
     @Test
