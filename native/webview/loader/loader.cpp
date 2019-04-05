@@ -93,7 +93,8 @@ jboolean DoCreateRelroFile(JNIEnv* env, const char* lib, const char* relro,
   }
   android_dlextinfo extinfo;
   extinfo.flags = ANDROID_DLEXT_RESERVED_ADDRESS | ANDROID_DLEXT_WRITE_RELRO |
-                  ANDROID_DLEXT_USE_NAMESPACE;
+                  ANDROID_DLEXT_USE_NAMESPACE |
+                  ANDROID_DLEXT_RESERVED_ADDRESS_RECURSIVE;
   extinfo.reserved_addr = gReservedAddress;
   extinfo.reserved_size = gReservedSize;
   extinfo.relro_fd = tmp_fd;
@@ -131,7 +132,8 @@ jint DoLoadWithRelroFile(JNIEnv* env, const char* lib, const char* relro,
   }
   android_dlextinfo extinfo;
   extinfo.flags = ANDROID_DLEXT_RESERVED_ADDRESS | ANDROID_DLEXT_USE_RELRO |
-                  ANDROID_DLEXT_USE_NAMESPACE;
+                  ANDROID_DLEXT_USE_NAMESPACE |
+                  ANDROID_DLEXT_RESERVED_ADDRESS_RECURSIVE;
   extinfo.reserved_addr = gReservedAddress;
   extinfo.reserved_size = gReservedSize;
   extinfo.relro_fd = relro_fd;
