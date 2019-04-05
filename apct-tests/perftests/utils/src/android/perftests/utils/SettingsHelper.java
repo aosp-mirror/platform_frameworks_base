@@ -18,12 +18,11 @@ package android.perftests.utils;
 
 import android.content.Context;
 import android.provider.Settings;
-import android.text.TextUtils;
-
-import java.util.Objects;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import java.util.Objects;
 
 /**
  * Provides utilities to interact with the device's {@link Settings}.
@@ -31,6 +30,7 @@ import androidx.annotation.Nullable;
 public final class SettingsHelper {
 
     public static final String NAMESPACE_SECURE = "secure";
+    public static final String NAMESPACE_GLOBAL = "global";
 
     private static int DEFAULT_TIMEOUT_MS = 5000;
 
