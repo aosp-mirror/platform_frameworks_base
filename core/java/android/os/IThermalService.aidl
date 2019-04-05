@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.os.CoolingDevice;
 import android.os.IThermalEventListener;
 import android.os.IThermalStatusListener;
 import android.os.Temperature;
@@ -52,7 +53,7 @@ interface IThermalService {
 
     /**
       * Get current temperature with its throttling status.
-      * @return list of android.os.Temperature
+      * @return list of {@link android.os.Temperature}.
       * {@hide}
       */
     List<Temperature> getCurrentTemperatures();
@@ -87,4 +88,19 @@ interface IThermalService {
       * {@hide}
       */
     int getCurrentThermalStatus();
+
+    /**
+      * Get current cooling devices.
+      * @return list of {@link android.os.CoolingDevice}.
+      * {@hide}
+      */
+    List<CoolingDevice> getCurrentCoolingDevices();
+
+    /**
+      * Get current cooling devices on given type.
+      * @param type the cooling device type to query.
+      * @return list of {@link android.os.CoolingDevice}.
+      * {@hide}
+      */
+    List<CoolingDevice> getCurrentCoolingDevicesWithType(in int type);
 }

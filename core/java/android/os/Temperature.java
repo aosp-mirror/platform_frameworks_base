@@ -17,8 +17,11 @@
 package android.os;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.hardware.thermal.V2_0.TemperatureType;
 import android.hardware.thermal.V2_0.ThrottlingSeverity;
+
+import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -30,13 +33,13 @@ import java.lang.annotation.RetentionPolicy;
  */
 public final class Temperature implements Parcelable {
     /** Temperature value */
-    private float mValue;
-    /** A temperature type from ThermalHAL */
-    private int mType;
-    /** Name of this temperature */
-    private String mName;
+    private final float mValue;
+    /** A Temperature type from ThermalHAL */
+    private final int mType;
+    /** Name of this Temperature */
+    private final String mName;
     /** The level of the sensor is currently in throttling */
-    private int mStatus;
+    private final int mStatus;
 
     @IntDef(prefix = { "THROTTLING_" }, value = {
             THROTTLING_NONE,
@@ -75,7 +78,7 @@ public final class Temperature implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface Type {}
 
-    /* Keep in sync with hardware/interfaces/thermal/2.0/types.hal */
+    /** Keep in sync with hardware/interfaces/thermal/2.0/types.hal */
     public static final int TYPE_UNKNOWN = TemperatureType.UNKNOWN;
     public static final int TYPE_CPU = TemperatureType.CPU;
     public static final int TYPE_GPU = TemperatureType.GPU;
@@ -89,9 +92,9 @@ public final class Temperature implements Parcelable {
     public static final int TYPE_NPU = TemperatureType.NPU;
 
     /**
-     * Verify a valid temperature type.
+     * Verify a valid Temperature type.
      *
-     * @return true if a temperature type is valid otherwise false.
+     * @return true if a Temperature type is valid otherwise false.
      */
     public static boolean isValidType(@Type int type) {
         return type >= TYPE_UNKNOWN && type <= TYPE_NPU;
@@ -106,67 +109,75 @@ public final class Temperature implements Parcelable {
         return status >= THROTTLING_NONE && status <= THROTTLING_SHUTDOWN;
     }
 
-    public Temperature() {
-        this(Float.NaN, TYPE_UNKNOWN, "", THROTTLING_NONE);
-    }
-
-    public Temperature(float value, @Type int type, String name, @ThrottlingStatus int status) {
+    public Temperature(float value, @Type int type,
+            @NonNull String name, @ThrottlingStatus int status) {
+        Preconditions.checkArgument(isValidType(type), "Invalid Type");
+        Preconditions.checkArgument(isValidStatus(status) , "Invalid Status");
         mValue = value;
-        mType = isValidType(type) ? type : TYPE_UNKNOWN;
-        mName = name;
-        mStatus = isValidStatus(status) ? status : THROTTLING_NONE;
+        mType = type;
+        mName = Preconditions.checkStringNotEmpty(name);
+        mStatus = status;
     }
 
     /**
-     * Return the temperature value.
+     * Return the Temperature value.
      *
-     * @return a temperature value in floating point could be NaN.
+     * @return a Temperature value in floating point could be NaN.
      */
     public float getValue() {
         return mValue;
     }
 
     /**
-     * Return the temperature type.
+     * Return the Temperature type.
      *
-     * @return a temperature type: TYPE_*
+     * @return a Temperature type: TYPE_*
      */
     public @Type int getType() {
         return mType;
     }
 
     /**
-     * Return the temperature name.
+     * Return the Temperature name.
      *
-     * @return a temperature name as String.
+     * @return a Temperature name as String.
      */
     public String getName() {
         return mName;
     }
 
     /**
-     * Return the temperature throttling status.
+     * Return the Temperature throttling status.
      *
-     * @return a temperature throttling status: THROTTLING_*
+     * @return a Temperature throttling status: THROTTLING_*
      */
     public @ThrottlingStatus int getStatus() {
         return mStatus;
     }
 
-    private Temperature(Parcel p) {
-        readFromParcel(p);
+    @Override
+    public String toString() {
+        return "Temperature{mValue=" + mValue + ", mType=" + mType
+                + ", mName=" + mName + ", mStatus=" + mStatus + "}";
     }
 
-    /**
-     * Fill in Temperature members from a Parcel.
-     *
-     * @param p the parceled Temperature object.
-     */
-    public void readFromParcel(Parcel p) {
-        mValue = p.readFloat();
-        mType = p.readInt();
-        mName = p.readString();
-        mStatus = p.readInt();
+    @Override
+    public int hashCode() {
+        int hash = mName.hashCode();
+        hash = 31 * hash + Float.hashCode(mValue);
+        hash = 31 * hash + mType;
+        hash = 31 * hash + mStatus;
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Temperature)) {
+            return false;
+        }
+        Temperature other = (Temperature) o;
+        return other.mValue == mValue && other.mType == mType
+                && other.mName.equals(mName) && other.mStatus == mStatus;
     }
 
     @Override
@@ -181,13 +192,18 @@ public final class Temperature implements Parcelable {
             new Parcelable.Creator<Temperature>() {
                 @Override
                 public Temperature createFromParcel(Parcel p) {
-                    return new Temperature(p);
+                    float value = p.readFloat();
+                    int type = p.readInt();
+                    String name = p.readString();
+                    int status = p.readInt();
+                    return new Temperature(value, type, name, status);
                 }
 
                 @Override
                 public Temperature[] newArray(int size) {
                     return new Temperature[size];
                 }
+
             };
 
     @Override
