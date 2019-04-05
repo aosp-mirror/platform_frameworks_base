@@ -64,6 +64,8 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Renders bubbles in a stack and handles animating expanded and collapsed states.
@@ -164,6 +166,8 @@ public class BubbleStackView extends FrameLayout {
     int[] mTempLoc = new int[2];
     RectF mTempRect = new RectF();
 
+    private final List<Rect> mSystemGestureExclusionRects = Collections.singletonList(new Rect());
+
     private ViewTreeObserver.OnPreDrawListener mViewUpdater =
             new ViewTreeObserver.OnPreDrawListener() {
                 @Override
@@ -174,6 +178,9 @@ public class BubbleStackView extends FrameLayout {
                     return true;
                 }
             };
+
+    private ViewTreeObserver.OnDrawListener mSystemGestureExcludeUpdater =
+            this::updateSystemGestureExcludeRects;
 
     private ViewClippingUtil.ClippingParameters mClippingParameters =
             new ViewClippingUtil.ClippingParameters() {
@@ -296,6 +303,9 @@ public class BubbleStackView extends FrameLayout {
                     () -> mExpandedBubble.expandedView.updateInsets(insets));
             return view.onApplyWindowInsets(insets);
         });
+
+        // This must be a separate OnDrawListener since it should be called for every draw.
+        getViewTreeObserver().addOnDrawListener(mSystemGestureExcludeUpdater);
     }
 
     /**
@@ -360,6 +370,22 @@ public class BubbleStackView extends FrameLayout {
                 return true;
         }
         return false;
+    }
+
+    private void updateSystemGestureExcludeRects() {
+        // Exclude the region occupied by the first BubbleView in the stack
+        Rect excludeZone = mSystemGestureExclusionRects.get(0);
+        if (mBubbleContainer.getChildCount() > 0) {
+            View firstBubble = mBubbleContainer.getChildAt(0);
+            excludeZone.set(firstBubble.getLeft(), firstBubble.getTop(), firstBubble.getRight(),
+                    firstBubble.getBottom());
+            excludeZone.offset((int) (firstBubble.getTranslationX() + 0.5f),
+                    (int) (firstBubble.getTranslationY() + 0.5f));
+            mBubbleContainer.setSystemGestureExclusionRects(mSystemGestureExclusionRects);
+        } else {
+            excludeZone.setEmpty();
+            mBubbleContainer.setSystemGestureExclusionRects(Collections.emptyList());
+        }
     }
 
     /**
