@@ -671,6 +671,24 @@ TEST_F(ManifestFixerTest, ApplicationInjectDebuggable) {
       {}, "application", xml::kSchemaAndroid, "debuggable", "true"), NotNull());
 }
 
+TEST_F(ManifestFixerTest, ApplicationProfileable) {
+  std::string shell = R"(
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="android">
+        <application>
+          <profileable android:shell="true"/>
+        </application>
+      </manifest>)";
+  EXPECT_THAT(Verify(shell), NotNull());
+  std::string noshell = R"(
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="android">
+        <application>
+          <profileable/>
+        </application>
+      </manifest>)";
+  EXPECT_THAT(Verify(noshell), NotNull());
+}
 
 TEST_F(ManifestFixerTest, IgnoreNamespacedElements) {
   std::string input = R"EOF(
