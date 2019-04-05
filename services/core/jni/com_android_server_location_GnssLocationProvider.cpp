@@ -735,29 +735,16 @@ Return<void> GnssCallback::gnssNmeaCb(
 }
 
 Return<void> GnssCallback::gnssSetCapabilitesCb(uint32_t capabilities) {
-    return GnssCallback::gnssSetCapabilitesCbImpl(capabilities,
-        /* hasSubHalCapabilityFlags = */ true);
+    ALOGD("%s: %du\n", __func__, capabilities);
+
+    JNIEnv* env = getJniEnv();
+    env->CallVoidMethod(mCallbacksObj, method_setTopHalCapabilities, capabilities);
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
+    return Void();
 }
 
 Return<void> GnssCallback::gnssSetCapabilitiesCb_2_0(uint32_t capabilities) {
-    return GnssCallback::gnssSetCapabilitesCbImpl(capabilities,
-        /* hasSubHalCapabilityFlags = */ false);
-}
-
-Return <void> GnssCallback::gnssSetCapabilitesCbImpl(uint32_t capabilities,
-        bool hasSubHalCapabilityFlags) {
-    // The IGnssCallback.hal@2.0 removed sub-HAL capability flags from the Capabilities enum
-    // and instead uses the sub-HAL non-null handle returned from IGnss.hal@2.0 to indicate
-    // support. Therefore, the 'hasSubHalCapabilityFlags' parameter is needed to tell if the
-    // 'capabilities' parameter includes the sub-HAL capability flags or not. Old HALs
-    // which explicitly set the sub-HAL capability bits must continue to work.
-    ALOGD("%s: capabilities=%du, hasSubHalCapabilityFlags=%d\n", __func__, capabilities,
-        hasSubHalCapabilityFlags);
-    JNIEnv* env = getJniEnv();
-    env->CallVoidMethod(mCallbacksObj, method_setTopHalCapabilities, capabilities,
-            boolToJbool(hasSubHalCapabilityFlags));
-    checkAndClearExceptionFromCallback(env, __FUNCTION__);
-    return Void();
+    return GnssCallback::gnssSetCapabilitesCb(capabilities);
 }
 
 Return<void> GnssCallback::gnssAcquireWakelockCb() {
@@ -1542,7 +1529,7 @@ static void android_location_GnssLocationProvider_init_once(JNIEnv* env, jclass 
     method_reportSvStatus = env->GetMethodID(clazz, "reportSvStatus", "(I[I[F[F[F[F)V");
     method_reportAGpsStatus = env->GetMethodID(clazz, "reportAGpsStatus", "(II[B)V");
     method_reportNmea = env->GetMethodID(clazz, "reportNmea", "(J)V");
-    method_setTopHalCapabilities = env->GetMethodID(clazz, "setTopHalCapabilities", "(IZ)V");
+    method_setTopHalCapabilities = env->GetMethodID(clazz, "setTopHalCapabilities", "(I)V");
     method_setGnssYearOfHardware = env->GetMethodID(clazz, "setGnssYearOfHardware", "(I)V");
     method_setGnssHardwareModelName = env->GetMethodID(clazz, "setGnssHardwareModelName",
             "(Ljava/lang/String;)V");
