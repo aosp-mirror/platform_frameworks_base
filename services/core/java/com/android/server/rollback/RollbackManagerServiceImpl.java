@@ -18,6 +18,7 @@ package com.android.server.rollback;
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -32,6 +33,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser;
 import android.content.pm.ParceledListSlice;
+import android.content.pm.UserInfo;
 import android.content.pm.VersionedPackage;
 import android.content.rollback.IRollbackManager;
 import android.content.rollback.PackageRollbackInfo;
@@ -43,6 +45,8 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
+import android.os.UserHandle;   // duped to avoid merge conflict
+import android.os.UserManager;  // out of order to avoid merge conflict
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
@@ -155,27 +159,12 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         // expiration.
         getHandler().post(() -> ensureRollbackDataLoaded());
 
-        PackageInstaller packageInstaller = mContext.getPackageManager().getPackageInstaller();
-        packageInstaller.registerSessionCallback(new SessionCallback(), getHandler());
-
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
-        filter.addAction(Intent.ACTION_PACKAGE_FULLY_REMOVED);
-        filter.addDataScheme("package");
-        mContext.registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-                if (Intent.ACTION_PACKAGE_REPLACED.equals(action)) {
-                    String packageName = intent.getData().getSchemeSpecificPart();
-                    onPackageReplaced(packageName);
-                }
-                if (Intent.ACTION_PACKAGE_FULLY_REMOVED.equals(action)) {
-                    String packageName = intent.getData().getSchemeSpecificPart();
-                    onPackageFullyRemoved(packageName);
-                }
-            }
-        }, filter, null, getHandler());
+        // TODO: Make sure to register these call backs when a new user is
+        // added too.
+        SessionCallback sessionCallback = new SessionCallback();
+        for (UserInfo userInfo : UserManager.get(mContext).getUsers(true)) {
+            registerUserCallbacks(userInfo.getUserHandle());
+        }
 
         IntentFilter enableRollbackFilter = new IntentFilter();
         enableRollbackFilter.addAction(Intent.ACTION_PACKAGE_ENABLE_ROLLBACK);
@@ -195,11 +184,14 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                             PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_INSTALL_FLAGS, 0);
                     int[] installedUsers = intent.getIntArrayExtra(
                             PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_INSTALLED_USERS);
+                    int user = intent.getIntExtra(
+                            PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_USER, 0);
+
                     File newPackageCodePath = new File(intent.getData().getPath());
 
                     getHandler().post(() -> {
                         boolean success = enableRollback(installFlags, newPackageCodePath,
-                                installedUsers);
+                                installedUsers, user);
                         int ret = PackageManagerInternal.ENABLE_ROLLBACK_SUCCEEDED;
                         if (!success) {
                             ret = PackageManagerInternal.ENABLE_ROLLBACK_FAILED;
@@ -219,6 +211,39 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         }, enableRollbackFilter, null, getHandler());
 
         registerTimeChangeReceiver();
+    }
+
+    private void registerUserCallbacks(UserHandle user) {
+        Context context = getContextAsUser(user);
+        if (context == null) {
+            Log.e(TAG, "Unable to register user callbacks for user " + user);
+            return;
+        }
+
+        // TODO: Reuse the same SessionCallback and broadcast receiver
+        // instances, rather than creating new instances for each user.
+
+        context.getPackageManager().getPackageInstaller()
+                .registerSessionCallback(new SessionCallback(), getHandler());
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
+        filter.addAction(Intent.ACTION_PACKAGE_FULLY_REMOVED);
+        filter.addDataScheme("package");
+        context.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                if (Intent.ACTION_PACKAGE_REPLACED.equals(action)) {
+                    String packageName = intent.getData().getSchemeSpecificPart();
+                    onPackageReplaced(packageName);
+                }
+                if (Intent.ACTION_PACKAGE_FULLY_REMOVED.equals(action)) {
+                    String packageName = intent.getData().getSchemeSpecificPart();
+                    onPackageFullyRemoved(packageName);
+                }
+            }
+        }, filter, null, getHandler());
     }
 
     @Override
@@ -781,6 +806,14 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         return false;
     }
 
+    private Context getContextAsUser(UserHandle user) {
+        try {
+            return mContext.createPackageContextAsUser(mContext.getPackageName(), 0, user);
+        } catch (PackageManager.NameNotFoundException e) {
+            return null;
+        }
+    }
+
     /**
      * Called via broadcast by the package manager when a package is being
      * staged for install with rollback enabled. Called before the package has
@@ -789,10 +822,11 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
      * @param installFlags information about what is being installed.
      * @param newPackageCodePath path to the package about to be installed.
      * @param installedUsers the set of users for which a given package is installed.
+     * @param user the user that owns the install session to enable rollback on.
      * @return true if enabling the rollback succeeds, false otherwise.
      */
     private boolean enableRollback(int installFlags, File newPackageCodePath,
-            int[] installedUsers) {
+            int[] installedUsers, @UserIdInt int user) {
 
         // Find the session id associated with this install.
         // TODO: It would be nice if package manager or package installer told
@@ -800,8 +834,17 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         // ourselves.
         PackageInstaller.SessionInfo session = null;
 
+        // getAllSessions only returns sessions for the associated user.
+        // Create a context with the right user so we can find the matching
+        // session.
+        final Context context = getContextAsUser(UserHandle.of(user));
+        if (context == null) {
+            Log.e(TAG, "Unable to create context for install session user.");
+            return false;
+        }
+
         int parentSessionId = -1;
-        PackageInstaller installer = mContext.getPackageManager().getPackageInstaller();
+        PackageInstaller installer = context.getPackageManager().getPackageInstaller();
         for (PackageInstaller.SessionInfo info : installer.getAllSessions()) {
             if (info.isMultiPackage()) {
                 for (int childId : info.getChildSessionIds()) {
@@ -918,7 +961,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         PackageManager pm = mContext.getPackageManager();
         final PackageInfo pkgInfo;
         try {
-            pkgInfo = pm.getPackageInfo(packageName, isApex ? PackageManager.MATCH_APEX : 0);
+            pkgInfo = getPackageInfo(packageName);
         } catch (PackageManager.NameNotFoundException e) {
             // TODO: Support rolling back fresh package installs rather than
             // fail here. Test this case.
@@ -1154,13 +1197,33 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         PackageManager pm = mContext.getPackageManager();
         PackageInfo pkgInfo = null;
         try {
-            pkgInfo = pm.getPackageInfo(packageName, PackageManager.MATCH_APEX);
+            pkgInfo = getPackageInfo(packageName);
         } catch (PackageManager.NameNotFoundException e) {
             return null;
         }
 
         return new VersionedPackage(packageName, pkgInfo.getLongVersionCode());
     }
+
+    /**
+     * Gets PackageInfo for the given package.
+     * Matches any user and apex. Returns null if no such package is
+     * installed.
+     */
+    private PackageInfo getPackageInfo(String packageName)
+            throws PackageManager.NameNotFoundException {
+        PackageManager pm = mContext.getPackageManager();
+        try {
+            // The MATCH_ANY_USER flag doesn't mix well with the MATCH_APEX
+            // flag, so make two separate attempts to get the package info.
+            // We don't need both flags at the same time because we assume
+            // apex files are always installed for all users.
+            return pm.getPackageInfo(packageName, PackageManager.MATCH_ANY_USER);
+        } catch (PackageManager.NameNotFoundException e) {
+            return pm.getPackageInfo(packageName, PackageManager.MATCH_APEX);
+        }
+    }
+
 
     private boolean packageVersionsEqual(VersionedPackage a, VersionedPackage b) {
         return a.getPackageName().equals(b.getPackageName())
