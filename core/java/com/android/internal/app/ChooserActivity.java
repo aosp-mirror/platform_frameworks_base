@@ -212,6 +212,8 @@ public class ChooserActivity extends ResolverActivity {
     @VisibleForTesting
     public static final int LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS = 250;
 
+    private static final int MAX_EXTRA_INITIAL_INTENTS = 2;
+
     private boolean mListViewDataChanged = false;
 
     @Retention(SOURCE)
@@ -356,8 +358,9 @@ public class ChooserActivity extends ResolverActivity {
         Parcelable[] pa = intent.getParcelableArrayExtra(Intent.EXTRA_INITIAL_INTENTS);
         Intent[] initialIntents = null;
         if (pa != null) {
-            initialIntents = new Intent[pa.length];
-            for (int i = 0; i < pa.length; i++) {
+            int count = Math.min(pa.length, MAX_EXTRA_INITIAL_INTENTS);
+            initialIntents = new Intent[count];
+            for (int i = 0; i < count; i++) {
                 if (!(pa[i] instanceof Intent)) {
                     Log.w(TAG, "Initial intent #" + i + " not an Intent: " + pa[i]);
                     finish();
