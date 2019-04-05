@@ -405,12 +405,7 @@ public class BiometricService extends SystemService {
                                 userId) != 0);
 
                 if (userId == ActivityManager.getCurrentUser()) {
-                    List<EnabledOnKeyguardCallback> callbacks = mEnabledOnKeyguardCallbacks;
-                    for (int i = 0; i < callbacks.size(); i++) {
-                        callbacks.get(i).notify(BiometricSourceType.FACE,
-                                mFaceEnabledOnKeyguard.getOrDefault(userId,
-                                        DEFAULT_KEYGUARD_ENABLED));
-                    }
+                    notifyEnabledOnKeyguardCallbacks(userId);
                 }
             } else if (FACE_UNLOCK_APP_ENABLED.equals(uri)) {
                 mFaceEnabledForApps.put(userId, Settings.Secure.getIntForUser(
@@ -439,6 +434,15 @@ public class BiometricService extends SystemService {
         boolean getFaceAlwaysRequireConfirmation(int userId) {
             return mFaceAlwaysRequireConfirmation
                     .getOrDefault(userId, DEFAULT_ALWAYS_REQUIRE_CONFIRMATION);
+        }
+
+        void notifyEnabledOnKeyguardCallbacks(int userId) {
+            List<EnabledOnKeyguardCallback> callbacks = mEnabledOnKeyguardCallbacks;
+            for (int i = 0; i < callbacks.size(); i++) {
+                callbacks.get(i).notify(BiometricSourceType.FACE,
+                        mFaceEnabledOnKeyguard.getOrDefault(userId,
+                                DEFAULT_KEYGUARD_ENABLED));
+            }
         }
     }
 
@@ -787,6 +791,7 @@ public class BiometricService extends SystemService {
                         @Override
                         public void onUserSwitchComplete(int newUserId) {
                             mSettingObserver.updateContentObserver();
+                            mSettingObserver.notifyEnabledOnKeyguardCallbacks(newUserId);
                         }
                     }, BiometricService.class.getName()
             );
