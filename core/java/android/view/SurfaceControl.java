@@ -195,7 +195,8 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeTransferTouchFocus(long transactionObj, IBinder fromToken,
             IBinder toToken);
     private static native boolean nativeGetProtectedContentSupport();
-    private static native void nativeSetMetadata(long transactionObj, int key, Parcel data);
+    private static native void nativeSetMetadata(long transactionObj, long nativeObject, int key,
+            Parcel data);
     private static native void nativeSyncInputWindows(long transactionObj);
     private static native boolean nativeGetDisplayBrightnessSupport(IBinder displayToken);
     private static native boolean nativeSetDisplayBrightness(IBinder displayToken,
@@ -2612,11 +2613,11 @@ public final class SurfaceControl implements Parcelable {
          * Sets an arbitrary piece of metadata on the surface. This is a helper for int data.
          * @hide
          */
-        public Transaction setMetadata(int key, int data) {
+        public Transaction setMetadata(SurfaceControl sc, int key, int data) {
             Parcel parcel = Parcel.obtain();
             parcel.writeInt(data);
             try {
-                setMetadata(key, parcel);
+                setMetadata(sc, key, parcel);
             } finally {
                 parcel.recycle();
             }
@@ -2627,8 +2628,8 @@ public final class SurfaceControl implements Parcelable {
          * Sets an arbitrary piece of metadata on the surface.
          * @hide
          */
-        public Transaction setMetadata(int key, Parcel data) {
-            nativeSetMetadata(mNativeObject, key, data);
+        public Transaction setMetadata(SurfaceControl sc, int key, Parcel data) {
+            nativeSetMetadata(mNativeObject, sc.mNativeObject, key, data);
             return this;
         }
 
