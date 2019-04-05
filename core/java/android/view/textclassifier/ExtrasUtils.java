@@ -22,7 +22,12 @@ import android.content.Intent;
 import android.icu.util.ULocale;
 import android.os.Bundle;
 
+import com.android.internal.util.ArrayUtils;
+
+import com.google.android.textclassifier.AnnotatorModel;
+
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Utility class for inserting and retrieving data in TextClassifier request/response extras.
@@ -31,6 +36,7 @@ import java.util.ArrayList;
 // TODO: Make this a TestApi for CTS testing.
 public final class ExtrasUtils {
 
+    private static final String SERIALIZED_ENTITIES_DATA = "serialized-entities-data";
     private static final String ENTITIES_EXTRAS = "entities-extras";
     private static final String ACTION_INTENT = "action-intent";
     private static final String ACTIONS_INTENTS = "actions-intents";
@@ -40,6 +46,7 @@ public final class ExtrasUtils {
     private static final String MODEL_VERSION = "model-version";
     private static final String MODEL_NAME = "model-name";
     private static final String TEXT_LANGUAGES = "text-languages";
+    private static final String ENTITIES = "entities";
 
     private ExtrasUtils() {}
 
@@ -155,6 +162,24 @@ public final class ExtrasUtils {
     }
 
     /**
+     * Stores serialized entity data information in TextClassifier response object's extras
+     * {@code container}.
+     */
+    public static void putSerializedEntityData(
+            Bundle container, @Nullable byte[] serializedEntityData) {
+        container.putByteArray(SERIALIZED_ENTITIES_DATA, serializedEntityData);
+    }
+
+    /**
+     * Returns serialized entity data information contained in a TextClassifier response
+     * object.
+     */
+    @Nullable
+    public static byte[] getSerializedEntityData(Bundle container) {
+        return container.getByteArray(SERIALIZED_ENTITIES_DATA);
+    }
+
+    /**
      * Stores {@code entities} information in TextClassifier response object's extras
      * {@code container}.
      *
@@ -252,5 +277,38 @@ public final class ExtrasUtils {
             return null;
         }
         return extra.getString(MODEL_NAME);
+    }
+
+    /**
+     * Stores the entities from {@link AnnotatorModel.ClassificationResult} in {@code container}.
+     */
+    public static void putEntities(
+            Bundle container,
+            @Nullable AnnotatorModel.ClassificationResult[] classifications) {
+        if (ArrayUtils.isEmpty(classifications)) {
+            return;
+        }
+        ArrayList<Bundle> entitiesBundle = new ArrayList<>();
+        for (AnnotatorModel.ClassificationResult classification : classifications) {
+            if (classification == null) {
+                continue;
+            }
+            Bundle entityBundle = new Bundle();
+            entityBundle.putString(ENTITY_TYPE, classification.getCollection());
+            entityBundle.putByteArray(
+                    SERIALIZED_ENTITIES_DATA,
+                    classification.getSerializedEntityData());
+            entitiesBundle.add(entityBundle);
+        }
+        if (!entitiesBundle.isEmpty()) {
+            container.putParcelableArrayList(ENTITIES, entitiesBundle);
+        }
+    }
+
+    /**
+     * Returns a list of entities contained in the {@code extra}.
+     */
+    public static List<Bundle> getEntities(Bundle container) {
+        return container.getParcelableArrayList(ENTITIES);
     }
 }
