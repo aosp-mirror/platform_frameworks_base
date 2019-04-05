@@ -111,6 +111,7 @@ CanvasContext::CanvasContext(RenderThread& thread, bool translucent, RenderNode*
     rootRenderNode->makeRoot();
     mRenderNodes.emplace_back(rootRenderNode);
     mProfiler.setDensity(mRenderThread.mainDisplayInfo().density);
+    setRenderAheadDepth(Properties::defaultRenderAhead);
 }
 
 CanvasContext::~CanvasContext() {
@@ -159,6 +160,7 @@ void CanvasContext::setSurface(sp<Surface>&& surface) {
     if (hasSurface) {
         mHaveNewSurface = true;
         mSwapHistory.clear();
+        applyRenderAheadSettings();
     } else {
         mRenderThread.removeFrameCallback(this);
         mGenerationID++;
@@ -423,6 +425,12 @@ void CanvasContext::draw() {
 
     waitOnFences();
 
+    if (mRenderAheadDepth) {
+        auto presentTime = mCurrentFrameInfo->get(FrameInfoIndex::Vsync) +
+                (mRenderThread.timeLord().frameIntervalNanos() * (mRenderAheadDepth + 1));
+        native_window_set_buffers_timestamp(mNativeSurface.get(), presentTime);
+    }
+
     bool requireSwap = false;
     bool didSwap =
             mRenderPipeline->swapBuffers(frame, drew, windowDirty, mCurrentFrameInfo, &requireSwap);
@@ -634,6 +642,28 @@ bool CanvasContext::surfaceRequiresRedraw() {
     surface->query(NATIVE_WINDOW_HEIGHT, &height);
 
     return width == mLastFrameWidth && height == mLastFrameHeight;
+}
+
+void CanvasContext::applyRenderAheadSettings() {
+    if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
+        // TODO: Fix SkiaVulkan's assumptions on buffer counts. And SIGBUS crashes.
+        mRenderAheadDepth = 0;
+        return;
+    }
+    if (mNativeSurface) {
+        native_window_set_buffer_count(mNativeSurface.get(), 3 + mRenderAheadDepth);
+        if (!mRenderAheadDepth) {
+            native_window_set_buffers_timestamp(mNativeSurface.get(), NATIVE_WINDOW_TIMESTAMP_AUTO);
+        }
+    }
+}
+
+void CanvasContext::setRenderAheadDepth(int renderAhead) {
+    if (renderAhead < 0 || renderAhead > 2 || renderAhead == mRenderAheadDepth) {
+        return;
+    }
+    mRenderAheadDepth = renderAhead;
+    applyRenderAheadSettings();
 }
 
 SkRect CanvasContext::computeDirtyRect(const Frame& frame, SkRect* dirty) {
