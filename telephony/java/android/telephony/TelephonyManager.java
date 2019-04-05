@@ -2647,7 +2647,7 @@ public class TelephonyManager {
      */
     /** {@hide} */
     @UnsupportedAppUsage
-    public static String getNetworkTypeName(int type) {
+    public static String getNetworkTypeName(@NetworkType int type) {
         switch (type) {
             case NETWORK_TYPE_GPRS:
                 return "GPRS";
@@ -4786,6 +4786,22 @@ public class TelephonyManager {
         } catch (NullPointerException ex) {
             return DATA_DISCONNECTED;
         }
+    }
+
+    /**
+     * Convert data state to string
+     *
+     * @return The data state in string format.
+     * @hide
+     */
+    public static String dataStateToString(@DataState int state) {
+        switch (state) {
+            case DATA_DISCONNECTED: return "DISCONNECTED";
+            case DATA_CONNECTING: return "CONNECTING";
+            case DATA_CONNECTED: return "CONNECTED";
+            case DATA_SUSPENDED: return "SUSPENDED";
+        }
+        return "UNKNOWN(" + state + ")";
     }
 
    /**
