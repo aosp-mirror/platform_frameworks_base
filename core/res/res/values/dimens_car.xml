@@ -106,4 +106,31 @@
     <!-- TextView -->
     <dimen name="car_textview_fading_edge_length">40dp</dimen>
 
+    <!-- Dialog start padding for button bar layout -->
+    <dimen name="button_bar_layout_start_padding">@*android:dimen/car_keyline_1</dimen>
+
+    <!-- Dialog end padding for button bar layout -->
+    <dimen name="button_bar_layout_end_padding">@*android:dimen/car_keyline_1</dimen>
+
+    <!-- Dialog top padding for button bar layout -->
+    <dimen name="button_bar_layout_top_padding">@*android:dimen/car_padding_2</dimen>
+
+    <!-- Dialog button layout height -->
+    <dimen name="button_layout_height">@*android:dimen/car_card_action_bar_height</dimen>
+
+    <!-- Dialog button end margin -->
+    <dimen name="button_end_margin">@*android:dimen/car_padding_4</dimen>
+
+    <!-- Dialog start margin for text view -->
+    <dimen name="text_view_start_margin">@*android:dimen/car_keyline_1</dimen>
+
+    <!-- Dialog end margin for text view -->
+    <dimen name="text_view_end_margin">@*android:dimen/car_keyline_1</dimen>
+
+    <!-- Dialog image size -->
+    <dimen name="image_size">@*android:dimen/car_icon_size</dimen>
+
+    <!-- Dialog image margin start -->
+    <dimen name="image_margin_start">@*android:dimen/car_keyline_1</dimen>
+
 </resources>
