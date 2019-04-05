@@ -1147,9 +1147,16 @@ public class Environment {
     public static boolean isExternalStorageSandboxed(@NonNull File path) {
         final Context context = AppGlobals.getInitialApplication();
         final AppOpsManager appOps = context.getSystemService(AppOpsManager.class);
-        return appOps.noteOpNoThrow(AppOpsManager.OP_LEGACY_STORAGE,
+
+        final boolean hasLegacy = appOps.noteOpNoThrow(AppOpsManager.OP_LEGACY_STORAGE,
                 context.getApplicationInfo().uid,
-                context.getPackageName()) != AppOpsManager.MODE_ALLOWED;
+                context.getPackageName()) == AppOpsManager.MODE_ALLOWED;
+
+        // STOPSHIP: only use app-op once permission model has fully landed
+        final boolean requestedLegacy = !AppGlobals.getInitialApplication().getApplicationInfo()
+                .isExternalStorageSandboxAllowed();
+
+        return !(hasLegacy || requestedLegacy);
     }
 
     static File getDirectory(String variableName, String defaultPath) {
