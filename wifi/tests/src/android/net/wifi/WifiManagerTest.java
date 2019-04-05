@@ -36,6 +36,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyList;
@@ -53,6 +54,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.net.DhcpInfo;
 import android.net.wifi.WifiManager.LocalOnlyHotspotCallback;
 import android.net.wifi.WifiManager.LocalOnlyHotspotObserver;
 import android.net.wifi.WifiManager.LocalOnlyHotspotReservation;
@@ -62,6 +64,7 @@ import android.net.wifi.WifiManager.NetworkRequestUserSelectionCallback;
 import android.net.wifi.WifiManager.OnWifiUsabilityStatsListener;
 import android.net.wifi.WifiManager.SoftApCallback;
 import android.net.wifi.WifiManager.TrafficStateCallback;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -92,6 +95,7 @@ public class WifiManagerTest {
     private static final int ERROR_NOT_SET = -1;
     private static final int ERROR_TEST_REASON = 5;
     private static final int TEST_UID = 14553;
+    private static final int TEST_NETWORK_ID = 143;
     private static final String TEST_PACKAGE_NAME = "TestPackage";
     private static final String TEST_COUNTRY_CODE = "US";
     private static final String[] TEST_MAC_ADDRESSES = {"da:a1:19:0:0:0"};
@@ -118,6 +122,7 @@ public class WifiManagerTest {
         MockitoAnnotations.initMocks(this);
         mLooper = new TestLooper();
         mHandler = spy(new Handler(mLooper.getLooper()));
+        mApplicationInfo.targetSdkVersion = Build.VERSION_CODES.Q;
         when(mContext.getApplicationInfo()).thenReturn(mApplicationInfo);
         when(mContext.getOpPackageName()).thenReturn(TEST_PACKAGE_NAME);
 
@@ -1437,5 +1442,201 @@ i     * Verify that a call to cancel WPS immediately returns a failure.
         when(mWifiService.getSupportedFeatures())
                 .thenReturn(new Long(~WifiManager.WIFI_FEATURE_DPP));
         assertFalse(mWifiManager.isEasyConnectSupported());
+    }
+
+    /**
+     * Test behavior of {@link WifiManager#addNetwork(WifiConfiguration)}
+     * @throws Exception
+     */
+    @Test
+    public void testAddNetwork() throws Exception {
+        WifiConfiguration configuration = new WifiConfiguration();
+        when(mWifiService.addOrUpdateNetwork(any(), anyString()))
+                .thenReturn(TEST_NETWORK_ID);
+
+        assertEquals(mWifiManager.addNetwork(configuration), TEST_NETWORK_ID);
+        verify(mWifiService).addOrUpdateNetwork(configuration, mContext.getOpPackageName());
+
+        // send a null config
+        assertEquals(mWifiManager.addNetwork(null), -1);
+    }
+
+    /**
+     * Test behavior of {@link WifiManager#addNetwork(WifiConfiguration)}
+     * @throws Exception
+     */
+    @Test
+    public void testUpdateNetwork() throws Exception {
+        WifiConfiguration configuration = new WifiConfiguration();
+        when(mWifiService.addOrUpdateNetwork(any(), anyString()))
+                .thenReturn(TEST_NETWORK_ID);
+
+        configuration.networkId = TEST_NETWORK_ID;
+        assertEquals(mWifiManager.updateNetwork(configuration), TEST_NETWORK_ID);
+        verify(mWifiService).addOrUpdateNetwork(configuration, mContext.getOpPackageName());
+
+        // config with invalid network ID
+        configuration.networkId = -1;
+        assertEquals(mWifiManager.updateNetwork(configuration), -1);
+
+        // send a null config
+        assertEquals(mWifiManager.updateNetwork(null), -1);
+    }
+
+    /**
+     * Test behavior of {@link WifiManager#enableNetwork(int, boolean)}
+     * @throws Exception
+     */
+    @Test
+    public void testEnableNetwork() throws Exception {
+        when(mWifiService.enableNetwork(anyInt(), anyBoolean(), anyString()))
+                .thenReturn(true);
+        assertTrue(mWifiManager.enableNetwork(TEST_NETWORK_ID, true));
+        verify(mWifiService).enableNetwork(TEST_NETWORK_ID, true, mContext.getOpPackageName());
+    }
+
+    /**
+     * Test behavior of {@link WifiManager#disableNetwork(int)}
+     * @throws Exception
+     */
+    @Test
+    public void testDisableNetwork() throws Exception {
+        when(mWifiService.disableNetwork(anyInt(), anyString()))
+                .thenReturn(true);
+        assertTrue(mWifiManager.disableNetwork(TEST_NETWORK_ID));
+        verify(mWifiService).disableNetwork(TEST_NETWORK_ID, mContext.getOpPackageName());
+    }
+
+    /**
+     * Test behavior of {@link WifiManager#disconnect()}
+     * @throws Exception
+     */
+    @Test
+    public void testDisconnect() throws Exception {
+        when(mWifiService.disconnect(anyString())).thenReturn(true);
+        assertTrue(mWifiManager.disconnect());
+        verify(mWifiService).disconnect(mContext.getOpPackageName());
+    }
+
+    /**
+     * Test behavior of {@link WifiManager#reconnect()}
+     * @throws Exception
+     */
+    @Test
+    public void testReconnect() throws Exception {
+        when(mWifiService.reconnect(anyString())).thenReturn(true);
+        assertTrue(mWifiManager.reconnect());
+        verify(mWifiService).reconnect(mContext.getOpPackageName());
+    }
+
+    /**
+     * Test behavior of {@link WifiManager#reassociate()}
+     * @throws Exception
+     */
+    @Test
+    public void testReassociate() throws Exception {
+        when(mWifiService.reassociate(anyString())).thenReturn(true);
+        assertTrue(mWifiManager.reassociate());
+        verify(mWifiService).reassociate(mContext.getOpPackageName());
+    }
+
+    /**
+     * Test behavior of {@link WifiManager#getSupportedFeatures()}
+     * @throws Exception
+     */
+    @Test
+    public void testGetSupportedFeatures() throws Exception {
+        long supportedFeatures =
+                WifiManager.WIFI_FEATURE_SCANNER
+                        | WifiManager.WIFI_FEATURE_PASSPOINT
+                        | WifiManager.WIFI_FEATURE_P2P;
+        when(mWifiService.getSupportedFeatures())
+                .thenReturn(Long.valueOf(supportedFeatures));
+
+        assertTrue(mWifiManager.isWifiScannerSupported());
+        assertTrue(mWifiManager.isPasspointSupported());
+        assertTrue(mWifiManager.isP2pSupported());
+        assertFalse(mWifiManager.isPortableHotspotSupported());
+        assertFalse(mWifiManager.is5GHzBandSupported());
+        assertFalse(mWifiManager.isDeviceToDeviceRttSupported());
+        assertFalse(mWifiManager.isDeviceToApRttSupported());
+        assertFalse(mWifiManager.isPreferredNetworkOffloadSupported());
+        assertFalse(mWifiManager.isAdditionalStaSupported());
+        assertFalse(mWifiManager.isTdlsSupported());
+        assertFalse(mWifiManager.isOffChannelTdlsSupported());
+        assertFalse(mWifiManager.isEnhancedPowerReportingSupported());
+    }
+
+    /**
+     * Test behavior of {@link WifiManager#getControllerActivityEnergyInfo()}
+     * @throws Exception
+     */
+    @Test
+    public void testGetControllerActivityEnergyInfo() throws Exception {
+        WifiActivityEnergyInfo activityEnergyInfo =
+                new WifiActivityEnergyInfo(5, 3, 3, new long[]{5L, 5L, 5L}, 5, 5, 5, 5);
+        when(mWifiService.reportActivityInfo()).thenReturn(activityEnergyInfo);
+
+        assertEquals(activityEnergyInfo, mWifiManager.getControllerActivityEnergyInfo());
+    }
+
+    /**
+     * Test behavior of {@link WifiManager#getConnectionInfo()}
+     * @throws Exception
+     */
+    @Test
+    public void testGetConnectionInfo() throws Exception {
+        WifiInfo wifiInfo = new WifiInfo();
+        when(mWifiService.getConnectionInfo(anyString())).thenReturn(wifiInfo);
+
+        assertEquals(wifiInfo, mWifiManager.getConnectionInfo());
+    }
+
+    /**
+     * Test behavior of {@link WifiManager#isDualModeSupported()}
+     * @throws Exception
+     */
+    @Test
+    public void testIsDualModeSupported() throws Exception {
+        when(mWifiService.needs5GHzToAnyApBandConversion()).thenReturn(true);
+        assertTrue(mWifiManager.isDualModeSupported());
+        verify(mWifiService).needs5GHzToAnyApBandConversion();
+    }
+
+    /**
+     * Test behavior of {@link WifiManager#isDualBandSupported()}
+     * @throws Exception
+     */
+    @Test
+    public void testIsDualBandSupported() throws Exception {
+        when(mWifiService.isDualBandSupported()).thenReturn(true);
+        assertTrue(mWifiManager.isDualBandSupported());
+        verify(mWifiService).isDualBandSupported();
+    }
+
+    /**
+     * Test behavior of {@link WifiManager#getDhcpInfo()}
+     * @throws Exception
+     */
+    @Test
+    public void testGetDhcpInfo() throws Exception {
+        DhcpInfo dhcpInfo = new DhcpInfo();
+
+        when(mWifiService.getDhcpInfo()).thenReturn(dhcpInfo);
+        assertEquals(dhcpInfo, mWifiManager.getDhcpInfo());
+        verify(mWifiService).getDhcpInfo();
+    }
+
+    /**
+     * Test behavior of {@link WifiManager#setWifiEnabled(boolean)}
+     * @throws Exception
+     */
+    @Test
+    public void testSetWifiEnabled() throws Exception {
+        when(mWifiService.setWifiEnabled(anyString(), anyBoolean())).thenReturn(true);
+        assertTrue(mWifiManager.setWifiEnabled(true));
+        verify(mWifiService).setWifiEnabled(mContext.getOpPackageName(), true);
+        assertTrue(mWifiManager.setWifiEnabled(false));
+        verify(mWifiService).setWifiEnabled(mContext.getOpPackageName(), false);
     }
 }
