@@ -227,4 +227,10 @@ oneway interface IStatusBar
      * display.
      */
     void suppressAmbientDisplay(boolean suppress);
+
+    /**
+     *  Used to show or hide in display fingerprint view.
+     */
+    void showInDisplayFingerprintView();
+    void hideInDisplayFingerprintView();
 }

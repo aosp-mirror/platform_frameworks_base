@@ -24,6 +24,7 @@ import com.android.systemui.SystemUI;
 import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.accessibility.WindowMagnification;
 import com.android.systemui.biometrics.AuthController;
+import com.android.systemui.biometrics.FODCircleViewImpl;
 import com.android.systemui.bubbles.dagger.BubbleModule;
 import com.android.systemui.globalactions.GlobalActionsComponent;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -65,6 +66,12 @@ public abstract class SystemUIBinder {
     @IntoMap
     @ClassKey(Divider.class)
     public abstract SystemUI bindDivider(Divider sysui);
+
+    /** Inject into FODCircleViewImpl. */
+    @Binds
+    @IntoMap
+    @ClassKey(FODCircleViewImpl.class)
+    public abstract SystemUI FODCircleViewImpl(FODCircleViewImpl sysui);
 
     /** Inject into GarbageMonitor.Service. */
     @Binds
