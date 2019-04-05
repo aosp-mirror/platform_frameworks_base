@@ -121,8 +121,6 @@ public abstract class CallRedirectionService extends Service {
      *
      * @param handle the new phone number to dial
      * @param targetPhoneAccount the {@link PhoneAccountHandle} to use when placing the call.
-     *                           If {@code null}, no change will be made to the
-     *                           {@link PhoneAccountHandle} used to place the call.
      * @param confirmFirst Telecom will ask users to confirm the redirection via a yes/no dialog
      *                     if the confirmFirst is true, and if the redirection request of this
      *                     response was sent with a true flag of allowInteractiveResponse via
