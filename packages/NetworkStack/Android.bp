@@ -49,6 +49,27 @@ android_library {
     manifest: "AndroidManifestBase.xml",
 }
 
+cc_library_shared {
+    name: "libnetworkstackutilsjni",
+    srcs: [
+        "jni/network_stack_utils_jni.cpp"
+    ],
+
+    shared_libs: [
+        "liblog",
+        "libcutils",
+        "libnativehelper",
+    ],
+    static_libs: [
+        "libpcap",
+    ],
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wno-unused-parameter",
+    ],
+}
+
 java_defaults {
     name: "NetworkStackAppCommon",
     defaults: ["NetworkStackCommon"],
@@ -56,6 +77,7 @@ java_defaults {
     static_libs: [
         "NetworkStackBase",
     ],
+    jni_libs: ["libnetworkstackutilsjni"],
     // Resources already included in NetworkStackBase
     resource_dirs: [],
     jarjar_rules: "jarjar-rules-shared.txt",
