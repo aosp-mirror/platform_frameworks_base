@@ -57,11 +57,13 @@ public:
         mHead = newHead;
     }
 
-    constexpr T&& pop() {
+    constexpr T pop() {
         LOG_ALWAYS_FATAL_IF(mTail == mHead, "empty");
         int index = mTail;
         mTail = (mTail + 1) % SIZE;
-        return std::move(mBuffer[index]);
+        T ret = std::move(mBuffer[index]);
+        mBuffer[index] = nullptr;
+        return ret;
     }
 
 private:
