@@ -674,6 +674,8 @@ public abstract class AutofillService extends Service {
      * Called when the Android system disconnects from the service.
      *
      * <p> At this point this service may no longer be an active {@link AutofillService}.
+     * It should not make calls on {@link AutofillManager} that requires the caller to be
+     * the current service.
      */
     public void onDisconnected() {
     }
