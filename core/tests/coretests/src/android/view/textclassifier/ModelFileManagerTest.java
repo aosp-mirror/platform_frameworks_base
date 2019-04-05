@@ -86,7 +86,7 @@ public class ModelFileManagerTest {
     public void get() {
         ModelFileManager.ModelFile modelFile =
                 new ModelFileManager.ModelFile(
-                        new File("/path/a"), 1, Collections.emptyList(), true);
+                        new File("/path/a"), 1, Collections.emptyList(), "", true);
         when(mModelFileSupplier.get()).thenReturn(Collections.singletonList(modelFile));
 
         List<ModelFileManager.ModelFile> modelFiles = mModelFileManager.listModelFiles();
@@ -100,12 +100,12 @@ public class ModelFileManagerTest {
         ModelFileManager.ModelFile olderModelFile =
                 new ModelFileManager.ModelFile(
                         new File("/path/a"), 1,
-                        Collections.emptyList(), true);
+                        Collections.emptyList(), "", true);
 
         ModelFileManager.ModelFile newerModelFile =
                 new ModelFileManager.ModelFile(
                         new File("/path/b"), 2,
-                        Collections.emptyList(), true);
+                        Collections.emptyList(), "", true);
         when(mModelFileSupplier.get())
                 .thenReturn(Arrays.asList(olderModelFile, newerModelFile));
 
@@ -121,12 +121,12 @@ public class ModelFileManagerTest {
         ModelFileManager.ModelFile languageIndependentModelFile =
                 new ModelFileManager.ModelFile(
                         new File("/path/a"), 1,
-                        Collections.emptyList(), true);
+                        Collections.emptyList(), "", true);
 
         ModelFileManager.ModelFile languageDependentModelFile =
                 new ModelFileManager.ModelFile(
                         new File("/path/b"), 1,
-                        Collections.singletonList(locale), false);
+                        Collections.singletonList(locale), locale.toLanguageTag(), false);
         when(mModelFileSupplier.get())
                 .thenReturn(
                         Arrays.asList(languageIndependentModelFile, languageDependentModelFile));
@@ -143,12 +143,12 @@ public class ModelFileManagerTest {
         ModelFileManager.ModelFile languageIndependentModelFile =
                 new ModelFileManager.ModelFile(
                         new File("/path/a"), 1,
-                        Collections.emptyList(), true);
+                        Collections.emptyList(), "", true);
 
         ModelFileManager.ModelFile languageDependentModelFile =
                 new ModelFileManager.ModelFile(
                         new File("/path/b"), 1,
-                        Collections.singletonList(locale), false);
+                        Collections.singletonList(locale), locale.toLanguageTag(), false);
 
         when(mModelFileSupplier.get())
                 .thenReturn(
@@ -165,12 +165,13 @@ public class ModelFileManagerTest {
         ModelFileManager.ModelFile languageIndependentModelFile =
                 new ModelFileManager.ModelFile(
                         new File("/path/a"), 1,
-                        Collections.emptyList(), true);
+                        Collections.emptyList(), "", true);
 
         ModelFileManager.ModelFile languageDependentModelFile =
                 new ModelFileManager.ModelFile(
                         new File("/path/b"), 1,
-                        Collections.singletonList(DEFAULT_LOCALE), false);
+                        Collections.singletonList(
+                                DEFAULT_LOCALE), DEFAULT_LOCALE.toLanguageTag(), false);
 
         when(mModelFileSupplier.get())
                 .thenReturn(
@@ -187,12 +188,12 @@ public class ModelFileManagerTest {
         ModelFileManager.ModelFile matchButOlderModel =
                 new ModelFileManager.ModelFile(
                         new File("/path/a"), 1,
-                        Collections.singletonList(Locale.forLanguageTag("fr")), false);
+                        Collections.singletonList(Locale.forLanguageTag("fr")), "fr", false);
 
         ModelFileManager.ModelFile mismatchButNewerModel =
                 new ModelFileManager.ModelFile(
                         new File("/path/b"), 2,
-                        Collections.singletonList(Locale.forLanguageTag("ja")), false);
+                        Collections.singletonList(Locale.forLanguageTag("ja")), "ja", false);
 
         when(mModelFileSupplier.get())
                 .thenReturn(
@@ -209,12 +210,12 @@ public class ModelFileManagerTest {
         ModelFileManager.ModelFile matchLocaleModel =
                 new ModelFileManager.ModelFile(
                         new File("/path/b"), 1,
-                        Collections.singletonList(Locale.forLanguageTag("ja")), false);
+                        Collections.singletonList(Locale.forLanguageTag("ja")), "ja", false);
 
         ModelFileManager.ModelFile languageIndependentModel =
                 new ModelFileManager.ModelFile(
                         new File("/path/a"), 2,
-                        Collections.emptyList(), true);
+                        Collections.emptyList(), "", true);
         when(mModelFileSupplier.get())
                 .thenReturn(
                         Arrays.asList(matchLocaleModel, languageIndependentModel));
@@ -231,12 +232,12 @@ public class ModelFileManagerTest {
         ModelFileManager.ModelFile modelA =
                 new ModelFileManager.ModelFile(
                         new File("/path/a"), 1,
-                        Collections.singletonList(Locale.forLanguageTag("ja")), false);
+                        Collections.singletonList(Locale.forLanguageTag("ja")), "ja", false);
 
         ModelFileManager.ModelFile modelB =
                 new ModelFileManager.ModelFile(
                         new File("/path/a"), 1,
-                        Collections.singletonList(Locale.forLanguageTag("ja")), false);
+                        Collections.singletonList(Locale.forLanguageTag("ja")), "ja", false);
 
         assertThat(modelA).isEqualTo(modelB);
     }
@@ -246,12 +247,12 @@ public class ModelFileManagerTest {
         ModelFileManager.ModelFile modelA =
                 new ModelFileManager.ModelFile(
                         new File("/path/a"), 1,
-                        Collections.singletonList(Locale.forLanguageTag("ja")), false);
+                        Collections.singletonList(Locale.forLanguageTag("ja")), "ja", false);
 
         ModelFileManager.ModelFile modelB =
                 new ModelFileManager.ModelFile(
                         new File("/path/b"), 1,
-                        Collections.singletonList(Locale.forLanguageTag("ja")), false);
+                        Collections.singletonList(Locale.forLanguageTag("ja")), "ja", false);
 
         assertThat(modelA).isNotEqualTo(modelB);
     }
@@ -262,7 +263,7 @@ public class ModelFileManagerTest {
         ModelFileManager.ModelFile modelA =
                 new ModelFileManager.ModelFile(
                         new File("/path/a"), 1,
-                        Collections.singletonList(Locale.forLanguageTag("ja")), false);
+                        Collections.singletonList(Locale.forLanguageTag("ja")), "ja", false);
 
         assertThat(modelA.getPath()).isEqualTo("/path/a");
     }
@@ -272,7 +273,7 @@ public class ModelFileManagerTest {
         ModelFileManager.ModelFile modelA =
                 new ModelFileManager.ModelFile(
                         new File("/path/a"), 1,
-                        Collections.singletonList(Locale.forLanguageTag("ja")), false);
+                        Collections.singletonList(Locale.forLanguageTag("ja")), "ja", false);
 
         assertThat(modelA.getName()).isEqualTo("a");
     }
@@ -282,12 +283,12 @@ public class ModelFileManagerTest {
         ModelFileManager.ModelFile modelA =
                 new ModelFileManager.ModelFile(
                         new File("/path/a"), 1,
-                        Collections.singletonList(Locale.forLanguageTag("ja")), false);
+                        Collections.singletonList(Locale.forLanguageTag("ja")), "ja", false);
 
         ModelFileManager.ModelFile modelB =
                 new ModelFileManager.ModelFile(
                         new File("/path/b"), 2,
-                        Collections.emptyList(), true);
+                        Collections.emptyList(), "", true);
 
         assertThat(modelA.isPreferredTo(modelB)).isTrue();
     }
@@ -297,12 +298,12 @@ public class ModelFileManagerTest {
         ModelFileManager.ModelFile modelA =
                 new ModelFileManager.ModelFile(
                         new File("/path/a"), 2,
-                        Collections.singletonList(Locale.forLanguageTag("ja")), false);
+                        Collections.singletonList(Locale.forLanguageTag("ja")), "ja", false);
 
         ModelFileManager.ModelFile modelB =
                 new ModelFileManager.ModelFile(
                         new File("/path/b"), 1,
-                        Collections.emptyList(), false);
+                        Collections.emptyList(), "", false);
 
         assertThat(modelA.isPreferredTo(modelB)).isTrue();
     }

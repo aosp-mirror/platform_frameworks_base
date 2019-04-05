@@ -167,6 +167,7 @@ public final class ModelFileManager {
                         file,
                         version,
                         supportedLocales,
+                        supportedLocalesStr,
                         ModelFile.LANGUAGE_INDEPENDENT.equals(supportedLocalesStr));
             } catch (FileNotFoundException e) {
                 Log.e(DEFAULT_LOG_TAG, "Failed to find " + file.getAbsolutePath(), e);
@@ -201,13 +202,16 @@ public final class ModelFileManager {
         private final File mFile;
         private final int mVersion;
         private final List<Locale> mSupportedLocales;
+        private final String mSupportedLocalesStr;
         private final boolean mLanguageIndependent;
 
         public ModelFile(File file, int version, List<Locale> supportedLocales,
+                String supportedLocalesStr,
                 boolean languageIndependent) {
             mFile = Preconditions.checkNotNull(file);
             mVersion = version;
             mSupportedLocales = Preconditions.checkNotNull(supportedLocales);
+            mSupportedLocalesStr = Preconditions.checkNotNull(supportedLocalesStr);
             mLanguageIndependent = languageIndependent;
         }
 
@@ -235,6 +239,11 @@ public final class ModelFileManager {
         /** Returns an immutable lists of supported locales. */
         public List<Locale> getSupportedLocales() {
             return Collections.unmodifiableList(mSupportedLocales);
+        }
+
+        /** Returns the original supported locals string read from the model file. */
+        public String getSupportedLocalesStr() {
+            return mSupportedLocalesStr;
         }
 
         /**
