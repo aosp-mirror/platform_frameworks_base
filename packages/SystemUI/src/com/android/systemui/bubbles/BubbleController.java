@@ -325,12 +325,11 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
      * Adds or updates a bubble associated with the provided notification entry.
      *
      * @param notif          the notification associated with this bubble.
-     * @param updatePosition whether this update should promote the bubble to the top of the stack.
      */
-    public void updateBubble(NotificationEntry notif, boolean updatePosition) {
+    void updateBubble(NotificationEntry notif) {
         if (mStackView != null && mBubbleData.getBubble(notif.key) != null) {
             // It's an update
-            mStackView.updateBubble(notif, updatePosition);
+            mStackView.updateBubble(notif);
         } else {
             if (mStackView == null) {
                 mStackView = new BubbleStackView(mContext, mBubbleData, mSurfaceSynchronizer);
@@ -403,7 +402,7 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
                 return;
             }
             if (entry.isBubble() && mNotificationInterruptionStateProvider.shouldBubbleUp(entry)) {
-                updateBubble(entry, true /* updatePosition */);
+                updateBubble(entry);
             }
         }
 
@@ -416,7 +415,7 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
                     && alertAgain(entry, entry.notification.getNotification())) {
                 entry.setShowInShadeWhenBubble(true);
                 entry.setBubbleDismissed(false); // updates come back as bubbles even if dismissed
-                updateBubble(entry, true /* updatePosition */);
+                updateBubble(entry);
                 mStackView.updateDotVisibility(entry.key);
             }
         }
