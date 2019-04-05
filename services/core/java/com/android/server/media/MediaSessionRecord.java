@@ -729,6 +729,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         PlaybackState state;
         long duration;
         synchronized (mLock) {
+            if (mDestroyed) {
+                return null;
+            }
             state = mPlaybackState;
             duration = mDuration;
         }
