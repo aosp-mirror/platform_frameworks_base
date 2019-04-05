@@ -903,9 +903,8 @@ public abstract class BiometricServiceBase extends SystemService
     }
 
     protected void setActiveUserInternal(int userId) {
-        mHandler.post(() -> {
-            updateActiveGroup(userId, null /* clientPackage */);
-        });
+        // Do not put on handler, since it should finish before returning to caller.
+        updateActiveGroup(userId, null /* clientPackage */);
     }
 
     protected void removeInternal(RemovalClient client) {
