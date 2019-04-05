@@ -31,6 +31,9 @@
 #include "renderthread/CanvasContext.h"
 #include "tests/common/TestUtils.h"
 
+#include <gui/BufferItemConsumer.h>
+#include <gui/Surface.h>
+
 using namespace android;
 using namespace android::uirenderer;
 using namespace android::uirenderer::renderthread;
@@ -421,10 +424,20 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, clip_replace) {
     EXPECT_EQ(1, surface->canvas()->mDrawCounter);
 }
 
+static sp<Surface> createDummySurface() {
+    sp<IGraphicBufferProducer> producer;
+    sp<IGraphicBufferConsumer> consumer;
+    BufferQueue::createBufferQueue(&producer, &consumer);
+    producer->setMaxDequeuedBufferCount(1);
+    producer->setAsyncMode(true);
+    return new Surface(producer);
+}
+
 RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, context_lost) {
+    auto surface = createDummySurface();
     auto pipeline = std::make_unique<SkiaOpenGLPipeline>(renderThread);
     EXPECT_FALSE(pipeline->isSurfaceReady());
-    EXPECT_TRUE(pipeline->setSurface((Surface*)0x01, SwapBehavior::kSwap_default, ColorMode::SRGB));
+    EXPECT_TRUE(pipeline->setSurface(surface.get(), SwapBehavior::kSwap_default, ColorMode::SRGB, 0));
     EXPECT_TRUE(pipeline->isSurfaceReady());
     renderThread.destroyRenderingContext();
     EXPECT_FALSE(pipeline->isSurfaceReady());

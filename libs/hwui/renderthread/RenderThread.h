@@ -22,8 +22,8 @@
 #include "../JankTracker.h"
 #include "CacheManager.h"
 #include "TimeLord.h"
-#include "thread/ThreadBase.h"
 #include "WebViewFunctorManager.h"
+#include "thread/ThreadBase.h"
 #include "utils/TimeUtils.h"
 
 #include <GrContext.h>
