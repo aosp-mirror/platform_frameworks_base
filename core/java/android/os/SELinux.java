@@ -31,12 +31,15 @@ import java.io.IOException;
 public class SELinux {
     private static final String TAG = "SELinux";
 
-    /** Keep in sync with ./external/libselinux/include/selinux/android.h */
+    /** Keep in sync with ./external/selinux/libselinux/include/selinux/android.h */
     private static final int SELINUX_ANDROID_RESTORECON_NOCHANGE = 1;
     private static final int SELINUX_ANDROID_RESTORECON_VERBOSE = 2;
     private static final int SELINUX_ANDROID_RESTORECON_RECURSE = 4;
     private static final int SELINUX_ANDROID_RESTORECON_FORCE = 8;
     private static final int SELINUX_ANDROID_RESTORECON_DATADATA = 16;
+    private static final int SELINUX_ANDROID_RESTORECON_SKIPCE = 32;
+    private static final int SELINUX_ANDROID_RESTORECON_CROSS_FILESYSTEMS = 64;
+    private static final int SELINUX_ANDROID_RESTORECON_SKIP_SEHASH = 128;
 
     /**
      * Get context associated with path by file_contexts.
@@ -182,7 +185,8 @@ public class SELinux {
     @UnsupportedAppUsage
     public static boolean restoreconRecursive(File file) {
         try {
-            return native_restorecon(file.getCanonicalPath(), SELINUX_ANDROID_RESTORECON_RECURSE);
+            return native_restorecon(file.getCanonicalPath(),
+                SELINUX_ANDROID_RESTORECON_RECURSE | SELINUX_ANDROID_RESTORECON_SKIP_SEHASH);
         } catch (IOException e) {
             Slog.e(TAG, "Error getting canonical path. Restorecon failed for " +
                     file.getPath(), e);
