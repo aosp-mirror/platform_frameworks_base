@@ -2999,7 +2999,10 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @deprecated Apps that redirect outgoing calls should use the
      * {@link android.telecom.CallRedirectionService} API.  Apps that perform call screening
-     * should use the {@link android.telecom.CallScreeningService} API.
+     * should use the {@link android.telecom.CallScreeningService} API.  Apps which need to be
+     * notified of basic call state should use
+     * {@link android.telephony.PhoneStateListener#onCallStateChanged(int, String)} to determine
+     * when a new outgoing call is placed.
      */
     @Deprecated
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
