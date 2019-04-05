@@ -16815,10 +16815,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 mForegroundInfo.mBoundsChanged = true;
             }
             invalidateParentIfNeeded();
-            if ((mPrivateFlags2 & PFLAG2_VIEW_QUICK_REJECTED) == PFLAG2_VIEW_QUICK_REJECTED) {
-                // View was rejected last time it was drawn by its parent; this may have changed
-                invalidateParentIfNeeded();
-            }
         }
     }
 
@@ -16884,10 +16880,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 mForegroundInfo.mBoundsChanged = true;
             }
             invalidateParentIfNeeded();
-            if ((mPrivateFlags2 & PFLAG2_VIEW_QUICK_REJECTED) == PFLAG2_VIEW_QUICK_REJECTED) {
-                // View was rejected last time it was drawn by its parent; this may have changed
-                invalidateParentIfNeeded();
-            }
         }
     }
 
@@ -16947,10 +16939,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 mForegroundInfo.mBoundsChanged = true;
             }
             invalidateParentIfNeeded();
-            if ((mPrivateFlags2 & PFLAG2_VIEW_QUICK_REJECTED) == PFLAG2_VIEW_QUICK_REJECTED) {
-                // View was rejected last time it was drawn by its parent; this may have changed
-                invalidateParentIfNeeded();
-            }
         }
     }
 
@@ -17007,10 +16995,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 mForegroundInfo.mBoundsChanged = true;
             }
             invalidateParentIfNeeded();
-            if ((mPrivateFlags2 & PFLAG2_VIEW_QUICK_REJECTED) == PFLAG2_VIEW_QUICK_REJECTED) {
-                // View was rejected last time it was drawn by its parent; this may have changed
-                invalidateParentIfNeeded();
-            }
         }
     }
 
