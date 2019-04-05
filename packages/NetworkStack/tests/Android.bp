@@ -55,6 +55,7 @@ android_test {
         "liblzma",
         "libnativehelper",
         "libnetworkstacktestsjni",
+        "libnetworkstackutilsjni",
         "libpackagelistparser",
         "libpcre2",
         "libprocessgroup",
