@@ -51,6 +51,7 @@ import android.net.metrics.DhcpClientEvent;
 import android.net.metrics.DhcpErrorEvent;
 import android.net.metrics.IpConnectivityLog;
 import android.net.util.InterfaceParams;
+import android.net.util.NetworkStackUtils;
 import android.net.util.SocketUtils;
 import android.os.Message;
 import android.os.SystemClock;
@@ -319,7 +320,7 @@ public class DhcpClient extends StateMachine {
             mPacketSock = Os.socket(AF_PACKET, SOCK_RAW, ETH_P_IP);
             SocketAddress addr = makePacketSocketAddress((short) ETH_P_IP, mIface.index);
             Os.bind(mPacketSock, addr);
-            SocketUtils.attachDhcpFilter(mPacketSock);
+            NetworkStackUtils.attachDhcpFilter(mPacketSock);
         } catch(SocketException|ErrnoException e) {
             Log.e(TAG, "Error creating packet socket", e);
             return false;

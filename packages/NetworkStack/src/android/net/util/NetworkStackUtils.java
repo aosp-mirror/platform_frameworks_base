@@ -22,14 +22,18 @@ import android.util.SparseArray;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
+import java.net.Inet4Address;
+import java.net.SocketException;
 import java.util.List;
 import java.util.function.Predicate;
-
 
 /**
  * Collection of utilities for the network stack.
  */
 public class NetworkStackUtils {
+    static {
+        System.loadLibrary("networkstackutilsjni");
+    }
 
     /**
      * @return True if the array is null or 0-length.
@@ -97,4 +101,39 @@ public class NetworkStackUtils {
         // TODO: Link to DeviceConfig API once it is ready.
         return defaultValue;
     }
+
+    /**
+     * Attaches a socket filter that accepts DHCP packets to the given socket.
+     */
+    public static native void attachDhcpFilter(FileDescriptor fd) throws SocketException;
+
+    /**
+     * Attaches a socket filter that accepts ICMPv6 router advertisements to the given socket.
+     * @param fd the socket's {@link FileDescriptor}.
+     * @param packetType the hardware address type, one of ARPHRD_*.
+     */
+    public static native void attachRaFilter(FileDescriptor fd, int packetType)
+            throws SocketException;
+
+    /**
+     * Attaches a socket filter that accepts L2-L4 signaling traffic required for IP connectivity.
+     *
+     * This includes: all ARP, ICMPv6 RS/RA/NS/NA messages, and DHCPv4 exchanges.
+     *
+     * @param fd the socket's {@link FileDescriptor}.
+     * @param packetType the hardware address type, one of ARPHRD_*.
+     */
+    public static native void attachControlPacketFilter(FileDescriptor fd, int packetType)
+            throws SocketException;
+
+    /**
+     * Add an entry into the ARP cache.
+     */
+    public static void addArpEntry(Inet4Address ipv4Addr, android.net.MacAddress ethAddr,
+            String ifname, FileDescriptor fd) throws IOException {
+        addArpEntry(ethAddr.toByteArray(), ipv4Addr.getAddress(), ifname, fd);
+    }
+
+    private static native void addArpEntry(byte[] ethAddr, byte[] netAddr, String ifname,
+            FileDescriptor fd) throws IOException;
 }

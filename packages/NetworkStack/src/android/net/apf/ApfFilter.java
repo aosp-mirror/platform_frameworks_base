@@ -49,7 +49,6 @@ import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.RaEvent;
 import android.net.util.InterfaceParams;
 import android.net.util.NetworkStackUtils;
-import android.net.util.SocketUtils;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.system.ErrnoException;
@@ -478,7 +477,7 @@ public class ApfFilter {
             SocketAddress addr = makePacketSocketAddress(
                     (short) ETH_P_IPV6, mInterfaceParams.index);
             Os.bind(socket, addr);
-            SocketUtils.attachRaFilter(socket, mApfCapabilities.apfPacketFormat);
+            NetworkStackUtils.attachRaFilter(socket, mApfCapabilities.apfPacketFormat);
         } catch(SocketException|ErrnoException e) {
             Log.e(TAG, "Error starting filter", e);
             return;
