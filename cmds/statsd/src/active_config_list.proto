@@ -24,7 +24,7 @@ option java_outer_classname = "ActiveConfigProto";
 message ActiveEventActivation {
     optional int32 atom_matcher_index = 1;
 
-    // TIme left in activation. When this proto is loaded after device boot,
+    // Time left in activation. When this proto is loaded after device boot,
     // the activation should be set to active for this duration.
     optional int64 remaining_ttl_nanos = 2;
 }

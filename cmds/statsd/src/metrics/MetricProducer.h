@@ -233,12 +233,8 @@ public:
         return isActiveLocked();
     }
 
-    void addActivation(int activationTrackerIndex, int64_t ttl_seconds,
-                       int deactivationTrackerIndex = -1);
-
-    inline void setActivationType(const MetricActivation::ActivationType& activationType) {
-        mActivationType = activationType;
-    }
+    void addActivation(int activationTrackerIndex, const ActivationType& activationType,
+            int64_t ttl_seconds, int deactivationTrackerIndex = -1);
 
     void prepareFistBucket() {
         std::lock_guard<std::mutex> lock(mMutex);
@@ -386,11 +382,16 @@ protected:
     mutable std::mutex mMutex;
 
     struct Activation {
-        Activation() : ttl_ns(0), start_ns(0), state(ActivationState::kNotActive)  {}
+        Activation(const ActivationType& activationType, const int64_t ttlNs)
+            : ttl_ns(ttlNs),
+              start_ns(0),
+              state(ActivationState::kNotActive),
+              activationType(activationType) {}
 
-        int64_t ttl_ns;
+        const int64_t ttl_ns;
         int64_t start_ns;
         ActivationState state;
+        const ActivationType activationType;
     };
     // When the metric producer has multiple activations, these activations are ORed to determine
     // whether the metric producer is ready to generate metrics.
@@ -401,8 +402,6 @@ protected:
 
     bool mIsActive;
 
-    MetricActivation::ActivationType mActivationType;
-
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetric);
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation);
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations);
@@ -411,6 +410,8 @@ protected:
     FRIEND_TEST(StatsLogProcessorTest, TestActiveConfigMetricDiskWriteRead);
     FRIEND_TEST(StatsLogProcessorTest, TestActivationOnBoot);
     FRIEND_TEST(StatsLogProcessorTest, TestActivationOnBootMultipleActivations);
+    FRIEND_TEST(StatsLogProcessorTest,
+            TestActivationOnBootMultipleActivationsDifferentActivationTypes);
 };
 
 }  // namespace statsd

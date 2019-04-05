@@ -109,8 +109,8 @@ void MetricProducer::flushIfExpire(int64_t elapsedTimestampNs) {
     }
 }
 
-void MetricProducer::addActivation(int activationTrackerIndex, int64_t ttl_seconds,
-                                   int deactivationTrackerIndex) {
+void MetricProducer::addActivation(int activationTrackerIndex, const ActivationType& activationType,
+        int64_t ttl_seconds, int deactivationTrackerIndex) {
     std::lock_guard<std::mutex> lock(mMutex);
     // When a metric producer does not depend on any activation, its mIsActive is true.
     // Therefore, if this is the 1st activation, mIsActive will turn to false. Otherwise it does not
@@ -118,8 +118,8 @@ void MetricProducer::addActivation(int activationTrackerIndex, int64_t ttl_secon
     if  (mEventActivationMap.empty()) {
         mIsActive = false;
     }
-    std::shared_ptr<Activation> activation = std::make_shared<Activation>();
-    activation->ttl_ns = ttl_seconds * NS_PER_SEC;
+    std::shared_ptr<Activation> activation =
+            std::make_shared<Activation>(activationType, ttl_seconds * NS_PER_SEC);
     mEventActivationMap.emplace(activationTrackerIndex, activation);
     if (-1 != deactivationTrackerIndex) {
         mEventDeactivationMap.emplace(deactivationTrackerIndex, activation);
@@ -131,13 +131,16 @@ void MetricProducer::activateLocked(int activationTrackerIndex, int64_t elapsedT
     if (it == mEventActivationMap.end()) {
         return;
     }
-    if (mActivationType == MetricActivation::ACTIVATE_ON_BOOT &&
-        it->second->state == ActivationState::kNotActive) {
-        it->second->state = ActivationState::kActiveOnBoot;
+    auto& activation = it->second;
+    if (ACTIVATE_ON_BOOT == activation->activationType) {
+        if (ActivationState::kNotActive == activation->state) {
+            activation->state = ActivationState::kActiveOnBoot;
+        }
+        // If the Activation is already active or set to kActiveOnBoot, do nothing.
         return;
     }
-    it->second->start_ns = elapsedTimestampNs;
-    it->second->state = ActivationState::kActive;
+    activation->start_ns = elapsedTimestampNs;
+    activation->state = ActivationState::kActive;
     mIsActive = true;
 }
 
