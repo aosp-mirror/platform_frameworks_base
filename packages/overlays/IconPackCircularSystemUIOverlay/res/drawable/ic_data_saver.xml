@@ -1,4 +1,4 @@
-
+<?xml version="1.0" encoding="utf-8"?>
 <!--
    Copyright (C) 2019 The Android Open Source Project
 
@@ -14,9 +14,18 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 -->
-
-<vector android:height="18dp " android:viewportHeight="24" android:viewportWidth="24" android:width="18dp " xmlns:android="http://schemas.android.com/apk/res/android">
-  <path android:fillColor="@android:color/white" android:pathData="M12,7a0.76 0.76 ,0,0,0-0.75 0.75 v3.5H7.75a0.75 0.75 ,0,0,0,0,1.5h3.5v3.5a0.75 0.75 ,0,0,0,1.5,0v-3.5h3.5a0.75 0.75 ,0,0,0,0-1.5h-3.5V7.75A0.76 0.76 ,0,0,0,12,7Z"/>
-  <path android:fillColor="@android:color/white" android:pathData="M3.36,7A10,10,0,0,0,20.27,17.64L18.1,16.39A7.5,7.5,0,1,1,11.25,4.56V2.05A10,10,0,0,0,3.36,7Z"/>
-  <path android:fillColor="@android:color/white" android:pathData="M21,16.35a10,10,0,0,0-8.27-14.3V4.56a7.48,7.48,0,0,1,6.1,10.54Z"/>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:height="18dp "
+    android:viewportHeight="24"
+    android:viewportWidth="24"
+    android:width="18dp " >
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M12,7a0.76 0.76 ,0,0,0-0.75 0.75 v3.5H7.75a0.75 0.75 ,0,0,0,0,1.5h3.5v3.5a0.75 0.75 ,0,0,0,1.5,0v-3.5h3.5a0.75 0.75 ,0,0,0,0-1.5h-3.5V7.75A0.76 0.76 ,0,0,0,12,7Z" />
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M3.36,7A10,10,0,0,0,20.27,17.64L18.1,16.39A7.5,7.5,0,1,1,11.25,4.56V2.05A10,10,0,0,0,3.36,7Z" />
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M21,16.35a10,10,0,0,0-8.27-14.3V4.56a7.48,7.48,0,0,1,6.1,10.54Z" />
 </vector>
