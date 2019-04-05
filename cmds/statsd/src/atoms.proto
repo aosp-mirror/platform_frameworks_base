@@ -234,7 +234,7 @@ message Atom {
         BluetoothDeviceTxPowerLevelReported bluetooth_device_tx_power_level_reported = 159;
         BluetoothHciTimeoutReported bluetooth_hci_timeout_reported = 160;
         BluetoothQualityReportReported bluetooth_quality_report_reported = 161;
-        BluetoothManufacturerInfoReported bluetooth_device_info_reported = 162;
+        BluetoothDeviceInfoReported bluetooth_device_info_reported = 162;
         BluetoothRemoteVersionInfoReported bluetooth_remote_version_info_reported = 163;
         BluetoothSdpAttributeReported bluetooth_sdp_attribute_reported = 164;
         BluetoothBondStateChanged bluetooth_bond_state_changed = 165;
@@ -1935,7 +1935,7 @@ message BluetoothQualityReportReported {
  * Logged from:
  *     packages/apps/Bluetooth
  */
-message BluetoothManufacturerInfoReported {
+message BluetoothDeviceInfoReported {
     // An identifier that can be used to match events for this device.
     // Currently, this is a salted hash of the MAC address of this Bluetooth device.
     // Salt: Randomly generated 256 bit value
