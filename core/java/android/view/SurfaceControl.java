@@ -92,7 +92,7 @@ public final class SurfaceControl implements Parcelable {
             Rect sourceCrop, int width, int height, boolean useIdentityTransform, int rotation,
             boolean captureSecureLayers);
     private static native ScreenshotGraphicBuffer nativeCaptureLayers(IBinder layerHandleToken,
-            Rect sourceCrop, float frameScale);
+            Rect sourceCrop, float frameScale, IBinder[] excludeLayers);
 
     private static native long nativeCreateTransaction();
     private static native long nativeGetNativeTransactionFinalizer();
@@ -1991,7 +1991,16 @@ public final class SurfaceControl implements Parcelable {
      */
     public static ScreenshotGraphicBuffer captureLayers(IBinder layerHandleToken, Rect sourceCrop,
             float frameScale) {
-        return nativeCaptureLayers(layerHandleToken, sourceCrop, frameScale);
+        return nativeCaptureLayers(layerHandleToken, sourceCrop, frameScale, null);
+    }
+
+    /**
+     * Like {@link captureLayers} but with an array of layer handles to exclude.
+     * @hide
+     */
+    public static ScreenshotGraphicBuffer captureLayersExcluding(IBinder layerHandleToken,
+            Rect sourceCrop, float frameScale, IBinder[] exclude) {
+        return nativeCaptureLayers(layerHandleToken, sourceCrop, frameScale, exclude);
     }
 
     /**
