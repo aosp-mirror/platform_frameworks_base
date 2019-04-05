@@ -3107,6 +3107,8 @@ message BiometricAcquired {
     optional int32 acquire_info = 6;
     // Vendor-specific acquire info. Valid only if acquire_info == ACQUIRED_VENDOR.
     optional int32 acquire_info_vendor = 7;
+    // Dictates if this message should trigger additional debugging.
+    optional bool debug = 8;
 }
 
 /**
@@ -3143,6 +3145,8 @@ message BiometricAuthenticated {
     // AUTHENTICATED. for setRequireConfirmation(true), this is from PENDING_CONFIRMATION to
     // CONFIRMED.
     optional int64 latency_millis = 7;
+    // Dictates if this message should trigger additional debugging.
+    optional bool debug = 8;
 }
 
 /**
@@ -3168,6 +3172,8 @@ message BiometricErrorOccurred {
     // Vendor-specific error info. Valid only if acquire_info == ACQUIRED_VENDOR. These are defined
     // by the vendor and not specified by the HIDL interface.
     optional int32 error_info_vendor = 7;
+    // Dictates if this message should trigger additional debugging.
+    optional bool debug = 8;
 }
 
 /**
@@ -3180,6 +3186,8 @@ message BiometricSystemHealthIssueDetected {
     optional android.hardware.biometrics.ModalityEnum modality = 1;
     // Type of issue detected.
     optional android.hardware.biometrics.IssueEnum issue = 2;
+    // Dictates if this message should trigger additional debugging.
+    optional bool debug = 3;
 }
 
 /**
