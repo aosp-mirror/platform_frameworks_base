@@ -98,7 +98,11 @@ easier.
     <style name="Widget.DeviceDefault.ActionBar.TabView" parent="Widget.Material.ActionBar.TabView"/>
     <style name="Widget.DeviceDefault.ActionBar.TabText" parent="Widget.Material.ActionBar.TabText"/>
     <style name="Widget.DeviceDefault.ActionBar.TabBar" parent="Widget.Material.ActionBar.TabBar"/>
-    <style name="Widget.DeviceDefault.ActionBar.Solid" parent="Widget.Material.ActionBar.Solid"/>
+    <style name="Widget.DeviceDefault.ActionBar.Solid" parent="Widget.Material.ActionBar.Solid">
+        <item name="background">?attr/colorPrimaryDark</item>
+        <item name="backgroundStacked">?attr/colorPrimaryDark</item>
+        <item name="backgroundSplit">?attr/colorPrimaryDark</item>
+    </style>
     <style name="Widget.DeviceDefault.Button.Borderless.Small" parent="Widget.Material.Button.Borderless.Small"/>
     <style name="Widget.DeviceDefault.AbsListView" parent="Widget.Material.AbsListView"/>
     <style name="Widget.DeviceDefault.Spinner.DropDown.ActionBar" parent="Widget.Material.Spinner.DropDown.ActionBar"/>
