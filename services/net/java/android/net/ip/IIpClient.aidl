@@ -27,6 +27,7 @@ oneway interface IIpClient {
     void shutdown();
     void startProvisioning(in ProvisioningConfigurationParcelable req);
     void stop();
+    void setL2KeyAndGroupHint(in String l2Key, in String groupHint);
     void setTcpBufferSizes(in String tcpBufferSizes);
     void setHttpProxy(in ProxyInfo proxyInfo);
     void setMulticastFilter(boolean enabled);
