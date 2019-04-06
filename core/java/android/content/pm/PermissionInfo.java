@@ -320,6 +320,27 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_REMOVED = 1<<1;
 
     /**
+     * Flag for {@link #flags}, corresponding to <code>hardRestricted</code>
+     * value of {@link android.R.attr#permissionFlags}.
+     *
+     * <p> This permission is restricted by the platform and it would be
+     * grantable only to apps that meet special criteria per platform
+     * policy.
+     */
+    public static final int FLAG_HARD_RESTRICTED = 1<<2;
+
+    /**
+     * Flag for {@link #flags}, corresponding to <code>softRestricted</code>
+     * value of {@link android.R.attr#permissionFlags}.
+     *
+     * <p>This permission is restricted by the platform and it would be
+     * grantable in its full form to apps that meet special criteria
+     * per platform policy. Otherwise, a weaker form of the permission
+     * would be granted. The weak grant depends on the permission.
+     */
+    public static final int FLAG_SOFT_RESTRICTED = 1<<3;
+
+    /**
      * Flag for {@link #flags}, indicating that this permission has been
      * installed into the system's globally defined permissions.
      */
@@ -575,8 +596,28 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     }
 
     /** @hide */
+    public boolean isHardRestricted() {
+        return (flags & PermissionInfo.FLAG_HARD_RESTRICTED) != 0;
+    }
+
+    /** @hide */
+    public boolean isSoftRestricted() {
+        return (flags & PermissionInfo.FLAG_SOFT_RESTRICTED) != 0;
+    }
+
+    /** @hide */
+    public boolean isRestricted() {
+        return isHardRestricted() || isSoftRestricted();
+    }
+
+    /** @hide */
     public boolean isAppOp() {
         return (protectionLevel & PermissionInfo.PROTECTION_FLAG_APPOP) != 0;
+    }
+
+    /** @hide */
+    public boolean isRuntime() {
+        return getProtection() == PROTECTION_DANGEROUS;
     }
 
     public static final @NonNull Creator<PermissionInfo> CREATOR =

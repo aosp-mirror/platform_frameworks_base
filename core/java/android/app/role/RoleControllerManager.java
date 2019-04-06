@@ -121,13 +121,6 @@ public class RoleControllerManager {
     }
 
     /**
-     * @see RoleControllerService#onSmsKillSwitchToggled(boolean)
-     */
-    public void onSmsKillSwitchToggled(boolean enabled) {
-        mRemoteService.scheduleAsyncRequest(new OnSmsKillSwitchToggledRequest(enabled));
-    }
-
-    /**
      * @see RoleControllerService#onIsApplicationQualifiedForRole(String, String)
      */
     @RequiresPermission(Manifest.permission.MANAGE_ROLE_HOLDERS)
@@ -411,28 +404,6 @@ public class RoleControllerManager {
                         mRemoteCallback);
             } catch (RemoteException e) {
                 Log.e(LOG_TAG, "Error calling onClearRoleHolders()", e);
-            }
-        }
-    }
-
-    /**
-     * Request for {@link #onSmsKillSwitchToggled(boolean)}
-     */
-    private static final class OnSmsKillSwitchToggledRequest
-            implements AbstractRemoteService.AsyncRequest<IRoleController> {
-
-        private final boolean mEnabled;
-
-        private OnSmsKillSwitchToggledRequest(boolean enabled) {
-            mEnabled = enabled;
-        }
-
-        @Override
-        public void run(@NonNull IRoleController service) {
-            try {
-                service.onSmsKillSwitchToggled(mEnabled);
-            } catch (RemoteException e) {
-                Log.e(LOG_TAG, "Error calling onSmsKillSwitchToggled()", e);
             }
         }
     }

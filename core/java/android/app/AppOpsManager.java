@@ -30,9 +30,7 @@ import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
-import android.database.ContentObserver;
 import android.media.AudioAttributes.AttributeUsage;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -42,7 +40,6 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserManager;
-import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.LongSparseArray;
 import android.util.LongSparseLongArray;
@@ -70,7 +67,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -1757,21 +1753,21 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED, // VIBRATE
             AppOpsManager.MODE_ALLOWED, // READ_CONTACTS
             AppOpsManager.MODE_ALLOWED, // WRITE_CONTACTS
-            AppOpsManager.MODE_ALLOWED, // READ_CALL_LOG
-            AppOpsManager.MODE_ALLOWED, // WRITE_CALL_LOG
+            AppOpsManager.MODE_DEFAULT, // READ_CALL_LOG
+            AppOpsManager.MODE_DEFAULT, // WRITE_CALL_LOG
             AppOpsManager.MODE_ALLOWED, // READ_CALENDAR
             AppOpsManager.MODE_ALLOWED, // WRITE_CALENDAR
             AppOpsManager.MODE_ALLOWED, // WIFI_SCAN
             AppOpsManager.MODE_ALLOWED, // POST_NOTIFICATION
             AppOpsManager.MODE_ALLOWED, // NEIGHBORING_CELLS
             AppOpsManager.MODE_ALLOWED, // CALL_PHONE
-            AppOpsManager.MODE_ALLOWED, // READ_SMS
+            AppOpsManager.MODE_DEFAULT, // READ_SMS
             AppOpsManager.MODE_IGNORED, // WRITE_SMS
-            AppOpsManager.MODE_ALLOWED, // RECEIVE_SMS
+            AppOpsManager.MODE_DEFAULT, // RECEIVE_SMS
             AppOpsManager.MODE_ALLOWED, // RECEIVE_EMERGENCY_BROADCAST
-            AppOpsManager.MODE_ALLOWED, // RECEIVE_MMS
-            AppOpsManager.MODE_ALLOWED, // RECEIVE_WAP_PUSH
-            AppOpsManager.MODE_ALLOWED, // SEND_SMS
+            AppOpsManager.MODE_DEFAULT, // RECEIVE_MMS
+            AppOpsManager.MODE_DEFAULT, // RECEIVE_WAP_PUSH
+            AppOpsManager.MODE_DEFAULT, // SEND_SMS
             AppOpsManager.MODE_ALLOWED, // READ_ICC_SMS
             AppOpsManager.MODE_ALLOWED, // WRITE_ICC_SMS
             AppOpsManager.MODE_DEFAULT, // WRITE_SETTINGS
@@ -1805,10 +1801,10 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED, // READ_PHONE_STATE
             AppOpsManager.MODE_ALLOWED, // ADD_VOICEMAIL
             AppOpsManager.MODE_ALLOWED, // USE_SIP
-            AppOpsManager.MODE_ALLOWED, // PROCESS_OUTGOING_CALLS
+            AppOpsManager.MODE_DEFAULT, // PROCESS_OUTGOING_CALLS
             AppOpsManager.MODE_ALLOWED, // USE_FINGERPRINT
             AppOpsManager.MODE_ALLOWED, // BODY_SENSORS
-            AppOpsManager.MODE_ALLOWED, // READ_CELL_BROADCASTS
+            AppOpsManager.MODE_DEFAULT, // READ_CELL_BROADCASTS
             AppOpsManager.MODE_ERRORED, // MOCK_LOCATION
             AppOpsManager.MODE_ALLOWED, // READ_EXTERNAL_STORAGE
             AppOpsManager.MODE_ALLOWED, // WRITE_EXTERNAL_STORAGE
@@ -2101,49 +2097,7 @@ public class AppOpsManager {
      * @hide
      */
     public static @Mode int opToDefaultMode(int op) {
-        // STOPSHIP b/118520006: Hardcode the default values once the feature is stable.
-        switch (op) {
-            // SMS permissions
-            case AppOpsManager.OP_SEND_SMS:
-            case AppOpsManager.OP_RECEIVE_SMS:
-            case AppOpsManager.OP_READ_SMS:
-            case AppOpsManager.OP_RECEIVE_WAP_PUSH:
-            case AppOpsManager.OP_RECEIVE_MMS:
-            case AppOpsManager.OP_READ_CELL_BROADCASTS:
-            // CallLog permissions
-            case AppOpsManager.OP_READ_CALL_LOG:
-            case AppOpsManager.OP_WRITE_CALL_LOG:
-            case AppOpsManager.OP_PROCESS_OUTGOING_CALLS: {
-                if (sSmsAndCallLogRestrictionEnabled.get() == 1) {
-                    return AppOpsManager.MODE_DEFAULT;
-                }
-            }
-        }
         return sOpDefaultMode[op];
-    }
-
-    // STOPSHIP b/118520006: Hardcode the default values once the feature is stable.
-    private static final AtomicInteger sSmsAndCallLogRestrictionEnabled = new AtomicInteger(-1);
-
-    // STOPSHIP b/118520006: Hardcode the default values once the feature is stable.
-    static {
-        final Context context = ActivityThread.currentApplication();
-        if (context != null) {
-            sSmsAndCallLogRestrictionEnabled.set(ActivityThread.currentActivityThread()
-                        .getIntCoreSetting(Settings.Global.SMS_ACCESS_RESTRICTION_ENABLED, 0));
-
-            final Uri uri =
-                    Settings.Global.getUriFor(Settings.Global.SMS_ACCESS_RESTRICTION_ENABLED);
-            context.getContentResolver().registerContentObserver(uri, false, new ContentObserver(
-                    context.getMainThreadHandler()) {
-                @Override
-                public void onChange(boolean selfChange) {
-                    sSmsAndCallLogRestrictionEnabled.set(Settings.Global.getInt(
-                            context.getContentResolver(),
-                            Settings.Global.SMS_ACCESS_RESTRICTION_ENABLED, 0));
-                }
-            });
-        }
     }
 
     /**

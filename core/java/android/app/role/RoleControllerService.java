@@ -131,15 +131,6 @@ public abstract class RoleControllerService extends Service {
                         roleName, flags, callback));
             }
 
-            @Override
-            public void onSmsKillSwitchToggled(boolean enabled) {
-                enforceCallerSystemUid("onSmsKillSwitchToggled");
-
-                mWorkerHandler.sendMessage(PooledLambda.obtainMessage(
-                        RoleControllerService::onSmsKillSwitchToggled, RoleControllerService.this,
-                        enabled));
-            }
-
             private void enforceCallerSystemUid(@NonNull String methodName) {
                 if (Binder.getCallingUid() != Process.SYSTEM_UID) {
                     throw new SecurityException("Only the system process can call " + methodName
@@ -257,17 +248,6 @@ public abstract class RoleControllerService extends Service {
     @WorkerThread
     public abstract boolean onClearRoleHolders(@NonNull String roleName,
             @RoleManager.ManageHoldersFlags int flags);
-
-    /**
-     * Cleanup appop/permissions state in response to sms kill switch toggle
-     *
-     * @param enabled whether kill switch was turned on
-     *
-     * @hide
-     */
-    //STOPSHIP: remove this api before shipping a final version
-    @WorkerThread
-    public abstract void onSmsKillSwitchToggled(boolean enabled);
 
     /**
      * Check whether an application is qualified for a role.

@@ -433,7 +433,6 @@ public class SettingsBackupTest {
                     Settings.Global.SIGNED_CONFIG_VERSION,
                     Settings.Global.SMART_SELECTION_UPDATE_CONTENT_URL,
                     Settings.Global.SMART_SELECTION_UPDATE_METADATA_URL,
-                    Settings.Global.SMS_ACCESS_RESTRICTION_ENABLED,
                     Settings.Global.SMS_OUTGOING_CHECK_INTERVAL_MS,
                     Settings.Global.SMS_OUTGOING_CHECK_MAX_COUNT,
                     Settings.Global.SMS_SHORT_CODE_CONFIRMATION,

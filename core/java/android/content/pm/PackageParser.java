@@ -3279,6 +3279,19 @@ public class PackageParser {
         perm.info.flags = sa.getInt(
                 com.android.internal.R.styleable.AndroidManifestPermission_permissionFlags, 0);
 
+        // For now only platform runtime permissions can be restricted
+        if (!perm.info.isRuntime() || !"android".equals(perm.info.packageName)) {
+            perm.info.flags &= ~PermissionInfo.FLAG_HARD_RESTRICTED;
+            perm.info.flags &= ~PermissionInfo.FLAG_SOFT_RESTRICTED;
+        } else {
+            // The platform does not get to specify conflicting permissions
+            if ((perm.info.flags & PermissionInfo.FLAG_HARD_RESTRICTED) != 0
+                    && (perm.info.flags & PermissionInfo.FLAG_SOFT_RESTRICTED) != 0) {
+                throw new IllegalStateException("Permission cannot be both soft and hard"
+                        + " restricted: " + perm.info.name);
+            }
+        }
+
         sa.recycle();
 
         if (perm.info.protectionLevel == -1) {

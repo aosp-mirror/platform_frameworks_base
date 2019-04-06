@@ -50,6 +50,7 @@ import android.content.om.IOverlayManager;
 import android.content.om.OverlayManager;
 import android.content.pm.CrossProfileApps;
 import android.content.pm.ICrossProfileApps;
+import android.content.pm.IPackageManager;
 import android.content.pm.IShortcutService;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
@@ -1239,14 +1240,16 @@ final class SystemServiceRegistry {
                 new CachedServiceFetcher<PermissionManager>() {
                     @Override
                     public PermissionManager createService(ContextImpl ctx) {
-                        return new PermissionManager(ctx.getOuterContext());
+                        IPackageManager packageManager = AppGlobals.getPackageManager();
+                        return new PermissionManager(ctx.getOuterContext(), packageManager);
                     }});
 
         registerService(Context.PERMISSION_CONTROLLER_SERVICE, PermissionControllerManager.class,
                 new CachedServiceFetcher<PermissionControllerManager>() {
                     @Override
                     public PermissionControllerManager createService(ContextImpl ctx) {
-                        return new PermissionControllerManager(ctx.getOuterContext());
+                        return new PermissionControllerManager(ctx.getOuterContext(),
+                                ctx.getMainThreadHandler());
                     }});
 
         registerService(Context.ROLE_SERVICE, RoleManager.class,

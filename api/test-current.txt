@@ -655,8 +655,13 @@ package android.content.pm {
     ctor public LauncherApps(android.content.Context);
   }
 
+  public static class PackageInstaller.SessionInfo implements android.os.Parcelable {
+    method @NonNull public java.util.Set<java.lang.String> getWhitelistedRestrictedPermissions();
+  }
+
   public static class PackageInstaller.SessionParams implements android.os.Parcelable {
     method public void setEnableRollback(boolean);
+    method @RequiresPermission("android.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS") public void setGrantedRuntimePermissions(String[]);
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setInstallAsApex();
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setStaged();
   }
@@ -679,7 +684,11 @@ package android.content.pm {
     method @RequiresPermission(anyOf={"android.permission.GRANT_RUNTIME_PERMISSIONS", "android.permission.REVOKE_RUNTIME_PERMISSIONS"}) public abstract void updatePermissionFlags(@NonNull String, @NonNull String, int, int, @NonNull android.os.UserHandle);
     field public static final String FEATURE_ADOPTABLE_STORAGE = "android.software.adoptable_storage";
     field public static final String FEATURE_FILE_BASED_ENCRYPTION = "android.software.file_based_encryption";
+    field public static final int FLAG_PERMISSION_APPLY_RESTRICTION = 16384; // 0x4000
     field public static final int FLAG_PERMISSION_POLICY_FIXED = 4; // 0x4
+    field public static final int FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT = 2048; // 0x800
+    field public static final int FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT = 4096; // 0x1000
+    field public static final int FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT = 8192; // 0x2000
     field public static final int FLAG_PERMISSION_REVIEW_REQUIRED = 64; // 0x40
     field public static final int FLAG_PERMISSION_REVOKE_ON_UPGRADE = 8; // 0x8
     field public static final int FLAG_PERMISSION_REVOKE_WHEN_REQUESTED = 128; // 0x80
@@ -688,6 +697,7 @@ package android.content.pm {
     field public static final int FLAG_PERMISSION_USER_SET = 1; // 0x1
     field public static final int MATCH_FACTORY_ONLY = 2097152; // 0x200000
     field public static final int MATCH_KNOWN_PACKAGES = 4202496; // 0x402000
+    field public static boolean RESTRICTED_PERMISSIONS_ENABLED;
     field public static final String SYSTEM_SHARED_LIBRARY_SERVICES = "android.ext.services";
     field public static final String SYSTEM_SHARED_LIBRARY_SHARED = "android.ext.shared";
   }
@@ -1820,7 +1830,7 @@ package android.os {
   }
 
   public static interface RemoteCallback.OnResultListener {
-    method public void onResult(android.os.Bundle);
+    method public void onResult(@Nullable android.os.Bundle);
   }
 
   public final class StrictMode {
@@ -2101,6 +2111,7 @@ package android.provider {
     method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static boolean setProperty(@NonNull String, @NonNull String, @Nullable String, boolean);
     field public static final String NAMESPACE_AUTOFILL = "autofill";
     field public static final String NAMESPACE_CONTENT_CAPTURE = "content_capture";
+    field public static final String NAMESPACE_PRIVACY = "privacy";
     field public static final String NAMESPACE_ROLLBACK = "rollback";
     field public static final String NAMESPACE_ROLLBACK_BOOT = "rollback_boot";
   }
@@ -2111,11 +2122,6 @@ package android.provider {
 
   public static interface DeviceConfig.OnPropertyChangedListener {
     method public void onPropertyChanged(@NonNull String, @NonNull String, @Nullable String);
-  }
-
-  public static interface DeviceConfig.Privacy {
-    field public static final String NAMESPACE = "privacy";
-    field public static final String PROPERTY_LOCATION_ACCESS_CHECK_ENABLED = "location_access_check_enabled";
   }
 
   public static class DeviceConfig.Properties {
@@ -2172,7 +2178,6 @@ package android.provider {
     field public static final String LOW_POWER_MODE = "low_power";
     field public static final String LOW_POWER_MODE_STICKY = "low_power_sticky";
     field public static final String OVERLAY_DISPLAY_DEVICES = "overlay_display_devices";
-    field public static final String SMS_ACCESS_RESTRICTION_ENABLED = "sms_access_restriction_enabled";
     field public static final String USE_OPEN_WIFI_PACKAGE = "use_open_wifi_package";
   }
 
