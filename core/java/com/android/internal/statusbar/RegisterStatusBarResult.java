@@ -78,8 +78,8 @@ public final class RegisterStatusBarResult implements Parcelable {
         dest.writeInt(mFullscreenStackSysUiVisibility);
         dest.writeInt(mDockedStackSysUiVisibility);
         dest.writeStrongBinder(mImeToken);
-        dest.writeParcelable(mFullscreenStackBounds, flags);
-        dest.writeParcelable(mDockedStackBounds, flags);
+        dest.writeTypedObject(mFullscreenStackBounds, flags);
+        dest.writeTypedObject(mDockedStackBounds, flags);
     }
 
     /**
@@ -101,8 +101,8 @@ public final class RegisterStatusBarResult implements Parcelable {
                     final int fullscreenStackSysUiVisibility = source.readInt();
                     final int dockedStackSysUiVisibility = source.readInt();
                     final IBinder imeToken = source.readStrongBinder();
-                    final Rect fullscreenStackBounds = Rect.CREATOR.createFromParcel(source);
-                    final Rect dockedStackBounds = Rect.CREATOR.createFromParcel(source);
+                    final Rect fullscreenStackBounds = source.readTypedObject(Rect.CREATOR);
+                    final Rect dockedStackBounds = source.readTypedObject(Rect.CREATOR);
                     return new RegisterStatusBarResult(icons, disabledFlags1, systemUiVisibility,
                             menuVisible, imeWindowVis, imeBackDisposition, showImeSwitcher,
                             disabledFlags2, fullscreenStackSysUiVisibility,
