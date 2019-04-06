@@ -1697,6 +1697,8 @@ class AlarmManagerService extends SystemService {
             return;
         }
 
+        type = fixTypeIfAuto(type);
+
         // Sanity check the window length.  This will catch people mistakenly
         // trying to pass an end-of-window timestamp rather than a duration.
         if (windowLength > AlarmManager.INTERVAL_HALF_DAY) {
@@ -1809,6 +1811,21 @@ class AlarmManagerService extends SystemService {
             index = NEVER_INDEX;
         }
         return mConstants.APP_STANDBY_QUOTAS[index];
+    }
+
+    /**
+     * In case of cars, we need to avoid scheduling wakeup alarms, since we don't want the system
+     * to wake up from suspend arbitrarily to perform app work.
+     */
+    private int fixTypeIfAuto(int type) {
+        if (mInjector.isAutomotive()) {
+            if (type == AlarmManager.ELAPSED_REALTIME_WAKEUP) {
+                type = AlarmManager.ELAPSED_REALTIME;
+            } else if (type == AlarmManager.RTC_WAKEUP) {
+                type = AlarmManager.RTC;
+            }
+        }
+        return type;
     }
 
     /**
@@ -2214,6 +2231,7 @@ class AlarmManagerService extends SystemService {
             pw.print("  mLastTickSet="); pw.println(sdf.format(new Date(mLastTickSet)));
             pw.print("  mLastTickAdded="); pw.println(sdf.format(new Date(mLastTickAdded)));
             pw.print("  mLastTickRemoved="); pw.println(sdf.format(new Date(mLastTickRemoved)));
+            pw.print("  mIsAutomotive="); pw.println(mInjector.isAutomotive());
 
             if (RECORD_ALARMS_IN_HISTORY) {
                 pw.println();
@@ -3838,9 +3856,12 @@ class AlarmManagerService extends SystemService {
     static class Injector {
         private long mNativeData;
         private Context mContext;
+        private final boolean mIsAutomotive;
 
         Injector(Context context) {
             mContext = context;
+            mIsAutomotive = context.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_AUTOMOTIVE);
         }
 
         void init() {
@@ -3928,6 +3949,10 @@ class AlarmManagerService extends SystemService {
 
         ClockReceiver getClockReceiver(AlarmManagerService service) {
             return service.new ClockReceiver();
+        }
+
+        boolean isAutomotive() {
+            return mIsAutomotive;
         }
     }
 
