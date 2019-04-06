@@ -406,7 +406,7 @@ public class WifiAwareManager {
 
         if (!WifiAwareUtils.isLegacyVersion(mContext, Build.VERSION_CODES.Q)) {
             throw new UnsupportedOperationException(
-                    "API not deprecated - use WifiAwareNetworkSpecifier.Builder");
+                    "API deprecated - use WifiAwareNetworkSpecifier.Builder");
         }
 
         if (role != WIFI_AWARE_DATA_PATH_ROLE_INITIATOR
