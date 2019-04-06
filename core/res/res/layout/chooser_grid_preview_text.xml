@@ -51,7 +51,9 @@
         android:layout_height="24dp"
         android:gravity="center"
         android:layout_gravity="center_vertical"
-        android:background="@drawable/ic_content_copy_gm2"/>
+        android:foreground="@drawable/ic_content_copy_gm2"
+        android:clickable="true"
+        android:background="?attr/selectableItemBackgroundBorderless"/>
   </LinearLayout>
 
   <!-- Required sub-layout so we can get the nice rounded corners-->
