@@ -141,10 +141,8 @@
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Chiamate Wi-Fi"</string>
     <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Non attiva"</string>
-    <!-- no translation found for wfc_mode_wifi_preferred_summary (7335489823608689868) -->
-    <skip />
-    <!-- no translation found for wfc_mode_cellular_preferred_summary (7081742743152286290) -->
-    <skip />
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"Chiamata tramite Wi-Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"Chiamata su rete mobile"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Solo Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: inoltro non effettuato"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -230,8 +228,7 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"Segnalazione di bug"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Termina sessione"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Screenshot"</string>
-    <!-- no translation found for bugreport_title (5981047024855257269) -->
-    <skip />
+    <string name="bugreport_title" msgid="5981047024855257269">"Segnalazione di bug"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Verranno raccolte informazioni sullo stato corrente del dispositivo che saranno inviate sotto forma di messaggio email. Passerà un po\' di tempo prima che la segnalazione di bug aperta sia pronta per essere inviata; ti preghiamo di avere pazienza."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Rapporto interattivo"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Utilizza questa opzione nella maggior parte dei casi. Ti consente di monitorare l\'avanzamento della segnalazione, di inserire maggiori dettagli relativi al problema e di acquisire screenshot. Potrebbero essere omesse alcune sezioni meno utilizzate il cui inserimento nella segnalazione richiede molto tempo."</string>
@@ -284,12 +281,9 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Geolocalizzazione"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"accedere alla posizione di questo dispositivo"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"Consentire all\'app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di accedere alla posizione di questo dispositivo?"</string>
-    <!-- no translation found for permgrouprequestdetail_location (1347189607421252902) -->
-    <skip />
-    <!-- no translation found for permgroupbackgroundrequest_location (5039063878675613235) -->
-    <skip />
-    <!-- no translation found for permgroupbackgroundrequestdetail_location (4597006851453417387) -->
-    <skip />
+    <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"L\'app avrà accesso alla posizione soltanto quando la usi"</string>
+    <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"Consentire a &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di accedere &lt;b&gt;sempre&lt;/b&gt; alla posizione di questo dispositivo?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="4597006851453417387">"L\'app al momento può accedere alla posizione soltanto mentre la usi"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Calendario"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"accedere al calendario"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Consentire all\'app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di accedere al tuo calendario?"</string>
@@ -302,9 +296,9 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Microfono"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"registrare audio"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Consentire all\'app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di registrare audio?"</string>
-    <string name="permgrouplab_activityRecognition" msgid="2838596644535616493">"Riconoscimento di attività"</string>
-    <string name="permgroupdesc_activityRecognition" msgid="7672248027571522602">"riconoscere l\'attività"</string>
-    <string name="permgrouprequest_activityRecognition" msgid="8121253142311250055">"Vuoi consentire a &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di riconoscere la tua attività fisica?"</string>
+    <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"Attività fisica"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"Consente di accedere all\'attività fisica"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"Vuoi consentire a &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di accedere alla tua attività fisica?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Fotocamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"scattare foto e registrare video"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Consentire a &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di scattare foto e registrare video?"</string>
@@ -317,15 +311,6 @@
     <string name="permgrouplab_sensors" msgid="4838614103153567532">"Sensori del corpo"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"accedere ai dati dei sensori relativi ai tuoi parametri vitali"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Consentire a &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di accedere ai dati dei sensori relativi ai parametri vitali?"</string>
-    <string name="permgrouplab_aural" msgid="965607064083134896">"Musica"</string>
-    <string name="permgroupdesc_aural" msgid="4870189506255958055">"Accesso alla tua musica"</string>
-    <string name="permgrouprequest_aural" msgid="6787926123071735620">"Vuoi consentire all\'app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di accedere alla tua musica?"</string>
-    <string name="permgrouplab_visual" msgid="6477382108771145134">"Foto e video"</string>
-    <string name="permgroupdesc_visual" msgid="3415827902566663546">"Accesso alle tue foto e ai tuoi video"</string>
-    <!-- no translation found for permgrouprequest_visual (4926581398380334943) -->
-    <skip />
-    <!-- no translation found for permgrouprequestdetail_visual (3827237829805228971) -->
-    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperare contenuti della finestra"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Esaminare i contenuti di una finestra con cui interagisci."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Attivare Esplora al tocco"</string>
@@ -518,31 +503,23 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Consente all\'applicazione di comunicare con tag, schede e lettori NFC (Near Field Communication)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"disattivazione blocco schermo"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Consente all\'applicazione di disattivare il blocco tastiera ed eventuali protezioni tramite password associate. Ad esempio, il telefono disattiva il blocco tastiera quando riceve una telefonata in arrivo e lo riattiva al termine della chiamata."</string>
-    <!-- no translation found for permlab_requestPasswordComplexity (202650535669249674) -->
-    <skip />
-    <!-- no translation found for permdesc_requestPasswordComplexity (4730994229754212347) -->
-    <skip />
+    <string name="permlab_requestPasswordComplexity" msgid="202650535669249674">"richiedi complessità del blocco schermo"</string>
+    <string name="permdesc_requestPasswordComplexity" msgid="4730994229754212347">"Consente all\'app di conoscere il livello di complessità del blocco schermo (alto, medio, basso o nessuno), che indica l\'intervallo di caratteri possibile e il tipo di blocco schermo. L\'app può inoltre suggerire agli utenti di aggiornare il blocco schermo a un livello specifico di complessità, ma gli utenti possono ignorare liberamente il suggerimento e uscire. Tieni presente che il blocco schermo non viene memorizzato come testo non crittografato, quindi l\'app non conosce la password esatta."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"Utilizzo di hardware biometrico"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Consente all\'app di utilizzare hardware biometrico per eseguire l\'autenticazione"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"gestisci hardware per il riconoscimento delle impronte digitali"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Consente all\'app di richiamare metodi per aggiungere e rimuovere modelli di impronte digitali da utilizzare."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"utilizzo di hardware per il riconoscimento delle impronte digitali"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Consente all\'app di utilizzare l\'hardware per il riconoscimento delle impronte digitali per eseguire l\'autenticazione"</string>
-    <string name="permlab_audioRead" msgid="6617225220728465565">"Lettura della tua raccolta musicale"</string>
-    <string name="permdesc_audioRead" msgid="5034032570243484805">"Consente all\'app di leggere la tua raccolta musicale."</string>
     <string name="permlab_audioWrite" msgid="2661772059799779292">"Modifica della tua raccolta musicale"</string>
     <string name="permdesc_audioWrite" msgid="8888544708166230494">"Consente all\'app di modificare la tua raccolta musicale."</string>
-    <string name="permlab_videoRead" msgid="9182618678674737229">"Lettura della tua raccolta di video"</string>
-    <string name="permdesc_videoRead" msgid="7045676429859396194">"Consente all\'app di leggere la tua raccolta di video."</string>
     <string name="permlab_videoWrite" msgid="128769316366746446">"Modifica della tua raccolta di video"</string>
     <string name="permdesc_videoWrite" msgid="5448565757490640841">"Consente all\'app di modificare la tua raccolta di video."</string>
-    <string name="permlab_imagesRead" msgid="3015078545742665304">"Lettura della tua raccolta di foto"</string>
-    <string name="permdesc_imagesRead" msgid="3144263806038695580">"Consente all\'app di leggere la tua raccolta di foto."</string>
     <string name="permlab_imagesWrite" msgid="3391306186247235510">"Modifica della tua raccolta di foto"</string>
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Consente all\'app di modificare la tua raccolta di foto."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"Lettura delle posizioni dalla tua raccolta multimediale"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Consente all\'app di leggere le posizioni dalla tua raccolta multimediale."</string>
-    <string name="biometric_dialog_default_title" msgid="4229778503907743328">"L\'app <xliff:g id="APP">%s</xliff:g> richiede l\'autenticazione."</string>
+    <string name="biometric_dialog_default_title" msgid="881952973720613213">"Verifica la tua identità"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Hardware biometrico non disponibile"</string>
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"Autenticazione annullata"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Non riconosciuto"</string>
@@ -576,59 +553,38 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Consente all\'app di richiamare i metodi per aggiungere e rimuovere i modelli di volti."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"utilizza l\'hardware per l\'autenticazione dei volti"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Consente all\'app di utilizzare hardware per l\'autenticazione dei volti"</string>
-    <!-- no translation found for face_acquired_insufficient (2767330364802375742) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_bright (5005650874582450967) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_dark (1966194696381394616) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_close (1401011882624272753) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_far (1210969240069012510) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_high (3362395713403348013) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_low (488983581737550912) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_right (941726879175375970) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_left (5873592047381190672) -->
-    <skip />
-    <!-- no translation found for face_acquired_poor_gaze (8471716624377228327) -->
-    <skip />
-    <!-- no translation found for face_acquired_not_detected (4885504661626728809) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_much_motion (3149332171102108851) -->
-    <skip />
+    <string name="face_acquired_insufficient" msgid="2767330364802375742">"Impossibile acquisire dati viso accurati. Riprova."</string>
+    <string name="face_acquired_too_bright" msgid="5005650874582450967">"Troppa luce. Prova con una luce più soft."</string>
+    <string name="face_acquired_too_dark" msgid="1966194696381394616">"Troppo buio. Prova con più luce."</string>
+    <string name="face_acquired_too_close" msgid="1401011882624272753">"Sposta il telefono più lontano."</string>
+    <string name="face_acquired_too_far" msgid="1210969240069012510">"Avvicina il telefono."</string>
+    <string name="face_acquired_too_high" msgid="3362395713403348013">"Sposta il telefono più in alto."</string>
+    <string name="face_acquired_too_low" msgid="488983581737550912">"Sposta il telefono più in basso."</string>
+    <string name="face_acquired_too_right" msgid="941726879175375970">"Sposta il telefono a destra."</string>
+    <string name="face_acquired_too_left" msgid="5873592047381190672">"Sposta il telefono a sinistra."</string>
+    <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Guarda lo schermo con gli occhi aperti."</string>
+    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Impossibile vedere il volto. Guarda il telefono."</string>
+    <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Troppo movimento. Tieni fermo il telefono."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Ripeti l\'acquisizione del volto."</string>
-    <!-- no translation found for face_acquired_too_different (7663983770123789694) -->
-    <skip />
+    <string name="face_acquired_too_different" msgid="7663983770123789694">"Non è più possibile riconoscere il volto. Riprova."</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"Troppo simile; cambia posa."</string>
-    <!-- no translation found for face_acquired_pan_too_extreme (1852495480382773759) -->
-    <skip />
-    <!-- no translation found for face_acquired_tilt_too_extreme (1290820400317982049) -->
-    <skip />
+    <string name="face_acquired_pan_too_extreme" msgid="1852495480382773759">"Guarda più direttamente verso lo schermo."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="1290820400317982049">"Guarda più direttamente verso lo schermo."</string>
     <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Raddrizza la testa in verticale."</string>
-    <!-- no translation found for face_acquired_obscured (5747521031647744553) -->
-    <skip />
-    <!-- no translation found for face_acquired_sensor_dirty (364493868630891300) -->
-    <skip />
+    <string name="face_acquired_obscured" msgid="5747521031647744553">"Libera lo spazio tra la tua testa e il telefono."</string>
+    <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"Pulisci la fotocamera."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
-    <string name="face_error_hw_not_available" msgid="6255891785768984615">"Hardware per il volto non disponibile."</string>
-    <!-- no translation found for face_error_timeout (2605673935810019129) -->
-    <skip />
-    <string name="face_error_no_space" msgid="8224993703466381314">"Il volto non può essere memorizzato."</string>
-    <string name="face_error_canceled" msgid="283945501061931023">"Operazione associata al volto annullata."</string>
-    <string name="face_error_user_canceled" msgid="8943921120862164539">"Autenticazione del volto annullata dall\'utente."</string>
+    <string name="face_error_hw_not_available" msgid="396883585636963908">"Imposs. verificare volto. Hardware non disponibile."</string>
+    <string name="face_error_timeout" msgid="2605673935810019129">"Timeout operazione associata al volto. Riprova."</string>
+    <string name="face_error_no_space" msgid="2712120617457553825">"Imposs. salvare dati nuovi volti. Elimina un volto vecchio."</string>
+    <string name="face_error_canceled" msgid="2768146728600802422">"Operazione associata al volto annullata"</string>
+    <string name="face_error_user_canceled" msgid="9003022830076496163">"Autenticazione volti annullata dall\'utente"</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Troppi tentativi. Riprova più tardi."</string>
-    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Troppi tentativi. Autenticazione disattivata."</string>
-    <!-- no translation found for face_error_unable_to_process (4940944939691171539) -->
-    <skip />
-    <!-- no translation found for face_error_not_enrolled (4245760276260427472) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (5296043240874659926) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"Troppi tentativi. Autenticazione volti disattivata."</string>
+    <string name="face_error_unable_to_process" msgid="4940944939691171539">"Impossibile verificare il volto. Riprova."</string>
+    <string name="face_error_not_enrolled" msgid="2600952202843125796">"Non hai configurato l\'autenticazione volti"</string>
+    <string name="face_error_hw_not_present" msgid="1317845121210260372">"Autenticazione volti non supportata su questo dispositivo"</string>
     <string name="face_name_template" msgid="7004562145809595384">"Volto <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1246,16 +1202,12 @@
     <string name="new_app_action" msgid="6694851182870774403">"Apri <xliff:g id="NEW_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="5894852887817332322">"<xliff:g id="OLD_APP">%1$s</xliff:g> si chiuderà senza salvare"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> ha superato il limite di memoria"</string>
-    <!-- no translation found for dump_heap_ready_notification (1162196579925048701) -->
-    <skip />
+    <string name="dump_heap_ready_notification" msgid="1162196579925048701">"Dump dell\'heap di <xliff:g id="PROC">%1$s</xliff:g> pronto"</string>
     <string name="dump_heap_notification_detail" msgid="3993078784053054141">"Dump dell\'heap raccolto. Tocca per condividere."</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Condividere il dump dell\'heap?"</string>
-    <!-- no translation found for dump_heap_text (8546022920319781701) -->
-    <skip />
-    <!-- no translation found for dump_heap_system_text (1205466256312104134) -->
-    <skip />
-    <!-- no translation found for dump_heap_ready_text (6759394977904051000) -->
-    <skip />
+    <string name="dump_heap_text" msgid="8546022920319781701">"Il processo <xliff:g id="PROC">%1$s</xliff:g>ha superato il suo limite di memoria del processo pari a <xliff:g id="SIZE">%2$s</xliff:g>. È disponibile un dump dell\'heap che puoi condividere con lo sviluppatore. Presta attenzione: questo dump dell\'heap può contenere tue informazioni personali a cui l\'applicazione ha accesso."</string>
+    <string name="dump_heap_system_text" msgid="3236094872980706024">"Il processo <xliff:g id="PROC">%1$s</xliff:g> ha superato il suo limite di memoria pari a <xliff:g id="SIZE">%2$s</xliff:g>. È disponibile un dump dell\'heap che puoi condividere. Presta attenzione: questo dump dell\'heap potrebbe contenere informazioni personali sensibili a cui il processo ha accesso, che potrebbero includere il testo digitato."</string>
+    <string name="dump_heap_ready_text" msgid="1778041771455343067">"È disponibile un dump dell\'heap del processo <xliff:g id="PROC">%1$s</xliff:g> che puoi condividere. Presta attenzione: questo dump dell\'heap potrebbe contenere informazioni personali sensibili a cui il processo ha accesso, che potrebbero includere il testo digitato."</string>
     <string name="sendText" msgid="5209874571959469142">"Scegli un\'azione per il testo"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Volume suoneria"</string>
     <string name="volume_music" msgid="5421651157138628171">"Volume contenuti multimediali"</string>
@@ -1294,10 +1246,8 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Tocca per vedere tutte le reti"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Connetti"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Tutte le reti"</string>
-    <!-- no translation found for wifi_suggestion_title (9099832833531486167) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_content (5883181205841582873) -->
-    <skip />
+    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Connettersi a reti Wi-Fi?"</string>
+    <string name="wifi_suggestion_content" msgid="5883181205841582873">"Consigliato da <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Sì"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"No"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Il Wi‑Fi verrà attivato automaticamente"</string>
@@ -1309,14 +1259,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Accedi alla rete"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <!-- no translation found for wifi_no_internet (5198100389964214865) -->
-    <skip />
+    <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> non ha accesso a Internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Tocca per le opzioni"</string>
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Connesso"</string>
-    <!-- no translation found for network_partial_connectivity (7774883385494762741) -->
-    <skip />
-    <!-- no translation found for network_partial_connectivity_detailed (1959697814165325217) -->
-    <skip />
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> ha una connettività limitata"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Tocca per connettere comunque"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Modifiche alle tue impostazioni dell\'hotspot"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"La tua banda di hotspot è cambiata."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Questo dispositivo non supporta la tua preferenza esclusiva per 5 GHz. Utilizzerà invece la banda a 5 GHz solo quando è disponibile."</string>
@@ -1401,10 +1348,8 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Debug USB collegato"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"Tocca per disattivare il debug USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Seleziona per disattivare il debug USB."</string>
-    <!-- no translation found for test_harness_mode_notification_title (2216359742631914387) -->
-    <skip />
-    <!-- no translation found for test_harness_mode_notification_message (1343197173054407119) -->
-    <skip />
+    <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"Modalità test harness attivata"</string>
+    <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Ripristina le impostazioni di fabbrica per disattivare la modalità test harness."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Liquidi o detriti nella porta USB"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"La porta USB viene disattivata automaticamente. Tocca per avere ulteriori informazioni."</string>
     <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"Puoi usare la porta USB in sicurezza"</string>
@@ -1661,8 +1606,8 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Overlay n. <xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", opzione sicura"</string>
-    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="5692097903712956720">"L\'avvio di questa attività in background da <xliff:g id="PACKAGENAME">%1$s</xliff:g> verrà bloccato nelle future build Q. Visita la pagina go/q-bg-block."</string>
-    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="8299522481076404353">"Avvio delle attività in background da <xliff:g id="PACKAGENAME">%1$s</xliff:g> bloccato. Visita la pagina go/q-bg-block."</string>
+    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="6995473033438879646">"L\'avvio di questa attività in background da <xliff:g id="PACKAGENAME">%1$s</xliff:g> verrà bloccato nelle future build Q. Visita la pagina g.co/dev/bgblock."</string>
+    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="3317816771072146229">"Avvio delle attività in background da <xliff:g id="PACKAGENAME">%1$s</xliff:g> bloccato. Visita la pagina g.co/dev/bgblock."</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Sequenza dimenticata"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Sequenza sbagliata"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Password sbagliata"</string>
@@ -1850,8 +1795,9 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Installato dall\'amministratore"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Aggiornato dall\'amministratore"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Eliminato dall\'amministratore"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"Per aumentare la durata della batteria, il Risparmio energetico disattiva alcune funzioni del dispositivo e limita le app. "<annotation id="url">"Ulteriori informazioni"</annotation></string>
-    <string name="battery_saver_description" msgid="769989536172631582">"Per aumentare la durata della batteria, il Risparmio energetico disattiva alcune funzioni del dispositivo e limita le app."</string>
+    <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Risparmio energetico disattiva o limita le attività in background, alcuni effetti visivi e altre funzionalità a consumo elevato per prolungare la durata della batteria. "<annotation id="url">"Ulteriori informazioni"</annotation></string>
+    <string name="battery_saver_description" msgid="6413346684861241431">"Risparmio energetico disattiva o limita le attività in background, alcuni effetti visivi e altre funzionalità a consumo elevato per prolungare la durata della batteria."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Per contribuire a ridurre l\'utilizzo dei dati, la funzione Risparmio dati impedisce ad alcune app di inviare o ricevere dati in background. Un\'app in uso può accedere ai dati, ma potrebbe farlo con meno frequenza. Esempio: le immagini non vengono visualizzate finché non le tocchi."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Attivare Risparmio dati?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Attiva"</string>
@@ -2046,22 +1992,14 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"Notifica di informazioni sulla modalità Routine"</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"La batteria potrebbe esaurirsi prima della ricarica abituale"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Risparmio energetico attivo per far durare di più la batteria"</string>
-    <!-- no translation found for battery_saver_notification_channel_name (2083316159716201806) -->
-    <skip />
-    <!-- no translation found for battery_saver_sticky_disabled_notification_title (6376147579378764641) -->
-    <skip />
-    <!-- no translation found for battery_saver_sticky_disabled_notification_summary (8090192609249817945) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_title (2960978289873161288) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_title (7555713825806482451) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_title (5954873381559605660) -->
-    <skip />
-    <!-- no translation found for battery_saver_off_notification_summary (1374222493681267143) -->
-    <skip />
-    <!-- no translation found for battery_saver_off_alternative_notification_summary (4340727818546508436) -->
-    <skip />
+    <string name="battery_saver_notification_channel_name" msgid="2083316159716201806">"Risparmio energetico"</string>
+    <string name="battery_saver_sticky_disabled_notification_title" msgid="6376147579378764641">"Risparmio energetico non si riattiverà finché la batteria non raggiungerà nuovamente un livello di carica basso"</string>
+    <string name="battery_saver_sticky_disabled_notification_summary" msgid="8090192609249817945">"La batteria ha raggiunto un livello di carica sufficiente. Risparmio energetico non si riattiverà finché la batteria non raggiungerà nuovamente un livello di carica basso"</string>
+    <string name="battery_saver_charged_notification_title" product="default" msgid="2960978289873161288">"Livello di carica del telefono: <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
+    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7555713825806482451">"Livello di carica del tablet: <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
+    <string name="battery_saver_charged_notification_title" product="device" msgid="5954873381559605660">"Livello di carica del dispositivo: <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
+    <string name="battery_saver_off_notification_summary" msgid="1374222493681267143">"Il risparmio energetico è disattivato. Funzionalità non più limitate."</string>
+    <string name="battery_saver_off_alternative_notification_summary" msgid="4340727818546508436">"Risparmio energetico disattivato. Funzionalità non più limitate."</string>
     <string name="mime_type_folder" msgid="7111951698626315204">"Cartella"</string>
     <string name="mime_type_apk" msgid="5518003630972506900">"Applicazione Android"</string>
     <string name="mime_type_generic" msgid="6833871596845900027">"File"</string>
@@ -2085,6 +2023,5 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> file</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> file</item>
     </plurals>
-    <!-- no translation found for chooser_no_direct_share_targets (997970693708458895) -->
-    <skip />
+    <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"Condivisione diretta non attiva"</string>
 </resources>

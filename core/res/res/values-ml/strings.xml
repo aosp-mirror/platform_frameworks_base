@@ -302,9 +302,9 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"മൈക്രോഫോണ്‍"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ഓഡിയോ റെക്കോർഡ് ചെയ്യുക"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"ഓഡിയോ റെക്കോർഡ് ചെയ്യാൻ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ആപ്പിനെ അനുവദിക്കണോ?"</string>
-    <string name="permgrouplab_activityRecognition" msgid="2838596644535616493">"പ്രവർത്തനം തിരിച്ചറിയൽ"</string>
-    <string name="permgroupdesc_activityRecognition" msgid="7672248027571522602">"പ്രവർത്തനം തിരിച്ചറിയുക"</string>
-    <string name="permgrouprequest_activityRecognition" msgid="8121253142311250055">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>-&lt;/b&gt;നെ നിങ്ങളുടെ ശാരീരിക പ്രവർത്തനം തിരിച്ചറിയാൻ അനുവദിക്കണോ?"</string>
+    <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"ശാരീരിക പ്രവർത്തനം"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"ശാരീരിക പ്രവർത്തനം ആക്‌സസ് ചെയ്യുക"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-നെ നിങ്ങളുടെ ശാരീരിക പ്രവർത്തനം ആക്‌സസ് ചെയ്യാൻ അനുവദിക്കണോ?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"ക്യാമറ"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ചിത്രങ്ങളെടുത്ത് വീഡിയോ റെക്കോർഡുചെയ്യുക"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"ചിത്രം എടുക്കാനും വീഡിയോ റെക്കോർഡ് ചെയ്യാനും &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ആപ്പിനെ അനുവദിക്കണോ?"</string>
@@ -317,15 +317,6 @@
     <string name="permgrouplab_sensors" msgid="4838614103153567532">"ബോഡി സെൻസറുകൾ"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"നിങ്ങളുടെ ജീവാധാര ലക്ഷണങ്ങളെ കുറിച്ചുള്ള സെൻസർ വിവരങ്ങൾ ആക്സസ് ചെയ്യുക"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"നിങ്ങളുടെ ജീവധാരണ ലക്ഷണങ്ങളെ കുറിച്ചുള്ള സെൻസർ ഡാറ്റ ആക്‌സസ് ചെയ്യാൻ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ആപ്പിനെ അനുവദിക്കണോ?"</string>
-    <string name="permgrouplab_aural" msgid="965607064083134896">"സംഗീതം"</string>
-    <string name="permgroupdesc_aural" msgid="4870189506255958055">"നിങ്ങളുടെ സംഗീതം ആക്‌സസ് ചെയ്യുക"</string>
-    <string name="permgrouprequest_aural" msgid="6787926123071735620">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; എന്നതിനെ നിങ്ങളുടെ സംഗീതം ആക്‌സസ് ചെയ്യാൻ അനുവദിക്കണോ?"</string>
-    <string name="permgrouplab_visual" msgid="6477382108771145134">"ഫോട്ടോകളും വീഡിയോകളും"</string>
-    <string name="permgroupdesc_visual" msgid="3415827902566663546">"നിങ്ങളുടെ ഫോട്ടോകളും &amp; വീഡിയോകളും"</string>
-    <!-- no translation found for permgrouprequest_visual (4926581398380334943) -->
-    <skip />
-    <!-- no translation found for permgrouprequestdetail_visual (3827237829805228971) -->
-    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"വിൻഡോ ഉള്ളടക്കം വീണ്ടെടുക്കുക"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"നിങ്ങൾ സംവദിക്കുന്ന ഒരു വിൻഡോയുടെ ഉള്ളടക്കം പരിശോധിക്കുക."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"സ്‌പർശനം വഴി പര്യവേക്ഷണം ചെയ്യുക, ഓണാക്കുക"</string>
@@ -528,21 +519,16 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"ഉപയോഗിക്കാനായി വിരലടയാള ടെംപ്ലേറ്റുകൾ ചേർക്കാനും ഇല്ലാതാക്കാനുമുള്ള രീതികൾ അഭ്യർത്ഥിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"ഫിംഗർപ്രിന്റ് ഹാർഡ്‌വെയർ ഉപയോഗിക്കുക"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"പ്രാമാണീകരണത്തിനായി വിരലടയാളം ഉപയോഗിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു"</string>
-    <string name="permlab_audioRead" msgid="6617225220728465565">"നിങ്ങളുടെ സംഗീത ശേഖരം റീഡ് ചെയ്യുക"</string>
-    <string name="permdesc_audioRead" msgid="5034032570243484805">"നിങ്ങളുടെ സംഗീത ശേഖരം റീഡ് ചെയ്യുന്നതിന് ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_audioWrite" msgid="2661772059799779292">"നിങ്ങളുടെ സംഗീത ശേഖരം പരിഷ്‌കരിക്കുക"</string>
     <string name="permdesc_audioWrite" msgid="8888544708166230494">"നിങ്ങളുടെ സംഗീത ശേഖരം പരിഷ്‌ക്കരിക്കുന്നതിന് ആപ്പിനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_videoRead" msgid="9182618678674737229">"നിങ്ങളുടെ വീഡിയോ ശേഖരം റീഡ് ചെയ്യുക"</string>
-    <string name="permdesc_videoRead" msgid="7045676429859396194">"നിങ്ങളുടെ വീഡിയോ ശേഖരം റീഡ് ചെയ്യുന്നതിന് ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_videoWrite" msgid="128769316366746446">"നിങ്ങളുടെ വീഡിയോ ശേഖരം പരിഷ്‌കരിക്കുക"</string>
     <string name="permdesc_videoWrite" msgid="5448565757490640841">"നിങ്ങളുടെ വീഡിയോ ശേഖരം പരിഷ്‌ക്കരിക്കുന്നതിന് ആപ്പിനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_imagesRead" msgid="3015078545742665304">"നിങ്ങളുടെ ഫോട്ടോ ശേഖരം റീഡ് ചെയ്യുക"</string>
-    <string name="permdesc_imagesRead" msgid="3144263806038695580">"നിങ്ങളുടെ ഫോട്ടോ ശേഖരം റീഡ് ചെയ്യുന്നതിന് ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_imagesWrite" msgid="3391306186247235510">"നിങ്ങളുടെ ഫോട്ടോ ശേഖരം പരിഷ്‌കരിക്കുക"</string>
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"നിങ്ങളുടെ ഫോട്ടോ ശേഖരം പരിഷ്‌ക്കരിക്കുന്നതിന് ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"നിങ്ങളുടെ മീഡിയ ശേഖരത്തിൽ നിന്നും ലൊക്കേഷനുകൾ റീഡ് ചെയ്യുക"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"നിങ്ങളുടെ മീഡിയ ശേഖരത്തിൽ നിന്നും ലൊക്കേഷനുകൾ റീഡ് ചെയ്യുന്നതിന് ആപ്പിനെ അനുവദിക്കുന്നു."</string>
-    <string name="biometric_dialog_default_title" msgid="4229778503907743328">"<xliff:g id="APP">%s</xliff:g> ആപ്പിന് നിങ്ങളെ പരിശോധിച്ചുറപ്പിക്കണം."</string>
+    <!-- no translation found for biometric_dialog_default_title (881952973720613213) -->
+    <skip />
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"ബയോമെട്രിക് ഹാർ‌ഡ്‌വെയർ ലഭ്യമല്ല"</string>
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"പരിശോധിച്ചുറപ്പിക്കൽ റദ്ദാക്കി"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"തിരിച്ചറിഞ്ഞില്ല"</string>
@@ -615,20 +601,18 @@
     <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
-    <string name="face_error_hw_not_available" msgid="6255891785768984615">"മുഖത്തിന്റെ ഹാർഡ്‌വെയർ ലഭ്യമല്ല."</string>
+    <string name="face_error_hw_not_available" msgid="396883585636963908">"മുഖം പരിശോധിക്കാൻ കഴിയില്ല. ഹാർഡ്‌വെയർ ലഭ്യമല്ല."</string>
     <!-- no translation found for face_error_timeout (2605673935810019129) -->
     <skip />
-    <string name="face_error_no_space" msgid="8224993703466381314">"മുഖം സൂക്ഷിക്കാനാവില്ല."</string>
-    <string name="face_error_canceled" msgid="283945501061931023">"മുഖത്തിന്റെ പ്രവർത്തനം റദ്ദാക്കി."</string>
-    <string name="face_error_user_canceled" msgid="8943921120862164539">"മുഖം പരിശോധിച്ചുറപ്പിക്കൽ ഉപയോക്താവ് റദ്ദാക്കി."</string>
+    <string name="face_error_no_space" msgid="2712120617457553825">"പുതിയ മുഖ ഡാറ്റ സംഭരിക്കാനാകില്ല. ആദ്യം പഴയത് ഇല്ലാതാക്കുക."</string>
+    <string name="face_error_canceled" msgid="2768146728600802422">"മുഖം തിരിച്ചറിയൽ പ്രവർത്തനം റദ്ദാക്കി"</string>
+    <string name="face_error_user_canceled" msgid="9003022830076496163">"മുഖം പരിശോധിച്ചുറപ്പിക്കൽ ഉപയോക്താവ് റദ്ദാക്കി"</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"നിരവധി തവണ ശ്രമിച്ചു. പിന്നീട് വീണ്ടും ശ്രമിക്കുക."</string>
-    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"നിരവധി തവണ ശ്രമിച്ചു. മുഖം തിരിച്ചറിയൽ പ്രവർത്തനരഹിതമാക്കി."</string>
+    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"വളരെയധികം ശ്രമങ്ങൾ. മുഖം തിരിച്ചറിയൽ പ്രവർത്തനരഹിതമാക്കി."</string>
     <!-- no translation found for face_error_unable_to_process (4940944939691171539) -->
     <skip />
-    <!-- no translation found for face_error_not_enrolled (4245760276260427472) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (5296043240874659926) -->
-    <skip />
+    <string name="face_error_not_enrolled" msgid="2600952202843125796">"നിങ്ങൾ മുഖം പരിശോധിച്ചുറപ്പിക്കൽ സജ്ജീകരിച്ചില്ല"</string>
+    <string name="face_error_hw_not_present" msgid="1317845121210260372">"ഈ ഉപകരണം മുഖം പരിശോധിച്ചുറപ്പിക്കൽ പിന്തുണയ്ക്കുന്നില്ല"</string>
     <string name="face_name_template" msgid="7004562145809595384">"മുഖം <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1252,10 +1236,8 @@
     <string name="dump_heap_title" msgid="5864292264307651673">"ഹീപ്പ് ഡംപ് പങ്കിടണോ?"</string>
     <!-- no translation found for dump_heap_text (8546022920319781701) -->
     <skip />
-    <!-- no translation found for dump_heap_system_text (1205466256312104134) -->
-    <skip />
-    <!-- no translation found for dump_heap_ready_text (6759394977904051000) -->
-    <skip />
+    <string name="dump_heap_system_text" msgid="3236094872980706024">"<xliff:g id="PROC">%1$s</xliff:g> പ്രോസസ്സ് അതിൻ്റെ മെമ്മറി പരിധിയായ <xliff:g id="SIZE">%2$s</xliff:g> കവിഞ്ഞു. നിങ്ങൾക്ക് പങ്കിടാൻ ഒരു ഹീപ്പ് ഡംപ് ലഭ്യമാണ്. ശ്രദ്ധിക്കുക: പ്രോസസിന് ആക്‌സസ് ചെയ്യാനാകുന്ന, സൂക്ഷ്‌മമായി കൈകാര്യം ചെയ്യേണ്ട ഏതെങ്കിലും വ്യക്തിഗത വിവരം ഈ ഹീപ്പ് ഡംപിൽ അടങ്ങിയിരിക്കാം, നിങ്ങൾ ടൈപ്പ് ചെയ്‌തിട്ടുള്ള കാര്യങ്ങൾ ഇതിൽ ഉൾപ്പെട്ടിരിക്കാം."</string>
+    <string name="dump_heap_ready_text" msgid="1778041771455343067">"നിങ്ങൾക്ക് പങ്കിടാൻ <xliff:g id="PROC">%1$s</xliff:g> എന്നതിൻ്റെ പ്രോസസിൻ്റെ ഒരു ഹീപ്പ് ഡംപ് ലഭ്യമാണ്. ശ്രദ്ധിക്കുക: പ്രോസസിന് ആക്‌സസ് ചെയ്യാനാകുന്ന, സൂക്ഷ്‌മമായി കൈകാര്യം ചെയ്യേണ്ട ഏതെങ്കിലും വ്യക്തിഗത വിവരം ഈ ഹീപ്പ് ഡംപിൽ അടങ്ങിയിരിക്കാം, നിങ്ങൾ ടൈപ്പ് ചെയ്‌തിട്ടുള്ള കാര്യങ്ങൾ ഇതിൽ ഉൾപ്പെട്ടിരിക്കാം."</string>
     <string name="sendText" msgid="5209874571959469142">"വാചകസന്ദേശത്തിനായി ഒരു പ്രവർത്തനം തിരഞ്ഞെടുക്കുക"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"റിംഗർ വോളിയം"</string>
     <string name="volume_music" msgid="5421651157138628171">"മീഡിയ വോളിയം"</string>
@@ -1662,8 +1644,8 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"ഓവർലേ #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", സുരക്ഷിതമാക്കുക"</string>
-    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="5692097903712956720">"<xliff:g id="PACKAGENAME">%1$s</xliff:g>-ൽ നിന്ന് ഈ പശ്ചാത്തല പ്രവർത്തനം ആരംഭിക്കുന്നത് ഭാവി Q നിർമ്മാണങ്ങളിൽ ബ്ലോക്ക് ചെയ്യപെടും. go/q-bg-block കാണുക."</string>
-    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="8299522481076404353">"<xliff:g id="PACKAGENAME">%1$s</xliff:g>-ൽ നിന്ന് പശ്ചാത്തല പ്രവർത്തനം ആരംഭിക്കുന്നത് ബ്ലോക്ക് ചെയ്‌തു. go/q-bg-block കാണുക."</string>
+    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="6995473033438879646">"<xliff:g id="PACKAGENAME">%1$s</xliff:g> എന്നതിൽ നിന്ന് ഈ പശ്ചാത്തല ആക്റ്റിവിറ്റി ആരംഭിക്കുന്നത് ഭാവിയിലെ Q ബിൽഡുകളിൽ ബ്ലോക്ക് ചെയ്യപ്പെടും. g.co/dev/bgblock കാണുക."</string>
+    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="3317816771072146229">"<xliff:g id="PACKAGENAME">%1$s</xliff:g> എന്നതിൽ നിന്ന് പശ്ചാത്തല ആക്റ്റിവിറ്റി ആരംഭിക്കുന്നത് ബ്ലോക്ക് ചെയ്‌തു. g.co/dev/bgblock കാണുക."</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"പാറ്റേൺ മറന്നു"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"പാറ്റേൺ തെറ്റാണ്"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"പാസ്‌വേഡ് തെറ്റാണ്"</string>
@@ -1851,8 +1833,11 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"നിങ്ങളുടെ അഡ്‌മിൻ ഇൻസ്റ്റാൾ ചെയ്യുന്നത്"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"നിങ്ങളുടെ അഡ്‌മിൻ അപ്‌ഡേറ്റ് ചെയ്യുന്നത്"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"നിങ്ങളുടെ അഡ്‌മിൻ ഇല്ലാതാക്കുന്നത്"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"നിങ്ങളുടെ ബാറ്ററി ലൈഫ് ദീർഘിപ്പിക്കാൻ, ബാറ്ററി ലാഭിക്കൽ, ചില ഉപകരണ ഫീച്ചറുകളെ ഓഫാക്കുകയും ആപ്പുകളെ പരിമിതപ്പെടുത്തുകയും ചെയ്യുന്നു. "<annotation id="url">"കൂടുതലറിയുക"</annotation></string>
-    <string name="battery_saver_description" msgid="769989536172631582">"നിങ്ങളുടെ ബാറ്ററി ലൈഫ് ദീർഘിപ്പിക്കാൻ, ബാറ്ററി ലാഭിക്കൽ, ചില ഉപകരണ ഫീച്ചറുകളെ ഓഫാക്കുകയും ആപ്പുകളെ നിയന്ത്രിക്കുകയും ചെയ്യുന്നു.‌"</string>
+    <string name="confirm_battery_saver" msgid="639106420541753635">"ശരി"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (2108984221113106294) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (6413346684861241431) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"ഡാറ്റാ ഉപയോഗം കുറയ്ക്കാൻ സഹായിക്കുന്നതിന്, പശ്ചാത്തലത്തിൽ ഡാറ്റ അയയ്ക്കുകയോ സ്വീകരിക്കുകയോ ചെയ്യുന്നതിൽ നിന്ന് ചില ആപ്‌സിനെ ഡാറ്റ സേവർ തടയുന്നു. നിങ്ങൾ നിലവിൽ ഉപയോഗിക്കുന്ന ഒരു ആപ്പിന് ഡാറ്റ ആക്സസ്സ് ചെയ്യാൻ കഴിയും, എന്നാൽ കുറഞ്ഞ ആവൃത്തിയിലാണിത് നടക്കുക. ഇതിനർത്ഥം, ഉദാഹരണമായി നിങ്ങൾ ടാപ്പ് ചെയ്യുന്നത് വരെ ചിത്രങ്ങൾ പ്രദ‍‍‍ർശിപ്പിക്കുകയില്ല എന്നാണ്."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ഡാറ്റ സേവർ ഓണാക്കണോ?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ഓണാക്കുക"</string>
@@ -1978,7 +1963,7 @@
     <string name="time_picker_minute_label" msgid="5168864173796598399">"മിനിറ്റ്"</string>
     <string name="time_picker_header_text" msgid="143536825321922567">"സമയം സജ്ജീകരിക്കുക"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"ശരിയായ സമയം ‌നൽകുക"</string>
-    <string name="time_picker_prompt_label" msgid="7588093983899966783">"സമയപ്രകാരം ടൈപ്പ് ചെയ്യുക"</string>
+    <string name="time_picker_prompt_label" msgid="7588093983899966783">"സമയം നൽകുക"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"സമയം നൽകുന്നതിന് ടെക്സ്റ്റ് ഇൻപുട്ട് ‌മോ‌ഡിലേക്ക് ‌മാറുക."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"‌സമയം നൽകുന്നതിന് ക്ലോക്ക് മോഡിലേക്ക് ‌മാറുക."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"സ്വയമേവ പൂരിപ്പിക്കൽ ഓപ്ഷനുകൾ"</string>
