@@ -112,17 +112,22 @@ public class CarVolumeDialogImpl implements VolumeDialog {
                     // zoneId
                     VolumeItem volumeItem = mAvailableVolumeItems.get(groupId);
                     int value = getSeekbarValue(mCarAudioManager, groupId);
+                    // find if the group id for which the volume changed is currently being
+                    // displayed.
+                    boolean isShowing = mCarVolumeLineItems.stream().anyMatch(
+                            item -> item.getGroupId() == groupId);
                     // Do not update the progress if it is the same as before. When car audio
                     // manager sets
                     // its group volume caused by the seekbar progress changed, it also triggers
                     // this
                     // callback. Updating the seekbar at the same time could block the continuous
                     // seeking.
-                    if (value != volumeItem.progress) {
+                    if (value != volumeItem.progress && isShowing) {
                         volumeItem.carVolumeItem.setProgress(value);
                         volumeItem.progress = value;
                     }
                     if ((flags & AudioManager.FLAG_SHOW_UI) != 0) {
+                        mCurrentlyDisplayingGroupId = groupId;
                         mHandler.obtainMessage(H.SHOW,
                                 Events.SHOW_REASON_VOLUME_CHANGED).sendToTarget();
                     }
@@ -134,10 +139,10 @@ public class CarVolumeDialogImpl implements VolumeDialog {
                 }
             };
     private boolean mHovering;
+    private int mCurrentlyDisplayingGroupId;
     private boolean mShowing;
     private boolean mExpanded;
     private View mExpandIcon;
-    private VolumeItem mDefaultVolumeItem;
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -152,8 +157,7 @@ public class CarVolumeDialogImpl implements VolumeDialog {
                     mAvailableVolumeItems.add(volumeItem);
                     // The first one is the default item.
                     if (groupId == 0) {
-                        mDefaultVolumeItem = volumeItem;
-                        setupDefaultCarVolumeItem();
+                        setuptListItem(0);
                     }
                 }
 
@@ -177,9 +181,11 @@ public class CarVolumeDialogImpl implements VolumeDialog {
         }
     };
 
-    private void setupDefaultCarVolumeItem() {
-        mDefaultVolumeItem.defaultItem = true;
-        addCarVolumeListItem(mDefaultVolumeItem, /* volumeGroupId = */0,
+    private void setuptListItem(int groupId) {
+        mCarVolumeLineItems.clear();
+        VolumeItem volumeItem = mAvailableVolumeItems.get(groupId);
+        volumeItem.defaultItem = true;
+        addCarVolumeListItem(volumeItem, /* volumeGroupId = */ groupId,
                 R.drawable.car_ic_keyboard_arrow_down, new ExpandIconListener()
         );
     }
@@ -299,9 +305,7 @@ public class CarVolumeDialogImpl implements VolumeDialog {
             return;
         }
         mShowing = true;
-        if (mCarVolumeLineItems.isEmpty()) {
-            setupDefaultCarVolumeItem();
-        }
+        setuptListItem(mCurrentlyDisplayingGroupId);
         mDialog.show();
         Events.writeEvent(mContext, Events.EVENT_SHOW_DIALOG, reason, mKeyguard.isKeyguardLocked());
     }
@@ -437,7 +441,7 @@ public class CarVolumeDialogImpl implements VolumeDialog {
             carVolumeItem.setSupplementalIcon(/* drawable= */ null,
                     /* showSupplementalIconDivider= */ false);
         }
-
+        carVolumeItem.setGroupId(volumeGroupId);
         mCarVolumeLineItems.add(carVolumeItem);
         volumeItem.carVolumeItem = carVolumeItem;
         volumeItem.progress = progress;
@@ -545,11 +549,8 @@ public class CarVolumeDialogImpl implements VolumeDialog {
         Animator inAnimator;
         if (mExpanded) {
             for (int groupId = 0; groupId < mAvailableVolumeItems.size(); ++groupId) {
-                // Adding the items which are not coming from the default item.
-                VolumeItem volumeItem = mAvailableVolumeItems.get(groupId);
-                if (volumeItem.defaultItem) {
-                    updateDefaultVolumeItem(volumeItem.carVolumeItem);
-                } else {
+                if (groupId != mCurrentlyDisplayingGroupId) {
+                    VolumeItem volumeItem = mAvailableVolumeItems.get(groupId);
                     addCarVolumeListItem(volumeItem, groupId, 0, null);
                 }
             }
@@ -561,11 +562,8 @@ public class CarVolumeDialogImpl implements VolumeDialog {
             Iterator itr = mCarVolumeLineItems.iterator();
             while (itr.hasNext()) {
                 CarVolumeItem carVolumeItem = (CarVolumeItem) itr.next();
-                VolumeItem volumeItem = findVolumeItem(carVolumeItem);
-                if (!volumeItem.defaultItem) {
+                if (carVolumeItem.getGroupId() != mCurrentlyDisplayingGroupId) {
                     itr.remove();
-                } else {
-                    updateDefaultVolumeItem(carVolumeItem);
                 }
             }
             inAnimator = AnimatorInflater.loadAnimator(
@@ -585,21 +583,6 @@ public class CarVolumeDialogImpl implements VolumeDialog {
         animators.setTarget(mExpandIcon);
         animators.start();
         mVolumeItemsAdapter.notifyDataSetChanged();
-    }
-
-    private void updateDefaultVolumeItem(CarVolumeItem carVolumeItem) {
-        VolumeItem volumeItem = findVolumeItem(carVolumeItem);
-
-        // When volume dialog is expanded or collapsed the default list item is never
-        // reset. Whereas all other list items are removed when the dialog is collapsed and then
-        // added when the dialog is expanded using {@link CarVolumeDialogImpl#addCarVolumeListItem}.
-        // This sets the progressbar and the tint color of icons for all items other than default
-        // if they were changed. For default list item it should be done manually here.
-        int color = mContext.getResources().getColor(R.color.car_volume_dialog_tint);
-        Drawable primaryIcon = mContext.getResources().getDrawable(volumeItem.icon);
-        primaryIcon.mutate().setTint(color);
-        volumeItem.carVolumeItem.setPrimaryIcon(primaryIcon);
-        volumeItem.carVolumeItem.setProgress(volumeItem.progress);
     }
 
     private final class VolumeSeekBarChangeListener implements OnSeekBarChangeListener {
