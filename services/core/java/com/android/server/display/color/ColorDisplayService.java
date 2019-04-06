@@ -610,6 +610,15 @@ public final class ColorDisplayService extends SystemService {
         }
     }
 
+    private boolean setDisplayWhiteBalanceSettingEnabled(boolean enabled) {
+        if (mCurrentUser == UserHandle.USER_NULL) {
+            return false;
+        }
+        return Secure.putIntForUser(getContext().getContentResolver(),
+                Secure.DISPLAY_WHITE_BALANCE_ENABLED,
+                enabled ? 1 : 0, mCurrentUser);
+    }
+
     private boolean isDisplayWhiteBalanceSettingEnabled() {
         if (mCurrentUser == UserHandle.USER_NULL) {
             return false;
@@ -1234,6 +1243,13 @@ public final class ColorDisplayService extends SystemService {
         }
 
         /**
+         * Returns whether Display white balance is currently enabled.
+         */
+        public boolean isDisplayWhiteBalanceEnabled() {
+            return isDisplayWhiteBalanceSettingEnabled();
+        }
+
+        /**
          * Adds a {@link WeakReference<ColorTransformController>} for a newly started activity, and
          * invokes {@link ColorTransformController#applyAppSaturation(float[], float[])} if needed.
          */
@@ -1253,7 +1269,7 @@ public final class ColorDisplayService extends SystemService {
          * Notify that the display white balance status has changed, either due to preemption by
          * another transform or the feature being turned off.
          */
-        void onDisplayWhiteBalanceStatusChanged(boolean enabled);
+        void onDisplayWhiteBalanceStatusChanged(boolean activated);
     }
 
     private final class TintHandler extends Handler {
@@ -1520,6 +1536,29 @@ public final class ColorDisplayService extends SystemService {
             final long token = Binder.clearCallingIdentity();
             try {
                 return getNightDisplayCustomEndTimeInternal();
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public boolean setDisplayWhiteBalanceEnabled(boolean enabled) {
+            getContext().enforceCallingOrSelfPermission(
+                    Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS,
+                    "Permission required to set night display activated");
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return setDisplayWhiteBalanceSettingEnabled(enabled);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public boolean isDisplayWhiteBalanceEnabled() {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return isDisplayWhiteBalanceSettingEnabled();
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
