@@ -104,6 +104,9 @@ public final class JobStatus {
             | CONSTRAINT_TIMING_DELAY
             | CONSTRAINT_WITHIN_QUOTA;
 
+    // TODO(b/129954980)
+    private static final boolean STATS_LOG_ENABLED = false;
+
     // Soft override: ignore constraints like time that don't affect API availability
     public static final int OVERRIDE_SOFT = 1;
     // Full override: ignore all constraints including API-affecting like connectivity
@@ -1000,7 +1003,7 @@ public final class JobStatus {
         }
         satisfiedConstraints = (satisfiedConstraints&~constraint) | (state ? constraint : 0);
         mSatisfiedConstraintsOfInterest = satisfiedConstraints & CONSTRAINTS_OF_INTEREST;
-        if ((STATSD_CONSTRAINTS_TO_LOG & constraint) != 0) {
+        if (STATS_LOG_ENABLED && (STATSD_CONSTRAINTS_TO_LOG & constraint) != 0) {
             StatsLog.write_non_chained(StatsLog.SCHEDULED_JOB_CONSTRAINT_CHANGED,
                     sourceUid, null, getBatteryName(), getProtoConstraint(constraint),
                     state ? StatsLog.SCHEDULED_JOB_CONSTRAINT_CHANGED__STATE__SATISFIED
