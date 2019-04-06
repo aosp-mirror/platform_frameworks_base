@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import android.os.SystemClock;
 import android.testing.AndroidTestingRunner;
@@ -447,6 +448,18 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
         assertEquals(100, mViews.get(3).getTranslationX(), .1f);
 
         Mockito.verify(allEnd, times(1)).run();
+    }
+
+    @Test
+    public void testAnimationsForChildrenFromIndex_noChildren() {
+        mLayout.setController(mTestableController);
+
+        final Runnable after = Mockito.mock(Runnable.class);
+        mTestableController
+                .animationsForChildrenFromIndex(0, (index, animation) -> { })
+                .startAll(after);
+
+        verify(after, Mockito.times(1)).run();
     }
 
     /**
