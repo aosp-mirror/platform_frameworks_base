@@ -202,13 +202,21 @@ public class PhysicsAnimationLayout extends FrameLayout {
             // add a multiple property end listener to the layout that will call the end action
             // provided to startAll() once all animations on the animated properties complete.
             return (endActions) -> {
+                final Runnable runAllEndActions = () -> {
+                    for (Runnable action : endActions) {
+                        action.run();
+                    }
+                };
+
+                // If there aren't any children to animate, just run the end actions.
+                if (mLayout.getChildCount() == 0) {
+                    runAllEndActions.run();
+                    return;
+                }
+
                 if (endActions != null) {
                     mLayout.setEndActionForMultipleProperties(
-                            () -> {
-                                for (Runnable action : endActions) {
-                                    action.run();
-                                }
-                            },
+                            runAllEndActions,
                             allAnimatedProperties.toArray(
                                     new DynamicAnimation.ViewProperty[0]));
                 }
