@@ -929,20 +929,13 @@ class StorageManagerService extends IStorageManager.Stub
     private void initIfBootedAndConnected() {
         Slog.d(TAG, "Thinking about init, mBootCompleted=" + mBootCompleted
                 + ", mDaemonConnected=" + mDaemonConnected);
-        if (mBootCompleted && mDaemonConnected) {
-            // Tell vold to lock or unlock the user directories based on the
-            // current file-based encryption status.
-            final boolean initLocked;
-            if (StorageManager.isFileEncryptedNativeOrEmulated()) {
-                // For native FBE this is a no-op after reboot, but this is
-                // still needed in case of framework restarts.
-                Slog.d(TAG, "FBE is enabled; ensuring all user directories are locked.");
-                initLocked = true;
-            } else {
-                // This is in case FBE emulation was turned off.
-                Slog.d(TAG, "FBE is disabled; ensuring the FBE emulation state is cleared.");
-                initLocked = false;
-            }
+        if (mBootCompleted && mDaemonConnected
+                && !StorageManager.isFileEncryptedNativeOnly()) {
+            // When booting a device without native support, make sure that our
+            // user directories are locked or unlocked based on the current
+            // emulation status.
+            final boolean initLocked = StorageManager.isFileEncryptedEmulatedOnly();
+            Slog.d(TAG, "Setting up emulation state, initlocked=" + initLocked);
             final List<UserInfo> users = mContext.getSystemService(UserManager.class).getUsers();
             for (UserInfo user : users) {
                 try {
