@@ -1050,6 +1050,35 @@ cc_library {
     },
 }
 
+// This library is meant for vendor code that needs to output protobuf. It links
+// against the static version of libprotobuf-cpp-lite, for which we can not guarantee
+// binary compatibility.
+cc_library {
+    name: "libplatformprotos-static",
+    defaults: ["libplatformprotos-defaults"],
+    host_supported: false,
+
+    // This is okay because this library is only built as a static library.  The C++
+    // API is not guaranteed. The proto API is guaranteed to be stable via Metrics Council,
+    // but is not authorized to be used outside of debugging.
+    vendor_available: true,
+
+    target: {
+        android: {
+            proto: {
+                type: "lite",
+            },
+            static_libs: [
+                "libprotobuf-cpp-lite",
+            ],
+            shared: {
+                enabled: false,
+            },
+        },
+    },
+}
+
+
 // This is the full proto version of libplatformprotos. It may only
 // be used by test code that is not shipped on the device.
 cc_library {
