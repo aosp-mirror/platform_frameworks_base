@@ -216,6 +216,11 @@ public class TextClassifierTest {
 
         TextClassification classification = mClassifier.classifyText(request);
         assertThat(classification, isTextClassification(classifiedText, TextClassifier.TYPE_DATE));
+        Bundle extras = classification.getExtras();
+        List<Bundle> entities = ExtrasUtils.getEntities(extras);
+        Truth.assertThat(entities).hasSize(1);
+        Bundle entity = entities.get(0);
+        Truth.assertThat(ExtrasUtils.getEntityType(entity)).isEqualTo(TextClassifier.TYPE_DATE);
     }
 
     @Test
@@ -484,6 +489,8 @@ public class TextClassifierTest {
         Truth.assertThat(conversationAction.getAction()).isNull();
         String code = ExtrasUtils.getCopyText(conversationAction.getExtras());
         Truth.assertThat(code).isEqualTo("12345");
+        Truth.assertThat(
+                ExtrasUtils.getSerializedEntityData(conversationAction.getExtras())).isNotEmpty();
     }
 
     private boolean isTextClassifierDisabled() {

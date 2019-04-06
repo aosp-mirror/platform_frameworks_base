@@ -69,14 +69,10 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 
 /**
- * Container for the expanded bubble view, handles rendering the caret and header of the view.
+ * Container for the expanded bubble view, handles rendering the caret and settings icon.
  */
 public class BubbleExpandedView extends LinearLayout implements View.OnClickListener {
     private static final String TAG = "BubbleExpandedView";
-
-    // Configurable via bubble settings; just for testing
-    private boolean mUseFooter;
-    private boolean mShowOnTop;
 
     // The triangle pointing to the expanded view
     private View mPointerView;
@@ -86,6 +82,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
 
     // Permission view
     private View mPermissionView;
+    private TextView mPermissionPrompt;
 
     // Views for expanded state
     private ExpandableNotificationRow mNotifRow;
@@ -98,9 +95,13 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     private boolean mNeedsNewHeight;
 
     private int mMinHeight;
-    private int mHeaderHeight;
+    private int mSettingsIconHeight;
     private int mBubbleHeight;
     private int mPermissionHeight;
+    private int mIconInset;
+    private Drawable mSettingsIconDrawable;
+    private int mPointerWidth;
+    private int mPointerHeight;
 
     private NotificationEntry mEntry;
     private PackageManager mPm;
@@ -177,23 +178,21 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
 
         Resources res = getResources();
         mPointerView = findViewById(R.id.pointer_view);
-        int width = res.getDimensionPixelSize(R.dimen.bubble_pointer_width);
-        int height = res.getDimensionPixelSize(R.dimen.bubble_pointer_height);
+        mPointerWidth = res.getDimensionPixelSize(R.dimen.bubble_pointer_width);
+        mPointerHeight = res.getDimensionPixelSize(R.dimen.bubble_pointer_height);
 
         TypedArray ta = getContext().obtainStyledAttributes(
                 new int[] {android.R.attr.colorBackgroundFloating});
         int bgColor = ta.getColor(0, Color.WHITE);
         ta.recycle();
 
-        mShowOnTop = BubbleController.showBubblesAtTop(getContext());
-        mUseFooter = BubbleController.useFooter(getContext());
+        ShapeDrawable triangleDrawable = new ShapeDrawable(TriangleShape.create(
+                mPointerWidth, mPointerHeight, false /* pointUp */));
 
-        ShapeDrawable triangleDrawable = new ShapeDrawable(
-                TriangleShape.create(width, height, mShowOnTop /* pointUp */));
         triangleDrawable.setTint(bgColor);
         mPointerView.setBackground(triangleDrawable);
 
-        FrameLayout viewWrapper = findViewById(R.id.header_permission_wrapper);
+        FrameLayout permissionOrSettings = findViewById(R.id.permission_or_settings);
 
         LayoutTransition transition = new LayoutTransition();
         transition.setDuration(200);
@@ -207,18 +206,21 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         transition.setInterpolator(LayoutTransition.DISAPPEARING, Interpolators.ALPHA_OUT);
 
         transition.setAnimateParentHierarchy(false);
-        viewWrapper.setLayoutTransition(transition);
-        viewWrapper.getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
+        permissionOrSettings.setLayoutTransition(transition);
+        permissionOrSettings.getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
 
-        mHeaderHeight = getContext().getResources().getDimensionPixelSize(
+        mSettingsIconHeight = getContext().getResources().getDimensionPixelSize(
                 R.dimen.bubble_expanded_header_height);
+        mSettingsIcon = findViewById(R.id.settings_button);
+        mIconInset = getResources().getDimensionPixelSize(R.dimen.bubble_icon_inset);
+        mSettingsIcon.setOnClickListener(this);
+        // Save initial drawable to create adaptive icons that will take its place.
+        mSettingsIconDrawable = mSettingsIcon.getDrawable();
+
         mPermissionHeight = getContext().getResources().getDimensionPixelSize(
                 R.dimen.bubble_permission_height);
-
         mPermissionView = findViewById(R.id.permission_layout);
-        mSettingsIcon = findViewById(R.id.settings_button);
-        mSettingsIcon.setOnClickListener(this);
-        updateHeaderColor();
+        mPermissionPrompt = mPermissionView.findViewById(R.id.prompt);
 
         findViewById(R.id.no_bubbles_button).setOnClickListener(this);
         findViewById(R.id.yes_bubbles_button).setOnClickListener(this);
@@ -238,18 +240,6 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
             }
             return view.onApplyWindowInsets(insets);
         });
-
-        if (!mShowOnTop) {
-            removeView(mPointerView);
-            if (mUseFooter) {
-                View divider = findViewById(R.id.divider);
-                viewWrapper.removeView(divider);
-                removeView(viewWrapper);
-                addView(divider);
-                addView(viewWrapper);
-            }
-            addView(mPointerView);
-        }
     }
 
     @Override
@@ -283,15 +273,13 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     /**
      * Creates a background with corners rounded based on how the view is configured to display
      */
-    private Drawable createHeaderPermissionBackground(int bgColor) {
+    private Drawable createPermissionBackground(int bgColor) {
         TypedArray ta2 = getContext().obtainStyledAttributes(
                 new int[] {android.R.attr.dialogCornerRadius});
         final float cr = ta2.getDimension(0, 0f);
         ta2.recycle();
 
-        float[] radii = mUseFooter
-                ? new float[] {0, 0, 0, 0, cr, cr, cr, cr}
-                : new float[] {cr, cr, cr, cr, 0, 0, 0, 0};
+        float[] radii = new float[] {cr, cr, cr, cr, 0, 0, 0, 0};
         GradientDrawable chromeBackground = new GradientDrawable();
         chromeBackground.setShape(GradientDrawable.RECTANGLE);
         chromeBackground.setCornerRadii(radii);
@@ -332,8 +320,8 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         if (mAppIcon == null) {
             mAppIcon = mPm.getDefaultActivityIcon();
         }
-        updateHeaderView();
-        updatePermissionView();
+        updateTheme();
+        togglePermissionOrSettings();
         updateExpandedView();
     }
 
@@ -353,22 +341,18 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                 // Still in the shade... remove it
                 parent.removeView(mNotifRow);
             }
-            if (mShowOnTop) {
-                addView(mNotifRow);
-            } else {
-                addView(mNotifRow, mUseFooter ? 0 : 1);
-            }
+            addView(mNotifRow, 1 /* index */);
         }
     }
 
     /**
      * Updates the entry backing this view. This will not re-populate ActivityView, it will
-     * only update the deep-links in the header, the title, and the height of the view.
+     * only update the deep-links in the title, and the height of the view.
      */
     public void update(NotificationEntry entry) {
         if (entry.key.equals(mEntry.key)) {
             mEntry = entry;
-            updateHeaderView();
+            updateSettingsContentDescription();
             updateHeight();
         } else {
             Log.w(TAG, "Trying to update entry with different key, new entry: "
@@ -376,35 +360,36 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         }
     }
 
-    /**
-     * Update header color and icon shape when theme changes.
-     */
-    void updateHeaderColor() {
+    void updateTheme() {
+        // Get new colors.
         TypedArray ta = mContext.obtainStyledAttributes(
-                new int[] {android.R.attr.colorBackgroundFloating, android.R.attr.colorForeground});
+                new int[]{android.R.attr.colorBackgroundFloating, android.R.attr.colorForeground});
         int backgroundColor = ta.getColor(0, Color.WHITE /* default */);
         int foregroundColor = ta.getColor(1, Color.BLACK /* default */);
         ta.recycle();
 
-        mPermissionView.setBackground(createHeaderPermissionBackground(backgroundColor));
+        // Must clear tint first - otherwise tint updates inconsistently.
+        mSettingsIconDrawable.setTintList(null);
+        mSettingsIconDrawable.setTint(foregroundColor);
 
-        Drawable settingsIcon =  mSettingsIcon.getDrawable();
-        settingsIcon.setTint(foregroundColor);
-
-        int mIconInset = getResources().getDimensionPixelSize(R.dimen.bubble_icon_inset);
-        InsetDrawable foreground = new InsetDrawable(settingsIcon, mIconInset);
+        InsetDrawable foreground = new InsetDrawable(mSettingsIconDrawable, mIconInset);
         ColorDrawable background = new ColorDrawable(backgroundColor);
         AdaptiveIconDrawable adaptiveIcon = new AdaptiveIconDrawable(background,
                 foreground);
         mSettingsIcon.setImageDrawable(adaptiveIcon);
+
+        // Update permission prompt color.
+        mPermissionView.setBackground(createPermissionBackground(backgroundColor));
+        mPermissionPrompt.setTextColor(foregroundColor);
+
+        // Update triangle color.
+        ShapeDrawable triangleDrawable = new ShapeDrawable(
+                TriangleShape.create(mPointerWidth, mPointerHeight, false /* pointUp */));
+        triangleDrawable.setTint(backgroundColor);
+        mPointerView.setBackground(triangleDrawable);
     }
 
-    private void updateHeaderView() {
-        mSettingsIcon.setContentDescription(getResources().getString(
-                R.string.bubbles_settings_button_description, mAppName));
-    }
-
-    private void updatePermissionView() {
+    void togglePermissionOrSettings() {
         boolean hasUserApprovedBubblesForPackage = false;
         try {
             hasUserApprovedBubblesForPackage =
@@ -417,12 +402,6 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
             showSettingsIcon();
         } else {
             showPermissionView();
-            ((ImageView) mPermissionView.findViewById(R.id.pkgicon)).setImageDrawable(mAppIcon);
-            ((TextView) mPermissionView.findViewById(R.id.pkgname)).setText(mAppName);
-            ((TextView) mPermissionView.findViewById(R.id.prompt)).setText(
-                    getResources().getString(R.string.bubbles_prompt, mAppName));
-            logBubbleClickEvent(mEntry,
-                    StatsLog.BUBBLE_UICHANGED__ACTION__PERMISSION_DIALOG_SHOWN);
         }
     }
 
@@ -457,7 +436,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
      */
     int getExpandedSize() {
         int chromeHeight = mPermissionView.getVisibility() != View.VISIBLE
-                ? mHeaderHeight
+                ? mSettingsIconHeight
                 : mPermissionHeight;
         return mBubbleHeight + mPointerView.getHeight() + mPointerMargin
                 + chromeHeight;
@@ -485,7 +464,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                 desiredHeight = desiredPx > 0 ? desiredPx : mMinHeight;
             }
             int chromeHeight = mPermissionView.getVisibility() != View.VISIBLE
-                    ? mHeaderHeight
+                    ? mSettingsIconHeight
                     : mPermissionHeight;
             int max = mStackView.getMaxExpandedHeight() - chromeHeight - mPointerView.getHeight()
                     - mPointerMargin;
@@ -548,15 +527,28 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         }
     }
 
+    private void updateSettingsContentDescription() {
+        mSettingsIcon.setContentDescription(getResources().getString(
+                R.string.bubbles_settings_button_description, mAppName));
+    }
+
     void showSettingsIcon() {
+        updateSettingsContentDescription();
+
         mPermissionView.setVisibility(GONE);
         mSettingsIcon.setVisibility(VISIBLE);
     }
 
     void showPermissionView() {
+        ((ImageView) mPermissionView.findViewById(R.id.pkgicon)).setImageDrawable(mAppIcon);
+        ((TextView) mPermissionView.findViewById(R.id.pkgname)).setText(mAppName);
+        mPermissionPrompt.setText(
+                getResources().getString(R.string.bubbles_prompt, mAppName));
+        logBubbleClickEvent(mEntry,
+                StatsLog.BUBBLE_UICHANGED__ACTION__PERMISSION_DIALOG_SHOWN);
+
         mSettingsIcon.setVisibility(GONE);
         mPermissionView.setVisibility(VISIBLE);
-
     }
 
     /**

@@ -1458,31 +1458,6 @@ public class TaskStack extends WindowContainer<Task> implements
         return false;
     }
 
-    int taskIdFromPoint(int x, int y) {
-        getBounds(mTmpRect);
-        if (!mTmpRect.contains(x, y) || isAdjustedForMinimizedDockedStack()) {
-            return -1;
-        }
-
-        for (int taskNdx = mChildren.size() - 1; taskNdx >= 0; --taskNdx) {
-            final Task task = mChildren.get(taskNdx);
-            final WindowState win = task.getTopVisibleAppMainWindow();
-            if (win == null) {
-                continue;
-            }
-            // We need to use the task's dim bounds (which is derived from the visible bounds of its
-            // apps windows) for any touch-related tests. Can't use the task's original bounds
-            // because it might be adjusted to fit the content frame. For example, the presence of
-            // the IME adjusting the windows frames when the app window is the IME target.
-            task.getDimBounds(mTmpRect);
-            if (mTmpRect.contains(x, y)) {
-                return task.mTaskId;
-            }
-        }
-
-        return -1;
-    }
-
     void findTaskForResizePoint(int x, int y, int delta,
             DisplayContent.TaskForResizePointSearchResult results) {
         if (!getWindowConfiguration().canResizeTask()) {

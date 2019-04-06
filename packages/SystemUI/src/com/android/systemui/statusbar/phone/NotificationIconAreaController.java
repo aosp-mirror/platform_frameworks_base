@@ -215,16 +215,13 @@ public class NotificationIconAreaController implements DarkReceiver,
         if (entry.isRowDismissed() && hideDismissed) {
             return false;
         }
-
         if (hideRepliedMessages && entry.isLastMessageFromReply()) {
             return false;
         }
-
         // showAmbient == show in shade but not shelf
-        if (!showAmbient && entry.shouldSuppressStatusBar()) {
+        if ((!showAmbient || mFullyDark) && entry.shouldSuppressStatusBar()) {
             return false;
         }
-
         return true;
     }
 

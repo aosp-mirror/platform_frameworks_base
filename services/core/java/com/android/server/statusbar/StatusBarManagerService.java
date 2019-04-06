@@ -52,6 +52,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
+import com.android.internal.statusbar.RegisterStatusBarResult;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.DumpUtils;
 import com.android.server.LocalServices;
@@ -63,7 +64,6 @@ import com.android.server.wm.WindowManagerService;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A note on locking:  We rely on the fact that calls onto mBar are oneway or
@@ -1037,37 +1037,27 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     // ================================================================================
     // TODO(b/118592525): refactor it as an IStatusBar API.
     @Override
-    public void registerStatusBar(IStatusBar bar, List<String> iconSlots,
-            List<StatusBarIcon> iconList, int switches[], List<IBinder> binders,
-            Rect fullscreenStackBounds, Rect dockedStackBounds) {
+    public RegisterStatusBarResult registerStatusBar(IStatusBar bar) {
         enforceStatusBarService();
 
         Slog.i(TAG, "registerStatusBar bar=" + bar);
         mBar = bar;
         mDeathRecipient.linkToDeath();
         notifyBarAttachChanged();
+        final ArrayMap<String, StatusBarIcon> icons;
         synchronized (mIcons) {
-            for (String slot : mIcons.keySet()) {
-                iconSlots.add(slot);
-                iconList.add(mIcons.get(slot));
-            }
+            icons = new ArrayMap<>(mIcons);
         }
         synchronized (mLock) {
             // TODO(b/118592525): Currently, status bar only works on the default display.
             // Make it aware of multi-display if needed.
             final UiState state = mDisplayUiState.get(DEFAULT_DISPLAY);
-            switches[0] = gatherDisableActionsLocked(mCurrentUserId, 1);
-            switches[1] = state.mSystemUiVisibility;
-            switches[2] = state.mMenuVisible ? 1 : 0;
-            switches[3] = state.mImeWindowVis;
-            switches[4] = state.mImeBackDisposition;
-            switches[5] = state.mShowImeSwitcher ? 1 : 0;
-            switches[6] = gatherDisableActionsLocked(mCurrentUserId, 2);
-            switches[7] = state.mFullscreenStackSysUiVisibility;
-            switches[8] = state.mDockedStackSysUiVisibility;
-            binders.add(state.mImeToken);
-            fullscreenStackBounds.set(state.mFullscreenStackBounds);
-            dockedStackBounds.set(state.mDockedStackBounds);
+            return new RegisterStatusBarResult(icons, gatherDisableActionsLocked(mCurrentUserId, 1),
+                    state.mSystemUiVisibility, state.mMenuVisible, state.mImeWindowVis,
+                    state.mImeBackDisposition, state.mShowImeSwitcher,
+                    gatherDisableActionsLocked(mCurrentUserId, 2),
+                    state.mFullscreenStackSysUiVisibility, state.mDockedStackSysUiVisibility,
+                    state.mImeToken, state.mFullscreenStackBounds, state.mDockedStackBounds);
         }
     }
 

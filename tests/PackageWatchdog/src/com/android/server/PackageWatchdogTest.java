@@ -26,7 +26,6 @@ import static org.junit.Assert.assertTrue;
 import android.content.Context;
 import android.content.pm.VersionedPackage;
 import android.os.Handler;
-import android.os.RemoteException;
 import android.os.test.TestLooper;
 import android.util.AtomicFile;
 
@@ -43,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -635,43 +635,34 @@ public class PackageWatchdogTest {
         private boolean mIsEnabled;
         private List<String> mSupportedPackages = new ArrayList<>();
         private List<String> mRequestedPackages = new ArrayList<>();
-        private Runnable mStateChangedRunnable;
         private Consumer<String> mPassedConsumer;
-
-        @Override
-        public void request(String packageName) throws RemoteException {
-            if (!mRequestedPackages.contains(packageName)) {
-                mRequestedPackages.add(packageName);
-            }
-        }
-
-        @Override
-        public void cancel(String packageName) throws RemoteException {
-            mRequestedPackages.remove(packageName);
-        }
-
-        @Override
-        public void getSupportedPackages(Consumer<List<String>> consumer) throws RemoteException {
-            consumer.accept(mIsEnabled ? mSupportedPackages : Collections.emptyList());
-        }
-
-        @Override
-        public void getRequestedPackages(Consumer<List<String>> consumer) throws RemoteException {
-            // Pass copy to prevent ConcurrentModificationException during test
-            consumer.accept(
-                    mIsEnabled ? new ArrayList<>(mRequestedPackages) : Collections.emptyList());
-        }
+        private Consumer<List<String>> mSupportedConsumer;
+        private Runnable mNotifySyncRunnable;
 
         @Override
         public void setEnabled(boolean enabled) {
             mIsEnabled = enabled;
-            mStateChangedRunnable.run();
+            if (!mIsEnabled) {
+                mSupportedPackages.clear();
+            }
         }
 
         @Override
-        public void setCallbacks(Runnable stateChangedRunnable, Consumer<String> passedConsumer) {
-            mStateChangedRunnable = stateChangedRunnable;
+        public void setCallbacks(Consumer<String> passedConsumer,
+                Consumer<List<String>> supportedConsumer, Runnable notifySyncRunnable) {
             mPassedConsumer = passedConsumer;
+            mSupportedConsumer = supportedConsumer;
+            mNotifySyncRunnable = notifySyncRunnable;
+        }
+
+        @Override
+        public void syncRequests(Set<String> packages) {
+            mRequestedPackages.clear();
+            if (mIsEnabled) {
+                packages.retainAll(mSupportedPackages);
+                mRequestedPackages.addAll(packages);
+            }
+            mSupportedConsumer.accept(mSupportedPackages);
         }
 
         public void setSupportedPackages(List<String> packages) {

@@ -93,7 +93,17 @@ class NotificationSwipeHelper extends SwipeHelper
     protected Handler getHandler() { return mHandler; }
 
     @VisibleForTesting
-    protected Runnable getFalsingCheck() { return mFalsingCheck; };
+    protected Runnable getFalsingCheck() {
+        return mFalsingCheck;
+    }
+
+    @Override
+    protected void onChildSnappedBack(View animView, float targetLeft) {
+        if (mCurrMenuRow != null && targetLeft == 0) {
+            mCurrMenuRow.resetMenu();
+            clearCurrentMenuRow();
+        }
+    }
 
     @Override
     public void onDownUpdate(View currView, MotionEvent ev) {
@@ -117,8 +127,10 @@ class NotificationSwipeHelper extends SwipeHelper
     protected void initializeRow(ExpandableNotificationRow row) {
         if (row.getEntry().hasFinishedInitialization()) {
             mCurrMenuRow = row.createMenu();
-            mCurrMenuRow.setMenuClickListener(mMenuListener);
-            mCurrMenuRow.onTouchStart();
+            if (mCurrMenuRow != null) {
+                mCurrMenuRow.setMenuClickListener(mMenuListener);
+                mCurrMenuRow.onTouchStart();
+            }
         }
     }
 

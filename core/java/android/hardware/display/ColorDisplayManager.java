@@ -392,6 +392,26 @@ public final class ColorDisplayManager {
     }
 
     /**
+     * Enables or disables display white balance.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS)
+    public boolean setDisplayWhiteBalanceEnabled(boolean enabled) {
+        return mManager.setDisplayWhiteBalanceEnabled(enabled);
+    }
+
+    /**
+     * Returns whether display white balance is currently enabled. Even if enabled, it may or may
+     * not be active, if another transform with higher priority is active.
+     *
+     * @hide
+     */
+    public boolean isDisplayWhiteBalanceEnabled() {
+        return mManager.isDisplayWhiteBalanceEnabled();
+    }
+
+    /**
      * Returns {@code true} if Night Display is supported by the device.
      *
      * @hide
@@ -611,6 +631,22 @@ public final class ColorDisplayManager {
         boolean setAppSaturationLevel(String packageName, int saturationLevel) {
             try {
                 return mCdm.setAppSaturationLevel(packageName, saturationLevel);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        boolean isDisplayWhiteBalanceEnabled() {
+            try {
+                return mCdm.isDisplayWhiteBalanceEnabled();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        boolean setDisplayWhiteBalanceEnabled(boolean enabled) {
+            try {
+                return mCdm.setDisplayWhiteBalanceEnabled(enabled);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

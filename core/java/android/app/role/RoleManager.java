@@ -113,20 +113,6 @@ public final class RoleManager {
     public static final String ROLE_HOME = "android.app.role.HOME";
 
     /**
-     * The name of the music player role.
-     *
-     * @see Intent#CATEGORY_APP_MUSIC
-     */
-    public static final String ROLE_MUSIC = "android.app.role.MUSIC";
-
-    /**
-     * The name of the gallery role.
-     *
-     * @see Intent#CATEGORY_APP_GALLERY
-     */
-    public static final String ROLE_GALLERY = "android.app.role.GALLERY";
-
-    /**
      * The name of the car mode dialer app role.
      * <p>
      * Similar to the {@link #ROLE_DIALER dialer} role, this role determines which app is

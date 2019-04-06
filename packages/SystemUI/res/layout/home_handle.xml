@@ -21,5 +21,7 @@
     android:layout_width="@dimen/navigation_home_handle_width"
     android:layout_height="match_parent"
     android:layout_weight="0"
+    android:paddingStart="@dimen/navigation_key_padding"
+    android:paddingEnd="@dimen/navigation_key_padding"
     />
 

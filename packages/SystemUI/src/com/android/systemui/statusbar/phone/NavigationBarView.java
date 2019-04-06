@@ -21,7 +21,6 @@ import static android.view.WindowManagerPolicyConstants.NAV_BAR_INVALID;
 
 import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_SHOW_OVERVIEW_BUTTON;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
-import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.NAV_BAR_VIEWS;
 
 import android.animation.LayoutTransition;
 import android.animation.LayoutTransition.TransitionListener;
@@ -35,6 +34,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ParceledListSlice;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Point;
@@ -48,6 +48,8 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
+import android.view.IPinnedStackController;
+import android.view.IPinnedStackListener;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
@@ -133,6 +135,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private boolean mUseCarModeUi = false;
     private boolean mInCarMode = false;
     private boolean mDockedStackExists;
+    private boolean mImeVisible;
 
     private final SparseArray<ButtonDispatcher> mButtonDispatchers = new SparseArray<>();
     private final ContextualButtonGroup mContextualButtonGroup;
@@ -231,6 +234,45 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 return super.performAccessibilityAction(host, action, args);
             }
             return true;
+        }
+    };
+
+    private final IPinnedStackListener.Stub mImeChangedListener = new IPinnedStackListener.Stub() {
+        @Override
+        public void onListenerRegistered(IPinnedStackController controller) {
+        }
+
+        @Override
+        public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
+            post(() -> {
+                // TODO remove this and do below when mNavigationIconHints changes
+                if (imeVisible) {
+                    getBackButton().setVisibility(VISIBLE);
+                    reloadNavIcons();
+                } else {
+                    getImeSwitchButton().setVisibility(GONE);
+                }
+                mImeVisible = imeVisible;
+                updateWindowTouchable();
+            });
+        }
+
+        @Override
+        public void onShelfVisibilityChanged(boolean shelfVisible, int shelfHeight) {
+        }
+
+        @Override
+        public void onMinimizedStateChanged(boolean isMinimized) {
+        }
+
+        @Override
+        public void onMovementBoundsChanged(Rect insetBounds, Rect normalBounds,
+                Rect animatingBounds, boolean fromImeAdjustment, boolean fromShelfAdjustment,
+                int displayRotation) {
+        }
+
+        @Override
+        public void onActionsChanged(ParceledListSlice actions) {
         }
     };
 
@@ -472,6 +514,11 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             return;
         }
 
+        if (QuickStepContract.isGesturalMode(getContext())) {
+            drawable.setRotation(degrees);
+            return;
+        }
+
         // Animate the back button's rotation to the new degrees and only in portrait move up the
         // back button to line up with the other buttons
         float targetY = !mOverviewProxyService.shouldShowSwipeUpUI() && !mIsVertical && useAltBack
@@ -574,8 +621,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         // Always disable recents when alternate car mode UI is active and for secondary displays.
         boolean disableRecent = isRecentsButtonDisabled();
 
-        boolean disableBack = QuickStepContract.isGesturalMode(getContext())
-                || (((mDisabledFlags & View.STATUS_BAR_DISABLE_BACK) != 0) && !useAltBack);
+        boolean disableBack = !useAltBack && (QuickStepContract.isGesturalMode(getContext())
+                || ((mDisabledFlags & View.STATUS_BAR_DISABLE_BACK) != 0));
 
         // When screen pinning, don't hide back and home when connected service or back and
         // recents buttons when disconnected from launcher service in screen pinning mode,
@@ -715,6 +762,11 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         setWindowFlag(WindowManager.LayoutParams.FLAG_SLIPPERY, slippery);
     }
 
+    public void updateWindowTouchable() {
+        boolean touchable = mImeVisible || !QuickStepContract.isGesturalMode(getContext());
+        setWindowFlag(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, !touchable);
+    }
+
     private void setWindowFlag(int flags, boolean enable) {
         final ViewGroup navbarView = ((ViewGroup) getParent());
         if (navbarView == null) {
@@ -734,7 +786,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     }
 
     private void onOverlaysChanged() {
-        mNavigationInflaterView.onTuningChanged(NAV_BAR_VIEWS, null);
+        mNavigationInflaterView.setNavigationBarLayout(null);
 
         // Color adaption is tied with showing home handle, only avaliable if visible
         if (QuickStepContract.isGesturalMode(getContext())) {
@@ -1062,6 +1114,15 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         filter.addDataScheme("package");
         getContext().registerReceiver(mOverlaysChangedReceiver, filter);
         mEdgeBackGestureHandler.onNavBarAttached();
+
+        if (QuickStepContract.isGesturalMode(getContext())) {
+            try {
+                WindowManagerWrapper.getInstance().addPinnedStackListener(mImeChangedListener);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to register pinned stack listener", e);
+            }
+        }
+        updateWindowTouchable();
     }
 
     @Override
@@ -1078,6 +1139,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
         getContext().unregisterReceiver(mOverlaysChangedReceiver);
         mEdgeBackGestureHandler.onNavBarDetached();
+
+        WindowManagerWrapper.getInstance().removePinnedStackListener(mImeChangedListener);
     }
 
     private void setUpSwipeUpOnboarding(boolean connectedToOverviewProxy) {

@@ -618,6 +618,7 @@
 
     <!-- Added in Q -->
     <protected-broadcast android:name="android.content.pm.action.SESSION_UPDATED" />
+    <protected-broadcast android:name="android.settings.action.GRAYSCALE_CHANGED" />
 
     <!-- For CarIdlenessTracker -->
     <protected-broadcast android:name="com.android.server.jobscheduler.GARAGE_MODE_ON" />
@@ -3439,6 +3440,11 @@
          @hide -->
     <permission android:name="android.permission.OBSERVE_ROLE_HOLDERS"
                 android:protectionLevel="signature|installer" />
+
+    <!-- Allows an application to manage the companion devices.
+         @hide -->
+    <permission android:name="android.permission.MANAGE_COMPANION_DEVICES"
+                android:protectionLevel="signature" />
 
     <!-- @SystemApi Allows an application to use SurfaceFlinger's low level features.
          <p>Not for use by third-party applications.

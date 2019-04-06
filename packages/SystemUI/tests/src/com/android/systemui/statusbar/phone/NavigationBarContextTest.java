@@ -36,6 +36,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.policy.KeyButtonDrawable;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -173,6 +174,7 @@ public class NavigationBarContextTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore("b/112934365")
     public void testUpdateIconsDarkIntensity() throws Exception {
         final int unusedColor = 0;
         final Drawable d = mock(Drawable.class);

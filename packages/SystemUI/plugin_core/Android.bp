@@ -13,9 +13,7 @@
 // limitations under the License.
 
 java_library {
-
+    sdk_version: "current",
     name: "PluginCoreLib",
-
     srcs: ["src/**/*.java"],
-
 }

@@ -319,6 +319,7 @@ java_defaults {
         "core/java/android/service/vr/IVrManager.aidl",
         "core/java/android/service/vr/IVrStateCallbacks.aidl",
         "core/java/android/service/watchdog/IExplicitHealthCheckService.aidl",
+        "core/java/android/service/watchdog/PackageInfo.aidl",
         "core/java/android/print/ILayoutResultCallback.aidl",
         "core/java/android/print/IPrinterDiscoveryObserver.aidl",
         "core/java/android/print/IPrintDocumentAdapter.aidl",
@@ -436,6 +437,7 @@ java_defaults {
         "core/java/com/android/internal/os/IShellCallback.aidl",
         "core/java/com/android/internal/statusbar/IStatusBar.aidl",
         "core/java/com/android/internal/statusbar/IStatusBarService.aidl",
+        "core/java/com/android/internal/statusbar/RegisterStatusBarResult.aidl",
         "core/java/com/android/internal/textservice/ISpellCheckerService.aidl",
         "core/java/com/android/internal/textservice/ISpellCheckerServiceCallback.aidl",
         "core/java/com/android/internal/textservice/ISpellCheckerSession.aidl",
@@ -1047,6 +1049,35 @@ cc_library {
         },
     },
 }
+
+// This library is meant for vendor code that needs to output protobuf. It links
+// against the static version of libprotobuf-cpp-lite, for which we can not guarantee
+// binary compatibility.
+cc_library {
+    name: "libplatformprotos-static",
+    defaults: ["libplatformprotos-defaults"],
+    host_supported: false,
+
+    // This is okay because this library is only built as a static library.  The C++
+    // API is not guaranteed. The proto API is guaranteed to be stable via Metrics Council,
+    // but is not authorized to be used outside of debugging.
+    vendor_available: true,
+
+    target: {
+        android: {
+            proto: {
+                type: "lite",
+            },
+            static_libs: [
+                "libprotobuf-cpp-lite",
+            ],
+            shared: {
+                enabled: false,
+            },
+        },
+    },
+}
+
 
 // This is the full proto version of libplatformprotos. It may only
 // be used by test code that is not shipped on the device.

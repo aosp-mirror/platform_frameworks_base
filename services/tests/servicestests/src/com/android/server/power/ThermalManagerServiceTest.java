@@ -28,6 +28,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.os.CoolingDevice;
 import android.os.IBinder;
 import android.os.IPowerManager;
 import android.os.IThermalEventListener;
@@ -85,6 +86,8 @@ public class ThermalManagerServiceTest {
     private class ThermalHalFake extends ThermalHalWrapper {
         private static final int INIT_STATUS = Temperature.THROTTLING_NONE;
         private ArrayList<Temperature> mTemperatureList = new ArrayList<>();
+        private ArrayList<CoolingDevice> mCoolingDeviceList = new ArrayList<>();
+
         private Temperature mSkin1 = new Temperature(0, Temperature.TYPE_SKIN, "skin1",
                 INIT_STATUS);
         private Temperature mSkin2 = new Temperature(0, Temperature.TYPE_SKIN, "skin2",
@@ -93,17 +96,40 @@ public class ThermalManagerServiceTest {
                 INIT_STATUS);
         private Temperature mUsbPort = new Temperature(0, Temperature.TYPE_USB_PORT, "usbport",
                 INIT_STATUS);
+        private CoolingDevice mCpu = new CoolingDevice(0, CoolingDevice.TYPE_BATTERY, "cpu");
+        private CoolingDevice mGpu = new CoolingDevice(0, CoolingDevice.TYPE_BATTERY, "gpu");
 
         ThermalHalFake() {
             mTemperatureList.add(mSkin1);
             mTemperatureList.add(mSkin2);
             mTemperatureList.add(mBattery);
             mTemperatureList.add(mUsbPort);
+            mCoolingDeviceList.add(mCpu);
+            mCoolingDeviceList.add(mGpu);
         }
 
         @Override
         protected List<Temperature> getCurrentTemperatures(boolean shouldFilter, int type) {
-            return mTemperatureList;
+            List<Temperature> ret = new ArrayList<>();
+            for (Temperature temperature : mTemperatureList) {
+                if (shouldFilter && type != temperature.getType()) {
+                    continue;
+                }
+                ret.add(temperature);
+            }
+            return ret;
+        }
+
+        @Override
+        protected List<CoolingDevice> getCurrentCoolingDevices(boolean shouldFilter, int type) {
+            List<CoolingDevice> ret = new ArrayList<>();
+            for (CoolingDevice cdev : mCoolingDeviceList) {
+                if (shouldFilter && type != cdev.getType()) {
+                    continue;
+                }
+                ret.add(cdev);
+            }
+            return ret;
         }
 
         @Override
@@ -117,8 +143,10 @@ public class ThermalManagerServiceTest {
         }
     }
 
-    private void assertTemperatureEquals(List<Temperature> expected, List<Temperature> value) {
-        assertEquals(new HashSet<>(expected), new HashSet<>(value));
+    private void assertListEqualsIgnoringOrder(List<?> actual, List<?> expected) {
+        HashSet<?> actualSet = new HashSet<>(actual);
+        HashSet<?> expectedSet = new HashSet<>(expected);
+        assertEquals(expectedSet, actualSet);
     }
 
     @Before
@@ -148,13 +176,14 @@ public class ThermalManagerServiceTest {
         ArgumentCaptor<Temperature> captor = ArgumentCaptor.forClass(Temperature.class);
         verify(mEventListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
                 .times(4)).notifyThrottling(captor.capture());
-        assertTemperatureEquals(mFakeHal.mTemperatureList, captor.getAllValues());
+        assertListEqualsIgnoringOrder(mFakeHal.mTemperatureList, captor.getAllValues());
         verify(mStatusListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
                 .times(1)).onStatusChange(Temperature.THROTTLING_NONE);
         captor = ArgumentCaptor.forClass(Temperature.class);
         verify(mEventListener2, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
                 .times(2)).notifyThrottling(captor.capture());
-        assertTemperatureEquals(new ArrayList<>(Arrays.asList(mFakeHal.mSkin1, mFakeHal.mSkin2)),
+        assertListEqualsIgnoringOrder(
+                new ArrayList<>(Arrays.asList(mFakeHal.mSkin1, mFakeHal.mSkin2)),
                 captor.getAllValues());
         verify(mStatusListener2, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
                 .times(1)).onStatusChange(Temperature.THROTTLING_NONE);
@@ -185,7 +214,7 @@ public class ThermalManagerServiceTest {
         ArgumentCaptor<Temperature> captor = ArgumentCaptor.forClass(Temperature.class);
         verify(mEventListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
                 .times(4)).notifyThrottling(captor.capture());
-        assertTemperatureEquals(mFakeHal.mTemperatureList, captor.getAllValues());
+        assertListEqualsIgnoringOrder(mFakeHal.mTemperatureList, captor.getAllValues());
         verify(mStatusListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
                 .times(1)).onStatusChange(Temperature.THROTTLING_NONE);
         // Register new callbacks and verify old ones are not called (remained same) while new
@@ -200,7 +229,8 @@ public class ThermalManagerServiceTest {
         captor = ArgumentCaptor.forClass(Temperature.class);
         verify(mEventListener2, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
                 .times(2)).notifyThrottling(captor.capture());
-        assertTemperatureEquals(new ArrayList<>(Arrays.asList(mFakeHal.mSkin1, mFakeHal.mSkin2)),
+        assertListEqualsIgnoringOrder(
+                new ArrayList<>(Arrays.asList(mFakeHal.mSkin1, mFakeHal.mSkin2)),
                 captor.getAllValues());
         verify(mStatusListener2, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
                 .times(1)).onStatusChange(Temperature.THROTTLING_NONE);
@@ -260,9 +290,9 @@ public class ThermalManagerServiceTest {
 
     @Test
     public void testGetCurrentTemperatures() throws RemoteException {
-        assertTemperatureEquals(mFakeHal.getCurrentTemperatures(false, 0),
+        assertListEqualsIgnoringOrder(mFakeHal.getCurrentTemperatures(false, 0),
                 mService.mService.getCurrentTemperatures());
-        assertTemperatureEquals(mFakeHal.getCurrentTemperatures(true, Temperature.TYPE_SKIN),
+        assertListEqualsIgnoringOrder(mFakeHal.getCurrentTemperatures(true, Temperature.TYPE_SKIN),
                 mService.mService.getCurrentTemperaturesWithType(Temperature.TYPE_SKIN));
     }
 
@@ -299,5 +329,17 @@ public class ThermalManagerServiceTest {
         assertEquals(0,
                 mService.mService.getCurrentTemperaturesWithType(Temperature.TYPE_SKIN).size());
         assertEquals(Temperature.THROTTLING_NONE, mService.mService.getCurrentThermalStatus());
+    }
+
+    @Test
+    public void testGetCurrentCoolingDevices() throws RemoteException {
+        assertListEqualsIgnoringOrder(mFakeHal.getCurrentCoolingDevices(false, 0),
+                mService.mService.getCurrentCoolingDevices());
+        assertListEqualsIgnoringOrder(
+                mFakeHal.getCurrentCoolingDevices(false, CoolingDevice.TYPE_BATTERY),
+                mService.mService.getCurrentCoolingDevices());
+        assertListEqualsIgnoringOrder(
+                mFakeHal.getCurrentCoolingDevices(true, CoolingDevice.TYPE_CPU),
+                mService.mService.getCurrentCoolingDevicesWithType(CoolingDevice.TYPE_CPU));
     }
 }

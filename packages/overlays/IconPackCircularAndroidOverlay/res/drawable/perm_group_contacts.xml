@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+   Copyright (C) 2019 The Android Open Source Project
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:height="24dp"
+    android:tint="@android:color/black"
+    android:viewportHeight="24"
+    android:viewportWidth="24"
+    android:width="24dp" >
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M12,9.75a1.5,1.5,0,1,1-1.5,1.5A1.5,1.5,0,0,1,12,9.75m0-1.5a3,3,0,1,0,3,3,3,3,0,0,0-3-3Z" />
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M17.25,3.5H6.75a0.75 0.75 ,0,0,1,0-1.5h10.5a0.75 0.75 ,0,0,1,0,1.5Z" />
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M17.25,22H6.75a0.75 0.75 ,0,0,1,0-1.5h10.5a0.75 0.75 ,0,0,1,0,1.5Z" />
+    <path android:pathData="M18.37,17.09A2.51,2.51,0,0,0,19.5,15V9A2.5,2.5,0,0,0,17,6.5H7A2.5,2.5,0,0,0,4.5,9v6a2.51,2.51,0,0,0,1.13,2.09A9,9,0,0,1,12,14.75,9,9,0,0,1,18.37,17.09Z" />
+    <path android:pathData="M7.53,17.5h8.94A7.49,7.49,0,0,0,12,16.25,7.49,7.49,0,0,0,7.53,17.5Z" />
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M17,5H7A4,4,0,0,0,3,9v6a4,4,0,0,0,4,4H17a4,4,0,0,0,4-4V9A4,4,0,0,0,17,5ZM7.53,17.5A7.49,7.49,0,0,1,12,16.25a7.49,7.49,0,0,1,4.47,1.25Zm12-2.5a2.51,2.51,0,0,1-1.13,2.09h0A9,9,0,0,0,12,14.75a9,9,0,0,0-6.37,2.34h0A2.51,2.51,0,0,1,4.5,15V9A2.5,2.5,0,0,1,7,6.5H17A2.5,2.5,0,0,1,19.5,9Z" />
+</vector>

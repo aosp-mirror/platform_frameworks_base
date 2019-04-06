@@ -954,7 +954,7 @@ package android.location {
     method public void setDriftNanosPerSecond(double);
     method public void setDriftUncertaintyNanosPerSecond(@FloatRange(from=0.0f) double);
     method public void setElapsedRealtimeNanos(long);
-    method public void setElapsedRealtimeUncertaintyNanos(@IntRange(from=0) long);
+    method public void setElapsedRealtimeUncertaintyNanos(@FloatRange(from=0.0f) double);
     method public void setFullBiasNanos(long);
     method public void setHardwareClockDiscontinuityCount(int);
     method public void setLeapSecond(int);
@@ -1542,16 +1542,11 @@ package android.net.metrics {
 package android.net.util {
 
   public final class SocketUtils {
-    method public static void addArpEntry(@NonNull java.net.Inet4Address, @NonNull android.net.MacAddress, @NonNull String, @NonNull java.io.FileDescriptor) throws java.io.IOException;
-    method public static void attachControlPacketFilter(@NonNull java.io.FileDescriptor, int) throws java.net.SocketException;
-    method public static void attachDhcpFilter(@NonNull java.io.FileDescriptor) throws java.net.SocketException;
-    method public static void attachRaFilter(@NonNull java.io.FileDescriptor, int) throws java.net.SocketException;
     method public static void bindSocketToInterface(@NonNull java.io.FileDescriptor, @NonNull String) throws android.system.ErrnoException;
     method public static void closeSocket(@Nullable java.io.FileDescriptor) throws java.io.IOException;
     method @NonNull public static java.net.SocketAddress makeNetlinkSocketAddress(int, int);
     method @NonNull public static java.net.SocketAddress makePacketSocketAddress(int, int);
     method @NonNull public static java.net.SocketAddress makePacketSocketAddress(int, @NonNull byte[]);
-    method public static void setSocketTimeValueOption(@NonNull java.io.FileDescriptor, int, int, long) throws android.system.ErrnoException;
   }
 
 }

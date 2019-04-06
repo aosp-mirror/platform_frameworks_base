@@ -278,17 +278,15 @@ public final class AppCompactor {
                     + " full, " + mPersistentCompactionCount + " persistent, "
                     + mBfgsCompactionCount + " BFGS compactions.");
 
-            if (mLastCompactionStats != null) {
-                pw.println("  Tracking last compaction stats for " + mLastCompactionStats.size()
-                        + " processes.");
-                if (DEBUG_COMPACTION) {
-                    for (Map.Entry<Integer, LastCompactionStats> entry
-                            : mLastCompactionStats.entrySet()) {
-                        int pid = entry.getKey();
-                        LastCompactionStats stats = entry.getValue();
-                        pw.println("    " + pid + ": "
-                                + Arrays.toString(stats.getRssAfterCompaction()));
-                    }
+            pw.println("  Tracking last compaction stats for " + mLastCompactionStats.size()
+                    + " processes.");
+            if (DEBUG_COMPACTION) {
+                for (Map.Entry<Integer, LastCompactionStats> entry
+                        : mLastCompactionStats.entrySet()) {
+                    int pid = entry.getKey();
+                    LastCompactionStats stats = entry.getValue();
+                    pw.println("    " + pid + ": "
+                            + Arrays.toString(stats.getRssAfterCompaction()));
                 }
             }
         }
@@ -504,10 +502,6 @@ public final class AppCompactor {
             default:
                 return COMPACT_ACTION_NONE;
         }
-    }
-
-    @VisibleForTesting static String procStateListToString(Integer... processStates) {
-        return Arrays.toString(processStates);
     }
 
     private static final class LastCompactionStats {

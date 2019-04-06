@@ -35,6 +35,7 @@ public class CarVolumeItem {
     private Drawable mSupplementalIcon;
     private View.OnClickListener mSupplementalIconOnClickListener;
     private boolean mShowSupplementalIconDivider;
+    private int mGroupId;
 
     private int mMax;
     private int mProgress;
@@ -83,6 +84,20 @@ public class CarVolumeItem {
         mSupplementalIcon = drawable;
         mShowSupplementalIconDivider = showSupplementalIconDivider;
         mIsDirty = true;
+    }
+
+    /**
+     * Gets the group id associated.
+     */
+    public int getGroupId() {
+        return mGroupId;
+    }
+
+    /**
+     * Sets the group id associated.
+     */
+    public void setGroupId(int groupId) {
+        this.mGroupId = groupId;
     }
 
     /** Sets {@code OnClickListener} for the supplemental icon. */

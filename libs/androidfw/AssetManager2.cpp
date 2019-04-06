@@ -1319,7 +1319,7 @@ void Theme::SetTo(const Theme& o) {
     typedef std::map<int, int> SourceToDestinationRuntimePackageMap;
     std::map<ApkAssetsCookie, SourceToDestinationRuntimePackageMap> src_asset_cookie_id_map;
 
-    // Determine which ApkAssets are loaded in both theme AssetManagers
+    // Determine which ApkAssets are loaded in both theme AssetManagers.
     std::vector<const ApkAssets*> src_assets = o.asset_manager_->GetApkAssets();
     for (size_t i = 0; i < src_assets.size(); i++) {
       const ApkAssets* src_asset = src_assets[i];
@@ -1328,7 +1328,7 @@ void Theme::SetTo(const Theme& o) {
       for (size_t j = 0; j < dest_assets.size(); j++) {
         const ApkAssets* dest_asset = dest_assets[j];
 
-        // Map the runtime package of the source apk asset to the destination apk asset
+        // Map the runtime package of the source apk asset to the destination apk asset.
         if (src_asset->GetPath() == dest_asset->GetPath()) {
           const std::vector<std::unique_ptr<const LoadedPackage>>& src_packages =
               src_asset->GetLoadedArsc()->GetPackages();
@@ -1353,15 +1353,14 @@ void Theme::SetTo(const Theme& o) {
             package_map[src_package_id] = dest_package_id;
           }
 
-          src_to_dest_asset_cookies.insert(std::pair<ApkAssetsCookie, ApkAssetsCookie>(i, j));
-          src_asset_cookie_id_map.insert(
-              std::pair<ApkAssetsCookie, SourceToDestinationRuntimePackageMap>(i, package_map));
+          src_to_dest_asset_cookies.insert(std::make_pair(i, j));
+          src_asset_cookie_id_map.insert(std::make_pair(i, package_map));
           break;
         }
       }
     }
 
-    // Reset the data in the destination theme
+    // Reset the data in the destination theme.
     for (size_t p = 0; p < packages_.size(); p++) {
       if (packages_[p] != nullptr) {
         packages_[p].reset();
@@ -1387,16 +1386,17 @@ void Theme::SetTo(const Theme& o) {
             continue;
           }
 
-          // If the attribute value represents an attribute or reference, the package id of the
-          // value needs to be rewritten to the package id of the value in the destination
-          uint32_t attribue_data = entry.value.data;
-          if ((entry.value.dataType == Res_value::TYPE_ATTRIBUTE
-              || entry.value.dataType == Res_value::TYPE_REFERENCE
-              || entry.value.dataType == Res_value::TYPE_DYNAMIC_ATTRIBUTE
-              || entry.value.dataType == Res_value::TYPE_DYNAMIC_REFERENCE)
-              && attribue_data != 0x0) {
+          bool is_reference = (entry.value.dataType == Res_value::TYPE_ATTRIBUTE
+                               || entry.value.dataType == Res_value::TYPE_REFERENCE
+                               || entry.value.dataType == Res_value::TYPE_DYNAMIC_ATTRIBUTE
+                               || entry.value.dataType == Res_value::TYPE_DYNAMIC_REFERENCE)
+                              && entry.value.data != 0x0;
 
-            // Determine the package id of the reference in the destination AssetManager
+          // If the attribute value represents an attribute or reference, the package id of the
+          // value needs to be rewritten to the package id of the value in the destination.
+          uint32_t attribute_data = entry.value.data;
+          if (is_reference) {
+            // Determine the package id of the reference in the destination AssetManager.
             auto value_package_map = src_asset_cookie_id_map.find(entry.cookie);
             if (value_package_map == src_asset_cookie_id_map.end()) {
               continue;
@@ -1408,14 +1408,28 @@ void Theme::SetTo(const Theme& o) {
               continue;
             }
 
-            attribue_data = fix_package_id(entry.value.data, value_dest_package->second);
+            attribute_data = fix_package_id(entry.value.data, value_dest_package->second);
+          }
+
+          // Find the cookie of the value in the destination. If the source apk is not loaded in the
+          // destination, only copy resources that do not reference resources in the source.
+          ApkAssetsCookie data_dest_cookie;
+          auto value_dest_cookie = src_to_dest_asset_cookies.find(entry.cookie);
+          if (value_dest_cookie != src_to_dest_asset_cookies.end()) {
+            data_dest_cookie = value_dest_cookie->second;
+          } else {
+            if (is_reference || entry.value.dataType == Res_value::TYPE_STRING) {
+              continue;
+            } else {
+              data_dest_cookie = 0x0;
+            }
           }
 
           // The package id of the attribute needs to be rewritten to the package id of the
-          // attribute in the destination
+          // attribute in the destination.
           int attribute_dest_package_id = p;
           if (attribute_dest_package_id != 0x01) {
-            // Find the cookie of the attribute resource id
+            // Find the cookie of the attribute resource id in the source AssetManager
             FindEntryResult attribute_entry_result;
             ApkAssetsCookie attribute_cookie =
                 o.asset_manager_->FindEntry(make_resid(p, t, e), 0 /* density_override */ ,
@@ -1423,7 +1437,7 @@ void Theme::SetTo(const Theme& o) {
                                             true /* ignore_configuration */,
                                             &attribute_entry_result);
 
-            // Determine the package id of the attribute in the destination AssetManager
+            // Determine the package id of the attribute in the destination AssetManager.
             auto attribute_package_map = src_asset_cookie_id_map.find(attribute_cookie);
             if (attribute_package_map == src_asset_cookie_id_map.end()) {
               continue;
@@ -1436,13 +1450,13 @@ void Theme::SetTo(const Theme& o) {
             attribute_dest_package_id = attribute_dest_package->second;
           }
 
-          // Lazily instantiate the destination package
+          // Lazily instantiate the destination package.
           std::unique_ptr<Package>& dest_package = packages_[attribute_dest_package_id];
           if (dest_package == nullptr) {
             dest_package.reset(new Package());
           }
 
-          // Lazily instantiate and resize the destination type
+          // Lazily instantiate and resize the destination type.
           util::unique_cptr<ThemeType>& dest_type = dest_package->types[t];
           if (dest_type == nullptr || dest_type->entry_count < type->entry_count) {
             const size_t type_alloc_size = sizeof(ThemeType)
@@ -1450,7 +1464,7 @@ void Theme::SetTo(const Theme& o) {
             void* dest_data = malloc(type_alloc_size);
             memset(dest_data, 0, type->entry_count * sizeof(ThemeEntry));
 
-            // Copy the existing destination type values if the type is resized
+            // Copy the existing destination type values if the type is resized.
             if (dest_type != nullptr) {
               memcpy(dest_data, type, sizeof(ThemeType)
                                       + (dest_type->entry_count * sizeof(ThemeEntry)));
@@ -1460,15 +1474,9 @@ void Theme::SetTo(const Theme& o) {
             dest_type->entry_count = type->entry_count;
           }
 
-          // Find the cookie of the value in the destination
-          auto value_dest_cookie = src_to_dest_asset_cookies.find(entry.cookie);
-          if (value_dest_cookie == src_to_dest_asset_cookies.end()) {
-            continue;
-          }
-
-          dest_type->entries[e].cookie = value_dest_cookie->second;
+          dest_type->entries[e].cookie = data_dest_cookie;
           dest_type->entries[e].value.dataType = entry.value.dataType;
-          dest_type->entries[e].value.data = attribue_data;
+          dest_type->entries[e].value.data = attribute_data;
           dest_type->entries[e].type_spec_flags = entry.type_spec_flags;
         }
       }

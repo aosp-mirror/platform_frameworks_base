@@ -30,12 +30,15 @@ public interface OnBlobRetrievedListener {
 
     /** Converts this OnBlobRetrievedListener to a parcelable object */
     @NonNull
-    static IOnBlobRetrievedListener toAIDL(final OnBlobRetrievedListener listener) {
+    static IOnBlobRetrievedListener toAIDL(@NonNull final OnBlobRetrievedListener listener) {
         return new IOnBlobRetrievedListener.Stub() {
             @Override
             public void onBlobRetrieved(final StatusParcelable statusParcelable, final String l2Key,
                     final String name, final Blob blob) {
-                listener.onBlobRetrieved(new Status(statusParcelable), l2Key, name, blob);
+                // NonNull, but still don't crash the system server if null
+                if (null != listener) {
+                    listener.onBlobRetrieved(new Status(statusParcelable), l2Key, name, blob);
+                }
             }
         };
     }

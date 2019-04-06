@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.UserInfo;
 import android.debug.AdbManagerInternal;
+import android.location.LocationManager;
 import android.os.BatteryManager;
 import android.os.Binder;
 import android.os.IBinder;
@@ -39,6 +40,7 @@ import android.util.Slog;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
+import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
 import com.android.server.PersistentDataBlockManagerInternal;
 import com.android.server.SystemService;
@@ -95,6 +97,12 @@ public class TestHarnessModeService extends SystemService {
         super.onBootPhase(phase);
     }
 
+    /**
+     * Begin the setup for Test Harness Mode.
+     *
+     * <p>Note: This is just the things that <em>need</em> to be done before the device finishes
+     * booting for the first time. Everything else should be done after the system is done booting.
+     */
     private void setUpTestHarnessMode() {
         Slog.d(TAG, "Setting up test harness mode");
         byte[] testHarnessModeData = getPersistentDataBlock().getTestHarnessModeData();
@@ -105,7 +113,14 @@ public class TestHarnessModeService extends SystemService {
         // If there is data, we should set the device as provisioned, so that we skip the setup
         // wizard.
         setDeviceProvisioned();
+        disableLockScreen();
         SystemProperties.set(TEST_HARNESS_MODE_PROPERTY, "1");
+    }
+
+    private void disableLockScreen() {
+        UserInfo userInfo = getPrimaryUser();
+        LockPatternUtils utils = new LockPatternUtils(getContext());
+        utils.setLockScreenDisabled(true, userInfo.id);
     }
 
     private void completeTestHarnessModeSetup() {
@@ -117,8 +132,8 @@ public class TestHarnessModeService extends SystemService {
         }
         try {
             setUpAdbFiles(PersistentData.fromBytes(testHarnessModeData));
-            disableAutoSync();
             configureSettings();
+            configureUser();
         } catch (SetUpTestHarnessModeException e) {
             Slog.e(TAG, "Failed to set up Test Harness Mode. Bad data.", e);
         } finally {
@@ -128,12 +143,6 @@ public class TestHarnessModeService extends SystemService {
             // anyway.
             getPersistentDataBlock().clearTestHarnessModeData();
         }
-    }
-
-    private void disableAutoSync() {
-        UserInfo primaryUser = UserManager.get(getContext()).getPrimaryUser();
-        ContentResolver
-            .setMasterSyncAutomaticallyAsUser(false, primaryUser.getUserHandle().getIdentifier());
     }
 
     private void configureSettings() {
@@ -156,6 +165,20 @@ public class TestHarnessModeService extends SystemService {
 
         writeBytesToFile(persistentData.mAdbKeys, adbManager.getAdbKeysFile().toPath());
         writeBytesToFile(persistentData.mAdbTempKeys, adbManager.getAdbTempKeysFile().toPath());
+    }
+
+    private void configureUser() {
+        UserInfo primaryUser = getPrimaryUser();
+
+        ContentResolver.setMasterSyncAutomaticallyAsUser(false, primaryUser.id);
+
+        LocationManager locationManager = getContext().getSystemService(LocationManager.class);
+        locationManager.setLocationEnabledForUser(true, primaryUser.getUserHandle());
+    }
+
+    private UserInfo getPrimaryUser() {
+        UserManager userManager = UserManager.get(getContext());
+        return userManager.getPrimaryUser();
     }
 
     private void writeBytesToFile(byte[] keys, Path adbKeys) {
@@ -266,9 +289,8 @@ public class TestHarnessModeService extends SystemService {
         }
 
         private boolean isDeviceSecure() {
-            UserInfo primaryUser = UserManager.get(getContext()).getPrimaryUser();
             KeyguardManager keyguardManager = getContext().getSystemService(KeyguardManager.class);
-            return keyguardManager.isDeviceSecure(primaryUser.id);
+            return keyguardManager.isDeviceSecure(getPrimaryUser().id);
         }
 
         private int handleEnable() {

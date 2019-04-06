@@ -367,6 +367,7 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
 
   application_action["uses-library"].Action(RequiredNameIsNotEmpty);
   application_action["library"].Action(RequiredNameIsNotEmpty);
+  application_action["profileable"];
 
   xml::XmlNodeAction& static_library_action = application_action["static-library"];
   static_library_action.Action(RequiredNameIsJavaPackage);

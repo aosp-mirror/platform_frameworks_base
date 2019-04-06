@@ -2682,7 +2682,7 @@ public class TelephonyManager {
      */
     /** {@hide} */
     @UnsupportedAppUsage
-    public static String getNetworkTypeName(int type) {
+    public static String getNetworkTypeName(@NetworkType int type) {
         switch (type) {
             case NETWORK_TYPE_GPRS:
                 return "GPRS";
@@ -4812,6 +4812,22 @@ public class TelephonyManager {
         }
     }
 
+    /**
+     * Convert data state to string
+     *
+     * @return The data state in string format.
+     * @hide
+     */
+    public static String dataStateToString(@DataState int state) {
+        switch (state) {
+            case DATA_DISCONNECTED: return "DISCONNECTED";
+            case DATA_CONNECTING: return "CONNECTING";
+            case DATA_CONNECTED: return "CONNECTED";
+            case DATA_SUSPENDED: return "SUSPENDED";
+        }
+        return "UNKNOWN(" + state + ")";
+    }
+
    /**
     * @hide
     */
@@ -5267,6 +5283,18 @@ public class TelephonyManager {
      * Use this method when no subscriptions are available on the SIM and the operation must be
      * performed using the physical slot index.
      *
+     * This operation wraps two APDU instructions:
+     * <ul>
+     *     <li>MANAGE CHANNEL to open a logical channel</li>
+     *     <li>SELECT the given {@code AID} using the given {@code p2}</li>
+     * </ul>
+     *
+     * Per Open Mobile API Specification v3.2 section 6.2.7.h, only p2 values of 0x00, 0x04, 0x08,
+     * and 0x0C are guaranteed to be supported.
+     *
+     * If the SELECT command's status word is not '9000', '62xx', or '63xx', the status word will be
+     * considered an error and the channel shall not be opened.
+     *
      * Input parameters equivalent to TS 27.007 AT+CCHO command.
      *
      * <p>Requires Permission:
@@ -5298,6 +5326,18 @@ public class TelephonyManager {
     /**
      * Opens a logical channel to the ICC card.
      *
+     * This operation wraps two APDU instructions:
+     * <ul>
+     *     <li>MANAGE CHANNEL to open a logical channel</li>
+     *     <li>SELECT the given {@code AID} using the given {@code p2}</li>
+     * </ul>
+     *
+     * Per Open Mobile API Specification v3.2 section 6.2.7.h, only p2 values of 0x00, 0x04, 0x08,
+     * and 0x0C are guaranteed to be supported.
+     *
+     * If the SELECT command's status word is not '9000', '62xx', or '63xx', the status word will be
+     * considered an error and the channel shall not be opened.
+     *
      * Input parameters equivalent to TS 27.007 AT+CCHO command.
      *
      * <p>Requires Permission:
@@ -5314,6 +5354,18 @@ public class TelephonyManager {
 
     /**
      * Opens a logical channel to the ICC card.
+     *
+     * This operation wraps two APDU instructions:
+     * <ul>
+     *     <li>MANAGE CHANNEL to open a logical channel</li>
+     *     <li>SELECT the given {@code AID} using the given {@code p2}</li>
+     * </ul>
+     *
+     * Per Open Mobile API Specification v3.2 section 6.2.7.h, only p2 values of 0x00, 0x04, 0x08,
+     * and 0x0C are guaranteed to be supported.
+     *
+     * If the SELECT command's status word is not '9000', '62xx', or '63xx', the status word will be
+     * considered an error and the channel shall not be opened.
      *
      * Input parameters equivalent to TS 27.007 AT+CCHO command.
      *
@@ -8936,6 +8988,27 @@ public class TelephonyManager {
         }
 
         return retval;
+    }
+
+    /**
+     * Determines the {@link PhoneAccountHandle} associated with a subscription Id.
+     *
+     * @param subscriptionId The subscription Id to check.
+     * @return The {@link PhoneAccountHandle} associated with a subscription Id, or {@code null} if
+     * there is no associated {@link PhoneAccountHandle}.
+     * @hide
+     */
+    public @Nullable PhoneAccountHandle getPhoneAccountHandleForSubscriptionId(int subscriptionId) {
+        PhoneAccountHandle returnValue = null;
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                returnValue = service.getPhoneAccountHandleForSubscriptionId(subscriptionId);
+            }
+        } catch (RemoteException e) {
+        }
+
+        return returnValue;
     }
 
     private int getSubIdForPhoneAccountHandle(PhoneAccountHandle phoneAccountHandle) {

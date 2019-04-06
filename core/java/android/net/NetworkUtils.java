@@ -29,7 +29,6 @@ import android.util.Log;
 import android.util.Pair;
 
 import java.io.FileDescriptor;
-import java.io.IOException;
 import java.math.BigInteger;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
@@ -48,32 +47,6 @@ import java.util.TreeSet;
 public class NetworkUtils {
 
     private static final String TAG = "NetworkUtils";
-
-    /**
-     * Attaches a socket filter that accepts DHCP packets to the given socket.
-     */
-    @UnsupportedAppUsage
-    public native static void attachDhcpFilter(FileDescriptor fd) throws SocketException;
-
-    /**
-     * Attaches a socket filter that accepts ICMPv6 router advertisements to the given socket.
-     * @param fd the socket's {@link FileDescriptor}.
-     * @param packetType the hardware address type, one of ARPHRD_*.
-     */
-    @UnsupportedAppUsage
-    public native static void attachRaFilter(FileDescriptor fd, int packetType) throws SocketException;
-
-    /**
-     * Attaches a socket filter that accepts L2-L4 signaling traffic required for IP connectivity.
-     *
-     * This includes: all ARP, ICMPv6 RS/RA/NS/NA messages, and DHCPv4 exchanges.
-     *
-     * @param fd the socket's {@link FileDescriptor}.
-     * @param packetType the hardware address type, one of ARPHRD_*.
-     */
-    @UnsupportedAppUsage
-    public native static void attachControlPacketFilter(FileDescriptor fd, int packetType)
-            throws SocketException;
 
     /**
      * Attaches a socket filter that drops all of incoming packets.
@@ -181,18 +154,6 @@ public class NetworkUtils {
      * Attempts to cancel the in-progress query associated with the {@code fd}.
      */
     public static native void resNetworkCancel(FileDescriptor fd);
-
-    /**
-     * Add an entry into the ARP cache.
-     */
-    public static void addArpEntry(Inet4Address ipv4Addr, MacAddress ethAddr, String ifname,
-            FileDescriptor fd) throws IOException {
-        addArpEntry(ethAddr.toByteArray(), ipv4Addr.getAddress(), ifname, fd);
-    }
-
-    private static native void addArpEntry(byte[] ethAddr, byte[] netAddr, String ifname,
-            FileDescriptor fd) throws IOException;
-
 
     /**
      * Get the tcp repair window associated with the {@code fd}.

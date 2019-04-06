@@ -51,6 +51,7 @@ import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.LocalLog;
 import android.util.Log;
+import android.util.Pair;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -298,6 +299,7 @@ public class IpClient extends StateMachine {
     private static final int EVENT_READ_PACKET_FILTER_COMPLETE    = 12;
     private static final int CMD_ADD_KEEPALIVE_PACKET_FILTER_TO_APF = 13;
     private static final int CMD_REMOVE_KEEPALIVE_PACKET_FILTER_FROM_APF = 14;
+    private static final int CMD_UPDATE_L2KEY_GROUPHINT = 15;
 
     // Internal commands to use instead of trying to call transitionTo() inside
     // a given State's enter() method. Calling transitionTo() from enter/exit
@@ -364,6 +366,8 @@ public class IpClient extends StateMachine {
     private String mTcpBufferSizes;
     private ProxyInfo mHttpProxy;
     private ApfFilter mApfFilter;
+    private String mL2Key; // The L2 key for this network, for writing into the memory store
+    private String mGroupHint; // The group hint for this network, for writing into the memory store
     private boolean mMulticastFiltering;
     private long mStartTimeMillis;
 
@@ -524,6 +528,11 @@ public class IpClient extends StateMachine {
             IpClient.this.stop();
         }
         @Override
+        public void setL2KeyAndGroupHint(String l2Key, String groupHint) {
+            checkNetworkStackCallingPermission();
+            IpClient.this.setL2KeyAndGroupHint(l2Key, groupHint);
+        }
+        @Override
         public void setTcpBufferSizes(String tcpBufferSizes) {
             checkNetworkStackCallingPermission();
             IpClient.this.setTcpBufferSizes(tcpBufferSizes);
@@ -649,6 +658,13 @@ public class IpClient extends StateMachine {
      */
     public void setTcpBufferSizes(String tcpBufferSizes) {
         sendMessage(CMD_UPDATE_TCP_BUFFER_SIZES, tcpBufferSizes);
+    }
+
+    /**
+     * Set the L2 key and group hint for storing info into the memory store.
+     */
+    public void setL2KeyAndGroupHint(String l2Key, String groupHint) {
+        sendMessage(CMD_UPDATE_L2KEY_GROUPHINT, new Pair<>(l2Key, groupHint));
     }
 
     /**
@@ -1068,6 +1084,10 @@ public class IpClient extends StateMachine {
             return true;
         }
         final int delta = setLinkProperties(newLp);
+        // Most of the attributes stored in the memory store are deduced from
+        // the link properties, therefore when the properties update the memory
+        // store record should be updated too.
+        maybeSaveNetworkToIpMemoryStore();
         if (sendCallbacks) {
             dispatchCallback(delta, newLp);
         }
@@ -1083,6 +1103,7 @@ public class IpClient extends StateMachine {
             Log.d(mTag, "onNewDhcpResults(" + Objects.toString(dhcpResults) + ")");
         }
         mCallback.onNewDhcpResults(dhcpResults);
+        maybeSaveNetworkToIpMemoryStore();
         dispatchCallback(delta, newLp);
     }
 
@@ -1213,6 +1234,10 @@ public class IpClient extends StateMachine {
         mInterfaceCtrl.clearAllAddresses();
     }
 
+    private void maybeSaveNetworkToIpMemoryStore() {
+        // TODO : implement this
+    }
+
     class StoppedState extends State {
         @Override
         public void enter() {
@@ -1257,6 +1282,13 @@ public class IpClient extends StateMachine {
                     mHttpProxy = (ProxyInfo) msg.obj;
                     handleLinkPropertiesUpdate(NO_CALLBACKS);
                     break;
+
+                case CMD_UPDATE_L2KEY_GROUPHINT: {
+                    final Pair<String, String> args = (Pair<String, String>) msg.obj;
+                    mL2Key = args.first;
+                    mGroupHint = args.second;
+                    break;
+                }
 
                 case CMD_SET_MULTICAST_FILTER:
                     mMulticastFiltering = (boolean) msg.obj;
@@ -1356,6 +1388,20 @@ public class IpClient extends StateMachine {
                         transitionTo(mRunningState);
                     }
                     break;
+
+                case CMD_UPDATE_L2KEY_GROUPHINT: {
+                    final Pair<String, String> args = (Pair<String, String>) msg.obj;
+                    mL2Key = args.first;
+                    mGroupHint = args.second;
+                    // TODO : attributes should be saved to the memory store with
+                    // these new values if they differ from the previous ones.
+                    // If the state machine is in pure StartedState, then the values to input
+                    // are not known yet and should be updated when the LinkProperties are updated.
+                    // If the state machine is in RunningState (which is a child of StartedState)
+                    // then the next NUD check should be used to store the new values to avoid
+                    // inputting current values for what may be a different L3 network.
+                    break;
+                }
 
                 case EVENT_PROVISIONING_TIMEOUT:
                     handleProvisioningFailure();

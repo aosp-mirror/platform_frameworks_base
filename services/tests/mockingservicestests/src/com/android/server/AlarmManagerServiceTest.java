@@ -66,6 +66,7 @@ import android.app.usage.UsageStatsManagerInternal;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -118,6 +119,8 @@ public class AlarmManagerServiceTest {
     private AlarmManagerService.ClockReceiver mClockReceiver;
     @Mock
     private PowerManager.WakeLock mWakeLock;
+    @Mock
+    private PackageManager mMockPackageManager;
 
     private MockitoSession mMockingSession;
     private Injector mInjector;
@@ -128,13 +131,19 @@ public class AlarmManagerServiceTest {
     static class TestTimer {
         private long mElapsed;
         boolean mExpired;
+        int mType;
 
         synchronized long getElapsed() {
             return mElapsed;
         }
 
-        synchronized void set(long millisElapsed) {
+        synchronized void set(int type, long millisElapsed) {
+            mType = type;
             mElapsed = millisElapsed;
+        }
+
+        synchronized int getType() {
+            return mType;
         }
 
         synchronized void expire() throws InterruptedException {
@@ -146,6 +155,8 @@ public class AlarmManagerServiceTest {
     }
 
     public class Injector extends AlarmManagerService.Injector {
+        boolean mIsAutomotiveOverride;
+
         Injector(Context context) {
             super(context);
         }
@@ -179,7 +190,7 @@ public class AlarmManagerServiceTest {
 
         @Override
         void setAlarm(int type, long millis) {
-            mTestTimer.set(millis);
+            mTestTimer.set(type, millis);
         }
 
         @Override
@@ -211,6 +222,11 @@ public class AlarmManagerServiceTest {
         PowerManager.WakeLock getAlarmWakeLock() {
             return mWakeLock;
         }
+
+        @Override
+        boolean isAutomotive() {
+            return mIsAutomotiveOverride;
+        }
     }
 
     @Before
@@ -237,6 +253,8 @@ public class AlarmManagerServiceTest {
         when(mMockContext.getContentResolver()).thenReturn(mMockResolver);
         doReturn("min_futurity=0,min_interval=0").when(() ->
                 Settings.Global.getString(mMockResolver, Settings.Global.ALARM_MANAGER_CONSTANTS));
+        when(mMockContext.getPackageManager()).thenReturn(mMockPackageManager);
+
         mInjector = new Injector(mMockContext);
         mService = new AlarmManagerService(mMockContext, mInjector);
         spyOn(mService);
@@ -929,6 +947,37 @@ public class AlarmManagerServiceTest {
         for (int i = 0; i < numAlarms; i++) {
             mService.removeLocked(pis[i], null);
             assertEquals(numAlarms - i - 1, mService.mAlarmsPerUid.get(TEST_CALLING_UID, 0));
+        }
+    }
+
+    @Test
+    public void alarmTypes() throws Exception {
+        final int[] typesToSet = {ELAPSED_REALTIME_WAKEUP, ELAPSED_REALTIME, RTC_WAKEUP, RTC};
+        final int[] typesExpected = {ELAPSED_REALTIME_WAKEUP, ELAPSED_REALTIME,
+                ELAPSED_REALTIME_WAKEUP, ELAPSED_REALTIME};
+        assertAlarmTypeConversion(typesToSet, typesExpected);
+    }
+
+    /**
+     * Confirm that wakeup alarms are never set for automotive.
+     */
+    @Test
+    public void alarmTypesForAuto() throws Exception {
+        mInjector.mIsAutomotiveOverride = true;
+        final int[] typesToSet = {ELAPSED_REALTIME_WAKEUP, ELAPSED_REALTIME, RTC_WAKEUP, RTC};
+        final int[] typesExpected = {ELAPSED_REALTIME, ELAPSED_REALTIME, ELAPSED_REALTIME,
+                ELAPSED_REALTIME};
+        assertAlarmTypeConversion(typesToSet, typesExpected);
+    }
+
+    private void assertAlarmTypeConversion(int[] typesToSet, int[] typesExpected) throws Exception {
+        for (int i = 0; i < typesToSet.length; i++) {
+            setTestAlarm(typesToSet[i], 1234, getNewMockPendingIntent());
+            final int typeSet = mTestTimer.getType();
+            assertEquals("Alarm of type " + typesToSet[i] + " was set to type " + typeSet,
+                    typesExpected[i], typeSet);
+            mNowElapsedTest = mTestTimer.getElapsed();
+            mTestTimer.expire();
         }
     }
 

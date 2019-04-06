@@ -15,6 +15,7 @@
  */
 package com.android.server.infra;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -45,6 +46,8 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
 /**
@@ -74,6 +77,30 @@ import java.util.List;
 // TODO(b/117779333): improve javadoc above instead of using Autofill as an example
 public abstract class AbstractMasterSystemService<M extends AbstractMasterSystemService<M, S>,
         S extends AbstractPerUserSystemService<S, M>> extends SystemService {
+
+    /** On a package update, does not refresh the per-user service in the cache. */
+    public static final int PACKAGE_UPDATE_POLICY_NO_REFRESH = 0;
+
+    /**
+     * On a package update, removes any existing per-user services in the cache.
+     *
+     * <p>This does not immediately recreate these services. It is assumed they will be recreated
+     * for the next user request.
+     */
+    public static final int PACKAGE_UPDATE_POLICY_REFRESH_LAZY = 1;
+
+    /**
+     * On a package update, removes and recreates any existing per-user services in the cache.
+     */
+    public static final int PACKAGE_UPDATE_POLICY_REFRESH_EAGER = 2;
+
+    @IntDef(flag = true, prefix = { "PACKAGE_UPDATE_POLICY_" }, value = {
+            PACKAGE_UPDATE_POLICY_NO_REFRESH,
+            PACKAGE_UPDATE_POLICY_REFRESH_LAZY,
+            PACKAGE_UPDATE_POLICY_REFRESH_EAGER
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PackageUpdatePolicy {}
 
     /**
      * Log tag
@@ -127,8 +154,11 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
 
     /**
      * Whether the per-user service should be removed from the cache when its apk is updated.
+     *
+     * <p>One of {@link #PACKAGE_UPDATE_POLICY_NO_REFRESH},
+     * {@link #PACKAGE_UPDATE_POLICY_REFRESH_LAZY} or {@link #PACKAGE_UPDATE_POLICY_REFRESH_EAGER}.
      */
-    private final boolean mRefreshServiceOnPackageUpdate;
+    private final @PackageUpdatePolicy int mPackageUpdatePolicy;
 
     /**
      * Name of the service packages whose APK are being updated, keyed by user id.
@@ -154,7 +184,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
             @Nullable ServiceNameResolver serviceNameResolver,
             @Nullable String disallowProperty) {
         this(context, serviceNameResolver, disallowProperty,
-                /* refreshServiceOnPackageUpdate=*/ true);
+                /*packageUpdatePolicy=*/ PACKAGE_UPDATE_POLICY_REFRESH_LAZY);
     }
 
     /**
@@ -167,17 +197,19 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
      * @param disallowProperty when not {@code null}, defines a {@link UserManager} restriction that
      *        disables the service. <b>NOTE: </b> you'll also need to add it to
      *        {@code UserRestrictionsUtils.USER_RESTRICTIONS}.
-     * @param refreshServiceOnPackageUpdate when {@code true}, the
-     *        {@link AbstractPerUserSystemService} is removed from the cache (and re-added) when the
-     *        service package is updated; when {@code false}, the service is untouched during the
-     *        update.
+     * @param packageUpdatePolicy when {@link #PACKAGE_UPDATE_POLICY_REFRESH_LAZY}, the
+     *        {@link AbstractPerUserSystemService} is removed from the cache when the service
+     *        package is updated; when {@link #PACKAGE_UPDATE_POLICY_REFRESH_EAGER}, the
+     *        {@link AbstractPerUserSystemService} is removed from the cache and immediately
+     *        re-added when the service package is updated; when
+     *        {@link #PACKAGE_UPDATE_POLICY_NO_REFRESH}, the service is untouched during the update.
      */
     protected AbstractMasterSystemService(@NonNull Context context,
             @Nullable ServiceNameResolver serviceNameResolver,
-            @Nullable String disallowProperty, boolean refreshServiceOnPackageUpdate) {
+            @Nullable String disallowProperty, @PackageUpdatePolicy int packageUpdatePolicy) {
         super(context);
 
-        mRefreshServiceOnPackageUpdate = refreshServiceOnPackageUpdate;
+        mPackageUpdatePolicy = packageUpdatePolicy;
 
         mServiceNameResolver = serviceNameResolver;
         if (mServiceNameResolver != null) {
@@ -645,7 +677,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
             final int size = mServicesCache.size();
             pw.print(prefix); pw.print("Debug: "); pw.print(realDebug);
             pw.print(" Verbose: "); pw.println(realVerbose);
-            pw.print("Refresh on package update: "); pw.println(mRefreshServiceOnPackageUpdate);
+            pw.print("Refresh on package update: "); pw.println(mPackageUpdatePolicy);
             if (mUpdatingPackageNames != null) {
                 pw.print("Packages being updated: "); pw.println(mUpdatingPackageNames);
             }
@@ -701,12 +733,21 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
                     }
                     mUpdatingPackageNames.put(userId, packageName);
                     onServicePackageUpdatingLocked(userId);
-                    if (mRefreshServiceOnPackageUpdate) {
+                    if (mPackageUpdatePolicy != PACKAGE_UPDATE_POLICY_NO_REFRESH) {
                         if (debug) {
-                            Slog.d(mTag, "Removing service for user " + userId + " because package "
-                                    + activePackageName + " is being updated");
+                            Slog.d(mTag, "Removing service for user " + userId
+                                    + " because package " + activePackageName
+                                    + " is being updated");
                         }
                         removeCachedServiceLocked(userId);
+
+                        if (mPackageUpdatePolicy == PACKAGE_UPDATE_POLICY_REFRESH_EAGER) {
+                            if (debug) {
+                                Slog.d(mTag, "Eagerly recreating service for user "
+                                        + userId);
+                            }
+                            getServiceForUserLocked(userId);
+                        }
                     } else {
                         if (debug) {
                             Slog.d(mTag, "Holding service for user " + userId + " while package "

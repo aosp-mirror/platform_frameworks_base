@@ -30,6 +30,7 @@ import static android.system.OsConstants.SO_SNDTIMEO;
 import android.net.util.SocketUtils;
 import android.system.ErrnoException;
 import android.system.Os;
+import android.system.StructTimeval;
 import android.util.Log;
 
 import java.io.FileDescriptor;
@@ -128,7 +129,7 @@ public class NetlinkSocket {
             throws ErrnoException, IllegalArgumentException, InterruptedIOException {
         checkTimeout(timeoutMs);
 
-        SocketUtils.setSocketTimeValueOption(fd, SOL_SOCKET, SO_RCVTIMEO, timeoutMs);
+        Os.setsockoptTimeval(fd, SOL_SOCKET, SO_RCVTIMEO, StructTimeval.fromMillis(timeoutMs));
 
         ByteBuffer byteBuffer = ByteBuffer.allocate(bufsize);
         int length = Os.read(fd, byteBuffer);
@@ -151,7 +152,7 @@ public class NetlinkSocket {
             FileDescriptor fd, byte[] bytes, int offset, int count, long timeoutMs)
             throws ErrnoException, IllegalArgumentException, InterruptedIOException {
         checkTimeout(timeoutMs);
-        SocketUtils.setSocketTimeValueOption(fd, SOL_SOCKET, SO_SNDTIMEO, timeoutMs);
+        Os.setsockoptTimeval(fd, SOL_SOCKET, SO_SNDTIMEO, StructTimeval.fromMillis(timeoutMs));
         return Os.write(fd, bytes, offset, count);
     }
 }

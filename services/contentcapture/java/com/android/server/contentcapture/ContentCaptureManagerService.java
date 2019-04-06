@@ -129,7 +129,8 @@ public final class ContentCaptureManagerService extends
     public ContentCaptureManagerService(@NonNull Context context) {
         super(context, new FrameworkResourcesServiceNameResolver(context,
                 com.android.internal.R.string.config_defaultContentCaptureService),
-                UserManager.DISALLOW_CONTENT_CAPTURE, /* refreshServiceOnPackageUpdate= */ false);
+                UserManager.DISALLOW_CONTENT_CAPTURE,
+                /*packageUpdatePolicy=*/ PACKAGE_UPDATE_POLICY_NO_REFRESH);
         DeviceConfig.addOnPropertyChangedListener(DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
                 ActivityThread.currentApplication().getMainExecutor(),
                 (namespace, key, value) -> onDeviceConfigChange(key, value));

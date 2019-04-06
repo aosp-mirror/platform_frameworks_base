@@ -105,10 +105,12 @@ public final class ColorDisplayService extends SystemService {
      */
     private static final long TRANSITION_DURATION = 3000L;
 
-    private static final int MSG_APPLY_NIGHT_DISPLAY_IMMEDIATE = 0;
-    private static final int MSG_APPLY_NIGHT_DISPLAY_ANIMATED = 1;
-    private static final int MSG_APPLY_GLOBAL_SATURATION = 2;
-    private static final int MSG_APPLY_DISPLAY_WHITE_BALANCE = 3;
+    private static final int MSG_USER_CHANGED = 0;
+    private static final int MSG_SET_UP = 1;
+    private static final int MSG_APPLY_NIGHT_DISPLAY_IMMEDIATE = 2;
+    private static final int MSG_APPLY_NIGHT_DISPLAY_ANIMATED = 3;
+    private static final int MSG_APPLY_GLOBAL_SATURATION = 4;
+    private static final int MSG_APPLY_DISPLAY_WHITE_BALANCE = 5;
 
     /**
      * Return value if a setting has not been set.
@@ -186,7 +188,7 @@ public final class ColorDisplayService extends SystemService {
 
             // Register listeners now that boot is complete.
             if (mCurrentUser != UserHandle.USER_NULL && mUserSetupObserver == null) {
-                setUp();
+                mHandler.sendEmptyMessage(MSG_SET_UP);
             }
         }
     }
@@ -196,7 +198,9 @@ public final class ColorDisplayService extends SystemService {
         super.onStartUser(userHandle);
 
         if (mCurrentUser == UserHandle.USER_NULL) {
-            onUserChanged(userHandle);
+            final Message message = mHandler.obtainMessage(MSG_USER_CHANGED);
+            message.arg1 = userHandle;
+            mHandler.sendMessage(message);
         }
     }
 
@@ -204,7 +208,9 @@ public final class ColorDisplayService extends SystemService {
     public void onSwitchUser(int userHandle) {
         super.onSwitchUser(userHandle);
 
-        onUserChanged(userHandle);
+        final Message message = mHandler.obtainMessage(MSG_USER_CHANGED);
+        message.arg1 = userHandle;
+        mHandler.sendMessage(message);
     }
 
     @Override
@@ -212,7 +218,9 @@ public final class ColorDisplayService extends SystemService {
         super.onStopUser(userHandle);
 
         if (mCurrentUser == userHandle) {
-            onUserChanged(UserHandle.USER_NULL);
+            final Message message = mHandler.obtainMessage(MSG_USER_CHANGED);
+            message.arg1 = UserHandle.USER_NULL;
+            mHandler.sendMessage(message);
         }
     }
 
@@ -262,7 +270,7 @@ public final class ColorDisplayService extends SystemService {
 
         // Listen for external changes to any of the settings.
         if (mContentObserver == null) {
-            mContentObserver = new ContentObserver(new Handler(DisplayThread.get().getLooper())) {
+            mContentObserver = new ContentObserver(mHandler) {
                 @Override
                 public void onChange(boolean selfChange, Uri uri) {
                     super.onChange(selfChange, uri);
@@ -467,6 +475,9 @@ public final class ColorDisplayService extends SystemService {
      * Apply the accessibility daltonizer transform based on the settings value.
      */
     private void onAccessibilityDaltonizerChanged() {
+        if (mCurrentUser == UserHandle.USER_NULL) {
+            return;
+        }
         final boolean enabled = Secure.getIntForUser(getContext().getContentResolver(),
                 Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED, 0, mCurrentUser) != 0;
         final int daltonizerMode = enabled ? Secure.getIntForUser(getContext().getContentResolver(),
@@ -490,6 +501,9 @@ public final class ColorDisplayService extends SystemService {
      * Apply the accessibility inversion transform based on the settings value.
      */
     private void onAccessibilityInversionChanged() {
+        if (mCurrentUser == UserHandle.USER_NULL) {
+            return;
+        }
         final boolean enabled = Secure.getIntForUser(getContext().getContentResolver(),
                 Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, 0, mCurrentUser) != 0;
         final DisplayTransformManager dtm = getLocalService(DisplayTransformManager.class);
@@ -596,7 +610,19 @@ public final class ColorDisplayService extends SystemService {
         }
     }
 
+    private boolean setDisplayWhiteBalanceSettingEnabled(boolean enabled) {
+        if (mCurrentUser == UserHandle.USER_NULL) {
+            return false;
+        }
+        return Secure.putIntForUser(getContext().getContentResolver(),
+                Secure.DISPLAY_WHITE_BALANCE_ENABLED,
+                enabled ? 1 : 0, mCurrentUser);
+    }
+
     private boolean isDisplayWhiteBalanceSettingEnabled() {
+        if (mCurrentUser == UserHandle.USER_NULL) {
+            return false;
+        }
         return Secure.getIntForUser(getContext().getContentResolver(),
                 Secure.DISPLAY_WHITE_BALANCE_ENABLED, 0, mCurrentUser) == 1;
     }
@@ -648,6 +674,9 @@ public final class ColorDisplayService extends SystemService {
     }
 
     private int getNightDisplayAutoModeRawInternal() {
+        if (mCurrentUser == UserHandle.USER_NULL) {
+            return NOT_SET;
+        }
         return Secure
                 .getIntForUser(getContext().getContentResolver(), Secure.NIGHT_DISPLAY_AUTO_MODE,
                         NOT_SET, mCurrentUser);
@@ -1214,6 +1243,13 @@ public final class ColorDisplayService extends SystemService {
         }
 
         /**
+         * Returns whether Display white balance is currently enabled.
+         */
+        public boolean isDisplayWhiteBalanceEnabled() {
+            return isDisplayWhiteBalanceSettingEnabled();
+        }
+
+        /**
          * Adds a {@link WeakReference<ColorTransformController>} for a newly started activity, and
          * invokes {@link ColorTransformController#applyAppSaturation(float[], float[])} if needed.
          */
@@ -1233,7 +1269,7 @@ public final class ColorDisplayService extends SystemService {
          * Notify that the display white balance status has changed, either due to preemption by
          * another transform or the feature being turned off.
          */
-        void onDisplayWhiteBalanceStatusChanged(boolean enabled);
+        void onDisplayWhiteBalanceStatusChanged(boolean activated);
     }
 
     private final class TintHandler extends Handler {
@@ -1245,6 +1281,12 @@ public final class ColorDisplayService extends SystemService {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
+                case MSG_USER_CHANGED:
+                    onUserChanged(msg.arg1);
+                    break;
+                case MSG_SET_UP:
+                    setUp();
+                    break;
                 case MSG_APPLY_GLOBAL_SATURATION:
                     mGlobalSaturationTintController.setMatrix(msg.arg1);
                     applyTint(mGlobalSaturationTintController, false);
@@ -1494,6 +1536,29 @@ public final class ColorDisplayService extends SystemService {
             final long token = Binder.clearCallingIdentity();
             try {
                 return getNightDisplayCustomEndTimeInternal();
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public boolean setDisplayWhiteBalanceEnabled(boolean enabled) {
+            getContext().enforceCallingOrSelfPermission(
+                    Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS,
+                    "Permission required to set night display activated");
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return setDisplayWhiteBalanceSettingEnabled(enabled);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public boolean isDisplayWhiteBalanceEnabled() {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return isDisplayWhiteBalanceSettingEnabled();
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
