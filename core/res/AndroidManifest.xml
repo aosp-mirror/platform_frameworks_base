@@ -618,6 +618,7 @@
 
     <!-- Added in Q -->
     <protected-broadcast android:name="android.content.pm.action.SESSION_UPDATED" />
+    <protected-broadcast android:name="android.settings.action.GRAYSCALE_CHANGED" />
 
     <!-- For CarIdlenessTracker -->
     <protected-broadcast android:name="com.android.server.jobscheduler.GARAGE_MODE_ON" />
