@@ -55,6 +55,7 @@ ProtoFileReader::ProtoFileReader(int fd)
          mSize(get_file_size(fd)),
          mPos(0),
          mOffset(0),
+         mMaxOffset(0),
          mChunkSize(sizeof(mBuffer)) {
 }
 
