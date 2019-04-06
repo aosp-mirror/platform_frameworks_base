@@ -416,8 +416,8 @@ public final class MediaFormat {
     /**
      * An optional key describing whether encoders prepend headers to sync frames (e.g.
      * SPS and PPS to IDR frames for H.264). This is an optional parameter that applies only
-     * to video encoders. A video encoder may not support this feature; check the output
-     * format to verify that this feature was enabled.
+     * to video encoders. A video encoder may not support this feature; the component will fail
+     * to configure in that case. For other components, this key is ignored.
      *
      * The value is an integer, with 1 indicating to prepend headers to every sync frames,
      * or 0 otherwise. The default value is 0.

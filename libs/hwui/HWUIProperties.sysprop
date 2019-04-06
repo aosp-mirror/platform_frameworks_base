@@ -7,3 +7,10 @@ prop {
     scope: Public
     access: Readonly
 }
+prop {
+    api_name: "render_ahead"
+    type: Integer
+    prop_name: "ro.hwui.render_ahead"
+    scope: Public
+    access: Readonly
+}

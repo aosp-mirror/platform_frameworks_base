@@ -26,7 +26,6 @@ import android.content.pm.VersionedPackage;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.RemoteException;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -55,12 +54,10 @@ import java.io.InputStream;
 import java.lang.annotation.Retention;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
 
 /**
  * Monitors the health of packages on the system and notifies interested observers when packages
@@ -154,10 +151,11 @@ public class PackageWatchdog {
     public void onPackagesReady() {
         synchronized (mLock) {
             mIsPackagesReady = true;
-            mHealthCheckController.setCallbacks(this::updateHealthChecks,
-                    packageName -> onHealthCheckPassed(packageName));
-            // Controller is disabled at creation until here where we may enable it
-            mHealthCheckController.setEnabled(mIsHealthCheckEnabled);
+            mHealthCheckController.setCallbacks(packageName -> onHealthCheckPassed(packageName),
+                    packages -> onSupportedPackages(packages),
+                    () -> syncRequestsAsync());
+            // Controller is initially disabled until here where we may enable it and sync requests
+            setExplicitHealthCheckEnabled(mIsHealthCheckEnabled);
         }
     }
 
@@ -196,41 +194,23 @@ public class PackageWatchdog {
      * @throws IllegalArgumentException if {@code packageNames} is empty
      * or {@code durationMs} is less than 1
      */
-    public void startObservingHealth(PackageHealthObserver observer, List<String> packages,
+    public void startObservingHealth(PackageHealthObserver observer, List<String> packageNames,
             long durationMs) {
-        if (packages.isEmpty() || durationMs < 1) {
-            throw new IllegalArgumentException("Observation not started, no packages specified"
-                    + "or invalid duration");
-        }
-        if (!mIsPackagesReady) {
-            // TODO: Queue observation requests when packages are not ready
-            Slog.w(TAG, "Attempt to observe when packages not ready");
+        if (packageNames.isEmpty()) {
+            Slog.wtf(TAG, "No packages to observe, " + observer.getName());
             return;
         }
-
-        try {
-            Slog.i(TAG, "Getting packages supporting explicit health check");
-            mHealthCheckController.getSupportedPackages(supportedPackages ->
-                    startObservingInner(observer, packages, durationMs, supportedPackages));
-        } catch (RemoteException e) {
-            Slog.wtf(TAG, "Failed to fetch supported explicit health check packages");
+        if (durationMs < 1) {
+            // TODO: Instead of failing, monitor for default? 48hrs?
+            throw new IllegalArgumentException("Invalid duration " + durationMs + "ms for observer "
+                    + observer.getName() + ". Not observing packages " + packageNames);
         }
-    }
 
-    private void startObservingInner(PackageHealthObserver observer,
-            List<String> packageNames, long durationMs,
-            List<String> healthCheckSupportedPackages) {
-        Slog.i(TAG, "Start observing packages " + packageNames
-                + ". Explicit health check supported packages " + healthCheckSupportedPackages);
         List<MonitoredPackage> packages = new ArrayList<>();
         for (int i = 0; i < packageNames.size(); i++) {
-            String packageName = packageNames.get(i);
-            boolean shouldEnableHealthCheck = healthCheckSupportedPackages.contains(packageName);
-            // If we should enable explicit health check for a package,
-            // MonitoredPackage#mHasHealthCheckPassed will be false
-            // until PackageWatchdog#onHealthCheckPassed
-            packages.add(new MonitoredPackage(packageName, durationMs, !shouldEnableHealthCheck));
+            packages.add(new MonitoredPackage(packageNames.get(i), durationMs, false));
         }
+
         synchronized (mLock) {
             ObserverInternal oldObserver = mAllObservers.get(observer.getName());
             if (oldObserver == null) {
@@ -248,95 +228,9 @@ public class PackageWatchdog {
         // Always reschedule because we may need to expire packages
         // earlier than we are already scheduled for
         rescheduleCleanup();
-        updateHealthChecks();
+        Slog.i(TAG, "Syncing health check requests, observing packages " + packageNames);
+        syncRequestsAsync();
         saveToFileAsync();
-    }
-
-    private void requestCheck(String packageName) {
-        try {
-            Slog.d(TAG, "Requesting explicit health check for " + packageName);
-            mHealthCheckController.request(packageName);
-        } catch (RemoteException e) {
-            Slog.wtf(TAG, "Failed to request explicit health check for " + packageName, e);
-        }
-    }
-
-    private void cancelCheck(String packageName) {
-        try {
-            Slog.d(TAG, "Cancelling explicit health check for " + packageName);
-            mHealthCheckController.cancel(packageName);
-        } catch (RemoteException e) {
-            Slog.wtf(TAG, "Failed to cancel explicit health check for " + packageName, e);
-        }
-    }
-
-    private void actOnDifference(Collection<String> collection1, Collection<String> collection2,
-            Consumer<String> action) {
-        Iterator<String> iterator = collection1.iterator();
-        while (iterator.hasNext()) {
-            String packageName = iterator.next();
-            if (!collection2.contains(packageName)) {
-                action.accept(packageName);
-            }
-        }
-    }
-
-    private void updateChecksInner(List<String> supportedPackages,
-            List<String> previousRequestedPackages) {
-        boolean shouldUpdateFile = false;
-
-        synchronized (mLock) {
-            Slog.i(TAG, "Updating explicit health checks. Supported packages: " + supportedPackages
-                    + ". Requested packages: " + previousRequestedPackages);
-            Set<String> newRequestedPackages = new ArraySet<>();
-            Iterator<ObserverInternal> oit = mAllObservers.values().iterator();
-            while (oit.hasNext()) {
-                ObserverInternal observer = oit.next();
-                Iterator<MonitoredPackage> pit =
-                        observer.mPackages.values().iterator();
-                while (pit.hasNext()) {
-                    MonitoredPackage monitoredPackage = pit.next();
-                    String packageName = monitoredPackage.mName;
-                    if (!monitoredPackage.mHasPassedHealthCheck) {
-                        if (supportedPackages.contains(packageName)) {
-                            newRequestedPackages.add(packageName);
-                        } else {
-                            shouldUpdateFile = true;
-                            monitoredPackage.mHasPassedHealthCheck = true;
-                        }
-                    }
-                }
-            }
-            // TODO: Support ending the binding if newRequestedPackages is empty.
-            // Will have to re-bind when we #startObservingHealth.
-
-            // Cancel packages no longer requested
-            actOnDifference(previousRequestedPackages, newRequestedPackages, p -> cancelCheck(p));
-            // Request packages not yet requested
-            actOnDifference(newRequestedPackages, previousRequestedPackages, p -> requestCheck(p));
-        }
-
-        if (shouldUpdateFile) {
-            saveToFileAsync();
-        }
-    }
-
-    private void updateHealthChecks() {
-        mShortTaskHandler.post(() -> {
-            try {
-                Slog.i(TAG, "Updating explicit health checks for all available packages");
-                mHealthCheckController.getSupportedPackages(supported -> {
-                    try {
-                        mHealthCheckController.getRequestedPackages(
-                                requested -> updateChecksInner(supported, requested));
-                    } catch (RemoteException e) {
-                        Slog.e(TAG, "Failed to get requested health check packages", e);
-                    }
-                });
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to get supported health check package", e);
-            }
-        });
     }
 
     /**
@@ -441,6 +335,9 @@ public class PackageWatchdog {
         synchronized (mLock) {
             mIsHealthCheckEnabled = enabled;
             mHealthCheckController.setEnabled(enabled);
+            Slog.i(TAG, "Syncing health check requests, explicit health check is "
+                    + (enabled ? "enabled" : "disabled"));
+            syncRequestsAsync();
         }
     }
 
@@ -487,6 +384,35 @@ public class PackageWatchdog {
     }
 
     /**
+     * Serializes and syncs health check requests with the {@link ExplicitHealthCheckController}.
+     */
+    private void syncRequestsAsync() {
+        if (!mShortTaskHandler.hasCallbacks(this::syncRequests)) {
+            mShortTaskHandler.post(this::syncRequests);
+        }
+    }
+
+    /**
+     * Syncs health check requests with the {@link ExplicitHealthCheckController}.
+     * Calls to this must be serialized.
+     *
+     * @see #syncRequestsAsync
+     */
+    private void syncRequests() {
+        Set<String> packages = null;
+        synchronized (mLock) {
+            if (mIsPackagesReady) {
+                packages = getPackagesPendingHealthChecksLocked();
+            } // else, we will sync requests when packages become ready
+        }
+
+        // Call outside lock to avoid holding lock when calling into the controller.
+        if (packages != null) {
+            mHealthCheckController.syncRequests(packages);
+        }
+    }
+
+    /**
      * Updates the observers monitoring {@code packageName} that explicit health check has passed.
      *
      * <p> This update is strictly for registered observers at the time of the call
@@ -512,9 +438,62 @@ public class PackageWatchdog {
                 }
             }
         }
+
+        // So we can unbind from the service if this was the last result we expected
+        Slog.i(TAG, "Syncing health check requests, health check passed for " + packageName);
+        syncRequestsAsync();
+
         if (shouldUpdateFile) {
             saveToFileAsync();
         }
+    }
+
+    private void onSupportedPackages(List<String> supportedPackages) {
+        boolean shouldUpdateFile = false;
+
+        synchronized (mLock) {
+            Slog.i(TAG, "Received supported packages " + supportedPackages);
+            Iterator<ObserverInternal> oit = mAllObservers.values().iterator();
+            while (oit.hasNext()) {
+                ObserverInternal observer = oit.next();
+                Iterator<MonitoredPackage> pit =
+                        observer.mPackages.values().iterator();
+                while (pit.hasNext()) {
+                    MonitoredPackage monitoredPackage = pit.next();
+                    String packageName = monitoredPackage.mName;
+                    if (!monitoredPackage.mHasPassedHealthCheck
+                            && !supportedPackages.contains(packageName)) {
+                        // Hasn't passed health check but health check is not supported
+                        Slog.i(TAG, packageName + " does not support health checks, passing");
+                        shouldUpdateFile = true;
+                        monitoredPackage.mHasPassedHealthCheck = true;
+                    }
+                }
+            }
+        }
+
+        if (shouldUpdateFile) {
+            saveToFileAsync();
+        }
+    }
+
+    private Set<String> getPackagesPendingHealthChecksLocked() {
+        Slog.d(TAG, "Getting all observed packages pending health checks");
+        Set<String> packages = new ArraySet<>();
+        Iterator<ObserverInternal> oit = mAllObservers.values().iterator();
+        while (oit.hasNext()) {
+            ObserverInternal observer = oit.next();
+            Iterator<MonitoredPackage> pit =
+                    observer.mPackages.values().iterator();
+            while (pit.hasNext()) {
+                MonitoredPackage monitoredPackage = pit.next();
+                String packageName = monitoredPackage.mName;
+                if (!monitoredPackage.mHasPassedHealthCheck) {
+                    packages.add(packageName);
+                }
+            }
+        }
+        return packages;
     }
 
     /** Reschedules handler to prune expired packages from observers. */
@@ -591,7 +570,8 @@ public class PackageWatchdog {
                 }
             }
         }
-        updateHealthChecks();
+        Slog.i(TAG, "Syncing health check requests pruned packages");
+        syncRequestsAsync();
         saveToFileAsync();
     }
 
@@ -690,6 +670,7 @@ public class PackageWatchdog {
     }
 
     private void saveToFileAsync() {
+        // TODO(b/120598832): Use Handler#hasCallbacks instead of removing and posting
         mLongTaskHandler.removeCallbacks(this::saveToFile);
         mLongTaskHandler.post(this::saveToFile);
     }

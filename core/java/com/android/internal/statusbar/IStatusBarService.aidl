@@ -24,6 +24,7 @@ import android.service.notification.StatusBarNotification;
 import android.hardware.biometrics.IBiometricServiceReceiverInternal;
 
 import com.android.internal.statusbar.IStatusBar;
+import com.android.internal.statusbar.RegisterStatusBarResult;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
 import com.android.internal.statusbar.NotificationVisibility;
@@ -54,10 +55,7 @@ interface IStatusBarService
 
     // ---- Methods below are for use by the status bar policy services ----
     // You need the STATUS_BAR_SERVICE permission
-    void registerStatusBar(IStatusBar callbacks, out List<String> iconSlots,
-            out List<StatusBarIcon> iconList,
-            out int[] switches, out List<IBinder> binders, out Rect fullscreenStackBounds,
-            out Rect dockedStackBounds);
+    RegisterStatusBarResult registerStatusBar(IStatusBar callbacks);
     void onPanelRevealed(boolean clearNotificationEffects, int numItems);
     void onPanelHidden();
     // Mark current notifications as "seen" and stop ringing, vibrating, blinking.

@@ -41,6 +41,7 @@ import android.content.pm.Signature;
 import android.database.ContentObserver;
 import android.database.CursorWindow;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -195,7 +196,13 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
                     Slog.i(LOG_TAG, "Packages changed - re-running initial grants for user "
                             + userId);
                 }
-                performInitialGrantsIfNecessary(userId);
+                if (Intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())
+                        && intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                    // Package is being upgraded - we're about to get ACTION_PACKAGE_ADDED
+                    return;
+                }
+                AsyncTask.THREAD_POOL_EXECUTOR.execute(
+                        () -> performInitialGrantsIfNecessaryAsync(userId));
             }
         }, UserHandle.ALL, intentFilter, null, null);
 
@@ -222,8 +229,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
         performInitialGrantsIfNecessary(userId);
     }
 
-    @MainThread
-    private void performInitialGrantsIfNecessary(@UserIdInt int userId) {
+    private CompletableFuture<Void> performInitialGrantsIfNecessaryAsync(@UserIdInt int userId) {
         RoleUserState userState;
         userState = getOrCreateUserState(userId);
 
@@ -247,19 +253,26 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
             getOrCreateControllerService(userId).grantDefaultRoles(FgThread.getExecutor(),
                     successful -> {
                         if (successful) {
+                            userState.setPackagesHash(packagesHash);
                             result.complete(null);
                         } else {
                             result.completeExceptionally(new RuntimeException());
                         }
                     });
-            try {
-                result.get(30, TimeUnit.SECONDS);
-                userState.setPackagesHash(packagesHash);
-            } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                Slog.e(LOG_TAG, "Failed to grant defaults for user " + userId, e);
-            }
+            return result;
         } else if (DEBUG) {
             Slog.i(LOG_TAG, "Already ran grants for package state " + packagesHash);
+        }
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @MainThread
+    private void performInitialGrantsIfNecessary(@UserIdInt int userId) {
+        CompletableFuture<Void> result = performInitialGrantsIfNecessaryAsync(userId);
+        try {
+            result.get(30, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            Slog.e(LOG_TAG, "Failed to grant defaults for user " + userId, e);
         }
     }
 

@@ -341,8 +341,9 @@ public class PowerUI extends SystemUI {
             // mark if we've already shown a warning this cycle. This will prevent the notification
             // trigger from spamming users by only showing low/critical warnings once per cycle
             if (currentSnapshot.getTimeRemainingMillis()
-                    <= currentSnapshot.getSevereLevelThreshold()
-                    || currentSnapshot.getBatteryLevel() <= mLowBatteryReminderLevels[1]) {
+                    <= currentSnapshot.getSevereThresholdMillis()
+                    || currentSnapshot.getBatteryLevel()
+                    <= currentSnapshot.getSevereLevelThreshold()) {
                 mSevereWarningShownThisChargeCycle = true;
                 mLowWarningShownThisChargeCycle = true;
                 if (DEBUG) {

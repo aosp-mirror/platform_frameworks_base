@@ -25,6 +25,7 @@
 #include <utils/misc.h>
 
 #include <assert.h>
+#include <vector>
 #include <EGL/egl.h>
 
 #include <ui/ANativeObjectBase.h>
@@ -206,6 +207,24 @@ toEGLHandle(JNIEnv *_env, jclass cls, jmethodID con, void *handle) {
     return _env->NewObject(cls, con, reinterpret_cast<jlong>(handle));
 }
 
+struct WrappedEGLAttribs {
+private:
+    std::vector<EGLAttrib> backing; // only for 32-bit
+public:
+    EGLAttrib *attribs;
+    WrappedEGLAttribs(): attribs(nullptr) { };
+    void init(jlong *array, jint size) {
+        if (sizeof(EGLAttrib) != sizeof(jlong)) {
+            for (jint i = 0; i < size; ++i) {
+                backing.push_back(array[i]);
+            }
+            attribs = backing.data();
+        } else {
+            attribs = (EGLAttrib*)array;
+        }
+    }
+};
+
 // --------------------------------------------------------------------------
 /* EGLSync eglCreateSync ( EGLDisplay dpy, EGLenum type, const EGLAttrib *attrib_list ) */
 static jobject
@@ -216,9 +235,9 @@ android_eglCreateSync
     const char * _exceptionMessage = NULL;
     EGLSync _returnValue = (EGLSync) 0;
     EGLDisplay dpy_native = (EGLDisplay) fromEGLHandle(_env, egldisplayGetHandleID, dpy);
-    EGLAttrib *attrib_list_base = (EGLAttrib *) 0;
+    jlong *attrib_list_base = (jlong *) 0;
     jint _remaining;
-    EGLAttrib *attrib_list = (EGLAttrib *) 0;
+    WrappedEGLAttribs attrib_list;
 
     if (!attrib_list_ref) {
         _exception = 1;
@@ -233,14 +252,14 @@ android_eglCreateSync
         goto exit;
     }
     _remaining = _env->GetArrayLength(attrib_list_ref) - offset;
-    attrib_list_base = (EGLAttrib *)
+    attrib_list_base = (jlong *)
         _env->GetLongArrayElements(attrib_list_ref, (jboolean *)0);
-    attrib_list = attrib_list_base + offset;
+    attrib_list.init(attrib_list_base + offset, _remaining);
 
     _returnValue = eglCreateSync(
         (EGLDisplay)dpy_native,
         (EGLenum)type,
-        (EGLAttrib *)attrib_list
+        attrib_list.attribs
     );
 
 exit:
@@ -253,6 +272,59 @@ exit:
         return nullptr;
     }
     return toEGLHandle(_env, eglsyncClass, eglsyncConstructor, _returnValue);
+}
+
+/* EGLBoolean eglGetSyncAttrib ( EGLDisplay dpy, EGLSync sync, EGLint attribute, EGLAttrib *value ) */
+static jboolean
+android_eglGetSyncAttrib
+  (JNIEnv *_env, jobject _this, jobject dpy, jobject sync, jint attribute, jlongArray value_ref, jint offset) {
+    jint _exception = 0;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
+    EGLBoolean _returnValue = (EGLBoolean) 0;
+    EGLDisplay dpy_native = (EGLDisplay) fromEGLHandle(_env, egldisplayGetHandleID, dpy);
+    EGLSync sync_native = (EGLSync) fromEGLHandle(_env, eglsyncGetHandleID, sync);
+    jlong *value_base = (jlong *) 0;
+    jint _remaining;
+    EGLAttrib value;
+
+    if (!value_ref) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "value == null";
+        goto exit;
+    }
+    if (offset < 0) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "offset < 0";
+        goto exit;
+    }
+    _remaining = _env->GetArrayLength(value_ref) - offset;
+    value_base = (jlong *)
+        _env->GetLongArrayElements(value_ref, (jboolean *)0);
+
+    _returnValue = eglGetSyncAttrib(
+        (EGLDisplay)dpy_native,
+        (EGLSync)sync_native,
+        (EGLint)attribute,
+        &value
+    );
+
+    if (value_base && _returnValue == EGL_TRUE) {
+        *(value_base + offset) = (jlong) value;
+    }
+
+exit:
+    if (value_base) {
+        _env->ReleaseLongArrayElements(value_ref, (jlong*)value_base,
+            _exception ? JNI_ABORT: 0);
+    }
+    if (_exception) {
+        jniThrowException(_env, _exceptionType, _exceptionMessage);
+        return JNI_FALSE;
+    }
+    return (jboolean)_returnValue;
 }
 
 /* EGLBoolean eglDestroySync ( EGLDisplay dpy, EGLSync sync ) */
@@ -287,56 +359,6 @@ android_eglClientWaitSync
     return (jint)_returnValue;
 }
 
-/* EGLBoolean eglGetSyncAttrib ( EGLDisplay dpy, EGLSync sync, EGLint attribute, EGLAttrib *value ) */
-static jboolean
-android_eglGetSyncAttrib
-  (JNIEnv *_env, jobject _this, jobject dpy, jobject sync, jint attribute, jlongArray value_ref, jint offset) {
-    jint _exception = 0;
-    const char * _exceptionType = NULL;
-    const char * _exceptionMessage = NULL;
-    EGLBoolean _returnValue = (EGLBoolean) 0;
-    EGLDisplay dpy_native = (EGLDisplay) fromEGLHandle(_env, egldisplayGetHandleID, dpy);
-    EGLSync sync_native = (EGLSync) fromEGLHandle(_env, eglsyncGetHandleID, sync);
-    EGLAttrib *value_base = (EGLAttrib *) 0;
-    jint _remaining;
-    EGLAttrib *value = (EGLAttrib *) 0;
-
-    if (!value_ref) {
-        _exception = 1;
-        _exceptionType = "java/lang/IllegalArgumentException";
-        _exceptionMessage = "value == null";
-        goto exit;
-    }
-    if (offset < 0) {
-        _exception = 1;
-        _exceptionType = "java/lang/IllegalArgumentException";
-        _exceptionMessage = "offset < 0";
-        goto exit;
-    }
-    _remaining = _env->GetArrayLength(value_ref) - offset;
-    value_base = (EGLAttrib *)
-        _env->GetLongArrayElements(value_ref, (jboolean *)0);
-    value = value_base + offset;
-
-    _returnValue = eglGetSyncAttrib(
-        (EGLDisplay)dpy_native,
-        (EGLSync)sync_native,
-        (EGLint)attribute,
-        (EGLAttrib *)value
-    );
-
-exit:
-    if (value_base) {
-        _env->ReleaseLongArrayElements(value_ref, (jlong*)value_base,
-            _exception ? JNI_ABORT: 0);
-    }
-    if (_exception) {
-        jniThrowException(_env, _exceptionType, _exceptionMessage);
-        return JNI_FALSE;
-    }
-    return (jboolean)_returnValue;
-}
-
 /* EGLDisplay eglGetPlatformDisplay ( EGLenum platform, EGLAttrib native_display, const EGLAttrib *attrib_list ) */
 static jobject
 android_eglGetPlatformDisplay
@@ -345,9 +367,9 @@ android_eglGetPlatformDisplay
     const char * _exceptionType = NULL;
     const char * _exceptionMessage = NULL;
     EGLDisplay _returnValue = (EGLDisplay) 0;
-    EGLAttrib *attrib_list_base = (EGLAttrib *) 0;
+    jlong *attrib_list_base = (jlong *) 0;
     jint _remaining;
-    EGLAttrib *attrib_list = (EGLAttrib *) 0;
+    WrappedEGLAttribs attrib_list;
 
     if (!attrib_list_ref) {
         _exception = 1;
@@ -362,14 +384,14 @@ android_eglGetPlatformDisplay
         goto exit;
     }
     _remaining = _env->GetArrayLength(attrib_list_ref) - offset;
-    attrib_list_base = (EGLAttrib *)
+    attrib_list_base = (jlong *)
         _env->GetLongArrayElements(attrib_list_ref, (jboolean *)0);
-    attrib_list = attrib_list_base + offset;
+    attrib_list.init(attrib_list_base + offset, _remaining);
 
     _returnValue = eglGetPlatformDisplay(
         (EGLenum)platform,
         (void *)native_display,
-        (EGLAttrib *)attrib_list
+        attrib_list.attribs
     );
 
 exit:
@@ -398,9 +420,9 @@ android_eglCreatePlatformWindowSurface
     EGLConfig config_native = (EGLConfig) fromEGLHandle(_env, eglconfigGetHandleID, config);
     jint _native_windowRemaining;
     void *native_window = (void *) 0;
-    EGLAttrib *attrib_list_base = (EGLAttrib *) 0;
+    jlong *attrib_list_base = (jlong *) 0;
     jint _attrib_listRemaining;
-    EGLAttrib *attrib_list = (EGLAttrib *) 0;
+    WrappedEGLAttribs attrib_list;
 
     if (!native_window_buf) {
         _exception = 1;
@@ -422,9 +444,9 @@ android_eglCreatePlatformWindowSurface
         goto exit;
     }
     _attrib_listRemaining = _env->GetArrayLength(attrib_list_ref) - offset;
-    attrib_list_base = (EGLAttrib *)
+    attrib_list_base = (jlong *)
         _env->GetLongArrayElements(attrib_list_ref, (jboolean *)0);
-    attrib_list = attrib_list_base + offset;
+    attrib_list.init(attrib_list_base + offset, _attrib_listRemaining);
 
     if (native_window == NULL) {
         char * _native_windowBase = (char *)_env->GetPrimitiveArrayCritical(_array, (jboolean *) 0);
@@ -434,7 +456,7 @@ android_eglCreatePlatformWindowSurface
         (EGLDisplay)dpy_native,
         (EGLConfig)config_native,
         (void *)native_window,
-        (EGLAttrib *)attrib_list
+        attrib_list.attribs
     );
 
 exit:
@@ -487,9 +509,9 @@ android_eglCreateImage
     EGLImage _returnValue = (EGLImage) 0;
     EGLDisplay dpy_native = (EGLDisplay) fromEGLHandle(_env, egldisplayGetHandleID, dpy);
     EGLContext context_native = (EGLContext) fromEGLHandle(_env, eglcontextGetHandleID, context);
-    EGLAttrib *attrib_list_base = (EGLAttrib *) 0;
+    jlong *attrib_list_base = (jlong *) 0;
     jint _remaining;
-    EGLAttrib *attrib_list = (EGLAttrib *) 0;
+    WrappedEGLAttribs attrib_list;
 
     if (!attrib_list_ref) {
         _exception = 1;
@@ -504,16 +526,16 @@ android_eglCreateImage
         goto exit;
     }
     _remaining = _env->GetArrayLength(attrib_list_ref) - offset;
-    attrib_list_base = (EGLAttrib *)
+    attrib_list_base = (jlong *)
         _env->GetLongArrayElements(attrib_list_ref, (jboolean *)0);
-    attrib_list = attrib_list_base + offset;
+    attrib_list.init(attrib_list_base + offset, _remaining);
 
     _returnValue = eglCreateImage(
         (EGLDisplay)dpy_native,
         (EGLContext)context_native,
         (EGLenum)target,
         (EGLClientBuffer)buffer,
-        (EGLAttrib *)attrib_list
+        attrib_list.attribs
     );
 
 exit:
@@ -527,7 +549,6 @@ exit:
     }
     return toEGLHandle(_env, eglimageClass, eglimageConstructor, _returnValue);
 }
-
 /* EGLBoolean eglDestroyImage ( EGLDisplay dpy, EGLImage image ) */
 static jboolean
 android_eglDestroyImage
@@ -548,9 +569,9 @@ static const char *classPathName = "android/opengl/EGL15";
 static const JNINativeMethod methods[] = {
 {"_nativeClassInit", "()V", (void*)nativeClassInit },
 {"eglCreateSync", "(Landroid/opengl/EGLDisplay;I[JI)Landroid/opengl/EGLSync;", (void *) android_eglCreateSync },
+{"eglGetSyncAttrib", "(Landroid/opengl/EGLDisplay;Landroid/opengl/EGLSync;I[JI)Z", (void *) android_eglGetSyncAttrib },
 {"eglDestroySync", "(Landroid/opengl/EGLDisplay;Landroid/opengl/EGLSync;)Z", (void *) android_eglDestroySync },
 {"eglClientWaitSync", "(Landroid/opengl/EGLDisplay;Landroid/opengl/EGLSync;IJ)I", (void *) android_eglClientWaitSync },
-{"eglGetSyncAttrib", "(Landroid/opengl/EGLDisplay;Landroid/opengl/EGLSync;I[JI)Z", (void *) android_eglGetSyncAttrib },
 {"eglGetPlatformDisplay", "(IJ[JI)Landroid/opengl/EGLDisplay;", (void *) android_eglGetPlatformDisplay },
 {"eglCreatePlatformWindowSurface", "(Landroid/opengl/EGLDisplay;Landroid/opengl/EGLConfig;Ljava/nio/Buffer;[JI)Landroid/opengl/EGLSurface;", (void *) android_eglCreatePlatformWindowSurface },
 {"eglCreatePlatformPixmapSurface", "(Landroid/opengl/EGLDisplay;Landroid/opengl/EGLConfig;Ljava/nio/Buffer;[JI)Landroid/opengl/EGLSurface;", (void *) android_eglCreatePlatformPixmapSurface },

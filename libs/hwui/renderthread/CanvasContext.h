@@ -204,6 +204,8 @@ public:
         return mUseForceDark;
     }
 
+    void setRenderAheadDepth(int renderAhead);
+
 private:
     CanvasContext(RenderThread& thread, bool translucent, RenderNode* rootRenderNode,
                   IContextFactory* contextFactory, std::unique_ptr<IRenderPipeline> renderPipeline);
@@ -217,6 +219,7 @@ private:
 
     bool isSwapChainStuffed();
     bool surfaceRequiresRedraw();
+    void applyRenderAheadSettings();
 
     SkRect computeDirtyRect(const Frame& frame, SkRect* dirty);
 
@@ -235,6 +238,7 @@ private:
     // painted onto its surface.
     bool mIsDirty = false;
     SwapBehavior mSwapBehavior = SwapBehavior::kSwap_default;
+    int mRenderAheadDepth = 0;
     struct SwapHistory {
         SkRect damage;
         nsecs_t vsyncTime;

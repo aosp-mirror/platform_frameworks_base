@@ -18,13 +18,9 @@ package com.android.server.display.whitebalance;
 
 import android.annotation.NonNull;
 import android.content.Context;
-import android.database.ContentObserver;
-import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.UserHandle;
-import android.provider.Settings.Secure;
 import android.util.Slog;
 
 import com.android.internal.util.Preconditions;
@@ -46,22 +42,19 @@ public class DisplayWhiteBalanceSettings implements
     protected static final String TAG = "DisplayWhiteBalanceSettings";
     protected boolean mLoggingEnabled;
 
-    private static final String SETTING_URI = Secure.DISPLAY_WHITE_BALANCE_ENABLED;
-    private static final int SETTING_DEFAULT = 0;
-    private static final int SETTING_ENABLED = 1;
-
     private static final int MSG_SET_ACTIVE = 1;
 
     private final Context mContext;
     private final Handler mHandler;
-    private final SettingsObserver mSettingsObserver;
+
+    private final ColorDisplayServiceInternal mCdsi;
 
     // To decouple the DisplayPowerController from the DisplayWhiteBalanceSettings, the DPC
     // implements Callbacks and passes itself to the DWBS so it can call back into it without
     // knowing about it.
     private Callbacks mCallbacks;
 
-    private int mSetting;
+    private boolean mEnabled;
     private boolean mActive;
 
     /**
@@ -79,18 +72,12 @@ public class DisplayWhiteBalanceSettings implements
         mLoggingEnabled = false;
         mContext = context;
         mHandler = new DisplayWhiteBalanceSettingsHandler(handler.getLooper());
-        mSettingsObserver = new SettingsObserver(mHandler);
-        mSetting = getSetting();
-        mActive = false;
         mCallbacks = null;
 
-        mContext.getContentResolver().registerContentObserver(
-                Secure.getUriFor(SETTING_URI), false /* notifyForDescendants */, mSettingsObserver,
-                UserHandle.USER_ALL);
-
-        ColorDisplayServiceInternal cds =
-                LocalServices.getService(ColorDisplayServiceInternal.class);
-        cds.setDisplayWhiteBalanceListener(this);
+        mCdsi = LocalServices.getService(ColorDisplayServiceInternal.class);
+        setEnabled(mCdsi.isDisplayWhiteBalanceEnabled());
+        final boolean isActive = mCdsi.setDisplayWhiteBalanceListener(this);
+        setActive(isActive);
     }
 
     /**
@@ -99,7 +86,7 @@ public class DisplayWhiteBalanceSettings implements
      * @param callbacks
      *      The object to call back to.
      *
-     * @return Whether the method suceeded or not.
+     * @return Whether the method succeeded or not.
      */
     public boolean setCallbacks(Callbacks callbacks) {
         if (mCallbacks == callbacks) {
@@ -131,14 +118,7 @@ public class DisplayWhiteBalanceSettings implements
      * @return Whether display white-balance is enabled.
      */
     public boolean isEnabled() {
-        return (mSetting == SETTING_ENABLED) && mActive;
-    }
-
-    /**
-     * Re-evaluate state after switching to a new user.
-     */
-    public void onSwitchUser() {
-        handleSettingChange();
+        return mEnabled && mActive;
     }
 
     /**
@@ -152,15 +132,14 @@ public class DisplayWhiteBalanceSettings implements
         writer.println("  mLoggingEnabled=" + mLoggingEnabled);
         writer.println("  mContext=" + mContext);
         writer.println("  mHandler=" + mHandler);
-        writer.println("  mSettingsObserver=" + mSettingsObserver);
-        writer.println("  mSetting=" + mSetting);
+        writer.println("  mEnabled=" + mEnabled);
         writer.println("  mActive=" + mActive);
         writer.println("  mCallbacks=" + mCallbacks);
     }
 
     @Override
-    public void onDisplayWhiteBalanceStatusChanged(boolean active) {
-        Message msg = mHandler.obtainMessage(MSG_SET_ACTIVE, active ? 1 : 0, 0);
+    public void onDisplayWhiteBalanceStatusChanged(boolean activated) {
+        Message msg = mHandler.obtainMessage(MSG_SET_ACTIVE, activated ? 1 : 0, 0);
         msg.sendToTarget();
     }
 
@@ -169,20 +148,14 @@ public class DisplayWhiteBalanceSettings implements
         Preconditions.checkNotNull(handler, "handler must not be null");
     }
 
-    private int getSetting() {
-        return Secure.getIntForUser(mContext.getContentResolver(), SETTING_URI, SETTING_DEFAULT,
-                UserHandle.USER_CURRENT);
-    }
-
-    private void handleSettingChange() {
-        final int setting = getSetting();
-        if (mSetting == setting) {
+    private void setEnabled(boolean enabled) {
+        if (mEnabled == enabled) {
             return;
         }
         if (mLoggingEnabled) {
-            Slog.d(TAG, "Setting: " + setting);
+            Slog.d(TAG, "Setting: " + enabled);
         }
-        mSetting = setting;
+        mEnabled = enabled;
         if (mCallbacks != null) {
             mCallbacks.updateWhiteBalance();
         }
@@ -201,17 +174,6 @@ public class DisplayWhiteBalanceSettings implements
         }
     }
 
-    private final class SettingsObserver extends ContentObserver {
-        SettingsObserver(Handler handler) {
-            super(handler);
-        }
-
-        @Override
-        public void onChange(boolean selfChange, Uri uri) {
-            handleSettingChange();
-        }
-    }
-
     private final class DisplayWhiteBalanceSettingsHandler extends Handler {
         DisplayWhiteBalanceSettingsHandler(Looper looper) {
             super(looper, null, true /* async */);
@@ -222,6 +184,7 @@ public class DisplayWhiteBalanceSettings implements
             switch (msg.what) {
                 case MSG_SET_ACTIVE:
                     setActive(msg.arg1 != 0);
+                    setEnabled(mCdsi.isDisplayWhiteBalanceEnabled());
                     break;
             }
         }

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
 /**
  * Copyright (c) 2019, The Android Open Source Project
@@ -15,11 +16,10 @@
  */
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="24dp"
     android:height="24dp"
+    android:viewportHeight="24"
     android:viewportWidth="24"
-    android:viewportHeight="24">
-
+    android:width="24dp" >
     <path
         android:fillColor="#FFFFFF"
         android:pathData="M13.93,16.02c0.15,0.15,0.34,0.22,0.53,0.22c0.19,0,0.38-0.07,0.53-0.22c0.29-0.29,0.3-0.77,0.01-1.06l-2.25-2.28V7.75 C12.75,7.34,12.41,7,12,7s-0.75,0.34-0.75,0.75V13c0,0.2,0.08,0.39,0.22,0.53L13.93,16.02z" />

@@ -44,6 +44,8 @@ import android.view.textclassifier.TextClassifier.Utils;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
+import com.google.android.textclassifier.AnnotatorModel;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.time.ZonedDateTime;
@@ -137,7 +139,7 @@ public final class TextClassification implements Parcelable {
             @Nullable Intent legacyIntent,
             @Nullable OnClickListener legacyOnClickListener,
             @NonNull List<RemoteAction> actions,
-            @NonNull Map<String, Float> entityConfidence,
+            @NonNull EntityConfidence entityConfidence,
             @Nullable String id,
             @NonNull Bundle extras) {
         mText = text;
@@ -146,7 +148,7 @@ public final class TextClassification implements Parcelable {
         mLegacyIntent = legacyIntent;
         mLegacyOnClickListener = legacyOnClickListener;
         mActions = Collections.unmodifiableList(actions);
-        mEntityConfidence = new EntityConfidence(entityConfidence);
+        mEntityConfidence = Preconditions.checkNotNull(entityConfidence);
         mId = id;
         mExtras = extras;
     }
@@ -326,7 +328,10 @@ public final class TextClassification implements Parcelable {
     public static final class Builder {
 
         @NonNull private List<RemoteAction> mActions = new ArrayList<>();
-        @NonNull private final Map<String, Float> mEntityConfidence = new ArrayMap<>();
+        @NonNull private final Map<String, Float> mTypeScoreMap = new ArrayMap<>();
+        @NonNull
+        private final Map<String, AnnotatorModel.ClassificationResult> mClassificationResults =
+                new ArrayMap<>();
         @Nullable private String mText;
         @Nullable private Drawable mLegacyIcon;
         @Nullable private String mLegacyLabel;
@@ -359,7 +364,36 @@ public final class TextClassification implements Parcelable {
         public Builder setEntityType(
                 @NonNull @EntityType String type,
                 @FloatRange(from = 0.0, to = 1.0) float confidenceScore) {
-            mEntityConfidence.put(type, confidenceScore);
+            setEntityType(type, confidenceScore, null);
+            return this;
+        }
+
+        /**
+         * @see #setEntityType(String, float)
+         *
+         * @hide
+         */
+        @NonNull
+        public Builder setEntityType(AnnotatorModel.ClassificationResult classificationResult) {
+            setEntityType(
+                    classificationResult.getCollection(),
+                    classificationResult.getScore(),
+                    classificationResult);
+            return this;
+        }
+
+        /**
+         * @see #setEntityType(String, float)
+         *
+         * @hide
+         */
+        @NonNull
+        private Builder setEntityType(
+                @NonNull @EntityType String type,
+                @FloatRange(from = 0.0, to = 1.0) float confidenceScore,
+                @Nullable AnnotatorModel.ClassificationResult classificationResult) {
+            mTypeScoreMap.put(type, confidenceScore);
+            mClassificationResults.put(type, classificationResult);
             return this;
         }
 
@@ -482,11 +516,13 @@ public final class TextClassification implements Parcelable {
          */
         @NonNull
         public TextClassification build() {
+            EntityConfidence entityConfidence = new EntityConfidence(mTypeScoreMap);
             return new TextClassification(mText, mLegacyIcon, mLegacyLabel, mLegacyIntent,
-                    mLegacyOnClickListener, mActions, mEntityConfidence, mId, buildExtras());
+                    mLegacyOnClickListener, mActions, entityConfidence, mId,
+                    buildExtras(entityConfidence));
         }
 
-        private Bundle buildExtras() {
+        private Bundle buildExtras(EntityConfidence entityConfidence) {
             final Bundle extras = mExtras == null ? new Bundle() : mExtras.deepCopy();
             if (mActionIntents.stream().anyMatch(Objects::nonNull)) {
                 ExtrasUtils.putActionsIntents(extras, mActionIntents);
@@ -494,6 +530,13 @@ public final class TextClassification implements Parcelable {
             if (mForeignLanguageExtra != null) {
                 ExtrasUtils.putForeignLanguageExtra(extras, mForeignLanguageExtra);
             }
+            List<String> sortedTypes = entityConfidence.getEntities();
+            ArrayList<AnnotatorModel.ClassificationResult> sortedEntities = new ArrayList<>();
+            for (String type : sortedTypes) {
+                sortedEntities.add(mClassificationResults.get(type));
+            }
+            ExtrasUtils.putEntities(
+                    extras, sortedEntities.toArray(new AnnotatorModel.ClassificationResult[0]));
             return extras.isEmpty() ? Bundle.EMPTY : extras;
         }
     }

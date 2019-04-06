@@ -956,6 +956,9 @@ message StaEvent {
     // The NetworkAgent Wifi usability score has changed in a way that may
     // impact connectivity
     TYPE_WIFI_USABILITY_SCORE_BREACH = 20;
+
+    // Link probe was performed
+    TYPE_LINK_PROBE = 21;
   }
 
   enum FrameworkDisconnectReason {
@@ -1077,6 +1080,18 @@ message StaEvent {
   // Prediction horizon (in second) of Wifi usability score provided by external
   // system app
   optional int32 last_prediction_horizon_sec = 16 [default = -1];
+
+  // Only valid if event type == TYPE_LINK_PROBE.
+  // true if link probe succeeded, false otherwise.
+  optional bool link_probe_was_success = 17;
+
+  // Only valid if event type == TYPE_LINK_PROBE and link_probe_was_success == true.
+  // Elapsed time, in milliseconds, of a successful link probe.
+  optional int32 link_probe_success_elapsed_time_ms = 18;
+
+  // Only valid if event type == TYPE_LINK_PROBE and link_probe_was_success == false.
+  // Failure reason for an unsuccessful link probe.
+  optional LinkProbeStats.LinkProbeFailureReason link_probe_failure_reason = 19;
 }
 
 // Wi-Fi Aware metrics

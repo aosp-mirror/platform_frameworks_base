@@ -226,6 +226,14 @@ int collate_atom(const Descriptor *atom, AtomDecl *atomDecl,
         errorCount++;
         continue;
     }
+
+    // Doubles are not supported yet.
+    if (javaType == JAVA_TYPE_DOUBLE) {
+        print_error(field, "Doubles are not supported in atoms. Please change field %s to float\n",
+                    field->name().c_str());
+        errorCount++;
+        continue;
+    }
   }
 
   // Check that if there's an attribution chain, it's at position 1.

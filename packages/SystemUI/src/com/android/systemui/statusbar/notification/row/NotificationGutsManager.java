@@ -165,8 +165,8 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         }
     }
 
-    public boolean bindGuts(final ExpandableNotificationRow row) {
-        row.inflateGuts();
+    private boolean bindGuts(final ExpandableNotificationRow row) {
+        row.ensureGutsInflated();
         return bindGuts(row, mGutsMenuItem);
     }
 
@@ -386,7 +386,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             return false;
         }
 
-        row.inflateGuts();
+        row.ensureGutsInflated();
         NotificationGuts guts = row.getGuts();
         mNotificationGutsExposed = guts;
         if (!bindGuts(row, menuItem)) {

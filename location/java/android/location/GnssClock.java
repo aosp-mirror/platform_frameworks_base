@@ -17,7 +17,6 @@
 package android.location;
 
 import android.annotation.FloatRange;
-import android.annotation.IntRange;
 import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -54,7 +53,7 @@ public final class GnssClock implements Parcelable {
     private double mDriftUncertaintyNanosPerSecond;
     private int mHardwareClockDiscontinuityCount;
     private long mElapsedRealtimeNanos;
-    private long mElapsedRealtimeUncertaintyNanos;
+    private double mElapsedRealtimeUncertaintyNanos;
 
     /**
      * @hide
@@ -469,8 +468,8 @@ public final class GnssClock implements Parcelable {
      * <p>The value is only available if {@link #hasElapsedRealtimeUncertaintyNanos()} is
      * {@code true}.
      */
-    @IntRange(from = 0)
-    public long getElapsedRealtimeUncertaintyNanos() {
+    @FloatRange(from = 0.0f)
+    public double getElapsedRealtimeUncertaintyNanos() {
         return mElapsedRealtimeUncertaintyNanos;
     }
 
@@ -482,7 +481,7 @@ public final class GnssClock implements Parcelable {
      */
     @TestApi
     public void setElapsedRealtimeUncertaintyNanos(
-            @IntRange(from = 0) long elapsedRealtimeUncertaintyNanos) {
+            @FloatRange(from = 0.0f) double elapsedRealtimeUncertaintyNanos) {
         setFlag(HAS_ELAPSED_REALTIME_UNCERTAINTY_NANOS);
         mElapsedRealtimeUncertaintyNanos = elapsedRealtimeUncertaintyNanos;
     }
@@ -496,7 +495,7 @@ public final class GnssClock implements Parcelable {
     @TestApi
     public void resetElapsedRealtimeUncertaintyNanos() {
         resetFlag(HAS_ELAPSED_REALTIME_UNCERTAINTY_NANOS);
-        mElapsedRealtimeUncertaintyNanos = Long.MAX_VALUE;
+        mElapsedRealtimeUncertaintyNanos = Double.NaN;
     }
 
     /**
@@ -543,7 +542,7 @@ public final class GnssClock implements Parcelable {
             gpsClock.mDriftUncertaintyNanosPerSecond = parcel.readDouble();
             gpsClock.mHardwareClockDiscontinuityCount = parcel.readInt();
             gpsClock.mElapsedRealtimeNanos = parcel.readLong();
-            gpsClock.mElapsedRealtimeUncertaintyNanos = parcel.readLong();
+            gpsClock.mElapsedRealtimeUncertaintyNanos = parcel.readDouble();
 
             return gpsClock;
         }
@@ -567,7 +566,7 @@ public final class GnssClock implements Parcelable {
         parcel.writeDouble(mDriftUncertaintyNanosPerSecond);
         parcel.writeInt(mHardwareClockDiscontinuityCount);
         parcel.writeLong(mElapsedRealtimeNanos);
-        parcel.writeLong(mElapsedRealtimeUncertaintyNanos);
+        parcel.writeDouble(mElapsedRealtimeUncertaintyNanos);
     }
 
     @Override

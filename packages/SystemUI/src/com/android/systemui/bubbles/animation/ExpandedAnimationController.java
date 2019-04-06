@@ -26,7 +26,6 @@ import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.systemui.R;
-import com.android.systemui.bubbles.BubbleController;
 
 import com.google.android.collect.Sets;
 
@@ -222,23 +221,14 @@ public class ExpandedAnimationController
         if (mLayout == null || mLayout.getRootWindowInsets() == null) {
             return 0;
         }
-        final boolean showOnTop = BubbleController.showBubblesAtTop(mLayout.getContext());
         final WindowInsets insets = mLayout.getRootWindowInsets();
-        if (showOnTop) {
-            return mBubblePaddingPx + Math.max(
-                    mStatusBarHeight,
-                    insets.getDisplayCutout() != null
-                            ? insets.getDisplayCutout().getSafeInsetTop()
-                            : 0);
-        } else {
-            int keyboardHeight = insets.getSystemWindowInsetBottom()
-                    - insets.getStableInsetBottom();
-            float bottomInset = keyboardHeight > 0
-                    ? keyboardHeight
-                    : (mPipDismissHeight - insets.getStableInsetBottom());
-            // Stable insets are excluded from display size, so we must subtract it
-            return mDisplaySize.y - mBubbleSizePx - mBubblePaddingPx - bottomInset;
-        }
+        int keyboardHeight = insets.getSystemWindowInsetBottom()
+                - insets.getStableInsetBottom();
+        float bottomInset = keyboardHeight > 0
+                ? keyboardHeight
+                : (mPipDismissHeight - insets.getStableInsetBottom());
+        // Stable insets are excluded from display size, so we must subtract it
+        return mDisplaySize.y - mBubbleSizePx - mBubblePaddingPx - bottomInset;
     }
 
     @Override

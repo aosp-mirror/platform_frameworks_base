@@ -954,7 +954,7 @@ package android.location {
     method public void setDriftNanosPerSecond(double);
     method public void setDriftUncertaintyNanosPerSecond(@FloatRange(from=0.0f) double);
     method public void setElapsedRealtimeNanos(long);
-    method public void setElapsedRealtimeUncertaintyNanos(@IntRange(from=0) long);
+    method public void setElapsedRealtimeUncertaintyNanos(@FloatRange(from=0.0f) double);
     method public void setFullBiasNanos(long);
     method public void setHardwareClockDiscontinuityCount(int);
     method public void setLeapSecond(int);

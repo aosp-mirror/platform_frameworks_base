@@ -260,6 +260,13 @@ public final class DeviceConfig {
     public static final String NAMESPACE_TEXTCLASSIFIER = "textclassifier";
 
     /**
+     * Namespace for contacts provider related features.
+     *
+     * @hide
+     */
+    public static final String NAMESPACE_CONTACTS_PROVIDER = "contacts_provider";
+
+    /**
      * List of namespaces which can be read without READ_DEVICE_CONFIG permission
      *
      * @hide

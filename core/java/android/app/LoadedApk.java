@@ -937,7 +937,9 @@ public final class LoadedApk {
         //
         // It is NOT ok to call this function from the system_server (for any of the packages it
         // loads code from) so we explicitly disallow it there.
-        if (needToSetupJitProfiles && !ActivityThread.isSystem()) {
+        //
+        // It is not ok to call this in a zygote context where mActivityThread is null.
+        if (needToSetupJitProfiles && !ActivityThread.isSystem() && mActivityThread != null) {
             setupJitProfileSupport();
         }
 

@@ -212,6 +212,8 @@ public class ChooserActivity extends ResolverActivity {
     @VisibleForTesting
     public static final int LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS = 250;
 
+    private static final int MAX_EXTRA_INITIAL_INTENTS = 2;
+
     private boolean mListViewDataChanged = false;
 
     @Retention(SOURCE)
@@ -356,8 +358,9 @@ public class ChooserActivity extends ResolverActivity {
         Parcelable[] pa = intent.getParcelableArrayExtra(Intent.EXTRA_INITIAL_INTENTS);
         Intent[] initialIntents = null;
         if (pa != null) {
-            initialIntents = new Intent[pa.length];
-            for (int i = 0; i < pa.length; i++) {
+            int count = Math.min(pa.length, MAX_EXTRA_INITIAL_INTENTS);
+            initialIntents = new Intent[count];
+            for (int i = 0; i < count; i++) {
                 if (!(pa[i] instanceof Intent)) {
                     Log.w(TAG, "Initial intent #" + i + " not an Intent: " + pa[i]);
                     finish();
@@ -785,7 +788,7 @@ public class ChooserActivity extends ResolverActivity {
         } else {
             ImageView fileIconView = parent.findViewById(R.id.content_preview_file_icon);
             fileIconView.setVisibility(View.VISIBLE);
-            fileIconView.setImageResource(R.drawable.ic_doc_generic);
+            fileIconView.setImageResource(R.drawable.chooser_file_generic);
         }
     }
 
@@ -834,12 +837,14 @@ public class ChooserActivity extends ResolverActivity {
             }
 
             for (Uri uri : uris) {
-                if (findPreferredContentPreview(uri, resolver) == CONTENT_PREVIEW_IMAGE) {
-                    return CONTENT_PREVIEW_IMAGE;
+                // Defaulting to file preview when there are mixed image/file types is
+                // preferable, as it shows the user the correct number of items being shared
+                if (findPreferredContentPreview(uri, resolver) == CONTENT_PREVIEW_FILE) {
+                    return CONTENT_PREVIEW_FILE;
                 }
             }
 
-            return CONTENT_PREVIEW_FILE;
+            return CONTENT_PREVIEW_IMAGE;
         }
 
         return CONTENT_PREVIEW_TEXT;
@@ -1808,15 +1813,17 @@ public class ChooserActivity extends ResolverActivity {
                     offset += lastHeight;
                 }
 
-                if (lastHeight != 0 && isSendAction(getTargetIntent())) {
+                boolean isPortrait = getResources().getConfiguration().orientation
+                                         == Configuration.ORIENTATION_PORTRAIT;
+                if (lastHeight != 0 && isSendAction(getTargetIntent()) && isPortrait) {
                     // make sure to leave room for direct share 4->8 expansion
                     int expansionArea =
-                            (int) (mResolverDrawerLayout.getUncollapsibleHeight()
+                            (int) (mResolverDrawerLayout.getAlwaysShowHeight()
                                     / DIRECT_SHARE_EXPANSION_RATE);
                     offset = Math.min(offset, bottom - top - lastHeight - expansionArea);
                 }
 
-                mResolverDrawerLayout.setCollapsibleHeightReserved(offset);
+                mResolverDrawerLayout.setCollapsibleHeightReserved(Math.min(offset, bottom - top));
             });
         }
     }
