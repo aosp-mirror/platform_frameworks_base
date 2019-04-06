@@ -22,6 +22,8 @@ import android.annotation.Nullable;
 public enum BlendMode {
 
     /**
+     * {@usesMathJax}
+     *
      * <p>
      *  <img src="{@docRoot}reference/android/images/graphics/blendmode_CLEAR.png" />
      *  <figcaption>Destination pixels covered by the source are cleared to 0.</figcaption>
@@ -32,6 +34,8 @@ public enum BlendMode {
     CLEAR(0),
 
     /**
+     * {@usesMathJax}
+     *
      * <p>
      *     <img src="{@docRoot}reference/android/images/graphics/blendmode_SRC.png" />
      *     <figcaption>The source pixels replace the destination pixels.</figcaption>
@@ -42,6 +46,8 @@ public enum BlendMode {
     SRC(1),
 
     /**
+     * {@usesMathJax}
+     *
      * <p>
      *     <img src="{@docRoot}reference/android/images/graphics/blendmode_DST.png" />
      *     <figcaption>The source pixels are discarded, leaving the destination intact.</figcaption>
@@ -52,6 +58,8 @@ public enum BlendMode {
     DST(2),
 
     /**
+     * {@usesMathJax}
+     *
      * <p>
      *     <img src="{@docRoot}reference/android/images/graphics/blendmode_SRC_OVER.png" />
      *     <figcaption>The source pixels are drawn over the destination pixels.</figcaption>
@@ -62,6 +70,8 @@ public enum BlendMode {
     SRC_OVER(3),
 
     /**
+     * {@usesMathJax}
+     *
      * <p>
      *     <img src="{@docRoot}reference/android/images/graphics/blendmode_DST_OVER.png" />
      *     <figcaption>The source pixels are drawn behind the destination pixels.</figcaption>
@@ -72,6 +82,8 @@ public enum BlendMode {
     DST_OVER(4),
 
     /**
+     * {@usesMathJax}
+     *
      * <p>
      *     <img src="{@docRoot}reference/android/images/graphics/blendmode_SRC_IN.png" />
      *     <figcaption>Keeps the source pixels that cover the destination pixels,
@@ -83,6 +95,8 @@ public enum BlendMode {
     SRC_IN(5),
 
     /**
+     * {@usesMathJax}
+     *
      * <p>
      *     <img src="{@docRoot}reference/android/images/graphics/blendmode_DST_IN.png" />
      *     <figcaption>Keeps the destination pixels that cover source pixels,
@@ -94,6 +108,8 @@ public enum BlendMode {
     DST_IN(6),
 
     /**
+     * {@usesMathJax}
+     *
      * <p>
      *     <img src="{@docRoot}reference/android/images/graphics/blendmode_SRC_OUT.png" />
      *     <figcaption>Keeps the source pixels that do not cover destination pixels.
@@ -106,6 +122,8 @@ public enum BlendMode {
     SRC_OUT(7),
 
     /**
+     * {@usesMathJax}
+     *
      * <p>
      *     <img src="{@docRoot}reference/android/images/graphics/blendmode_DST_OUT.png" />
      *     <figcaption>Keeps the destination pixels that are not covered by source pixels.
@@ -118,6 +136,8 @@ public enum BlendMode {
     DST_OUT(8),
 
     /**
+     * {@usesMathJax}
+     *
      * <p>
      *     <img src="{@docRoot}reference/android/images/graphics/blendmode_SRC_ATOP.png" />
      *     <figcaption>Discards the source pixels that do not cover destination pixels.
@@ -129,6 +149,8 @@ public enum BlendMode {
     SRC_ATOP(9),
 
     /**
+     * {@usesMathJax}
+     *
      * <p>
      *     <img src="{@docRoot}reference/android/images/graphics/blendmode_DST_ATOP.png" />
      *     <figcaption>Discards the destination pixels that are not covered by source pixels.
@@ -140,6 +162,8 @@ public enum BlendMode {
     DST_ATOP(10),
 
     /**
+     * {@usesMathJax}
+     *
      * <p>
      *     <img src="{@docRoot}reference/android/images/graphics/blendmode_XOR.png" />
      *     <figcaption>Discards the source and destination pixels where source pixels
@@ -153,6 +177,8 @@ public enum BlendMode {
     XOR(11),
 
     /**
+     * {@usesMathJax}
+     *
      * <p>
      *     <img src="{@docRoot}reference/android/images/graphics/blendmode_PLUS.png" />
      *     <figcaption>Adds the source pixels to the destination pixels and saturates
@@ -164,6 +190,8 @@ public enum BlendMode {
     PLUS(12),
 
     /**
+     * {@usesMathJax}
+     *
      * <p>
      *     <img src="{@docRoot}reference/android/images/graphics/blendmode_MODULATE.png" />
      *     <figcaption>Multiplies the source and destination pixels.</figcaption>
@@ -175,6 +203,8 @@ public enum BlendMode {
     MODULATE(13),
 
     /**
+     * {@usesMathJax}
+     *
      * <p>
      *     <img src="{@docRoot}reference/android/images/graphics/blendmode_SCREEN.png" />
      *     <figcaption>
@@ -188,6 +218,8 @@ public enum BlendMode {
     SCREEN(14),
 
     /**
+     * {@usesMathJax}
+     *
      * <p>
      *     <img src="{@docRoot}reference/android/images/graphics/blendmode_OVERLAY.png" />
      *     <figcaption>
@@ -205,6 +237,8 @@ public enum BlendMode {
     OVERLAY(15),
 
     /**
+     * {@usesMathJax}
+     *
      * <p>
      *     <img src="{@docRoot}reference/android/images/graphics/blendmode_DARKEN.png" />
      *     <figcaption>
@@ -221,6 +255,8 @@ public enum BlendMode {
     DARKEN(16),
 
     /**
+     * {@usesMathJax}
+     *
      * <p>
      *     <img src="{@docRoot}reference/android/images/graphics/blendmode_LIGHTEN.png" />
      *     <figcaption>Retains the largest component of the source and
@@ -235,6 +271,8 @@ public enum BlendMode {
     LIGHTEN(17),
 
     /**
+     * {@usesMathJax}
+     *
      * <p>
      *     <img src="{@docRoot}reference/android/images/graphics/blendmode_COLOR_DODGE.png" />
      *     <figcaption>Makes destination brighter to reflect source.</figcaption>
@@ -257,6 +295,8 @@ public enum BlendMode {
     COLOR_DODGE(18),
 
     /**
+     * {@usesMathJax}
+     *
      * <p>
      *     <img src="{@docRoot}reference/android/images/graphics/blendmode_COLOR_BURN.png" />
      *     <figcaption>Makes destination darker to reflect source.</figcaption>
@@ -280,6 +320,8 @@ public enum BlendMode {
     COLOR_BURN(19),
 
     /**
+     * {@usesMathJax}
+     *
      * <p>
      *     <img src="{@docRoot}reference/android/images/graphics/blendmode_HARD_LIGHT.png" />
      *     <figcaption>Makes destination lighter or darker, depending on source.</figcaption>
@@ -302,6 +344,8 @@ public enum BlendMode {
     HARD_LIGHT(20),
 
     /**
+     * {@usesMathJax}
+     *
      * <p>
      *     <img src="{@docRoot}reference/android/images/graphics/blendmode_SOFT_LIGHT.png" />
      *     <figcaption>Makes destination lighter or darker, depending on source.</figcaption>
@@ -348,6 +392,8 @@ public enum BlendMode {
     SOFT_LIGHT(21),
 
     /**
+     * {@usesMathJax}
+     *
      * <p>
      *     <img src="{@docRoot}reference/android/images/graphics/blendmode_DIFFERENCE.png" />
      *     <figcaption>Subtracts darker from lighter with higher contrast.</figcaption>
@@ -367,6 +413,8 @@ public enum BlendMode {
     DIFFERENCE(22),
 
     /**
+     * {@usesMathJax}
+     *
      * <p>
      *     <img src="{@docRoot}reference/android/images/graphics/blendmode_DIFFERENCE.png" />
      *     <figcaption>Subtracts darker from lighter with lower contrast.</figcaption>
@@ -385,6 +433,8 @@ public enum BlendMode {
     EXCLUSION(23),
 
     /**
+     * {@usesMathJax}
+     *
      * <p>
      *     <img src="{@docRoot}reference/android/images/graphics/blendmode_MODULATE.png" />
      *     <figcaption>Multiplies the source and destination pixels.</figcaption>
@@ -397,6 +447,8 @@ public enum BlendMode {
     MULTIPLY(24),
 
     /**
+     * {@usesMathJax}
+     *
      * <p>
      *     <img src="{@docRoot}reference/android/images/graphics/blendmode_HUE.png" />
      *     <figcaption>
@@ -408,6 +460,8 @@ public enum BlendMode {
     HUE(25),
 
     /**
+     * {@usesMathJax}
+     *
      * <p>
      *     <img src="{@docRoot}reference/android/images/graphics/blendmode_SATURATION.png" />
      *     <figcaption>
@@ -419,6 +473,8 @@ public enum BlendMode {
     SATURATION(26),
 
     /**
+     * {@usesMathJax}
+     *
      * <p>
      *     <img src="{@docRoot}reference/android/images/graphics/blendmode_COLOR.png" />
      *     <figcaption>
@@ -430,6 +486,8 @@ public enum BlendMode {
     COLOR(27),
 
     /**
+     * {@usesMathJax}
+     *
      * <p>
      *     <img src="{@docRoot}reference/android/images/graphics/blendmode_LUMINOSITY.png" />
      *     <figcaption>
