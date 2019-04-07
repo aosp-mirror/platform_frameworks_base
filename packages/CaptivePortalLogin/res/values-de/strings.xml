@@ -18,7 +18,7 @@
     <string name="ssl_error_unknown" msgid="4405203446079465859">"Unbekannter Zertifikatfehler."</string>
     <string name="ssl_security_warning_title" msgid="8768539813847504404">"Sicherheitswarnung"</string>
     <string name="ssl_error_view_certificate" msgid="5722652540168339333">"Zertifikat ansehen"</string>
-    <string name="ok" msgid="2817931639040794018">"OK"</string>
+    <string name="ok" msgid="2817931639040794018">"Ok"</string>
     <string name="page_info_address" msgid="1261481517455692363">"Adresse:"</string>
     <string name="page_info" msgid="4416941086705172545">"Seiteninformationen"</string>
 </resources>
