@@ -602,6 +602,17 @@ public class DeviceIdleController extends SystemService
                         }
                     }
                 } break;
+                case PowerManager.ACTION_POWER_SAVE_MODE_CHANGED: {
+                    if (Settings.Global.getInt(getContext().getContentResolver(),
+                                Settings.Global.AGGRESSIVE_BATTERY_SAVER, 0) != 0) {
+                        int isPowerSave = mPowerManager.isPowerSaveMode() ? 1 : 0;
+
+                        Settings.Global.putInt(getContext().getContentResolver(),
+                                Settings.Global.AGGRESSIVE_IDLE_ENABLED, isPowerSave);
+                        Settings.Global.putInt(getContext().getContentResolver(),
+                                Settings.Global.AGGRESSIVE_STANDBY_ENABLED, isPowerSave);
+                    }
+                }
             }
         }
     };
@@ -2144,6 +2155,10 @@ public class DeviceIdleController extends SystemService
                 filter.addAction(Intent.ACTION_SCREEN_OFF);
                 filter.addAction(Intent.ACTION_SCREEN_ON);
                 getContext().registerReceiver(mInteractivityReceiver, filter);
+
+                filter = new IntentFilter();
+                filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
+                getContext().registerReceiver(mReceiver, filter);
 
                 mLocalActivityManager.setDeviceIdleWhitelist(
                         mPowerSaveWhitelistAllAppIdArray, mPowerSaveWhitelistExceptIdleAppIdArray);
