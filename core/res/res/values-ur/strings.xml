@@ -302,9 +302,9 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"مائکروفون"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"آڈیو ریکارڈ کریں"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"‏&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; کو آڈیو ریکارڈ کرنے کی اجازت دیں؟"</string>
-    <string name="permgrouplab_activityRecognition" msgid="2838596644535616493">"سرگرمی کی شناخت"</string>
-    <string name="permgroupdesc_activityRecognition" msgid="7672248027571522602">"سرگرمی کی شناخت کریں"</string>
-    <string name="permgrouprequest_activityRecognition" msgid="8121253142311250055">"‏&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; کو آپ کی جسمانی سرگرمی کی شناخت کرنے کی اجازت دیں؟"</string>
+    <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"جسمانی سرگرمی"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"اپنی جسمانی سرگرمی تک رسائی حاصل کریں"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"‏‎&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;b&gt;‎ کو آپ کی جسمانی سرگرمی کی شناخت کرنے کی اجازت دیں؟"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"کیمرا"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"تصاویر لیں اور ویڈیو ریکارڈ کریں"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"‏&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; کو تصاویر لینے اور ویڈیو ریکارڈ کرنے کی اجازت دیں؟"</string>
@@ -317,15 +317,6 @@
     <string name="permgrouplab_sensors" msgid="4838614103153567532">"باڈی سینسرز"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"اپنی علامات حیات کے متعلق سنسر ڈیٹا تک رسائی حاصل کریں"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"‏&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; کو آپ کے اہم اشاروں کے متعلق سینسر ڈیٹا تک رسائی کی اجازت دیں؟"</string>
-    <string name="permgrouplab_aural" msgid="965607064083134896">"موسیقی"</string>
-    <string name="permgroupdesc_aural" msgid="4870189506255958055">"اپنی موسیقی تک رسائی حاصل کریں"</string>
-    <string name="permgrouprequest_aural" msgid="6787926123071735620">"‏&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; کو آپ کی موسیقی تک رسائی کی اجازت دیں؟"</string>
-    <string name="permgrouplab_visual" msgid="6477382108771145134">"تصاویر اور ویڈیوز"</string>
-    <string name="permgroupdesc_visual" msgid="3415827902566663546">"اپنی تصاویر اور ویڈیوز تک رسائی حاصل کریں"</string>
-    <!-- no translation found for permgrouprequest_visual (4926581398380334943) -->
-    <skip />
-    <!-- no translation found for permgrouprequestdetail_visual (3827237829805228971) -->
-    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ونڈو مواد بازیافت کرنے کی"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"کسی ایسی ونڈو کے مواد کا معائنہ کریں جس کے ساتھ آپ تعامل کر رہے ہیں۔"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ٹچ کے ذریعے دریافت کریں کو آن کرنے کی"</string>
@@ -528,21 +519,16 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"ایپ کو استعمال کیلئے فنگر پرنٹ کی تمثیلات شامل کرنے اور حذف کرنے کیلئے طریقوں کو کالعدم قرار دینے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"فنگر پرنٹ ہارڈ ویئر استعمال کریں"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"ایپ کو توثیق کیلئے فنگر پرنٹ ہارڈ ویئر استعمال کرنے کی اجازت دیتا ہے"</string>
-    <string name="permlab_audioRead" msgid="6617225220728465565">"اپنے موسیقی کا مجموعہ پڑھیں"</string>
-    <string name="permdesc_audioRead" msgid="5034032570243484805">"ایپ کو آپ کی موسیقی کا مجموعہ پڑھنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_audioWrite" msgid="2661772059799779292">"اپنی موسیقی کے مجموعے میں ترمیم کریں"</string>
     <string name="permdesc_audioWrite" msgid="8888544708166230494">"ایپ کو آپ کی موسیقی کے مجموعے میں ترمیم کی اجازت دیتا ہے۔"</string>
-    <string name="permlab_videoRead" msgid="9182618678674737229">"اپنی ویڈیو کا مجموعہ پڑھیں"</string>
-    <string name="permdesc_videoRead" msgid="7045676429859396194">"ایپ کو آپ کی ویڈیو کا مجموعہ پڑھنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_videoWrite" msgid="128769316366746446">"اپنی ویڈیو کے مجموعے میں ترمیم کریں"</string>
     <string name="permdesc_videoWrite" msgid="5448565757490640841">"ایپ کو آپ کی ویڈیو کے مجموعے میں ترمیم کرنے کی اجازت دیتا ہے۔"</string>
-    <string name="permlab_imagesRead" msgid="3015078545742665304">"اپنی تصویر کا مجموعہ پڑھیں"</string>
-    <string name="permdesc_imagesRead" msgid="3144263806038695580">"ایپ کو آپ کی تصویر کا مجموعہ پڑھنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_imagesWrite" msgid="3391306186247235510">"اپنی تصویر کے مجموعے میں ترمیم کریں"</string>
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"ایپ کو آپ کی تصویر کے مجموعے میں ترمیم کی اجازت دیتا ہے۔"</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"اپنی میڈيا کے مجموعے سے مقامات پڑھیں"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"ایپ کو آپ کی میڈيا کے مجموعے سے مقامات پڑھنے کی اجازت دیتا ہے۔"</string>
-    <string name="biometric_dialog_default_title" msgid="4229778503907743328">"ایپلیکیشن <xliff:g id="APP">%s</xliff:g> تصدیق کرنا چاہتی ہے۔"</string>
+    <!-- no translation found for biometric_dialog_default_title (881952973720613213) -->
+    <skip />
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"بایومیٹرک ہارڈ ویئر دستیاب نہیں ہے"</string>
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"تصدیق کا عمل منسوخ ہو گیا"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"تسلیم شدہ نہیں ہے"</string>
@@ -615,20 +601,18 @@
     <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
-    <string name="face_error_hw_not_available" msgid="6255891785768984615">"چہرے کا ہارڈویئر دستیاب نہیں ہے۔"</string>
+    <string name="face_error_hw_not_available" msgid="396883585636963908">"چہرے کی توثیق نہیں کی جا سکی۔ ہارڈ ویئر دستیاب نہیں ہے۔"</string>
     <!-- no translation found for face_error_timeout (2605673935810019129) -->
     <skip />
-    <string name="face_error_no_space" msgid="8224993703466381314">"چہرے کو اسٹور نہیں کیا جا سکتا۔"</string>
-    <string name="face_error_canceled" msgid="283945501061931023">"چہرے پر ہونے والی کارروائی منسوخ ہو گئی۔"</string>
-    <string name="face_error_user_canceled" msgid="8943921120862164539">"صارف نے چہرے کی تصدیق کو مسترد کر دیا۔"</string>
+    <string name="face_error_no_space" msgid="2712120617457553825">"چہرے کا نیا ڈیٹا اسٹور نہیں کر سکتے۔ پہلے پرانا حذف کریں۔"</string>
+    <string name="face_error_canceled" msgid="2768146728600802422">"چہرے پر آپریشن منسوخ ہو گئی"</string>
+    <string name="face_error_user_canceled" msgid="9003022830076496163">"صارف نے چہرے کی تصدیق کو منسوخ کر دیا"</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"کافی زیادہ کوششیں کی گئیں۔ دوبارہ کوشش کریں۔"</string>
-    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"کافی زیادہ کوششیں کی گئیں۔ چہرے کی توثیق منسوخ ہو گئی۔"</string>
+    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"کافی زیادہ کوششیں۔ چہرے سے تصدیق غیر فعال کر دی گئی ہے۔"</string>
     <!-- no translation found for face_error_unable_to_process (4940944939691171539) -->
     <skip />
-    <!-- no translation found for face_error_not_enrolled (4245760276260427472) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (5296043240874659926) -->
-    <skip />
+    <string name="face_error_not_enrolled" msgid="2600952202843125796">"آپ نے چہرے سے تصدیق سیٹ اپ نہیں کیا ہے"</string>
+    <string name="face_error_hw_not_present" msgid="1317845121210260372">"اس آلہ پر چہرے سے تصدیق تعاون یافتہ نہیں ہے"</string>
     <string name="face_name_template" msgid="7004562145809595384">"چہرہ <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1252,10 +1236,8 @@
     <string name="dump_heap_title" msgid="5864292264307651673">"ہیپ ڈمپ کا اشتراک کریں؟"</string>
     <!-- no translation found for dump_heap_text (8546022920319781701) -->
     <skip />
-    <!-- no translation found for dump_heap_system_text (1205466256312104134) -->
-    <skip />
-    <!-- no translation found for dump_heap_ready_text (6759394977904051000) -->
-    <skip />
+    <string name="dump_heap_system_text" msgid="3236094872980706024">"<xliff:g id="PROC">%1$s</xliff:g> پروسیس نے اپنی میموری کی حد <xliff:g id="SIZE">%2$s</xliff:g> سے بڑھا لی ہے۔ آپ کے اشتراک کرنے کے لیے ہیپ ڈمپ دستیاب ہے۔ محتاط رہیں: اس ہیپ ڈمپ میں حساس ذاتی معلومات ہو سکتی ہے، جس میں آپ کے ذریعے ٹائپ کردہ چیزیں شامل ہو سکتی ہیں، جس تک پروسیس کو رسائی حاصل ہو سکتی ہے۔"</string>
+    <string name="dump_heap_ready_text" msgid="1778041771455343067">"<xliff:g id="PROC">%1$s</xliff:g> کے پروسیس کا ہیپ ڈمپ آپ کے اشتراک کے لیے دستیاب ہے۔ محتاط رہیں: اس ہیپ ڈمپ میں ممکنہ طور پر حساس ذاتی معلومات ہو سکتی ہے، جس میں آپ کے ذریعے ٹائپ کردہ چیزیں شامل ہو سکتی ہیں، جس تک پروسیس کو رسائی حاصل ہو سکتی ہے۔"</string>
     <string name="sendText" msgid="5209874571959469142">"متن کیلئے ایک کارروائی منتخب کریں"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"رنگر والیوم"</string>
     <string name="volume_music" msgid="5421651157138628171">"میڈیا والیوم"</string>
@@ -1662,8 +1644,8 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"‏اوور لے ‎#<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">"، محفوظ"</string>
-    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="5692097903712956720">"‏<xliff:g id="PACKAGENAME">%1$s</xliff:g> سے شروع ہونے والی پس منظر کی اس سرگرمی کو مستقبل کے Q بلڈز میں مسدود کر دیا جائے گا۔ go/q-bg-block دیکھیں۔"</string>
-    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="8299522481076404353">"‏<xliff:g id="PACKAGENAME">%1$s</xliff:g> سے شروع ہونے والی پس منظر کی سرگرمی کو مسدود کر دیا گیا ہے۔ go/q-bg-block دیکھیں۔"</string>
+    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="6995473033438879646">"‏<xliff:g id="PACKAGENAME">%1$s</xliff:g> سے شروع ہونے والی پس منظر کی اس سرگرمی کو مستقبل کے Q بلڈز میں مسدود کر دیا جائے گا۔ g.co/dev/bgblock ملاحظہ کریں۔"</string>
+    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="3317816771072146229">"‏<xliff:g id="PACKAGENAME">%1$s</xliff:g> سے شروع ہونے والی پس منظر کی سرگرمی کو مسدود کر دیا گیا ہے۔ g.co/dev/bgblock ملاحظہ کریں۔"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"پیٹرن بھول گئے"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"غلط پیٹرن"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"غلط پاس ورڈ"</string>
@@ -1851,8 +1833,11 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"آپ کے منتظم کے ذریعے انسٹال کیا گیا"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"آپ کے منتظم کے ذریعے اپ ڈیٹ کیا گیا"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"آپ کے منتظم کے ذریعے حذف کیا گیا"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"آپ کی بیٹری لائف کو بڑھانے کیلئے، بیٹری سیور آلہ کی کچھ خصوصیات کو آف اور ایپس کو محدود کرتا ہے۔ "<annotation id="url">"مزید جانیں"</annotation></string>
-    <string name="battery_saver_description" msgid="769989536172631582">"آپ کی بیٹری لائف کو بڑھانے کیلئے، بیٹری سیور آلہ کی کچھ خصوصیات کو آف اور ایپس کو محدود کرتا ہے۔"</string>
+    <string name="confirm_battery_saver" msgid="639106420541753635">"ٹھیک ہے"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (2108984221113106294) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (6413346684861241431) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"ڈیٹا کے استعمال کو کم کرنے میں مدد کیلئے، ڈیٹا سیور پس منظر میں کچھ ایپس کو ڈیٹا بھیجنے یا موصول کرنے سے روکتا ہے۔ آپ جو ایپ فی الحال استعمال کر رہے ہیں وہ ڈیٹا پر رسائی کر سکتی ہے مگر ہو سکتا ہے ایسا زیادہ نہ ہو۔ اس کا مطلب مثال کے طور پر یہ ہو سکتا ہے کہ تصاویر تھپتھپانے تک ظاہر نہ ہوں۔"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ڈیٹا سیور آن کریں؟"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"آن کریں"</string>
