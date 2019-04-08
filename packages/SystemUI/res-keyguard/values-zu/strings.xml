@@ -171,15 +171,15 @@
   </string-array>
   <string-array name="type_clock_minutes">
     <item msgid="8322049385467207985">"Ezimpondweni"</item>
-    <item msgid="8837126587669001578">"O’Okukodwa"</item>
-    <item msgid="4294343372940455660">"O’Okubili"</item>
-    <item msgid="7129166637707421536">"O’Kuthathu"</item>
-    <item msgid="7579404865008788673">"O’Okune"</item>
-    <item msgid="3873924689207380586">"O’Isihlanu"</item>
-    <item msgid="4849565597850069377">"O’Isithupha"</item>
-    <item msgid="4404219424523572364">"O’Isikhombisa"</item>
-    <item msgid="8740481214764087329">"O’Isishiyagalombili"</item>
-    <item msgid="1713216865806811237">"O’Isishiyagalombili"</item>
+    <item msgid="2091812961809760681">"Oh okukodwa"</item>
+    <item msgid="1496435384877290709">"Oh okubili"</item>
+    <item msgid="881846472976674129">"Oh okuthathu"</item>
+    <item msgid="2784477043911540584">"Oh isine"</item>
+    <item msgid="1610928853656700614">"Oh isihlanu"</item>
+    <item msgid="2317806244043886658">"Oh isithupha"</item>
+    <item msgid="3318687539120971327">"Oh isikhombisa"</item>
+    <item msgid="5701600693712102348">"Oh isishiyagalombili"</item>
+    <item msgid="3247381605947372495">"Oh isishiyagalolunye"</item>
     <item msgid="3508406095411245038">"Ishumi"</item>
     <item msgid="7161996337755311711">"Ishumi nanye"</item>
     <item msgid="4044549963329624197">"Ishumi nambili"</item>
