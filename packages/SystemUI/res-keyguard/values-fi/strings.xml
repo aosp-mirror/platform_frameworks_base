@@ -171,15 +171,15 @@
   </string-array>
   <string-array name="type_clock_minutes">
     <item msgid="8322049385467207985">"Nolla nolla"</item>
-    <item msgid="8837126587669001578">"Nolla yksi"</item>
-    <item msgid="4294343372940455660">"Nolla kaksi"</item>
-    <item msgid="7129166637707421536">"Nolla kolme"</item>
-    <item msgid="7579404865008788673">"Nolla neljä"</item>
-    <item msgid="3873924689207380586">"Nolla viisi"</item>
-    <item msgid="4849565597850069377">"Nolla kuusi"</item>
-    <item msgid="4404219424523572364">"Nolla seitsemän"</item>
-    <item msgid="8740481214764087329">"Nolla kahdeksan"</item>
-    <item msgid="1713216865806811237">"Nolla yhdeksän"</item>
+    <item msgid="2091812961809760681">"Nolla yksi"</item>
+    <item msgid="1496435384877290709">"Nolla kaksi"</item>
+    <item msgid="881846472976674129">"Nolla kolme"</item>
+    <item msgid="2784477043911540584">"Nolla neljä"</item>
+    <item msgid="1610928853656700614">"Nolla viisi"</item>
+    <item msgid="2317806244043886658">"Nolla kuusi"</item>
+    <item msgid="3318687539120971327">"Nolla seitsemän"</item>
+    <item msgid="5701600693712102348">"Nolla kahdeksan"</item>
+    <item msgid="3247381605947372495">"Nolla yhdeksän"</item>
     <item msgid="3508406095411245038">"Kymmenen"</item>
     <item msgid="7161996337755311711">"Yksitoista"</item>
     <item msgid="4044549963329624197">"Kaksitoista"</item>

@@ -171,15 +171,15 @@
   </string-array>
   <string-array name="type_clock_minutes">
     <item msgid="8322049385467207985">"Kamili"</item>
-    <item msgid="8837126587669001578">"Na Dakika Moja"</item>
-    <item msgid="4294343372940455660">"Na Dakika Mbili"</item>
-    <item msgid="7129166637707421536">"Na Dakika Tatu"</item>
-    <item msgid="7579404865008788673">"Na Dakika Nne"</item>
-    <item msgid="3873924689207380586">"Na Dakika Tano"</item>
-    <item msgid="4849565597850069377">"Na Dakika Sita"</item>
-    <item msgid="4404219424523572364">"Na Dakika Saba"</item>
-    <item msgid="8740481214764087329">"Nane"</item>
-    <item msgid="1713216865806811237">"Na Dakika Tisa"</item>
+    <item msgid="2091812961809760681">"Na Dakika Moja"</item>
+    <item msgid="1496435384877290709">"Na Dakika Mbili"</item>
+    <item msgid="881846472976674129">"Na Dakika Tatu"</item>
+    <item msgid="2784477043911540584">"Na Dakika Nne"</item>
+    <item msgid="1610928853656700614">"Na Dakika Tano"</item>
+    <item msgid="2317806244043886658">"Na Dakika Sita"</item>
+    <item msgid="3318687539120971327">"Na Dakika Saba"</item>
+    <item msgid="5701600693712102348">"Na Dakika Nane"</item>
+    <item msgid="3247381605947372495">"Na Dakika Tisa"</item>
     <item msgid="3508406095411245038">"Kumi"</item>
     <item msgid="7161996337755311711">"Kumi na Moja"</item>
     <item msgid="4044549963329624197">"Kumi na Mbili"</item>

@@ -180,15 +180,15 @@
   </string-array>
   <string-array name="type_clock_minutes">
     <item msgid="8322049385467207985"></item>
-    <item msgid="8837126587669001578">"Jedan"</item>
-    <item msgid="4294343372940455660">"Dva"</item>
-    <item msgid="7129166637707421536">"Tri"</item>
-    <item msgid="7579404865008788673">"Četiri"</item>
-    <item msgid="3873924689207380586">"Pet"</item>
-    <item msgid="4849565597850069377">"Šest"</item>
-    <item msgid="4404219424523572364">"Sedam"</item>
-    <item msgid="8740481214764087329">"Osam"</item>
-    <item msgid="1713216865806811237">"Devet"</item>
+    <item msgid="2091812961809760681">"Nula jedan"</item>
+    <item msgid="1496435384877290709">"Nula dva"</item>
+    <item msgid="881846472976674129">"Nula tri"</item>
+    <item msgid="2784477043911540584">"Nula četiri"</item>
+    <item msgid="1610928853656700614">"Nula pet"</item>
+    <item msgid="2317806244043886658">"Nula šest"</item>
+    <item msgid="3318687539120971327">"Nula sedam"</item>
+    <item msgid="5701600693712102348">"Nula osam"</item>
+    <item msgid="3247381605947372495">"Nula devet"</item>
     <item msgid="3508406095411245038">"Deset"</item>
     <item msgid="7161996337755311711">"Jedanaest"</item>
     <item msgid="4044549963329624197">"Dvanaest"</item>
