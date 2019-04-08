@@ -88,6 +88,12 @@ public class Account implements Parcelable {
     public Account(Parcel in) {
         this.name = in.readString();
         this.type = in.readString();
+        if (TextUtils.isEmpty(name)) {
+            throw new android.os.BadParcelableException("the name must not be empty: " + name);
+        }
+        if (TextUtils.isEmpty(type)) {
+            throw new android.os.BadParcelableException("the type must not be empty: " + type);
+        }
         this.accessId = in.readString();
         if (accessId != null) {
             synchronized (sAccessedAccounts) {
