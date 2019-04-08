@@ -5461,6 +5461,8 @@ message PermissionGrantRequestResultReported {
         USER_DENIED_WITH_PREJUDICE = 7;
         // permission was automatically denied
         AUTO_DENIED = 8;
+        // permission request was ignored because permission is restricted
+        IGNORED_RESTRICTED_PERMISSION = 9;
     }
     // The result of the permission grant
     optional Result result = 6;

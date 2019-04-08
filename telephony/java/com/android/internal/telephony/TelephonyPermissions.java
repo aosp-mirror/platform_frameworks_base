@@ -54,6 +54,12 @@ public final class TelephonyPermissions {
     private static final Supplier<ITelephony> TELEPHONY_SUPPLIER = () ->
             ITelephony.Stub.asInterface(ServiceManager.getService(Context.TELEPHONY_SERVICE));
 
+    /**
+     * Whether to disable the new device identifier access restrictions.
+     */
+    private static final String PROPERTY_DEVICE_IDENTIFIER_ACCESS_RESTRICTIONS_DISABLED =
+            "device_identifier_access_restrictions_disabled";
+
     // Contains a mapping of packages that did not meet the new requirements to access device
     // identifiers and the methods they were attempting to invoke; used to prevent duplicate
     // reporting of packages / methods.
@@ -446,8 +452,8 @@ public final class TelephonyPermissions {
      * Returns true if the new device identifier access restrictions are disabled.
      */
     private static boolean isIdentifierCheckDisabled() {
-        return Boolean.parseBoolean(DeviceConfig.getProperty(DeviceConfig.Privacy.NAMESPACE,
-                DeviceConfig.Privacy.PROPERTY_DEVICE_IDENTIFIER_ACCESS_RESTRICTIONS_DISABLED));
+        return DeviceConfig.getInt(DeviceConfig.NAMESPACE_PRIVACY,
+                PROPERTY_DEVICE_IDENTIFIER_ACCESS_RESTRICTIONS_DISABLED, 0) == 1;
     }
 
     /**

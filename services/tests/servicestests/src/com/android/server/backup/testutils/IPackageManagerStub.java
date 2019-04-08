@@ -225,6 +225,24 @@ public class IPackageManagerStub implements IPackageManager {
     }
 
     @Override
+    public List<String> getWhitelistedRestrictedPermissions(String packageName, int flags,
+            int userId) throws RemoteException {
+        return null;
+    }
+
+    @Override
+    public boolean addWhitelistedRestrictedPermission(String packageName, String permission,
+            int whitelistFlags, int userId) throws RemoteException {
+        return false;
+    }
+
+    @Override
+    public boolean removeWhitelistedRestrictedPermission(String packageName, String permission,
+            int whitelistFlags, int userId) throws RemoteException {
+        return false;
+    }
+
+    @Override
     public boolean shouldShowRequestPermissionRationale(String permissionName, String packageName,
         int userId) throws RemoteException {
         return false;
@@ -858,7 +876,7 @@ public class IPackageManagerStub implements IPackageManager {
     }
 
     @Override
-    public boolean isUpgrade() throws RemoteException {
+    public boolean isDeviceUpgrading() throws RemoteException {
         return false;
     }
 
@@ -1180,6 +1198,16 @@ public class IPackageManagerStub implements IPackageManager {
     @Override
     public ModuleInfo getModuleInfo(String packageName, int flags) throws RemoteException {
         return null;
+    }
+
+    @Override
+    public int getRuntimePermissionsVersion(int userId) throws RemoteException {
+        return 0;
+    }
+
+    @Override
+    public void setRuntimePermissionsVersion(int version, int userId) throws RemoteException {
+
     }
 
     @Override

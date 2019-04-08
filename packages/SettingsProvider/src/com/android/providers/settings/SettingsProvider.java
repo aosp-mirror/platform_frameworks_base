@@ -3610,7 +3610,7 @@ public class SettingsProvider extends ContentProvider {
 
                     final boolean isUpgrade;
                     try {
-                        isUpgrade = mPackageManager.isUpgrade();
+                        isUpgrade = mPackageManager.isDeviceUpgrading();
                     } catch (RemoteException e) {
                         throw new IllegalStateException("Package manager not available");
                     }

@@ -69,8 +69,10 @@ import dalvik.system.VMRuntime;
 import java.io.File;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 /**
  * Class for retrieving various kinds of information related to the application
@@ -83,6 +85,11 @@ public abstract class PackageManager {
 
     /** {@hide} */
     public static final boolean APPLY_DEFAULT_TO_DEVICE_PROTECTED_STORAGE = true;
+
+    /** {@hide} */
+    @SystemApi
+    @TestApi
+    public static boolean RESTRICTED_PERMISSIONS_ENABLED = false;
 
     /**
      * This exception is thrown when a given package, application, or component
@@ -712,6 +719,7 @@ public abstract class PackageManager {
             INSTALL_ALL_USERS,
             INSTALL_REQUEST_DOWNGRADE,
             INSTALL_GRANT_RUNTIME_PERMISSIONS,
+            INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS,
             INSTALL_FORCE_VOLUME_UUID,
             INSTALL_FORCE_PERMISSION_PROMPT,
             INSTALL_INSTANT_APP,
@@ -793,6 +801,16 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int INSTALL_GRANT_RUNTIME_PERMISSIONS = 0x00000100;
+
+    /**
+     * Flag parameter for {@link #installPackage} to indicate that all restricted
+     * permissions should be whitelisted. If {@link #INSTALL_ALL_USERS}
+     * is set the restricted permissions will be whitelisted for all users, otherwise
+     * only to the owner.
+     *
+     * @hide
+     */
+    public static final int INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS = 0x00000200;
 
     /** {@hide} */
     public static final int INSTALL_FORCE_VOLUME_UUID = 0x00000200;
@@ -3075,13 +3093,71 @@ public abstract class PackageManager {
     public static final int FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED =  1 << 9;
 
     /**
-     * Mask for all permission flags present in Android P
-     *
-     * @deprecated This constant does not contain useful information and should never have been
-     * exposed. When checking permission flags always flag each flag explicitly and ignore all
-     * flags that do not matter for this particular code.
+     * Permission flag: The permission is restricted but the app is exempt
+     * from the restriction and is allowed to hold this permission in its
+     * full form and the exemption is provided by the installer on record.
      *
      * @hide
+     */
+    @TestApi
+    @SystemApi
+    public static final int FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT =  1 << 11;
+
+    /**
+     * Permission flag: The permission is restricted but the app is exempt
+     * from the restriction and is allowed to hold this permission in its
+     * full form and the exemption is provided by the system due to its
+     * permission policy.
+     *
+     * @hide
+     */
+    @TestApi
+    @SystemApi
+    public static final int FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT =  1 << 12;
+
+    /**
+     * Permission flag: The permission is restricted but the app is exempt
+     * from the restriction and is allowed to hold this permission and the
+     * exemption is provided by the system when upgrading from an OS version
+     * where the permission was not restricted to an OS version where the
+     * permission is restricted.
+     *
+     * @hide
+     */
+    @TestApi
+    @SystemApi
+    public static final int FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT =  1 << 13;
+
+
+    /**
+     * Permission flag: The permission is disabled but may be granted. If
+     * disabled the data protected by the permission should be protected
+     * by a no-op (empty list, default error, etc) instead of crashing the
+     * client.
+     *
+     * @hide
+     */
+    @TestApi
+    @SystemApi
+    public static final int FLAG_PERMISSION_APPLY_RESTRICTION =  1 << 14;
+
+
+    /**
+     * Permission flags: Bitwise or of all permission flags allowing an
+     * exemption for a restricted permission.
+     * @hide
+     */
+    public static final int FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT =
+            FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT
+                    | FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT
+                    | FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT;
+
+    /**
+     * Mask for all permission flags.
+     *
+     * @hide
+     *
+     * @deprecated Don't use - does not capture all flags.
      */
     @Deprecated
     @SystemApi
@@ -3092,7 +3168,20 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    public static final int MASK_PERMISSION_FLAGS_ALL = 0x3FF;
+    public static final int MASK_PERMISSION_FLAGS_ALL = FLAG_PERMISSION_USER_SET
+            | FLAG_PERMISSION_USER_FIXED
+            | FLAG_PERMISSION_POLICY_FIXED
+            | FLAG_PERMISSION_REVOKE_ON_UPGRADE
+            | FLAG_PERMISSION_SYSTEM_FIXED
+            | FLAG_PERMISSION_GRANTED_BY_DEFAULT
+            | FLAG_PERMISSION_REVIEW_REQUIRED
+            | FLAG_PERMISSION_REVOKE_WHEN_REQUESTED
+            | FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED
+            | FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED
+            | FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT
+            | FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT
+            | FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT
+            | FLAG_PERMISSION_APPLY_RESTRICTION;
 
     /**
      * Injected activity in app that forwards user to setting activity of that app.
@@ -3100,6 +3189,35 @@ public abstract class PackageManager {
      * @hide
      */
     public static final String APP_DETAILS_ACTIVITY_CLASS_NAME = AppDetailsActivity.class.getName();
+
+    /**
+     * Permission whitelist flag: permissions whitelisted by the system.
+     * Permissions can also be whitelisted by the installer or on upgrade.
+     */
+    public static final int FLAG_PERMISSION_WHITELIST_SYSTEM = 1 << 0;
+
+    /**
+     * Permission whitelist flag: permissions whitelisted by the installer.
+     * Permissions can also be whitelisted by the system or on upgrade.
+     */
+    public static final int FLAG_PERMISSION_WHITELIST_INSTALLER = 1 << 1;
+
+    /**
+     * Permission whitelist flag: permissions whitelisted by the system
+     * when upgrading from an OS version where the permission was not
+     * restricted to an OS version where the permission is restricted.
+     * Permissions can also be whitelisted by the installer or the system.
+     */
+    public static final int FLAG_PERMISSION_WHITELIST_UPGRADE = 1 << 2;
+
+    /** @hide */
+    @IntDef(flag = true, prefix = {"FLAG_PERMISSION_WHITELIST_"}, value = {
+            FLAG_PERMISSION_WHITELIST_SYSTEM,
+            FLAG_PERMISSION_WHITELIST_INSTALLER,
+            FLAG_PERMISSION_WHITELIST_UPGRADE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PermissionWhitelistFlags {}
 
     /**
      * This is a library that contains components apps can invoke. For
@@ -3824,6 +3942,10 @@ public abstract class PackageManager {
             /*
             FLAG_PERMISSION_REVOKE_WHEN_REQUESED
             */
+            FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT,
+            FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT,
+            FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT,
+            FLAG_PERMISSION_APPLY_RESTRICTION
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface PermissionFlags {}
@@ -3923,6 +4045,163 @@ public abstract class PackageManager {
     public abstract void updatePermissionFlags(@NonNull String permissionName,
             @NonNull String packageName, @PermissionFlags int flagMask,
             @PermissionFlags int flagValues, @NonNull UserHandle user);
+
+    /**
+     * Gets the restricted permissions that have been whitelisted and the app
+     * is allowed to have them granted in their full form.
+     *
+     * <p> Permissions can be hard restricted which means that the app cannot hold
+     * them or soft restricted where the app can hold the permission but in a weaker
+     * form. Whether a permission is {@link PermissionInfo#FLAG_HARD_RESTRICTED hard
+     * restricted} or {@link PermissionInfo#FLAG_SOFT_RESTRICTED soft restricted}
+     * depends on the permission declaration. Whitelisting a hard restricted permission
+     * allows for the to hold that permission and whitelisting a soft restricted
+     * permission allows the app to hold the permission in its full, unrestricted form.
+     *
+     * <p><ol>There are three whitelists:
+     *
+     * <li>one for cases where the system permission policy whitelists a permission
+     * This list corresponds to the{@link #FLAG_PERMISSION_WHITELIST_SYSTEM} flag.
+     * Can only be accessed by pre-installed holders of a dedicated permission.
+     *
+     * <li>one for cases where the system whitelists the permission when upgrading
+     * from an OS version in which the permission was not restricted to an OS version
+     * in which the permission is restricted. This list corresponds to the {@link
+     * #FLAG_PERMISSION_WHITELIST_UPGRADE} flag. Can be accessed by pre-installed
+     * holders of a dedicated permission or the installer on record.
+     *
+     * <li>one for cases where the installer of the package whitelists a permission.
+     * This list corresponds to the {@link #FLAG_PERMISSION_WHITELIST_INSTALLER} flag.
+     * Can be accessed by pre-installed holders of a dedicated permission or the
+     * installer on record.
+     *
+     * @param packageName The app for which to get whitelisted permissions.
+     * @param whitelistFlag The flag to determine which whitelist to query. Only one flag
+     * can be passed.s
+     * @return The whitelisted permissions that are on any of the whitelists you query for.
+     *
+     * @see #addWhitelistedRestrictedPermission(String, String, int)
+     * @see #removeWhitelistedRestrictedPermission(String, String, int)
+     * @see #FLAG_PERMISSION_WHITELIST_SYSTEM
+     * @see #FLAG_PERMISSION_WHITELIST_UPGRADE
+     * @see #FLAG_PERMISSION_WHITELIST_INSTALLER
+     *
+     * @throws SecurityException if you try to access a whitelist that you have no access to.
+     */
+    @RequiresPermission(value = Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS,
+            conditional = true)
+    public @NonNull Set<String> getWhitelistedRestrictedPermissions(
+            @NonNull String packageName, @PermissionWhitelistFlags int whitelistFlag) {
+        return Collections.emptySet();
+    }
+
+    /**
+     * Adds a whitelisted restricted permission for an app.
+     *
+     * <p> Permissions can be hard restricted which means that the app cannot hold
+     * them or soft restricted where the app can hold the permission but in a weaker
+     * form. Whether a permission is {@link PermissionInfo#FLAG_HARD_RESTRICTED hard
+     * restricted} or {@link PermissionInfo#FLAG_SOFT_RESTRICTED soft restricted}
+     * depends on the permission declaration. Whitelisting a hard restricted permission
+     * allows for the to hold that permission and whitelisting a soft restricted
+     * permission allows the app to hold the permission in its full, unrestricted form.
+     *
+     * <p><ol>There are three whitelists:
+     *
+     * <li>one for cases where the system permission policy whitelists a permission
+     * This list corresponds to the {@link #FLAG_PERMISSION_WHITELIST_SYSTEM} flag.
+     * Can only be modified by pre-installed holders of a dedicated permission.
+     *
+     * <li>one for cases where the system whitelists the permission when upgrading
+     * from an OS version in which the permission was not restricted to an OS version
+     * in which the permission is restricted. This list corresponds to the {@link
+     * #FLAG_PERMISSION_WHITELIST_UPGRADE} flag. Can be modified by pre-installed
+     * holders of a dedicated permission. The installer on record can only remove
+     * permissions from this whitelist.
+     *
+     * <li>one for cases where the installer of the package whitelists a permission.
+     * This list corresponds to the {@link #FLAG_PERMISSION_WHITELIST_INSTALLER} flag.
+     * Can be modified by pre-installed holders of a dedicated permission or the installer
+     * on record.
+     *
+     * <p>You need to specify the whitelists for which to set the whitelisted permissions
+     * which will clear the previous whitelisted permissions and replace them with the
+     * provided ones.
+     *
+     * @param packageName The app for which to get whitelisted permissions.
+     * @param permission The whitelisted permission to add.
+     * @param whitelistFlags The whitelists to which to add. Passing multiple flags
+     * updates all specified whitelists.
+     * @return Whether the permission was added to the whitelist.
+     *
+     * @see #getWhitelistedRestrictedPermissions(String, int)
+     * @see #removeWhitelistedRestrictedPermission(String, String, int)
+     * @see #FLAG_PERMISSION_WHITELIST_SYSTEM
+     * @see #FLAG_PERMISSION_WHITELIST_UPGRADE
+     * @see #FLAG_PERMISSION_WHITELIST_INSTALLER
+     *
+     * @throws SecurityException if you try to modify a whitelist that you have no access to.
+     */
+    @RequiresPermission(value = Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS,
+            conditional = true)
+    public boolean addWhitelistedRestrictedPermission(@NonNull String packageName,
+            @NonNull String permission, @PermissionWhitelistFlags int whitelistFlags) {
+        return false;
+    }
+
+    /**
+     * Removes a whitelisted restricted permission for an app.
+     *
+     * <p> Permissions can be hard restricted which means that the app cannot hold
+     * them or soft restricted where the app can hold the permission but in a weaker
+     * form. Whether a permission is {@link PermissionInfo#FLAG_HARD_RESTRICTED hard
+     * restricted} or {@link PermissionInfo#FLAG_SOFT_RESTRICTED soft restricted}
+     * depends on the permission declaration. Whitelisting a hard restricted permission
+     * allows for the to hold that permission and whitelisting a soft restricted
+     * permission allows the app to hold the permission in its full, unrestricted form.
+     *
+     * <p><ol>There are three whitelists:
+     *
+     * <li>one for cases where the system permission policy whitelists a permission
+     * This list corresponds to the {@link #FLAG_PERMISSION_WHITELIST_SYSTEM} flag.
+     * Can only be modified by pre-installed holders of a dedicated permission.
+     *
+     * <li>one for cases where the system whitelists the permission when upgrading
+     * from an OS version in which the permission was not restricted to an OS version
+     * in which the permission is restricted. This list corresponds to the {@link
+     * #FLAG_PERMISSION_WHITELIST_UPGRADE} flag. Can be modified by pre-installed
+     * holders of a dedicated permission. The installer on record can only remove
+     * permissions from this whitelist.
+     *
+     * <li>one for cases where the installer of the package whitelists a permission.
+     * This list corresponds to the {@link #FLAG_PERMISSION_WHITELIST_INSTALLER} flag.
+     * Can be modified by pre-installed holders of a dedicated permission or the installer
+     * on record.
+     *
+     * <p>You need to specify the whitelists for which to set the whitelisted permissions
+     * which will clear the previous whitelisted permissions and replace them with the
+     * provided ones.
+     *
+     * @param packageName The app for which to get whitelisted permissions.
+     * @param permission The whitelisted permission to remove.
+     * @param whitelistFlags The whitelists from which to remove. Passing multiple flags
+     * updates all specified whitelists.
+     * @return Whether the permission was removed from the whitelist.
+     *
+     * @see #getWhitelistedRestrictedPermissions(String, int)
+     * @see #addWhitelistedRestrictedPermission(String, String, int)
+     * @see #FLAG_PERMISSION_WHITELIST_SYSTEM
+     * @see #FLAG_PERMISSION_WHITELIST_UPGRADE
+     * @see #FLAG_PERMISSION_WHITELIST_INSTALLER
+     *
+     * @throws SecurityException if you try to modify a whitelist that you have no access to.
+     */
+    @RequiresPermission(value = Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS,
+        conditional = true)
+    public boolean removeWhitelistedRestrictedPermission(@NonNull String packageName,
+        @NonNull String permission, @PermissionWhitelistFlags int whitelistFlags) {
+        return false;
+    }
 
     /**
      * Gets whether you should show UI with rationale for requesting a permission.
@@ -6515,6 +6794,13 @@ public abstract class PackageManager {
     public abstract boolean isUpgrade();
 
     /**
+     * Returns true if the device is upgrading, such as first boot after OTA.
+     */
+    public boolean isDeviceUpgrading() {
+        return false;
+    }
+
+    /**
      * Return interface that offers the ability to install, upgrade, and remove
      * applications on the device.
      */
@@ -6739,6 +7025,10 @@ public abstract class PackageManager {
             case FLAG_PERMISSION_REVOKE_WHEN_REQUESTED: return "REVOKE_WHEN_REQUESTED";
             case FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED: return "USER_SENSITIVE_WHEN_GRANTED";
             case FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED: return "USER_SENSITIVE_WHEN_DENIED";
+            case FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT: return "RESTRICTION_INSTALLER_EXEMPT";
+            case FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT: return "RESTRICTION_SYSTEM_EXEMPT";
+            case FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT: return "RESTRICTION_UPGRADE_EXEMPT";
+            case FLAG_PERMISSION_APPLY_RESTRICTION: return "FLAG_PERMISSION_APPLY_RESTRICTION";
             default: return Integer.toString(flag);
         }
     }
