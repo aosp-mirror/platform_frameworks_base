@@ -595,15 +595,13 @@ public class BubbleStackView extends FrameLayout {
 
     /**
      * Updates a bubble in the stack.
-     *
-     * @param entry the entry to update in the stack.
-     * @param updatePosition whether this bubble should be moved to top of the stack.
+     *  @param entry the entry to update in the stack.
      */
-    public void updateBubble(NotificationEntry entry, boolean updatePosition) {
+    public void updateBubble(NotificationEntry entry) {
         Bubble b = mBubbleData.getBubble(entry.key);
         mBubbleData.updateBubble(entry.key, entry);
 
-        if (updatePosition && !mIsExpanded) {
+        if (!mIsExpanded) {
             // If alerting it gets promoted to top of the stack.
             if (mBubbleContainer.indexOfChild(b.iconView) != 0) {
                 mBubbleContainer.moveViewTo(b.iconView, 0);
