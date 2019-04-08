@@ -1214,7 +1214,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 && mLastOriginalBackgroundDrawable == mOriginalBackgroundDrawable) {
             return;
         }
-        if (mBackgroundInsets.equals(Insets.NONE)) {
+        if (mOriginalBackgroundDrawable == null || mBackgroundInsets.equals(Insets.NONE)) {
             setBackground(mOriginalBackgroundDrawable);
         } else {
             setBackground(new InsetDrawable(mOriginalBackgroundDrawable,
