@@ -1596,6 +1596,16 @@ public class JobInfo implements Parcelable {
             }
             return new JobInfo(this);
         }
+
+        /**
+         * @hide
+         */
+        public String summarize() {
+            final String service = (mJobService != null)
+                    ? mJobService.flattenToShortString()
+                    : "null";
+            return "JobInfo.Builder{job:" + mJobId + "/" + service + "}";
+        }
     }
 
     /**
