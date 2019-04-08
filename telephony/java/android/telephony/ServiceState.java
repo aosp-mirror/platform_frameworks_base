@@ -1045,6 +1045,7 @@ public class ServiceState implements Parcelable {
         mIsEmergencyOnly = false;
         mLteEarfcnRsrpBoost = 0;
         mNrFrequencyRange = FREQUENCY_RANGE_UNKNOWN;
+        mNetworkRegistrationInfos.clear();
         addNetworkRegistrationInfo(new NetworkRegistrationInfo.Builder()
                 .setDomain(NetworkRegistrationInfo.DOMAIN_CS)
                 .setTransportType(AccessNetworkConstants.TRANSPORT_TYPE_WWAN)
