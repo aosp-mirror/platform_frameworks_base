@@ -462,7 +462,6 @@ FileDescriptorTable* FileDescriptorTable::Create(const std::vector<int>& fds_to_
     }
 
     if (std::find(fds_to_ignore.begin(), fds_to_ignore.end(), fd) != fds_to_ignore.end()) {
-      LOG(INFO) << "Ignoring open file descriptor " << fd;
       continue;
     }
 
@@ -496,7 +495,6 @@ void FileDescriptorTable::Restat(const std::vector<int>& fds_to_ignore, fail_fn_
     }
 
     if (std::find(fds_to_ignore.begin(), fds_to_ignore.end(), fd) != fds_to_ignore.end()) {
-      LOG(INFO) << "Ignoring open file descriptor " << fd;
       continue;
     }
 
