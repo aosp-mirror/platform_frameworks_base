@@ -251,9 +251,7 @@ message SecureSettingsProto {
         // The App or module that changes the location mode.
         optional SettingProto changer = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
-        // What should happen to the location permissions when upgraded to Android Q.
-        // 0 == revoke permissions. Anything else == do nothing.
-        optional SettingProto permissions_upgrade_to_q_mode = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        reserved 3; // used to be used for permissions_upgrade_to_q_mode
     }
     optional Location location = 31;
 
