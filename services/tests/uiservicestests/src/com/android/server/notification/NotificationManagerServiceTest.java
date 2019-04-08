@@ -2887,7 +2887,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testApplyEnqueuedAdjustmentFromAssistant_importance_onTime() throws Exception {
+    public void testApplyEnqueuedAdjustmentFromAssistant_importance() throws Exception {
         final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
         mService.addEnqueuedNotification(r);
         NotificationManagerService.WorkerHandler handler = mock(
@@ -2902,25 +2902,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.applyEnqueuedAdjustmentFromAssistant(null, adjustment);
 
         assertEquals(IMPORTANCE_LOW, r.getImportance());
-    }
-
-    @Test
-    public void testApplyEnqueuedAdjustmentFromAssistant_importance_tooLate() throws Exception {
-        final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
-        mService.addNotification(r);
-        NotificationManagerService.WorkerHandler handler = mock(
-                NotificationManagerService.WorkerHandler.class);
-        mService.setHandler(handler);
-        when(mAssistants.isSameUser(eq(null), anyInt())).thenReturn(true);
-
-        Bundle signals = new Bundle();
-        signals.putInt(KEY_IMPORTANCE, IMPORTANCE_LOW);
-        Adjustment adjustment = new Adjustment(
-                r.sbn.getPackageName(), r.getKey(), signals, "", r.getUser().getIdentifier());
-        mBinderService.applyEnqueuedAdjustmentFromAssistant(null, adjustment);
-
-        assertEquals(IMPORTANCE_DEFAULT, r.getImportance());
-        assertFalse(r.hasAdjustment(KEY_IMPORTANCE));
     }
 
     @Test
