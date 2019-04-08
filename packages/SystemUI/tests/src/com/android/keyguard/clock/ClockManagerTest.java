@@ -18,12 +18,14 @@ package com.android.keyguard.clock;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.ContentResolver;
 import android.database.ContentObserver;
+import android.net.Uri;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
@@ -52,6 +54,8 @@ public final class ClockManagerTest extends SysuiTestCase {
 
     private static final String BUBBLE_CLOCK = BubbleClockController.class.getName();
     private static final Class<?> BUBBLE_CLOCK_CLASS = BubbleClockController.class;
+    private static final int USER_ID = 0;
+    private static final Uri SETTINGS_URI = null;
 
     private ClockManager mClockManager;
     private ContentObserver mContentObserver;
@@ -106,10 +110,10 @@ public final class ClockManagerTest extends SysuiTestCase {
     @Test
     public void getCurrentClock_default() {
         // GIVEN that settings doesn't contain any values
-        when(mMockSettingsWrapper.getLockScreenCustomClockFace()).thenReturn(null);
-        when(mMockSettingsWrapper.getDockedClockFace()).thenReturn(null);
+        when(mMockSettingsWrapper.getLockScreenCustomClockFace(anyInt())).thenReturn(null);
+        when(mMockSettingsWrapper.getDockedClockFace(anyInt())).thenReturn(null);
         // WHEN settings change event is fired
-        mContentObserver.onChange(false);
+        mContentObserver.onChange(false, SETTINGS_URI, USER_ID);
         // THEN the result is null, indicated the default clock face should be used.
         assertThat(mClockManager.getCurrentClock()).isNull();
     }
@@ -117,9 +121,9 @@ public final class ClockManagerTest extends SysuiTestCase {
     @Test
     public void getCurrentClock_customClock() {
         // GIVEN that settings is set to the bubble clock face
-        when(mMockSettingsWrapper.getLockScreenCustomClockFace()).thenReturn(BUBBLE_CLOCK);
+        when(mMockSettingsWrapper.getLockScreenCustomClockFace(anyInt())).thenReturn(BUBBLE_CLOCK);
         // WHEN settings change event is fired
-        mContentObserver.onChange(false);
+        mContentObserver.onChange(false, SETTINGS_URI, USER_ID);
         // THEN the plugin is the bubble clock face.
         assertThat(mClockManager.getCurrentClock()).isInstanceOf(BUBBLE_CLOCK_CLASS);
     }
@@ -127,9 +131,9 @@ public final class ClockManagerTest extends SysuiTestCase {
     @Test
     public void onClockChanged_customClock() {
         // GIVEN that settings is set to the bubble clock face
-        when(mMockSettingsWrapper.getLockScreenCustomClockFace()).thenReturn(BUBBLE_CLOCK);
+        when(mMockSettingsWrapper.getLockScreenCustomClockFace(anyInt())).thenReturn(BUBBLE_CLOCK);
         // WHEN settings change event is fired
-        mContentObserver.onChange(false);
+        mContentObserver.onChange(false, SETTINGS_URI, USER_ID);
         // THEN the plugin is the bubble clock face.
         ArgumentCaptor<ClockPlugin> captor = ArgumentCaptor.forClass(ClockPlugin.class);
         verify(mMockListener1).onClockChanged(captor.capture());
@@ -139,9 +143,9 @@ public final class ClockManagerTest extends SysuiTestCase {
     @Test
     public void onClockChanged_uniqueInstances() {
         // GIVEN that settings is set to the bubble clock face
-        when(mMockSettingsWrapper.getLockScreenCustomClockFace()).thenReturn(BUBBLE_CLOCK);
+        when(mMockSettingsWrapper.getLockScreenCustomClockFace(anyInt())).thenReturn(BUBBLE_CLOCK);
         // WHEN settings change event is fired
-        mContentObserver.onChange(false);
+        mContentObserver.onChange(false, SETTINGS_URI, USER_ID);
         // THEN the listeners receive separate instances of the Bubble clock plugin.
         ArgumentCaptor<ClockPlugin> captor1 = ArgumentCaptor.forClass(ClockPlugin.class);
         ArgumentCaptor<ClockPlugin> captor2 = ArgumentCaptor.forClass(ClockPlugin.class);
@@ -156,9 +160,9 @@ public final class ClockManagerTest extends SysuiTestCase {
     public void getCurrentClock_badSettingsValue() {
         // GIVEN that settings contains a value that doesn't correspond to a
         // custom clock face.
-        when(mMockSettingsWrapper.getLockScreenCustomClockFace()).thenReturn("bad value");
+        when(mMockSettingsWrapper.getLockScreenCustomClockFace(anyInt())).thenReturn("bad value");
         // WHEN settings change event is fired
-        mContentObserver.onChange(false);
+        mContentObserver.onChange(false, SETTINGS_URI, USER_ID);
         // THEN the result is null.
         assertThat(mClockManager.getCurrentClock()).isNull();
     }
@@ -174,7 +178,7 @@ public final class ClockManagerTest extends SysuiTestCase {
     @Test
     public void getCurrentClock_dockedCustomClock() {
         // GIVEN settings is set to the bubble clock face
-        when(mMockSettingsWrapper.getDockedClockFace()).thenReturn(BUBBLE_CLOCK);
+        when(mMockSettingsWrapper.getDockedClockFace(anyInt())).thenReturn(BUBBLE_CLOCK);
         // WHEN dock event fires
         mFakeDockManager.setDockEvent(DockManager.STATE_DOCKED);
         // THEN the plugin is the bubble clock face.
@@ -184,7 +188,7 @@ public final class ClockManagerTest extends SysuiTestCase {
     @Test
     public void getCurrentClock_badDockedSettingsValue() {
         // GIVEN settings contains a value that doesn't correspond to an available clock face.
-        when(mMockSettingsWrapper.getDockedClockFace()).thenReturn("bad value");
+        when(mMockSettingsWrapper.getDockedClockFace(anyInt())).thenReturn("bad value");
         // WHEN dock event fires
         mFakeDockManager.setDockEvent(DockManager.STATE_DOCKED);
         // THEN the result is null.
@@ -195,8 +199,8 @@ public final class ClockManagerTest extends SysuiTestCase {
     public void getCurrentClock_badDockedSettingsFallback() {
         // GIVEN settings contains a value that doesn't correspond to an available clock face, but
         // locked screen settings is set to bubble clock.
-        when(mMockSettingsWrapper.getDockedClockFace()).thenReturn("bad value");
-        when(mMockSettingsWrapper.getLockScreenCustomClockFace()).thenReturn(BUBBLE_CLOCK);
+        when(mMockSettingsWrapper.getDockedClockFace(anyInt())).thenReturn("bad value");
+        when(mMockSettingsWrapper.getLockScreenCustomClockFace(anyInt())).thenReturn(BUBBLE_CLOCK);
         // WHEN dock event is fired
         mFakeDockManager.setDockEvent(DockManager.STATE_DOCKED);
         // THEN the plugin is the bubble clock face.
