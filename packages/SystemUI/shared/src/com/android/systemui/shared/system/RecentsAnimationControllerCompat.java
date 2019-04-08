@@ -77,9 +77,15 @@ public class RecentsAnimationControllerCompat {
         }
     }
 
-    public void finish(boolean toHome) {
+    /**
+     * Finish the current recents animation.
+     * @param toHome Going to home or back to the previous app.
+     * @param sendUserLeaveHint determines whether userLeaveHint will be set true to the previous
+     *                          app.
+     */
+    public void finish(boolean toHome, boolean sendUserLeaveHint) {
         try {
-            mAnimationController.finish(toHome);
+            mAnimationController.finish(toHome, sendUserLeaveHint);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to finish recents animation", e);
         }

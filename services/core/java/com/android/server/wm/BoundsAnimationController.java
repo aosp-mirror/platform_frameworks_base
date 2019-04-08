@@ -73,6 +73,13 @@ public class BoundsAnimationController {
     /** Schedule a PiP mode changed callback when this animation ends. */
     public static final int SCHEDULE_PIP_MODE_CHANGED_ON_END = 2;
 
+    public static final int BOUNDS = 0;
+    public static final int FADE_IN = 1;
+
+    @IntDef({BOUNDS, FADE_IN}) public @interface AnimationType {}
+
+    private static final int FADE_IN_DURATION = 500;
+
     // Only accessed on UI thread.
     private ArrayMap<BoundsAnimationTarget, BoundsAnimator> mRunningAnimations = new ArrayMap<>();
 
@@ -115,6 +122,7 @@ public class BoundsAnimationController {
     private boolean mFinishAnimationAfterTransition = false;
     private final AnimationHandler mAnimationHandler;
     private Choreographer mChoreographer;
+    private @AnimationType int mAnimationType;
 
     private static final int WAIT_FOR_DRAW_TIMEOUT_MS = 3000;
 
@@ -140,6 +148,7 @@ public class BoundsAnimationController {
             implements ValueAnimator.AnimatorUpdateListener, ValueAnimator.AnimatorListener {
 
         private final BoundsAnimationTarget mTarget;
+        private final @AnimationType int mAnimationType;
         private final Rect mFrom = new Rect();
         private final Rect mTo = new Rect();
         private final Rect mTmpRect = new Rect();
@@ -166,8 +175,8 @@ public class BoundsAnimationController {
 
         // Depending on whether we are animating from
         // a smaller to a larger size
-        private final int mFrozenTaskWidth;
-        private final int mFrozenTaskHeight;
+        private int mFrozenTaskWidth;
+        private int mFrozenTaskHeight;
 
         // Timeout callback to ensure we continue the animation if waiting for resuming or app
         // windows drawn fails
@@ -176,12 +185,13 @@ public class BoundsAnimationController {
             resume();
         };
 
-        BoundsAnimator(BoundsAnimationTarget target, Rect from, Rect to,
-                @SchedulePipModeChangedState int schedulePipModeChangedState,
+        BoundsAnimator(BoundsAnimationTarget target, @AnimationType int animationType, Rect from,
+                Rect to, @SchedulePipModeChangedState int schedulePipModeChangedState,
                 @SchedulePipModeChangedState int prevShedulePipModeChangedState,
                 boolean moveFromFullscreen, boolean moveToFullscreen, Rect frozenTask) {
             super();
             mTarget = target;
+            mAnimationType = animationType;
             mFrom.set(from);
             mTo.set(to);
             mSchedulePipModeChangedState = schedulePipModeChangedState;
@@ -195,12 +205,14 @@ public class BoundsAnimationController {
             // to their final size immediately so we can use scaling to make the window
             // larger. Likewise if we are going from bigger to smaller, we want to wait until
             // the end so we don't have to upscale from the smaller finished size.
-            if (animatingToLargerSize()) {
-                mFrozenTaskWidth = mTo.width();
-                mFrozenTaskHeight = mTo.height();
-            } else {
-                mFrozenTaskWidth = frozenTask.isEmpty() ? mFrom.width() : frozenTask.width();
-                mFrozenTaskHeight = frozenTask.isEmpty() ? mFrom.height() : frozenTask.height();
+            if (mAnimationType == BOUNDS) {
+                if (animatingToLargerSize()) {
+                    mFrozenTaskWidth = mTo.width();
+                    mFrozenTaskHeight = mTo.height();
+                } else {
+                    mFrozenTaskWidth = frozenTask.isEmpty() ? mFrom.width() : frozenTask.width();
+                    mFrozenTaskHeight = frozenTask.isEmpty() ? mFrom.height() : frozenTask.height();
+                }
             }
         }
 
@@ -222,8 +234,9 @@ public class BoundsAnimationController {
             // otherwise.
             boolean continueAnimation;
             if (mPrevSchedulePipModeChangedState == NO_PIP_MODE_CHANGED_CALLBACKS) {
-                continueAnimation = mTarget.onAnimationStart(mSchedulePipModeChangedState ==
-                        SCHEDULE_PIP_MODE_CHANGED_ON_START, false /* forceUpdate */);
+                continueAnimation = mTarget.onAnimationStart(
+                        mSchedulePipModeChangedState == SCHEDULE_PIP_MODE_CHANGED_ON_START,
+                        false /* forceUpdate */, mAnimationType);
 
                 // When starting an animation from fullscreen, pause here and wait for the
                 // windows-drawn signal before we start the rest of the transition down into PiP.
@@ -238,7 +251,8 @@ public class BoundsAnimationController {
                 // However, we still need to report to them that they are leaving PiP, so this will
                 // force an update via a mode changed callback.
                 continueAnimation = mTarget.onAnimationStart(
-                        true /* schedulePipModeChangedCallback */, true /* forceUpdate */);
+                        true /* schedulePipModeChangedCallback */, true /* forceUpdate */,
+                        mAnimationType);
             } else {
                 // The animation is already running, but we should check that the TaskStack is still
                 // valid before continuing with the animation
@@ -285,6 +299,13 @@ public class BoundsAnimationController {
         @Override
         public void onAnimationUpdate(ValueAnimator animation) {
             final float value = (Float) animation.getAnimatedValue();
+            if (mAnimationType == FADE_IN) {
+                if (!mTarget.setPinnedStackAlpha(value)) {
+                    cancelAndCallAnimationEnd();
+                }
+                return;
+            }
+
             final float remains = 1 - value;
             mTmpRect.left = (int) (mFrom.left * remains + mTo.left * value + 0.5f);
             mTmpRect.top = (int) (mFrom.top * remains + mTo.top * value + 0.5f);
@@ -408,16 +429,29 @@ public class BoundsAnimationController {
 
     public void animateBounds(final BoundsAnimationTarget target, Rect from, Rect to,
             int animationDuration, @SchedulePipModeChangedState int schedulePipModeChangedState,
-            boolean moveFromFullscreen, boolean moveToFullscreen) {
+            boolean moveFromFullscreen, boolean moveToFullscreen,
+            @AnimationType int animationType) {
         animateBoundsImpl(target, from, to, animationDuration, schedulePipModeChangedState,
-                moveFromFullscreen, moveToFullscreen);
+                moveFromFullscreen, moveToFullscreen, animationType);
     }
 
     @VisibleForTesting
     BoundsAnimator animateBoundsImpl(final BoundsAnimationTarget target, Rect from, Rect to,
             int animationDuration, @SchedulePipModeChangedState int schedulePipModeChangedState,
-            boolean moveFromFullscreen, boolean moveToFullscreen) {
+            boolean moveFromFullscreen, boolean moveToFullscreen,
+            @AnimationType int animationType) {
         final BoundsAnimator existing = mRunningAnimations.get(target);
+        // animateBoundsImpl gets called twice for each animation. The second time we get the final
+        // to rect that respects the shelf, which is when we want to resize. Our signal for fade in
+        // comes in from how to enter into pip, but we also need to use the to and from rect to
+        // decide which animation we want to run finally.
+        boolean shouldResize = false;
+        if (isRunningFadeInAnimation(target)) {
+            shouldResize = true;
+            if (from.contains(to)) {
+                animationType = FADE_IN;
+            }
+        }
         final boolean replacing = existing != null;
         @SchedulePipModeChangedState int prevSchedulePipModeChangedState =
                 NO_PIP_MODE_CHANGED_CALLBACKS;
@@ -477,16 +511,32 @@ public class BoundsAnimationController {
             // Since we are replacing, we skip both animation start and end callbacks
             existing.cancel();
         }
-        final BoundsAnimator animator = new BoundsAnimator(target, from, to,
+        if (shouldResize) {
+            target.setPinnedStackSize(to, null);
+        }
+        final BoundsAnimator animator = new BoundsAnimator(target, animationType, from, to,
                 schedulePipModeChangedState, prevSchedulePipModeChangedState,
                 moveFromFullscreen, moveToFullscreen, frozenTask);
         mRunningAnimations.put(target, animator);
         animator.setFloatValues(0f, 1f);
-        animator.setDuration((animationDuration != -1 ? animationDuration
-                : DEFAULT_TRANSITION_DURATION) * DEBUG_ANIMATION_SLOW_DOWN_FACTOR);
+        animator.setDuration(animationType == FADE_IN ? FADE_IN_DURATION
+                : (animationDuration != -1 ? animationDuration : DEFAULT_TRANSITION_DURATION)
+                        * DEBUG_ANIMATION_SLOW_DOWN_FACTOR);
         animator.setInterpolator(mFastOutSlowInInterpolator);
         animator.start();
         return animator;
+    }
+
+    public void setAnimationType(@AnimationType int animationType) {
+        mAnimationType = animationType;
+    }
+
+    /** return the current animation type. */
+    public @AnimationType int getAnimationType() {
+        @AnimationType int animationType = mAnimationType;
+        // Default to BOUNDS.
+        mAnimationType = BOUNDS;
+        return animationType;
     }
 
     public Handler getHandler() {
@@ -496,6 +546,11 @@ public class BoundsAnimationController {
     public void onAllWindowsDrawn() {
         if (DEBUG) Slog.d(TAG, "onAllWindowsDrawn:");
         mHandler.post(this::resume);
+    }
+
+    private boolean isRunningFadeInAnimation(final BoundsAnimationTarget target) {
+        final BoundsAnimator existing = mRunningAnimations.get(target);
+        return existing != null && existing.mAnimationType == FADE_IN && existing.isStarted();
     }
 
     private void resume() {
