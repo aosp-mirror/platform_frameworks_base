@@ -133,6 +133,7 @@ import android.os.ServiceSpecificException;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -1628,8 +1629,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
      */
     private boolean disallowedBecauseSystemCaller() {
         // TODO: start throwing a SecurityException when GnssLocationProvider stops calling
-        // requestRouteToHost.
-        if (isSystem(Binder.getCallingUid())) {
+        // requestRouteToHost. In Q, GnssLocationProvider is changed to not call requestRouteToHost
+        // for devices launched with Q and above. However, existing devices upgrading to Q and
+        // above must continued to be supported for few more releases.
+        if (isSystem(Binder.getCallingUid()) && SystemProperties.getInt(
+                "ro.product.first_api_level", 0) > Build.VERSION_CODES.P) {
             log("This method exists only for app backwards compatibility"
                     + " and must not be called by system services.");
             return true;
