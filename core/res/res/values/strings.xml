@@ -525,7 +525,7 @@
     <!-- label for screenshot item in power menu -->
     <string name="global_action_screenshot">Screenshot</string>
 
-    <!-- Take bug report menu title [CHAR LIMIT=20] -->
+    <!-- Take bug report menu title [CHAR LIMIT=30] -->
     <string name="bugreport_title">Bug report</string>
     <!-- Message in bugreport dialog describing what it does [CHAR LIMIT=NONE] -->
     <!-- TODO: remove if not used anymore -->
