@@ -101,6 +101,7 @@ cc_defaults {
         "debug/GlesDriver.cpp",
         "debug/FatalBaseDriver.cpp",
         "debug/NullGlesDriver.cpp",
+        "debug/NullSkiaInterface.cpp",
     ],
     include_dirs: ["frameworks/native/opengl/libs/GLES2"],
 }
