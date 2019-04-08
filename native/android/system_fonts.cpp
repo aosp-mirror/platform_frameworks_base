@@ -250,7 +250,8 @@ AFont* _Nonnull AFontMatcher_match(
                 minikin::U16StringPiece(text, textLength),
                 matcher->mFontStyle,
                 matcher->mLocaleListId,
-                static_cast<minikin::FamilyVariant>(matcher->mFamilyVariant));
+                static_cast<minikin::FamilyVariant>(matcher->mFamilyVariant),
+                1  /* maxRun */);
 
     const minikin::Font* font = runs[0].fakedFont.font;
     std::unique_ptr<AFont> result = std::make_unique<AFont>();
