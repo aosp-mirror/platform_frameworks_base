@@ -18,6 +18,7 @@ package com.android.server.pm.permission;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.PermissionInfoFlags;
 import android.content.pm.PackageParser;
 import android.content.pm.PermissionGroupInfo;
@@ -76,8 +77,16 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
             @NonNull PackageParser.Package pkg, @NonNull int[] userIds,
             @NonNull String[] grantedPermissions, int callingUid,
             @Nullable PermissionCallback callback);
+    public abstract @Nullable List<String> getWhitelistedRestrictedPermissions(
+            @NonNull PackageParser.Package pkg,
+            @PackageManager.PermissionWhitelistFlags int whitelistFlags, int userId);
+    public abstract void setWhitelistedRestrictedPermissions(
+            @NonNull PackageParser.Package pkg, @NonNull int[] userIds,
+            @NonNull List<String> permissions, int callingUid,
+            @PackageManager.PermissionWhitelistFlags int whitelistFlags,
+            @Nullable PermissionCallback callback);
     public abstract void revokeRuntimePermission(@NonNull String permName,
-            @NonNull String packageName, boolean overridePolicy, int callingUid, int userId,
+            @NonNull String packageName, boolean overridePolicy, int userId,
             @Nullable PermissionCallback callback);
 
     public abstract void updatePermissions(@Nullable String packageName,

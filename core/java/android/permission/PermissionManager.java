@@ -16,10 +16,19 @@
 
 package android.permission;
 
+import android.Manifest;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.content.pm.IPackageManager;
+import android.content.pm.PackageManager;
+import android.content.pm.PermissionInfo;
+import android.os.RemoteException;
 
 import com.android.internal.annotations.Immutable;
 import com.android.server.SystemConfig;
@@ -46,14 +55,53 @@ public final class PermissionManager {
 
     private final @NonNull Context mContext;
 
+    private final IPackageManager mPackageManager;
+
     /**
      * Creates a new instance.
      *
      * @param context The current context in which to operate.
      * @hide
      */
-    public PermissionManager(@NonNull Context context) {
+    public PermissionManager(@NonNull Context context, IPackageManager packageManager) {
         mContext = context;
+        mPackageManager = packageManager;
+    }
+
+    /**
+     * Gets the version of the runtime permission database.
+     *
+     * @return The database version.
+     *
+     * @hide
+     */
+    @TestApi
+    @SystemApi
+    @RequiresPermission(Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY)
+    public @IntRange(from = 0) int getRuntimePermissionsVersion() {
+        try {
+            return mPackageManager.getRuntimePermissionsVersion(mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets the version of the runtime permission database.
+     *
+     * @param version The new version.
+     *
+     * @hide
+     */
+    @TestApi
+    @SystemApi
+    @RequiresPermission(Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY)
+    public void setRuntimePermissionsVersion(@IntRange(from = 0) int version) {
+        try {
+            mPackageManager.setRuntimePermissionsVersion(version, mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**

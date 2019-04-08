@@ -56,7 +56,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Log;
-import android.util.SparseArray;
+import android.util.Pair;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.infra.AbstractMultiplePendingRequestsRemoteService;
@@ -95,7 +95,8 @@ public final class PermissionControllerManager {
      * Global remote services (per user) used by all {@link PermissionControllerManager managers}
      */
     @GuardedBy("sLock")
-    private static SparseArray<RemoteService> sRemoteServices = new SparseArray<>(1);
+    private static ArrayMap<Pair<Integer, Thread>, RemoteService> sRemoteServices
+            = new ArrayMap<>(1);
 
     /**
      * The key for retrieving the result from the returned bundle.
@@ -217,20 +218,24 @@ public final class PermissionControllerManager {
      * Create a new {@link PermissionControllerManager}.
      *
      * @param context to create the manager for
+     * @param handler handler to schedule work
      *
      * @hide
      */
-    public PermissionControllerManager(@NonNull Context context) {
+    public PermissionControllerManager(@NonNull Context context, @NonNull Handler handler) {
         synchronized (sLock) {
-            RemoteService remoteService = sRemoteServices.get(context.getUserId(), null);
+            Pair<Integer, Thread> key = new Pair<>(context.getUserId(),
+                    handler.getLooper().getThread());
+            RemoteService remoteService = sRemoteServices.get(key);
             if (remoteService == null) {
                 Intent intent = new Intent(SERVICE_INTERFACE);
                 intent.setPackage(context.getPackageManager().getPermissionControllerPackageName());
                 ResolveInfo serviceInfo = context.getPackageManager().resolveService(intent, 0);
 
                 remoteService = new RemoteService(context.getApplicationContext(),
-                        serviceInfo.getComponentInfo().getComponentName(), context.getUser());
-                sRemoteServices.put(context.getUserId(), remoteService);
+                        serviceInfo.getComponentInfo().getComponentName(), handler,
+                        context.getUser());
+                sRemoteServices.put(key, remoteService);
             }
 
             mRemoteService = remoteService;
@@ -454,6 +459,23 @@ public final class PermissionControllerManager {
     }
 
     /**
+     * Grant or upgrade runtime permissions. The upgrade could be performed
+     * based on whether the device upgraded, whether the permission database
+     * version is old, or because the permission policy changed.
+     *
+     * @param executor Executor on which to invoke the callback
+     * @param callback Callback to receive the result
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY)
+    public void grantOrUpgradeDefaultRuntimePermissions(
+            @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
+        mRemoteService.scheduleRequest(new PendingGrantOrUpgradeDefaultRuntimePermissionsRequest(
+                mRemoteService, executor, callback));
+    }
+
+    /**
      * A connection to the remote service
      */
     static final class RemoteService extends
@@ -469,10 +491,10 @@ public final class PermissionControllerManager {
          * @param user User the remote service should be connected as
          */
         RemoteService(@NonNull Context context, @NonNull ComponentName componentName,
-                @NonNull UserHandle user) {
+                @NonNull Handler handler, @NonNull UserHandle user) {
             super(context, SERVICE_INTERFACE, componentName, user.getIdentifier(),
                     service -> Log.e(TAG, "RemoteService " + service + " died"),
-                    context.getMainThreadHandler(), 0, false, 1);
+                    handler, 0, false, 1);
         }
 
         /**
@@ -1144,6 +1166,53 @@ public final class PermissionControllerManager {
                         mRemoteCallback);
             } catch (RemoteException e) {
                 Log.e(TAG, "Error counting permission users", e);
+            }
+        }
+    }
+
+    /**
+     * Request for {@link #grantOrUpgradeDefaultRuntimePermissions(Executor, Consumer)}
+     */
+    private static final class PendingGrantOrUpgradeDefaultRuntimePermissionsRequest extends
+            AbstractRemoteService.PendingRequest<RemoteService, IPermissionController> {
+        private final @NonNull Consumer<Boolean> mCallback;
+
+        private final @NonNull RemoteCallback mRemoteCallback;
+
+        private PendingGrantOrUpgradeDefaultRuntimePermissionsRequest(
+                @NonNull RemoteService service,  @NonNull @CallbackExecutor Executor executor,
+                @NonNull Consumer<Boolean> callback) {
+            super(service);
+            mCallback = callback;
+
+            mRemoteCallback = new RemoteCallback(result -> executor.execute(() -> {
+                long token = Binder.clearCallingIdentity();
+                try {
+                    callback.accept(result != null);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                    finish();
+                }
+            }), null);
+        }
+
+        @Override
+        protected void onTimeout(RemoteService remoteService) {
+            long token = Binder.clearCallingIdentity();
+            try {
+                mCallback.accept(false);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void run() {
+            try {
+                getService().getServiceInterface().grantOrUpgradeDefaultRuntimePermissions(
+                        mRemoteCallback);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error granting or upgrading runtime permissions", e);
             }
         }
     }

@@ -170,6 +170,7 @@ import android.content.pm.PackageList;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.LegacyPackageDeleteObserver;
 import android.content.pm.PackageManager.ModuleInfoFlags;
+import android.content.pm.PackageManager.PermissionWhitelistFlags;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManagerInternal.CheckPermissionDelegate;
 import android.content.pm.PackageManagerInternal.PackageListObserver;
@@ -744,6 +745,9 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @GuardedBy("mPackages")
     final private ArraySet<PackageListObserver> mPackageListObservers = new ArraySet<>();
+
+    @GuardedBy("mPackages")
+    private final SparseIntArray mDefaultPermissionsGrantedUsers = new SparseIntArray();
 
     private final ModuleInfoProvider mModuleInfoProvider;
 
@@ -1487,10 +1491,15 @@ public class PackageManagerService extends IPackageManager.Stub
                         final boolean virtualPreload = ((args.installFlags
                                 & PackageManager.INSTALL_VIRTUAL_PRELOAD) != 0);
                         final String[] grantedPermissions = args.installGrantPermissions;
+                        final List<String> whitelistedRestrictedPermissions = ((args.installFlags
+                                & PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS) != 0
+                                    && parentRes.pkg != null)
+                                ? parentRes.pkg.requestedPermissions : null;
 
                         // Handle the parent package
-                        handlePackagePostInstall(parentRes, grantPermissions, killApp,
-                                virtualPreload, grantedPermissions, didRestore,
+                        handlePackagePostInstall(parentRes, grantPermissions,
+                                killApp, virtualPreload, grantedPermissions,
+                                whitelistedRestrictedPermissions, didRestore,
                                 args.installerPackageName, args.observer);
 
                         // Handle the child packages
@@ -1498,8 +1507,9 @@ public class PackageManagerService extends IPackageManager.Stub
                                 ? parentRes.addedChildPackages.size() : 0;
                         for (int i = 0; i < childCount; i++) {
                             PackageInstalledInfo childRes = parentRes.addedChildPackages.valueAt(i);
-                            handlePackagePostInstall(childRes, grantPermissions, killApp,
-                                    virtualPreload, grantedPermissions, false /*didRestore*/,
+                            handlePackagePostInstall(childRes, grantPermissions,
+                                    killApp, virtualPreload, grantedPermissions,
+                                    whitelistedRestrictedPermissions, false /*didRestore*/,
                                     args.installerPackageName, args.observer);
                         }
 
@@ -1777,13 +1787,24 @@ public class PackageManagerService extends IPackageManager.Stub
     };
 
     private void handlePackagePostInstall(PackageInstalledInfo res, boolean grantPermissions,
-            boolean killApp, boolean virtualPreload, String[] grantedPermissions,
+            boolean killApp, boolean virtualPreload,
+            String[] grantedPermissions, List<String> whitelistedRestrictedPermissions,
             boolean launchedForRestore, String installerPackage,
             IPackageInstallObserver2 installObserver) {
         if (res.returnCode == PackageManager.INSTALL_SUCCEEDED) {
             // Send the removed broadcasts
             if (res.removedInfo != null) {
                 res.removedInfo.sendPackageRemovedBroadcasts(killApp);
+            }
+
+            // Whitelist any restricted permissions first as some may be runtime
+            // that the installer requested to be granted at install time.
+            if (whitelistedRestrictedPermissions != null
+                    && !whitelistedRestrictedPermissions.isEmpty()) {
+                mPermissionManager.setWhitelistedRestrictedPermissions(
+                        res.pkg, res.newUsers, whitelistedRestrictedPermissions,
+                        Process.myUid(), PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER,
+                        mPermissionCallback);
             }
 
             // Now that we successfully installed the package, grant runtime
@@ -1999,6 +2020,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
             if (allNewUsers && !update) {
                 notifyPackageAdded(packageName, res.uid);
+            } else {
+                notifyPackageChanged(packageName, res.uid);
             }
 
             // Log current value of "unknown sources" setting
@@ -2308,6 +2331,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         public void onDefaultRuntimePermissionsGranted(int userId) {
                             synchronized(mPackages) {
                                 mSettings.onDefaultRuntimePermissionsGrantedLPr(userId);
+                                mDefaultPermissionsGrantedUsers.put(userId, userId);
                             }
                         }
                     }, mPackages /*externalLock*/);
@@ -3475,7 +3499,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
-    public boolean isUpgrade() {
+    public boolean isDeviceUpgrading() {
         // allow instant applications
         // The system property allows testing ota flow when upgraded to the same image.
         return mIsUpgrade || SystemProperties.getBoolean(
@@ -5527,7 +5551,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 == PackageManager.PERMISSION_GRANTED);
 
         mPermissionManager.revokeRuntimePermission(permName, packageName, overridePolicy,
-                getCallingUid(), userId, mPermissionCallback);
+                userId, mPermissionCallback);
     }
 
     @Override
@@ -5614,6 +5638,193 @@ public class PackageManagerService extends IPackageManager.Stub
                     mPermissionCallback);
             if (changed) {
                 mSettings.writeRuntimePermissionsForUserLPr(userId, false);
+            }
+        }
+    }
+
+    @Override
+    public @Nullable List<String> getWhitelistedRestrictedPermissions(@NonNull String packageName,
+            @PermissionWhitelistFlags int whitelistFlags, @UserIdInt int userId) {
+        Preconditions.checkNotNull(packageName);
+        Preconditions.checkFlagsArgument(whitelistFlags,
+                PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE
+                        | PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM
+                        | PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER);
+        Preconditions.checkArgumentNonNegative(userId, null);
+
+        if (UserHandle.getCallingUserId() != userId) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.INTERACT_ACROSS_USERS,
+                    "getWhitelistedRestrictedPermissions for user " + userId);
+        }
+
+        synchronized (mPackages) {
+            final PackageSetting packageSetting = mSettings.mPackages.get(packageName);
+            if (packageSetting == null) {
+                Slog.w(TAG, "Unknown package: " + packageName);
+                return null;
+            }
+
+            final boolean isCallerPrivileged = mContext.checkCallingOrSelfPermission(
+                    Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS)
+                            == PackageManager.PERMISSION_GRANTED;
+            final PackageSetting installerPackageSetting = mSettings.mPackages.get(
+                    packageSetting.installerPackageName);
+            final boolean isCallerInstallerOnRecord = installerPackageSetting != null
+                    && UserHandle.isSameApp(installerPackageSetting.appId, Binder.getCallingUid());
+
+            if ((whitelistFlags & PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM) != 0
+                    && !isCallerPrivileged) {
+                throw new SecurityException("Querying system whitelist requires "
+                        + Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS);
+            }
+
+            if ((whitelistFlags & (PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE
+                    | PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER)) != 0) {
+                if (!isCallerPrivileged && !isCallerInstallerOnRecord) {
+                    throw new SecurityException("Querying upgrade or installer whitelist"
+                            + " requires being installer on record or "
+                            + Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS);
+                }
+            }
+
+            if (filterAppAccessLPr(packageSetting, Binder.getCallingUid(),
+                    UserHandle.getCallingUserId())) {
+                return null;
+            }
+
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                return mPermissionManager.getWhitelistedRestrictedPermissions(
+                        packageSetting.pkg, whitelistFlags, userId);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+    }
+
+    @Override
+    public boolean addWhitelistedRestrictedPermission(@NonNull String packageName,
+            @NonNull String permission, @PermissionWhitelistFlags int whitelistFlags,
+            @UserIdInt int userId) {
+        // Other argument checks are done in get/setWhitelistedRestrictedPermissions
+        Preconditions.checkNotNull(permission);
+
+        List<String> permissions = getWhitelistedRestrictedPermissions(packageName,
+                whitelistFlags, userId);
+        if (permissions == null) {
+            permissions = new ArrayList<>(1);
+        }
+        if (permissions.indexOf(permission) < 0) {
+            permissions.add(permission);
+            setWhitelistedRestrictedPermissions(packageName, permissions,
+                    whitelistFlags, userId);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean removeWhitelistedRestrictedPermission(@NonNull String packageName,
+            @NonNull String permission, @PermissionWhitelistFlags int whitelistFlags,
+            @UserIdInt int userId) {
+        // Other argument checks are done in get/setWhitelistedRestrictedPermissions
+        Preconditions.checkNotNull(permission);
+
+        final List<String> permissions = getWhitelistedRestrictedPermissions(packageName,
+                whitelistFlags, userId);
+        if (permissions != null && permissions.remove(permission)) {
+            setWhitelistedRestrictedPermissions(packageName, permissions,
+                    whitelistFlags, userId);
+            return true;
+        }
+        return false;
+    }
+
+    private void setWhitelistedRestrictedPermissions(@NonNull String packageName,
+            @Nullable List<String> permissions, @PermissionWhitelistFlags int whitelistFlag,
+            @UserIdInt int userId) {
+        Preconditions.checkNotNull(packageName);
+        Preconditions.checkFlagsArgument(whitelistFlag,
+                PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE
+                        | PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM
+                        | PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER);
+        Preconditions.checkArgument(Integer.bitCount(whitelistFlag) == 1);
+        Preconditions.checkArgumentNonNegative(userId, null);
+
+        if (UserHandle.getCallingUserId() != userId) {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.INTERACT_ACROSS_USERS,
+                    "setWhitelistedRestrictedPermissions for user " + userId);
+        }
+
+        synchronized (mPackages) {
+            final PackageSetting packageSetting = mSettings.mPackages.get(packageName);
+            if (packageSetting == null) {
+                Slog.w(TAG, "Unknown package: " + packageName);
+                return;
+            }
+
+            final boolean isCallerPrivileged = mContext.checkCallingOrSelfPermission(
+                    Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS)
+                            == PackageManager.PERMISSION_GRANTED;
+            final PackageSetting installerPackageSetting = mSettings.mPackages.get(
+                    packageSetting.installerPackageName);
+            final boolean isCallerInstallerOnRecord = installerPackageSetting != null
+                    && UserHandle.isSameApp(installerPackageSetting.appId, Binder.getCallingUid());
+
+            if ((whitelistFlag & PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM) != 0
+                    && !isCallerPrivileged) {
+                throw new SecurityException("Modifying system whitelist requires "
+                        + Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS);
+            }
+
+            if ((whitelistFlag & PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE) != 0) {
+                if (!isCallerPrivileged && !isCallerInstallerOnRecord) {
+                    throw new SecurityException("Modifying upgrade whitelist requires"
+                            + " being installer on record or "
+                            + Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS);
+                }
+                final List<String> whitelistedPermissions = getWhitelistedRestrictedPermissions(
+                        packageName, whitelistFlag, userId);
+                if (permissions == null || permissions.isEmpty()) {
+                    if (whitelistedPermissions == null || whitelistedPermissions.isEmpty()) {
+                        return;
+                    }
+                } else {
+                    // Only the system can add and remove while the installer can only remove.
+                    final int permissionCount = permissions.size();
+                    for (int i = 0; i < permissionCount; i++) {
+                        if ((whitelistedPermissions == null
+                                || !whitelistedPermissions.contains(permissions.get(i)))
+                                && !isCallerPrivileged) {
+                            throw new SecurityException("Adding to upgrade whitelist requires"
+                                    + Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS);
+                        }
+                    }
+                }
+            }
+
+            if ((whitelistFlag & PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER) != 0) {
+                if (!isCallerPrivileged && !isCallerInstallerOnRecord) {
+                    throw new SecurityException("Modifying installer whitelist requires"
+                            + " being installer on record or "
+                            + Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS);
+                }
+            }
+
+            if (filterAppAccessLPr(packageSetting, Binder.getCallingUid(),
+                    UserHandle.getCallingUserId())) {
+                return;
+            }
+
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mPermissionManager.setWhitelistedRestrictedPermissions(packageSetting.pkg,
+                        new int[]{userId}, permissions, Process.myUid(), whitelistFlag,
+                        mPermissionCallback);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
         }
     }
@@ -8676,7 +8887,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private void maybeClearProfilesForUpgradesLI(
             @Nullable PackageSetting originalPkgSetting,
             @NonNull PackageParser.Package currentPkg) {
-        if (originalPkgSetting == null || !isUpgrade()) {
+        if (originalPkgSetting == null || !isDeviceUpgrading()) {
           return;
         }
         if (originalPkgSetting.versionCode == currentPkg.mVersionCode) {
@@ -9163,7 +9374,7 @@ public class PackageManagerService extends IPackageManager.Stub
         enforceSystemOrRoot("Only the system can request package update");
 
         // We need to re-extract after an OTA.
-        boolean causeUpgrade = isUpgrade();
+        boolean causeUpgrade = isDeviceUpgrading();
 
         // First boot or factory reset.
         // Note: we also handle devices that are upgrading to N right now as if it is their
@@ -9224,7 +9435,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             boolean useProfileForDexopt = false;
 
-            if ((isFirstBoot() || isUpgrade()) && isSystemApp(pkg)) {
+            if ((isFirstBoot() || isDeviceUpgrading()) && isSystemApp(pkg)) {
                 // Copy over initial preopt profiles since we won't get any JIT samples for methods
                 // that are already compiled.
                 File profileFile = new File(getPrebuildProfilePath(pkg));
@@ -12551,6 +12762,22 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @Override
+    public void notifyPackageChanged(String packageName, int uid) {
+        final PackageListObserver[] observers;
+        synchronized (mPackages) {
+            if (mPackageListObservers.size() == 0) {
+                return;
+            }
+            final PackageListObserver[] observerArray =
+                    new PackageListObserver[mPackageListObservers.size()];
+            observers = mPackageListObservers.toArray(observerArray);
+        }
+        for (int i = observers.length - 1; i >= 0; --i) {
+            observers[i].onPackageChanged(packageName, uid);
+        }
+    }
+
     private static final Comparator<ProviderInfo> sProviderInitOrderSorter = (p1, p2) -> {
         final int v1 = p1.initOrder;
         final int v2 = p2.initOrder;
@@ -14510,6 +14737,7 @@ public class PackageManagerService extends IPackageManager.Stub
         int mRet;
         final String packageAbiOverride;
         final String[] grantedRuntimePermissions;
+        final List<String> whitelistedRestrictedPermissions;
         final VerificationInfo verificationInfo;
         final PackageParser.SigningDetails signingDetails;
         final int installReason;
@@ -14519,8 +14747,8 @@ public class PackageManagerService extends IPackageManager.Stub
         InstallParams(OriginInfo origin, MoveInfo move, IPackageInstallObserver2 observer,
                 int installFlags, String installerPackageName, String volumeUuid,
                 VerificationInfo verificationInfo, UserHandle user, String packageAbiOverride,
-                String[] grantedPermissions, PackageParser.SigningDetails signingDetails,
-                int installReason) {
+                String[] grantedPermissions, List<String> whitelistedRestrictedPermissions,
+                PackageParser.SigningDetails signingDetails, int installReason) {
             super(user);
             this.origin = origin;
             this.move = move;
@@ -14531,6 +14759,7 @@ public class PackageManagerService extends IPackageManager.Stub
             this.verificationInfo = verificationInfo;
             this.packageAbiOverride = packageAbiOverride;
             this.grantedRuntimePermissions = grantedPermissions;
+            this.whitelistedRestrictedPermissions = whitelistedRestrictedPermissions;
             this.signingDetails = signingDetails;
             this.installReason = installReason;
         }
@@ -14558,8 +14787,10 @@ public class PackageManagerService extends IPackageManager.Stub
             installerPackageName = activeInstallSession.getInstallerPackageName();
             volumeUuid = activeInstallSession.getSessionParams().volumeUuid;
             packageAbiOverride = activeInstallSession.getSessionParams().abiOverride;
-            grantedRuntimePermissions =
-                    activeInstallSession.getSessionParams().grantedRuntimePermissions;
+            grantedRuntimePermissions = activeInstallSession.getSessionParams()
+                    .grantedRuntimePermissions;
+            whitelistedRestrictedPermissions = activeInstallSession.getSessionParams()
+                    .whitelistedRestrictedPermissions;
             signingDetails = activeInstallSession.getSigningDetails();
         }
 
@@ -15016,6 +15247,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final UserHandle user;
         final String abiOverride;
         final String[] installGrantPermissions;
+        final List<String> whitelistedRestrictedPermissions;
         /** If non-null, drop an async trace when the install completes */
         final String traceMethod;
         final int traceCookie;
@@ -15032,6 +15264,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 int installFlags, String installerPackageName, String volumeUuid,
                 UserHandle user, String[] instructionSets,
                 String abiOverride, String[] installGrantPermissions,
+                List<String> whitelistedRestrictedPermissions,
                 String traceMethod, int traceCookie, SigningDetails signingDetails,
                 int installReason,
                 MultiPackageInstallParams multiPackageInstallParams) {
@@ -15045,6 +15278,7 @@ public class PackageManagerService extends IPackageManager.Stub
             this.instructionSets = instructionSets;
             this.abiOverride = abiOverride;
             this.installGrantPermissions = installGrantPermissions;
+            this.whitelistedRestrictedPermissions = whitelistedRestrictedPermissions;
             this.traceMethod = traceMethod;
             this.traceCookie = traceCookie;
             this.signingDetails = signingDetails;
@@ -15135,7 +15369,7 @@ public class PackageManagerService extends IPackageManager.Stub
             super(params.origin, params.move, params.observer, params.installFlags,
                     params.installerPackageName, params.volumeUuid,
                     params.getUser(), null /*instructionSets*/, params.packageAbiOverride,
-                    params.grantedRuntimePermissions,
+                    params.grantedRuntimePermissions, params.whitelistedRestrictedPermissions,
                     params.traceMethod, params.traceCookie, params.signingDetails,
                     params.installReason, params.mParentInstallParams);
         }
@@ -15143,7 +15377,7 @@ public class PackageManagerService extends IPackageManager.Stub
         /** Existing install */
         FileInstallArgs(String codePath, String resourcePath, String[] instructionSets) {
             super(OriginInfo.fromNothing(), null, null, 0, null, null, null, instructionSets,
-                    null, null, null, 0, PackageParser.SigningDetails.UNKNOWN,
+                    null, null, null, null, 0, PackageParser.SigningDetails.UNKNOWN,
                     PackageManager.INSTALL_REASON_UNKNOWN, null /* parent */);
             this.codeFile = (codePath != null) ? new File(codePath) : null;
             this.resourceFile = (resourcePath != null) ? new File(resourcePath) : null;
@@ -15334,7 +15568,7 @@ public class PackageManagerService extends IPackageManager.Stub
             super(params.origin, params.move, params.observer, params.installFlags,
                     params.installerPackageName, params.volumeUuid,
                     params.getUser(), null /* instruction sets */, params.packageAbiOverride,
-                    params.grantedRuntimePermissions,
+                    params.grantedRuntimePermissions, params.whitelistedRestrictedPermissions,
                     params.traceMethod, params.traceCookie, params.signingDetails,
                     params.installReason, params.mParentInstallParams);
         }
@@ -20960,6 +21194,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
         }
+
         sUserManager.systemReady();
         // If we upgraded grant all default permissions before kicking off.
         for (int userId : grantPermissionsUserIds) {
@@ -22809,7 +23044,8 @@ public class PackageManagerService extends IPackageManager.Stub
         final InstallParams params = new InstallParams(origin, move, installObserver, installFlags,
                 installerPackageName, volumeUuid, null /*verificationInfo*/, user,
                 packageAbiOverride, null /*grantedPermissions*/,
-                PackageParser.SigningDetails.UNKNOWN, PackageManager.INSTALL_REASON_UNKNOWN);
+                null /*whitelistedRestrictedPermissions*/, PackageParser.SigningDetails.UNKNOWN,
+                PackageManager.INSTALL_REASON_UNKNOWN);
         params.setTraceMethod("movePackage").setTraceCookie(System.identityHashCode(params));
         msg.obj = params;
 
@@ -23904,7 +24140,7 @@ public class PackageManagerService extends IPackageManager.Stub
         public void revokeRuntimePermission(String packageName, String permName, int userId,
                 boolean overridePolicy) {
             mPermissionManager.revokeRuntimePermission(
-                    permName, packageName, overridePolicy, getCallingUid(), userId,
+                    permName, packageName, overridePolicy, userId,
                     mPermissionCallback);
         }
 
@@ -24285,6 +24521,13 @@ public class PackageManagerService extends IPackageManager.Stub
                         null);
             }
         }
+
+        @Override
+        public boolean wereDefaultPermissionsGrantedSinceBoot(int userId) {
+            synchronized (mPackages) {
+                return mDefaultPermissionPolicy.wereDefaultPermissionsGrantedSinceBoot(userId);
+            }
+        }
     }
 
     @GuardedBy("mPackages")
@@ -24328,6 +24571,29 @@ public class PackageManagerService extends IPackageManager.Stub
             // Should not happen
         }
         return EmptyArray.STRING;
+    }
+
+    @Override
+    public int getRuntimePermissionsVersion(@UserIdInt int userId) {
+        Preconditions.checkArgumentNonnegative(userId);
+        mContext.enforceCallingOrSelfPermission(
+                Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY,
+                "setRuntimePermissionVersion");
+        synchronized (mPackages) {
+            return mSettings.getDefaultRuntimePermissionsVersionLPr(userId);
+        }
+    }
+
+    @Override
+    public void setRuntimePermissionsVersion(int version, @UserIdInt int userId) {
+        Preconditions.checkArgumentNonnegative(version);
+        Preconditions.checkArgumentNonnegative(userId);
+        mContext.enforceCallingOrSelfPermission(
+                Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY,
+                "setRuntimePermissionVersion");
+        synchronized (mPackages) {
+            mSettings.setDefaultRuntimePermissionsVersionLPr(version, userId);
+        }
     }
 
     @Override
@@ -24795,5 +25061,6 @@ interface PackageSender {
     void sendPackageAddedForNewUsers(String packageName, boolean sendBootCompleted,
         boolean includeStopped, int appId, int[] userIds, int[] instantUserIds);
     void notifyPackageAdded(String packageName, int uid);
+    void notifyPackageChanged(String packageName, int uid);
     void notifyPackageRemoved(String packageName, int uid);
 }
