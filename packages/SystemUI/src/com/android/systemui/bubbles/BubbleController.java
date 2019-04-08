@@ -216,6 +216,7 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
         }
 
         mBubbleData = data;
+        mBubbleData.setListener(mBubbleDataListener);
         mSurfaceSynchronizer = synchronizer;
     }
 
@@ -435,6 +436,47 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
                 // This was a cancel so we should remove the bubble
                 removeBubble(entry.key, DISMISS_NOTIF_CANCEL);
             }
+        }
+    };
+
+    private final BubbleData.Listener mBubbleDataListener = new BubbleData.Listener() {
+        @Override
+        public void onBubbleAdded(Bubble bubble) {
+
+        }
+
+        @Override
+        public void onBubbleRemoved(Bubble bubble, int reason) {
+
+        }
+
+        public void onBubbleUpdated(Bubble bubble) {
+
+        }
+
+        @Override
+        public void onOrderChanged(List<Bubble> bubbles) {
+
+        }
+
+        @Override
+        public void onSelectionChanged(Bubble selectedBubble) {
+
+        }
+
+        @Override
+        public void onExpandedChanged(boolean expanded) {
+
+        }
+
+        @Override
+        public void showFlyoutText(Bubble bubble, String text) {
+
+        }
+
+        @Override
+        public void apply() {
+
         }
     };
 
