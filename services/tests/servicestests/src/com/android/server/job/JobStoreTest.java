@@ -379,6 +379,82 @@ public class JobStoreTest {
                 .build());
     }
 
+    @Test
+    public void testPersistedIdleConstraint() throws Exception {
+        JobInfo.Builder b = new Builder(8, mComponent)
+                .setRequiresDeviceIdle(true)
+                .setPersisted(true);
+        JobStatus taskStatus = JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1, null);
+
+        mTaskStoreUnderTest.add(taskStatus);
+        waitForPendingIo();
+
+        final JobSet jobStatusSet = new JobSet();
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
+        assertEquals("Incorrect # of persisted tasks.", 1, jobStatusSet.size());
+        JobStatus loaded = jobStatusSet.getAllJobs().iterator().next();
+        assertEquals("Idle constraint not persisted correctly.",
+                loaded.getJob().isRequireDeviceIdle(),
+                taskStatus.getJob().isRequireDeviceIdle());
+    }
+
+    @Test
+    public void testPersistedChargingConstraint() throws Exception {
+        JobInfo.Builder b = new Builder(8, mComponent)
+                .setRequiresCharging(true)
+                .setPersisted(true);
+        JobStatus taskStatus = JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1, null);
+
+        mTaskStoreUnderTest.add(taskStatus);
+        waitForPendingIo();
+
+        final JobSet jobStatusSet = new JobSet();
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
+        assertEquals("Incorrect # of persisted tasks.", 1, jobStatusSet.size());
+        JobStatus loaded = jobStatusSet.getAllJobs().iterator().next();
+        assertEquals("Charging constraint not persisted correctly.",
+                loaded.getJob().isRequireCharging(),
+                taskStatus.getJob().isRequireCharging());
+    }
+
+    @Test
+    public void testPersistedStorageNotLowConstraint() throws Exception {
+        JobInfo.Builder b = new Builder(8, mComponent)
+                .setRequiresStorageNotLow(true)
+                .setPersisted(true);
+        JobStatus taskStatus = JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1, null);
+
+        mTaskStoreUnderTest.add(taskStatus);
+        waitForPendingIo();
+
+        final JobSet jobStatusSet = new JobSet();
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
+        assertEquals("Incorrect # of persisted tasks.", 1, jobStatusSet.size());
+        JobStatus loaded = jobStatusSet.getAllJobs().iterator().next();
+        assertEquals("Storage-not-low constraint not persisted correctly.",
+                loaded.getJob().isRequireStorageNotLow(),
+                taskStatus.getJob().isRequireStorageNotLow());
+    }
+
+    @Test
+    public void testPersistedBatteryNotLowConstraint() throws Exception {
+        JobInfo.Builder b = new Builder(8, mComponent)
+                .setRequiresBatteryNotLow(true)
+                .setPersisted(true);
+        JobStatus taskStatus = JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1, null);
+
+        mTaskStoreUnderTest.add(taskStatus);
+        waitForPendingIo();
+
+        final JobSet jobStatusSet = new JobSet();
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
+        assertEquals("Incorrect # of persisted tasks.", 1, jobStatusSet.size());
+        JobStatus loaded = jobStatusSet.getAllJobs().iterator().next();
+        assertEquals("Battery-not-low constraint not persisted correctly.",
+                loaded.getJob().isRequireBatteryNotLow(),
+                taskStatus.getJob().isRequireBatteryNotLow());
+    }
+
     /**
      * Helper function to kick a {@link JobInfo} through a persistence cycle and
      * assert that it's unchanged.
