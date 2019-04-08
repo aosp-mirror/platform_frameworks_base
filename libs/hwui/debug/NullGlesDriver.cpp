@@ -20,8 +20,10 @@ namespace android {
 namespace uirenderer {
 namespace debug {
 
+extern const GrGLInterface* CreateNullSkiaInterface();
+
 sk_sp<const GrGLInterface> NullGlesDriver::getSkiaInterface() {
-    sk_sp<const GrGLInterface> skiaInterface(GrGLCreateNullInterface());
+    sk_sp<const GrGLInterface> skiaInterface(CreateNullSkiaInterface());
     return skiaInterface;
 }
 
