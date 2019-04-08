@@ -9891,10 +9891,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         info.setContentDescription(getContentDescription());
 
         info.setEnabled(isEnabled());
+        info.setClickable(isClickable());
+        info.setFocusable(isFocusable());
         info.setScreenReaderFocusable(isScreenReaderFocusable());
         info.setFocused(isFocused());
         info.setAccessibilityFocused(isAccessibilityFocused());
         info.setSelected(isSelected());
+        info.setLongClickable(isLongClickable());
+        info.setContextClickable(isContextClickable());
         info.setLiveRegion(getAccessibilityLiveRegion());
         if ((mTooltipInfo != null) && (mTooltipInfo.mTooltipText != null)) {
             info.setTooltipText(mTooltipInfo.mTooltipText);
