@@ -78,10 +78,11 @@ public class ApnSetting implements Parcelable {
      */
     public static final int TYPE_NONE = ApnTypes.NONE;
     /**
-     * APN type for all APNs.
+     * APN type for all APNs (except wild-cardable types).
      * @hide
      */
-    public static final int TYPE_ALL = ApnTypes.ALL | ApnTypes.MCX;
+    public static final int TYPE_ALL = ApnTypes.DEFAULT | ApnTypes.HIPRI | ApnTypes.MMS
+            | ApnTypes.SUPL | ApnTypes.DUN | ApnTypes.FOTA | ApnTypes.IMS | ApnTypes.CBS;
     /** APN type for default data traffic. */
     public static final int TYPE_DEFAULT = ApnTypes.DEFAULT | ApnTypes.HIPRI;
     /** APN type for MMS traffic. */
