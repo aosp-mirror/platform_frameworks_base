@@ -38,6 +38,7 @@
     <attr name="frameColor" format="color" />
     <declare-styleable name="BatteryMeterView">
         <attr name="frameColor" />
+        <attr name="textAppearance" format="reference"/>
     </declare-styleable>
     <declare-styleable name="Clock">
         <attr name="amPmStyle" format="enum">
