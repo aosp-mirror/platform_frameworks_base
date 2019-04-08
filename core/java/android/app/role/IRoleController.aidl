@@ -33,8 +33,6 @@ oneway interface IRoleController {
 
     void onClearRoleHolders(in String roleName, int flags, in RemoteCallback callback);
 
-    void onSmsKillSwitchToggled(boolean enabled);
-
     void isApplicationQualifiedForRole(in String roleName, in String packageName,
             in RemoteCallback callback);
 

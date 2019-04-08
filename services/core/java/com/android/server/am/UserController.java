@@ -2269,7 +2269,7 @@ class UserController implements Handler.Callback {
         boolean isFirstBootOrUpgrade() {
             IPackageManager pm = AppGlobals.getPackageManager();
             try {
-                return pm.isFirstBoot() || pm.isUpgrade();
+                return pm.isFirstBoot() || pm.isDeviceUpgrading();
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

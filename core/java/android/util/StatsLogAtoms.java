@@ -78,6 +78,13 @@ public class StatsLogAtoms {
 
     /**
      * Possible value of {@link PermissionGrantRequestResultReported_Result}:
+     * permission request was ignored because it was restricted
+     */
+    public static final int PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__IGNORED_RESTRICTED_PERMISSION =
+            StatsLogInternal.PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__IGNORED_RESTRICTED_PERMISSION;
+
+    /**
+     * Possible value of {@link PermissionGrantRequestResultReported_Result}:
      * permission was granted by user action
      */
     public static final int PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__USER_GRANTED =

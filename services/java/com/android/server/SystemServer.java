@@ -32,6 +32,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.res.Configuration;
 import android.content.res.Resources.Theme;
 import android.database.sqlite.SQLiteCompatibilityWalFlags;
@@ -124,6 +125,7 @@ import com.android.server.pm.OtaDexoptService;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.ShortcutService;
 import com.android.server.pm.UserManagerService;
+import com.android.server.policy.PermissionPolicyService;
 import com.android.server.policy.PhoneWindowManager;
 import com.android.server.policy.role.LegacyRoleResolutionPolicy;
 import com.android.server.power.PowerManagerService;
@@ -543,7 +545,7 @@ public final class SystemServer {
     }
 
     private boolean isFirstBootOrUpgrade() {
-        return mPackageManagerService.isFirstBoot() || mPackageManagerService.isUpgrade();
+        return mPackageManagerService.isFirstBoot() || mPackageManagerService.isDeviceUpgrading();
     }
 
     private void reportWtf(String msg, Throwable e) {
@@ -1986,6 +1988,11 @@ public final class SystemServer {
 
         traceBeginAndSlog("StartBootPhaseDeviceSpecificServicesReady");
         mSystemServiceManager.startBootPhase(SystemService.PHASE_DEVICE_SPECIFIC_SERVICES_READY);
+        traceEnd();
+
+        // Permission policy service
+        traceBeginAndSlog("StartPermissionPolicyService");
+        mSystemServiceManager.startService(PermissionPolicyService.class);
         traceEnd();
 
         // These are needed to propagate to the runnable below.

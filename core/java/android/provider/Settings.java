@@ -13379,18 +13379,6 @@ public final class Settings {
                 "location_global_kill_switch";
 
         /**
-         * If set to 1, app cannot request read sms permission unless it's the default sms handler.
-         *
-         * STOPSHIP: Remove this once we ship with the restriction enabled.
-         *
-         * @hide
-         */
-        @SystemApi
-        @TestApi
-        public static final String SMS_ACCESS_RESTRICTION_ENABLED =
-                "sms_access_restriction_enabled";
-
-        /**
          * If set to 1, the device identifier check will be relaxed to the previous READ_PHONE_STATE
          * permission check for 3P apps.
          *
