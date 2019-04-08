@@ -34,14 +34,14 @@ public final class CellSignalStrengthTdscdma extends CellSignalStrength implemen
     private static final String LOG_TAG = "CellSignalStrengthTdscdma";
     private static final boolean DBG = false;
 
-    private static final int TDSCDMA_RSSI_MAX = -51;
-    private static final int TDSCDMA_RSSI_GREAT = -77;
-    private static final int TDSCDMA_RSSI_GOOD = -87;
-    private static final int TDSCDMA_RSSI_MODERATE = -97;
-    private static final int TDSCDMA_RSSI_POOR = -107;
-
-    private static final int TDSCDMA_RSCP_MIN = -120;
+    // These levels are arbitrary but carried over from SignalStrength.java for consistency.
     private static final int TDSCDMA_RSCP_MAX = -24;
+    private static final int TDSCDMA_RSCP_GREAT = -49;
+    private static final int TDSCDMA_RSCP_GOOD = -73;
+    private static final int TDSCDMA_RSCP_MODERATE = -97;
+    private static final int TDSCDMA_RSCP_POOR = -110;
+    private static final int TDSCDMA_RSCP_MIN = -120;
+
 
     private int mRssi; // in dBm [-113, -51], CellInfo.UNAVAILABLE
 
@@ -135,11 +135,11 @@ public final class CellSignalStrengthTdscdma extends CellSignalStrength implemen
     /** @hide */
     @Override
     public void updateLevel(PersistableBundle cc, ServiceState ss) {
-        if (mRssi > TDSCDMA_RSSI_MAX) mLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
-        else if (mRssi >= TDSCDMA_RSSI_GREAT) mLevel = SIGNAL_STRENGTH_GREAT;
-        else if (mRssi >= TDSCDMA_RSSI_GOOD)  mLevel = SIGNAL_STRENGTH_GOOD;
-        else if (mRssi >= TDSCDMA_RSSI_MODERATE)  mLevel = SIGNAL_STRENGTH_MODERATE;
-        else if (mRssi >= TDSCDMA_RSSI_POOR) mLevel = SIGNAL_STRENGTH_POOR;
+        if (mRscp > TDSCDMA_RSCP_MAX) mLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
+        else if (mRscp >= TDSCDMA_RSCP_GREAT) mLevel = SIGNAL_STRENGTH_GREAT;
+        else if (mRscp >= TDSCDMA_RSCP_GOOD)  mLevel = SIGNAL_STRENGTH_GOOD;
+        else if (mRscp >= TDSCDMA_RSCP_MODERATE)  mLevel = SIGNAL_STRENGTH_MODERATE;
+        else if (mRscp >= TDSCDMA_RSCP_POOR) mLevel = SIGNAL_STRENGTH_POOR;
         else mLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
     }
 
@@ -156,6 +156,23 @@ public final class CellSignalStrengthTdscdma extends CellSignalStrength implemen
      */
     public int getRscp() {
         return mRscp;
+    }
+
+    /**
+     * Get the RSSI as dBm value -113..-51dBm or {@link CellInfo#UNAVAILABLE UNAVAILABLE}.
+     *
+     * @hide
+     */
+    public int getRssi() {
+        return mRssi;
+    }
+
+    /**
+     * Get the BER as an ASU value 0..7, 99, or {@link CellInfo#UNAVAILABLE UNAVAILABLE}.
+     * @hide
+     */
+    public int getBitErrorRate() {
+        return mBitErrorRate;
     }
 
     /**
