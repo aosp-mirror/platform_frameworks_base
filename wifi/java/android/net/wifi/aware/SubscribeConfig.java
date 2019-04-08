@@ -205,8 +205,10 @@ public final class SubscribeConfig implements Parcelable {
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(mServiceName, mServiceSpecificInfo, mMatchFilter, mSubscribeType,
-                mTtlSec, mEnableTerminateNotification, mMinDistanceMmSet, mMaxDistanceMmSet);
+        int result = Objects.hash(Arrays.hashCode(mServiceName),
+                Arrays.hashCode(mServiceSpecificInfo), Arrays.hashCode(mMatchFilter),
+                mSubscribeType, mTtlSec, mEnableTerminateNotification, mMinDistanceMmSet,
+                mMaxDistanceMmSet);
 
         if (mMinDistanceMmSet) {
             result = Objects.hash(result, mMinDistanceMm);

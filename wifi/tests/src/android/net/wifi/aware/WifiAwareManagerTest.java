@@ -709,6 +709,7 @@ public class WifiAwareManagerTest {
         ConfigRequest rereadConfigRequest = ConfigRequest.CREATOR.createFromParcel(parcelR);
 
         assertEquals(configRequest, rereadConfigRequest);
+        assertEquals(configRequest.hashCode(), rereadConfigRequest.hashCode());
     }
 
     /*
@@ -801,6 +802,7 @@ public class WifiAwareManagerTest {
         SubscribeConfig rereadSubscribeConfig = SubscribeConfig.CREATOR.createFromParcel(parcelR);
 
         assertEquals(subscribeConfig, rereadSubscribeConfig);
+        assertEquals(subscribeConfig.hashCode(), rereadSubscribeConfig.hashCode());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -892,6 +894,7 @@ public class WifiAwareManagerTest {
         PublishConfig rereadPublishConfig = PublishConfig.CREATOR.createFromParcel(parcelR);
 
         assertEquals(publishConfig, rereadPublishConfig);
+        assertEquals(publishConfig.hashCode(), rereadPublishConfig.hashCode());
     }
 
     @Test(expected = IllegalArgumentException.class)
