@@ -1424,6 +1424,11 @@ public class ResolverActivity extends Activity {
             activity.startActivityAsUser(mResolvedIntent, options, user);
             return false;
         }
+
+    }
+
+    List<DisplayResolveInfo> getDisplayList() {
+        return mAdapter.mDisplayList;
     }
 
     /**
@@ -1523,12 +1528,12 @@ public class ResolverActivity extends Activity {
         private final List<ResolveInfo> mBaseResolveList;
         protected ResolveInfo mLastChosen;
         private DisplayResolveInfo mOtherProfile;
-        private boolean mHasExtendedInfo;
         private ResolverListController mResolverListController;
         private int mPlaceholderCount;
 
         protected final LayoutInflater mInflater;
 
+        // This one is the list that the Adapter will actually present.
         List<DisplayResolveInfo> mDisplayList;
         List<ResolvedComponentInfo> mUnfilteredResolveList;
 
@@ -1709,6 +1714,7 @@ public class ResolverActivity extends Activity {
             }
         }
 
+
         private void processSortedList(List<ResolvedComponentInfo> sortedComponents) {
             int N;
             if (sortedComponents != null && (N = sortedComponents.size()) != 0) {
@@ -1746,6 +1752,7 @@ public class ResolverActivity extends Activity {
                     }
                 }
 
+
                 for (ResolvedComponentInfo rci : sortedComponents) {
                     final ResolveInfo ri = rci.getResolveInfoAt(0);
                     if (ri != null) {
@@ -1755,8 +1762,11 @@ public class ResolverActivity extends Activity {
                 }
             }
 
+
             postListReadyRunnable();
         }
+
+
 
         /**
          * Some necessary methods for creating the list are initiated in onCreate and will also
@@ -1891,19 +1901,6 @@ public class ResolverActivity extends Activity {
             return position;
         }
 
-        public boolean hasExtendedInfo() {
-            return mHasExtendedInfo;
-        }
-
-        public boolean hasResolvedTarget(ResolveInfo info) {
-            for (int i = 0, N = mDisplayList.size(); i < N; i++) {
-                if (resolveInfoMatch(info, mDisplayList.get(i).getResolveInfo())) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
         public int getDisplayResolveInfoCount() {
             return mDisplayList.size();
         }
@@ -1968,6 +1965,7 @@ public class ResolverActivity extends Activity {
             }
         }
     }
+
 
     @VisibleForTesting
     public static final class ResolvedComponentInfo {
