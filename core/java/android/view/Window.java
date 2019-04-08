@@ -2340,10 +2340,11 @@ public abstract class Window {
      * <p>When the status bar color has a non-zero alpha value, the value of this
      * property has no effect.
      *
-     * @see android.R.attr#ensureStatusBarContrastWhenTransparent
-     * @hide pending API
+     * @see android.R.attr#ensuringStatusBarContrastWhenTransparent
+     * @see #isEnsuringStatusBarContrastWhenTransparent
+     * @see #setStatusBarColor
      */
-    public void setEnsureStatusBarContrastWhenTransparent(boolean ensureContrast) {
+    public void setEnsuringStatusBarContrastWhenTransparent(boolean ensureContrast) {
     }
 
     /**
@@ -2353,11 +2354,12 @@ public abstract class Window {
      * <p>When the status bar color has a non-zero alpha value, the value of this
      * property has no effect.
      *
-     * @see android.R.attr#ensureStatusBarContrastWhenTransparent
      * @return true, if the system is ensuring contrast, false otherwise.
-     * @hide pending API
+     * @see android.R.attr#ensuringStatusBarContrastWhenTransparent
+     * @see #setEnsuringStatusBarContrastWhenTransparent
+     * @see #setStatusBarColor
      */
-    public boolean isEnsureStatusBarContrastWhenTransparent() {
+    public boolean isEnsuringStatusBarContrastWhenTransparent() {
         return false;
     }
 
@@ -2372,10 +2374,11 @@ public abstract class Window {
      * <p>When the navigation bar color has a non-zero alpha value, the value of this
      * property has no effect.
      *
-     * @see android.R.attr#ensureNavigationBarContrastWhenTransparent
-     * @hide pending API
+     * @see android.R.attr#ensuringNavigationBarContrastWhenTransparent
+     * @see #isEnsuringNavigationBarContrastWhenTransparent
+     * @see #setNavigationBarColor
      */
-    public void setEnsureNavigationBarContrastWhenTransparent(boolean ensureContrast) {
+    public void setEnsuringNavigationBarContrastWhenTransparent(boolean ensureContrast) {
     }
 
     /**
@@ -2386,10 +2389,11 @@ public abstract class Window {
      * property has no effect.
      *
      * @return true, if the system is ensuring contrast, false otherwise.
-     * @see android.R.attr#ensureNavigationBarContrastWhenTransparent
-     * @hide pending API
+     * @see android.R.attr#ensuringNavigationBarContrastWhenTransparent
+     * @see #setEnsuringNavigationBarContrastWhenTransparent
+     * @see #setNavigationBarColor
      */
-    public boolean isEnsureNavigationBarContrastWhenTransparent() {
+    public boolean isEnsuringNavigationBarContrastWhenTransparent() {
         return false;
     }
 

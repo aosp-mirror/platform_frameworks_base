@@ -3256,7 +3256,7 @@
     <dimen name="config_backGestureInset">0dp</dimen>
 
     <!-- Controls whether the navbar needs a scrim with
-         {@link Window#setEnsureNavigationBarContrastWhenTransparent}. -->
+         {@link Window#setEnsuringNavigationBarContrastWhenTransparent}. -->
     <bool name="config_navBarNeedsScrim">true</bool>
 
     <!-- Default insets [LEFT/RIGHTxTOP/BOTTOM] from the screen edge for picture-in-picture windows.
