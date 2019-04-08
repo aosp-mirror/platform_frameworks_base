@@ -10696,6 +10696,25 @@ public class TelephonyManager {
     }
 
     /**
+     * It indicates whether modem is enabled or not per slot.
+     * It's the corresponding status of {@link #enableModemForSlot}.
+     *
+     * @param slotIndex which slot it's checking.
+     * @hide
+     */
+    public boolean isModemEnabledForSlot(int slotIndex) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.isModemEnabledForSlot(slotIndex, mContext.getOpPackageName());
+            }
+        } catch (RemoteException ex) {
+            Log.e(TAG, "enableModem RemoteException", ex);
+        }
+        return false;
+    }
+
+    /**
      * Indicate if the user is allowed to use multiple SIM cards at the same time to register
      * on the network (e.g. Dual Standby or Dual Active) when the device supports it, or if the
      * usage is restricted. This API is used to prevent usage of multiple SIM card, based on
