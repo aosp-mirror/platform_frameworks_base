@@ -254,6 +254,8 @@ public final class SystemServer {
             "com.android.server.autofill.AutofillManagerService";
     private static final String CONTENT_CAPTURE_MANAGER_SERVICE_CLASS =
             "com.android.server.contentcapture.ContentCaptureManagerService";
+    private static final String SYSTEM_CAPTIONS_MANAGER_SERVICE_CLASS =
+            "com.android.server.systemcaptions.SystemCaptionsManagerService";
     private static final String TIME_ZONE_RULES_MANAGER_SERVICE_CLASS =
             "com.android.server.timezone.RulesManagerService$Lifecycle";
     private static final String IOT_SERVICE_CLASS =
@@ -1231,6 +1233,8 @@ public final class SystemServer {
 
             startContentCaptureService(context);
             startAttentionService(context);
+
+            startSystemCaptionsManagerService(context);
 
             // App prediction manager service
             traceBeginAndSlog("StartAppPredictionService");
@@ -2225,6 +2229,19 @@ public final class SystemServer {
         }, BOOT_TIMINGS_TRACE_LOG);
     }
 
+    private void startSystemCaptionsManagerService(@NonNull Context context) {
+        String serviceName = context.getString(
+                com.android.internal.R.string.config_defaultSystemCaptionsManagerService);
+        if (TextUtils.isEmpty(serviceName)) {
+            Slog.d(TAG, "SystemCaptionsManagerService disabled because resource is not overlaid");
+            return;
+        }
+
+        traceBeginAndSlog("StartSystemCaptionsManagerService");
+        mSystemServiceManager.startService(SYSTEM_CAPTIONS_MANAGER_SERVICE_CLASS);
+        traceEnd();
+    }
+
     private void startContentCaptureService(@NonNull Context context) {
         // First check if it was explicitly enabled by DeviceConfig
         boolean explicitlyEnabled = false;
@@ -2273,7 +2290,7 @@ public final class SystemServer {
         traceEnd();
     }
 
-    static final void startSystemUi(Context context, WindowManagerService windowManager) {
+    private static void startSystemUi(Context context, WindowManagerService windowManager) {
         Intent intent = new Intent();
         intent.setComponent(new ComponentName("com.android.systemui",
                 "com.android.systemui.SystemUIService"));
