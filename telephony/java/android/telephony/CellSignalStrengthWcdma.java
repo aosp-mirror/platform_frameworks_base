@@ -66,7 +66,7 @@ public final class CellSignalStrengthWcdma extends CellSignalStrength implements
     public static final String LEVEL_CALCULATION_METHOD_RSCP = "rscp";
 
     // Default to RSSI for backwards compatibility with older devices
-    private static final String sLevelCalculationMethod = LEVEL_CALCULATION_METHOD_RSSI;
+    private static final String DEFAULT_LEVEL_CALCULATION_METHOD = LEVEL_CALCULATION_METHOD_RSSI;
 
     private int mRssi; // in dBm [-113, 51] or CellInfo.UNAVAILABLE if unknown
     private int mBitErrorRate; // bit error rate (0-7, 99) as defined in TS 27.007 8.5 or
@@ -161,14 +161,14 @@ public final class CellSignalStrengthWcdma extends CellSignalStrength implements
         int[] rscpThresholds;
 
         if (cc == null) {
-            calcMethod = sLevelCalculationMethod;
+            calcMethod = DEFAULT_LEVEL_CALCULATION_METHOD;
             rscpThresholds = sRscpThresholds;
         } else {
             // TODO: abstract this entire thing into a series of functions
             calcMethod = cc.getString(
                     CarrierConfigManager.KEY_WCDMA_DEFAULT_SIGNAL_STRENGTH_MEASUREMENT_STRING,
-                    sLevelCalculationMethod);
-            if (TextUtils.isEmpty(calcMethod)) calcMethod = sLevelCalculationMethod;
+                    DEFAULT_LEVEL_CALCULATION_METHOD);
+            if (TextUtils.isEmpty(calcMethod)) calcMethod = DEFAULT_LEVEL_CALCULATION_METHOD;
             rscpThresholds = cc.getIntArray(
                     CarrierConfigManager.KEY_WCDMA_RSCP_THRESHOLDS_INT_ARRAY);
             if (rscpThresholds == null || rscpThresholds.length != NUM_SIGNAL_STRENGTH_THRESHOLDS) {
