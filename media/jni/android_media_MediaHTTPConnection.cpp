@@ -109,8 +109,7 @@ static void android_media_MediaHTTPConnection_native_init(JNIEnv *env) {
     gFields.context = env->GetFieldID(clazz.get(), "mNativeContext", "J");
     CHECK(gFields.context != NULL);
 
-    gFields.readAtMethodID = env->GetMethodID(
-            clazz.get(), "readAt", "(J[BILandroid/media/MediaHTTPConnection$ConnectionState;)I");
+    gFields.readAtMethodID = env->GetMethodID(clazz.get(), "readAt", "(J[BI)I");
 }
 
 static void android_media_MediaHTTPConnection_native_setup(
@@ -133,7 +132,7 @@ static jobject android_media_MediaHTTPConnection_native_getIMemory(
 }
 
 static jint android_media_MediaHTTPConnection_native_readAt(
-        JNIEnv *env, jobject thiz, jlong offset, jint size, jobject connectionState) {
+        JNIEnv *env, jobject thiz, jlong offset, jint size) {
     sp<JMediaHTTPConnection> conn = getObject(env, thiz);
     if (size > JMediaHTTPConnection::kBufferSize) {
         size = JMediaHTTPConnection::kBufferSize;
@@ -142,7 +141,7 @@ static jint android_media_MediaHTTPConnection_native_readAt(
     jbyteArray byteArrayObj = conn->getByteArrayObj();
 
     jint n = env->CallIntMethod(
-            thiz, gFields.readAtMethodID, offset, byteArrayObj, size, connectionState);
+            thiz, gFields.readAtMethodID, offset, byteArrayObj, size);
 
     if (n > 0) {
         env->GetByteArrayRegion(
@@ -159,7 +158,7 @@ static const JNINativeMethod gMethods[] = {
     { "native_getIMemory", "()Landroid/os/IBinder;",
       (void *)android_media_MediaHTTPConnection_native_getIMemory },
 
-    { "native_readAt", "(JILandroid/media/MediaHTTPConnection$ConnectionState;)I",
+    { "native_readAt", "(JI)I",
       (void *)android_media_MediaHTTPConnection_native_readAt },
 
     { "native_init", "()V",
