@@ -3051,7 +3051,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         + mSdkVersion + "; regranting permissions for internal storage");
             }
             mPermissionManager.updateAllPermissions(
-                    StorageManager.UUID_PRIVATE_INTERNAL, sdkUpdated, false, mPackages.values(),
+                    StorageManager.UUID_PRIVATE_INTERNAL, sdkUpdated, mPackages.values(),
                     mPermissionCallback);
             ver.sdkVersion = mSdkVersion;
 
@@ -5569,7 +5569,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         synchronized (mPackages) {
             mPermissionManager.updateAllPermissions(
-                    StorageManager.UUID_PRIVATE_INTERNAL, false, false, mPackages.values(),
+                    StorageManager.UUID_PRIVATE_INTERNAL, false, mPackages.values(),
                     mPermissionCallback);
             for (int userId : UserManagerService.getInstance().getUserIds()) {
                 final int packageCount = mPackages.size();
@@ -21213,8 +21213,8 @@ public class PackageManagerService extends IPackageManager.Stub
         // try optimizing this.
         synchronized (mPackages) {
             mPermissionManager.updateAllPermissions(
-                    StorageManager.UUID_PRIVATE_INTERNAL, false, mIsPreQUpgrade,
-                    mPackages.values(), mPermissionCallback);
+                    StorageManager.UUID_PRIVATE_INTERNAL, false, mPackages.values(),
+                    mPermissionCallback);
         }
 
         // Watch for external volumes that come and go over time
@@ -22204,8 +22204,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 logCriticalInfo(Log.INFO, "Platform changed from " + ver.sdkVersion + " to "
                         + mSdkVersion + "; regranting permissions for " + volumeUuid);
             }
-            mPermissionManager.updateAllPermissions(volumeUuid, sdkUpdated, false,
-                    mPackages.values(), mPermissionCallback);
+            mPermissionManager.updateAllPermissions(volumeUuid, sdkUpdated, mPackages.values(),
+                    mPermissionCallback);
 
             // Yay, everything is now upgraded
             ver.forceCurrent();
@@ -23238,7 +23238,7 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized(mPackages) {
             // NOTE: This adds UPDATE_PERMISSIONS_REPLACE_PKG
             mPermissionManager.updateAllPermissions(
-                    StorageManager.UUID_PRIVATE_INTERNAL, true, false, mPackages.values(),
+                    StorageManager.UUID_PRIVATE_INTERNAL, true, mPackages.values(),
                     mPermissionCallback);
         }
     }

@@ -82,7 +82,6 @@ import android.permission.PermissionControllerManager;
 import android.permission.PermissionManager;
 import android.permission.PermissionManagerInternal;
 import android.permission.PermissionManagerInternal.OnRuntimePermissionStateChangedListener;
-import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -2603,62 +2602,12 @@ public class PermissionManagerService {
     }
 
     private void updateAllPermissions(String volumeUuid, boolean sdkUpdated,
-            boolean updatePermissionsOnPreQUpdate, Collection<PackageParser.Package> allPackages,
-            PermissionCallback callback) {
+            Collection<PackageParser.Package> allPackages, PermissionCallback callback) {
         final int flags = UPDATE_PERMISSIONS_ALL |
                 (sdkUpdated
                         ? UPDATE_PERMISSIONS_REPLACE_PKG | UPDATE_PERMISSIONS_REPLACE_ALL
                         : 0);
         updatePermissions(null, null, volumeUuid, flags, allPackages, callback);
-
-        if (updatePermissionsOnPreQUpdate) {
-            final int[] userIds = UserManagerService.getInstance().getUserIds();
-
-            for (PackageParser.Package pkg : allPackages) {
-                final PackageSetting ps = (PackageSetting) pkg.mExtras;
-                if (ps == null) {
-                    return;
-                }
-
-                final boolean appSupportsRuntimePermissions =
-                        pkg.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.M;
-                final PermissionsState permsState = ps.getPermissionsState();
-
-                for (String permName : new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION,
-                        Manifest.permission.ACCESS_BACKGROUND_LOCATION}) {
-                    final BasePermission bp = mSettings.getPermissionLocked(permName);
-
-                    for (int userId : userIds) {
-                        if (Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                                Settings.Secure.LOCATION_PERMISSIONS_UPGRADE_TO_Q_MODE, 0, userId)
-                                != 0) {
-                            continue;
-                        }
-
-                        final PermissionState permState = permsState.getRuntimePermissionState(
-                                permName, userId);
-
-                        if (permState != null
-                                && (permState.getFlags() & BLOCKING_PERMISSION_FLAGS) == 0) {
-                            if (permState.isGranted()) {
-                                permsState.updatePermissionFlags(bp, userId,
-                                        USER_PERMISSION_FLAGS, 0);
-                            }
-
-                            if (appSupportsRuntimePermissions) {
-                                permsState.revokeRuntimePermission(bp, userId);
-                            } else {
-                                // Force a review even for apps that were already installed
-                                permsState.updatePermissionFlags(bp, userId,
-                                        FLAG_PERMISSION_REVIEW_REQUIRED,
-                                        FLAG_PERMISSION_REVIEW_REQUIRED);
-                            }
-                        }
-                    }
-                }
-            }
-        }
     }
 
     private void updatePermissions(String changingPkgName, PackageParser.Package changingPkg,
@@ -3148,10 +3097,9 @@ public class PermissionManagerService {
         }
         @Override
         public void updateAllPermissions(String volumeUuid, boolean sdkUpdated,
-                boolean updatePermissionsOnPreQUpdate, Collection<PackageParser.Package> allPackages,
-                PermissionCallback callback) {
+                Collection<PackageParser.Package> allPackages, PermissionCallback callback) {
             PermissionManagerService.this.updateAllPermissions(
-                    volumeUuid, sdkUpdated, updatePermissionsOnPreQUpdate, allPackages, callback);
+                    volumeUuid, sdkUpdated, allPackages, callback);
         }
         @Override
         public String[] getAppOpPermissionPackages(String permName) {
