@@ -171,15 +171,15 @@
   </string-array>
   <string-array name="type_clock_minutes">
     <item msgid="8322049385467207985">"-"</item>
-    <item msgid="8837126587669001578">"Et"</item>
-    <item msgid="4294343372940455660">"To"</item>
-    <item msgid="7129166637707421536">"Tre"</item>
-    <item msgid="7579404865008788673">"Fire"</item>
-    <item msgid="3873924689207380586">"Fem"</item>
-    <item msgid="4849565597850069377">"Seks"</item>
-    <item msgid="4404219424523572364">"Syv"</item>
-    <item msgid="8740481214764087329">"Otte"</item>
-    <item msgid="1713216865806811237">"Ni"</item>
+    <item msgid="2091812961809760681">"Et"</item>
+    <item msgid="1496435384877290709">"To"</item>
+    <item msgid="881846472976674129">"Tre"</item>
+    <item msgid="2784477043911540584">"Fire"</item>
+    <item msgid="1610928853656700614">"Fem"</item>
+    <item msgid="2317806244043886658">"Seks"</item>
+    <item msgid="3318687539120971327">"Syv"</item>
+    <item msgid="5701600693712102348">"Otte"</item>
+    <item msgid="3247381605947372495">"Ni"</item>
     <item msgid="3508406095411245038">"Ti"</item>
     <item msgid="7161996337755311711">"Elleve"</item>
     <item msgid="4044549963329624197">"Tolv"</item>

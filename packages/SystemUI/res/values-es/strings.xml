@@ -34,6 +34,7 @@
     <string name="invalid_charger_text" msgid="6480624964117840005">"Utiliza el cargador original incluido con el dispositivo"</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Ajustes"</string>
     <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"¿Activar Ahorro de batería?"</string>
+    <string name="battery_saver_confirmation_title_generic" msgid="2090922638411744540">"Información de Ahorro de batería"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Activar"</string>
     <string name="battery_saver_start_action" msgid="8187820911065797519">"Activar Ahorro de batería"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Ajustes"</string>
@@ -62,6 +63,8 @@
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"El usuario con el que se ha iniciado sesión en este dispositivo no puede activar la depuración USB. Para utilizar esta función, inicia sesión con la cuenta de usuario principal."</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"Puerto USB inhabilitado"</string>
     <string name="usb_contaminant_message" msgid="2205845572186473860">"Para proteger tu dispositivo de los líquidos y la suciedad, el puerto USB se ha inhabilitado y no detectará ningún accesorio.\n\nRecibirás una notificación cuando puedas volver a usarlo."</string>
+    <string name="usb_port_enabled" msgid="7906141351687694867">"Puerto USB habilitado para detectar cargadores y accesorios"</string>
+    <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"Habilitar USB"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom para ajustar"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Expandir para ajustar"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Captura de pantalla"</string>
@@ -108,8 +111,7 @@
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Desbloquear sin usar tu huella digital"</string>
     <string name="accessibility_scanning_face" msgid="769545173211758586">"Escaneando cara"</string>
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Enviar"</string>
-    <!-- no translation found for accessibility_manage_notification (2026361503393549753) -->
-    <skip />
+    <string name="accessibility_manage_notification" msgid="2026361503393549753">"Gestionar notificaciones"</string>
     <string name="unlock_label" msgid="8779712358041029439">"desbloquear"</string>
     <string name="phone_label" msgid="2320074140205331708">"abrir teléfono"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"abrir el asistente de voz"</string>
@@ -180,8 +182,7 @@
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Datos móviles"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Datos móviles activados"</string>
     <string name="cell_data_off_content_description" msgid="4356113230238585072">"Datos desactiv."</string>
-    <!-- no translation found for not_default_data_content_description (9194667237765917844) -->
-    <skip />
+    <string name="not_default_data_content_description" msgid="9194667237765917844">"No está establecido para usar los datos"</string>
     <string name="cell_data_off" msgid="1051264981229902873">"Desactivados"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Compartir conexión por Bluetooth"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Modo avión"</string>
@@ -223,12 +224,9 @@
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Modo avión activado."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"silencio total"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"solo alarmas"</string>
-    <!-- no translation found for accessibility_quick_settings_dnd (5555155552520665891) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_dnd_changed_off (2757071272328547807) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_dnd_changed_on (6808220653747701059) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd" msgid="5555155552520665891">"No molestar."</string>
+    <string name="accessibility_quick_settings_dnd_changed_off" msgid="2757071272328547807">"No molestar desactivado."</string>
+    <string name="accessibility_quick_settings_dnd_changed_on" msgid="6808220653747701059">"No molestar activado."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth."</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"Bluetooth desactivado."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"Bluetooth activado."</string>
@@ -279,6 +277,7 @@
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> notificaciones más dentro.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> notificación más dentro.</item>
     </plurals>
+    <string name="notification_summary_message_format" msgid="715071952312553396">"<xliff:g id="CONTACT_NAME">%1$s</xliff:g>: <xliff:g id="MESSAGE_CONTENT">%2$s</xliff:g>"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Ajustes de notificaciones"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"Ajustes de <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"La pantalla girará automáticamente."</string>
@@ -291,9 +290,8 @@
     <string name="start_dreams" msgid="5640361424498338327">"Salvapantallas"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_header_onboarding_text" msgid="8030309023792936283">"Mantén pulsados los iconos para ver más opciones"</string>
-    <!-- no translation found for quick_settings_dnd_label (7112342227663678739) -->
-    <skip />
-    <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Solo prioritarias"</string>
+    <string name="quick_settings_dnd_label" msgid="7112342227663678739">"No molestar"</string>
+    <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Solo interrupciones prioritarias"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Solo alarmas"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Silencio total"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
@@ -399,7 +397,7 @@
     <string name="camera_hint" msgid="7939688436797157483">"Desliza desde el icono para abrir la cámara"</string>
     <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Silencio total (también se silenciarán los lectores de pantalla)."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Silencio total"</string>
-    <string name="interruption_level_priority" msgid="6426766465363855505">"Solo prioritarias"</string>
+    <string name="interruption_level_priority" msgid="6426766465363855505">"Solo interrupciones prioritarias"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Solo alarmas"</string>
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Silencio\ntotal"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Solo\ncon prioridad"</string>
@@ -443,10 +441,8 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"Ahorro de batería activado"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Reduce el rendimiento y los datos en segundo plano"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Desactivar Ahorro de batería"</string>
-    <!-- no translation found for media_projection_dialog_text (5751657130671431216) -->
-    <skip />
-    <!-- no translation found for media_projection_dialog_title (8124184308671641248) -->
-    <skip />
+    <string name="media_projection_dialog_text" msgid="5751657130671431216">"Mientras graba o envía contenido, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> puede obtener información sensible, como el audio que reproduces, contraseñas, información de pagos, fotos y mensajes."</string>
+    <string name="media_projection_dialog_title" msgid="8124184308671641248">"Se muestra información sensible durante el envío y la grabación"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"No volver a mostrar"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Borrar todo"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Gestionar"</string>
@@ -521,10 +517,8 @@
     <string name="accessibility_volume_settings" msgid="4915364006817819212">"Ajustes de sonido"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Mostrar"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Ocultar"</string>
-    <!-- no translation found for volume_odi_captions_tip (1193653197906918269) -->
-    <skip />
-    <!-- no translation found for accessibility_volume_close_odi_captions_tip (1163987066404128967) -->
-    <skip />
+    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"Subtítulos autom. multimedia"</string>
+    <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"Cerrar las recomendaciones de subtítulos"</string>
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"Cambiar dispositivo de salida"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Pantalla fijada"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"La pantalla se mantiene visible hasta que dejas de fijarla. Para ello, mantén pulsados los botones Atrás y Aplicaciones recientes."</string>
@@ -625,27 +619,24 @@
     <string name="notification_channel_unsilenced" msgid="4790904571552394137">"Estas notificaciones te avisarán con sonido"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"Normalmente ignoras estas notificaciones. \n¿Quieres seguir viéndolas?"</string>
     <string name="inline_done_button" msgid="492513001558716452">"Listo"</string>
-    <!-- no translation found for inline_ok_button (966006867967928987) -->
-    <skip />
+    <string name="inline_ok_button" msgid="975600017662930615">"Aplicar"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"¿Quieres seguir viendo estas notificaciones?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Detener las notificaciones"</string>
     <string name="inline_deliver_silently_button" msgid="7756289895745629140">"Enviar en silencio"</string>
     <string name="inline_block_button" msgid="8735843688021655065">"Bloquear"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Seguir mostrando"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"Minimizar"</string>
-    <string name="inline_silent_button_silent" msgid="4411510650503783646">"Mostrar en silencio"</string>
+    <string name="inline_silent_button_silent" msgid="6904727667411781466">"En silencio"</string>
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"Silenciar notificaciones"</string>
-    <!-- no translation found for inline_silent_button_alert (2273030946176140380) -->
-    <skip />
+    <string name="inline_silent_button_alert" msgid="2449191160203602471">"Emergentes"</string>
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"Quiero seguir recibiendo alertas"</string>
+    <string name="inline_turn_off_notifications" msgid="8635596135532202355">"Desactivar notificaciones"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"¿Quieres seguir viendo las notificaciones de esta aplicación?"</string>
-    <!-- no translation found for hint_text_block (3554459167504485284) -->
-    <skip />
-    <!-- no translation found for hint_text_silent (859468056340177016) -->
-    <skip />
-    <!-- no translation found for hint_text_alert (428122667751463119) -->
-    <skip />
+    <string name="hint_text_block" msgid="3554459167504485284">"Las notificaciones bloqueadas no aparecen en ningún lugar ni reproducen sonido. Puedes desbloquear las notificaciones en Ajustes."</string>
+    <string name="hint_text_silent" msgid="859468056340177016">"Las notificaciones que están en silencio aparecen en el panel, la pantalla de bloqueo; presentan un banner y reproducen sonido."</string>
+    <string name="hint_text_alert" msgid="2721169810318722524">"Estas notificaciones sonarán y aparecerán en el panel de notificaciones, la barra de estado y la pantalla de bloqueo"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"Estas notificaciones no se pueden desactivar"</string>
+    <string name="notification_multichannel_desc" msgid="4695920306092240550">"Este grupo de notificaciones no se puede configurar aquí"</string>
     <string name="notification_delegate_header" msgid="9167022191405284627">"mediante <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Esta aplicación está usando la cámara."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Esta aplicación está usando el micrófono."</string>
@@ -724,11 +715,9 @@
     <string name="keyboard_shortcut_group_applications_youtube" msgid="6555453761294723317">"YouTube"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="9043614299194991263">"Calendario"</string>
     <string name="tuner_full_zen_title" msgid="4540823317772234308">"Mostrar con controles de volumen"</string>
-    <!-- no translation found for volume_and_do_not_disturb (1750270820297253561) -->
-    <skip />
+    <string name="volume_and_do_not_disturb" msgid="1750270820297253561">"No molestar"</string>
     <string name="volume_dnd_silent" msgid="4363882330723050727">"Combinación de teclas para los botones de volumen"</string>
-    <!-- no translation found for volume_up_silent (7545869833038212815) -->
-    <skip />
+    <string name="volume_up_silent" msgid="7545869833038212815">"Salir de No molestar al subir el volumen"</string>
     <string name="battery" msgid="7498329822413202973">"Batería"</string>
     <string name="clock" msgid="7416090374234785905">"Reloj"</string>
     <string name="headset" msgid="4534219457597457353">"Auriculares"</string>
@@ -869,6 +858,7 @@
     <string name="go_to_web" msgid="2650669128861626071">"Ir al navegador"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Datos móviles"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> ‑ <xliff:g id="ID_2">%2$s</xliff:g>"</string>
+    <string name="mobile_carrier_text_format" msgid="3241721038678469804">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi desactivado"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth desactivado"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"No molestar está desactivado"</string>
@@ -900,10 +890,6 @@
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"Volcar pila de SysUI"</string>
     <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"<xliff:g id="APP">%1$s</xliff:g> está usando tu <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"Hay aplicaciones que usan tu <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
-    <string name="ongoing_privacy_dialog_ok" msgid="3273300106348958308">"Entendido"</string>
-    <string name="ongoing_privacy_dialog_open_settings" msgid="6773015940472748876">"Ajustes privacidad"</string>
-    <string name="ongoing_privacy_dialog_single_app_title" msgid="6019646962021696632">"Aplicación que usa tu <xliff:g id="TYPES_LIST">%s</xliff:g>"</string>
-    <string name="ongoing_privacy_dialog_multiple_apps_title" msgid="8013356222977903365">"Aplicaciones que usan tu <xliff:g id="TYPES_LIST">%s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="6854860652480837439">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="2400503446627122483">" y "</string>
     <string name="privacy_type_camera" msgid="1676604631892420333">"cámara"</string>
@@ -912,30 +898,18 @@
     <string name="sensor_privacy_mode" msgid="8982771253020769598">"Sensores desactivados"</string>
     <string name="device_services" msgid="1191212554435440592">"Servicios del dispositivo"</string>
     <string name="music_controls_no_title" msgid="5236895307087002011">"Sin título"</string>
-    <!-- no translation found for restart_button_description (2035077840254950187) -->
-    <skip />
+    <string name="restart_button_description" msgid="2035077840254950187">"Toca para reiniciar esta aplicación e ir a la pantalla completa."</string>
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"Abrir <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for bubbles_settings_button_description (2970630476657287189) -->
-    <skip />
-    <!-- no translation found for bubbles_prompt (8807968030159469710) -->
-    <skip />
-    <!-- no translation found for no_bubbles (337101288173078247) -->
-    <skip />
+    <string name="bubbles_settings_button_description" msgid="2970630476657287189">"Ajustes de los cuadros de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="bubbles_prompt" msgid="8807968030159469710">"¿Quieres permitir los cuadros de <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="no_bubbles" msgid="337101288173078247">"Denegar"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Permitir"</string>
-    <!-- no translation found for ask_me_later_bubbles (2147688438402939029) -->
-    <skip />
-    <!-- no translation found for bubble_content_description_single (1184462974339387516) -->
-    <skip />
-    <!-- no translation found for bubble_content_description_stack (8666349184095622232) -->
-    <skip />
-    <!-- no translation found for bubble_accessibility_action_move (1794879742234803840) -->
-    <skip />
-    <!-- no translation found for bubble_accessibility_action_move_top_left (104736832249802724) -->
-    <skip />
-    <!-- no translation found for bubble_accessibility_action_move_top_right (1671844272347036806) -->
-    <skip />
-    <!-- no translation found for bubble_accessibility_action_move_bottom_left (206369104473183217) -->
-    <skip />
-    <!-- no translation found for bubble_accessibility_action_move_bottom_right (8705660152384312329) -->
-    <skip />
+    <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Preguntarme más tarde"</string>
+    <string name="bubble_content_description_single" msgid="1184462974339387516">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> de <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
+    <string name="bubble_content_description_stack" msgid="8666349184095622232">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> de <xliff:g id="APP_NAME">%2$s</xliff:g> y <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> más"</string>
+    <string name="bubble_accessibility_action_move" msgid="1794879742234803840">"Mover"</string>
+    <string name="bubble_accessibility_action_move_top_left" msgid="104736832249802724">"Mover arriba a la izquierda"</string>
+    <string name="bubble_accessibility_action_move_top_right" msgid="1671844272347036806">"Mover arriba a la derecha"</string>
+    <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"Mover abajo a la izquierda."</string>
+    <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"Mover abajo a la derecha"</string>
 </resources>

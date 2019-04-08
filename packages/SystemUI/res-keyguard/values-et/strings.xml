@@ -171,15 +171,15 @@
   </string-array>
   <string-array name="type_clock_minutes">
     <item msgid="8322049385467207985">"null üks"</item>
-    <item msgid="8837126587669001578">"null üks"</item>
-    <item msgid="4294343372940455660">"null kaks"</item>
-    <item msgid="7129166637707421536">"null kolm"</item>
-    <item msgid="7579404865008788673">"null neli"</item>
-    <item msgid="3873924689207380586">"null viis"</item>
-    <item msgid="4849565597850069377">"null kuus"</item>
-    <item msgid="4404219424523572364">"null seitse"</item>
-    <item msgid="8740481214764087329">"null kaheksa"</item>
-    <item msgid="1713216865806811237">"null üheksa"</item>
+    <item msgid="2091812961809760681">"null üks"</item>
+    <item msgid="1496435384877290709">"null kaks"</item>
+    <item msgid="881846472976674129">"null kolm"</item>
+    <item msgid="2784477043911540584">"null neli"</item>
+    <item msgid="1610928853656700614">"null viis"</item>
+    <item msgid="2317806244043886658">"null kuus"</item>
+    <item msgid="3318687539120971327">"null seitse"</item>
+    <item msgid="5701600693712102348">"null kaheksa"</item>
+    <item msgid="3247381605947372495">"null üheksa"</item>
     <item msgid="3508406095411245038">"Kümme"</item>
     <item msgid="7161996337755311711">"Üksteist"</item>
     <item msgid="4044549963329624197">"Kaksteist"</item>
