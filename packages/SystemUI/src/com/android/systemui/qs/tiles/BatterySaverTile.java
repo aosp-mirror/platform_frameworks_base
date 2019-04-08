@@ -16,6 +16,7 @@
 package com.android.systemui.qs.tiles;
 
 import android.content.Intent;
+import android.provider.Settings.Secure;
 import android.service.quicksettings.Tile;
 import android.widget.Switch;
 
@@ -23,6 +24,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.SecureSetting;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.BatteryController;
 
@@ -32,6 +34,7 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
         BatteryController.BatteryStateChangeCallback {
 
     private final BatteryController mBatteryController;
+    private final SecureSetting mSetting;
 
     private int mLevel;
     private boolean mPowerSave;
@@ -45,11 +48,23 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
         super(host);
         mBatteryController = batteryController;
         mBatteryController.observe(getLifecycle(), this);
+        mSetting = new SecureSetting(mContext, mHandler, Secure.LOW_POWER_WARNING_ACKNOWLEDGED) {
+            @Override
+            protected void handleValueChanged(int value, boolean observedChange) {
+                handleRefreshState(null);
+            }
+        };
     }
 
     @Override
     public BooleanState newTileState() {
         return new BooleanState();
+    }
+
+    @Override
+    protected void handleDestroy() {
+        super.handleDestroy();
+        mSetting.setListening(false);
     }
 
     @Override
@@ -59,6 +74,7 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
 
     @Override
     public void handleSetListening(boolean listening) {
+        mSetting.setListening(listening);
     }
 
     @Override
@@ -88,6 +104,7 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
         state.contentDescription = state.label;
         state.value = mPowerSave;
         state.expandedAccessibilityClassName = Switch.class.getName();
+        state.showRippleEffect = mSetting.getValue() == 0;
     }
 
     @Override
