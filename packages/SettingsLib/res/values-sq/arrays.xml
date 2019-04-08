@@ -254,7 +254,7 @@
     <item msgid="7899496259191969307">"Maksimumi 4 procese"</item>
   </string-array>
   <string-array name="usb_configuration_titles">
-    <item msgid="488237561639712799">"Po ngarkohet"</item>
+    <item msgid="488237561639712799">"Po karikohet"</item>
     <item msgid="5220695614993094977">"MTP (Protokolli i Transferimit të Medias)"</item>
     <item msgid="2086000968159047375">"PTP (Protokolli i Transferimit të Fotografive)"</item>
     <item msgid="7398830860950841822">"RNDIS (USB Eternet)"</item>
