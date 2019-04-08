@@ -34,10 +34,10 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_WHEN_REQU
 import static android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
-import static android.content.pm.PackageManager.MASK_PERMISSION_FLAGS_ALL;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE;
+import static android.content.pm.PackageManager.MASK_PERMISSION_FLAGS_ALL;
 import static android.content.pm.PackageManager.RESTRICTED_PERMISSIONS_ENABLED;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.os.UserHandle.getAppId;
@@ -69,7 +69,6 @@ import android.content.pm.PermissionInfo;
 import android.metrics.LogMaker;
 import android.os.Binder;
 import android.os.Build;
-import android.os.Debug;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
@@ -82,8 +81,8 @@ import android.os.storage.StorageManagerInternal;
 import android.permission.PermissionControllerManager;
 import android.permission.PermissionManager;
 import android.permission.PermissionManagerInternal;
-import android.provider.Settings;
 import android.permission.PermissionManagerInternal.OnRuntimePermissionStateChangedListener;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -2458,9 +2457,8 @@ public class PermissionManagerService {
         }
 
         if (updatePermissions) {
-            // Update app permissions to take into account the new whitelist state.
-            updatePermissions(pkg.packageName, pkg, getVolumeUuidForPackage(pkg),
-                    0 /*flags*/, null /*allPackages*/, callback);
+            // Update permission of this app to take into account the new whitelist state.
+            restorePermissionState(pkg, false, pkg.packageName, callback);
 
             // If this resulted in losing a permission we need to kill the app.
             if (oldGrantedRestrictedPermissions != null) {
