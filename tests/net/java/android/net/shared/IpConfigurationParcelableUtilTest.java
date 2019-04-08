@@ -19,7 +19,8 @@ package android.net.shared;
 import static android.net.InetAddresses.parseNumericAddress;
 import static android.net.shared.IpConfigurationParcelableUtil.fromStableParcelable;
 import static android.net.shared.IpConfigurationParcelableUtil.toStableParcelable;
-import static android.net.shared.ParcelableTestUtil.assertFieldCountEquals;
+
+import static com.android.internal.util.ParcelableTestUtil.assertFieldCountEquals;
 
 import static org.junit.Assert.assertEquals;
 

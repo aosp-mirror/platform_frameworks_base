@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.net.shared;
+package com.android.internal.util;
 
 import static org.junit.Assert.assertEquals;
 

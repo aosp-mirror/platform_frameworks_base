@@ -19,13 +19,14 @@ package com.android.internal.util;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import android.annotation.NonNull;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import androidx.annotation.NonNull;
 
 import java.util.concurrent.Executor;
 
@@ -36,7 +37,7 @@ public final class TestUtils {
      * Block until the given Handler thread becomes idle, or until timeoutMs has passed.
      */
     public static void waitForIdleHandler(HandlerThread handlerThread, long timeoutMs) {
-        waitForIdleHandler(handlerThread.getThreadHandler(), timeoutMs);
+        waitForIdleLooper(handlerThread.getLooper(), timeoutMs);
     }
 
     /**

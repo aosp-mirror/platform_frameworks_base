@@ -19,11 +19,10 @@ package android.net.apf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
-import android.net.shared.ParcelableTestUtil;
-
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.util.ParcelableTestUtil;
 import com.android.internal.util.TestUtils;
 
 import org.junit.Test;
