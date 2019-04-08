@@ -790,6 +790,7 @@ public class NetworkMonitor extends StateMachine {
 
         @Override
         public void exit() {
+            mLaunchCaptivePortalAppBroadcastReceiver = null;
             hideProvisioningNotification();
         }
     }
@@ -913,9 +914,10 @@ public class NetworkMonitor extends StateMachine {
                 mLaunchCaptivePortalAppBroadcastReceiver = new CustomIntentReceiver(
                         ACTION_LAUNCH_CAPTIVE_PORTAL_APP, new Random().nextInt(),
                         CMD_LAUNCH_CAPTIVE_PORTAL_APP);
+                // Display the sign in notification.
+                // Only do this once for every time we enter MaybeNotifyState. b/122164725
+                showProvisioningNotification(mLaunchCaptivePortalAppBroadcastReceiver.mAction);
             }
-            // Display the sign in notification.
-            showProvisioningNotification(mLaunchCaptivePortalAppBroadcastReceiver.mAction);
             // Retest for captive portal occasionally.
             sendMessageDelayed(CMD_CAPTIVE_PORTAL_RECHECK, 0 /* no UID */,
                     CAPTIVE_PORTAL_REEVALUATE_DELAY_MS);
