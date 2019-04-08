@@ -11199,62 +11199,6 @@ public final class Settings {
         public static final String CAPTIVE_PORTAL_USER_AGENT = "captive_portal_user_agent";
 
         /**
-         * The threshold value for the number of consecutive dns timeout events received to be a
-         * signal of data stall. The number of consecutive timeouts needs to be {@code >=} this
-         * threshold to be considered a data stall. Set the value to {@code <= 0} to disable. Note
-         * that the value should be {@code > 0} if the DNS data stall detection is enabled.
-         *
-         * @hide
-         */
-        @SystemApi
-        @TestApi
-        public static final String DATA_STALL_CONSECUTIVE_DNS_TIMEOUT_THRESHOLD =
-                "data_stall_consecutive_dns_timeout_threshold";
-
-        /**
-         * The minimal time interval in milliseconds for data stall reevaluation.
-         *
-         * @hide
-         */
-        @SystemApi
-        @TestApi
-        public static final String DATA_STALL_MIN_EVALUATE_INTERVAL =
-                "data_stall_min_evaluate_interval";
-
-        /**
-         * DNS timeouts older than this timeout (in milliseconds) are not considered for detecting
-         * a data stall.
-         *
-         * @hide
-         */
-        @SystemApi
-        @TestApi
-        public static final String DATA_STALL_VALID_DNS_TIME_THRESHOLD =
-                "data_stall_valid_dns_time_threshold";
-
-        /**
-         * Which data stall detection signal to use. This is a bitmask constructed by bitwise-or-ing
-         * (i.e. {@code |}) the DATA_STALL_EVALUATION_TYPE_* values.
-         *
-         * Type: int
-         * Valid values:
-         *   {@link #DATA_STALL_EVALUATION_TYPE_DNS} : Use dns as a signal.
-         * @hide
-         */
-        @SystemApi
-        @TestApi
-        public static final String DATA_STALL_EVALUATION_TYPE = "data_stall_evaluation_type";
-
-        /**
-         * Use dns timeout counts to detect data stall.
-         *
-         * @hide
-         */
-        @SystemApi
-        @TestApi
-        public static final int DATA_STALL_EVALUATION_TYPE_DNS = 1;
-
-        /**
          * Whether to try cellular data recovery when a bad network is reported.
          *
          * @hide
