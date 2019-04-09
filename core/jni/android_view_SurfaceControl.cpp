@@ -317,7 +317,8 @@ static jobject nativeCaptureLayers(JNIEnv* env, jclass clazz, jobject layerHandl
                                        buffer->getPixelFormat(),
                                        (jint)buffer->getUsage(),
                                        (jlong)buffer.get(),
-                                       namedColorSpace);
+                                       namedColorSpace,
+                                       false /* capturedSecureLayers */);
 }
 
 static void nativeApplyTransaction(JNIEnv* env, jclass clazz, jlong transactionObj, jboolean sync) {
