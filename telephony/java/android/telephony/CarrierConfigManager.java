@@ -2598,6 +2598,19 @@ public class CarrierConfigManager {
     public static final String KEY_IS_OPPORTUNISTIC_SUBSCRIPTION_BOOL =
             "key_is_opportunistic_subscription_bool";
 
+    /**
+     * A list of 4 GSM RSSI thresholds above which a signal level is considered POOR,
+     * MODERATE, GOOD, or EXCELLENT, to be used in SignalStrength reporting.
+     *
+     * Note that the min and max thresholds are fixed at -113 and -51, as set in 3GPP TS 27.007
+     * section 8.5.
+     * <p>
+     * See CellSignalStrengthGsm#GSM_RSSI_MAX and CellSignalStrengthGsm#GSM_RSSI_MIN. Any signal
+     * level outside these boundaries is considered invalid.
+     * @hide
+     */
+    public static final String KEY_GSM_RSSI_THRESHOLDS_INT_ARRAY =
+            "gsm_rssi_thresholds_int_array";
 
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
@@ -2992,6 +3005,13 @@ public class CarrierConfigManager {
                 false);
         sDefaults.putString(KEY_SUBSCRIPTION_GROUP_UUID_STRING, "");
         sDefaults.putBoolean(KEY_IS_OPPORTUNISTIC_SUBSCRIPTION_BOOL, false);
+        sDefaults.putIntArray(KEY_GSM_RSSI_THRESHOLDS_INT_ARRAY,
+                new int[] {
+                        -107, /* SIGNAL_STRENGTH_POOR */
+                        -103, /* SIGNAL_STRENGTH_MODERATE */
+                        -97, /* SIGNAL_STRENGTH_GOOD */
+                        -89,  /* SIGNAL_STRENGTH_GREAT */
+                });
     }
 
     /**
