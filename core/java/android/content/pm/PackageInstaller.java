@@ -30,7 +30,6 @@ import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageManager.DeleteFlags;
 import android.content.pm.PackageManager.InstallReason;
@@ -1221,7 +1220,7 @@ public class PackageInstaller {
             try {
                 mSession.addChildSessionId(sessionId);
             } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
+                e.rethrowFromSystemServer();
             }
         }
 
@@ -1235,7 +1234,7 @@ public class PackageInstaller {
             try {
                 mSession.removeChildSessionId(sessionId);
             } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
+                e.rethrowFromSystemServer();
             }
         }
     }
