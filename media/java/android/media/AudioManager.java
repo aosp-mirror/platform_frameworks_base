@@ -1499,7 +1499,22 @@ public class AudioManager {
         int result = AudioSystem.setAllowedCapturePolicy(Process.myUid(), flags);
         if (result != AudioSystem.AUDIO_STATUS_OK) {
             Log.e(TAG, "Could not setAllowedCapturePolicy: " + result);
+            return;
         }
+        mCapturePolicy = capturePolicy;
+    }
+
+    @AudioAttributes.CapturePolicy
+    private int mCapturePolicy = AudioAttributes.ALLOW_CAPTURE_BY_ALL;
+
+    /**
+     * Return the capture policy.
+     * @return the capture policy set by {@link #setAllowedCapturePolicy(int)} or
+     *         the default if it was not called.
+     */
+    @AudioAttributes.CapturePolicy
+    public int getAllowedCapturePolicy() {
+        return mCapturePolicy;
     }
 
     //====================================================================
