@@ -3345,6 +3345,9 @@
     <!-- True if the device supports system decorations on secondary displays. -->
     <bool name="config_supportsSystemDecorsOnSecondaryDisplays">true</bool>
 
+    <!-- True if the device supports insecure lock screen. -->
+    <bool name="config_supportsInsecureLockScreen">true</bool>
+
     <!-- True if the device requires AppWidgetService even if it does not have
          the PackageManager.FEATURE_APP_WIDGETS feature -->
     <bool name="config_enableAppWidgetService">false</bool>
