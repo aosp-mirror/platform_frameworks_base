@@ -401,7 +401,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         @Override
         public void getOutline(View view, Outline outline) {
             if (mAmbientState.isDarkAtAll() || !mShowDarkShelf) {
-                outline.setRoundRect(mBackgroundAnimationRect, mCornerRadius);
+                float xProgress = mDarkXInterpolator.getInterpolation(
+                        (1 - mLinearDarkAmount) * mBackgroundXFactor);
+                outline.setRoundRect(mBackgroundAnimationRect,
+                        MathUtils.lerp(mCornerRadius / 2.0f, mCornerRadius,
+                                xProgress));
             } else {
                 ViewOutlineProvider.BACKGROUND.getOutline(view, outline);
             }
