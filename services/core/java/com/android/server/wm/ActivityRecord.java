@@ -1595,8 +1595,8 @@ final class ActivityRecord extends ConfigurationContainer {
             try {
                 ArrayList<ReferrerIntent> ar = new ArrayList<>(1);
                 ar.add(rintent);
-                mAtmService.getLifecycleManager().scheduleTransaction(
-                        app.getThread(), appToken, NewIntentItem.obtain(ar, mState == PAUSED));
+                mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
+                        NewIntentItem.obtain(ar));
                 unsent = false;
             } catch (RemoteException e) {
                 Slog.w(TAG, "Exception thrown sending new intent to " + this, e);

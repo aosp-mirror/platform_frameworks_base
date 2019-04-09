@@ -150,8 +150,7 @@ public abstract class ClientTransactionHandler {
             Configuration overrideConfig);
 
     /** Deliver new intent. */
-    public abstract void handleNewIntent(IBinder token, List<ReferrerIntent> intents,
-            boolean andPause);
+    public abstract void handleNewIntent(IBinder token, List<ReferrerIntent> intents);
 
     /** Deliver picture-in-picture mode change notification. */
     public abstract void handlePictureInPictureModeChanged(IBinder token, boolean isInPipMode,

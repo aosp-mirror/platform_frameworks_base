@@ -2962,8 +2962,7 @@ class ActivityStack extends ConfigurationContainer {
                 }
 
                 if (next.newIntents != null) {
-                    transaction.addCallback(NewIntentItem.obtain(next.newIntents,
-                            false /* andPause */));
+                    transaction.addCallback(NewIntentItem.obtain(next.newIntents));
                 }
 
                 // Well the app will no longer be stopped.
