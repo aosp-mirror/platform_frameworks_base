@@ -159,7 +159,7 @@ message Atom {
         BiometricAcquired biometric_acquired = 87;
         BiometricAuthenticated biometric_authenticated = 88;
         BiometricErrorOccurred biometric_error_occurred = 89;
-        Notification notification = 90;
+        // Atom number 90 is available for use.
         BatteryHealthSnapshot battery_health_snapshot = 91;
         SlowIo slow_io = 92;
         BatteryCausedShutdown battery_caused_shutdown = 93;
@@ -3205,76 +3205,6 @@ message BiometricEnrolled {
     optional int64 latency_millis = 3;
     // Whether or not the enrollment was successful.
     optional bool success = 4;
-}
-
-message Notification {
-
-    // Type of notification event.
-    enum Type {
-        TYPE_UNKNOWN = 0;
-        // Notification became visible to the user.
-        TYPE_OPEN = 1;
-        // Notification became hidden.
-        TYPE_CLOSE = 2;
-        // Notification switched to detail mode.
-        TYPE_DETAIL = 3;
-        // Notification was clicked.
-        TYPE_ACTION = 4;
-        // Notification was dismissed.
-        TYPE_DISMISS = 5;
-        // Notification switched to summary mode. The enum value of 14 is to
-        // match that of metrics_constants.
-        TYPE_COLLAPSE = 14;
-    }
-    optional Type type = 1;
-
-    // Package name associated with the notification.
-    optional string package_name = 2;
-
-    // Tag associated with notification.
-    optional string tag = 3;
-
-    // Application-supplied ID associated with the notification.
-    optional int32 id = 4;
-
-    // Index of notification in the notification panel.
-    optional int32 shade_index = 5;
-
-    // The number of notifications in the notification panel.
-    optional int32 shade_count = 6;
-
-    // Importance for the notification.
-    optional int32 importance = 7;
-
-    // ID for the notification channel.
-    optional string channel_id = 8;
-
-    // Importance for the notification channel.
-    optional int32 channel_importance = 9;
-
-    // Application-supplied ID associated with the notifications group.
-    optional string group_id = 10;
-
-    // Whether notification was a group summary.
-    optional bool group_summary = 11;
-
-    // Reason for dismissal of a notification. This field is only meaningful for
-    // TYPE_DISMISS events.
-    optional int32 dismiss_reason = 12;
-
-    // The first post time of notification, stable across updates.
-    optional int64 creation_millis = 13;
-
-    // The most recent interruption time, or the creation time if no updates.
-    // Differs from update_millis because updates are filtered based on whether
-    // they actually interrupted the user.
-    optional int64 interruption_millis = 14;
-
-    // The most recent update time, or the creation time if no updates.
-    optional int64 update_millis = 15;
-
-    // The most recent visibility event.
-    optional int64 visible_millis = 16;
 }
 
 /*
