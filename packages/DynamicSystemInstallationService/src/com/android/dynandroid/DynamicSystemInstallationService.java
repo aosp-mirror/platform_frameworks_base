@@ -380,12 +380,12 @@ public class DynamicSystemInstallationService extends Service
                 builder.setContentText(getString(R.string.notification_install_completed));
 
                 builder.addAction(new Notification.Action.Builder(
-                        null, getString(R.string.notification_action_reboot_to_dynsystem),
-                        createPendingIntent(ACTION_REBOOT_TO_DYN_SYSTEM)).build());
-
-                builder.addAction(new Notification.Action.Builder(
                         null, getString(R.string.notification_action_discard),
                         createPendingIntent(ACTION_DISCARD_INSTALL)).build());
+
+                builder.addAction(new Notification.Action.Builder(
+                        null, getString(R.string.notification_action_reboot_to_dynsystem),
+                        createPendingIntent(ACTION_REBOOT_TO_DYN_SYSTEM)).build());
 
                 break;
 

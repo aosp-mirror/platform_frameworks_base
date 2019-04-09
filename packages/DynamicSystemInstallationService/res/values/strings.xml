@@ -13,11 +13,11 @@
     <string name="keyguard_description">Please enter your password and continue to AndroidOnTap installation</string>
 
     <!-- Displayed on notification: AndroidOnTap installation is completed [CHAR LIMIT=128] -->
-    <string name="notification_install_completed">New system is ready, you can reboot into it or discard it.</string>
+    <string name="notification_install_completed">System update is ready. To finish installing, restart your device.</string>
     <!-- Displayed on notification: AndroidOnTap installation is in progress [CHAR LIMIT=128] -->
-    <string name="notification_install_inprogress">Installation is in progress.</string>
+    <string name="notification_install_inprogress">Install in progress</string>
     <!-- Displayed on notification: AndroidOnTap installation is in progress [CHAR LIMIT=128] -->
-    <string name="notification_install_failed">Installation Failed.</string>
+    <string name="notification_install_failed">Install Failed</string>
     <!-- Displayed on notification: We are running in AndroidOnTap [CHAR LIMIT=128] -->
     <string name="notification_dynsystem_in_use">We are running in AndroidOnTap.</string>
 
@@ -27,12 +27,12 @@
     <string name="notification_action_discard">Discard</string>
     <!-- Action on notification: Uninstall AndroidOnTap [CHAR LIMIT=16] -->
     <string name="notification_action_uninstall">Uninstall</string>
-    <!-- Action on notification: Reboot to AndroidOnTap [CHAR LIMIT=16] -->
-    <string name="notification_action_reboot_to_dynsystem">Reboot</string>
+    <!-- Action on notification: Restart to AndroidOnTap [CHAR LIMIT=16] -->
+    <string name="notification_action_reboot_to_dynsystem">Restart</string>
 
     <!-- Toast when installed AndroidOnTap is discarded [CHAR LIMIT=64] -->
     <string name="toast_dynsystem_discarded">Installed AndroidOnTap is discarded.</string>
     <!-- Toast when we fail to launch into AndroidOnTap [CHAR LIMIT=64] -->
-    <string name="toast_failed_to_reboot_to_dynsystem">Failed to reboot into AndroidOnTap.</string>
+    <string name="toast_failed_to_reboot_to_dynsystem">Failed to restart to AndroidOnTap.</string>
 
 </resources>
