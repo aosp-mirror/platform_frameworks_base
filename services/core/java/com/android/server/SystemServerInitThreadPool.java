@@ -22,9 +22,10 @@ import android.util.Slog;
 
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.Preconditions;
+import com.android.server.am.ActivityManagerService;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -47,6 +48,8 @@ public class SystemServerInitThreadPool {
     private ExecutorService mService = ConcurrentUtils.newFixedThreadPool(4,
             "system-server-init-thread", Process.THREAD_PRIORITY_FOREGROUND);
 
+    private List<String> mPendingTasks = new ArrayList<>();
+
     public static synchronized SystemServerInitThreadPool get() {
         if (sInstance == null) {
             sInstance = new SystemServerInitThreadPool();
@@ -57,19 +60,26 @@ public class SystemServerInitThreadPool {
     }
 
     public Future<?> submit(Runnable runnable, String description) {
-        if (IS_DEBUGGABLE) {
-            return mService.submit(() -> {
-                Slog.d(TAG, "Started executing " + description);
-                try {
-                    runnable.run();
-                } catch (RuntimeException e) {
-                    Slog.e(TAG, "Failure in " + description + ": " + e, e);
-                    throw e;
-                }
-                Slog.d(TAG, "Finished executing "  + description);
-            });
+        synchronized (mPendingTasks) {
+            mPendingTasks.add(description);
         }
-        return mService.submit(runnable);
+        return mService.submit(() -> {
+            if (IS_DEBUGGABLE) {
+                Slog.d(TAG, "Started executing " + description);
+            }
+            try {
+                runnable.run();
+            } catch (RuntimeException e) {
+                Slog.e(TAG, "Failure in " + description + ": " + e, e);
+                throw e;
+            }
+            synchronized (mPendingTasks) {
+                mPendingTasks.remove(description);
+            }
+            if (IS_DEBUGGABLE) {
+                Slog.d(TAG, "Finished executing " + description);
+            }
+        });
     }
 
     static synchronized void shutdown() {
@@ -81,16 +91,36 @@ public class SystemServerInitThreadPool {
                         TimeUnit.MILLISECONDS);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
+                dumpStackTraces();
                 throw new IllegalStateException(TAG + " init interrupted");
+            }
+            if (!terminated) {
+                // dump stack must be called before shutdownNow() to collect stacktrace of threads
+                // in the thread pool.
+                dumpStackTraces();
             }
             List<Runnable> unstartedRunnables = sInstance.mService.shutdownNow();
             if (!terminated) {
+                final List<String> copy = new ArrayList<>();
+                synchronized (sInstance.mPendingTasks) {
+                    copy.addAll(sInstance.mPendingTasks);
+                }
                 throw new IllegalStateException("Cannot shutdown. Unstarted tasks "
-                        + unstartedRunnables);
+                        + unstartedRunnables + " Unfinished tasks " + copy);
             }
             sInstance.mService = null; // Make mService eligible for GC
+            sInstance.mPendingTasks = null;
             Slog.d(TAG, "Shutdown successful");
         }
     }
 
+    /**
+     * A helper function to call ActivityManagerService.dumpStackTraces().
+     */
+    private static void dumpStackTraces() {
+        final ArrayList<Integer> pids = new ArrayList<>();
+        pids.add(Process.myPid());
+        ActivityManagerService.dumpStackTraces(
+                pids, null, null, null);
+    }
 }
