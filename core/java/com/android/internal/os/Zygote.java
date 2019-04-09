@@ -87,7 +87,7 @@ public final class Zygote {
      * Bit shift for use with {@link #API_ENFORCEMENT_POLICY_MASK}.
      *
      * (flags & API_ENFORCEMENT_POLICY_MASK) >> API_ENFORCEMENT_POLICY_SHIFT gives
-     * @ApplicationInfo.ApiEnforcementPolicy values.
+     * {@link ApplicationInfo.HiddenApiEnforcementPolicy} values.
      */
     public static final int API_ENFORCEMENT_POLICY_SHIFT =
             Integer.numberOfTrailingZeros(API_ENFORCEMENT_POLICY_MASK);
@@ -128,7 +128,7 @@ public final class Zygote {
     public static final int MOUNT_EXTERNAL_FULL = IVold.REMOUNT_MODE_FULL;
 
     /** Number of bytes sent to the Zygote over USAP pipes or the pool event FD */
-    public static final int USAP_MANAGEMENT_MESSAGE_BYTES = 8;
+    static final int USAP_MANAGEMENT_MESSAGE_BYTES = 8;
 
     /**
      * An extraArg passed when a zygote process is forking a child-zygote, specifying a name
@@ -173,7 +173,7 @@ public final class Zygote {
     public static final int SOCKET_BUFFER_SIZE = 256;
 
     /** a prototype instance for a future List.toArray() */
-    protected static final int[][] INT_ARRAY_2D = new int[0][0];
+    static final int[][] INT_ARRAY_2D = new int[0][0];
 
     /**
      * @hide for internal use only.
@@ -231,7 +231,7 @@ public final class Zygote {
      * @return 0 if this is the child, pid of the child
      * if this is the parent, or -1 on error.
      */
-    public static int forkAndSpecialize(int uid, int gid, int[] gids, int runtimeFlags,
+    static int forkAndSpecialize(int uid, int gid, int[] gids, int runtimeFlags,
             int[][] rlimits, int mountExternal, String seInfo, String niceName, int[] fdsToClose,
             int[] fdsToIgnore, boolean startChildZygote, String instructionSet, String appDataDir,
             String packageName, String[] packagesForUID, String sandboxId, int targetSdkVersion) {
@@ -281,7 +281,7 @@ public final class Zygote {
      * @param instructionSet null-ok  The instruction set to use.
      * @param appDataDir null-ok  The data directory of the app.
      */
-    public static void specializeAppProcess(int uid, int gid, int[] gids, int runtimeFlags,
+    private static void specializeAppProcess(int uid, int gid, int[] gids, int runtimeFlags,
             int[][] rlimits, int mountExternal, String seInfo, String niceName,
             boolean startChildZygote, String instructionSet, String appDataDir, String packageName,
             String[] packagesForUID, String sandboxId) {
@@ -337,7 +337,7 @@ public final class Zygote {
      * @return 0 if this is the child, pid of the child
      * if this is the parent, or -1 on error.
      */
-    public static int forkSystemServer(int uid, int gid, int[] gids, int runtimeFlags,
+    static int forkSystemServer(int uid, int gid, int[] gids, int runtimeFlags,
             int[][] rlimits, long permittedCapabilities, long effectiveCapabilities) {
         ZygoteHooks.preFork();
         // Resets nice priority for zygote process.
@@ -367,7 +367,7 @@ public final class Zygote {
      *
      * @param appInfo ApplicationInfo of the application
      */
-    protected static void allowAppFilesAcrossFork(ApplicationInfo appInfo) {
+    static void allowAppFilesAcrossFork(ApplicationInfo appInfo) {
         for (String path : appInfo.getAllApkPaths()) {
             Zygote.nativeAllowFileAcrossFork(path);
         }
@@ -413,7 +413,7 @@ public final class Zygote {
                 defaultValue);
     }
 
-    protected static void emptyUsapPool() {
+    static void emptyUsapPool() {
         nativeEmptyUsapPool();
     }
 
@@ -425,7 +425,7 @@ public final class Zygote {
      * Note that Device Config is not available without an application so SystemProperties is used
      * instead.
      *
-     * @see SystemProperties.getBoolean
+     * @see SystemProperties#getBoolean
      *
      * TODO (chriswailes): Cache the system property location in native code and then write a JNI
      *                     function to fetch it.
@@ -663,7 +663,7 @@ public final class Zygote {
     /**
      * Mark execute-only segments of libraries read+execute for apps with targetSdkVersion<Q.
      */
-    protected static void disableExecuteOnly(int targetSdkVersion) {
+    private static void disableExecuteOnly(int targetSdkVersion) {
         if ((targetSdkVersion < Build.VERSION_CODES.Q) && !nativeDisableExecuteOnly()) {
             Log.e("Zygote", "Failed to set libraries to read+execute.");
         }
@@ -674,7 +674,7 @@ public final class Zygote {
     /**
      * @return  Raw file descriptors for the read-end of USAP reporting pipes.
      */
-    protected static int[] getUsapPipeFDs() {
+    static int[] getUsapPipeFDs() {
         return nativeGetUsapPipeFDs();
     }
 
@@ -686,7 +686,7 @@ public final class Zygote {
      * @param usapPID  Process ID of the entry to remove
      * @return True if the entry was removed; false if it doesn't exist
      */
-    protected static boolean removeUsapTableEntry(int usapPID) {
+    static boolean removeUsapTableEntry(int usapPID) {
         return nativeRemoveUsapTableEntry(usapPID);
     }
 
@@ -699,9 +699,10 @@ public final class Zygote {
      *
      * @param args non-null; zygote spawner arguments
      * @param peer non-null; peer credentials
-     * @throws ZygoteSecurityException
+     * @throws ZygoteSecurityException Indicates a security issue when applying the UID based
+     *  security policies
      */
-    protected static void applyUidSecurityPolicy(ZygoteArguments args, Credentials peer)
+    static void applyUidSecurityPolicy(ZygoteArguments args, Credentials peer)
             throws ZygoteSecurityException {
 
         if (peer.getUid() == Process.SYSTEM_UID) {
@@ -737,7 +738,7 @@ public final class Zygote {
      *
      * @param args non-null; zygote spawner args
      */
-    protected static void applyDebuggerSystemProperty(ZygoteArguments args) {
+    static void applyDebuggerSystemProperty(ZygoteArguments args) {
         if (RoSystemProperties.DEBUGGABLE) {
             args.mRuntimeFlags |= Zygote.DEBUG_ENABLE_JDWP;
         }
@@ -754,9 +755,10 @@ public final class Zygote {
      *
      * @param args non-null; zygote spawner arguments
      * @param peer non-null; peer credentials
-     * @throws ZygoteSecurityException
+     * @throws ZygoteSecurityException Thrown when `--invoke-with` is specified for a non-debuggable
+     *  application.
      */
-    protected static void applyInvokeWithSecurityPolicy(ZygoteArguments args, Credentials peer)
+    static void applyInvokeWithSecurityPolicy(ZygoteArguments args, Credentials peer)
             throws ZygoteSecurityException {
         int peerUid = peer.getUid();
 
@@ -773,7 +775,7 @@ public final class Zygote {
      *
      * @param args non-null; zygote args
      */
-    protected static void applyInvokeWithSystemProperty(ZygoteArguments args) {
+    static void applyInvokeWithSystemProperty(ZygoteArguments args) {
         if (args.mInvokeWith == null && args.mNiceName != null) {
             String property = "wrap." + args.mNiceName;
             args.mInvokeWith = SystemProperties.get(property);
@@ -851,11 +853,15 @@ public final class Zygote {
         }
     }
 
+    // This function is called from native code in com_android_internal_os_Zygote.cpp
+    @SuppressWarnings("unused")
     private static void callPostForkSystemServerHooks() {
         // SystemServer specific post fork hooks run before child post fork hooks.
         ZygoteHooks.postForkSystemServer();
     }
 
+    // This function is called from native code in com_android_internal_os_Zygote.cpp
+    @SuppressWarnings("unused")
     private static void callPostForkChildHooks(int runtimeFlags, boolean isSystemServer,
             boolean isZygote, String instructionSet) {
         ZygoteHooks.postForkChild(runtimeFlags, isSystemServer, isZygote, instructionSet);
@@ -877,7 +883,7 @@ public final class Zygote {
      *
      * @param command The shell command to execute.
      */
-    public static void execShell(String command) {
+    static void execShell(String command) {
         String[] args = { "/system/bin/sh", "-c", command };
         try {
             Os.execv(args[0], args);
@@ -895,7 +901,7 @@ public final class Zygote {
      * @param args An array of argument strings to be quoted and appended to the command.
      * @see #execShell(String)
      */
-    public static void appendQuotedShellArgs(StringBuilder command, String[] args) {
+    static void appendQuotedShellArgs(StringBuilder command, String[] args) {
         for (String arg : args) {
             command.append(" '").append(arg.replace("'", "'\\''")).append("'");
         }
