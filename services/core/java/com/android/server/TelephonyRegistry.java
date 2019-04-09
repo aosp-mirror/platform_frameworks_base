@@ -1315,12 +1315,12 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             return;
         }
         if (VDBG) {
-            log("notifyUserMobileDataStateChangedForSubscriberPhoneID: subId=" + phoneId
-                    + " state=" + state);
+            log("notifyUserMobileDataStateChangedForSubscriberPhoneID: PhoneId=" + phoneId
+                    + " subId=" + subId + " state=" + state);
         }
         synchronized (mRecords) {
             if (validatePhoneId(phoneId)) {
-                mMessageWaiting[phoneId] = state;
+                mUserMobileDataState[phoneId] = state;
                 for (Record r : mRecords) {
                     if (r.matchPhoneStateListenerEvent(
                             PhoneStateListener.LISTEN_USER_MOBILE_DATA_STATE) &&
