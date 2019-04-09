@@ -1262,15 +1262,16 @@ public final class OomAdjuster {
                                 // processes).  These should not bring the current process
                                 // into the top state, since they are not on top.  Instead
                                 // give them the best bound state after that.
+                                final int bestState = cr.hasFlag(Context.BIND_INCLUDE_CAPABILITIES)
+                                        ? PROCESS_STATE_FOREGROUND_SERVICE_LOCATION
+                                        : PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
                                 if ((cr.flags & Context.BIND_FOREGROUND_SERVICE) != 0) {
-                                    clientProcState =
-                                            PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
+                                    clientProcState = bestState;
                                 } else if (mService.mWakefulness
                                         == PowerManagerInternal.WAKEFULNESS_AWAKE
                                         && (cr.flags & Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE)
                                                 != 0) {
-                                    clientProcState =
-                                            PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
+                                    clientProcState = bestState;
                                 } else {
                                     clientProcState =
                                             PROCESS_STATE_IMPORTANT_FOREGROUND;
