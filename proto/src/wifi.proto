@@ -474,9 +474,6 @@ message WifiLog {
   // Number of times the SarManager failed to register SAR sensor listener
   optional int32 num_sar_sensor_registration_failures = 122;
 
-  // Histogram of the EAP method type of all installed Passpoint profiles
-  repeated PasspointProfileTypeCount installed_passpoint_profile_type = 123;
-
   // Hardware revision (EVT, DVT, PVT etc.)
   optional string hardware_revision = 124;
 
@@ -548,6 +545,12 @@ message WifiLog {
 
   // Passpoint provison metrics
   optional PasspointProvisionStats passpoint_provision_stats = 147;
+
+  // Histogram of the EAP method type of all installed Passpoint profiles for R1
+  repeated PasspointProfileTypeCount installed_passpoint_profile_type_for_r1 = 123;
+
+  // Histogram of the EAP method type of all installed Passpoint profiles for R2
+  repeated PasspointProfileTypeCount installed_passpoint_profile_type_for_r2 = 148;
 }
 
 // Information that gets logged for every WiFi connection.
