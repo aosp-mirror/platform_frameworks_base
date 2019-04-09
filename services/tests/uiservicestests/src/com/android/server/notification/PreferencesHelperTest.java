@@ -940,12 +940,12 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     @Test
     public void testClearLockedFields() {
         final NotificationChannel channel = getChannel();
-        mHelper.clearLockedFields(channel);
+        mHelper.clearLockedFieldsLocked(channel);
         assertEquals(0, channel.getUserLockedFields());
 
         channel.lockFields(NotificationChannel.USER_LOCKED_PRIORITY
                 | NotificationChannel.USER_LOCKED_IMPORTANCE);
-        mHelper.clearLockedFields(channel);
+        mHelper.clearLockedFieldsLocked(channel);
         assertEquals(0, channel.getUserLockedFields());
     }
 
