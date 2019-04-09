@@ -627,7 +627,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 drawingBounds.bottom -= framePadding.bottom - frameOffsets.bottom;
             }
 
-            Drawable bg = getBackground();
+            Drawable bg = super.getBackground();
             if (bg != null) {
                 bg.setBounds(drawingBounds);
             }
@@ -1233,6 +1233,11 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         }
         mLastBackgroundInsets = mBackgroundInsets;
         mLastOriginalBackgroundDrawable = mOriginalBackgroundDrawable;
+    }
+
+    @Override
+    public Drawable getBackground() {
+        return mOriginalBackgroundDrawable;
     }
 
     private int calculateStatusBarColor() {
