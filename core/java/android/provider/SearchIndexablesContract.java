@@ -16,6 +16,7 @@
 
 package android.provider;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.content.ContentResolver;
 
@@ -210,6 +211,7 @@ public class SearchIndexablesContract {
     /**
      * Cursor schema for SliceUriPairs.
      */
+    @NonNull
     public static final String[] SLICE_URI_PAIRS_COLUMNS = new String[]{
             SliceUriPairColumns.KEY,
             SliceUriPairColumns.SLICE_URI
