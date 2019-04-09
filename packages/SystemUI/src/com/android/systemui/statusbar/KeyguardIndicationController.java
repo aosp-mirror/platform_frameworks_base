@@ -83,7 +83,7 @@ public class KeyguardIndicationController implements StateListener {
 
     private final int mSlowThreshold;
     private final int mFastThreshold;
-    private LockIcon mLockIcon;
+    private final LockIcon mLockIcon;
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
     private String mRestingIndication;
@@ -685,6 +685,11 @@ public class KeyguardIndicationController implements StateListener {
             if (mVisible) {
                 updateIndication(false);
             }
+        }
+
+        @Override
+        public void onKeyguardBouncerChanged(boolean bouncer) {
+            mLockIcon.setBouncerVisible(bouncer);
         }
     };
 }
