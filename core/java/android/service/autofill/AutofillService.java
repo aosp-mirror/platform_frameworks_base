@@ -695,6 +695,8 @@ public abstract class AutofillService extends Service {
      * finishing the {@link FillCallback}.
      *
      * @return The history or {@code null} if there are no events.
+     *
+     * @throws RuntimeException if the event history could not be retrieved.
      */
     @Nullable public final FillEventHistory getFillEventHistory() {
         final AutofillManager afm = getSystemService(AutofillManager.class);
