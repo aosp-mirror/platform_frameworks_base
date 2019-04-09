@@ -275,7 +275,20 @@ class ScreenRotationAnimation {
             final int displayId = display.getDisplayId();
             final Surface surface = mService.mSurfaceFactory.make();
             surface.copyFrom(mSurfaceControl);
-            if (mService.mDisplayManagerInternal.screenshot(displayId, surface)) {
+            SurfaceControl.ScreenshotGraphicBuffer gb =
+                mService.mDisplayManagerInternal.screenshot(displayId);
+            if (gb != null) {
+                try {
+                    surface.attachAndQueueBuffer(gb.getGraphicBuffer());
+                } catch (RuntimeException e) {
+                    Slog.w(TAG, "Failed to attach screenshot - " + e.getMessage());
+                }
+                // If the screenshot contains secure layers, we have to make sure the
+                // screenshot surface we display it in also has FLAG_SECURE so that
+                // the user can not screenshot secure layers via the screenshot surface.
+                if (gb.containsSecureLayers()) {
+                    t.setSecure(mSurfaceControl, true);
+                }
                 t.setLayer(mSurfaceControl, SCREEN_FREEZE_LAYER_SCREENSHOT);
                 t.setAlpha(mSurfaceControl, 0);
                 t.show(mSurfaceControl);
