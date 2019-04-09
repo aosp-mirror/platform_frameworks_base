@@ -2347,6 +2347,9 @@ class PackageManagerShellCommand extends ShellCommand {
                     break;
                 case "-g":
                     sessionParams.installFlags |= PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS;
+                case "-w":
+                    sessionParams.installFlags |=
+                            PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS;
                     break;
                 case "--dont-kill":
                     sessionParams.installFlags |= PackageManager.INSTALL_DONT_KILL_APP;
@@ -2950,7 +2953,7 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("       [--user USER_ID] INTENT");
         pw.println("    Prints all broadcast receivers that can handle the given INTENT.");
         pw.println("");
-        pw.println("  install [-lrtsfdg] [-i PACKAGE] [--user USER_ID|all|current]");
+        pw.println("  install [-lrtsfdgw] [-i PACKAGE] [--user USER_ID|all|current]");
         pw.println("       [-p INHERIT_PACKAGE] [--install-location 0/1/2]");
         pw.println("       [--install-reason 0/1/2/3/4] [--originating-uri URI]");
         pw.println("       [--referrer URI] [--abi ABI_NAME] [--force-sdk]");
@@ -2969,6 +2972,7 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      -d: allow version code downgrade (debuggable packages only)");
         pw.println("      -p: partial application install (new split on top of existing pkg)");
         pw.println("      -g: grant all runtime permissions");
+        pw.println("      -w: whitelist all restricted permissions");
         pw.println("      -S: size in bytes of package, required for stdin");
         pw.println("      --user: install under the given user.");
         pw.println("      --dont-kill: installing a new feature split, don't kill running app");

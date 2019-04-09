@@ -353,7 +353,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
             throw new IllegalStateException("Should not be ota-dexopting when trying to move.");
         }
 
-        if (!mPackageManagerService.isUpgrade()) {
+        if (!mPackageManagerService.isDeviceUpgrading()) {
             Slog.d(TAG, "No upgrade, skipping A/B artifacts check.");
             return;
         }

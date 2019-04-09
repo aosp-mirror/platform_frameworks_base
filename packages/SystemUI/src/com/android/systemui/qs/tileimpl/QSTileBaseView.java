@@ -80,7 +80,6 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
         // Default to Quick Tile padding, and QSTileView will specify its own padding.
         int padding = context.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_padding);
         mIconFrame = new FrameLayout(context);
-        mIconFrame.setForegroundGravity(Gravity.CENTER);
         int size = context.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size);
         addView(mIconFrame, new LayoutParams(size, size));
         mBg = new ImageView(getContext());
@@ -93,14 +92,14 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
         int bgSize = context.getResources().getDimensionPixelSize(R.dimen.qs_tile_background_size);
         d.setIntrinsicHeight(bgSize);
         d.setIntrinsicWidth(bgSize);
-        mBg.setScaleType(ScaleType.FIT_CENTER);
         mBg.setImageDrawable(d);
-        mIconFrame.addView(mBg, ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT);
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(bgSize, bgSize, Gravity.CENTER);
+        mIconFrame.addView(mBg, lp);
+        mBg.setLayoutParams(lp);
         mIcon = icon;
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.setMargins(0, padding, 0, padding);
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT,
+                Gravity.CENTER);
         mIconFrame.addView(mIcon, params);
         mIconFrame.setClipChildren(false);
         mIconFrame.setClipToPadding(false);

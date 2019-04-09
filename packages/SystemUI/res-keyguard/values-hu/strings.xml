@@ -171,15 +171,15 @@
   </string-array>
   <string-array name="type_clock_minutes">
     <item msgid="8322049385467207985">"óra"</item>
-    <item msgid="8837126587669001578">"Egy"</item>
-    <item msgid="4294343372940455660">"Kettő"</item>
-    <item msgid="7129166637707421536">"Három"</item>
-    <item msgid="7579404865008788673">"Négy"</item>
-    <item msgid="3873924689207380586">"Öt"</item>
-    <item msgid="4849565597850069377">"Hat"</item>
-    <item msgid="4404219424523572364">"Hét"</item>
-    <item msgid="8740481214764087329">"Nyolc"</item>
-    <item msgid="1713216865806811237">"Kilenc"</item>
+    <item msgid="2091812961809760681">"Nulla egy"</item>
+    <item msgid="1496435384877290709">"Nulla kettő"</item>
+    <item msgid="881846472976674129">"Nulla három"</item>
+    <item msgid="2784477043911540584">"Nulla négy"</item>
+    <item msgid="1610928853656700614">"Nulla öt"</item>
+    <item msgid="2317806244043886658">"Nulla hat"</item>
+    <item msgid="3318687539120971327">"Nulla hét"</item>
+    <item msgid="5701600693712102348">"Nulla nyolc"</item>
+    <item msgid="3247381605947372495">"Nulla kilenc"</item>
     <item msgid="3508406095411245038">"Tíz"</item>
     <item msgid="7161996337755311711">"Tizenegy"</item>
     <item msgid="4044549963329624197">"Tizenkettő"</item>

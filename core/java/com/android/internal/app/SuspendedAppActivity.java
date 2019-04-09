@@ -79,7 +79,7 @@ public class SuspendedAppActivity extends AlertActivity
                 : ID_NULL;
         if (iconId != ID_NULL && mSuspendingAppResources != null) {
             try {
-                return mSuspendingAppResources.getDrawable(iconId, null);
+                return mSuspendingAppResources.getDrawable(iconId, getTheme());
             } catch (Resources.NotFoundException nfe) {
                 Slog.e(TAG, "Could not resolve drawable resource id " + iconId);
             }

@@ -44,7 +44,6 @@ public class QSIconViewImpl extends QSIconView {
 
     protected final View mIcon;
     protected final int mIconSizePx;
-    protected final int mTilePaddingBelowIconPx;
     private boolean mAnimationEnabled = true;
     private int mState = -1;
     private int mTint;
@@ -54,7 +53,6 @@ public class QSIconViewImpl extends QSIconView {
 
         final Resources res = context.getResources();
         mIconSizePx = res.getDimensionPixelSize(R.dimen.qs_tile_icon_size);
-        mTilePaddingBelowIconPx =  res.getDimensionPixelSize(R.dimen.qs_tile_padding_below_icon);
 
         mIcon = createIcon();
         addView(mIcon);
@@ -73,7 +71,7 @@ public class QSIconViewImpl extends QSIconView {
         final int w = MeasureSpec.getSize(widthMeasureSpec);
         final int iconSpec = exactly(mIconSizePx);
         mIcon.measure(MeasureSpec.makeMeasureSpec(w, getIconMeasureMode()), iconSpec);
-        setMeasuredDimension(w, mIcon.getMeasuredHeight() + mTilePaddingBelowIconPx);
+        setMeasuredDimension(w, mIcon.getMeasuredHeight());
     }
 
     @Override

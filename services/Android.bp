@@ -31,6 +31,7 @@ java_library {
         "services.print",
         "services.restrictions",
         "services.startop",
+        "services.systemcaptions",
         "services.usage",
         "services.usb",
         "services.voiceinteraction",

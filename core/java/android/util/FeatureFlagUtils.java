@@ -42,6 +42,8 @@ public class FeatureFlagUtils {
             "settings_global_actions_force_grid_enabled";
     public static final String GLOBAL_ACTIONS_PANEL_ENABLED =
             "settings_global_actions_panel_enabled";
+    public static final String PIXEL_WALLPAPER_CATEGORY_SWITCH =
+            "settings_pixel_wallpaper_category_switch";
     public static final String DYNAMIC_SYSTEM = "settings_dynamic_system";
 
     private static final Map<String, String> DEFAULT_FLAGS;
@@ -60,6 +62,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SCREENRECORD_LONG_PRESS, "false");
         DEFAULT_FLAGS.put(FORCE_GLOBAL_ACTIONS_GRID_ENABLED, "false");
         DEFAULT_FLAGS.put(GLOBAL_ACTIONS_PANEL_ENABLED, "true");
+        DEFAULT_FLAGS.put(PIXEL_WALLPAPER_CATEGORY_SWITCH, "false");
         DEFAULT_FLAGS.put("settings_wifi_details_saved_screen", "true");
         DEFAULT_FLAGS.put("settings_wifi_details_datausage_header", "false");
     }

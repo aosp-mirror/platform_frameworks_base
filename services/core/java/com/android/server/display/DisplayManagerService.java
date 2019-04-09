@@ -1269,21 +1269,14 @@ public final class DisplayManagerService extends SystemService {
         return null;
     }
 
-    private boolean screenshotInternal(int displayId, Surface outSurface) {
+    private SurfaceControl.ScreenshotGraphicBuffer screenshotInternal(int displayId) {
         final IBinder token = getDisplayToken(displayId);
         if (token == null) {
-            return false;
+            return null;
         }
-        final SurfaceControl.ScreenshotGraphicBuffer gb =
-                SurfaceControl.screenshotToBufferWithSecureLayersUnsafe(
+        return SurfaceControl.screenshotToBufferWithSecureLayersUnsafe(
                         token, new Rect(), 0 /* width */, 0 /* height */,
                         false /* useIdentityTransform */, 0 /* rotation */);
-        try {
-            outSurface.attachAndQueueBuffer(gb.getGraphicBuffer());
-        } catch (RuntimeException e) {
-            Slog.w(TAG, "Failed to take screenshot - " + e.getMessage());
-        }
-        return true;
     }
 
     @VisibleForTesting
@@ -2354,8 +2347,8 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override
-        public boolean screenshot(int displayId, Surface outSurface) {
-            return screenshotInternal(displayId, outSurface);
+        public SurfaceControl.ScreenshotGraphicBuffer screenshot(int displayId) {
+            return screenshotInternal(displayId);
         }
 
         @Override

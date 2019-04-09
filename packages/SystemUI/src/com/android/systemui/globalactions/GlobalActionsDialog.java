@@ -505,6 +505,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             }
             TextView messageView = v.findViewById(R.id.message);
             messageView.setTextColor(textColor);
+            messageView.setSelected(true); // necessary for marquee to work
             ImageView icon = (ImageView) v.findViewById(R.id.icon);
             icon.getDrawable().setTint(textColor);
             return v;
@@ -1137,6 +1138,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
             ImageView icon = (ImageView) v.findViewById(R.id.icon);
             TextView messageView = (TextView) v.findViewById(R.id.message);
+            messageView.setSelected(true); // necessary for marquee to work
 
             TextView statusView = (TextView) v.findViewById(R.id.status);
             final String status = getStatus();
@@ -1240,6 +1242,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             if (messageView != null) {
                 messageView.setText(mMessageResId);
                 messageView.setEnabled(enabled);
+                messageView.setSelected(true); // necessary for marquee to work
             }
 
             boolean on = ((mState == State.On) || (mState == State.TurningOn));

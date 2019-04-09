@@ -47,7 +47,6 @@ import static android.app.admin.DevicePolicyManager.DELEGATION_INSTALL_EXISTING_
 import static android.app.admin.DevicePolicyManager.DELEGATION_KEEP_UNINSTALLED_PACKAGES;
 import static android.app.admin.DevicePolicyManager.DELEGATION_NETWORK_LOGGING;
 import static android.app.admin.DevicePolicyManager.DELEGATION_PACKAGE_ACCESS;
-import static android.app.admin.DevicePolicyManager.DELEGATION_PACKAGE_INSTALLATION;
 import static android.app.admin.DevicePolicyManager.DELEGATION_PERMISSION_GRANT;
 import static android.app.admin.DevicePolicyManager.ID_TYPE_BASE_INFO;
 import static android.app.admin.DevicePolicyManager.ID_TYPE_IMEI;
@@ -379,13 +378,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         DELEGATION_KEEP_UNINSTALLED_PACKAGES,
         DELEGATION_NETWORK_LOGGING,
         DELEGATION_CERT_SELECTION,
-        DELEGATION_PACKAGE_INSTALLATION
     };
 
     // Subset of delegations that can only be delegated by Device Owner.
     private static final List<String> DEVICE_OWNER_DELEGATIONS = Arrays.asList(new String[] {
             DELEGATION_NETWORK_LOGGING,
-            DELEGATION_PACKAGE_INSTALLATION
     });
 
     // Subset of delegations that only one single package within a given user can hold
@@ -11269,10 +11266,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     && isActiveAdminWithPolicy(callerUid,
                             DeviceAdminInfo.USES_POLICY_PROFILE_OWNER)) {
                 // device owner or a profile owner affiliated with the device owner
-                return true;
-            }
-            if (DevicePolicyManagerService.this.isCallerDelegate(callerPackage, callerUid,
-                    DELEGATION_PACKAGE_INSTALLATION)) {
                 return true;
             }
             return false;

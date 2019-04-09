@@ -1335,15 +1335,15 @@
     <string name="no_permissions" msgid="7283357728219338112">"Nuk kërkohen leje"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"kjo mund të të kushtojë para"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Në rregull"</string>
-    <string name="usb_charging_notification_title" msgid="1595122345358177163">"Kjo pajisje po ngarkohet nëpërmjet USB-së"</string>
-    <string name="usb_supplying_notification_title" msgid="4631045789893086181">"Pajisja e lidhur po ngarkohet nëpërmjet USB-së"</string>
+    <string name="usb_charging_notification_title" msgid="1595122345358177163">"Kjo pajisje po karikohet nëpërmjet USB-së"</string>
+    <string name="usb_supplying_notification_title" msgid="4631045789893086181">"Pajisja e lidhur po karikohet nëpërmjet USB-së"</string>
     <string name="usb_mtp_notification_title" msgid="4238227258391151029">"Transferimi i skedarëve nëpërmjet USB-së u aktivizua"</string>
     <string name="usb_ptp_notification_title" msgid="5425857879922006878">"PTP nëpërmjet USB-së u aktivizua"</string>
     <string name="usb_tether_notification_title" msgid="3716143122035802501">"Ndarja e internetit nëpërmjet USB-së u aktivizua"</string>
     <string name="usb_midi_notification_title" msgid="5356040379749154805">"MIDI nëpërmjet USB-së u aktivizua"</string>
     <string name="usb_accessory_notification_title" msgid="1785694450621427730">"Aksesori i USB-së u lidh"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Trokit për më shumë opsione."</string>
-    <string name="usb_power_notification_message" msgid="4647527153291917218">"Pajisja e lidhur po ngarkohet. Trokit për opsione të tjera."</string>
+    <string name="usb_power_notification_message" msgid="4647527153291917218">"Pajisja e lidhur po karikohet. Trokit për opsione të tjera."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"U zbulua aksesor i audios analoge"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Pajisja e bashkuar nuk është e pajtueshme me këtë telefon. Trokit për të mësuar më shumë."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Korrigjuesi i USB-së i lidhur"</string>

@@ -951,6 +951,11 @@ public class PackageManagerStub extends PackageManager {
     }
 
     @Override
+    public boolean isDeviceUpgrading() {
+        return false;
+    }
+
+    @Override
     public PackageInstaller getPackageInstaller() {
         return null;
     }

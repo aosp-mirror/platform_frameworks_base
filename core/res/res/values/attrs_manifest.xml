@@ -310,13 +310,24 @@
         <!-- Set to indicate that this permission allows an operation that
              may cost the user money.  Such permissions may be highlighted
              when shown to the user with this additional information.  -->
-        <flag name="costsMoney" value="0x0001" />
+        <flag name="costsMoney" value="0x1" />
         <!-- Additional flag from base permission type: this permission has been
              removed and it is no longer enforced. It shouldn't be shown in the
              UI. Removed permissions are kept as normal permissions for backwards
              compatibility as apps may be checking them before calling an API.
         -->
         <flag name="removed" value="0x2" />
+        <!-- This permission is restricted by the platform and it would be
+             grantable only to apps that meet special criteria per platform
+             policy.
+        -->
+        <flag name="hardRestricted" value="0x4" />
+        <!-- This permission is restricted by the platform and it would be
+             grantable in its full form to apps that meet special criteria
+             per platform policy. Otherwise, a weaker form of the permission
+             would be granted. The weak grant depends on the permission.
+        -->
+        <flag name="softRestricted" value="0x8" />
     </attr>
 
     <!-- Specified the name of a group that this permission is associated

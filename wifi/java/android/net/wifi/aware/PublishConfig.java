@@ -172,8 +172,9 @@ public final class PublishConfig implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mServiceName, mServiceSpecificInfo, mMatchFilter, mPublishType, mTtlSec,
-                mEnableTerminateNotification, mEnableRanging);
+        return Objects.hash(Arrays.hashCode(mServiceName), Arrays.hashCode(mServiceSpecificInfo),
+                Arrays.hashCode(mMatchFilter), mPublishType, mTtlSec, mEnableTerminateNotification,
+                mEnableRanging);
     }
 
     /**

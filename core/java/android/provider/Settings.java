@@ -5662,17 +5662,6 @@ public final class Settings {
         private static final Validator ODI_CAPTIONS_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
-         * Setting to indicate that on device captions cannot be shown because the app
-         * which is currently playing media had opted out.
-         *
-         * @hide
-         */
-        @SystemApi
-        public static final String ODI_CAPTIONS_OPTED_OUT = "odi_captions_opted_out";
-
-        private static final Validator ODI_CAPTIONS_OPTED_OUT_VALIDATOR = BOOLEAN_VALIDATOR;
-
-        /**
          * On Android 8.0 (API level 26) and higher versions of the platform,
          * a 64-bit number (expressed as a hexadecimal string), unique to
          * each combination of app-signing key, user, and device.
@@ -8998,7 +8987,6 @@ public final class Settings {
             VALIDATORS.put(SILENCE_CALL_GESTURE_COUNT, SILENCE_GESTURE_COUNT_VALIDATOR);
             VALIDATORS.put(SILENCE_NOTIFICATION_GESTURE_COUNT, SILENCE_GESTURE_COUNT_VALIDATOR);
             VALIDATORS.put(ODI_CAPTIONS_ENABLED, ODI_CAPTIONS_ENABLED_VALIDATOR);
-            VALIDATORS.put(ODI_CAPTIONS_OPTED_OUT, ODI_CAPTIONS_OPTED_OUT_VALIDATOR);
         }
 
         /**
@@ -13389,18 +13377,6 @@ public final class Settings {
         @TestApi
         public static final String LOCATION_GLOBAL_KILL_SWITCH =
                 "location_global_kill_switch";
-
-        /**
-         * If set to 1, app cannot request read sms permission unless it's the default sms handler.
-         *
-         * STOPSHIP: Remove this once we ship with the restriction enabled.
-         *
-         * @hide
-         */
-        @SystemApi
-        @TestApi
-        public static final String SMS_ACCESS_RESTRICTION_ENABLED =
-                "sms_access_restriction_enabled";
 
         /**
          * If set to 1, the device identifier check will be relaxed to the previous READ_PHONE_STATE

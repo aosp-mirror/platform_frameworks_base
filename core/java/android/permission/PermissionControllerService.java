@@ -178,6 +178,17 @@ public abstract class PermissionControllerService extends Service {
             boolean countSystem, long numMillis);
 
     /**
+     * Grant or upgrade runtime permissions. The upgrade could be performed
+     * based on whether the device upgraded, whether the permission database
+     * version is old, or because the permission policy changed.
+     *
+     * @see PackageManager#isDeviceUpgrading()
+     * @see PermissionManager#getRuntimePermissionsVersion()
+     * @see PermissionManager#setRuntimePermissionsVersion(int)
+     */
+    public abstract void onGrantOrUpgradeDefaultRuntimePermissions();
+
+    /**
      * Set the runtime permission state from a device admin.
      *
      * @param callerPackageName The package name of the admin requesting the change
@@ -350,6 +361,18 @@ public abstract class PermissionControllerService extends Service {
                         PermissionControllerService.this, callerPackageName, packageName,
                         permission, grantState, callback));
             }
+
+            @Override
+            public void grantOrUpgradeDefaultRuntimePermissions(@NonNull RemoteCallback callback) {
+                checkNotNull(callback, "callback");
+
+                enforceCallingPermission(Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY,
+                        null);
+
+                mHandler.sendMessage(obtainMessage(
+                        PermissionControllerService::grantOrUpgradeDefaultRuntimePermissions,
+                        PermissionControllerService.this, callback));
+            }
         };
     }
 
@@ -425,5 +448,10 @@ public abstract class PermissionControllerService extends Service {
         Bundle result = new Bundle();
         result.putBoolean(PermissionControllerManager.KEY_RESULT, wasSet);
         callback.sendResult(result);
+    }
+
+    private void grantOrUpgradeDefaultRuntimePermissions(@NonNull RemoteCallback callback) {
+        onGrantOrUpgradeDefaultRuntimePermissions();
+        callback.sendResult(Bundle.EMPTY);
     }
 }

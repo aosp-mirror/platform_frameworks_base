@@ -60,6 +60,11 @@ public class PackageManagerServiceTest {
             }
 
             @Override
+            public void notifyPackageChanged(String packageName, int uid) {
+
+            }
+
+            @Override
             public void notifyPackageRemoved(String packageName, int uid) {
             }
         }

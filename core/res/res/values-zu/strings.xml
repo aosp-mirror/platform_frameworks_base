@@ -1979,7 +1979,7 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"Amakholi nezaziso zizodlidliza"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Amakholi nezaziso zizothuliswa"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Ushintsho lwesistimu"</string>
-    <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Ungaphazamasi"</string>
+    <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Ungaphazamisi"</string>
     <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Ukungaphazamisi kufihle izaziso"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"Thepha ukuze ufunde kabanzi futhi ushintshe."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Ukungaphazamisi kushintshile"</string>

@@ -139,6 +139,9 @@ public class InstallInstalling extends AlertActivity {
                         getIntent().getStringExtra(Intent.EXTRA_INSTALLER_PACKAGE_NAME);
                 params.installReason = PackageManager.INSTALL_REASON_USER;
 
+                // Whitelist all restricted permissions.
+                params.setWhitelistedRestrictedPermissions(null /*permissions*/);
+
                 File file = new File(mPackageURI.getPath());
                 try {
                     PackageParser.PackageLite pkg = PackageParser.parsePackageLite(file, 0);

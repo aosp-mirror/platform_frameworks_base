@@ -620,13 +620,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         private int noteProxyOp(String callingPkg, int op) {
             if (op != AppOpsManager.OP_NONE) {
                 int mode = mAppOpsManager.noteProxyOp(op, callingPkg);
-                int nonDefaultMode = mode == MODE_DEFAULT ? interpretDefaultAppOpMode(op) : mode;
-                if (mode == MODE_DEFAULT && nonDefaultMode == MODE_IGNORED) {
-                    Log.w(TAG, "Denying access for " + callingPkg + " to " + getClass().getName()
-                            + " (" + AppOpsManager.opToName(op)
-                            + " = " + AppOpsManager.opToName(mode) + ")");
-                }
-                return mode == MODE_DEFAULT ? nonDefaultMode : mode;
+                return mode == MODE_DEFAULT ? MODE_IGNORED : mode;
             }
 
             return AppOpsManager.MODE_ALLOWED;
@@ -652,16 +646,6 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         }
 
         return mTransport.noteProxyOp(callingPkg, AppOpsManager.permissionToOpCode(permission));
-    }
-
-    /**
-     * Allows for custom interpretations of {@link AppOpsManager#MODE_DEFAULT} by individual
-     * content providers
-     *
-     * @hide
-     */
-    protected int interpretDefaultAppOpMode(int op) {
-        return MODE_IGNORED;
     }
 
     /** {@hide} */

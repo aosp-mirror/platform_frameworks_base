@@ -18,6 +18,7 @@ package android.permission;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.os.UserHandle;
 
 /**
@@ -28,6 +29,23 @@ import android.os.UserHandle;
  * @hide
  */
 public abstract class PermissionManagerInternal {
+
+    /**
+     * Listener for package permission state (permissions or flags) changes.
+     */
+    public interface OnRuntimePermissionStateChangedListener {
+
+        /**
+         * Called when the runtime permission state (permissions or flags) changed.
+         *
+         * @param packageName The package for which the change happened.
+         * @param userId the user id for which the change happened.
+         */
+        @Nullable
+        void onRuntimePermissionStateChanged(@NonNull String packageName,
+                @UserIdInt int userId);
+    }
+
     /**
      * Get the state of the runtime permissions as xml file.
      *
@@ -59,4 +77,20 @@ public abstract class PermissionManagerInternal {
      */
     public abstract void restoreDelayedRuntimePermissions(@NonNull String packageName,
             @NonNull UserHandle user);
+
+    /**
+     * Adds a listener for runtime permission state (permissions or flags) changes.
+     *
+     * @param listener The listener.
+     */
+    public abstract void addOnRuntimePermissionStateChangedListener(
+            @NonNull OnRuntimePermissionStateChangedListener listener);
+
+    /**
+     * Removes a listener for runtime permission state (permissions or flags) changes.
+     *
+     * @param listener The listener.
+     */
+    public abstract void removeOnRuntimePermissionStateChangedListener(
+            @NonNull OnRuntimePermissionStateChangedListener listener);
 }

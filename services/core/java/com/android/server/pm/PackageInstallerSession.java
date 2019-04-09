@@ -139,6 +139,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     static final String TAG_SESSION = "session";
     static final String TAG_CHILD_SESSION = "childSession";
     private static final String TAG_GRANTED_RUNTIME_PERMISSION = "granted-runtime-permission";
+    private static final String TAG_WHITELISTED_RESTRICTED_PERMISSION =
+            "whitelisted-restricted-permission";
     private static final String ATTR_SESSION_ID = "sessionId";
     private static final String ATTR_USER_ID = "userId";
     private static final String ATTR_INSTALLER_PACKAGE_NAME = "installerPackageName";
@@ -486,6 +488,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             info.originatingUid = params.originatingUid;
             info.referrerUri = params.referrerUri;
             info.grantedRuntimePermissions = params.grantedRuntimePermissions;
+            info.whitelistedRestrictedPermissions = params.whitelistedRestrictedPermissions;
             info.installFlags = params.installFlags;
             info.isMultiPackage = params.isMultiPackage;
             info.isStaged = params.isStaged;
@@ -2331,6 +2334,19 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    private static void writeWhitelistedRestrictedPermissionsLocked(@NonNull XmlSerializer out,
+            @Nullable List<String> whitelistedRestrictedPermissions) throws IOException {
+        if (whitelistedRestrictedPermissions != null) {
+            final int permissionCount = whitelistedRestrictedPermissions.size();
+            for (int i = 0; i < permissionCount; i++) {
+                out.startTag(null, TAG_WHITELISTED_RESTRICTED_PERMISSION);
+                writeStringAttribute(out, ATTR_NAME, whitelistedRestrictedPermissions.get(i));
+                out.endTag(null, TAG_WHITELISTED_RESTRICTED_PERMISSION);
+            }
+        }
+    }
+
+
     private static File buildAppIconFile(int sessionId, @NonNull File sessionsDir) {
         return new File(sessionsDir, "app_icon." + sessionId + ".png");
     }
@@ -2392,6 +2408,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             writeIntAttribute(out, ATTR_INSTALL_REASON, params.installReason);
 
             writeGrantedRuntimePermissionsLocked(out, params.grantedRuntimePermissions);
+            writeWhitelistedRestrictedPermissionsLocked(out,
+                    params.whitelistedRestrictedPermissions);
 
             // Persist app icon if changed since last written
             File appIconFile = buildAppIconFile(sessionId, sessionsDir);
@@ -2510,7 +2528,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         // Store the current depth. We should stop parsing when we reach an end tag at the same
         // depth.
-        List<String> permissions = new ArrayList<>();
+        List<String> grantedRuntimePermissions = new ArrayList<>();
+        List<String> whitelistedRestrictedPermissions = new ArrayList<>();
         List<Integer> childSessionIds = new ArrayList<>();
         int outerDepth = in.getDepth();
         int type;
@@ -2520,15 +2539,24 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 continue;
             }
             if (TAG_GRANTED_RUNTIME_PERMISSION.equals(in.getName())) {
-                permissions.add(readStringAttribute(in, ATTR_NAME));
+                grantedRuntimePermissions.add(readStringAttribute(in, ATTR_NAME));
+            }
+            if (TAG_WHITELISTED_RESTRICTED_PERMISSION.equals(in.getName())) {
+                whitelistedRestrictedPermissions.add(readStringAttribute(in, ATTR_NAME));
+
             }
             if (TAG_CHILD_SESSION.equals(in.getName())) {
                 childSessionIds.add(readIntAttribute(in, ATTR_SESSION_ID, SessionInfo.INVALID_ID));
             }
         }
 
-        if (permissions.size() > 0) {
-            params.grantedRuntimePermissions = permissions.stream().toArray(String[]::new);
+        if (grantedRuntimePermissions.size() > 0) {
+            params.grantedRuntimePermissions = grantedRuntimePermissions
+                    .stream().toArray(String[]::new);
+        }
+
+        if (whitelistedRestrictedPermissions.size() > 0) {
+            params.whitelistedRestrictedPermissions = whitelistedRestrictedPermissions;
         }
 
         int[] childSessionIdsArray;

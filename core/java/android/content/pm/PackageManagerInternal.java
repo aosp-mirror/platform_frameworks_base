@@ -80,6 +80,8 @@ public abstract class PackageManagerInternal {
     public interface PackageListObserver {
         /** A package was added to the system. */
         void onPackageAdded(@NonNull String packageName, int uid);
+        /** A package was changed - either installed for a specific user or updated. */
+        default void onPackageChanged(@NonNull String packageName, int uid) {}
         /** A package was removed from the system. */
         void onPackageRemoved(@NonNull String packageName, int uid);
     }
@@ -191,8 +193,10 @@ public abstract class PackageManagerInternal {
          *
          * @param packageName package name of the default home, or {@code null} to remove
          * @param userId the user id
+         * @param callback the callback made after the default home as been updated
          */
-        void setDefaultHomeAsync(@Nullable String packageName, @UserIdInt int userId);
+        void setDefaultHomeAsync(@Nullable String packageName, @UserIdInt int userId,
+                @NonNull Consumer<Boolean> callback);
     }
 
     /**
@@ -950,4 +954,13 @@ public abstract class PackageManagerInternal {
      */
     public abstract void uninstallApex(String packageName, long versionCode, int userId,
             IntentSender intentSender);
+
+    /**
+     * Whether default permission grants have been performed for a user
+     * since the device booted.
+     *
+     * @param userId The user id.
+     * @return true if default permissions
+     */
+    public abstract boolean wereDefaultPermissionsGrantedSinceBoot(int userId);
 }

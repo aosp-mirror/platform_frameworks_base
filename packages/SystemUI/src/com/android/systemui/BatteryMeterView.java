@@ -47,6 +47,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.StyleRes;
+
 import com.android.settingslib.Utils;
 import com.android.settingslib.graph.ThemedBatteryDrawable;
 import com.android.systemui.plugins.DarkIconDispatcher;
@@ -86,6 +88,7 @@ public class BatteryMeterView extends LinearLayout implements
 
     private BatteryController mBatteryController;
     private SettingObserver mSettingObserver;
+    private final @StyleRes int mPercentageStyleId;
     private int mTextColor;
     private int mLevel;
     private int mShowPercentMode = MODE_DEFAULT;
@@ -132,6 +135,7 @@ public class BatteryMeterView extends LinearLayout implements
                 defStyle, 0);
         final int frameColor = atts.getColor(R.styleable.BatteryMeterView_frameColor,
                 context.getColor(R.color.meter_background_color));
+        mPercentageStyleId = atts.getResourceId(R.styleable.BatteryMeterView_textAppearance, 0);
         mDrawable = new ThemedBatteryDrawable(context, frameColor);
         atts.recycle();
 
@@ -402,6 +406,9 @@ public class BatteryMeterView extends LinearLayout implements
             if (!showing) {
                 mBatteryPercentView = loadPercentView();
                 if (mTextColor != 0) mBatteryPercentView.setTextColor(mTextColor);
+                if (mPercentageStyleId != 0) { // Only set if specified as attribute
+                    mBatteryPercentView.setTextAppearance(mPercentageStyleId);
+                }
                 updatePercentText();
                 addView(mBatteryPercentView,
                         new ViewGroup.LayoutParams(
@@ -440,7 +447,6 @@ public class BatteryMeterView extends LinearLayout implements
         scaledLayoutParams.setMargins(0, 0, 0, marginBottom);
 
         mBatteryIconView.setLayoutParams(scaledLayoutParams);
-        FontSizeUtils.updateFontSize(mBatteryPercentView, R.dimen.qs_time_expanded_size);
     }
 
     @Override

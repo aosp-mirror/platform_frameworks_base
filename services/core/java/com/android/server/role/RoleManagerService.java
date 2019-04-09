@@ -38,9 +38,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.Signature;
-import android.database.ContentObserver;
 import android.database.CursorWindow;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
@@ -52,7 +50,6 @@ import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.os.UserManagerInternal;
-import android.provider.Settings;
 import android.service.sms.FinancialSmsService;
 import android.telephony.IFinancialSmsCallback;
 import android.text.TextUtils;
@@ -88,6 +85,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
 
 /**
  * Service for role management.
@@ -205,23 +203,6 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
                         () -> performInitialGrantsIfNecessaryAsync(userId));
             }
         }, UserHandle.ALL, intentFilter, null, null);
-
-        getContext().getContentResolver().registerContentObserver(
-                Settings.Global.getUriFor(Settings.Global.SMS_ACCESS_RESTRICTION_ENABLED), false,
-                new ContentObserver(getContext().getMainThreadHandler()) {
-                    @Override
-                    public void onChange(boolean selfChange, Uri uri, int userId) {
-                        boolean killSwitchEnabled = Settings.Global.getInt(
-                                getContext().getContentResolver(),
-                                Settings.Global.SMS_ACCESS_RESTRICTION_ENABLED, 0) == 1;
-                        for (int user : mUserManagerInternal.getUserIds()) {
-                            if (mUserManagerInternal.isUserRunning(user)) {
-                                getOrCreateControllerService(user)
-                                        .onSmsKillSwitchToggled(killSwitchEnabled);
-                            }
-                        }
-                    }
-                }, UserHandle.USER_ALL);
     }
 
     @Override
@@ -800,19 +781,21 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
         }
 
         @Override
-        public void setDefaultHomeAsync(@Nullable String packageName, @UserIdInt int userId) {
-            RemoteCallback callback = new RemoteCallback(result -> {
+        public void setDefaultHomeAsync(@Nullable String packageName, @UserIdInt int userId,
+                @NonNull Consumer<Boolean> callback) {
+            RemoteCallback remoteCallback = new RemoteCallback(result -> {
                 boolean successful = result != null;
                 if (!successful) {
                     Slog.e(LOG_TAG, "Failed to set default home: " + packageName);
                 }
+                callback.accept(successful);
             });
             if (packageName != null) {
                 getOrCreateControllerService(userId).onAddRoleHolder(RoleManager.ROLE_HOME,
-                        packageName, 0, callback);
+                        packageName, 0, remoteCallback);
             } else {
                 getOrCreateControllerService(userId).onClearRoleHolders(RoleManager.ROLE_HOME, 0,
-                        callback);
+                        remoteCallback);
             }
         }
     }

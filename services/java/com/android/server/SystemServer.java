@@ -32,6 +32,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.res.Configuration;
 import android.content.res.Resources.Theme;
 import android.database.sqlite.SQLiteCompatibilityWalFlags;
@@ -124,6 +125,7 @@ import com.android.server.pm.OtaDexoptService;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.ShortcutService;
 import com.android.server.pm.UserManagerService;
+import com.android.server.policy.PermissionPolicyService;
 import com.android.server.policy.PhoneWindowManager;
 import com.android.server.policy.role.LegacyRoleResolutionPolicy;
 import com.android.server.power.PowerManagerService;
@@ -254,6 +256,8 @@ public final class SystemServer {
             "com.android.server.autofill.AutofillManagerService";
     private static final String CONTENT_CAPTURE_MANAGER_SERVICE_CLASS =
             "com.android.server.contentcapture.ContentCaptureManagerService";
+    private static final String SYSTEM_CAPTIONS_MANAGER_SERVICE_CLASS =
+            "com.android.server.systemcaptions.SystemCaptionsManagerService";
     private static final String TIME_ZONE_RULES_MANAGER_SERVICE_CLASS =
             "com.android.server.timezone.RulesManagerService$Lifecycle";
     private static final String IOT_SERVICE_CLASS =
@@ -541,7 +545,7 @@ public final class SystemServer {
     }
 
     private boolean isFirstBootOrUpgrade() {
-        return mPackageManagerService.isFirstBoot() || mPackageManagerService.isUpgrade();
+        return mPackageManagerService.isFirstBoot() || mPackageManagerService.isDeviceUpgrading();
     }
 
     private void reportWtf(String msg, Throwable e) {
@@ -1231,6 +1235,8 @@ public final class SystemServer {
 
             startContentCaptureService(context);
             startAttentionService(context);
+
+            startSystemCaptionsManagerService(context);
 
             // App prediction manager service
             traceBeginAndSlog("StartAppPredictionService");
@@ -1984,6 +1990,11 @@ public final class SystemServer {
         mSystemServiceManager.startBootPhase(SystemService.PHASE_DEVICE_SPECIFIC_SERVICES_READY);
         traceEnd();
 
+        // Permission policy service
+        traceBeginAndSlog("StartPermissionPolicyService");
+        mSystemServiceManager.startService(PermissionPolicyService.class);
+        traceEnd();
+
         // These are needed to propagate to the runnable below.
         final NetworkManagementService networkManagementF = networkManagement;
         final NetworkStatsService networkStatsF = networkStats;
@@ -2225,6 +2236,19 @@ public final class SystemServer {
         }, BOOT_TIMINGS_TRACE_LOG);
     }
 
+    private void startSystemCaptionsManagerService(@NonNull Context context) {
+        String serviceName = context.getString(
+                com.android.internal.R.string.config_defaultSystemCaptionsManagerService);
+        if (TextUtils.isEmpty(serviceName)) {
+            Slog.d(TAG, "SystemCaptionsManagerService disabled because resource is not overlaid");
+            return;
+        }
+
+        traceBeginAndSlog("StartSystemCaptionsManagerService");
+        mSystemServiceManager.startService(SYSTEM_CAPTIONS_MANAGER_SERVICE_CLASS);
+        traceEnd();
+    }
+
     private void startContentCaptureService(@NonNull Context context) {
         // First check if it was explicitly enabled by DeviceConfig
         boolean explicitlyEnabled = false;
@@ -2273,7 +2297,7 @@ public final class SystemServer {
         traceEnd();
     }
 
-    static final void startSystemUi(Context context, WindowManagerService windowManager) {
+    private static void startSystemUi(Context context, WindowManagerService windowManager) {
         Intent intent = new Intent();
         intent.setComponent(new ComponentName("com.android.systemui",
                 "com.android.systemui.SystemUIService"));

@@ -29,7 +29,7 @@ import android.annotation.TestApi;
 public final class RemoteCallback implements Parcelable {
 
     public interface OnResultListener {
-        public void onResult(Bundle result);
+        void onResult(@Nullable Bundle result);
     }
 
     private final OnResultListener mListener;

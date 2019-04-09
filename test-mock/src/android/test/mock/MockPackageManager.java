@@ -56,6 +56,7 @@ import android.os.UserHandle;
 import android.os.storage.VolumeInfo;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * A mock {@link android.content.pm.PackageManager} class.  All methods are non-functional and throw
@@ -291,6 +292,27 @@ public class MockPackageManager extends PackageManager {
     @Override
     public void updatePermissionFlags(String permissionName, String packageName,
             int flagMask, int flagValues, UserHandle user) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
+    public @NonNull Set<String> getWhitelistedRestrictedPermissions(
+            @NonNull String packageName, @PermissionWhitelistFlags int whitelistFlags) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
+    public boolean addWhitelistedRestrictedPermission(@NonNull String packageName,
+            @NonNull String permission, @PermissionWhitelistFlags int whitelistFlags) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
+    public boolean removeWhitelistedRestrictedPermission(@NonNull String packageName,
+            @NonNull String permission, @PermissionWhitelistFlags int whitelistFlags) {
         throw new UnsupportedOperationException();
     }
 
@@ -1100,6 +1122,14 @@ public class MockPackageManager extends PackageManager {
      */
     @Override
     public boolean isUpgrade() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public boolean isDeviceUpgrading() {
         throw new UnsupportedOperationException();
     }
 
