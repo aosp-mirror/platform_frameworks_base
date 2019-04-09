@@ -3836,9 +3836,9 @@ class StorageManagerService extends IStorageManager.Stub
             }
 
             // Determine if caller is holding runtime permission
-            final boolean hasRead = StorageManager.checkPermissionAndAppOp(mContext, false, 0,
+            final boolean hasRead = StorageManager.checkPermissionAndCheckOp(mContext, false, 0,
                     uid, packageName, READ_EXTERNAL_STORAGE, OP_READ_EXTERNAL_STORAGE);
-            final boolean hasWrite = StorageManager.checkPermissionAndAppOp(mContext, false, 0,
+            final boolean hasWrite = StorageManager.checkPermissionAndCheckOp(mContext, false, 0,
                     uid, packageName, WRITE_EXTERNAL_STORAGE, OP_WRITE_EXTERNAL_STORAGE);
             // STOPSHIP: remove this temporary hack once we have dynamic runtime
             // permissions fully enabled again
