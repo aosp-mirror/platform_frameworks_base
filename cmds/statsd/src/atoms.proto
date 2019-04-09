@@ -4919,6 +4919,8 @@ message AppCompacted {
     UNKNOWN = 0;
     SOME = 1;
     FULL = 2;
+    PERSISTENT = 3;
+    BFGS = 4;
   }
   optional Action action = 3;
 
