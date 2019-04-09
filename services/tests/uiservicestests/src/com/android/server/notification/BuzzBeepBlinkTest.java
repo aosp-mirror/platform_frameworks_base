@@ -48,8 +48,8 @@ import android.app.Notification;
 import android.app.Notification.Builder;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
@@ -63,6 +63,7 @@ import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.testing.TestableContext;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManager;
@@ -70,6 +71,7 @@ import android.view.accessibility.IAccessibilityManagerClient;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.R;
 import com.android.internal.util.IntPair;
 import com.android.server.UiServiceTestCase;
 import com.android.server.lights.Light;
@@ -86,6 +88,7 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidJUnit4.class)
 public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
+    private TestableContext mContext = spy(getContext());
     @Mock AudioManager mAudioManager;
     @Mock Vibrator mVibrator;
     @Mock android.media.IRingtonePlayer mRingtonePlayer;
@@ -96,6 +99,8 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
     NotificationUsageStats mUsageStats;
     @Mock
     IAccessibilityManager mAccessibilityService;
+    @Mock
+    Resources mResources;
 
     private NotificationManagerService mService;
     private String mPkg = "com.android.server.notification";
@@ -145,7 +150,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         verify(mAccessibilityService).addClient(any(IAccessibilityManagerClient.class), anyInt());
         assertTrue(accessibilityManager.isEnabled());
 
-        mService = spy(new NotificationManagerService(getContext()));
+        mService = spy(new NotificationManagerService(mContext));
         mService.setAudioManager(mAudioManager);
         mService.setVibrator(mVibrator);
         mService.setSystemReady(true);
@@ -275,7 +280,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
             boolean isLeanback) {
         NotificationChannel channel =
                 new NotificationChannel("test", "test", IMPORTANCE_HIGH);
-        final Builder builder = new Builder(getContext())
+        final Builder builder = new Builder(mContext)
                 .setContentTitle("foo")
                 .setSmallIcon(android.R.drawable.sym_def_app_icon)
                 .setPriority(Notification.PRIORITY_HIGH)
@@ -321,15 +326,14 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
             n.flags |= Notification.FLAG_INSISTENT;
         }
 
-        Context context = spy(getContext());
-        PackageManager packageManager = spy(context.getPackageManager());
-        when(context.getPackageManager()).thenReturn(packageManager);
+        PackageManager packageManager = spy(mContext.getPackageManager());
+        when(mContext.getPackageManager()).thenReturn(packageManager);
         when(packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK))
                 .thenReturn(isLeanback);
 
         StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, id, mTag, mUid,
                 mPid, n, mUser, null, System.currentTimeMillis());
-        NotificationRecord r = new NotificationRecord(context, sbn, channel);
+        NotificationRecord r = new NotificationRecord(mContext, sbn, channel);
         mService.addNotification(r);
         return r;
     }
@@ -455,7 +459,25 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testNoBeepForImportanceDefaultInAutomotive() throws Exception {
+    public void testNoBeepForAutomotiveIfEffectsDisabled() throws Exception {
+        when(mContext.getResources()).thenReturn(mResources);
+        when(mResources.getBoolean(R.bool.config_enableServerNotificationEffectsForAutomotive))
+                .thenReturn(false);
+        mService.setIsAutomotive(true);
+
+        NotificationRecord r = getBeepyNotification();
+
+        mService.buzzBeepBlinkLocked(r);
+
+        verifyNeverBeep();
+        assertFalse(r.isInterruptive());
+    }
+
+    @Test
+    public void testNoBeepForImportanceDefaultInAutomotiveIfEffectsEnabled() throws Exception {
+        when(mContext.getResources()).thenReturn(mResources);
+        when(mResources.getBoolean(R.bool.config_enableServerNotificationEffectsForAutomotive))
+                .thenReturn(true);
         mService.setIsAutomotive(true);
 
         NotificationRecord r = getBeepyNotification();
@@ -468,7 +490,10 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testBeepForImportanceHighInAutomotive() throws Exception {
+    public void testBeepForImportanceHighInAutomotiveIfEffectsEnabled() throws Exception {
+        when(mContext.getResources()).thenReturn(mResources);
+        when(mResources.getBoolean(R.bool.config_enableServerNotificationEffectsForAutomotive))
+                .thenReturn(true);
         mService.setIsAutomotive(true);
 
         NotificationRecord r = getBeepyNotification();
@@ -1015,12 +1040,12 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
     public void testEmptyUriSoundTreatedAsNoSound() throws Exception {
         NotificationChannel channel = new NotificationChannel("test", "test", IMPORTANCE_HIGH);
         channel.setSound(Uri.EMPTY, null);
-        final Notification n = new Builder(getContext(), "test")
+        final Notification n = new Builder(mContext, "test")
                 .setSmallIcon(android.R.drawable.sym_def_app_icon).build();
 
         StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, 0, mTag, mUid,
                 mPid, n, mUser, null, System.currentTimeMillis());
-        NotificationRecord r = new NotificationRecord(getContext(), sbn, channel);
+        NotificationRecord r = new NotificationRecord(mContext, sbn, channel);
         mService.addNotification(r);
 
         mService.buzzBeepBlinkLocked(r);
@@ -1069,13 +1094,13 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
     @Test
     public void testCrossUserSoundMuted() throws Exception {
-        final Notification n = new Builder(getContext(), "test")
+        final Notification n = new Builder(mContext, "test")
                 .setSmallIcon(android.R.drawable.sym_def_app_icon).build();
 
         int userId = mUser.getIdentifier() + 1;
         StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, 0, mTag, mUid,
                 mPid, n, UserHandle.of(userId), null, System.currentTimeMillis());
-        NotificationRecord r = new NotificationRecord(getContext(), sbn,
+        NotificationRecord r = new NotificationRecord(mContext, sbn,
                 new NotificationChannel("test", "test", IMPORTANCE_HIGH));
 
         mService.buzzBeepBlinkLocked(r);
