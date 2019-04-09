@@ -20,6 +20,8 @@ import android.net.TrafficStats;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.android.internal.util.TrafficStatsConstants;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -92,7 +94,8 @@ public class GpsXtraDownloader {
 
         // load balance our requests among the available servers
         while (result == null) {
-            final int oldTag = TrafficStats.getAndSetThreadStatsTag(TrafficStats.TAG_SYSTEM_GPS);
+            final int oldTag = TrafficStats.getAndSetThreadStatsTag(
+                    TrafficStatsConstants.TAG_SYSTEM_GPS);
             try {
                 result = doDownload(mXtraServers[mNextServerIndex]);
             } finally {

@@ -16,7 +16,6 @@
 
 package android.net.dhcp;
 
-import static android.net.TrafficStats.TAG_SYSTEM_DHCP_SERVER;
 import static android.net.dhcp.DhcpPacket.DHCP_CLIENT;
 import static android.net.dhcp.DhcpPacket.DHCP_HOST_NAME;
 import static android.net.dhcp.DhcpPacket.DHCP_SERVER;
@@ -33,6 +32,7 @@ import static android.system.OsConstants.SOL_SOCKET;
 import static android.system.OsConstants.SO_BROADCAST;
 import static android.system.OsConstants.SO_REUSEADDR;
 
+import static com.android.internal.util.TrafficStatsConstants.TAG_SYSTEM_DHCP_SERVER;
 import static com.android.server.util.NetworkStackConstants.INFINITE_LEASE;
 import static com.android.server.util.NetworkStackConstants.IPV4_ADDR_ALL;
 import static com.android.server.util.NetworkStackConstants.IPV4_ADDR_ANY;

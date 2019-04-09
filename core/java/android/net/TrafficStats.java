@@ -90,6 +90,42 @@ public class TrafficStats {
     public static final int UID_TETHERING = -5;
 
     /**
+     * Tag values in this range are reserved for the network stack. The network stack is
+     * running as UID {@link android.os.Process.NETWORK_STACK_UID} when in the mainline
+     * module separate process, and as the system UID otherwise.
+     */
+    /** @hide */
+    @SystemApi
+    public static final int TAG_NETWORK_STACK_RANGE_START = 0xFFFFFD00;
+    /** @hide */
+    @SystemApi
+    public static final int TAG_NETWORK_STACK_RANGE_END = 0xFFFFFEFF;
+
+    /**
+     * Tags between 0xFFFFFF00 and 0xFFFFFFFF are reserved and used internally by system services
+     * like DownloadManager when performing traffic on behalf of an application.
+     */
+    // Please note there is no enforcement of these constants, so do not rely on them to
+    // determine that the caller is a system caller.
+    /** @hide */
+    @SystemApi
+    public static final int TAG_SYSTEM_IMPERSONATION_RANGE_START = 0xFFFFFF00;
+    /** @hide */
+    @SystemApi
+    public static final int TAG_SYSTEM_IMPERSONATION_RANGE_END = 0xFFFFFF0F;
+
+    /**
+     * Tag values between these ranges are reserved for the network stack to do traffic
+     * on behalf of applications. It is a subrange of the range above.
+     */
+    /** @hide */
+    @SystemApi
+    public static final int TAG_NETWORK_STACK_IMPERSONATION_RANGE_START = 0xFFFFFF80;
+    /** @hide */
+    @SystemApi
+    public static final int TAG_NETWORK_STACK_IMPERSONATION_RANGE_END = 0xFFFFFF8F;
+
+    /**
      * Default tag value for {@link DownloadManager} traffic.
      *
      * @hide
@@ -127,26 +163,9 @@ public class TrafficStats {
      */
     public static final int TAG_SYSTEM_APP = 0xFFFFFF05;
 
+    // TODO : remove this constant when Wifi code is updated
     /** @hide */
-    @SystemApi
-    @TestApi
-    public static final int TAG_SYSTEM_DHCP = 0xFFFFFF40;
-    /** @hide */
-    public static final int TAG_SYSTEM_NTP = 0xFFFFFF41;
-    /** @hide */
-    @SystemApi
-    @TestApi
     public static final int TAG_SYSTEM_PROBE = 0xFFFFFF42;
-    /** @hide */
-    public static final int TAG_SYSTEM_NEIGHBOR = 0xFFFFFF43;
-    /** @hide */
-    public static final int TAG_SYSTEM_GPS = 0xFFFFFF44;
-    /** @hide */
-    public static final int TAG_SYSTEM_PAC = 0xFFFFFF45;
-    /** @hide */
-    @SystemApi
-    @TestApi
-    public static final int TAG_SYSTEM_DHCP_SERVER = 0xFFFFFF46;
 
     private static INetworkStatsService sStatsService;
 
