@@ -22,6 +22,7 @@ import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.util.Pair;
 
+import com.android.settingslib.R;
 import com.android.settingslib.bluetooth.BluetoothUtils;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 
@@ -47,7 +48,9 @@ public class BluetoothMediaDevice extends MediaDevice {
 
     @Override
     public String getSummary() {
-        return mCachedDevice.getConnectionSummary();
+        return isConnected() || mCachedDevice.isBusy()
+                ? mCachedDevice.getConnectionSummary()
+                : mContext.getString(R.string.bluetooth_disconnected);
     }
 
     @Override
