@@ -615,7 +615,6 @@ public final class ActivityThread extends ClientTransactionHandler {
                 sb.append(", finished=").append(activity.isFinishing());
                 sb.append(", destroyed=").append(activity.isDestroyed());
                 sb.append(", startedActivity=").append(activity.mStartedActivity);
-                sb.append(", temporaryPause=").append(activity.mTemporaryPause);
                 sb.append(", changingConfigurations=").append(activity.mChangingConfigurations);
                 sb.append("}");
             }
@@ -3319,35 +3318,15 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
-    @UnsupportedAppUsage
-    void performNewIntents(IBinder token, List<ReferrerIntent> intents, boolean andPause) {
+    @Override
+    public void handleNewIntent(IBinder token, List<ReferrerIntent> intents) {
         final ActivityClientRecord r = mActivities.get(token);
         if (r == null) {
             return;
         }
 
-        final boolean resumed = !r.paused;
-        if (resumed) {
-            r.activity.mTemporaryPause = true;
-            performPauseActivityIfNeeded(r, "performNewIntents");
-        }
         checkAndBlockForNetworkAccess();
         deliverNewIntents(r, intents);
-        if (resumed) {
-            performResumeActivity(token, false, "performNewIntents");
-            r.activity.mTemporaryPause = false;
-        } else if (andPause) {
-            // In this case the activity was in the paused state when we delivered the intent,
-            // to guarantee onResume gets called after onNewIntent we temporarily resume the
-            // activity and pause again as the caller wanted.
-            performResumeActivity(token, false, "performNewIntents");
-            performPauseActivityIfNeeded(r, "performNewIntents");
-        }
-    }
-
-    @Override
-    public void handleNewIntent(IBinder token, List<ReferrerIntent> intents, boolean andPause) {
-        performNewIntents(token, intents, andPause);
     }
 
     public void handleRequestAssistContextExtras(RequestAssistContextExtras cmd) {
@@ -4662,7 +4641,6 @@ public final class ActivityThread extends ClientTransactionHandler {
                 try {
                     // Now we are idle.
                     r.activity.mCalled = false;
-                    r.activity.mTemporaryPause = true;
                     mInstrumentation.callActivityOnPause(r.activity);
                     if (!r.activity.mCalled) {
                         throw new SuperNotCalledException(
@@ -4684,7 +4662,6 @@ public final class ActivityThread extends ClientTransactionHandler {
             deliverResults(r, results, reason);
             if (resumed) {
                 r.activity.performResume(false, reason);
-                r.activity.mTemporaryPause = false;
             }
         }
     }
