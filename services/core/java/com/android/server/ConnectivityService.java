@@ -6557,7 +6557,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         uid, newRules, metered, mRestrictBackground);
             }
             if (oldBlocked == newBlocked) {
-                return;
+                continue;
             }
             final int arg = encodeBool(newBlocked);
             for (int i = 0; i < nai.numNetworkRequests(); i++) {
