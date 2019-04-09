@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.IntRange;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
@@ -183,7 +184,9 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
         mLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
     }
 
+    /** {@inheritDoc} */
     @Override
+    @IntRange(from = SIGNAL_STRENGTH_NONE_OR_UNKNOWN, to = SIGNAL_STRENGTH_GREAT)
     public int getLevel() {
         return mLevel;
     }
@@ -227,6 +230,9 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
         return asuLevel;
     }
 
+    /**
+     * Get the CSI-RSRP as dBm value -140..-44dBm or {@link CellInfo#UNAVAILABLE UNAVAILABLE}.
+     */
     @Override
     public int getDbm() {
         return mCsiRsrp;

@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -121,13 +122,10 @@ public final class CellSignalStrengthTdscdma extends CellSignalStrength implemen
         mLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
     }
 
-    /**
-     * Retrieve an abstract level value for the overall signal strength.
-     *
-     * @return a single integer from 0 to 4 representing the general signal quality.
-     *     0 represents very poor signal strength while 4 represents a very strong signal strength.
-     */
+
+    /** {@inheritDoc} */
     @Override
+    @IntRange(from = 0, to = 4)
     public int getLevel() {
         return mLevel;
     }
@@ -144,7 +142,7 @@ public final class CellSignalStrengthTdscdma extends CellSignalStrength implemen
     }
 
     /**
-     * Get the signal strength as dBm
+     * Get the RSCP as dBm value -120..-24dBm or {@link CellInfo#UNAVAILABLE UNAVAILABLE}.
      */
     @Override
     public int getDbm() {
