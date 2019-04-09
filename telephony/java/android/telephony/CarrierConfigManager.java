@@ -672,6 +672,22 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_DATA_SERVICE_WLAN_PACKAGE_OVERRIDE_STRING
             = "carrier_data_service_wlan_package_override_string";
 
+    /**
+     * Override the device's configuration for the cellular data service class to use
+     * for this SIM card.
+     * @hide
+     */
+    public static final String KEY_CARRIER_DATA_SERVICE_WWAN_CLASS_OVERRIDE_STRING =
+            "carrier_data_service_wwan_class_override_string";
+
+    /**
+     * Override the device's configuration for the IWLAN data service class to use
+     * for this SIM card.
+     * @hide
+     */
+    public static final String KEY_CARRIER_DATA_SERVICE_WLAN_CLASS_OVERRIDE_STRING =
+            "carrier_data_service_wlan_class_override_string";
+
     /** Flag specifying whether VoLTE TTY is supported. */
     public static final String KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL
             = "carrier_volte_tty_supported_bool";
@@ -2382,6 +2398,14 @@ public class CarrierConfigManager {
             "carrier_network_service_wlan_package_override_string";
 
     /**
+     * Decides when clients try to bind to iwlan network service, which class name will
+     * the binding intent go to.
+     * @hide
+     */
+    public static final String KEY_CARRIER_NETWORK_SERVICE_WLAN_CLASS_OVERRIDE_STRING =
+            "carrier_network_service_wlan_class_override_string";
+
+    /**
      * Decides when clients try to bind to wwan (cellular) network service, which package name will
      * the binding intent go to.
      * @hide
@@ -2390,12 +2414,28 @@ public class CarrierConfigManager {
             "carrier_network_service_wwan_package_override_string";
 
     /**
+     * Decides when clients try to bind to wwan (cellular) network service, which class name will
+     * the binding intent go to.
+     * @hide
+     */
+    public static final String KEY_CARRIER_NETWORK_SERVICE_WWAN_CLASS_OVERRIDE_STRING =
+            "carrier_network_service_wwan_class_override_string";
+
+    /**
      * The package name of qualified networks service that telephony binds to.
      *
      * @hide
      */
     public static final String KEY_CARRIER_QUALIFIED_NETWORKS_SERVICE_PACKAGE_OVERRIDE_STRING =
             "carrier_qualified_networks_service_package_override_string";
+
+    /**
+     * The class name of qualified networks service that telephony binds to.
+     *
+     * @hide
+     */
+    public static final String KEY_CARRIER_QUALIFIED_NETWORKS_SERVICE_CLASS_OVERRIDE_STRING =
+            "carrier_qualified_networks_service_class_override_string";
     /**
      * A list of 4 LTE RSCP thresholds above which a signal level is considered POOR,
      * MODERATE, GOOD, or EXCELLENT, to be used in SignalStrength reporting.
