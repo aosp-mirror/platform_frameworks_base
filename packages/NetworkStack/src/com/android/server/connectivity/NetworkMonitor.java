@@ -32,8 +32,18 @@ import static android.net.metrics.ValidationProbeEvent.DNS_FAILURE;
 import static android.net.metrics.ValidationProbeEvent.DNS_SUCCESS;
 import static android.net.metrics.ValidationProbeEvent.PROBE_FALLBACK;
 import static android.net.metrics.ValidationProbeEvent.PROBE_PRIVDNS;
+import static android.net.util.DataStallUtils.CONFIG_DATA_STALL_CONSECUTIVE_DNS_TIMEOUT_THRESHOLD;
+import static android.net.util.DataStallUtils.CONFIG_DATA_STALL_EVALUATION_TYPE;
+import static android.net.util.DataStallUtils.CONFIG_DATA_STALL_MIN_EVALUATE_INTERVAL;
+import static android.net.util.DataStallUtils.CONFIG_DATA_STALL_VALID_DNS_TIME_THRESHOLD;
+import static android.net.util.DataStallUtils.DATA_STALL_EVALUATION_TYPE_DNS;
+import static android.net.util.DataStallUtils.DEFAULT_CONSECUTIVE_DNS_TIMEOUT_THRESHOLD;
+import static android.net.util.DataStallUtils.DEFAULT_DATA_STALL_EVALUATION_TYPES;
+import static android.net.util.DataStallUtils.DEFAULT_DATA_STALL_MIN_EVALUATE_TIME_MS;
+import static android.net.util.DataStallUtils.DEFAULT_DATA_STALL_VALID_DNS_TIME_THRESHOLD_MS;
+import static android.net.util.DataStallUtils.DEFAULT_DNS_LOG_SIZE;
+import static android.net.util.NetworkStackUtils.NAMESPACE_CONNECTIVITY;
 import static android.net.util.NetworkStackUtils.isEmpty;
-import static android.provider.Settings.Global.DATA_STALL_EVALUATION_TYPE_DNS;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -60,6 +70,7 @@ import android.net.metrics.NetworkEvent;
 import android.net.metrics.ValidationProbeEvent;
 import android.net.shared.NetworkMonitorUtils;
 import android.net.shared.PrivateDnsConfig;
+import android.net.util.NetworkStackUtils;
 import android.net.util.SharedLog;
 import android.net.util.Stopwatch;
 import android.net.wifi.WifiInfo;
@@ -126,18 +137,6 @@ public class NetworkMonitor extends StateMachine {
 
     private static final int SOCKET_TIMEOUT_MS = 10000;
     private static final int PROBE_TIMEOUT_MS  = 3000;
-
-    // Default configuration values for data stall detection.
-    private static final int DEFAULT_CONSECUTIVE_DNS_TIMEOUT_THRESHOLD = 5;
-    private static final int DEFAULT_DATA_STALL_MIN_EVALUATE_TIME_MS = 60 * 1000;
-    private static final int DEFAULT_DATA_STALL_VALID_DNS_TIME_THRESHOLD_MS = 30 * 60 * 1000;
-
-    private static final int DEFAULT_DATA_STALL_EVALUATION_TYPES =
-            DATA_STALL_EVALUATION_TYPE_DNS;
-    // Reevaluate it as intending to increase the number. Larger log size may cause statsd
-    // log buffer bust and have stats log lost.
-    private static final int DEFAULT_DNS_LOG_SIZE = 20;
-
     enum EvaluationResult {
         VALIDATED(true),
         CAPTIVE_PORTAL(false);
@@ -388,7 +387,7 @@ public class NetworkMonitor extends StateMachine {
         mDnsStallDetector = new DnsStallDetector(mConsecutiveDnsTimeoutThreshold);
         mDataStallMinEvaluateTime = getDataStallMinEvaluateTime();
         mDataStallValidDnsTimeThreshold = getDataStallValidDnsTimeThreshold();
-        mDataStallEvaluationType = getDataStallEvalutionType();
+        mDataStallEvaluationType = getDataStallEvaluationType();
 
         // Provide empty LinkProperties and NetworkCapabilities to make sure they are never null,
         // even before notifyNetworkConnected.
@@ -1184,25 +1183,26 @@ public class NetworkMonitor extends StateMachine {
     }
 
     private int getConsecutiveDnsTimeoutThreshold() {
-        return mDependencies.getSetting(mContext,
-                Settings.Global.DATA_STALL_CONSECUTIVE_DNS_TIMEOUT_THRESHOLD,
+        return mDependencies.getDeviceConfigPropertyInt(NAMESPACE_CONNECTIVITY,
+                CONFIG_DATA_STALL_CONSECUTIVE_DNS_TIMEOUT_THRESHOLD,
                 DEFAULT_CONSECUTIVE_DNS_TIMEOUT_THRESHOLD);
     }
 
     private int getDataStallMinEvaluateTime() {
-        return mDependencies.getSetting(mContext,
-                Settings.Global.DATA_STALL_MIN_EVALUATE_INTERVAL,
+        return mDependencies.getDeviceConfigPropertyInt(NAMESPACE_CONNECTIVITY,
+                CONFIG_DATA_STALL_MIN_EVALUATE_INTERVAL,
                 DEFAULT_DATA_STALL_MIN_EVALUATE_TIME_MS);
     }
 
     private int getDataStallValidDnsTimeThreshold() {
-        return mDependencies.getSetting(mContext,
-                Settings.Global.DATA_STALL_VALID_DNS_TIME_THRESHOLD,
+        return mDependencies.getDeviceConfigPropertyInt(NAMESPACE_CONNECTIVITY,
+                CONFIG_DATA_STALL_VALID_DNS_TIME_THRESHOLD,
                 DEFAULT_DATA_STALL_VALID_DNS_TIME_THRESHOLD_MS);
     }
 
-    private int getDataStallEvalutionType() {
-        return mDependencies.getSetting(mContext, Settings.Global.DATA_STALL_EVALUATION_TYPE,
+    private int getDataStallEvaluationType() {
+        return mDependencies.getDeviceConfigPropertyInt(NAMESPACE_CONNECTIVITY,
+                CONFIG_DATA_STALL_EVALUATION_TYPE,
                 DEFAULT_DATA_STALL_EVALUATION_TYPES);
     }
 
@@ -1723,6 +1723,33 @@ public class NetworkMonitor extends StateMachine {
         public String getSetting(Context context, String symbol, String defaultValue) {
             final String value = Settings.Global.getString(context.getContentResolver(), symbol);
             return value != null ? value : defaultValue;
+        }
+
+        /**
+         * Look up the value of a property in DeviceConfig.
+         * @param namespace The namespace containing the property to look up.
+         * @param name The name of the property to look up.
+         * @param defaultValue The value to return if the property does not exist or has no non-null
+         *                     value.
+         * @return the corresponding value, or defaultValue if none exists.
+         */
+        @Nullable
+        public String getDeviceConfigProperty(@NonNull String namespace, @NonNull String name,
+                @Nullable String defaultValue) {
+            return NetworkStackUtils.getDeviceConfigProperty(namespace, name, defaultValue);
+        }
+
+        /**
+         * Look up the value of a property in DeviceConfig.
+         * @param namespace The namespace containing the property to look up.
+         * @param name The name of the property to look up.
+         * @param defaultValue The value to return if the property does not exist or has no non-null
+         *                     value.
+         * @return the corresponding value, or defaultValue if none exists.
+         */
+        public int getDeviceConfigPropertyInt(@NonNull String namespace, @NonNull String name,
+                int defaultValue) {
+            return NetworkStackUtils.getDeviceConfigPropertyInt(namespace, name, defaultValue);
         }
 
         public static final Dependencies DEFAULT = new Dependencies();
