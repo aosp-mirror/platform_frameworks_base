@@ -194,6 +194,9 @@
     <uses-permission android:name="android.permission.SET_WALLPAPER" />
     <uses-permission android:name="android.permission.SET_WALLPAPER_COMPONENT" />
 
+    <!-- Permission required to test ContentResolver caching. -->
+    <uses-permission android:name="android.permission.CACHE_CONTENT" />
+
     <application android:label="@string/app_label"
                  android:defaultToDeviceProtectedStorage="true"
                  android:directBootAware="true">
