@@ -1238,6 +1238,9 @@ public class VoiceInteractionManagerService extends SystemService {
 
             RoleObserver(@NonNull @CallbackExecutor Executor executor) {
                 mRm.addOnRoleHoldersChangedListenerAsUser(executor, this, UserHandle.ALL);
+                UserHandle currentUser = UserHandle.of(LocalServices.getService(
+                        ActivityManagerInternal.class).getCurrentUserId());
+                onRoleHoldersChanged(RoleManager.ROLE_ASSISTANT, currentUser);
             }
 
             private @NonNull String getDefaultRecognizer(@NonNull UserHandle user) {
@@ -1285,7 +1288,9 @@ public class VoiceInteractionManagerService extends SystemService {
                     // Try to set role holder as VoiceInteractionService
                     List<ResolveInfo> services = mPm.queryIntentServicesAsUser(
                             new Intent(VoiceInteractionService.SERVICE_INTERFACE).setPackage(pkg),
-                            PackageManager.GET_META_DATA, userId);
+                            PackageManager.GET_META_DATA
+                                    | PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userId);
 
                     for (ResolveInfo resolveInfo : services) {
                         ServiceInfo serviceInfo = resolveInfo.serviceInfo;
@@ -1318,7 +1323,9 @@ public class VoiceInteractionManagerService extends SystemService {
                     // If no service could be found try to set assist activity
                     final List<ResolveInfo> activities = mPm.queryIntentActivitiesAsUser(
                             new Intent(Intent.ACTION_ASSIST).setPackage(pkg),
-                            PackageManager.MATCH_DEFAULT_ONLY, userId);
+                            PackageManager.MATCH_DEFAULT_ONLY
+                                    | PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userId);
 
                     for (ResolveInfo resolveInfo : activities) {
                         ActivityInfo activityInfo = resolveInfo.activityInfo;
@@ -1331,6 +1338,7 @@ public class VoiceInteractionManagerService extends SystemService {
                         Settings.Secure.putStringForUser(getContext().getContentResolver(),
                                 Settings.Secure.VOICE_RECOGNITION_SERVICE,
                                 getDefaultRecognizer(user), userId);
+                        return;
                     }
                 }
             }
