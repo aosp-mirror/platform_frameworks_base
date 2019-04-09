@@ -542,10 +542,6 @@ public class NetworkMonitor extends StateMachine {
                     return HANDLED;
                 case CMD_NETWORK_DISCONNECTED:
                     logNetworkEvent(NetworkEvent.NETWORK_DISCONNECTED);
-                    if (mLaunchCaptivePortalAppBroadcastReceiver != null) {
-                        mContext.unregisterReceiver(mLaunchCaptivePortalAppBroadcastReceiver);
-                        mLaunchCaptivePortalAppBroadcastReceiver = null;
-                    }
                     quit();
                     return HANDLED;
                 case CMD_FORCE_REEVALUATION:
@@ -779,7 +775,10 @@ public class NetworkMonitor extends StateMachine {
 
         @Override
         public void exit() {
-            mLaunchCaptivePortalAppBroadcastReceiver = null;
+            if (mLaunchCaptivePortalAppBroadcastReceiver != null) {
+                mContext.unregisterReceiver(mLaunchCaptivePortalAppBroadcastReceiver);
+                mLaunchCaptivePortalAppBroadcastReceiver = null;
+            }
             hideProvisioningNotification();
         }
     }
