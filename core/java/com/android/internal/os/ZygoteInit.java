@@ -367,11 +367,17 @@ public class ZygoteInit {
                 null /*declaringPackage*/, null /*dependentPackages*/, null /*dependencies*/);
         hidlManager.addDependency(hidlBase);
 
+        SharedLibraryInfo androidTestBase = new SharedLibraryInfo(
+                "/system/framework/android.test.base.jar", null /*packageName*/,
+                null /*codePaths*/, null /*name*/, 0 /*version*/, SharedLibraryInfo.TYPE_BUILTIN,
+                null /*declaringPackage*/, null /*dependentPackages*/, null /*dependencies*/);
+
         ApplicationLoaders.getDefault().createAndCacheNonBootclasspathSystemClassLoaders(
                 new SharedLibraryInfo[]{
                     // ordered dependencies first
                     hidlBase,
                     hidlManager,
+                    androidTestBase,
                 });
     }
 
