@@ -37,7 +37,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
-import android.service.autofill.AutofillService;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseIntArray;
@@ -350,7 +349,9 @@ public abstract class ContentCaptureService extends Service {
     /**
      * Called when the Android system disconnects from the service.
      *
-     * <p> At this point this service may no longer be an active {@link AutofillService}.
+     * <p> At this point this service may no longer be an active {@link ContentCaptureService}.
+     * It should not make calls on {@link ContentCaptureManager} that requires the caller to be
+     * the current service.
      */
     public void onDisconnected() {
         Slog.i(TAG, "unbinding from " + getClass().getName());
