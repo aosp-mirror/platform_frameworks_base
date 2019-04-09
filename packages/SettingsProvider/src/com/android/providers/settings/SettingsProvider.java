@@ -70,7 +70,6 @@ import android.provider.SettingsValidators;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.ByteStringUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -82,6 +81,8 @@ import com.android.internal.os.BackgroundThread;
 import com.android.providers.settings.SettingsState.Setting;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
+
+import libcore.util.HexEncoding;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -96,7 +97,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -2144,7 +2144,7 @@ public class SettingsProvider extends ContentProvider {
             rand.nextBytes(keyBytes);
 
             // Convert to string for storage in settings table.
-            final String userKey = ByteStringUtils.toHexString(keyBytes);
+            final String userKey = HexEncoding.encodeToString(keyBytes, true /* upperCase */);
 
             // Store the key in the ssaid table.
             final SettingsState ssaidSettings = getSettingsLocked(SETTINGS_TYPE_SSAID, userId);
@@ -2174,13 +2174,16 @@ public class SettingsProvider extends ContentProvider {
                 }
             }
             final String userKey = userKeySetting.getValue();
+            if (userKey == null || userKey.length() % 2 != 0) {
+                throw new IllegalStateException("User key invalid");
+            }
 
             // Convert the user's key back to a byte array.
-            final byte[] keyBytes = ByteStringUtils.fromHexToByteArray(userKey);
+            final byte[] keyBytes = HexEncoding.decode(userKey);
 
             // Validate that the key is of expected length.
             // Keys are currently 32 bytes, but were once 16 bytes during Android O development.
-            if (keyBytes == null || (keyBytes.length != 16 && keyBytes.length != 32)) {
+            if (keyBytes.length != 16 && keyBytes.length != 32) {
                 throw new IllegalStateException("User key invalid");
             }
 
@@ -2202,8 +2205,8 @@ public class SettingsProvider extends ContentProvider {
             }
 
             // Convert result to a string for storage in settings table. Only want first 64 bits.
-            final String ssaid = ByteStringUtils.toHexString(m.doFinal()).substring(0, 16)
-                    .toLowerCase(Locale.US);
+            final String ssaid = HexEncoding.encodeToString(m.doFinal(), false /* upperCase */)
+                    .substring(0, 16);
 
             // Save the ssaid in the ssaid table.
             final String uid = Integer.toString(callingPkg.applicationInfo.uid);
