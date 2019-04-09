@@ -32,6 +32,9 @@ import java.util.function.Predicate;
  * Collection of utilities for the network stack.
  */
 public class NetworkStackUtils {
+    // TODO: Refer to DeviceConfig definition.
+    public static final String NAMESPACE_CONNECTIVITY = "connectivity";
+
     static {
         System.loadLibrary("networkstackutilsjni");
     }
@@ -101,6 +104,24 @@ public class NetworkStackUtils {
             @Nullable String defaultValue) {
         String value = DeviceConfig.getProperty(namespace, name);
         return value != null ? value : defaultValue;
+    }
+
+    /**
+     * Look up the value of a property for a particular namespace from {@link DeviceConfig}.
+     * @param namespace The namespace containing the property to look up.
+     * @param name The name of the property to look up.
+     * @param defaultValue The value to return if the property does not exist or has no non-null
+     *                     value.
+     * @return the corresponding value, or defaultValue if none exists.
+     */
+    public static int getDeviceConfigPropertyInt(@NonNull String namespace, @NonNull String name,
+            int defaultValue) {
+        String value = getDeviceConfigProperty(namespace, name, null /* defaultValue */);
+        try {
+            return (value != null) ? Integer.parseInt(value) : defaultValue;
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
     }
 
     /**
