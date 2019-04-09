@@ -325,14 +325,10 @@ class TestNetworkService extends ITestNetworkManager.Stub {
         agent.teardown();
     }
 
-    // STOPSHIP: Change this back to android.Manifest.permission.MANAGE_TEST_NETWORKS
-    private static final String PERMISSION_NAME = "dummy";
+    private static final String PERMISSION_NAME =
+            android.Manifest.permission.MANAGE_TEST_NETWORKS;
 
     public static void enforceTestNetworkPermissions(@NonNull Context context) {
-        // STOPSHIP: Re-enable these checks. Disabled until adoptShellPermissionIdentity() can be
-        //           called from CTS test code.
-        if (false) {
-            context.enforceCallingOrSelfPermission(PERMISSION_NAME, "TestNetworkService");
-        }
+        context.enforceCallingOrSelfPermission(PERMISSION_NAME, "TestNetworkService");
     }
 }
