@@ -41,6 +41,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.view.autofill.AutofillId;
+import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
 import android.view.autofill.IAugmentedAutofillManagerClient;
 import android.view.autofill.IAutofillWindowPresenter;
@@ -183,6 +184,8 @@ public abstract class AugmentedAutofillService extends Service {
      * Called when the Android system disconnects from the service.
      *
      * <p> At this point this service may no longer be an active {@link AugmentedAutofillService}.
+     * It should not make calls on {@link AutofillManager} that requires the caller to be
+     * the current service.
      */
     public void onDisconnected() {
     }
