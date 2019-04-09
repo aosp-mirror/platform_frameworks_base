@@ -324,6 +324,8 @@ class ApexManager {
                     ipw.println("State: ROLLBACK IN PROGRESS");
                 } else if (si.isRolledBack) {
                     ipw.println("State: ROLLED BACK");
+                } else if (si.isRollbackFailed) {
+                    ipw.println("State: ROLLBACK FAILED");
                 }
                 ipw.decreaseIndent();
             }
