@@ -756,7 +756,6 @@ android.content.ActivityNotFoundException
 android.content.AsyncQueryHandler$WorkerArgs
 android.content.AsyncQueryHandler$WorkerHandler
 android.content.AsyncQueryHandler
-android.content.AsyncTaskLoader$LoadTask
 android.content.AsyncTaskLoader
 android.content.BroadcastReceiver$PendingResult$1
 android.content.BroadcastReceiver$PendingResult
@@ -3186,7 +3185,6 @@ android.speech.tts.ITextToSpeechCallback
 android.speech.tts.ITextToSpeechService$Stub$Proxy
 android.speech.tts.ITextToSpeechService
 android.speech.tts.TextToSpeech$Action
-android.speech.tts.TextToSpeech$Connection$SetupConnectionAsyncTask
 android.speech.tts.TextToSpeech$Connection
 android.speech.tts.TextToSpeech$OnInitListener
 android.speech.tts.TextToSpeech
