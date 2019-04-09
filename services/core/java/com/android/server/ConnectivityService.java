@@ -1771,11 +1771,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // caller type. Need to re-factor NetdEventListenerService to allow multiple
             // NetworkMonitor registrants.
             if (nai != null && nai.satisfies(mDefaultRequest)) {
-                try {
-                    nai.networkMonitor().notifyDnsResponse(returnCode);
-                } catch (RemoteException e) {
-                    e.rethrowFromSystemServer();
-                }
+                Binder.withCleanCallingIdentity(() ->
+                        nai.networkMonitor().notifyDnsResponse(returnCode));
             }
         }
 
