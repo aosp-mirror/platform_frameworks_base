@@ -28,4 +28,6 @@
 
     <!-- The background color of a notification card. -->
     <color name="notification_material_background_color">@color/black</color>
+
+    <color name="chooser_row_divider">@color/list_divider_color_dark</color>
 </resources>

@@ -2592,10 +2592,8 @@ public class ChooserActivity extends ResolverActivity {
 
             if (startType != lastStartType || rowPosition == getContentPreviewRowCount()) {
                 row.setBackground(mChooserRowLayer);
-                setVertPadding(row, 0, 0);
             } else {
                 row.setBackground(null);
-                setVertPadding(row, 0, 0);
             }
 
             int columnCount = holder.getColumnCount();
@@ -2640,10 +2638,6 @@ public class ChooserActivity extends ResolverActivity {
                     holder.setViewVisibility(i, View.INVISIBLE);
                 }
             }
-        }
-
-        private void setVertPadding(ViewGroup row, int top, int bottom) {
-            row.setPadding(row.getPaddingLeft(), top, row.getPaddingRight(), bottom);
         }
 
         int getFirstRowPosition(int row) {
