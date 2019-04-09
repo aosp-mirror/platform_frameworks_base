@@ -184,6 +184,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
     private static final int PSK_WPA = 1;
     private static final int PSK_WPA2 = 2;
     private static final int PSK_WPA_WPA2 = 3;
+    private static final int PSK_SAE = 4;
 
     /**
      * The number of distinct wifi levels.
@@ -764,7 +765,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
             ssid = bestResult.SSID;
             bssid = bestResult.BSSID;
             security = getSecurity(bestResult);
-            if (security == SECURITY_PSK) {
+            if (security == SECURITY_PSK || security == SECURITY_SAE) {
                 pskType = getPskType(bestResult);
             }
             mIsCarrierAp = bestResult.isCarrierAp;
@@ -826,8 +827,13 @@ public class AccessPoint implements Comparable<AccessPoint> {
                 return concise ? context.getString(R.string.wifi_security_short_wep) :
                     context.getString(R.string.wifi_security_wep);
             case SECURITY_SAE:
-                return concise ? context.getString(R.string.wifi_security_short_sae) :
-                    context.getString(R.string.wifi_security_sae);
+                if (pskType == PSK_SAE) {
+                    return concise ? context.getString(R.string.wifi_security_short_psk_sae) :
+                            context.getString(R.string.wifi_security_psk_sae);
+                } else {
+                    return concise ? context.getString(R.string.wifi_security_short_sae) :
+                            context.getString(R.string.wifi_security_sae);
+                }
             case SECURITY_OWE:
                 return concise ? context.getString(R.string.wifi_security_short_owe) :
                     context.getString(R.string.wifi_security_owe);
@@ -1461,14 +1467,21 @@ public class AccessPoint implements Comparable<AccessPoint> {
     private static int getPskType(ScanResult result) {
         boolean wpa = result.capabilities.contains("WPA-PSK");
         boolean wpa2 = result.capabilities.contains("RSN-PSK");
-        if (wpa2 && wpa) {
+        boolean wpa3TransitionMode = result.capabilities.contains("PSK+SAE");
+        boolean wpa3 = result.capabilities.contains("RSN-SAE");
+        if (wpa3TransitionMode) {
+            return PSK_SAE;
+        } else if (wpa2 && wpa) {
             return PSK_WPA_WPA2;
         } else if (wpa2) {
             return PSK_WPA2;
         } else if (wpa) {
             return PSK_WPA;
         } else {
-            Log.w(TAG, "Received abnormal flag string: " + result.capabilities);
+            if (!wpa3) {
+                // Suppress warning for WPA3 only networks
+                Log.w(TAG, "Received abnormal flag string: " + result.capabilities);
+            }
             return PSK_UNKNOWN;
         }
     }
