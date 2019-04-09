@@ -15,9 +15,16 @@
  */
 package android.net;
 
+import static android.Manifest.permission.NETWORK_STACK;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.content.Context;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 /**
  *
  * Constants for client code communicating with the network stack service.
@@ -37,4 +44,52 @@ public class NetworkStack {
             "android.permission.MAINLINE_NETWORK_STACK";
 
     private NetworkStack() {}
+
+    /**
+     * If the NetworkStack, MAINLINE_NETWORK_STACK are not allowed for a particular process, throw a
+     * {@link SecurityException}.
+     *
+     * @param context {@link android.content.Context} for the process.
+     *
+     * @hide
+     */
+    public static void checkNetworkStackPermission(final @NonNull Context context) {
+        checkNetworkStackPermissionOr(context);
+    }
+
+    /**
+     * If the NetworkStack, MAINLINE_NETWORK_STACK or other specified permissions are not allowed
+     * for a particular process, throw a {@link SecurityException}.
+     *
+     * @param context {@link android.content.Context} for the process.
+     * @param otherPermissions The set of permissions that could be the candidate permissions , or
+     *                         empty string if none of other permissions needed.
+     * @hide
+     */
+    public static void checkNetworkStackPermissionOr(final @NonNull Context context,
+            final @NonNull String... otherPermissions) {
+        ArrayList<String> permissions = new ArrayList<String>(Arrays.asList(otherPermissions));
+        permissions.add(NETWORK_STACK);
+        permissions.add(PERMISSION_MAINLINE_NETWORK_STACK);
+        enforceAnyPermissionOf(context, permissions.toArray(new String[0]));
+    }
+
+    private static void enforceAnyPermissionOf(final @NonNull Context context,
+            final @NonNull String... permissions) {
+        if (!checkAnyPermissionOf(context, permissions)) {
+            throw new SecurityException("Requires one of the following permissions: "
+                + String.join(", ", permissions) + ".");
+        }
+    }
+
+    private static boolean checkAnyPermissionOf(final @NonNull Context context,
+            final @NonNull String... permissions) {
+        for (String permission : permissions) {
+            if (context.checkCallingOrSelfPermission(permission) == PERMISSION_GRANTED) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
