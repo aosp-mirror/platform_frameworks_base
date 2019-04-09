@@ -73,6 +73,7 @@
 #include <android-base/stringprintf.h>
 #include <android-base/strings.h>
 #include <android-base/unique_fd.h>
+#include <bionic_malloc.h>
 #include <cutils/ashmem.h>
 #include <cutils/fs.h>
 #include <cutils/multiuser.h>
@@ -499,12 +500,9 @@ static void EnableDebugger() {
   }
 }
 
-// The debug malloc library needs to know whether it's the zygote or a child.
-extern "C" int gMallocLeakZygoteChild;
-
 static void PreApplicationInit() {
   // The child process sets this to indicate it's not the zygote.
-  gMallocLeakZygoteChild = 1;
+  android_mallopt(M_SET_ZYGOTE_CHILD, nullptr, 0);
 
   // Set the jemalloc decay time to 1.
   mallopt(M_DECAY_TIME, 1);
