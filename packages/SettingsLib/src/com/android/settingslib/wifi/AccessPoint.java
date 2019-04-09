@@ -1460,7 +1460,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
     private static int getPskType(ScanResult result) {
         boolean wpa = result.capabilities.contains("WPA-PSK");
-        boolean wpa2 = result.capabilities.contains("WPA2-PSK");
+        boolean wpa2 = result.capabilities.contains("RSN-PSK");
         if (wpa2 && wpa) {
             return PSK_WPA_WPA2;
         } else if (wpa2) {
