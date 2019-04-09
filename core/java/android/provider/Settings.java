@@ -14712,6 +14712,18 @@ public final class Settings {
         public static final String TEXT_CLASSIFIER_ACTION_MODEL_PARAMS =
                 "text_classifier_action_model_params";
 
+        /**
+         * The amount of time to suppress "power-off" from the power button after the device has
+         * woken due to a gesture (lifting the phone).  Since users have learned to hit the power
+         * button immediately when lifting their device, it can cause the device to turn off if a
+         * gesture has just woken the device. This value tells us the milliseconds to wait after
+         * a gesture before "power-off" via power-button is functional again. A value of 0 is no
+         * delay, and reverts to the old behavior.
+         *
+         * @hide
+         */
+        public static final String POWER_BUTTON_SUPPRESSION_DELAY_AFTER_GESTURE_WAKE =
+                "power_button_suppression_delay_after_gesture_wake";
     }
 
     /**

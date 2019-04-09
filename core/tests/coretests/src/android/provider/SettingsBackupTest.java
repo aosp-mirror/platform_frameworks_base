@@ -392,6 +392,7 @@ public class SettingsBackupTest {
                     Settings.Global.PDP_WATCHDOG_POLL_INTERVAL_MS,
                     Settings.Global.PDP_WATCHDOG_TRIGGER_PACKET_COUNT,
                     Settings.Global.POLICY_CONTROL,
+                    Settings.Global.POWER_BUTTON_SUPPRESSION_DELAY_AFTER_GESTURE_WAKE,
                     Settings.Global.POWER_MANAGER_CONSTANTS,
                     Settings.Global.PREFERRED_NETWORK_MODE,
                     Settings.Global.PRIVATE_DNS_DEFAULT_MODE,
