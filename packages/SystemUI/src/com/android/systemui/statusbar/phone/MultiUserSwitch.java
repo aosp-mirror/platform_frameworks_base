@@ -98,8 +98,10 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
         // Short-circuiting from UserManager. Needs to be extracted because of SystemUI boolean flag
         // qs_show_user_switcher_for_single_user
 
+        // The default in UserManager is to show the switcher. We want to not show it unless the
+        // user explicitly requests it in Settings
         final boolean userSwitcherEnabled = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.USER_SWITCHER_ENABLED, 1) != 0;
+                Settings.Global.USER_SWITCHER_ENABLED, 0) != 0;
 
         if (!UserManager.supportsMultipleUsers()
                 || mUserManager.hasUserRestriction(UserManager.DISALLOW_USER_SWITCH)
