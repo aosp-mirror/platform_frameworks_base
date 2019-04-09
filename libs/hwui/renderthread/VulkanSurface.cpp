@@ -266,47 +266,46 @@ VulkanSurface* VulkanSurface::Create(ANativeWindow* window, ColorMode colorMode,
         vkPixelFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
     }
 
-    if (nullptr != vkManager.mGetPhysicalDeviceImageFormatProperties2) {
-        VkPhysicalDeviceExternalImageFormatInfo externalImageFormatInfo;
-        externalImageFormatInfo.sType =
-                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_IMAGE_FORMAT_INFO;
-        externalImageFormatInfo.pNext = nullptr;
-        externalImageFormatInfo.handleType =
-                VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID;
+    LOG_ALWAYS_FATAL_IF(nullptr == vkManager.mGetPhysicalDeviceImageFormatProperties2,
+                        "vkGetPhysicalDeviceImageFormatProperties2 is missing");
+    VkPhysicalDeviceExternalImageFormatInfo externalImageFormatInfo;
+    externalImageFormatInfo.sType =
+            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_IMAGE_FORMAT_INFO;
+    externalImageFormatInfo.pNext = nullptr;
+    externalImageFormatInfo.handleType =
+            VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID;
 
-        VkPhysicalDeviceImageFormatInfo2 imageFormatInfo;
-        imageFormatInfo.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_FORMAT_INFO_2;
-        imageFormatInfo.pNext = &externalImageFormatInfo;
-        imageFormatInfo.format = vkPixelFormat;
-        imageFormatInfo.type = VK_IMAGE_TYPE_2D;
-        imageFormatInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-        imageFormatInfo.usage = usageFlags;
-        imageFormatInfo.flags = 0;
+    VkPhysicalDeviceImageFormatInfo2 imageFormatInfo;
+    imageFormatInfo.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_FORMAT_INFO_2;
+    imageFormatInfo.pNext = &externalImageFormatInfo;
+    imageFormatInfo.format = vkPixelFormat;
+    imageFormatInfo.type = VK_IMAGE_TYPE_2D;
+    imageFormatInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+    imageFormatInfo.usage = usageFlags;
+    imageFormatInfo.flags = 0;
 
-        VkAndroidHardwareBufferUsageANDROID hwbUsage;
-        hwbUsage.sType = VK_STRUCTURE_TYPE_ANDROID_HARDWARE_BUFFER_USAGE_ANDROID;
-        hwbUsage.pNext = nullptr;
+    VkAndroidHardwareBufferUsageANDROID hwbUsage;
+    hwbUsage.sType = VK_STRUCTURE_TYPE_ANDROID_HARDWARE_BUFFER_USAGE_ANDROID;
+    hwbUsage.pNext = nullptr;
 
-        VkImageFormatProperties2 imgFormProps;
-        imgFormProps.sType = VK_STRUCTURE_TYPE_IMAGE_FORMAT_PROPERTIES_2;
-        imgFormProps.pNext = &hwbUsage;
+    VkImageFormatProperties2 imgFormProps;
+    imgFormProps.sType = VK_STRUCTURE_TYPE_IMAGE_FORMAT_PROPERTIES_2;
+    imgFormProps.pNext = &hwbUsage;
 
-        res = vkManager.mGetPhysicalDeviceImageFormatProperties2(vkManager.mPhysicalDevice,
-                                                                 &imageFormatInfo, &imgFormProps);
-        if (VK_SUCCESS != res) {
-            ALOGE("Failed to query GetPhysicalDeviceImageFormatProperties2");
-            return nullptr;
-        }
-
-        windowInfo.windowUsageFlags = hwbUsage.androidHardwareBufferUsage;
-        if (vkManager.isQualcomm()) {
-            windowInfo.windowUsageFlags =
-                    windowInfo.windowUsageFlags | AHARDWAREBUFFER_USAGE_VENDOR_0;
-        }
-
-    } else {
-        ALOGE("VulkanSurface::Create() vkmGetPhysicalDeviceImageFormatProperties2 is missing");
+    res = vkManager.mGetPhysicalDeviceImageFormatProperties2(vkManager.mPhysicalDevice,
+                                                             &imageFormatInfo, &imgFormProps);
+    if (VK_SUCCESS != res) {
+        ALOGE("Failed to query GetPhysicalDeviceImageFormatProperties2");
         return nullptr;
+    }
+
+    uint64_t consumerUsage;
+    native_window_get_consumer_usage(window, &consumerUsage);
+    windowInfo.windowUsageFlags = consumerUsage | hwbUsage.androidHardwareBufferUsage;
+
+    if (vkManager.isQualcomm()) {
+        windowInfo.windowUsageFlags =
+                windowInfo.windowUsageFlags | AHARDWAREBUFFER_USAGE_VENDOR_0;
     }
 
     /*
