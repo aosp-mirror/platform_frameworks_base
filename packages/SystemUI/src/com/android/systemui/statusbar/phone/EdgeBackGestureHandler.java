@@ -204,6 +204,7 @@ public class EdgeBackGestureHandler implements DisplayListener {
 
         if (!mIsEnabled) {
             WindowManagerWrapper.getInstance().removePinnedStackListener(mImeChangedListener);
+            mContext.getSystemService(DisplayManager.class).unregisterDisplayListener(this);
 
             try {
                 WindowManagerGlobal.getWindowManagerService()
@@ -215,6 +216,8 @@ public class EdgeBackGestureHandler implements DisplayListener {
 
         } else {
             updateDisplaySize();
+            mContext.getSystemService(DisplayManager.class).registerDisplayListener(this,
+                    mContext.getMainThreadHandler());
 
             try {
                 WindowManagerWrapper.getInstance().addPinnedStackListener(mImeChangedListener);
@@ -344,7 +347,8 @@ public class EdgeBackGestureHandler implements DisplayListener {
 
     private void updateDisplaySize() {
         mContext.getSystemService(DisplayManager.class)
-                .getDisplay(mDisplayId).getRealSize(mDisplaySize);
+                .getDisplay(mDisplayId)
+                .getRealSize(mDisplaySize);
     }
 
     private void sendEvent(int action, int code) {
