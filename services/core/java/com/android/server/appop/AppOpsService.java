@@ -1089,8 +1089,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             return Collections.emptyList();
         }
         synchronized (this) {
-            Ops pkgOps = getOpsRawLocked(uid, resolvedPackageName, false /* edit */,
-                    false /* uidMismatchExpected */);
+            Ops pkgOps = getOpsRawLocked(uid, resolvedPackageName, false /* isPrivileged */,
+                    false /* edit */);
             if (pkgOps == null) {
                 return null;
             }
@@ -1187,8 +1187,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     private void pruneOp(Op op, int uid, String packageName) {
         if (!op.hasAnyTime()) {
-            Ops ops = getOpsRawLocked(uid, packageName, false /* edit */,
-                    false /* uidMismatchExpected */);
+            Ops ops = getOpsRawLocked(uid, packageName, false /* isPrivileged */, false /* edit */);
             if (ops != null) {
                 ops.remove(op.op);
                 if (ops.size() <= 0) {
@@ -1335,11 +1334,6 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
-    @Override
-    public void setMode(int code, int uid, String packageName, int mode) {
-        setMode(code, uid, packageName, mode, true, false);
-    }
-
     /**
      * Sets the mode for a certain op and uid.
      *
@@ -1347,19 +1341,25 @@ public class AppOpsService extends IAppOpsService.Stub {
      * @param uid The UID for which to set
      * @param packageName The package for which to set
      * @param mode The new mode to set
-     * @param verifyUid Iff {@code true}, check that the package name belongs to the uid
-     * @param isPrivileged Whether the package is privileged. (Only used if {@code verifyUid ==
-     *                     false})
      */
-    private void setMode(int code, int uid, @NonNull String packageName, int mode,
-            boolean verifyUid, boolean isPrivileged) {
+    @Override
+    public void setMode(int code, int uid, @NonNull String packageName, int mode) {
         enforceManageAppOpsModes(Binder.getCallingPid(), Binder.getCallingUid(), uid);
         verifyIncomingOp(code);
         ArraySet<ModeCallback> repCbs = null;
         code = AppOpsManager.opToSwitch(code);
+
+        boolean isPrivileged;
+        try {
+            isPrivileged = verifyAndGetIsPrivileged(uid, packageName);
+        } catch (SecurityException e) {
+            Slog.e(TAG, "Cannot setMode", e);
+            return;
+        }
+
         synchronized (this) {
             UidState uidState = getUidStateLocked(uid, false);
-            Op op = getOpLocked(code, uid, packageName, true, verifyUid, isPrivileged);
+            Op op = getOpLocked(code, uid, packageName, isPrivileged, true);
             if (op != null) {
                 if (op.mode != mode) {
                     op.mode = mode;
@@ -1743,11 +1743,18 @@ public class AppOpsService extends IAppOpsService.Stub {
      */
     private @Mode int checkOperationUnchecked(int code, int uid, @NonNull String packageName,
                 boolean raw, boolean verify) {
-        synchronized (this) {
+        boolean isPrivileged;
+        try {
+            isPrivileged = verifyAndGetIsPrivileged(uid, packageName);
+        } catch (Exception e) {
             if (verify) {
-                checkPackage(uid, packageName);
+                throw e;
             }
-            if (isOpRestrictedLocked(uid, code, packageName)) {
+            return AppOpsManager.MODE_IGNORED;
+        }
+
+        synchronized (this) {
+            if (isOpRestrictedLocked(uid, code, packageName, isPrivileged)) {
                 return AppOpsManager.MODE_IGNORED;
             }
             code = AppOpsManager.opToSwitch(code);
@@ -1757,7 +1764,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 final int rawMode = uidState.opModes.get(code);
                 return raw ? rawMode : uidState.evalMode(code, rawMode);
             }
-            Op op = getOpLocked(code, uid, packageName, false, verify, false);
+            Op op = getOpLocked(code, uid, packageName, false, false);
             if (op == null) {
                 return AppOpsManager.opToDefaultMode(code);
             }
@@ -1862,14 +1869,12 @@ public class AppOpsService extends IAppOpsService.Stub {
     @Override
     public int checkPackage(int uid, String packageName) {
         Preconditions.checkNotNull(packageName);
-        synchronized (this) {
-            Ops ops = getOpsRawLocked(uid, packageName, true /* edit */,
-                    true /* uidMismatchExpected */);
-            if (ops != null) {
-                return AppOpsManager.MODE_ALLOWED;
-            } else {
-                return AppOpsManager.MODE_ERRORED;
-            }
+        try {
+            verifyAndGetIsPrivileged(uid, packageName);
+
+            return AppOpsManager.MODE_ALLOWED;
+        } catch (SecurityException ignored) {
+            return AppOpsManager.MODE_ERRORED;
         }
     }
 
@@ -1932,9 +1937,16 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     private int noteOperationUnchecked(int code, int uid, String packageName,
             int proxyUid, String proxyPackageName, @OpFlags int flags) {
+        boolean isPrivileged;
+        try {
+            isPrivileged = verifyAndGetIsPrivileged(uid, packageName);
+        } catch (SecurityException e) {
+            Slog.e(TAG, "Cannot startOperation", e);
+            return AppOpsManager.MODE_IGNORED;
+        }
+
         synchronized (this) {
-            final Ops ops = getOpsRawLocked(uid, packageName, true /* edit */,
-                    false /* uidMismatchExpected */);
+            final Ops ops = getOpsRawLocked(uid, packageName, isPrivileged, true /* edit */);
             if (ops == null) {
                 scheduleOpNotedIfNeededLocked(code, uid, packageName,
                         AppOpsManager.MODE_IGNORED);
@@ -1943,7 +1955,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 return AppOpsManager.MODE_ERRORED;
             }
             final Op op = getOpLocked(ops, code, true);
-            if (isOpRestrictedLocked(uid, code, packageName)) {
+            if (isOpRestrictedLocked(uid, code, packageName, isPrivileged)) {
                 scheduleOpNotedIfNeededLocked(code, uid, packageName,
                         AppOpsManager.MODE_IGNORED);
                 return AppOpsManager.MODE_IGNORED;
@@ -2102,16 +2114,25 @@ public class AppOpsService extends IAppOpsService.Stub {
             return  AppOpsManager.MODE_IGNORED;
         }
         ClientState client = (ClientState)token;
+
+        boolean isPrivileged;
+        try {
+            isPrivileged = verifyAndGetIsPrivileged(uid, packageName);
+        } catch (SecurityException e) {
+            Slog.e(TAG, "Cannot startOperation", e);
+            return AppOpsManager.MODE_IGNORED;
+        }
+
         synchronized (this) {
-            final Ops ops = getOpsRawLocked(uid, resolvedPackageName, true /* edit */,
-                    false /* uidMismatchExpected */);
+            final Ops ops = getOpsRawLocked(uid, resolvedPackageName, isPrivileged,
+                    true /* edit */);
             if (ops == null) {
                 if (DEBUG) Slog.d(TAG, "startOperation: no op for code " + code + " uid " + uid
                         + " package " + resolvedPackageName);
                 return AppOpsManager.MODE_ERRORED;
             }
             final Op op = getOpLocked(ops, code, true);
-            if (isOpRestrictedLocked(uid, code, resolvedPackageName)) {
+            if (isOpRestrictedLocked(uid, code, resolvedPackageName, isPrivileged)) {
                 return AppOpsManager.MODE_IGNORED;
             }
             final int switchCode = AppOpsManager.opToSwitch(code);
@@ -2183,8 +2204,17 @@ public class AppOpsService extends IAppOpsService.Stub {
             return;
         }
         ClientState client = (ClientState) token;
+
+        boolean isPrivileged;
+        try {
+            isPrivileged = verifyAndGetIsPrivileged(uid, packageName);
+        } catch (SecurityException e) {
+            Slog.e(TAG, "Cannot finishOperation", e);
+            return;
+        }
+
         synchronized (this) {
-            Op op = getOpLocked(code, uid, resolvedPackageName, true, true, false);
+            Op op = getOpLocked(code, uid, resolvedPackageName, isPrivileged, true);
             if (op == null) {
                 return;
             }
@@ -2436,8 +2466,76 @@ public class AppOpsService extends IAppOpsService.Stub {
         uidState.pendingStateCommitTime = 0;
     }
 
-    private Ops getOpsRawLocked(int uid, String packageName, boolean edit,
-            boolean uidMismatchExpected) {
+    /**
+     * Verify that package belongs to uid and return whether the package is privileged.
+     *
+     * @param uid The uid the package belongs to
+     * @param packageName The package the might belong to the uid
+     *
+     * @return {@code true} iff the package is privileged
+     */
+    private boolean verifyAndGetIsPrivileged(int uid, String packageName) {
+        if (uid == Process.ROOT_UID) {
+            // For backwards compatibility, don't check package name for root UID.
+            return false;
+        }
+
+        // Do not check if uid/packageName is already known
+        synchronized (this) {
+            UidState uidState = mUidStates.get(uid);
+            if (uidState != null && uidState.pkgOps != null) {
+                Ops ops = uidState.pkgOps.get(packageName);
+
+                if (ops != null) {
+                    return ops.isPrivileged;
+                }
+            }
+        }
+
+        boolean isPrivileged = false;
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            int pkgUid;
+
+            ApplicationInfo appInfo = LocalServices.getService(PackageManagerInternal.class)
+                    .getApplicationInfo(packageName, PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
+                                    | PackageManager.MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS
+                                    | PackageManager.MATCH_UNINSTALLED_PACKAGES
+                                    | PackageManager.MATCH_INSTANT,
+                            Process.SYSTEM_UID, UserHandle.getUserId(uid));
+            if (appInfo != null) {
+                pkgUid = appInfo.uid;
+                isPrivileged = (appInfo.privateFlags
+                        & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
+            } else {
+                pkgUid = resolveUid(packageName);
+                if (pkgUid >= 0) {
+                    isPrivileged = false;
+                }
+            }
+            if (pkgUid != uid) {
+                throw new SecurityException("Specified package " + packageName + " under uid " + uid
+                        + " but it is really " + pkgUid);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+
+        return isPrivileged;
+    }
+
+    /**
+     * Get (and potentially create) ops.
+     *
+     * @param uid The uid the package belongs to
+     * @param packageName The name of the package
+     * @param isPrivileged If the package is privilidged (ignored if {@code edit} is false)
+     * @param edit If an ops does not exist, create the ops?
+
+     * @return
+     */
+    private Ops getOpsRawLocked(int uid, String packageName, boolean isPrivileged, boolean edit) {
         UidState uidState = getUidStateLocked(uid, edit);
         if (uidState == null) {
             return null;
@@ -2455,47 +2553,6 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (!edit) {
                 return null;
             }
-            boolean isPrivileged = false;
-            // This is the first time we have seen this package name under this uid,
-            // so let's make sure it is valid.
-            if (uid != 0) {
-                final long ident = Binder.clearCallingIdentity();
-                try {
-                    int pkgUid = -1;
-                    try {
-                        ApplicationInfo appInfo = ActivityThread.getPackageManager()
-                                .getApplicationInfo(packageName,
-                                        PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
-                                        UserHandle.getUserId(uid));
-                        if (appInfo != null) {
-                            pkgUid = appInfo.uid;
-                            isPrivileged = (appInfo.privateFlags
-                                    & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
-                        } else {
-                            pkgUid = resolveUid(packageName);
-                            if (pkgUid >= 0) {
-                                isPrivileged = false;
-                            }
-                        }
-                    } catch (RemoteException e) {
-                        Slog.w(TAG, "Could not contact PackageManager", e);
-                    }
-                    if (pkgUid != uid) {
-                        // Oops!  The package name is not valid for the uid they are calling
-                        // under.  Abort.
-                        if (!uidMismatchExpected) {
-                            RuntimeException ex = new RuntimeException("here");
-                            ex.fillInStackTrace();
-                            Slog.w(TAG, "Bad call: specified package " + packageName
-                                    + " under uid " + uid + " but it is really " + pkgUid, ex);
-                        }
-                        return null;
-                    }
-                } finally {
-                    Binder.restoreCallingIdentity(ident);
-                }
-            }
             ops = new Ops(packageName, uidState, isPrivileged);
             uidState.pkgOps.put(packageName, ops);
         }
@@ -2503,7 +2560,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     /**
-     * Get the state of all ops for a package, <b>don't verify that package belongs to uid</b>.
+     * Get the state of all ops for a package.
      *
      * <p>Usually callers should use {@link #getOpLocked} and not call this directly.
      *
@@ -2561,23 +2618,15 @@ public class AppOpsService extends IAppOpsService.Stub {
      * @param code The code of the op
      * @param uid The uid the of the package
      * @param packageName The package name for which to get the state for
+     * @param isPrivileged Whether the package is privileged or not (only used if {@code edit
+     *                     == true})
      * @param edit Iff {@code true} create the {@link Op} object if not yet created
-     * @param verifyUid Iff {@code true} check that the package belongs to the uid
-     * @param isPrivileged Whether the package is privileged or not (only used if {@code verifyUid
-     *                     == false})
      *
      * @return The {@link Op state} of the op
      */
-    private @Nullable Op getOpLocked(int code, int uid, @NonNull String packageName, boolean edit,
-            boolean verifyUid, boolean isPrivileged) {
-        Ops ops;
-
-        if (verifyUid) {
-            ops = getOpsRawLocked(uid, packageName, edit, false /* uidMismatchExpected */);
-        }  else {
-            ops = getOpsRawNoVerifyLocked(uid, packageName, edit, isPrivileged);
-        }
-
+    private @Nullable Op getOpLocked(int code, int uid, @NonNull String packageName,
+            boolean isPrivileged, boolean edit) {
+        Ops ops = getOpsRawNoVerifyLocked(uid, packageName, edit, isPrivileged);
         if (ops == null) {
             return null;
         }
@@ -2599,7 +2648,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         return op;
     }
 
-    private boolean isOpRestrictedLocked(int uid, int code, String packageName) {
+    private boolean isOpRestrictedLocked(int uid, int code, String packageName,
+            boolean isPrivileged) {
         int userHandle = UserHandle.getUserId(uid);
         final int restrictionSetCount = mOpUserRestrictions.size();
 
@@ -2611,8 +2661,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                 if (AppOpsManager.opAllowSystemBypassRestriction(code)) {
                     // If we are the system, bypass user restrictions for certain codes
                     synchronized (this) {
-                        Ops ops = getOpsRawLocked(uid, packageName, true /* edit */,
-                                false /* uidMismatchExpected */);
+                        Ops ops = getOpsRawLocked(uid, packageName, isPrivileged,
+                                true /* edit */);
                         if ((ops != null) && ops.isPrivileged) {
                             return false;
                         }
@@ -2960,7 +3010,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                         out.attribute(null, "n", Integer.toString(pkg.getUid()));
                         synchronized (this) {
                             Ops ops = getOpsRawLocked(pkg.getUid(), pkg.getPackageName(),
-                                    false /* edit */, false /* uidMismatchExpected */);
+                                    false /* isPrivileged */, false /* edit */);
                             // Should always be present as the list of PackageOps is generated
                             // from Ops.
                             if (ops != null) {
