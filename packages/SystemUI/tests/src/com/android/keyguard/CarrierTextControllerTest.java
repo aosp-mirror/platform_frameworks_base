@@ -37,6 +37,7 @@ import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.telephony.SubscriptionInfo;
+import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -81,6 +82,8 @@ public class CarrierTextControllerTest extends SysuiTestCase {
     private ConnectivityManager mConnectivityManager;
     @Mock
     private TelephonyManager mTelephonyManager;
+    @Mock
+    private SubscriptionManager mSubscriptionManager;
     private CarrierTextController.CarrierTextCallbackInfo mCarrierTextCallbackInfo;
 
     private CarrierTextController mCarrierTextController;
@@ -94,6 +97,7 @@ public class CarrierTextControllerTest extends SysuiTestCase {
         mContext.addMockSystemService(WifiManager.class, mWifiManager);
         mContext.addMockSystemService(ConnectivityManager.class, mConnectivityManager);
         mContext.addMockSystemService(TelephonyManager.class, mTelephonyManager);
+        mContext.addMockSystemService(SubscriptionManager.class, mSubscriptionManager);
         mDependency.injectMockDependency(WakefulnessLifecycle.class);
         mDependency.injectTestDependency(Dependency.MAIN_HANDLER,
                 new Handler(mTestableLooper.getLooper()));
@@ -169,6 +173,7 @@ public class CarrierTextControllerTest extends SysuiTestCase {
         list.add(TEST_SUBSCRIPTION);
         when(mKeyguardUpdateMonitor.getSimState(anyInt())).thenReturn(IccCardConstants.State.READY);
         when(mKeyguardUpdateMonitor.getSubscriptionInfo(anyBoolean())).thenReturn(list);
+        when(mSubscriptionManager.getActiveSubscriptionInfoList(anyBoolean())).thenReturn(list);
         mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
 
         ArgumentCaptor<CarrierTextController.CarrierTextCallbackInfo> captor =
@@ -192,6 +197,7 @@ public class CarrierTextControllerTest extends SysuiTestCase {
         list.add(TEST_SUBSCRIPTION_ROAMING);
         when(mKeyguardUpdateMonitor.getSimState(anyInt())).thenReturn(IccCardConstants.State.READY);
         when(mKeyguardUpdateMonitor.getSubscriptionInfo(anyBoolean())).thenReturn(list);
+        when(mSubscriptionManager.getActiveSubscriptionInfoList(anyBoolean())).thenReturn(list);
         mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
 
         ArgumentCaptor<CarrierTextController.CarrierTextCallbackInfo> captor =
