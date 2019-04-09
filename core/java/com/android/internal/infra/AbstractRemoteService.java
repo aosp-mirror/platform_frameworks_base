@@ -449,13 +449,13 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
                 return;
             }
             mBinding = false;
-            mService = getServiceInterface(service);
             try {
                 service.linkToDeath(AbstractRemoteService.this, 0);
             } catch (RemoteException re) {
                 handleBinderDied();
                 return;
             }
+            mService = getServiceInterface(service);
             handleOnConnectedStateChangedInternal(true);
             mServiceDied = false;
         }
