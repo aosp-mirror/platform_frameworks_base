@@ -4731,6 +4731,18 @@ public class Intent implements Parcelable, Cloneable {
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
     public static final String CATEGORY_APP_MUSIC = "android.intent.category.APP_MUSIC";
 
+    /**
+     * Used with {@link #ACTION_MAIN} to launch the files application.
+     * The activity should be able to browse and manage files stored on the device.
+     * <p>NOTE: This should not be used as the primary key of an Intent,
+     * since it will not result in the app launching with the correct
+     * action and category.  Instead, use this with
+     * {@link #makeMainSelectorActivity(String, String)} to generate a main
+     * Intent with this category in the selector.</p>
+     */
+    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
+    public static final String CATEGORY_APP_FILES = "android.intent.category.APP_FILES";
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard extra data keys.
