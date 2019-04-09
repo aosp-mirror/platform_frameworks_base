@@ -29,7 +29,7 @@ import android.telephony.ims.RcsParticipantQueryParams;
 import android.telephony.ims.RcsParticipantQueryResult;
 import android.telephony.ims.RcsQueryContinuationToken;
 import android.telephony.ims.RcsThreadQueryParams;
-import android.telephony.ims.RcsThreadQueryResult;
+import android.telephony.ims.RcsThreadQueryResultParcelable;
 
 /**
  * RPC definition between RCS storage APIs and phone process.
@@ -39,9 +39,9 @@ interface IRcs {
     /////////////////////////
     // RcsMessageStore APIs
     /////////////////////////
-    RcsThreadQueryResult getRcsThreads(in RcsThreadQueryParams queryParams);
+    RcsThreadQueryResultParcelable getRcsThreads(in RcsThreadQueryParams queryParams);
 
-    RcsThreadQueryResult getRcsThreadsWithToken(
+    RcsThreadQueryResultParcelable getRcsThreadsWithToken(
         in RcsQueryContinuationToken continuationToken);
 
     RcsParticipantQueryResult getParticipants(in RcsParticipantQueryParams queryParams);
