@@ -73,6 +73,11 @@ public class ResolverDrawerLayout extends ViewGroup {
      */
     private float mCollapseOffset;
 
+    /**
+      * Track fractions of pixels from drag calculations. Without this, the view offsets get
+      * out of sync due to frequently dropping fractions of a pixel from '(int) dy' casts.
+      */
+    private float mDragRemainder = 0.0f;
     private int mCollapsibleHeight;
     private int mUncollapsibleHeight;
     private int mAlwaysShowHeight;
@@ -485,6 +490,16 @@ public class ResolverDrawerLayout extends ViewGroup {
                 mCollapsibleHeight + mUncollapsibleHeight));
         if (newPos != mCollapseOffset) {
             dy = newPos - mCollapseOffset;
+
+            mDragRemainder += dy - (int) dy;
+            if (mDragRemainder >= 1.0f) {
+                mDragRemainder -= 1.0f;
+                dy += 1.0f;
+            } else if (mDragRemainder <= -1.0f) {
+                mDragRemainder += 1.0f;
+                dy -= 1.0f;
+            }
+
             final int childCount = getChildCount();
             for (int i = 0; i < childCount; i++) {
                 final View child = getChildAt(i);

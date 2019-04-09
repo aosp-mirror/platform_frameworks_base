@@ -130,6 +130,15 @@ interface IPackageManager {
 
     void updatePermissionFlagsForAllApps(int flagMask, int flagValues, int userId);
 
+    List<String> getWhitelistedRestrictedPermissions(String packageName, int flags,
+            int userId);
+
+    boolean addWhitelistedRestrictedPermission(String packageName, String permission,
+            int whitelistFlags, int userId);
+
+    boolean removeWhitelistedRestrictedPermission(String packageName, String permission,
+            int whitelistFlags, int userId);
+
     boolean shouldShowRequestPermissionRationale(String permissionName,
             String packageName, int userId);
 
@@ -643,7 +652,7 @@ interface IPackageManager {
 
     boolean isFirstBoot();
     boolean isOnlyCoreApps();
-    boolean isUpgrade();
+    boolean isDeviceUpgrading();
 
     void setPermissionEnforced(String permission, boolean enforced);
     boolean isPermissionEnforced(String permission);
@@ -757,4 +766,8 @@ interface IPackageManager {
     List<ModuleInfo> getInstalledModules(int flags);
 
     ModuleInfo getModuleInfo(String packageName, int flags);
+
+    int getRuntimePermissionsVersion(int userId);
+
+    void setRuntimePermissionsVersion(int version, int userId);
 }

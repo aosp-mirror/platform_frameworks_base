@@ -284,9 +284,8 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
 
     @Override
     public boolean isCaptionStreamOptedOut() {
-        int currentValue = Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.ODI_CAPTIONS_OPTED_OUT, 0);
-        return currentValue == 1;
+        // TODO(b/129768185): Removing secure setting, to be replaced by sound event listener
+        return false;
     }
 
     public void getCaptionsComponentState(boolean fromTooltip) {

@@ -413,7 +413,7 @@
     <!-- The height of the qs customize header. Should be (28dp - qs_tile_margin_top_bottom). -->
     <dimen name="qs_customize_header_min_height">40dp</dimen>
     <dimen name="qs_tile_margin_top">18dp</dimen>
-    <dimen name="qs_tile_background_size">40dp</dimen>
+    <dimen name="qs_tile_background_size">44dp</dimen>
     <dimen name="qs_quick_tile_size">48dp</dimen>
     <!-- Maximum width of quick quick settings panel. Defaults to MATCH_PARENT-->
     <dimen name="qs_quick_layout_width">-1px</dimen>
@@ -424,7 +424,6 @@
     <dimen name="qs_page_indicator_height">8dp</dimen>
     <dimen name="qs_tile_icon_size">24dp</dimen>
     <dimen name="qs_tile_text_size">12sp</dimen>
-    <dimen name="qs_carrier_info_text_size">14sp</dimen>
     <dimen name="qs_tile_divider_height">1dp</dimen>
     <dimen name="qs_panel_padding">16dp</dimen>
     <dimen name="qs_dual_tile_height">112dp</dimen>
@@ -432,7 +431,6 @@
     <dimen name="qs_dual_tile_padding_horizontal">6dp</dimen>
     <dimen name="qs_tile_padding_top">14dp</dimen>
     <dimen name="qs_tile_padding_top_large_text">4dp</dimen>
-    <dimen name="qs_tile_padding_below_icon">12dp</dimen>
     <dimen name="qs_tile_padding_bottom">16dp</dimen>
     <dimen name="qs_tile_spacing">4dp</dimen>
     <dimen name="qs_panel_padding_bottom">0dp</dimen>

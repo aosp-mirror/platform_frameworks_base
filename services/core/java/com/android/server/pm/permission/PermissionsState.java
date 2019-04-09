@@ -607,7 +607,7 @@ public final class PermissionsState {
 
     private int grantPermission(BasePermission permission, int userId) {
         if (hasPermission(permission.getName(), userId)) {
-            return PERMISSION_OPERATION_FAILURE;
+            return PERMISSION_OPERATION_SUCCESS;
         }
 
         final boolean hasGids = !ArrayUtils.isEmpty(permission.computeGids(userId));
@@ -632,7 +632,7 @@ public final class PermissionsState {
     private int revokePermission(BasePermission permission, int userId) {
         final String permName = permission.getName();
         if (!hasPermission(permName, userId)) {
-            return PERMISSION_OPERATION_FAILURE;
+            return PERMISSION_OPERATION_SUCCESS;
         }
 
         final boolean hasGids = !ArrayUtils.isEmpty(permission.computeGids(userId));

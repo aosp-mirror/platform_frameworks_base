@@ -661,8 +661,10 @@ public class PackageWatchdogTest {
             if (mIsEnabled) {
                 packages.retainAll(mSupportedPackages);
                 mRequestedPackages.addAll(packages);
+                mSupportedConsumer.accept(mSupportedPackages);
+            } else {
+                mSupportedConsumer.accept(Collections.emptyList());
             }
-            mSupportedConsumer.accept(mSupportedPackages);
         }
 
         public void setSupportedPackages(List<String> packages) {

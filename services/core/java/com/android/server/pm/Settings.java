@@ -1313,12 +1313,20 @@ public final class Settings {
 
     boolean areDefaultRuntimePermissionsGrantedLPr(int userId) {
         return mRuntimePermissionsPersistence
-                .areDefaultRuntimPermissionsGrantedLPr(userId);
+                .areDefaultRuntimePermissionsGrantedLPr(userId);
     }
 
     void onDefaultRuntimePermissionsGrantedLPr(int userId) {
         mRuntimePermissionsPersistence
                 .onDefaultRuntimePermissionsGrantedLPr(userId);
+    }
+
+    int getDefaultRuntimePermissionsVersionLPr(int userId) {
+        return mRuntimePermissionsPersistence.getVersionLPr(userId);
+    }
+
+    void setDefaultRuntimePermissionsVersionLPr(int version, int userId) {
+        mRuntimePermissionsPersistence.setVersionLPr(version, userId);
     }
 
     public VersionInfo findOrCreateVersion(String volumeUuid) {
@@ -4727,7 +4735,13 @@ public final class Settings {
                         && !permissionNames.contains(perm)) {
                     continue;
                 }
-                pw.print(prefix); pw.print("    "); pw.println(perm);
+                pw.print(prefix); pw.print("    "); pw.print(perm);
+                final BasePermission bp = mPermissions.getPermission(perm);
+                if (bp != null && bp.isRestricted()) {
+                    pw.println(": restricted=true");
+                } else {
+                    pw.println();
+                }
             }
         }
 
@@ -5023,7 +5037,10 @@ public final class Settings {
             final int flag = 1 << Integer.numberOfTrailingZeros(flags);
             flags &= ~flag;
             flagsString.append(PackageManager.permissionFlagToString(flag));
-            flagsString.append(' ');
+            if (flags != 0) {
+                flagsString.append('|');
+            }
+
         }
         if (flagsString != null) {
             flagsString.append(']');
@@ -5085,6 +5102,8 @@ public final class Settings {
         private static final long WRITE_PERMISSIONS_DELAY_MILLIS = 200;
         private static final long MAX_WRITE_PERMISSIONS_DELAY_MILLIS = 2000;
 
+        private static final int INITIAL_VERSION = 0;
+
         private final Handler mHandler = new MyHandler();
 
         private final Object mPersistenceLock;
@@ -5095,6 +5114,10 @@ public final class Settings {
         @GuardedBy("mLock")
         // The mapping keys are user ids.
         private final SparseLongArray mLastNotWrittenMutationTimesMillis = new SparseLongArray();
+
+        @GuardedBy("mLock")
+        // The mapping keys are user ids.
+        private final SparseIntArray mVersions = new SparseIntArray();
 
         @GuardedBy("mLock")
         // The mapping keys are user ids.
@@ -5109,7 +5132,18 @@ public final class Settings {
         }
 
         @GuardedBy("Settings.this.mLock")
-        public boolean areDefaultRuntimPermissionsGrantedLPr(int userId) {
+        int getVersionLPr(int userId) {
+            return mVersions.get(userId);
+        }
+
+        @GuardedBy("Settings.this.mLock")
+        void setVersionLPr(int version, int userId) {
+            mVersions.put(userId, version);
+            writePermissionsForUserAsyncLPr(userId);
+        }
+
+        @GuardedBy("Settings.this.mLock")
+        public boolean areDefaultRuntimePermissionsGrantedLPr(int userId) {
             return mDefaultPermissionsGranted.get(userId);
         }
 
@@ -5206,6 +5240,9 @@ public final class Settings {
 
                 serializer.startTag(null, TAG_RUNTIME_PERMISSIONS);
 
+                final int version = mVersions.get(userId, INITIAL_VERSION);
+                serializer.attribute(null, ATTR_VERSION, Integer.toString(version));
+
                 String fingerprint = mFingerprints.get(userId);
                 if (fingerprint != null) {
                     serializer.attribute(null, ATTR_FINGERPRINT, fingerprint);
@@ -5263,6 +5300,7 @@ public final class Settings {
             }
 
             mDefaultPermissionsGranted.delete(userId);
+            mVersions.delete(userId);
             mFingerprints.remove(userId);
         }
 
@@ -5326,6 +5364,9 @@ public final class Settings {
 
                 switch (parser.getName()) {
                     case TAG_RUNTIME_PERMISSIONS: {
+                        int version = XmlUtils.readIntAttribute(parser, ATTR_VERSION,
+                                INITIAL_VERSION);
+                        mVersions.put(userId, version);
                         String fingerprint = parser.getAttributeValue(null, ATTR_FINGERPRINT);
                         mFingerprints.put(userId, fingerprint);
                         final boolean defaultsGranted = Build.FINGERPRINT.equals(fingerprint);

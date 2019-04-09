@@ -160,7 +160,7 @@ public class BubbleControllerTest extends SysuiTestCase {
 
     @Test
     public void testAddBubble() {
-        mBubbleController.updateBubble(mRow.getEntry(), true /* updatePosition */);
+        mBubbleController.updateBubble(mRow.getEntry());
         assertTrue(mBubbleController.hasBubbles());
 
         verify(mBubbleStateChangeListener).onHasBubblesChanged(true);
@@ -169,13 +169,13 @@ public class BubbleControllerTest extends SysuiTestCase {
     @Test
     public void testHasBubbles() {
         assertFalse(mBubbleController.hasBubbles());
-        mBubbleController.updateBubble(mRow.getEntry(), true /* updatePosition */);
+        mBubbleController.updateBubble(mRow.getEntry());
         assertTrue(mBubbleController.hasBubbles());
     }
 
     @Test
     public void testRemoveBubble() {
-        mBubbleController.updateBubble(mRow.getEntry(), true /* updatePosition */);
+        mBubbleController.updateBubble(mRow.getEntry());
         assertTrue(mBubbleController.hasBubbles());
 
         verify(mBubbleStateChangeListener).onHasBubblesChanged(true);
@@ -189,8 +189,8 @@ public class BubbleControllerTest extends SysuiTestCase {
 
     @Test
     public void testDismissStack() {
-        mBubbleController.updateBubble(mRow.getEntry(), true /* updatePosition */);
-        mBubbleController.updateBubble(mRow2.getEntry(), true /* updatePosition */);
+        mBubbleController.updateBubble(mRow.getEntry());
+        mBubbleController.updateBubble(mRow2.getEntry());
         assertTrue(mBubbleController.hasBubbles());
 
         mBubbleController.dismissStack(BubbleController.DISMISS_USER_GESTURE);
@@ -206,7 +206,7 @@ public class BubbleControllerTest extends SysuiTestCase {
 
         // Mark it as a bubble and add it explicitly
         mEntryListener.onPendingEntryAdded(mRow.getEntry());
-        mBubbleController.updateBubble(mRow.getEntry(), true /* updatePosition */);
+        mBubbleController.updateBubble(mRow.getEntry());
 
         // We should have bubbles & their notifs should show in the shade
         assertTrue(mBubbleController.hasBubbles());
@@ -235,8 +235,8 @@ public class BubbleControllerTest extends SysuiTestCase {
         // Mark it as a bubble and add it explicitly
         mEntryListener.onPendingEntryAdded(mRow.getEntry());
         mEntryListener.onPendingEntryAdded(mRow2.getEntry());
-        mBubbleController.updateBubble(mRow.getEntry(), true /* updatePosition */);
-        mBubbleController.updateBubble(mRow2.getEntry(), true /* updatePosition */);
+        mBubbleController.updateBubble(mRow.getEntry());
+        mBubbleController.updateBubble(mRow2.getEntry());
 
         // We should have bubbles & their notifs should show in the shade
         assertTrue(mBubbleController.hasBubbles());
@@ -272,7 +272,7 @@ public class BubbleControllerTest extends SysuiTestCase {
     public void testExpansionRemovesShowInShade() {
         // Mark it as a bubble and add it explicitly
         mEntryListener.onPendingEntryAdded(mRow.getEntry());
-        mBubbleController.updateBubble(mRow.getEntry(), true /* updatePosition */);
+        mBubbleController.updateBubble(mRow.getEntry());
 
         // We should have bubbles & their notifs should show in the shade
         assertTrue(mBubbleController.hasBubbles());
@@ -293,8 +293,8 @@ public class BubbleControllerTest extends SysuiTestCase {
         // Mark it as a bubble and add it explicitly
         mEntryListener.onPendingEntryAdded(mRow.getEntry());
         mEntryListener.onPendingEntryAdded(mRow2.getEntry());
-        mBubbleController.updateBubble(mRow.getEntry(), true /* updatePosition */);
-        mBubbleController.updateBubble(mRow2.getEntry(), true /* updatePosition */);
+        mBubbleController.updateBubble(mRow.getEntry());
+        mBubbleController.updateBubble(mRow2.getEntry());
         verify(mBubbleStateChangeListener).onHasBubblesChanged(true);
 
         // Expand
@@ -333,7 +333,7 @@ public class BubbleControllerTest extends SysuiTestCase {
 
         // Add the auto expand bubble
         mEntryListener.onPendingEntryAdded(mAutoExpandRow.getEntry());
-        mBubbleController.updateBubble(mAutoExpandRow.getEntry(), true /* updatePosition */);
+        mBubbleController.updateBubble(mAutoExpandRow.getEntry());
 
         // Expansion shouldn't change
         verify(mBubbleExpandListener, never()).onBubbleExpandChanged(false /* expanded */,
@@ -371,7 +371,7 @@ public class BubbleControllerTest extends SysuiTestCase {
 
         // Add the auto expand bubble
         mEntryListener.onPendingEntryAdded(mAutoExpandRow.getEntry());
-        mBubbleController.updateBubble(mAutoExpandRow.getEntry(), true /* updatePosition */);
+        mBubbleController.updateBubble(mAutoExpandRow.getEntry());
 
         // Expansion should change
         verify(mBubbleExpandListener).onBubbleExpandChanged(true /* expanded */,
@@ -387,7 +387,7 @@ public class BubbleControllerTest extends SysuiTestCase {
     public void testSuppressNotif_FailsNotForeground() {
         // Add the suppress notif bubble
         mEntryListener.onPendingEntryAdded(mSuppressNotifRow.getEntry());
-        mBubbleController.updateBubble(mSuppressNotifRow.getEntry(), true /* updatePosition */);
+        mBubbleController.updateBubble(mSuppressNotifRow.getEntry());
 
         // Should show in shade because we weren't forground
         assertTrue(mSuppressNotifRow.getEntry().showInShadeWhenBubble());
@@ -423,7 +423,7 @@ public class BubbleControllerTest extends SysuiTestCase {
 
         // Add the suppress notif bubble
         mEntryListener.onPendingEntryAdded(mSuppressNotifRow.getEntry());
-        mBubbleController.updateBubble(mSuppressNotifRow.getEntry(), true /* updatePosition */);
+        mBubbleController.updateBubble(mSuppressNotifRow.getEntry());
 
         // Should NOT show in shade because we were foreground
         assertFalse(mSuppressNotifRow.getEntry().showInShadeWhenBubble());
@@ -438,7 +438,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         final String key = mRow.getEntry().key;
 
         mEntryListener.onPendingEntryAdded(mRow.getEntry());
-        mBubbleController.updateBubble(mRow.getEntry(), true /* updatePosition */);
+        mBubbleController.updateBubble(mRow.getEntry());
 
         // Simulate notification cancellation.
         mEntryListener.onEntryRemoved(mRow.getEntry(), null /* notificationVisibility (unused) */,
@@ -464,22 +464,22 @@ public class BubbleControllerTest extends SysuiTestCase {
 
     @Test
     public void testDeleteIntent_removeBubble_aged() throws PendingIntent.CanceledException {
-        mBubbleController.updateBubble(mRow.getEntry(), true /* updatePosition */);
+        mBubbleController.updateBubble(mRow.getEntry());
         mBubbleController.removeBubble(mRow.getEntry().key, BubbleController.DISMISS_AGED);
         verify(mDeleteIntent, never()).send();
     }
 
     @Test
     public void testDeleteIntent_removeBubble_user() throws PendingIntent.CanceledException {
-        mBubbleController.updateBubble(mRow.getEntry(), true /* updatePosition */);
+        mBubbleController.updateBubble(mRow.getEntry());
         mBubbleController.removeBubble(mRow.getEntry().key, BubbleController.DISMISS_USER_GESTURE);
         verify(mDeleteIntent, times(1)).send();
     }
 
     @Test
     public void testDeleteIntent_dismissStack() throws PendingIntent.CanceledException {
-        mBubbleController.updateBubble(mRow.getEntry(), true /* updatePosition */);
-        mBubbleController.updateBubble(mRow2.getEntry(), true /* updatePosition */);
+        mBubbleController.updateBubble(mRow.getEntry());
+        mBubbleController.updateBubble(mRow2.getEntry());
         mBubbleController.dismissStack(BubbleController.DISMISS_USER_GESTURE);
         verify(mDeleteIntent, times(2)).send();
     }
