@@ -60,6 +60,9 @@ SkColorType PixelFormatToColorType(android::PixelFormat format) {
 }
 
 sk_sp<SkColorSpace> DataSpaceToColorSpace(android_dataspace dataspace) {
+    if (dataspace == HAL_DATASPACE_UNKNOWN) {
+        return SkColorSpace::MakeSRGB();
+    }
 
     skcms_Matrix3x3 gamut;
     switch (dataspace & HAL_DATASPACE_STANDARD_MASK) {
