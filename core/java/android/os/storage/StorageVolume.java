@@ -265,8 +265,13 @@ public final class StorageVolume implements Parcelable {
     }
 
     /** {@hide} */
+    public static @Nullable String normalizeUuid(@Nullable String fsUuid) {
+        return fsUuid != null ? fsUuid.toLowerCase(Locale.US) : null;
+    }
+
+    /** {@hide} */
     public @Nullable String getNormalizedUuid() {
-        return mFsUuid != null ? mFsUuid.toLowerCase(Locale.US) : null;
+        return normalizeUuid(mFsUuid);
     }
 
     /**
