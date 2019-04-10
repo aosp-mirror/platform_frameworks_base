@@ -348,6 +348,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mPackageManagerClient.hasSystemFeature(FEATURE_WATCH)).thenReturn(false);
         when(mUgmInternal.newUriPermissionOwner(anyString())).thenReturn(mPermOwner);
         when(mPackageManager.getPackagesForUid(mUid)).thenReturn(new String[]{PKG});
+        when(mPackageManagerClient.getPackagesForUid(anyInt())).thenReturn(new String[]{PKG});
 
         // write to a test file; the system file isn't readable from tests
         mFile = new File(mContext.getCacheDir(), "test.xml");
@@ -4918,6 +4919,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals(1, mService.getNotificationRecordCount());
     }
 
+    @Test
     public void testGetAllowedAssistantAdjustments() throws Exception {
         List<String> capabilities = mBinderService.getAllowedAssistantAdjustments(null);
         assertNotNull(capabilities);
@@ -4932,8 +4934,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         }
     }
 
+    @Test
     public void testAdjustRestrictedKey() throws Exception {
         NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        mService.addNotification(r);
+        when(mAssistants.isSameUser(any(), anyInt())).thenReturn(true);
 
         when(mAssistants.isAdjustmentAllowed(KEY_IMPORTANCE)).thenReturn(true);
         when(mAssistants.isAdjustmentAllowed(KEY_USER_SENTIMENT)).thenReturn(false);
@@ -4951,8 +4956,12 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals(USER_SENTIMENT_NEUTRAL, r.getUserSentiment());
     }
 
+    @Test
     public void testAutomaticZenRuleValidation_policyFilterAgreement() throws Exception {
-        ComponentName owner = mock(ComponentName.class);
+        when(mConditionProviders.isPackageOrComponentAllowed(anyString(), anyInt()))
+                .thenReturn(true);
+        mService.setZenHelper(mock(ZenModeHelper.class));
+        ComponentName owner = new ComponentName(mContext, this.getClass());
         ZenPolicy zenPolicy = new ZenPolicy.Builder().allowAlarms(true).build();
         boolean isEnabled = true;
         AutomaticZenRule rule = new AutomaticZenRule("test", owner, owner, mock(Uri.class),
@@ -4960,7 +4969,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         try {
             mBinderService.addAutomaticZenRule(rule);
-            fail("Zen policy only aplies to priority only mode");
+            fail("Zen policy only applies to priority only mode");
         } catch (IllegalArgumentException e) {
             // yay
         }
@@ -4974,6 +4983,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.addAutomaticZenRule(rule);
     }
 
+    @Test
     public void testAreNotificationsEnabledForPackage_crossUser() throws Exception {
         try {
             mBinderService.areNotificationsEnabledForPackage(mContext.getPackageName(),
@@ -4990,6 +5000,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mUid + UserHandle.PER_USER_RANGE);
     }
 
+    @Test
     public void testAreBubblesAllowedForPackage_crossUser() throws Exception {
         try {
             mBinderService.areBubblesAllowedForPackage(mContext.getPackageName(),
