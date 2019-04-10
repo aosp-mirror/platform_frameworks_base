@@ -2676,7 +2676,13 @@ public final class MediaStore {
             public static final String ALBUM = "album";
 
             /**
-             * The artist whose songs appear on this album
+             * The ID of the artist whose songs appear on this album.
+             */
+            @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
+            public static final String ARTIST_ID = "artist_id";
+
+            /**
+             * The name of the artist whose songs appear on this album.
              */
             @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
             public static final String ARTIST = "artist";
