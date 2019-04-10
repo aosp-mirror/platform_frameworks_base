@@ -24,8 +24,8 @@
               android:gravity="center"
               android:paddingTop="24dp"
               android:paddingBottom="8dp"
-              android:paddingLeft="2dp"
-              android:paddingRight="2dp"
+              android:paddingLeft="12dp"
+              android:paddingRight="12dp"
               android:focusable="true"
               android:background="?attr/selectableItemBackgroundBorderless">
 
@@ -45,7 +45,6 @@
               android:textAppearance="?attr/textAppearanceSmall"
               android:textColor="?attr/textColorPrimary"
               android:textSize="14sp"
-              android:fontFamily="sans-serif-condensed"
               android:gravity="top|center_horizontal"
               android:lines="1"
               android:ellipsize="end" />
@@ -54,6 +53,7 @@
     <TextView android:id="@android:id/text2"
               android:textAppearance="?android:attr/textAppearanceSmall"
               android:textSize="12sp"
+              android:textColor="?attr/textColorSecondary"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
               android:lines="1"
