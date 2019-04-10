@@ -166,6 +166,9 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     @Override
     public void onUnlockUser(int userHandle) {
         Set<Association> associations = readAllAssociations(userHandle);
+        if (associations == null || associations.isEmpty()) {
+            return;
+        }
         Set<String> companionAppPackages = new HashSet<>();
         for (Association association : associations) {
             companionAppPackages.add(association.companionAppPackage);
