@@ -508,13 +508,14 @@ public class AudioService extends IAudioService.Stub
     // Used to play ringtones outside system_server
     private volatile IRingtonePlayer mRingtonePlayer;
 
-    // Devices for which the volume is fixed and VolumePanel slider should be disabled
+    // Devices for which the volume is fixed (volume is either max or muted)
     int mFixedVolumeDevices = AudioSystem.DEVICE_OUT_HDMI |
             AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET |
             AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET |
             AudioSystem.DEVICE_OUT_HDMI_ARC |
             AudioSystem.DEVICE_OUT_SPDIF |
             AudioSystem.DEVICE_OUT_AUX_LINE;
+    // Devices for which the volume is always max, no volume panel
     int mFullVolumeDevices = 0;
 
     private final boolean mMonitorRotation;
@@ -859,6 +860,11 @@ public class AudioService extends IAudioService.Stub
                     mFixedVolumeDevices &= ~AudioSystem.DEVICE_ALL_HDMI_SYSTEM_AUDIO_AND_SPEAKER;
                 }
                 mHdmiPlaybackClient = mHdmiManager.getPlaybackClient();
+                if (mHdmiPlaybackClient != null) {
+                    // not a television: HDMI output will be always at max
+                    mFixedVolumeDevices &= ~AudioSystem.DEVICE_OUT_HDMI;
+                    mFullVolumeDevices |= AudioSystem.DEVICE_OUT_HDMI;
+                }
                 mHdmiCecSink = false;
                 mHdmiAudioSystemClient = mHdmiManager.getAudioSystemClient();
             }
@@ -1065,7 +1071,6 @@ public class AudioService extends IAudioService.Stub
             }
 
             if (isPlatformTelevision()) {
-                mFixedVolumeDevices |= AudioSystem.DEVICE_OUT_HDMI;
                 checkAllFixedVolumeDevices();
                 synchronized (mHdmiClientLock) {
                     if (mHdmiManager != null && mHdmiPlaybackClient != null) {
@@ -1656,7 +1661,7 @@ public class AudioService extends IAudioService.Stub
 
         flags &= ~AudioManager.FLAG_FIXED_VOLUME;
         if ((streamTypeAlias == AudioSystem.STREAM_MUSIC) &&
-               ((device & mFixedVolumeDevices) != 0)) {
+                ((device & mFixedVolumeDevices) != 0)) {
             flags |= AudioManager.FLAG_FIXED_VOLUME;
 
             // Always toggle between max safe volume and 0 for fixed volume devices where safe
@@ -1733,8 +1738,9 @@ public class AudioService extends IAudioService.Stub
                     !checkSafeMediaVolume(streamTypeAlias, aliasIndex + step, device)) {
                 Log.e(TAG, "adjustStreamVolume() safe volume index = " + oldIndex);
                 mVolumeController.postDisplaySafeVolumeWarning(flags);
-            } else if (streamState.adjustIndex(direction * step, device, caller)
-                    || streamState.mIsMuted) {
+            } else if (((device & mFullVolumeDevices) == 0)
+                    && (streamState.adjustIndex(direction * step, device, caller)
+                            || streamState.mIsMuted)) {
                 // Post message to set system volume (it in turn will post a
                 // message to persist).
                 if (streamState.mIsMuted) {
@@ -1785,9 +1791,10 @@ public class AudioService extends IAudioService.Stub
             synchronized (mHdmiClientLock) {
                 if (mHdmiManager != null) {
                     // mHdmiCecSink true => mHdmiPlaybackClient != null
-                    if (mHdmiCecSink &&
-                            streamTypeAlias == AudioSystem.STREAM_MUSIC &&
-                            oldIndex != newIndex) {
+                    if (mHdmiCecSink
+                            && streamTypeAlias == AudioSystem.STREAM_MUSIC
+                            // vol change on a full volume device
+                            && ((device & mFullVolumeDevices) != 0)) {
                         int keyCode = (direction == -1) ? KeyEvent.KEYCODE_VOLUME_DOWN :
                                 KeyEvent.KEYCODE_VOLUME_UP;
                         final long ident = Binder.clearCallingIdentity();
@@ -1814,7 +1821,7 @@ public class AudioService extends IAudioService.Stub
             }
         }
         int index = mStreamStates[streamType].getIndex(device);
-        sendVolumeUpdate(streamType, oldIndex, index, flags);
+        sendVolumeUpdate(streamType, oldIndex, index, flags, device);
     }
 
     // Called after a delay when volume down is pressed while muted
@@ -1824,7 +1831,7 @@ public class AudioService extends IAudioService.Stub
 
         final int device = getDeviceForStream(stream);
         final int index = mStreamStates[stream].getIndex(device);
-        sendVolumeUpdate(stream, index, index, flags);
+        sendVolumeUpdate(stream, index, index, flags, device);
     }
 
     private void setSystemAudioVolume(int oldVolume, int newVolume, int maxVolume, int flags) {
@@ -1835,7 +1842,9 @@ public class AudioService extends IAudioService.Stub
                     || mHdmiTvClient == null
                     || oldVolume == newVolume
                     || (flags & AudioManager.FLAG_HDMI_SYSTEM_AUDIO_VOLUME) != 0
-                    || !mHdmiSystemAudioSupported) return;
+                    || !mHdmiSystemAudioSupported) {
+                return;
+            }
             final long token = Binder.clearCallingIdentity();
             try {
                 mHdmiTvClient.setSystemAudioVolume(oldVolume, newVolume, maxVolume);
@@ -2149,7 +2158,7 @@ public class AudioService extends IAudioService.Stub
                 Binder.restoreCallingIdentity(identity);
             }
         }
-        sendVolumeUpdate(streamType, oldIndex, index, flags);
+        sendVolumeUpdate(streamType, oldIndex, index, flags, device);
     }
 
 
@@ -2303,18 +2312,22 @@ public class AudioService extends IAudioService.Stub
     }
 
     // UI update and Broadcast Intent
-    protected void sendVolumeUpdate(int streamType, int oldIndex, int index, int flags) {
+    protected void sendVolumeUpdate(int streamType, int oldIndex, int index, int flags, int device)
+    {
         streamType = mStreamVolumeAlias[streamType];
 
         if (streamType == AudioSystem.STREAM_MUSIC) {
-            flags = updateFlagsForSystemAudio(flags);
+            flags = updateFlagsForTvPlatform(flags);
+            if ((device & mFullVolumeDevices) != 0) {
+                flags &= ~AudioManager.FLAG_SHOW_UI;
+            }
         }
         mVolumeController.postVolumeChanged(streamType, flags);
     }
 
     // If Hdmi-CEC system audio mode is on, we show volume bar only when TV
     // receives volume notification from Audio Receiver.
-    private int updateFlagsForSystemAudio(int flags) {
+    private int updateFlagsForTvPlatform(int flags) {
         synchronized (mHdmiClientLock) {
             if (mHdmiTvClient != null) {
                 if (mHdmiSystemAudioSupported &&
@@ -2328,7 +2341,7 @@ public class AudioService extends IAudioService.Stub
 
     // UI update and Broadcast Intent
     private void sendMasterMuteUpdate(boolean muted, int flags) {
-        mVolumeController.postMasterMuteChanged(updateFlagsForSystemAudio(flags));
+        mVolumeController.postMasterMuteChanged(updateFlagsForTvPlatform(flags));
         broadcastMasterMuteStatus(muted);
     }
 
@@ -2355,6 +2368,9 @@ public class AudioService extends IAudioService.Stub
                                     int device,
                                     boolean force,
                                     String caller) {
+        if ((device & mFullVolumeDevices) != 0) {
+            return;
+        }
         VolumeStreamState streamState = mStreamStates[streamType];
 
         if (streamState.setIndex(index, device, caller) || force) {
@@ -5810,9 +5826,14 @@ public class AudioService extends IAudioService.Stub
     }
 
     //==========================================================================================
-    // Hdmi Cec system audio mode.
-    // If Hdmi Cec's system audio mode is on, audio service should send the volume change
-    // to HdmiControlService so that the audio receiver can handle it.
+    // Hdmi CEC:
+    // - System audio mode:
+    //     If Hdmi Cec's system audio mode is on, audio service should send the volume change
+    //     to HdmiControlService so that the audio receiver can handle it.
+    // - CEC sink:
+    //     OUT_HDMI becomes a "full volume device", i.e. output is always at maximum level
+    //     and volume changes won't be taken into account on this device. Volume adjustments
+    //     are transformed into key events for the HDMI playback client.
     //==========================================================================================
 
     private class MyDisplayStatusCallback implements HdmiPlaybackClient.DisplayStatusCallback {
@@ -5821,8 +5842,18 @@ public class AudioService extends IAudioService.Stub
                 if (mHdmiManager != null) {
                     mHdmiCecSink = (status != HdmiControlManager.POWER_STATUS_UNKNOWN);
                     // Television devices without CEC service apply software volume on HDMI output
-                    if (isPlatformTelevision() && !mHdmiCecSink) {
-                        mFixedVolumeDevices &= ~AudioSystem.DEVICE_OUT_HDMI;
+                    if (mHdmiCecSink) {
+                        if (DEBUG_VOL) {
+                            Log.d(TAG, "CEC sink: setting HDMI as full vol device");
+                        }
+                        mFullVolumeDevices |= AudioSystem.DEVICE_OUT_HDMI;
+                    } else {
+                        if (DEBUG_VOL) {
+                            Log.d(TAG, "TV, no CEC: setting HDMI as regular vol device");
+                        }
+                        // Android TV devices without CEC service apply software volume on
+                        // HDMI output
+                        mFullVolumeDevices &= ~AudioSystem.DEVICE_OUT_HDMI;
                     }
                     checkAllFixedVolumeDevices();
                 }
