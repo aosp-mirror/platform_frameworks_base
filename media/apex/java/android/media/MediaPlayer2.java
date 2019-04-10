@@ -31,6 +31,7 @@ import android.media.MediaDrm.KeyRequest;
 import android.media.MediaPlayer2.DrmInfo;
 import android.media.MediaPlayer2Proto.PlayerMessage;
 import android.media.MediaPlayer2Proto.Value;
+import android.media.protobuf.InvalidProtocolBufferException;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -46,7 +47,6 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.media.protobuf.InvalidProtocolBufferException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
