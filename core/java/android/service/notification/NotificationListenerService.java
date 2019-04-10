@@ -16,6 +16,7 @@
 
 package android.service.notification;
 
+import android.annotation.CurrentTimeMillisLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SdkConstant;
@@ -1680,6 +1681,7 @@ public abstract class NotificationListenerService extends Service {
          *
          * @return the time of the last alerting behavior, in milliseconds.
          */
+        @CurrentTimeMillisLong
         public long getLastAudiblyAlertedMillis() {
             return mLastAudiblyAlertedMs;
         }
