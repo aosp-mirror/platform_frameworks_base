@@ -106,7 +106,7 @@ public class BubbleData {
     }
 
     public void addBubble(Bubble b) {
-        mBubbles.put(b.key, b);
+        mBubbles.put(b.getKey(), b);
     }
 
     @Nullable
