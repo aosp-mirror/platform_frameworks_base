@@ -287,4 +287,6 @@ interface ISub {
     int getSimStateForSlotIndex(int slotIndex);
 
     boolean isActiveSubId(int subId, String callingPackage);
+
+    boolean setAlwaysAllowMmsData(int subId, boolean alwaysAllow);
 }
