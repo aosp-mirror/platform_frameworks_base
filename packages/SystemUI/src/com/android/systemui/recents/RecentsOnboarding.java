@@ -64,6 +64,7 @@ import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
+import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 
 import java.io.PrintWriter;
@@ -339,7 +340,7 @@ public class RecentsOnboarding {
     }
 
     public void onConnectedToLauncher() {
-        if (!ONBOARDING_ENABLED) {
+        if (!ONBOARDING_ENABLED || QuickStepContract.isGesturalMode(mContext)) {
             return;
         }
 
