@@ -43,7 +43,6 @@ import android.content.pm.PackageUserState;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Process;
-import android.os.RemoteException;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.util.Log;
@@ -472,16 +471,6 @@ public class PackageInstallerActivity extends AlertActivity {
                 mOriginatingUid, mOriginatingPackage);
         switch (appOpMode) {
             case AppOpsManager.MODE_DEFAULT:
-                try {
-                    int result = mIpm.checkUidPermission(
-                            Manifest.permission.REQUEST_INSTALL_PACKAGES, mOriginatingUid);
-                    if (result == PackageManager.PERMISSION_GRANTED) {
-                        initiateInstall();
-                        break;
-                    }
-                } catch (RemoteException exc) {
-                    Log.e(TAG, "Unable to talk to package manager");
-                }
                 mAppOpsManager.setMode(appOpCode, mOriginatingUid,
                         mOriginatingPackage, AppOpsManager.MODE_ERRORED);
                 // fall through
