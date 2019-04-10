@@ -16,7 +16,6 @@ package android.telecom;
 
 import android.Manifest;
 import android.annotation.IntDef;
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressAutoDoc;
@@ -497,6 +496,9 @@ public class TelecomManager {
      * Dialer implementations (see {@link #getDefaultDialerPackage()}) which would also like to
      * override the system provided ringing should set this meta-data to {@code true} in the
      * manifest registration of their {@link InCallService}.
+     * <p>
+     * When {@code true}, it is the {@link InCallService}'s responsibility to play a ringtone for
+     * all incoming calls.
      */
     public static final String METADATA_IN_CALL_SERVICE_RINGING =
             "android.telecom.IN_CALL_SERVICE_RINGING";
@@ -1495,8 +1497,21 @@ public class TelecomManager {
 
     /**
      * Silences the ringer if a ringing call exists.
-     *
-     * Requires permission: {@link android.Manifest.permission#MODIFY_PHONE_STATE}
+     * <p>
+     * This method can only be relied upon to stop the ringtone for a call if the ringtone has
+     * already started playing.  It is intended to handle use-cases such as silencing a ringing call
+     * when the user presses the volume button during ringing.
+     * <p>
+     * If this method is called prior to when the ringtone begins playing, the ringtone will not be
+     * silenced.  As such it is not intended as a means to avoid playing of a ringtone.
+     * <p>
+     * A dialer app which wants to have more control over ringtone playing should declare
+     * {@link TelecomManager#METADATA_IN_CALL_SERVICE_RINGING} in the manifest entry for their
+     * {@link InCallService} implementation to indicate that the app wants to be responsible for
+     * playing the ringtone for all incoming calls.
+     * <p>
+     * Requires permission: {@link android.Manifest.permission#MODIFY_PHONE_STATE} or that the
+     * app fills the dialer role (see {@link #getDefaultDialerPackage()}).
      */
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void silenceRinger() {
