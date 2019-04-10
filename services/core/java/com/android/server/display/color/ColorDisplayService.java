@@ -461,7 +461,9 @@ public final class ColorDisplayService extends SystemService {
                     .setMatrix(mNightDisplayTintController.getColorTemperatureSetting());
         }
 
-        updateDisplayWhiteBalanceStatus();
+        if (mDisplayWhiteBalanceTintController.isAvailable(getContext())) {
+            updateDisplayWhiteBalanceStatus();
+        }
 
         final DisplayTransformManager dtm = getLocalService(DisplayTransformManager.class);
         dtm.setColorMode(mode, mNightDisplayTintController.getMatrix());
@@ -624,7 +626,11 @@ public final class ColorDisplayService extends SystemService {
             return false;
         }
         return Secure.getIntForUser(getContext().getContentResolver(),
-                Secure.DISPLAY_WHITE_BALANCE_ENABLED, 0, mCurrentUser) == 1;
+                Secure.DISPLAY_WHITE_BALANCE_ENABLED,
+                getContext().getResources()
+                        .getBoolean(R.bool.config_displayWhiteBalanceEnabledDefault) ? 1
+                        : 0,
+                mCurrentUser) == 1;
     }
 
     private boolean isDeviceColorManagedInternal() {
