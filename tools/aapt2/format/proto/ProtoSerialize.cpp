@@ -312,6 +312,12 @@ static void SerializeOverlayableItemToPb(const OverlayableItem& overlayable_item
   if (overlayable_item.policies & OverlayableItem::Policy::kSignature) {
     pb_overlayable_item->add_policy(pb::OverlayableItem::SIGNATURE);
   }
+  if (overlayable_item.policies & OverlayableItem::Policy::kOdm) {
+    pb_overlayable_item->add_policy(pb::OverlayableItem::ODM);
+  }
+  if (overlayable_item.policies & OverlayableItem::Policy::kOem) {
+    pb_overlayable_item->add_policy(pb::OverlayableItem::OEM);
+  }
 
   SerializeSourceToPb(overlayable_item.source, source_pool,
                       pb_overlayable_item->mutable_source());

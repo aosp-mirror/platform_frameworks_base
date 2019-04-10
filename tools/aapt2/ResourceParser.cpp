@@ -1143,34 +1143,38 @@ bool ResourceParser::ParseOverlayable(xml::XmlPullParser* parser, ParsedResource
       } else if (Maybe<StringPiece> maybe_type = xml::FindNonEmptyAttribute(parser, "type")) {
         // Parse the polices separated by vertical bar characters to allow for specifying multiple
         // policies. Items within the policy tag will have the specified policy.
-        for (StringPiece part : util::Tokenize(maybe_type.value(), '|')) {
+        static const auto kPolicyMap =
+            ImmutableMap<StringPiece, OverlayableItem::Policy>::CreatePreSorted({
+                {"odm", OverlayableItem::Policy::kOdm},
+                {"oem", OverlayableItem::Policy::kOem},
+                {"product", OverlayableItem::Policy::kProduct},
+                {"public", OverlayableItem::Policy::kPublic},
+                {"signature", OverlayableItem::Policy::kSignature},
+                {"system", OverlayableItem::Policy::kSystem},
+                {"vendor", OverlayableItem::Policy::kVendor},
+            });
+
+        for (const StringPiece& part : util::Tokenize(maybe_type.value(), '|')) {
           StringPiece trimmed_part = util::TrimWhitespace(part);
-          if (trimmed_part == "public") {
-            current_policies |= OverlayableItem::Policy::kPublic;
-          } else if (trimmed_part == "product") {
-            current_policies |= OverlayableItem::Policy::kProduct;
-          } else if (trimmed_part == "system") {
-            current_policies |= OverlayableItem::Policy::kSystem;
-          } else if (trimmed_part == "vendor") {
-            current_policies |= OverlayableItem::Policy::kVendor;
-          } else if (trimmed_part == "signature") {
-            current_policies |= OverlayableItem::Policy::kSignature;
-          } else {
+          const auto policy = kPolicyMap.find(trimmed_part);
+          if (policy == kPolicyMap.end()) {
             diag_->Error(DiagMessage(element_source)
                          << "<policy> has unsupported type '" << trimmed_part << "'");
             error = true;
             continue;
           }
+
+          current_policies |= policy->second;
         }
       } else {
         diag_->Error(DiagMessage(element_source)
-                         << "<policy> must have a 'type' attribute");
+                     << "<policy> must have a 'type' attribute");
         error = true;
         continue;
       }
     } else if (!ShouldIgnoreElement(element_namespace, element_name)) {
       diag_->Error(DiagMessage(element_source) << "invalid element <" << element_name << "> "
-                                            << " in <overlayable>");
+                                               << " in <overlayable>");
       error = true;
       break;
     }

@@ -393,6 +393,12 @@ bool DeserializeOverlayableItemFromPb(const pb::OverlayableItem& pb_overlayable,
       case pb::OverlayableItem::SIGNATURE:
         out_overlayable->policies |= OverlayableItem::Policy::kSignature;
         break;
+      case pb::OverlayableItem::ODM:
+        out_overlayable->policies |= OverlayableItem::Policy::kOdm;
+        break;
+      case pb::OverlayableItem::OEM:
+        out_overlayable->policies |= OverlayableItem::Policy::kOem;
+        break;
       default:
         *out_error = "unknown overlayable policy";
         return false;
