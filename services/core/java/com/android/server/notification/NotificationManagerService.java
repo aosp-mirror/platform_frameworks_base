@@ -2856,7 +2856,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public List<String> getAllowedAssistantCapabilities(String pkg) {
+        public List<String> getAllowedAssistantAdjustments(String pkg) {
             checkCallerIsSystemOrSameApp(pkg);
 
             if (!isCallerSystemOrPhone()
@@ -2864,11 +2864,11 @@ public class NotificationManagerService extends SystemService {
                     throw new SecurityException("Not currently an assistant");
             }
 
-            return mAssistants.getAllowedAssistantCapabilities();
+            return mAssistants.getAllowedAssistantAdjustments();
         }
 
         @Override
-        public void allowAssistantCapability(String adjustmentType) {
+        public void allowAssistantAdjustment(String adjustmentType) {
             checkCallerIsSystemOrSystemUiOrShell();
             mAssistants.allowAdjustmentType(adjustmentType);
 
@@ -2876,7 +2876,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void disallowAssistantCapability(String adjustmentType) {
+        public void disallowAssistantAdjustment(String adjustmentType) {
             checkCallerIsSystemOrSystemUiOrShell();
             mAssistants.disallowAdjustmentType(adjustmentType);
 
@@ -7410,7 +7410,7 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
-        protected List<String> getAllowedAssistantCapabilities() {
+        protected List<String> getAllowedAssistantAdjustments() {
             synchronized (mLock) {
                 List<String> types = new ArrayList<>();
                 types.addAll(mAllowedAdjustments);
@@ -7470,7 +7470,7 @@ public class NotificationManagerService extends SystemService {
         private void notifyCapabilitiesChanged(final ManagedServiceInfo info) {
             final INotificationListener assistant = (INotificationListener) info.service;
             try {
-                assistant.onCapabilitiesChanged();
+                assistant.onAllowedAdjustmentsChanged();
             } catch (RemoteException ex) {
                 Slog.e(TAG, "unable to notify assistant (capabilities): " + assistant, ex);
             }

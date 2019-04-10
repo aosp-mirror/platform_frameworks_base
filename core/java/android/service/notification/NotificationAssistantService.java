@@ -220,10 +220,10 @@ public abstract class NotificationAssistantService extends NotificationListenerS
     /**
      * Implement this to know when a user has changed which features of
      * their notifications the assistant can modify.
-     * <p> Query {@link NotificationManager#getAllowedAssistantCapabilities()} to see what
+     * <p> Query {@link NotificationManager#getAllowedAssistantAdjustments()} to see what
      * {@link Adjustment adjustments} you are currently allowed to make.</p>
      */
-    public void onCapabilitiesChanged() {
+    public void onAllowedAdjustmentsChanged() {
     }
 
     /**
@@ -361,8 +361,8 @@ public abstract class NotificationAssistantService extends NotificationListenerS
         }
 
         @Override
-        public void onCapabilitiesChanged() {
-            mHandler.obtainMessage(MyHandler.MSG_ON_CAPABILITIES_CHANGED).sendToTarget();
+        public void onAllowedAdjustmentsChanged() {
+            mHandler.obtainMessage(MyHandler.MSG_ON_ALLOWED_ADJUSTMENTS_CHANGED).sendToTarget();
         }
     }
 
@@ -374,7 +374,7 @@ public abstract class NotificationAssistantService extends NotificationListenerS
         public static final int MSG_ON_NOTIFICATION_DIRECT_REPLY_SENT = 5;
         public static final int MSG_ON_SUGGESTED_REPLY_SENT = 6;
         public static final int MSG_ON_ACTION_INVOKED = 7;
-        public static final int MSG_ON_CAPABILITIES_CHANGED = 8;
+        public static final int MSG_ON_ALLOWED_ADJUSTMENTS_CHANGED = 8;
 
         public MyHandler(Looper looper) {
             super(looper, null, false);
@@ -456,8 +456,8 @@ public abstract class NotificationAssistantService extends NotificationListenerS
                     onActionInvoked(key, action, source);
                     break;
                 }
-                case MSG_ON_CAPABILITIES_CHANGED: {
-                    onCapabilitiesChanged();
+                case MSG_ON_ALLOWED_ADJUSTMENTS_CHANGED: {
+                    onAllowedAdjustmentsChanged();
                     break;
                 }
             }
