@@ -38,6 +38,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_DRAWN_APPLICATION;
+
 import static com.android.internal.policy.PhoneWindow.FEATURE_OPTIONS_PANEL;
 
 import android.animation.Animator;
@@ -124,6 +125,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     private final static int DECOR_SHADOW_FOCUSED_HEIGHT_IN_DIP = 20;
     // The height of a window which has not in DIP.
     private final static int DECOR_SHADOW_UNFOCUSED_HEIGHT_IN_DIP = 5;
+
+    private static final int SCRIM_LIGHT = 0x99ffffff; // 60% white
 
     public static final ColorViewAttributes STATUS_BAR_COLOR_VIEW_ATTRIBUTES =
             new ColorViewAttributes(SYSTEM_UI_FLAG_FULLSCREEN, FLAG_TRANSLUCENT_STATUS,
@@ -1237,19 +1240,31 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
     private int calculateStatusBarColor() {
         return calculateBarColor(mWindow.getAttributes().flags, FLAG_TRANSLUCENT_STATUS,
-                mSemiTransparentBarColor, mWindow.mStatusBarColor);
+                mSemiTransparentBarColor, mWindow.mStatusBarColor,
+                getWindowSystemUiVisibility(), SYSTEM_UI_FLAG_LIGHT_STATUS_BAR,
+                mWindow.mEnsureStatusBarContrastWhenTransparent);
     }
 
     private int calculateNavigationBarColor() {
         return calculateBarColor(mWindow.getAttributes().flags, FLAG_TRANSLUCENT_NAVIGATION,
-                mSemiTransparentBarColor, mWindow.mNavigationBarColor);
+                mSemiTransparentBarColor, mWindow.mNavigationBarColor,
+                getWindowSystemUiVisibility(), SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR,
+                mWindow.mEnsureNavigationBarContrastWhenTransparent
+                        && getContext().getResources().getBoolean(R.bool.config_navBarNeedsScrim));
     }
 
     public static int calculateBarColor(int flags, int translucentFlag, int semiTransparentBarColor,
-            int barColor) {
-        return (flags & translucentFlag) != 0 ? semiTransparentBarColor
-                : (flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0 ? barColor
-                : Color.BLACK;
+            int barColor, int sysuiVis, int lightSysuiFlag, boolean scrimTransparent) {
+        if ((flags & translucentFlag) != 0) {
+            return semiTransparentBarColor;
+        } else if ((flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0) {
+            return Color.BLACK;
+        } else if (scrimTransparent && barColor == Color.TRANSPARENT) {
+            boolean light = (sysuiVis & lightSysuiFlag) != 0;
+            return light ? SCRIM_LIGHT : semiTransparentBarColor;
+        } else {
+            return barColor;
+        }
     }
 
     private int getCurrentColor(ColorViewState state) {

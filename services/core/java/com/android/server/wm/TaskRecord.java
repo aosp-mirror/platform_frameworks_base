@@ -1688,6 +1688,8 @@ class TaskRecord extends ConfigurationContainer {
             int colorBackground = 0;
             int statusBarColor = 0;
             int navigationBarColor = 0;
+            boolean statusBarContrastWhenTransparent = false;
+            boolean navigationBarContrastWhenTransparent = false;
             boolean topActivity = true;
             for (--activityNdx; activityNdx >= 0; --activityNdx) {
                 final ActivityRecord r = mActivities.get(activityNdx);
@@ -1711,12 +1713,17 @@ class TaskRecord extends ConfigurationContainer {
                         colorBackground = r.taskDescription.getBackgroundColor();
                         statusBarColor = r.taskDescription.getStatusBarColor();
                         navigationBarColor = r.taskDescription.getNavigationBarColor();
+                        statusBarContrastWhenTransparent =
+                                r.taskDescription.getEnsureStatusBarContrastWhenTransparent();
+                        navigationBarContrastWhenTransparent =
+                                r.taskDescription.getEnsureNavigationBarContrastWhenTransparent();
                     }
                 }
                 topActivity = false;
             }
             lastTaskDescription = new TaskDescription(label, null, iconResource, iconFilename,
-                    colorPrimary, colorBackground, statusBarColor, navigationBarColor);
+                    colorPrimary, colorBackground, statusBarColor, navigationBarColor,
+                    statusBarContrastWhenTransparent, navigationBarContrastWhenTransparent);
             if (mTask != null) {
                 mTask.setTaskDescription(lastTaskDescription);
             }
