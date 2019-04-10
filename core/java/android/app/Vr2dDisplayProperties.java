@@ -17,6 +17,7 @@
 package android.app;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -136,7 +137,7 @@ public final class Vr2dDisplayProperties implements Parcelable {
     /**
      * Prints out dump info.
      */
-    public void dump(PrintWriter pw, String prefix) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
         pw.println(prefix + toString());
     }
 
@@ -188,7 +189,7 @@ public final class Vr2dDisplayProperties implements Parcelable {
     /**
      * Convenience class for creating Vr2dDisplayProperties.
      */
-    public static class Builder {
+    public static final class Builder {
         private int mAddedFlags = 0;
         private int mRemovedFlags = 0;
 
@@ -203,6 +204,7 @@ public final class Vr2dDisplayProperties implements Parcelable {
         /**
          * Sets the dimensions to use for the virtual display.
          */
+        @NonNull
         public Builder setDimensions(int width, int height, int dpi) {
             mWidth = width;
             mHeight = height;
@@ -213,6 +215,7 @@ public final class Vr2dDisplayProperties implements Parcelable {
         /**
          * Toggles the virtual display functionality for 2D activities in VR.
          */
+        @NonNull
         public Builder setEnabled(boolean enabled) {
             if (enabled) {
                 addFlags(FLAG_VIRTUAL_DISPLAY_ENABLED);
@@ -225,6 +228,7 @@ public final class Vr2dDisplayProperties implements Parcelable {
         /**
          * Adds property flags.
          */
+        @NonNull
         public Builder addFlags(@Vr2dDisplayFlag int flags) {
             mAddedFlags |= flags;
             mRemovedFlags &= ~flags;
@@ -234,6 +238,7 @@ public final class Vr2dDisplayProperties implements Parcelable {
         /**
          * Removes property flags.
          */
+        @NonNull
         public Builder removeFlags(@Vr2dDisplayFlag int flags) {
             mRemovedFlags |= flags;
             mAddedFlags &= ~flags;
@@ -243,6 +248,7 @@ public final class Vr2dDisplayProperties implements Parcelable {
         /**
          * Builds the Vr2dDisplayProperty instance.
          */
+        @NonNull
         public Vr2dDisplayProperties build() {
             return new Vr2dDisplayProperties(mWidth, mHeight, mDpi, mAddedFlags, mRemovedFlags);
         }
