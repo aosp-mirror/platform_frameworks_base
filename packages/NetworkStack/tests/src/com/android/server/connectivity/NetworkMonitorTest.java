@@ -47,7 +47,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.INetworkMonitorCallbacks;
@@ -76,6 +78,7 @@ import android.util.ArrayMap;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -89,6 +92,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.URL;
+import java.util.HashSet;
 import java.util.Random;
 
 import javax.net.ssl.SSLHandshakeException;
@@ -117,6 +121,9 @@ public class NetworkMonitorTest {
     private @Mock DataStallStatsUtils mDataStallStatsUtils;
     private @Mock WifiInfo mWifiInfo;
     private @Captor ArgumentCaptor<String> mNetworkTestedRedirectUrlCaptor;
+
+    private HashSet<WrappedNetworkMonitor> mCreatedNetworkMonitors;
+    private HashSet<BroadcastReceiver> mRegisteredReceivers;
 
     private static final int TEST_NETID = 4242;
     private static final String TEST_HTTP_URL = "http://www.google.com/gen_204";
@@ -197,14 +204,45 @@ public class NetworkMonitorTest {
                 InetAddresses.parseNumericAddress("192.168.0.0")
         }).when(mNetwork).getAllByName(any());
 
+        when(mContext.registerReceiver(any(BroadcastReceiver.class), any())).then((invocation) -> {
+            mRegisteredReceivers.add(invocation.getArgument(0));
+            return new Intent();
+        });
+
+        doAnswer((invocation) -> {
+            mRegisteredReceivers.remove(invocation.getArgument(0));
+            return null;
+        }).when(mContext).unregisterReceiver(any());
+
         setMinDataStallEvaluateInterval(500);
         setDataStallEvaluationType(DATA_STALL_EVALUATION_TYPE_DNS);
         setValidDataStallDnsTimeThreshold(500);
         setConsecutiveDnsTimeoutThreshold(5);
+
+        mCreatedNetworkMonitors = new HashSet<>();
+        mRegisteredReceivers = new HashSet<>();
+    }
+
+    @After
+    public void tearDown() {
+        assertTrue(mCreatedNetworkMonitors.size() > 0);
+        // Make a local copy of mCreatedNetworkMonitors because during the iteration below,
+        // WrappedNetworkMonitor#onQuitting will delete elements from it on the handler threads.
+        WrappedNetworkMonitor[] networkMonitors = mCreatedNetworkMonitors.toArray(
+                new WrappedNetworkMonitor[0]);
+        for (WrappedNetworkMonitor nm : networkMonitors) {
+            nm.notifyNetworkDisconnected();
+            nm.awaitQuit();
+        }
+        assertEquals("NetworkMonitor still running after disconnect",
+                0, mCreatedNetworkMonitors.size());
+        assertEquals("BroadcastReceiver still registered after disconnect",
+                0, mRegisteredReceivers.size());
     }
 
     private class WrappedNetworkMonitor extends NetworkMonitor {
         private long mProbeTime = 0;
+        private final ConditionVariable mQuitCv = new ConditionVariable(false);
 
         WrappedNetworkMonitor() {
                 super(mContext, mCallbacks, mNetwork, mLogger, mValidationLogger, mDependencies,
@@ -224,12 +262,24 @@ public class NetworkMonitorTest {
         protected void addDnsEvents(@NonNull final DataStallDetectionStats.Builder stats) {
             generateTimeoutDnsEvent(stats, DEFAULT_DNS_TIMEOUT_THRESHOLD);
         }
+
+        @Override
+        protected void onQuitting() {
+            assertTrue(mCreatedNetworkMonitors.remove(this));
+            mQuitCv.open();
+        }
+
+        protected void awaitQuit() {
+            assertTrue("NetworkMonitor did not quit after " + HANDLER_TIMEOUT_MS + "ms",
+                    mQuitCv.block(HANDLER_TIMEOUT_MS));
+        }
     }
 
     private WrappedNetworkMonitor makeMonitor() {
         final WrappedNetworkMonitor nm = new WrappedNetworkMonitor();
         nm.start();
         waitForIdle(nm.getHandler());
+        mCreatedNetworkMonitors.add(nm);
         return nm;
     }
 
@@ -482,6 +532,8 @@ public class NetworkMonitorTest {
         verify(mCallbacks, timeout(HANDLER_TIMEOUT_MS).times(1))
                 .showProvisioningNotification(any(), any());
 
+        assertEquals(1, mRegisteredReceivers.size());
+
         // Check that startCaptivePortalApp sends the expected intent.
         nm.launchCaptivePortalApp();
 
@@ -504,6 +556,8 @@ public class NetworkMonitorTest {
         nm.notifyCaptivePortalAppFinished(APP_RETURN_DISMISSED);
         verify(mCallbacks, timeout(HANDLER_TIMEOUT_MS).times(1))
                 .notifyNetworkTested(NETWORK_TEST_RESULT_VALID, null);
+
+        assertEquals(0, mRegisteredReceivers.size());
     }
 
     @Test
@@ -644,21 +698,25 @@ public class NetworkMonitorTest {
 
     private void runPortalNetworkTest() {
         runNetworkTest(NETWORK_TEST_RESULT_INVALID);
+        assertEquals(1, mRegisteredReceivers.size());
         assertNotNull(mNetworkTestedRedirectUrlCaptor.getValue());
     }
 
     private void runNotPortalNetworkTest() {
         runNetworkTest(NETWORK_TEST_RESULT_VALID);
+        assertEquals(0, mRegisteredReceivers.size());
         assertNull(mNetworkTestedRedirectUrlCaptor.getValue());
     }
 
     private void runFailedNetworkTest() {
         runNetworkTest(NETWORK_TEST_RESULT_INVALID);
+        assertEquals(0, mRegisteredReceivers.size());
         assertNull(mNetworkTestedRedirectUrlCaptor.getValue());
     }
 
     private void runPartialConnectivityNetworkTest() {
         runNetworkTest(NETWORK_TEST_RESULT_PARTIAL_CONNECTIVITY);
+        assertEquals(0, mRegisteredReceivers.size());
         assertNull(mNetworkTestedRedirectUrlCaptor.getValue());
     }
 
@@ -675,6 +733,7 @@ public class NetworkMonitorTest {
         } catch (RemoteException e) {
             fail("Unexpected exception: " + e);
         }
+        waitForIdle(monitor.getHandler());
 
         return monitor;
     }
