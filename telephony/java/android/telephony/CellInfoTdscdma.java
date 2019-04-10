@@ -75,6 +75,9 @@ public final class CellInfoTdscdma extends CellInfo implements Parcelable {
         mCellSignalStrengthTdscdma = new CellSignalStrengthTdscdma(cit.signalStrengthTdscdma);
     }
 
+    /**
+     * @return a {@link CellIdentityTdscdma} instance.
+     */
     @Override
     public @NonNull CellIdentityTdscdma getCellIdentity() {
         return mCellIdentityTdscdma;
@@ -85,6 +88,9 @@ public final class CellInfoTdscdma extends CellInfo implements Parcelable {
         mCellIdentityTdscdma = cid;
     }
 
+    /**
+     * @return a {@link CellSignalStrengthTdscdma} instance.
+     */
     @Override
     public @NonNull CellSignalStrengthTdscdma getCellSignalStrength() {
         return mCellSignalStrengthTdscdma;
