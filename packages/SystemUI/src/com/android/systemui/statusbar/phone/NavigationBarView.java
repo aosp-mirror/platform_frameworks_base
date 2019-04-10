@@ -507,9 +507,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         final boolean useAltBack =
                 (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0;
         final boolean isRtl = mConfiguration.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
-        float degrees = useAltBack
-                ? (isRtl ? 270 : -90)
-                : (isRtl ? 180 : 0);
+        float degrees = useAltBack ? (isRtl ? 90 : -90) : 0;
         if (drawable.getRotation() == degrees) {
             return;
         }
