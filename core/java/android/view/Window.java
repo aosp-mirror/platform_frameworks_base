@@ -2329,6 +2329,70 @@ public abstract class Window {
         return 0;
     }
 
+    /**
+     * Sets whether the system should ensure that the status bar has enough
+     * contrast when a fully transparent background is requested.
+     *
+     * <p>If set to this value, the system will determine whether a scrim is necessary
+     * to ensure that the status bar has enough contrast with the contents of
+     * this app, and set an appropriate effective bar background color accordingly.
+     *
+     * <p>When the status bar color has a non-zero alpha value, the value of this
+     * property has no effect.
+     *
+     * @see android.R.attr#ensureStatusBarContrastWhenTransparent
+     * @hide pending API
+     */
+    public void setEnsureStatusBarContrastWhenTransparent(boolean ensureContrast) {
+    }
+
+    /**
+     * Returns whether the system is ensuring that the status bar has enough contrast when a
+     * fully transparent background is requested.
+     *
+     * <p>When the status bar color has a non-zero alpha value, the value of this
+     * property has no effect.
+     *
+     * @see android.R.attr#ensureStatusBarContrastWhenTransparent
+     * @return true, if the system is ensuring contrast, false otherwise.
+     * @hide pending API
+     */
+    public boolean isEnsureStatusBarContrastWhenTransparent() {
+        return false;
+    }
+
+    /**
+     * Sets whether the system should ensure that the navigation bar has enough
+     * contrast when a fully transparent background is requested.
+     *
+     * <p>If set to this value, the system will determine whether a scrim is necessary
+     * to ensure that the navigation bar has enough contrast with the contents of
+     * this app, and set an appropriate effective bar background color accordingly.
+     *
+     * <p>When the navigation bar color has a non-zero alpha value, the value of this
+     * property has no effect.
+     *
+     * @see android.R.attr#ensureNavigationBarContrastWhenTransparent
+     * @hide pending API
+     */
+    public void setEnsureNavigationBarContrastWhenTransparent(boolean ensureContrast) {
+    }
+
+    /**
+     * Returns whether the system is ensuring that the navigation bar has enough contrast when a
+     * fully transparent background is requested.
+     *
+     * <p>When the navigation bar color has a non-zero alpha value, the value of this
+     * property has no effect.
+     *
+     * @return true, if the system is ensuring contrast, false otherwise.
+     * @see android.R.attr#ensureNavigationBarContrastWhenTransparent
+     * @hide pending API
+     */
+    public boolean isEnsureNavigationBarContrastWhenTransparent() {
+        return false;
+    }
+
     /** @hide */
     public void setTheme(int resId) {
     }

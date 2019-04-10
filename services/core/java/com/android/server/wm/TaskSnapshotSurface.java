@@ -18,6 +18,8 @@ package com.android.server.wm;
 
 import static android.graphics.Color.WHITE;
 import static android.graphics.Color.alpha;
+import static android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+import static android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
 import static android.view.WindowManager.LayoutParams.FLAG_IGNORE_CHEEK_PRESSES;
@@ -148,9 +150,8 @@ class TaskSnapshotSurface implements StartingSurface {
         final Rect tmpStableInsets = new Rect();
         final InsetsState mTmpInsetsState = new InsetsState();
         final MergedConfiguration tmpMergedConfiguration = new MergedConfiguration();
-        int backgroundColor = WHITE;
-        int statusBarColor = 0;
-        int navigationBarColor = 0;
+        final TaskDescription taskDescription = new TaskDescription();
+        taskDescription.setBackgroundColor(WHITE);
         final int sysUiVis;
         final int windowFlags;
         final int windowPrivateFlags;
@@ -194,11 +195,9 @@ class TaskSnapshotSurface implements StartingSurface {
             layoutParams.systemUiVisibility = sysUiVis;
             layoutParams.setTitle(String.format(TITLE_FORMAT, task.mTaskId));
 
-            final TaskDescription taskDescription = task.getTaskDescription();
-            if (taskDescription != null) {
-                backgroundColor = taskDescription.getBackgroundColor();
-                statusBarColor = taskDescription.getStatusBarColor();
-                navigationBarColor = taskDescription.getNavigationBarColor();
+            final TaskDescription td = task.getTaskDescription();
+            if (td != null) {
+                taskDescription.copyFrom(td);
             }
             taskBounds = new Rect();
             task.getBounds(taskBounds);
@@ -216,8 +215,8 @@ class TaskSnapshotSurface implements StartingSurface {
             // Local call.
         }
         final TaskSnapshotSurface snapshotSurface = new TaskSnapshotSurface(service, window,
-                surfaceControl, snapshot, layoutParams.getTitle(), backgroundColor, statusBarColor,
-                navigationBarColor, sysUiVis, windowFlags, windowPrivateFlags, taskBounds,
+                surfaceControl, snapshot, layoutParams.getTitle(), taskDescription, sysUiVis,
+                windowFlags, windowPrivateFlags, taskBounds,
                 currentOrientation);
         window.setOuter(snapshotSurface);
         try {
@@ -234,9 +233,9 @@ class TaskSnapshotSurface implements StartingSurface {
 
     @VisibleForTesting
     TaskSnapshotSurface(WindowManagerService service, Window window, SurfaceControl surfaceControl,
-            TaskSnapshot snapshot, CharSequence title, int backgroundColor, int statusBarColor,
-            int navigationBarColor, int sysUiVis, int windowFlags, int windowPrivateFlags,
-            Rect taskBounds, int currentOrientation) {
+            TaskSnapshot snapshot, CharSequence title, TaskDescription taskDescription,
+            int sysUiVis, int windowFlags, int windowPrivateFlags, Rect taskBounds,
+            int currentOrientation) {
         mService = service;
         mSurface = new Surface();
         mHandler = new Handler(mService.mH.getLooper());
@@ -245,11 +244,12 @@ class TaskSnapshotSurface implements StartingSurface {
         mSurfaceControl = surfaceControl;
         mSnapshot = snapshot;
         mTitle = title;
+        int backgroundColor = taskDescription.getBackgroundColor();
         mBackgroundPaint.setColor(backgroundColor != 0 ? backgroundColor : WHITE);
         mTaskBounds = taskBounds;
         mSystemBarBackgroundPainter = new SystemBarBackgroundPainter(windowFlags,
-                windowPrivateFlags, sysUiVis, statusBarColor, navigationBarColor);
-        mStatusBarColor = statusBarColor;
+                windowPrivateFlags, sysUiVis, taskDescription);
+        mStatusBarColor = taskDescription.getStatusBarColor();
         mOrientationOnCreation = currentOrientation;
     }
 
@@ -490,7 +490,7 @@ class TaskSnapshotSurface implements StartingSurface {
         private final int mSysUiVis;
 
         SystemBarBackgroundPainter( int windowFlags, int windowPrivateFlags, int sysUiVis,
-                int statusBarColor, int navigationBarColor) {
+                TaskDescription taskDescription) {
             mWindowFlags = windowFlags;
             mWindowPrivateFlags = windowPrivateFlags;
             mSysUiVis = sysUiVis;
@@ -498,11 +498,17 @@ class TaskSnapshotSurface implements StartingSurface {
             final int semiTransparent = context.getColor(
                     R.color.system_bar_background_semi_transparent);
             mStatusBarColor = DecorView.calculateBarColor(windowFlags, FLAG_TRANSLUCENT_STATUS,
-                    semiTransparent, statusBarColor);
+                    semiTransparent, taskDescription.getStatusBarColor(), sysUiVis,
+                    SYSTEM_UI_FLAG_LIGHT_STATUS_BAR,
+                    taskDescription.getEnsureStatusBarContrastWhenTransparent());
             mNavigationBarColor = DecorView.calculateBarColor(windowFlags,
-                    FLAG_TRANSLUCENT_NAVIGATION, semiTransparent, navigationBarColor);
+                    FLAG_TRANSLUCENT_NAVIGATION, semiTransparent,
+                    taskDescription.getNavigationBarColor(), sysUiVis,
+                    SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR,
+                    taskDescription.getEnsureNavigationBarContrastWhenTransparent()
+                            && context.getResources().getBoolean(R.bool.config_navBarNeedsScrim));
             mStatusBarPaint.setColor(mStatusBarColor);
-            mNavigationBarPaint.setColor(navigationBarColor);
+            mNavigationBarPaint.setColor(mNavigationBarColor);
         }
 
         void setInsets(Rect contentInsets, Rect stableInsets) {
