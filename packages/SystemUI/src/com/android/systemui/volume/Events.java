@@ -94,7 +94,6 @@ public class Events {
     public static final int DISMISS_STREAM_GONE = 7;
     public static final int DISMISS_REASON_OUTPUT_CHOOSER = 8;
     public static final int DISMISS_REASON_USB_OVERHEAD_ALARM_CHANGED = 9;
-    public static final int DISMISS_REASON_ODI_CAPTIONS_CLICKED = 10;
     public static final String[] DISMISS_REASONS = {
             "unknown",
             "touch_outside",
@@ -105,8 +104,7 @@ public class Events {
             "done_clicked",
             "a11y_stream_changed",
             "output_chooser",
-            "usb_temperature_below_threshold",
-            "odi_captions_clicked"
+            "usb_temperature_below_threshold"
     };
 
     public static final int SHOW_REASON_UNKNOWN = 0;
