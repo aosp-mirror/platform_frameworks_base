@@ -576,7 +576,7 @@ public class WifiAwareManagerTest {
                 equalTo(configRequest.mClusterLow));
         collector.checkThat("mMasterPreference", 0,
                 equalTo(configRequest.mMasterPreference));
-        collector.checkThat("mSupport5gBand", false, equalTo(configRequest.mSupport5gBand));
+        collector.checkThat("mSupport5gBand", true, equalTo(configRequest.mSupport5gBand));
         collector.checkThat("mDiscoveryWindowInterval.length", 2,
                 equalTo(configRequest.mDiscoveryWindowInterval.length));
         collector.checkThat("mDiscoveryWindowInterval[2.4GHz]", ConfigRequest.DW_INTERVAL_NOT_INIT,
