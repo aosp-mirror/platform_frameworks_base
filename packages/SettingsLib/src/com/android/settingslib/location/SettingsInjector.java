@@ -20,14 +20,12 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
-import android.graphics.drawable.Drawable;
 import android.location.SettingInjectorService;
 import android.os.Bundle;
 import android.os.Handler;
@@ -37,9 +35,9 @@ import android.os.Messenger;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AttributeSet;
-import android.util.IconDrawableFactory;
 import android.util.Log;
 import android.util.Xml;
 
@@ -56,8 +54,8 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -157,22 +155,8 @@ public class SettingsInjector {
      * Adds the InjectedSetting information to a Preference object
      */
     private void populatePreference(Preference preference, InjectedSetting setting) {
-        final PackageManager pm = mContext.getPackageManager();
-        Drawable appIcon = null;
-        try {
-            final PackageItemInfo itemInfo = new PackageItemInfo();
-            itemInfo.icon = setting.iconId;
-            itemInfo.packageName = setting.packageName;
-            final ApplicationInfo appInfo = pm.getApplicationInfo(setting.packageName,
-                    PackageManager.GET_META_DATA);
-            appIcon = IconDrawableFactory.newInstance(mContext)
-                    .getBadgedIcon(itemInfo, appInfo, setting.mUserHandle.getIdentifier());
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.e(TAG, "Can't get ApplicationInfo for " + setting.packageName, e);
-        }
         preference.setTitle(setting.title);
         preference.setSummary(R.string.loading_injected_setting_summary);
-        preference.setIcon(appIcon);
         preference.setOnPreferenceClickListener(new ServiceSettingClickedListener(setting));
     }
 
@@ -182,13 +166,15 @@ public class SettingsInjector {
      * @param profileId Identifier of the user/profile to obtain the injected settings for or
      *                  UserHandle.USER_CURRENT for all profiles associated with current user.
      */
-    public List<Preference> getInjectedSettings(Context prefContext, final int profileId) {
+    public Map<Integer, List<Preference>> getInjectedSettings(Context prefContext,
+            final int profileId) {
         final UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         final List<UserHandle> profiles = um.getUserProfiles();
-        ArrayList<Preference> prefs = new ArrayList<>();
+        final ArrayMap<Integer, List<Preference>> result = new ArrayMap<>();
         mSettings.clear();
         for (UserHandle userHandle : profiles) {
             if (profileId == UserHandle.USER_CURRENT || profileId == userHandle.getIdentifier()) {
+                final List<Preference> prefs = new ArrayList<>();
                 Iterable<InjectedSetting> settings = getSettings(userHandle);
                 for (InjectedSetting setting : settings) {
                     Preference preference = createPreference(prefContext, setting);
@@ -196,12 +182,14 @@ public class SettingsInjector {
                     prefs.add(preference);
                     mSettings.add(new Setting(setting, preference));
                 }
+                if (!prefs.isEmpty()) {
+                    result.put(userHandle.getIdentifier(), prefs);
+                }
             }
         }
 
         reloadStatusMessages();
-
-        return prefs;
+        return result;
     }
 
     /**
@@ -300,28 +288,6 @@ public class SettingsInjector {
         } finally {
             sa.recycle();
         }
-    }
-
-    /**
-     * Checks wheteher there is any preference that other apps have injected.
-     *
-     * @param profileId Identifier of the user/profile to obtain the injected settings for or
-     *                  UserHandle.USER_CURRENT for all profiles associated with current user.
-     */
-    public boolean hasInjectedSettings(final int profileId) {
-        final UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-        final List<UserHandle> profiles = um.getUserProfiles();
-        final int profileCount = profiles.size();
-        for (int i = 0; i < profileCount; ++i) {
-            final UserHandle userHandle = profiles.get(i);
-            if (profileId == UserHandle.USER_CURRENT || profileId == userHandle.getIdentifier()) {
-                Iterable<InjectedSetting> settings = getSettings(userHandle);
-                for (InjectedSetting setting : settings) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     /**
