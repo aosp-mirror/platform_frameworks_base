@@ -77,7 +77,6 @@ const int FIELD_ID_TIME_TO_LIVE_NANOS = 2;
 
 #define NS_PER_HOUR 3600 * NS_PER_SEC
 
-#define STATS_DATA_DIR "/data/misc/stats-data"
 #define STATS_ACTIVE_METRIC_DIR "/data/misc/stats-active-metric"
 
 // Cool down period for writing data to disk to avoid overwriting files.
@@ -104,6 +103,19 @@ StatsLogProcessor::StatsLogProcessor(const sp<UidMap>& uidMap,
 }
 
 StatsLogProcessor::~StatsLogProcessor() {
+}
+
+static void flushProtoToBuffer(ProtoOutputStream& proto, vector<uint8_t>* outData) {
+    outData->clear();
+    outData->resize(proto.size());
+    size_t pos = 0;
+    sp<android::util::ProtoReader> reader = proto.data();
+    while (reader->readBuffer() != NULL) {
+        size_t toRead = reader->currentToRead();
+        std::memcpy(&((*outData)[pos]), reader->readBuffer(), toRead);
+        pos += toRead;
+        reader->move(toRead);
+    }
 }
 
 void StatsLogProcessor::onAnomalyAlarmFired(
@@ -366,25 +378,29 @@ void StatsLogProcessor::onDumpReport(const ConfigKey& key, const int64_t dumpTim
     proto->end(configKeyToken);
     // End of ConfigKey.
 
+    bool keepFile = false;
+    auto it = mMetricsManagers.find(key);
+    if (it != mMetricsManagers.end() && it->second->shouldPersistLocalHistory()) {
+        keepFile = true;
+    }
+
     // Then, check stats-data directory to see there's any file containing
     // ConfigMetricsReport from previous shutdowns to concatenate to reports.
-    StorageManager::appendConfigMetricsReport(key, proto, erase_data);
+    StorageManager::appendConfigMetricsReport(
+            key, proto, erase_data && !keepFile /* should remove file after appending it */,
+            dumpReportReason == ADB_DUMP /*if caller is adb*/);
 
-    auto it = mMetricsManagers.find(key);
     if (it != mMetricsManagers.end()) {
         // This allows another broadcast to be sent within the rate-limit period if we get close to
         // filling the buffer again soon.
         mLastBroadcastTimes.erase(key);
 
-        // Start of ConfigMetricsReport (reports).
-        uint64_t reportsToken =
-                proto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_REPORTS);
-        onConfigMetricsReportLocked(key, dumpTimeStampNs,
-                                    include_current_partial_bucket,
-                                    erase_data, dumpReportReason,
-                                    dumpLatency, proto);
-        proto->end(reportsToken);
-        // End of ConfigMetricsReport (reports).
+        vector<uint8_t> buffer;
+        onConfigMetricsReportLocked(key, dumpTimeStampNs, include_current_partial_bucket,
+                                    erase_data, dumpReportReason, dumpLatency,
+                                    false /* is this data going to be saved on disk */, &buffer);
+        proto->write(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_REPORTS,
+                     reinterpret_cast<char*>(buffer.data()), buffer.size());
     } else {
         ALOGW("Config source %s does not exist", key.ToString().c_str());
     }
@@ -404,16 +420,8 @@ void StatsLogProcessor::onDumpReport(const ConfigKey& key, const int64_t dumpTim
                  dumpReportReason, dumpLatency, &proto);
 
     if (outData != nullptr) {
-        outData->clear();
-        outData->resize(proto.size());
-        size_t pos = 0;
-        sp<android::util::ProtoReader> reader = proto.data();
-        while (reader->readBuffer() != NULL) {
-            size_t toRead = reader->currentToRead();
-            std::memcpy(&((*outData)[pos]), reader->readBuffer(), toRead);
-            pos += toRead;
-            reader->move(toRead);
-        }
+        flushProtoToBuffer(proto, outData);
+        VLOG("output data size %zu", outData->size());
     }
 
     StatsdStats::getInstance().noteMetricsReportSent(key, proto.size());
@@ -422,13 +430,11 @@ void StatsLogProcessor::onDumpReport(const ConfigKey& key, const int64_t dumpTim
 /*
  * onConfigMetricsReportLocked dumps serialized ConfigMetricsReport into outData.
  */
-void StatsLogProcessor::onConfigMetricsReportLocked(const ConfigKey& key,
-                                                    const int64_t dumpTimeStampNs,
-                                                    const bool include_current_partial_bucket,
-                                                    const bool erase_data,
-                                                    const DumpReportReason dumpReportReason,
-                                                    const DumpLatency dumpLatency,
-                                                    ProtoOutputStream* proto) {
+void StatsLogProcessor::onConfigMetricsReportLocked(
+        const ConfigKey& key, const int64_t dumpTimeStampNs,
+        const bool include_current_partial_bucket, const bool erase_data,
+        const DumpReportReason dumpReportReason, const DumpLatency dumpLatency,
+        const bool dataSavedOnDisk, vector<uint8_t>* buffer) {
     // We already checked whether key exists in mMetricsManagers in
     // WriteDataToDisk.
     auto it = mMetricsManagers.find(key);
@@ -440,35 +446,46 @@ void StatsLogProcessor::onConfigMetricsReportLocked(const ConfigKey& key,
 
     std::set<string> str_set;
 
+    ProtoOutputStream tempProto;
     // First, fill in ConfigMetricsReport using current data on memory, which
     // starts from filling in StatsLogReport's.
-    it->second->onDumpReport(dumpTimeStampNs, include_current_partial_bucket,
-                             erase_data, dumpLatency, &str_set, proto);
+    it->second->onDumpReport(dumpTimeStampNs, include_current_partial_bucket, erase_data,
+                             dumpLatency, &str_set, &tempProto);
 
     // Fill in UidMap if there is at least one metric to report.
     // This skips the uid map if it's an empty config.
     if (it->second->getNumMetrics() > 0) {
-        uint64_t uidMapToken = proto->start(FIELD_TYPE_MESSAGE | FIELD_ID_UID_MAP);
+        uint64_t uidMapToken = tempProto.start(FIELD_TYPE_MESSAGE | FIELD_ID_UID_MAP);
         mUidMap->appendUidMap(
                 dumpTimeStampNs, key, it->second->hashStringInReport() ? &str_set : nullptr,
-                it->second->versionStringsInReport(), it->second->installerInReport(), proto);
-        proto->end(uidMapToken);
+                it->second->versionStringsInReport(), it->second->installerInReport(), &tempProto);
+        tempProto.end(uidMapToken);
     }
 
     // Fill in the timestamps.
-    proto->write(FIELD_TYPE_INT64 | FIELD_ID_LAST_REPORT_ELAPSED_NANOS,
-                (long long)lastReportTimeNs);
-    proto->write(FIELD_TYPE_INT64 | FIELD_ID_CURRENT_REPORT_ELAPSED_NANOS,
-                (long long)dumpTimeStampNs);
-    proto->write(FIELD_TYPE_INT64 | FIELD_ID_LAST_REPORT_WALL_CLOCK_NANOS,
-                (long long)lastReportWallClockNs);
-    proto->write(FIELD_TYPE_INT64 | FIELD_ID_CURRENT_REPORT_WALL_CLOCK_NANOS,
-                (long long)getWallClockNs());
+    tempProto.write(FIELD_TYPE_INT64 | FIELD_ID_LAST_REPORT_ELAPSED_NANOS,
+                    (long long)lastReportTimeNs);
+    tempProto.write(FIELD_TYPE_INT64 | FIELD_ID_CURRENT_REPORT_ELAPSED_NANOS,
+                    (long long)dumpTimeStampNs);
+    tempProto.write(FIELD_TYPE_INT64 | FIELD_ID_LAST_REPORT_WALL_CLOCK_NANOS,
+                    (long long)lastReportWallClockNs);
+    tempProto.write(FIELD_TYPE_INT64 | FIELD_ID_CURRENT_REPORT_WALL_CLOCK_NANOS,
+                    (long long)getWallClockNs());
     // Dump report reason
-    proto->write(FIELD_TYPE_INT32 | FIELD_ID_DUMP_REPORT_REASON, dumpReportReason);
+    tempProto.write(FIELD_TYPE_INT32 | FIELD_ID_DUMP_REPORT_REASON, dumpReportReason);
 
     for (const auto& str : str_set) {
-        proto->write(FIELD_TYPE_STRING | FIELD_COUNT_REPEATED | FIELD_ID_STRINGS, str);
+        tempProto.write(FIELD_TYPE_STRING | FIELD_COUNT_REPEATED | FIELD_ID_STRINGS, str);
+    }
+
+    flushProtoToBuffer(tempProto, buffer);
+
+    // save buffer to disk if needed
+    if (erase_data && !dataSavedOnDisk && it->second->shouldPersistLocalHistory()) {
+        VLOG("save history to disk");
+        string file_name = StorageManager::getDataHistoryFileName((long)getWallClockSec(),
+                                                                  key.GetUid(), key.GetId());
+        StorageManager::writeFile(file_name.c_str(), buffer->data(), buffer->size());
     }
 }
 
@@ -584,18 +601,14 @@ void StatsLogProcessor::WriteDataToDiskLocked(const ConfigKey& key,
         !mMetricsManagers.find(key)->second->shouldWriteToDisk()) {
         return;
     }
-    ProtoOutputStream proto;
+    vector<uint8_t> buffer;
     onConfigMetricsReportLocked(key, timestampNs, true /* include_current_partial_bucket*/,
-                                true /* erase_data */, dumpReportReason, dumpLatency, &proto);
-    string file_name = StringPrintf("%s/%ld_%d_%lld", STATS_DATA_DIR,
-         (long)getWallClockSec(), key.GetUid(), (long long)key.GetId());
-    android::base::unique_fd fd(open(file_name.c_str(),
-                                O_WRONLY | O_CREAT | O_CLOEXEC, S_IRUSR | S_IWUSR));
-    if (fd == -1) {
-        ALOGE("Attempt to write %s but failed", file_name.c_str());
-        return;
-    }
-    proto.flush(fd.get());
+                                true /* erase_data */, dumpReportReason, dumpLatency, true,
+                                &buffer);
+    string file_name =
+            StorageManager::getDataFileName((long)getWallClockSec(), key.GetUid(), key.GetId());
+    StorageManager::writeFile(file_name.c_str(), buffer.data(), buffer.size());
+
     // We were able to write the ConfigMetricsReport to disk, so we should trigger collection ASAP.
     mOnDiskDataConfigs.insert(key);
 }

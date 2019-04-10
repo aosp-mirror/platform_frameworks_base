@@ -164,12 +164,13 @@ private:
                                const DumpReportReason dumpReportReason,
                                const DumpLatency dumpLatency);
 
-    void onConfigMetricsReportLocked(const ConfigKey& key, const int64_t dumpTimeStampNs,
-                                     const bool include_current_partial_bucket,
-                                     const bool erase_data,
-                                     const DumpReportReason dumpReportReason,
-                                     const DumpLatency dumpLatency,
-                                     util::ProtoOutputStream* proto);
+    void onConfigMetricsReportLocked(
+            const ConfigKey& key, const int64_t dumpTimeStampNs,
+            const bool include_current_partial_bucket, const bool erase_data,
+            const DumpReportReason dumpReportReason, const DumpLatency dumpLatency,
+            /*if dataSavedToDisk is true, it indicates the caller will write the data to disk
+             (e.g., before reboot). So no need to further persist local history.*/
+            const bool dataSavedToDisk, vector<uint8_t>* proto);
 
     /* Check if we should send a broadcast if approaching memory limits and if we're over, we
      * actually delete the data. */
