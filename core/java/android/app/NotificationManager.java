@@ -1169,6 +1169,7 @@ public class NotificationManager {
      * @hide
      */
     @SystemApi
+    @TestApi
     public boolean isNotificationAssistantAccessGranted(@NonNull ComponentName assistant) {
         INotificationManager service = getService();
         try {
@@ -1204,10 +1205,37 @@ public class NotificationManager {
      * @hide
      */
     @SystemApi
+    @TestApi
     public @NonNull @Adjustment.Keys List<String> getAllowedAssistantCapabilities() {
         INotificationManager service = getService();
         try {
             return service.getAllowedAssistantCapabilities(mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    public void allowAssistantCapability(String capability) {
+        INotificationManager service = getService();
+        try {
+            service.allowAssistantCapability(capability);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    public void disallowAssistantCapability(String capability) {
+        INotificationManager service = getService();
+        try {
+            service.disallowAssistantCapability(capability);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1310,6 +1338,7 @@ public class NotificationManager {
      * @hide
      */
     @SystemApi
+    @TestApi
     public void setNotificationAssistantAccessGranted(@Nullable ComponentName assistant,
             boolean granted) {
         INotificationManager service = getService();
@@ -1332,6 +1361,7 @@ public class NotificationManager {
 
     /** @hide */
     @SystemApi
+    @TestApi
     public @Nullable ComponentName getAllowedNotificationAssistant() {
         INotificationManager service = getService();
         try {
