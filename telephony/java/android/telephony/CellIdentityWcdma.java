@@ -150,6 +150,7 @@ public final class CellIdentityWcdma extends CellIdentity {
     /**
      * @return Mobile Country Code in string version, null if unavailable.
      */
+    @Nullable
     public String getMccString() {
         return mMccStr;
     }
@@ -157,6 +158,7 @@ public final class CellIdentityWcdma extends CellIdentity {
     /**
      * @return Mobile Network Code in string version, null if unavailable.
      */
+    @Nullable
     public String getMncString() {
         return mMncStr;
     }

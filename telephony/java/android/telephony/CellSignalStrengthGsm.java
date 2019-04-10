@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.IntRange;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -97,13 +98,9 @@ public final class CellSignalStrengthGsm extends CellSignalStrength implements P
         mLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
     }
 
-    /**
-     * Retrieve an abstract level value for the overall signal strength.
-     *
-     * @return a single integer from 0 to 4 representing the general signal quality.
-     *     0 represents very poor signal strength while 4 represents a very strong signal strength.
-     */
+    /** {@inheritDoc} */
     @Override
+    @IntRange(from = SIGNAL_STRENGTH_NONE_OR_UNKNOWN, to = SIGNAL_STRENGTH_GREAT)
     public int getLevel() {
         return mLevel;
     }
@@ -141,7 +138,7 @@ public final class CellSignalStrengthGsm extends CellSignalStrength implements P
     /**
      * Get the RSSI in ASU.
      *
-     * Asu is calculated based on 3GPP RSRP. Refer to 3GPP 27.007 (Ver 10.3.0) Sec 8.69
+     * Asu is calculated based on 3GPP RSSI. Refer to 3GPP 27.007 (Ver 10.3.0) Sec 8.69
      *
      * @return RSSI in ASU 0..31, 99, or UNAVAILABLE
      */
