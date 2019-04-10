@@ -48,7 +48,6 @@ java_defaults {
         "libselinux",
         "libui",
         "libutils",
-        "libvintf",
         "libvndksupport",
         "libtinyxml2",
         "libunwindstack",
