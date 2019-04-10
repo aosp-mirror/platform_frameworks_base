@@ -1020,11 +1020,7 @@ class UserController implements Handler.Callback {
                         if (state.state == STATE_RUNNING_UNLOCKED) {
                             // We'll skip all later code, so we must tell listener it's already
                             // unlocked.
-                            try {
-                                unlockListener.onFinished(userId, null);
-                            } catch (RemoteException ignore) {
-                                // Ignore.
-                            }
+                            notifyFinished(userId, unlockListener);
                         }
                         return true;
                     }
