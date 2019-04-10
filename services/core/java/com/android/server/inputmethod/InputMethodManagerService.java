@@ -4101,13 +4101,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     // ----------------------------------------------------------------------
 
-    boolean setInputMethodEnabledLocked(String id, boolean enabled) {
-        // Make sure this is a valid input method.
-        InputMethodInfo imm = mMethodMap.get(id);
-        if (imm == null) {
-            throw new IllegalArgumentException("Unknown id: " + mCurMethodId);
-        }
-
+    /**
+     * Enable or disable the given IME by updating {@link Settings.Secure#ENABLED_INPUT_METHODS}.
+     *
+     * @param id ID of the IME is to be manipulated. It is OK to pass IME ID that is currently not
+     *           recognized by the system.
+     * @param enabled {@code true} if {@code id} needs to be enabled.
+     * @return {@code true} if the IME was previously enabled. {@code false} otherwise.
+     */
+    private boolean setInputMethodEnabledLocked(String id, boolean enabled) {
         List<Pair<String, ArrayList<String>>> enabledInputMethodsList = mSettings
                 .getEnabledInputMethodsAndSubtypeListLocked();
 
@@ -4695,6 +4697,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         final boolean previouslyEnabled;
         synchronized (mMethodMap) {
             if (!userHasDebugPriv(mSettings.getCurrentUserId(), shellCommand)) {
+                return ShellCommandResult.SUCCESS;
+            }
+            // Make sure this is a valid input method.
+            if (enabled && !mMethodMap.containsKey(id)) {
+                final PrintWriter error = shellCommand.getErrPrintWriter();
+                error.print("Unknown input method ");
+                error.print(id);
+                error.println(" cannot be enabled");
                 return ShellCommandResult.SUCCESS;
             }
             previouslyEnabled = setInputMethodEnabledLocked(id, enabled);
