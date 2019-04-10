@@ -22,6 +22,8 @@ import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_AFTER_ANIM;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_BEFORE_ANIM;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_NONE;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -70,7 +72,8 @@ public class WindowAnimationSpecTest {
                 mStackBounds, false /* canSkipFirstFrame */, STACK_CLIP_AFTER_ANIM,
                 true /* isAppAnimation */, 0 /* windowCornerRadius */);
         windowAnimationSpec.apply(mTransaction, mSurfaceControl, 0);
-        verify(mTransaction).setWindowCrop(eq(mSurfaceControl), argThat(Rect::isEmpty));
+        verify(mTransaction).setWindowCrop(eq(mSurfaceControl),
+                argThat(rect -> rect.equals(mStackBounds)));
     }
 
     @Test
@@ -80,7 +83,8 @@ public class WindowAnimationSpecTest {
                 new Point(20, 40), mStackBounds, false /* canSkipFirstFrame */,
                 STACK_CLIP_AFTER_ANIM, true /* isAppAnimation */, 0 /* windowCornerRadius */);
         windowAnimationSpec.apply(mTransaction, mSurfaceControl, 0);
-        verify(mTransaction).setWindowCrop(eq(mSurfaceControl), argThat(Rect::isEmpty));
+        verify(mTransaction).setWindowCrop(eq(mSurfaceControl),
+                argThat(rect -> rect.equals(mStackBounds)));
     }
 
     @Test
@@ -118,6 +122,17 @@ public class WindowAnimationSpecTest {
         when(mAnimation.hasRoundedCorners()).thenReturn(true);
         windowAnimationSpec.apply(mTransaction, mSurfaceControl, 0);
         verify(mTransaction).setCornerRadius(eq(mSurfaceControl), eq(windowCornerRadius));
+    }
+
+    @Test
+    public void testApply_setCornerRadius_noClip() {
+        final float windowCornerRadius = 30f;
+        WindowAnimationSpec windowAnimationSpec = new WindowAnimationSpec(mAnimation, null,
+                mStackBounds, false /* canSkipFirstFrame */, STACK_CLIP_NONE,
+                true /* isAppAnimation */, windowCornerRadius);
+        when(mAnimation.hasRoundedCorners()).thenReturn(true);
+        windowAnimationSpec.apply(mTransaction, mSurfaceControl, 0);
+        verify(mTransaction, never()).setCornerRadius(any(), anyFloat());
     }
 
     @Test

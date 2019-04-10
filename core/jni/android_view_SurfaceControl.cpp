@@ -250,10 +250,11 @@ static jobject nativeScreenshot(JNIEnv* env, jclass clazz,
 
     Rect sourceCrop = rectFromObj(env, sourceCropObj);
     sp<GraphicBuffer> buffer;
+    bool capturedSecureLayers = false;
     status_t res = ScreenshotClient::capture(displayToken, dataspace,
             ui::PixelFormat::RGBA_8888,
             sourceCrop, width, height,
-            useIdentityTransform, rotation, captureSecureLayers, &buffer);
+            useIdentityTransform, rotation, captureSecureLayers, &buffer, capturedSecureLayers);
     if (res != NO_ERROR) {
         return NULL;
     }
@@ -266,7 +267,8 @@ static jobject nativeScreenshot(JNIEnv* env, jclass clazz,
             buffer->getPixelFormat(),
             (jint)buffer->getUsage(),
             (jlong)buffer.get(),
-            namedColorSpace);
+            namedColorSpace,
+            capturedSecureLayers);
 }
 
 static jobject nativeCaptureLayers(JNIEnv* env, jclass clazz, jobject layerHandleToken,
@@ -315,7 +317,8 @@ static jobject nativeCaptureLayers(JNIEnv* env, jclass clazz, jobject layerHandl
                                        buffer->getPixelFormat(),
                                        (jint)buffer->getUsage(),
                                        (jlong)buffer.get(),
-                                       namedColorSpace);
+                                       namedColorSpace,
+                                       false /* capturedSecureLayers */);
 }
 
 static void nativeApplyTransaction(JNIEnv* env, jclass clazz, jlong transactionObj, jboolean sync) {
@@ -1455,7 +1458,7 @@ int register_android_view_SurfaceControl(JNIEnv* env)
             MakeGlobalRefOrDie(env, screenshotGraphicsBufferClazz);
     gScreenshotGraphicBufferClassInfo.builder = GetStaticMethodIDOrDie(env,
             screenshotGraphicsBufferClazz,
-            "createFromNative", "(IIIIJI)Landroid/view/SurfaceControl$ScreenshotGraphicBuffer;");
+            "createFromNative", "(IIIIJIZ)Landroid/view/SurfaceControl$ScreenshotGraphicBuffer;");
 
     jclass displayedContentSampleClazz = FindClassOrDie(env,
             "android/hardware/display/DisplayedContentSample");

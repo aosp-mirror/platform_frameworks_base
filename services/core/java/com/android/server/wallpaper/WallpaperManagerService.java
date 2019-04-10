@@ -2629,7 +2629,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     0, null, new UserHandle(serviceUserId)));
             if (!mContext.bindServiceAsUser(intent, newConn,
                     Context.BIND_AUTO_CREATE | Context.BIND_SHOWING_UI
-                            | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
+                            | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE
+                            | Context.BIND_INCLUDE_CAPABILITIES,
                     new UserHandle(serviceUserId))) {
                 String msg = "Unable to bind service: "
                         + componentName;

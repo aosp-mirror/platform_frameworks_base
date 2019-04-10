@@ -16,6 +16,7 @@
 
 package android.provider;
 
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.slice.Slice;
 import android.content.ContentProvider;
@@ -184,6 +185,7 @@ public abstract class SearchIndexablesProvider extends ContentProvider {
      * Returns a {@link Cursor} linking {@link Slice} {@link Uri Uris} to the
      * corresponding Settings key.
      */
+    @Nullable
     public Cursor querySliceUriPairs() {
         // By default no-op;
         return null;

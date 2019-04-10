@@ -212,15 +212,15 @@ public class ObjectPoolTests {
 
     @Test
     public void testRecycleNewIntentItem() {
-        NewIntentItem emptyItem = NewIntentItem.obtain(null, false);
-        NewIntentItem item = NewIntentItem.obtain(referrerIntentList(), true);
+        NewIntentItem emptyItem = NewIntentItem.obtain(null);
+        NewIntentItem item = NewIntentItem.obtain(referrerIntentList());
         assertNotSame(item, emptyItem);
         assertFalse(item.equals(emptyItem));
 
         item.recycle();
         assertEquals(item, emptyItem);
 
-        NewIntentItem item2 = NewIntentItem.obtain(referrerIntentList(), true);
+        NewIntentItem item2 = NewIntentItem.obtain(referrerIntentList());
         assertSame(item, item2);
         assertFalse(item2.equals(emptyItem));
     }

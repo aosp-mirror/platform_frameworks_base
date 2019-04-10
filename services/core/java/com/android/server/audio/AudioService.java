@@ -855,8 +855,7 @@ public class AudioService extends IAudioService.Stub
 
     public void onSystemReady() {
         mSystemReady = true;
-        sendMsg(mAudioHandler, MSG_LOAD_SOUND_EFFECTS, SENDMSG_QUEUE,
-                0, 0, null, 0);
+        scheduleLoadSoundEffects();
 
         mDeviceBroker.onSystemReady();
 
@@ -3222,6 +3221,14 @@ public class AudioService extends IAudioService.Stub
             }
         }
         return (reply.mStatus == 0);
+    }
+
+    /**
+     * Schedule loading samples into the soundpool.
+     * This method can be overridden to schedule loading at a later time.
+     */
+    protected void scheduleLoadSoundEffects() {
+        sendMsg(mAudioHandler, MSG_LOAD_SOUND_EFFECTS, SENDMSG_QUEUE, 0, 0, null, 0);
     }
 
     /**

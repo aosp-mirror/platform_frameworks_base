@@ -21,7 +21,11 @@ import static android.net.INetworkMonitor.NETWORK_TEST_RESULT_INVALID;
 import static android.net.INetworkMonitor.NETWORK_TEST_RESULT_PARTIAL_CONNECTIVITY;
 import static android.net.INetworkMonitor.NETWORK_TEST_RESULT_VALID;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
-import static android.provider.Settings.Global.DATA_STALL_EVALUATION_TYPE_DNS;
+import static android.net.util.DataStallUtils.CONFIG_DATA_STALL_CONSECUTIVE_DNS_TIMEOUT_THRESHOLD;
+import static android.net.util.DataStallUtils.CONFIG_DATA_STALL_EVALUATION_TYPE;
+import static android.net.util.DataStallUtils.CONFIG_DATA_STALL_MIN_EVALUATE_INTERVAL;
+import static android.net.util.DataStallUtils.CONFIG_DATA_STALL_VALID_DNS_TIME_THRESHOLD;
+import static android.net.util.DataStallUtils.DATA_STALL_EVALUATION_TYPE_DNS;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -30,7 +34,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
@@ -45,6 +48,7 @@ import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.INetworkMonitorCallbacks;
 import android.net.InetAddresses;
@@ -95,6 +99,7 @@ public class NetworkMonitorTest {
     private static final String LOCATION_HEADER = "location";
 
     private @Mock Context mContext;
+    private @Mock Resources mResources;
     private @Mock IpConnectivityLog mLogger;
     private @Mock SharedLog mValidationLogger;
     private @Mock NetworkInfo mNetworkInfo;
@@ -114,7 +119,6 @@ public class NetworkMonitorTest {
     private @Captor ArgumentCaptor<String> mNetworkTestedRedirectUrlCaptor;
 
     private static final int TEST_NETID = 4242;
-
     private static final String TEST_HTTP_URL = "http://www.google.com/gen_204";
     private static final String TEST_HTTPS_URL = "https://www.google.com/gen_204";
     private static final String TEST_FALLBACK_URL = "http://fallback.google.com/gen_204";
@@ -150,14 +154,20 @@ public class NetworkMonitorTest {
                 .thenReturn(Settings.Global.CAPTIVE_PORTAL_MODE_PROMPT);
         when(mDependencies.getSetting(any(), eq(Settings.Global.CAPTIVE_PORTAL_USE_HTTPS),
                 anyInt())).thenReturn(1);
-        when(mDependencies.getCaptivePortalServerHttpUrl(any())).thenReturn(TEST_HTTP_URL);
-        when(mDependencies.getSetting(any(), eq(Settings.Global.CAPTIVE_PORTAL_HTTPS_URL),
-                anyString())).thenReturn(TEST_HTTPS_URL);
+        when(mDependencies.getSetting(any(), eq(Settings.Global.CAPTIVE_PORTAL_HTTP_URL), any()))
+                .thenReturn(TEST_HTTP_URL);
+        when(mDependencies.getSetting(any(), eq(Settings.Global.CAPTIVE_PORTAL_HTTPS_URL), any()))
+                .thenReturn(TEST_HTTPS_URL);
+
         doReturn(mNetwork).when(mNetwork).getPrivateDnsBypassingCopy();
 
         when(mContext.getSystemService(Context.CONNECTIVITY_SERVICE)).thenReturn(mCm);
         when(mContext.getSystemService(Context.TELEPHONY_SERVICE)).thenReturn(mTelephony);
         when(mContext.getSystemService(Context.WIFI_SERVICE)).thenReturn(mWifi);
+        when(mContext.getResources()).thenReturn(mResources);
+
+        when(mResources.getString(anyInt())).thenReturn("");
+        when(mResources.getStringArray(anyInt())).thenReturn(new String[0]);
 
         when(mNetworkInfo.getType()).thenReturn(ConnectivityManager.TYPE_WIFI);
         setFallbackUrl(TEST_FALLBACK_URL);
@@ -593,24 +603,23 @@ public class NetworkMonitorTest {
     }
 
     private void setDataStallEvaluationType(int type) {
-        when(mDependencies.getSetting(any(),
-            eq(Settings.Global.DATA_STALL_EVALUATION_TYPE), anyInt())).thenReturn(type);
+        when(mDependencies.getDeviceConfigPropertyInt(any(),
+            eq(CONFIG_DATA_STALL_EVALUATION_TYPE), anyInt())).thenReturn(type);
     }
 
     private void setMinDataStallEvaluateInterval(int time) {
-        when(mDependencies.getSetting(any(),
-            eq(Settings.Global.DATA_STALL_MIN_EVALUATE_INTERVAL), anyInt())).thenReturn(time);
+        when(mDependencies.getDeviceConfigPropertyInt(any(),
+            eq(CONFIG_DATA_STALL_MIN_EVALUATE_INTERVAL), anyInt())).thenReturn(time);
     }
 
     private void setValidDataStallDnsTimeThreshold(int time) {
-        when(mDependencies.getSetting(any(),
-            eq(Settings.Global.DATA_STALL_VALID_DNS_TIME_THRESHOLD), anyInt())).thenReturn(time);
+        when(mDependencies.getDeviceConfigPropertyInt(any(),
+            eq(CONFIG_DATA_STALL_VALID_DNS_TIME_THRESHOLD), anyInt())).thenReturn(time);
     }
 
     private void setConsecutiveDnsTimeoutThreshold(int num) {
-        when(mDependencies.getSetting(any(),
-            eq(Settings.Global.DATA_STALL_CONSECUTIVE_DNS_TIMEOUT_THRESHOLD), anyInt()))
-            .thenReturn(num);
+        when(mDependencies.getDeviceConfigPropertyInt(any(),
+            eq(CONFIG_DATA_STALL_CONSECUTIVE_DNS_TIMEOUT_THRESHOLD), anyInt())).thenReturn(num);
     }
 
     private void setFallbackUrl(String url) {

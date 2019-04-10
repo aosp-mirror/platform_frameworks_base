@@ -5980,7 +5980,7 @@ package android.provider {
     field public static final String NON_INDEXABLES_KEYS_PATH = "settings/non_indexables_key";
     field public static final String PROVIDER_INTERFACE = "android.content.action.SEARCH_INDEXABLES_PROVIDER";
     field public static final String SLICE_URI_PAIRS = "slice_uri_pairs";
-    field public static final String[] SLICE_URI_PAIRS_COLUMNS;
+    field @NonNull public static final String[] SLICE_URI_PAIRS_COLUMNS;
     field public static final String SLICE_URI_PAIRS_PATH = "settings/slice_uri_pairs";
   }
 
@@ -6028,7 +6028,7 @@ package android.provider {
     method public android.database.Cursor query(android.net.Uri, String[], String, String[], String);
     method public abstract android.database.Cursor queryNonIndexableKeys(String[]);
     method public abstract android.database.Cursor queryRawData(String[]);
-    method public android.database.Cursor querySliceUriPairs();
+    method @Nullable public android.database.Cursor querySliceUriPairs();
     method public abstract android.database.Cursor queryXmlResources(String[]);
     method public final int update(android.net.Uri, android.content.ContentValues, String, String[]);
   }
@@ -6062,11 +6062,6 @@ package android.provider {
     field public static final String CAPTIVE_PORTAL_USE_HTTPS = "captive_portal_use_https";
     field public static final String CARRIER_APP_NAMES = "carrier_app_names";
     field public static final String CARRIER_APP_WHITELIST = "carrier_app_whitelist";
-    field public static final String DATA_STALL_CONSECUTIVE_DNS_TIMEOUT_THRESHOLD = "data_stall_consecutive_dns_timeout_threshold";
-    field public static final String DATA_STALL_EVALUATION_TYPE = "data_stall_evaluation_type";
-    field public static final int DATA_STALL_EVALUATION_TYPE_DNS = 1; // 0x1
-    field public static final String DATA_STALL_MIN_EVALUATE_INTERVAL = "data_stall_min_evaluate_interval";
-    field public static final String DATA_STALL_VALID_DNS_TIME_THRESHOLD = "data_stall_valid_dns_time_threshold";
     field public static final String DEFAULT_SM_DP_PLUS = "default_sm_dp_plus";
     field public static final String DEVICE_DEMO_MODE = "device_demo_mode";
     field public static final String DEVICE_PROVISIONING_MOBILE_DATA_ENABLED = "device_provisioning_mobile_data";

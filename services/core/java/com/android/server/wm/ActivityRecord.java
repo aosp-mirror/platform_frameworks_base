@@ -863,7 +863,7 @@ final class ActivityRecord extends ConfigurationContainer {
             name = intent.getComponent().flattenToShortString();
         }
 
-        private static ActivityRecord tokenToActivityRecordLocked(Token token) {
+        private static @Nullable ActivityRecord tokenToActivityRecordLocked(Token token) {
             if (token == null) {
                 return null;
             }
@@ -891,7 +891,7 @@ final class ActivityRecord extends ConfigurationContainer {
         }
     }
 
-    static ActivityRecord forTokenLocked(IBinder token) {
+    static @Nullable ActivityRecord forTokenLocked(IBinder token) {
         try {
             return Token.tokenToActivityRecordLocked((Token)token);
         } catch (ClassCastException e) {
@@ -1595,8 +1595,8 @@ final class ActivityRecord extends ConfigurationContainer {
             try {
                 ArrayList<ReferrerIntent> ar = new ArrayList<>(1);
                 ar.add(rintent);
-                mAtmService.getLifecycleManager().scheduleTransaction(
-                        app.getThread(), appToken, NewIntentItem.obtain(ar, mState == PAUSED));
+                mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
+                        NewIntentItem.obtain(ar));
                 unsent = false;
             } catch (RemoteException e) {
                 Slog.w(TAG, "Exception thrown sending new intent to " + this, e);
@@ -2127,10 +2127,13 @@ final class ActivityRecord extends ConfigurationContainer {
     static void activityResumedLocked(IBinder token) {
         final ActivityRecord r = ActivityRecord.forTokenLocked(token);
         if (DEBUG_SAVED_STATE) Slog.i(TAG_STATES, "Resumed activity; dropping state of: " + r);
-        if (r != null) {
-            r.icicle = null;
-            r.haveState = false;
+        if (r == null) {
+            // If an app reports resumed after a long delay, the record on server side might have
+            // been removed (e.g. destroy timeout), so the token could be null.
+            return;
         }
+        r.icicle = null;
+        r.haveState = false;
 
         final ActivityDisplay display = r.getDisplay();
         if (display != null) {

@@ -27,10 +27,10 @@ oneway interface IIpClient {
     void shutdown();
     void startProvisioning(in ProvisioningConfigurationParcelable req);
     void stop();
-    void setL2KeyAndGroupHint(in String l2Key, in String groupHint);
     void setTcpBufferSizes(in String tcpBufferSizes);
     void setHttpProxy(in ProxyInfo proxyInfo);
     void setMulticastFilter(boolean enabled);
     void addKeepalivePacketFilter(int slot, in TcpKeepalivePacketDataParcelable pkt);
     void removeKeepalivePacketFilter(int slot);
+    void setL2KeyAndGroupHint(in String l2Key, in String groupHint);
 }

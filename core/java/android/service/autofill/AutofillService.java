@@ -674,6 +674,8 @@ public abstract class AutofillService extends Service {
      * Called when the Android system disconnects from the service.
      *
      * <p> At this point this service may no longer be an active {@link AutofillService}.
+     * It should not make calls on {@link AutofillManager} that requires the caller to be
+     * the current service.
      */
     public void onDisconnected() {
     }
@@ -695,6 +697,8 @@ public abstract class AutofillService extends Service {
      * finishing the {@link FillCallback}.
      *
      * @return The history or {@code null} if there are no events.
+     *
+     * @throws RuntimeException if the event history could not be retrieved.
      */
     @Nullable public final FillEventHistory getFillEventHistory() {
         final AutofillManager afm = getSystemService(AutofillManager.class);

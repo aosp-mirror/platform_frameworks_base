@@ -136,7 +136,13 @@ public final class StatsLog extends StatsLogInternal {
      * @param trainName        name of install train.
      * @param trainVersionCode version code of the train.
      * @param options          optional flags about this install.
-     * @param state            current install state.
+     *                         The last 3 bits indicate options:
+     *                             0x01: FLAG_REQUIRE_STAGING
+     *                             0x02: FLAG_ROLLBACK_ENABLED
+     *                             0x04: FLAG_REQUIRE_LOW_LATENCY_MONITOR
+     * @param state            current install state. Defined as State enums in
+     *                         BinaryPushStateChanged atom in
+     *                         frameworks/base/cmds/statsd/src/atoms.proto
      * @param experimentIds    experiment ids.
      * @return True if the log request was sent to statsd.
      */
