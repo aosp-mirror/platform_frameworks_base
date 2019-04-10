@@ -30,7 +30,6 @@ import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageManager.DeleteFlags;
 import android.content.pm.PackageManager.InstallReason;
@@ -840,13 +839,12 @@ public class PackageInstaller {
      * installation (for example, the same split name), the APK in this session
      * will replace the existing APK.
      * <p>
-     * In such a case that multiple packages need to be commited simultaneously,
+     * In such a case that multiple packages need to be committed simultaneously,
      * multiple sessions can be referenced by a single multi-package session.
      * This session is created with no package name and calling
-     * {@link SessionParams#setMultiPackage()} with {@code true}. The
-     * individual session IDs can be added with {@link #addChildSessionId(int)}
-     * and commit of the multi-package session will result in all child sessions
-     * being committed atomically.
+     * {@link SessionParams#setMultiPackage()}. The individual session IDs can be
+     * added with {@link #addChildSessionId(int)} and commit of the multi-package
+     * session will result in all child sessions being committed atomically.
      */
     public static class Session implements Closeable {
         /** {@hide} */
