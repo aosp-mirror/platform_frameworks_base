@@ -35,7 +35,6 @@ import static com.android.server.wm.WindowManagerService.H.WALLPAPER_DRAW_PENDIN
 
 import android.graphics.Bitmap;
 import android.graphics.Rect;
-import android.hardware.HardwareBuffer;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.IBinder;
@@ -744,8 +743,7 @@ class WallpaperController {
             return null;
         }
         return Bitmap.wrapHardwareBuffer(
-                HardwareBuffer.createFromGraphicBuffer(wallpaperBuffer.getGraphicBuffer()),
-                wallpaperBuffer.getColorSpace());
+                wallpaperBuffer.getGraphicBuffer(), wallpaperBuffer.getColorSpace());
     }
 
     private WindowState getTopVisibleWallpaper() {
