@@ -1130,7 +1130,7 @@ public class StorageManager {
     public @NonNull StorageVolume getStorageVolume(@NonNull Uri uri) {
         final String volumeName = MediaStore.getVolumeName(uri);
         switch (volumeName) {
-            case MediaStore.VOLUME_EXTERNAL:
+            case MediaStore.VOLUME_EXTERNAL_PRIMARY:
                 return getPrimaryStorageVolume();
             default:
                 for (StorageVolume vol : getStorageVolumes()) {
