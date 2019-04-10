@@ -38,7 +38,6 @@ import android.service.notification.RankingHelperProto;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.util.proto.ProtoOutputStream;
@@ -180,7 +179,7 @@ public class PreferencesHelper implements RankingConfig {
                                 }
                             }
 
-                            PackagePreferences r = getOrCreatePackagePreferences(name, uid,
+                            PackagePreferences r = getOrCreatePackagePreferencesLocked(name, uid,
                                     XmlUtils.readIntAttribute(
                                             parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE),
                                     XmlUtils.readIntAttribute(parser, ATT_PRIORITY,
@@ -264,9 +263,9 @@ public class PreferencesHelper implements RankingConfig {
                             }
 
                             try {
-                                deleteDefaultChannelIfNeeded(r);
+                                deleteDefaultChannelIfNeededLocked(r);
                             } catch (PackageManager.NameNotFoundException e) {
-                                Slog.e(TAG, "deleteDefaultChannelIfNeeded - Exception: " + e);
+                                Slog.e(TAG, "deleteDefaultChannelIfNeededLocked - Exception: " + e);
                             }
                         }
                     }
@@ -276,50 +275,46 @@ public class PreferencesHelper implements RankingConfig {
         throw new IllegalStateException("Failed to reach END_DOCUMENT");
     }
 
-    private PackagePreferences getPackagePreferences(String pkg, int uid) {
+    private PackagePreferences getPackagePreferencesLocked(String pkg, int uid) {
         final String key = packagePreferencesKey(pkg, uid);
-        synchronized (mPackagePreferences) {
-            return mPackagePreferences.get(key);
-        }
+        return mPackagePreferences.get(key);
     }
 
-    private PackagePreferences getOrCreatePackagePreferences(String pkg, int uid) {
-        return getOrCreatePackagePreferences(pkg, uid,
+    private PackagePreferences getOrCreatePackagePreferencesLocked(String pkg, int uid) {
+        return getOrCreatePackagePreferencesLocked(pkg, uid,
                 DEFAULT_IMPORTANCE, DEFAULT_PRIORITY, DEFAULT_VISIBILITY, DEFAULT_SHOW_BADGE,
                 DEFAULT_ALLOW_BUBBLE);
     }
 
-    private PackagePreferences getOrCreatePackagePreferences(String pkg, int uid, int importance,
-            int priority, int visibility, boolean showBadge, boolean allowBubble) {
+    private PackagePreferences getOrCreatePackagePreferencesLocked(String pkg, int uid,
+            int importance, int priority, int visibility, boolean showBadge, boolean allowBubble) {
         final String key = packagePreferencesKey(pkg, uid);
-        synchronized (mPackagePreferences) {
-            PackagePreferences
-                    r = (uid == UNKNOWN_UID) ? mRestoredWithoutUids.get(pkg)
-                    : mPackagePreferences.get(key);
-            if (r == null) {
-                r = new PackagePreferences();
-                r.pkg = pkg;
-                r.uid = uid;
-                r.importance = importance;
-                r.priority = priority;
-                r.visibility = visibility;
-                r.showBadge = showBadge;
-                r.allowBubble = allowBubble;
+        PackagePreferences
+                r = (uid == UNKNOWN_UID) ? mRestoredWithoutUids.get(pkg)
+                : mPackagePreferences.get(key);
+        if (r == null) {
+            r = new PackagePreferences();
+            r.pkg = pkg;
+            r.uid = uid;
+            r.importance = importance;
+            r.priority = priority;
+            r.visibility = visibility;
+            r.showBadge = showBadge;
+            r.allowBubble = allowBubble;
 
-                try {
-                    createDefaultChannelIfNeeded(r);
-                } catch (PackageManager.NameNotFoundException e) {
-                    Slog.e(TAG, "createDefaultChannelIfNeeded - Exception: " + e);
-                }
-
-                if (r.uid == UNKNOWN_UID) {
-                    mRestoredWithoutUids.put(pkg, r);
-                } else {
-                    mPackagePreferences.put(key, r);
-                }
+            try {
+                createDefaultChannelIfNeededLocked(r);
+            } catch (PackageManager.NameNotFoundException e) {
+                Slog.e(TAG, "createDefaultChannelIfNeededLocked - Exception: " + e);
             }
-            return r;
+
+            if (r.uid == UNKNOWN_UID) {
+                mRestoredWithoutUids.put(pkg, r);
+            } else {
+                mPackagePreferences.put(key, r);
+            }
         }
+        return r;
     }
 
     private boolean shouldHaveDefaultChannel(PackagePreferences r) throws
@@ -336,7 +331,7 @@ public class PreferencesHelper implements RankingConfig {
         return true;
     }
 
-    private void deleteDefaultChannelIfNeeded(PackagePreferences r) throws
+    private void deleteDefaultChannelIfNeededLocked(PackagePreferences r) throws
             PackageManager.NameNotFoundException {
         if (!r.channels.containsKey(NotificationChannel.DEFAULT_CHANNEL_ID)) {
             // Not present
@@ -352,7 +347,7 @@ public class PreferencesHelper implements RankingConfig {
         r.channels.remove(NotificationChannel.DEFAULT_CHANNEL_ID);
     }
 
-    private void createDefaultChannelIfNeeded(PackagePreferences r) throws
+    private void createDefaultChannelIfNeededLocked(PackagePreferences r) throws
             PackageManager.NameNotFoundException {
         if (r.channels.containsKey(NotificationChannel.DEFAULT_CHANNEL_ID)) {
             r.channels.get(NotificationChannel.DEFAULT_CHANNEL_ID).setName(mContext.getString(
@@ -479,9 +474,11 @@ public class PreferencesHelper implements RankingConfig {
      * @param allowed whether bubbles are allowed.
      */
     public void setBubblesAllowed(String pkg, int uid, boolean allowed) {
-        PackagePreferences p = getOrCreatePackagePreferences(pkg, uid);
-        p.allowBubble = allowed;
-        p.lockedAppFields = p.lockedAppFields | LockableAppFields.USER_LOCKED_BUBBLE;
+        synchronized (mPackagePreferences) {
+            PackagePreferences p = getOrCreatePackagePreferencesLocked(pkg, uid);
+            p.allowBubble = allowed;
+            p.lockedAppFields = p.lockedAppFields | LockableAppFields.USER_LOCKED_BUBBLE;
+        }
     }
 
     /**
@@ -493,11 +490,15 @@ public class PreferencesHelper implements RankingConfig {
      */
     @Override
     public boolean areBubblesAllowed(String pkg, int uid) {
-        return getOrCreatePackagePreferences(pkg, uid).allowBubble;
+        synchronized (mPackagePreferences) {
+            return getOrCreatePackagePreferencesLocked(pkg, uid).allowBubble;
+        }
     }
 
     public int getAppLockedFields(String pkg, int uid) {
-        return getOrCreatePackagePreferences(pkg, uid).lockedAppFields;
+        synchronized (mPackagePreferences) {
+            return getOrCreatePackagePreferencesLocked(pkg, uid).lockedAppFields;
+        }
     }
 
     /**
@@ -505,7 +506,9 @@ public class PreferencesHelper implements RankingConfig {
      */
     @Override
     public int getImportance(String packageName, int uid) {
-        return getOrCreatePackagePreferences(packageName, uid).importance;
+        synchronized (mPackagePreferences) {
+            return getOrCreatePackagePreferencesLocked(packageName, uid).importance;
+        }
     }
 
     /**
@@ -514,18 +517,24 @@ public class PreferencesHelper implements RankingConfig {
      * locking field, see {@link NotificationChannel#USER_LOCKED_IMPORTANCE}.
      */
     public boolean getIsAppImportanceLocked(String packageName, int uid) {
-        int userLockedFields = getOrCreatePackagePreferences(packageName, uid).lockedAppFields;
-        return (userLockedFields & LockableAppFields.USER_LOCKED_IMPORTANCE) != 0;
+        synchronized (mPackagePreferences) {
+            int userLockedFields = getOrCreatePackagePreferencesLocked(packageName, uid).lockedAppFields;
+            return (userLockedFields & LockableAppFields.USER_LOCKED_IMPORTANCE) != 0;
+        }
     }
 
     @Override
     public boolean canShowBadge(String packageName, int uid) {
-        return getOrCreatePackagePreferences(packageName, uid).showBadge;
+        synchronized (mPackagePreferences) {
+            return getOrCreatePackagePreferencesLocked(packageName, uid).showBadge;
+        }
     }
 
     @Override
     public void setShowBadge(String packageName, int uid, boolean showBadge) {
-        getOrCreatePackagePreferences(packageName, uid).showBadge = showBadge;
+        synchronized (mPackagePreferences) {
+            getOrCreatePackagePreferencesLocked(packageName, uid).showBadge = showBadge;
+        }
         updateConfig();
     }
 
@@ -534,20 +543,26 @@ public class PreferencesHelper implements RankingConfig {
         if (groupId == null) {
             return false;
         }
-        PackagePreferences r = getOrCreatePackagePreferences(packageName, uid);
-        NotificationChannelGroup group = r.groups.get(groupId);
-        if (group == null) {
-            return false;
+        synchronized (mPackagePreferences) {
+            PackagePreferences r = getOrCreatePackagePreferencesLocked(packageName, uid);
+            NotificationChannelGroup group = r.groups.get(groupId);
+            if (group == null) {
+                return false;
+            }
+            return group.isBlocked();
         }
-        return group.isBlocked();
     }
 
     int getPackagePriority(String pkg, int uid) {
-        return getOrCreatePackagePreferences(pkg, uid).priority;
+        synchronized (mPackagePreferences) {
+            return getOrCreatePackagePreferencesLocked(pkg, uid).priority;
+        }
     }
 
     int getPackageVisibility(String pkg, int uid) {
-        return getOrCreatePackagePreferences(pkg, uid).visibility;
+        synchronized (mPackagePreferences) {
+            return getOrCreatePackagePreferencesLocked(pkg, uid).visibility;
+        }
     }
 
     @Override
@@ -557,32 +572,34 @@ public class PreferencesHelper implements RankingConfig {
         Preconditions.checkNotNull(group);
         Preconditions.checkNotNull(group.getId());
         Preconditions.checkNotNull(!TextUtils.isEmpty(group.getName()));
-        PackagePreferences r = getOrCreatePackagePreferences(pkg, uid);
-        if (r == null) {
-            throw new IllegalArgumentException("Invalid package");
-        }
-        final NotificationChannelGroup oldGroup = r.groups.get(group.getId());
-        if (!group.equals(oldGroup)) {
-            // will log for new entries as well as name/description changes
-            MetricsLogger.action(getChannelGroupLog(group.getId(), pkg));
-        }
-        if (oldGroup != null) {
-            group.setChannels(oldGroup.getChannels());
+        synchronized (mPackagePreferences) {
+            PackagePreferences r = getOrCreatePackagePreferencesLocked(pkg, uid);
+            if (r == null) {
+                throw new IllegalArgumentException("Invalid package");
+            }
+            final NotificationChannelGroup oldGroup = r.groups.get(group.getId());
+            if (!group.equals(oldGroup)) {
+                // will log for new entries as well as name/description changes
+                MetricsLogger.action(getChannelGroupLog(group.getId(), pkg));
+            }
+            if (oldGroup != null) {
+                group.setChannels(oldGroup.getChannels());
 
-            // apps can't update the blocked status or app overlay permission
-            if (fromTargetApp) {
-                group.setBlocked(oldGroup.isBlocked());
-                group.unlockFields(group.getUserLockedFields());
-                group.lockFields(oldGroup.getUserLockedFields());
-            } else {
-                // but the system can
-                if (group.isBlocked() != oldGroup.isBlocked()) {
-                    group.lockFields(NotificationChannelGroup.USER_LOCKED_BLOCKED_STATE);
-                    updateChannelsBypassingDnd(mContext.getUserId());
+                // apps can't update the blocked status or app overlay permission
+                if (fromTargetApp) {
+                    group.setBlocked(oldGroup.isBlocked());
+                    group.unlockFields(group.getUserLockedFields());
+                    group.lockFields(oldGroup.getUserLockedFields());
+                } else {
+                    // but the system can
+                    if (group.isBlocked() != oldGroup.isBlocked()) {
+                        group.lockFields(NotificationChannelGroup.USER_LOCKED_BLOCKED_STATE);
+                        updateChannelsBypassingDnd(mContext.getUserId());
+                    }
                 }
             }
+            r.groups.put(group.getId(), group);
         }
-        r.groups.put(group.getId(), group);
     }
 
     @Override
@@ -592,94 +609,96 @@ public class PreferencesHelper implements RankingConfig {
         Preconditions.checkNotNull(channel);
         Preconditions.checkNotNull(channel.getId());
         Preconditions.checkArgument(!TextUtils.isEmpty(channel.getName()));
-        PackagePreferences r = getOrCreatePackagePreferences(pkg, uid);
-        if (r == null) {
-            throw new IllegalArgumentException("Invalid package");
-        }
-        if (channel.getGroup() != null && !r.groups.containsKey(channel.getGroup())) {
-            throw new IllegalArgumentException("NotificationChannelGroup doesn't exist");
-        }
-        if (NotificationChannel.DEFAULT_CHANNEL_ID.equals(channel.getId())) {
-            throw new IllegalArgumentException("Reserved id");
-        }
-        NotificationChannel existing = r.channels.get(channel.getId());
-        // Keep most of the existing settings
-        if (existing != null && fromTargetApp) {
-            if (existing.isDeleted()) {
-                existing.setDeleted(false);
+        synchronized (mPackagePreferences) {
+            PackagePreferences r = getOrCreatePackagePreferencesLocked(pkg, uid);
+            if (r == null) {
+                throw new IllegalArgumentException("Invalid package");
+            }
+            if (channel.getGroup() != null && !r.groups.containsKey(channel.getGroup())) {
+                throw new IllegalArgumentException("NotificationChannelGroup doesn't exist");
+            }
+            if (NotificationChannel.DEFAULT_CHANNEL_ID.equals(channel.getId())) {
+                throw new IllegalArgumentException("Reserved id");
+            }
+            NotificationChannel existing = r.channels.get(channel.getId());
+            // Keep most of the existing settings
+            if (existing != null && fromTargetApp) {
+                if (existing.isDeleted()) {
+                    existing.setDeleted(false);
 
-                // log a resurrected channel as if it's new again
-                MetricsLogger.action(getChannelLog(channel, pkg).setType(
-                        com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_OPEN));
+                    // log a resurrected channel as if it's new again
+                    MetricsLogger.action(getChannelLog(channel, pkg).setType(
+                            com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_OPEN));
+                }
+
+                existing.setName(channel.getName().toString());
+                existing.setDescription(channel.getDescription());
+                existing.setBlockableSystem(channel.isBlockableSystem());
+                if (existing.getGroup() == null) {
+                    existing.setGroup(channel.getGroup());
+                }
+
+                // Apps are allowed to downgrade channel importance if the user has not changed any
+                // fields on this channel yet.
+                final int previousExistingImportance = existing.getImportance();
+                if (existing.getUserLockedFields() == 0 &&
+                        channel.getImportance() < existing.getImportance()) {
+                    existing.setImportance(channel.getImportance());
+                }
+
+                // system apps and dnd access apps can bypass dnd if the user hasn't changed any
+                // fields on the channel yet
+                if (existing.getUserLockedFields() == 0 && hasDndAccess) {
+                    boolean bypassDnd = channel.canBypassDnd();
+                    existing.setBypassDnd(bypassDnd);
+
+                    if (bypassDnd != mAreChannelsBypassingDnd
+                            || previousExistingImportance != existing.getImportance()) {
+                        updateChannelsBypassingDnd(mContext.getUserId());
+                    }
+                }
+
+                updateConfig();
+                return;
+            }
+            if (channel.getImportance() < IMPORTANCE_NONE
+                    || channel.getImportance() > NotificationManager.IMPORTANCE_MAX) {
+                throw new IllegalArgumentException("Invalid importance level");
             }
 
-            existing.setName(channel.getName().toString());
-            existing.setDescription(channel.getDescription());
-            existing.setBlockableSystem(channel.isBlockableSystem());
-            if (existing.getGroup() == null) {
-                existing.setGroup(channel.getGroup());
+            // Reset fields that apps aren't allowed to set.
+            if (fromTargetApp && !hasDndAccess) {
+                channel.setBypassDnd(r.priority == Notification.PRIORITY_MAX);
             }
-
-            // Apps are allowed to downgrade channel importance if the user has not changed any
-            // fields on this channel yet.
-            final int previousExistingImportance = existing.getImportance();
-            if (existing.getUserLockedFields() == 0 &&
-                    channel.getImportance() < existing.getImportance()) {
-                existing.setImportance(channel.getImportance());
+            if (fromTargetApp) {
+                channel.setLockscreenVisibility(r.visibility);
             }
-
-            // system apps and dnd access apps can bypass dnd if the user hasn't changed any
-            // fields on the channel yet
-            if (existing.getUserLockedFields() == 0 && hasDndAccess) {
-                boolean bypassDnd = channel.canBypassDnd();
-                existing.setBypassDnd(bypassDnd);
-
-                if (bypassDnd != mAreChannelsBypassingDnd
-                        || previousExistingImportance != existing.getImportance()) {
-                    updateChannelsBypassingDnd(mContext.getUserId());
+            clearLockedFieldsLocked(channel);
+            channel.setImportanceLockedByOEM(r.oemLockedImportance);
+            if (!channel.isImportanceLockedByOEM()) {
+                if (r.futureOemLockedChannels.remove(channel.getId())) {
+                    channel.setImportanceLockedByOEM(true);
                 }
             }
-
-            updateConfig();
-            return;
-        }
-        if (channel.getImportance() < IMPORTANCE_NONE
-                || channel.getImportance() > NotificationManager.IMPORTANCE_MAX) {
-            throw new IllegalArgumentException("Invalid importance level");
-        }
-
-        // Reset fields that apps aren't allowed to set.
-        if (fromTargetApp && !hasDndAccess) {
-            channel.setBypassDnd(r.priority == Notification.PRIORITY_MAX);
-        }
-        if (fromTargetApp) {
-            channel.setLockscreenVisibility(r.visibility);
-        }
-        clearLockedFields(channel);
-        channel.setImportanceLockedByOEM(r.oemLockedImportance);
-        if (!channel.isImportanceLockedByOEM()) {
-            if (r.futureOemLockedChannels.remove(channel.getId())) {
-                channel.setImportanceLockedByOEM(true);
+            channel.setImportanceLockedByCriticalDeviceFunction(r.defaultAppLockedImportance);
+            if (channel.getLockscreenVisibility() == Notification.VISIBILITY_PUBLIC) {
+                channel.setLockscreenVisibility(
+                        NotificationListenerService.Ranking.VISIBILITY_NO_OVERRIDE);
             }
-        }
-        channel.setImportanceLockedByCriticalDeviceFunction(r.defaultAppLockedImportance);
-        if (channel.getLockscreenVisibility() == Notification.VISIBILITY_PUBLIC) {
-            channel.setLockscreenVisibility(
-                    NotificationListenerService.Ranking.VISIBILITY_NO_OVERRIDE);
-        }
-        if (!r.showBadge) {
-            channel.setShowBadge(false);
-        }
+            if (!r.showBadge) {
+                channel.setShowBadge(false);
+            }
 
-        r.channels.put(channel.getId(), channel);
-        if (channel.canBypassDnd() != mAreChannelsBypassingDnd) {
-            updateChannelsBypassingDnd(mContext.getUserId());
+            r.channels.put(channel.getId(), channel);
+            if (channel.canBypassDnd() != mAreChannelsBypassingDnd) {
+                updateChannelsBypassingDnd(mContext.getUserId());
+            }
+            MetricsLogger.action(getChannelLog(channel, pkg).setType(
+                    com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_OPEN));
         }
-        MetricsLogger.action(getChannelLog(channel, pkg).setType(
-                com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_OPEN));
     }
 
-    void clearLockedFields(NotificationChannel channel) {
+    void clearLockedFieldsLocked(NotificationChannel channel) {
         channel.unlockFields(channel.getUserLockedFields());
     }
 
@@ -688,55 +707,58 @@ public class PreferencesHelper implements RankingConfig {
             boolean fromUser) {
         Preconditions.checkNotNull(updatedChannel);
         Preconditions.checkNotNull(updatedChannel.getId());
-        PackagePreferences r = getOrCreatePackagePreferences(pkg, uid);
-        if (r == null) {
-            throw new IllegalArgumentException("Invalid package");
-        }
-        NotificationChannel channel = r.channels.get(updatedChannel.getId());
-        if (channel == null || channel.isDeleted()) {
-            throw new IllegalArgumentException("Channel does not exist");
-        }
-        if (updatedChannel.getLockscreenVisibility() == Notification.VISIBILITY_PUBLIC) {
-            updatedChannel.setLockscreenVisibility(
-                    NotificationListenerService.Ranking.VISIBILITY_NO_OVERRIDE);
-        }
-        if (fromUser) {
-            updatedChannel.lockFields(channel.getUserLockedFields());
-            lockFieldsForUpdate(channel, updatedChannel);
-        } else {
-            updatedChannel.unlockFields(updatedChannel.getUserLockedFields());
-        }
-        // no importance updates are allowed if OEM blocked it
-        updatedChannel.setImportanceLockedByOEM(channel.isImportanceLockedByOEM());
-        if (updatedChannel.isImportanceLockedByOEM()) {
-            updatedChannel.setImportance(channel.getImportance());
-        }
-        updatedChannel.setImportanceLockedByCriticalDeviceFunction(r.defaultAppLockedImportance);
-        if (updatedChannel.isImportanceLockedByCriticalDeviceFunction()) {
-            updatedChannel.setImportance(channel.getImportance());
-        }
+        synchronized (mPackagePreferences) {
+            PackagePreferences r = getOrCreatePackagePreferencesLocked(pkg, uid);
+            if (r == null) {
+                throw new IllegalArgumentException("Invalid package");
+            }
+            NotificationChannel channel = r.channels.get(updatedChannel.getId());
+            if (channel == null || channel.isDeleted()) {
+                throw new IllegalArgumentException("Channel does not exist");
+            }
+            if (updatedChannel.getLockscreenVisibility() == Notification.VISIBILITY_PUBLIC) {
+                updatedChannel.setLockscreenVisibility(
+                        NotificationListenerService.Ranking.VISIBILITY_NO_OVERRIDE);
+            }
+            if (fromUser) {
+                updatedChannel.lockFields(channel.getUserLockedFields());
+                lockFieldsForUpdateLocked(channel, updatedChannel);
+            } else {
+                updatedChannel.unlockFields(updatedChannel.getUserLockedFields());
+            }
+            // no importance updates are allowed if OEM blocked it
+            updatedChannel.setImportanceLockedByOEM(channel.isImportanceLockedByOEM());
+            if (updatedChannel.isImportanceLockedByOEM()) {
+                updatedChannel.setImportance(channel.getImportance());
+            }
+            updatedChannel.setImportanceLockedByCriticalDeviceFunction(
+                    r.defaultAppLockedImportance);
+            if (updatedChannel.isImportanceLockedByCriticalDeviceFunction()) {
+                updatedChannel.setImportance(channel.getImportance());
+            }
 
-        r.channels.put(updatedChannel.getId(), updatedChannel);
+            r.channels.put(updatedChannel.getId(), updatedChannel);
 
-        if (onlyHasDefaultChannel(pkg, uid)) {
-            // copy settings to app level so they are inherited by new channels
-            // when the app migrates
-            r.importance = updatedChannel.getImportance();
-            r.priority = updatedChannel.canBypassDnd()
-                    ? Notification.PRIORITY_MAX : Notification.PRIORITY_DEFAULT;
-            r.visibility = updatedChannel.getLockscreenVisibility();
-            r.showBadge = updatedChannel.canShowBadge();
-        }
+            if (onlyHasDefaultChannel(pkg, uid)) {
+                // copy settings to app level so they are inherited by new channels
+                // when the app migrates
+                r.importance = updatedChannel.getImportance();
+                r.priority = updatedChannel.canBypassDnd()
+                        ? Notification.PRIORITY_MAX : Notification.PRIORITY_DEFAULT;
+                r.visibility = updatedChannel.getLockscreenVisibility();
+                r.showBadge = updatedChannel.canShowBadge();
+            }
 
-        if (!channel.equals(updatedChannel)) {
-            // only log if there are real changes
-            MetricsLogger.action(getChannelLog(updatedChannel, pkg)
-                    .setSubtype(fromUser ? 1 : 0));
-        }
+            if (!channel.equals(updatedChannel)) {
+                // only log if there are real changes
+                MetricsLogger.action(getChannelLog(updatedChannel, pkg)
+                        .setSubtype(fromUser ? 1 : 0));
+            }
 
-        if (updatedChannel.canBypassDnd() != mAreChannelsBypassingDnd
-                || channel.getImportance() != updatedChannel.getImportance()) {
-            updateChannelsBypassingDnd(mContext.getUserId());
+            if (updatedChannel.canBypassDnd() != mAreChannelsBypassingDnd
+                    || channel.getImportance() != updatedChannel.getImportance()) {
+                updateChannelsBypassingDnd(mContext.getUserId());
+            }
         }
         updateConfig();
     }
@@ -745,35 +767,39 @@ public class PreferencesHelper implements RankingConfig {
     public NotificationChannel getNotificationChannel(String pkg, int uid, String channelId,
             boolean includeDeleted) {
         Preconditions.checkNotNull(pkg);
-        PackagePreferences r = getOrCreatePackagePreferences(pkg, uid);
-        if (r == null) {
+        synchronized (mPackagePreferences) {
+            PackagePreferences r = getOrCreatePackagePreferencesLocked(pkg, uid);
+            if (r == null) {
+                return null;
+            }
+            if (channelId == null) {
+                channelId = NotificationChannel.DEFAULT_CHANNEL_ID;
+            }
+            final NotificationChannel nc = r.channels.get(channelId);
+            if (nc != null && (includeDeleted || !nc.isDeleted())) {
+                return nc;
+            }
             return null;
         }
-        if (channelId == null) {
-            channelId = NotificationChannel.DEFAULT_CHANNEL_ID;
-        }
-        final NotificationChannel nc = r.channels.get(channelId);
-        if (nc != null && (includeDeleted || !nc.isDeleted())) {
-            return nc;
-        }
-        return null;
     }
 
     @Override
     public void deleteNotificationChannel(String pkg, int uid, String channelId) {
-        PackagePreferences r = getPackagePreferences(pkg, uid);
-        if (r == null) {
-            return;
-        }
-        NotificationChannel channel = r.channels.get(channelId);
-        if (channel != null) {
-            channel.setDeleted(true);
-            LogMaker lm = getChannelLog(channel, pkg);
-            lm.setType(com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_CLOSE);
-            MetricsLogger.action(lm);
+        synchronized (mPackagePreferences) {
+            PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
+            if (r == null) {
+                return;
+            }
+            NotificationChannel channel = r.channels.get(channelId);
+            if (channel != null) {
+                channel.setDeleted(true);
+                LogMaker lm = getChannelLog(channel, pkg);
+                lm.setType(com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_CLOSE);
+                MetricsLogger.action(lm);
 
-            if (mAreChannelsBypassingDnd && channel.canBypassDnd()) {
-                updateChannelsBypassingDnd(mContext.getUserId());
+                if (mAreChannelsBypassingDnd && channel.canBypassDnd()) {
+                    updateChannelsBypassingDnd(mContext.getUserId());
+                }
             }
         }
     }
@@ -783,25 +809,29 @@ public class PreferencesHelper implements RankingConfig {
     public void permanentlyDeleteNotificationChannel(String pkg, int uid, String channelId) {
         Preconditions.checkNotNull(pkg);
         Preconditions.checkNotNull(channelId);
-        PackagePreferences r = getPackagePreferences(pkg, uid);
-        if (r == null) {
-            return;
+        synchronized (mPackagePreferences) {
+            PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
+            if (r == null) {
+                return;
+            }
+            r.channels.remove(channelId);
         }
-        r.channels.remove(channelId);
     }
 
     @Override
     public void permanentlyDeleteNotificationChannels(String pkg, int uid) {
         Preconditions.checkNotNull(pkg);
-        PackagePreferences r = getPackagePreferences(pkg, uid);
-        if (r == null) {
-            return;
-        }
-        int N = r.channels.size() - 1;
-        for (int i = N; i >= 0; i--) {
-            String key = r.channels.keyAt(i);
-            if (!NotificationChannel.DEFAULT_CHANNEL_ID.equals(key)) {
-                r.channels.remove(key);
+        synchronized (mPackagePreferences) {
+            PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
+            if (r == null) {
+                return;
+            }
+            int N = r.channels.size() - 1;
+            for (int i = N; i >= 0; i--) {
+                String key = r.channels.keyAt(i);
+                if (!NotificationChannel.DEFAULT_CHANNEL_ID.equals(key)) {
+                    r.channels.remove(key);
+                }
             }
         }
     }
@@ -875,32 +905,36 @@ public class PreferencesHelper implements RankingConfig {
     public NotificationChannelGroup getNotificationChannelGroupWithChannels(String pkg,
             int uid, String groupId, boolean includeDeleted) {
         Preconditions.checkNotNull(pkg);
-        PackagePreferences r = getPackagePreferences(pkg, uid);
-        if (r == null || groupId == null || !r.groups.containsKey(groupId)) {
-            return null;
-        }
-        NotificationChannelGroup group = r.groups.get(groupId).clone();
-        group.setChannels(new ArrayList<>());
-        int N = r.channels.size();
-        for (int i = 0; i < N; i++) {
-            final NotificationChannel nc = r.channels.valueAt(i);
-            if (includeDeleted || !nc.isDeleted()) {
-                if (groupId.equals(nc.getGroup())) {
-                    group.addChannel(nc);
+        synchronized (mPackagePreferences) {
+            PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
+            if (r == null || groupId == null || !r.groups.containsKey(groupId)) {
+                return null;
+            }
+            NotificationChannelGroup group = r.groups.get(groupId).clone();
+            group.setChannels(new ArrayList<>());
+            int N = r.channels.size();
+            for (int i = 0; i < N; i++) {
+                final NotificationChannel nc = r.channels.valueAt(i);
+                if (includeDeleted || !nc.isDeleted()) {
+                    if (groupId.equals(nc.getGroup())) {
+                        group.addChannel(nc);
+                    }
                 }
             }
+            return group;
         }
-        return group;
     }
 
     public NotificationChannelGroup getNotificationChannelGroup(String groupId, String pkg,
             int uid) {
         Preconditions.checkNotNull(pkg);
-        PackagePreferences r = getPackagePreferences(pkg, uid);
-        if (r == null) {
-            return null;
+        synchronized (mPackagePreferences) {
+            PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
+            if (r == null) {
+                return null;
+            }
+            return r.groups.get(groupId);
         }
-        return r.groups.get(groupId);
     }
 
     @Override
@@ -908,60 +942,64 @@ public class PreferencesHelper implements RankingConfig {
             int uid, boolean includeDeleted, boolean includeNonGrouped, boolean includeEmpty) {
         Preconditions.checkNotNull(pkg);
         Map<String, NotificationChannelGroup> groups = new ArrayMap<>();
-        PackagePreferences r = getPackagePreferences(pkg, uid);
-        if (r == null) {
-            return ParceledListSlice.emptyList();
-        }
-        NotificationChannelGroup nonGrouped = new NotificationChannelGroup(null, null);
-        int N = r.channels.size();
-        for (int i = 0; i < N; i++) {
-            final NotificationChannel nc = r.channels.valueAt(i);
-            if (includeDeleted || !nc.isDeleted()) {
-                if (nc.getGroup() != null) {
-                    if (r.groups.get(nc.getGroup()) != null) {
-                        NotificationChannelGroup ncg = groups.get(nc.getGroup());
-                        if (ncg == null) {
-                            ncg = r.groups.get(nc.getGroup()).clone();
-                            ncg.setChannels(new ArrayList<>());
-                            groups.put(nc.getGroup(), ncg);
+        synchronized (mPackagePreferences) {
+            PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
+            if (r == null) {
+                return ParceledListSlice.emptyList();
+            }
+            NotificationChannelGroup nonGrouped = new NotificationChannelGroup(null, null);
+            int N = r.channels.size();
+            for (int i = 0; i < N; i++) {
+                final NotificationChannel nc = r.channels.valueAt(i);
+                if (includeDeleted || !nc.isDeleted()) {
+                    if (nc.getGroup() != null) {
+                        if (r.groups.get(nc.getGroup()) != null) {
+                            NotificationChannelGroup ncg = groups.get(nc.getGroup());
+                            if (ncg == null) {
+                                ncg = r.groups.get(nc.getGroup()).clone();
+                                ncg.setChannels(new ArrayList<>());
+                                groups.put(nc.getGroup(), ncg);
 
+                            }
+                            ncg.addChannel(nc);
                         }
-                        ncg.addChannel(nc);
+                    } else {
+                        nonGrouped.addChannel(nc);
                     }
-                } else {
-                    nonGrouped.addChannel(nc);
                 }
             }
-        }
-        if (includeNonGrouped && nonGrouped.getChannels().size() > 0) {
-            groups.put(null, nonGrouped);
-        }
-        if (includeEmpty) {
-            for (NotificationChannelGroup group : r.groups.values()) {
-                if (!groups.containsKey(group.getId())) {
-                    groups.put(group.getId(), group);
+            if (includeNonGrouped && nonGrouped.getChannels().size() > 0) {
+                groups.put(null, nonGrouped);
+            }
+            if (includeEmpty) {
+                for (NotificationChannelGroup group : r.groups.values()) {
+                    if (!groups.containsKey(group.getId())) {
+                        groups.put(group.getId(), group);
+                    }
                 }
             }
+            return new ParceledListSlice<>(new ArrayList<>(groups.values()));
         }
-        return new ParceledListSlice<>(new ArrayList<>(groups.values()));
     }
 
     public List<NotificationChannel> deleteNotificationChannelGroup(String pkg, int uid,
             String groupId) {
         List<NotificationChannel> deletedChannels = new ArrayList<>();
-        PackagePreferences r = getPackagePreferences(pkg, uid);
-        if (r == null || TextUtils.isEmpty(groupId)) {
-            return deletedChannels;
-        }
+        synchronized (mPackagePreferences) {
+            PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
+            if (r == null || TextUtils.isEmpty(groupId)) {
+                return deletedChannels;
+            }
 
-        r.groups.remove(groupId);
+            r.groups.remove(groupId);
 
-        int N = r.channels.size();
-        for (int i = 0; i < N; i++) {
-            final NotificationChannel nc = r.channels.valueAt(i);
-            if (groupId.equals(nc.getGroup())) {
-                nc.setDeleted(true);
-                deletedChannels.add(nc);
+            int N = r.channels.size();
+            for (int i = 0; i < N; i++) {
+                final NotificationChannel nc = r.channels.valueAt(i);
+                if (groupId.equals(nc.getGroup())) {
+                    nc.setDeleted(true);
+                    deletedChannels.add(nc);
+                }
             }
         }
         return deletedChannels;
@@ -970,11 +1008,15 @@ public class PreferencesHelper implements RankingConfig {
     @Override
     public Collection<NotificationChannelGroup> getNotificationChannelGroups(String pkg,
             int uid) {
-        PackagePreferences r = getPackagePreferences(pkg, uid);
-        if (r == null) {
-            return new ArrayList<>();
+        List<NotificationChannelGroup> groups = new ArrayList<>();
+        synchronized (mPackagePreferences) {
+            PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
+            if (r == null) {
+                return groups;
+            }
+            groups.addAll(r.groups.values());
         }
-        return r.groups.values();
+        return groups;
     }
 
     @Override
@@ -982,18 +1024,20 @@ public class PreferencesHelper implements RankingConfig {
             boolean includeDeleted) {
         Preconditions.checkNotNull(pkg);
         List<NotificationChannel> channels = new ArrayList<>();
-        PackagePreferences r = getPackagePreferences(pkg, uid);
-        if (r == null) {
-            return ParceledListSlice.emptyList();
-        }
-        int N = r.channels.size();
-        for (int i = 0; i < N; i++) {
-            final NotificationChannel nc = r.channels.valueAt(i);
-            if (includeDeleted || !nc.isDeleted()) {
-                channels.add(nc);
+        synchronized (mPackagePreferences) {
+            PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
+            if (r == null) {
+                return ParceledListSlice.emptyList();
             }
+            int N = r.channels.size();
+            for (int i = 0; i < N; i++) {
+                final NotificationChannel nc = r.channels.valueAt(i);
+                if (includeDeleted || !nc.isDeleted()) {
+                    channels.add(nc);
+                }
+            }
+            return new ParceledListSlice<>(channels);
         }
-        return new ParceledListSlice<>(channels);
     }
 
     /**
@@ -1008,7 +1052,7 @@ public class PreferencesHelper implements RankingConfig {
             // notifications from this package aren't blocked
             if (r != null && r.importance != IMPORTANCE_NONE) {
                 for (NotificationChannel channel : r.channels.values()) {
-                    if (channelIsLive(r, channel) && channel.canBypassDnd()) {
+                    if (channelIsLiveLocked(r, channel) && channel.canBypassDnd()) {
                         channels.add(channel);
                     }
                 }
@@ -1024,46 +1068,52 @@ public class PreferencesHelper implements RankingConfig {
      * upgrades.
      */
     public boolean onlyHasDefaultChannel(String pkg, int uid) {
-        PackagePreferences r = getOrCreatePackagePreferences(pkg, uid);
-        if (r.channels.size() == 1
-                && r.channels.containsKey(NotificationChannel.DEFAULT_CHANNEL_ID)) {
-            return true;
+        synchronized (mPackagePreferences) {
+            PackagePreferences r = getOrCreatePackagePreferencesLocked(pkg, uid);
+            if (r.channels.size() == 1
+                    && r.channels.containsKey(NotificationChannel.DEFAULT_CHANNEL_ID)) {
+                return true;
+            }
+            return false;
         }
-        return false;
     }
 
     public int getDeletedChannelCount(String pkg, int uid) {
         Preconditions.checkNotNull(pkg);
         int deletedCount = 0;
-        PackagePreferences r = getPackagePreferences(pkg, uid);
-        if (r == null) {
+        synchronized (mPackagePreferences) {
+            PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
+            if (r == null) {
+                return deletedCount;
+            }
+            int N = r.channels.size();
+            for (int i = 0; i < N; i++) {
+                final NotificationChannel nc = r.channels.valueAt(i);
+                if (nc.isDeleted()) {
+                    deletedCount++;
+                }
+            }
             return deletedCount;
         }
-        int N = r.channels.size();
-        for (int i = 0; i < N; i++) {
-            final NotificationChannel nc = r.channels.valueAt(i);
-            if (nc.isDeleted()) {
-                deletedCount++;
-            }
-        }
-        return deletedCount;
     }
 
     public int getBlockedChannelCount(String pkg, int uid) {
         Preconditions.checkNotNull(pkg);
         int blockedCount = 0;
-        PackagePreferences r = getPackagePreferences(pkg, uid);
-        if (r == null) {
+        synchronized (mPackagePreferences) {
+            PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
+            if (r == null) {
+                return blockedCount;
+            }
+            int N = r.channels.size();
+            for (int i = 0; i < N; i++) {
+                final NotificationChannel nc = r.channels.valueAt(i);
+                if (!nc.isDeleted() && IMPORTANCE_NONE == nc.getImportance()) {
+                    blockedCount++;
+                }
+            }
             return blockedCount;
         }
-        int N = r.channels.size();
-        for (int i = 0; i < N; i++) {
-            final NotificationChannel nc = r.channels.valueAt(i);
-            if (!nc.isDeleted() && IMPORTANCE_NONE == nc.getImportance()) {
-                blockedCount++;
-            }
-        }
-        return blockedCount;
     }
 
     public int getBlockedAppCount(int userId) {
@@ -1098,7 +1148,7 @@ public class PreferencesHelper implements RankingConfig {
                 }
 
                 for (NotificationChannel channel : r.channels.values()) {
-                    if (channelIsLive(r, channel) && channel.canBypassDnd()) {
+                    if (channelIsLiveLocked(r, channel) && channel.canBypassDnd()) {
                         count++;
                         break;
                     }
@@ -1136,7 +1186,7 @@ public class PreferencesHelper implements RankingConfig {
                 }
 
                 for (NotificationChannel channel : r.channels.values()) {
-                    if (channelIsLive(r, channel) && channel.canBypassDnd()) {
+                    if (channelIsLiveLocked(r, channel) && channel.canBypassDnd()) {
                         if (!mAreChannelsBypassingDnd) {
                             mAreChannelsBypassingDnd = true;
                             updateZenPolicy(true);
@@ -1153,7 +1203,7 @@ public class PreferencesHelper implements RankingConfig {
         }
     }
 
-    private boolean channelIsLive(PackagePreferences pkgPref, NotificationChannel channel) {
+    private boolean channelIsLiveLocked(PackagePreferences pkgPref, NotificationChannel channel) {
         // Channel is in a group that's blocked
         if (isGroupBlocked(pkgPref.pkg, pkgPref.uid, channel.getGroup())) {
             return false;
@@ -1185,7 +1235,9 @@ public class PreferencesHelper implements RankingConfig {
      */
     @Override
     public void setImportance(String pkgName, int uid, int importance) {
-        getOrCreatePackagePreferences(pkgName, uid).importance = importance;
+        synchronized (mPackagePreferences) {
+            getOrCreatePackagePreferencesLocked(pkgName, uid).importance = importance;
+        }
         updateConfig();
     }
 
@@ -1204,12 +1256,15 @@ public class PreferencesHelper implements RankingConfig {
      * considered for sentiment adjustments (and thus never show a blocking helper).
      */
     public void setAppImportanceLocked(String packageName, int uid) {
-        PackagePreferences prefs = getOrCreatePackagePreferences(packageName, uid);
-        if ((prefs.lockedAppFields & LockableAppFields.USER_LOCKED_IMPORTANCE) != 0) {
-            return;
-        }
+        synchronized (mPackagePreferences) {
+            PackagePreferences prefs = getOrCreatePackagePreferencesLocked(packageName, uid);
+            if ((prefs.lockedAppFields & LockableAppFields.USER_LOCKED_IMPORTANCE) != 0) {
+                return;
+            }
 
-        prefs.lockedAppFields = prefs.lockedAppFields | LockableAppFields.USER_LOCKED_IMPORTANCE;
+            prefs.lockedAppFields =
+                    prefs.lockedAppFields | LockableAppFields.USER_LOCKED_IMPORTANCE;
+        }
         updateConfig();
     }
 
@@ -1217,15 +1272,17 @@ public class PreferencesHelper implements RankingConfig {
      * Returns the delegate for a given package, if it's allowed by the package and the user.
      */
     public @Nullable String getNotificationDelegate(String sourcePkg, int sourceUid) {
-        PackagePreferences prefs = getPackagePreferences(sourcePkg, sourceUid);
+        synchronized (mPackagePreferences) {
+            PackagePreferences prefs = getPackagePreferencesLocked(sourcePkg, sourceUid);
 
-        if (prefs == null || prefs.delegate == null) {
-            return null;
+            if (prefs == null || prefs.delegate == null) {
+                return null;
+            }
+            if (!prefs.delegate.mUserAllowed || !prefs.delegate.mEnabled) {
+                return null;
+            }
+            return prefs.delegate.mPkg;
         }
-        if (!prefs.delegate.mUserAllowed || !prefs.delegate.mEnabled) {
-            return null;
-        }
-        return prefs.delegate.mPkg;
     }
 
     /**
@@ -1233,11 +1290,13 @@ public class PreferencesHelper implements RankingConfig {
      */
     public void setNotificationDelegate(String sourcePkg, int sourceUid,
             String delegatePkg, int delegateUid) {
-        PackagePreferences prefs = getOrCreatePackagePreferences(sourcePkg, sourceUid);
+        synchronized (mPackagePreferences) {
+            PackagePreferences prefs = getOrCreatePackagePreferencesLocked(sourcePkg, sourceUid);
 
-        boolean userAllowed = prefs.delegate == null || prefs.delegate.mUserAllowed;
-        Delegate delegate = new Delegate(delegatePkg, delegateUid, true, userAllowed);
-        prefs.delegate = delegate;
+            boolean userAllowed = prefs.delegate == null || prefs.delegate.mUserAllowed;
+            Delegate delegate = new Delegate(delegatePkg, delegateUid, true, userAllowed);
+            prefs.delegate = delegate;
+        }
         updateConfig();
     }
 
@@ -1245,9 +1304,15 @@ public class PreferencesHelper implements RankingConfig {
      * Used by an app to turn off its notification delegate.
      */
     public void revokeNotificationDelegate(String sourcePkg, int sourceUid) {
-        PackagePreferences prefs = getPackagePreferences(sourcePkg, sourceUid);
-        if (prefs != null && prefs.delegate != null) {
-            prefs.delegate.mEnabled = false;
+        boolean changed = false;
+        synchronized (mPackagePreferences) {
+            PackagePreferences prefs = getPackagePreferencesLocked(sourcePkg, sourceUid);
+            if (prefs != null && prefs.delegate != null) {
+                prefs.delegate.mEnabled = false;
+                changed = true;
+            }
+        }
+        if (changed) {
             updateConfig();
         }
     }
@@ -1256,9 +1321,15 @@ public class PreferencesHelper implements RankingConfig {
      * Toggles whether an app can have a notification delegate on behalf of a user.
      */
     public void toggleNotificationDelegate(String sourcePkg, int sourceUid, boolean userAllowed) {
-        PackagePreferences prefs = getPackagePreferences(sourcePkg, sourceUid);
-        if (prefs != null && prefs.delegate != null) {
-            prefs.delegate.mUserAllowed = userAllowed;
+        boolean changed = false;
+        synchronized (mPackagePreferences) {
+            PackagePreferences prefs = getPackagePreferencesLocked(sourcePkg, sourceUid);
+            if (prefs != null && prefs.delegate != null) {
+                prefs.delegate.mUserAllowed = userAllowed;
+                changed = true;
+            }
+        }
+        if (changed) {
             updateConfig();
         }
     }
@@ -1269,13 +1340,16 @@ public class PreferencesHelper implements RankingConfig {
      */
     public boolean isDelegateAllowed(String sourcePkg, int sourceUid,
             String potentialDelegatePkg, int potentialDelegateUid) {
-        PackagePreferences prefs = getPackagePreferences(sourcePkg, sourceUid);
+        synchronized (mPackagePreferences) {
+            PackagePreferences prefs = getPackagePreferencesLocked(sourcePkg, sourceUid);
 
-        return prefs != null && prefs.isValidDelegate(potentialDelegatePkg, potentialDelegateUid);
+            return prefs != null && prefs.isValidDelegate(potentialDelegatePkg,
+                    potentialDelegateUid);
+        }
     }
 
     @VisibleForTesting
-    void lockFieldsForUpdate(NotificationChannel original, NotificationChannel update) {
+    void lockFieldsForUpdateLocked(NotificationChannel original, NotificationChannel update) {
         if (original.canBypassDnd() != update.canBypassDnd()) {
             update.lockFields(NotificationChannel.USER_LOCKED_PRIORITY);
         }
@@ -1309,30 +1383,30 @@ public class PreferencesHelper implements RankingConfig {
         pw.print(prefix);
         pw.println("per-package config:");
 
-        pw.println("PackagePreferencess:");
+        pw.println("PackagePreferences:");
         synchronized (mPackagePreferences) {
-            dumpPackagePreferencess(pw, prefix, filter, mPackagePreferences);
+            dumpPackagePreferencesLocked(pw, prefix, filter, mPackagePreferences);
         }
         pw.println("Restored without uid:");
-        dumpPackagePreferencess(pw, prefix, filter, mRestoredWithoutUids);
+        dumpPackagePreferencesLocked(pw, prefix, filter, mRestoredWithoutUids);
     }
 
     public void dump(ProtoOutputStream proto,
             @NonNull NotificationManagerService.DumpFilter filter) {
         synchronized (mPackagePreferences) {
-            dumpPackagePreferencess(proto, RankingHelperProto.RECORDS, filter,
+            dumpPackagePreferencesLocked(proto, RankingHelperProto.RECORDS, filter,
                     mPackagePreferences);
         }
-        dumpPackagePreferencess(proto, RankingHelperProto.RECORDS_RESTORED_WITHOUT_UID, filter,
+        dumpPackagePreferencesLocked(proto, RankingHelperProto.RECORDS_RESTORED_WITHOUT_UID, filter,
                 mRestoredWithoutUids);
     }
 
-    private static void dumpPackagePreferencess(PrintWriter pw, String prefix,
+    private static void dumpPackagePreferencesLocked(PrintWriter pw, String prefix,
             @NonNull NotificationManagerService.DumpFilter filter,
-            ArrayMap<String, PackagePreferences> PackagePreferencess) {
-        final int N = PackagePreferencess.size();
+            ArrayMap<String, PackagePreferences> packagePreferences) {
+        final int N = packagePreferences.size();
         for (int i = 0; i < N; i++) {
-            final PackagePreferences r = PackagePreferencess.valueAt(i);
+            final PackagePreferences r = packagePreferences.valueAt(i);
             if (filter.matches(r.pkg)) {
                 pw.print(prefix);
                 pw.print("  AppSettings: ");
@@ -1369,13 +1443,13 @@ public class PreferencesHelper implements RankingConfig {
         }
     }
 
-    private static void dumpPackagePreferencess(ProtoOutputStream proto, long fieldId,
+    private static void dumpPackagePreferencesLocked(ProtoOutputStream proto, long fieldId,
             @NonNull NotificationManagerService.DumpFilter filter,
-            ArrayMap<String, PackagePreferences> PackagePreferencess) {
-        final int N = PackagePreferencess.size();
+            ArrayMap<String, PackagePreferences> packagePreferences) {
+        final int N = packagePreferences.size();
         long fToken;
         for (int i = 0; i < N; i++) {
-            final PackagePreferences r = PackagePreferencess.valueAt(i);
+            final PackagePreferences r = packagePreferences.valueAt(i);
             if (filter.matches(r.pkg)) {
                 fToken = proto.start(fieldId);
 
@@ -1626,11 +1700,11 @@ public class PreferencesHelper implements RankingConfig {
                 // Package upgrade
                 try {
                     synchronized (mPackagePreferences) {
-                        PackagePreferences fullPackagePreferences = getPackagePreferences(pkg,
+                        PackagePreferences fullPackagePreferences = getPackagePreferencesLocked(pkg,
                                 mPm.getPackageUidAsUser(pkg, changeUserId));
                         if (fullPackagePreferences != null) {
-                            createDefaultChannelIfNeeded(fullPackagePreferences);
-                            deleteDefaultChannelIfNeeded(fullPackagePreferences);
+                            createDefaultChannelIfNeededLocked(fullPackagePreferences);
+                            deleteDefaultChannelIfNeededLocked(fullPackagePreferences);
                         }
                     }
                 } catch (PackageManager.NameNotFoundException e) {
