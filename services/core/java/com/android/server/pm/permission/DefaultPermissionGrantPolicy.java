@@ -1363,6 +1363,9 @@ public final class DefaultPermissionGrantPolicy {
 
     private PackageInfo getPackageInfo(String pkg,
             @PackageManager.PackageInfoFlags int extraFlags) {
+        if (pkg == null) {
+            return null;
+        }
         try {
             return mContext.getPackageManager().getPackageInfo(pkg,
                     DEFAULT_PACKAGE_INFO_QUERY_FLAGS | extraFlags);
