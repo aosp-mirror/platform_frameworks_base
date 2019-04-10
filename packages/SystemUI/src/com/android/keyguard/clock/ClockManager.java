@@ -20,8 +20,10 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
@@ -35,6 +37,7 @@ import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManager.DockEventListener;
 import com.android.systemui.plugins.ClockPlugin;
 import com.android.systemui.plugins.PluginListener;
+import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.util.InjectionInflationController;
 
@@ -61,6 +64,7 @@ public final class ClockManager {
     private final ContentResolver mContentResolver;
     private final SettingsWrapper mSettingsWrapper;
     private final Handler mMainHandler = new Handler(Looper.getMainLooper());
+    private final CurrentUserTracker mCurrentUserTracker;
 
     /**
      * Observe settings changes to know when to switch the clock face.
@@ -68,9 +72,11 @@ public final class ClockManager {
     private final ContentObserver mContentObserver =
             new ContentObserver(mMainHandler) {
                 @Override
-                public void onChange(boolean selfChange) {
-                    super.onChange(selfChange);
-                    reload();
+                public void onChange(boolean selfChange, Uri uri, int userId) {
+                    super.onChange(selfChange, uri, userId);
+                    if (userId == mCurrentUserTracker.getCurrentUserId()) {
+                        reload();
+                    }
                 }
             };
 
@@ -123,6 +129,12 @@ public final class ClockManager {
         mPluginManager = pluginManager;
         mContentResolver = contentResolver;
         mSettingsWrapper = settingsWrapper;
+        mCurrentUserTracker = new CurrentUserTracker(context) {
+            @Override
+            public void onUserSwitched(int newUserId) {
+                reload();
+            }
+        };
         mPreviewClocks = new AvailableClocks();
 
         Resources res = context.getResources();
@@ -203,10 +215,11 @@ public final class ClockManager {
         mPluginManager.addPluginListener(mPreviewClocks, ClockPlugin.class, true);
         mContentResolver.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE),
-                false, mContentObserver);
+                false, mContentObserver, UserHandle.USER_ALL);
         mContentResolver.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.DOCKED_CLOCK_FACE),
-                false, mContentObserver);
+                false, mContentObserver, UserHandle.USER_ALL);
+        mCurrentUserTracker.startTracking();
         if (mDockManager == null) {
             mDockManager = SysUiServiceProvider.getComponent(mContext, DockManager.class);
         }
@@ -218,6 +231,7 @@ public final class ClockManager {
     private void unregister() {
         mPluginManager.removePluginListener(mPreviewClocks);
         mContentResolver.unregisterContentObserver(mContentObserver);
+        mCurrentUserTracker.stopTracking();
         if (mDockManager != null) {
             mDockManager.removeListener(mDockEventListener);
         }
@@ -334,7 +348,8 @@ public final class ClockManager {
         private ClockPlugin getClockPlugin() {
             ClockPlugin plugin = null;
             if (ClockManager.this.isDocked()) {
-                final String name = mSettingsWrapper.getDockedClockFace();
+                final String name = mSettingsWrapper.getDockedClockFace(
+                        mCurrentUserTracker.getCurrentUserId());
                 if (name != null) {
                     plugin = mClocks.get(name);
                     if (plugin != null) {
@@ -342,7 +357,8 @@ public final class ClockManager {
                     }
                 }
             }
-            final String name = mSettingsWrapper.getLockScreenCustomClockFace();
+            final String name = mSettingsWrapper.getLockScreenCustomClockFace(
+                    mCurrentUserTracker.getCurrentUserId());
             if (name != null) {
                 plugin = mClocks.get(name);
             }

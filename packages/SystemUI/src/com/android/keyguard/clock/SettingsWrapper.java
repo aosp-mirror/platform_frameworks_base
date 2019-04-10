@@ -34,15 +34,19 @@ public class SettingsWrapper {
 
     /**
      * Gets the value stored in settings for the custom clock face.
+     *
+     * @param userId ID of the user.
      */
-    public String getLockScreenCustomClockFace() {
-        return Settings.Secure.getString(mContentResolver, CUSTOM_CLOCK_FACE);
+    public String getLockScreenCustomClockFace(int userId) {
+        return Settings.Secure.getStringForUser(mContentResolver, CUSTOM_CLOCK_FACE, userId);
     }
 
     /**
      * Gets the value stored in settings for the clock face to use when docked.
+     *
+     * @param userId ID of the user.
      */
-    public String getDockedClockFace() {
-        return Settings.Secure.getString(mContentResolver, DOCKED_CLOCK_FACE);
+    public String getDockedClockFace(int userId) {
+        return Settings.Secure.getStringForUser(mContentResolver, DOCKED_CLOCK_FACE, userId);
     }
 }
