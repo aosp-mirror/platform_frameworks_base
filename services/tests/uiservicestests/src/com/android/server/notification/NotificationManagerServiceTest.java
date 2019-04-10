@@ -71,8 +71,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
+import android.app.AutomaticZenRule;
 import android.app.IActivityManager;
 import android.app.INotificationManager;
 import android.app.ITransientNotification;
@@ -117,6 +119,7 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationStats;
 import android.service.notification.NotifyingApp;
 import android.service.notification.StatusBarNotification;
+import android.service.notification.ZenPolicy;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
@@ -4965,6 +4968,29 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         assertEquals(IMPORTANCE_LOW, r.getAssistantImportance());
         assertEquals(USER_SENTIMENT_NEUTRAL, r.getUserSentiment());
+    }
+
+    public void testAutomaticZenRuleValidation_policyFilterAgreement() throws Exception {
+        ComponentName owner = mock(ComponentName.class);
+        ZenPolicy zenPolicy = new ZenPolicy.Builder().allowAlarms(true).build();
+        boolean isEnabled = true;
+        AutomaticZenRule rule = new AutomaticZenRule("test", owner, owner, mock(Uri.class),
+                zenPolicy, NotificationManager.INTERRUPTION_FILTER_NONE, isEnabled);
+
+        try {
+            mBinderService.addAutomaticZenRule(rule);
+            fail("Zen policy only aplies to priority only mode");
+        } catch (IllegalArgumentException e) {
+            // yay
+        }
+
+        rule = new AutomaticZenRule("test", owner, owner, mock(Uri.class),
+                zenPolicy, NotificationManager.INTERRUPTION_FILTER_PRIORITY, isEnabled);
+        mBinderService.addAutomaticZenRule(rule);
+
+        rule = new AutomaticZenRule("test", owner, owner, mock(Uri.class),
+                null, NotificationManager.INTERRUPTION_FILTER_NONE, isEnabled);
+        mBinderService.addAutomaticZenRule(rule);
     }
 
     public void testAreNotificationsEnabledForPackage_crossUser() throws Exception {
