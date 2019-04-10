@@ -3055,6 +3055,7 @@ public class ChooserActivity extends ResolverActivity {
         private int mRadius = 0;
         private Path mPath = new Path();
         private Paint mOverlayPaint = new Paint(0);
+        private Paint mRoundRectPaint = new Paint(0);
         private Paint mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         private String mExtraImageCount = null;
 
@@ -3078,6 +3079,11 @@ public class ChooserActivity extends ResolverActivity {
             mOverlayPaint.setColor(0x99000000);
             mOverlayPaint.setStyle(Paint.Style.FILL);
 
+            mRoundRectPaint.setColor(context.getResources().getColor(R.color.chooser_row_divider));
+            mRoundRectPaint.setStyle(Paint.Style.STROKE);
+            mRoundRectPaint.setStrokeWidth(context.getResources()
+                    .getDimensionPixelSize(R.dimen.chooser_preview_image_border));
+
             mTextPaint.setColor(Color.WHITE);
             mTextPaint.setTextSize(context.getResources()
                     .getDimensionPixelSize(R.dimen.chooser_preview_image_font_size));
@@ -3087,8 +3093,8 @@ public class ChooserActivity extends ResolverActivity {
         private void updatePath(int width, int height) {
             mPath.reset();
 
-            int imageWidth = width - getPaddingRight();
-            int imageHeight = height - getPaddingBottom();
+            int imageWidth = width - getPaddingRight() - getPaddingLeft();
+            int imageHeight = height - getPaddingBottom() - getPaddingTop();
             mPath.addRoundRect(getPaddingLeft(), getPaddingTop(), imageWidth, imageHeight, mRadius,
                     mRadius, Path.Direction.CW);
         }
@@ -3120,7 +3126,6 @@ public class ChooserActivity extends ResolverActivity {
             updatePath(width, height);
         }
 
-
         @Override
         protected void onDraw(Canvas canvas) {
             if (mRadius != 0) {
@@ -3129,8 +3134,12 @@ public class ChooserActivity extends ResolverActivity {
 
             super.onDraw(canvas);
 
+            int x = getPaddingLeft();
+            int y = getPaddingRight();
+            int width = getWidth() - getPaddingRight() - getPaddingLeft();
+            int height = getHeight() - getPaddingBottom() - getPaddingTop();
             if (mExtraImageCount != null) {
-                canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), mOverlayPaint);
+                canvas.drawRect(x, y, width, height, mOverlayPaint);
 
                 int xPos = canvas.getWidth() / 2;
                 int yPos = (int) ((canvas.getHeight() / 2.0f)
@@ -3138,6 +3147,8 @@ public class ChooserActivity extends ResolverActivity {
 
                 canvas.drawText(mExtraImageCount, xPos, yPos, mTextPaint);
             }
+
+            canvas.drawRoundRect(x, y, width, height, mRadius, mRadius, mRoundRectPaint);
         }
     }
 }
