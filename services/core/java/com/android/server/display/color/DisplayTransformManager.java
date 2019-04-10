@@ -28,6 +28,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Arrays;
 
@@ -73,15 +74,27 @@ public class DisplayTransformManager {
     private static final int SURFACE_FLINGER_TRANSACTION_DISPLAY_COLOR = 1023;
     private static final int SURFACE_FLINGER_TRANSACTION_QUERY_COLOR_MANAGED = 1030;
 
-    private static final String PERSISTENT_PROPERTY_SATURATION = "persist.sys.sf.color_saturation";
-    private static final String PERSISTENT_PROPERTY_DISPLAY_COLOR = "persist.sys.sf.native_mode";
+    @VisibleForTesting
+    static final String PERSISTENT_PROPERTY_SATURATION = "persist.sys.sf.color_saturation";
+    @VisibleForTesting
+    static final String PERSISTENT_PROPERTY_DISPLAY_COLOR = "persist.sys.sf.native_mode";
 
     private static final float COLOR_SATURATION_NATURAL = 1.0f;
     private static final float COLOR_SATURATION_BOOSTED = 1.1f;
 
+    /**
+     * Display color modes defined by DisplayColorSetting in
+     * frameworks/native/services/surfaceflinger/SurfaceFlinger.h.
+     */
     private static final int DISPLAY_COLOR_MANAGED = 0;
     private static final int DISPLAY_COLOR_UNMANAGED = 1;
     private static final int DISPLAY_COLOR_ENHANCED = 2;
+    /**
+     * Display color mode range reserved for vendor customizations by the RenderIntent definition in
+     * hardware/interfaces/graphics/common/1.1/types.hal.
+     */
+    private static final int VENDOR_MODE_RANGE_MIN = 256; // 0x100
+    private static final int VENDOR_MODE_RANGE_MAX = 511; // 0x1ff
 
     /**
      * Map of level -> color transformation matrix.
@@ -257,7 +270,11 @@ public class DisplayTransformManager {
         } else if (colorMode == ColorDisplayManager.COLOR_MODE_AUTOMATIC) {
             applySaturation(COLOR_SATURATION_NATURAL);
             setDisplayColor(DISPLAY_COLOR_ENHANCED);
+        } else if (colorMode >= VENDOR_MODE_RANGE_MIN && colorMode <= VENDOR_MODE_RANGE_MAX) {
+            applySaturation(COLOR_SATURATION_NATURAL);
+            setDisplayColor(colorMode);
         }
+
         setColorMatrix(LEVEL_COLOR_MATRIX_NIGHT_DISPLAY, nightDisplayMatrix);
 
         updateConfiguration();
