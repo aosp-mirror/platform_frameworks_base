@@ -185,6 +185,9 @@ public class TestSystemImpl implements SystemInterface {
     public void notifyZygote(boolean enableMultiProcess) {}
 
     @Override
+    public void ensureZygoteStarted() {}
+
+    @Override
     public boolean isMultiProcessDefaultEnabled() {
         return mMultiProcessDefault;
     }
