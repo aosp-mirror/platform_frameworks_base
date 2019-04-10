@@ -1658,7 +1658,7 @@ easier.
     <style name="Theme.DeviceDefault.DayNight" parent="Theme.DeviceDefault.Light" />
 
     <!-- Theme used for the intent picker activity. -->
-    <style name="Theme.DeviceDefault.Resolver" parent="Theme.DeviceDefault.DayNight">
+    <style name="Theme.DeviceDefault.ResolverCommon" parent="Theme.DeviceDefault.DayNight">
         <item name="windowEnterTransition">@empty</item>
         <item name="windowExitTransition">@empty</item>
         <item name="windowIsTranslucent">true</item>
@@ -1670,6 +1670,12 @@ easier.
         <item name="colorControlActivated">?attr/colorControlHighlight</item>
         <item name="listPreferredItemPaddingStart">?attr/dialogPreferredPadding</item>
         <item name="listPreferredItemPaddingEnd">?attr/dialogPreferredPadding</item>
+        <item name="navigationBarColor">?attr/colorBackgroundFloating</item>
+        <item name="navigationBarDividerColor">@color/chooser_row_divider</item>
+    </style>
+
+    <style name="Theme.DeviceDefault.Resolver" parent="Theme.DeviceDefault.ResolverCommon">
+        <item name="windowLightNavigationBar">true</item>
     </style>
 
     <!-- @hide DeviceDefault themes for the autofill FillUi -->
