@@ -396,9 +396,6 @@ interface INetworkManagementService
      */
     void setNetworkPermission(int netId, int permission);
 
-    void setPermission(String permission, in int[] uids);
-    void clearPermission(in int[] uids);
-
     /**
      * Allow UID to call protect().
      */
