@@ -937,7 +937,7 @@ class ActivityStarter {
                 || callingUid == Process.NFC_UID) {
             return false;
         }
-        // don't abort if the callingUid is in the foreground or is a persistent system process
+        // don't abort if the callingUid has a visible window or is a persistent system process
         final int callingUidProcState = mService.getUidState(callingUid);
         final boolean callingUidHasAnyVisibleWindow =
                 mService.mWindowManager.mRoot.isAnyNonToastWindowVisibleForUid(callingUid);
@@ -946,7 +946,7 @@ class ActivityStarter {
                 || callingUidProcState == ActivityManager.PROCESS_STATE_BOUND_TOP;
         final boolean isCallingUidPersistentSystemProcess = (callingUid == Process.SYSTEM_UID)
                 || callingUidProcState <= ActivityManager.PROCESS_STATE_PERSISTENT_UI;
-        if (isCallingUidForeground || isCallingUidPersistentSystemProcess) {
+        if (callingUidHasAnyVisibleWindow || isCallingUidPersistentSystemProcess) {
             return false;
         }
         // take realCallingUid into consideration
@@ -965,8 +965,8 @@ class ActivityStarter {
                 : (realCallingUid == Process.SYSTEM_UID)
                         || realCallingUidProcState <= ActivityManager.PROCESS_STATE_PERSISTENT_UI;
         if (realCallingUid != callingUid) {
-            // don't abort if the realCallingUid is in the foreground and callingUid isn't
-            if (isRealCallingUidForeground) {
+            // don't abort if the realCallingUid has a visible window
+            if (realCallingUidHasAnyVisibleWindow) {
                 return false;
             }
             // if the realCallingUid is a persistent system process, abort if the IntentSender
@@ -988,10 +988,6 @@ class ActivityStarter {
             callerApp = mService.getProcessController(realCallingPid, realCallingUid);
         }
         if (callerApp != null) {
-            // don't abort if the callerApp has any visible activity
-            if (callerApp.hasForegroundActivities()) {
-                return false;
-            }
             // don't abort if the callerApp is instrumenting with background activity starts privs
             if (callerApp.isInstrumentingWithBackgroundActivityStartPrivileges()) {
                 return false;
@@ -1061,8 +1057,7 @@ class ActivityStarter {
         final ArraySet<Integer> boundClientUids = callerApp.getBoundClientUids();
         for (int i = boundClientUids.size() - 1; i >= 0; --i) {
             final int uid = boundClientUids.valueAt(i);
-            if (mService.mWindowManager.mRoot.isAnyNonToastWindowVisibleForUid(uid)
-                    || mService.getUidState(uid) == ActivityManager.PROCESS_STATE_TOP) {
+            if (mService.isUidForeground(uid)) {
                 return true;
             }
         }
