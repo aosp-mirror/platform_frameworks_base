@@ -112,7 +112,10 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Px;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.ActivityThread;
+import android.app.LoadedApk;
+import android.app.ResourcesManager;
 import android.app.StatusBarManager;
 import android.content.Context;
 import android.content.Intent;
@@ -209,6 +212,8 @@ public class DisplayPolicy {
     private final DisplayContent mDisplayContent;
     private final Object mLock;
     private final Handler mHandler;
+
+    private Resources mCurrentUserResources;
 
     private final boolean mCarDockEnablesAccelerometer;
     private final boolean mDeskDockEnablesAccelerometer;
@@ -2604,9 +2609,17 @@ public class DisplayPolicy {
     }
 
     /**
+     * Called when the user is switched.
+     */
+    public void switchUser() {
+        updateCurrentUserResources();
+    }
+
+    /**
      * Called when the resource overlays change.
      */
     public void onOverlayChangedLw() {
+        updateCurrentUserResources();
         onConfigurationChanged();
         mSystemGestures.onConfigurationChanged();
     }
@@ -2617,8 +2630,7 @@ public class DisplayPolicy {
     public void onConfigurationChanged() {
         final DisplayRotation displayRotation = mDisplayContent.getDisplayRotation();
 
-        final Context uiContext = getSystemUiContext();
-        final Resources res = uiContext.getResources();
+        final Resources res = getCurrentUserResources();
         final int portraitRotation = displayRotation.getPortraitRotation();
         final int upsideDownRotation = displayRotation.getUpsideDownRotation();
         final int landscapeRotation = displayRotation.getLandscapeRotation();
@@ -2693,15 +2705,49 @@ public class DisplayPolicy {
     }
 
     void updateConfigurationAndScreenSizeDependentBehaviors() {
-        final Context uiContext = getSystemUiContext();
-        final Resources res = uiContext.getResources();
+        final Resources res = getCurrentUserResources();
         mNavigationBarCanMove =
                 mDisplayContent.mBaseDisplayWidth != mDisplayContent.mBaseDisplayHeight
                         && res.getBoolean(R.bool.config_navBarCanMove);
     }
 
+    /**
+     * Updates the current user's resources to pick up any changes for the current user (including
+     * overlay paths)
+     */
+    private void updateCurrentUserResources() {
+        final int userId = mService.mAmInternal.getCurrentUserId();
+        final Context uiContext = getSystemUiContext();
+        final LoadedApk pi = ActivityThread.currentActivityThread().getPackageInfo(
+                uiContext.getPackageName(), null, 0, userId);
+
+        // Create the resources from the current-user package info
+        // (see ContextImpl.createDisplayContext)
+        mCurrentUserResources = ResourcesManager.getInstance().getResources(null,
+                pi.getResDir(),
+                null /* splitResDirs */,
+                pi.getOverlayDirs(),
+                pi.getApplicationInfo().sharedLibraryFiles,
+                mDisplayContent.getDisplayId(),
+                null /* overrideConfig */,
+                uiContext.getResources().getCompatibilityInfo(),
+                null /* classLoader */);
+    }
+
     @VisibleForTesting
-    Context getSystemUiContext() {
+    Resources getCurrentUserResources() {
+        if (mCurrentUserResources == null) {
+            updateCurrentUserResources();
+        }
+        return mCurrentUserResources;
+    }
+
+    @VisibleForTesting
+    Context getContext() {
+        return mContext;
+    }
+
+    private Context getSystemUiContext() {
         final Context uiContext = ActivityThread.currentActivityThread().getSystemUiContext();
         return mDisplayContent.isDefaultDisplay
                 ? uiContext : uiContext.createDisplayContext(mDisplayContent.getDisplay());
