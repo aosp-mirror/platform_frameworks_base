@@ -308,6 +308,7 @@ public class ZygoteProcess {
      * @param packageName null-ok the name of the package this process belongs to.
      * @param packagesForUid null-ok all the packages with the same uid as this process.
      * @param zygoteArgs Additional arguments to supply to the zygote process.
+     * @param useSystemGraphicsDriver whether the process uses system graphics driver.
      *
      * @return An object that describes the result of the attempt to start the process.
      * @throws RuntimeException on fatal start failure
@@ -326,7 +327,8 @@ public class ZygoteProcess {
                                                   @Nullable String[] packagesForUid,
                                                   @Nullable String sandboxId,
                                                   boolean useUsapPool,
-                                                  @Nullable String[] zygoteArgs) {
+                                                  @Nullable String[] zygoteArgs,
+                                                  boolean useSystemGraphicsDriver) {
         // TODO (chriswailes): Is there a better place to check this value?
         if (fetchUsapPoolEnabledPropWithMinInterval()) {
             informZygotesOfUsapPoolStatus();

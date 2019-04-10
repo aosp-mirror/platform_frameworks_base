@@ -513,6 +513,7 @@ public class Process {
      * @param packageName null-ok the name of the package this process belongs to.
      * @param packagesForUid null-ok all the packages with the same uid as this process.
      * @param zygoteArgs Additional arguments to supply to the zygote process.
+     * @param useSystemGraphicsDriver whether the process uses system graphics driver.
      * 
      * @return An object that describes the result of the attempt to start the process.
      * @throws RuntimeException on fatal start failure
@@ -532,12 +533,13 @@ public class Process {
                                   @Nullable String packageName,
                                   @Nullable String[] packagesForUid,
                                   @Nullable String sandboxId,
-                                  @Nullable String[] zygoteArgs) {
+                                  @Nullable String[] zygoteArgs,
+                                  boolean useSystemGraphicsDriver) {
         return ZYGOTE_PROCESS.start(processClass, niceName, uid, gid, gids,
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, invokeWith, packageName,
                     packagesForUid, sandboxId, /*useUnspecializedAppProcessPool=*/ true,
-                    zygoteArgs);
+                    zygoteArgs, useSystemGraphicsDriver);
     }
 
     /** @hide */
@@ -554,12 +556,13 @@ public class Process {
                                   @Nullable String packageName,
                                   @Nullable String[] packagesForUid,
                                   @Nullable String sandboxId,
-                                  @Nullable String[] zygoteArgs) {
+                                  @Nullable String[] zygoteArgs,
+                                  boolean useSystemGraphicsDriver) {
         return WebViewZygote.getProcess().start(processClass, niceName, uid, gid, gids,
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, invokeWith, packageName,
                     packagesForUid, sandboxId, /*useUnspecializedAppProcessPool=*/ false,
-                    zygoteArgs);
+                    zygoteArgs, useSystemGraphicsDriver);
     }
 
     /**
