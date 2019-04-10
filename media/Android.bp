@@ -24,6 +24,10 @@ java_library {
         "mediaplayer2-protos",
     ],
 
+    permitted_packages: [
+        "android.media",
+    ],
+
     installable: true,
 
     // Make sure that the implementaion only relies on SDK or system APIs.
