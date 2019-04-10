@@ -1152,7 +1152,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mBrightnessMirrorController != null) {
             mBrightnessMirrorController.onDensityOrFontScaleChanged();
         }
-        mStatusBarKeyguardViewManager.onDensityOrFontScaleChanged();
         // TODO: Bring these out of StatusBar.
         ((UserInfoControllerImpl) Dependency.get(UserInfoController.class))
                 .onDensityOrFontScaleChanged();
@@ -3949,6 +3948,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 }
 
                 private void setPulsing(boolean pulsing) {
+                    mStatusBarKeyguardViewManager.setPulsing(pulsing);
                     mKeyguardViewMediator.setPulsing(pulsing);
                     mNotificationPanel.setPulsing(pulsing);
                     mVisualStabilityManager.setPulsing(pulsing);
