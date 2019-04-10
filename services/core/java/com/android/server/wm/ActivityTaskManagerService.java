@@ -632,7 +632,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     private FontScaleSettingObserver mFontScaleSettingObserver;
 
-    private String mDeviceOwnerPackageName;
+    private int mDeviceOwnerUid = Process.INVALID_UID;
 
     private final class FontScaleSettingObserver extends ContentObserver {
         private final Uri mFontScaleUri = Settings.System.getUriFor(FONT_SCALE);
@@ -5829,15 +5829,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 || mWindowManager.mRoot.isAnyNonToastWindowVisibleForUid(uid);
     }
 
-    boolean isDeviceOwner(String packageName) {
-        if (packageName == null) {
-            return false;
-        }
-        return packageName.equals(mDeviceOwnerPackageName);
+    boolean isDeviceOwner(int uid) {
+        return uid >= 0 && mDeviceOwnerUid == uid;
     }
 
-    void setDeviceOwnerPackageName(String deviceOwnerPkg) {
-        mDeviceOwnerPackageName = deviceOwnerPkg;
+    void setDeviceOwnerUid(int uid) {
+        mDeviceOwnerUid = uid;
     }
 
     /**
@@ -7283,9 +7280,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public void setDeviceOwnerPackageName(String deviceOwnerPkg) {
+        public void setDeviceOwnerUid(int uid) {
             synchronized (mGlobalLock) {
-                ActivityTaskManagerService.this.setDeviceOwnerPackageName(deviceOwnerPkg);
+                ActivityTaskManagerService.this.setDeviceOwnerUid(uid);
             }
         }
 

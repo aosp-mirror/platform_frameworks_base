@@ -1025,11 +1025,11 @@ class ActivityStarter {
         if (mSupervisor.mRecentTasks.isCallerRecents(callingUid)) {
             return false;
         }
-        // don't abort if the callingPackage is the device owner
-        if (mService.isDeviceOwner(callingPackage)) {
+        // don't abort if the callingUid is the device owner
+        if (mService.isDeviceOwner(callingUid)) {
             return false;
         }
-        // don't abort if the callingPackage has companion device
+        // don't abort if the callingUid has companion device
         final int callingUserId = UserHandle.getUserId(callingUid);
         if (mService.isAssociatedCompanionApp(callingUserId, callingUid)) {
             return false;
