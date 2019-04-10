@@ -71,4 +71,8 @@ easier.
     <style name="ThemeOverlay.DeviceDefault.Accent.DayNight"
            parent="@style/ThemeOverlay.DeviceDefault.Accent" />
 
+    <style name="Theme.DeviceDefault.Resolver" parent="Theme.DeviceDefault.ResolverCommon">
+        <item name="windowLightNavigationBar">false</item>
+    </style>
+
 </resources>
