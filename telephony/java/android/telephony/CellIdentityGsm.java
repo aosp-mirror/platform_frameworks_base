@@ -166,6 +166,7 @@ public final class CellIdentityGsm extends CellIdentity {
     /**
      * @return Mobile Country Code in string format, null if unavailable.
      */
+    @Nullable
     public String getMccString() {
         return mMccStr;
     }
@@ -173,6 +174,7 @@ public final class CellIdentityGsm extends CellIdentity {
     /**
      * @return Mobile Network Code in string format, null if unavailable.
      */
+    @Nullable
     public String getMncString() {
         return mMncStr;
     }
