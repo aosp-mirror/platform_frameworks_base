@@ -207,5 +207,22 @@ public class BiometricManager {
             Slog.w(TAG, "onConfirmDeviceCredentialError(): Service not connected");
         }
     }
+
+    /**
+     * TODO(b/123378871): Remove when moved.
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public void registerCancellationCallback(IBiometricConfirmDeviceCredentialCallback callback) {
+        if (mService != null) {
+            try {
+                mService.registerCancellationCallback(callback);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        } else {
+            Slog.w(TAG, "registerCancellationCallback(): Service not connected");
+        }
+    }
 }
 
