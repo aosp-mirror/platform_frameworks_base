@@ -1148,9 +1148,9 @@ public class Environment {
         final Context context = AppGlobals.getInitialApplication();
         final AppOpsManager appOps = context.getSystemService(AppOpsManager.class);
 
-        final boolean hasLegacy = appOps.noteOpNoThrow(AppOpsManager.OP_LEGACY_STORAGE,
+        final boolean hasLegacy = appOps.checkOpNoThrow(AppOpsManager.OP_LEGACY_STORAGE,
                 context.getApplicationInfo().uid,
-                context.getPackageName()) == AppOpsManager.MODE_ALLOWED;
+                context.getOpPackageName()) == AppOpsManager.MODE_ALLOWED;
 
         // STOPSHIP: only use app-op once permission model has fully landed
         final boolean requestedLegacy = !AppGlobals.getInitialApplication().getApplicationInfo()
