@@ -397,6 +397,11 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
     abstract void handlePendingRequestWhileUnBound(
             @NonNull BasePendingRequest<S, I> pendingRequest);
 
+    /**
+     * Called if {@link Context#bindServiceAsUser} returns {@code false}.
+     */
+    abstract void handleBindFailure();
+
     private boolean handleIsBound() {
         return mService != null;
     }
@@ -418,6 +423,8 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
             mBinding = false;
 
             if (!mServiceDied) {
+                // TODO(b/126266412): merge these 2 calls?
+                handleBindFailure();
                 handleBinderDied();
             }
         }
@@ -545,6 +552,12 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
         }
 
         void onFinished() { }
+
+        /**
+         * Called when request fails due to reasons internal to {@link AbstractRemoteService},
+         * e.g. failure to bind to service.
+         */
+        protected void onFailed() { }
 
         /**
          * Checks whether this request was cancelled.

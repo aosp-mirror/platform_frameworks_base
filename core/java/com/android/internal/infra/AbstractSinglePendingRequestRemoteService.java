@@ -67,6 +67,15 @@ public abstract class AbstractSinglePendingRequestRemoteService<S
     }
 
     @Override // from AbstractRemoteService
+    void handleBindFailure() {
+        if (mPendingRequest != null) {
+            if (mVerbose) Slog.v(mTag, "Sending failure to " + mPendingRequest);
+            mPendingRequest.onFailed();
+            mPendingRequest = null;
+        }
+    }
+
+    @Override // from AbstractRemoteService
     public void dump(@NonNull String prefix, @NonNull PrintWriter pw) {
         super.dump(prefix, pw);
         pw.append(prefix).append("hasPendingRequest=")
