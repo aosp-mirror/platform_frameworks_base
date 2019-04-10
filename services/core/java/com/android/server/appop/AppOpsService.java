@@ -1840,11 +1840,14 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     private boolean isPackageSuspendedForUser(String pkg, int uid) {
+        final long identity = Binder.clearCallingIdentity();
         try {
             return AppGlobals.getPackageManager().isPackageSuspendedForUser(
                     pkg, UserHandle.getUserId(uid));
         } catch (RemoteException re) {
             throw new SecurityException("Could not talk to package manager service");
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
     }
 
