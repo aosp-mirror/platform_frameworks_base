@@ -546,7 +546,7 @@ public class MediaPlayer2 implements AutoCloseable, AudioRouting {
             @Override
             void process() {
                 if (getState() == PLAYER_STATE_PLAYING) {
-                    pause();
+                    native_pause();
                 }
                 playNextDataSource();
             }
