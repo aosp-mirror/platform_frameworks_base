@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.content.res.TypedArray;
 import android.os.UserHandle;
 import android.util.AttributeSet;
+import android.view.Display;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -202,5 +203,17 @@ public class CarFacetButton extends LinearLayout {
         if (mUseMoreIcon) {
             mMoreIcon.setVisibility(showMoreIcon ? VISIBLE : GONE);
         }
+    }
+
+    /**
+     * @return The id of the display the button is on or Display.INVALID_DISPLAY if it's not yet on
+     *         a display.
+     */
+    public int getDisplayId() {
+        Display display = getDisplay();
+        if (display == null) {
+            return Display.INVALID_DISPLAY;
+        }
+        return display.getDisplayId();
     }
 }
