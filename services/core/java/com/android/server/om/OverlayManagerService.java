@@ -166,6 +166,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *     . . . .  . . . . . . . . . . . . . . . . . .
  * </pre>
  *
+ * <p>To test the OMS, execute:
+ * <code>
+ * atest FrameworksServicesTests:com.android.server.om  # internal tests
+ * atest OverlayDeviceTests OverlayHostTests            # public API tests
+ * </code>
+ * </p>
+ *
  * <p>Finally, here is a list of keywords used in the OMS context.</p>
  *
  * <ul>
