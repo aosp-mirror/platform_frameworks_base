@@ -30,7 +30,6 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
-import static com.android.systemui.volume.Events.DISMISS_REASON_ODI_CAPTIONS_CLICKED;
 import static com.android.systemui.volume.Events.DISMISS_REASON_SETTINGS_CLICKED;
 
 import android.animation.ObjectAnimator;
@@ -519,7 +518,6 @@ public class VolumeDialogImpl implements VolumeDialog,
             mODICaptionsIcon.setOnConfirmedTapListener(() -> {
                 onCaptionIconClicked();
                 Events.writeEvent(mContext, Events.EVENT_ODI_CAPTIONS_CLICK);
-                dismissH(DISMISS_REASON_ODI_CAPTIONS_CLICKED);
             }, mHandler);
         }
 
