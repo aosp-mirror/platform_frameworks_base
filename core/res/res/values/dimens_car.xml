@@ -121,6 +121,9 @@
     <!-- Dialog button end margin -->
     <dimen name="button_end_margin">@*android:dimen/car_padding_4</dimen>
 
+    <!-- Dialog top padding when there is no title -->
+    <dimen name="dialog_no_title_padding_top">@*android:dimen/car_padding_4</dimen>
+
     <!-- Dialog start margin for text view -->
     <dimen name="text_view_start_margin">@*android:dimen/car_keyline_1</dimen>
 
