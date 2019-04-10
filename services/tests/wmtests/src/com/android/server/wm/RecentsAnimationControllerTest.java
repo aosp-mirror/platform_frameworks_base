@@ -163,7 +163,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         // Assume IRecentsAnimationController#cleanupScreenshot called to finish screenshot
         // animation.
         mController.mRecentScreenshotAnimator.cancelAnimation();
-        verify(mAnimationCallbacks).onAnimationFinished(REORDER_KEEP_IN_PLACE, true);
+        verify(mAnimationCallbacks).onAnimationFinished(REORDER_KEEP_IN_PLACE, true, false);
     }
 
     private static void verifyNoMoreInteractionsExceptAsBinder(IInterface binder) {

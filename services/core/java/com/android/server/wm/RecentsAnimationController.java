@@ -27,6 +27,7 @@ import static android.view.WindowManager.INPUT_CONSUMER_RECENTS_ANIMATION;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_RECENTS_ANIM;
 import static com.android.server.wm.AnimationAdapterProto.REMOTE;
+import static com.android.server.wm.BoundsAnimationController.FADE_IN;
 import static com.android.server.wm.RemoteAnimationAdapterWrapperProto.TARGET;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_RECENTS_ANIMATIONS;
 import static com.android.server.wm.WindowManagerInternal.AppTransitionListener;
@@ -142,7 +143,9 @@ public class RecentsAnimationController implements DeathRecipient {
     };
 
     public interface RecentsAnimationCallbacks {
-        void onAnimationFinished(@ReorderMode int reorderMode, boolean runSychronously);
+        /** Callback when recents animation is finished. */
+        void onAnimationFinished(@ReorderMode int reorderMode, boolean runSychronously,
+                boolean sendUserLeaveHint);
     }
 
     private final IRecentsAnimationController mController =
@@ -179,7 +182,7 @@ public class RecentsAnimationController implements DeathRecipient {
         }
 
         @Override
-        public void finish(boolean moveHomeToTop) {
+        public void finish(boolean moveHomeToTop, boolean sendUserLeaveHint) {
             if (DEBUG_RECENTS_ANIMATIONS) Slog.d(TAG, "finish(" + moveHomeToTop + "):"
                     + " mCanceled=" + mCanceled);
             final long token = Binder.clearCallingIdentity();
@@ -195,7 +198,9 @@ public class RecentsAnimationController implements DeathRecipient {
                 mCallbacks.onAnimationFinished(moveHomeToTop
                         ? REORDER_MOVE_TO_TOP
                         : REORDER_MOVE_TO_ORIGINAL_POSITION,
-                        true /* runSynchronously */);
+                        true /* runSynchronously */, sendUserLeaveHint);
+                final DisplayContent dc = mService.mRoot.getDisplayContent(mDisplayId);
+                dc.mBoundsAnimationController.setAnimationType(FADE_IN);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -497,7 +502,8 @@ public class RecentsAnimationController implements DeathRecipient {
                 Slog.e(TAG, "Failed to cancel recents animation", e);
             }
             // Clean up and return to the previous app
-            mCallbacks.onAnimationFinished(reorderMode, runSynchronously);
+            mCallbacks.onAnimationFinished(reorderMode, runSynchronously,
+                    false /* sendUserLeaveHint */);
         }
     }
 
@@ -542,7 +548,8 @@ public class RecentsAnimationController implements DeathRecipient {
                         if (DEBUG_RECENTS_ANIMATIONS) {
                             Slog.d(TAG, "mRecentScreenshotAnimator finish");
                         }
-                        mCallbacks.onAnimationFinished(reorderMode, runSynchronously);
+                        mCallbacks.onAnimationFinished(reorderMode, runSynchronously,
+                                false /* sendUserLeaveHint */);
                     }, mService);
             mRecentScreenshotAnimator.transferAnimation(task.mSurfaceAnimator);
         }

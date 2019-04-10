@@ -26,6 +26,8 @@ import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.view.WindowManager.TRANSIT_NONE;
 
 import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.wm.BoundsAnimationController.BOUNDS;
+import static com.android.server.wm.BoundsAnimationController.FADE_IN;
 import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_ORIGINAL_POSITION;
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_TOP;
@@ -201,7 +203,8 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
         }
     }
 
-    private void finishAnimation(@RecentsAnimationController.ReorderMode int reorderMode) {
+    private void finishAnimation(@RecentsAnimationController.ReorderMode int reorderMode,
+            boolean sendUserLeaveHint) {
         synchronized (mService.mGlobalLock) {
             if (DEBUG) Slog.d(TAG, "onAnimationFinished(): controller="
                     + mWindowManager.getRecentsAnimationController()
@@ -246,7 +249,18 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                     if (reorderMode == REORDER_MOVE_TO_TOP) {
                         // Bring the target stack to the front
                         mStackSupervisor.mNoAnimActivities.add(targetActivity);
-                        targetStack.moveToFront("RecentsAnimation.onAnimationFinished()");
+
+                        if (sendUserLeaveHint) {
+                            // Setting this allows the previous app to PiP.
+                            mStackSupervisor.mUserLeaving = true;
+                            targetStack.moveTaskToFrontLocked(targetActivity.getTaskRecord(),
+                                    true /* noAnimation */, null /* activityOptions */,
+                                    targetActivity.appTimeTracker,
+                                    "RecentsAnimation.onAnimationFinished()");
+                        } else {
+                            targetStack.moveToFront("RecentsAnimation.onAnimationFinished()");
+                        }
+
                         if (DEBUG) {
                             final ActivityStack topStack = getTopNonAlwaysOnTopStack();
                             if (topStack != targetStack) {
@@ -300,11 +314,11 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
 
     @Override
     public void onAnimationFinished(@RecentsAnimationController.ReorderMode int reorderMode,
-            boolean runSychronously) {
+            boolean runSychronously, boolean sendUserLeaveHint) {
         if (runSychronously) {
-            finishAnimation(reorderMode);
+            finishAnimation(reorderMode, sendUserLeaveHint);
         } else {
-            mService.mH.post(() -> finishAnimation(reorderMode));
+            mService.mH.post(() -> finishAnimation(reorderMode, sendUserLeaveHint));
         }
     }
 
@@ -317,6 +331,10 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
         }
         final RecentsAnimationController controller =
                 mWindowManager.getRecentsAnimationController();
+        final DisplayContent dc =
+                mService.mRootActivityContainer.getDefaultDisplay().mDisplayContent;
+        dc.mBoundsAnimationController.setAnimationType(
+                controller.shouldCancelWithDeferredScreenshot() ? FADE_IN : BOUNDS);
 
         // Cancel running recents animation and screenshot previous task when the next
         // transition starts in below cases:
