@@ -6562,7 +6562,7 @@ package android.service.euicc {
     ctor public EuiccService();
     method @CallSuper public android.os.IBinder onBind(android.content.Intent);
     method public abstract int onDeleteSubscription(int, String);
-    method public abstract android.service.euicc.DownloadSubscriptionResult onDownloadSubscription(int, @NonNull android.telephony.euicc.DownloadableSubscription, boolean, boolean, @Nullable android.os.Bundle);
+    method public android.service.euicc.DownloadSubscriptionResult onDownloadSubscription(int, @NonNull android.telephony.euicc.DownloadableSubscription, boolean, boolean, @Nullable android.os.Bundle);
     method @Deprecated public int onDownloadSubscription(int, @NonNull android.telephony.euicc.DownloadableSubscription, boolean, boolean);
     method public abstract int onEraseSubscriptions(int);
     method public abstract android.service.euicc.GetDefaultDownloadableSubscriptionListResult onGetDefaultDownloadableSubscriptionList(int, boolean);
