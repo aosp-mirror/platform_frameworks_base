@@ -66,9 +66,10 @@
     <dimen name="car_padding_0">4dp</dimen>
     <dimen name="car_padding_1">8dp</dimen>
     <dimen name="car_padding_2">16dp</dimen>
-    <dimen name="car_padding_3">28dp</dimen>
+    <dimen name="car_padding_3">24dp</dimen>
     <dimen name="car_padding_4">32dp</dimen>
     <dimen name="car_padding_5">64dp</dimen>
+    <dimen name="car_padding_6">96dp</dimen>
 
     <!-- Radius -->
     <dimen name="car_radius_1">4dp</dimen>
