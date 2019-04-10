@@ -38,6 +38,10 @@ public final class CellSignalStrengthGsm extends CellSignalStrength implements P
     private static final int GSM_RSSI_GOOD = -97;
     private static final int GSM_RSSI_MODERATE = -103;
     private static final int GSM_RSSI_POOR = -107;
+    private static final int GSM_RSSI_MIN = -113;
+
+    private static final int[] sRssiThresholds = new int[] {
+            GSM_RSSI_POOR, GSM_RSSI_MODERATE, GSM_RSSI_GOOD, GSM_RSSI_GREAT};
 
     private int mRssi; // in dBm [-113, -51] or UNAVAILABLE
     @UnsupportedAppUsage
@@ -54,7 +58,7 @@ public final class CellSignalStrengthGsm extends CellSignalStrength implements P
 
     /** @hide */
     public CellSignalStrengthGsm(int rssi, int ber, int ta) {
-        mRssi = inRangeOrUnavailable(rssi, -113, -51);
+        mRssi = inRangeOrUnavailable(rssi, GSM_RSSI_MIN, GSM_RSSI_MAX);
         mBitErrorRate = inRangeOrUnavailable(ber, 0, 7, 99);
         mTimingAdvance = inRangeOrUnavailable(ta, 0, 219);
         updateLevel(null, null);
@@ -108,12 +112,22 @@ public final class CellSignalStrengthGsm extends CellSignalStrength implements P
     /** @hide */
     @Override
     public void updateLevel(PersistableBundle cc, ServiceState ss) {
-        if (mRssi > GSM_RSSI_MAX) mLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
-        else if (mRssi >= GSM_RSSI_GREAT) mLevel = SIGNAL_STRENGTH_GREAT;
-        else if (mRssi >= GSM_RSSI_GOOD)  mLevel = SIGNAL_STRENGTH_GOOD;
-        else if (mRssi >= GSM_RSSI_MODERATE)  mLevel = SIGNAL_STRENGTH_MODERATE;
-        else if (mRssi >= GSM_RSSI_POOR) mLevel = SIGNAL_STRENGTH_POOR;
-        else mLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
+        int[] rssiThresholds;
+        if (cc == null) {
+            rssiThresholds = sRssiThresholds;
+        } else {
+            rssiThresholds = cc.getIntArray(CarrierConfigManager.KEY_GSM_RSSI_THRESHOLDS_INT_ARRAY);
+            if (rssiThresholds == null || rssiThresholds.length != NUM_SIGNAL_STRENGTH_THRESHOLDS) {
+                rssiThresholds = sRssiThresholds;
+            }
+        }
+        int level = NUM_SIGNAL_STRENGTH_THRESHOLDS;
+        if (mRssi < GSM_RSSI_MIN || mRssi > GSM_RSSI_MAX) {
+            mLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
+            return;
+        }
+        while (level > 0 && mRssi < rssiThresholds[level - 1]) level--;
+        mLevel = level;
     }
 
     /**
