@@ -1516,6 +1516,11 @@ public class NotificationManagerService extends SystemService {
     }
 
     @VisibleForTesting
+    void setZenHelper(ZenModeHelper zenHelper) {
+        mZenModeHelper = zenHelper;
+    }
+
+    @VisibleForTesting
     void setIsAutomotive(boolean isAutomotive) {
         mIsAutomotive = isAutomotive;
     }
@@ -3563,7 +3568,7 @@ public class NotificationManagerService extends SystemService {
                 return;
             }
             boolean accessAllowed = false;
-            String[] packages = getContext().getPackageManager().getPackagesForUid(uid);
+            String[] packages = mPackageManagerClient.getPackagesForUid(uid);
             final int packageCount = packages.length;
             for (int i = 0; i < packageCount; i++) {
                 if (mConditionProviders.isPackageOrComponentAllowed(
