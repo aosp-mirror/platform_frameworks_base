@@ -114,8 +114,8 @@ public final class StaticIpConfiguration implements Parcelable {
     }
 
     /**
-     * Get a {@link String} listing in priority order of the comma separated domains to search when
-     * resolving host names on the link.
+     * Get a {@link String} containing the comma separated domains to search when resolving host
+     * names on this link, in priority order.
      */
     public @Nullable String getDomains() {
         return domains;
