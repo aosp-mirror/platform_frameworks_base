@@ -1489,8 +1489,10 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
             final long token = Binder.clearCallingIdentity();
 
             if (DEBUG_KEY_EVENT) {
-                Log.d(TAG, "dispatchVolumeKeyEvent, pkg=" + packageName + ", pid=" + pid + ", uid="
-                        + uid + ", asSystem=" + asSystemService + ", event=" + keyEvent);
+                Log.d(TAG, "dispatchVolumeKeyEvent, pkg=" + packageName
+                        + ", opPkg=" + opPackageName + ", pid=" + pid + ", uid=" + uid
+                        + ", asSystem=" + asSystemService + ", event=" + keyEvent
+                        + ", stream=" + stream + ", musicOnly=" + musicOnly);
             }
 
             try {
