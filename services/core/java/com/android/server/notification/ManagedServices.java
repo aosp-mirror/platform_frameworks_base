@@ -79,7 +79,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Predicate;
 
 /**
  * Manages the lifecycle of application-provided services bound by system server.
@@ -1163,6 +1162,7 @@ abstract public class ManagedServices {
                 @Override
                 public void onNullBinding(ComponentName name) {
                     Slog.v(TAG, "onNullBinding() called with: name = [" + name + "]");
+                    mServicesBound.remove(servicesBindingTag);
                 }
             };
             if (!mContext.bindServiceAsUser(intent,
@@ -1178,6 +1178,11 @@ abstract public class ManagedServices {
             mServicesBound.remove(servicesBindingTag);
             Slog.e(TAG, "Unable to bind " + getCaption() + " service: " + intent, ex);
         }
+    }
+
+    boolean isBound(ComponentName cn, int userId) {
+        final Pair<ComponentName, Integer> servicesBindingTag = Pair.create(cn, userId);
+        return mServicesBound.contains(servicesBindingTag);
     }
 
     /**
