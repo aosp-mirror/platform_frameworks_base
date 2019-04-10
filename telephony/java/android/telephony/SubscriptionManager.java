@@ -364,12 +364,6 @@ public class SubscriptionManager {
     public static final String NAME_SOURCE = "name_source";
 
     /**
-     * The name_source is undefined
-     * @hide
-     */
-    public static final int NAME_SOURCE_UNDEFINDED = -1;
-
-    /**
      * The name_source is the default
      * @hide
      */
@@ -1598,27 +1592,16 @@ public class SubscriptionManager {
     }
 
     /**
-     * Set display name by simInfo index
-     * @param displayName the display name of SIM card
-     * @param subId the unique SubscriptionInfo index in database
-     * @return the number of records updated
-     * @hide
-     */
-    public int setDisplayName(String displayName, int subId) {
-        return setDisplayName(displayName, subId, NAME_SOURCE_UNDEFINDED);
-    }
-
-    /**
      * Set display name by simInfo index with name source
      * @param displayName the display name of SIM card
      * @param subId the unique SubscriptionInfo index in database
      * @param nameSource 0: NAME_SOURCE_DEFAULT_SOURCE, 1: NAME_SOURCE_SIM_SOURCE,
-     *                   2: NAME_SOURCE_USER_INPUT, -1 NAME_SOURCE_UNDEFINED
+     *                   2: NAME_SOURCE_USER_INPUT
      * @return the number of records updated or < 0 if invalid subId
      * @hide
      */
     @UnsupportedAppUsage
-    public int setDisplayName(String displayName, int subId, long nameSource) {
+    public int setDisplayName(String displayName, int subId, int nameSource) {
         if (VDBG) {
             logd("[setDisplayName]+  displayName:" + displayName + " subId:" + subId
                     + " nameSource:" + nameSource);

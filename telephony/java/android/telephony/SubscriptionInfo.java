@@ -87,8 +87,8 @@ public class SubscriptionInfo implements Parcelable {
     private int mCarrierId;
 
     /**
-     * The source of the name, NAME_SOURCE_UNDEFINED, NAME_SOURCE_DEFAULT_SOURCE,
-     * NAME_SOURCE_SIM_SOURCE or NAME_SOURCE_USER_INPUT.
+     * The source of the name, NAME_SOURCE_DEFAULT_SOURCE, NAME_SOURCE_SIM_SOURCE or
+     * NAME_SOURCE_USER_INPUT.
      */
     private int mNameSource;
 
@@ -103,7 +103,7 @@ public class SubscriptionInfo implements Parcelable {
     private String mNumber;
 
     /**
-     * Data roaming state, DATA_RAOMING_ENABLE, DATA_RAOMING_DISABLE
+     * Data roaming state, DATA_ROAMING_ENABLE, DATA_ROAMING_DISABLE
      */
     private int mDataRoaming;
 
@@ -306,8 +306,8 @@ public class SubscriptionInfo implements Parcelable {
     }
 
     /**
-     * @return the source of the name, eg NAME_SOURCE_UNDEFINED, NAME_SOURCE_DEFAULT_SOURCE,
-     * NAME_SOURCE_SIM_SOURCE or NAME_SOURCE_USER_INPUT.
+     * @return the source of the name, eg NAME_SOURCE_DEFAULT_SOURCE, NAME_SOURCE_SIM_SOURCE or
+     * NAME_SOURCE_USER_INPUT.
      * @hide
      */
     @UnsupportedAppUsage
@@ -316,8 +316,8 @@ public class SubscriptionInfo implements Parcelable {
     }
 
     /**
-     * Creates and returns an icon {@code Bitmap} to represent this {@code SubscriptionInfo} in a user
-     * interface.
+     * Creates and returns an icon {@code Bitmap} to represent this {@code SubscriptionInfo} in a
+     * user interface.
      *
      * @param context A {@code Context} to get the {@code DisplayMetrics}s from.
      *
