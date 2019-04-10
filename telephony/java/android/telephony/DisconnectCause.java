@@ -333,6 +333,13 @@ public final class DisconnectCause {
      */
     public static final int OTASP_PROVISIONING_IN_PROCESS = 76;
 
+    /**
+     * Indicates that the call is dropped due to RTCP inactivity, primarily due to media path
+     * disruption.
+     * @hide
+     */
+    public static final int MEDIA_TIMEOUT = 77;
+
     //*********************************************************************************************
     // When adding a disconnect type:
     // 1) Update toString() with the newly added disconnect type.
@@ -501,6 +508,8 @@ public final class DisconnectCause {
             return "TOO_MANY_ONGOING_CALLS";
         case OTASP_PROVISIONING_IN_PROCESS:
             return "OTASP_PROVISIONING_IN_PROCESS";
+        case MEDIA_TIMEOUT:
+            return "MEDIA_TIMEOUT";
         default:
             return "INVALID: " + cause;
         }
