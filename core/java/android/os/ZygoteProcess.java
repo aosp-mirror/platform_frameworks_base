@@ -646,9 +646,14 @@ public class ZygoteProcess {
                 ZygoteConfig.USAP_POOL_ENABLED, USAP_POOL_ENABLED_DEFAULT);
 
         if (!propertyString.isEmpty()) {
-            mUsapPoolEnabled = Zygote.getConfigurationPropertyBoolean(
+            if (SystemProperties.get("dalvik.vm.boot-image", "").endsWith("apex.art")) {
+                // TODO(b/119800099): Tweak usap configuration in jitzygote mode.
+                mUsapPoolEnabled = false;
+            } else {
+                mUsapPoolEnabled = Zygote.getConfigurationPropertyBoolean(
                     ZygoteConfig.USAP_POOL_ENABLED,
                     Boolean.parseBoolean(USAP_POOL_ENABLED_DEFAULT));
+            }
         }
 
         boolean valueChanged = origVal != mUsapPoolEnabled;
