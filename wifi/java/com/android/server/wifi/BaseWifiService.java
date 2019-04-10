@@ -124,7 +124,7 @@ public class BaseWifiService extends IWifiManager.Stub {
     }
 
     @Override
-    public List<PasspointConfiguration> getPasspointConfigurations() {
+    public List<PasspointConfiguration> getPasspointConfigurations(String packageName) {
         throw new UnsupportedOperationException();
     }
 
