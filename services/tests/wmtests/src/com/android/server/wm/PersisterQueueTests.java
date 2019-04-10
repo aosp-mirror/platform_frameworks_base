@@ -39,7 +39,6 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Predicate;
 
 /**
  * Build/Install/Run:
@@ -47,208 +46,222 @@ import java.util.function.Predicate;
  */
 @MediumTest
 @Presubmit
-public class PersisterQueueTests implements PersisterQueue.Listener {
+public class PersisterQueueTests {
     private static final long INTER_WRITE_DELAY_MS = 50;
     private static final long PRE_TASK_DELAY_MS = 300;
-    // We allow at most 1s more than the expected timeout.
-    private static final long TIMEOUT_ALLOWANCE = 100;
-
-    private static final Predicate<MatchingTestItem> TEST_ITEM_PREDICATE = item -> item.mMatching;
-
-    private AtomicInteger mItemCount;
-    private CountDownLatch mSetUpLatch;
-    private volatile CountDownLatch mLatch;
-    private List<Boolean> mProbablyDoneResults;
+    // We allow at most 0.2s more than the expected timeout.
+    private static final long TIMEOUT_ALLOWANCE = 200;
 
     private final PersisterQueue mTarget =
             new PersisterQueue(INTER_WRITE_DELAY_MS, PRE_TASK_DELAY_MS);
 
+    private TestPersisterQueueListener mListener;
+    private TestWriteQueueItemFactory mFactory;
+
     @Before
     public void setUp() throws Exception {
-        mItemCount = new AtomicInteger(0);
-        mProbablyDoneResults = new ArrayList<>();
-        mSetUpLatch = new CountDownLatch(1);
+        mListener = new TestPersisterQueueListener();
+        mListener.setExpectedOnPreProcessItemCallbackTimes(1);
+        mTarget.addListener(mListener);
 
-        mTarget.addListener(this);
+        mFactory = new TestWriteQueueItemFactory();
+
         mTarget.startPersisting();
 
         assertTrue("Target didn't call callback on start up.",
-                mSetUpLatch.await(TIMEOUT_ALLOWANCE, TimeUnit.MILLISECONDS));
+                mListener.waitForAllExpectedCallbackDone(TIMEOUT_ALLOWANCE));
     }
 
     @After
     public void tearDown() throws Exception {
         mTarget.stopPersisting();
-        mTarget.removeListener(this);
+        mTarget.removeListener(mListener);
     }
 
     @Test
     public void testCallCallbackOnStartUp() {
         // The onPreProcessItem() must be called on start up.
-        assertEquals(1, mProbablyDoneResults.size());
+        assertEquals(1, mListener.mProbablyDoneResults.size());
         // The last one must be called with probably done being true.
-        assertTrue("The last probablyDone must be true.", mProbablyDoneResults.get(0));
+        assertTrue("The last probablyDone must be true.", mListener.mProbablyDoneResults.get(0));
     }
 
     @Test
     public void testProcessOneItem() throws Exception {
-        mLatch = new CountDownLatch(1);
+        mFactory.setExpectedProcessedItemNumber(1);
+        mListener.setExpectedOnPreProcessItemCallbackTimes(1);
 
         final long dispatchTime = SystemClock.uptimeMillis();
-        mTarget.addItem(new TestItem(), false);
-        assertTrue("Target didn't call callback enough times.",
-                mLatch.await(PRE_TASK_DELAY_MS + TIMEOUT_ALLOWANCE, TimeUnit.MILLISECONDS));
-        assertEquals("Target didn't process item.", 1, mItemCount.get());
+        mTarget.addItem(mFactory.createItem(), false);
+        assertTrue("Target didn't process item enough times.",
+                mFactory.waitForAllExpectedItemsProcessed(PRE_TASK_DELAY_MS + TIMEOUT_ALLOWANCE));
+        assertEquals("Target didn't process item.", 1, mFactory.getTotalProcessedItemCount());
         final long processDuration = SystemClock.uptimeMillis() - dispatchTime;
         assertTrue("Target didn't wait enough time before processing item. duration: "
                         + processDuration + "ms pretask delay: " + PRE_TASK_DELAY_MS + "ms",
                 processDuration >= PRE_TASK_DELAY_MS);
 
+        assertTrue("Target didn't call callback enough times.",
+                mListener.waitForAllExpectedCallbackDone(TIMEOUT_ALLOWANCE));
         // Once before processing this item, once after that.
-        assertEquals(2, mProbablyDoneResults.size());
+        assertEquals(2, mListener.mProbablyDoneResults.size());
         // The last one must be called with probably done being true.
-        assertTrue("The last probablyDone must be true.", mProbablyDoneResults.get(1));
+        assertTrue("The last probablyDone must be true.", mListener.mProbablyDoneResults.get(1));
     }
 
     @Test
     public void testProcessOneItem_Flush() throws Exception {
-        mLatch = new CountDownLatch(1);
+        mFactory.setExpectedProcessedItemNumber(1);
+        mListener.setExpectedOnPreProcessItemCallbackTimes(1);
 
         final long dispatchTime = SystemClock.uptimeMillis();
-        mTarget.addItem(new TestItem(), true);
-        assertTrue("Target didn't call callback enough times.",
-                mLatch.await(TIMEOUT_ALLOWANCE, TimeUnit.MILLISECONDS));
-        assertEquals("Target didn't process item.", 1, mItemCount.get());
+        mTarget.addItem(mFactory.createItem(), true);
+        assertTrue("Target didn't process item enough times.",
+                mFactory.waitForAllExpectedItemsProcessed(TIMEOUT_ALLOWANCE));
+        assertEquals("Target didn't process item.", 1, mFactory.getTotalProcessedItemCount());
         final long processDuration = SystemClock.uptimeMillis() - dispatchTime;
         assertTrue("Target didn't process item immediately when flushing. duration: "
                         + processDuration + "ms pretask delay: "
                         + PRE_TASK_DELAY_MS + "ms",
                 processDuration < PRE_TASK_DELAY_MS);
 
+        assertTrue("Target didn't call callback enough times.",
+                mFactory.waitForAllExpectedItemsProcessed(TIMEOUT_ALLOWANCE));
         // Once before processing this item, once after that.
-        assertEquals(2, mProbablyDoneResults.size());
+        assertEquals(2, mListener.mProbablyDoneResults.size());
         // The last one must be called with probably done being true.
-        assertTrue("The last probablyDone must be true.", mProbablyDoneResults.get(1));
+        assertTrue("The last probablyDone must be true.", mListener.mProbablyDoneResults.get(1));
     }
 
     @Test
     public void testProcessTwoItems() throws Exception {
-        mLatch = new CountDownLatch(2);
+        mFactory.setExpectedProcessedItemNumber(2);
+        mListener.setExpectedOnPreProcessItemCallbackTimes(2);
 
         final long dispatchTime = SystemClock.uptimeMillis();
-        mTarget.addItem(new TestItem(), false);
-        mTarget.addItem(new TestItem(), false);
+        mTarget.addItem(mFactory.createItem(), false);
+        mTarget.addItem(mFactory.createItem(), false);
         assertTrue("Target didn't call callback enough times.",
-                mLatch.await(PRE_TASK_DELAY_MS + INTER_WRITE_DELAY_MS + TIMEOUT_ALLOWANCE,
-                        TimeUnit.MILLISECONDS));
-        assertEquals("Target didn't process all items.", 2, mItemCount.get());
+                mFactory.waitForAllExpectedItemsProcessed(PRE_TASK_DELAY_MS + INTER_WRITE_DELAY_MS
+                        + TIMEOUT_ALLOWANCE));
+        assertEquals("Target didn't process all items.", 2, mFactory.getTotalProcessedItemCount());
         final long processDuration = SystemClock.uptimeMillis() - dispatchTime;
         assertTrue("Target didn't wait enough time before processing item. duration: "
                         + processDuration + "ms pretask delay: " + PRE_TASK_DELAY_MS
                         + "ms inter write delay: " + INTER_WRITE_DELAY_MS + "ms",
                 processDuration >= PRE_TASK_DELAY_MS + INTER_WRITE_DELAY_MS);
-
+        assertTrue("Target didn't call the onPreProcess callback enough times",
+                mListener.waitForAllExpectedCallbackDone(TIMEOUT_ALLOWANCE));
         // Once before processing this item, once after that.
-        assertEquals(3, mProbablyDoneResults.size());
+        assertEquals(3, mListener.mProbablyDoneResults.size());
         // The first one must be called with probably done being false.
-        assertFalse("The first probablyDone must be false.", mProbablyDoneResults.get(1));
+        assertFalse("The first probablyDone must be false.", mListener.mProbablyDoneResults.get(1));
         // The last one must be called with probably done being true.
-        assertTrue("The last probablyDone must be true.", mProbablyDoneResults.get(2));
+        assertTrue("The last probablyDone must be true.", mListener.mProbablyDoneResults.get(2));
     }
 
     @Test
     @FlakyTest(bugId = 128526085)
     public void testProcessTwoItems_OneAfterAnother() throws Exception {
         // First item
-        mLatch = new CountDownLatch(1);
+        mFactory.setExpectedProcessedItemNumber(1);
+        mListener.setExpectedOnPreProcessItemCallbackTimes(1);
         long dispatchTime = SystemClock.uptimeMillis();
-        mTarget.addItem(new TestItem(), false);
-        assertTrue("Target didn't call callback enough times.",
-                mLatch.await(PRE_TASK_DELAY_MS + TIMEOUT_ALLOWANCE, TimeUnit.MILLISECONDS));
+        mTarget.addItem(mFactory.createItem(), false);
+        assertTrue("Target didn't process item enough times.",
+                mFactory.waitForAllExpectedItemsProcessed(PRE_TASK_DELAY_MS + TIMEOUT_ALLOWANCE));
         long processDuration = SystemClock.uptimeMillis() - dispatchTime;
         assertTrue("Target didn't wait enough time before processing item."
                         + processDuration + "ms pretask delay: "
                         + PRE_TASK_DELAY_MS + "ms",
                 processDuration >= PRE_TASK_DELAY_MS);
-        assertEquals("Target didn't process item.", 1, mItemCount.get());
+        assertEquals("Target didn't process item.", 1, mFactory.getTotalProcessedItemCount());
+        assertTrue("Target didn't call callback enough times.",
+                mListener.waitForAllExpectedCallbackDone(TIMEOUT_ALLOWANCE));
 
         // Second item
-        mLatch = new CountDownLatch(1);
+        mFactory.setExpectedProcessedItemNumber(1);
+        mListener.setExpectedOnPreProcessItemCallbackTimes(1);
         dispatchTime = SystemClock.uptimeMillis();
         // Synchronize on the instance to make sure we schedule the item after it starts to wait for
         // task indefinitely.
         synchronized (mTarget) {
-            mTarget.addItem(new TestItem(), false);
+            mTarget.addItem(mFactory.createItem(), false);
         }
-        assertTrue("Target didn't call callback enough times.",
-                mLatch.await(PRE_TASK_DELAY_MS + TIMEOUT_ALLOWANCE, TimeUnit.MILLISECONDS));
-        assertEquals("Target didn't process all items.", 2, mItemCount.get());
+        assertTrue("Target didn't process item enough times.",
+                mFactory.waitForAllExpectedItemsProcessed(PRE_TASK_DELAY_MS + TIMEOUT_ALLOWANCE));
+        assertEquals("Target didn't process all items.", 2, mFactory.getTotalProcessedItemCount());
         processDuration = SystemClock.uptimeMillis() - dispatchTime;
         assertTrue("Target didn't wait enough time before processing item. Process time: "
                         + processDuration + "ms pre task delay: "
                         + PRE_TASK_DELAY_MS + "ms",
                 processDuration >= PRE_TASK_DELAY_MS);
 
+        assertTrue("Target didn't call callback enough times.",
+                mListener.waitForAllExpectedCallbackDone(TIMEOUT_ALLOWANCE));
         // Once before processing this item, once after that.
-        assertEquals(3, mProbablyDoneResults.size());
+        assertEquals(3, mListener.mProbablyDoneResults.size());
         // The last one must be called with probably done being true.
-        assertTrue("The last probablyDone must be true.", mProbablyDoneResults.get(2));
+        assertTrue("The last probablyDone must be true.", mListener.mProbablyDoneResults.get(2));
     }
 
     @Test
     public void testFindLastItemNotReturnDifferentType() {
         synchronized (mTarget) {
-            mTarget.addItem(new TestItem(), false);
-            assertNull(mTarget.findLastItem(TEST_ITEM_PREDICATE, MatchingTestItem.class));
+            mTarget.addItem(mFactory.createItem(), false);
+            assertNull(mTarget.findLastItem(TestItem::shouldKeepOnFilter,
+                    FilterableTestItem.class));
         }
     }
 
     @Test
     public void testFindLastItemNotReturnMismatchItem() {
         synchronized (mTarget) {
-            mTarget.addItem(new MatchingTestItem(false), false);
-            assertNull(mTarget.findLastItem(TEST_ITEM_PREDICATE, MatchingTestItem.class));
+            mTarget.addItem(mFactory.createFilterableItem(false), false);
+            assertNull(mTarget.findLastItem(TestItem::shouldKeepOnFilter,
+                    FilterableTestItem.class));
         }
     }
 
     @Test
     public void testFindLastItemReturnMatchedItem() {
         synchronized (mTarget) {
-            final MatchingTestItem item = new MatchingTestItem(true);
+            final FilterableTestItem item = mFactory.createFilterableItem(true);
             mTarget.addItem(item, false);
-            assertSame(item, mTarget.findLastItem(TEST_ITEM_PREDICATE, MatchingTestItem.class));
+            assertSame(item, mTarget.findLastItem(TestItem::shouldKeepOnFilter,
+                    FilterableTestItem.class));
         }
     }
 
     @Test
     public void testRemoveItemsNotRemoveDifferentType() throws Exception {
-        mLatch = new CountDownLatch(1);
+        mListener.setExpectedOnPreProcessItemCallbackTimes(1);
         synchronized (mTarget) {
-            mTarget.addItem(new TestItem(), false);
-            mTarget.removeItems(TEST_ITEM_PREDICATE, MatchingTestItem.class);
+            mTarget.addItem(mFactory.createItem(), false);
+            mTarget.removeItems(TestItem::shouldKeepOnFilter, FilterableTestItem.class);
         }
         assertTrue("Target didn't call callback enough times.",
-                mLatch.await(PRE_TASK_DELAY_MS + TIMEOUT_ALLOWANCE, TimeUnit.MILLISECONDS));
-        assertEquals("Target didn't process item.", 1, mItemCount.get());
+                mListener.waitForAllExpectedCallbackDone(PRE_TASK_DELAY_MS + TIMEOUT_ALLOWANCE));
+        assertEquals("Target didn't process item.", 1, mFactory.getTotalProcessedItemCount());
     }
 
     @Test
     public void testRemoveItemsNotRemoveMismatchedItem() throws Exception {
-        mLatch = new CountDownLatch(1);
+        mListener.setExpectedOnPreProcessItemCallbackTimes(1);
         synchronized (mTarget) {
-            mTarget.addItem(new MatchingTestItem(false), false);
-            mTarget.removeItems(TEST_ITEM_PREDICATE, MatchingTestItem.class);
+            mTarget.addItem(mFactory.createFilterableItem(false), false);
+            mTarget.removeItems(TestItem::shouldKeepOnFilter, FilterableTestItem.class);
         }
         assertTrue("Target didn't call callback enough times.",
-                mLatch.await(PRE_TASK_DELAY_MS + TIMEOUT_ALLOWANCE, TimeUnit.MILLISECONDS));
-        assertEquals("Target didn't process item.", 1, mItemCount.get());
+                mListener.waitForAllExpectedCallbackDone(PRE_TASK_DELAY_MS + TIMEOUT_ALLOWANCE));
+        assertEquals("Target didn't process item.", 1, mFactory.getTotalProcessedItemCount());
     }
 
     @Test
     public void testUpdateLastOrAddItemUpdatesMatchedItem() throws Exception {
-        mLatch = new CountDownLatch(1);
-        final MatchingTestItem scheduledItem = new MatchingTestItem(true);
-        final MatchingTestItem expected = new MatchingTestItem(true);
+        mListener.setExpectedOnPreProcessItemCallbackTimes(1);
+        final FilterableTestItem scheduledItem = mFactory.createFilterableItem(true);
+        final FilterableTestItem expected = mFactory.createFilterableItem(true);
         synchronized (mTarget) {
             mTarget.addItem(scheduledItem, false);
             mTarget.updateLastOrAddItem(expected, false);
@@ -256,15 +269,15 @@ public class PersisterQueueTests implements PersisterQueue.Listener {
 
         assertSame(expected, scheduledItem.mUpdateFromItem);
         assertTrue("Target didn't call callback enough times.",
-                mLatch.await(PRE_TASK_DELAY_MS + TIMEOUT_ALLOWANCE, TimeUnit.MILLISECONDS));
-        assertEquals("Target didn't process item.", 1, mItemCount.get());
+                mListener.waitForAllExpectedCallbackDone(PRE_TASK_DELAY_MS + TIMEOUT_ALLOWANCE));
+        assertEquals("Target didn't process item.", 1, mFactory.getTotalProcessedItemCount());
     }
 
     @Test
     public void testUpdateLastOrAddItemUpdatesAddItemWhenNoMatch() throws Exception {
-        mLatch = new CountDownLatch(2);
-        final MatchingTestItem scheduledItem = new MatchingTestItem(false);
-        final MatchingTestItem expected = new MatchingTestItem(true);
+        mListener.setExpectedOnPreProcessItemCallbackTimes(2);
+        final FilterableTestItem scheduledItem = mFactory.createFilterableItem(false);
+        final FilterableTestItem expected = mFactory.createFilterableItem(true);
         synchronized (mTarget) {
             mTarget.addItem(scheduledItem, false);
             mTarget.updateLastOrAddItem(expected, false);
@@ -272,73 +285,132 @@ public class PersisterQueueTests implements PersisterQueue.Listener {
 
         assertNull(scheduledItem.mUpdateFromItem);
         assertTrue("Target didn't call callback enough times.",
-                mLatch.await(PRE_TASK_DELAY_MS + INTER_WRITE_DELAY_MS + TIMEOUT_ALLOWANCE,
-                        TimeUnit.MILLISECONDS));
-        assertEquals("Target didn't process item.", 2, mItemCount.get());
+                mListener.waitForAllExpectedCallbackDone(PRE_TASK_DELAY_MS + INTER_WRITE_DELAY_MS
+                        + TIMEOUT_ALLOWANCE));
+        assertEquals("Target didn't process item.", 2, mFactory.getTotalProcessedItemCount());
     }
 
     @Test
     public void testRemoveItemsRemoveMatchedItem() throws Exception {
-        mLatch = new CountDownLatch(1);
+        mListener.setExpectedOnPreProcessItemCallbackTimes(1);
         synchronized (mTarget) {
-            mTarget.addItem(new TestItem(), false);
-            mTarget.addItem(new MatchingTestItem(true), false);
-            mTarget.removeItems(TEST_ITEM_PREDICATE, MatchingTestItem.class);
+            mTarget.addItem(mFactory.createItem(), false);
+            mTarget.addItem(mFactory.createFilterableItem(true), false);
+            mTarget.removeItems(TestItem::shouldKeepOnFilter, FilterableTestItem.class);
         }
         assertTrue("Target didn't call callback enough times.",
-                mLatch.await(PRE_TASK_DELAY_MS + TIMEOUT_ALLOWANCE, TimeUnit.MILLISECONDS));
-        assertEquals("Target didn't process item.", 1, mItemCount.get());
+                mListener.waitForAllExpectedCallbackDone(PRE_TASK_DELAY_MS + TIMEOUT_ALLOWANCE));
+        assertEquals("Target didn't process item.", 1, mFactory.getTotalProcessedItemCount());
     }
 
     @Test
     public void testFlushWaitSynchronously() {
         final long dispatchTime = SystemClock.uptimeMillis();
-        mTarget.addItem(new TestItem(), false);
-        mTarget.addItem(new TestItem(), false);
+        mTarget.addItem(mFactory.createItem(), false);
+        mTarget.addItem(mFactory.createItem(), false);
         mTarget.flush();
         assertEquals("Flush should wait until all items are processed before return.",
-                2, mItemCount.get());
+                2, mFactory.getTotalProcessedItemCount());
         final long processTime = SystemClock.uptimeMillis() - dispatchTime;
         assertWithMessage("Flush should trigger immediate flush without delays. processTime: "
                 + processTime).that(processTime).isLessThan(TIMEOUT_ALLOWANCE);
     }
 
-    @Override
-    public void onPreProcessItem(boolean queueEmpty) {
-        mProbablyDoneResults.add(queueEmpty);
+    private static class TestWriteQueueItemFactory {
+        private final AtomicInteger mItemCount = new AtomicInteger(0);;
+        private CountDownLatch mLatch;
 
-        final CountDownLatch latch = mLatch;
-        if (latch != null) {
-            latch.countDown();
+        int getTotalProcessedItemCount() {
+            return mItemCount.get();
         }
 
-        mSetUpLatch.countDown();
+        void setExpectedProcessedItemNumber(int countDown) {
+            mLatch = new CountDownLatch(countDown);
+        }
+
+        boolean waitForAllExpectedItemsProcessed(long timeoutInMilliseconds)
+                throws InterruptedException {
+            return mLatch.await(timeoutInMilliseconds, TimeUnit.MILLISECONDS);
+        }
+
+        TestItem createItem() {
+            return new TestItem(mItemCount, mLatch);
+        }
+
+        FilterableTestItem createFilterableItem(boolean shouldKeepOnFilter) {
+            return new FilterableTestItem(shouldKeepOnFilter, mItemCount, mLatch);
+        }
     }
 
-    private class TestItem<T extends TestItem<T>> implements PersisterQueue.WriteQueueItem<T> {
+    private static class TestItem<T extends TestItem<T>>
+            implements PersisterQueue.WriteQueueItem<T> {
+        private AtomicInteger mItemCount;
+        private CountDownLatch mLatch;
+
+        TestItem(AtomicInteger itemCount, CountDownLatch latch) {
+            mItemCount = itemCount;
+            mLatch = latch;
+        }
+
         @Override
         public void process() {
             mItemCount.getAndIncrement();
+            if (mLatch != null) {
+                // Count down the latch at the last step is necessary, as it's a kind of lock to the
+                // next assert in many test cases.
+                mLatch.countDown();
+            }
+        }
+
+        boolean shouldKeepOnFilter() {
+            return true;
         }
     }
 
-    private class MatchingTestItem extends TestItem<MatchingTestItem> {
-        private boolean mMatching;
+    private static class FilterableTestItem extends TestItem<FilterableTestItem> {
+        private boolean mShouldKeepOnFilter;
 
-        private MatchingTestItem mUpdateFromItem;
+        private FilterableTestItem mUpdateFromItem;
 
-        private MatchingTestItem(boolean matching) {
-            mMatching = matching;
+        private FilterableTestItem(boolean shouldKeepOnFilter, AtomicInteger mItemCount,
+                CountDownLatch mLatch) {
+            super(mItemCount, mLatch);
+            mShouldKeepOnFilter = shouldKeepOnFilter;
         }
 
         @Override
-        public boolean matches(MatchingTestItem item) {
-            return item.mMatching;
+        public boolean matches(FilterableTestItem item) {
+            return item.mShouldKeepOnFilter;
         }
 
         @Override
-        public void updateFrom(MatchingTestItem item) {
+        public void updateFrom(FilterableTestItem item) {
             mUpdateFromItem = item;
+        }
+
+        @Override
+        boolean shouldKeepOnFilter() {
+            return mShouldKeepOnFilter;
+        }
+    }
+
+    private class TestPersisterQueueListener implements PersisterQueue.Listener {
+        CountDownLatch mCallbackLatch;
+        final List<Boolean> mProbablyDoneResults = new ArrayList<>();
+
+        @Override
+        public void onPreProcessItem(boolean queueEmpty) {
+            mProbablyDoneResults.add(queueEmpty);
+            mCallbackLatch.countDown();
+        }
+
+        void setExpectedOnPreProcessItemCallbackTimes(int countDown) {
+            mCallbackLatch = new CountDownLatch(countDown);
+        }
+
+        boolean waitForAllExpectedCallbackDone(long timeoutInMilliseconds)
+                throws InterruptedException {
+            return mCallbackLatch.await(timeoutInMilliseconds, TimeUnit.MILLISECONDS);
         }
     }
 }
