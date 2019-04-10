@@ -1032,6 +1032,9 @@
     <!-- Boolean indicating whether display white balance is supported. -->
     <bool name="config_displayWhiteBalanceAvailable">false</bool>
 
+    <!-- Boolean indicating whether display white balance should be enabled by default. -->
+    <bool name="config_displayWhiteBalanceEnabledDefault">false</bool>
+
     <!-- Minimum color temperature, in Kelvin, supported by display white balance. -->
     <integer name="config_displayWhiteBalanceColorTemperatureMin">4000</integer>
 
