@@ -102,7 +102,7 @@ static void applyColorTransform(ColorTransform transform, SkPaint& paint) {
         // TODO: LRU this or something to avoid spamming new color mode filters
         if (paint.getColorFilter()->asColorMode(&color, &mode)) {
             color = transformColor(transform, color);
-            paint.setColorFilter(SkColorFilter::MakeModeFilter(color, mode));
+            paint.setColorFilter(SkColorFilters::Blend(color, mode));
         }
     }
 }

@@ -77,7 +77,7 @@ static jlong BitmapShader_constructor(JNIEnv* env, jobject o, jlong matrixPtr, j
         image = SkMakeImageFromRasterBitmap(bitmap, kNever_SkCopyPixelsMode);
     }
     sk_sp<SkShader> shader = image->makeShader(
-            (SkShader::TileMode)tileModeX, (SkShader::TileMode)tileModeY);
+            (SkTileMode)tileModeX, (SkTileMode)tileModeY);
     ThrowIAE_IfNull(env, shader.get());
 
     if (matrix) {
@@ -122,7 +122,7 @@ static jlong LinearGradient_create(JNIEnv* env, jobject, jlong matrixPtr,
 
     sk_sp<SkShader> shader(SkGradientShader::MakeLinear(pts, &colors[0],
                 GraphicsJNI::getNativeColorSpace(colorSpaceHandle), pos, colors.size(),
-                static_cast<SkShader::TileMode>(tileMode), sGradientShaderFlags, nullptr));
+                static_cast<SkTileMode>(tileMode), sGradientShaderFlags, nullptr));
     ThrowIAE_IfNull(env, shader);
 
     const SkMatrix* matrix = reinterpret_cast<const SkMatrix*>(matrixPtr);
@@ -152,7 +152,7 @@ static jlong RadialGradient_create(JNIEnv* env, jobject, jlong matrixPtr, jfloat
 
     sk_sp<SkShader> shader = SkGradientShader::MakeRadial(center, radius, &colors[0],
             GraphicsJNI::getNativeColorSpace(colorSpaceHandle), pos, colors.size(),
-            static_cast<SkShader::TileMode>(tileMode), sGradientShaderFlags, nullptr);
+            static_cast<SkTileMode>(tileMode), sGradientShaderFlags, nullptr);
     ThrowIAE_IfNull(env, shader);
 
     const SkMatrix* matrix = reinterpret_cast<const SkMatrix*>(matrixPtr);
@@ -197,8 +197,8 @@ static jlong ComposeShader_create(JNIEnv* env, jobject o, jlong matrixPtr,
     SkShader* shaderA = reinterpret_cast<SkShader *>(shaderAHandle);
     SkShader* shaderB = reinterpret_cast<SkShader *>(shaderBHandle);
     SkBlendMode mode = static_cast<SkBlendMode>(xfermodeHandle);
-    sk_sp<SkShader> baseShader(SkShader::MakeComposeShader(
-            sk_ref_sp(shaderA), sk_ref_sp(shaderB), mode));
+    sk_sp<SkShader> baseShader(SkShaders::Blend(mode,
+            sk_ref_sp(shaderA), sk_ref_sp(shaderB)));
 
     SkShader* shader;
 

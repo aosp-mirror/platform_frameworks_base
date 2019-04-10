@@ -66,7 +66,7 @@ private:
                     matrix[SkColorMatrix::kB_Trans] = 5.0f;
                     matrix[SkColorMatrix::kA_Trans] = 10.0f;
 
-                    paint.setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(matrix));
+                    paint.setColorFilter(SkColorFilters::MatrixRowMajor255(matrix));
 
                     // set a shader so it's not likely for the matrix to be optimized away (since a
                     // clever
@@ -75,7 +75,7 @@ private:
                     SkPoint pts[] = {SkPoint::Make(0, 0), SkPoint::Make(width, height)};
                     SkColor colors[2] = {Color::DeepPurple_500, Color::DeepOrange_500};
                     paint.setShader(SkGradientShader::MakeLinear(pts, colors, pos, 2,
-                                                                 SkShader::kClamp_TileMode));
+                                                                 SkTileMode::kClamp));
 
                     // overdraw several times to emphasize shader cost
                     for (int i = 0; i < 10; i++) {
