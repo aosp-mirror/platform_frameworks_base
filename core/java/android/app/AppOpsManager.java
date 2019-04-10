@@ -38,7 +38,6 @@ import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
-import android.os.SystemProperties;
 import android.os.UserManager;
 import android.util.ArrayMap;
 import android.util.LongSparseArray;
@@ -5209,7 +5208,6 @@ public class AppOpsManager {
      * @hide
      */
     public int noteProxyOpNoThrow(int op, String proxiedPackageName, int proxiedUid) {
-        logOperationIfNeeded(op, mContext.getOpPackageName(), proxiedPackageName);
         try {
             return mService.noteProxyOperation(op, Process.myUid(), mContext.getOpPackageName(),
                     proxiedUid, proxiedPackageName);
@@ -5238,7 +5236,6 @@ public class AppOpsManager {
      */
     @UnsupportedAppUsage
     public int noteOpNoThrow(int op, int uid, String packageName) {
-        logOperationIfNeeded(op, packageName, null);
         try {
             return mService.noteOperation(op, uid, packageName);
         } catch (RemoteException e) {
@@ -5346,7 +5343,6 @@ public class AppOpsManager {
      * @hide
      */
     public int startOpNoThrow(int op, int uid, String packageName, boolean startIfModeDefault) {
-        logOperationIfNeeded(op, packageName, null);
         try {
             return mService.startOperation(getToken(mService), op, uid, packageName,
                     startIfModeDefault);
@@ -5363,7 +5359,6 @@ public class AppOpsManager {
      * @hide
      */
     public void finishOp(int op, int uid, String packageName) {
-        logOperationIfNeeded(op, packageName, null);
         try {
             mService.finishOperation(getToken(mService), op, uid, packageName);
         } catch (RemoteException e) {
@@ -5702,46 +5697,5 @@ public class AppOpsManager {
         }
 
         return AppOpsManager.MODE_DEFAULT;
-    }
-
-    private static void logOperationIfNeeded(int op, String callingPackage, String proxiedPackage) {
-        // Check if debug logging propety is enabled.
-        if (!SystemProperties.getBoolean(DEBUG_LOGGING_ENABLE_PROP, false)) {
-            return;
-        }
-        // Check if this package should be logged.
-        String packages = SystemProperties.get(DEBUG_LOGGING_PACKAGES_PROP, "");
-        if (!"".equals(packages) && callingPackage != null) {
-            boolean found = false;
-            for (String pkg : packages.split(",")) {
-                if (callingPackage.equals(pkg)) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                return;
-            }
-        }
-        String opStr = opToName(op);
-        // Check if this app op should be logged
-        String logOps = SystemProperties.get(DEBUG_LOGGING_OPS_PROP, "");
-        if (!"".equals(logOps)) {
-            boolean found = false;
-            for (String logOp : logOps.split(",")) {
-                if (opStr.equals(logOp)) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                return;
-            }
-        }
-
-        // Log a stack trace
-        Exception here = new Exception("HERE!");
-        android.util.Log.i(DEBUG_LOGGING_TAG, "Note operation package= " + callingPackage
-                + " proxied= " + proxiedPackage + " op= " + opStr, here);
     }
 }
