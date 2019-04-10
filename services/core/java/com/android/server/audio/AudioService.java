@@ -1960,7 +1960,7 @@ public class AudioService extends IAudioService.Stub
             return;
         }
         for (final int groupedStream : avg.getLegacyStreamTypes()) {
-            setStreamVolume(stream, index, flags, callingPackage, callingPackage,
+            setStreamVolume(groupedStream, index, flags, callingPackage, callingPackage,
                             Binder.getCallingUid());
         }
     }
