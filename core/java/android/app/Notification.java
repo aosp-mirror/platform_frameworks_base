@@ -618,9 +618,11 @@ public class Notification implements Parcelable
     public static final int FLAG_CAN_COLORIZE = 0x00000800;
 
     /**
-     * Bit to be bitswised-ored into the {@link #flags} field that should be
-     * set if this notification can be shown as a bubble.
-     * @hide
+     * Bit to be bitswised-ored into the {@link #flags} field that should be set if this
+     * notification is showing as a bubble. This will be set by the system if it is determined
+     * that your notification is allowed to be a bubble.
+     *
+     * @see {@link Notification.Builder#setBubbleMetadata(BubbleMetadata)}
      */
     public static final int FLAG_BUBBLE = 0x00001000;
 
@@ -3578,9 +3580,9 @@ public class Notification implements Parcelable
          * <p>This data will be ignored unless the notification is posted to a channel that
          * allows {@link NotificationChannel#canBubble() bubbles}.</p>
          *
-         * <b>Notifications with a valid and allowed bubble metadata will display in collapsed state
-         * outside of the notification shade on unlocked devices. When a user interacts with the
-         * collapsed state, the bubble intent will be invoked and displayed.</b>
+         * <p>Notifications allowed to bubble that have valid bubble metadata will display in
+         * collapsed state outside of the notification shade on unlocked devices. When a user
+         * interacts with the collapsed state, the bubble intent will be invoked and displayed.</p>
          */
         @NonNull
         public Builder setBubbleMetadata(@Nullable BubbleMetadata data) {
