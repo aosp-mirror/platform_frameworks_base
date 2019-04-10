@@ -2869,7 +2869,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void allowAssistantCapability(String adjustmentType) {
-            checkCallerIsSystemOrShell();
+            checkCallerIsSystemOrSystemUiOrShell();
             mAssistants.allowAdjustmentType(adjustmentType);
 
             handleSavePolicyFile();
@@ -2877,7 +2877,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void disallowAssistantCapability(String adjustmentType) {
-            checkCallerIsSystemOrShell();
+            checkCallerIsSystemOrSystemUiOrShell();
             mAssistants.disallowAdjustmentType(adjustmentType);
 
             handleSavePolicyFile();
@@ -3811,7 +3811,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public ComponentName getAllowedNotificationAssistantForUser(int userId) {
-            checkCallerIsSystem();
+            checkCallerIsSystemOrSystemUiOrShell();
             List<ComponentName> allowedComponents = mAssistants.getAllowedComponents(userId);
             if (allowedComponents.size() > 1) {
                 throw new IllegalStateException(
@@ -3894,7 +3894,7 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void setNotificationAssistantAccessGrantedForUser(ComponentName assistant,
                 int userId, boolean granted) {
-            checkCallerIsSystemOrShell();
+            checkCallerIsSystemOrSystemUiOrShell();
             mAssistants.setUserSet(userId, true);
             final long identity = Binder.clearCallingIdentity();
             try {
@@ -3929,10 +3929,6 @@ public class NotificationManagerService extends SystemService {
                         }
                     }
                     if (!foundEnqueued) {
-                        // adjustment arrived too late to apply to enqueued; apply to posted
-                        // However, since the notification is now posted and may have alerted,
-                        // ignore any importance related adjustments
-                        adjustment.getSignals().remove(Adjustment.KEY_IMPORTANCE);
                         applyAdjustmentFromAssistant(token, adjustment);
                     }
                 }
@@ -4123,7 +4119,7 @@ public class NotificationManagerService extends SystemService {
             }
             return;
         }
-        if (mAllowedManagedServicePackages.test(assistant.getPackageName(), userId,
+        if (!granted || mAllowedManagedServicePackages.test(assistant.getPackageName(), userId,
                 mAssistants.getRequiredPermission())) {
             mConditionProviders.setPackageOrComponentEnabled(assistant.flattenToString(),
                     userId, false, granted);
@@ -6995,6 +6991,16 @@ public class NotificationManagerService extends SystemService {
         throw new SecurityException("Disallowed call for uid " + Binder.getCallingUid());
     }
 
+    private void checkCallerIsSystemOrSystemUiOrShell() {
+        if (Binder.getCallingUid() == Process.SHELL_UID) {
+            return;
+        }
+        if (isCallerSystemOrPhone()) {
+            return;
+        }
+        getContext().enforceCallingPermission(android.Manifest.permission.STATUS_BAR_SERVICE, null);
+    }
+
     private void checkCallerIsSystemOrSameApp(String pkg) {
         if (isCallerSystemOrPhone()) {
             return;
@@ -7302,7 +7308,7 @@ public class NotificationManagerService extends SystemService {
 
         @GuardedBy("mLock")
         private ArrayMap<Integer, Boolean> mUserSetMap = new ArrayMap<>();
-        private List<String> mAllowedAdjustments = new ArrayList<>();
+        private Set<String> mAllowedAdjustments = new ArraySet<>();
 
         public NotificationAssistants(Context context, Object lock, UserProfiles up,
                 IPackageManager pm) {
@@ -7390,11 +7396,17 @@ public class NotificationManagerService extends SystemService {
             synchronized (mLock) {
                 mAllowedAdjustments.add(type);
             }
+            for (final ManagedServiceInfo info : NotificationAssistants.this.getServices()) {
+                mHandler.post(() -> notifyCapabilitiesChanged(info));
+            }
         }
 
         protected void disallowAdjustmentType(String type) {
             synchronized (mLock) {
                 mAllowedAdjustments.remove(type);
+            }
+            for (final ManagedServiceInfo info : NotificationAssistants.this.getServices()) {
+                    mHandler.post(() -> notifyCapabilitiesChanged(info));
             }
         }
 
@@ -7453,6 +7465,15 @@ public class NotificationManagerService extends SystemService {
                 throws IOException {
             boolean userSet = XmlUtils.readBooleanAttribute(parser, ATT_USER_SET, false);
             setUserSet(userId, userSet);
+        }
+
+        private void notifyCapabilitiesChanged(final ManagedServiceInfo info) {
+            final INotificationListener assistant = (INotificationListener) info.service;
+            try {
+                assistant.onCapabilitiesChanged();
+            } catch (RemoteException ex) {
+                Slog.e(TAG, "unable to notify assistant (capabilities): " + assistant, ex);
+            }
         }
 
         private void notifySeen(final ManagedServiceInfo info,
