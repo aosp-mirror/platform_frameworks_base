@@ -32,7 +32,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
 import android.content.res.Configuration;
 import android.content.res.Resources.Theme;
 import android.database.sqlite.SQLiteCompatibilityWalFlags;
@@ -158,8 +157,6 @@ import com.android.server.wm.WindowManagerGlobalLock;
 import com.android.server.wm.WindowManagerService;
 
 import dalvik.system.VMRuntime;
-
-import com.google.android.startop.iorap.IorapForwardingService;
 
 import java.io.File;
 import java.io.IOException;
@@ -1071,10 +1068,6 @@ public final class SystemServer {
 
             traceBeginAndSlog("PinnerService");
             mSystemServiceManager.startService(PinnerService.class);
-            traceEnd();
-
-            traceBeginAndSlog("IorapForwardingService");
-            mSystemServiceManager.startService(IorapForwardingService.class);
             traceEnd();
 
             traceBeginAndSlog("SignedConfigService");
