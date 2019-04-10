@@ -514,6 +514,7 @@ package android.provider {
 
   public final class MediaStore {
     method @Deprecated @NonNull public static android.net.Uri createPending(@NonNull android.content.Context, @NonNull android.provider.MediaStore.PendingParams);
+    method @Deprecated @NonNull public static java.util.Set<java.lang.String> getAllVolumeNames(@NonNull android.content.Context);
     method @Deprecated @NonNull public static android.provider.MediaStore.PendingSession openPending(@NonNull android.content.Context, @NonNull android.net.Uri);
     method @Deprecated @NonNull public static android.net.Uri setIncludeTrashed(@NonNull android.net.Uri);
     method @Deprecated public static void trash(@NonNull android.content.Context, @NonNull android.net.Uri);
