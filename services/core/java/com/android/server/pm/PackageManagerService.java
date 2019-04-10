@@ -2943,7 +2943,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
                 // Uncompress and install any stubbed system applications.
                 // This must be done last to ensure all stubs are replaced or disabled.
-                decompressSystemApplications(stubSystemApps, scanFlags);
+                installSystemStubPackages(stubSystemApps, scanFlags);
 
                 final int cachedNonSystemApps = PackageParser.sCachedPackageReadCount.get()
                                 - cachedSystemApps;
@@ -3254,49 +3254,37 @@ public class PackageManagerService extends IPackageManager.Stub
      * <p>In order to forcefully attempt an installation of a full application, go to app
      * settings and enable the application.
      */
-    private void decompressSystemApplications(@NonNull List<String> stubSystemApps, int scanFlags) {
-        for (int i = stubSystemApps.size() - 1; i >= 0; --i) {
-            final String pkgName = stubSystemApps.get(i);
+    private void installSystemStubPackages(@NonNull List<String> systemStubPackageNames,
+            @ScanFlags int scanFlags) {
+        for (int i = systemStubPackageNames.size() - 1; i >= 0; --i) {
+            final String packageName = systemStubPackageNames.get(i);
             // skip if the system package is already disabled
-            if (mSettings.isDisabledSystemPackageLPr(pkgName)) {
-                stubSystemApps.remove(i);
+            if (mSettings.isDisabledSystemPackageLPr(packageName)) {
+                systemStubPackageNames.remove(i);
                 continue;
             }
             // skip if the package isn't installed (?!); this should never happen
-            final PackageParser.Package pkg = mPackages.get(pkgName);
+            final PackageParser.Package pkg = mPackages.get(packageName);
             if (pkg == null) {
-                stubSystemApps.remove(i);
+                systemStubPackageNames.remove(i);
                 continue;
             }
             // skip if the package has been disabled by the user
-            final PackageSetting ps = mSettings.mPackages.get(pkgName);
+            final PackageSetting ps = mSettings.mPackages.get(packageName);
             if (ps != null) {
                 final int enabledState = ps.getEnabled(UserHandle.USER_SYSTEM);
                 if (enabledState == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER) {
-                    stubSystemApps.remove(i);
+                    systemStubPackageNames.remove(i);
                     continue;
                 }
             }
 
-            if (DEBUG_COMPRESSION) {
-                Slog.i(TAG, "Uncompressing system stub; pkg: " + pkgName);
-            }
-
-            // uncompress the binary to its eventual destination on /data
-            final File scanFile = decompressPackage(pkg);
-            if (scanFile == null) {
-                continue;
-            }
-
             // install the package to replace the stub on /system
             try {
-                mSettings.disableSystemPackageLPw(pkgName, true /*replaced*/);
-                removePackageLI(pkg, true /*chatty*/);
-                scanPackageTracedLI(scanFile, 0 /*reparseFlags*/, scanFlags, 0, null);
+                installStubPackageLI(pkg, 0, scanFlags);
                 ps.setEnabled(PackageManager.COMPONENT_ENABLED_STATE_DEFAULT,
                         UserHandle.USER_SYSTEM, "android");
-                stubSystemApps.remove(i);
-                continue;
+                systemStubPackageNames.remove(i);
             } catch (PackageManagerException e) {
                 Slog.e(TAG, "Failed to parse uncompressed system package: " + e.getMessage());
             }
@@ -3305,8 +3293,8 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         // disable any stub still left; these failed to install the full application
-        for (int i = stubSystemApps.size() - 1; i >= 0; --i) {
-            final String pkgName = stubSystemApps.get(i);
+        for (int i = systemStubPackageNames.size() - 1; i >= 0; --i) {
+            final String pkgName = systemStubPackageNames.get(i);
             final PackageSetting ps = mSettings.mPackages.get(pkgName);
             ps.setEnabled(PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
                     UserHandle.USER_SYSTEM, "android");
@@ -3315,20 +3303,107 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     /**
+     * Extract, install and enable a stub package.
+     * <p>If the compressed file can not be extracted / installed for any reason, the stub
+     * APK will be installed and the package will be disabled. To recover from this situation,
+     * the user will need to go into system settings and re-enable the package.
+     */
+    private boolean enableCompressedPackage(PackageParser.Package stubPkg) {
+        final int parseFlags = mDefParseFlags | PackageParser.PARSE_CHATTY
+                | PackageParser.PARSE_ENFORCE_CODE;
+        synchronized (mInstallLock) {
+            final PackageParser.Package pkg;
+            try (PackageFreezer freezer =
+                    freezePackage(stubPkg.packageName, "setEnabledSetting")) {
+                pkg = installStubPackageLI(stubPkg, parseFlags, 0 /*scanFlags*/);
+                synchronized (mPackages) {
+                    prepareAppDataAfterInstallLIF(pkg);
+                    try {
+                        updateSharedLibrariesLocked(pkg, null, mPackages);
+                    } catch (PackageManagerException e) {
+                        Slog.e(TAG, "updateAllSharedLibrariesLPw failed: ", e);
+                    }
+                    mPermissionManager.updatePermissions(
+                            pkg.packageName, pkg, true, mPackages.values(),
+                            mPermissionCallback);
+                    mSettings.writeLPr();
+                }
+            } catch (PackageManagerException e) {
+                // Whoops! Something went very wrong; roll back to the stub and disable the package
+                try (PackageFreezer freezer =
+                        freezePackage(stubPkg.packageName, "setEnabledSetting")) {
+                    synchronized (mPackages) {
+                        // NOTE: Ensure the system package is enabled; even for a compressed stub.
+                        // If we don't, installing the system package fails during scan
+                        enableSystemPackageLPw(stubPkg);
+                    }
+                    installPackageFromSystemLIF(stubPkg.codePath,
+                            null /*allUserHandles*/, null /*origUserHandles*/,
+                            null /*origPermissionsState*/, true /*writeSettings*/);
+                } catch (PackageManagerException pme) {
+                    // Serious WTF; we have to be able to install the stub
+                    Slog.wtf(TAG, "Failed to restore system package:" + stubPkg.packageName, pme);
+                } finally {
+                    // Disable the package; the stub by itself is not runnable
+                    synchronized (mPackages) {
+                        final PackageSetting stubPs = mSettings.mPackages.get(stubPkg.packageName);
+                        if (stubPs != null) {
+                            stubPs.setEnabled(COMPONENT_ENABLED_STATE_DISABLED,
+                                    UserHandle.USER_SYSTEM, "android");
+                        }
+                        mSettings.writeLPr();
+                    }
+                }
+                return false;
+            }
+            clearAppDataLIF(pkg, UserHandle.USER_ALL, FLAG_STORAGE_DE
+                    | FLAG_STORAGE_CE | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
+            mDexManager.notifyPackageUpdated(pkg.packageName,
+                    pkg.baseCodePath, pkg.splitCodePaths);
+        }
+        return true;
+    }
+
+    private PackageParser.Package installStubPackageLI(PackageParser.Package stubPkg,
+            @ParseFlags int parseFlags, @ScanFlags int scanFlags)
+                    throws PackageManagerException {
+        if (DEBUG_COMPRESSION) {
+            Slog.i(TAG, "Uncompressing system stub; pkg: " + stubPkg.packageName);
+        }
+        // uncompress the binary to its eventual destination on /data
+        final File scanFile = decompressPackage(stubPkg.packageName, stubPkg.codePath);
+        if (scanFile == null) {
+            throw new PackageManagerException("Unable to decompress stub at " + stubPkg.codePath);
+        }
+        synchronized (mPackages) {
+            mSettings.disableSystemPackageLPw(stubPkg.packageName, true /*replaced*/);
+        }
+        removePackageLI(stubPkg, true /*chatty*/);
+        try {
+            return scanPackageTracedLI(scanFile, parseFlags, scanFlags, 0, null);
+        } catch (PackageManagerException e) {
+            Slog.w(TAG, "Failed to install compressed system package:" + stubPkg.packageName, e);
+            // Remove the failed install
+            removeCodePathLI(scanFile);
+            throw e;
+        }
+    }
+
+    /**
      * Decompresses the given package on the system image onto
      * the /data partition.
      * @return The directory the package was decompressed into. Otherwise, {@code null}.
      */
-    private File decompressPackage(PackageParser.Package pkg) {
-        final File[] compressedFiles = getCompressedFiles(pkg.codePath);
+    private File decompressPackage(String packageName, String codePath) {
+        final File[] compressedFiles = getCompressedFiles(codePath);
         if (compressedFiles == null || compressedFiles.length == 0) {
             if (DEBUG_COMPRESSION) {
-                Slog.i(TAG, "No files to decompress: " + pkg.baseCodePath);
+                Slog.i(TAG, "No files to decompress: " + codePath);
             }
             return null;
         }
         final File dstCodePath =
-                getNextCodePath(Environment.getDataAppDirectory(null), pkg.packageName);
+                getNextCodePath(Environment.getDataAppDirectory(null), packageName);
         int ret = PackageManager.INSTALL_SUCCEEDED;
         try {
             Os.mkdir(dstCodePath.getAbsolutePath(), 0755);
@@ -3341,14 +3416,14 @@ public class PackageManagerService extends IPackageManager.Stub
                 ret = decompressFile(srcFile, dstFile);
                 if (ret != PackageManager.INSTALL_SUCCEEDED) {
                     logCriticalInfo(Log.ERROR, "Failed to decompress"
-                            + "; pkg: " + pkg.packageName
+                            + "; pkg: " + packageName
                             + ", file: " + dstFileName);
                     break;
                 }
             }
         } catch (ErrnoException e) {
             logCriticalInfo(Log.ERROR, "Failed to decompress"
-                    + "; pkg: " + pkg.packageName
+                    + "; pkg: " + packageName
                     + ", err: " + e.errno);
         }
         if (ret == PackageManager.INSTALL_SUCCEEDED) {
@@ -3360,7 +3435,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         null /*abiOverride*/);
             } catch (IOException e) {
                 logCriticalInfo(Log.ERROR, "Failed to extract native libraries"
-                        + "; pkg: " + pkg.packageName);
+                        + "; pkg: " + packageName);
                 ret = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
             } finally {
                 IoUtils.closeQuietly(handle);
@@ -17979,12 +18054,15 @@ public class PackageManagerService extends IPackageManager.Stub
             return PackageManager.DELETE_FAILED_DEVICE_POLICY_MANAGER;
         }
 
-        PackageSetting uninstalledPs;
-        PackageParser.Package pkg;
+        final PackageSetting uninstalledPs;
+        final PackageSetting disabledSystemPs;
+        final PackageParser.Package pkg;
 
         // for the uninstall-updates case and restricted profiles, remember the per-
         // user handle installed state
         int[] allUsers;
+        /** enabled state of the uninstalled application */
+        final int origEnabledState;
         synchronized (mPackages) {
             uninstalledPs = mSettings.mPackages.get(packageName);
             if (uninstalledPs == null) {
@@ -17999,6 +18077,11 @@ public class PackageManagerService extends IPackageManager.Stub
                 return PackageManager.DELETE_FAILED_INTERNAL_ERROR;
             }
 
+            disabledSystemPs = mSettings.getDisabledSystemPkgLPr(packageName);
+            // Save this off before we delete the package. When deleting a stub application
+            // we always set the enabled state to 'disabled'.
+            origEnabledState = uninstalledPs == null
+                    ? COMPONENT_ENABLED_STATE_DEFAULT : uninstalledPs.getEnabled(userId);
             // Static shared libs can be declared by any package, so let us not
             // allow removing a package if it provides a lib others depend on.
             pkg = mPackages.get(packageName);
@@ -18067,9 +18150,29 @@ public class PackageManagerService extends IPackageManager.Stub
         Runtime.getRuntime().gc();
         // Delete the resources here after sending the broadcast to let
         // other processes clean up before deleting resources.
-        if (info.args != null) {
-            synchronized (mInstallLock) {
+        synchronized (mInstallLock) {
+            if (info.args != null) {
                 info.args.doPostDeleteLI(true);
+            }
+            final PackageParser.Package stubPkg =
+                    (disabledSystemPs == null) ? null : disabledSystemPs.pkg;
+            if (stubPkg != null && stubPkg.isStub) {
+                synchronized (mPackages) {
+                    // restore the enabled state of the stub; the state is overwritten when
+                    // the stub is uninstalled
+                    final PackageSetting stubPs = mSettings.mPackages.get(stubPkg.packageName);
+                    if (stubPs != null) {
+                        stubPs.setEnabled(origEnabledState, userId, "android");
+                    }
+                }
+                if (origEnabledState == COMPONENT_ENABLED_STATE_DEFAULT
+                        || origEnabledState == COMPONENT_ENABLED_STATE_ENABLED) {
+                    if (DEBUG_COMPRESSION) {
+                        Slog.i(TAG, "Enabling system stub after removal; pkg: "
+                                + stubPkg.packageName);
+                    }
+                    enableCompressedPackage(stubPkg);
+                }
             }
         }
 
@@ -18476,7 +18579,14 @@ public class PackageManagerService extends IPackageManager.Stub
             throw new SystemDeleteException(e);
         } finally {
             if (disabledPs.pkg.isStub) {
-                mSettings.disableSystemPackageLPw(disabledPs.name, true /*replaced*/);
+                // We've re-installed the stub; make sure it's disabled here. If package was
+                // originally enabled, we'll install the compressed version of the application
+                // and re-enable it afterward.
+                final PackageSetting stubPs = mSettings.mPackages.get(deletedPkg.packageName);
+                if (stubPs != null) {
+                    stubPs.setEnabled(
+                            COMPONENT_ENABLED_STATE_DISABLED, UserHandle.USER_SYSTEM, "android");
+                }
             }
         }
     }
@@ -20552,101 +20662,8 @@ public class PackageManagerService extends IPackageManager.Stub
             if (isSystemStub
                     && (newState == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
                             || newState == PackageManager.COMPONENT_ENABLED_STATE_ENABLED)) {
-                final File codePath = decompressPackage(deletedPkg);
-                if (codePath == null) {
-                    Slog.e(TAG, "couldn't decompress pkg: " + pkgSetting.name);
+                if (!enableCompressedPackage(deletedPkg)) {
                     return;
-                }
-                // TODO remove direct parsing of the package object during internal cleanup
-                // of scan package
-                // We need to call parse directly here for no other reason than we need
-                // the new package in order to disable the old one [we use the information
-                // for some internal optimization to optionally create a new package setting
-                // object on replace]. However, we can't get the package from the scan
-                // because the scan modifies live structures and we need to remove the
-                // old [system] package from the system before a scan can be attempted.
-                // Once scan is indempotent we can remove this parse and use the package
-                // object we scanned, prior to adding it to package settings.
-                final PackageParser pp = new PackageParser();
-                pp.setSeparateProcesses(mSeparateProcesses);
-                pp.setDisplayMetrics(mMetrics);
-                pp.setCallback(mPackageParserCallback);
-                final PackageParser.Package tmpPkg;
-                try {
-                    final @ParseFlags int parseFlags = mDefParseFlags
-                            | PackageParser.PARSE_MUST_BE_APK
-                            | PackageParser.PARSE_IS_SYSTEM_DIR;
-                    tmpPkg = pp.parsePackage(codePath, parseFlags);
-                } catch (PackageParserException e) {
-                    Slog.w(TAG, "Failed to parse compressed system package:" + pkgSetting.name, e);
-                    return;
-                }
-                synchronized (mInstallLock) {
-                    // Disable the stub and remove any package entries
-                    removePackageLI(deletedPkg, true);
-                    synchronized (mPackages) {
-                        disableSystemPackageLPw(deletedPkg, tmpPkg);
-                    }
-                    final PackageParser.Package pkg;
-                    try (PackageFreezer freezer =
-                            freezePackage(deletedPkg.packageName, "setEnabledSetting")) {
-                        final int parseFlags = mDefParseFlags | PackageParser.PARSE_CHATTY
-                                | PackageParser.PARSE_ENFORCE_CODE;
-                        pkg = scanPackageTracedLI(codePath, parseFlags, 0 /*scanFlags*/,
-                                0 /*currentTime*/, null /*user*/);
-                        prepareAppDataAfterInstallLIF(pkg);
-                        synchronized (mPackages) {
-                            try {
-                                updateSharedLibrariesLocked(pkg, null, mPackages);
-                            } catch (PackageManagerException e) {
-                                Slog.e(TAG, "updateAllSharedLibrariesLPw failed: ", e);
-                            }
-                            mPermissionManager.updatePermissions(
-                                    pkg.packageName, pkg, true, mPackages.values(),
-                                    mPermissionCallback);
-                            mSettings.writeLPr();
-                        }
-                    } catch (PackageManagerException e) {
-                        // Whoops! Something went wrong; try to roll back to the stub
-                        Slog.w(TAG, "Failed to install compressed system package:"
-                                + pkgSetting.name, e);
-                        // Remove the failed install
-                        removeCodePathLI(codePath);
-
-                        // Install the system package
-                        try (PackageFreezer freezer =
-                                freezePackage(deletedPkg.packageName, "setEnabledSetting")) {
-                            synchronized (mPackages) {
-                                // NOTE: The system package always needs to be enabled; even
-                                // if it's for a compressed stub. If we don't, installing the
-                                // system package fails during scan [scanning checks the disabled
-                                // packages]. We will reverse this later, after we've "installed"
-                                // the stub.
-                                // This leaves us in a fragile state; the stub should never be
-                                // enabled, so, cross your fingers and hope nothing goes wrong
-                                // until we can disable the package later.
-                                enableSystemPackageLPw(deletedPkg);
-                            }
-                            installPackageFromSystemLIF(deletedPkg.codePath,
-                                    /*isPrivileged*/ null /*allUserHandles*/,
-                                    null /*origUserHandles*/, null /*origPermissionsState*/,
-                                    true /*writeSettings*/);
-                        } catch (PackageManagerException pme) {
-                            Slog.w(TAG, "Failed to restore system package:"
-                                    + deletedPkg.packageName, pme);
-                        } finally {
-                            synchronized (mPackages) {
-                                mSettings.disableSystemPackageLPw(
-                                        deletedPkg.packageName, true /*replaced*/);
-                                mSettings.writeLPr();
-                            }
-                        }
-                        return;
-                    }
-                    clearAppDataLIF(pkg, UserHandle.USER_ALL, FLAG_STORAGE_DE
-                            | FLAG_STORAGE_CE | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
-                    mDexManager.notifyPackageUpdated(pkg.packageName,
-                            pkg.baseCodePath, pkg.splitCodePaths);
                 }
             }
             if (newState == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
