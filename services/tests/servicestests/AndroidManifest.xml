@@ -68,6 +68,7 @@
     <uses-permission android:name="android.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS" />
     <uses-permission android:name="android.permission.READ_DEVICE_CONFIG" />
     <uses-permission android:name="android.permission.WRITE_DEVICE_CONFIG" />
+    <uses-permission android:name="android.permission.HARDWARE_TEST"/>
 
     <!-- Uses API introduced in O (26) -->
     <uses-sdk android:minSdkVersion="1"

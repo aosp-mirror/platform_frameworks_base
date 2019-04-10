@@ -25,7 +25,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.RemoteException;
@@ -153,11 +152,6 @@ public class ResolverListController {
     }
 
     // Filter out any activities that the launched uid does not have permission for.
-    //
-    // Also filter out those that are suspended because they couldn't be started. We don't do this
-    // when we have an explicit list of resolved activities, because that only happens when
-    // we are being subclassed, so we can safely launch whatever they gave us.
-    //
     // To preserve the inputList, optionally will return the original list if any modification has
     // been made.
     @VisibleForTesting
@@ -171,9 +165,8 @@ public class ResolverListController {
             int granted = ActivityManager.checkComponentPermission(
                     ai.permission, mLaunchedFromUid,
                     ai.applicationInfo.uid, ai.exported);
-            boolean suspended = (ai.applicationInfo.flags
-                    & ApplicationInfo.FLAG_SUSPENDED) != 0;
-            if (granted != PackageManager.PERMISSION_GRANTED || suspended
+
+            if (granted != PackageManager.PERMISSION_GRANTED
                     || isComponentFiltered(ai.getComponentName())) {
                 // Access not allowed! We're about to filter an item,
                 // so modify the unfiltered version if it hasn't already been modified.
@@ -253,6 +246,7 @@ public class ResolverListController {
                 isComputed = true;
             }
             Collections.sort(inputList, mResolverComparator);
+
             long afterRank = System.currentTimeMillis();
             if (DEBUG) {
                 Log.d(TAG, "Time Cost: " + Long.toString(afterRank - beforeRank));
@@ -261,6 +255,7 @@ public class ResolverListController {
             Log.e(TAG, "Compute & Sort was interrupted: " + e);
         }
     }
+
 
     private static boolean isSameResolvedComponent(ResolveInfo a,
             ResolverActivity.ResolvedComponentInfo b) {

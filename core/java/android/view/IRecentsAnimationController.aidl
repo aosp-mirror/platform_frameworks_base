@@ -41,9 +41,11 @@ interface IRecentsAnimationController {
      * with remote animation targets should be relinquished. If {@param moveHomeToTop} is true, then
      * the home activity should be moved to the top. Otherwise, the home activity is hidden and the
      * user is returned to the app.
+     * @param sendUserLeaveHint If set to true, {@link Activity#onUserLeaving} will be sent to the
+     *                          top resumed app, false otherwise.
      */
     @UnsupportedAppUsage
-    void finish(boolean moveHomeToTop);
+    void finish(boolean moveHomeToTop, boolean sendUserLeaveHint);
 
     /**
      * Called by the handler to indicate that the recents animation input consumer should be

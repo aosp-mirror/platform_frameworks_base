@@ -1177,7 +1177,7 @@ static int write_java_method_for_module(
 
         // Initialize the buffer with list data type.
         fprintf(out, "        buff[pos] = LIST_TYPE;\n");
-        fprintf(out, "        buff[pos + 1] = %lu;\n", signature.size() + 2);
+        fprintf(out, "        buff[pos + 1] = %zu;\n", signature.size() + 2);
         fprintf(out, "        pos += LIST_TYPE_OVERHEAD;\n");
 
         // Write timestamp.

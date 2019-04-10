@@ -96,8 +96,9 @@ public class IpSecService extends IIpSecService.Stub {
             new int[] {OsConstants.AF_INET, OsConstants.AF_INET6};
 
     private static final int NETD_FETCH_TIMEOUT_MS = 5000; // ms
-    private static final int MAX_PORT_BIND_ATTEMPTS = 10;
     private static final InetAddress INADDR_ANY;
+
+    @VisibleForTesting static final int MAX_PORT_BIND_ATTEMPTS = 10;
 
     static {
         try {

@@ -451,7 +451,7 @@ public final class OverlayInfo implements Parcelable {
     public String toString() {
         return "OverlayInfo { overlay=" + packageName + ", targetPackage=" + targetPackageName
                 + ((targetOverlayableName == null) ? ""
-                : ", targetOverlyabale=" + targetOverlayableName)
+                : ", targetOverlayable=" + targetOverlayableName)
                 + ", state=" + state + " (" + stateToString(state) + "), userId=" + userId + " }";
     }
 }

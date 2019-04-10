@@ -43,12 +43,18 @@ public final class CellInfoNr extends CellInfo {
         mCellSignalStrength = other.mCellSignalStrength;
     }
 
+    /**
+     * @return a {@link CellIdentityNr} instance.
+     */
     @Override
     @NonNull
     public CellIdentity getCellIdentity() {
         return mCellIdentity;
     }
 
+    /**
+     * @return a {@link CellSignalStrengthNr} instance.
+     */
     @Override
     @NonNull
     public CellSignalStrength getCellSignalStrength() {

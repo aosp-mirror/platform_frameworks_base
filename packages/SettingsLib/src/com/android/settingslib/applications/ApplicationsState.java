@@ -83,17 +83,18 @@ import java.util.regex.Pattern;
  * as needed.
  */
 public class ApplicationsState {
-    static final String TAG = "ApplicationsState";
-    static final boolean DEBUG = false;
-    static final boolean DEBUG_LOCKING = false;
+    private static final String TAG = "ApplicationsState";
 
     public static final int SIZE_UNKNOWN = -1;
     public static final int SIZE_INVALID = -2;
 
-    static final Pattern REMOVE_DIACRITICALS_PATTERN
+    private static final boolean DEBUG = false;
+    private static final boolean DEBUG_LOCKING = false;
+    private static final Object sLock = new Object();
+    private static final Pattern REMOVE_DIACRITICALS_PATTERN
             = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
 
-    static final Object sLock = new Object();
+    @VisibleForTesting
     static ApplicationsState sInstance;
 
     public static ApplicationsState getInstance(Application app) {
@@ -126,13 +127,12 @@ public class ApplicationsState {
 
     // Information about all applications.  Synchronize on mEntriesMap
     // to protect access to these.
-    final ArrayList<Session> mSessions = new ArrayList<Session>();
-    final ArrayList<Session> mRebuildingSessions = new ArrayList<Session>();
+    final ArrayList<Session> mSessions = new ArrayList<>();
+    final ArrayList<Session> mRebuildingSessions = new ArrayList<>();
     private InterestingConfigChanges mInterestingConfigChanges = new InterestingConfigChanges();
     // Map: userid => (Map: package name => AppEntry)
-    final SparseArray<HashMap<String, AppEntry>> mEntriesMap =
-            new SparseArray<HashMap<String, AppEntry>>();
-    final ArrayList<AppEntry> mAppEntries = new ArrayList<AppEntry>();
+    final SparseArray<HashMap<String, AppEntry>> mEntriesMap = new SparseArray<>();
+    final ArrayList<AppEntry> mAppEntries = new ArrayList<>();
     List<ApplicationInfo> mApplications = new ArrayList<>();
     long mCurId = 1;
     UUID mCurComputingSizeUuid;
@@ -182,9 +182,10 @@ public class ApplicationsState {
         mInterestingConfigChanges = interestingConfigChanges;
     }
 
-    public static final @SessionFlags int DEFAULT_SESSION_FLAGS =
+    @SessionFlags
+    public static final int DEFAULT_SESSION_FLAGS =
             FLAG_SESSION_REQUEST_HOME_APP | FLAG_SESSION_REQUEST_ICONS |
-            FLAG_SESSION_REQUEST_SIZES | FLAG_SESSION_REQUEST_LAUNCHER;
+                    FLAG_SESSION_REQUEST_SIZES | FLAG_SESSION_REQUEST_LAUNCHER;
 
     private ApplicationsState(Application app, IPackageManager iPackageManager) {
         mContext = app;
@@ -194,7 +195,7 @@ public class ApplicationsState {
         mUm = mContext.getSystemService(UserManager.class);
         mStats = mContext.getSystemService(StorageStatsManager.class);
         for (int userId : mUm.getProfileIdsWithDisabled(UserHandle.myUserId())) {
-            mEntriesMap.put(userId, new HashMap<String, AppEntry>());
+            mEntriesMap.put(userId, new HashMap<>());
         }
 
         mThread = new HandlerThread("ApplicationsState.Loader",
@@ -683,9 +684,16 @@ public class ApplicationsState {
     private AppEntry getEntryLocked(ApplicationInfo info) {
         int userId = UserHandle.getUserId(info.uid);
         AppEntry entry = mEntriesMap.get(userId).get(info.packageName);
-        if (DEBUG) Log.i(TAG, "Looking up entry of pkg " + info.packageName + ": " + entry);
+        if (DEBUG) {
+            Log.i(TAG, "Looking up entry of pkg " + info.packageName + ": " + entry);
+        }
         if (entry == null) {
-            if (DEBUG) Log.i(TAG, "Creating AppEntry for " + info.packageName);
+            if (mHiddenModules.contains(info.packageName)) {
+                return null;
+            }
+            if (DEBUG) {
+                Log.i(TAG, "Creating AppEntry for " + info.packageName);
+            }
             entry = new AppEntry(mContext, info, mCurId++);
             mEntriesMap.get(userId).put(info.packageName, entry);
             mAppEntries.add(entry);
@@ -759,7 +767,8 @@ public class ApplicationsState {
         boolean mRebuildForeground;
 
         private final boolean mHasLifecycle;
-        @SessionFlags private int mFlags = DEFAULT_SESSION_FLAGS;
+        @SessionFlags
+        private int mFlags = DEFAULT_SESSION_FLAGS;
 
         Session(Callbacks callbacks, Lifecycle lifecycle) {
             mCallbacks = callbacks;
@@ -771,7 +780,8 @@ public class ApplicationsState {
             }
         }
 
-        public @SessionFlags int getSessionFlags() {
+        @SessionFlags
+        public int getSessionFlags() {
             return mFlags;
         }
 
@@ -863,25 +873,32 @@ public class ApplicationsState {
                 filter.init(mContext);
             }
 
-            List<AppEntry> apps;
+            final List<AppEntry> apps;
             synchronized (mEntriesMap) {
                 apps = new ArrayList<>(mAppEntries);
             }
 
-            ArrayList<AppEntry> filteredApps = new ArrayList<AppEntry>();
-            if (DEBUG) Log.i(TAG, "Rebuilding...");
-            for (int i = 0; i < apps.size(); i++) {
-                AppEntry entry = apps.get(i);
+            ArrayList<AppEntry> filteredApps = new ArrayList<>();
+            if (DEBUG) {
+                Log.i(TAG, "Rebuilding...");
+            }
+            for (AppEntry entry : apps) {
                 if (entry != null && (filter == null || filter.filterApp(entry))) {
                     synchronized (mEntriesMap) {
-                        if (DEBUG_LOCKING) Log.v(TAG, "rebuild acquired lock");
+                        if (DEBUG_LOCKING) {
+                            Log.v(TAG, "rebuild acquired lock");
+                        }
                         if (comparator != null) {
                             // Only need the label if we are going to be sorting.
                             entry.ensureLabel(mContext);
                         }
-                        if (DEBUG) Log.i(TAG, "Using " + entry.info.packageName + ": " + entry);
+                        if (DEBUG) {
+                            Log.i(TAG, "Using " + entry.info.packageName + ": " + entry);
+                        }
                         filteredApps.add(entry);
-                        if (DEBUG_LOCKING) Log.v(TAG, "rebuild releasing lock");
+                        if (DEBUG_LOCKING) {
+                            Log.v(TAG, "rebuild releasing lock");
+                        }
                     }
                 }
             }
@@ -1290,7 +1307,8 @@ public class ApplicationsState {
             }
         }
 
-        private @SessionFlags int getCombinedSessionFlags(List<Session> sessions) {
+        @SessionFlags
+        private int getCombinedSessionFlags(List<Session> sessions) {
             synchronized (mEntriesMap) {
                 int flags = 0;
                 for (Session session : sessions) {
@@ -1601,7 +1619,7 @@ public class ApplicationsState {
             }
             if (object1.info != null && object2.info != null) {
                 compareResult =
-                    sCollator.compare(object1.info.packageName, object2.info.packageName);
+                        sCollator.compare(object1.info.packageName, object2.info.packageName);
                 if (compareResult != 0) {
                     return compareResult;
                 }

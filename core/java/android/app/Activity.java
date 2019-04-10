@@ -820,8 +820,6 @@ public class Activity extends ContextThemeWrapper
     /** {@code true} if the activity lifecycle is in a state which supports picture-in-picture.
      * This only affects the client-side exception, the actual state check still happens in AMS. */
     private boolean mCanEnterPictureInPicture = false;
-    /** true if the activity is going through a transient pause */
-    /*package*/ boolean mTemporaryPause = false;
     /** true if the activity is being destroyed in order to recreate it with a new configuration */
     /*package*/ boolean mChangingConfigurations = false;
     @UnsupportedAppUsage

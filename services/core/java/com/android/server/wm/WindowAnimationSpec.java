@@ -98,14 +98,25 @@ public class WindowAnimationSpec implements AnimationSpec {
         tmp.transformation.getMatrix().postTranslate(mPosition.x, mPosition.y);
         t.setMatrix(leash, tmp.transformation.getMatrix(), tmp.floats);
         t.setAlpha(leash, tmp.transformation.getAlpha());
-        if (mStackClipMode == STACK_CLIP_NONE || mStackClipMode == STACK_CLIP_AFTER_ANIM) {
-            t.setWindowCrop(leash, tmp.transformation.getClipRect());
+
+        boolean cropSet = false;
+        if (mStackClipMode == STACK_CLIP_NONE) {
+            if (tmp.transformation.hasClipRect()) {
+                t.setWindowCrop(leash, tmp.transformation.getClipRect());
+                cropSet = true;
+            }
         } else {
             mTmpRect.set(mStackBounds);
-            mTmpRect.intersect(tmp.transformation.getClipRect());
+            if (tmp.transformation.hasClipRect()) {
+                mTmpRect.intersect(tmp.transformation.getClipRect());
+            }
             t.setWindowCrop(leash, mTmpRect);
+            cropSet = true;
         }
-        if (mAnimation.hasRoundedCorners() && mWindowCornerRadius > 0) {
+
+        // We can only apply rounded corner if a crop is set, as otherwise the value is meaningless,
+        // since it doesn't have anything it's relative to.
+        if (cropSet && mAnimation.hasRoundedCorners() && mWindowCornerRadius > 0) {
             t.setCornerRadius(leash, mWindowCornerRadius);
         }
     }

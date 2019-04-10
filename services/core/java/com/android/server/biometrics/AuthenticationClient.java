@@ -129,13 +129,16 @@ public abstract class AuthenticationClient extends ClientMonitor {
         boolean result = false;
 
         try {
+            if (DEBUG) Slog.v(getLogTag(), "onAuthenticated(" + authenticated + ")"
+                    + ", ID:" + identifier.getBiometricId()
+                    + ", Owner: " + getOwnerString()
+                    + ", isBP: " + isBiometricPrompt()
+                    + ", listener: " + listener
+                    + ", requireConfirmation: " + mRequireConfirmation);
+
             if (authenticated) {
                 mAlreadyDone = true;
-                if (DEBUG) Slog.v(getLogTag(), "onAuthenticated(" + getOwnerString()
-                        + ", ID:" + identifier.getBiometricId()
-                        + ", isBP: " + isBiometricPrompt()
-                        + ", listener: " + listener
-                        + ", requireConfirmation: " + mRequireConfirmation);
+
                 if (listener != null) {
                     vibrateSuccess();
                 }

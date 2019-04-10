@@ -44,6 +44,8 @@ import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -131,6 +133,8 @@ public class ResolverActivity extends Activity {
     private Runnable mPostListReadyRunnable;
 
     private boolean mRegistered;
+
+    private ColorMatrixColorFilter mSuspendedMatrixColorFilter;
 
     /** See {@link #setRetainInOnStop}. */
     private boolean mRetainInOnStop;
@@ -350,6 +354,8 @@ public class ResolverActivity extends Activity {
             bindProfileView();
         }
 
+        initSuspendedColorMatrix();
+
         if (isVoiceInteraction()) {
             onSetupVoiceInteraction();
         }
@@ -365,6 +371,25 @@ public class ResolverActivity extends Activity {
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         mAdapter.handlePackagesChanged();
+    }
+
+    private void initSuspendedColorMatrix() {
+        int grayValue = 127;
+        float scale = 0.5f; // half bright
+
+        ColorMatrix tempBrightnessMatrix = new ColorMatrix();
+        float[] mat = tempBrightnessMatrix.getArray();
+        mat[0] = scale;
+        mat[6] = scale;
+        mat[12] = scale;
+        mat[4] = grayValue;
+        mat[9] = grayValue;
+        mat[14] = grayValue;
+
+        ColorMatrix matrix = new ColorMatrix();
+        matrix.setSaturation(0.0f);
+        matrix.preConcat(tempBrightnessMatrix);
+        mSuspendedMatrixColorFilter = new ColorMatrixColorFilter(matrix);
     }
 
     /**
@@ -1019,7 +1044,14 @@ public class ResolverActivity extends Activity {
 
         if (target != null) {
             safelyStartActivity(target);
+
+            // Rely on the ActivityManager to pop up a dialog regarding app suspension
+            // and return false
+            if (target.isSuspended()) {
+                return false;
+            }
         }
+
         return true;
     }
 
@@ -1106,7 +1138,7 @@ public class ResolverActivity extends Activity {
     }
 
     public boolean shouldAutoLaunchSingleChoice(TargetInfo target) {
-        return true;
+        return !target.isSuspended();
     }
 
     public void showTargetDetails(ResolveInfo ri) {
@@ -1326,6 +1358,7 @@ public class ResolverActivity extends Activity {
         private final CharSequence mExtendedInfo;
         private final Intent mResolvedIntent;
         private final List<Intent> mSourceIntents = new ArrayList<>();
+        private boolean mIsSuspended;
 
         public DisplayResolveInfo(Intent originalIntent, ResolveInfo pri, CharSequence pLabel,
                 CharSequence pInfo, Intent pOrigIntent) {
@@ -1340,6 +1373,8 @@ public class ResolverActivity extends Activity {
                     | Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
             final ActivityInfo ai = mResolveInfo.activityInfo;
             intent.setComponent(new ComponentName(ai.applicationInfo.packageName, ai.name));
+
+            mIsSuspended = (ai.applicationInfo.flags & ApplicationInfo.FLAG_SUSPENDED) != 0;
 
             mResolvedIntent = intent;
         }
@@ -1410,7 +1445,6 @@ public class ResolverActivity extends Activity {
 
         @Override
         public boolean startAsCaller(ResolverActivity activity, Bundle options, int userId) {
-
             if (mEnableChooserDelegate) {
                 return activity.startAsCallerImpl(mResolvedIntent, options, false, userId);
             } else {
@@ -1424,6 +1458,14 @@ public class ResolverActivity extends Activity {
             activity.startActivityAsUser(mResolvedIntent, options, user);
             return false;
         }
+
+        public boolean isSuspended() {
+            return mIsSuspended;
+        }
+    }
+
+    List<DisplayResolveInfo> getDisplayList() {
+        return mAdapter.mDisplayList;
     }
 
     /**
@@ -1515,6 +1557,11 @@ public class ResolverActivity extends Activity {
          * @return the list of supported source intents deduped against this single target
          */
         List<Intent> getAllSourceIntents();
+
+        /**
+          * @return true if this target can be selected by the user
+          */
+        boolean isSuspended();
     }
 
     public class ResolveListAdapter extends BaseAdapter {
@@ -1523,12 +1570,12 @@ public class ResolverActivity extends Activity {
         private final List<ResolveInfo> mBaseResolveList;
         protected ResolveInfo mLastChosen;
         private DisplayResolveInfo mOtherProfile;
-        private boolean mHasExtendedInfo;
         private ResolverListController mResolverListController;
         private int mPlaceholderCount;
 
         protected final LayoutInflater mInflater;
 
+        // This one is the list that the Adapter will actually present.
         List<DisplayResolveInfo> mDisplayList;
         List<ResolvedComponentInfo> mUnfilteredResolveList;
 
@@ -1709,6 +1756,7 @@ public class ResolverActivity extends Activity {
             }
         }
 
+
         private void processSortedList(List<ResolvedComponentInfo> sortedComponents) {
             int N;
             if (sortedComponents != null && (N = sortedComponents.size()) != 0) {
@@ -1746,6 +1794,7 @@ public class ResolverActivity extends Activity {
                     }
                 }
 
+
                 for (ResolvedComponentInfo rci : sortedComponents) {
                     final ResolveInfo ri = rci.getResolveInfoAt(0);
                     if (ri != null) {
@@ -1755,8 +1804,11 @@ public class ResolverActivity extends Activity {
                 }
             }
 
+
             postListReadyRunnable();
         }
+
+
 
         /**
          * Some necessary methods for creating the list are initiated in onCreate and will also
@@ -1891,19 +1943,6 @@ public class ResolverActivity extends Activity {
             return position;
         }
 
-        public boolean hasExtendedInfo() {
-            return mHasExtendedInfo;
-        }
-
-        public boolean hasResolvedTarget(ResolveInfo info) {
-            for (int i = 0, N = mDisplayList.size(); i < N; i++) {
-                if (resolveInfoMatch(info, mDisplayList.get(i).getResolveInfo())) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
         public int getDisplayResolveInfoCount() {
             return mDisplayList.size();
         }
@@ -1960,6 +1999,12 @@ public class ResolverActivity extends Activity {
                 holder.text2.setText(subLabel);
             }
 
+            if (info.isSuspended()) {
+                holder.icon.setColorFilter(mSuspendedMatrixColorFilter);
+            } else {
+                holder.icon.setColorFilter(null);
+            }
+
             if (info instanceof DisplayResolveInfo
                     && !((DisplayResolveInfo) info).hasDisplayIcon()) {
                 new LoadIconTask((DisplayResolveInfo) info, holder.icon).execute();
@@ -1968,6 +2013,7 @@ public class ResolverActivity extends Activity {
             }
         }
     }
+
 
     @VisibleForTesting
     public static final class ResolvedComponentInfo {

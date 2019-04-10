@@ -34,10 +34,10 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_WHEN_REQU
 import static android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
-import static android.content.pm.PackageManager.MASK_PERMISSION_FLAGS_ALL;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE;
+import static android.content.pm.PackageManager.MASK_PERMISSION_FLAGS_ALL;
 import static android.content.pm.PackageManager.RESTRICTED_PERMISSIONS_ENABLED;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.os.UserHandle.getAppId;
@@ -69,7 +69,6 @@ import android.content.pm.PermissionInfo;
 import android.metrics.LogMaker;
 import android.os.Binder;
 import android.os.Build;
-import android.os.Debug;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
@@ -82,7 +81,6 @@ import android.os.storage.StorageManagerInternal;
 import android.permission.PermissionControllerManager;
 import android.permission.PermissionManager;
 import android.permission.PermissionManagerInternal;
-import android.provider.Settings;
 import android.permission.PermissionManagerInternal.OnRuntimePermissionStateChangedListener;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -2458,9 +2456,8 @@ public class PermissionManagerService {
         }
 
         if (updatePermissions) {
-            // Update app permissions to take into account the new whitelist state.
-            updatePermissions(pkg.packageName, pkg, getVolumeUuidForPackage(pkg),
-                    0 /*flags*/, null /*allPackages*/, callback);
+            // Update permission of this app to take into account the new whitelist state.
+            restorePermissionState(pkg, false, pkg.packageName, callback);
 
             // If this resulted in losing a permission we need to kill the app.
             if (oldGrantedRestrictedPermissions != null) {
@@ -2605,62 +2602,12 @@ public class PermissionManagerService {
     }
 
     private void updateAllPermissions(String volumeUuid, boolean sdkUpdated,
-            boolean updatePermissionsOnPreQUpdate, Collection<PackageParser.Package> allPackages,
-            PermissionCallback callback) {
+            Collection<PackageParser.Package> allPackages, PermissionCallback callback) {
         final int flags = UPDATE_PERMISSIONS_ALL |
                 (sdkUpdated
                         ? UPDATE_PERMISSIONS_REPLACE_PKG | UPDATE_PERMISSIONS_REPLACE_ALL
                         : 0);
         updatePermissions(null, null, volumeUuid, flags, allPackages, callback);
-
-        if (updatePermissionsOnPreQUpdate) {
-            final int[] userIds = UserManagerService.getInstance().getUserIds();
-
-            for (PackageParser.Package pkg : allPackages) {
-                final PackageSetting ps = (PackageSetting) pkg.mExtras;
-                if (ps == null) {
-                    return;
-                }
-
-                final boolean appSupportsRuntimePermissions =
-                        pkg.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.M;
-                final PermissionsState permsState = ps.getPermissionsState();
-
-                for (String permName : new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION,
-                        Manifest.permission.ACCESS_BACKGROUND_LOCATION}) {
-                    final BasePermission bp = mSettings.getPermissionLocked(permName);
-
-                    for (int userId : userIds) {
-                        if (Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                                Settings.Secure.LOCATION_PERMISSIONS_UPGRADE_TO_Q_MODE, 0, userId)
-                                != 0) {
-                            continue;
-                        }
-
-                        final PermissionState permState = permsState.getRuntimePermissionState(
-                                permName, userId);
-
-                        if (permState != null
-                                && (permState.getFlags() & BLOCKING_PERMISSION_FLAGS) == 0) {
-                            if (permState.isGranted()) {
-                                permsState.updatePermissionFlags(bp, userId,
-                                        USER_PERMISSION_FLAGS, 0);
-                            }
-
-                            if (appSupportsRuntimePermissions) {
-                                permsState.revokeRuntimePermission(bp, userId);
-                            } else {
-                                // Force a review even for apps that were already installed
-                                permsState.updatePermissionFlags(bp, userId,
-                                        FLAG_PERMISSION_REVIEW_REQUIRED,
-                                        FLAG_PERMISSION_REVIEW_REQUIRED);
-                            }
-                        }
-                    }
-                }
-            }
-        }
     }
 
     private void updatePermissions(String changingPkgName, PackageParser.Package changingPkg,
@@ -3150,10 +3097,9 @@ public class PermissionManagerService {
         }
         @Override
         public void updateAllPermissions(String volumeUuid, boolean sdkUpdated,
-                boolean updatePermissionsOnPreQUpdate, Collection<PackageParser.Package> allPackages,
-                PermissionCallback callback) {
+                Collection<PackageParser.Package> allPackages, PermissionCallback callback) {
             PermissionManagerService.this.updateAllPermissions(
-                    volumeUuid, sdkUpdated, updatePermissionsOnPreQUpdate, allPackages, callback);
+                    volumeUuid, sdkUpdated, allPackages, callback);
         }
         @Override
         public String[] getAppOpPermissionPackages(String permName) {

@@ -211,7 +211,7 @@ public class DynamicSystemClient {
      * Intent Keys
      */
     /**
-     * Intent key: Size of system image, in bytes.
+     * Intent key: Size of the system image, in bytes.
      * @hide
      */
     public static final String KEY_SYSTEM_SIZE = "KEY_SYSTEM_SIZE";
@@ -365,7 +365,7 @@ public class DynamicSystemClient {
      *
      * This function doesn't require prior calling {@link #bind}.
      *
-     * @param systemUrl A network URL or a file URL to system image.
+     * @param systemUrl a network Uri, a file Uri or a content Uri pointing to a system image file.
      * @param systemSize size of system image.
      */
     @RequiresPermission(android.Manifest.permission.INSTALL_DYNAMIC_SYSTEM)
@@ -381,7 +381,7 @@ public class DynamicSystemClient {
      *
      * This function doesn't require prior calling {@link #bind}.
      *
-     * @param systemUrl A network URL or a file URL to system image.
+     * @param systemUrl a network Uri, a file Uri or a content Uri pointing to a system image file.
      * @param systemSize size of system image.
      * @param userdataSize bytes reserved for userdata.
      */
