@@ -10888,4 +10888,33 @@ public class TelephonyManager {
         }
         return new Pair<Integer, Integer>(-1, -1);
     }
+
+
+    /**
+     * Return whether MMS data is enabled. This will tell if framework will accept a MMS network
+     * request on a subId.
+     *
+     *  Mms is enabled if:
+     *  1) user data is turned on, or
+     *  2) MMS is un-metered for this subscription, or
+     *  3) alwaysAllowMms setting {@link SubscriptionManager#setAlwaysAllowMmsData} is turned on.
+     *
+     * @return whether MMS data is allowed.
+     *
+     * @hide
+     */
+    public boolean isMmsDataEnabled() {
+        String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.isMmsDataEnabled(getSubId(), pkgForDebug);
+            }
+        } catch (RemoteException ex) {
+            if (!isSystemProcess()) {
+                ex.rethrowAsRuntimeException();
+            }
+        }
+        return false;
+    }
 }
