@@ -275,7 +275,7 @@ public final class ConversationActions implements Parcelable {
                         mAuthor,
                         mReferenceTime,
                         mText == null ? null : new SpannedString(mText),
-                        mExtras == null ? new Bundle() : mExtras.deepCopy());
+                        mExtras == null ? Bundle.EMPTY : mExtras);
             }
         }
     }
