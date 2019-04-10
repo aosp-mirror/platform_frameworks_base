@@ -213,7 +213,7 @@ public final class ConfigRequest implements Parcelable {
      * Builder used to build {@link ConfigRequest} objects.
      */
     public static final class Builder {
-        private boolean mSupport5gBand = false;
+        private boolean mSupport5gBand = true;
         private int mMasterPreference = 0;
         private int mClusterLow = CLUSTER_ID_MIN;
         private int mClusterHigh = CLUSTER_ID_MAX;
