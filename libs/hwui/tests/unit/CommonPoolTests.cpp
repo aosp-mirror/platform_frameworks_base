@@ -136,3 +136,47 @@ TEST(CommonPool, fullQueue) {
         f.get();
     }
 }
+
+class ObjectTracker {
+    static std::atomic_int sGlobalCount;
+
+public:
+    ObjectTracker() {
+        sGlobalCount++;
+    }
+    ObjectTracker(const ObjectTracker&) {
+        sGlobalCount++;
+    }
+    ObjectTracker(ObjectTracker&&) {
+        sGlobalCount++;
+    }
+    ~ObjectTracker() {
+        sGlobalCount--;
+    }
+
+    static int count() { return sGlobalCount.load(); }
+};
+
+std::atomic_int ObjectTracker::sGlobalCount{0};
+
+TEST(CommonPool, asyncLifecycleCheck) {
+    ASSERT_EQ(0, ObjectTracker::count());
+    {
+        ObjectTracker obj;
+        ASSERT_EQ(1, ObjectTracker::count());
+        EXPECT_LT(1, CommonPool::async([obj] { return ObjectTracker::count(); }).get());
+    }
+    CommonPool::waitForIdle();
+    ASSERT_EQ(0, ObjectTracker::count());
+}
+
+TEST(CommonPool, syncLifecycleCheck) {
+    ASSERT_EQ(0, ObjectTracker::count());
+    {
+        ObjectTracker obj;
+        ASSERT_EQ(1, ObjectTracker::count());
+        EXPECT_LT(1, CommonPool::runSync([obj] { return ObjectTracker::count(); }));
+    }
+    CommonPool::waitForIdle();
+    ASSERT_EQ(0, ObjectTracker::count());
+}
