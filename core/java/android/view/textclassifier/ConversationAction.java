@@ -266,7 +266,7 @@ public final class ConversationAction implements Parcelable {
                     mAction,
                     mTextReply,
                     mScore,
-                    mExtras == null ? Bundle.EMPTY : mExtras.deepCopy());
+                    mExtras == null ? Bundle.EMPTY : mExtras);
         }
     }
 }
