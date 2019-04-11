@@ -1429,11 +1429,9 @@ public class ChooserActivity extends ResolverActivity {
     }
 
     private void updateAlphabeticalList() {
-        if (getDisplayList().size() > MAX_RANKED_TARGETS) {
-            mSortedList.clear();
-            mSortedList.addAll(getDisplayList());
-            Collections.sort(mSortedList, new AzInfoComparator(ChooserActivity.this));
-        }
+        mSortedList.clear();
+        mSortedList.addAll(getDisplayList());
+        Collections.sort(mSortedList, new AzInfoComparator(ChooserActivity.this));
     }
 
     /**
@@ -2049,11 +2047,12 @@ public class ChooserActivity extends ResolverActivity {
         @Override
         public int getUnfilteredCount() {
             int appTargets = super.getUnfilteredCount();
-            if (appTargets > MAX_RANKED_TARGETS) {
-                appTargets = appTargets + MAX_RANKED_TARGETS;
+            if (appTargets > getMaxRankedTargets()) {
+                appTargets = appTargets + getMaxRankedTargets();
             }
             return appTargets + getSelectableServiceTargetCount() + getCallerTargetCount();
         }
+
 
         public int getCallerTargetCount() {
             return Math.min(mCallerTargets.size(), MAX_SUGGESTED_APP_TARGETS);
@@ -2082,14 +2081,17 @@ public class ChooserActivity extends ResolverActivity {
 
         int getAlphaTargetCount() {
             int standardCount = super.getCount();
-            return standardCount > MAX_RANKED_TARGETS ? standardCount : 0;
+            return standardCount > getMaxRankedTargets() ? standardCount : 0;
         }
 
         int getRankedTargetCount() {
-            int spacesAvailable = MAX_RANKED_TARGETS - getCallerTargetCount();
+            int spacesAvailable = getMaxRankedTargets() - getCallerTargetCount();
             return Math.min(spacesAvailable, super.getCount());
         }
 
+        private int getMaxRankedTargets() {
+            return mChooserRowAdapter == null ? 4 : mChooserRowAdapter.getMaxTargetsPerRow();
+        }
 
         public int getPositionTargetType(int position) {
             int offset = 0;
