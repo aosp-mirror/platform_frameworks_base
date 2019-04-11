@@ -730,6 +730,11 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
             ActivityManager.getService().notifyCleartextNetwork(uid,
                     HexDump.hexStringToByteArray(hex));
         }
+
+        @Override
+        public int getInterfaceVersion() {
+            return INetdUnsolicitedEventListener.VERSION;
+        }
     }
 
     //
