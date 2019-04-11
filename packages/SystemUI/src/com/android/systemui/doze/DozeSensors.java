@@ -228,9 +228,9 @@ public class DozeSensors {
     /** Dump current state */
     public void dump(PrintWriter pw) {
         for (TriggerSensor s : mSensors) {
-            pw.print("Sensor: "); pw.println(s.toString());
+            pw.print("  Sensor: "); pw.println(s.toString());
         }
-        pw.print("ProxSensor: "); pw.println(mProxSensor.toString());
+        pw.print("  ProxSensor: "); pw.println(mProxSensor.toString());
     }
 
     /**
