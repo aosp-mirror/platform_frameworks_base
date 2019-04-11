@@ -37,6 +37,8 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 
+import libcore.util.HexEncoding;
+
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
@@ -1490,7 +1492,8 @@ public class ViewDebug {
                             if (type == int.class) {
                                 fieldValue = formatIntToHexString((Integer) fieldValue);
                             } else if (type == byte.class) {
-                                fieldValue = "0x" + Byte.toHexString((Byte) fieldValue, true);
+                                fieldValue = "0x"
+                                        + HexEncoding.encodeToString((Byte) fieldValue, true);
                             }
                         }
                     }
