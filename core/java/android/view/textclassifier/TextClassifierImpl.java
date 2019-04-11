@@ -451,10 +451,6 @@ public final class TextClassifierImpl implements TextClassifier {
         Collection<String> expectedTypes = resolveActionTypesFromRequest(request);
         List<ConversationAction> conversationActions = new ArrayList<>();
         for (ActionsSuggestionsModel.ActionSuggestion nativeSuggestion : nativeSuggestions) {
-            if (request.getMaxSuggestions() >= 0
-                    && conversationActions.size() == request.getMaxSuggestions()) {
-                break;
-            }
             String actionType = nativeSuggestion.getActionType();
             if (!expectedTypes.contains(actionType)) {
                 continue;
@@ -484,6 +480,10 @@ public final class TextClassifierImpl implements TextClassifier {
         }
         conversationActions =
                 ActionsSuggestionsHelper.removeActionsWithDuplicates(conversationActions);
+        if (request.getMaxSuggestions() >= 0
+                && conversationActions.size() > request.getMaxSuggestions()) {
+            conversationActions = conversationActions.subList(0, request.getMaxSuggestions());
+        }
         String resultId = ActionsSuggestionsHelper.createResultId(
                 mContext,
                 request.getConversation(),

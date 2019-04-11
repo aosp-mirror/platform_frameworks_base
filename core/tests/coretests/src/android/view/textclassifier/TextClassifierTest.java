@@ -380,7 +380,7 @@ public class TextClassifierTest {
     }
 
     @Test
-    public void testSuggestConversationActions_textReplyOnly_maxThree() {
+    public void testSuggestConversationActions_textReplyOnly_maxOne() {
         if (isTextClassifierDisabled()) return;
         ConversationActions.Message message =
                 new ConversationActions.Message.Builder(
@@ -399,12 +399,11 @@ public class TextClassifierTest {
                         .build();
 
         ConversationActions conversationActions = mClassifier.suggestConversationActions(request);
-        assertTrue(conversationActions.getConversationActions().size() > 0);
-        for (ConversationAction conversationAction :
-                conversationActions.getConversationActions()) {
-            assertThat(conversationAction,
-                    isConversationAction(ConversationAction.TYPE_TEXT_REPLY));
-        }
+        Truth.assertThat(conversationActions.getConversationActions()).hasSize(1);
+        ConversationAction conversationAction = conversationActions.getConversationActions().get(0);
+        Truth.assertThat(conversationAction.getType()).isEqualTo(
+                ConversationAction.TYPE_TEXT_REPLY);
+        Truth.assertThat(conversationAction.getTextReply()).isNotNull();
     }
 
     @Test
@@ -491,6 +490,24 @@ public class TextClassifierTest {
         Truth.assertThat(code).isEqualTo("12345");
         Truth.assertThat(
                 ExtrasUtils.getSerializedEntityData(conversationAction.getExtras())).isNotEmpty();
+    }
+
+    @Test
+    public void testSuggetsConversationActions_deduplicate() {
+        if (isTextClassifierDisabled()) return;
+        ConversationActions.Message message =
+                new ConversationActions.Message.Builder(
+                        ConversationActions.Message.PERSON_USER_OTHERS)
+                        .setText("a@android.com b@android.com")
+                        .build();
+        ConversationActions.Request request =
+                new ConversationActions.Request.Builder(Collections.singletonList(message))
+                        .setMaxSuggestions(3)
+                        .build();
+
+        ConversationActions conversationActions = mClassifier.suggestConversationActions(request);
+
+        Truth.assertThat(conversationActions.getConversationActions()).isEmpty();
     }
 
     private boolean isTextClassifierDisabled() {
