@@ -1988,7 +1988,7 @@
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"Сховішча на прыладзе"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"Адладка USB"</string>
     <string name="time_picker_hour_label" msgid="2979075098868106450">"гадз"</string>
-    <string name="time_picker_minute_label" msgid="5168864173796598399">"хвіліна"</string>
+    <string name="time_picker_minute_label" msgid="5168864173796598399">"хв"</string>
     <string name="time_picker_header_text" msgid="143536825321922567">"Задаць час"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"Увядзіце дапушчальны час"</string>
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"Увядзіце час"</string>

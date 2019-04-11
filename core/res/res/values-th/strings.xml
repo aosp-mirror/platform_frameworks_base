@@ -526,7 +526,7 @@
     <string name="biometric_error_canceled" msgid="349665227864885880">"ยกเลิกการตรวจสอบสิทธิ์แล้ว"</string>
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"ไม่ได้ตั้ง PIN, รูปแบบ หรือรหัสผ่าน"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"ตรวจพบลายนิ้วมือเพียงบางส่วน โปรดลองอีกครั้ง"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"ไม่สามารถประมวลผลลายนิ้วมือได้ โปรดลองอีกครั้ง"</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"ประมวลผลลายนิ้วมือไม่ได้ โปรดลองอีกครั้ง"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"เซ็นเซอร์ลายนิ้วมือไม่สะอาด โปรดทำความสะอาดและลองอีกครั้ง"</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"เคลื่อนนิ้วเร็วเกินไป โปรดลองอีกครั้ง"</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"นิ้วเคลื่อนที่ช้าเกินไป โปรดลองอีกครั้ง"</string>
@@ -661,7 +661,7 @@
     <string name="policylab_wipeData" msgid="3910545446758639713">"ลบข้อมูลทั้งหมด"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"ลบข้อมูลของแท็บเล็ตโดยไม่มีการเตือน ด้วยการดำเนินการรีเซ็ตข้อมูลเป็นค่าเริ่มต้น"</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"ลบข้อมูลของทีวีโดยไม่ต้องมีคำเตือนโดยการรีเซ็ตข้อมูลเป็นค่าเริ่มต้น"</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"ลบข้อมูลของโทรศัพท์โดยไม่มีการเตือน ด้วยการดำเนินการรีเซ็ตข้อมูลเป็นค่าเริ่มต้น"</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"ลบข้อมูลโทรศัพท์โดยไม่มีการเตือน ด้วยการรีเซ็ตข้อมูลเป็นค่าเริ่มต้น"</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"ลบข้อมูลผู้ใช้"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"ลบข้อมูลของผู้ใช้นี้ในแท็บเล็ตเครื่องนี้โดยไม่มีการเตือน"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"ลบข้อมูลของผู้ใช้นี้ในทีวีเครื่องนี้โดยไม่มีการเตือน"</string>
@@ -1616,7 +1616,7 @@
       <item quantity="other">ลองอีกครั้งใน <xliff:g id="NUMBER">%d</xliff:g> วินาที</item>
       <item quantity="one">ลองอีกครั้งใน 1 วินาที</item>
     </plurals>
-    <string name="kg_pattern_instructions" msgid="398978611683075868">"วาดรูปแบบของคุณ"</string>
+    <string name="kg_pattern_instructions" msgid="398978611683075868">"ลากรูปแบบของคุณ"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"ป้อน PIN ของซิม"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"ป้อน PIN"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"ป้อนรหัสผ่าน"</string>

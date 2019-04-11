@@ -301,7 +301,7 @@
     <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"Permitir que o app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acesse sua atividade física?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Câmera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"tire fotos e grave vídeos"</string>
-    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tire fotos e grave vídeos?"</string>
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Permitir que o app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tire fotos e grave vídeos?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"Registro de chamadas"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"ler e gravar o registro de chamadas telefônicas"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Permitir que o app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acesse seu registro de chamadas telefônicas?"</string>
@@ -1213,14 +1213,14 @@
     <string name="volume_music" msgid="5421651157138628171">"Volume da mídia"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Reproduzindo por meio de Bluetooth"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Toque silencioso definido"</string>
-    <string name="volume_call" msgid="3941680041282788711">"Volume na chamada"</string>
-    <string name="volume_bluetooth_call" msgid="2002891926351151534">"Volume de chamada Bluetooth"</string>
+    <string name="volume_call" msgid="3941680041282788711">"Volume das chamadas"</string>
+    <string name="volume_bluetooth_call" msgid="2002891926351151534">"Volume das chamadas por Bluetooth"</string>
     <string name="volume_alarm" msgid="1985191616042689100">"Volume do alarme"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Volume da notificação"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Volume"</string>
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Volume de Bluetooth"</string>
     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Volume do toque"</string>
-    <string name="volume_icon_description_incall" msgid="8890073218154543397">"Volume de chamadas"</string>
+    <string name="volume_icon_description_incall" msgid="8890073218154543397">"Volume das chamadas"</string>
     <string name="volume_icon_description_media" msgid="4217311719665194215">"Volume da mídia"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Volume da notificação"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Toque padrão"</string>
@@ -1361,7 +1361,7 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"COMPARTILHAR"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"RECUSAR"</string>
     <string name="select_input_method" msgid="4653387336791222978">"Selecione o método de entrada"</string>
-    <string name="show_ime" msgid="2506087537466597099">"Manter na tela enquanto o teclado físico estiver ativo"</string>
+    <string name="show_ime" msgid="2506087537466597099">"Mantém o teclado virtual na tela enquanto o teclado físico está ativo"</string>
     <string name="hardware" msgid="194658061510127999">"Mostrar teclado virtual"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Configurar teclado físico"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Toque para selecionar o idioma e o layout"</string>
@@ -1796,8 +1796,8 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Atualizado pelo seu administrador"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Excluído pelo seu administrador"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"A \"Economia de bateria\" desativa ou restringe atividades em segundo plano, alguns efeitos visuais e outros recursos que consomem muita energia, a fim de prolongar a duração da bateria. "<annotation id="url">"Saiba mais"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"A \"Economia de bateria\" desativa ou restringe atividades em segundo plano, alguns efeitos visuais e outros recursos que consomem muita energia, a fim de prolongar a duração da bateria."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"A Economia de bateria desativa ou restringe atividades em segundo plano, alguns efeitos visuais e outros recursos que consomem muita energia, a fim de prolongar a duração da bateria. "<annotation id="url">"Saiba mais"</annotation></string>
+    <string name="battery_saver_description" msgid="6413346684861241431">"A Economia de bateria desativa ou restringe atividades em segundo plano, alguns efeitos visuais e outros recursos que consomem muita energia, a fim de prolongar a duração da bateria."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Para ajudar a reduzir o uso de dados, a Economia de dados impede que alguns apps enviem ou recebam dados em segundo plano. Um app que você esteja usando no momento pode acessar dados, mas com menos frequência. Isso pode fazer com que imagens não sejam exibidas até que você toque nelas."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Ativar Economia de dados?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Ativar"</string>
@@ -1991,15 +1991,15 @@
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"exibindo sobre outros apps na sua tela"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"Notificação de informação do modo rotina"</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"A bateria pode acabar antes da recarga normal"</string>
-    <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"A \"Economia de bateria\" foi ativada para aumentar a duração da carga"</string>
+    <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"A Economia de bateria foi ativada para aumentar a duração da carga"</string>
     <string name="battery_saver_notification_channel_name" msgid="2083316159716201806">"Economia de bateria"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="6376147579378764641">"A \"Economia de bateria\" só será reativada quando a bateria estiver acabando novamente"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="8090192609249817945">"A bateria foi carregada até o nível suficiente. A \"Economia de bateria\" só será reativada quando a bateria estiver acabando novamente."</string>
+    <string name="battery_saver_sticky_disabled_notification_title" msgid="6376147579378764641">"A Economia de bateria só será reativada quando a bateria estiver acabando novamente"</string>
+    <string name="battery_saver_sticky_disabled_notification_summary" msgid="8090192609249817945">"A bateria foi carregada até o nível suficiente. A Economia de bateria só será reativada quando a bateria estiver acabando novamente."</string>
     <string name="battery_saver_charged_notification_title" product="default" msgid="2960978289873161288">"Smartphone <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> carregado"</string>
     <string name="battery_saver_charged_notification_title" product="tablet" msgid="7555713825806482451">"Tablet <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> carregado"</string>
     <string name="battery_saver_charged_notification_title" product="device" msgid="5954873381559605660">"Dispositivo <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> carregado"</string>
-    <string name="battery_saver_off_notification_summary" msgid="1374222493681267143">"\"Economia de bateria\" desativada. Os recursos não estão mais restritos."</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="4340727818546508436">"\"Economia de bateria\" desativada. Os recursos não estão mais restritos."</string>
+    <string name="battery_saver_off_notification_summary" msgid="1374222493681267143">"Economia de bateria desativada. Os recursos não estão mais restritos."</string>
+    <string name="battery_saver_off_alternative_notification_summary" msgid="4340727818546508436">"Economia de bateria desativada. Os recursos não estão mais restritos."</string>
     <string name="mime_type_folder" msgid="7111951698626315204">"Pasta"</string>
     <string name="mime_type_apk" msgid="5518003630972506900">"Aplicativo Android"</string>
     <string name="mime_type_generic" msgid="6833871596845900027">"Arquivo"</string>
