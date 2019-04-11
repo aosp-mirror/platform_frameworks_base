@@ -172,6 +172,7 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <string name="data_connection_5ge" msgid="4699478963278829331">"5Ge"</string>
     <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
     <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G trở lên"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
@@ -362,7 +363,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Giới hạn <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Cảnh báo <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="7608026833638817218">"Hồ sơ công việc"</string>
-    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Chế độ ánh sáng ban đêm"</string>
+    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Ánh sáng đêm"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"Bật khi trời tối"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Cho đến khi trời sáng"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Bật vào lúc <xliff:g id="TIME">%s</xliff:g>"</string>

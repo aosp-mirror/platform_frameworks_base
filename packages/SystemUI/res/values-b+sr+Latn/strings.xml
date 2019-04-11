@@ -172,6 +172,7 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <string name="data_connection_5ge" msgid="4699478963278829331">"5Ge"</string>
     <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
     <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
@@ -376,7 +377,7 @@
     <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"Prevucite udesno da biste brzo promenili aplikacije"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7171470775439860480">"Uključi/isključi pregled"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Napunjena je"</string>
-    <string name="expanded_header_battery_charging" msgid="205623198487189724">"Punjenje"</string>
+    <string name="expanded_header_battery_charging" msgid="205623198487189724">"Puni se"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> do kraja punjenja"</string>
     <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"Ne puni se"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"Mreža se možda\nnadgleda"</string>
