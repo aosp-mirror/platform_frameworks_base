@@ -187,11 +187,13 @@ public class CarStatusBar extends StatusBar implements
         if (mIsKeyguard) {
             updateNavBarForKeyguardContent();
         }
+        // CarFacetButtonController was reset therefore we need to re-add the status bar elements
+        // to the controller.
+        mCarFacetButtonController.addAllFacetButtons(mStatusBarWindow);
     }
 
     private void addTemperatureViewToController(View v) {
         if (v instanceof TemperatureView) {
-            Log.d(TAG, "addTemperatureViewToController: found ");
             mHvacController.addHvacTextView((TemperatureView) v);
         } else if (v instanceof ViewGroup) {
             ViewGroup viewGroup = (ViewGroup) v;
