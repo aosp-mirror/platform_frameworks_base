@@ -458,6 +458,18 @@ public class SubscriptionManager {
     public static final String CARRIER_ID = "carrier_id";
 
     /**
+     * @hide A comma-separated list of EHPLMNs associated with the subscription
+     * <P>Type: TEXT (String)</P>
+     */
+    public static final String EHPLMNS = "ehplmns";
+
+    /**
+     * @hide A comma-separated list of HPLMNs associated with the subscription
+     * <P>Type: TEXT (String)</P>
+     */
+    public static final String HPLMNS = "hplmns";
+
+    /**
      * TelephonyProvider column name for the MCC associated with a SIM, stored as a string.
      * <P>Type: TEXT (String)</P>
      * @hide
