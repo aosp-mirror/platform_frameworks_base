@@ -1228,6 +1228,24 @@ public final class MultiClientInputMethodManagerService {
         public boolean isUidAllowedOnDisplay(int displayId, int uid) {
             return mIWindowManagerInternal.isUidAllowedOnDisplay(displayId, uid);
         }
+
+        @BinderThread
+        @Override
+        public void setActive(int clientId, boolean active) {
+            synchronized (mPerUserData.mLock) {
+                final InputMethodClientInfo clientInfo =
+                        mPerUserData.getClientFromIdLocked(clientId);
+                if (clientInfo == null) {
+                    Slog.e(TAG, "Unknown clientId=" + clientId);
+                    return;
+                }
+                try {
+                    clientInfo.mClient.setActive(active, false /* fullscreen */);
+                } catch (RemoteException e) {
+                    return;
+                }
+            }
+        }
     }
 
     /**

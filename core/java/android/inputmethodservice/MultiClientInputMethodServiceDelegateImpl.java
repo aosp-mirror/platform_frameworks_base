@@ -190,4 +190,8 @@ final class MultiClientInputMethodServiceDelegateImpl {
     boolean isUidAllowedOnDisplay(int displayId, int uid) {
         return mPrivOps.isUidAllowedOnDisplay(displayId, uid);
     }
+
+    void setActive(int clientId, boolean active) {
+        mPrivOps.setActive(clientId, active);
+    }
 }
