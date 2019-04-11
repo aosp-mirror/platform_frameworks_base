@@ -26,16 +26,41 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
  */
 class Bubble {
 
+    private final String mKey;
+    private final BubbleExpandedView.OnBubbleBlockedListener mListener;
+
+    private boolean mInflated;
+
     public BubbleView iconView;
     public BubbleExpandedView expandedView;
-    public String key;
     public NotificationEntry entry;
 
+    Bubble(NotificationEntry e, BubbleExpandedView.OnBubbleBlockedListener listener) {
+        entry = e;
+        mKey = e.key;
+        mListener = listener;
+    }
+
+    /** @deprecated use the other constructor to defer View creation. */
+    @Deprecated
     Bubble(NotificationEntry e, LayoutInflater inflater, BubbleStackView stackView,
             BubbleExpandedView.OnBubbleBlockedListener listener) {
-        entry = e;
-        key = entry.key;
+        this(e, listener);
+        inflate(inflater, stackView);
+    }
 
+    public String getKey() {
+        return mKey;
+    }
+
+    boolean isInflated() {
+        return mInflated;
+    }
+
+    void inflate(LayoutInflater inflater, BubbleStackView stackView) {
+        if (mInflated) {
+            return;
+        }
         iconView = (BubbleView) inflater.inflate(
                 R.layout.bubble_view, stackView, false /* attachToRoot */);
         iconView.setNotif(entry);
@@ -44,12 +69,14 @@ class Bubble {
                 R.layout.bubble_expanded_view, stackView, false /* attachToRoot */);
         expandedView.setEntry(entry, stackView);
 
-        expandedView.setOnBlockedListener(listener);
+        expandedView.setOnBlockedListener(mListener);
+        mInflated = true;
     }
 
-    public void setEntry(NotificationEntry entry) {
-        key = entry.key;
-        iconView.update(entry);
-        expandedView.update(entry);
+    void setEntry(NotificationEntry entry) {
+        if (mInflated) {
+            iconView.update(entry);
+            expandedView.update(entry);
+        }
     }
 }

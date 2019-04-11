@@ -138,6 +138,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
             ClockManager clockManager) {
         super(context, attrs);
         mStatusBarStateController = statusBarStateController;
+        mStatusBarState = mStatusBarStateController.getState();
         mSysuiColorExtractor = colorExtractor;
         mClockManager = clockManager;
         mTransition = new ClockBoundsTransition();

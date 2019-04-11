@@ -18,13 +18,34 @@ package android.content.res;
 
 import android.annotation.UnsupportedAppUsage;
 import android.graphics.Color;
-import android.text.*;
-import android.text.style.*;
-import android.util.Log;
-import android.util.SparseArray;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.text.Annotation;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.SpannedString;
+import android.text.TextPaint;
+import android.text.TextUtils;
+import android.text.style.AbsoluteSizeSpan;
+import android.text.style.BackgroundColorSpan;
+import android.text.style.BulletSpan;
+import android.text.style.CharacterStyle;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.LineHeightSpan;
+import android.text.style.RelativeSizeSpan;
+import android.text.style.StrikethroughSpan;
+import android.text.style.StyleSpan;
+import android.text.style.SubscriptSpan;
+import android.text.style.SuperscriptSpan;
+import android.text.style.TextAppearanceSpan;
+import android.text.style.TypefaceSpan;
+import android.text.style.URLSpan;
+import android.text.style.UnderlineSpan;
+import android.util.Log;
+import android.util.SparseArray;
+
+import com.android.internal.annotations.GuardedBy;
 
 import java.util.Arrays;
 
@@ -40,8 +61,12 @@ final class StringBlock {
     private final long mNative;
     private final boolean mUseSparse;
     private final boolean mOwnsNative;
+
     private CharSequence[] mStrings;
     private SparseArray<CharSequence> mSparseStrings;
+
+    @GuardedBy("this") private boolean mOpen = true;
+
     StyleIDs mStyleIDs = null;
 
     public StringBlock(byte[] data, boolean useSparse) {
@@ -141,12 +166,23 @@ final class StringBlock {
         }
     }
 
+    @Override
     protected void finalize() throws Throwable {
         try {
             super.finalize();
         } finally {
-            if (mOwnsNative) {
-                nativeDestroy(mNative);
+            close();
+        }
+    }
+
+    public void close() throws Throwable {
+        synchronized (this) {
+            if (mOpen) {
+                mOpen = false;
+
+                if (mOwnsNative) {
+                    nativeDestroy(mNative);
+                }
             }
         }
     }

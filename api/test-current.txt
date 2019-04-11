@@ -14,6 +14,7 @@ package android {
     field public static final String MANAGE_ROLLBACKS = "android.permission.MANAGE_ROLLBACKS";
     field public static final String READ_CELL_BROADCASTS = "android.permission.READ_CELL_BROADCASTS";
     field public static final String REMOVE_TASKS = "android.permission.REMOVE_TASKS";
+    field public static final String SUSPEND_APPS = "android.permission.SUSPEND_APPS";
     field public static final String TEST_MANAGE_ROLLBACKS = "android.permission.TEST_MANAGE_ROLLBACKS";
     field public static final String WRITE_DEVICE_CONFIG = "android.permission.WRITE_DEVICE_CONFIG";
     field public static final String WRITE_MEDIA_STORAGE = "android.permission.WRITE_MEDIA_STORAGE";
@@ -328,9 +329,9 @@ package android.app {
   }
 
   public class NotificationManager {
-    method public void allowAssistantCapability(String);
-    method public void disallowAssistantCapability(String);
-    method @NonNull public java.util.List<java.lang.String> getAllowedAssistantCapabilities();
+    method public void allowAssistantAdjustment(String);
+    method public void disallowAssistantAdjustment(String);
+    method @NonNull public java.util.List<java.lang.String> getAllowedAssistantAdjustments();
     method @Nullable public android.content.ComponentName getAllowedNotificationAssistant();
     method public android.content.ComponentName getEffectsSuppressor();
     method public boolean isNotificationAssistantAccessGranted(@NonNull android.content.ComponentName);
@@ -2488,8 +2489,8 @@ package android.service.notification {
     method public final void adjustNotification(@NonNull android.service.notification.Adjustment);
     method public final void adjustNotifications(@NonNull java.util.List<android.service.notification.Adjustment>);
     method public void onActionInvoked(@NonNull String, @NonNull android.app.Notification.Action, int);
+    method public void onAllowedAdjustmentsChanged();
     method @NonNull public final android.os.IBinder onBind(@Nullable android.content.Intent);
-    method public void onCapabilitiesChanged();
     method public void onNotificationDirectReplied(@NonNull String);
     method @Nullable public abstract android.service.notification.Adjustment onNotificationEnqueued(@NonNull android.service.notification.StatusBarNotification);
     method @Nullable public android.service.notification.Adjustment onNotificationEnqueued(@NonNull android.service.notification.StatusBarNotification, @NonNull android.app.NotificationChannel);
@@ -2698,6 +2699,7 @@ package android.telephony {
   public class TelephonyManager {
     method public int checkCarrierPrivilegesForPackage(String);
     method public int getCarrierIdListVersion();
+    method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public String getLine1AlphaTag();
     method public android.util.Pair<java.lang.Integer,java.lang.Integer> getRadioHalVersion();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void refreshUiccProfile();
     method @Deprecated public void setCarrierTestOverride(String, String, String, String, String, String, String);
@@ -2878,31 +2880,6 @@ package android.util.proto {
     method public void writeRawVarint64(long);
     method public void writeRawZigZag32(int);
     method public void writeRawZigZag64(long);
-  }
-
-  public final class ProtoInputStream extends android.util.proto.ProtoStream {
-    ctor public ProtoInputStream(java.io.InputStream, int);
-    ctor public ProtoInputStream(java.io.InputStream);
-    ctor public ProtoInputStream(byte[]);
-    method public int decodeZigZag32(int);
-    method public long decodeZigZag64(long);
-    method public String dumpDebugData();
-    method public void end(long);
-    method public int getFieldNumber();
-    method public int getOffset();
-    method public int getWireType();
-    method public boolean isNextField(long) throws java.io.IOException;
-    method public int nextField() throws java.io.IOException;
-    method public boolean readBoolean(long) throws java.io.IOException;
-    method public byte[] readBytes(long) throws java.io.IOException;
-    method public double readDouble(long) throws java.io.IOException;
-    method public float readFloat(long) throws java.io.IOException;
-    method public int readInt(long) throws java.io.IOException;
-    method public long readLong(long) throws java.io.IOException;
-    method public String readString(long) throws java.io.IOException;
-    method public void skip() throws java.io.IOException;
-    method public long start(long) throws java.io.IOException;
-    field public static final int NO_MORE_FIELDS = -1; // 0xffffffff
   }
 
   public final class ProtoOutputStream extends android.util.proto.ProtoStream {

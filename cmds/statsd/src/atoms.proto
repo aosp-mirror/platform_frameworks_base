@@ -176,23 +176,38 @@ message Atom {
         FlagFlipUpdateOccurred flag_flip_update_occurred = 101;
         BinaryPushStateChanged binary_push_state_changed = 102;
         DevicePolicyEvent device_policy_event = 103;
-        DocsUIFileOperationCanceledReported docs_ui_file_op_canceled = 104;
-        DocsUIFileOperationCopyMoveModeReported docs_ui_file_op_copy_move_mode_reported = 105;
-        DocsUIFileOperationFailureReported docs_ui_file_op_failure = 106;
-        DocsUIFileOperationReported docs_ui_provider_file_op = 107;
-        DocsUIInvalidScopedAccessRequestReported docs_ui_invalid_scoped_access_request = 108;
-        DocsUILaunchReported docs_ui_launch_reported = 109;
-        DocsUIRootVisitedReported docs_ui_root_visited = 110;
-        DocsUIStartupMsReported docs_ui_startup_ms = 111;
-        DocsUIUserActionReported docs_ui_user_action_reported = 112;
+        DocsUIFileOperationCanceledReported docs_ui_file_op_canceled =
+            104 [(log_from_module) = "docsui"];
+        DocsUIFileOperationCopyMoveModeReported
+            docs_ui_file_op_copy_move_mode_reported =
+            105 [(log_from_module) = "docsui"];
+        DocsUIFileOperationFailureReported docs_ui_file_op_failure =
+            106 [(log_from_module) = "docsui"];
+        DocsUIFileOperationReported docs_ui_provider_file_op =
+            107 [(log_from_module) = "docsui"];
+        DocsUIInvalidScopedAccessRequestReported
+            docs_ui_invalid_scoped_access_request =
+            108 [(log_from_module) = "docsui"];
+        DocsUILaunchReported docs_ui_launch_reported =
+            109 [(log_from_module) = "docsui"];
+        DocsUIRootVisitedReported docs_ui_root_visited =
+            110 [(log_from_module) = "docsui"];
+        DocsUIStartupMsReported docs_ui_startup_ms =
+            111 [(log_from_module) = "docsui"];
+        DocsUIUserActionReported docs_ui_user_action_reported =
+            112 [(log_from_module) = "docsui"];
         WifiEnabledStateChanged wifi_enabled_state_changed = 113;
         WifiRunningStateChanged wifi_running_state_changed = 114;
         AppCompacted app_compacted = 115;
         NetworkDnsEventReported network_dns_event_reported = 116 [(log_from_module) = "resolv"];
-        DocsUIPickerLaunchedFromReported docs_ui_picker_launched_from_reported = 117;
-        DocsUIPickResultReported docs_ui_pick_result_reported = 118;
-        DocsUISearchModeReported docs_ui_search_mode_reported = 119;
-        DocsUISearchTypeReported docs_ui_search_type_reported = 120;
+        DocsUIPickerLaunchedFromReported docs_ui_picker_launched_from_reported =
+            117 [(log_from_module) = "docsui"];
+        DocsUIPickResultReported docs_ui_pick_result_reported =
+            118 [(log_from_module) = "docsui"];
+        DocsUISearchModeReported docs_ui_search_mode_reported =
+            119 [(log_from_module) = "docsui"];
+        DocsUISearchTypeReported docs_ui_search_type_reported =
+            120 [(log_from_module) = "docsui"];
         DataStallEvent data_stall_event = 121;
         RescuePartyResetReported rescue_party_reset_reported = 122;
         SignedConfigReported signed_config_reported = 123;
@@ -3251,13 +3266,12 @@ message BinaryPushStateChanged {
         INSTALLER_ROLLBACK_BOOT_TRIGGERED_FAILURE = 14;
         INSTALLER_ROLLBACK_SUCCESS = 15;
         INSTALLER_ROLLBACK_FAILURE = 16;
-        INSTALLER_ROLLBACK_CANCEL_STAGED_REMOVE_FROM_QUEUE = 17;
-        INSTALLER_ROLLBACK_CANCEL_STAGED_DELETE_SESSION_INITIATED = 18;
-        INSTALLER_ROLLBACK_CANCEL_STAGED_DELETE_SESSION_SUCCESS = 19;
-        INSTALLER_ROLLBACK_CANCEL_STAGED_DELETE_SESSION_FAILURE = 20;
-        INSTALL_STAGED_CANCEL_REQUESTED = 21;
-        INSTALL_STAGED_CANCEL_SUCCESS = 22;
-        INSTALL_STAGED_CANCEL_FAILURE = 23;
+        INSTALLER_ROLLBACK_STAGED_CANCEL_REQUESTED = 17;
+        INSTALLER_ROLLBACK_STAGED_CANCEL_SUCCESS = 18;
+        INSTALLER_ROLLBACK_STAGED_CANCEL_FAILURE = 19;
+        INSTALL_STAGED_CANCEL_REQUESTED = 20;
+        INSTALL_STAGED_CANCEL_SUCCESS = 21;
+        INSTALL_STAGED_CANCEL_FAILURE = 22;
     }
     optional State state = 6;
     // Possible experiment ids for monitoring this push.
@@ -5748,13 +5762,12 @@ message TrainInfo {
         INSTALLER_ROLLBACK_BOOT_TRIGGERED_FAILURE = 14;
         INSTALLER_ROLLBACK_SUCCESS = 15;
         INSTALLER_ROLLBACK_FAILURE = 16;
-        INSTALLER_ROLLBACK_CANCEL_STAGED_REMOVE_FROM_QUEUE = 17;
-        INSTALLER_ROLLBACK_CANCEL_STAGED_DELETE_SESSION_INITIATED = 18;
-        INSTALLER_ROLLBACK_CANCEL_STAGED_DELETE_SESSION_SUCCESS = 19;
-        INSTALLER_ROLLBACK_CANCEL_STAGED_DELETE_SESSION_FAILURE = 20;
-        INSTALL_STAGED_CANCEL_REQUESTED = 21;
-        INSTALL_STAGED_CANCEL_SUCCESS = 22;
-        INSTALL_STAGED_CANCEL_FAILURE = 23;
+        INSTALLER_ROLLBACK_STAGED_CANCEL_REQUESTED = 17;
+        INSTALLER_ROLLBACK_STAGED_CANCEL_SUCCESS = 18;
+        INSTALLER_ROLLBACK_STAGED_CANCEL_FAILURE = 19;
+        INSTALL_STAGED_CANCEL_REQUESTED = 20;
+        INSTALL_STAGED_CANCEL_SUCCESS = 21;
+        INSTALL_STAGED_CANCEL_FAILURE = 22;
     }
     optional Status status = 4;
 }

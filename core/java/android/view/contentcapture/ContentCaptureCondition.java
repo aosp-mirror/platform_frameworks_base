@@ -54,7 +54,9 @@ public final class ContentCaptureCondition implements Parcelable {
      *
      * @param locusId id of the condition, as defined by
      * {@link ContentCaptureContext#getLocusId()}.
-     * @param flags either {@link ContentCaptureCondition#FLAG_IS_REGEX} or {@code 0}.
+     * @param flags either {@link ContentCaptureCondition#FLAG_IS_REGEX} (to use a regular
+     * expression match) or {@code 0} (in which case the {@code LocusId} must be an exact match of
+     * the {@code LocusId} used in the {@link ContentCaptureContext}).
      */
     public ContentCaptureCondition(@NonNull LocusId locusId, @Flags int flags) {
         this.mLocusId = Preconditions.checkNotNull(locusId);

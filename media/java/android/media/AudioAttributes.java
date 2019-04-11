@@ -893,7 +893,7 @@ public final class AudioAttributes implements Parcelable {
          * @param muted true to force muting haptic channels.
          * @return the same Builder instance.
          */
-        public Builder setMuteHapticChannels(boolean muted) {
+        public @NonNull Builder setHapticChannelsMuted(boolean muted) {
             mMuteHapticChannels = muted;
             return this;
         }

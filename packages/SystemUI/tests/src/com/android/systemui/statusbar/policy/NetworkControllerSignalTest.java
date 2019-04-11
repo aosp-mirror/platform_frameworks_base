@@ -300,7 +300,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         // We can only test whether unregister gets called if it thinks its in a listening
         // state.
         mNetworkController.mListening = true;
-        mNetworkController.setCurrentSubscriptions(subscriptions);
+        mNetworkController.setCurrentSubscriptionsLocked(subscriptions);
 
         for (int i = 0; i < testSubscriptions.length; i++) {
             if (i == indexToSkipController) {

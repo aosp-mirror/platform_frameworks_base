@@ -33,4 +33,8 @@
     <!-- Controls the size of the back gesture inset. -->
     <dimen name="config_backGestureInset">20dp</dimen>
 
+    <!-- Controls whether the navbar needs a scrim with
+     {@link Window#setEnsureNavigationBarContrastWhenTransparent}. -->
+    <bool name="config_navBarNeedsScrim">false</bool>
+
 </resources>

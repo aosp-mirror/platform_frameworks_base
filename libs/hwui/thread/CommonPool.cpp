@@ -49,9 +49,13 @@ CommonPool::CommonPool() {
     }
 }
 
-void CommonPool::post(Task&& task) {
+CommonPool& CommonPool::instance() {
     static CommonPool pool;
-    pool.enqueue(std::move(task));
+    return pool;
+}
+
+void CommonPool::post(Task&& task) {
+    instance().enqueue(std::move(task));
 }
 
 void CommonPool::enqueue(Task&& task) {
@@ -83,6 +87,19 @@ void CommonPool::workerLoop() {
             work();
             lock.lock();
         }
+    }
+}
+
+void CommonPool::waitForIdle() {
+    instance().doWaitForIdle();
+}
+
+void CommonPool::doWaitForIdle() {
+    std::unique_lock lock(mLock);
+    while (mWaitingThreads != THREAD_COUNT) {
+        lock.unlock();
+        usleep(100);
+        lock.lock();
     }
 }
 

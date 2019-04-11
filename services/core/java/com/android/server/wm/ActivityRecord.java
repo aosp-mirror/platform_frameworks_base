@@ -693,13 +693,13 @@ final class ActivityRecord extends ConfigurationContainer {
         }
     }
 
-    void scheduleTopResumedActivityChanged(boolean onTop) {
+    boolean scheduleTopResumedActivityChanged(boolean onTop) {
         if (!attachedToProcess()) {
             if (DEBUG_STATES) {
                 Slog.w(TAG, "Can't report activity position update - client not running"
                                 + ", activityRecord=" + this);
             }
-            return;
+            return false;
         }
         try {
             if (DEBUG_STATES) {
@@ -710,7 +710,9 @@ final class ActivityRecord extends ConfigurationContainer {
                     TopResumedActivityChangeItem.obtain(onTop));
         } catch (RemoteException e) {
             // If process died, whatever.
+            return false;
         }
+        return true;
     }
 
     void updateMultiWindowMode() {
@@ -3408,7 +3410,6 @@ final class ActivityRecord extends ConfigurationContainer {
             transaction.addCallback(callbackItem);
             transaction.setLifecycleStateRequest(lifecycleItem);
             mAtmService.getLifecycleManager().scheduleTransaction(transaction);
-            mStackSupervisor.updateTopResumedActivityIfNeeded();
             // Note: don't need to call pauseIfSleepingLocked() here, because the caller will only
             // request resume if this activity is currently resumed, which implies we aren't
             // sleeping.

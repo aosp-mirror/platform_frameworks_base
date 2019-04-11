@@ -83,7 +83,7 @@ public class KeyguardIndicationController implements StateListener {
 
     private final int mSlowThreshold;
     private final int mFastThreshold;
-    private LockIcon mLockIcon;
+    private final LockIcon mLockIcon;
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
     private String mRestingIndication;
@@ -539,7 +539,6 @@ public class KeyguardIndicationController implements StateListener {
 
     protected class BaseKeyguardCallback extends KeyguardUpdateMonitorCallback {
         public static final int HIDE_DELAY_MS = 5000;
-        private int mLastSuccessiveErrorMessage = -1;
 
         @Override
         public void onRefreshBatteryInfo(KeyguardUpdateMonitor.BatteryStatus status) {
@@ -577,20 +576,14 @@ public class KeyguardIndicationController implements StateListener {
             if (!updateMonitor.isUnlockingWithBiometricAllowed()) {
                 return;
             }
+            animatePadlockError();
             if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
                 mStatusBarKeyguardViewManager.showBouncerMessage(helpString,
                         mInitialTextColorState);
             } else if (updateMonitor.isScreenOn()) {
-                mLockIcon.setTransientBiometricsError(true);
                 showTransientIndication(helpString);
                 hideTransientIndicationDelayed(TRANSIENT_BIOMETRIC_ERROR_TIMEOUT);
-                mHandler.removeMessages(MSG_CLEAR_BIOMETRIC_MSG);
-                mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_CLEAR_BIOMETRIC_MSG),
-                        TRANSIENT_BIOMETRIC_ERROR_TIMEOUT);
             }
-            // Help messages indicate that there was actually a try since the last error, so those
-            // are not two successive error messages anymore.
-            mLastSuccessiveErrorMessage = -1;
         }
 
         @Override
@@ -600,15 +593,9 @@ public class KeyguardIndicationController implements StateListener {
             if (shouldSuppressBiometricError(msgId, biometricSourceType, updateMonitor)) {
                 return;
             }
+            animatePadlockError();
             if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
-                // When swiping up right after receiving a biometric error, the bouncer calls
-                // authenticate leading to the same message being shown again on the bouncer.
-                // We want to avoid this, as it may confuse the user when the message is too
-                // generic.
-                if (mLastSuccessiveErrorMessage != msgId) {
-                    mStatusBarKeyguardViewManager.showBouncerMessage(errString,
-                            mInitialTextColorState);
-                }
+                mStatusBarKeyguardViewManager.showBouncerMessage(errString, mInitialTextColorState);
             } else if (updateMonitor.isScreenOn()) {
                 showTransientIndication(errString);
                 // We want to keep this message around in case the screen was off
@@ -616,7 +603,13 @@ public class KeyguardIndicationController implements StateListener {
             } else {
                 mMessageToShowOnScreenOn = errString;
             }
-            mLastSuccessiveErrorMessage = msgId;
+        }
+
+        private void animatePadlockError() {
+            mLockIcon.setTransientBiometricsError(true);
+            mHandler.removeMessages(MSG_CLEAR_BIOMETRIC_MSG);
+            mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_CLEAR_BIOMETRIC_MSG),
+                    TRANSIENT_BIOMETRIC_ERROR_TIMEOUT);
         }
 
         private boolean shouldSuppressBiometricError(int msgId,
@@ -670,14 +663,7 @@ public class KeyguardIndicationController implements StateListener {
         @Override
         public void onBiometricAuthenticated(int userId, BiometricSourceType biometricSourceType) {
             super.onBiometricAuthenticated(userId, biometricSourceType);
-            mLastSuccessiveErrorMessage = -1;
             mHandler.sendEmptyMessage(MSG_HIDE_TRANSIENT);
-        }
-
-        @Override
-        public void onBiometricAuthFailed(BiometricSourceType biometricSourceType) {
-            super.onBiometricAuthFailed(biometricSourceType);
-            mLastSuccessiveErrorMessage = -1;
         }
 
         @Override
@@ -685,6 +671,11 @@ public class KeyguardIndicationController implements StateListener {
             if (mVisible) {
                 updateIndication(false);
             }
+        }
+
+        @Override
+        public void onKeyguardBouncerChanged(boolean bouncer) {
+            mLockIcon.setBouncerVisible(bouncer);
         }
     };
 }

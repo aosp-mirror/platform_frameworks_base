@@ -82,6 +82,11 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
      * @hide
      */
     public static final String KEY_ALLOW_DEVICE_CREDENTIAL = "allow_device_credential";
+    /**
+     * @hide
+     */
+    public static final String KEY_FROM_CONFIRM_DEVICE_CREDENTIAL
+            = "from_confirm_device_credential";
 
     /**
      * Error/help message will show for this amount of time.
@@ -267,6 +272,17 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          */
         @NonNull public Builder setDeviceCredentialAllowed(boolean allowed) {
             mBundle.putBoolean(KEY_ALLOW_DEVICE_CREDENTIAL, allowed);
+            return this;
+        }
+
+        /**
+         * TODO(123378871): Remove when moved.
+         * @return
+         * @hide
+         */
+        @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+        @NonNull public Builder setFromConfirmDeviceCredential() {
+            mBundle.putBoolean(KEY_FROM_CONFIRM_DEVICE_CREDENTIAL, true);
             return this;
         }
 
@@ -494,7 +510,8 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     public void authenticateUser(@NonNull CancellationSignal cancel,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull AuthenticationCallback callback,
-            int userId) {
+            int userId,
+            IBiometricConfirmDeviceCredentialCallback confirmDeviceCredentialCallback) {
         if (cancel == null) {
             throw new IllegalArgumentException("Must supply a cancellation signal");
         }
@@ -504,7 +521,8 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         if (callback == null) {
             throw new IllegalArgumentException("Must supply a callback");
         }
-        authenticateInternal(null /* crypto */, cancel, executor, callback, userId);
+        authenticateInternal(null /* crypto */, cancel, executor, callback, userId,
+                confirmDeviceCredentialCallback);
     }
 
     /**
@@ -555,7 +573,8 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         if (mBundle.getBoolean(KEY_ALLOW_DEVICE_CREDENTIAL)) {
             throw new IllegalArgumentException("Device credential not supported with crypto");
         }
-        authenticateInternal(crypto, cancel, executor, callback, mContext.getUserId());
+        authenticateInternal(crypto, cancel, executor, callback, mContext.getUserId(),
+                null /* confirmDeviceCredentialCallback */);
     }
 
     /**
@@ -597,7 +616,8 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         if (callback == null) {
             throw new IllegalArgumentException("Must supply a callback");
         }
-        authenticateInternal(null /* crypto */, cancel, executor, callback, mContext.getUserId());
+        authenticateInternal(null /* crypto */, cancel, executor, callback, mContext.getUserId(),
+                null /* confirmDeviceCredentialCallback */);
     }
 
     private void cancelAuthentication() {
@@ -614,7 +634,8 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             @NonNull CancellationSignal cancel,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull AuthenticationCallback callback,
-            int userId) {
+            int userId,
+            IBiometricConfirmDeviceCredentialCallback confirmDeviceCredentialCallback) {
         try {
             if (cancel.isCanceled()) {
                 Log.w(TAG, "Authentication already canceled");
@@ -629,7 +650,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             final long sessionId = crypto != null ? crypto.getOpId() : 0;
             if (BiometricManager.hasBiometrics(mContext)) {
                 mService.authenticate(mToken, sessionId, userId, mBiometricServiceReceiver,
-                        mContext.getOpPackageName(), mBundle);
+                        mContext.getOpPackageName(), mBundle, confirmDeviceCredentialCallback);
             } else {
                 mExecutor.execute(() -> {
                     callback.onAuthenticationError(BiometricPrompt.BIOMETRIC_ERROR_HW_NOT_PRESENT,

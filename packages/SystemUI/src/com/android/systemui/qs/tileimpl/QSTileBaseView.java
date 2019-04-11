@@ -40,7 +40,6 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.ImageView.ScaleType;
 import android.widget.Switch;
 
 import com.android.settingslib.Utils;
@@ -63,6 +62,7 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
     private boolean mTileState;
     private boolean mCollapsedView;
     private boolean mClicked;
+    private boolean mShowRippleEffect = true;
 
     private final ImageView mBg;
     private final int mColorActive;
@@ -209,6 +209,7 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
             mCircleColor = circleColor;
         }
 
+        mShowRippleEffect = state.showRippleEffect;
         setClickable(state.state != Tile.STATE_UNAVAILABLE);
         setLongClickable(state.handlesLongClick);
         mIcon.setIcon(state, allowAnimations);
@@ -254,7 +255,7 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
     @Override
     public void setClickable(boolean clickable) {
         super.setClickable(clickable);
-        setBackground(clickable ? mRipple : null);
+        setBackground(clickable && mShowRippleEffect ? mRipple : null);
     }
 
     @Override

@@ -47,6 +47,8 @@ import com.android.systemui.statusbar.policy.NetworkControllerImpl.SubscriptionD
 import java.io.PrintWriter;
 import java.util.BitSet;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class MobileSignalController extends SignalController<
@@ -73,6 +75,9 @@ public class MobileSignalController extends SignalController<
     private SignalStrength mSignalStrength;
     private MobileIconGroup mDefaultIcons;
     private Config mConfig;
+    private boolean mInflateSignalStrengths = false;
+    // Some specific carriers have 5GE network which is special LTE CA network.
+    private static final int NETWORK_TYPE_LTE_CA_5GE = TelephonyManager.MAX_NETWORK_TYPE + 1;
 
     // TODO: Reduce number of vars passed in, if we have the NetworkController, probably don't
     // need listener lists anymore.
@@ -114,6 +119,7 @@ public class MobileSignalController extends SignalController<
 
     public void setConfiguration(Config config) {
         mConfig = config;
+        updateInflateSignalStrength();
         mapIconSets();
         updateTelephony();
     }
@@ -236,11 +242,19 @@ public class MobileSignalController extends SignalController<
                         TelephonyIcons.LTE_PLUS);
             }
         }
+        mNetworkToIconLookup.put(NETWORK_TYPE_LTE_CA_5GE,
+                TelephonyIcons.LTE_CA_5G_E);
         mNetworkToIconLookup.put(TelephonyManager.NETWORK_TYPE_IWLAN, TelephonyIcons.WFC);
     }
 
+    private void updateInflateSignalStrength() {
+        mInflateSignalStrengths = SubscriptionManager.getResourcesForSubId(mContext,
+               mSubscriptionInfo.getSubscriptionId())
+               .getBoolean(R.bool.config_inflateSignalStrength);
+    }
+
     private int getNumLevels() {
-        if (mConfig.inflateSignalStrengths) {
+        if (mInflateSignalStrengths) {
             return SignalStrength.NUM_SIGNAL_STRENGTH_BINS + 1;
         }
         return SignalStrength.NUM_SIGNAL_STRENGTH_BINS;
@@ -252,7 +266,7 @@ public class MobileSignalController extends SignalController<
             return SignalDrawable.getCarrierChangeState(getNumLevels());
         } else if (mCurrentState.connected) {
             int level = mCurrentState.level;
-            if (mConfig.inflateSignalStrengths) {
+            if (mInflateSignalStrengths) {
                 level++;
             }
             boolean dataDisabled = mCurrentState.userSetup
@@ -379,6 +393,26 @@ public class MobileSignalController extends SignalController<
             // for long.
             mCurrentState.dataSim = true;
         }
+    }
+
+    private boolean isCarrierSpecificDataIcon() {
+        if (mConfig.patternOfCarrierSpecificDataIcon == null
+                || mConfig.patternOfCarrierSpecificDataIcon.length() == 0) {
+            return false;
+        }
+
+        Pattern stringPattern = Pattern.compile(mConfig.patternOfCarrierSpecificDataIcon);
+        String[] operatorNames = new String[]{mServiceState.getOperatorAlphaLongRaw(),
+                mServiceState.getOperatorAlphaShortRaw()};
+        for (String opName : operatorNames) {
+            if (!TextUtils.isEmpty(opName)) {
+                Matcher matcher = stringPattern.matcher(opName);
+                if (matcher.find()) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -535,6 +569,7 @@ public class MobileSignalController extends SignalController<
         pw.println("  mSignalStrength=" + mSignalStrength + ",");
         pw.println("  mDataState=" + mDataState + ",");
         pw.println("  mDataNetType=" + mDataNetType + ",");
+        pw.println("  mInflateSignalStrengths=" + mInflateSignalStrengths + ",");
     }
 
     class MobilePhoneStateListener extends PhoneStateListener {
@@ -559,12 +594,8 @@ public class MobileSignalController extends SignalController<
                         + " dataState=" + state.getDataRegState());
             }
             mServiceState = state;
-            if (state != null) {
-                mDataNetType = state.getDataNetworkType();
-                if (mDataNetType == TelephonyManager.NETWORK_TYPE_LTE && mServiceState != null &&
-                        mServiceState.isUsingCarrierAggregation()) {
-                    mDataNetType = TelephonyManager.NETWORK_TYPE_LTE_CA;
-                }
+            if (mServiceState != null) {
+                updateDataNetType(mServiceState.getDataNetworkType());
             }
             updateTelephony();
         }
@@ -576,12 +607,19 @@ public class MobileSignalController extends SignalController<
                         + " type=" + networkType);
             }
             mDataState = state;
-            mDataNetType = networkType;
-            if (mDataNetType == TelephonyManager.NETWORK_TYPE_LTE && mServiceState != null &&
-                    mServiceState.isUsingCarrierAggregation()) {
-                mDataNetType = TelephonyManager.NETWORK_TYPE_LTE_CA;
-            }
+            updateDataNetType(networkType);
             updateTelephony();
+        }
+
+        private void updateDataNetType(int networkType) {
+            mDataNetType = networkType;
+            if (mDataNetType == TelephonyManager.NETWORK_TYPE_LTE) {
+                if (isCarrierSpecificDataIcon()) {
+                    mDataNetType = NETWORK_TYPE_LTE_CA_5GE;
+                } else if (mServiceState != null && mServiceState.isUsingCarrierAggregation()) {
+                    mDataNetType = TelephonyManager.NETWORK_TYPE_LTE_CA;
+                }
+            }
         }
 
         @Override
