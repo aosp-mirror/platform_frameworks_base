@@ -1920,7 +1920,7 @@
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"Хранилище на устройството"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"Отстраняване на грешки през USB"</string>
     <string name="time_picker_hour_label" msgid="2979075098868106450">"час"</string>
-    <string name="time_picker_minute_label" msgid="5168864173796598399">"минута"</string>
+    <string name="time_picker_minute_label" msgid="5168864173796598399">"минути"</string>
     <string name="time_picker_header_text" msgid="143536825321922567">"Задаване на час"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"Въведете валиден час"</string>
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"Въведете часа"</string>

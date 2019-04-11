@@ -519,8 +519,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ ਫ਼ੋਟੋ ਸੰਗ੍ਰਹਿ ਨੂੰ ਸੋਧਣ ਦਿੰਦੀ ਹੈ।"</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"ਤੁਹਾਡੇ ਮੀਡੀਆ ਸੰਗ੍ਰਹਿ ਦੇ ਟਿਕਾਣਿਆਂ ਨੂੰ ਪੜ੍ਹਨਾ"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ ਮੀਡੀਆ ਸੰਗ੍ਰਹਿ ਦੇ ਟਿਕਾਣਿਆਂ ਨੂੰ ਪੜ੍ਹਨ ਦਿੰਦੀ ਹੈ।"</string>
-    <!-- no translation found for biometric_dialog_default_title (881952973720613213) -->
-    <skip />
+    <string name="biometric_dialog_default_title" msgid="881952973720613213">"ਪ੍ਰਮਾਣਿਤ ਕਰੋ ਕਿ ਇਹ ਤੁਸੀਂ ਹੀ ਹੋ"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"ਬਾਇਓਮੈਟ੍ਰਿਕ ਹਾਰਡਵੇਅਰ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"ਪ੍ਰਮਾਣੀਕਰਨ ਰੱਦ ਕੀਤਾ ਗਿਆ"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"ਪਛਾਣ ਨਹੀਂ ਹੋਈ"</string>
@@ -1206,7 +1205,7 @@
     <string name="dump_heap_ready_notification" msgid="1162196579925048701">"<xliff:g id="PROC">%1$s</xliff:g> ਹੀਪ ਡੰਪ ਤਿਆਰ ਹੈ"</string>
     <string name="dump_heap_notification_detail" msgid="3993078784053054141">"ਹੀਪ ਡੰਪ ਨੂੰ ਇਕੱਤਰ ਕੀਤਾ ਗਿਆ। ਸਾਂਝਾ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"ਕੀ ਹੀਪ ਡੰਪ ਸ਼ੇਅਰ ਕਰਨਾ ਹੈ?"</string>
-    <string name="dump_heap_text" msgid="8546022920319781701">"<xliff:g id="PROC">%1$s</xliff:g> ਪ੍ਰਕਿਰਿਆ ਇਸਦੀ ਮੈਮਰੀ ਸੀਮਾ <xliff:g id="SIZE">%2$s</xliff:g> ਤੋਂ ਵਧ ਗਈ ਹੈ। ਇਸਦੇ ਵਿਕਾਸਕਾਰ ਨਾਲ ਸਾਂਝਾ ਕਰਨ ਲਈ ਤੁਹਾਡੇ ਲਈ ਇੱਕ ਹੀਪ ਡੰਪ ਉਪਲਬਧ ਹੈ। ਸਾਵਧਾਨ ਰਹੋ: ਇਸ ਹੀਪ ਡੰਪ ਵਿੱਚ ਤੁਹਾਡੀ ਕੋਈ ਵੀ ਨਿੱਜੀ ਜਾਣਕਾਰੀ ਹੋ ਸਕਦੀ ਹੈ, ਜਿਸ \'ਤੇ ਐਪਲੀਕੇਸ਼ਨ ਦੀ ਪਹੁੰਚ ਹੈ।"</string>
+    <string name="dump_heap_text" msgid="8546022920319781701">"<xliff:g id="PROC">%1$s</xliff:g> ਪ੍ਰਕਿਰਿਆ ਇਸਦੀ ਮੈਮੋਰੀ ਸੀਮਾ <xliff:g id="SIZE">%2$s</xliff:g> ਤੋਂ ਵਧ ਗਈ ਹੈ। ਇਸਦੇ ਵਿਕਾਸਕਾਰ ਨਾਲ ਸਾਂਝਾ ਕਰਨ ਲਈ ਤੁਹਾਡੇ ਵਾਸਤੇ ਇੱਕ ਹੀਪ ਡੰਪ ਉਪਲਬਧ ਹੈ। ਸਾਵਧਾਨ ਰਹੋ: ਇਸ ਹੀਪ ਡੰਪ ਵਿੱਚ ਤੁਹਾਡੀ ਕੋਈ ਵੀ ਨਿੱਜੀ ਜਾਣਕਾਰੀ ਹੋ ਸਕਦੀ ਹੈ, ਜਿਸ \'ਤੇ ਐਪਲੀਕੇਸ਼ਨ ਦੀ ਪਹੁੰਚ ਹੈ।"</string>
     <string name="dump_heap_system_text" msgid="3236094872980706024">"<xliff:g id="PROC">%1$s</xliff:g> ਪ੍ਰਕਿਰਿਆ, ਇਸ ਦੀ ਮੈਮੋਰੀ ਸੀਮਾ <xliff:g id="SIZE">%2$s</xliff:g> ਤੋਂ ਵੱਧ ਗਈ ਹੈ। ਸਾਂਝਾ ਕਰਨ ਲਈ ਹੀਪ ਡੰਪ ਤੁਹਾਡੇ ਲਈ ਉਪਲਬਧ ਹੈ। ਸਾਵਧਾਨ ਰਹੋ: ਇਸ ਹੀਪ ਡੰਪ ਵਿੱਚ ਕੋਈ ਵੀ ਸੰਵੇਦਨਸ਼ੀਲ ਨਿੱਜੀ ਜਾਣਕਾਰੀ ਸ਼ਾਮਲ ਹੋ ਸਕਦੀ ਹੈ, ਜਿਸ \'ਤੇ ਪ੍ਰਕਿਰਿਆ ਦੀ ਪਹੁੰਚ ਹੈ, ਜਿਸ ਵਿੱਚ ਸ਼ਾਇਦ ਤੁਹਾਡੇ ਵੱਲੋਂ ਟਾਈਪ ਕੀਤੀਆਂ ਚੀਜ਼ਾਂ ਸ਼ਾਮਲ ਹੋਣ।"</string>
     <string name="dump_heap_ready_text" msgid="1778041771455343067">"ਸਾਂਝਾ ਕਰਨ ਲਈ <xliff:g id="PROC">%1$s</xliff:g> ਦੀ ਪ੍ਰਕਿਰਿਆ ਦਾ ਹੀਪ ਡੰਪ ਤੁਹਾਡੇ ਲਈ ਉਪਲਬਧ ਹੈ। ਸਾਵਧਾਨ ਰਹੋ: ਸ਼ਾਇਦ ਇਸ ਹੀਪ ਡੰਪ ਵਿੱਚ ਕੋਈ ਵੀ ਸੰਵੇਦਨਸ਼ੀਲ ਨਿੱਜੀ ਜਾਣਕਾਰੀ ਸ਼ਾਮਲ ਹੋਵੇ, ਜਿਸ \'ਤੇ ਪ੍ਰਕਿਰਿਆ ਦੀ ਪਹੁੰਚ ਹੈ, ਜਿਸ ਵਿੱਚ ਸ਼ਾਇਦ ਤੁਹਾਡੇ ਵੱਲੋਂ ਟਾਈਪ ਕੀਤੀਆਂ ਚੀਜ਼ਾਂ ਸ਼ਾਮਲ ਹੋਣ।"</string>
     <string name="sendText" msgid="5209874571959469142">"ਲਿਖਤ ਲਈ ਕੋਈ ਕਾਰਵਾਈ ਚੁਣੋ"</string>
@@ -1350,7 +1349,7 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ਡੀਬਗਿੰਗ ਕਨੈਕਟ ਕੀਤੀ"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"USB ਡੀਬੱਗਿੰਗ ਬੰਦ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB ਡੀਬੱਗਿੰਗ ਅਯੋਗ ਬਣਾਉਣ ਲਈ ਚੁਣੋ।"</string>
-    <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"ਟੈਸਟ ਹਾਰਨੈੱਸ ਮੋਡ ਚਾਲੂ ਕੀਤਾ ਗਿਆ"</string>
+    <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"ਟੈਸਟ ਹਾਰਨੈੱਸ ਮੋਡ ਚਾਲੂ ਹੈ"</string>
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"ਟੈਸਟ ਹਾਰਨੈੱਸ ਮੋਡ ਬੰਦ ਕਰਨ ਲਈ ਫੈਕਟਰੀ ਰੀਸੈੱਟ ਕਰੋ।"</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB ਪੋਰਟ ਵਿੱਚ ਪਾਣੀ ਜਾਂ ਧੂੜ-ਮਿੱਟੀ"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB ਪੋਰਟ ਸਵੈਚਲਿਤ ਤੌਰ \'ਤੇ ਬੰਦ ਕੀਤਾ ਗਿਆ। ਹੋਰ ਜਾਣਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>

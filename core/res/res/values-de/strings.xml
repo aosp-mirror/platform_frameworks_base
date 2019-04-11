@@ -577,7 +577,7 @@
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Gesicht nicht erkannt. Hardware nicht verfügbar."</string>
     <string name="face_error_timeout" msgid="2605673935810019129">"Erkennungszeit überschritten. Noch mal versuchen."</string>
-    <string name="face_error_no_space" msgid="2712120617457553825">"Kein Speicherplatz frei. Bitte alte Gesichtsdaten löschen."</string>
+    <string name="face_error_no_space" msgid="2712120617457553825">"Kein Speicherplatz frei. Bitte erst ein Gesicht löschen."</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"Gesichtserkennung abgebrochen"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"Gesichtserkennung vom Nutzer abgebrochen"</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Zu viele Versuche, bitte später noch einmal versuchen"</string>
@@ -1206,8 +1206,8 @@
     <string name="dump_heap_notification_detail" msgid="3993078784053054141">"Heap-Dump wurde erfasst. Tippe, um ihn zu teilen."</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Heap-Dump teilen?"</string>
     <string name="dump_heap_text" msgid="8546022920319781701">"Für den Prozess \"<xliff:g id="PROC">%1$s</xliff:g>\" wurde das Speicherlimit von <xliff:g id="SIZE">%2$s</xliff:g> überschritten. Es steht ein Heap-Dump zur Verfügung, den du mit dem Entwickler teilen kannst. Beachte jedoch unbedingt, dass der Heap-Dump personenbezogene Daten von dir enthalten kann, auf die die App zugreifen kann."</string>
-    <string name="dump_heap_system_text" msgid="3236094872980706024">"Für den Prozess \"<xliff:g id="PROC">%1$s</xliff:g>\" wurde das Prozessspeicherlimit von <xliff:g id="SIZE">%2$s</xliff:g> überschritten. Es steht ein Heap-Dump zur Verfügung, den du teilen kannst. Beachte jedoch unbedingt, dass der Heap-Dump vertrauliche personenbezogene Daten von dir enthalten kann, auf die der Prozess Zugriff hat, einschließlich der von dir eingegebenen Informationen."</string>
-    <string name="dump_heap_ready_text" msgid="1778041771455343067">"Es steht ein Heap-Dump des Prozesses \"<xliff:g id="PROC">%1$s</xliff:g>\" zur Verfügung, den du teilen kannst. Beachte jedoch unbedingt, dass der Heap-Dump vertrauliche personenbezogene Daten von dir enthalten kann, auf die der Prozess Zugriff hat, einschließlich der von dir eingegebenen Informationen."</string>
+    <string name="dump_heap_system_text" msgid="3236094872980706024">"Für den Prozess \"<xliff:g id="PROC">%1$s</xliff:g>\" wurde das Prozessspeicherlimit von <xliff:g id="SIZE">%2$s</xliff:g> überschritten. Es gibt einen Heap-Dump, den du teilen kannst. Beachte jedoch unbedingt, dass der Heap-Dump vertrauliche personenbezogene Daten von dir enthalten kann, auf die der Prozess Zugriff hat, einschließlich der von dir eingegebenen Informationen."</string>
+    <string name="dump_heap_ready_text" msgid="1778041771455343067">"Es gibt einen Heap-Dump des Prozesses \"<xliff:g id="PROC">%1$s</xliff:g>\", den du teilen kannst. Beachte jedoch unbedingt, dass der Heap-Dump vertrauliche personenbezogene Daten von dir enthalten kann, auf die der Prozess Zugriff hat, einschließlich der von dir eingegebenen Informationen."</string>
     <string name="sendText" msgid="5209874571959469142">"Aktion für Text auswählen"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Klingeltonlautstärke"</string>
     <string name="volume_music" msgid="5421651157138628171">"Medienlautstärke"</string>
@@ -1844,7 +1844,7 @@
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Abends unter der Woche"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Wochenende"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Termin"</string>
-    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Beim Schlafen"</string>
+    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Schlafen"</string>
     <string name="muted_by" msgid="5942954724562097128">"Einige Töne werden von <xliff:g id="THIRD_PARTY">%1$s</xliff:g> stummgeschaltet"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Es liegt ein internes Problem mit deinem Gerät vor. Möglicherweise verhält es sich instabil, bis du es auf die Werkseinstellungen zurücksetzt."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Es liegt ein internes Problem mit deinem Gerät vor. Bitte wende dich diesbezüglich an den Hersteller."</string>

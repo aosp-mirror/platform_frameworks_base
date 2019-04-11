@@ -519,8 +519,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"એપને તમારો ફોટો સંગ્રહ સંશોધિત કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"આપના મીડિયા સંગ્રહમાંથી સ્થાનો વાંચવા"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"એપને તમારા મીડિયા સંગ્રહમાંથી સ્થાનો વાંચવાની મંજૂરી આપે છે."</string>
-    <!-- no translation found for biometric_dialog_default_title (881952973720613213) -->
-    <skip />
+    <string name="biometric_dialog_default_title" msgid="881952973720613213">"આ તમે જ છો તેનો પુરાવો આપો"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"બાયોમેટ્રિક હાર્ડવેર ઉપલબ્ધ નથી"</string>
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"પ્રમાણીકરણ રદ કર્યું"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"ઓળખાયેલ નથી"</string>

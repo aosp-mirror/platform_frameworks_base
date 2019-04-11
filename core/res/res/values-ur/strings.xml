@@ -527,8 +527,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"ایپ کو آپ کی تصویر کے مجموعے میں ترمیم کی اجازت دیتا ہے۔"</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"اپنی میڈيا کے مجموعے سے مقامات پڑھیں"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"ایپ کو آپ کی میڈيا کے مجموعے سے مقامات پڑھنے کی اجازت دیتا ہے۔"</string>
-    <!-- no translation found for biometric_dialog_default_title (881952973720613213) -->
-    <skip />
+    <string name="biometric_dialog_default_title" msgid="881952973720613213">"توثیق کریں کہ یہ آپ ہیں"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"بایومیٹرک ہارڈ ویئر دستیاب نہیں ہے"</string>
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"تصدیق کا عمل منسوخ ہو گیا"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"تسلیم شدہ نہیں ہے"</string>

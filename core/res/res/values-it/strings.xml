@@ -140,7 +140,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Chiamate Wi-Fi"</string>
     <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
-    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Non attiva"</string>
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Off"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"Chiamata tramite Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"Chiamata su rete mobile"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Solo Wi-Fi"</string>
