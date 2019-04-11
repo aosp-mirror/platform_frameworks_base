@@ -12666,6 +12666,45 @@ public final class Settings {
         public static final String DYNAMIC_POWER_SAVINGS_ENABLED = "dynamic_power_savings_enabled";
 
         /**
+         * A long value indicating how much longer the system battery is estimated to last in
+         * millis. See {@link #BATTERY_ESTIMATES_LAST_UPDATE_TIME} for the last time this value
+         * was updated.
+         *
+         * @hide
+         */
+        public static final String TIME_REMAINING_ESTIMATE_MILLIS =
+                "time_remaining_estimate_millis";
+
+        /**
+         * A boolean indicating whether {@link #TIME_REMAINING_ESTIMATE_MILLIS} is based customized
+         * to the devices usage or using global models. See
+         * {@link #BATTERY_ESTIMATES_LAST_UPDATE_TIME} for the last time this value was updated.
+         *
+         * @hide
+         */
+        public static final String TIME_REMAINING_ESTIMATE_BASED_ON_USAGE =
+                "time_remaining_estimate_based_on_usage";
+
+        /**
+         * A long value indicating how long the system battery takes to deplete from 100% to 0% on
+         * average based on historical drain rates. See {@link #BATTERY_ESTIMATES_LAST_UPDATE_TIME}
+         * for the last time this value was updated.
+         *
+         * @hide
+         */
+        public static final String AVERAGE_TIME_TO_DISCHARGE = "average_time_to_discharge";
+
+        /**
+         * A long indicating the epoch time in milliseconds when
+         * {@link #TIME_REMAINING_ESTIMATE_MILLIS}, {@link #TIME_REMAINING_ESTIMATE_BASED_ON_USAGE},
+         * and {@link #AVERAGE_TIME_TO_DISCHARGE} were last updated.
+         *
+         * @hide
+         */
+        public static final String BATTERY_ESTIMATES_LAST_UPDATE_TIME =
+                "battery_estimates_last_update_time";
+
+        /**
          * The max value for {@link #LOW_POWER_MODE_TRIGGER_LEVEL}. If this setting is not set
          * or the value is 0, the default max will be used.
          *

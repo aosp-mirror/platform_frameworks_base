@@ -42,6 +42,7 @@ import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.settingslib.fuelgauge.Estimate;
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -283,6 +284,7 @@ public class PowerUI extends SystemUI {
             mCurrentBatteryStateSnapshot = new BatteryStateSnapshot(mBatteryLevel, isPowerSaverMode,
                     plugged, bucket, mBatteryStatus, mLowBatteryReminderLevels[1],
                     mLowBatteryReminderLevels[0], estimate.getEstimateMillis(),
+                    estimate.getAverageDischargeTime(),
                     mEnhancedEstimates.getSevereWarningThreshold(),
                     mEnhancedEstimates.getLowWarningThreshold(), estimate.isBasedOnUsage(),
                     mEnhancedEstimates.getLowWarningEnabled());
@@ -316,7 +318,8 @@ public class PowerUI extends SystemUI {
             return estimate;
         }
         return new Estimate(mLastBatteryStateSnapshot.getTimeRemainingMillis(),
-                mLastBatteryStateSnapshot.isBasedOnUsage());
+                mLastBatteryStateSnapshot.isBasedOnUsage(),
+                mLastBatteryStateSnapshot.getAverageTimeToDischargeMillis());
     }
 
     @VisibleForTesting
