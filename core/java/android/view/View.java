@@ -17899,7 +17899,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final int scrollX = mScrollX;
         final int scrollY = mScrollY;
         invalidateInternal(dirty.left - scrollX, dirty.top - scrollY,
-                dirty.right - scrollX, dirty.bottom - scrollY, true);
+                dirty.right - scrollX, dirty.bottom - scrollY, true, false);
     }
 
     /**
@@ -17925,7 +17925,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public void invalidate(int l, int t, int r, int b) {
         final int scrollX = mScrollX;
         final int scrollY = mScrollY;
-        invalidateInternal(l - scrollX, t - scrollY, r - scrollX, b - scrollY, true);
+        invalidateInternal(l - scrollX, t - scrollY, r - scrollX, b - scrollY, true, false);
     }
 
     /**
@@ -17955,10 +17955,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @UnsupportedAppUsage
     public void invalidate(boolean invalidateCache) {
-        invalidateInternal(0, 0, mRight - mLeft, mBottom - mTop, invalidateCache);
+        invalidateInternal(0, 0, mRight - mLeft, mBottom - mTop, invalidateCache, true);
     }
 
-    void invalidateInternal(int l, int t, int r, int b, boolean invalidateCache) {
+    void invalidateInternal(int l, int t, int r, int b, boolean invalidateCache,
+            boolean fullInvalidate) {
         if (mGhostView != null) {
             mGhostView.invalidate(true);
             return;
@@ -17975,9 +17976,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if ((mPrivateFlags & (PFLAG_DRAWN | PFLAG_HAS_BOUNDS)) == (PFLAG_DRAWN | PFLAG_HAS_BOUNDS)
                 || (invalidateCache && (mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) == PFLAG_DRAWING_CACHE_VALID)
                 || (mPrivateFlags & PFLAG_INVALIDATED) != PFLAG_INVALIDATED
-                || isOpaque() != mLastIsOpaque) {
-            mLastIsOpaque = isOpaque();
-            mPrivateFlags &= ~PFLAG_DRAWN;
+                || (fullInvalidate && isOpaque() != mLastIsOpaque)) {
+            if (fullInvalidate) {
+                mLastIsOpaque = isOpaque();
+                mPrivateFlags &= ~PFLAG_DRAWN;
+            }
 
             mPrivateFlags |= PFLAG_DIRTY;
 
@@ -22522,7 +22525,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @Override
     public void invalidateDrawable(@NonNull Drawable drawable) {
         if (verifyDrawable(drawable)) {
-            invalidate();
+            final Rect dirty = drawable.getDirtyBounds();
+            final int scrollX = mScrollX;
+            final int scrollY = mScrollY;
+
+            invalidate(dirty.left + scrollX, dirty.top + scrollY,
+                    dirty.right + scrollX, dirty.bottom + scrollY);
             rebuildOutline();
         }
     }
