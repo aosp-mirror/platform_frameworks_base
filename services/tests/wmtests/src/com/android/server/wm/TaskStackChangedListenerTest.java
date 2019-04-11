@@ -207,7 +207,8 @@ public class TaskStackChangedListenerTest {
 
         // Test for onTaskMovedToFront.
         assertEquals(1, taskMovedToFrontLatch.getCount());
-        mService.moveTaskToFront(id, 0, null);
+        mService.moveTaskToFront(null, getInstrumentation().getContext().getPackageName(), id, 0,
+                null);
         waitForCallback(taskMovedToFrontLatch);
         assertEquals(activity.getTaskId(), params[0]);
 
