@@ -455,12 +455,12 @@ public class CachedBluetoothDeviceTest {
         updateProfileStatus(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
         when(mDevice.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
         mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.HEARING_AID);
-        when(mDevice.getMetadata(BluetoothDevice.METADATA_IS_UNTHETHERED_HEADSET)).thenReturn(
-                "true");
-        when(mDevice.getMetadata(BluetoothDevice.METADATA_UNTHETHERED_LEFT_BATTERY)).thenReturn(
-                TWS_BATTERY_LEFT);
-        when(mDevice.getMetadata(BluetoothDevice.METADATA_UNTHETHERED_RIGHT_BATTERY)).thenReturn(
-                TWS_BATTERY_RIGHT);
+        when(mDevice.getMetadata(BluetoothDevice.METADATA_IS_UNTETHERED_HEADSET)).thenReturn(
+                "true".getBytes());
+        when(mDevice.getMetadata(BluetoothDevice.METADATA_UNTETHERED_LEFT_BATTERY)).thenReturn(
+                TWS_BATTERY_LEFT.getBytes());
+        when(mDevice.getMetadata(BluetoothDevice.METADATA_UNTETHERED_RIGHT_BATTERY)).thenReturn(
+                TWS_BATTERY_RIGHT.getBytes());
 
         assertThat(mCachedDevice.getConnectionSummary()).isEqualTo(
                 "Active, L: 15% battery, R: 25% battery");
@@ -472,12 +472,12 @@ public class CachedBluetoothDeviceTest {
         updateProfileStatus(mHfpProfile, BluetoothProfile.STATE_CONNECTED);
         updateProfileStatus(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
         when(mDevice.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
-        when(mDevice.getMetadata(BluetoothDevice.METADATA_IS_UNTHETHERED_HEADSET)).thenReturn(
-                "true");
-        when(mDevice.getMetadata(BluetoothDevice.METADATA_UNTHETHERED_LEFT_BATTERY)).thenReturn(
-                TWS_BATTERY_LEFT);
-        when(mDevice.getMetadata(BluetoothDevice.METADATA_UNTHETHERED_RIGHT_BATTERY)).thenReturn(
-                TWS_BATTERY_RIGHT);
+        when(mDevice.getMetadata(BluetoothDevice.METADATA_IS_UNTETHERED_HEADSET)).thenReturn(
+                "true".getBytes());
+        when(mDevice.getMetadata(BluetoothDevice.METADATA_UNTETHERED_LEFT_BATTERY)).thenReturn(
+                TWS_BATTERY_LEFT.getBytes());
+        when(mDevice.getMetadata(BluetoothDevice.METADATA_UNTETHERED_RIGHT_BATTERY)).thenReturn(
+                TWS_BATTERY_RIGHT.getBytes());
 
         assertThat(mCachedDevice.getConnectionSummary()).isEqualTo(
                 "L: 15% battery, R: 25% battery");
