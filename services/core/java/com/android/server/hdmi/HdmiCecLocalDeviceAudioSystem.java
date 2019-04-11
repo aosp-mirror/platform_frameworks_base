@@ -919,16 +919,12 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
             }
         }
         // Init arc whenever System Audio Mode is on
-        // Terminate arc when System Audio Mode is off
         // Since some TVs don't request ARC on with System Audio Mode on request
         if (SystemProperties.getBoolean(Constants.PROPERTY_ARC_SUPPORT, true)
                 && isDirectConnectToTv()) {
             if (newSystemAudioMode && !isArcEnabled()
                     && !hasAction(ArcInitiationActionFromAvr.class)) {
                 addAndStartAction(new ArcInitiationActionFromAvr(this));
-            } else if (!newSystemAudioMode && isArcEnabled()) {
-                removeAction(ArcTerminationActionFromAvr.class);
-                addAndStartAction(new ArcTerminationActionFromAvr(this));
             }
         }
     }
