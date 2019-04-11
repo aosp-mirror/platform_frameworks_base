@@ -1245,18 +1245,55 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      * when necessary.
      */
     public void logContextCommitted() {
-        mHandler.sendMessage(obtainMessage(
-                Session::doLogContextCommitted, this));
+        mHandler.sendMessage(obtainMessage(Session::handleLogContextCommitted, this));
     }
 
-    private void doLogContextCommitted() {
+    private void handleLogContextCommitted() {
+        final FillResponse lastResponse;
         synchronized (mLock) {
-            logContextCommittedLocked();
+            lastResponse = getLastResponseLocked("logContextCommited()");
+        }
+
+        if (lastResponse == null) {
+            Slog.w(TAG, "handleLogContextCommitted(): last response is null");
+            return;
+        }
+
+        // Merge UserData if necessary.
+        // Fields in packageUserData will override corresponding fields in genericUserData.
+        final UserData genericUserData = mService.getUserData();
+        final UserData packageUserData = lastResponse.getUserData();
+        final FieldClassificationUserData userData;
+        if (packageUserData == null && genericUserData == null) {
+            userData = null;
+        } else if (packageUserData != null && genericUserData != null) {
+            userData = new CompositeUserData(genericUserData, packageUserData);
+        } else if (packageUserData != null) {
+            userData = packageUserData;
+        } else {
+            userData = mService.getUserData();
+        }
+
+        final FieldClassificationStrategy fcStrategy = mService.getFieldClassificationStrategy();
+
+        // Sets field classification scores
+        if (userData != null && fcStrategy != null) {
+            logFieldClassificationScore(fcStrategy, userData);
+        } else {
+            logContextCommitted(null, null);
+        }
+    }
+
+    private void logContextCommitted(@Nullable ArrayList<AutofillId> detectedFieldIds,
+            @Nullable ArrayList<FieldClassification> detectedFieldClassifications) {
+        synchronized (mLock) {
+            logContextCommittedLocked(detectedFieldIds, detectedFieldClassifications);
         }
     }
 
     @GuardedBy("mLock")
-    private void logContextCommittedLocked() {
+    private void logContextCommittedLocked(@Nullable ArrayList<AutofillId> detectedFieldIds,
+            @Nullable ArrayList<FieldClassification> detectedFieldClassifications) {
         final FillResponse lastResponse = getLastResponseLocked("logContextCommited()");
         if (lastResponse == null) return;
 
@@ -1308,21 +1345,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         + "classification ids)");
             }
             return;
-        }
-
-        // Merge UserData if necessary.
-        // Fields in packageUserData will override corresponding fields in genericUserData.
-        final UserData genericUserData = mService.getUserData();
-        final UserData packageUserData = lastResponse.getUserData();
-        final FieldClassificationUserData userData;
-        if (packageUserData == null && genericUserData == null) {
-            userData = null;
-        } else if (packageUserData != null && genericUserData != null) {
-            userData = new CompositeUserData(genericUserData, packageUserData);
-        } else if (packageUserData != null) {
-            userData = packageUserData;
-        } else {
-            userData = mService.getUserData();
         }
 
         for (int i = 0; i < mViewStates.size(); i++) {
@@ -1449,33 +1471,18 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
         }
 
-        // Sets field classification scores
-        final FieldClassificationStrategy fcStrategy = mService.getFieldClassificationStrategy();
-        if (userData != null && fcStrategy != null) {
-            logFieldClassificationScoreLocked(fcStrategy, ignoredDatasets, changedFieldIds,
-                    changedDatasetIds, manuallyFilledFieldIds, manuallyFilledDatasetIds,
-                    userData, mViewStates.values());
-        } else {
-            mService.logContextCommittedLocked(id, mClientState, mSelectedDatasetIds,
-                    ignoredDatasets, changedFieldIds, changedDatasetIds,
-                    manuallyFilledFieldIds, manuallyFilledDatasetIds,
-                    mComponentName, mCompatMode);
-        }
+        mService.logContextCommittedLocked(id, mClientState, mSelectedDatasetIds,
+                ignoredDatasets, changedFieldIds, changedDatasetIds,
+                manuallyFilledFieldIds, manuallyFilledDatasetIds, detectedFieldIds,
+                detectedFieldClassifications, mComponentName, mCompatMode);
     }
 
     /**
      * Adds the matches to {@code detectedFieldsIds} and {@code detectedFieldClassifications} for
      * {@code fieldId} based on its {@code currentValue} and {@code userData}.
      */
-    private void logFieldClassificationScoreLocked(
-            @NonNull FieldClassificationStrategy fcStrategy,
-            @NonNull ArraySet<String> ignoredDatasets,
-            @NonNull ArrayList<AutofillId> changedFieldIds,
-            @NonNull ArrayList<String> changedDatasetIds,
-            @NonNull ArrayList<AutofillId> manuallyFilledFieldIds,
-            @NonNull ArrayList<ArrayList<String>> manuallyFilledDatasetIds,
-            @NonNull FieldClassificationUserData userData,
-            @NonNull Collection<ViewState> viewStates) {
+    private void logFieldClassificationScore(@NonNull FieldClassificationStrategy fcStrategy,
+            @NonNull FieldClassificationUserData userData) {
 
         final String[] userValues = userData.getValues();
         final String[] categoryIds = userData.getCategoryIds();
@@ -1501,6 +1508,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final ArrayList<FieldClassification> detectedFieldClassifications = new ArrayList<>(
                 maxFieldsSize);
 
+        final Collection<ViewState> viewStates;
+        synchronized (mLock) {
+            viewStates = mViewStates.values();
+        }
+
         final int viewsSize = viewStates.size();
 
         // First, we get all scores.
@@ -1516,10 +1528,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final RemoteCallback callback = new RemoteCallback((result) -> {
             if (result == null) {
                 if (sDebug) Slog.d(TAG, "setFieldClassificationScore(): no results");
-                mService.logContextCommittedLocked(id, mClientState, mSelectedDatasetIds,
-                        ignoredDatasets, changedFieldIds, changedDatasetIds,
-                        manuallyFilledFieldIds, manuallyFilledDatasetIds,
-                        mComponentName, mCompatMode);
+                logContextCommitted(null, null);
                 return;
             }
             final Scores scores = result.getParcelable(EXTRA_SCORES);
@@ -1546,7 +1555,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                             final Float currentScore = scoresByField.get(categoryId);
                             if (currentScore != null && currentScore > score) {
                                 if (sVerbose) {
-                                    Slog.v(TAG,  "skipping score " + score
+                                    Slog.v(TAG, "skipping score " + score
                                             + " because it's less than " + currentScore);
                                 }
                                 continue;
@@ -1556,8 +1565,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                                         + autofillId);
                             }
                             scoresByField.put(categoryId, score);
-                        }
-                        else if (sVerbose) {
+                        } else if (sVerbose) {
                             Slog.v(TAG, "skipping score 0 at index " + j + " and id " + autofillId);
                         }
                     }
@@ -1581,10 +1589,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 return;
             }
 
-            mService.logContextCommittedLocked(id, mClientState, mSelectedDatasetIds,
-                    ignoredDatasets, changedFieldIds, changedDatasetIds, manuallyFilledFieldIds,
-                    manuallyFilledDatasetIds, detectedFieldIds, detectedFieldClassifications,
-                    mComponentName, mCompatMode);
+            logContextCommitted(detectedFieldIds, detectedFieldClassifications);
         });
 
         fcStrategy.calculateScores(callback, currentValues, userValues, categoryIds,
