@@ -172,6 +172,7 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <string name="data_connection_5ge" msgid="4699478963278829331">"5Ge"</string>
     <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
     <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
@@ -714,7 +715,7 @@
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Nazaj"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"Obvestila"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"Bližnjične tipke"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="8413348767825486492">"Preklop razporeda tipkovnice"</string>
+    <string name="keyboard_shortcut_group_system_switch_input" msgid="8413348767825486492">"Preklop postavitve tipkovnice"</string>
     <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"Aplikacije"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"Pomoč"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"Brskalnik"</string>

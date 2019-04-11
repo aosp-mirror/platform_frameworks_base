@@ -172,6 +172,8 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <!-- no translation found for data_connection_5ge (4699478963278829331) -->
+    <skip />
     <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
     <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
@@ -497,12 +499,12 @@
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"Hap kredencialet e besuara"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"Administratori yt ka aktivizuar regjistrimin e rrjetit, i cili monitoron trafikun në pajisjen tënde.\n\nPër më shumë informacione, kontakto me administratorin."</string>
-    <string name="monitoring_description_vpn" msgid="4445150119515393526">"I dhe leje një aplikacioni që të konfigurojë një lidhje VPN.\n\nKy aplikacion mund të monitorojë pajisjen tënde dhe aktivitetin e rrjetit, përfshirë mailet, aplikacionet dhe sajtet e uebit."</string>
+    <string name="monitoring_description_vpn" msgid="4445150119515393526">"I dhe leje një aplikacioni që të konfigurojë një lidhje VPN.\n\nKy aplikacion mund të monitorojë pajisjen tënde dhe aktivitetin e rrjetit, përfshirë email-et, aplikacionet dhe sajtet e uebit."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"Profili yt i punës menaxhohet nga <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministratori yt mund të monitorojë aktivitetin tënd të rrjetit, duke përfshirë email-et, aplikacionet dhe sajtet e uebit.\n\nPër më shumë informacion, kontakto me administratorin tënd.\n\nJe i lidhur edhe me një VPN, që mund të monitorojë aktivitetin tënd të rrjetit."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="1828472472674709532">"Je i lidhur me aplikacionin <xliff:g id="APPLICATION">%1$s</xliff:g> i cili mund të monitorojë aktivitetin tënd në rrjet, duke përfshirë mail-et, aplikacionet dhe sajtet e uebit."</string>
-    <string name="monitoring_description_app_personal" msgid="484599052118316268">"Je i lidhur me aplikacionin <xliff:g id="APPLICATION">%1$s</xliff:g>, i cili mund të monitorojë aktivitetin tënd personal në rrjet, përfshirë mailet, aplikacionet dhe sajtet e uebit."</string>
-    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Je i lidhur me aplikacionin <xliff:g id="APPLICATION">%1$s</xliff:g>, i cili mund të monitorojë aktivitetin tënd personal në rrjet, përfshirë mailet, aplikacionet dhe sajtet e uebit."</string>
+    <string name="monitoring_description_app_personal" msgid="484599052118316268">"Je i lidhur me aplikacionin <xliff:g id="APPLICATION">%1$s</xliff:g>, i cili mund të monitorojë aktivitetin tënd personal në rrjet, përfshirë email-et, aplikacionet dhe sajtet e uebit."</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Je i lidhur me aplikacionin <xliff:g id="APPLICATION">%1$s</xliff:g>, i cili mund të monitorojë aktivitetin tënd personal në rrjet, përfshirë email-et, aplikacionet dhe sajtet e uebit."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Profili yt i punës menaxhohet nga <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Profili është i lidhur me <xliff:g id="APPLICATION">%2$s</xliff:g>, i cili mund të monitorojë aktivitetin tënd të punës në rrjet, duke përfshirë mail-et, aplikacionet dhe sajtet e uebit.\n\nPër më shumë informacione, kontakto me administratorin."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Profili yt i punës menaxhohet nga <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Profili është i lidhur me <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, i cili mund të monitorojë aktivitetin tënd të punës në rrjet, duke përfshirë mail-et, aplikacionet dhe sajtet e uebit.\n\nJe lidhur gjithashtu edhe me <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, i cili mund të monitorojë aktivitetin tënd personal në rrjet."</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"Shkyçur për <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>

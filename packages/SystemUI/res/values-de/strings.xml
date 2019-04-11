@@ -172,6 +172,7 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <string name="data_connection_5ge" msgid="4699478963278829331">"5Ge"</string>
     <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
     <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
@@ -840,7 +841,7 @@
     <string name="lockscreen_unlock_right" msgid="1529992940510318775">"Rechte Verknüpfung entsperrt außerdem"</string>
     <string name="lockscreen_none" msgid="4783896034844841821">"Keine"</string>
     <string name="tuner_launch_app" msgid="1527264114781925348">"<xliff:g id="APP">%1$s</xliff:g> starten"</string>
-    <string name="tuner_other_apps" msgid="4726596850501162493">"Weitere Apps"</string>
+    <string name="tuner_other_apps" msgid="4726596850501162493">"Sonstige Apps"</string>
     <string name="tuner_circle" msgid="2340998864056901350">"Kreis"</string>
     <string name="tuner_plus" msgid="6792960658533229675">"Plus"</string>
     <string name="tuner_minus" msgid="4806116839519226809">"Minus"</string>

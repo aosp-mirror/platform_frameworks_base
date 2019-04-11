@@ -26,8 +26,8 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"सूचनाएं"</string>
     <string name="battery_low_title" msgid="9187898087363540349">"बैटरी जल्दी ही खत्म हो जाएगी"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> शेष"</string>
-    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> बची है, आपके इस्तेमाल करने के तरीके के हिसाब से बैटरी लगभग <xliff:g id="TIME">%2$s</xliff:g> चलेगी"</string>
-    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> बची है, बैटरी लगभग <xliff:g id="TIME">%2$s</xliff:g> चलेगी"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> बची है, आपके इस्तेमाल करने के हिसाब से बैटरी करीब <xliff:g id="TIME">%2$s</xliff:g> चलेगी"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> बची है, बैटरी करीब <xliff:g id="TIME">%2$s</xliff:g> चलेगी"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> बैटरी बची है. बैटरी सेवर चालू है."</string>
     <string name="invalid_charger" msgid="2741987096648693172">"यूएसबी के ज़रिए चार्ज नहीं किया जा सकता. अपने डिवाइस के साथ मिलने वाले चार्जर का इस्तेमाल करें."</string>
     <string name="invalid_charger_title" msgid="2836102177577255404">"यूएसबी के ज़रिए चार्ज नहीं किया जा सकता"</string>
@@ -175,6 +175,8 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"एलटीई"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <!-- no translation found for data_connection_5ge (4699478963278829331) -->
+    <skip />
     <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
     <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
@@ -284,8 +286,7 @@
       <item quantity="one">इसमें <xliff:g id="NUMBER_1">%s</xliff:g> और सूचनाएं हैं.</item>
       <item quantity="other">इसमें <xliff:g id="NUMBER_1">%s</xliff:g> और सूचनाएं हैं.</item>
     </plurals>
-    <!-- no translation found for notification_summary_message_format (715071952312553396) -->
-    <skip />
+    <string name="notification_summary_message_format" msgid="715071952312553396">"<xliff:g id="CONTACT_NAME">%1$s</xliff:g>: <xliff:g id="MESSAGE_CONTENT">%2$s</xliff:g>"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"सूचना सेटिंग"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> सेटिंग"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"स्‍क्रीन स्‍वचालित रूप से घूमेगी."</string>
@@ -397,7 +398,7 @@
     <string name="zen_silence_introduction" msgid="3137882381093271568">"इससे अलार्म, संगीत, वीडियो और गेम सहित सभी आवाज़ और कंपन (वाइब्रेशन) रोक दिए जाते हैं."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"कम अत्यावश्यक सूचनाएं नीचे दी गई हैं"</string>
-    <string name="notification_tap_again" msgid="7590196980943943842">"खोलने के लिए पुन: टैप करें"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"खोलने के लिए फिर से टैप करें"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"अनलॉक करने के लिए ऊपर स्वाइप करें"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"इस डिवाइस का प्रबंधन आपका संगठन करता है"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"इस डिवाइस के प्रबंधक <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> हैं"</string>
@@ -427,7 +428,7 @@
     <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"अतिथि को निकालें?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"इस सत्र के सभी ऐप्स और डेटा को हटा दिया जाएगा."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"निकालें"</string>
-    <string name="guest_wipe_session_title" msgid="6419439912885956132">"अतिथि, आपका पुन: स्वागत है!"</string>
+    <string name="guest_wipe_session_title" msgid="6419439912885956132">"अतिथि, आपका फिर से स्वागत है!"</string>
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"क्‍या आप अपना सत्र जारी रखना चाहते हैं?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"फिर से शुरू करें"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"हां, जारी रखें"</string>
@@ -611,7 +612,7 @@
     <string name="activity_not_found" msgid="348423244327799974">"ऐप्लिकेशन आपके डिवाइस पर इंस्टॉल नहीं है"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"घड़ी के सेकंड दिखाएं"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"स्टेटस बार में सेकंड में समय दिखाएं. इससे बैटरी लाइफ़ पर असर पड़ सकता है."</string>
-    <string name="qs_rearrange" msgid="8060918697551068765">"त्वरित सेटिंग को पुन: व्यवस्थित करें"</string>
+    <string name="qs_rearrange" msgid="8060918697551068765">"त्वरित सेटिंग को फिर से व्यवस्थित करें"</string>
     <string name="show_brightness" msgid="6613930842805942519">"त्वरित सेटिंग में स्क्रीन की रोशनी दिखाएं"</string>
     <string name="experimental" msgid="6198182315536726162">"प्रयोगात्मक"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"ब्लूटूथ चालू करें?"</string>
@@ -632,32 +633,26 @@
     <string name="notification_channel_unsilenced" msgid="4790904571552394137">"ये सूचनाएं आपको अलर्ट करेंगी"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"अाप अक्सर इन सूचनाओं को खारिज कर देते हैं. \nआगे भी इन्हें देखना जारी रखना चाहते हैं?"</string>
     <string name="inline_done_button" msgid="492513001558716452">"हो गया"</string>
-    <!-- no translation found for inline_ok_button (975600017662930615) -->
-    <skip />
+    <string name="inline_ok_button" msgid="975600017662930615">"लागू करें"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"ये सूचनाएं दिखाना जारी रखें?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"सूचनाएं दिखाना बंद करें"</string>
     <string name="inline_deliver_silently_button" msgid="7756289895745629140">"बिना आवाज़ के भेजें"</string>
     <string name="inline_block_button" msgid="8735843688021655065">"ब्लॉक करें"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"दिखाना जारी रखें"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"सूचनाएं छोटी करें"</string>
-    <!-- no translation found for inline_silent_button_silent (6904727667411781466) -->
-    <skip />
+    <string name="inline_silent_button_silent" msgid="6904727667411781466">"बिना आवाज़ के"</string>
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"साइलेंट मोड में सूचनाएं पाएं"</string>
-    <!-- no translation found for inline_silent_button_alert (2449191160203602471) -->
-    <skip />
+    <string name="inline_silent_button_alert" msgid="2449191160203602471">"आवाज़ वाली सूचनाएं"</string>
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"सूचना देना जारी रखें"</string>
-    <!-- no translation found for inline_turn_off_notifications (8635596135532202355) -->
-    <skip />
+    <string name="inline_turn_off_notifications" msgid="8635596135532202355">"सूचनाएं बंद करें"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"इस ऐप्लिकेशन से जुड़ी सूचनाएं दिखाना जारी रखें?"</string>
     <!-- no translation found for hint_text_block (3554459167504485284) -->
     <skip />
     <!-- no translation found for hint_text_silent (859468056340177016) -->
     <skip />
-    <!-- no translation found for hint_text_alert (2721169810318722524) -->
-    <skip />
+    <string name="hint_text_alert" msgid="2721169810318722524">"यह सूचनाएं आवाज़ करेंगी और सूचना की दराज, स्टेटस बार और लॉक स्क्रीन में दिखाई देंगी"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"ये सूचनाएं दिखाया जाना बंद नहीं किया जा सकता"</string>
-    <!-- no translation found for notification_multichannel_desc (4695920306092240550) -->
-    <skip />
+    <string name="notification_multichannel_desc" msgid="4695920306092240550">"सूचनाओं के इस समूह को यहां कॉन्फ़िगर नहीं किया जा सकता"</string>
     <string name="notification_delegate_header" msgid="9167022191405284627">"<xliff:g id="APP_NAME">%1$s</xliff:g> के ज़रिए"</string>
     <string name="appops_camera" msgid="8100147441602585776">"यह ऐप्लिकेशन कैमरे का इस्तेमाल कर रहा है."</string>
     <string name="appops_microphone" msgid="741508267659494555">"यह ऐप्लिकेशन माइक्रोफ़ोन का इस्तेमाल कर रहा है."</string>
