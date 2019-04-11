@@ -2545,8 +2545,8 @@ public class ChooserActivity extends ResolverActivity {
 
             if (isDirectShare) {
                 DirectShareViewHolder dsvh = (DirectShareViewHolder) holder;
-                setViewHeight(dsvh.getRow(0), holder.getMeasuredRowHeight());
-                setViewHeight(dsvh.getRow(1), holder.getMeasuredRowHeight());
+                setViewHeight(dsvh.getRow(0), dsvh.getMinRowHeight());
+                setViewHeight(dsvh.getRow(1), dsvh.getMinRowHeight());
             }
 
             viewGroup.setTag(holder);
@@ -2828,6 +2828,10 @@ public class ChooserActivity extends ResolverActivity {
             return mDirectShareCurrHeight;
         }
 
+        public int getMinRowHeight() {
+            return mDirectShareMinHeight;
+        }
+
         public void setViewVisibility(int i, int visibility) {
             final View v = getView(i);
             if (visibility == View.VISIBLE) {
@@ -2850,15 +2854,20 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         public void handleScroll(AbsListView view, int y, int oldy, int maxTargetsPerRow) {
-            if (mHideDirectShareExpansion) {
-                return;
-            }
+            // only exit early if fully collapsed, otherwise onListRebuilt() with shifting
+            // targets can lock us into an expanded mode
+            boolean notExpanded = mDirectShareCurrHeight == mDirectShareMinHeight;
+            if (notExpanded) {
+                if (mHideDirectShareExpansion) {
+                    return;
+                }
 
-            // only expand if we have more than maxTargetsPerRow, and delay that decision
-            // until they start to scroll
-            if (mChooserListAdapter.getSelectableServiceTargetCount() <= maxTargetsPerRow) {
-                mHideDirectShareExpansion = true;
-                return;
+                // only expand if we have more than maxTargetsPerRow, and delay that decision
+                // until they start to scroll
+                if (mChooserListAdapter.getSelectableServiceTargetCount() <= maxTargetsPerRow) {
+                    mHideDirectShareExpansion = true;
+                    return;
+                }
             }
 
             int yDiff = (int) ((oldy - y) * DIRECT_SHARE_EXPANSION_RATE);
