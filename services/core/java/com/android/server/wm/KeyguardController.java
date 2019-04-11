@@ -294,7 +294,16 @@ class KeyguardController {
     /**
      * Called when occluded state changed.
      */
-    private void handleOccludedChanged() {
+    private void handleOccludedChanged(int displayId) {
+        // TODO(b/113840485): Handle app transition for individual display, and apply occluded
+        // state change to secondary displays.
+        // For now, only default display fully supports occluded change. Other displays only
+        // updates keygaurd sleep token on that display.
+        if (displayId != DEFAULT_DISPLAY) {
+            updateKeyguardSleepToken(displayId);
+            return;
+        }
+
         mWindowManager.onKeyguardOccludedChanged(isDisplayOccluded(DEFAULT_DISPLAY));
         if (isKeyguardLocked()) {
             mWindowManager.deferSurfaceLayout();
@@ -303,7 +312,7 @@ class KeyguardController {
                         .prepareAppTransition(resolveOccludeTransit(),
                                 false /* alwaysKeepCurrent */, 0 /* flags */,
                                 true /* forceOverride */);
-                updateKeyguardSleepToken();
+                updateKeyguardSleepToken(DEFAULT_DISPLAY);
                 mRootActivityContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
                 mWindowManager.executeAppTransition();
             } finally {
@@ -395,13 +404,16 @@ class KeyguardController {
         for (int displayNdx = mRootActivityContainer.getChildCount() - 1;
              displayNdx >= 0; displayNdx--) {
             final ActivityDisplay display = mRootActivityContainer.getChildAt(displayNdx);
-            final int displayId = display.mDisplayId;
-            final KeyguardDisplayState state = getDisplay(displayId);
-            if (isKeyguardUnoccludedOrAodShowing(displayId) && state.mSleepToken == null) {
-                state.acquiredSleepToken();
-            } else if (!isKeyguardUnoccludedOrAodShowing(displayId) && state.mSleepToken != null) {
-                state.releaseSleepToken();
-            }
+            updateKeyguardSleepToken(display.mDisplayId);
+        }
+    }
+
+    private void updateKeyguardSleepToken(int displayId) {
+        final KeyguardDisplayState state = getDisplay(displayId);
+        if (isKeyguardUnoccludedOrAodShowing(displayId) && state.mSleepToken == null) {
+            state.acquiredSleepToken();
+        } else if (!isKeyguardUnoccludedOrAodShowing(displayId) && state.mSleepToken != null) {
+            state.releaseSleepToken();
         }
     }
 
@@ -483,11 +495,8 @@ class KeyguardController {
                 mOccluded |= controller.mWindowManager.isShowingDream();
             }
 
-            // TODO(b/113840485): Handle app transition for individual display, and apply occluded
-            // state change to secondary displays.
-            // For now, only default display can change occluded.
-            if (lastOccluded != mOccluded && mDisplayId == DEFAULT_DISPLAY) {
-                controller.handleOccludedChanged();
+            if (lastOccluded != mOccluded) {
+                controller.handleOccludedChanged(mDisplayId);
             }
             if (lastDismissActivity != mDismissingKeyguardActivity && !mOccluded
                     && mDismissingKeyguardActivity != null
