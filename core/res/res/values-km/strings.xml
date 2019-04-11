@@ -578,7 +578,7 @@
     <string name="face_error_hw_not_available" msgid="396883585636963908">"មិនអាច​ផ្ទៀងផ្ទាត់​មុខបានទេ។ មិនមាន​ហាតវែរទេ។"</string>
     <string name="face_error_timeout" msgid="2605673935810019129">"ការសម្គាល់​មុខ​បាន​អស់ម៉ោង។ សូមព្យាយាមម្ដងទៀត។"</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"មិនអាច​ផ្ទុកទិន្នន័យទម្រង់​មុខថ្មី​បានទេ។ សូមលុបទិន្នន័យទម្រង់​មុខចាស់ជាមុនសិន។"</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"បាន​បោះបង់​ប្រតិបត្តិការចាប់​ទម្រង់មុខ។"</string>
+    <string name="face_error_canceled" msgid="2768146728600802422">"បាន​បោះបង់​ប្រតិបត្តិការចាប់​ទម្រង់មុខ"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"ការផ្ទៀងផ្ទាត់មុខ​ត្រូវបានបោះបង់​ដោយអ្នកប្រើប្រាស់"</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"ព្យាយាមចូលច្រើនពេកហើយ។ សូមព្យាយាមម្តងទៀតពេលក្រោយ។"</string>
     <string name="face_error_lockout_permanent" msgid="3485837851962070925">"ព្យាយាមចូលច្រើនពេក។ បានបិទ​ការផ្ទៀងផ្ទាត់មុខ។"</string>

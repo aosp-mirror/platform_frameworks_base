@@ -302,12 +302,9 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"மைக்ரோஃபோன்"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ஒலிப் பதிவு செய்யலாம்"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"ஆடியோவைப் பதிவு செய்ய &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; பயன்பாட்டை அனுமதிக்கவா?"</string>
-    <!-- no translation found for permgrouplab_activityRecognition (1565108047054378642) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_activityRecognition (6949472038320473478) -->
-    <skip />
-    <!-- no translation found for permgrouprequest_activityRecognition (7626438016904799383) -->
-    <skip />
+    <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"உடல் செயல்பாடுகள்"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"உடல் செயல்பாட்டைக் கண்காணிக்கும்"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"உடல் செயல்பாட்டைக் கண்காணிக்க &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ஆப்ஸை அனுமதிக்கவா?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"கேமரா"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"படங்கள் மற்றும் வீடியோக்கள் எடுக்கலாம்"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"படங்கள் எடுக்கவும், வீடியோ பதிவு செய்யவும் &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ஆப்ஸை அனுமதிக்கவா?"</string>
@@ -530,8 +527,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"உங்களின் படத் தொகுப்பை மாற்ற ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"மீடியா தொகுப்பிலிருந்து இடங்களை அறிதல்"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"உங்களின் மீடியா தொகுப்பிலிருந்து இடங்களை அறிந்துகொள்ள ஆப்ஸை அனுமதிக்கும்."</string>
-    <!-- no translation found for biometric_dialog_default_title (881952973720613213) -->
-    <skip />
+    <string name="biometric_dialog_default_title" msgid="881952973720613213">"நீங்கள்தான் என உறுதிசெய்க"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"பயோமெட்ரிக் வன்பொருள் இல்லை"</string>
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"அங்கீகரிப்பு ரத்தானது"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"அடையாளங்காணபடவில்லை"</string>
@@ -604,25 +600,18 @@
     <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
-    <!-- no translation found for face_error_hw_not_available (396883585636963908) -->
-    <skip />
+    <string name="face_error_hw_not_available" msgid="396883585636963908">"முகத்தைச் சரிபார்க்க இயலவில்லை. வன்பொருள் இல்லை."</string>
     <!-- no translation found for face_error_timeout (2605673935810019129) -->
     <skip />
-    <!-- no translation found for face_error_no_space (2712120617457553825) -->
-    <skip />
-    <!-- no translation found for face_error_canceled (2768146728600802422) -->
-    <skip />
-    <!-- no translation found for face_error_user_canceled (9003022830076496163) -->
-    <skip />
+    <string name="face_error_no_space" msgid="2712120617457553825">"புதிய முகங்களைச் சேர்க்க இயலவில்லை. பழையது ஒன்றை நீக்கவும்."</string>
+    <string name="face_error_canceled" msgid="2768146728600802422">"முக அங்கீகாரச் செயல்பாடு ரத்துசெய்யப்பட்டது"</string>
+    <string name="face_error_user_canceled" msgid="9003022830076496163">"முக அங்கீகாரம் பயனரால் ரத்துசெய்யப்பட்டது"</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"பலமுறை முயன்றுவிட்டீர்கள். பிறகு முயலவும்."</string>
-    <!-- no translation found for face_error_lockout_permanent (3485837851962070925) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"பலமுறை முயன்றுவிட்டீர்கள். முக அங்கீகாரம் முடக்கப்பட்டது."</string>
     <!-- no translation found for face_error_unable_to_process (4940944939691171539) -->
     <skip />
-    <!-- no translation found for face_error_not_enrolled (2600952202843125796) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (1317845121210260372) -->
-    <skip />
+    <string name="face_error_not_enrolled" msgid="2600952202843125796">"முக அங்கீகாரத்தை இன்னும் நீங்கள் அமைக்கவில்லை"</string>
+    <string name="face_error_hw_not_present" msgid="1317845121210260372">"இந்தச் சாதனத்தில் முக அங்கீகாரம் ஆதரிக்கப்படவில்லை"</string>
     <string name="face_name_template" msgid="7004562145809595384">"முகம் <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1246,10 +1235,8 @@
     <string name="dump_heap_title" msgid="5864292264307651673">"ஹீப் டம்பைப் பகிரவா?"</string>
     <!-- no translation found for dump_heap_text (8546022920319781701) -->
     <skip />
-    <!-- no translation found for dump_heap_system_text (3236094872980706024) -->
-    <skip />
-    <!-- no translation found for dump_heap_ready_text (1778041771455343067) -->
-    <skip />
+    <string name="dump_heap_system_text" msgid="3236094872980706024">"<xliff:g id="SIZE">%2$s</xliff:g> அளவான தனது நினைவக வரம்பை <xliff:g id="PROC">%1$s</xliff:g> செயலாக்கம் மீறியுள்ளது. உங்களுக்கான ஹீப் டம்ப் பகிர்வதற்குக் கிடைக்கிறது. கவனத்திற்கு: நீங்கள் உள்ளிட்டவை உட்பட செயலாக்கத்திற்கு அணுகலுள்ள தனிப்பட்ட தகவல்கள் இந்த ஹீப் டம்பில் இருக்கக்கூடும்"</string>
+    <string name="dump_heap_ready_text" msgid="1778041771455343067">"<xliff:g id="PROC">%1$s</xliff:g> செயலாக்கத்திற்கான ஹீப் டம்ப் நீங்கள் பகிர்வதற்குக் கிடைக்கிறது. கவனத்திற்கு: நீங்கள் உள்ளிட்டவை உட்பட செயலாக்கத்திற்கு அணுகலுள்ள தனிப்பட்ட தகவல்கள் இந்த ஹீப் டம்பில் இருக்கக்கூடும்."</string>
     <string name="sendText" msgid="5209874571959469142">"உரைக்கான செயலைத் தேர்வுசெய்யவும்"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"ரிங்கரின் ஒலியளவு"</string>
     <string name="volume_music" msgid="5421651157138628171">"மீடியாவின் ஒலியளவு"</string>
@@ -1656,10 +1643,8 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"மேலோட்ட #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", பாதுகாப்பானது"</string>
-    <!-- no translation found for activity_starter_block_bg_activity_starts_permissive (6995473033438879646) -->
-    <skip />
-    <!-- no translation found for activity_starter_block_bg_activity_starts_enforcing (3317816771072146229) -->
-    <skip />
+    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="6995473033438879646">"<xliff:g id="PACKAGENAME">%1$s</xliff:g>மின் \'பின்னணிச் செயல்பாடுத் தொடக்கம்\' இனிவரும் Q பதிப்புகளில் தடுக்கப்படும். g.co/dev/bgblock என்ற இணைப்பைப் பார்க்கவும்."</string>
+    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="3317816771072146229">"<xliff:g id="PACKAGENAME">%1$s</xliff:g>மில் \'பின்னணிச் செயல்பாட்டுத் தொடக்கம்\' தடுக்கப்பட்டுள்ளது. g.co/dev/bgblock என்ற இணைப்பைப் பார்க்கவும்."</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"வடிவத்தை மறந்துவிட்டீர்களா"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"தவறான வடிவம்"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"தவறான கடவுச்சொல்"</string>
@@ -1965,7 +1950,7 @@
     <string name="conference_call" msgid="3751093130790472426">"குழு அழைப்பு"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"உதவிக்குறிப்பு"</string>
     <string name="app_category_game" msgid="5431836943981492993">"கேம்ஸ்"</string>
-    <string name="app_category_audio" msgid="1659853108734301647">"இசையும் ஆடியோவும்"</string>
+    <string name="app_category_audio" msgid="1659853108734301647">"இசை &amp; ஆடியோ"</string>
     <string name="app_category_video" msgid="2728726078629384196">"திரைப்படங்களும் வீடியோவும்"</string>
     <string name="app_category_image" msgid="4867854544519846048">"புகைப்படங்களும் படங்களும்"</string>
     <string name="app_category_social" msgid="5842783057834965912">"சமூகமும் தகவல்தொடர்பும்"</string>

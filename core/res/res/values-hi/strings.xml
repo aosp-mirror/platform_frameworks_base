@@ -160,15 +160,15 @@
     <string name="httpErrorAuth" msgid="1435065629438044534">"प्रमाणीकृत नहीं किया जा सका."</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"प्रॉक्‍सी सर्वर द्वारा प्रमाणीकरण असफल था."</string>
     <string name="httpErrorConnect" msgid="8714273236364640549">"सर्वर से कनेक्ट नहीं किया जा सका."</string>
-    <string name="httpErrorIO" msgid="2340558197489302188">"सर्वर से संचार नहीं किया जा सका. बाद में पुन: प्रयास करें."</string>
-    <string name="httpErrorTimeout" msgid="4743403703762883954">"सर्वर से कनेक्‍शन का समय समाप्त हुआ."</string>
+    <string name="httpErrorIO" msgid="2340558197489302188">"सर्वर से संचार नहीं किया जा सका. बाद में फिर से प्रयास करें."</string>
+    <string name="httpErrorTimeout" msgid="4743403703762883954">"सर्वर से कनेक्‍शन का समय खत्म हुआ."</string>
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"पेज में कई ऐसे कई वेबलिंक हैं जो दूसरे सर्वर पर ले जाते हैं."</string>
     <string name="httpErrorUnsupportedScheme" msgid="5015730812906192208">"प्रोटोकॉल समर्थित नहीं है."</string>
     <string name="httpErrorFailedSslHandshake" msgid="96549606000658641">"सुरक्षित कनेक्शन स्थापित नहीं किया जा सका."</string>
     <string name="httpErrorBadUrl" msgid="3636929722728881972">"यूआरएल गलत होने की वजह से पेज नहीं खोला जा सका."</string>
     <string name="httpErrorFile" msgid="2170788515052558676">"फ़ाइल पर नहीं पहुंचा जा सका."</string>
     <string name="httpErrorFileNotFound" msgid="6203856612042655084">"अनुरोधित फ़ाइल नहीं मिल सकी."</string>
-    <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"बहुत सारे अनुरोधों का संसाधन हो रहा है. बाद में पुन: प्रयास करें."</string>
+    <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"बहुत सारे अनुरोधों का संसाधन हो रहा है. बाद में फिर से प्रयास करें."</string>
     <string name="notification_title" msgid="8967710025036163822">"<xliff:g id="ACCOUNT">%1$s</xliff:g> के लिए प्रवेश गड़बड़ी"</string>
     <string name="contentServiceSync" msgid="8353523060269335667">"समन्वयन"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="7036196943673524858">"सिंक नहीं किया जा सकता"</string>
@@ -234,7 +234,7 @@
     <skip />
     <string name="bugreport_message" msgid="398447048750350456">"इससे ईमेल भेजने के लिए, आपके डिवाइस की मौजूदा स्थिति से जुड़ी जानकारी इकट्ठा की जाएगी. गड़बड़ी की रिपोर्ट बनना शुरू होने से लेकर भेजने के लिए तैयार होने तक कुछ समय लगेगा; कृपया इंतज़ार करें."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"सहभागी रिपोर्ट"</string>
-    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"अधिकांश परिस्थितियों में इसका उपयोग करें. यह आपको रिपोर्ट की प्रगति ट्रैक करने देता है, समस्या के बारे में अधिक विवरण डालने देता है और स्क्रीनशॉट लेने देता है. यह आपको ऐसे कम उपयोग किए गए अनुभाग मिटाने दे सकता है जिनकी रिपोर्ट करने में अधिक समय लगता है."</string>
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"ज़्यादातर परिस्थितियों में इसका उपयोग करें. यह आपको रिपोर्ट की प्रगति ट्रैक करने देता है, समस्या के बारे में अधिक विवरण डालने देता है और स्क्रीनशॉट लेने देता है. यह आपको ऐसे कम उपयोग किए गए अनुभाग मिटाने दे सकता है जिनकी रिपोर्ट करने में अधिक समय लगता है."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"पूर्ण रिपोर्ट"</string>
     <string name="bugreport_option_full_summary" msgid="7210859858969115745">"जब आपका डिवाइस ठीक से काम नहीं कर रहा हो या बहुत धीमा हो या जब आपको रिपोर्ट के सभी भागों की ज़रूरत हो, तो सिस्टम से कम से कम रोक-टोक के लिए इस विकल्प का इस्तेमाल करें. यह आपको ज़्यादा जानकारी डालने या अतिरिक्त स्क्रीनशॉट लेने नहीं देता."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
@@ -283,7 +283,7 @@
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; को अपने संपर्क देखने की अनुमति देना चाहते हैं?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"जगह"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"इस डिवाइस की जगह तक पहुंचने दें"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; को इस डिवाइस की \'जगह की जानकारी\' ऐक्सेस करने की अनुमति देना चाहते हैं?"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; को इस डिवाइस की \'जगह की जानकारी\' एक्सेस करने की अनुमति देना चाहते हैं?"</string>
     <!-- no translation found for permgrouprequestdetail_location (1347189607421252902) -->
     <skip />
     <!-- no translation found for permgroupbackgroundrequest_location (5039063878675613235) -->
@@ -366,12 +366,12 @@
     <string name="permdesc_getTasks" msgid="7454215995847658102">"ऐप को माजूदा समय में और हाल ही में चल रही कार्रवाइयों के बारे में जानकारी निकालने देता है. इससे ऐप डिवाइस पर इस्तेमाल किए गए ऐप के बारे में जानकारी खोज सकता है."</string>
     <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"प्रोफ़ाइल और डिवाइस स्‍वामियों को प्रबंधित करें"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"ऐप्‍स को प्रोफ़ाइल स्‍वामी और डिवाइस स्‍वामी सेट करने दें."</string>
-    <string name="permlab_reorderTasks" msgid="2018575526934422779">"चल रहे ऐप्स पुन: क्रमित करें"</string>
+    <string name="permlab_reorderTasks" msgid="2018575526934422779">"चल रहे ऐप्स फिर से क्रमित करें"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"ऐप्स  को कार्यों को अग्रभूमि और पृष्‍ठभूमि पर ले जाने देता है. ऐप्स  आपके इनपुट के बिना यह कर सकता है."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"कार मोड चालू करें"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"ऐप्स  को कार मोड सक्षम करने देता है."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"अन्‍य ऐप्स बंद करें"</string>
-    <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"ऐप्स  को अन्‍य ऐप्स की पृष्ठभूमि प्रक्रियाओं को समाप्त करने देता है. यह अन्य ऐप्स  का चलना रोक सकता है."</string>
+    <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"ऐप्स  को अन्‍य ऐप्स की पृष्ठभूमि प्रक्रियाओं को खत्म करने देता है. यह अन्य ऐप्स  का चलना रोक सकता है."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"यह ऐप्लिकेशन दूसरे ऐप्लिकेशन के ऊपर दिखाई दे सकता है"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"यह ऐप्लिकेशन, दूसरे ऐप्लिकेशन के ऊपर या स्क्रीन के अन्य भागों पर दिखाई दे सकता है. इससे ऐप्लिकेशन के सामान्य उपयोग में बाधा आ सकती है और दूसरे ऐप्लिकेशन के दिखाई देने के तरीकों में बदलाव हो सकता है."</string>
     <string name="permlab_runInBackground" msgid="7365290743781858803">"बैकग्राउंड में चलता है"</string>
@@ -389,13 +389,13 @@
     <string name="permlab_writeSettings" msgid="2226195290955224730">"सिस्‍टम सेटिंग बदलें"</string>
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"ऐप्स  को सिस्टम सेटिंग डेटा संशोधित करने देता है. दुर्भावनापूर्ण ऐप्स  आपके सिस्टम के कॉन्फ़िगरेशन को दूषित कर सकते हैं."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"प्रारंभ होने पर चलाएं"</string>
-    <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"ऐप्स  को सिस्टम द्वारा बूटिंग पूर्ण करते ही स्वतः आरंभ करने देता है. इससे टैबलेट को आरंभ होने में अधिक समय लग सकता है और ऐप्स  को निरंतर चलाकर संपूर्ण टैबलेट को धीमा करने देता है."</string>
+    <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"ऐप्स  को सिस्टम द्वारा बूटिंग पूर्ण करते ही अपने आप आरंभ करने देता है. इससे टैबलेट को आरंभ होने में अधिक समय लग सकता है और ऐप्स  को निरंतर चलाकर संपूर्ण टैबलेट को धीमा करने देता है."</string>
     <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"सिस्‍टम के चालू होते ही ऐप को अपने आप शुरू होने देती है. इससे टीवी को चालू होने में ज़्यादा समय लग सकता है और ऐप के लगातार चलते रहने से पूरा टैबलेट धीमा हो सकता है."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"सिस्‍टम के चालू होते ही ऐप को अपने आप शुरू होने देती है. इससे फ़ोन को चालू होने में ज़्यादा समय लग सकता है और ऐप के लगातार चलते रहने से पूरा फ़ोन धीमा हो सकता है."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"स्टिकी प्रसारण भेजें"</string>
-    <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"ऐप्स को स्‍टिकी प्रसारण भेजने देता है, जो प्रसारण समाप्त होने के बाद भी बने रहते हैं. अत्यधिक उपयोग, टैबलेट की बहुत अधिक मेमोरी का उपयोग करके उसे धीमा या अस्‍थिर कर सकता है."</string>
+    <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"ऐप्स को स्‍टिकी प्रसारण भेजने देता है, जो प्रसारण खत्म होने के बाद भी बने रहते हैं. अत्यधिक उपयोग, टैबलेट की बहुत अधिक मेमोरी का उपयोग करके उसे धीमा या अस्‍थिर कर सकता है."</string>
     <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"ऐप को स्‍िटकी प्रसारण भेजने देती है, जो प्रसारण बंद होने के बाद भी बने रहते हैं. अत्‍यधिक उपयोग से टीवी धीमा या अस्‍थिर हो सकता है जिससे वह बहुत सारी मेमोरी का उपयोग कर सकता है."</string>
-    <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"ऐप्स को स्‍टिकी प्रसारण भेजने देता है, जो प्रसारण समाप्त होने के बाद भी बने रहते हैं. अत्यधिक उपयोग, फ़ोन की बहुत अधिक मेमोरी का उपयोग करके उसे धीमा या अस्‍थिर कर सकता है."</string>
+    <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"ऐप्स को स्‍टिकी प्रसारण भेजने देता है, जो प्रसारण खत्म होने के बाद भी बने रहते हैं. अत्यधिक उपयोग, फ़ोन की बहुत अधिक मेमोरी का उपयोग करके उसे धीमा या अस्‍थिर कर सकता है."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"अपने संपर्क पढ़ें"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"ऐप को आपके टैबलेट पर मौजूद आपके संपर्कों का डेटा पढ़ने देती है, जिसमें ये भी शामिल है कि आपने कुछ ख़ास लोगों से कितनी बार कॉल, ईमेल, या कुछ और तरीकों से बातचीत की. यह अनुमति ऐप को आपका संपर्क डेटा सेव करने देती है और धोखा देने वाले ऐप संपर्क डेटा को आपकी जानकारी के बिना शेयर कर सकते हैं."</string>
     <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"ऐप को आपके टीवी पर मौजूद आपके संपर्कों का डेटा पढ़ने देती है, जिसमें ये भी शामिल है कि आपने कुछ ख़ास लोगों से कितनी बार कॉल, ईमेल, या कुछ और तरीकों से बातचीत की. यह अनुमति ऐप को आपका संपर्क डेटा सेव करने देती है और धोखा देने वाले ऐप संपर्क डेटा को आपकी जानकारी के बिना शेयर कर सकते हैं."</string>
@@ -511,7 +511,7 @@
     <string name="permlab_nfc" msgid="4423351274757876953">"नियर फ़ील्‍ड कम्‍यूनिकेशन नियंत्रित करें"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"ऐप्स  को नियर फ़ील्ड कम्यूनिकेशन (NFC) टैग, कार्ड, और रीडर के साथ संचार करने देता है."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"अपना स्‍क्रीन लॉक अक्षम करें"</string>
-    <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"ऐप्स को कीलॉक और कोई भी संबद्ध पासवर्ड सुरक्षा अक्षम करने देता है. उदाहरण के लिए, इनकमिंग फ़ोन कॉल प्राप्त करते समय फ़ोन, कीलॉक को अक्षम कर देता है, फिर कॉल समाप्त होने पर कीलॉक को पुन: सक्षम कर देता है."</string>
+    <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"ऐप्स को कीलॉक और कोई भी संबद्ध पासवर्ड सुरक्षा अक्षम करने देता है. उदाहरण के लिए, इनकमिंग फ़ोन कॉल प्राप्त करते समय फ़ोन, कीलॉक को अक्षम कर देता है, फिर कॉल खत्म होने पर कीलॉक को फिर से सक्षम कर देता है."</string>
     <!-- no translation found for permlab_requestPasswordComplexity (202650535669249674) -->
     <skip />
     <!-- no translation found for permdesc_requestPasswordComplexity (4730994229754212347) -->
@@ -530,15 +530,14 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"इससे ऐप्लिकेशन को आपके फ़ोटो संग्रह में बदलाव करने की मंज़ूरी दी जाती है."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"अपने मीडिया संग्रह से जगह की जानकारी एक्सेस करने की अनुमति दें"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"इससे ऐप्लिकेशन को आपके मीडिया संग्रह से जगह की जानकारी एक्सेस करने की अनुमति दी जाती है."</string>
-    <!-- no translation found for biometric_dialog_default_title (881952973720613213) -->
-    <skip />
+    <string name="biometric_dialog_default_title" msgid="881952973720613213">"अपनी पहचान की पुष्टि करें"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"बायोमेट्रिक हार्डवेयर उपलब्ध नहीं है"</string>
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"प्रमाणीकरण रद्द किया गया"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"पहचान नहीं हो पाई"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"प्रमाणीकरण रद्द किया गया"</string>
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"पिन, पैटर्न या पासवर्ड सेट नहीं है"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"आंशिक फ़िंगरप्रिंट की पहचान की गई. कृपया पुनः प्रयास करें."</string>
-    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"फ़िंगरप्रिंट संसाधित नहीं हो सका. कृपया पुन: प्रयास करें."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"फ़िंगरप्रिंट संसाधित नहीं हो सका. कृपया फिर से प्रयास करें."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"फ़िंगरप्रिंट सेंसर गंदा है. कृपया साफ़ करें और फिर कोशिश करें."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"उंगली बहुत तेज़ी से चलाई गई है. कृपया फिर से कोशिश करें."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"उंगली बहुत धीरे चलाई गई. कृपया फिर से कोशिश करें."</string>
@@ -549,12 +548,12 @@
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"चेहरे की पहचान की गई, कृपया पुष्टि बटन दबाएं"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"फ़िंगरप्रिंट हार्डवेयर उपलब्ध नहीं है."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"फ़िंगरप्रिंट को संग्रहित नहीं किया जा सका. कृपया कोई मौजूदा फ़िंगरप्रिंट निकालें."</string>
-    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"फ़िंगरप्रिंट का समय समाप्त हो गया. पुनः प्रयास करें."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"फ़िंगरप्रिंट का समय खत्म हो गया. पुनः प्रयास करें."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"फ़िंगरप्रिंट क्रियान्वयन रोक दिया गया."</string>
     <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"उपयोगकर्ता ने फिंगरप्रिंट की पुष्टि की कार्रवाई रद्द कर दी है."</string>
-    <string name="fingerprint_error_lockout" msgid="5536934748136933450">"बहुत अधिक प्रयास कर लिए गए हैं. बाद में पुन: प्रयास करें."</string>
+    <string name="fingerprint_error_lockout" msgid="5536934748136933450">"बहुत अधिक प्रयास कर लिए गए हैं. बाद में फिर से प्रयास करें."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"बहुत अधिक कोशिशें. फ़िंगरप्रिंट सेंसर अक्षम है."</string>
-    <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"पुन: प्रयास करें."</string>
+    <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"फिर से प्रयास करें."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"कोई फ़िंगरप्रिंट रजिस्टर नहीं किया गया है."</string>
     <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"इस डिवाइस में फ़िंगरप्रिंट सेंसर नहीं है."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"फ़िंगरप्रिंट <xliff:g id="FINGERID">%d</xliff:g>"</string>
@@ -604,25 +603,18 @@
     <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
-    <!-- no translation found for face_error_hw_not_available (396883585636963908) -->
-    <skip />
+    <string name="face_error_hw_not_available" msgid="396883585636963908">"चेहरा नहीं पहचान पा रहे. हार्डवेयर उपलब्ध नहीं है."</string>
     <!-- no translation found for face_error_timeout (2605673935810019129) -->
     <skip />
-    <!-- no translation found for face_error_no_space (2712120617457553825) -->
-    <skip />
-    <!-- no translation found for face_error_canceled (2768146728600802422) -->
-    <skip />
-    <!-- no translation found for face_error_user_canceled (9003022830076496163) -->
-    <skip />
+    <string name="face_error_no_space" msgid="2712120617457553825">"चेहरे का नया डेटा सेव नहीं हो सकता. कोई पुराना डेटा मिटाएं."</string>
+    <string name="face_error_canceled" msgid="2768146728600802422">"चेहरा पहचानने की कार्रवाई रद्द की गई"</string>
+    <string name="face_error_user_canceled" msgid="9003022830076496163">"उपयोगकर्ता ने \'चेहरे की पहचान\' रद्द कर दी."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"कई बार कोशिश की गई. बाद में कोशिश करें."</string>
-    <!-- no translation found for face_error_lockout_permanent (3485837851962070925) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"कई बार कोशिश की जा चुकी है. \'चेहरे की पहचान\' बंद कर दी गई."</string>
     <!-- no translation found for face_error_unable_to_process (4940944939691171539) -->
     <skip />
-    <!-- no translation found for face_error_not_enrolled (2600952202843125796) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (1317845121210260372) -->
-    <skip />
+    <string name="face_error_not_enrolled" msgid="2600952202843125796">"आपने डिवाइस पर \'चेहरे की पहचान\' सेट नहीं की है."</string>
+    <string name="face_error_hw_not_present" msgid="1317845121210260372">"इस डिवाइस पर \'चेहरे की पहचान\' सुविधा काम नहीं करती."</string>
     <string name="face_name_template" msgid="7004562145809595384">"चेहरा <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -687,7 +679,7 @@
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"स्‍क्रीन लॉक पासवर्ड और पिन की लंबाई और उनमें स्वीकृत वर्णों को नियंत्रित करना."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"स्‍क्रीन अनलॉक करने के की कोशिशों पर नज़र रखना"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"स्‍क्रीन को अनलॉक करते समय गलत लिखे गए पासवर्ड की संख्‍या पर निगरानी करें, और बहुत अधिक बार गलत पासवर्ड लिखे जाने पर टैबलेट लॉक करें या टैबलेट का संपूर्ण डेटा मिटाएं."</string>
-    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"स्‍क्रीन को अनलॉक करते समय गलत तरीके से लिखे गए पासवर्ड पर नज़र रखें और यदि बहुत अधिक गलत पासवर्ड लिखे जाते हैं तो टीवी को लॉक करें या टीवी का सभी डेटा मिटा दें."</string>
+    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"स्‍क्रीन को अनलॉक करते समय गलत तरीके से लिखे गए पासवर्ड पर नज़र रखें और अगर बहुत अधिक गलत पासवर्ड लिखे जाते हैं तो टीवी को लॉक करें या टीवी का सभी डेटा मिटा दें."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"स्क्रीन को अनलॉक करते समय जितनी बार गलत पासवर्ड लिखा गया है, उसकी संख्या पर नज़र रखना और अगर बहुत बार गलत पासवर्ड डाले गए हैं, तो फ़ोन को लॉक कर देना या फ़ोन का सारा डेटा मिटा देना."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"स्‍क्रीन का लॉक खोलते समय गलत तरीके से लिखे गए पासवर्ड पर नज़र रखें, और अगर बार-बार अधिक पासवर्ड लिखे जाते हैं तो टैबलेट को लॉक करें या इस उपयोगकर्ता का सभी डेटा मिटा दें."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"स्‍क्रीन का लॉक खोलते समय गलत तरीके से लिखे गए पासवर्ड पर नज़र रखें, और अगर बार-बार गलत पासवर्ड लिखा जाता है तो टीवी को लॉक करें या इस उपयोगकर्ता का सभी डेटा मिटा दें."</string>
@@ -765,7 +757,7 @@
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"घर का फ़ैक्स"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"पेजर"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"अन्य"</string>
-    <string name="phoneTypeCallback" msgid="2712175203065678206">"पुन: कॉल करें"</string>
+    <string name="phoneTypeCallback" msgid="2712175203065678206">"फिर से कॉल करें"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"कार"</string>
     <string name="phoneTypeCompanyMain" msgid="540434356461478916">"कंपनी का मुख्य"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
@@ -871,19 +863,19 @@
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"कृपया उपयोग के लिए गाइड देखें या ग्राहक सहायता से संपर्क करें."</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"सिम कार्ड लॉक किया गया है."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"सिम कार्ड अनलॉक कर रहा है…"</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"आपने अपना अनलॉक आकार <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत बनाया है. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
-    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"आपने अपना पासवर्ड <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से लिखा है. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"आपने अपना अनलॉक आकार <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत बनाया है. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंड में फिर से प्रयास करें."</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"आपने अपना पासवर्ड <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से लिखा है. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंड में फिर से प्रयास करें."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"आपने अपना पिन <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से लिखा है. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंड में फिर से प्रयास करें."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"आपने अपना अनलॉक आकार <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत बनाया है. <xliff:g id="NUMBER_1">%2$d</xliff:g> और असफल प्रयासों के बाद, आपसे अपने Google साइन-इन का उपयोग करके आपके टैबलेट को अनलॉक करने को कहा जाएगा.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"आपने अपना अनलॉक पैटन <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से बनाया है. <xliff:g id="NUMBER_1">%2$d</xliff:g> और असफल प्रयासों के बाद, आपसे अपने टीवी को अपने Google साइन-इन का उपयोग करके अनलॉक करने के लिए कहा जाएगा.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"आपने अपना अनलॉक आकार <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत बनाया है. <xliff:g id="NUMBER_1">%2$d</xliff:g> और असफल प्रयासों के बाद, आपसे अपने Google साइन-इन का उपयोग करके आपके फ़ोन को अनलॉक करने को कहा जाएगा.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"आपने अपना अनलॉक आकार <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत बनाया है. <xliff:g id="NUMBER_1">%2$d</xliff:g> और असफल प्रयासों के बाद, आपसे अपने Google साइन-इन का उपयोग करके आपके टैबलेट को अनलॉक करने को कहा जाएगा.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंड में फिर से प्रयास करें."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"आपने अपना अनलॉक पैटन <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से बनाया है. <xliff:g id="NUMBER_1">%2$d</xliff:g> और असफल प्रयासों के बाद, आपसे अपने टीवी को अपने Google साइन-इन का उपयोग करके अनलॉक करने के लिए कहा जाएगा.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंड में फिर से प्रयास करें."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"आपने अपना अनलॉक आकार <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत बनाया है. <xliff:g id="NUMBER_1">%2$d</xliff:g> और असफल प्रयासों के बाद, आपसे अपने Google साइन-इन का उपयोग करके आपके फ़ोन को अनलॉक करने को कहा जाएगा.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंड में फिर से प्रयास करें."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"आप टैबलेट का लॉक खोलने के लिए <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से कोशिश कर चुके हैं. <xliff:g id="NUMBER_1">%2$d</xliff:g> बार और गलत कोशिश करने पर, टैबलेट फ़ैक्ट्री डिफ़ॉल्ट पर रीसेट हो जाएगा और सभी उपयोगकर्ता डेटा खो जाएगा."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"आपने टीवी का लॉक खोलने के लिए <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से कोशिश की है. <xliff:g id="NUMBER_1">%2$d</xliff:g> और बार गलत कोशिश करने पर, टीवी को फ़ैक्ट्री डिफ़ॉल्‍ट पर रीसेट कर दिया जाएगा और सभी उपयोगकर्ता डेटा खो जाएगा."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"आप फ़ोन का लॉक खोलने के लिए <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से कोशिश कर चुके हैं. <xliff:g id="NUMBER_1">%2$d</xliff:g> बार और गलत कोशिश करने पर, फ़ोन फ़ैक्ट्री डिफ़ॉल्ट पर रीसेट हो जाएगा और सभी उपयोगकर्ता डेटा खो जाएगा."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"आप टैबलेट को गलत तरीके से <xliff:g id="NUMBER">%d</xliff:g> बार अनलॉक करने का प्रयास कर चुके हैं. टैबलेट अब फ़ैक्‍टरी डिफ़ॉल्‍ट पर रीसेट हो जाएगा."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"आपने टीवी को अनलॉक करने के लिए <xliff:g id="NUMBER">%d</xliff:g> बार गलत तरीके से प्रयास किया है. अब टीवी को फ़ैक्‍टरी डिफ़ॉल्‍ट पर रीसेट कर दिया जाएगा."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"आप फ़ोन को गलत तरीके से <xliff:g id="NUMBER">%d</xliff:g> बार अनलॉक करने का प्रयास कर चुके हैं. फ़ोन अब फ़ैक्‍टरी डिफ़ॉल्‍ट पर रीसेट हो जाएगा."</string>
-    <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"<xliff:g id="NUMBER">%d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
+    <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"<xliff:g id="NUMBER">%d</xliff:g> सेकंड में फिर से प्रयास करें."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"आकार भूल गए?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"खाता अनलॉक"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"बहुत अधिक आकार प्रयास"</string>
@@ -914,7 +906,7 @@
     <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"कैमरा"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"मीडिया नियंत्रण"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"विजेट फिर से क्रमित करना प्रारंभ."</string>
-    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"विजेट फिर से क्रमित करना समाप्त."</string>
+    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"विजेट फिर से क्रमित करना खत्म."</string>
     <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"विजेट <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> को हटा दिया गया."</string>
     <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"अनलॉक क्षेत्र का विस्तार करें."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"स्लाइड अनलॉक."</string>
@@ -1193,7 +1185,7 @@
     <string name="aerr_restart" msgid="7581308074153624475">"ऐप्लिकेशन फिर से खोलें"</string>
     <string name="aerr_report" msgid="5371800241488400617">"फ़ीडबैक भेजें"</string>
     <string name="aerr_close" msgid="2991640326563991340">"बंद करें"</string>
-    <string name="aerr_mute" msgid="1974781923723235953">"डिवाइस पुन: प्रारंभ होने तक म्यूट करें"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"डिवाइस फिर से प्रारंभ होने तक म्यूट करें"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"प्रतीक्षा करें"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"ऐप बंद करें"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -1246,10 +1238,8 @@
     <string name="dump_heap_title" msgid="5864292264307651673">"हीप डंप शेयर करें?"</string>
     <!-- no translation found for dump_heap_text (8546022920319781701) -->
     <skip />
-    <!-- no translation found for dump_heap_system_text (3236094872980706024) -->
-    <skip />
-    <!-- no translation found for dump_heap_ready_text (1778041771455343067) -->
-    <skip />
+    <string name="dump_heap_system_text" msgid="3236094872980706024">"<xliff:g id="PROC">%1$s</xliff:g> प्रक्रिया अपनी <xliff:g id="SIZE">%2$s</xliff:g> की मेमोरी सीमा पार कर चुकी है. एक हीप डंप शेयर किए जाने के लिए तैयार है. सावधान रहें: इस हीप डंप में कोई ऐसी संवेदनशील निजी जानकारी भी शामिल हो सकती है जिसका एक्सेस प्रोसेस के पास हो. इसमें आपके टाइप किए गए शब्दों का डेटा भी शामिल है."</string>
+    <string name="dump_heap_ready_text" msgid="1778041771455343067">"<xliff:g id="PROC">%1$s</xliff:g> प्रक्रिया का हीप डंप शेयर किए जाने के लिए तैयार है. सावधान रहें: इस हीप डंप में कोई ऐसी संवेदनशील निजी जानकारी शामिल हो सकती है जिसका एक्सेस प्रोसेस के पास हो. इसमें आपके टाइप किए गए शब्दों का डेटा भी शामिल है."</string>
     <string name="sendText" msgid="5209874571959469142">"मैसेज करने के लिए कोई कार्रवाई चुनें"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"रिंगर वॉल्‍यूम"</string>
     <string name="volume_music" msgid="5421651157138628171">"मीडिया वॉल्‍यूम"</string>
@@ -1361,7 +1351,7 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"हमेशा अनुमति दें"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"कभी भी अनुमति न दें"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"सिमकार्ड निकाला गया"</string>
-    <string name="sim_removed_message" msgid="2333164559970958645">"मान्‍य सि‍म कार्ड डालकर पुन: प्रारंभ करने तक मोबाइल नेटवर्क अनुपलब्‍ध रहेगा."</string>
+    <string name="sim_removed_message" msgid="2333164559970958645">"मान्‍य सि‍म कार्ड डालकर फिर से प्रारंभ करने तक मोबाइल नेटवर्क अनुपलब्‍ध रहेगा."</string>
     <string name="sim_done_button" msgid="827949989369963775">"हो गया"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"सिम कार्ड जोड़ा गया"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"मोबाइल नेटवर्क की पहुंच पाने लिए अपना डिवाइस फिर से चालू करें."</string>
@@ -1411,7 +1401,7 @@
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"अस्वीकार करें"</string>
     <string name="select_input_method" msgid="4653387336791222978">"इनपुट पद्धति चुनें"</string>
     <string name="show_ime" msgid="2506087537466597099">"सामान्य कीबोर्ड के सक्रिय होने के दौरान इसे स्‍क्रीन पर बनाए रखें"</string>
-    <string name="hardware" msgid="194658061510127999">"वर्चूअल कीबोर्ड दिखाएं"</string>
+    <string name="hardware" msgid="194658061510127999">"वर्चुअल कीबोर्ड दिखाएं"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"सामान्य कीबोर्ड कॉन्फ़िगर करें"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"भाषा और लेआउट चुनने के लिए टैप करें"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1655,10 +1645,8 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"ओवरले #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", सुरक्षित"</string>
-    <!-- no translation found for activity_starter_block_bg_activity_starts_permissive (6995473033438879646) -->
-    <skip />
-    <!-- no translation found for activity_starter_block_bg_activity_starts_enforcing (3317816771072146229) -->
-    <skip />
+    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="6995473033438879646">"आने वाले Q बिल्ड में <xliff:g id="PACKAGENAME">%1$s</xliff:g> के बैकग्राउंड में गतिविधि शुरू करने पर रोक लगा दी जाएगी. इस बारे में जानने के लिए g.co/dev/bgblock पर जाएं."</string>
+    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="3317816771072146229">"<xliff:g id="PACKAGENAME">%1$s</xliff:g> के बैकग्राउंड में गतिविधि शुरू करने पर रोक लगा दी गई है. इस बारे में जानने के लिए g.co/dev/bgblock पर जाएं."</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"आकार भूल गए"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"गलत पैटर्न डाला गया है"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"गलत पासवर्ड"</string>
@@ -1678,7 +1666,7 @@
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"गलत PIN कोड."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"ऐसा PIN लिखें, जो 4 से 8 अंकों का हो."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"PUK कोड 8 अंकों का होना चाहिए."</string>
-    <string name="kg_invalid_puk" msgid="3638289409676051243">"सही PUK कोड पुन: डालें. बार-बार प्रयास करने से सिम स्थायी रूप से अक्षम हो जाएगी."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"सही PUK कोड फिर से डालें. बार-बार प्रयास करने से सिम स्थायी रूप से अक्षम हो जाएगी."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"पिन कोड का मिलान नहीं होता"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"बहुत अधिक आकार प्रयास"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"अनलॉक करने के लिए, अपने Google खाते से साइन इन करें."</string>
@@ -1688,18 +1676,18 @@
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"उपयोगकर्ता नाम या पासवर्ड गलत है"</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"अपना उपयोगकर्ता नाम या पासवर्ड भूल गए?\n "<b>"google.com/accounts/recovery"</b>" पर जाएं."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"खाते की जाँच की जा रही है…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"आप अपना PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से लिख चुके हैं. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"आप अपना पासवर्ड <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से लिख चुके हैं. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"आपने अपना अनलॉक आकार <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से आरेखित किया है. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"आप अपना PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से लिख चुके हैं. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंड में फिर से प्रयास करें."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"आप अपना पासवर्ड <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से लिख चुके हैं. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंड में फिर से प्रयास करें."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"आपने अपना अनलॉक आकार <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से आरेखित किया है. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंड में फिर से प्रयास करें."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"आप टैबलेट का लॉक खोलने के लिए <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से कोशिश कर चुके हैं. <xliff:g id="NUMBER_1">%2$d</xliff:g> बार और गलत कोशिश करने पर, टैबलेट फ़ैक्ट्री डिफ़ॉल्ट पर रीसेट हो जाएगा और सभी उपयोगकर्ता डेटा खो जाएगा."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"आप टीवी का लॉक खोलने के लिए <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से कोशिश कर चुके हैं. <xliff:g id="NUMBER_1">%2$d</xliff:g> बार और गलत कोशिश करने पर टीवी को फ़ैक्ट्री डिफ़ॉल्‍ट पर रीसेट कर दिया जाएगा और सभी उपयोगकर्ता डेटा खो जाएगा."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"आप फ़ोन का लॉक खोलने के लिए <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से कोशिश कर चुके हैं. <xliff:g id="NUMBER_1">%2$d</xliff:g> बार और गलत कोशिश करने पर फ़ोन फ़ैक्ट्री डिफ़ॉल्ट पर रीसेट हो जाएगा और सभी उपयोगकर्ता डेटा खो जाएगा."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"आप टैबलेट को अनलॉक करने के लिए <xliff:g id="NUMBER">%d</xliff:g> बार गलत तरीके से प्रयास कर चुके हैं. टैबलेट अब फ़ैक्‍टरी डिफ़ॉल्‍ट पर रीसेट हो जाएगा."</string>
     <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"आपने टीवी को अनलॉक करने के लिए <xliff:g id="NUMBER">%d</xliff:g> बार गलत तरीके से प्रयास किया है. अब टीवी को फ़ैक्‍टरी डिफ़ॉल्‍ट पर रीसेट कर दिया जाएगा."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"आप फ़ोन को अनलॉक करने के लिए <xliff:g id="NUMBER">%d</xliff:g> बार गलत तरीके से प्रयास कर चुके हैं. फ़ोन अब फ़ैक्टरी डिफ़ॉल्ट पर रीसेट हो जाएगा."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"आपने अपने अनलॉक आकार को <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से आरेखित किया है. <xliff:g id="NUMBER_1">%2$d</xliff:g> और असफल प्रयासों के बाद, आपसे अपने टैबलेट को किसी ईमेल खाते के उपयोग से अनलॉक करने के लिए कहा जाएगा.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"आपने अपने अनलॉक आकार को <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से आरेखित किया है. <xliff:g id="NUMBER_1">%2$d</xliff:g> और असफल प्रयासों के बाद, आपसे अपने टैबलेट को किसी ईमेल खाते के उपयोग से अनलॉक करने के लिए कहा जाएगा.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंड में फिर से प्रयास करें."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"आपने अपने लॉक खोलने के पैटर्न को <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से ड्रॉ किया है. अगर आपने <xliff:g id="NUMBER_1">%2$d</xliff:g> बार और गलत ड्रॉ किया, तो आपको किसी ईमेल खाते के ज़रिये अपने टीवी को अनलॉक करने को कहा जाएगा.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंड में फिर से कोशिश करें."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"आपने अपने अनलॉक आकार को <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से आरेखित किया है. <xliff:g id="NUMBER_1">%2$d</xliff:g> और असफल प्रयासों के बाद, आपसे अपने फ़ोन को किसी ईमेल खाते का उपयोग करके अनलॉक करने के लिए कहा जाएगा.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"आपने अपने अनलॉक आकार को <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से आरेखित किया है. <xliff:g id="NUMBER_1">%2$d</xliff:g> और असफल प्रयासों के बाद, आपसे अपने फ़ोन को किसी ईमेल खाते का उपयोग करके अनलॉक करने के लिए कहा जाएगा.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंड में फिर से प्रयास करें."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"निकालें"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"वॉल्यूम को सुझाए गए स्तर से ऊपर बढ़ाएं?\n\nअत्यधिक वॉल्यूम पर अधिक समय तक सुनने से आपकी सुनने की क्षमता को नुकसान हो सकता है."</string>
@@ -1822,8 +1810,8 @@
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN मेल नहीं खाते हैं. फिर से कोशिश करें."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN बहुत छोटा है. कम से कम 4 अंकों का होना चाहिए."</string>
     <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
-      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> सेकंड में पुन: प्रयास करें</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> सेकंड में पुन: प्रयास करें</item>
+      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> सेकंड में फिर से प्रयास करें</item>
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> सेकंड में फिर से प्रयास करें</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"बाद में फिर से प्रयास करें"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"आप पूरे स्क्रीन पर देख रहे हैं"</string>
@@ -1958,7 +1946,7 @@
     <string name="app_info" msgid="6856026610594615344">"ऐप्लिकेशन की जानकारी"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"डेमो प्रारंभ हो रहा है…"</string>
-    <string name="demo_restarting_message" msgid="952118052531642451">"डिवाइस पुन: रीसेट कर रहा है…"</string>
+    <string name="demo_restarting_message" msgid="952118052531642451">"डिवाइस फिर से रीसेट कर रहा है…"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"अक्षम <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="3751093130790472426">"कॉन्फ़्रेंस कॉल"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"टूलटिप"</string>

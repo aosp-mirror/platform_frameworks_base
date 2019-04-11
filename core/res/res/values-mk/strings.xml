@@ -528,7 +528,7 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Откриен е делумен отпечаток. Обидете се повторно."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Отпечатокот не можеше да се обработи. Обидете се повторно."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Сензорот за отпечатоци е валкан. Исчистете го и обидете се повторно."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Прстот се дрижеше пребрзо. Обидете се повторно."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Прстот се движеше пребрзо. Обидете се повторно."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Прстот се движеше премногу бавно. Обидете се повторно."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
@@ -1362,7 +1362,7 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"СПОДЕЛИ"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ОДБИЈ"</string>
     <string name="select_input_method" msgid="4653387336791222978">"Одбери метод на внес"</string>
-    <string name="show_ime" msgid="2506087537466597099">"Прикажувај го на екранот додека е активна физичката тастатура"</string>
+    <string name="show_ime" msgid="2506087537466597099">"Прикажувај ја на екранот додека е активна физичката тастатура"</string>
     <string name="hardware" msgid="194658061510127999">"Прикажи виртуелна тастатура"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Конфигурирајте физичка тастатура"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Допрете за избирање јазик и распоред"</string>

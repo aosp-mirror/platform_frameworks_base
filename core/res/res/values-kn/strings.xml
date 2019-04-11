@@ -519,8 +519,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"ನಿಮ್ಮ ಫೋಟೋ ಸಂಗ್ರಹಣೆಯನ್ನು ಮಾರ್ಪಡಿಸಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"ನಿಮ್ಮ ಮೀಡಿಯಾ ಸಂಗ್ರಹಣೆಯಿಂದ ಸ್ಥಳಗಳನ್ನು ಓದಿ"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"ನಿಮ್ಮ ಮೀಡಿಯಾ ಸಂಗ್ರಹಣೆಯಿಂದ ಸ್ಥಳಗಳನ್ನು ಓದಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
-    <!-- no translation found for biometric_dialog_default_title (881952973720613213) -->
-    <skip />
+    <string name="biometric_dialog_default_title" msgid="881952973720613213">"ಇದು ನೀವೇ ಎಂಬುದನ್ನು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"ಬಯೋಮೆಟ್ರಿಕ್ ಹಾರ್ಡ್‌ವೇರ್‌ ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"ಪ್ರಮಾಣೀಕರಣವನ್ನು ರದ್ದುಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"ಗುರುತಿಸಲಾಗಿಲ್ಲ"</string>
@@ -528,7 +527,7 @@
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"ಪಿನ್, ಪ್ಯಾಟರ್ನ್ ಅಥವಾ ಪಾಸ್‌ವರ್ಡ್ ಸೆಟ್ ಮಾಡಿಲ್ಲ"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"ಭಾಗಶಃ ಬೆರಳಚ್ಚು ಪತ್ತೆಯಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"ಬೆರಳಚ್ಚು ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"ಬೆರಳಚ್ಚು ಸೆನ್ಸಾರ್ ಕೊಳೆಯಾಗಿದೆ. ದಯವಿಟ್ಟು ಅದನ್ನು ಸ್ವಚ್ಛಗೊಳಿಸಿ ಹಾಗೂ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"ಬೆರಳಚ್ಚು ಸೆನ್ಸರ್ ಮಲಿನಗೊಂಡಿದೆ. ದಯವಿಟ್ಟು ಅದನ್ನು ಸ್ವಚ್ಛಗೊಳಿಸಿ ಹಾಗೂ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"ಬೆರಳನ್ನು ಅತಿ ವೇಗವಾಗಿ ಸರಿಸಲಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"ಬೆರಳನ್ನು ತುಂಬಾ ನಿಧಾನವಾಗಿ ಸರಿಸಲಾಗಿದೆ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -1206,7 +1205,7 @@
     <string name="dump_heap_ready_notification" msgid="1162196579925048701">"<xliff:g id="PROC">%1$s</xliff:g> ಹೀಪ್ ಡಂಪ್ ಸಿದ್ಧವಾಗಿದೆ"</string>
     <string name="dump_heap_notification_detail" msgid="3993078784053054141">"ಹೀಪ್ ಡಂಪ್ ಅನ್ನು ಸಂಗ್ರಹಿಸಲಾಗಿದೆ; ಹಂಚಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"ಹೀಪ್ ಡಂಪ್ ಹಂಚಿಕೊಳ್ಳುವುದೇ?"</string>
-    <string name="dump_heap_text" msgid="8546022920319781701">"<xliff:g id="PROC">%1$s</xliff:g> ಪ್ರಕ್ರಿಯೆಯು ತನ್ನ <xliff:g id="SIZE">%2$s</xliff:g> ಮೆಮೊರಿ ಮಿತಿಯನ್ನು ಮೀರಿದೆ. ಅದರ ಡೆವಲಪರ್ ಜೊತೆಗೆ ಹಂಚಿಕೊಳ್ಳಲು ಹಂಚಿಕೊಳ್ಳಲು ನಿಮಗಾಗಿ ಹೀಪ್ ಡಂಪ್ ಲಭ್ಯವಿದೆ. ಎಚ್ಚರಿಕೆ: ಈ ಹೀಪ್ ಡಂಪ್, ಪ್ರಕ್ರಿಯೆಯು ಪ್ರವೇಶ ಹೊಂದಿರುವ ಯಾವುದೇ ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ಮಾಹಿತಿಯನ್ನು ಒಳಗೊಂಡಿರಬಹುದು."</string>
+    <string name="dump_heap_text" msgid="8546022920319781701">"<xliff:g id="PROC">%1$s</xliff:g> ಪ್ರಕ್ರಿಯೆಯು ತನ್ನ <xliff:g id="SIZE">%2$s</xliff:g> ಮೆಮೊರಿ ಮಿತಿಯನ್ನು ಮೀರಿದೆ. ಅದರ ಡೆವಲಪರ್ ಜೊತೆಗೆ ಹಂಚಿಕೊಳ್ಳಲು ನಿಮಗಾಗಿ ಹೀಪ್ ಡಂಪ್ ಲಭ್ಯವಿದೆ. ಎಚ್ಚರಿಕೆ: ಈ ಹೀಪ್ ಡಂಪ್, ಅಪ್ಲಿಕೇಶನ್ ಪ್ರವೇಶ ಹೊಂದಿರುವ ನಿಮ್ಮ ಯಾವುದೇ ವೈಯಕ್ತಿಕ ಮಾಹಿತಿಯನ್ನು ಒಳಗೊಂಡಿರಬಹುದು."</string>
     <string name="dump_heap_system_text" msgid="3236094872980706024">"<xliff:g id="PROC">%1$s</xliff:g> ಪ್ರಕ್ರಿಯೆಯು ತನ್ನ <xliff:g id="SIZE">%2$s</xliff:g> ಮೆಮೊರಿ ಮಿತಿಯನ್ನು ಮೀರಿದೆ. ಹಂಚಿಕೊಳ್ಳಲು ನಿಮಗಾಗಿ ಹೀಪ್ ಡಂಪ್ ಲಭ್ಯವಿದೆ. ಎಚ್ಚರಿಕೆ: ಈ ಹೀಪ್ ಡಂಪ್, ಪ್ರಕ್ರಿಯೆಯು ಯಾವುದೇ ಸೂಕ್ಷ್ಮ ವೈಯಕ್ತಿಕ ಮಾಹಿತಿಗೆ ಪ್ರವೇಶವನ್ನು ಹೊಂದಿರಬಹುದು, ಇದು ನೀವು ಟೈಪ್ ಮಾಡಿದ ವಿಷಯಗಳನ್ನು ಸಹ ಒಳಗೊಂಡಿರಬಹುದು."</string>
     <string name="dump_heap_ready_text" msgid="1778041771455343067">"<xliff:g id="PROC">%1$s</xliff:g> ನ ಪ್ರಕ್ರಿಯೆಯ ಹೀಪ್ ಡಂಪ್ ನಿಮಗಾಗಿ ಹಂಚಿಕೊಳ್ಳಲು ಲಭ್ಯವಿದೆ. ಎಚ್ಚರಿಕೆ: ಈ ಹೀಪ್ ಡಂಪ್, ಪ್ರಕ್ರಿಯೆಯು ಯಾವುದೇ ಸೂಕ್ಷ್ಮ ವೈಯಕ್ತಿಕ ಮಾಹಿತಿಗೆ ಪ್ರವೇಶವನ್ನು ಹೊಂದಿರಬಹುದು, ಇದು ನೀವು ಟೈಪ್ ಮಾಡಿದ ವಿಷಯಗಳನ್ನು ಸಹ ಒಳಗೊಂಡಿರಬಹುದು."</string>
     <string name="sendText" msgid="5209874571959469142">"ಪಠ್ಯಕ್ಕೆ ಕ್ರಿಯೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
@@ -1350,8 +1349,8 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ಡೀಬಗಿಂಗ್‌‌ ಸಂಪರ್ಕಗೊಂಡಿದೆ"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"USB ಡೀಬಗ್‌ ಮಾಡುವಿಕೆಯನ್ನು ಆಫ್‌ ಮಾಡಲು ಟ್ಯಾಪ್‌ ಮಾಡಿ"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB ಡೀಬಗ್‌ ಮಾಡುವಿಕೆಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ಆಯ್ಕೆ ಮಾಡಿ."</string>
-    <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"ಸ್ವಯಂ ಪರೀಕ್ಷೆಯಾಗುವುದು ಮೋಡ್ ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
-    <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"ಸ್ವಯಂ ಪರೀಕ್ಷೆಯಾಗುವುದು ಮೋಡ್ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ಫ್ಯಾಕ್ಟರಿ ರಿಸೆಟ್ ಮಾಡಬೇಕು."</string>
+    <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"ಸ್ವಯಂ ಪರೀಕ್ಷೆಯಾಗುವಿಕೆ ಮೋಡ್ ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
+    <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"ಸ್ವಯಂ ಪರೀಕ್ಷೆಯಾಗುವಿಕೆ ಮೋಡ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ಫ್ಯಾಕ್ಟರಿ ರಿಸೆಟ್ ಮಾಡಬೇಕು."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB ಪೋರ್ಟ್‌ನಲ್ಲಿ ದ್ರವ ಅಥವಾ ಧೂಳಿನ ಕಣಗಳಿವೆ"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB ಪೋರ್ಟ್ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ನಿಷ್ಕ್ರಿಯಗೊಂಡಿದೆ. ಇನ್ನಷ್ಟು ತಿಳಿಯಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"USB ಪೋರ್ಟ್ ಬಳಸಲು ಸುರಕ್ಷಿತವಾಗಿದೆ"</string>
@@ -1996,7 +1995,7 @@
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"ಬ್ಯಾಟರಿ ಅವಧಿ ಹೆಚ್ಚಿಸಲು ಬ್ಯಾಟರಿ ಸೇವರ್ ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="battery_saver_notification_channel_name" msgid="2083316159716201806">"ಬ್ಯಾಟರಿ ಸೇವರ್"</string>
     <string name="battery_saver_sticky_disabled_notification_title" msgid="6376147579378764641">"ಇನ್ನೊಮ್ಮೆ ಬ್ಯಾಟರಿ ಕಡಿಮೆಯಾಗುವವರೆಗೂ ಬ್ಯಾಟರಿ ಸೇವರ್ ಮರುಸಕ್ರಿಯವಾಗುವುದಿಲ್ಲ"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="8090192609249817945">"ಸಾಕಾಗುವಷ್ಟು ಬ್ಯಾಟರಿಯನ್ನು ಚಾರ್ಜ್ ಮಾಡಲಾಗಿದೆ. ಇನ್ನೊಮ್ಮೆ ಬ್ಯಾಟರಿ ಕಡಿಮೆಯಾಗುವವರೆಗೂ ಬ್ಯಾಟರಿ ಸೇವರ್ ಮರುಸಕ್ರಿಯವಾಗುವುದಿಲ್ಲ."</string>
+    <string name="battery_saver_sticky_disabled_notification_summary" msgid="8090192609249817945">"ಬ್ಯಾಟರಿಯನ್ನು ಬೇಕಾಗಿರುವಷ್ಟು ಮಟ್ಟಕ್ಕೆ ಚಾರ್ಜ್ ಮಾಡಲಾಗಿದೆ. ಇನ್ನೊಮ್ಮೆ ಬ್ಯಾಟರಿ ಕಡಿಮೆಯಾಗುವವರೆಗೂ ಬ್ಯಾಟರಿ ಸೇವರ್ ಮರುಸಕ್ರಿಯವಾಗುವುದಿಲ್ಲ."</string>
     <string name="battery_saver_charged_notification_title" product="default" msgid="2960978289873161288">"ಫೋನ್ <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> ಚಾರ್ಜ್ ಆಗಿದೆ"</string>
     <string name="battery_saver_charged_notification_title" product="tablet" msgid="7555713825806482451">"ಟ್ಯಾಬ್ಲೆಟ್ <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> ಚಾರ್ಜ್ ಆಗಿದೆ"</string>
     <string name="battery_saver_charged_notification_title" product="device" msgid="5954873381559605660">"ಸಾಧನ <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> ಚಾರ್ಜ್ ಆಗಿದೆ"</string>

@@ -301,7 +301,7 @@
     <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"運動データへのアクセスを &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; に許可しますか？"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"カメラ"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"写真と動画の撮影"</string>
-    <string name="permgrouprequest_camera" msgid="1299833592069671756">"写真と動画の撮影を &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; に許可しますか？"</string>
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"写真と動画の撮影を「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"通話履歴"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"通話履歴の読み取りと書き込み"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"通話履歴へのアクセスを &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; に許可しますか？"</string>
@@ -545,7 +545,7 @@
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"もう一度お試しください。"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"指紋が登録されていません。"</string>
     <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"このデバイスには指紋認証センサーがありません。"</string>
-    <string name="fingerprint_name_template" msgid="5870957565512716938">"指紋<xliff:g id="FINGERID">%d</xliff:g>"</string>
+    <string name="fingerprint_name_template" msgid="5870957565512716938">"指紋 <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"指紋アイコン"</string>

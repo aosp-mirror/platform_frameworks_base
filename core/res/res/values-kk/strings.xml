@@ -283,7 +283,7 @@
     <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; қолданбасына құрылғының орналасқан жері туралы мәліметтерді пайдалануға рұқсат берілсін бе?"</string>
     <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"Қолданбаны пайдалану кезінде ғана оған геодеректеріңізді көруге рұқсат етіледі."</string>
     <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; қолданбасына құрылғының геодеректері &lt;b&gt;үнемі&lt;/b&gt; көрсетіліп тұрсын ба?"</string>
-    <string name="permgroupbackgroundrequestdetail_location" msgid="4597006851453417387">"Қолданба геодеректерді тек жұмыс кезінде ғана пайдалана алады"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="4597006851453417387">"Қолданба геодеректерді тек жұмыс кезінде ғана пайдалана алады."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Күнтізбе"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"күнтізбеге кіру"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; қолданбасына күнтізбеге кіруге рұқсат берілсін бе?"</string>
@@ -553,7 +553,7 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Қолданбаға пайдаланатын бет үлгілерін енгізу және жою әдістерін шақыруға мүмкіндік береді."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"бетті тану жабдығын пайдалану"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Қолданбаға бетті тану жабдығын қолдануға рұқсат етеді"</string>
-    <string name="face_acquired_insufficient" msgid="2767330364802375742">"Дәл бет деректері алынбады. Әрекетті қайталаңыз."</string>
+    <string name="face_acquired_insufficient" msgid="2767330364802375742">"Бет деректері дұрыс алынбады. Әрекетті қайталаңыз."</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"Тым ашық. Күңгірттеу жарық керек."</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"Тым қараңғы. Молырақ жарық керек."</string>
     <string name="face_acquired_too_close" msgid="1401011882624272753">"Телефонды алшақ ұстаңыз."</string>
@@ -576,7 +576,7 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Бетті тану мүмкін емес. Жабдық қолжетімді емес."</string>
-    <string name="face_error_timeout" msgid="2605673935810019129">"Бет тануды күту уақыты бітті. Әрекетті қайталаңыз."</string>
+    <string name="face_error_timeout" msgid="2605673935810019129">"Бетті тану уақыты бітті. Әрекетті қайталаңыз."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Жаңа бетті сақтау мүмкін емес. Алдымен ескісін жойыңыз."</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"Бетті танудан бас тартылды."</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"Пайдаланушы бетті тану әрекетінен бас тартты."</string>
@@ -1210,7 +1210,7 @@
     <string name="dump_heap_ready_text" msgid="1778041771455343067">"<xliff:g id="PROC">%1$s</xliff:g> процесінің дамп файлы бөлісуге дайын. Бұл дамп файлында процесс кезінде пайдаланылған кез келген құпия жеке ақпарат (соның ішінде сіз енгізген деректер) болуы мүмкін екенін ескеріңіз."</string>
     <string name="sendText" msgid="5209874571959469142">"Мәтін үшін әрекет таңдау"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Қоңырау шырылының қаттылығы"</string>
-    <string name="volume_music" msgid="5421651157138628171">"Meдиа дыбысының қаттылығы"</string>
+    <string name="volume_music" msgid="5421651157138628171">"Mультимeдиа дыбыс деңгейі"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Bluetooth арқылы ойнату"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Үнсіз қоңырау әуенін орнату"</string>
     <string name="volume_call" msgid="3941680041282788711">"Келетін қоңырау дыбысының қаттылығы"</string>
@@ -1220,8 +1220,8 @@
     <string name="volume_unknown" msgid="1400219669770445902">"Дыбыс қаттылығы"</string>
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Bluetooth дыбысының қаттылығы"</string>
     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Қоңырау әуенінің дыбыс қаттылығы"</string>
-    <string name="volume_icon_description_incall" msgid="8890073218154543397">"Қоңырау дыбысының қаттылығы"</string>
-    <string name="volume_icon_description_media" msgid="4217311719665194215">"Meдиа дыбысының қаттылығы"</string>
+    <string name="volume_icon_description_incall" msgid="8890073218154543397">"Қоңыраудағы дыбыс деңгейі"</string>
+    <string name="volume_icon_description_media" msgid="4217311719665194215">"Mультимeдиа дыбыс деңгейі"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Хабар дыбысының қаттылығы"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Әдепкі рингтон"</string>
     <string name="ringtone_default_with_actual" msgid="1767304850491060581">"Әдепкі (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>

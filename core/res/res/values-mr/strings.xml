@@ -519,8 +519,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"अॅपला तुमच्या फोटो संग्रहामध्ये सुधारणा करण्याची अनुमती देते."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"तुमच्या मीडिया संग्रहातून स्थाने वाचा"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"अॅपला तुमच्या मीडिया संग्रहामध्येील स्थाने वाचण्यासाठी अनुमती देते."</string>
-    <!-- no translation found for biometric_dialog_default_title (881952973720613213) -->
-    <skip />
+    <string name="biometric_dialog_default_title" msgid="881952973720613213">"हे तुम्हीच आहात याची पडताळणी करा"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"बायोमेट्रिक हार्डवेअर उपलब्ध नाही"</string>
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"ऑथेंटिकेशन रद्द केले"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"ओळखले नाही"</string>
@@ -675,7 +674,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"स्टोअर केलेला अ‍ॅप डेटा एंक्रिप्ट केला जाणे आवश्यक आहे."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"कॅमेरे अक्षम करा"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"सर्व डिव्हाइस कॅमेर्‍यांचा वापर प्रतिबंधित करा."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"काही स्क्रीन लॉक वैशिष्‍ट्ये अक्षम करा"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"काही स्क्रीन लॉक वैशिष्‍ट्ये बंद करा"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"काही स्क्रीन लॉक वैशिष्‍ट्यांचा वापर प्रतिबंधित करा."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"घर"</item>

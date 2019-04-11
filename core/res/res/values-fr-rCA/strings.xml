@@ -301,7 +301,7 @@
     <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"Autoriser « <xliff:g id="APP_NAME">%1$s</xliff:g> » à accéder à vos activités physiques?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Appareil photo"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"prendre des photos et filmer des vidéos"</string>
-    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Autoriser « <xliff:g id="APP_NAME">%1$s</xliff:g> » à prendre des photos et à filmer des vidéos?"</string>
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à prendre des photos et à filmer des vidéos?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"Journaux d\'appels"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"lire et écrire le journal des appels téléphoniques"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à accéder à vos journaux d\'appels?"</string>
@@ -1844,7 +1844,7 @@
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Soirs de semaine"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Fin de semaine"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Événement"</string>
-    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Dormir"</string>
+    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Sommeil"</string>
     <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> désactive certains sons"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Un problème interne est survenu avec votre appareil. Il se peut qu\'il soit instable jusqu\'à ce que vous le réinitialisiez à sa configuration d\'usine."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Un problème interne est survenu avec votre appareil. Communiquez avec le fabricant pour obtenir plus de détails."</string>

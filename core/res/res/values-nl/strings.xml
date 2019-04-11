@@ -1098,7 +1098,7 @@
     <string name="view_calendar" msgid="979609872939597838">"Weergeven"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"Geselecteerde tijd weergeven op de kalender"</string>
     <string name="add_calendar_event" msgid="1953664627192056206">"Plannen"</string>
-    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Evenement plannen voor geselecteerde tijd"</string>
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Afspraak plannen voor geselecteerde tijd"</string>
     <string name="view_flight" msgid="7691640491425680214">"Volgen"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Geselecteerde vlucht volgen"</string>
     <string name="translate" msgid="9218619809342576858">"Vertalen"</string>
@@ -1209,7 +1209,7 @@
     <string name="dump_heap_system_text" msgid="3236094872980706024">"Het proces <xliff:g id="PROC">%1$s</xliff:g> overschrijdt de geheugenlimiet van <xliff:g id="SIZE">%2$s</xliff:g>. Er is een heap dump beschikbaar die je kunt delen. Let op: Deze heap dump kan gevoelige persoonlijke informatie bevatten waartoe het proces toegang heeft. Dit omvat mogelijk wat je hebt getypt."</string>
     <string name="dump_heap_ready_text" msgid="1778041771455343067">"Er is een heap dump beschikbaar van het proces van <xliff:g id="PROC">%1$s</xliff:g>. Deze kun je delen. Let op: Deze heap dump bevat mogelijk gevoelige persoonlijke informatie waartoe het proces toegang heeft. Dit omvat mogelijk wat je hebt getypt."</string>
     <string name="sendText" msgid="5209874571959469142">"Een actie voor tekst selecteren"</string>
-    <string name="volume_ringtone" msgid="6885421406845734650">"Belvolume"</string>
+    <string name="volume_ringtone" msgid="6885421406845734650">"Beltoonvolume"</string>
     <string name="volume_music" msgid="5421651157138628171">"Mediavolume"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Afspelen via Bluetooth"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Stille beltoon ingesteld"</string>
@@ -1220,7 +1220,7 @@
     <string name="volume_unknown" msgid="1400219669770445902">"Volume"</string>
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Bluetooth-volume"</string>
     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Beltoonvolume"</string>
-    <string name="volume_icon_description_incall" msgid="8890073218154543397">"Belvolume"</string>
+    <string name="volume_icon_description_incall" msgid="8890073218154543397">"Gespreksvolume"</string>
     <string name="volume_icon_description_media" msgid="4217311719665194215">"Mediavolume"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Meldingsvolume"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Standaardbeltoon"</string>
@@ -1843,7 +1843,7 @@
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Downtime"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Doordeweekse avond"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Weekend"</string>
-    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Evenement"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Afspraken"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Slapen"</string>
     <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> dempt sommige geluiden"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Er is een intern probleem met je apparaat. Het apparaat kan instabiel zijn totdat u het apparaat terugzet naar de fabrieksinstellingen."</string>
