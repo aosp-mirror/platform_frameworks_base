@@ -255,7 +255,6 @@ import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Base64;
-import android.util.ByteStringUtils;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.ExceptionUtils;
@@ -330,6 +329,7 @@ import dalvik.system.VMRuntime;
 
 import libcore.io.IoUtils;
 import libcore.util.EmptyArray;
+import libcore.util.HexEncoding;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -10494,8 +10494,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     } else {
                         // lib signing cert could have rotated beyond the one expected, check to see
                         // if the new one has been blessed by the old
-                        if (!libPkg.mSigningDetails.hasSha256Certificate(
-                                ByteStringUtils.fromHexToByteArray(expectedCertDigests[0]))) {
+                        byte[] digestBytes = HexEncoding.decode(
+                                expectedCertDigests[0], false /* allowSingleChar */);
+                        if (!libPkg.mSigningDetails.hasSha256Certificate(digestBytes)) {
                             throw new PackageManagerException(
                                     INSTALL_FAILED_MISSING_SHARED_LIBRARY,
                                     "Package " + packageName + " requires differently signed" +
