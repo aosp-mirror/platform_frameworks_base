@@ -2964,6 +2964,146 @@ TEST(ValueMetricProducerTest, TestPullNeededNoTimeConstraints) {
     EXPECT_EQ(10, report.value_metrics().data(0).bucket_info(0).condition_true_nanos());
 }
 
+TEST(ValueMetricProducerTest, TestPulledData_noDiff_withoutCondition) {
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
+    metric.set_use_diff(false);
+
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerNoConditions(pullerManager, metric);
+
+    vector<shared_ptr<LogEvent>> allData;
+    allData.push_back(ValueMetricProducerTestHelper::createEvent(bucket2StartTimeNs + 30, 10));
+    valueProducer->onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs + 30);
+
+    // Bucket should have been completed.
+    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {10}, {bucketSizeNs});
+}
+
+TEST(ValueMetricProducerTest, TestPulledData_noDiff_withMultipleConditionChanges) {
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
+    metric.set_use_diff(false);
+
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, Pull(tagId, _))
+            // condition becomes true
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                data->push_back(ValueMetricProducerTestHelper::createEvent(
+                        bucketStartTimeNs + 30, 10));
+                return true;
+            }))
+            // condition becomes false
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                data->push_back(ValueMetricProducerTestHelper::createEvent(
+                        bucketStartTimeNs + 50, 20));
+                return true;
+            }));
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerWithCondition(pullerManager, metric);
+    valueProducer->mCondition = ConditionState::kFalse;
+
+    valueProducer->onConditionChanged(true, bucketStartTimeNs + 8);
+    valueProducer->onConditionChanged(false, bucketStartTimeNs + 50);
+    // has one slice
+    EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
+    ValueMetricProducer::Interval curInterval =
+            valueProducer->mCurrentSlicedBucket.begin()->second[0];
+    EXPECT_EQ(false, curInterval.hasBase);
+    EXPECT_EQ(true, curInterval.hasValue);
+    EXPECT_EQ(20, curInterval.value.long_value);
+
+
+    // Now the alarm is delivered. Condition is off though.
+    vector<shared_ptr<LogEvent>> allData;
+    allData.push_back(ValueMetricProducerTestHelper::createEvent(bucket2StartTimeNs + 30, 110));
+    valueProducer->onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs);
+
+    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {20}, {50 - 8});
+    curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
+    EXPECT_EQ(false, curInterval.hasBase);
+    EXPECT_EQ(false, curInterval.hasValue);
+}
+
+TEST(ValueMetricProducerTest, TestPulledData_noDiff_bucketBoundaryTrue) {
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
+    metric.set_use_diff(false);
+
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, Pull(tagId, _))
+            // condition becomes true
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                data->push_back(ValueMetricProducerTestHelper::createEvent(
+                        bucketStartTimeNs + 30, 10));
+                return true;
+            }));
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerWithCondition(pullerManager, metric);
+    valueProducer->mCondition = ConditionState::kFalse;
+
+    valueProducer->onConditionChanged(true, bucketStartTimeNs + 8);
+
+    // Now the alarm is delivered. Condition is off though.
+    vector<shared_ptr<LogEvent>> allData;
+    allData.push_back(ValueMetricProducerTestHelper::createEvent(bucket2StartTimeNs + 30, 30));
+    valueProducer->onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs);
+
+    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {30}, {bucketSizeNs - 8});
+    ValueMetricProducer::Interval curInterval =
+            valueProducer->mCurrentSlicedBucket.begin()->second[0];
+    EXPECT_EQ(false, curInterval.hasBase);
+    EXPECT_EQ(false, curInterval.hasValue);
+}
+
+TEST(ValueMetricProducerTest, TestPulledData_noDiff_bucketBoundaryFalse) {
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
+    metric.set_use_diff(false);
+
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerWithCondition(pullerManager, metric);
+    valueProducer->mCondition = ConditionState::kFalse;
+
+    // Now the alarm is delivered. Condition is off though.
+    vector<shared_ptr<LogEvent>> allData;
+    allData.push_back(ValueMetricProducerTestHelper::createEvent(bucket2StartTimeNs + 30, 30));
+    valueProducer->onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs);
+
+    // Condition was always false.
+    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {}, {});
+}
+
+TEST(ValueMetricProducerTest, TestPulledData_noDiff_withFailure) {
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
+    metric.set_use_diff(false);
+
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, Pull(tagId, _))
+            // condition becomes true
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                data->push_back(ValueMetricProducerTestHelper::createEvent(
+                        bucketStartTimeNs + 30, 10));
+                return true;
+            }))
+            .WillOnce(Return(false));
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerWithCondition(pullerManager, metric);
+    valueProducer->mCondition = ConditionState::kFalse;
+
+    valueProducer->onConditionChanged(true, bucketStartTimeNs + 8);
+    valueProducer->onConditionChanged(false, bucketStartTimeNs + 50);
+
+    // Now the alarm is delivered. Condition is off though.
+    vector<shared_ptr<LogEvent>> allData;
+    allData.push_back(ValueMetricProducerTestHelper::createEvent(bucket2StartTimeNs + 30, 30));
+    valueProducer->onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs);
+
+    // No buckets, we had a failure.
+    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {}, {});
+}
 
 }  // namespace statsd
 }  // namespace os
