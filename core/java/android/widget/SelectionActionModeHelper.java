@@ -933,12 +933,11 @@ public final class SelectionActionModeHelper {
             final String language = ExtrasUtils.getEntityType(foreignLanguageExtra);
             final float score = ExtrasUtils.getScore(foreignLanguageExtra);
             final String model = ExtrasUtils.getModelName(foreignLanguageExtra);
-            return new TextClassifierEvent.Builder(
-                    TextClassifierEvent.CATEGORY_LANGUAGE_DETECTION, eventType)
+            return new TextClassifierEvent.LanguageDetectionEvent.Builder(eventType)
                     .setEventContext(classificationContext)
                     .setResultId(classification.getId())
                     .setEntityTypes(language)
-                    .setScore(score)
+                    .setScores(score)
                     .setActionIndices(classification.getActions().indexOf(translateAction))
                     .setModelName(model)
                     .build();

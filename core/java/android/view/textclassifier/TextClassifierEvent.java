@@ -19,6 +19,7 @@ package android.view.textclassifier;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.icu.util.ULocale;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -30,54 +31,65 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 
 /**
- * A text classifier event.
+ * This class represents events that are sent by components to the {@link TextClassifier} to report
+ * something of note that relates to a feature powered by the TextClassifier. The TextClassifier may
+ * log these events or use them to improve future responses to queries.
+ * <p>
+ * Each categories of the events have their own subclass. Events of each types has an associated
+ * set of related properties. You can find the specification of them in the subclasses.
  */
-// TODO: Comprehensive javadoc.
-public final class TextClassifierEvent implements Parcelable {
+public abstract class TextClassifierEvent implements Parcelable {
 
-    public static final @android.annotation.NonNull Creator<TextClassifierEvent> CREATOR = new Creator<TextClassifierEvent>() {
-        @Override
-        public TextClassifierEvent createFromParcel(Parcel in) {
-            return readFromParcel(in);
-        }
-
-        @Override
-        public TextClassifierEvent[] newArray(int size) {
-            return new TextClassifierEvent[size];
-        }
-    };
+    private static final int PARCEL_TOKEN_TEXT_SELECTION_EVENT = 1;
+    private static final int PARCEL_TOKEN_TEXT_LINKIFY_EVENT = 2;
+    private static final int PARCEL_TOKEN_CONVERSATION_ACTION_EVENT = 3;
+    private static final int PARCEL_TOKEN_LANGUAGE_DETECTION_EVENT = 4;
 
     /** @hide **/
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({CATEGORY_UNDEFINED, CATEGORY_SELECTION, CATEGORY_LINKIFY,
+    @IntDef({CATEGORY_SELECTION, CATEGORY_LINKIFY,
             CATEGORY_CONVERSATION_ACTIONS, CATEGORY_LANGUAGE_DETECTION})
     public @interface Category {
         // For custom event categories, use range 1000+.
     }
-    /** Undefined category */
-    public static final int CATEGORY_UNDEFINED = 0;
-    /** Smart selection */
+
+    /**
+     * Smart selection
+     *
+     * @see TextSelectionEvent
+     */
     public static final int CATEGORY_SELECTION = 1;
-    /** Linkify */
+    /**
+     * Linkify
+     *
+     * @see TextLinkifyEvent
+     */
     public static final int CATEGORY_LINKIFY = 2;
-    /** Conversation actions */
+    /**
+     *  Conversation actions
+     *
+     * @see ConversationActionsEvent
+     */
     public static final int CATEGORY_CONVERSATION_ACTIONS = 3;
-    /** Language detection */
+    /**
+     * Language detection
+     *
+     * @see LanguageDetectionEvent
+     */
     public static final int CATEGORY_LANGUAGE_DETECTION = 4;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({TYPE_UNDEFINED, TYPE_SELECTION_STARTED, TYPE_SELECTION_MODIFIED,
-             TYPE_SMART_SELECTION_SINGLE, TYPE_SMART_SELECTION_MULTI, TYPE_AUTO_SELECTION,
-             TYPE_ACTIONS_SHOWN, TYPE_LINK_CLICKED, TYPE_OVERTYPE, TYPE_COPY_ACTION,
-             TYPE_PASTE_ACTION, TYPE_CUT_ACTION, TYPE_SHARE_ACTION, TYPE_SMART_ACTION,
-             TYPE_SELECTION_DRAG, TYPE_SELECTION_DESTROYED, TYPE_OTHER_ACTION, TYPE_SELECT_ALL,
-             TYPE_SELECTION_RESET, TYPE_MANUAL_REPLY, TYPE_ACTIONS_GENERATED})
+    @IntDef({TYPE_SELECTION_STARTED, TYPE_SELECTION_MODIFIED,
+            TYPE_SMART_SELECTION_SINGLE, TYPE_SMART_SELECTION_MULTI, TYPE_AUTO_SELECTION,
+            TYPE_ACTIONS_SHOWN, TYPE_LINK_CLICKED, TYPE_OVERTYPE, TYPE_COPY_ACTION,
+            TYPE_PASTE_ACTION, TYPE_CUT_ACTION, TYPE_SHARE_ACTION, TYPE_SMART_ACTION,
+            TYPE_SELECTION_DRAG, TYPE_SELECTION_DESTROYED, TYPE_OTHER_ACTION, TYPE_SELECT_ALL,
+            TYPE_SELECTION_RESET, TYPE_MANUAL_REPLY, TYPE_ACTIONS_GENERATED})
     public @interface Type {
         // For custom event types, use range 1,000,000+.
     }
-    /** User started a new selection. */
-    public static final int TYPE_UNDEFINED = 0;
+
     /** User started a new selection. */
     public static final int TYPE_SELECTION_STARTED = 1;
     /** User modified an existing selection. */
@@ -119,63 +131,49 @@ public final class TextClassifierEvent implements Parcelable {
     /** TextClassifier generated some actions */
     public static final int TYPE_ACTIONS_GENERATED = 20;
 
-    @Category private final int mEventCategory;
-    @Type private final int mEventType;
-    @Nullable private final String[] mEntityTypes;
-    @Nullable private final TextClassificationContext mEventContext;
-    @Nullable private final String mResultId;
+    @Category
+    private final int mEventCategory;
+    @Type
+    private final int mEventType;
+    @Nullable
+    private final String[] mEntityTypes;
+    @Nullable
+    private final TextClassificationContext mEventContext;
+    @Nullable
+    private final String mResultId;
     private final int mEventIndex;
-    private final long mEventTime;
+    private final float[] mScores;
+    @Nullable
+    private final String mModelName;
+    private final int[] mActionIndices;
     private final Bundle mExtras;
 
-    // Smart selection.
-    private final int mRelativeWordStartIndex;
-    private final int mRelativeWordEndIndex;
-    private final int mRelativeSuggestedWordStartIndex;
-    private final int mRelativeSuggestedWordEndIndex;
+    private TextClassifierEvent(Builder builder) {
+        mEventCategory = builder.mEventCategory;
+        mEventType = builder.mEventType;
+        mEntityTypes = builder.mEntityTypes;
+        mEventContext = builder.mEventContext;
+        mResultId = builder.mResultId;
+        mEventIndex = builder.mEventIndex;
+        mScores = builder.mScores;
+        mModelName = builder.mModelName;
+        mActionIndices = builder.mActionIndices;
+        mExtras = builder.mExtras == null ? Bundle.EMPTY : builder.mExtras;
+    }
 
-    // Smart action.
-    private final int[] mActionIndices;
-
-    // Language detection.
-    @Nullable private final String mLanguage;
-    private final float mScore;
-
-    @Nullable private final String mModelName;
-
-    private TextClassifierEvent(
-            int eventCategory,
-            int eventType,
-            String[] entityTypes,
-            TextClassificationContext eventContext,
-            String resultId,
-            int eventIndex,
-            long eventTime,
-            Bundle extras,
-            int relativeWordStartIndex,
-            int relativeWordEndIndex,
-            int relativeSuggestedWordStartIndex,
-            int relativeSuggestedWordEndIndex,
-            int[] actionIndex,
-            String language,
-            float score,
-            String modelVersion) {
-        mEventCategory = eventCategory;
-        mEventType = eventType;
-        mEntityTypes = entityTypes;
-        mEventContext = eventContext;
-        mResultId = resultId;
-        mEventIndex = eventIndex;
-        mEventTime = eventTime;
-        mExtras = extras;
-        mRelativeWordStartIndex = relativeWordStartIndex;
-        mRelativeWordEndIndex = relativeWordEndIndex;
-        mRelativeSuggestedWordStartIndex = relativeSuggestedWordStartIndex;
-        mRelativeSuggestedWordEndIndex = relativeSuggestedWordEndIndex;
-        mActionIndices = actionIndex;
-        mLanguage = language;
-        mScore = score;
-        mModelName = modelVersion;
+    private TextClassifierEvent(Parcel in) {
+        mEventCategory = in.readInt();
+        mEventType = in.readInt();
+        mEntityTypes = in.readStringArray();
+        mEventContext = in.readParcelable(null);
+        mResultId = in.readString();
+        mEventIndex = in.readInt();
+        int scoresLength = in.readInt();
+        mScores = new float[scoresLength];
+        in.readFloatArray(mScores);
+        mModelName = in.readString();
+        mActionIndices = in.createIntArray();
+        mExtras = in.readBundle();
     }
 
     @Override
@@ -183,44 +181,62 @@ public final class TextClassifierEvent implements Parcelable {
         return 0;
     }
 
+    @NonNull
+    public static final Creator<TextClassifierEvent> CREATOR = new Creator<TextClassifierEvent>() {
+        @Override
+        public TextClassifierEvent createFromParcel(Parcel in) {
+            int token = in.readInt();
+            if (token == PARCEL_TOKEN_TEXT_SELECTION_EVENT) {
+                return new TextSelectionEvent(in);
+            }
+            if (token == PARCEL_TOKEN_TEXT_LINKIFY_EVENT) {
+                return new TextLinkifyEvent(in);
+            }
+            if (token == PARCEL_TOKEN_LANGUAGE_DETECTION_EVENT) {
+                return new LanguageDetectionEvent(in);
+            }
+            if (token == PARCEL_TOKEN_CONVERSATION_ACTION_EVENT) {
+                return new ConversationActionsEvent(in);
+            }
+            throw new IllegalStateException("Unexpected input event type token in parcel.");
+        }
+
+        @Override
+        public TextClassifierEvent[] newArray(int size) {
+            return new TextClassifierEvent[size];
+        }
+    };
+
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(getParcelToken());
         dest.writeInt(mEventCategory);
         dest.writeInt(mEventType);
         dest.writeStringArray(mEntityTypes);
         dest.writeParcelable(mEventContext, flags);
         dest.writeString(mResultId);
         dest.writeInt(mEventIndex);
-        dest.writeLong(mEventTime);
-        dest.writeBundle(mExtras);
-        dest.writeInt(mRelativeWordStartIndex);
-        dest.writeInt(mRelativeWordEndIndex);
-        dest.writeInt(mRelativeSuggestedWordStartIndex);
-        dest.writeInt(mRelativeSuggestedWordEndIndex);
-        dest.writeIntArray(mActionIndices);
-        dest.writeString(mLanguage);
-        dest.writeFloat(mScore);
+        dest.writeInt(mScores.length);
+        dest.writeFloatArray(mScores);
         dest.writeString(mModelName);
+        dest.writeIntArray(mActionIndices);
+        dest.writeBundle(mExtras);
     }
 
-    private static TextClassifierEvent readFromParcel(Parcel in) {
-        return new TextClassifierEvent(
-                /* eventCategory= */ in.readInt(),
-                /* eventType= */ in.readInt(),
-                /* entityTypes=*/ in.readStringArray(),
-                /* eventContext= */ in.readParcelable(null),
-                /* resultId= */ in.readString(),
-                /* eventIndex= */ in.readInt(),
-                /* eventTime= */ in.readLong(),
-                /* extras= */ in.readBundle(),
-                /* relativeWordStartIndex= */ in.readInt(),
-                /* relativeWordEndIndex= */ in.readInt(),
-                /* relativeSuggestedWordStartIndex= */ in.readInt(),
-                /* relativeSuggestedWordEndIndex= */ in.readInt(),
-                /* actionIndices= */ in.createIntArray(),
-                /* language= */ in.readString(),
-                /* score= */ in.readFloat(),
-                /* modelVersion= */ in.readString());
+    private int getParcelToken() {
+        if (this instanceof TextSelectionEvent) {
+            return PARCEL_TOKEN_TEXT_SELECTION_EVENT;
+        }
+        if (this instanceof TextLinkifyEvent) {
+            return PARCEL_TOKEN_TEXT_LINKIFY_EVENT;
+        }
+        if (this instanceof LanguageDetectionEvent) {
+            return PARCEL_TOKEN_LANGUAGE_DETECTION_EVENT;
+        }
+        if (this instanceof ConversationActionsEvent) {
+            return PARCEL_TOKEN_CONVERSATION_ACTION_EVENT;
+        }
+        throw new IllegalArgumentException("Unexpected type: " + this.getClass().getSimpleName());
     }
 
     /**
@@ -241,6 +257,8 @@ public final class TextClassifierEvent implements Parcelable {
 
     /**
      * Returns an array of entity types. e.g. {@link TextClassifier#TYPE_ADDRESS}.
+     *
+     * @see Builder#setEntityTypes(String...) for supported types.
      */
     @NonNull
     public String[] getEntityTypes() {
@@ -270,13 +288,33 @@ public final class TextClassifierEvent implements Parcelable {
         return mEventIndex;
     }
 
-    // TODO: Remove this API.
     /**
-     * Returns the time this event occurred. This is the number of milliseconds since
-     * January 1, 1970, 00:00:00 GMT. 0 indicates not set.
+     * Returns the scores of the suggestions.
      */
-    public long getEventTime() {
-        return mEventTime;
+    @NonNull
+    public float[] getScores() {
+        return mScores;
+    }
+
+    /**
+     * Returns the model name.
+     */
+    @Nullable
+    public String getModelName() {
+        return mModelName;
+    }
+
+    /**
+     * Returns the indices of the actions relating to this event.
+     * Actions are usually returned by the text classifier in priority order with the most
+     * preferred action at index 0. This list gives an indication of the position of the actions
+     * that are being reported.
+     *
+     * @see Builder#setActionIndices(int...)
+     */
+    @NonNull
+    public int[] getActionIndices() {
+        return mActionIndices;
     }
 
     /**
@@ -289,151 +327,149 @@ public final class TextClassifierEvent implements Parcelable {
         return mExtras;
     }
 
-    /**
-     * For smart selection. Returns the relative word index of the start of the selection.
-     */
-    public int getRelativeWordStartIndex() {
-        return mRelativeWordStartIndex;
-    }
-
-    /**
-     * For smart selection. Returns the relative word (exclusive) index of the end of the selection.
-     */
-    public int getRelativeWordEndIndex() {
-        return mRelativeWordEndIndex;
-    }
-
-    /**
-     * For smart selection. Returns the relative word index of the start of the smart selection.
-     */
-    public int getRelativeSuggestedWordStartIndex() {
-        return mRelativeSuggestedWordStartIndex;
-    }
-
-    /**
-     * For smart selection. Returns the relative word (exclusive) index of the end of the
-     * smart selection.
-     */
-    public int getRelativeSuggestedWordEndIndex() {
-        return mRelativeSuggestedWordEndIndex;
-    }
-
-    /**
-     * Returns the indices of the actions relating to this event.
-     * Actions are usually returned by the text classifier in priority order with the most
-     * preferred action at index 0. This list gives an indication of the position of the actions
-     * that are being reported.
-     */
-    @NonNull
-    public int[] getActionIndices() {
-        return mActionIndices;
-    }
-
-    /**
-     * For language detection. Returns the language tag for the detected locale.
-     * @see java.util.Locale#forLanguageTag(String).
-     */
-    @Nullable
-    public String getLanguage() {
-        return mLanguage;
-    }
-
-    /**
-     * Returns the score of the suggestion.
-     */
-    public float getScore() {
-        return mScore;
-    }
-
-    /**
-     * Returns the model name.
-     * @hide
-     */
-    @Nullable
-    public String getModelName() {
-        return mModelName;
+    @Override
+    public String toString() {
+        StringBuilder out = new StringBuilder(128);
+        out.append(this.getClass().getSimpleName());
+        out.append("{");
+        out.append("mEventCategory=").append(mEventCategory);
+        out.append(", mEventTypes=").append(Arrays.toString(mEntityTypes));
+        out.append(", mEventContext=").append(mEventContext);
+        out.append(", mResultId=").append(mResultId);
+        out.append(", mEventIndex=").append(mEventIndex);
+        out.append(", mExtras=").append(mExtras);
+        out.append(", mScores=").append(Arrays.toString(mScores));
+        out.append(", mModelName=").append(mModelName);
+        out.append(", mActionIndices=").append(Arrays.toString(mActionIndices));
+        out.append("}");
+        return out.toString();
     }
 
     /**
      * Builder to build a text classifier event.
+     *
+     * @param <T> The subclass to be built.
      */
-    public static final class Builder {
+    public abstract static class Builder<T extends Builder<T>> {
 
         private final int mEventCategory;
         private final int mEventType;
         private String[] mEntityTypes = new String[0];
-        @Nullable private TextClassificationContext mEventContext;
-        @Nullable private String mResultId;
+        @Nullable
+        private TextClassificationContext mEventContext;
+        @Nullable
+        private String mResultId;
         private int mEventIndex;
-        private long mEventTime;
-        @Nullable private Bundle mExtras;
-        private int mRelativeWordStartIndex;
-        private int mRelativeWordEndIndex;
-        private int mRelativeSuggestedWordStartIndex;
-        private int mRelativeSuggestedWordEndIndex;
-        private int[] mActionIndices = new int[0];
-        @Nullable private String mLanguage;
-        private float mScore;
-
+        private float[] mScores = new float[0];
+        @Nullable
         private String mModelName;
+        private int[] mActionIndices = new int[0];
+        @Nullable
+        private Bundle mExtras;
 
         /**
          * Creates a builder for building {@link TextClassifierEvent}s.
          *
          * @param eventCategory The event category. e.g. {@link #CATEGORY_SELECTION}
-         * @param eventType The event type. e.g. {@link #TYPE_SELECTION_STARTED}
+         * @param eventType     The event type. e.g. {@link #TYPE_SELECTION_STARTED}
          */
-        public Builder(@Category int eventCategory, @Type int eventType) {
+        private Builder(@Category int eventCategory, @Type int eventType) {
             mEventCategory = eventCategory;
             mEventType = eventType;
         }
 
         /**
          * Sets the entity types. e.g. {@link TextClassifier#TYPE_ADDRESS}.
+         * <p>
+         * Supported types:
+         * <p>See {@link TextClassifier.EntityType}
+         * <p>See {@link ConversationAction.ActionType}
+         * <p>See {@link ULocale#toLanguageTag()}
          */
         @NonNull
-        public Builder setEntityTypes(@NonNull String... entityTypes) {
+        public T setEntityTypes(@NonNull String... entityTypes) {
+            Preconditions.checkNotNull(entityTypes);
             mEntityTypes = new String[entityTypes.length];
             System.arraycopy(entityTypes, 0, mEntityTypes, 0, entityTypes.length);
-            return this;
+            return self();
         }
 
         /**
          * Sets the event context.
          */
         @NonNull
-        public Builder setEventContext(@Nullable TextClassificationContext eventContext) {
+        public T setEventContext(@Nullable TextClassificationContext eventContext) {
             mEventContext = eventContext;
-            return this;
+            return self();
         }
 
         /**
          * Sets the id of the text classifier result related to this event.
          */
         @NonNull
-        public Builder setResultId(@Nullable String resultId) {
+        public T setResultId(@Nullable String resultId) {
             mResultId = resultId;
-            return this;
+            return self();
         }
 
         /**
-         * Sets the index of this events in the series of events it belongs to.
+         * Sets the index of this event in the series of events it belongs to.
          */
         @NonNull
-        public Builder setEventIndex(int eventIndex) {
+        public T setEventIndex(int eventIndex) {
             mEventIndex = eventIndex;
-            return this;
+            return self();
         }
 
-        // TODO: Remove this API.
         /**
-         * Sets the time this event occurred. This is the number of milliseconds since
-         * January 1, 1970, 00:00:00 GMT. 0 indicates not set.
+         * Sets the scores of the suggestions.
          */
         @NonNull
-        public Builder setEventTime(long eventTime) {
-            mEventTime = eventTime;
-            return this;
+        public T setScores(@NonNull float... scores) {
+            Preconditions.checkNotNull(scores);
+            mScores = new float[scores.length];
+            System.arraycopy(scores, 0, mScores, 0, scores.length);
+            return self();
+        }
+
+        /**
+         * Sets the model name string.
+         */
+        @NonNull
+        public T setModelName(@Nullable String modelVersion) {
+            mModelName = modelVersion;
+            return self();
+        }
+
+        /**
+         * Sets the indices of the actions involved in this event. Actions are usually returned by
+         * the text classifier in priority order with the most preferred action at index 0.
+         * These indices give an indication of the position of the actions that are being reported.
+         * <p>
+         * E.g.
+         * <pre>
+         *   // 3 smart actions are shown at index 0, 1, 2 respectively in response to a link click.
+         *   new TextClassifierEvent.Builder(CATEGORY_LINKIFY, TYPE_ACTIONS_SHOWN)
+         *       .setEventIndex(0, 1, 2)
+         *       ...
+         *       .build();
+         *
+         *   ...
+         *
+         *   // Smart action at index 1 is activated.
+         *   new TextClassifierEvent.Builder(CATEGORY_LINKIFY, TYPE_SMART_ACTION)
+         *       .setEventIndex(1)
+         *       ...
+         *       .build();
+         * </pre>
+         *
+         * @see TextClassification#getActions()
+         */
+        @NonNull
+        public T setActionIndices(@NonNull int... actionIndices) {
+            mActionIndices = new int[actionIndices.length];
+            System.arraycopy(actionIndices, 0, mActionIndices, 0, actionIndices.length);
+            return self();
         }
 
         /**
@@ -445,136 +481,545 @@ public final class TextClassifierEvent implements Parcelable {
          * objects in this bundle.
          */
         @NonNull
-        public Builder setExtras(@NonNull Bundle extras) {
+        public T setExtras(@NonNull Bundle extras) {
             mExtras = Preconditions.checkNotNull(extras);
-            return this;
+            return self();
         }
 
-        /**
-         * For smart selection. Sets the relative word index of the start of the selection.
-         */
-        @NonNull
-        public Builder setRelativeWordStartIndex(int relativeWordStartIndex) {
-            mRelativeWordStartIndex = relativeWordStartIndex;
-            return this;
-        }
-
-        /**
-         * For smart selection. Sets the relative word (exclusive) index of the end of the
-         * selection.
-         */
-        @NonNull
-        public Builder setRelativeWordEndIndex(int relativeWordEndIndex) {
-            mRelativeWordEndIndex = relativeWordEndIndex;
-            return this;
-        }
-
-        /**
-         * For smart selection. Sets the relative word index of the start of the smart selection.
-         */
-        @NonNull
-        public Builder setRelativeSuggestedWordStartIndex(int relativeSuggestedWordStartIndex) {
-            mRelativeSuggestedWordStartIndex = relativeSuggestedWordStartIndex;
-            return this;
-        }
-
-        /**
-         * For smart selection. Sets the relative word (exclusive) index of the end of the
-         * smart selection.
-         */
-        @NonNull
-        public Builder setRelativeSuggestedWordEndIndex(int relativeSuggestedWordEndIndex) {
-            mRelativeSuggestedWordEndIndex = relativeSuggestedWordEndIndex;
-            return this;
-        }
-
-        /**
-         * Sets the indices of the actions involved in this event. Actions are usually returned by
-         * the text classifier in priority order with the most preferred action at index 0.
-         * This index gives an indication of the position of the action that is being reported.
-         */
-        @NonNull
-        public Builder setActionIndices(@NonNull int... actionIndices) {
-            mActionIndices = new int[actionIndices.length];
-            System.arraycopy(actionIndices, 0, mActionIndices, 0, actionIndices.length);
-            return this;
-        }
-
-        /**
-         * For language detection. Sets the language tag for the detected locale.
-         * @see java.util.Locale#forLanguageTag(String).
-         */
-        @NonNull
-        public Builder setLanguage(@Nullable String language) {
-            mLanguage = language;
-            return this;
-        }
-
-        /**
-         * Sets the score of the suggestion.
-         */
-        @NonNull
-        public Builder setScore(float score) {
-            mScore = score;
-            return this;
-        }
-
-        /**
-         * Sets the model name string.
-         * @hide
-         */
-        public Builder setModelName(@Nullable String modelVersion) {
-            mModelName = modelVersion;
-            return this;
-        }
-
-        /**
-         * Builds and returns a text classifier event.
-         */
-        @NonNull
-        public TextClassifierEvent build() {
-            mExtras = mExtras == null ? Bundle.EMPTY : mExtras;
-            return new TextClassifierEvent(
-                    mEventCategory,
-                    mEventType,
-                    mEntityTypes,
-                    mEventContext,
-                    mResultId,
-                    mEventIndex,
-                    mEventTime,
-                    mExtras,
-                    mRelativeWordStartIndex,
-                    mRelativeWordEndIndex,
-                    mRelativeSuggestedWordStartIndex,
-                    mRelativeSuggestedWordEndIndex,
-                    mActionIndices,
-                    mLanguage,
-                    mScore,
-                    mModelName);
-        }
-        // TODO: Add build(boolean validate).
+        abstract T self();
     }
 
-    @Override
-    public String toString() {
-        StringBuilder out = new StringBuilder(128);
-        out.append("TextClassifierEvent{");
-        out.append("mEventCategory=").append(mEventCategory);
-        out.append(", mEventTypes=").append(Arrays.toString(mEntityTypes));
-        out.append(", mEventContext=").append(mEventContext);
-        out.append(", mResultId=").append(mResultId);
-        out.append(", mEventIndex=").append(mEventIndex);
-        out.append(", mEventTime=").append(mEventTime);
-        out.append(", mExtras=").append(mExtras);
-        out.append(", mRelativeWordStartIndex=").append(mRelativeWordStartIndex);
-        out.append(", mRelativeWordEndIndex=").append(mRelativeWordEndIndex);
-        out.append(", mRelativeSuggestedWordStartIndex=").append(mRelativeSuggestedWordStartIndex);
-        out.append(", mRelativeSuggestedWordEndIndex=").append(mRelativeSuggestedWordEndIndex);
-        out.append(", mActionIndices=").append(Arrays.toString(mActionIndices));
-        out.append(", mLanguage=").append(mLanguage);
-        out.append(", mScore=").append(mScore);
-        out.append(", mModelName=").append(mModelName);
-        out.append("}");
-        return out.toString();
+    /**
+     * This class represents events that are related to the smart text selection feature.
+     * <p>
+     * <pre>
+     *     // User started a selection. e.g. "York" in text "New York City, NY".
+     *     new TextSelectionEvent.Builder(TYPE_SELECTION_STARTED)
+     *         .setEventContext(classificationContext)
+     *         .setEventIndex(0)
+     *         .build();
+     *
+     *     // System smart-selects a recognized entity. e.g. "New York City".
+     *     new TextSelectionEvent.Builder(TYPE_SMART_SELECTION_MULTI)
+     *         .setEventContext(classificationContext)
+     *         .setResultId(textSelection.getId())
+     *         .setRelativeWordStartIndex(-1) // Goes back one word to "New" from "York".
+     *         .setRelativeWordEndIndex(2)    // Goes forward 2 words from "York" to start of ",".
+     *         .setEntityTypes(textClassification.getEntity(0))
+     *         .setScore(textClassification.getConfidenceScore(entityType))
+     *         .setEventIndex(1)
+     *         .build();
+     *
+     *     // User resets the selection to the original selection. i.e. "York".
+     *     new TextSelectionEvent.Builder(TYPE_SELECTION_RESET)
+     *         .setEventContext(classificationContext)
+     *         .setResultId(textSelection.getId())
+     *         .setRelativeSuggestedWordStartIndex(-1) // Repeated from above.
+     *         .setRelativeSuggestedWordEndIndex(2)    // Repeated from above.
+     *         .setRelativeWordStartIndex(0)           // Original selection is always at (0, 1].
+     *         .setRelativeWordEndIndex(1)
+     *         .setEntityTypes(textClassification.getEntity(0))
+     *         .setScore(textClassification.getConfidenceScore(entityType))
+     *         .setEventIndex(2)
+     *         .build();
+     *
+     *     // User modified the selection. e.g. "New".
+     *     new TextSelectionEvent.Builder(TYPE_SELECTION_MODIFIED)
+     *         .setEventContext(classificationContext)
+     *         .setResultId(textSelection.getId())
+     *         .setRelativeSuggestedWordStartIndex(-1) // Repeated from above.
+     *         .setRelativeSuggestedWordEndIndex(2)    // Repeated from above.
+     *         .setRelativeWordStartIndex(-1)          // Goes backward one word from "York" to
+     *         "New".
+     *         .setRelativeWordEndIndex(0)             // Goes backward one word to exclude "York".
+     *         .setEntityTypes(textClassification.getEntity(0))
+     *         .setScore(textClassification.getConfidenceScore(entityType))
+     *         .setEventIndex(3)
+     *         .build();
+     *
+     *     // Smart (contextual) actions (at indices, 0, 1, 2) presented to the user.
+     *     // e.g. "Map", "Ride share", "Explore".
+     *     new TextSelectionEvent.Builder(TYPE_ACTIONS_SHOWN)
+     *         .setEventContext(classificationContext)
+     *         .setResultId(textClassification.getId())
+     *         .setEntityTypes(textClassification.getEntity(0))
+     *         .setScore(textClassification.getConfidenceScore(entityType))
+     *         .setActionIndices(0, 1, 2)
+     *         .setEventIndex(4)
+     *         .build();
+     *
+     *     // User chooses the "Copy" action.
+     *     new TextSelectionEvent.Builder(TYPE_COPY_ACTION)
+     *         .setEventContext(classificationContext)
+     *         .setResultId(textClassification.getId())
+     *         .setEntityTypes(textClassification.getEntity(0))
+     *         .setScore(textClassification.getConfidenceScore(entityType))
+     *         .setEventIndex(5)
+     *         .build();
+     *
+     *     // User chooses smart action at index 1. i.e. "Ride share".
+     *     new TextSelectionEvent.Builder(TYPE_SMART_ACTION)
+     *         .setEventContext(classificationContext)
+     *         .setResultId(textClassification.getId())
+     *         .setEntityTypes(textClassification.getEntity(0))
+     *         .setScore(textClassification.getConfidenceScore(entityType))
+     *         .setActionIndices(1)
+     *         .setEventIndex(5)
+     *         .build();
+     *
+     *     // Selection dismissed.
+     *     new TextSelectionEvent.Builder(TYPE_SELECTION_DESTROYED)
+     *         .setEventContext(classificationContext)
+     *         .setResultId(textClassification.getId())
+     *         .setEntityTypes(textClassification.getEntity(0))
+     *         .setScore(textClassification.getConfidenceScore(entityType))
+     *         .setEventIndex(6)
+     *         .build();
+     * </pre>
+     * <p>
+     */
+    public static final class TextSelectionEvent extends TextClassifierEvent implements Parcelable {
+
+        @NonNull
+        public static final Creator<TextSelectionEvent> CREATOR =
+                new Creator<TextSelectionEvent>() {
+                    @Override
+                    public TextSelectionEvent createFromParcel(Parcel in) {
+                        in.readInt(); // skip token, we already know this is a TextSelectionEvent
+                        return new TextSelectionEvent(in);
+                    }
+
+                    @Override
+                    public TextSelectionEvent[] newArray(int size) {
+                        return new TextSelectionEvent[size];
+                    }
+                };
+
+        final int mRelativeWordStartIndex;
+        final int mRelativeWordEndIndex;
+        final int mRelativeSuggestedWordStartIndex;
+        final int mRelativeSuggestedWordEndIndex;
+
+        private TextSelectionEvent(TextSelectionEvent.Builder builder) {
+            super(builder);
+            mRelativeWordStartIndex = builder.mRelativeWordStartIndex;
+            mRelativeWordEndIndex = builder.mRelativeWordEndIndex;
+            mRelativeSuggestedWordStartIndex = builder.mRelativeSuggestedWordStartIndex;
+            mRelativeSuggestedWordEndIndex = builder.mRelativeSuggestedWordEndIndex;
+        }
+
+        private TextSelectionEvent(Parcel in) {
+            super(in);
+            mRelativeWordStartIndex = in.readInt();
+            mRelativeWordEndIndex = in.readInt();
+            mRelativeSuggestedWordStartIndex = in.readInt();
+            mRelativeSuggestedWordEndIndex = in.readInt();
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            super.writeToParcel(dest, flags);
+            dest.writeInt(mRelativeWordStartIndex);
+            dest.writeInt(mRelativeWordEndIndex);
+            dest.writeInt(mRelativeSuggestedWordStartIndex);
+            dest.writeInt(mRelativeSuggestedWordEndIndex);
+        }
+
+        /**
+         * Returns the relative word index of the start of the selection.
+         */
+        public int getRelativeWordStartIndex() {
+            return mRelativeWordStartIndex;
+        }
+
+        /**
+         * Returns the relative word (exclusive) index of the end of the selection.
+         */
+        public int getRelativeWordEndIndex() {
+            return mRelativeWordEndIndex;
+        }
+
+        /**
+         * Returns the relative word index of the start of the smart selection.
+         */
+        public int getRelativeSuggestedWordStartIndex() {
+            return mRelativeSuggestedWordStartIndex;
+        }
+
+        /**
+         * Returns the relative word (exclusive) index of the end of the
+         * smart selection.
+         */
+        public int getRelativeSuggestedWordEndIndex() {
+            return mRelativeSuggestedWordEndIndex;
+        }
+
+        /**
+         * Builder class for {@link TextSelectionEvent}.
+         */
+        public static final class Builder extends
+                TextClassifierEvent.Builder<TextSelectionEvent.Builder> {
+            int mRelativeWordStartIndex;
+            int mRelativeWordEndIndex;
+            int mRelativeSuggestedWordStartIndex;
+            int mRelativeSuggestedWordEndIndex;
+
+            /**
+             * Creates a builder for building {@link TextSelectionEvent}s.
+             *
+             * @param eventType     The event type. e.g. {@link #TYPE_SELECTION_STARTED}
+             */
+            public Builder(@Type int eventType) {
+                super(CATEGORY_SELECTION, eventType);
+            }
+
+            /**
+             * Sets the relative word index of the start of the selection.
+             */
+            @NonNull
+            public Builder setRelativeWordStartIndex(int relativeWordStartIndex) {
+                mRelativeWordStartIndex = relativeWordStartIndex;
+                return this;
+            }
+
+            /**
+             * Sets the relative word (exclusive) index of the end of the
+             * selection.
+             */
+            @NonNull
+            public Builder setRelativeWordEndIndex(int relativeWordEndIndex) {
+                mRelativeWordEndIndex = relativeWordEndIndex;
+                return this;
+            }
+
+            /**
+             * Sets the relative word index of the start of the smart
+             * selection.
+             */
+            @NonNull
+            public Builder setRelativeSuggestedWordStartIndex(int relativeSuggestedWordStartIndex) {
+                mRelativeSuggestedWordStartIndex = relativeSuggestedWordStartIndex;
+                return this;
+            }
+
+            /**
+             * Sets the relative word (exclusive) index of the end of the
+             * smart selection.
+             */
+            @NonNull
+            public Builder setRelativeSuggestedWordEndIndex(int relativeSuggestedWordEndIndex) {
+                mRelativeSuggestedWordEndIndex = relativeSuggestedWordEndIndex;
+                return this;
+            }
+
+            @Override
+            TextSelectionEvent.Builder self() {
+                return this;
+            }
+
+            /**
+             * Builds and returns a {@link TextSelectionEvent}.
+             */
+            @NonNull
+            public TextSelectionEvent build() {
+                return new TextSelectionEvent(this);
+            }
+        }
+    }
+
+    /**
+     * This class represents events that are related to the smart linkify feature.
+     * <p>
+     * <pre>
+     *     // User clicked on a link.
+     *     new TextLinkifyEvent.Builder(TYPE_LINK_CLICKED)
+     *         .setEventContext(classificationContext)
+     *         .setResultId(textClassification.getId())
+     *         .setEntityTypes(textClassification.getEntity(0))
+     *         .setScore(textClassification.getConfidenceScore(entityType))
+     *         .setEventIndex(0)
+     *         .build();
+     *
+     *     // Smart (contextual) actions presented to the user in response to a link click.
+     *     new TextLinkifyEvent.Builder(TYPE_ACTIONS_SHOWN)
+     *         .setEventContext(classificationContext)
+     *         .setResultId(textClassification.getId())
+     *         .setEntityTypes(textClassification.getEntity(0))
+     *         .setScore(textClassification.getConfidenceScore(entityType))
+     *         .setActionIndices(range(textClassification.getActions().size()))
+     *         .setEventIndex(1)
+     *         .build();
+     *
+     *     // User chooses smart action at index 0.
+     *     new TextLinkifyEvent.Builder(TYPE_SMART_ACTION)
+     *         .setEventContext(classificationContext)
+     *         .setResultId(textClassification.getId())
+     *         .setEntityTypes(textClassification.getEntity(0))
+     *         .setScore(textClassification.getConfidenceScore(entityType))
+     *         .setActionIndices(0)
+     *         .setEventIndex(2)
+     *         .build();
+     * </pre>
+     */
+    public static final class TextLinkifyEvent extends TextClassifierEvent implements Parcelable {
+
+        @NonNull
+        public static final Creator<TextLinkifyEvent> CREATOR =
+                new Creator<TextLinkifyEvent>() {
+                    @Override
+                    public TextLinkifyEvent createFromParcel(Parcel in) {
+                        in.readInt(); // skip token, we already know this is a TextLinkifyEvent
+                        return new TextLinkifyEvent(in);
+                    }
+
+                    @Override
+                    public TextLinkifyEvent[] newArray(int size) {
+                        return new TextLinkifyEvent[size];
+                    }
+                };
+
+        private TextLinkifyEvent(Parcel in) {
+            super(in);
+        }
+
+        private TextLinkifyEvent(TextLinkifyEvent.Builder builder) {
+            super(builder);
+        }
+
+        /**
+         * Builder class for {@link TextLinkifyEvent}.
+         */
+        public static final class Builder
+                extends TextClassifierEvent.Builder<TextLinkifyEvent.Builder> {
+            /**
+             * Creates a builder for building {@link TextLinkifyEvent}s.
+             *
+             * @param eventType The event type. e.g. {@link #TYPE_SMART_ACTION}
+             */
+            public Builder(@Type int eventType) {
+                super(TextClassifierEvent.CATEGORY_LINKIFY, eventType);
+            }
+
+            @Override
+            Builder self() {
+                return this;
+            }
+
+            /**
+             * Builds and returns a {@link TextLinkifyEvent}.
+             */
+            @NonNull
+            public TextLinkifyEvent build() {
+                return new TextLinkifyEvent(this);
+            }
+        }
+    }
+
+    /**
+     * This class represents events that are related to the language detection feature.
+     * <p>
+     * <pre>
+     *     // Translate action shown for foreign text.
+     *     new LanguageDetectionEvent.Builder(TYPE_ACTIONS_SHOWN)
+     *         .setEventContext(classificationContext)
+     *         .setResultId(textClassification.getId())
+     *         .setEntityTypes(language)
+     *         .setScore(score)
+     *         .setActionIndices(textClassification.getActions().indexOf(translateAction))
+     *         .setEventIndex(0)
+     *         .build();
+     *
+     *     // Translate action selected.
+     *     new LanguageDetectionEvent.Builder(TYPE_SMART_ACTION)
+     *         .setEventContext(classificationContext)
+     *         .setResultId(textClassification.getId())
+     *         .setEntityTypes(language)
+     *         .setScore(score)
+     *         .setActionIndices(textClassification.getActions().indexOf(translateAction))
+     *         .setEventIndex(1)
+     *         .build();
+     */
+    public static final class LanguageDetectionEvent extends TextClassifierEvent
+            implements Parcelable {
+
+        @NonNull
+        public static final Creator<LanguageDetectionEvent> CREATOR =
+                new Creator<LanguageDetectionEvent>() {
+                    @Override
+                    public LanguageDetectionEvent createFromParcel(Parcel in) {
+                        // skip token, we already know this is a LanguageDetectionEvent.
+                        in.readInt();
+                        return new LanguageDetectionEvent(in);
+                    }
+
+                    @Override
+                    public LanguageDetectionEvent[] newArray(int size) {
+                        return new LanguageDetectionEvent[size];
+                    }
+                };
+
+        @Nullable
+        private final ULocale mLocale;
+
+        private LanguageDetectionEvent(Parcel in) {
+            super(in);
+            final String languageTag = in.readString();
+            mLocale = languageTag == null ? null : ULocale.forLanguageTag(languageTag);
+        }
+
+        private LanguageDetectionEvent(LanguageDetectionEvent.Builder builder) {
+            super(builder);
+            mLocale = builder.mLocale;
+        }
+
+        /**
+         * Returns the detected locale.
+         */
+        @Nullable
+        public ULocale getLocale() {
+            return mLocale;
+        }
+
+        /**
+         * Builder class for {@link LanguageDetectionEvent}.
+         */
+        public static final class Builder
+                extends TextClassifierEvent.Builder<LanguageDetectionEvent.Builder> {
+            @Nullable
+            private ULocale mLocale;
+
+            /**
+             * Creates a builder for building {@link TextSelectionEvent}s.
+             *
+             * @param eventType The event type. e.g. {@link #TYPE_SMART_ACTION}
+             */
+            public Builder(@Type int eventType) {
+                super(TextClassifierEvent.CATEGORY_LANGUAGE_DETECTION, eventType);
+            }
+
+            /**
+             * Sets the detected locale.
+             */
+            @NonNull
+            public Builder setLocale(@Nullable ULocale locale) {
+                mLocale = locale;
+                return this;
+            }
+
+            @Override
+            Builder self() {
+                return this;
+            }
+
+            /**
+             * Builds and returns a {@link LanguageDetectionEvent}.
+             */
+            @NonNull
+            public LanguageDetectionEvent build() {
+                return new LanguageDetectionEvent(this);
+            }
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            super.writeToParcel(dest, flags);
+            dest.writeString(mLocale == null ? null : mLocale.toLanguageTag());
+        }
+    }
+
+    /**
+     * This class represents events that are related to the conversation actions feature.
+     * <p>
+     * <pre>
+     *     // Conversation (contextual) actions/replies generated.
+     *     new ConversationActionsEvent.Builder(TYPE_ACTIONS_GENERATED)
+     *         .setEventContext(classificationContext)
+     *         .setResultId(conversationActions.getId())
+     *         .setEntityTypes(getTypes(conversationActions))
+     *         .setActionIndices(range(conversationActions.getActions().size()))
+     *         .setEventIndex(0)
+     *         .build();
+     *
+     *     // Conversation actions/replies presented to user.
+     *     new ConversationActionsEvent.Builder(TYPE_ACTIONS_SHOWN)
+     *         .setEventContext(classificationContext)
+     *         .setResultId(conversationActions.getId())
+     *         .setEntityTypes(getTypes(conversationActions))
+     *         .setActionIndices(range(conversationActions.getActions().size()))
+     *         .setEventIndex(1)
+     *         .build();
+     *
+     *     // User clicked the "Reply" button to compose their custom reply.
+     *     new ConversationActionsEvent.Builder(TYPE_MANUAL_REPLY)
+     *         .setEventContext(classificationContext)
+     *         .setResultId(conversationActions.getId())
+     *         .setEventIndex(2)
+     *         .build();
+     *
+     *     // User selected a smart (contextual) action/reply.
+     *     new ConversationActionsEvent.Builder(TYPE_SMART_ACTION)
+     *         .setEventContext(classificationContext)
+     *         .setResultId(conversationActions.getId())
+     *         .setEntityTypes(conversationActions.get(1).getType())
+     *         .setScore(conversationAction.get(1).getConfidenceScore())
+     *         .setActionIndices(1)
+     *         .setEventIndex(2)
+     *         .build();
+     * </pre>
+     */
+    public static final class ConversationActionsEvent extends TextClassifierEvent
+            implements Parcelable {
+
+        @NonNull
+        public static final Creator<ConversationActionsEvent> CREATOR =
+                new Creator<ConversationActionsEvent>() {
+                    @Override
+                    public ConversationActionsEvent createFromParcel(Parcel in) {
+                        // skip token, we already know this is a ConversationActionsEvent.
+                        in.readInt();
+                        return new ConversationActionsEvent(in);
+                    }
+
+                    @Override
+                    public ConversationActionsEvent[] newArray(int size) {
+                        return new ConversationActionsEvent[size];
+                    }
+                };
+
+        private ConversationActionsEvent(Parcel in) {
+            super(in);
+        }
+
+        private ConversationActionsEvent(ConversationActionsEvent.Builder builder) {
+            super(builder);
+        }
+
+        /**
+         * Builder class for {@link ConversationActionsEvent}.
+         */
+        public static final class Builder
+                extends TextClassifierEvent.Builder<ConversationActionsEvent.Builder> {
+            /**
+             * Creates a builder for building {@link TextSelectionEvent}s.
+             *
+             * @param eventType The event type. e.g. {@link #TYPE_SMART_ACTION}
+             */
+            public Builder(@Type int eventType) {
+                super(TextClassifierEvent.CATEGORY_CONVERSATION_ACTIONS, eventType);
+            }
+
+            @Override
+            Builder self() {
+                return this;
+            }
+
+            /**
+             * Builds and returns a {@link ConversationActionsEvent}.
+             */
+            @NonNull
+            public ConversationActionsEvent build() {
+                return new ConversationActionsEvent(this);
+            }
+        }
     }
 }

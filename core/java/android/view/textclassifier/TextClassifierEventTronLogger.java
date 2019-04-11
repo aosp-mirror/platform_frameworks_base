@@ -65,9 +65,10 @@ public final class TextClassifierEventTronLogger {
         final LogMaker log = new LogMaker(category)
                 .setSubtype(getLogType(event))
                 .addTaggedData(FIELD_TEXT_CLASSIFIER_SESSION_ID, event.getResultId())
-                .addTaggedData(FIELD_TEXTCLASSIFIER_MODEL, getModelName(event))
-                .addTaggedData(FIELD_TEXT_CLASSIFIER_SCORE, event.getScore());
-
+                .addTaggedData(FIELD_TEXTCLASSIFIER_MODEL, getModelName(event));
+        if (event.getScores().length >= 1) {
+            log.addTaggedData(FIELD_TEXT_CLASSIFIER_SCORE, event.getScores()[0]);
+        }
         String[] entityTypes = event.getEntityTypes();
         // The old logger does not support a field of list type, and thus workaround by store them
         // in three separate fields. This is not an issue with the new logger.

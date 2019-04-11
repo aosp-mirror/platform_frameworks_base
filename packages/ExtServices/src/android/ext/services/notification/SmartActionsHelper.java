@@ -338,7 +338,7 @@ public class SmartActionsHelper {
                 createTextClassifierEventBuilder(
                         TextClassifierEvent.TYPE_SMART_ACTION, session.resultId)
                         .setEntityTypes(ConversationAction.TYPE_TEXT_REPLY)
-                        .setScore(session.repliesScores.getOrDefault(reply, 0f))
+                        .setScores(session.repliesScores.getOrDefault(reply, 0f))
                         .build();
         mTextClassifier.onTextClassifierEvent(textClassifierEvent);
     }
@@ -381,11 +381,9 @@ public class SmartActionsHelper {
                 .build();
     }
 
-    private TextClassifierEvent.Builder createTextClassifierEventBuilder(
+    private TextClassifierEvent.ConversationActionsEvent.Builder createTextClassifierEventBuilder(
             int eventType, String resultId) {
-        return new TextClassifierEvent.Builder(
-                TextClassifierEvent.CATEGORY_CONVERSATION_ACTIONS, eventType)
-                .setEventTime(System.currentTimeMillis())
+        return new TextClassifierEvent.ConversationActionsEvent.Builder(eventType)
                 .setEventContext(
                         new TextClassificationContext.Builder(
                                 mContext.getPackageName(), TextClassifier.WIDGET_TYPE_NOTIFICATION)
