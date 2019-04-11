@@ -18,6 +18,7 @@ package android.bluetooth;
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -351,6 +352,7 @@ public final class BluetoothDevice implements Parcelable {
 
     /**
      * Manufacturer name of this Bluetooth device
+     * Data type should be {@String} as {@link Byte} array.
      * @hide
      */
     @SystemApi
@@ -358,6 +360,7 @@ public final class BluetoothDevice implements Parcelable {
 
     /**
      * Model name of this Bluetooth device
+     * Data type should be {@String} as {@link Byte} array.
      * @hide
      */
     @SystemApi
@@ -365,6 +368,7 @@ public final class BluetoothDevice implements Parcelable {
 
     /**
      * Software version of this Bluetooth device
+     * Data type should be {@String} as {@link Byte} array.
      * @hide
      */
     @SystemApi
@@ -372,6 +376,7 @@ public final class BluetoothDevice implements Parcelable {
 
     /**
      * Hardware version of this Bluetooth device
+     * Data type should be {@String} as {@link Byte} array.
      * @hide
      */
     @SystemApi
@@ -379,6 +384,7 @@ public final class BluetoothDevice implements Parcelable {
 
     /**
      * Package name of the companion app, if any
+     * Data type should be {@String} as {@link Byte} array.
      * @hide
      */
     @SystemApi
@@ -386,6 +392,7 @@ public final class BluetoothDevice implements Parcelable {
 
     /**
      * URI to the main icon shown on the settings UI
+     * Data type should be {@link Byte} array.
      * @hide
      */
     @SystemApi
@@ -393,80 +400,91 @@ public final class BluetoothDevice implements Parcelable {
 
     /**
      * Whether this device is an untethered headset with left, right and case
+     * Data type should be {@String} as {@link Byte} array.
      * @hide
      */
     @SystemApi
-    public static final int METADATA_IS_UNTHETHERED_HEADSET = 6;
+    public static final int METADATA_IS_UNTETHERED_HEADSET = 6;
 
     /**
      * URI to icon of the left headset
+     * Data type should be {@link Byte} array.
      * @hide
      */
     @SystemApi
-    public static final int METADATA_UNTHETHERED_LEFT_ICON = 7;
+    public static final int METADATA_UNTETHERED_LEFT_ICON = 7;
 
     /**
      * URI to icon of the right headset
+     * Data type should be {@link Byte} array.
      * @hide
      */
     @SystemApi
-    public static final int METADATA_UNTHETHERED_RIGHT_ICON = 8;
+    public static final int METADATA_UNTETHERED_RIGHT_ICON = 8;
 
     /**
      * URI to icon of the headset charging case
+     * Data type should be {@link Byte} array.
      * @hide
      */
     @SystemApi
-    public static final int METADATA_UNTHETHERED_CASE_ICON = 9;
+    public static final int METADATA_UNTETHERED_CASE_ICON = 9;
 
     /**
-     * Battery level (0-100), {@link BluetoothDevice#BATTERY_LEVEL_UNKNOWN}
-     * is invalid, of the left headset
+     * Battery level of left headset
+     * Data type should be {@String} 0-100 as {@link Byte} array, otherwise
+     * as invalid.
      * @hide
      */
     @SystemApi
-    public static final int METADATA_UNTHETHERED_LEFT_BATTERY = 10;
+    public static final int METADATA_UNTETHERED_LEFT_BATTERY = 10;
 
     /**
-     * Battery level (0-100), {@link BluetoothDevice#BATTERY_LEVEL_UNKNOWN}
-     * is invalid, of the right headset
+     * Battery level of rigth headset
+     * Data type should be {@String} 0-100 as {@link Byte} array, otherwise
+     * as invalid.
      * @hide
      */
     @SystemApi
-    public static final int METADATA_UNTHETHERED_RIGHT_BATTERY = 11;
+    public static final int METADATA_UNTETHERED_RIGHT_BATTERY = 11;
 
     /**
-     * Battery level (0-100), {@link BluetoothDevice#BATTERY_LEVEL_UNKNOWN}
-     * is invalid, of the headset charging case
+     * Battery level of the headset charging case
+     * Data type should be {@String} 0-100 as {@link Byte} array, otherwise
+     * as invalid.
      * @hide
      */
     @SystemApi
-    public static final int METADATA_UNTHETHERED_CASE_BATTERY = 12;
+    public static final int METADATA_UNTETHERED_CASE_BATTERY = 12;
 
     /**
      * Whether the left headset is charging
+     * Data type should be {@String} as {@link Byte} array.
      * @hide
      */
     @SystemApi
-    public static final int METADATA_UNTHETHERED_LEFT_CHARGING = 13;
+    public static final int METADATA_UNTETHERED_LEFT_CHARGING = 13;
 
     /**
      * Whether the right headset is charging
+     * Data type should be {@String} as {@link Byte} array.
      * @hide
      */
     @SystemApi
-    public static final int METADATA_UNTHETHERED_RIGHT_CHARGING = 14;
+    public static final int METADATA_UNTETHERED_RIGHT_CHARGING = 14;
 
     /**
      * Whether the headset charging case is charging
+     * Data type should be {@String} as {@link Byte} array.
      * @hide
      */
     @SystemApi
-    public static final int METADATA_UNTHETHERED_CASE_CHARGING = 15;
+    public static final int METADATA_UNTETHERED_CASE_CHARGING = 15;
 
     /**
-     * URI to the enhanced settings UI slice, null or empty String means
-     * the UI does not exist
+     * URI to the enhanced settings UI slice
+     * Data type should be {@String} as {@link Byte} array, null means
+     * the UI does not exist.
      * @hide
      */
     @SystemApi
@@ -2243,21 +2261,21 @@ public final class BluetoothDevice implements Parcelable {
      * {@link #BOND_NONE}.
      *
      * @param key must be within the list of BluetoothDevice.METADATA_*
-     * @param value the string data to set for key. Must be less than
+     * @param value a byte array data to set for key. Must be less than
      * {@link BluetoothAdapter#METADATA_MAX_LENGTH} characters in length
      * @return true on success, false on error
      * @hide
     */
     @SystemApi
     @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
-    public boolean setMetadata(int key, String value) {
+    public boolean setMetadata(int key, @NonNull byte[] value) {
         final IBluetooth service = sService;
         if (service == null) {
             Log.e(TAG, "Bluetooth is not enabled. Cannot set metadata");
             return false;
         }
-        if (value.length() > METADATA_MAX_LENGTH) {
-            throw new IllegalArgumentException("value length is " + value.length()
+        if (value.length > METADATA_MAX_LENGTH) {
+            throw new IllegalArgumentException("value length is " + value.length
                     + ", should not over " + METADATA_MAX_LENGTH);
         }
         try {
@@ -2272,12 +2290,13 @@ public final class BluetoothDevice implements Parcelable {
      * Get a keyed metadata for this {@link BluetoothDevice} as {@link String}
      *
      * @param key must be within the list of BluetoothDevice.METADATA_*
-     * @return Metadata of the key as string, null on error or not found
+     * @return Metadata of the key as byte array, null on error or not found
      * @hide
      */
     @SystemApi
+    @Nullable
     @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
-    public String getMetadata(int key) {
+    public byte[] getMetadata(int key) {
         final IBluetooth service = sService;
         if (service == null) {
             Log.e(TAG, "Bluetooth is not enabled. Cannot get metadata");
