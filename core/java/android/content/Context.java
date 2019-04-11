@@ -3820,10 +3820,7 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a {@link
-     * android.net.wifi.rtt.WifiRttManager} for ranging devices with wifi
-     *
-     * Note: this is a replacement for WIFI_RTT_SERVICE above. It will
-     * be renamed once final implementation in place.
+     * android.net.wifi.rtt.WifiRttManager} for ranging devices with wifi.
      *
      * @see #getSystemService(String)
      * @see android.net.wifi.rtt.WifiRttManager
