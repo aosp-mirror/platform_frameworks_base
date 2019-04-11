@@ -34,7 +34,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
-import android.os.IRemoteCallback;
 import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -50,7 +49,7 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.android.internal.colorextraction.ColorExtractor;
-import com.android.internal.colorextraction.drawable.GradientDrawable;
+import com.android.internal.colorextraction.drawable.ScrimDrawable;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.Utils;
@@ -87,9 +86,9 @@ import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.utilities.Utilities;
+import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.shared.recents.view.AppTransitionAnimationSpecCompat;
 import com.android.systemui.shared.recents.view.AppTransitionAnimationSpecsFuture;
 import com.android.systemui.shared.recents.view.RecentsTransition;
@@ -134,7 +133,7 @@ public class RecentsView extends FrameLayout {
     private int mDividerSize;
 
     private float mBusynessFactor;
-    private GradientDrawable mBackgroundScrim;
+    private ScrimDrawable mBackgroundScrim;
     private ColorDrawable mMultiWindowBackgroundScrim;
     private ValueAnimator mBackgroundScrimAnimator;
     private Point mTmpDisplaySize = new Point();
@@ -172,7 +171,7 @@ public class RecentsView extends FrameLayout {
         mDividerSize = ssp.getDockedDividerSize(context);
         mTouchHandler = new RecentsViewTouchHandler(this);
         mFlingAnimationUtils = new FlingAnimationUtils(context, 0.3f);
-        mBackgroundScrim = new GradientDrawable(context);
+        mBackgroundScrim = new ScrimDrawable();
         mMultiWindowBackgroundScrim = new ColorDrawable();
 
         LayoutInflater inflater = LayoutInflater.from(context);
@@ -395,7 +394,7 @@ public class RecentsView extends FrameLayout {
      * @param animated Interpolate colors if true.
      */
     public void setScrimColors(ColorExtractor.GradientColors scrimColors, boolean animated) {
-        mBackgroundScrim.setColors(scrimColors, animated);
+        mBackgroundScrim.setColor(scrimColors.getMainColor(), animated);
         int alpha = mMultiWindowBackgroundScrim.getAlpha();
         mMultiWindowBackgroundScrim.setColor(scrimColors.getMainColor());
         mMultiWindowBackgroundScrim.setAlpha(alpha);
@@ -467,7 +466,6 @@ public class RecentsView extends FrameLayout {
         // Needs to know the screen size since the gradient never scales up or down
         // even when bounds change.
         mContext.getDisplay().getRealSize(mTmpDisplaySize);
-        mBackgroundScrim.setScreenSize(mTmpDisplaySize.x, mTmpDisplaySize.y);
         mBackgroundScrim.setBounds(left, top, right, bottom);
         mMultiWindowBackgroundScrim.setBounds(0, 0, mTmpDisplaySize.x, mTmpDisplaySize.y);
 

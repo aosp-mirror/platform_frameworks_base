@@ -18,6 +18,11 @@ package com.android.systemui.colorextraction;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
 
 import android.app.WallpaperColors;
 import android.app.WallpaperManager;
@@ -27,7 +32,9 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.colorextraction.ColorExtractor;
+import com.android.internal.colorextraction.types.Tonal;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -57,7 +64,7 @@ public class SysuiColorExtractorTests extends SysuiTestCase {
         simulateEvent(extractor);
         extractor.setWallpaperVisible(false);
 
-        ColorExtractor.GradientColors fallbackColors = extractor.getFallbackColors();
+        ColorExtractor.GradientColors fallbackColors = extractor.getNeutralColors();
 
         for (int type : sTypes) {
             assertEquals("Not using fallback!",
@@ -96,7 +103,7 @@ public class SysuiColorExtractorTests extends SysuiTestCase {
         extractor.setWallpaperVisible(true);
         extractor.setHasBackdrop(true);
 
-        ColorExtractor.GradientColors fallbackColors = extractor.getFallbackColors();
+        ColorExtractor.GradientColors fallbackColors = extractor.getNeutralColors();
 
         for (int type : sTypes) {
             assertEquals("Not using fallback!",
@@ -106,6 +113,19 @@ public class SysuiColorExtractorTests extends SysuiTestCase {
         }
     }
 
+    @Test
+    public void onUiModeChanged_reloadsColors() {
+        Tonal tonal = mock(Tonal.class);
+        ConfigurationController configurationController = mock(ConfigurationController.class);
+        SysuiColorExtractor sysuiColorExtractor = new SysuiColorExtractor(getContext(),
+                tonal, configurationController, false /* registerVisibility */);
+        verify(configurationController).addCallback(eq(sysuiColorExtractor));
+
+        reset(tonal);
+        sysuiColorExtractor.onUiModeChanged();
+        verify(tonal).applyFallback(any(), any());
+    }
+
     private SysuiColorExtractor getTestableExtractor(ColorExtractor.GradientColors colors) {
         return new SysuiColorExtractor(getContext(),
                 (inWallpaperColors, outGradientColorsNormal, outGradientColorsDark,
@@ -113,7 +133,7 @@ public class SysuiColorExtractorTests extends SysuiTestCase {
                     outGradientColorsNormal.set(colors);
                     outGradientColorsDark.set(colors);
                     outGradientColorsExtraDark.set(colors);
-                }, false);
+                }, mock(ConfigurationController.class), false);
     }
 
     private void simulateEvent(SysuiColorExtractor extractor) {

@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.WallpaperColors;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.util.Log;
 import android.util.MathUtils;
@@ -51,11 +52,13 @@ public class Tonal implements ExtractionType {
 
     private static final boolean DEBUG = true;
 
-    public static final int MAIN_COLOR_LIGHT = 0xffe0e0e0;
-    public static final int MAIN_COLOR_DARK = 0xff212121;
+    public static final int MAIN_COLOR_LIGHT = 0xffdadce0;
+    public static final int MAIN_COLOR_DARK = 0xff202124;
+    public static final int MAIN_COLOR_REGULAR = 0xff000000;
 
     private final TonalPalette mGreyPalette;
     private final ArrayList<TonalPalette> mTonalPalettes;
+    private final Context mContext;
 
     // Temporary variable to avoid allocations
     private float[] mTmpHSL = new float[3];
@@ -64,6 +67,7 @@ public class Tonal implements ExtractionType {
 
         ConfigParser parser = new ConfigParser(context);
         mTonalPalettes = parser.getTonalPalettes();
+        mContext = context;
 
         mGreyPalette = mTonalPalettes.get(0);
         mTonalPalettes.remove(0);
@@ -247,7 +251,20 @@ public class Tonal implements ExtractionType {
         boolean light = inWallpaperColors != null
                 && (inWallpaperColors.getColorHints() & WallpaperColors.HINT_SUPPORTS_DARK_TEXT)
                 != 0;
-        final int color = light ? MAIN_COLOR_LIGHT : MAIN_COLOR_DARK;
+        boolean dark = inWallpaperColors != null
+                && (inWallpaperColors.getColorHints() & WallpaperColors.HINT_SUPPORTS_DARK_THEME)
+                != 0;
+        final int color;
+        final boolean inNightMode = (mContext.getResources().getConfiguration().uiMode
+                & android.content.res.Configuration.UI_MODE_NIGHT_MASK)
+                == Configuration.UI_MODE_NIGHT_YES;
+        if (light) {
+            color = MAIN_COLOR_LIGHT;
+        } else if (dark || inNightMode) {
+            color = MAIN_COLOR_DARK;
+        } else {
+            color = MAIN_COLOR_REGULAR;
+        }
         final float[] hsl = new float[3];
         ColorUtils.colorToHSL(color, hsl);
 
