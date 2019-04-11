@@ -75,6 +75,7 @@ public class MobileSignalController extends SignalController<
     private SignalStrength mSignalStrength;
     private MobileIconGroup mDefaultIcons;
     private Config mConfig;
+    private boolean mInflateSignalStrengths = false;
     // Some specific carriers have 5GE network which is special LTE CA network.
     private static final int NETWORK_TYPE_LTE_CA_5GE = TelephonyManager.MAX_NETWORK_TYPE + 1;
 
@@ -118,6 +119,7 @@ public class MobileSignalController extends SignalController<
 
     public void setConfiguration(Config config) {
         mConfig = config;
+        updateInflateSignalStrength();
         mapIconSets();
         updateTelephony();
     }
@@ -245,8 +247,14 @@ public class MobileSignalController extends SignalController<
         mNetworkToIconLookup.put(TelephonyManager.NETWORK_TYPE_IWLAN, TelephonyIcons.WFC);
     }
 
+    private void updateInflateSignalStrength() {
+        mInflateSignalStrengths = SubscriptionManager.getResourcesForSubId(mContext,
+               mSubscriptionInfo.getSubscriptionId())
+               .getBoolean(R.bool.config_inflateSignalStrength);
+    }
+
     private int getNumLevels() {
-        if (mConfig.inflateSignalStrengths) {
+        if (mInflateSignalStrengths) {
             return SignalStrength.NUM_SIGNAL_STRENGTH_BINS + 1;
         }
         return SignalStrength.NUM_SIGNAL_STRENGTH_BINS;
@@ -258,7 +266,7 @@ public class MobileSignalController extends SignalController<
             return SignalDrawable.getCarrierChangeState(getNumLevels());
         } else if (mCurrentState.connected) {
             int level = mCurrentState.level;
-            if (mConfig.inflateSignalStrengths) {
+            if (mInflateSignalStrengths) {
                 level++;
             }
             boolean dataDisabled = mCurrentState.userSetup
@@ -561,6 +569,7 @@ public class MobileSignalController extends SignalController<
         pw.println("  mSignalStrength=" + mSignalStrength + ",");
         pw.println("  mDataState=" + mDataState + ",");
         pw.println("  mDataNetType=" + mDataNetType + ",");
+        pw.println("  mInflateSignalStrengths=" + mInflateSignalStrengths + ",");
     }
 
     class MobilePhoneStateListener extends PhoneStateListener {

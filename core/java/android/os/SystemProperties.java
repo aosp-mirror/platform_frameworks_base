@@ -212,6 +212,21 @@ public class SystemProperties {
         }
     }
 
+    /**
+     * Remove the target callback.
+     *
+     * @param callback The {@link Runnable} that should be removed.
+     * @hide
+     */
+    @UnsupportedAppUsage
+    public static void removeChangeCallback(@NonNull Runnable callback) {
+        synchronized (sChangeCallbacks) {
+            if (sChangeCallbacks.contains(callback)) {
+                sChangeCallbacks.remove(callback);
+            }
+        }
+    }
+
     @SuppressWarnings("unused")  // Called from native code.
     private static void callChangeCallbacks() {
         synchronized (sChangeCallbacks) {

@@ -631,7 +631,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     public void notifyAssistantVisibilityChanged(float visibility) {
         try {
-            mOverviewProxy.onAssistantVisibilityChanged(visibility);
+            if (mOverviewProxy != null) {
+                mOverviewProxy.onAssistantVisibilityChanged(visibility);
+            }
         } catch (RemoteException e) {
             Log.e(TAG_OPS, "Failed to call onAssistantVisibilityChanged()", e);
         }

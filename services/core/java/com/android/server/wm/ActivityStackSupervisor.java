@@ -853,7 +853,6 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
                 // Schedule transaction.
                 mService.getLifecycleManager().scheduleTransaction(clientTransaction);
-                updateTopResumedActivityIfNeeded();
 
                 if ((proc.mInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE) != 0
                         && mService.mHasHeavyWeightFeature) {
@@ -2321,8 +2320,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         // mTopResumedActivityWaitingForPrev == true at this point would mean that an activity
         // before the prevTopActivity one hasn't reported back yet. So server never sent the top
         // resumed state change message to prevTopActivity.
-        if (prevActivityReceivedTopState) {
-            prevTopActivity.scheduleTopResumedActivityChanged(false /* onTop */);
+        if (prevActivityReceivedTopState
+                && prevTopActivity.scheduleTopResumedActivityChanged(false /* onTop */)) {
             scheduleTopResumedStateLossTimeout(prevTopActivity);
             mTopResumedActivityWaitingForPrev = true;
         }

@@ -1399,6 +1399,11 @@ public abstract class NotificationListenerService extends Service {
         }
 
         @Override
+        public void onCapabilitiesChanged() {
+            // no-op in the listener
+        }
+
+        @Override
         public void onNotificationChannelModification(String pkgName, UserHandle user,
                 NotificationChannel channel,
                 @ChannelOrGroupModificationTypes int modificationType) {

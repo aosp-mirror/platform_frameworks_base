@@ -57,8 +57,10 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     private int mDensity;
     private boolean mPulsing;
     private boolean mDozing;
+    private boolean mBouncerVisible;
     private boolean mLastDozing;
     private boolean mLastPulsing;
+    private boolean mLastBouncerVisible;
 
     private final Runnable mDrawOffTimeout = () -> update(true /* forceUpdate */);
     private float mDarkAmount;
@@ -109,9 +111,9 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         int state = getState();
         mIsFaceUnlockState = state == STATE_SCANNING_FACE;
         if (state != mLastState || mLastDozing != mDozing || mLastPulsing != mPulsing
-                || mLastScreenOn != mScreenOn || force) {
+                || mLastScreenOn != mScreenOn || mLastBouncerVisible != mBouncerVisible || force) {
             int iconAnimRes = getAnimationResForTransition(mLastState, state, mLastPulsing,
-                    mPulsing, mLastDozing, mDozing);
+                    mPulsing, mLastDozing, mDozing, mBouncerVisible);
             boolean isAnim = iconAnimRes != -1;
 
             Drawable icon;
@@ -159,6 +161,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
             mLastScreenOn = mScreenOn;
             mLastDozing = mDozing;
             mLastPulsing = mPulsing;
+            mLastBouncerVisible = mBouncerVisible;
         }
 
         setVisibility(mDozing && !mPulsing ? GONE : VISIBLE);
@@ -231,8 +234,8 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     }
 
     private static int getAnimationResForTransition(int oldState, int newState,
-            boolean wasPulsing, boolean pulsing,
-            boolean wasDozing, boolean dozing) {
+            boolean wasPulsing, boolean pulsing, boolean wasDozing, boolean dozing,
+            boolean bouncerVisible) {
 
         // Never animate when screen is off
         if (dozing && !pulsing) {
@@ -249,7 +252,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
             return com.android.internal.R.anim.lock_unlock;
         } else if (justLocked) {
             return com.android.internal.R.anim.lock_lock;
-        } else if (newState == STATE_SCANNING_FACE) {
+        } else if (newState == STATE_SCANNING_FACE && bouncerVisible) {
             return com.android.internal.R.anim.lock_scanning;
         } else if (!wasPulsing && pulsing && newState != STATE_LOCK_OPEN) {
             return com.android.internal.R.anim.lock_in;
@@ -297,5 +300,16 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         Drawable drawable = getDrawable().mutate();
         int color = ColorUtils.blendARGB(Color.TRANSPARENT, Color.WHITE, mDarkAmount);
         drawable.setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+    }
+
+    /**
+     * If bouncer is visible or not.
+     */
+    public void setBouncerVisible(boolean bouncerVisible) {
+        if (mBouncerVisible == bouncerVisible) {
+            return;
+        }
+        mBouncerVisible = bouncerVisible;
+        update();
     }
 }

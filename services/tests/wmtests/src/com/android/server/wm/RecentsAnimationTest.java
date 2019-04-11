@@ -71,6 +71,7 @@ public class RecentsAnimationTest extends ActivityTestsBase {
     @Test
     public void testCancelAnimationOnVisibleStackOrderChange() {
         ActivityDisplay display = mService.mRootActivityContainer.getDefaultDisplay();
+        display.mDisplayContent.mBoundsAnimationController = mock(BoundsAnimationController.class);
         ActivityStack fullscreenStack = display.createStack(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, true /* onTop */);
         new ActivityBuilder(mService)

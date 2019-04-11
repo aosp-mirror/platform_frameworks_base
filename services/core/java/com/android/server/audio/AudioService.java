@@ -1960,7 +1960,7 @@ public class AudioService extends IAudioService.Stub
             return;
         }
         for (final int groupedStream : avg.getLegacyStreamTypes()) {
-            setStreamVolume(stream, index, flags, callingPackage, callingPackage,
+            setStreamVolume(groupedStream, index, flags, callingPackage, callingPackage,
                             Binder.getCallingUid());
         }
     }
@@ -3368,8 +3368,14 @@ public class AudioService extends IAudioService.Stub
                 .append(Binder.getCallingPid()).toString();
         final boolean stateChanged = mDeviceBroker.setSpeakerphoneOn(on, eventSource);
         if (stateChanged) {
-            mContext.sendBroadcast(new Intent(AudioManager.ACTION_SPEAKERPHONE_STATE_CHANGED)
-                    .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY));
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                mContext.sendBroadcastAsUser(
+                        new Intent(AudioManager.ACTION_SPEAKERPHONE_STATE_CHANGED)
+                                .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY), UserHandle.ALL);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
         }
     }
 

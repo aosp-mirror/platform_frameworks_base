@@ -34,6 +34,7 @@ import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
 import static android.view.WindowManager.DOCKED_TOP;
 
+import static com.android.server.wm.BoundsAnimationController.FADE_IN;
 import static com.android.server.wm.BoundsAnimationController.NO_PIP_MODE_CHANGED_CALLBACKS;
 import static com.android.server.wm.BoundsAnimationController.SCHEDULE_PIP_MODE_CHANGED_ON_END;
 import static com.android.server.wm.BoundsAnimationController.SCHEDULE_PIP_MODE_CHANGED_ON_START;
@@ -148,6 +149,7 @@ public class TaskStack extends WindowContainer<Task> implements
     private boolean mCancelCurrentBoundsAnimation = false;
     private Rect mBoundsAnimationTarget = new Rect();
     private Rect mBoundsAnimationSourceHintBounds = new Rect();
+    private @BoundsAnimationController.AnimationType int mAnimationType;
 
     Rect mPreAnimationBounds = new Rect();
 
@@ -1572,7 +1574,8 @@ public class TaskStack extends WindowContainer<Task> implements
     }
 
     @Override  // AnimatesBounds
-    public boolean onAnimationStart(boolean schedulePipModeChangedCallback, boolean forceUpdate) {
+    public boolean onAnimationStart(boolean schedulePipModeChangedCallback, boolean forceUpdate,
+            @BoundsAnimationController.AnimationType int animationType) {
         // Hold the lock since this is called from the BoundsAnimator running on the UiThread
         synchronized (mWmService.mGlobalLock) {
             if (!isAttached()) {
@@ -1583,6 +1586,7 @@ public class TaskStack extends WindowContainer<Task> implements
             mBoundsAnimatingRequested = false;
             mBoundsAnimating = true;
             mCancelCurrentBoundsAnimation = false;
+            mAnimationType = animationType;
 
             // If we are changing UI mode, as in the PiP to fullscreen
             // transition, then we need to wait for the window to draw.
@@ -1599,7 +1603,8 @@ public class TaskStack extends WindowContainer<Task> implements
                 // I don't believe you...
             }
 
-            if (schedulePipModeChangedCallback && mActivityStack != null) {
+            if ((schedulePipModeChangedCallback || animationType == FADE_IN)
+                    && mActivityStack != null) {
                 // We need to schedule the PiP mode change before the animation up. It is possible
                 // in this case for the animation down to not have been completed, so always
                 // force-schedule and update to the client to ensure that it is notified that it
@@ -1613,6 +1618,21 @@ public class TaskStack extends WindowContainer<Task> implements
 
     @Override  // AnimatesBounds
     public void onAnimationEnd(boolean schedulePipModeChangedCallback, Rect finalStackSize,
+            boolean moveToFullscreen) {
+        if (mAnimationType == BoundsAnimationController.FADE_IN) {
+            setPinnedStackAlpha(1f);
+            try {
+                mWmService.mActivityTaskManager.notifyPinnedStackAnimationEnded();
+            } catch (RemoteException e) {
+                // I don't believe you...
+            }
+            return;
+        }
+
+        onBoundAnimationEnd(schedulePipModeChangedCallback, finalStackSize, moveToFullscreen);
+    }
+
+    private void onBoundAnimationEnd(boolean schedulePipModeChangedCallback, Rect finalStackSize,
             boolean moveToFullscreen) {
         if (inPinnedWindowingMode()) {
             // Update to the final bounds if requested. This is done here instead of in the bounds
@@ -1725,10 +1745,23 @@ public class TaskStack extends WindowContainer<Task> implements
         final @SchedulePipModeChangedState int finalSchedulePipModeChangedState =
                 schedulePipModeChangedState;
         final DisplayContent displayContent = getDisplayContent();
+        @BoundsAnimationController.AnimationType int intendedAnimationType =
+                displayContent.mBoundsAnimationController.getAnimationType();
+        if (intendedAnimationType == FADE_IN) {
+            if (fromFullscreen) {
+                setPinnedStackAlpha(0f);
+            }
+            if (toBounds.width() == fromBounds.width()
+                    && toBounds.height() == fromBounds.height()) {
+                intendedAnimationType = BoundsAnimationController.BOUNDS;
+            }
+        }
+
+        final @BoundsAnimationController.AnimationType int animationType = intendedAnimationType;
         displayContent.mBoundsAnimationController.getHandler().post(() -> {
             displayContent.mBoundsAnimationController.animateBounds(this, fromBounds,
                     finalToBounds, animationDuration, finalSchedulePipModeChangedState,
-                    fromFullscreen, toFullscreen);
+                    fromFullscreen, toFullscreen, animationType);
         });
     }
 
@@ -1903,6 +1936,20 @@ public class TaskStack extends WindowContainer<Task> implements
         if (mDimmer.updateDims(getPendingTransaction(), mTmpDimBoundsRect)) {
             scheduleAnimation();
         }
+    }
+
+    @Override
+    public boolean setPinnedStackAlpha(float alpha) {
+        // Hold the lock since this is called from the BoundsAnimator running on the UiThread
+        synchronized (mWmService.mGlobalLock) {
+            if (mCancelCurrentBoundsAnimation) {
+                return false;
+            }
+            getPendingTransaction().setAlpha(getSurfaceControl(), alpha);
+            scheduleAnimation();
+        }
+
+        return true;
     }
 
     public DisplayInfo getDisplayInfo() {

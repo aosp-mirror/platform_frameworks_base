@@ -214,13 +214,11 @@ public final class ConversationActions implements Parcelable {
         /**
          * Returns the extended data related to this conversation action.
          *
-         * <p><b>NOTE: </b>Each call to this method returns a new bundle copy so clients should
-         * prefer to hold a reference to the returned bundle rather than frequently calling this
-         * method.
+         * <p><b>NOTE: </b>Do not modify this bundle.
          */
         @NonNull
         public Bundle getExtras() {
-            return mExtras.deepCopy();
+            return mExtras;
         }
 
         /** Builder class to construct a {@link Message} */

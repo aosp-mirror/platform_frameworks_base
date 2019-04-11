@@ -85,9 +85,7 @@ class ImageProcessHelper {
             Bitmap bitmap = bitmaps[0];
             if (bitmap != null) {
                 int[] histogram = processHistogram(bitmap);
-                Float val = computePercentile85(bitmap, histogram);
-                bitmaps[0] = null;
-                return val;
+                return computePercentile85(bitmap, histogram);
             }
             Log.e(TAG, "Per85ComputeTask: Can't get bitmap");
             return DEFAULT_PER85;

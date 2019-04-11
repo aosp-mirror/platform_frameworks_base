@@ -18,7 +18,7 @@ package com.android.internal.util;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.ContentResolver.TypeInfo;
+import android.content.ContentResolver.MimeTypeInfo;
 import android.content.res.Resources;
 import android.graphics.drawable.Icon;
 import android.text.TextUtils;
@@ -34,9 +34,9 @@ import java.util.Objects;
 
 public class MimeIconUtils {
     @GuardedBy("sCache")
-    private static final ArrayMap<String, TypeInfo> sCache = new ArrayMap<>();
+    private static final ArrayMap<String, MimeTypeInfo> sCache = new ArrayMap<>();
 
-    private static TypeInfo buildTypeInfo(String mimeType, int iconId,
+    private static MimeTypeInfo buildTypeInfo(String mimeType, int iconId,
             int labelId, int extLabelId) {
         final Resources res = Resources.getSystem();
 
@@ -49,10 +49,10 @@ public class MimeIconUtils {
             label = res.getString(labelId);
         }
 
-        return new TypeInfo(Icon.createWithResource(res, iconId), label, label);
+        return new MimeTypeInfo(Icon.createWithResource(res, iconId), label, label);
     }
 
-    private static @Nullable TypeInfo buildTypeInfo(@NonNull String mimeType) {
+    private static @Nullable MimeTypeInfo buildTypeInfo(@NonNull String mimeType) {
         switch (mimeType) {
             case "inode/directory":
             case "vnd.android.document/directory":
@@ -222,7 +222,7 @@ public class MimeIconUtils {
         }
     }
 
-    private static @Nullable TypeInfo buildGenericTypeInfo(@NonNull String mimeType) {
+    private static @Nullable MimeTypeInfo buildGenericTypeInfo(@NonNull String mimeType) {
         // Look for partial matches
         if (mimeType.startsWith("audio/")) {
             return buildTypeInfo(mimeType, R.drawable.ic_doc_audio,
@@ -252,12 +252,12 @@ public class MimeIconUtils {
                 R.string.mime_type_generic, R.string.mime_type_generic_ext);
     }
 
-    public static @NonNull TypeInfo getTypeInfo(@NonNull String mimeType) {
+    public static @NonNull MimeTypeInfo getTypeInfo(@NonNull String mimeType) {
         // Normalize MIME type
         mimeType = mimeType.toLowerCase(Locale.US);
 
         synchronized (sCache) {
-            TypeInfo res = sCache.get(mimeType);
+            MimeTypeInfo res = sCache.get(mimeType);
             if (res == null) {
                 res = buildTypeInfo(mimeType);
                 sCache.put(mimeType, res);

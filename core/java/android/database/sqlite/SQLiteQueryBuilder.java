@@ -52,7 +52,7 @@ public class SQLiteQueryBuilder {
     private static final Pattern sLimitPattern =
             Pattern.compile("\\s*\\d+\\s*(,\\s*\\d+\\s*)?");
     private static final Pattern sAggregationPattern = Pattern.compile(
-            "(?i)(AVG|COUNT|MAX|MIN|SUM|TOTAL)\\((.+)\\)");
+            "(?i)(AVG|COUNT|MAX|MIN|SUM|TOTAL|GROUP_CONCAT)\\((.+)\\)");
 
     private Map<String, String> mProjectionMap = null;
     private List<Pattern> mProjectionGreylist = null;

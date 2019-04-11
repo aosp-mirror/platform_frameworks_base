@@ -1130,7 +1130,7 @@ public class StorageManager {
     public @NonNull StorageVolume getStorageVolume(@NonNull Uri uri) {
         final String volumeName = MediaStore.getVolumeName(uri);
         switch (volumeName) {
-            case MediaStore.VOLUME_EXTERNAL:
+            case MediaStore.VOLUME_EXTERNAL_PRIMARY:
                 return getPrimaryStorageVolume();
             default:
                 for (StorageVolume vol : getStorageVolumes()) {
@@ -1652,6 +1652,26 @@ public class StorageManager {
      */
     public static boolean checkPermissionAndAppOp(Context context, boolean enforce,
             int pid, int uid, String packageName, String permission, int op) {
+        return checkPermissionAndAppOp(context, enforce, pid, uid, packageName, permission, op,
+                true);
+    }
+
+    /**
+     * Check that given app holds both permission and appop but do not noteOp.
+     * @hide
+     */
+    public static boolean checkPermissionAndCheckOp(Context context, boolean enforce,
+            int pid, int uid, String packageName, String permission, int op) {
+        return checkPermissionAndAppOp(context, enforce, pid, uid, packageName, permission, op,
+                false);
+    }
+
+    /**
+     * Check that given app holds both permission and appop.
+     * @hide
+     */
+    private static boolean checkPermissionAndAppOp(Context context, boolean enforce,
+            int pid, int uid, String packageName, String permission, int op, boolean note) {
         if (context.checkPermission(permission, pid, uid) != PERMISSION_GRANTED) {
             if (enforce) {
                 throw new SecurityException(
@@ -1662,7 +1682,21 @@ public class StorageManager {
         }
 
         AppOpsManager appOps = context.getSystemService(AppOpsManager.class);
-        final int mode = appOps.noteOpNoThrow(op, uid, packageName);
+        final int mode;
+        if (note) {
+            mode = appOps.noteOpNoThrow(op, uid, packageName);
+        } else {
+            try {
+                appOps.checkPackage(uid, packageName);
+            } catch (SecurityException e) {
+                if (enforce) {
+                    throw e;
+                } else {
+                    return false;
+                }
+            }
+            mode = appOps.checkOpNoThrow(op, uid, packageName);
+        }
         switch (mode) {
             case AppOpsManager.MODE_ALLOWED:
                 return true;

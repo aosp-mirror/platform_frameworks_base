@@ -220,6 +220,26 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
         mSurfaceSynchronizer = synchronizer;
     }
 
+    /**
+     * BubbleStackView is lazily created by this method the first time a Bubble is added. This
+     * method initializes the stack view and adds it to the StatusBar just above the scrim.
+     */
+    private void ensureStackViewCreated() {
+        if (mStackView == null) {
+            mStackView = new BubbleStackView(mContext, mBubbleData, mSurfaceSynchronizer);
+            ViewGroup sbv = mStatusBarWindowController.getStatusBarView();
+            // TODO(b/130237686): When you expand the shade on top of expanded bubble, there is no
+            //  scrim between bubble and the shade
+            int bubblePosition = sbv.indexOfChild(sbv.findViewById(R.id.scrim_behind)) + 1;
+            sbv.addView(mStackView, bubblePosition,
+                    new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
+            if (mExpandListener != null) {
+                mStackView.setExpandListener(mExpandListener);
+            }
+            mStackView.setOnBlockedListener(this);
+        }
+    }
+
     @Override
     public void onUiModeChanged() {
         if (mStackView != null) {
@@ -325,27 +345,15 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
     /**
      * Adds or updates a bubble associated with the provided notification entry.
      *
-     * @param notif          the notification associated with this bubble.
+     * @param notif the notification associated with this bubble.
      */
     void updateBubble(NotificationEntry notif) {
         if (mStackView != null && mBubbleData.getBubble(notif.key) != null) {
             // It's an update
             mStackView.updateBubble(notif);
         } else {
-            if (mStackView == null) {
-                mStackView = new BubbleStackView(mContext, mBubbleData, mSurfaceSynchronizer);
-                ViewGroup sbv = mStatusBarWindowController.getStatusBarView();
-                // XXX: Bug when you expand the shade on top of expanded bubble, there is no scrim
-                // between bubble and the shade
-                int bubblePosition = sbv.indexOfChild(sbv.findViewById(R.id.scrim_behind)) + 1;
-                sbv.addView(mStackView, bubblePosition,
-                        new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
-                if (mExpandListener != null) {
-                    mStackView.setExpandListener(mExpandListener);
-                }
-                mStackView.setOnBlockedListener(this);
-            }
             // It's new
+            ensureStackViewCreated();
             mStackView.addBubble(notif);
         }
         if (shouldAutoExpand(notif)) {

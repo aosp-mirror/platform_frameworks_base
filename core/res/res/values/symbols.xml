@@ -2777,6 +2777,7 @@
   <java-symbol type="dimen" name="chooser_edge_margin_normal" />
   <java-symbol type="dimen" name="chooser_preview_image_font_size"/>
   <java-symbol type="dimen" name="chooser_preview_width" />
+  <java-symbol type="dimen" name="chooser_preview_image_border"/>
   <java-symbol type="dimen" name="chooser_max_collapsed_height" />
   <java-symbol type="layout" name="chooser_grid" />
   <java-symbol type="layout" name="chooser_grid_preview_text" />
@@ -2790,6 +2791,7 @@
   <java-symbol type="drawable" name="scroll_indicator_material" />
 
   <java-symbol type="layout" name="chooser_row" />
+  <java-symbol type="color" name="chooser_row_divider" />
   <java-symbol type="layout" name="chooser_row_direct_share" />
   <java-symbol type="bool" name="config_supportDoubleTapWake" />
   <java-symbol type="drawable" name="ic_perm_device_info" />
@@ -3148,7 +3150,6 @@
 
   <java-symbol type="bool" name="config_setColorTransformAccelerated" />
   <java-symbol type="bool" name="config_setColorTransformAcceleratedPerLayer" />
-  <java-symbol type="bool" name="config_displayWhiteBalanceAvailable" />
   <java-symbol type="bool" name="config_nightDisplayAvailable" />
   <java-symbol type="bool" name="config_allowDisablingAssistDisclosure" />
   <java-symbol type="integer" name="config_defaultNightDisplayAutoMode" />
@@ -3160,8 +3161,8 @@
   <java-symbol type="array" name="config_nightDisplayColorTemperatureCoefficients" />
   <java-symbol type="array" name="config_nightDisplayColorTemperatureCoefficientsNative" />
   <java-symbol type="array" name="config_availableColorModes" />
-
   <java-symbol type="bool" name="config_displayWhiteBalanceAvailable" />
+  <java-symbol type="bool" name="config_displayWhiteBalanceEnabledDefault" />
   <java-symbol type="integer" name="config_displayWhiteBalanceColorTemperatureMin" />
   <java-symbol type="integer" name="config_displayWhiteBalanceColorTemperatureMax" />
   <java-symbol type="integer" name="config_displayWhiteBalanceColorTemperatureDefault" />

@@ -179,8 +179,10 @@ public class NavigationBarContextTest extends SysuiTestCase {
         final int unusedColor = 0;
         final Drawable d = mock(Drawable.class);
         final ContextualButton button = spy(mBtn0);
-        final KeyButtonDrawable kbd1 = spy(new KeyButtonDrawable(d, unusedColor, unusedColor));
-        final KeyButtonDrawable kbd2 = spy(new KeyButtonDrawable(d, unusedColor, unusedColor));
+        final KeyButtonDrawable kbd1 = spy(new KeyButtonDrawable(d, unusedColor, unusedColor,
+                false /* horizontalFlip */));
+        final KeyButtonDrawable kbd2 = spy(new KeyButtonDrawable(d, unusedColor, unusedColor,
+                false /* horizontalFlip */));
         kbd1.setDarkIntensity(TEST_DARK_INTENSITY);
         kbd2.setDarkIntensity(0f);
 

@@ -55,6 +55,7 @@ import android.util.Log;
 import android.util.MathUtils;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
@@ -108,16 +109,10 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private final SubscriptionDefaults mSubDefaults;
     private final DataSaverController mDataSaverController;
     private final CurrentUserTracker mUserTracker;
+    private final Object mLock = new Object();
     private Config mConfig;
 
-    private PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
-        @Override
-        public void onActiveDataSubscriptionIdChanged(int subId) {
-            mActiveMobileDataSubscription = subId;
-            doUpdateMobileControllers();
-        }
-    };
-
+    private PhoneStateListener mPhoneStateListener;
     private int mActiveMobileDataSubscription = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
     // Subcontrollers.
@@ -279,6 +274,14 @@ public class NetworkControllerImpl extends BroadcastReceiver
         // TODO: Move off of the deprecated CONNECTIVITY_ACTION broadcast and rely on callbacks
         // exclusively for status bar icons.
         mConnectivityManager.registerDefaultNetworkCallback(callback, mReceiverHandler);
+        // Register the listener on our bg looper
+        mPhoneStateListener = new PhoneStateListener(bgLooper) {
+            @Override
+            public void onActiveDataSubscriptionIdChanged(int subId) {
+                mActiveMobileDataSubscription = subId;
+                doUpdateMobileControllers();
+            }
+        };
     }
 
     public DataSaverController getDataSaverController() {
@@ -600,7 +603,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
             updateNoSims();
             return;
         }
-        setCurrentSubscriptions(subscriptions);
+        synchronized (mLock) {
+            setCurrentSubscriptionsLocked(subscriptions);
+        }
         updateNoSims();
         recalculateEmergency();
     }
@@ -628,8 +633,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
         return false;
     }
 
+    @GuardedBy("mLock")
     @VisibleForTesting
-    void setCurrentSubscriptions(List<SubscriptionInfo> subscriptions) {
+    public void setCurrentSubscriptionsLocked(List<SubscriptionInfo> subscriptions) {
         Collections.sort(subscriptions, new Comparator<SubscriptionInfo>() {
             @Override
             public int compare(SubscriptionInfo lhs, SubscriptionInfo rhs) {

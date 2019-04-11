@@ -309,6 +309,7 @@ applications that come with the platform
         <permission name="android.permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS"/>
         <permission name="android.permission.SET_WALLPAPER" />
         <permission name="android.permission.SET_WALLPAPER_COMPONENT" />
+        <permission name="android.permission.REQUEST_NOTIFICATION_ASSISTANT_SERVICE" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">

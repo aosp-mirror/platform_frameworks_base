@@ -19,6 +19,7 @@
 #include <inttypes.h>
 #include <string.h>
 #include <algorithm>
+#include <array>
 #include <memory>
 #include <vector>
 #include <cmath>
@@ -976,6 +977,153 @@ static status_t generateNoiseProfile(const double* perChannelNoiseProfile, uint8
     return OK;
 }
 
+static void undistort(/*inout*/double& x, /*inout*/double& y,
+        const std::array<float, 6>& distortion,
+        const float cx, const float cy, const float f) {
+    double xp = (x - cx) / f;
+    double yp = (y - cy) / f;
+
+    double x2 = xp * xp;
+    double y2 = yp * yp;
+    double r2 = x2 + y2;
+    double xy2 = 2.0 * xp * yp;
+
+    const float k0 = distortion[0];
+    const float k1 = distortion[1];
+    const float k2 = distortion[2];
+    const float k3 = distortion[3];
+    const float p1 = distortion[4];
+    const float p2 = distortion[5];
+
+    double kr = k0 + ((k3 * r2 + k2) * r2 + k1) * r2;
+    double xpp = xp * kr + p1 * xy2 + p2 * (r2 + 2.0 * x2);
+    double ypp = yp * kr + p1 * (r2 + 2.0 * y2) + p2 * xy2;
+
+    x = xpp * f + cx;
+    y = ypp * f + cy;
+    return;
+}
+
+static inline bool unDistortWithinPreCorrArray(
+        double x, double y,
+        const std::array<float, 6>& distortion,
+        const float cx, const float cy, const float f,
+        int preCorrW, int preCorrH) {
+    undistort(x, y, distortion, cx, cy, f);
+    if (x < 0.0 || y < 0.0 || x > preCorrW - 1 || y > preCorrH - 1) {
+        return false;
+    }
+    return true;
+}
+
+static inline bool boxWithinPrecorrectionArray(
+        int left, int top, int right, int bottom,
+        const std::array<float, 6>& distortion,
+        const float& cx, const float& cy, const float& f,
+        const int& preCorrW, const int& preCorrH){
+    // Top row
+    if (!unDistortWithinPreCorrArray(left, top, distortion, cx, cy, f, preCorrW, preCorrH)) {
+        return false;
+    }
+
+    if (!unDistortWithinPreCorrArray(cx, top, distortion, cx, cy, f, preCorrW, preCorrH)) {
+        return false;
+    }
+
+    if (!unDistortWithinPreCorrArray(right, top, distortion, cx, cy, f, preCorrW, preCorrH)) {
+        return false;
+    }
+
+    // Middle row
+    if (!unDistortWithinPreCorrArray(left, cy, distortion, cx, cy, f, preCorrW, preCorrH)) {
+        return false;
+    }
+
+    if (!unDistortWithinPreCorrArray(right, cy, distortion, cx, cy, f, preCorrW, preCorrH)) {
+        return false;
+    }
+
+    // Bottom row
+    if (!unDistortWithinPreCorrArray(left, bottom, distortion, cx, cy, f, preCorrW, preCorrH)) {
+        return false;
+    }
+
+    if (!unDistortWithinPreCorrArray(cx, bottom, distortion, cx, cy, f, preCorrW, preCorrH)) {
+        return false;
+    }
+
+    if (!unDistortWithinPreCorrArray(right, bottom, distortion, cx, cy, f, preCorrW, preCorrH)) {
+        return false;
+    }
+    return true;
+}
+
+static inline bool scaledBoxWithinPrecorrectionArray(
+        double scale/*must be <= 1.0*/,
+        const std::array<float, 6>& distortion,
+        const float cx, const float cy, const float f,
+        const int preCorrW, const int preCorrH){
+
+    double left = cx * (1.0 - scale);
+    double right = (preCorrW - 1) * scale + cx * (1.0 - scale);
+    double top = cy * (1.0 - scale);
+    double bottom = (preCorrH - 1) * scale + cy * (1.0 - scale);
+
+    return boxWithinPrecorrectionArray(left, top, right, bottom,
+            distortion, cx, cy, f, preCorrW, preCorrH);
+}
+
+static status_t findPostCorrectionScale(
+        double stepSize, double minScale,
+        const std::array<float, 6>& distortion,
+        const float cx, const float cy, const float f,
+        const int preCorrW, const int preCorrH,
+        /*out*/ double* outScale) {
+    if (outScale == nullptr) {
+        ALOGE("%s: outScale must not be null", __FUNCTION__);
+        return BAD_VALUE;
+    }
+
+    for (double scale = 1.0; scale > minScale; scale -= stepSize) {
+        if (scaledBoxWithinPrecorrectionArray(
+                scale, distortion, cx, cy, f, preCorrW, preCorrH)) {
+            *outScale = scale;
+            return OK;
+        }
+    }
+    ALOGE("%s: cannot find cropping scale for lens distortion: stepSize %f, minScale %f",
+            __FUNCTION__, stepSize, minScale);
+    return BAD_VALUE;
+}
+
+// Apply a scale factor to distortion coefficients so that the image is zoomed out and all pixels
+// are sampled within the precorrection array
+static void normalizeLensDistortion(
+        /*inout*/std::array<float, 6>& distortion,
+        float cx, float cy, float f, int preCorrW, int preCorrH) {
+    ALOGV("%s: distortion [%f, %f, %f, %f, %f, %f], (cx,cy) (%f, %f), f %f, (W,H) (%d, %d)",
+            __FUNCTION__, distortion[0], distortion[1], distortion[2],
+            distortion[3], distortion[4], distortion[5],
+            cx, cy, f, preCorrW, preCorrH);
+
+    // Only update distortion coeffients if we can find a good bounding box
+    double scale = 1.0;
+    if (OK == findPostCorrectionScale(0.002, 0.5,
+            distortion, cx, cy, f, preCorrW, preCorrH,
+            /*out*/&scale)) {
+        ALOGV("%s: scaling distortion coefficients by %f", __FUNCTION__, scale);
+        // The formula:
+        // xc = xi * (k0 + k1*r^2 + k2*r^4 + k3*r^6) + k4 * (2*xi*yi) + k5 * (r^2 + 2*xi^2)
+        // To create effective zoom we want to replace xi by xi *m, yi by yi*m and r^2 by r^2*m^2
+        // Factor the extra m power terms into k0~k6
+        std::array<float, 6> scalePowers = {1, 3, 5, 7, 2, 2};
+        for (size_t i = 0; i < 6; i++) {
+            distortion[i] *= pow(scale, scalePowers[i]);
+        }
+    }
+    return;
+}
+
 // ----------------------------------------------------------------------------
 extern "C" {
 
@@ -1086,9 +1234,9 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
         uint32_t pixHeight = static_cast<uint32_t>(pixelArrayEntry.data.i32[1]);
 
         if (!((imageWidth == preWidth && imageHeight == preHeight) ||
-            (imageWidth == pixWidth && imageHeight == pixHeight))) {
+                (imageWidth == pixWidth && imageHeight == pixHeight))) {
             jniThrowException(env, "java/lang/AssertionError",
-                    "Height and width of imate buffer did not match height and width of"
+                    "Height and width of image buffer did not match height and width of"
                     "either the preCorrectionActiveArraySize or the pixelArraySize.");
             return nullptr;
         }
@@ -1793,7 +1941,7 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
         status_t err = OK;
 
         // Set up rectilinear distortion correction
-        float distortion[6] {1.f, 0.f, 0.f, 0.f, 0.f, 0.f};
+        std::array<float, 6> distortion = {1.f, 0.f, 0.f, 0.f, 0.f, 0.f};
         bool gotDistortion = false;
 
         camera_metadata_entry entry4 =
@@ -1810,6 +1958,19 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
                     results.find(ANDROID_LENS_DISTORTION);
             if (entry3.count == 5) {
                 gotDistortion = true;
+
+
+                // Scale the distortion coefficients to create a zoom in warpped image so that all
+                // pixels are drawn within input image.
+                for (size_t i = 0; i < entry3.count; i++) {
+                    distortion[i+1] = entry3.data.f[i];
+                }
+
+                // TODO b/118690688: deal with the case where RAW size != preCorrSize
+                if (preWidth == imageWidth && preHeight == imageHeight) {
+                    normalizeLensDistortion(distortion, cx, cy, f, preWidth, preHeight);
+                }
+
                 float m_x = std::fmaxf(preWidth-1 - cx, cx);
                 float m_y = std::fmaxf(preHeight-1 - cy, cy);
                 float m_sq = m_x*m_x + m_y*m_y;
@@ -1831,7 +1992,7 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
                     m / f
                 };
                 for (size_t i = 0; i < entry3.count; i++) {
-                    distortion[i+1] = convCoeff[i] * entry3.data.f[i];
+                    distortion[i+1] *= convCoeff[i];
                 }
             } else {
                 entry3 = results.find(ANDROID_LENS_RADIAL_DISTORTION);
@@ -1859,8 +2020,8 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
                 }
             }
             if (gotDistortion) {
-                err = builder.addWarpRectilinearForMetadata(distortion, preWidth, preHeight, cx,
-                        cy);
+                err = builder.addWarpRectilinearForMetadata(
+                        distortion.data(), preWidth, preHeight, cx, cy);
                 if (err != OK) {
                     ALOGE("%s: Could not add distortion correction.", __FUNCTION__);
                     jniThrowRuntimeException(env, "failed to add distortion correction.");

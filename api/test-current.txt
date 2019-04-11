@@ -328,8 +328,14 @@ package android.app {
   }
 
   public class NotificationManager {
+    method public void allowAssistantCapability(String);
+    method public void disallowAssistantCapability(String);
+    method @NonNull public java.util.List<java.lang.String> getAllowedAssistantCapabilities();
+    method @Nullable public android.content.ComponentName getAllowedNotificationAssistant();
     method public android.content.ComponentName getEffectsSuppressor();
+    method public boolean isNotificationAssistantAccessGranted(@NonNull android.content.ComponentName);
     method public boolean matchesCallFilter(android.os.Bundle);
+    method public void setNotificationAssistantAccessGranted(@Nullable android.content.ComponentName, boolean);
   }
 
   public final class PictureInPictureParams implements android.os.Parcelable {
@@ -1889,6 +1895,7 @@ package android.os {
     field public static final int EFFECT_STRENGTH_LIGHT = 0; // 0x0
     field public static final int EFFECT_STRENGTH_MEDIUM = 1; // 0x1
     field public static final int EFFECT_STRENGTH_STRONG = 2; // 0x2
+    field public static final int EFFECT_TEXTURE_TICK = 21; // 0x15
     field public static final int EFFECT_THUD = 3; // 0x3
     field public static final int[] RINGTONES;
   }
@@ -2454,8 +2461,47 @@ package android.service.contentcapture {
 
 package android.service.notification {
 
+  public final class Adjustment implements android.os.Parcelable {
+    ctor public Adjustment(String, String, android.os.Bundle, CharSequence, int);
+    ctor public Adjustment(@NonNull String, @NonNull String, @NonNull android.os.Bundle, @NonNull CharSequence, @NonNull android.os.UserHandle);
+    method public int describeContents();
+    method @NonNull public CharSequence getExplanation();
+    method @NonNull public String getKey();
+    method @NonNull public String getPackage();
+    method @NonNull public android.os.Bundle getSignals();
+    method public int getUser();
+    method @NonNull public android.os.UserHandle getUserHandle();
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.notification.Adjustment> CREATOR;
+    field public static final String KEY_CONTEXTUAL_ACTIONS = "key_contextual_actions";
+    field public static final String KEY_IMPORTANCE = "key_importance";
+    field public static final String KEY_SNOOZE_CRITERIA = "key_snooze_criteria";
+    field public static final String KEY_TEXT_REPLIES = "key_text_replies";
+    field public static final String KEY_USER_SENTIMENT = "key_user_sentiment";
+  }
+
   @Deprecated public abstract class ConditionProviderService extends android.app.Service {
     method @Deprecated public boolean isBound();
+  }
+
+  public abstract class NotificationAssistantService extends android.service.notification.NotificationListenerService {
+    ctor public NotificationAssistantService();
+    method public final void adjustNotification(@NonNull android.service.notification.Adjustment);
+    method public final void adjustNotifications(@NonNull java.util.List<android.service.notification.Adjustment>);
+    method public void onActionInvoked(@NonNull String, @NonNull android.app.Notification.Action, int);
+    method @NonNull public final android.os.IBinder onBind(@Nullable android.content.Intent);
+    method public void onCapabilitiesChanged();
+    method public void onNotificationDirectReplied(@NonNull String);
+    method @Nullable public abstract android.service.notification.Adjustment onNotificationEnqueued(@NonNull android.service.notification.StatusBarNotification);
+    method @Nullable public android.service.notification.Adjustment onNotificationEnqueued(@NonNull android.service.notification.StatusBarNotification, @NonNull android.app.NotificationChannel);
+    method public void onNotificationExpansionChanged(@NonNull String, boolean, boolean);
+    method public abstract void onNotificationSnoozedUntilContext(@NonNull android.service.notification.StatusBarNotification, @NonNull String);
+    method public void onNotificationsSeen(@NonNull java.util.List<java.lang.String>);
+    method public void onSuggestedReplySent(@NonNull String, @NonNull CharSequence, int);
+    method public final void unsnoozeNotification(@NonNull String);
+    field public static final String SERVICE_INTERFACE = "android.service.notification.NotificationAssistantService";
+    field public static final int SOURCE_FROM_APP = 0; // 0x0
+    field public static final int SOURCE_FROM_ASSISTANT = 1; // 0x1
   }
 
   public abstract class NotificationListenerService extends android.app.Service {

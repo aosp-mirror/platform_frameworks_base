@@ -34,7 +34,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ParceledListSlice;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Point;
@@ -48,8 +47,6 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
-import android.view.IPinnedStackController;
-import android.view.IPinnedStackListener;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
@@ -234,45 +231,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 return super.performAccessibilityAction(host, action, args);
             }
             return true;
-        }
-    };
-
-    private final IPinnedStackListener.Stub mImeChangedListener = new IPinnedStackListener.Stub() {
-        @Override
-        public void onListenerRegistered(IPinnedStackController controller) {
-        }
-
-        @Override
-        public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
-            post(() -> {
-                // TODO remove this and do below when mNavigationIconHints changes
-                if (imeVisible) {
-                    getBackButton().setVisibility(VISIBLE);
-                    reloadNavIcons();
-                } else {
-                    getImeSwitchButton().setVisibility(GONE);
-                }
-                mImeVisible = imeVisible;
-                updateWindowTouchable();
-            });
-        }
-
-        @Override
-        public void onShelfVisibilityChanged(boolean shelfVisible, int shelfHeight) {
-        }
-
-        @Override
-        public void onMinimizedStateChanged(boolean isMinimized) {
-        }
-
-        @Override
-        public void onMovementBoundsChanged(Rect insetBounds, Rect normalBounds,
-                Rect animatingBounds, boolean fromImeAdjustment, boolean fromShelfAdjustment,
-                int displayRotation) {
-        }
-
-        @Override
-        public void onActionsChanged(ParceledListSlice actions) {
         }
     };
 
@@ -507,9 +465,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         final boolean useAltBack =
                 (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0;
         final boolean isRtl = mConfiguration.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
-        float degrees = useAltBack
-                ? (isRtl ? 270 : -90)
-                : (isRtl ? 180 : 0);
+        float degrees = useAltBack ? (isRtl ? 90 : -90) : 0;
         if (drawable.getRotation() == degrees) {
             return;
         }
@@ -559,10 +515,13 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     public void setNavigationIconHints(int hints) {
         if (hints == mNavigationIconHints) return;
-        final boolean backAlt = (hints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0;
-        if ((mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0 && !backAlt) {
-            mTransitionListener.onBackAltCleared();
+        final boolean newBackAlt = (hints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0;
+        final boolean oldBackAlt =
+                (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0;
+        if (newBackAlt != oldBackAlt) {
+            onImeVisibilityChanged(newBackAlt);
         }
+
         if (DEBUG) {
             android.widget.Toast.makeText(getContext(),
                 "Navigation icon hints = " + hints,
@@ -570,6 +529,14 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         }
         mNavigationIconHints = hints;
         updateNavButtonIcons();
+    }
+
+    private void onImeVisibilityChanged(boolean visible) {
+        if (!visible) {
+            mTransitionListener.onBackAltCleared();
+        }
+        mImeVisible = visible;
+        updateWindowTouchable();
     }
 
     public void setDisabledFlags(int disabledFlags) {
@@ -1114,14 +1081,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         filter.addDataScheme("package");
         getContext().registerReceiver(mOverlaysChangedReceiver, filter);
         mEdgeBackGestureHandler.onNavBarAttached();
-
-        if (QuickStepContract.isGesturalMode(getContext())) {
-            try {
-                WindowManagerWrapper.getInstance().addPinnedStackListener(mImeChangedListener);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Failed to register pinned stack listener", e);
-            }
-        }
         updateWindowTouchable();
     }
 
@@ -1139,8 +1098,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
         getContext().unregisterReceiver(mOverlaysChangedReceiver);
         mEdgeBackGestureHandler.onNavBarDetached();
-
-        WindowManagerWrapper.getInstance().removePinnedStackListener(mImeChangedListener);
     }
 
     private void setUpSwipeUpOnboarding(boolean connectedToOverviewProxy) {

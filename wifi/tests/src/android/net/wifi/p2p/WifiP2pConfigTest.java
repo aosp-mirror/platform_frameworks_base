@@ -16,7 +16,10 @@
 
 package android.net.wifi.p2p;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+
+import android.os.Parcel;
 
 import androidx.test.filters.SmallTest;
 
@@ -27,6 +30,8 @@ import org.junit.Test;
  */
 @SmallTest
 public class WifiP2pConfigTest {
+
+    private static final String DEVICE_ADDRESS = "aa:bb:cc:dd:ee:ff";
     /**
      * Check network name setter
      */
@@ -113,4 +118,43 @@ public class WifiP2pConfigTest {
             // expected exception.
         }
     }
+
+    @Test
+    /*
+     * Verify WifiP2pConfig basic operations
+     */
+    public void testWifiP2pConfig() throws Exception {
+        WifiP2pConfig config = new WifiP2pConfig();
+        config.deviceAddress = DEVICE_ADDRESS;
+
+        WifiP2pConfig copiedConfig = new WifiP2pConfig(config);
+        // no equals operator, use toString for comparison.
+        assertEquals(config.toString(), copiedConfig.toString());
+
+        Parcel parcelW = Parcel.obtain();
+        config.writeToParcel(parcelW, 0);
+        byte[] bytes = parcelW.marshall();
+        parcelW.recycle();
+
+        Parcel parcelR = Parcel.obtain();
+        parcelR.unmarshall(bytes, 0, bytes.length);
+        parcelR.setDataPosition(0);
+        WifiP2pConfig configFromParcel = WifiP2pConfig.CREATOR.createFromParcel(parcelR);
+
+        // no equals operator, use toString for comparison.
+        assertEquals(config.toString(), configFromParcel.toString());
+
+    }
+
+    @Test
+    /*
+     * Verify WifiP2pConfig invalidate API
+     */
+    public void testInvalidate() throws Exception {
+        WifiP2pConfig config = new WifiP2pConfig();
+        config.deviceAddress = DEVICE_ADDRESS;
+        config.invalidate();
+        assertEquals("", config.deviceAddress);
+    }
+
 }

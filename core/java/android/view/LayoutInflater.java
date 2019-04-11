@@ -416,23 +416,8 @@ public abstract class LayoutInflater {
     }
 
     private void initPrecompiledViews() {
-        // Use the device config if enabled, otherwise default to the system property.
-        String usePrecompiledLayout = null;
-        try {
-            usePrecompiledLayout = DeviceConfig.getProperty(
-                    DeviceConfig.NAMESPACE_RUNTIME,
-                    USE_PRECOMPILED_LAYOUT);
-        } catch (Exception e) {
-          // May be caused by permission errors reading the property (i.e. instant apps).
-        }
+        // Precompiled layouts are not supported in this release.
         boolean enabled = false;
-        if (TextUtils.isEmpty(usePrecompiledLayout)) {
-            enabled = SystemProperties.getBoolean(
-                    USE_PRECOMPILED_LAYOUT,
-                    false);
-        } else {
-            enabled = Boolean.parseBoolean(usePrecompiledLayout);
-        }
         initPrecompiledViews(enabled);
     }
 

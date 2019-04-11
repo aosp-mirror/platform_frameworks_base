@@ -302,11 +302,52 @@ public final class DefaultPermissionGrantPolicy {
     }
 
     public void grantDefaultPermissions(int userId) {
+        removeSystemFixedStorage(userId);
         grantPermissionsToSysComponentsAndPrivApps(userId);
         grantDefaultSystemHandlerPermissions(userId);
         grantDefaultPermissionExceptions(userId);
         synchronized (mLock) {
             mDefaultPermissionsGrantedUsers.put(userId, userId);
+        }
+    }
+
+    // STOPSHIP: This is meant to fix the devices messed up by storage permission model 2 and
+    //           should be removed once all devices were updated
+    private void removeSystemFixedStorage(int userId) {
+        List<PackageInfo> packages = mContext.getPackageManager().getInstalledPackagesAsUser(
+                DEFAULT_PACKAGE_INFO_QUERY_FLAGS, userId);
+
+        for (PackageInfo pkg : packages) {
+            if (pkg == null || pkg.requestedPermissions == null) {
+                continue;
+            }
+
+            for (String permission : pkg.requestedPermissions) {
+                if (!(Manifest.permission.READ_EXTERNAL_STORAGE.equals(permission)
+                        || Manifest.permission.WRITE_EXTERNAL_STORAGE.equals(permission))) {
+                    continue;
+                }
+
+                int flags = mContext.getPackageManager().getPermissionFlags(permission,
+                        pkg.packageName, UserHandle.of(userId));
+                if ((flags & PackageManager.FLAG_PERMISSION_SYSTEM_FIXED) == 0) {
+                    continue;
+                }
+
+                Log.v(TAG, "Removing system fixed " + pkg.packageName + "/" + permission);
+                mContext.getPackageManager().updatePermissionFlags(permission, pkg.packageName,
+                        PackageManager.FLAG_PERMISSION_SYSTEM_FIXED, 0, UserHandle.of(userId));
+
+                if (!doesPackageSupportRuntimePermissions(pkg)
+                        || (flags & (PackageManager.FLAG_PERMISSION_USER_SET
+                        | PackageManager.FLAG_PERMISSION_POLICY_FIXED)) != 0) {
+                    continue;
+                }
+
+                Log.v(TAG, "Revoking " + pkg.packageName + "/" + permission);
+                mContext.getPackageManager().revokeRuntimePermission(pkg.packageName, permission,
+                        UserHandle.of(userId));
+            }
         }
     }
 
@@ -1322,6 +1363,9 @@ public final class DefaultPermissionGrantPolicy {
 
     private PackageInfo getPackageInfo(String pkg,
             @PackageManager.PackageInfoFlags int extraFlags) {
+        if (pkg == null) {
+            return null;
+        }
         try {
             return mContext.getPackageManager().getPackageInfo(pkg,
                     DEFAULT_PACKAGE_INFO_QUERY_FLAGS | extraFlags);
