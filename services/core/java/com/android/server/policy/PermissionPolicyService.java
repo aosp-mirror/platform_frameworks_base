@@ -31,6 +31,7 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManagerInternal.PackageListObserver;
 import android.content.pm.PackageParser;
 import android.content.pm.PermissionInfo;
+import android.os.Build;
 import android.os.Process;
 import android.os.UserHandle;
 import android.permission.PermissionControllerManager;
@@ -234,12 +235,20 @@ public final class PermissionPolicyService extends SystemService {
          * @see #syncRestrictedOps
          */
         private final @NonNull ArrayList<OpToRestrict> mOpsToRestrict = new ArrayList<>();
+
         /**
          * All ops that need to be unrestricted
          *
          * @see #syncRestrictedOps
          */
         private final @NonNull ArrayList<OpToUnrestrict> mOpsToUnrestrict = new ArrayList<>();
+
+        /**
+         * All foreground permissions
+         *
+         * @see #syncOpsOfFgPermissions()
+         */
+        private final @NonNull ArrayList<FgPermission> mFgPermOps = new ArrayList<>();
 
         PermissionToOpSynchroniser(@NonNull Context context) {
             mContext = context;
@@ -340,10 +349,41 @@ public final class PermissionPolicyService extends SystemService {
         }
 
         /**
+         * Set app ops that belong to restricted permissions.
+         *
+         * <p>This processed ops previously added by {@link #addOpIfRestricted}
+         */
+        private void syncOpsOfFgPermissions() {
+            int numFgPermOps = mFgPermOps.size();
+            for (int i = 0; i < numFgPermOps; i++) {
+                FgPermission perm = mFgPermOps.get(i);
+
+                if (mPackageManager.checkPermission(perm.fgPermissionName, perm.packageName)
+                        == PackageManager.PERMISSION_GRANTED) {
+                    if (mPackageManager.checkPermission(perm.bgPermissionName, perm.packageName)
+                            == PackageManager.PERMISSION_GRANTED) {
+                        mAppOpsManager.setUidMode(
+                                AppOpsManager.permissionToOpCode(perm.fgPermissionName), perm.uid,
+                                AppOpsManager.MODE_ALLOWED);
+                    } else {
+                        mAppOpsManager.setUidMode(
+                                AppOpsManager.permissionToOpCode(perm.fgPermissionName), perm.uid,
+                                AppOpsManager.MODE_FOREGROUND);
+                    }
+                } else {
+                    mAppOpsManager.setUidMode(
+                            AppOpsManager.permissionToOpCode(perm.fgPermissionName), perm.uid,
+                            AppOpsManager.MODE_IGNORED);
+                }
+            }
+        }
+
+        /**
          * Synchronize all previously {@link #addPackage added} packages.
          */
         void syncPackages() {
             syncRestrictedOps();
+            syncOpsOfFgPermissions();
         }
 
         /**
@@ -378,6 +418,21 @@ public final class PermissionPolicyService extends SystemService {
             } else if (permissionInfo.isSoftRestricted()) {
                 //TODO: Implement soft restrictions like storage here.
             }
+        }
+
+        private void addOpIfFgPermissions(@NonNull PermissionInfo permissionInfo,
+                @NonNull PackageInfo pkg) {
+            if (pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.M) {
+                // Pre-M apps do not store their fg/bg state in the permissions
+                return;
+            }
+
+            if (permissionInfo.backgroundPermission == null) {
+                return;
+            }
+
+            mFgPermOps.add(new FgPermission(pkg.applicationInfo.uid, pkg.packageName,
+                    permissionInfo.name, permissionInfo.backgroundPermission));
         }
 
         /**
@@ -415,6 +470,7 @@ public final class PermissionPolicyService extends SystemService {
                 }
 
                 addOpIfRestricted(permissionInfo, pkg);
+                addOpIfFgPermissions(permissionInfo, pkg);
             }
         }
 
@@ -449,6 +505,21 @@ public final class PermissionPolicyService extends SystemService {
                 this.uid = uid;
                 this.packageName = packageName;
                 this.code = code;
+            }
+        }
+
+        private class FgPermission {
+            final int uid;
+            final @NonNull String packageName;
+            final @NonNull String fgPermissionName;
+            final @NonNull String bgPermissionName;
+
+            private FgPermission(int uid, @NonNull String packageName,
+                    @NonNull String fgPermissionName, @NonNull String bgPermissionName) {
+                this.uid = uid;
+                this.packageName = packageName;
+                this.fgPermissionName = fgPermissionName;
+                this.bgPermissionName = bgPermissionName;
             }
         }
     }
