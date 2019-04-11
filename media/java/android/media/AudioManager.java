@@ -17,6 +17,7 @@
 package android.media;
 
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -1204,6 +1205,7 @@ public class AudioManager {
      * @hide
      */
     @SystemApi
+    @IntRange(from = 0)
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public int getVolumeIndexForAttributes(@NonNull AudioAttributes attr) {
         Preconditions.checkNotNull(attr, "attr must not be null");
@@ -1224,6 +1226,7 @@ public class AudioManager {
      * @hide
      */
     @SystemApi
+    @IntRange(from = 0)
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public int getMaxVolumeIndexForAttributes(@NonNull AudioAttributes attr) {
         Preconditions.checkNotNull(attr, "attr must not be null");
@@ -1244,6 +1247,7 @@ public class AudioManager {
      * @hide
      */
     @SystemApi
+    @IntRange(from = 0)
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public int getMinVolumeIndexForAttributes(@NonNull AudioAttributes attr) {
         Preconditions.checkNotNull(attr, "attr must not be null");
