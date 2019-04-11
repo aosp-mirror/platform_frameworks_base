@@ -36,7 +36,9 @@ import java.io.IOException;
  */
 public final class ApkAssets {
     @GuardedBy("this") private final long mNativePtr;
-    @GuardedBy("this") private StringBlock mStringBlock;
+    @GuardedBy("this") private final StringBlock mStringBlock;
+
+    @GuardedBy("this") private boolean mOpen = true;
 
     /**
      * Creates a new ApkAssets instance from the given path on disk.
@@ -180,7 +182,20 @@ public final class ApkAssets {
 
     @Override
     protected void finalize() throws Throwable {
-        nativeDestroy(mNativePtr);
+        close();
+    }
+
+    /**
+     * Closes this class and the contained {@link #mStringBlock}.
+     */
+    public void close() throws Throwable {
+        synchronized (this) {
+            if (mOpen) {
+                mOpen = false;
+                mStringBlock.close();
+                nativeDestroy(mNativePtr);
+            }
+        }
     }
 
     private static native long nativeLoad(
