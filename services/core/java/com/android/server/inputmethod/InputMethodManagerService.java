@@ -4607,9 +4607,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 pw.decreaseIndent();
                 pw.decreaseIndent();
 
-                pw.println("set <ID>");
+                pw.println("set [--user <USER_ID>] <ID>");
                 pw.increaseIndent();
                 pw.println("switches to the given input method ID.");
+                pw.increaseIndent();
+                pw.print("--user <USER_ID>: Specify which user to enable.");
+                pw.println(" Assumes the current user if not specified.");
+                pw.decreaseIndent();
                 pw.decreaseIndent();
 
                 pw.println("reset");
@@ -4810,17 +4814,55 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @BinderThread
     @ShellCommandResult
     private int handleShellCommandSetInputMethod(@NonNull ShellCommand shellCommand) {
-        final String id = shellCommand.getNextArgRequired();
+        final String imeId = shellCommand.getNextArgRequired();
+        final PrintWriter out = shellCommand.getOutPrintWriter();
+        final PrintWriter error = shellCommand.getErrPrintWriter();
+        final int userIdToBeResolved = handleOptionsForCommandsThatOnlyHaveUserOption(shellCommand);
         synchronized (mMethodMap) {
-            if (!userHasDebugPriv(mSettings.getCurrentUserId(), shellCommand)) {
-                return ShellCommandResult.SUCCESS;
+            final int[] userIds = InputMethodUtils.resolveUserId(userIdToBeResolved,
+                    mSettings.getCurrentUserId(), shellCommand.getErrPrintWriter());
+            for (int userId : userIds) {
+                if (!userHasDebugPriv(userId, shellCommand)) {
+                    continue;
+                }
+                boolean failedToSelectUnknownIme = false;
+                if (userId == mSettings.getCurrentUserId()) {
+                    if (mMethodMap.containsKey(imeId)) {
+                        setInputMethodLocked(imeId, NOT_A_SUBTYPE_ID);
+                    } else {
+                        failedToSelectUnknownIme = true;
+                    }
+                } else {
+                    final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
+                    final ArrayList<InputMethodInfo> methodList = new ArrayList<>();
+                    final ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap =
+                            new ArrayMap<>();
+                    AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
+                    queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap,
+                            methodMap, methodList);
+                    final InputMethodSettings settings = new InputMethodSettings(
+                            mContext.getResources(), mContext.getContentResolver(), methodMap,
+                            userId, false);
+                    if (methodMap.containsKey(imeId)) {
+                        settings.putSelectedInputMethod(imeId);
+                        settings.putSelectedSubtype(NOT_A_SUBTYPE_ID);
+                    } else {
+                        failedToSelectUnknownIme = true;
+                    }
+                }
+                if (failedToSelectUnknownIme) {
+                    error.print("Unknown input method ");
+                    error.print(imeId);
+                    error.print(" cannot be selected for user #");
+                    error.println(userId);
+                } else {
+                    out.print("Input method ");
+                    out.print(imeId);
+                    out.print(" selected for user #");
+                    error.println(userId);
+                }
             }
-            setInputMethodLocked(id, NOT_A_SUBTYPE_ID);
         }
-        final PrintWriter pr = shellCommand.getOutPrintWriter();
-        pr.print("Input method ");
-        pr.print(id);
-        pr.println("  selected");
         return ShellCommandResult.SUCCESS;
     }
 
