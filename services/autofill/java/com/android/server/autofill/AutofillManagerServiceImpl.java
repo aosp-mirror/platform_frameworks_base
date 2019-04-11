@@ -1165,6 +1165,11 @@ final class AutofillManagerServiceImpl
         return true;
     }
 
+    boolean isAugmentedAutofillServiceForUserLocked(int callingUid) {
+        return mRemoteAugmentedAutofillServiceInfo != null
+                && mRemoteAugmentedAutofillServiceInfo.applicationInfo.uid == callingUid;
+    }
+
     /**
      * Sets which packages and activities can trigger augmented autofill.
      *
