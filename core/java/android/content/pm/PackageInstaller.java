@@ -30,7 +30,6 @@ import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageManager.DeleteFlags;
 import android.content.pm.PackageManager.InstallReason;
@@ -504,12 +503,14 @@ public class PackageInstaller {
      *
      * <p>Staged session is active iff:
      * <ul>
-     *     <li>It is committed.
-     *     <li>It is not applied.
-     *     <li>It is not failed.
+     *     <li>It is committed, i.e. {@link SessionInfo#isCommitted()} is {@code true}, and
+     *     <li>it is not applied, i.e. {@link SessionInfo#isStagedSessionApplied()} is {@code
+     *     false}, and
+     *     <li>it is not failed, i.e. {@link SessionInfo#isStagedSessionFailed()} is {@code false}.
      * </ul>
      *
-     * <p>In case of a multi-apk session, parent session will be returned.
+     * <p>In case of a multi-apk session, reasoning above is applied to the parent session, since
+     * that is the one that should been {@link Session#commit committed}.
      */
     public @Nullable SessionInfo getActiveStagedSession() {
         final List<SessionInfo> stagedSessions = getStagedSessions();
@@ -2307,7 +2308,8 @@ public class PackageInstaller {
         }
 
         /**
-         * Whenever this session was committed.
+         * Returns {@code true} if {@link Session#commit(IntentSender)}} was called for this
+         * session.
          */
         public boolean isCommitted() {
             return isCommitted;
