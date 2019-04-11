@@ -2228,6 +2228,7 @@
   <java-symbol type="id" name="button_always" />
   <java-symbol type="id" name="button_app_settings" />
   <java-symbol type="integer" name="config_globalActionsKeyTimeout" />
+  <java-symbol type="integer" name="config_screenshotChordKeyTimeout" />
   <java-symbol type="integer" name="config_maxResolverActivityColumns" />
   <java-symbol type="array" name="config_notificationSignalExtractors" />
 
