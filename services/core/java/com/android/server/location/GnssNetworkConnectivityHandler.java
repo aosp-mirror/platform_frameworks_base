@@ -457,15 +457,13 @@ class GnssNetworkConnectivityHandler {
         }
         mAGpsDataConnectionState = AGPS_DATA_CONNECTION_OPENING;
 
-        // The NetworkRequest.Builder class is not used to construct the network request because
-        // the ConnectivityService requires the network request to be constructed in this way
-        // to extend support for requestRouteToHostAddress() method for pre-gnss@2.0 devices.
-        NetworkCapabilities networkCapabilities = new NetworkCapabilities();
-        networkCapabilities.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
-        networkCapabilities.addCapability(getNetworkCapability(mAGpsType));
-        NetworkRequest networkRequest = new NetworkRequest(networkCapabilities,
-                getLegacyDataConnectionType(agpsType), ConnectivityManager.REQUEST_ID_UNSET,
-                NetworkRequest.Type.REQUEST);
+        // The transport type must be set to NetworkCapabilities.TRANSPORT_CELLULAR for the
+        // deprecated requestRouteToHostAddress() method in ConnectivityService to work for
+        // pre-gnss@2.0 devices.
+        NetworkRequest.Builder networkRequestBuilder = new NetworkRequest.Builder();
+        networkRequestBuilder.addCapability(getNetworkCapability(mAGpsType));
+        networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
+        NetworkRequest networkRequest = networkRequestBuilder.build();
         mConnMgr.requestNetwork(
                 networkRequest,
                 mSuplConnectivityCallback,
@@ -487,19 +485,6 @@ class GnssNetworkConnectivityHandler {
         }
     }
 
-    private int getLegacyDataConnectionType(int agpsType) {
-        switch (agpsType) {
-            case AGPS_TYPE_C2K:
-            case AGPS_TYPE_SUPL:
-                return ConnectivityManager.TYPE_MOBILE_SUPL;
-            case AGPS_TYPE_EIMS:
-                return ConnectivityManager.TYPE_MOBILE_EMERGENCY;
-            case AGPS_TYPE_IMS:
-                return ConnectivityManager.TYPE_MOBILE_IMS;
-            default:
-                throw new IllegalArgumentException("agpsType: " + agpsType);
-        }
-    }
     private void handleReleaseSuplConnection(int agpsDataConnStatus) {
         if (DEBUG) {
             String message = String.format(
