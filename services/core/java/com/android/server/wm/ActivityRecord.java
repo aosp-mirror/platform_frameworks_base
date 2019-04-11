@@ -87,6 +87,7 @@ import static android.content.res.Configuration.UI_MODE_TYPE_VR_HEADSET;
 import static android.os.Build.VERSION_CODES.HONEYCOMB;
 import static android.os.Build.VERSION_CODES.O;
 import static android.os.Process.SYSTEM_UID;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
@@ -1948,14 +1949,20 @@ final class ActivityRecord extends ConfigurationContainer {
             return false;
         }
 
+        // Whether the activity is on the sleeping display.
+        // TODO(b/129750406): This should be applied for the default display, too.
+        final boolean isDisplaySleeping = getDisplay().isSleeping()
+                && getDisplayId() != DEFAULT_DISPLAY;
         // Whether this activity is the top activity of this stack.
         final boolean isTop = this == stack.getTopActivity();
         // Exclude the case where this is the top activity in a pinned stack.
         final boolean isTopNotPinnedStack = stack.isAttached()
                 && stack.getDisplay().isTopNotPinnedStack(stack);
-        // Now check whether it's really visible depending on Keyguard state.
-        return stack.checkKeyguardVisibility(this,
+        // Now check whether it's really visible depending on Keyguard state, and update
+        // {@link ActivityStack} internal states.
+        final boolean visibleIgnoringDisplayStatus = stack.checkKeyguardVisibility(this,
                 visibleIgnoringKeyguard, isTop && isTopNotPinnedStack);
+        return visibleIgnoringDisplayStatus && !isDisplaySleeping;
     }
 
     boolean shouldBeVisible() {
