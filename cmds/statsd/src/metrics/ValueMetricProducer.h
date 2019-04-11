@@ -259,6 +259,11 @@ private:
     FRIEND_TEST(ValueMetricProducerTest, TestLateOnDataPulledWithoutDiff);
     FRIEND_TEST(ValueMetricProducerTest, TestPartialBucketCreated);
     FRIEND_TEST(ValueMetricProducerTest, TestPartialResetOnBucketBoundaries);
+    FRIEND_TEST(ValueMetricProducerTest, TestPulledData_noDiff_bucketBoundaryFalse);
+    FRIEND_TEST(ValueMetricProducerTest, TestPulledData_noDiff_bucketBoundaryTrue);
+    FRIEND_TEST(ValueMetricProducerTest, TestPulledData_noDiff_withFailure);
+    FRIEND_TEST(ValueMetricProducerTest, TestPulledData_noDiff_withMultipleConditionChanges);
+    FRIEND_TEST(ValueMetricProducerTest, TestPulledData_noDiff_withoutCondition);
     FRIEND_TEST(ValueMetricProducerTest, TestPulledEventsNoCondition);
     FRIEND_TEST(ValueMetricProducerTest, TestPulledEventsTakeAbsoluteValueOnReset);
     FRIEND_TEST(ValueMetricProducerTest, TestPulledEventsTakeZeroOnReset);
