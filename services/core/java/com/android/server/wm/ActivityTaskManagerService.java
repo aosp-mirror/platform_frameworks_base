@@ -5458,6 +5458,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         StatsLog.ACTIVITY_MANAGER_SLEEP_STATE_CHANGED__STATE__AWAKE);
                 startTimeTrackingFocusedActivityLocked();
                 mTopProcessState = ActivityManager.PROCESS_STATE_TOP;
+                Slog.d(TAG, "Top Process State changed to PROCESS_STATE_TOP");
                 mStackSupervisor.comeOutOfSleepIfNeededLocked();
             }
             mRootActivityContainer.applySleepTokens(true /* applyToStacks */);
@@ -5472,6 +5473,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 mCurAppTimeTracker.stop();
             }
             mTopProcessState = ActivityManager.PROCESS_STATE_TOP_SLEEPING;
+            Slog.d(TAG, "Top Process State changed to PROCESS_STATE_TOP_SLEEPING");
             mStackSupervisor.goingToSleepLocked();
             updateResumedAppTrace(null /* resumed */);
             updateOomAdj = true;
