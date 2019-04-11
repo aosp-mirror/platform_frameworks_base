@@ -212,6 +212,38 @@ public class UserLifecycleTests {
     }
 
     @Test
+    public void ephemeralUserStopped() throws Exception {
+        while (mRunner.keepRunning()) {
+            mRunner.pauseTiming();
+            final int startUser = mAm.getCurrentUser();
+            final UserInfo userInfo = mUm.createUser("TestUser",
+                    UserInfo.FLAG_EPHEMERAL | UserInfo.FLAG_DEMO);
+            switchUser(userInfo.id);
+            final CountDownLatch latch = new CountDownLatch(1);
+            InstrumentationRegistry.getContext().registerReceiver(new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (Intent.ACTION_USER_STOPPED.equals(intent.getAction()) && intent.getIntExtra(
+                            Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL) == userInfo.id) {
+                        latch.countDown();
+                    }
+                }
+            }, new IntentFilter(Intent.ACTION_USER_STOPPED));
+            final CountDownLatch switchLatch = new CountDownLatch(1);
+            registerUserSwitchObserver(switchLatch, null, startUser);
+            mRunner.resumeTiming();
+
+            mAm.switchUser(startUser);
+            latch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
+
+            mRunner.pauseTiming();
+            switchLatch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
+            removeUser(userInfo.id);
+            mRunner.resumeTiming();
+        }
+    }
+
+    @Test
     public void managedProfileUnlock() throws Exception {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
@@ -258,37 +290,6 @@ public class UserLifecycleTests {
         }
     }
 
-    @Test
-    public void ephemeralUserStopped() throws Exception {
-        while (mRunner.keepRunning()) {
-            mRunner.pauseTiming();
-            final int startUser = mAm.getCurrentUser();
-            final UserInfo userInfo = mUm.createUser("TestUser",
-                    UserInfo.FLAG_EPHEMERAL | UserInfo.FLAG_DEMO);
-            switchUser(userInfo.id);
-            final CountDownLatch latch = new CountDownLatch(1);
-            InstrumentationRegistry.getContext().registerReceiver(new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    if (Intent.ACTION_USER_STOPPED.equals(intent.getAction()) && intent.getIntExtra(
-                            Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL) == userInfo.id) {
-                        latch.countDown();
-                    }
-                }
-            }, new IntentFilter(Intent.ACTION_USER_STOPPED));
-            final CountDownLatch switchLatch = new CountDownLatch(1);
-            registerUserSwitchObserver(switchLatch, null, startUser);
-            mRunner.resumeTiming();
-
-            mAm.switchUser(startUser);
-            latch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
-
-            mRunner.pauseTiming();
-            switchLatch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
-            removeUser(userInfo.id);
-            mRunner.resumeTiming();
-        }
-    }
 
     @Test
     public void managedProfileStopped() throws Exception {
