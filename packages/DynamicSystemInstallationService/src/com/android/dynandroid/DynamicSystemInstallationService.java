@@ -326,6 +326,8 @@ public class DynamicSystemInstallationService extends Service
         } else if (status == STATUS_READY) {
             startForeground(NOTIFICATION_ID,
                     buildNotification(STATUS_READY, CAUSE_NOT_SPECIFIED));
+        } else {
+            stopSelf();
         }
     }
 
