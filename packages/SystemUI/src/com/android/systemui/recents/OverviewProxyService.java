@@ -28,6 +28,9 @@ import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_INP
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SUPPORTS_WINDOW_CORNERS;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SYSUI_PROXY;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_WINDOW_CORNER_RADIUS;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NAV_BAR_HIDDEN;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SCREEN_PINNING;
 
 import android.annotation.FloatRange;
 import android.content.BroadcastReceiver;
@@ -52,6 +55,7 @@ import android.view.InputMonitor;
 import android.view.MotionEvent;
 
 import com.android.internal.policy.ScreenDecorationsUtils;
+import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.Prefs;
 import com.android.systemui.SysUiServiceProvider;
@@ -60,7 +64,10 @@ import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.recents.ISystemUiProxy;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
+import com.android.systemui.shared.system.QuickStepContract.SystemUiStateFlags;
 import com.android.systemui.stackdivider.Divider;
+import com.android.systemui.statusbar.NavigationBarController;
+import com.android.systemui.statusbar.phone.NavigationBarFragment;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -107,6 +114,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private IOverviewProxy mOverviewProxy;
     private int mConnectionBackoffAttempts;
     private @InteractionType int mInteractionFlags;
+    private @SystemUiStateFlags int mSysUiStateFlags;
     private boolean mBound;
     private boolean mIsEnabled;
     private int mCurrentBoundedUserId = -1;
@@ -368,6 +376,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             }
             dispatchNavButtonBounds();
 
+            // Update the systemui state flags
+            updateSystemUiStateFlags();
+
             notifyConnectionChanged();
         }
 
@@ -394,19 +405,29 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     private final DeviceProvisionedListener mDeviceProvisionedCallback =
                 new DeviceProvisionedListener() {
-            @Override
-            public void onUserSetupChanged() {
-                if (mDeviceProvisionedController.isCurrentUserSetup()) {
-                    internalConnectToCurrentUser();
-                }
-            }
 
-            @Override
-            public void onUserSwitched() {
-                mConnectionBackoffAttempts = 0;
+        @Override
+        public void onDeviceProvisionedChanged() {
+            /*
+            on initialize, keep track of the previous gestural state (nothing is enabled by default)
+            restore to a non gestural state if device is not provisioned
+            once the device is provisioned, restore to the original state
+             */
+        }
+
+        @Override
+        public void onUserSetupChanged() {
+            if (mDeviceProvisionedController.isCurrentUserSetup()) {
                 internalConnectToCurrentUser();
             }
-        };
+        }
+
+        @Override
+        public void onUserSwitched() {
+            mConnectionBackoffAttempts = 0;
+            internalConnectToCurrentUser();
+        }
+    };
 
     // This is the death handler for the binder from the launcher service
     private final IBinder.DeathRecipient mOverviewServiceDeathRcpt
@@ -452,6 +473,45 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             }
         } catch (RemoteException e) {
             Log.e(TAG_OPS, "Failed to notify back action", e);
+        }
+    }
+
+    public void setSystemUiStateFlag(int flag, boolean enabled) {
+        int newState = mSysUiStateFlags;
+        if (enabled) {
+            newState |= flag;
+        } else {
+            newState &= ~flag;
+        }
+        if (mSysUiStateFlags != newState) {
+            mSysUiStateFlags = newState;
+            notifySystemUiStateFlags(mSysUiStateFlags);
+        }
+    }
+
+    private void updateSystemUiStateFlags() {
+        final NavigationBarController navBar = Dependency.get(NavigationBarController.class);
+        final NavigationBarFragment navBarFragment = navBar.getDefaultNavigationBarFragment();
+        final StatusBar statusBar = SysUiServiceProvider.getComponent(mContext, StatusBar.class);
+        final boolean panelExpanded = statusBar != null && statusBar.getPanel() != null
+                && statusBar.getPanel().isFullyExpanded();
+        mSysUiStateFlags = 0;
+        mSysUiStateFlags |= ActivityManagerWrapper.getInstance().isScreenPinningActive()
+                ? SYSUI_STATE_SCREEN_PINNING : 0;
+        mSysUiStateFlags |= (navBarFragment == null || !navBarFragment.isNavBarWindowVisible())
+                ? SYSUI_STATE_NAV_BAR_HIDDEN : 0;
+        mSysUiStateFlags |= panelExpanded
+                ? SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED : 0;
+        notifySystemUiStateFlags(mSysUiStateFlags);
+    }
+
+    private void notifySystemUiStateFlags(int flags) {
+        try {
+            if (mOverviewProxy != null) {
+                mOverviewProxy.onSystemUiStateChanged(flags);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG_OPS, "Failed to notify sysui state change", e);
         }
     }
 
@@ -659,6 +719,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         pw.print("  quickStepIntentResolved="); pw.println(isEnabled());
         pw.print("  navBarMode=");
         pw.println(QuickStepContract.getCurrentInteractionMode(mContext));
+        pw.print("  mSysUiStateFlags="); pw.println(mSysUiStateFlags);
     }
 
     public interface OverviewProxyListener {
