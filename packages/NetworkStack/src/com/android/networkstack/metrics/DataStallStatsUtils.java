@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package android.net.metrics;
+package com.android.networkstack.metrics;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.net.captiveportal.CaptivePortalProbeResult;
 import android.util.Log;
-import android.util.StatsLog;
 
 import com.android.internal.util.HexDump;
 import com.android.server.connectivity.nano.DataStallEventProto;
@@ -37,13 +36,11 @@ import com.android.server.connectivity.nano.DataStallEventProto;
  */
 public class DataStallStatsUtils {
     private static final String TAG = DataStallStatsUtils.class.getSimpleName();
-    private static final int DATA_STALL_EVENT_ID = 121;
     private static final boolean DBG = false;
 
     private static int probeResultToEnum(@Nullable final CaptivePortalProbeResult result) {
         if (result == null) return DataStallEventProto.INVALID;
 
-        // TODO: Add partial connectivity support.
         if (result.isSuccessful()) {
             return DataStallEventProto.VALID;
         } else if (result.isPortal()) {
@@ -65,8 +62,7 @@ public class DataStallStatsUtils {
             Log.d(TAG, "write: " + stats + " with result: " + validationResult
                     + ", dns: " + HexDump.toHexString(stats.mDns));
         }
-        // TODO(b/124613085): Update API once the public StatsLog API is ready.
-        StatsLog.write(DATA_STALL_EVENT_ID,
+        NetworkStackStatsLog.write(NetworkStackStatsLog.DATA_STALL_EVENT,
                 stats.mEvaluationType,
                 validationResult,
                 stats.mNetworkType,
