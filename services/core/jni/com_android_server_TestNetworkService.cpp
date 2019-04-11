@@ -54,12 +54,12 @@ static void throwException(JNIEnv* env, int error, const char* action, const cha
     jniThrowException(env, "java/lang/IllegalStateException", msg.c_str());
 }
 
-static int createTunInterface(JNIEnv* env, const char* iface) {
+static int createTunTapInterface(JNIEnv* env, bool isTun, const char* iface) {
     base::unique_fd tun(open("/dev/tun", O_RDWR | O_NONBLOCK));
     ifreq ifr{};
 
     // Allocate interface.
-    ifr.ifr_flags = IFF_TUN | IFF_NO_PI;
+    ifr.ifr_flags = (isTun ? IFF_TUN : IFF_TAP) | IFF_NO_PI;
     strlcpy(ifr.ifr_name, iface, IFNAMSIZ);
     if (ioctl(tun.get(), TUNSETIFF, &ifr)) {
         throwException(env, errno, "allocating", ifr.ifr_name);
@@ -80,23 +80,23 @@ static int createTunInterface(JNIEnv* env, const char* iface) {
 
 //------------------------------------------------------------------------------
 
-static jint create(JNIEnv* env, jobject /* thiz */, jstring jIface) {
+static jint create(JNIEnv* env, jobject /* thiz */, jboolean isTun, jstring jIface) {
     ScopedUtfChars iface(env, jIface);
     if (!iface.c_str()) {
         jniThrowNullPointerException(env, "iface");
         return -1;
     }
 
-    int tun = createTunInterface(env, iface.c_str());
+    int tun = createTunTapInterface(env, isTun, iface.c_str());
 
-    // Any exceptions will be thrown from the createTunInterface call
+    // Any exceptions will be thrown from the createTunTapInterface call
     return tun;
 }
 
 //------------------------------------------------------------------------------
 
 static const JNINativeMethod gMethods[] = {
-    {"jniCreateTun", "(Ljava/lang/String;)I", (void*)create},
+    {"jniCreateTunTap", "(ZLjava/lang/String;)I", (void*)create},
 };
 
 int register_android_server_TestNetworkService(JNIEnv* env) {
