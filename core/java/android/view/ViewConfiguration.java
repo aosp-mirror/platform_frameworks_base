@@ -87,6 +87,12 @@ public class ViewConfiguration {
 
     /**
      * Defines the duration in milliseconds a user needs to hold down the
+     * appropriate buttons (power + volume down) to trigger the screenshot chord.
+     */
+    private static final int SCREENSHOT_CHORD_KEY_TIMEOUT = 500;
+
+    /**
+     * Defines the duration in milliseconds a user needs to hold down the
      * appropriate button to bring up the accessibility shortcut for the first time
      */
     private static final int A11Y_SHORTCUT_KEY_TIMEOUT = 3000;
@@ -316,6 +322,7 @@ public class ViewConfiguration {
     private final float mVerticalScrollFactor;
     private final float mHorizontalScrollFactor;
     private final boolean mShowMenuShortcutsWhenKeyboardPresent;
+    private final long mScreenshotChordKeyTimeout;
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123768915)
     private boolean sHasPermanentMenuKey;
@@ -353,6 +360,7 @@ public class ViewConfiguration {
         mHorizontalScrollFactor = HORIZONTAL_SCROLL_FACTOR;
         mVerticalScrollFactor = VERTICAL_SCROLL_FACTOR;
         mShowMenuShortcutsWhenKeyboardPresent = false;
+        mScreenshotChordKeyTimeout = SCREENSHOT_CHORD_KEY_TIMEOUT;
 
         // Getter throws if mConstructedWithContext is false so doesn't matter what
         // this value is.
@@ -457,6 +465,9 @@ public class ViewConfiguration {
 
         mMinScalingSpan = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.config_minScalingSpan);
+
+        mScreenshotChordKeyTimeout = res.getInteger(
+                com.android.internal.R.integer.config_screenshotChordKeyTimeout);
     }
 
     /**
@@ -887,6 +898,18 @@ public class ViewConfiguration {
     @TestApi
     public long getDeviceGlobalActionKeyTimeout() {
         return mGlobalActionsKeyTimeout;
+    }
+
+    /**
+     * The amount of time a user needs to press the relevant keys to trigger
+     * the screenshot chord.
+     *
+     * @return how long a user needs to press the relevant keys to trigger
+     *   the screenshot chord.
+     * @hide
+     */
+    public long getScreenshotChordKeyTimeout() {
+        return mScreenshotChordKeyTimeout;
     }
 
     /**
