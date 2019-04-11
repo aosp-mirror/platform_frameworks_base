@@ -4616,10 +4616,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 pw.decreaseIndent();
                 pw.decreaseIndent();
 
-                pw.println("reset");
+                pw.println("reset [--user <USER_ID>]");
                 pw.increaseIndent();
                 pw.println("reset currently selected/enabled IMEs to the default ones as if "
                         + "the device is initially booted with the current locale.");
+                pw.increaseIndent();
+                pw.print("--user <USER_ID>: Specify which user to reset.");
+                pw.println(" Assumes the current user if not specified.");
+                pw.decreaseIndent();
+
                 pw.decreaseIndent();
 
                 pw.decreaseIndent();
@@ -4874,45 +4879,67 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @BinderThread
     @ShellCommandResult
     private int handleShellCommandResetInputMethod(@NonNull ShellCommand shellCommand) {
+        final PrintWriter out = shellCommand.getOutPrintWriter();
+        final int userIdToBeResolved = handleOptionsForCommandsThatOnlyHaveUserOption(shellCommand);
         synchronized (mMethodMap) {
-            if (!userHasDebugPriv(mSettings.getCurrentUserId(), shellCommand)) {
-                return ShellCommandResult.SUCCESS;
-            }
-            final String nextIme;
-            final List<InputMethodInfo> nextEnabledImes;
-            hideCurrentInputLocked(0, null);
-            unbindCurrentMethodLocked();
-            // Reset the current IME
-            resetSelectedInputMethodAndSubtypeLocked(null);
-            // Also reset the settings of the current IME
-            mSettings.putSelectedInputMethod(null);
-            // Disable all enabled IMEs.
-            mSettings.getEnabledInputMethodListLocked().forEach(
-                    imi -> setInputMethodEnabledLocked(imi.getId(), false));
-            // Re-enable with default enabled IMEs.
-            InputMethodUtils.getDefaultEnabledImes(mContext, mMethodList).forEach(
-                    imi -> setInputMethodEnabledLocked(imi.getId(), true));
-            updateInputMethodsFromSettingsLocked(true /* enabledMayChange */);
-            InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(mIPackageManager,
-                    mSettings.getEnabledInputMethodListLocked(),
-                    mSettings.getCurrentUserId(),
-                    mContext.getBasePackageName());
-            nextIme = mSettings.getSelectedInputMethod();
-            nextEnabledImes = mSettings.getEnabledInputMethodListLocked();
-            final PrintWriter pr = shellCommand.getOutPrintWriter();
-            pr.println("Reset current and enabled IMEs");
-            pr.println("Newly selected IME:");
-            pr.print("  "); pr.println(nextIme);
-            pr.println("Newly enabled IMEs:");
-            {
-                final int N = nextEnabledImes.size();
-                for (int i = 0; i < N; ++i) {
-                    pr.print("  ");
-                    pr.println(nextEnabledImes.get(i).getId());
+            final int[] userIds = InputMethodUtils.resolveUserId(userIdToBeResolved,
+                    mSettings.getCurrentUserId(), shellCommand.getErrPrintWriter());
+            for (int userId : userIds) {
+                if (!userHasDebugPriv(userId, shellCommand)) {
+                    continue;
                 }
+                final String nextIme;
+                final List<InputMethodInfo> nextEnabledImes;
+                if (userId == mSettings.getCurrentUserId()) {
+                    hideCurrentInputLocked(0, null);
+                    unbindCurrentMethodLocked();
+                    // Reset the current IME
+                    resetSelectedInputMethodAndSubtypeLocked(null);
+                    // Also reset the settings of the current IME
+                    mSettings.putSelectedInputMethod(null);
+                    // Disable all enabled IMEs.
+                    mSettings.getEnabledInputMethodListLocked().forEach(
+                            imi -> setInputMethodEnabledLocked(imi.getId(), false));
+                    // Re-enable with default enabled IMEs.
+                    InputMethodUtils.getDefaultEnabledImes(mContext, mMethodList).forEach(
+                            imi -> setInputMethodEnabledLocked(imi.getId(), true));
+                    updateInputMethodsFromSettingsLocked(true /* enabledMayChange */);
+                    InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(mIPackageManager,
+                            mSettings.getEnabledInputMethodListLocked(),
+                            mSettings.getCurrentUserId(),
+                            mContext.getBasePackageName());
+                    nextIme = mSettings.getSelectedInputMethod();
+                    nextEnabledImes = mSettings.getEnabledInputMethodListLocked();
+                } else {
+                    final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
+                    final ArrayList<InputMethodInfo> methodList = new ArrayList<>();
+                    final ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap =
+                            new ArrayMap<>();
+                    AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
+                    queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap,
+                            methodMap, methodList);
+                    final InputMethodSettings settings = new InputMethodSettings(
+                            mContext.getResources(), mContext.getContentResolver(), methodMap,
+                            userId, false);
+
+                    nextEnabledImes = InputMethodUtils.getDefaultEnabledImes(mContext, methodList);
+                    nextIme = InputMethodUtils.getMostApplicableDefaultIME(nextEnabledImes).getId();
+
+                    // Reset enabled IMEs.
+                    settings.putEnabledInputMethodsStr("");
+                    nextEnabledImes.forEach(imi -> settings.appendAndPutEnabledInputMethodLocked(
+                            imi.getId(), false));
+
+                    // Reset selected IME.
+                    settings.putSelectedInputMethod(nextIme);
+                    settings.putSelectedSubtype(NOT_A_SUBTYPE_ID);
+                }
+                out.println("Reset current and enabled IMEs for user #" + userId);
+                out.println("  Selected: " + nextIme);
+                nextEnabledImes.forEach(ime -> out.println("   Enabled: " + ime.getId()));
             }
-            return ShellCommandResult.SUCCESS;
         }
+        return ShellCommandResult.SUCCESS;
     }
 
     /**
