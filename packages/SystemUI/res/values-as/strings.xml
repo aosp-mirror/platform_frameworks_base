@@ -172,6 +172,8 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"এলটিই"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"এলটিই+"</string>
+    <!-- no translation found for data_connection_5ge (4699478963278829331) -->
+    <skip />
     <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
     <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
@@ -277,8 +279,7 @@
       <item quantity="one"> ভিতৰত আৰু <xliff:g id="NUMBER_1">%s</xliff:g>টা জাননী আছে।</item>
       <item quantity="other"> ভিতৰত আৰু <xliff:g id="NUMBER_1">%s</xliff:g>টা জাননী আছে।</item>
     </plurals>
-    <!-- no translation found for notification_summary_message_format (715071952312553396) -->
-    <skip />
+    <string name="notification_summary_message_format" msgid="715071952312553396">"<xliff:g id="CONTACT_NAME">%1$s</xliff:g>: <xliff:g id="MESSAGE_CONTENT">%2$s</xliff:g>"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"জাননীৰ ছেটিংসমূহ"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> ছেটিংসমূহ"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"আপোনাৰ ফ\'নৰ স্ক্ৰীণ স্বয়ংক্ৰিয়ভাৱে ঘূৰিব৷"</string>
@@ -620,30 +621,24 @@
     <string name="notification_channel_unsilenced" msgid="4790904571552394137">"এই জাননীবোৰে আপোনাক সতৰ্ক কৰিব"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"আপুনি সাধাৰণতে এই জাননীসমূহ অগ্ৰাহ্য কৰে। \nসেইবোৰ দেখুওৱাই থাকিব লাগিবনে?"</string>
     <string name="inline_done_button" msgid="492513001558716452">"কৰা হ’ল"</string>
-    <!-- no translation found for inline_ok_button (975600017662930615) -->
-    <skip />
+    <string name="inline_ok_button" msgid="975600017662930615">"প্ৰয়োগ কৰক"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"এই জাননীসমূহ দেখুওৱাই থাকিব লাগিবনে?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"জাননী বন্ধ কৰক"</string>
     <string name="inline_deliver_silently_button" msgid="7756289895745629140">"নিৰৱে ডেলিভাৰ কৰক"</string>
     <string name="inline_block_button" msgid="8735843688021655065">"অৱৰোধ কৰক"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"দেখুওৱাই থাকক"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"সৰু কৰক"</string>
-    <!-- no translation found for inline_silent_button_silent (6904727667411781466) -->
-    <skip />
+    <string name="inline_silent_button_silent" msgid="6904727667411781466">"মৃদু"</string>
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"নীৰৱ হৈ থাকক"</string>
-    <!-- no translation found for inline_silent_button_alert (2449191160203602471) -->
-    <skip />
+    <string name="inline_silent_button_alert" msgid="2449191160203602471">"বাধা দিয়া"</string>
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"সতৰ্ক কৰি থাকক"</string>
-    <!-- no translation found for inline_turn_off_notifications (8635596135532202355) -->
-    <skip />
+    <string name="inline_turn_off_notifications" msgid="8635596135532202355">"জাননী অফ কৰক"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"এই এপটোৰ জাননী দেখুওৱাই থাকিব লাগিবনে?"</string>
     <string name="hint_text_block" msgid="3554459167504485284">"অৱৰোধ কৰা জাননী ক’তো দেখা নাযায় বা সেইবোৰে কোনো শব্দ নকৰে। আপুনি ছেটিংসমূহলৈ গৈ জাননীসমূহ অৱৰোধৰ পৰা আঁতৰাব পাৰে৷"</string>
     <string name="hint_text_silent" msgid="859468056340177016">"নিৰৱ জাননীসমূহ শ্বেডত দেখা যায়, কিন্তু লক স্ক্ৰীণত আৰু বেনাৰ হিচাপে দেখা নাযায় আৰু কোনো শব্দ নকৰে।"</string>
-    <!-- no translation found for hint_text_alert (2721169810318722524) -->
-    <skip />
+    <string name="hint_text_alert" msgid="2721169810318722524">"এই জাননীবোৰে এটা শব্দ কৰিব আৰু জাননী দেৰাজ, স্থিতি দণ্ড আৰু লক স্ক্ৰীণত দেখা যাব"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"এই জাননীসমূহ বন্ধ কৰিব নোৱাৰি"</string>
-    <!-- no translation found for notification_multichannel_desc (4695920306092240550) -->
-    <skip />
+    <string name="notification_multichannel_desc" msgid="4695920306092240550">"এই ধৰণৰ জাননীবোৰ ইয়াত কনফিগাৰ কৰিব পৰা নাযায়"</string>
     <string name="notification_delegate_header" msgid="9167022191405284627">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ জৰিয়তে"</string>
     <string name="appops_camera" msgid="8100147441602585776">"এই এপে কেমেৰা ব্য়ৱহাৰ কৰি আছে।"</string>
     <string name="appops_microphone" msgid="741508267659494555">"এই এপে মাইক্ৰ\'ফ\'ন ব্য়ৱহাৰ কৰি আছে।"</string>

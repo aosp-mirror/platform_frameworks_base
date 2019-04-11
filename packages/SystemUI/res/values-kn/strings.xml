@@ -172,6 +172,8 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <!-- no translation found for data_connection_5ge (4699478963278829331) -->
+    <skip />
     <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
     <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
@@ -277,8 +279,7 @@
       <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> ಕ್ಕಿಂತ ಹೆಚ್ಚು ಅಧಿಸೂಚನೆಗಳು ಒಳಗಿವೆ.</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> ಕ್ಕಿಂತ ಹೆಚ್ಚು ಅಧಿಸೂಚನೆಗಳು ಒಳಗಿವೆ.</item>
     </plurals>
-    <!-- no translation found for notification_summary_message_format (715071952312553396) -->
-    <skip />
+    <string name="notification_summary_message_format" msgid="715071952312553396">"<xliff:g id="CONTACT_NAME">%1$s</xliff:g>: <xliff:g id="MESSAGE_CONTENT">%2$s</xliff:g>"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"ಅಧಿಸೂಚನೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"ಪರದೆಯು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ತಿರುಗುತ್ತದೆ."</string>
@@ -620,30 +621,24 @@
     <string name="notification_channel_unsilenced" msgid="4790904571552394137">"ಈ ಸೂಚನೆಗಳು ನಿಮ್ಮನ್ನು ಎಚ್ಚರಿಸುತ್ತವೆ"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"ನೀವು ಸಾಮಾನ್ಯವಾಗಿ ಈ ಅಧಿಸೂಚನೆಗಳನ್ನು ವಜಾಗೊಳಿಸಿದ್ದೀರಿ. \nಅವುಗಳನ್ನು ತೋರಿಸುತ್ತಲೇ ಇರಬೇಕೆ?"</string>
     <string name="inline_done_button" msgid="492513001558716452">"ಪೂರ್ಣಗೊಂಡಿದೆ"</string>
-    <!-- no translation found for inline_ok_button (975600017662930615) -->
-    <skip />
+    <string name="inline_ok_button" msgid="975600017662930615">"ಅನ್ವಯಿಸಿ"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"ಈ ಅಧಿಸೂಚನೆಗಳನ್ನು ತೋರಿಸುತ್ತಲೇ ಇರಬೇಕೆ?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"ಅಧಿಸೂಚನೆಗಳನ್ನು ನಿಲ್ಲಿಸಿ"</string>
     <string name="inline_deliver_silently_button" msgid="7756289895745629140">"ಮೌನವಾಗಿ ವಿತರಿಸಿ"</string>
     <string name="inline_block_button" msgid="8735843688021655065">"ನಿರ್ಬಂಧಿಸಿ"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"ತೋರಿಸುತ್ತಲಿರಿ"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"ಕಿರಿದುಗೊಳಿಸಿ"</string>
-    <!-- no translation found for inline_silent_button_silent (6904727667411781466) -->
-    <skip />
+    <string name="inline_silent_button_silent" msgid="6904727667411781466">"ಹಿತವಾಗಿ"</string>
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"ಮೌನವಾಗಿರಿ"</string>
-    <!-- no translation found for inline_silent_button_alert (2449191160203602471) -->
-    <skip />
+    <string name="inline_silent_button_alert" msgid="2449191160203602471">"ಅಡಚಣೆ"</string>
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"ಎಚ್ಚರಿಸುತ್ತಿರಿ"</string>
-    <!-- no translation found for inline_turn_off_notifications (8635596135532202355) -->
-    <skip />
+    <string name="inline_turn_off_notifications" msgid="8635596135532202355">"ಅಧಿಸೂಚನೆಗಳನ್ನು ಆಫ್ ಮಾಡಿ"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"ಈ ಅಪ್ಲಿಕೇಶನ್‌ನಿಂದ ಅಧಿಸೂಚನೆಗಳನ್ನು ತೋರಿಸುತ್ತಲೇ ಇರಬೇಕೆ?"</string>
     <string name="hint_text_block" msgid="3554459167504485284">"ನಿರ್ಬಂಧಿಸಲಾದ ಅಧಿಸೂಚನೆಗಳು ಎಲ್ಲಿಯೂ ಗೋಚರಿಸುವುದಿಲ್ಲ ಅಥವಾ ಯಾವುದೇ ಧ್ವನಿಯನ್ನು ಪ್ಲೇ ಮಾಡುವುದಿಲ್ಲ. ನೀವು ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಅಧಿಸೂಚನೆಗಳ ನಿರ್ಬಂಧವನ್ನು ರದ್ದುಗೊಳಿಸಬಹುದು."</string>
     <string name="hint_text_silent" msgid="859468056340177016">"ನಿಶ್ಶಬ್ಧ ಅಧಿಸೂಚನೆಗಳು ಶೇಡ್‌ನಲ್ಲಿ ಗೋಚರಿಸುತ್ತವೆ, ಆದರೆ ಲಾಕ್ ಸ್ಕ್ರೀನ್ ಮೇಲೆ ಗೋಚರಿಸುವುದಿಲ್ಲ, ಬ್ಯಾನರ್ ಪ್ರಸ್ತುತಪಡಿಸುತ್ತವೆ ಅಥವಾ ಧ್ವನಿಯನ್ನು ಪ್ಲೇ ಮಾಡುತ್ತವೆ."</string>
-    <!-- no translation found for hint_text_alert (2721169810318722524) -->
-    <skip />
+    <string name="hint_text_alert" msgid="2721169810318722524">"ಈ ಅಧಿಸೂಚನೆಗಳನ್ನು ಸ್ವೀಕರಿಸಿದಾಗ ಧ್ವನಿಯನ್ನು ಮಾಡುತ್ತವೆ ಮತ್ತು ಅಧಿಸೂಚನೆ ಡ್ರಾಯರ್, ಸ್ಥಿತಿ ಪಟ್ಟಿ ಮತ್ತು ಲಾಕ್ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ತೋರಿಸಲಾಗುತ್ತದೆ"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"ಈ ಅಧಿಸೂಚನೆಗಳನ್ನು ಆಫ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
-    <!-- no translation found for notification_multichannel_desc (4695920306092240550) -->
-    <skip />
+    <string name="notification_multichannel_desc" msgid="4695920306092240550">"ಈ ಗುಂಪಿನ ಅಧಿಸೂಚನೆಗಳನ್ನು ಇಲ್ಲಿ ಕಾನ್ಫಿಗರ್‌ ಮಾಡಲಾಗಿರುವುದಿಲ್ಲ"</string>
     <string name="notification_delegate_header" msgid="9167022191405284627">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಮೂಲಕ"</string>
     <string name="appops_camera" msgid="8100147441602585776">"ಈ ಅಪ್ಲಿಕೇಶನ್ ಕ್ಯಾಮರಾವನ್ನು ಬಳಸುತ್ತಿದೆ."</string>
     <string name="appops_microphone" msgid="741508267659494555">"ಈ ಅಪ್ಲಿಕೇಶನ್ ಮೈಕ್ರೊಫೋನ್ ಅನ್ನು ಬಳಸುತ್ತಿದೆ."</string>
