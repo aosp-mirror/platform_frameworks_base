@@ -172,6 +172,8 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <!-- no translation found for data_connection_5ge (4699478963278829331) -->
+    <skip />
     <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
     <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
@@ -277,8 +279,7 @@
       <item quantity="one">ভিতরে আরও <xliff:g id="NUMBER_1">%s</xliff:g>টি বিজ্ঞপ্তি আছে।</item>
       <item quantity="other">ভিতরে আরও <xliff:g id="NUMBER_1">%s</xliff:g>টি বিজ্ঞপ্তি আছে।</item>
     </plurals>
-    <!-- no translation found for notification_summary_message_format (715071952312553396) -->
-    <skip />
+    <string name="notification_summary_message_format" msgid="715071952312553396">"<xliff:g id="CONTACT_NAME">%1$s</xliff:g>: <xliff:g id="MESSAGE_CONTENT">%2$s</xliff:g>"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"বিজ্ঞপ্তির সেটিংস"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> সেটিংস"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"স্ক্রিন অটোমেটিক ঘুরে যাবে৷"</string>
@@ -620,30 +621,24 @@
     <string name="notification_channel_unsilenced" msgid="4790904571552394137">"এই বিজ্ঞপ্তিগুলি আপনাকে সতর্ক করে দেবে"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"এই বিজ্ঞপ্তিগুলিকে আপনি সাধারণত বাতিল করেন। \nসেগুলি দেখতে চান?"</string>
     <string name="inline_done_button" msgid="492513001558716452">"হয়ে গেছে"</string>
-    <!-- no translation found for inline_ok_button (975600017662930615) -->
-    <skip />
+    <string name="inline_ok_button" msgid="975600017662930615">"প্রয়োগ করুন"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"এই বিজ্ঞপ্তিগুলি পরেও দেখে যেতে চান?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"বিজ্ঞপ্তি বন্ধ করুন"</string>
     <string name="inline_deliver_silently_button" msgid="7756289895745629140">"সাইলেন্ট মোডে দেখান"</string>
     <string name="inline_block_button" msgid="8735843688021655065">"ব্লক করুন"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"দেখতে থাকুন"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"ছোট করে দিন"</string>
-    <!-- no translation found for inline_silent_button_silent (6904727667411781466) -->
-    <skip />
+    <string name="inline_silent_button_silent" msgid="6904727667411781466">"সাইলেন্ট মোডে"</string>
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"বিজ্ঞপ্তি মিউট করুন"</string>
-    <!-- no translation found for inline_silent_button_alert (2449191160203602471) -->
-    <skip />
+    <string name="inline_silent_button_alert" msgid="2449191160203602471">"বিরক্তিকর"</string>
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"বিজ্ঞপ্তি পান"</string>
-    <!-- no translation found for inline_turn_off_notifications (8635596135532202355) -->
-    <skip />
+    <string name="inline_turn_off_notifications" msgid="8635596135532202355">"বিজ্ঞপ্তি বন্ধ করুন"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"এই অ্যাপের বিজ্ঞপ্তি পরেও দেখে যেতে চান?"</string>
     <string name="hint_text_block" msgid="3554459167504485284">"ব্লক করা বিজ্ঞপ্তি কোথাও দেখানো হয় না ও সেটির শব্দ শোনা যায় না। আপনি সেটিংস থেকে বিজ্ঞপ্তি আনব্লক করতে পারেন।"</string>
     <string name="hint_text_silent" msgid="859468056340177016">"নীরব বিজ্ঞপ্তি শেডে দেখানো হয়, কিন্তু লক স্ক্রিনে দেখানো হয় না। একইসাথে, এটি ব্যানার দেখাতে পারে না বা আওয়াজও করতে পারে না।"</string>
-    <!-- no translation found for hint_text_alert (2721169810318722524) -->
-    <skip />
+    <string name="hint_text_alert" msgid="2721169810318722524">"আওয়াজ হলেই জানতে পারবেন বিজ্ঞপ্তি এসেছে এবং সেটি বিজ্ঞপ্তি ড্রয়ার, স্ট্যাটাস বার এবং লক স্ক্রিনে দেখা যাবে"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"এই বিজ্ঞপ্তিগুলি বন্ধ করা যাবে না"</string>
-    <!-- no translation found for notification_multichannel_desc (4695920306092240550) -->
-    <skip />
+    <string name="notification_multichannel_desc" msgid="4695920306092240550">"এই সমস্ত বিজ্ঞপ্তিকে এখানে কনফিগার করা যাবে না"</string>
     <string name="notification_delegate_header" msgid="9167022191405284627">"<xliff:g id="APP_NAME">%1$s</xliff:g>-এর মাধ্যমে"</string>
     <string name="appops_camera" msgid="8100147441602585776">"এই অ্যাপটি ক্যামেরা ব্যবহার করছে।"</string>
     <string name="appops_microphone" msgid="741508267659494555">"এই অ্যাপটি মাইক্রোফোন ব্যবহার করছে।"</string>

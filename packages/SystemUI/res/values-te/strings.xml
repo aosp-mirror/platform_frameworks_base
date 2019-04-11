@@ -41,7 +41,7 @@
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"స్క్రీన్ ఆటో-రొటేట్‌"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"మ్యూట్"</string>
-    <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"స్వయంచాలకం"</string>
+    <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"ఆటోమేటిక్"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"నోటిఫికేషన్‌లు"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"బ్లూటూత్ టీథర్ చేయబడింది"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"ఇన్‌పుట్ పద్ధతులను సెటప్ చేయండి"</string>
@@ -172,6 +172,8 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <!-- no translation found for data_connection_5ge (4699478963278829331) -->
+    <skip />
     <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
     <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
@@ -225,7 +227,7 @@
     <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"మొత్తం నిశ్శబ్దం"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"అలారాలు మాత్రమే"</string>
     <string name="accessibility_quick_settings_dnd" msgid="5555155552520665891">"అంతరాయం కలిగించవద్దు."</string>
-    <string name="accessibility_quick_settings_dnd_changed_off" msgid="2757071272328547807">"అంతరాయం కలిగించవద్దు ఆఫ్ చేయబడింది."</string>
+    <string name="accessibility_quick_settings_dnd_changed_off" msgid="2757071272328547807">"\'అంతరాయం కలిగించవద్దు\' ఆఫ్ చేయబడింది."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="6808220653747701059">"అంతరాయం కలిగించవద్దు ఆన్ చేయబడింది."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"బ్లూటూత్."</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"బ్లూటూత్ ఆఫ్‌లో ఉంది."</string>
@@ -277,8 +279,7 @@
       <item quantity="other">లోపల మరో <xliff:g id="NUMBER_1">%s</xliff:g> నోటిఫికేషన్‌లు ఉన్నాయి.</item>
       <item quantity="one">లోపల మరో <xliff:g id="NUMBER_0">%s</xliff:g> నోటిఫికేషన్ ఉంది.</item>
     </plurals>
-    <!-- no translation found for notification_summary_message_format (715071952312553396) -->
-    <skip />
+    <string name="notification_summary_message_format" msgid="715071952312553396">"<xliff:g id="CONTACT_NAME">%1$s</xliff:g>: <xliff:g id="MESSAGE_CONTENT">%2$s</xliff:g>"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"నోటిఫికేషన్ సెట్టింగ్‌లు"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> సెట్టింగ్‌లు"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"స్క్రీన్ స్వయంచాలకంగా తిప్పబడుతుంది."</string>
@@ -337,7 +338,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"పరికరాలు ఏవీ అందుబాటులో లేవు"</string>
     <string name="quick_settings_cast_no_wifi" msgid="2696477881905521882">"Wi‑Fi కనెక్ట్ కాలేదు"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"ప్రకాశం"</string>
-    <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"స్వయంచాలకం"</string>
+    <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"ఆటోమేటిక్"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"రంగులను తారుమారు చేయి"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"రంగు సవరణ మోడ్"</string>
     <string name="quick_settings_more_settings" msgid="326112621462813682">"మరిన్ని సెట్టింగ్‌లు"</string>
@@ -518,7 +519,7 @@
     <string name="accessibility_volume_settings" msgid="4915364006817819212">"ధ్వని సెట్టింగ్‌లు"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"విస్తరింపజేయండి"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"కుదించండి"</string>
-    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"ఆటోమేటిక్ క్యాప్షన్ మీడియా"</string>
+    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"మీడియాకు ఆటోమేటిక్ శీర్షికలు"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"ఉపశీర్షికల చిట్కాను మూసివేయండి"</string>
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"పరికరం అవుట్‌పుట్‌ని మార్చండి"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"స్క్రీన్ పిన్ చేయబడింది"</string>
@@ -620,30 +621,24 @@
     <string name="notification_channel_unsilenced" msgid="4790904571552394137">"ఈ నోటిఫికేషన్‌లు మిమ్మల్ని హెచ్చరిస్తాయి"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"మీరు సాధారణంగా ఈ నోటిఫికేషన్‌లను విస్మరిస్తారు. \nవాటి ప్రదర్శనను కొనసాగించాలా?"</string>
     <string name="inline_done_button" msgid="492513001558716452">"పూర్తయింది"</string>
-    <!-- no translation found for inline_ok_button (975600017662930615) -->
-    <skip />
+    <string name="inline_ok_button" msgid="975600017662930615">"వర్తింపజేయి"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"ఈ నోటిఫికేషన్‌లను చూపిస్తూ ఉండాలా?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"నోటిఫికేషన్‌లను ఆపివేయి"</string>
     <string name="inline_deliver_silently_button" msgid="7756289895745629140">"నిశ్శబ్దంగా బట్వాడా చేయండి"</string>
     <string name="inline_block_button" msgid="8735843688021655065">"బ్లాక్ చేయి"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"చూపిస్తూనే ఉండు"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"కుదించు"</string>
-    <!-- no translation found for inline_silent_button_silent (6904727667411781466) -->
-    <skip />
+    <string name="inline_silent_button_silent" msgid="6904727667411781466">"సున్నితం"</string>
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"నిశబ్దంగా తెలియజేయి"</string>
-    <!-- no translation found for inline_silent_button_alert (2449191160203602471) -->
-    <skip />
+    <string name="inline_silent_button_alert" msgid="2449191160203602471">"అంతరాయం"</string>
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"ఎప్పటికప్పుడు హెచ్చరించు"</string>
-    <!-- no translation found for inline_turn_off_notifications (8635596135532202355) -->
-    <skip />
+    <string name="inline_turn_off_notifications" msgid="8635596135532202355">"నోటిఫికేషన్‌లను ఆఫ్ చేయి"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"ఈ యాప్ నుండి నోటిఫికేషన్‌లను చూపిస్తూ ఉండాలా?"</string>
     <string name="hint_text_block" msgid="3554459167504485284">"బ్లాక్ చేసిన నోటిఫికే‌షన్‌లు ఎక్కడా కనిపించవు, అలాగే శబ్దం ప్లే కాదు. మీరు సెట్టింగ్‌లలో నోటిఫికేషన్‌లను అన్‌బ్లాక్ చేయవచ్చు."</string>
     <string name="hint_text_silent" msgid="859468056340177016">"నిశ్శబ్ద నోటిఫికేషన్‌లు షేడ్‌లో కనిపిస్తాయి, కానీ లాక్ స్క్రీన్‌పై కనిపించవు, బ్యానర్‌లుగా అందించబడవు, అలాగే సౌండ్ ప్లే కాదు."</string>
-    <!-- no translation found for hint_text_alert (2721169810318722524) -->
-    <skip />
+    <string name="hint_text_alert" msgid="2721169810318722524">"ఈ నోటిఫికేషన్‌లు శబ్దాన్ని చేస్తూ నోటిఫికేషన్ డ్రాయర్, స్థితి పట్టీ మరియు లాక్ స్క్రీన్‌లో చూపుతాయి"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"ఈ నోటిఫికేషన్‌లను ఆఫ్ చేయలేరు"</string>
-    <!-- no translation found for notification_multichannel_desc (4695920306092240550) -->
-    <skip />
+    <string name="notification_multichannel_desc" msgid="4695920306092240550">"ఈ నోటిఫికేషన్‌ల సమూహాన్ని ఇక్కడ కాన్ఫిగర్ చేయలేము"</string>
     <string name="notification_delegate_header" msgid="9167022191405284627">"<xliff:g id="APP_NAME">%1$s</xliff:g> ద్వారా"</string>
     <string name="appops_camera" msgid="8100147441602585776">"ఈ యాప్ ఈ కెమెరాను ఉపయోగిస్తోంది."</string>
     <string name="appops_microphone" msgid="741508267659494555">"ఈ యాప్ మైక్రోఫోన్‌ను ఉపయోగిస్తుంది."</string>
@@ -724,7 +719,7 @@
     <string name="tuner_full_zen_title" msgid="4540823317772234308">"వాల్యూమ్ నియంత్రణలతో చూపు"</string>
     <string name="volume_and_do_not_disturb" msgid="1750270820297253561">"అంతరాయం కలిగించవద్దు"</string>
     <string name="volume_dnd_silent" msgid="4363882330723050727">"వాల్యూమ్ బటన్‌ల షార్ట్‌కట్"</string>
-    <string name="volume_up_silent" msgid="7545869833038212815">"వాల్యూమ్ పెంచితే అంతరాయం కలిగించవద్దు నుండి నిష్క్రమిస్తుంది"</string>
+    <string name="volume_up_silent" msgid="7545869833038212815">"వాల్యూమ్ పెంచితే \'అంతరాయం కలిగించవద్దు\' ను ఆపివేస్తుంది"</string>
     <string name="battery" msgid="7498329822413202973">"బ్యాటరీ"</string>
     <string name="clock" msgid="7416090374234785905">"గడియారం"</string>
     <string name="headset" msgid="4534219457597457353">"హెడ్‌సెట్"</string>
@@ -911,7 +906,7 @@
     <string name="bubbles_prompt" msgid="8807968030159469710">"<xliff:g id="APP_NAME">%1$s</xliff:g> నుండి బబుల్‌లను అనుమతించాలా?"</string>
     <string name="no_bubbles" msgid="337101288173078247">"తిరస్కరించు"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"అనుమతించు"</string>
-    <string name="ask_me_later_bubbles" msgid="2147688438402939029">"నన్ను తర్వాత అడగండి"</string>
+    <string name="ask_me_later_bubbles" msgid="2147688438402939029">"నన్ను తర్వాత అడగు"</string>
     <string name="bubble_content_description_single" msgid="1184462974339387516">"<xliff:g id="APP_NAME">%2$s</xliff:g> నుండి <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="8666349184095622232">"<xliff:g id="APP_NAME">%2$s</xliff:g> నుండి <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> మరియు మరో <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>"</string>
     <string name="bubble_accessibility_action_move" msgid="1794879742234803840">"తరలించు"</string>

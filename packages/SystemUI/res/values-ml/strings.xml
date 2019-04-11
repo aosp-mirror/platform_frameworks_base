@@ -63,10 +63,8 @@
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"ഉപകരണത്തിൽ ഇപ്പോൾ സൈൻ ഇൻ ചെയ്‌തിരിക്കുന്ന ഉപയോക്താവിന് USB ഡീബഗ്ഗിംഗ് ഓണാക്കാനാകില്ല. ഈ ഫീച്ചർ ഉപയോഗിക്കാൻ പ്രാഥമിക ഉപയോക്താവിലേക്ക് മാറുക."</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"USB പോർട്ട് പ്രവർത്തനരഹിതമാക്കി"</string>
     <string name="usb_contaminant_message" msgid="2205845572186473860">"ദ്രാവകത്തിൽ നിന്നോ പൊടിയിൽ നിന്നോ നിങ്ങളുടെ ഉപകരണത്തെ പരിരക്ഷിക്കാനായി USB പോർട്ട് പ്രവർത്തനരഹിതമാക്കിയിരിക്കുന്നതിനാൽ അത് ആക്‌സസറികളൊന്നും തിരിച്ചറിയില്ല.\n\n USB പോർട്ട് സുരക്ഷിതമായി വീണ്ടും ഉപയോഗിക്കാനാകുമ്പോൾ നിങ്ങളെ അറിയിക്കും."</string>
-    <!-- no translation found for usb_port_enabled (7906141351687694867) -->
-    <skip />
-    <!-- no translation found for usb_disable_contaminant_detection (2103905315747120033) -->
-    <skip />
+    <string name="usb_port_enabled" msgid="7906141351687694867">"ആക്‌സസറികളും ചാർജറുകളും കണ്ടെത്താൻ USB പോർട്ട് പ്രവർത്തനക്ഷമമാക്കുക"</string>
+    <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"USB പ്രവർത്തനക്ഷമമാക്കുക"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"സ്‌ക്രീനിൽ ഉൾക്കൊള്ളിക്കാൻ സൂം ചെയ്യുക"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"സ്‌ക്രീനിൽ ഉൾക്കൊള്ളിക്കാൻ വലിച്ചുനീട്ടുക"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"സ്‌ക്രീൻഷോട്ട്"</string>
@@ -113,8 +111,7 @@
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"നിങ്ങളുടെ ഫിംഗർപ്രിന്റ് ഉപയോഗിക്കാതെ അൺലോക്കുചെയ്യുക"</string>
     <string name="accessibility_scanning_face" msgid="769545173211758586">"മുഖം സ്കാൻ ചെയ്യുന്നു"</string>
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"അയയ്ക്കുക"</string>
-    <!-- no translation found for accessibility_manage_notification (2026361503393549753) -->
-    <skip />
+    <string name="accessibility_manage_notification" msgid="2026361503393549753">"അറിയിപ്പുകൾ മാനേജ് ചെയ്യുക"</string>
     <string name="unlock_label" msgid="8779712358041029439">"അൺലോക്കുചെയ്യുക"</string>
     <string name="phone_label" msgid="2320074140205331708">"ഫോൺ തുറക്കുക"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"വോയ്‌സ് അസിസ്റ്റ് തുറക്കുക"</string>
@@ -175,6 +172,8 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <!-- no translation found for data_connection_5ge (4699478963278829331) -->
+    <skip />
     <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
     <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
@@ -185,8 +184,7 @@
     <string name="accessibility_cell_data" msgid="5326139158682385073">"മൊബൈൽ ഡാറ്റ"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"മൊബൈൽ ഡാറ്റ ഓണാണ്"</string>
     <string name="cell_data_off_content_description" msgid="4356113230238585072">"മൊബൈൽ ഡാറ്റ ഓഫാണ്"</string>
-    <!-- no translation found for not_default_data_content_description (9194667237765917844) -->
-    <skip />
+    <string name="not_default_data_content_description" msgid="9194667237765917844">"ഡാറ്റ ഉപയോഗിക്കുന്നതിന് സജ്ജീകരിച്ചിട്ടില്ല"</string>
     <string name="cell_data_off" msgid="1051264981229902873">"ഓഫ്"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ബ്ലൂടൂത്ത് ടെതറിംഗ്."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"ഫ്ലൈറ്റ് മോഡ്."</string>
@@ -228,12 +226,9 @@
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"ഫ്ലൈറ്റ് മോഡ് ഓണാക്കി."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"പൂർണ്ണ നിശബ്‌ദത"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"അലാറങ്ങൾ മാത്രം"</string>
-    <!-- no translation found for accessibility_quick_settings_dnd (5555155552520665891) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_dnd_changed_off (2757071272328547807) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_dnd_changed_on (6808220653747701059) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd" msgid="5555155552520665891">"ശല്യപ്പെടുത്തരുത്."</string>
+    <string name="accessibility_quick_settings_dnd_changed_off" msgid="2757071272328547807">"ശല്യപ്പെടുത്തരുത് എന്നത് ഓഫാക്കി."</string>
+    <string name="accessibility_quick_settings_dnd_changed_on" msgid="6808220653747701059">"ശല്യപ്പെടുത്തരുത് എന്നത് ഓണാക്കി."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth"</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"ബ്ലൂടൂത്ത് ഓഫാണ്."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"ബ്ലൂടൂത്ത് ഓണാണ്."</string>
@@ -284,8 +279,7 @@
       <item quantity="other">ഉള്ളിൽ <xliff:g id="NUMBER_1">%s</xliff:g> അറിയിപ്പുകൾ കൂടിയുണ്ട്.</item>
       <item quantity="one">ഉള്ളിൽ <xliff:g id="NUMBER_0">%s</xliff:g> അറിയിപ്പ് കൂടിയുണ്ട്.</item>
     </plurals>
-    <!-- no translation found for notification_summary_message_format (715071952312553396) -->
-    <skip />
+    <string name="notification_summary_message_format" msgid="715071952312553396">"<xliff:g id="CONTACT_NAME">%1$s</xliff:g>: <xliff:g id="MESSAGE_CONTENT">%2$s</xliff:g>"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"അറിയിപ്പ് ക്രമീകരണങ്ങൾ"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> ക്രമീകരണം"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"സ്‌ക്രീൻ സ്വയമേവ തിരിയും."</string>
@@ -298,8 +292,7 @@
     <string name="start_dreams" msgid="5640361424498338327">"സ്ക്രീൻ സേവർ"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"ഇതർനെറ്റ്"</string>
     <string name="quick_settings_header_onboarding_text" msgid="8030309023792936283">"കൂടുതൽ ഓപ്ഷനുകൾക്കായി ഐക്കണുകൾ സ്‌പർശിച്ച് പിടിക്കുക"</string>
-    <!-- no translation found for quick_settings_dnd_label (7112342227663678739) -->
-    <skip />
+    <string name="quick_settings_dnd_label" msgid="7112342227663678739">"ശല്യപ്പെടുത്തരുത്"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"മുൻഗണന മാത്രം"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"അലാറങ്ങൾ മാത്രം"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"പൂർണ്ണ നിശബ്‌ദത"</string>
@@ -450,10 +443,8 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"ബാറ്ററി ലാഭിക്കൽ ഓണാണ്"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"പ്രവർത്തനവും പശ്ചാത്തല ഡാറ്റയും കുറയ്‌ക്കുന്നു"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"ബാറ്ററി ലാഭിക്കൽ ഓഫാക്കുക"</string>
-    <!-- no translation found for media_projection_dialog_text (5751657130671431216) -->
-    <skip />
-    <!-- no translation found for media_projection_dialog_title (8124184308671641248) -->
-    <skip />
+    <string name="media_projection_dialog_text" msgid="5751657130671431216">"റിക്കോർഡ് ചെയ്യുമ്പോഴോ കാസ്‌റ്റ് ചെയ്യുമ്പോഴോ, നിങ്ങൾ പ്ലേ ചെയ്യുന്ന ഓഡിയോയും പാസ്‌വേഡുകളും, പേയ്മെന്റ് വിവരം, ഫോട്ടോകൾ, സന്ദേശങ്ങളും <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>-ന് ക്യാപ്‌ചർ ചെയ്യാനാവും."</string>
+    <string name="media_projection_dialog_title" msgid="8124184308671641248">"കാസ്‌റ്റ് /റിക്കോർഡ് ചെയ്യുമ്പോൾ സൂക്ഷ്‌മമായി കൈകാര്യം ചെയ്യേണ്ട വിവരം വെളിപ്പെടുത്തുന്നു"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"വീണ്ടും കാണിക്കരുത്"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"എല്ലാം മായ്‌ക്കുക"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"മാനേജ് ചെയ്യുക"</string>
@@ -528,10 +519,8 @@
     <string name="accessibility_volume_settings" msgid="4915364006817819212">"ശബ്‌ദ ക്രമീകരണം"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"വികസിപ്പിക്കുക"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"ചുരുക്കുക"</string>
-    <!-- no translation found for volume_odi_captions_tip (1193653197906918269) -->
-    <skip />
-    <!-- no translation found for accessibility_volume_close_odi_captions_tip (1163987066404128967) -->
-    <skip />
+    <string name="volume_odi_captions_tip" msgid="1193653197906918269">"മീഡിയയ്ക്ക് സ്വയമേവ ക്യാപ്ഷൻ"</string>
+    <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"അടിക്കുറിപ്പുകൾക്കുള്ള നുറുങ്ങ്"</string>
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"ഔട്ട്‌പുട്ട് ഉപകരണം മാറുക"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"സ്‌ക്രീൻ പിൻ ചെയ്‌തു"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"നിങ്ങൾ അൺപിൻ ചെയ്യുന്നതുവരെ ഇത് കാണുന്ന വിധത്തിൽ നിലനിർത്തും. അൺപിൻ ചെയ്യാൻ \'തിരികെ\', \'ചുരുക്കവിവരണം\' എന്നിവ സ്‌പർശിച്ച് പിടിക്കുക."</string>
@@ -632,32 +621,24 @@
     <string name="notification_channel_unsilenced" msgid="4790904571552394137">"ഈ അറിയിപ്പുകൾ നിങ്ങൾക്ക് മുന്നറിയിപ്പ് നൽകും"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"സാധാരണയായി നിങ്ങൾ ഈ അറിയിപ്പുകൾ നിരാകരിക്കുന്നു. \nഅവ തുടർന്നും കാണിക്കണോ?"</string>
     <string name="inline_done_button" msgid="492513001558716452">"പൂർത്തിയായി"</string>
-    <!-- no translation found for inline_ok_button (975600017662930615) -->
-    <skip />
+    <string name="inline_ok_button" msgid="975600017662930615">"ബാധകമാക്കുക"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"ഈ അറിയിപ്പുകൾ തുടർന്നും കാണിക്കണോ?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"അറിയിപ്പുകൾ നിർത്തുക"</string>
     <string name="inline_deliver_silently_button" msgid="7756289895745629140">"നിശബ്‌ദമായി ഡെലിവർ ചെയ്യുക"</string>
     <string name="inline_block_button" msgid="8735843688021655065">"ബ്ലോക്ക് ചെയ്യുക"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"തുടർന്നും കാണിക്കുക"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"ചെറുതാക്കുക‍"</string>
-    <!-- no translation found for inline_silent_button_silent (6904727667411781466) -->
-    <skip />
+    <string name="inline_silent_button_silent" msgid="6904727667411781466">"നിശബ്‌ദമായ"</string>
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"നിശബ്‌ദമായ നിലയിൽ തുടരുക"</string>
-    <!-- no translation found for inline_silent_button_alert (2449191160203602471) -->
-    <skip />
+    <string name="inline_silent_button_alert" msgid="2449191160203602471">"തടസ്സപ്പെടുത്തുന്ന"</string>
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"മുന്നറിയിപ്പ് നൽകുന്നത് തുടരുക"</string>
-    <!-- no translation found for inline_turn_off_notifications (8635596135532202355) -->
-    <skip />
+    <string name="inline_turn_off_notifications" msgid="8635596135532202355">"അറിയിപ്പുകൾ ഓഫാക്കുക"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"ഈ ആപ്പിൽ നിന്നുള്ള അറിയിപ്പുകൾ തുടർന്നും കാണിക്കണോ?"</string>
-    <!-- no translation found for hint_text_block (3554459167504485284) -->
-    <skip />
-    <!-- no translation found for hint_text_silent (859468056340177016) -->
-    <skip />
-    <!-- no translation found for hint_text_alert (2721169810318722524) -->
-    <skip />
+    <string name="hint_text_block" msgid="3554459167504485284">"ബ്ലോക്ക് ചെയ്‌ത അറിയിപ്പുകൾ എവിടെയും ദൃശ്യമാവുകയോ ശബ്‌ദം പ്ലേ ചെയ്യുകയോ ഇല്ല. ക്രമീകരണത്തിൽ നിങ്ങൾക്ക് അറിയിപ്പുകൾ അൺബ്ലോക്ക് ചെയ്യാനാവും."</string>
+    <string name="hint_text_silent" msgid="859468056340177016">"നിശബ്‌ദ അറിയിപ്പുകൾ ഷെയ്‌ഡിൽ ദൃശ്യമാകും, പക്ഷെ ലോക്ക് സ്‌ക്രീനിൽ ദൃശ്യമാവുകയോ ബാനർ അവതരിപ്പിക്കുകയോ ഒരു ശബ്‌ദം പ്ലേ ചെയ്യുകയോ ഇല്ല."</string>
+    <string name="hint_text_alert" msgid="2721169810318722524">"ഈ അറിയിപ്പുകൾ ഒരു ശബ്‌ദമുണ്ടാക്കുകയും അറിയിപ്പ് ഡ്രോയർ, സ്‌റ്റാറ്റസ് ബാർ, ലോക്ക് സ്ക്രീൻ എന്നിവയിൽ കാണിക്കുകയും ചെയ്യും"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"ഈ അറിയിപ്പുകൾ ഓഫാക്കാനാവില്ല"</string>
-    <!-- no translation found for notification_multichannel_desc (4695920306092240550) -->
-    <skip />
+    <string name="notification_multichannel_desc" msgid="4695920306092240550">"അറിയിപ്പുകളുടെ ഈ ഗ്രൂപ്പ് ഇവിടെ കോണ്‍ഫിഗര്‍ ചെയ്യാൻ കഴിയില്ല"</string>
     <string name="notification_delegate_header" msgid="9167022191405284627">"<xliff:g id="APP_NAME">%1$s</xliff:g> വഴി"</string>
     <string name="appops_camera" msgid="8100147441602585776">"ഈ ആപ്പ് ക്യാമറ ഉപയോഗിക്കുന്നുണ്ട്."</string>
     <string name="appops_microphone" msgid="741508267659494555">"ഈ ആപ്പ് മൈക്രോഫോൺ ഉപയോഗിക്കുന്നു."</string>
@@ -736,11 +717,9 @@
     <string name="keyboard_shortcut_group_applications_youtube" msgid="6555453761294723317">"YouTube"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="9043614299194991263">"കലണ്ടർ"</string>
     <string name="tuner_full_zen_title" msgid="4540823317772234308">"വോളിയം നിയന്ത്രണങ്ങളോടൊപ്പം കാണിക്കുക"</string>
-    <!-- no translation found for volume_and_do_not_disturb (1750270820297253561) -->
-    <skip />
+    <string name="volume_and_do_not_disturb" msgid="1750270820297253561">"ശല്യപ്പെടുത്തരുത്"</string>
     <string name="volume_dnd_silent" msgid="4363882330723050727">"വോളിയം ബട്ടൺ കുറുക്കുവഴി"</string>
-    <!-- no translation found for volume_up_silent (7545869833038212815) -->
-    <skip />
+    <string name="volume_up_silent" msgid="7545869833038212815">"ശബ്‌ദം കൂടുമ്പോൾ \'ശല്യപ്പെടുത്തരുതിൽ\' നിന്ന് പുറത്ത് കടക്കൂ"</string>
     <string name="battery" msgid="7498329822413202973">"ബാറ്ററി"</string>
     <string name="clock" msgid="7416090374234785905">"ക്ലോക്ക്"</string>
     <string name="headset" msgid="4534219457597457353">"ഹെഡ്‌സെറ്റ്"</string>
@@ -881,8 +860,7 @@
     <string name="go_to_web" msgid="2650669128861626071">"ബ്രൗസറിലേക്ക് പോവുക"</string>
     <string name="mobile_data" msgid="7094582042819250762">"മൊബൈൽ ഡാറ്റ"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
-    <!-- no translation found for mobile_carrier_text_format (3241721038678469804) -->
-    <skip />
+    <string name="mobile_carrier_text_format" msgid="3241721038678469804">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"വൈഫൈ ഓഫാണ്"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth ഓഫാണ്"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"\'ശല്യപ്പെടുത്തരുത്\' ഓഫാണ്"</string>
@@ -922,30 +900,18 @@
     <string name="sensor_privacy_mode" msgid="8982771253020769598">"സെൻസറുകൾ ഓഫാണ്"</string>
     <string name="device_services" msgid="1191212554435440592">"ഉപകരണ സേവനങ്ങള്‍"</string>
     <string name="music_controls_no_title" msgid="5236895307087002011">"പേരില്ല"</string>
-    <!-- no translation found for restart_button_description (2035077840254950187) -->
-    <skip />
+    <string name="restart_button_description" msgid="2035077840254950187">"ഈ ആപ്പ് റീസ്‌റ്റാർട്ട് ചെയ്യാനും പൂർണ്ണ സ്‌ക്രീനാവാനും ടാപ്പ് ചെയ്യുക."</string>
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"<xliff:g id="APP_NAME">%1$s</xliff:g> തുറക്കുക"</string>
-    <!-- no translation found for bubbles_settings_button_description (2970630476657287189) -->
-    <skip />
-    <!-- no translation found for bubbles_prompt (8807968030159469710) -->
-    <skip />
-    <!-- no translation found for no_bubbles (337101288173078247) -->
-    <skip />
+    <string name="bubbles_settings_button_description" msgid="2970630476657287189">"<xliff:g id="APP_NAME">%1$s</xliff:g> എന്നതിനുള്ള ബബിളുകളുടെ ക്രമീകരണം"</string>
+    <string name="bubbles_prompt" msgid="8807968030159469710">"<xliff:g id="APP_NAME">%1$s</xliff:g>-ൽ നിന്നും ബബിളുകളെ അനുവദിക്കണോ?"</string>
+    <string name="no_bubbles" msgid="337101288173078247">"നിരസിക്കുക"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"അനുവദിക്കുക"</string>
-    <!-- no translation found for ask_me_later_bubbles (2147688438402939029) -->
-    <skip />
-    <!-- no translation found for bubble_content_description_single (1184462974339387516) -->
-    <skip />
-    <!-- no translation found for bubble_content_description_stack (8666349184095622232) -->
-    <skip />
-    <!-- no translation found for bubble_accessibility_action_move (1794879742234803840) -->
-    <skip />
-    <!-- no translation found for bubble_accessibility_action_move_top_left (104736832249802724) -->
-    <skip />
-    <!-- no translation found for bubble_accessibility_action_move_top_right (1671844272347036806) -->
-    <skip />
-    <!-- no translation found for bubble_accessibility_action_move_bottom_left (206369104473183217) -->
-    <skip />
-    <!-- no translation found for bubble_accessibility_action_move_bottom_right (8705660152384312329) -->
-    <skip />
+    <string name="ask_me_later_bubbles" msgid="2147688438402939029">"എന്നോട് പിന്നീട് ചോദിക്കുക"</string>
+    <string name="bubble_content_description_single" msgid="1184462974339387516">"<xliff:g id="APP_NAME">%2$s</xliff:g>-ൽ നിന്നുള്ള <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
+    <string name="bubble_content_description_stack" msgid="8666349184095622232">"<xliff:g id="APP_NAME">%2$s</xliff:g> എന്നതിൽ നിന്നുള്ള <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>, <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> കൂടുതലും"</string>
+    <string name="bubble_accessibility_action_move" msgid="1794879742234803840">"നീക്കുക"</string>
+    <string name="bubble_accessibility_action_move_top_left" msgid="104736832249802724">"മുകളിൽ ഇടതുഭാഗത്തേക്ക് നീക്കുക"</string>
+    <string name="bubble_accessibility_action_move_top_right" msgid="1671844272347036806">"മുകളിൽ വലതുഭാഗത്തേക്ക് നീക്കുക"</string>
+    <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"ചുവടെ ഇടതുഭാഗത്തേക്ക് നീക്കുക"</string>
+    <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"ചുവടെ വലതുഭാഗത്തേക്ക് നീക്കുക"</string>
 </resources>

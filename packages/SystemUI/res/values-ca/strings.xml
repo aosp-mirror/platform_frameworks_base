@@ -172,6 +172,7 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <string name="data_connection_5ge" msgid="4699478963278829331">"5Ge"</string>
     <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
     <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
@@ -604,7 +605,7 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Vols activar el Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Per connectar el teclat amb la tauleta, primer has d\'activar el Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Activa"</string>
-    <string name="show_silently" msgid="6841966539811264192">"Mostra les notificacions de manera silenciosa"</string>
+    <string name="show_silently" msgid="6841966539811264192">"Mostra les notificacions en silenci"</string>
     <string name="block" msgid="2734508760962682611">"Bloqueja totes les notificacions"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"No silenciïs"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"No silenciïs ni bloquegis"</string>

@@ -172,6 +172,8 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <!-- no translation found for data_connection_5ge (4699478963278829331) -->
+    <skip />
     <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
     <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
@@ -704,7 +706,7 @@
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Volver"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"Notificacións"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"Atallos de teclado"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="8413348767825486492">"Cambiar de deseño de teclado"</string>
+    <string name="keyboard_shortcut_group_system_switch_input" msgid="8413348767825486492">"Cambiar deseño do teclado"</string>
     <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"Aplicacións"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"Asistente"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"Navegador"</string>
