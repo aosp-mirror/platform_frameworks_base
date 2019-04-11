@@ -3255,6 +3255,10 @@
     <!-- Controls the size of the back gesture inset. -->
     <dimen name="config_backGestureInset">0dp</dimen>
 
+    <!-- Controls whether the navbar needs a scrim with
+         {@link Window#setEnsureNavigationBarContrastWhenTransparent}. -->
+    <bool name="config_navBarNeedsScrim">true</bool>
+
     <!-- Default insets [LEFT/RIGHTxTOP/BOTTOM] from the screen edge for picture-in-picture windows.
          These values are in DPs and will be converted to pixel sizes internally. -->
     <string translatable="false" name="config_defaultPictureInPictureScreenEdgeInsets">16x16</string>

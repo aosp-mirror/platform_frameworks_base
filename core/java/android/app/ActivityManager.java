@@ -986,6 +986,8 @@ public class ActivityManager {
         private int mColorBackground;
         private int mStatusBarColor;
         private int mNavigationBarColor;
+        private boolean mEnsureStatusBarContrastWhenTransparent;
+        private boolean mEnsureNavigationBarContrastWhenTransparent;
 
         /**
          * Creates the TaskDescription to the specified values.
@@ -998,7 +1000,7 @@ public class ActivityManager {
          */
         @Deprecated
         public TaskDescription(String label, Bitmap icon, int colorPrimary) {
-            this(label, icon, 0, null, colorPrimary, 0, 0, 0);
+            this(label, icon, 0, null, colorPrimary, 0, 0, 0, false, false);
             if ((colorPrimary != 0) && (Color.alpha(colorPrimary) != 255)) {
                 throw new RuntimeException("A TaskDescription's primary color should be opaque");
             }
@@ -1014,7 +1016,7 @@ public class ActivityManager {
          *                     opaque.
          */
         public TaskDescription(String label, @DrawableRes int iconRes, int colorPrimary) {
-            this(label, null, iconRes, null, colorPrimary, 0, 0, 0);
+            this(label, null, iconRes, null, colorPrimary, 0, 0, 0, false, false);
             if ((colorPrimary != 0) && (Color.alpha(colorPrimary) != 255)) {
                 throw new RuntimeException("A TaskDescription's primary color should be opaque");
             }
@@ -1029,7 +1031,7 @@ public class ActivityManager {
          */
         @Deprecated
         public TaskDescription(String label, Bitmap icon) {
-            this(label, icon, 0, null, 0, 0, 0, 0);
+            this(label, icon, 0, null, 0, 0, 0, 0, false, false);
         }
 
         /**
@@ -1040,7 +1042,7 @@ public class ActivityManager {
          *                activity.
          */
         public TaskDescription(String label, @DrawableRes int iconRes) {
-            this(label, null, iconRes, null, 0, 0, 0, 0);
+            this(label, null, iconRes, null, 0, 0, 0, 0, false, false);
         }
 
         /**
@@ -1049,19 +1051,21 @@ public class ActivityManager {
          * @param label A label and description of the current state of this activity.
          */
         public TaskDescription(String label) {
-            this(label, null, 0, null, 0, 0, 0, 0);
+            this(label, null, 0, null, 0, 0, 0, 0, false, false);
         }
 
         /**
          * Creates an empty TaskDescription.
          */
         public TaskDescription() {
-            this(null, null, 0, null, 0, 0, 0, 0);
+            this(null, null, 0, null, 0, 0, 0, 0, false, false);
         }
 
         /** @hide */
         public TaskDescription(String label, Bitmap bitmap, int iconRes, String iconFilename,
-                int colorPrimary, int colorBackground, int statusBarColor, int navigationBarColor) {
+                int colorPrimary, int colorBackground, int statusBarColor, int navigationBarColor,
+                boolean ensureStatusBarContrastWhenTransparent,
+                boolean ensureNavigationBarContrastWhenTransparent) {
             mLabel = label;
             mIcon = bitmap;
             mIconRes = iconRes;
@@ -1070,6 +1074,9 @@ public class ActivityManager {
             mColorBackground = colorBackground;
             mStatusBarColor = statusBarColor;
             mNavigationBarColor = navigationBarColor;
+            mEnsureStatusBarContrastWhenTransparent = ensureStatusBarContrastWhenTransparent;
+            mEnsureNavigationBarContrastWhenTransparent =
+                    ensureNavigationBarContrastWhenTransparent;
         }
 
         /**
@@ -1092,6 +1099,9 @@ public class ActivityManager {
             mColorBackground = other.mColorBackground;
             mStatusBarColor = other.mStatusBarColor;
             mNavigationBarColor = other.mNavigationBarColor;
+            mEnsureStatusBarContrastWhenTransparent = other.mEnsureStatusBarContrastWhenTransparent;
+            mEnsureNavigationBarContrastWhenTransparent =
+                    other.mEnsureNavigationBarContrastWhenTransparent;
         }
 
         /**
@@ -1114,6 +1124,9 @@ public class ActivityManager {
             if (other.mNavigationBarColor != 0) {
                 mNavigationBarColor = other.mNavigationBarColor;
             }
+            mEnsureStatusBarContrastWhenTransparent = other.mEnsureStatusBarContrastWhenTransparent;
+            mEnsureNavigationBarContrastWhenTransparent =
+                    other.mEnsureNavigationBarContrastWhenTransparent;
         }
 
         private TaskDescription(Parcel source) {
@@ -1272,6 +1285,37 @@ public class ActivityManager {
             return mNavigationBarColor;
         }
 
+        /**
+         * @hide
+         */
+        public boolean getEnsureStatusBarContrastWhenTransparent() {
+            return mEnsureStatusBarContrastWhenTransparent;
+        }
+
+        /**
+         * @hide
+         */
+        public void setEnsureStatusBarContrastWhenTransparent(
+                boolean ensureStatusBarContrastWhenTransparent) {
+            mEnsureStatusBarContrastWhenTransparent = ensureStatusBarContrastWhenTransparent;
+        }
+
+        /**
+         * @hide
+         */
+        public boolean getEnsureNavigationBarContrastWhenTransparent() {
+            return mEnsureNavigationBarContrastWhenTransparent;
+        }
+
+        /**
+         * @hide
+         */
+        public void setEnsureNavigationBarContrastWhenTransparent(
+                boolean ensureNavigationBarContrastWhenTransparent) {
+            mEnsureNavigationBarContrastWhenTransparent =
+                    ensureNavigationBarContrastWhenTransparent;
+        }
+
         /** @hide */
         public void saveToXml(XmlSerializer out) throws IOException {
             if (mLabel != null) {
@@ -1332,6 +1376,8 @@ public class ActivityManager {
             dest.writeInt(mColorBackground);
             dest.writeInt(mStatusBarColor);
             dest.writeInt(mNavigationBarColor);
+            dest.writeBoolean(mEnsureStatusBarContrastWhenTransparent);
+            dest.writeBoolean(mEnsureNavigationBarContrastWhenTransparent);
             if (mIconFilename == null) {
                 dest.writeInt(0);
             } else {
@@ -1348,6 +1394,8 @@ public class ActivityManager {
             mColorBackground = source.readInt();
             mStatusBarColor = source.readInt();
             mNavigationBarColor = source.readInt();
+            mEnsureStatusBarContrastWhenTransparent = source.readBoolean();
+            mEnsureNavigationBarContrastWhenTransparent = source.readBoolean();
             mIconFilename = source.readInt() > 0 ? source.readString() : null;
         }
 
@@ -1366,8 +1414,11 @@ public class ActivityManager {
             return "TaskDescription Label: " + mLabel + " Icon: " + mIcon +
                     " IconRes: " + mIconRes + " IconFilename: " + mIconFilename +
                     " colorPrimary: " + mColorPrimary + " colorBackground: " + mColorBackground +
-                    " statusBarColor: " + mColorBackground +
-                    " navigationBarColor: " + mNavigationBarColor;
+                    " statusBarColor: " + mStatusBarColor + (
+                    mEnsureStatusBarContrastWhenTransparent ? " (contrast when transparent)"
+                            : "") + " navigationBarColor: " + mNavigationBarColor + (
+                    mEnsureNavigationBarContrastWhenTransparent
+                            ? " (contrast when transparent)" : "");
         }
     }
 

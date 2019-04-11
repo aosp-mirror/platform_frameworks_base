@@ -30,6 +30,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 
+import android.app.ActivityManager.TaskDescription;
 import android.app.ActivityManager.TaskSnapshot;
 import android.content.ComponentName;
 import android.graphics.Canvas;
@@ -38,7 +39,6 @@ import android.graphics.GraphicBuffer;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
-import android.view.Surface;
 import android.view.SurfaceControl;
 
 import androidx.test.filters.SmallTest;
@@ -67,8 +67,17 @@ public class TaskSnapshotSurfaceTest extends WindowTestsBase {
                 ORIENTATION_PORTRAIT, contentInsets, false, 1.0f, true /* isRealSnapshot */,
                 WINDOWING_MODE_FULLSCREEN, 0 /* systemUiVisibility */, false /* isTranslucent */);
         mSurface = new TaskSnapshotSurface(mWm, new Window(), new SurfaceControl(), snapshot, "Test",
-                Color.WHITE, Color.RED, Color.BLUE, sysuiVis, windowFlags, 0, taskBounds,
-                ORIENTATION_PORTRAIT);
+                createTaskDescription(Color.WHITE, Color.RED, Color.BLUE), sysuiVis, windowFlags, 0,
+                taskBounds, ORIENTATION_PORTRAIT);
+    }
+
+    private static TaskDescription createTaskDescription(int background, int statusBar,
+            int navigationBar) {
+        final TaskDescription td = new TaskDescription();
+        td.setBackgroundColor(background);
+        td.setStatusBarColor(statusBar);
+        td.setNavigationBarColor(navigationBar);
+        return td;
     }
 
     private void setupSurface(int width, int height) {

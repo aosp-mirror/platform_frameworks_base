@@ -362,11 +362,9 @@ class TaskSnapshotController {
         }
         final int color = ColorUtils.setAlphaComponent(
                 task.getTaskDescription().getBackgroundColor(), 255);
-        final int statusBarColor = task.getTaskDescription().getStatusBarColor();
-        final int navigationBarColor = task.getTaskDescription().getNavigationBarColor();
         final LayoutParams attrs = mainWindow.getAttrs();
         final SystemBarBackgroundPainter decorPainter = new SystemBarBackgroundPainter(attrs.flags,
-                attrs.privateFlags, attrs.systemUiVisibility, statusBarColor, navigationBarColor);
+                attrs.privateFlags, attrs.systemUiVisibility, task.getTaskDescription());
         final int width = mainWindow.getFrameLw().width();
         final int height = mainWindow.getFrameLw().height();
 
