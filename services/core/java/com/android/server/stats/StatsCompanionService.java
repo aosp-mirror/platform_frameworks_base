@@ -1458,8 +1458,18 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     private void pullNumBiometricsEnrolled(int modality, int tagId, long elapsedNanos,
             long wallClockNanos, List<StatsLogEventWrapper> pulledData) {
-        FingerprintManager fingerprintManager = mContext.getSystemService(FingerprintManager.class);
-        FaceManager faceManager = mContext.getSystemService(FaceManager.class);
+        final PackageManager pm = mContext.getPackageManager();
+        FingerprintManager fingerprintManager = null;
+        FaceManager faceManager = null;
+
+        if (pm.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
+            fingerprintManager = mContext.getSystemService(
+                    FingerprintManager.class);
+        }
+        if (pm.hasSystemFeature(PackageManager.FEATURE_FACE)) {
+            faceManager = mContext.getSystemService(FaceManager.class);
+        }
+
         if (modality == BiometricsProtoEnums.MODALITY_FINGERPRINT && fingerprintManager == null) {
             return;
         }
