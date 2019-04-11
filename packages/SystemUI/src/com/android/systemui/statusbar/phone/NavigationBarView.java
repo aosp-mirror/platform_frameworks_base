@@ -20,6 +20,7 @@ import static android.content.Intent.ACTION_OVERLAY_CHANGED;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_INVALID;
 
 import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_SHOW_OVERVIEW_BUTTON;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
 
 import android.animation.LayoutTransition;
@@ -632,10 +633,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         return getContext().getDisplay();
     }
 
-    public boolean inScreenPinning() {
-        return ActivityManagerWrapper.getInstance().isScreenPinningActive();
-    }
-
     public void setLayoutTransitionsEnabled(boolean enabled) {
         mLayoutTransitionsEnabled = enabled;
         updateLayoutTransitionsEnabled();
@@ -691,6 +688,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     public void onPanelExpandedChange(boolean expanded) {
         updateSlippery();
+        mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED,
+                expanded);
     }
 
     public void updateStates() {
@@ -708,10 +707,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         WindowManagerWrapper.getInstance().setNavBarVirtualKeyHapticFeedbackEnabled(!showSwipeUpUI);
         getHomeButton().setAccessibilityDelegate(
                 showSwipeUpUI ? mQuickStepAccessibilityDelegate : null);
-    }
-
-    public boolean isNotificationsFullyCollapsed() {
-        return mPanelView.isFullyCollapsed();
     }
 
     /**
