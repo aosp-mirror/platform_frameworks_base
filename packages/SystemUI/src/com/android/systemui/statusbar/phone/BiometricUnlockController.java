@@ -367,16 +367,11 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
     @Override
     public void onFinishedGoingToSleep(int why) {
         Trace.beginSection("BiometricUnlockController#onFinishedGoingToSleep");
-        if (mPendingAuthenticatedUserId != -1) {
-
+        BiometricSourceType pendingType = mPendingAuthenticatedBioSourceType;
+        int pendingUserId = mPendingAuthenticatedUserId;
+        if (pendingUserId != -1 && pendingType != null) {
             // Post this to make sure it's executed after the device is fully locked.
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    onBiometricAuthenticated(mPendingAuthenticatedUserId,
-                            mPendingAuthenticatedBioSourceType);
-                }
-            });
+            mHandler.post(() -> onBiometricAuthenticated(pendingUserId, pendingType));
         }
         mPendingAuthenticatedUserId = -1;
         mPendingAuthenticatedBioSourceType = null;
