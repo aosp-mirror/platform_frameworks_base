@@ -659,7 +659,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
             boolean hasForegroundActivities, boolean callerIsRecents,
             boolean callerIsTempWhitelisted,
             boolean callerIsInstrumentingWithBackgroundActivityStartPrivileges,
-            boolean isCallingPackageNameDeviceOwner, boolean isCallingPackageTempWhitelisted) {
+            boolean isCallingUidDeviceOwner, boolean isCallingPackageTempWhitelisted) {
         // window visibility
         doReturn(callingUidHasVisibleWindow).when(mService.mWindowManager.mRoot)
                 .isAnyNonToastWindowVisibleForUid(callingUid);
@@ -685,8 +685,8 @@ public class ActivityStarterTests extends ActivityTestsBase {
         // caller is instrumenting with background activity starts privileges
         callerApp.setInstrumenting(callerIsInstrumentingWithBackgroundActivityStartPrivileges,
                 callerIsInstrumentingWithBackgroundActivityStartPrivileges);
-        // calling package name is the device owner
-        doReturn(isCallingPackageNameDeviceOwner).when(mService).isDeviceOwner(any());
+        // callingUid is the device owner
+        doReturn(isCallingUidDeviceOwner).when(mService).isDeviceOwner(callingUid);
         // calling package name is temporarily whitelisted
         doReturn(isCallingPackageTempWhitelisted).when(mService)
                 .isPackageNameWhitelistedForBgActivityStarts("com.whatever.dude");
