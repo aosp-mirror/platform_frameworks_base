@@ -2052,7 +2052,10 @@ public class ActivityManager {
     @RequiresPermission(android.Manifest.permission.REORDER_TASKS)
     public void moveTaskToFront(int taskId, @MoveTaskFlags int flags, Bundle options) {
         try {
-            getTaskService().moveTaskToFront(taskId, flags, options);
+            ActivityThread thread = ActivityThread.currentActivityThread();
+            IApplicationThread appThread = thread.getApplicationThread();
+            String packageName = mContext.getPackageName();
+            getTaskService().moveTaskToFront(appThread, packageName, taskId, flags, options);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -4263,7 +4266,10 @@ public class ActivityManager {
          */
         public void moveToFront() {
             try {
-                mAppTaskImpl.moveToFront();
+                ActivityThread thread = ActivityThread.currentActivityThread();
+                IApplicationThread appThread = thread.getApplicationThread();
+                String packageName = ActivityThread.currentPackageName();
+                mAppTaskImpl.moveToFront(appThread, packageName);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
