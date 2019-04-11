@@ -2945,6 +2945,7 @@
         <public name="allowExternalStorageSandbox"/>
         <public name="ensuringStatusBarContrastWhenTransparent" />
         <public name="ensuringNavigationBarContrastWhenTransparent" />
+        <public name="identifier" />
     </public-group>
 
     <public-group type="drawable" first-id="0x010800b4">

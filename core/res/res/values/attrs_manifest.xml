@@ -2814,6 +2814,9 @@
             case-sensitive, unlike formal RFC MIME types.  As a result,
             MIME types here should always use lower case letters.</em></p> -->
         <attr name="mimeType" />
+        <!-- The identifier to assign to the intent, as per
+            {@link android.content.Intent#setIdentifier Intent.setIdentifier()}. -->
+        <attr name="identifier" format="string" />
         <!-- The package part of the ComponentName to assign to the Intent, as per
             {@link android.content.Intent#setComponent Intent.setComponent()}. -->
         <attr name="targetPackage" />
