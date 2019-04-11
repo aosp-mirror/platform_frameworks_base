@@ -1206,10 +1206,10 @@ public class NotificationManager {
      */
     @SystemApi
     @TestApi
-    public @NonNull @Adjustment.Keys List<String> getAllowedAssistantCapabilities() {
+    public @NonNull @Adjustment.Keys List<String> getAllowedAssistantAdjustments() {
         INotificationManager service = getService();
         try {
-            return service.getAllowedAssistantCapabilities(mContext.getOpPackageName());
+            return service.getAllowedAssistantAdjustments(mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1219,10 +1219,10 @@ public class NotificationManager {
      * @hide
      */
     @TestApi
-    public void allowAssistantCapability(String capability) {
+    public void allowAssistantAdjustment(String capability) {
         INotificationManager service = getService();
         try {
-            service.allowAssistantCapability(capability);
+            service.allowAssistantAdjustment(capability);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1232,10 +1232,10 @@ public class NotificationManager {
      * @hide
      */
     @TestApi
-    public void disallowAssistantCapability(String capability) {
+    public void disallowAssistantAdjustment(String capability) {
         INotificationManager service = getService();
         try {
-            service.disallowAssistantCapability(capability);
+            service.disallowAssistantAdjustment(capability);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

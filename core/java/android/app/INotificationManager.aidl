@@ -70,9 +70,9 @@ interface INotificationManager
     boolean areNotificationsEnabled(String pkg);
     int getPackageImportance(String pkg);
 
-    List<String> getAllowedAssistantCapabilities(String pkg);
-    void allowAssistantCapability(String adjustmentType);
-    void disallowAssistantCapability(String adjustmentType);
+    List<String> getAllowedAssistantAdjustments(String pkg);
+    void allowAssistantAdjustment(String adjustmentType);
+    void disallowAssistantAdjustment(String adjustmentType);
 
     boolean shouldHideSilentStatusIcons(String callingPkg);
     void setHideSilentStatusIcons(boolean hide);
