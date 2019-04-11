@@ -20,7 +20,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.app.AlarmManager;
-import android.app.WallpaperManager;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -121,8 +120,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     private final Handler mHandler;
 
     private final SysuiColorExtractor mColorExtractor;
-    private GradientColors mLockColors;
-    private GradientColors mSystemColors;
+    private GradientColors mColors;
     private boolean mNeedsDrawableColorUpdate;
 
     protected float mScrimBehindAlpha;
@@ -190,10 +188,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
 
         mColorExtractor = Dependency.get(SysuiColorExtractor.class);
         mColorExtractor.addOnColorsChangedListener(this);
-        mLockColors = mColorExtractor.getColors(WallpaperManager.FLAG_LOCK,
-                ColorExtractor.TYPE_DARK, true /* ignoreVisibility */);
-        mSystemColors = mColorExtractor.getColors(WallpaperManager.FLAG_SYSTEM,
-                ColorExtractor.TYPE_DARK, true /* ignoreVisibility */);
+        mColors = mColorExtractor.getNeutralColors();
         mNeedsDrawableColorUpdate = true;
 
         final ScrimState[] states = ScrimState.values();
@@ -201,7 +196,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             states[i].init(mScrimInFront, mScrimBehind, mDozeParameters);
             states[i].setScrimBehindAlphaKeyguard(mScrimBehindAlphaKeyguard);
         }
-        mState = ScrimState.UNINITIALIZED;
 
         mScrimBehind.setDefaultFocusHighlightEnabled(false);
         mScrimInFront.setDefaultFocusHighlightEnabled(false);
@@ -488,17 +482,15 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         // Make sure we have the right gradients and their opacities will satisfy GAR.
         if (mNeedsDrawableColorUpdate) {
             mNeedsDrawableColorUpdate = false;
-            boolean isKeyguard = mKeyguardUpdateMonitor.isKeyguardVisible() && !mKeyguardOccluded;
-            GradientColors currentScrimColors = isKeyguard ? mLockColors : mSystemColors;
             // Only animate scrim color if the scrim view is actually visible
             boolean animateScrimInFront = mScrimInFront.getViewAlpha() != 0 && !mBlankScreen;
             boolean animateScrimBehind = mScrimBehind.getViewAlpha() != 0 && !mBlankScreen;
-            mScrimInFront.setColors(currentScrimColors, animateScrimInFront);
-            mScrimBehind.setColors(currentScrimColors, animateScrimBehind);
+            mScrimInFront.setColors(mColors, animateScrimInFront);
+            mScrimBehind.setColors(mColors, animateScrimBehind);
 
             // Calculate minimum scrim opacity for white or black text.
-            int textColor = currentScrimColors.supportsDarkText() ? Color.BLACK : Color.WHITE;
-            int mainColor = currentScrimColors.getMainColor();
+            int textColor = mColors.supportsDarkText() ? Color.BLACK : Color.WHITE;
+            int mainColor = mColors.getMainColor();
             float minOpacity = ColorUtils.calculateMinimumBackgroundAlpha(textColor, mainColor,
                     4.5f /* minimumContrast */) / 255f;
             mScrimBehindAlpha = Math.max(mScrimBehindAlphaResValue, minOpacity);
@@ -815,7 +807,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     }
 
     public int getBackgroundColor() {
-        int color = mLockColors.getMainColor();
+        int color = mColors.getMainColor();
         return Color.argb((int) (mScrimBehind.getViewAlpha() * Color.alpha(color)),
                 Color.red(color), Color.green(color), Color.blue(color));
     }
@@ -830,18 +822,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
 
     @Override
     public void onColorsChanged(ColorExtractor colorExtractor, int which) {
-        if ((which & WallpaperManager.FLAG_LOCK) != 0) {
-            mLockColors = mColorExtractor.getColors(WallpaperManager.FLAG_LOCK,
-                    ColorExtractor.TYPE_DARK, true /* ignoreVisibility */);
-            mNeedsDrawableColorUpdate = true;
-            scheduleUpdate();
-        }
-        if ((which & WallpaperManager.FLAG_SYSTEM) != 0) {
-            mSystemColors = mColorExtractor.getColors(WallpaperManager.FLAG_SYSTEM,
-                    ColorExtractor.TYPE_DARK, mState != ScrimState.UNLOCKED);
-            mNeedsDrawableColorUpdate = true;
-            scheduleUpdate();
-        }
+        mColors = mColorExtractor.getNeutralColors();
+        mNeedsDrawableColorUpdate = true;
+        scheduleUpdate();
     }
 
     @VisibleForTesting
