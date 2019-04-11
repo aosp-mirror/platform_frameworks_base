@@ -29,6 +29,7 @@ import android.os.ParcelFileDescriptor;
 interface ITestNetworkManager
 {
     TestNetworkInterface createTunInterface(in LinkAddress[] linkAddrs);
+    TestNetworkInterface createTapInterface();
 
     void setupTestNetwork(in String iface, in IBinder binder);
 
