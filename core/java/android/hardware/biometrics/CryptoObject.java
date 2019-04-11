@@ -25,8 +25,8 @@ import javax.crypto.Cipher;
 import javax.crypto.Mac;
 
 /**
- * A wrapper class for the crypto objects supported by FingerprintManager. Currently the
- * framework supports {@link Signature}, {@link Cipher} and {@link Mac} objects.
+ * A wrapper class for the crypto objects supported by BiometricPrompt and FingerprintManager.
+ * Currently the framework supports {@link Signature}, {@link Cipher} and {@link Mac} objects.
  * @hide
  */
 public class CryptoObject {
