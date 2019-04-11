@@ -15,8 +15,11 @@
  */
 package com.android.server.appop;
 
+import static android.app.ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
+import static android.app.ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE_LOCATION;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_ERRORED;
+import static android.app.AppOpsManager.MODE_FOREGROUND;
 import static android.app.AppOpsManager.OP_COARSE_LOCATION;
 import static android.app.AppOpsManager.OP_READ_SMS;
 import static android.app.AppOpsManager.OP_WIFI_SCAN;
@@ -25,6 +28,7 @@ import static android.app.AppOpsManager.OP_WRITE_SMS;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import android.app.ActivityManager;
 import android.app.AppOpsManager.OpEntry;
 import android.app.AppOpsManager.PackageOps;
 import android.content.Context;
@@ -37,6 +41,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.appop.AppOpsService;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -220,6 +225,108 @@ public class AppOpsServiceTest {
 
         mAppOpsService.uidRemoved(mMyUid);
         assertThat(getLoggedOps()).isNull();
+    }
+
+    private void setupProcStateTests() {
+        // For the location proc state tests
+        mAppOpsService.setMode(OP_COARSE_LOCATION, mMyUid, mMyPackageName, MODE_FOREGROUND);
+        mAppOpsService.mConstants.FG_SERVICE_STATE_SETTLE_TIME = 0;
+        mAppOpsService.mConstants.TOP_STATE_SETTLE_TIME = 0;
+        mAppOpsService.mConstants.BG_STATE_SETTLE_TIME = 0;
+    }
+
+    @Test
+    public void testUidProcStateChange_cachedToTopToCached() throws Exception {
+        setupProcStateTests();
+
+        mAppOpsService.updateUidProcState(mMyUid, ActivityManager.PROCESS_STATE_CACHED_EMPTY);
+        assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, mMyPackageName))
+                .isNotEqualTo(MODE_ALLOWED);
+
+        mAppOpsService.updateUidProcState(mMyUid, ActivityManager.PROCESS_STATE_TOP);
+        assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, mMyPackageName))
+                .isEqualTo(MODE_ALLOWED);
+
+        mAppOpsService.updateUidProcState(mMyUid, ActivityManager.PROCESS_STATE_CACHED_EMPTY);
+        // Second time to make sure that settle time is overcome
+        Thread.sleep(50);
+        mAppOpsService.updateUidProcState(mMyUid, ActivityManager.PROCESS_STATE_CACHED_EMPTY);
+        assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, mMyPackageName))
+                .isNotEqualTo(MODE_ALLOWED);
+    }
+
+    @Test
+    public void testUidProcStateChange_cachedToFgs() throws Exception {
+        setupProcStateTests();
+
+        mAppOpsService.updateUidProcState(mMyUid, ActivityManager.PROCESS_STATE_CACHED_EMPTY);
+        assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, mMyPackageName))
+                .isNotEqualTo(MODE_ALLOWED);
+
+        mAppOpsService.updateUidProcState(mMyUid, PROCESS_STATE_FOREGROUND_SERVICE);
+        assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, mMyPackageName))
+                .isNotEqualTo(MODE_ALLOWED);
+    }
+
+    @Test
+    public void testUidProcStateChange_cachedToFgsLocation() throws Exception {
+        setupProcStateTests();
+
+        mAppOpsService.updateUidProcState(mMyUid, ActivityManager.PROCESS_STATE_CACHED_EMPTY);
+        assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, mMyPackageName))
+                .isNotEqualTo(MODE_ALLOWED);
+
+        mAppOpsService.updateUidProcState(mMyUid,
+                PROCESS_STATE_FOREGROUND_SERVICE_LOCATION);
+        assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, mMyPackageName))
+                .isEqualTo(MODE_ALLOWED);
+    }
+
+    @Test
+    public void testUidProcStateChange_topToFgs() throws Exception {
+        setupProcStateTests();
+
+        mAppOpsService.updateUidProcState(mMyUid, ActivityManager.PROCESS_STATE_CACHED_EMPTY);
+        assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, mMyPackageName))
+                .isNotEqualTo(MODE_ALLOWED);
+
+        mAppOpsService.updateUidProcState(mMyUid, ActivityManager.PROCESS_STATE_TOP);
+        assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, mMyPackageName))
+                .isEqualTo(MODE_ALLOWED);
+
+        mAppOpsService.updateUidProcState(mMyUid, PROCESS_STATE_FOREGROUND_SERVICE);
+        // Second time to make sure that settle time is overcome
+        Thread.sleep(50);
+        mAppOpsService.updateUidProcState(mMyUid, PROCESS_STATE_FOREGROUND_SERVICE);
+        assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, mMyPackageName))
+                .isNotEqualTo(MODE_ALLOWED);
+    }
+
+    @Test
+    public void testUidProcStateChange_topToFgsLocationToFgs() throws Exception {
+        setupProcStateTests();
+
+        mAppOpsService.updateUidProcState(mMyUid, ActivityManager.PROCESS_STATE_CACHED_EMPTY);
+        assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, mMyPackageName))
+                .isNotEqualTo(MODE_ALLOWED);
+
+        mAppOpsService.updateUidProcState(mMyUid, ActivityManager.PROCESS_STATE_TOP);
+        assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, mMyPackageName))
+                .isEqualTo(MODE_ALLOWED);
+
+        mAppOpsService.updateUidProcState(mMyUid, PROCESS_STATE_FOREGROUND_SERVICE_LOCATION);
+        // Second time to make sure that settle time is overcome
+        Thread.sleep(50);
+        mAppOpsService.updateUidProcState(mMyUid, PROCESS_STATE_FOREGROUND_SERVICE_LOCATION);
+        assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, mMyPackageName))
+                .isEqualTo(MODE_ALLOWED);
+
+        mAppOpsService.updateUidProcState(mMyUid, PROCESS_STATE_FOREGROUND_SERVICE);
+        // Second time to make sure that settle time is overcome
+        Thread.sleep(50);
+        mAppOpsService.updateUidProcState(mMyUid, PROCESS_STATE_FOREGROUND_SERVICE);
+        assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, mMyPackageName))
+                .isNotEqualTo(MODE_ALLOWED);
     }
 
     private List<PackageOps> getLoggedOps() {
