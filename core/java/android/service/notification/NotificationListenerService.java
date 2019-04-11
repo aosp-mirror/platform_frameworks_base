@@ -1400,7 +1400,7 @@ public abstract class NotificationListenerService extends Service {
         }
 
         @Override
-        public void onCapabilitiesChanged() {
+        public void onAllowedAdjustmentsChanged() {
             // no-op in the listener
         }
 

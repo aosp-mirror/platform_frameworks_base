@@ -4948,15 +4948,15 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals(1, mService.getNotificationRecordCount());
     }
 
-    public void testGetAllowedAssistantCapabilities() throws Exception {
-        List<String> capabilities = mBinderService.getAllowedAssistantCapabilities(null);
+    public void testGetAllowedAssistantAdjustments() throws Exception {
+        List<String> capabilities = mBinderService.getAllowedAssistantAdjustments(null);
         assertNotNull(capabilities);
 
         for (int i = capabilities.size() - 1; i >= 0; i--) {
             String capability = capabilities.get(i);
-            mBinderService.disallowAssistantCapability(capability);
-            assertEquals(i + 1, mBinderService.getAllowedAssistantCapabilities(null).size());
-            List<String> currentCapabilities = mBinderService.getAllowedAssistantCapabilities(null);
+            mBinderService.disallowAssistantAdjustment(capability);
+            assertEquals(i + 1, mBinderService.getAllowedAssistantAdjustments(null).size());
+            List<String> currentCapabilities = mBinderService.getAllowedAssistantAdjustments(null);
             assertNotNull(currentCapabilities);
             assertFalse(currentCapabilities.contains(capability));
         }
