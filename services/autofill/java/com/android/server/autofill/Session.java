@@ -704,6 +704,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             mClient.asBinder().linkToDeath(mClientVulture, 0);
         } catch (RemoteException e) {
             Slog.w(TAG, "could not set binder death listener on autofill client: " + e);
+            mClientVulture = null;
         }
     }
 
@@ -714,6 +715,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             if (!unlinked) {
                 Slog.w(TAG, "unlinking vulture from death failed for " + mActivityToken);
             }
+            mClientVulture = null;
         }
     }
 
