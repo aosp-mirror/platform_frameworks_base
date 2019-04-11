@@ -356,8 +356,10 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
             ensureStackViewCreated();
             mStackView.addBubble(notif);
         }
+        Bubble bubble = mBubbleData.getBubble(notif.key);
         if (shouldAutoExpand(notif)) {
-            mStackView.setExpandedBubble(notif);
+            mStackView.setSelectedBubble(bubble);
+            mStackView.setExpanded(true);
         }
         updateVisibility();
     }
