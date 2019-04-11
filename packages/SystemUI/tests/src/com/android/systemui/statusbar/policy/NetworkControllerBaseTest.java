@@ -428,8 +428,12 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
 
         IconState iconState = iconArg.getValue();
 
-        int state = SignalDrawable.getState(icon, SignalStrength.NUM_SIGNAL_STRENGTH_BINS,
-                cutOut);
+        int numSignalStrengthBins = SignalStrength.NUM_SIGNAL_STRENGTH_BINS;
+        if (mMobileSignalController.mInflateSignalStrengths) {
+            numSignalStrengthBins++;
+            icon++;
+        }
+        int state = SignalDrawable.getState(icon, numSignalStrengthBins, cutOut);
         assertEquals("Data icon in status bar", typeIcon, (int) typeIconArg.getValue());
         assertEquals("Signal icon in status bar", state, iconState.icon);
         assertEquals("Visibility in status bar", visible, iconState.visible);
