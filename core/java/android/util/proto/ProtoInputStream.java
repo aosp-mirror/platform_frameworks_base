@@ -16,8 +16,6 @@
 
 package android.util.proto;
 
-import android.annotation.TestApi;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -64,7 +62,6 @@ import java.util.ArrayList;
  *
  * @hide
  */
-@TestApi
 public final class ProtoInputStream extends ProtoStream {
 
     public static final int NO_MORE_FIELDS = -1;
