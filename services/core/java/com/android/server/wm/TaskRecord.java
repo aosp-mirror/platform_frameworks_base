@@ -22,6 +22,7 @@ import static android.app.ActivityTaskManager.RESIZE_MODE_FORCED;
 import static android.app.ActivityTaskManager.RESIZE_MODE_SYSTEM;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
@@ -2048,15 +2049,12 @@ class TaskRecord extends ConfigurationContainer {
         }
         mTmpBounds.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
 
-        policy.getStableInsetsLw(displayInfo.rotation,
-                displayInfo.logicalWidth, displayInfo.logicalHeight, displayInfo.displayCutout,
-                mTmpInsets);
-        intersectWithInsetsIfFits(outStableBounds, mTmpBounds, mTmpInsets);
-
-        policy.getNonDecorInsetsLw(displayInfo.rotation,
-                displayInfo.logicalWidth, displayInfo.logicalHeight, displayInfo.displayCutout,
-                mTmpInsets);
+        policy.getNonDecorInsetsLw(displayInfo.rotation, displayInfo.logicalWidth,
+                displayInfo.logicalHeight, displayInfo.displayCutout, mTmpInsets);
         intersectWithInsetsIfFits(outNonDecorBounds, mTmpBounds, mTmpInsets);
+
+        policy.convertNonDecorInsetsToStableInsets(mTmpInsets, displayInfo.rotation);
+        intersectWithInsetsIfFits(outStableBounds, mTmpBounds, mTmpInsets);
     }
 
     /**
@@ -2073,7 +2071,7 @@ class TaskRecord extends ConfigurationContainer {
 
     void computeConfigResourceOverrides(@NonNull Configuration inOutConfig,
             @NonNull Configuration parentConfig) {
-        computeConfigResourceOverrides(inOutConfig, parentConfig, true /* insideParentBounds */);
+        computeConfigResourceOverrides(inOutConfig, parentConfig, null /* compatInsets */);
     }
 
     /**
@@ -2085,7 +2083,8 @@ class TaskRecord extends ConfigurationContainer {
      * just be inherited from the parent configuration.
      **/
     void computeConfigResourceOverrides(@NonNull Configuration inOutConfig,
-            @NonNull Configuration parentConfig, boolean insideParentBounds) {
+            @NonNull Configuration parentConfig,
+            @Nullable ActivityRecord.CompatDisplayInsets compatInsets) {
         int windowingMode = inOutConfig.windowConfiguration.getWindowingMode();
         if (windowingMode == WINDOWING_MODE_UNDEFINED) {
             windowingMode = parentConfig.windowConfiguration.getWindowingMode();
@@ -2103,6 +2102,9 @@ class TaskRecord extends ConfigurationContainer {
             inOutConfig.windowConfiguration.setAppBounds(bounds);
             outAppBounds = inOutConfig.windowConfiguration.getAppBounds();
         }
+        // Non-null compatibility insets means the activity prefers to keep its original size, so
+        // the out bounds doesn't need to be restricted by the parent.
+        final boolean insideParentBounds = compatInsets == null;
         if (insideParentBounds && windowingMode != WINDOWING_MODE_FREEFORM) {
             final Rect parentAppBounds = parentConfig.windowConfiguration.getAppBounds();
             if (parentAppBounds != null && !parentAppBounds.isEmpty()) {
@@ -2125,6 +2127,17 @@ class TaskRecord extends ConfigurationContainer {
                 // Set to app bounds because it excludes decor insets.
                 mTmpNonDecorBounds.set(outAppBounds);
                 mTmpStableBounds.set(outAppBounds);
+
+                // Apply the given non-decor and stable insets to calculate the corresponding bounds
+                // for screen size of configuration.
+                final int rotation = parentConfig.windowConfiguration.getRotation();
+                if (rotation != ROTATION_UNDEFINED && compatInsets != null) {
+                    compatInsets.getDisplayBounds(mTmpBounds, rotation);
+                    intersectWithInsetsIfFits(mTmpNonDecorBounds, mTmpBounds,
+                            compatInsets.mNonDecorInsets[rotation]);
+                    intersectWithInsetsIfFits(mTmpStableBounds, mTmpBounds,
+                            compatInsets.mStableInsets[rotation]);
+                }
             }
 
             if (inOutConfig.screenWidthDp == Configuration.SCREEN_WIDTH_DP_UNDEFINED) {
