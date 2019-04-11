@@ -1484,6 +1484,7 @@
   <java-symbol type="drawable" name="ic_settings_print" />
   <java-symbol type="drawable" name="ic_signal_location" />
   <java-symbol type="drawable" name="ic_info_outline_24" />
+  <java-symbol type="drawable" name="ic_qs_ui_mode_night" />
 
   <java-symbol type="drawable" name="stat_notify_mmcc_indication_icn" />
   <java-symbol type="drawable" name="autofilled_highlight"/>

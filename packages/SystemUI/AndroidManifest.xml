@@ -175,6 +175,9 @@
     <!-- Adding Quick Settings tiles -->
     <uses-permission android:name="android.permission.BIND_QUICK_SETTINGS_TILE" />
 
+    <!-- Quick Settings tile: Night Mode / Dark Theme -->
+    <uses-permission android:name="android.permission.MODIFY_DAY_NIGHT_MODE" />
+
     <!-- Block notifications inline notifications -->
     <uses-permission android:name="android.permission.UPDATE_APP_OPS_STATS" />
 
