@@ -171,7 +171,7 @@ package com.android.uiautomator.core {
     method public com.android.uiautomator.core.UiSelector checked(boolean);
     method public com.android.uiautomator.core.UiSelector childSelector(com.android.uiautomator.core.UiSelector);
     method public com.android.uiautomator.core.UiSelector className(java.lang.String);
-    method public com.android.uiautomator.core.UiSelector className(java.lang.Class<T>);
+    method public <T> com.android.uiautomator.core.UiSelector className(java.lang.Class<T>);
     method public com.android.uiautomator.core.UiSelector classNameMatches(java.lang.String);
     method public com.android.uiautomator.core.UiSelector clickable(boolean);
     method protected com.android.uiautomator.core.UiSelector cloneSelector();
