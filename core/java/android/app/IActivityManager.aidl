@@ -130,7 +130,8 @@ interface IActivityManager {
     List<ActivityManager.RunningTaskInfo> getFilteredTasks(int maxNum, int ignoreActivityType,
             int ignoreWindowingMode);
     @UnsupportedAppUsage
-    void moveTaskToFront(int task, int flags, in Bundle options);
+    void moveTaskToFront(in IApplicationThread caller, in String callingPackage, int task,
+            int flags, in Bundle options);
     @UnsupportedAppUsage
     int getTaskForActivity(in IBinder token, in boolean onlyRoot);
     ContentProviderHolder getContentProvider(in IApplicationThread caller, in String callingPackage,
