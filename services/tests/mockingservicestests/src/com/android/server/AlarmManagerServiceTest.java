@@ -78,6 +78,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.util.SparseArray;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.annotations.GuardedBy;
@@ -403,6 +404,7 @@ public class AlarmManagerServiceTest {
         assertEquals(expectedTriggerTime, mTestTimer.getElapsed());
     }
 
+    @FlakyTest(bugId = 130313408)
     @Test
     public void testEarliestAlarmSet() {
         final PendingIntent pi6 = getNewMockPendingIntent();
