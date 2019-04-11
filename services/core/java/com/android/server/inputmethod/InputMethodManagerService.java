@@ -4589,14 +4589,22 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 pw.decreaseIndent();
                 pw.decreaseIndent();
 
-                pw.println("enable <ID>");
+                pw.println("enable [--user <USER_ID>] <ID>");
                 pw.increaseIndent();
                 pw.println("allows the given input method ID to be used.");
+                pw.increaseIndent();
+                pw.print("--user <USER_ID>: Specify which user to enable.");
+                pw.println(" Assumes the current user if not specified.");
+                pw.decreaseIndent();
                 pw.decreaseIndent();
 
-                pw.println("disable <ID>");
+                pw.println("disable [--user <USER_ID>] <ID>");
                 pw.increaseIndent();
                 pw.println("disallows the given input method ID to be used.");
+                pw.increaseIndent();
+                pw.print("--user <USER_ID>: Specify which user to disable.");
+                pw.println(" Assumes the current user if not specified.");
+                pw.decreaseIndent();
                 pw.decreaseIndent();
 
                 pw.println("set <ID>");
@@ -4693,29 +4701,105 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @ShellCommandResult
     private int handleShellCommandEnableDisableInputMethod(
             @NonNull ShellCommand shellCommand, boolean enabled) {
-        final String id = shellCommand.getNextArgRequired();
-        final boolean previouslyEnabled;
+        final String imeId = shellCommand.getNextArgRequired();
+        final PrintWriter out = shellCommand.getOutPrintWriter();
+        final PrintWriter error = shellCommand.getErrPrintWriter();
+        final int userIdToBeResolved = handleOptionsForCommandsThatOnlyHaveUserOption(shellCommand);
         synchronized (mMethodMap) {
-            if (!userHasDebugPriv(mSettings.getCurrentUserId(), shellCommand)) {
-                return ShellCommandResult.SUCCESS;
+            final int[] userIds = InputMethodUtils.resolveUserId(userIdToBeResolved,
+                    mSettings.getCurrentUserId(), shellCommand.getErrPrintWriter());
+            for (int userId : userIds) {
+                if (!userHasDebugPriv(userId, shellCommand)) {
+                    continue;
+                }
+                handleShellCommandEnableDisableInputMethodInternalLocked(userId, imeId, enabled,
+                        out, error);
             }
-            // Make sure this is a valid input method.
-            if (enabled && !mMethodMap.containsKey(id)) {
-                final PrintWriter error = shellCommand.getErrPrintWriter();
-                error.print("Unknown input method ");
-                error.print(id);
-                error.println(" cannot be enabled");
-                return ShellCommandResult.SUCCESS;
-            }
-            previouslyEnabled = setInputMethodEnabledLocked(id, enabled);
         }
-        final PrintWriter pr = shellCommand.getOutPrintWriter();
-        pr.print("Input method ");
-        pr.print(id);
-        pr.print(": ");
-        pr.print((enabled == previouslyEnabled) ? "already " : "now ");
-        pr.println(enabled ? "enabled" : "disabled");
         return ShellCommandResult.SUCCESS;
+    }
+
+    /**
+     * A special helper method for commands that only have {@code -u} and {@code --user} options.
+     *
+     * <p>You cannot use this helper method if the command has other options.</p>
+     *
+     * @param shellCommand {@link ShellCommand} from which options should be obtained.
+     * @return User ID to be resolved. {@link UserHandle#CURRENT} if not specified.
+     */
+    @BinderThread
+    @UserIdInt
+    private static int handleOptionsForCommandsThatOnlyHaveUserOption(ShellCommand shellCommand) {
+        while (true) {
+            final String nextOption = shellCommand.getNextOption();
+            if (nextOption == null) {
+                break;
+            }
+            switch (nextOption) {
+                case "-u":
+                case "--user":
+                    return UserHandle.parseUserArg(shellCommand.getNextArgRequired());
+            }
+        }
+        return UserHandle.USER_CURRENT;
+    }
+
+    @BinderThread
+    private void handleShellCommandEnableDisableInputMethodInternalLocked(
+            @UserIdInt int userId, String imeId, boolean enabled, PrintWriter out,
+            PrintWriter error) {
+        boolean failedToEnableUnknownIme = false;
+        boolean previouslyEnabled = false;
+        if (userId == mSettings.getCurrentUserId()) {
+            if (enabled && !mMethodMap.containsKey(imeId)) {
+                failedToEnableUnknownIme = true;
+            } else {
+                previouslyEnabled = setInputMethodEnabledLocked(imeId, enabled);
+            }
+        } else {
+            final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
+            final ArrayList<InputMethodInfo> methodList = new ArrayList<>();
+            final ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap =
+                    new ArrayMap<>();
+            AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
+            queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap,
+                    methodMap, methodList);
+            final InputMethodSettings settings = new InputMethodSettings(mContext.getResources(),
+                    mContext.getContentResolver(), methodMap, userId, false);
+            if (enabled) {
+                if (!methodMap.containsKey(imeId)) {
+                    failedToEnableUnknownIme = true;
+                } else {
+                    for (InputMethodInfo imi : settings.getEnabledInputMethodListLocked()) {
+                        if (TextUtils.equals(imi.getId(), imeId)) {
+                            previouslyEnabled = true;
+                            break;
+                        }
+                    }
+                    if (!previouslyEnabled) {
+                        settings.appendAndPutEnabledInputMethodLocked(imeId, false);
+                    }
+                }
+            } else {
+                previouslyEnabled =
+                        settings.buildAndPutEnabledInputMethodsStrRemovingIdLocked(
+                                new StringBuilder(),
+                                settings.getEnabledInputMethodsAndSubtypeListLocked(), imeId);
+            }
+        }
+        if (failedToEnableUnknownIme) {
+            error.print("Unknown input method ");
+            error.print(imeId);
+            error.println(" cannot be enabled for user #" + userId);
+        } else {
+            out.print("Input method ");
+            out.print(imeId);
+            out.print(": ");
+            out.print((enabled == previouslyEnabled) ? "already " : "now ");
+            out.print(enabled ? "enabled" : "disabled");
+            out.print(" for user #");
+            out.println(userId);
+        }
     }
 
     /**
