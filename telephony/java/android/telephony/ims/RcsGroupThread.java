@@ -169,8 +169,9 @@ public class RcsGroupThread extends RcsThread {
         RcsParticipantQueryParams queryParameters =
                 new RcsParticipantQueryParams.Builder().setThread(this).build();
 
-        RcsParticipantQueryResult queryResult = RcsControllerCall.call(
-                iRcs -> iRcs.getParticipants(queryParameters));
+        RcsParticipantQueryResult queryResult = new RcsParticipantQueryResult(
+                RcsControllerCall.call(
+                        iRcs -> iRcs.getParticipants(queryParameters)));
 
         List<RcsParticipant> participantList = queryResult.getParticipants();
         Set<RcsParticipant> participantSet = new LinkedHashSet<>(participantList);
