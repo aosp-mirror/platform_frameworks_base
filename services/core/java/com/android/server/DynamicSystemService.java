@@ -47,7 +47,7 @@ public class DynamicSystemService extends IDynamicSystemService.Stub implements 
     private static IGsiService connect(DeathRecipient recipient) throws RemoteException {
         IBinder binder = ServiceManager.getService("gsiservice");
         if (binder == null) {
-            throw new RemoteException(NO_SERVICE_ERROR);
+            return null;
         }
         /**
          * The init will restart gsiservice if it crashed and the proxy object will need to be
@@ -68,26 +68,31 @@ public class DynamicSystemService extends IDynamicSystemService.Stub implements 
 
     private IGsiService getGsiService() throws RemoteException {
         checkPermission();
+
         if (!"running".equals(SystemProperties.get("init.svc.gsid"))) {
             SystemProperties.set("ctl.start", "gsid");
-            for (int sleepMs = 64; sleepMs <= (GSID_ROUGH_TIMEOUT_MS << 1); sleepMs <<= 1) {
-                try {
-                    Thread.sleep(sleepMs);
-                } catch (InterruptedException e) {
-                    Slog.e(TAG, "Interrupted when waiting for GSID");
-                    break;
+        }
+
+        for (int sleepMs = 64; sleepMs <= (GSID_ROUGH_TIMEOUT_MS << 1); sleepMs <<= 1) {
+            synchronized (this) {
+                if (mGsiService == null) {
+                    mGsiService = connect(this);
                 }
-                if ("running".equals(SystemProperties.get("init.svc.gsid"))) {
-                    break;
+                if (mGsiService != null) {
+                    return mGsiService;
                 }
             }
-        }
-        synchronized (this) {
-            if (mGsiService == null) {
-                mGsiService = connect(this);
+
+            try {
+                Slog.d(TAG, "GsiService is not ready, wait for " + sleepMs + "ms");
+                Thread.sleep(sleepMs);
+            } catch (InterruptedException e) {
+                Slog.e(TAG, "Interrupted when waiting for GSID");
+                return null;
             }
-            return mGsiService;
         }
+
+        throw new RemoteException(NO_SERVICE_ERROR);
     }
 
     private void checkPermission() {
