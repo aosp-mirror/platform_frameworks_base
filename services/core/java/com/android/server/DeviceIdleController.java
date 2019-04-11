@@ -1399,8 +1399,8 @@ public class DeviceIdleController extends SystemService
                 } break;
                 case MSG_TEMP_APP_WHITELIST_TIMEOUT: {
                     // TODO: What is keeping the device awake at this point? Does it need to be?
-                    int uid = msg.arg1;
-                    checkTempAppWhitelistTimeout(uid);
+                    int appId = msg.arg1;
+                    checkTempAppWhitelistTimeout(appId);
                 } break;
                 case MSG_REPORT_MAINTENANCE_ACTIVITY: {
                     // TODO: What is keeping the device awake at this point? Does it need to be?
@@ -1656,9 +1656,9 @@ public class DeviceIdleController extends SystemService
         }
 
         // duration in milliseconds
-        public void addPowerSaveTempWhitelistAppDirect(int appId, long duration, boolean sync,
+        public void addPowerSaveTempWhitelistAppDirect(int uid, long duration, boolean sync,
                 String reason) {
-            addPowerSaveTempWhitelistAppDirectInternal(0, appId, duration, sync, reason);
+            addPowerSaveTempWhitelistAppDirectInternal(0, uid, duration, sync, reason);
         }
 
         // duration in milliseconds
@@ -2357,8 +2357,7 @@ public class DeviceIdleController extends SystemService
             long duration, int userId, boolean sync, String reason) {
         try {
             int uid = getContext().getPackageManager().getPackageUidAsUser(packageName, userId);
-            int appId = UserHandle.getAppId(uid);
-            addPowerSaveTempWhitelistAppDirectInternal(callingUid, appId, duration, sync, reason);
+            addPowerSaveTempWhitelistAppDirectInternal(callingUid, uid, duration, sync, reason);
         } catch (NameNotFoundException e) {
         }
     }
@@ -2367,10 +2366,11 @@ public class DeviceIdleController extends SystemService
      * Adds an app to the temporary whitelist and resets the endTime for granting the
      * app an exemption to access network and acquire wakelocks.
      */
-    void addPowerSaveTempWhitelistAppDirectInternal(int callingUid, int appId,
+    void addPowerSaveTempWhitelistAppDirectInternal(int callingUid, int uid,
             long duration, boolean sync, String reason) {
         final long timeNow = SystemClock.elapsedRealtime();
         boolean informWhitelistChanged = false;
+        int appId = UserHandle.getAppId(uid);
         synchronized (this) {
             int callingAppId = UserHandle.getAppId(callingUid);
             if (callingAppId >= Process.FIRST_APPLICATION_UID) {
@@ -2395,7 +2395,7 @@ public class DeviceIdleController extends SystemService
                 // No pending timeout for the app id, post a delayed message
                 try {
                     mBatteryStats.noteEvent(BatteryStats.HistoryItem.EVENT_TEMP_WHITELIST_START,
-                            reason, appId);
+                            reason, uid);
                 } catch (RemoteException e) {
                 }
                 postTempActiveTimeoutMessage(appId, duration);
@@ -2440,34 +2440,34 @@ public class DeviceIdleController extends SystemService
         }
     }
 
-    private void postTempActiveTimeoutMessage(int uid, long delay) {
+    private void postTempActiveTimeoutMessage(int appId, long delay) {
         if (DEBUG) {
-            Slog.d(TAG, "postTempActiveTimeoutMessage: uid=" + uid + ", delay=" + delay);
+            Slog.d(TAG, "postTempActiveTimeoutMessage: appId=" + appId + ", delay=" + delay);
         }
-        mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_TEMP_APP_WHITELIST_TIMEOUT, uid, 0),
-                delay);
+        mHandler.sendMessageDelayed(
+                mHandler.obtainMessage(MSG_TEMP_APP_WHITELIST_TIMEOUT, appId, 0), delay);
     }
 
-    void checkTempAppWhitelistTimeout(int uid) {
+    void checkTempAppWhitelistTimeout(int appId) {
         final long timeNow = SystemClock.elapsedRealtime();
         if (DEBUG) {
-            Slog.d(TAG, "checkTempAppWhitelistTimeout: uid=" + uid + ", timeNow=" + timeNow);
+            Slog.d(TAG, "checkTempAppWhitelistTimeout: appId=" + appId + ", timeNow=" + timeNow);
         }
         synchronized (this) {
-            Pair<MutableLong, String> entry = mTempWhitelistAppIdEndTimes.get(uid);
+            Pair<MutableLong, String> entry = mTempWhitelistAppIdEndTimes.get(appId);
             if (entry == null) {
                 // Nothing to do
                 return;
             }
             if (timeNow >= entry.first.value) {
-                mTempWhitelistAppIdEndTimes.delete(uid);
-                onAppRemovedFromTempWhitelistLocked(uid, entry.second);
+                mTempWhitelistAppIdEndTimes.delete(appId);
+                onAppRemovedFromTempWhitelistLocked(appId, entry.second);
             } else {
                 // Need more time
                 if (DEBUG) {
-                    Slog.d(TAG, "Time to remove UID " + uid + ": " + entry.first.value);
+                    Slog.d(TAG, "Time to remove AppId " + appId + ": " + entry.first.value);
                 }
-                postTempActiveTimeoutMessage(uid, entry.first.value - timeNow);
+                postTempActiveTimeoutMessage(appId, entry.first.value - timeNow);
             }
         }
     }
