@@ -24,11 +24,12 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.os.Process;
 import android.os.ServiceManager;
-import android.util.ByteStringUtils;
 import android.util.EventLog;
 import android.util.Log;
 
 import com.android.server.pm.dex.DynamicCodeLogger;
+
+import libcore.util.HexEncoding;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -280,10 +281,10 @@ public class DynamicCodeLoggingService extends JobService {
     }
 
     private static String unhex(String hexEncodedPath) {
-        byte[] bytes = ByteStringUtils.fromHexToByteArray(hexEncodedPath);
-        if (bytes == null || bytes.length == 0) {
+        if (hexEncodedPath == null || hexEncodedPath.length() == 0) {
             return "";
         }
+        byte[] bytes = HexEncoding.decode(hexEncodedPath, false /* allowSingleChar */);
         return new String(bytes);
     }
 }
