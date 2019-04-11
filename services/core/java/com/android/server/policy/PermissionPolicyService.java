@@ -17,8 +17,10 @@
 package com.android.server.policy;
 
 import static android.content.pm.PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION;
+import static android.content.pm.PackageManager.GET_PERMISSIONS;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
 import android.content.Context;
@@ -158,6 +160,20 @@ public final class PermissionPolicyService extends SystemService {
                 });
     }
 
+    private static @Nullable Context getUserContext(@NonNull Context context,
+            @NonNull UserHandle user) {
+        if (context.getUser().equals(user)) {
+            return context;
+        } else {
+            try {
+                return context.createPackageContextAsUser(context.getPackageName(), 0, user);
+            } catch (NameNotFoundException e) {
+                Slog.e(LOG_TAG, "Cannot create context for user " + user, e);
+                return null;
+            }
+        }
+    }
+
     /**
      * Synchronize a single package.
      */
@@ -165,20 +181,22 @@ public final class PermissionPolicyService extends SystemService {
             @NonNull String packageName, @UserIdInt int userId) {
         final PackageManagerInternal packageManagerInternal = LocalServices.getService(
                 PackageManagerInternal.class);
-        final PackageParser.Package pkg = packageManagerInternal.getPackage(packageName);
+        final PackageInfo pkg = packageManagerInternal.getPackageInfo(packageName, 0,
+                Process.SYSTEM_UID, userId);
         if (pkg == null) {
             return;
         }
-        final PermissionToOpSynchroniser synchroniser = new PermissionToOpSynchroniser(context);
-        synchroniser.addPackage(pkg, userId);
+        final PermissionToOpSynchroniser synchroniser = new PermissionToOpSynchroniser(
+                getUserContext(context, UserHandle.of(userId)));
+        synchroniser.addPackage(pkg.packageName);
         final String[] sharedPkgNames = packageManagerInternal.getPackagesForSharedUserId(
-                pkg.mSharedUserId, userId);
+                pkg.sharedUserId, userId);
         if (sharedPkgNames != null) {
             for (String sharedPkgName : sharedPkgNames) {
                 final PackageParser.Package sharedPkg = packageManagerInternal
                         .getPackage(sharedPkgName);
                 if (sharedPkg != null) {
-                    synchroniser.addPackage(sharedPkg, userId);
+                    synchroniser.addPackage(sharedPkg.packageName);
                 }
             }
         }
@@ -192,9 +210,9 @@ public final class PermissionPolicyService extends SystemService {
             @UserIdInt int userId) {
         final PackageManagerInternal packageManagerInternal = LocalServices.getService(
                 PackageManagerInternal.class);
-        final PermissionToOpSynchroniser synchronizer = new PermissionToOpSynchroniser(context);
-        packageManagerInternal.forEachPackage((pkg) ->
-                synchronizer.addPackage(pkg, userId));
+        final PermissionToOpSynchroniser synchronizer = new PermissionToOpSynchroniser(
+                getUserContext(context, UserHandle.of(userId)));
+        packageManagerInternal.forEachPackage((pkg) -> synchronizer.addPackage(pkg.packageName));
         synchronizer.syncPackages();
     }
 
@@ -304,7 +322,7 @@ public final class PermissionPolicyService extends SystemService {
                 if (unrequestedRestrictedPermissions != null) {
                     final int uid = unrequestedRestrictedPermissionsForUid.keyAt(i);
                     final String[] packageNames = (uid != Process.ROOT_UID)
-                            ? mContext.getPackageManager().getPackagesForUid(uid)
+                            ? mPackageManager.getPackagesForUid(uid)
                             : new String[] {"root"};
                     if (packageNames == null) {
                         continue;
@@ -336,14 +354,12 @@ public final class PermissionPolicyService extends SystemService {
          *
          * @param permissionInfo The permission that is currently looked at
          * @param pkg The package looked at
-         * @param userId The user the package belongs to
          */
         private void addOpIfRestricted(@NonNull PermissionInfo permissionInfo,
-                @NonNull PackageParser.Package pkg, @UserIdInt int userId) {
+                @NonNull PackageInfo pkg) {
             final String permission = permissionInfo.name;
             final int opCode = AppOpsManager.permissionToOpCode(permission);
-            final int uid = UserHandle.getUid(userId, UserHandle.getAppId(pkg.applicationInfo.uid));
-            final UserHandle userHandle = UserHandle.of(userId);
+            final int uid = pkg.applicationInfo.uid;
 
             if (!permissionInfo.isRestricted()) {
                 return;
@@ -351,7 +367,7 @@ public final class PermissionPolicyService extends SystemService {
 
             final boolean applyRestriction = PackageManager.RESTRICTED_PERMISSIONS_ENABLED
                     && (mPackageManager.getPermissionFlags(permission, pkg.packageName,
-                    userHandle) & FLAG_PERMISSION_APPLY_RESTRICTION) != 0;
+                    mContext.getUser()) & FLAG_PERMISSION_APPLY_RESTRICTION) != 0;
 
             if (permissionInfo.isHardRestricted()) {
                 if (applyRestriction) {
@@ -369,18 +385,23 @@ public final class PermissionPolicyService extends SystemService {
          *
          * <p>Note: Called with the package lock held. Do <u>not</u> call into app-op manager.
          *
-         * @param pkg The package to add for later processing
-         * @param userId The user the package belongs to
+         * @param pkgName The package to add for later processing.
          */
-        void addPackage(@NonNull PackageParser.Package pkg, @UserIdInt int userId) {
-            final int uid = UserHandle.getUid(userId, UserHandle.getAppId(pkg.applicationInfo.uid));
+        void addPackage(@NonNull String pkgName) {
+            final PackageInfo pkg;
+            try {
+                pkg = mPackageManager.getPackageInfo(pkgName, GET_PERMISSIONS);
+            } catch (NameNotFoundException e) {
+                return;
+            }
 
-            mAllUids.put(uid, uid);
+            mAllUids.put(pkg.applicationInfo.uid, pkg.applicationInfo.uid);
 
-            final int permissionCount = pkg.requestedPermissions.size();
-            for (int i = 0; i < permissionCount; i++) {
-                final String permission = pkg.requestedPermissions.get(i);
+            if (pkg.requestedPermissions == null) {
+                return;
+            }
 
+            for (String permission : pkg.requestedPermissions) {
                 final int opCode = AppOpsManager.permissionToOpCode(permission);
                 if (opCode == AppOpsManager.OP_NONE) {
                     continue;
@@ -393,7 +414,7 @@ public final class PermissionPolicyService extends SystemService {
                     continue;
                 }
 
-                addOpIfRestricted(permissionInfo, pkg, userId);
+                addOpIfRestricted(permissionInfo, pkg);
             }
         }
 
