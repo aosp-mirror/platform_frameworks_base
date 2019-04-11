@@ -188,11 +188,16 @@ public class GraphicsEnvironment {
 
                     if (gpuDebugLayerApp != null && !gpuDebugLayerApp.isEmpty()) {
                         Log.i(TAG, "GPU debug layer app: " + gpuDebugLayerApp);
-                        final String paths = getDebugLayerAppPaths(pm, gpuDebugLayerApp);
-                        if (paths != null) {
-                            // Append the path so files placed in the app's base directory will
-                            // override the external path
-                            layerPaths += paths + ":";
+                        // If a colon is present, treat this as multiple apps, so Vulkan and GLES
+                        // layer apps can be provided at the same time.
+                        String[] layerApps = gpuDebugLayerApp.split(":");
+                        for (int i = 0; i < layerApps.length; i++) {
+                            String paths = getDebugLayerAppPaths(pm, layerApps[i]);
+                            if (paths != null) {
+                                // Append the path so files placed in the app's base directory will
+                                // override the external path
+                                layerPaths += paths + ":";
+                            }
                         }
                     }
 
