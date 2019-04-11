@@ -94,8 +94,7 @@ public class NetworkStackUtils {
      * Look up the value of a property for a particular namespace from {@link DeviceConfig}.
      * @param namespace The namespace containing the property to look up.
      * @param name The name of the property to look up.
-     * @param defaultValue The value to return if the property does not exist or has no non-null
-     *                     value.
+     * @param defaultValue The value to return if the property does not exist or has no valid value.
      * @return the corresponding value, or defaultValue if none exists.
      */
     @Nullable
