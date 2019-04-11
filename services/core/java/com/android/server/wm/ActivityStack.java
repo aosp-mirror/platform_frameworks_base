@@ -4089,11 +4089,14 @@ class ActivityStack extends ConfigurationContainer {
         // The activity that we are finishing may be over the lock screen. In this case, we do not
         // want to consider activities that cannot be shown on the lock screen as running and should
         // proceed with finishing the activity if there is no valid next top running activity.
+        // Note that if this finishing activity is floating task, we don't need to wait the
+        // next activity resume and can destroy it directly.
         final ActivityDisplay display = getDisplay();
         final ActivityRecord next = display.topRunningActivity(true /* considerKeyguardState */);
+        final boolean isFloating = r.getConfiguration().windowConfiguration.tasksAreFloating();
 
         if (mode == FINISH_AFTER_VISIBLE && (r.visible || r.nowVisible)
-                && next != null && !next.nowVisible) {
+                && next != null && !next.nowVisible && !isFloating) {
             if (!mStackSupervisor.mStoppingActivities.contains(r)) {
                 addToStopping(r, false /* scheduleIdle */, false /* idleDelayed */);
             }
