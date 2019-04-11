@@ -583,23 +583,24 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
     private boolean shouldAutoExpand(NotificationEntry entry) {
         Notification.BubbleMetadata metadata = entry.getBubbleMetadata();
         return metadata != null && metadata.getAutoExpandBubble()
-                && isForegroundApp(entry.notification.getPackageName());
+                && isForegroundApp(mContext, entry.notification.getPackageName());
     }
 
     private void updateShowInShadeForSuppressNotification(NotificationEntry entry) {
         boolean suppressNotification = entry.getBubbleMetadata() != null
                 && entry.getBubbleMetadata().getSuppressNotification()
-                && isForegroundApp(entry.notification.getPackageName());
+                && isForegroundApp(mContext, entry.notification.getPackageName());
         entry.setShowInShadeWhenBubble(!suppressNotification);
     }
 
     /**
      * Return true if the applications with the package name is running in foreground.
      *
+     * @param context application context.
      * @param pkgName application package name.
      */
-    private boolean isForegroundApp(String pkgName) {
-        ActivityManager am = mContext.getSystemService(ActivityManager.class);
+    public static boolean isForegroundApp(Context context, String pkgName) {
+        ActivityManager am = context.getSystemService(ActivityManager.class);
         List<RunningTaskInfo> tasks = am.getRunningTasks(1 /* maxNum */);
         return !tasks.isEmpty() && pkgName.equals(tasks.get(0).topActivity.getPackageName());
     }

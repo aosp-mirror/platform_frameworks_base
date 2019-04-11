@@ -5584,6 +5584,12 @@ message BubbleUIChanged {
 
     // Whether the bubble is unread. If it is unread, a dot is shown in the bubble stack icon.
     optional bool is_unread = 9;
+
+    // Whether the bubble is an on-going one.
+    optional bool is_ongoing = 10;
+
+    // Whether the bubble is produced by an app running in foreground.
+    optional bool is_foreground = 11;
 }
 
 /**
