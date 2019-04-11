@@ -108,7 +108,6 @@ import android.net.VpnService;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.NetworkEvent;
 import android.net.netlink.InetDiagMessage;
-import android.net.shared.NetworkMonitorUtils;
 import android.net.shared.PrivateDnsConfig;
 import android.net.util.MultinetworkPolicyTracker;
 import android.net.util.NetdService;
@@ -237,6 +236,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private static final boolean VDBG = Log.isLoggable(TAG, Log.VERBOSE);
 
     private static final boolean LOGD_BLOCKED_NETWORKINFO = true;
+
+    /**
+     * Default URL to use for {@link #getCaptivePortalServerUrl()}. This should not be changed
+     * by OEMs for configuration purposes, as this value is overridden by
+     * Settings.Global.CAPTIVE_PORTAL_HTTP_URL.
+     * R.string.config_networkCaptivePortalServerUrl should be overridden instead for this purpose
+     * (preferably via runtime resource overlays).
+     */
+    private static final String DEFAULT_CAPTIVE_PORTAL_HTTP_URL =
+            "http://connectivitycheck.gstatic.com/generate_204";
 
     // TODO: create better separation between radio types and network types
 
@@ -6701,9 +6710,20 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @Override
     public String getCaptivePortalServerUrl() {
         enforceConnectivityInternalPermission();
-        final String defaultUrl = mContext.getResources().getString(
-                R.string.config_networkDefaultCaptivePortalServerUrl);
-        return NetworkMonitorUtils.getCaptivePortalServerHttpUrl(mContext, defaultUrl);
+        String settingUrl = mContext.getResources().getString(
+                R.string.config_networkCaptivePortalServerUrl);
+
+        if (!TextUtils.isEmpty(settingUrl)) {
+            return settingUrl;
+        }
+
+        settingUrl = Settings.Global.getString(mContext.getContentResolver(),
+                Settings.Global.CAPTIVE_PORTAL_HTTP_URL);
+        if (!TextUtils.isEmpty(settingUrl)) {
+            return settingUrl;
+        }
+
+        return DEFAULT_CAPTIVE_PORTAL_HTTP_URL;
     }
 
     @Override
