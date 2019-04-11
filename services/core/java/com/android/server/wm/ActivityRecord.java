@@ -88,6 +88,8 @@ import static android.os.Build.VERSION_CODES.HONEYCOMB;
 import static android.os.Build.VERSION_CODES.O;
 import static android.os.Process.SYSTEM_UID;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.Surface.ROTATION_270;
+import static android.view.Surface.ROTATION_90;
 
 import static com.android.server.am.ActivityRecordProto.CONFIGURATION_CONTAINER;
 import static com.android.server.am.ActivityRecordProto.FRONT_OF_TASK;
@@ -195,6 +197,7 @@ import android.util.Slog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.view.AppTransitionAnimationSpec;
+import android.view.DisplayCutout;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IApplicationToken;
 import android.view.RemoteAnimationDefinition;
@@ -381,6 +384,12 @@ final class ActivityRecord extends ConfigurationContainer {
     private int[] mVerticalSizeConfigurations;
     private int[] mHorizontalSizeConfigurations;
     private int[] mSmallestSizeConfigurations;
+
+    /**
+     * The precomputed display insets for resolving configuration. It will be non-null if
+     * {@link #shouldUseSizeCompatMode} returns {@code true}.
+     */
+    private CompatDisplayInsets mCompatDisplayInsets;
 
     boolean pendingVoiceInteractionStart;   // Waiting for activity-invoked voice session
     IVoiceInteractionSession voiceSession;  // Voice interaction session for this activity
@@ -2833,6 +2842,11 @@ final class ActivityRecord extends ConfigurationContainer {
                 // The smallest screen width is the short side of screen bounds. Because the bounds
                 // and density won't be changed, smallestScreenWidthDp is also fixed.
                 overrideConfig.smallestScreenWidthDp = parentConfig.smallestScreenWidthDp;
+
+                final ActivityDisplay display = getDisplay();
+                if (display != null && display.mDisplayContent != null) {
+                    mCompatDisplayInsets = new CompatDisplayInsets(display.mDisplayContent);
+                }
             }
         }
         onRequestedOverrideConfigurationChanged(overrideConfig);
@@ -2849,7 +2863,7 @@ final class ActivityRecord extends ConfigurationContainer {
             super.resolveOverrideConfiguration(newParentConfiguration);
             if (hasOverrideBounds) {
                 task.computeConfigResourceOverrides(getResolvedOverrideConfiguration(),
-                        newParentConfiguration, true /* insideParentBounds */);
+                        newParentConfiguration);
             }
         }
 
@@ -2922,9 +2936,8 @@ final class ActivityRecord extends ConfigurationContainer {
             resolvedBounds.right -= resolvedAppBounds.left;
         }
 
-        // In size compatibility mode, activity is allowed to have larger bounds than its parent.
         task.computeConfigResourceOverrides(resolvedConfig, newParentConfiguration,
-                false /* insideParentBounds */);
+                mCompatDisplayInsets);
         // Use parent orientation if it cannot be decided by bounds, so the activity can fit inside
         // the parent bounds appropriately.
         if (resolvedConfig.screenWidthDp == resolvedConfig.screenHeightDp) {
@@ -3450,6 +3463,7 @@ final class ActivityRecord extends ConfigurationContainer {
         // configuration.
         getRequestedOverrideConfiguration().setToDefaults();
         getResolvedOverrideConfiguration().setToDefaults();
+        mCompatDisplayInsets = null;
         if (visible) {
             // Configuration will be ensured when becoming visible, so if it is already visible,
             // then the manual update is needed.
@@ -3795,5 +3809,47 @@ final class ActivityRecord extends ConfigurationContainer {
         final long token = proto.start(fieldId);
         writeToProto(proto);
         proto.end(token);
+    }
+
+    /**
+     * The precomputed insets of the display in each rotation. This is used to make the size
+     * compatibility mode activity compute the configuration without relying on its current display.
+     */
+    static class CompatDisplayInsets {
+        final int mDisplayWidth;
+        final int mDisplayHeight;
+
+        /** The nonDecorInsets for each rotation. Includes the navigation bar and cutout insets. */
+        final Rect[] mNonDecorInsets = new Rect[4];
+        /**
+         * The stableInsets for each rotation. Includes the status bar inset and the
+         * nonDecorInsets. It is used to compute {@link Configuration#screenWidthDp} and
+         * {@link Configuration#screenHeightDp}.
+         */
+        final Rect[] mStableInsets = new Rect[4];
+
+        CompatDisplayInsets(DisplayContent display) {
+            mDisplayWidth = display.mBaseDisplayWidth;
+            mDisplayHeight = display.mBaseDisplayHeight;
+            final DisplayPolicy policy = display.getDisplayPolicy();
+            final DisplayCutout cutout = display.getDisplayInfo().displayCutout;
+            for (int rotation = 0; rotation < 4; rotation++) {
+                mNonDecorInsets[rotation] = new Rect();
+                mStableInsets[rotation] = new Rect();
+                final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
+                final int dw = rotated ? mDisplayHeight : mDisplayWidth;
+                final int dh = rotated ? mDisplayWidth : mDisplayHeight;
+                policy.getNonDecorInsetsLw(rotation, dw, dh, cutout, mNonDecorInsets[rotation]);
+                mStableInsets[rotation].set(mNonDecorInsets[rotation]);
+                policy.convertNonDecorInsetsToStableInsets(mStableInsets[rotation], rotation);
+            }
+        }
+
+        void getDisplayBounds(Rect outBounds, int rotation) {
+            final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
+            final int dw = rotated ? mDisplayHeight : mDisplayWidth;
+            final int dh = rotated ? mDisplayWidth : mDisplayHeight;
+            outBounds.set(0, 0, dw, dh);
+        }
     }
 }
