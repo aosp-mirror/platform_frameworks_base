@@ -160,6 +160,12 @@ public:
     // Max platform atom tag number.
     static const int32_t kMaxPlatformAtomTag = 100000;
 
+    // Vendor pulled atom start id.
+    static const int32_t kVendorPulledAtomStartTag = 150000;
+
+    // Max accepted atom id.
+    static const int32_t kMaxAtomTag = 200000;
+
     static const int64_t kInt64Max = 0x7fffffffffffffffLL;
 
     /**
