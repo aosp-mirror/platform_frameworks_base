@@ -16,15 +16,16 @@
 
 package android.net;
 
-import java.lang.reflect.Method;
-import java.net.InetAddress;
+import static android.net.RouteInfo.RTN_UNREACHABLE;
 
-import android.net.IpPrefix;
-import android.net.RouteInfo;
 import android.os.Parcel;
+import android.test.suitebuilder.annotation.SmallTest;
 
 import junit.framework.TestCase;
-import android.test.suitebuilder.annotation.SmallTest;
+
+import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
 
 public class RouteInfoTest extends TestCase {
 
@@ -152,67 +153,85 @@ public class RouteInfoTest extends TestCase {
     }
 
     public void testHostAndDefaultRoutes() {
-      RouteInfo r;
+        RouteInfo r;
 
-      r = new RouteInfo(Prefix("0.0.0.0/0"), Address("0.0.0.0"), "wlan0");
-      assertFalse(r.isHostRoute());
-      assertTrue(r.isDefaultRoute());
-      assertTrue(r.isIPv4Default());
-      assertFalse(r.isIPv6Default());
+        r = new RouteInfo(Prefix("0.0.0.0/0"), Address("0.0.0.0"), "wlan0");
+        assertFalse(r.isHostRoute());
+        assertTrue(r.isDefaultRoute());
+        assertTrue(r.isIPv4Default());
+        assertFalse(r.isIPv6Default());
 
-      r = new RouteInfo(Prefix("::/0"), Address("::"), "wlan0");
-      assertFalse(r.isHostRoute());
-      assertTrue(r.isDefaultRoute());
-      assertFalse(r.isIPv4Default());
-      assertTrue(r.isIPv6Default());
+        r = new RouteInfo(Prefix("::/0"), Address("::"), "wlan0");
+        assertFalse(r.isHostRoute());
+        assertTrue(r.isDefaultRoute());
+        assertFalse(r.isIPv4Default());
+        assertTrue(r.isIPv6Default());
 
-      r = new RouteInfo(Prefix("192.0.2.0/24"), null, "wlan0");
-      assertFalse(r.isHostRoute());
-      assertFalse(r.isDefaultRoute());
-      assertFalse(r.isIPv4Default());
-      assertFalse(r.isIPv6Default());
+        r = new RouteInfo(Prefix("192.0.2.0/24"), null, "wlan0");
+        assertFalse(r.isHostRoute());
+        assertFalse(r.isDefaultRoute());
+        assertFalse(r.isIPv4Default());
+        assertFalse(r.isIPv6Default());
 
-      r = new RouteInfo(Prefix("2001:db8::/48"), null, "wlan0");
-      assertFalse(r.isHostRoute());
-      assertFalse(r.isDefaultRoute());
-      assertFalse(r.isIPv4Default());
-      assertFalse(r.isIPv6Default());
+        r = new RouteInfo(Prefix("2001:db8::/48"), null, "wlan0");
+        assertFalse(r.isHostRoute());
+        assertFalse(r.isDefaultRoute());
+        assertFalse(r.isIPv4Default());
+        assertFalse(r.isIPv6Default());
 
-      r = new RouteInfo(Prefix("192.0.2.0/32"), Address("0.0.0.0"), "wlan0");
-      assertTrue(r.isHostRoute());
-      assertFalse(r.isDefaultRoute());
-      assertFalse(r.isIPv4Default());
-      assertFalse(r.isIPv6Default());
+        r = new RouteInfo(Prefix("192.0.2.0/32"), Address("0.0.0.0"), "wlan0");
+        assertTrue(r.isHostRoute());
+        assertFalse(r.isDefaultRoute());
+        assertFalse(r.isIPv4Default());
+        assertFalse(r.isIPv6Default());
 
-      r = new RouteInfo(Prefix("2001:db8::/128"), Address("::"), "wlan0");
-      assertTrue(r.isHostRoute());
-      assertFalse(r.isDefaultRoute());
-      assertFalse(r.isIPv4Default());
-      assertFalse(r.isIPv6Default());
+        r = new RouteInfo(Prefix("2001:db8::/128"), Address("::"), "wlan0");
+        assertTrue(r.isHostRoute());
+        assertFalse(r.isDefaultRoute());
+        assertFalse(r.isIPv4Default());
+        assertFalse(r.isIPv6Default());
 
-      r = new RouteInfo(Prefix("192.0.2.0/32"), null, "wlan0");
-      assertTrue(r.isHostRoute());
-      assertFalse(r.isDefaultRoute());
-      assertFalse(r.isIPv4Default());
-      assertFalse(r.isIPv6Default());
+        r = new RouteInfo(Prefix("192.0.2.0/32"), null, "wlan0");
+        assertTrue(r.isHostRoute());
+        assertFalse(r.isDefaultRoute());
+        assertFalse(r.isIPv4Default());
+        assertFalse(r.isIPv6Default());
 
-      r = new RouteInfo(Prefix("2001:db8::/128"), null, "wlan0");
-      assertTrue(r.isHostRoute());
-      assertFalse(r.isDefaultRoute());
-      assertFalse(r.isIPv4Default());
-      assertFalse(r.isIPv6Default());
+        r = new RouteInfo(Prefix("2001:db8::/128"), null, "wlan0");
+        assertTrue(r.isHostRoute());
+        assertFalse(r.isDefaultRoute());
+        assertFalse(r.isIPv4Default());
+        assertFalse(r.isIPv6Default());
 
-      r = new RouteInfo(Prefix("::/128"), Address("fe80::"), "wlan0");
-      assertTrue(r.isHostRoute());
-      assertFalse(r.isDefaultRoute());
-      assertFalse(r.isIPv4Default());
-      assertFalse(r.isIPv6Default());
+        r = new RouteInfo(Prefix("::/128"), Address("fe80::"), "wlan0");
+        assertTrue(r.isHostRoute());
+        assertFalse(r.isDefaultRoute());
+        assertFalse(r.isIPv4Default());
+        assertFalse(r.isIPv6Default());
 
-      r = new RouteInfo(Prefix("0.0.0.0/32"), Address("192.0.2.1"), "wlan0");
-      assertTrue(r.isHostRoute());
-      assertFalse(r.isDefaultRoute());
-      assertFalse(r.isIPv4Default());
-      assertFalse(r.isIPv6Default());
+        r = new RouteInfo(Prefix("0.0.0.0/32"), Address("192.0.2.1"), "wlan0");
+        assertTrue(r.isHostRoute());
+        assertFalse(r.isDefaultRoute());
+        assertFalse(r.isIPv4Default());
+        assertFalse(r.isIPv6Default());
+
+        r = new RouteInfo(Prefix("0.0.0.0/32"), Address("192.0.2.1"), "wlan0");
+        assertTrue(r.isHostRoute());
+        assertFalse(r.isDefaultRoute());
+        assertFalse(r.isIPv4Default());
+        assertFalse(r.isIPv6Default());
+
+        r = new RouteInfo(new IpPrefix(Inet4Address.ANY, 0), RTN_UNREACHABLE);
+        assertFalse(r.isHostRoute());
+        assertFalse(r.isDefaultRoute());
+        assertFalse(r.isIPv4Default());
+        assertFalse(r.isIPv6Default());
+
+        r = new RouteInfo(new IpPrefix(Inet6Address.ANY, 0), RTN_UNREACHABLE);
+        assertFalse(r.isHostRoute());
+        assertFalse(r.isDefaultRoute());
+        assertFalse(r.isIPv4Default());
+        assertFalse(r.isIPv6Default());
     }
 
     public void testTruncation() {

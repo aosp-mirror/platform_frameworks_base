@@ -16,6 +16,8 @@
 
 package com.android.server;
 
+import static android.content.pm.PackageManager.GET_PERMISSIONS;
+import static android.content.pm.PackageManager.MATCH_ANY_USER;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.NETID_UNSET;
 import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_OFF;
@@ -60,11 +62,13 @@ import static android.net.NetworkPolicyManager.RULE_ALLOW_METERED;
 import static android.net.NetworkPolicyManager.RULE_NONE;
 import static android.net.NetworkPolicyManager.RULE_REJECT_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
+import static android.net.RouteInfo.RTN_UNREACHABLE;
 
 import static com.android.internal.util.TestUtils.waitForIdleHandler;
 import static com.android.internal.util.TestUtils.waitForIdleLooper;
 import static com.android.internal.util.TestUtils.waitForIdleSerialExecutor;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -72,12 +76,14 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -97,6 +103,10 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
@@ -151,6 +161,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.system.Os;
 import android.test.mock.MockContentResolver;
@@ -186,6 +197,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
@@ -194,6 +206,7 @@ import org.mockito.stubbing.Answer;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -261,6 +274,8 @@ public class ConnectivityServiceTest {
     @Mock IDnsResolver mMockDnsResolver;
     @Mock INetd mMockNetd;
     @Mock NetworkStackClient mNetworkStack;
+    @Mock PackageManager mPackageManager;
+    @Mock UserManager mUserManager;
 
     private ArgumentCaptor<String[]> mStringArrayCaptor = ArgumentCaptor.forClass(String[].class);
 
@@ -331,6 +346,7 @@ public class ConnectivityServiceTest {
             if (Context.CONNECTIVITY_SERVICE.equals(name)) return mCm;
             if (Context.NOTIFICATION_SERVICE.equals(name)) return mock(NotificationManager.class);
             if (Context.NETWORK_STACK_SERVICE.equals(name)) return mNetworkStack;
+            if (Context.USER_SERVICE.equals(name)) return mUserManager;
             return super.getSystemService(name);
         }
 
@@ -342,6 +358,11 @@ public class ConnectivityServiceTest {
         @Override
         public Resources getResources() {
             return mResources;
+        }
+
+        @Override
+        public PackageManager getPackageManager() {
+            return mPackageManager;
         }
     }
 
@@ -1057,7 +1078,7 @@ public class ConnectivityServiceTest {
         public WrappedConnectivityService(Context context, INetworkManagementService netManager,
                 INetworkStatsService statsService, INetworkPolicyManager policyManager,
                 IpConnectivityLog log, INetd netd, IDnsResolver dnsResolver) {
-            super(context, netManager, statsService, policyManager, dnsResolver, log);
+            super(context, netManager, statsService, policyManager, dnsResolver, log, netd);
             mNetd = netd;
             mLingerDelayMs = TEST_LINGER_DELAY_MS;
         }
@@ -1196,12 +1217,28 @@ public class ConnectivityServiceTest {
         fail("ConditionVariable was blocked for more than " + TIMEOUT_MS + "ms");
     }
 
+    private static final int VPN_USER = 0;
+    private static final int APP1_UID = UserHandle.getUid(VPN_USER, 10100);
+    private static final int APP2_UID = UserHandle.getUid(VPN_USER, 10101);
+    private static final int VPN_UID = UserHandle.getUid(VPN_USER, 10043);
+
     @Before
     public void setUp() throws Exception {
         mContext = InstrumentationRegistry.getContext();
 
         MockitoAnnotations.initMocks(this);
         when(mMetricsService.defaultNetworkMetrics()).thenReturn(mDefaultNetworkMetrics);
+
+        when(mUserManager.getUsers(eq(true))).thenReturn(
+                Arrays.asList(new UserInfo[] {
+                        new UserInfo(VPN_USER, "", 0),
+                }));
+        when(mPackageManager.getInstalledPackages(eq(GET_PERMISSIONS | MATCH_ANY_USER))).thenReturn(
+                Arrays.asList(new PackageInfo[] {
+                        buildPackageInfo(/* SYSTEM */ false, APP1_UID),
+                        buildPackageInfo(/* SYSTEM */ false, APP2_UID),
+                        buildPackageInfo(/* SYSTEM */ false, VPN_UID)
+                }));
 
         // InstrumentationTestRunner prepares a looper, but AndroidJUnitRunner does not.
         // http://b/25897652 .
@@ -6128,5 +6165,166 @@ public class ConnectivityServiceTest {
         assertEquals(mWiFiNetworkAgent.getNetwork(), mCm.getActiveNetwork());
         assertEquals(testProxyInfo, mService.getProxyForNetwork(mWiFiNetworkAgent.getNetwork()));
         assertEquals(testProxyInfo, mService.getProxyForNetwork(null));
+    }
+
+    @Test
+    public void testFullyRoutedVpnResultsInInterfaceFilteringRules() throws Exception {
+        LinkProperties lp = new LinkProperties();
+        lp.setInterfaceName("tun0");
+        lp.addRoute(new RouteInfo(new IpPrefix(Inet4Address.ANY, 0), null));
+        // The uid range needs to cover the test app so the network is visible to it.
+        final Set<UidRange> vpnRange = Collections.singleton(UidRange.createForUser(VPN_USER));
+        final MockNetworkAgent vpnNetworkAgent = establishVpn(lp, VPN_UID, vpnRange);
+
+        // Connected VPN should have interface rules set up. There are two expected invocations,
+        // one during VPN uid update, one during VPN LinkProperties update
+        ArgumentCaptor<int[]> uidCaptor = ArgumentCaptor.forClass(int[].class);
+        verify(mMockNetd, times(2)).firewallAddUidInterfaceRules(eq("tun0"), uidCaptor.capture());
+        assertContainsExactly(uidCaptor.getAllValues().get(0), APP1_UID, APP2_UID);
+        assertContainsExactly(uidCaptor.getAllValues().get(1), APP1_UID, APP2_UID);
+        assertTrue(mService.mPermissionMonitor.getVpnUidRanges("tun0").equals(vpnRange));
+
+        vpnNetworkAgent.disconnect();
+        waitForIdle();
+
+        // Disconnected VPN should have interface rules removed
+        verify(mMockNetd).firewallRemoveUidInterfaceRules(uidCaptor.capture());
+        assertContainsExactly(uidCaptor.getValue(), APP1_UID, APP2_UID);
+        assertNull(mService.mPermissionMonitor.getVpnUidRanges("tun0"));
+    }
+
+    @Test
+    public void testLegacyVpnDoesNotResultInInterfaceFilteringRule() throws Exception {
+        LinkProperties lp = new LinkProperties();
+        lp.setInterfaceName("tun0");
+        lp.addRoute(new RouteInfo(new IpPrefix(Inet4Address.ANY, 0), null));
+        // The uid range needs to cover the test app so the network is visible to it.
+        final Set<UidRange> vpnRange = Collections.singleton(UidRange.createForUser(VPN_USER));
+        final MockNetworkAgent vpnNetworkAgent = establishVpn(lp, Process.SYSTEM_UID, vpnRange);
+
+        // Legacy VPN should not have interface rules set up
+        verify(mMockNetd, never()).firewallAddUidInterfaceRules(any(), any());
+    }
+
+    public void testLocalIpv4OnlyVpnDoesNotResultInInterfaceFilteringRule()
+            throws Exception {
+        LinkProperties lp = new LinkProperties();
+        lp.setInterfaceName("tun0");
+        lp.addRoute(new RouteInfo(new IpPrefix("192.0.2.0/24"), null, "tun0"));
+        lp.addRoute(new RouteInfo(new IpPrefix(Inet6Address.ANY, 0), RTN_UNREACHABLE));
+        // The uid range needs to cover the test app so the network is visible to it.
+        final Set<UidRange> vpnRange = Collections.singleton(UidRange.createForUser(VPN_USER));
+        final MockNetworkAgent vpnNetworkAgent = establishVpn(lp, Process.SYSTEM_UID, vpnRange);
+
+        // IPv6 unreachable route should not be misinterpreted as a default route
+        verify(mMockNetd, never()).firewallAddUidInterfaceRules(any(), any());
+    }
+
+    @Test
+    public void testVpnHandoverChangesInterfaceFilteringRule() throws Exception {
+        LinkProperties lp = new LinkProperties();
+        lp.setInterfaceName("tun0");
+        lp.addRoute(new RouteInfo(new IpPrefix(Inet4Address.ANY, 0), null));
+        // The uid range needs to cover the test app so the network is visible to it.
+        final Set<UidRange> vpnRange = Collections.singleton(UidRange.createForUser(VPN_USER));
+        final MockNetworkAgent vpnNetworkAgent = establishVpn(lp, VPN_UID, vpnRange);
+
+        // Connected VPN should have interface rules set up. There are two expected invocations,
+        // one during VPN uid update, one during VPN LinkProperties update
+        ArgumentCaptor<int[]> uidCaptor = ArgumentCaptor.forClass(int[].class);
+        verify(mMockNetd, times(2)).firewallAddUidInterfaceRules(eq("tun0"), uidCaptor.capture());
+        assertContainsExactly(uidCaptor.getAllValues().get(0), APP1_UID, APP2_UID);
+        assertContainsExactly(uidCaptor.getAllValues().get(1), APP1_UID, APP2_UID);
+
+        reset(mMockNetd);
+        InOrder inOrder = inOrder(mMockNetd);
+        lp.setInterfaceName("tun1");
+        vpnNetworkAgent.sendLinkProperties(lp);
+        waitForIdle();
+        // VPN handover (switch to a new interface) should result in rules being updated (old rules
+        // removed first, then new rules added)
+        inOrder.verify(mMockNetd).firewallRemoveUidInterfaceRules(uidCaptor.capture());
+        assertContainsExactly(uidCaptor.getValue(), APP1_UID, APP2_UID);
+        inOrder.verify(mMockNetd).firewallAddUidInterfaceRules(eq("tun1"), uidCaptor.capture());
+        assertContainsExactly(uidCaptor.getValue(), APP1_UID, APP2_UID);
+
+        reset(mMockNetd);
+        lp = new LinkProperties();
+        lp.setInterfaceName("tun1");
+        lp.addRoute(new RouteInfo(new IpPrefix("192.0.2.0/24"), null, "tun1"));
+        vpnNetworkAgent.sendLinkProperties(lp);
+        waitForIdle();
+        // VPN not routing everything should no longer have interface filtering rules
+        verify(mMockNetd).firewallRemoveUidInterfaceRules(uidCaptor.capture());
+        assertContainsExactly(uidCaptor.getValue(), APP1_UID, APP2_UID);
+
+        reset(mMockNetd);
+        lp = new LinkProperties();
+        lp.setInterfaceName("tun1");
+        lp.addRoute(new RouteInfo(new IpPrefix(Inet6Address.ANY, 0), null));
+        vpnNetworkAgent.sendLinkProperties(lp);
+        waitForIdle();
+        // Back to routing all IPv6 traffic should have filtering rules
+        verify(mMockNetd).firewallAddUidInterfaceRules(eq("tun1"), uidCaptor.capture());
+        assertContainsExactly(uidCaptor.getValue(), APP1_UID, APP2_UID);
+    }
+
+    @Test
+    public void testUidUpdateChangesInterfaceFilteringRule() throws Exception {
+        LinkProperties lp = new LinkProperties();
+        lp.setInterfaceName("tun0");
+        lp.addRoute(new RouteInfo(new IpPrefix(Inet6Address.ANY, 0), null));
+        // The uid range needs to cover the test app so the network is visible to it.
+        final UidRange vpnRange = UidRange.createForUser(VPN_USER);
+        final MockNetworkAgent vpnNetworkAgent = establishVpn(lp, VPN_UID,
+                Collections.singleton(vpnRange));
+
+        reset(mMockNetd);
+        InOrder inOrder = inOrder(mMockNetd);
+
+        // Update to new range which is old range minus APP1, i.e. only APP2
+        final Set<UidRange> newRanges = new HashSet<>(Arrays.asList(
+                new UidRange(vpnRange.start, APP1_UID - 1),
+                new UidRange(APP1_UID + 1, vpnRange.stop)));
+        vpnNetworkAgent.setUids(newRanges);
+        waitForIdle();
+
+        ArgumentCaptor<int[]> uidCaptor = ArgumentCaptor.forClass(int[].class);
+        // Verify old rules are removed before new rules are added
+        inOrder.verify(mMockNetd).firewallRemoveUidInterfaceRules(uidCaptor.capture());
+        assertContainsExactly(uidCaptor.getValue(), APP1_UID, APP2_UID);
+        inOrder.verify(mMockNetd).firewallAddUidInterfaceRules(eq("tun0"), uidCaptor.capture());
+        assertContainsExactly(uidCaptor.getValue(), APP2_UID);
+    }
+
+
+    private MockNetworkAgent establishVpn(LinkProperties lp, int establishingUid,
+            Set<UidRange> vpnRange) {
+        final MockNetworkAgent vpnNetworkAgent = new MockNetworkAgent(TRANSPORT_VPN, lp);
+        vpnNetworkAgent.getNetworkCapabilities().setEstablishingVpnAppUid(establishingUid);
+        mMockVpn.setNetworkAgent(vpnNetworkAgent);
+        mMockVpn.connect();
+        mMockVpn.setUids(vpnRange);
+        vpnNetworkAgent.connect(true);
+        waitForIdle();
+        return vpnNetworkAgent;
+    }
+
+    private void assertContainsExactly(int[] actual, int... expected) {
+        int[] sortedActual = Arrays.copyOf(actual, actual.length);
+        int[] sortedExpected = Arrays.copyOf(expected, expected.length);
+        Arrays.sort(sortedActual);
+        Arrays.sort(sortedExpected);
+        assertArrayEquals(sortedExpected, sortedActual);
+    }
+
+    private static PackageInfo buildPackageInfo(boolean hasSystemPermission, int uid) {
+        final PackageInfo packageInfo = new PackageInfo();
+        packageInfo.requestedPermissions = new String[0];
+        packageInfo.applicationInfo = new ApplicationInfo();
+        packageInfo.applicationInfo.privateFlags = 0;
+        packageInfo.applicationInfo.uid = UserHandle.getUid(UserHandle.USER_SYSTEM,
+                UserHandle.getAppId(uid));
+        return packageInfo;
     }
 }
