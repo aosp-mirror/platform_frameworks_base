@@ -1602,8 +1602,8 @@ public class PackageParser {
         final String apkPath = fd != null ? debugPathName : apkFile.getAbsolutePath();
 
         XmlResourceParser parser = null;
+        ApkAssets apkAssets = null;
         try {
-            final ApkAssets apkAssets;
             try {
                 apkAssets = fd != null
                         ? ApkAssets.loadFromFd(fd, debugPathName, false, false)
@@ -1640,7 +1640,13 @@ public class PackageParser {
                     "Failed to parse " + apkPath, e);
         } finally {
             IoUtils.closeQuietly(parser);
-            // TODO(b/72056911): Implement and call close() on ApkAssets.
+            if (apkAssets != null) {
+                try {
+                    apkAssets.close();
+                } catch (Throwable ignored) {
+                }
+            }
+            // TODO(b/72056911): Implement AutoCloseable on ApkAssets.
         }
     }
 
