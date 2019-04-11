@@ -735,19 +735,18 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
             }
 
-            final DetailedState state = DetailedState.DISCONNECTED;
-
             if (wasFirstNetwork || wasDefault) {
-                maybeLogBroadcast(nai, state, type, wasDefault);
-                mService.sendLegacyNetworkBroadcast(nai, state, type);
+                maybeLogBroadcast(nai, DetailedState.DISCONNECTED, type, wasDefault);
+                mService.sendLegacyNetworkBroadcast(nai, DetailedState.DISCONNECTED, type);
             }
 
             if (!list.isEmpty() && wasFirstNetwork) {
                 if (DBG) log("Other network available for type " + type +
                               ", sending connected broadcast");
                 final NetworkAgentInfo replacement = list.get(0);
-                maybeLogBroadcast(replacement, state, type, mService.isDefaultNetwork(replacement));
-                mService.sendLegacyNetworkBroadcast(replacement, state, type);
+                maybeLogBroadcast(replacement, DetailedState.CONNECTED, type,
+                        mService.isDefaultNetwork(replacement));
+                mService.sendLegacyNetworkBroadcast(replacement, DetailedState.CONNECTED, type);
             }
         }
 
