@@ -20,6 +20,8 @@ import android.net.ConnectivityManager.TYPE_ETHERNET
 import android.net.ConnectivityManager.TYPE_MOBILE
 import android.net.ConnectivityManager.TYPE_WIFI
 import android.net.ConnectivityManager.TYPE_WIMAX
+import android.net.NetworkInfo.DetailedState.CONNECTED
+import android.net.NetworkInfo.DetailedState.DISCONNECTED
 import androidx.test.filters.SmallTest
 import androidx.test.runner.AndroidJUnit4
 import com.android.server.ConnectivityService.LegacyTypeTracker
@@ -32,8 +34,12 @@ import org.junit.Assert.fail
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.never
+import org.mockito.Mockito.reset
+import org.mockito.Mockito.verify
 
 const val UNSUPPORTED_TYPE = TYPE_WIMAX
 
@@ -88,5 +94,21 @@ class LegacyTypeTrackerTest {
         // Make sure adding a network for an unsupported type does not register it.
         mTracker.add(UNSUPPORTED_TYPE, mobileNai)
         assertNull(mTracker.getNetworkForType(UNSUPPORTED_TYPE))
+    }
+
+    @Test
+    fun testBroadcastOnDisconnect() {
+        val mobileNai1 = mock(NetworkAgentInfo::class.java)
+        val mobileNai2 = mock(NetworkAgentInfo::class.java)
+        doReturn(false).`when`(mMockService).isDefaultNetwork(mobileNai1)
+        mTracker.add(TYPE_MOBILE, mobileNai1)
+        verify(mMockService).sendLegacyNetworkBroadcast(mobileNai1, CONNECTED, TYPE_MOBILE)
+        reset(mMockService)
+        doReturn(false).`when`(mMockService).isDefaultNetwork(mobileNai2)
+        mTracker.add(TYPE_MOBILE, mobileNai2)
+        verify(mMockService, never()).sendLegacyNetworkBroadcast(any(), any(), anyInt())
+        mTracker.remove(TYPE_MOBILE, mobileNai1, false /* wasDefault */)
+        verify(mMockService).sendLegacyNetworkBroadcast(mobileNai1, DISCONNECTED, TYPE_MOBILE)
+        verify(mMockService).sendLegacyNetworkBroadcast(mobileNai2, CONNECTED, TYPE_MOBILE)
     }
 }
