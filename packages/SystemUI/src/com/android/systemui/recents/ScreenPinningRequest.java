@@ -16,6 +16,7 @@
 
 package com.android.systemui.recents;
 
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SCREEN_PINNING;
 import static com.android.systemui.util.leak.RotationUtils.ROTATION_LANDSCAPE;
 import static com.android.systemui.util.leak.RotationUtils.ROTATION_SEASCAPE;
 
@@ -44,6 +45,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.shared.system.WindowManagerWrapper;
@@ -59,6 +61,7 @@ public class ScreenPinningRequest implements View.OnClickListener {
 
     private final AccessibilityManager mAccessibilityService;
     private final WindowManager mWindowManager;
+    private final OverviewProxyService mOverviewProxyService;
 
     private RequestWindowView mRequestWindow;
 
@@ -71,6 +74,7 @@ public class ScreenPinningRequest implements View.OnClickListener {
                 mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
         mWindowManager = (WindowManager)
                 mContext.getSystemService(Context.WINDOW_SERVICE);
+        mOverviewProxyService = Dependency.get(OverviewProxyService.class);
     }
 
     public void clearPrompt() {
@@ -125,6 +129,7 @@ public class ScreenPinningRequest implements View.OnClickListener {
         if (v.getId() == R.id.screen_pinning_ok_button || mRequestWindow == v) {
             try {
                 ActivityTaskManager.getService().startSystemLockTaskMode(taskId);
+                mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_SCREEN_PINNING, true);
             } catch (RemoteException e) {}
         }
         clearPrompt();

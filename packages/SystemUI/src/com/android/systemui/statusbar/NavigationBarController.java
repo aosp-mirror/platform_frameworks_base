@@ -67,7 +67,10 @@ public class NavigationBarController implements Callbacks {
         mContext = context;
         mHandler = handler;
         mDisplayManager = (DisplayManager) mContext.getSystemService(Context.DISPLAY_SERVICE);
-        getComponent(mContext, CommandQueue.class).addCallback(this);
+        CommandQueue commandQueue = getComponent(mContext, CommandQueue.class);
+        if (commandQueue != null) {
+            commandQueue.addCallback(this);
+        }
     }
 
     @Override
@@ -205,5 +208,10 @@ public class NavigationBarController implements Callbacks {
     public NavigationBarView getDefaultNavigationBarView() {
         NavigationBarFragment navBar = mNavigationBars.get(DEFAULT_DISPLAY);
         return (navBar == null) ? null : (NavigationBarView) navBar.getView();
+    }
+
+    /** @return {@link NavigationBarFragment} on the default display. */
+    public NavigationBarFragment getDefaultNavigationBarFragment() {
+        return mNavigationBars.get(DEFAULT_DISPLAY);
     }
 }

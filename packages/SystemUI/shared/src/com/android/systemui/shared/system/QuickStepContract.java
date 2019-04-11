@@ -20,11 +20,15 @@ import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_2BUTTON;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 
+import android.annotation.IntDef;
 import android.content.Context;
 import android.content.res.Resources;
 import android.view.WindowManagerPolicyConstants;
 
 import com.android.internal.policy.ScreenDecorationsUtils;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Various shared constants between Launcher and SysUI as part of quickstep
@@ -43,6 +47,17 @@ public class QuickStepContract {
             WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY;
     public static final String NAV_BAR_MODE_GESTURAL_OVERLAY =
             WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY;
+
+    public static final int SYSUI_STATE_SCREEN_PINNING = 1 << 0;
+    public static final int SYSUI_STATE_NAV_BAR_HIDDEN = 1 << 1;
+    public static final int SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED = 1 << 2;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({SYSUI_STATE_SCREEN_PINNING,
+            SYSUI_STATE_NAV_BAR_HIDDEN,
+            SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED
+    })
+    public @interface SystemUiStateFlags {}
 
     /**
      * Touch slopes and thresholds for quick step operations. Drag slop is the point where the
