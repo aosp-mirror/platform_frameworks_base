@@ -1047,6 +1047,12 @@ public class ChooserActivity extends ResolverActivity {
                     value -= mChooserListAdapter.getCallerTargetCount()
                             + mChooserListAdapter.getSelectableServiceTargetCount();
                     break;
+                case ChooserListAdapter.TARGET_STANDARD_AZ:
+                    // A-Z targets are unranked standard targets; we use -1 to mark that they
+                    // are from the alphabetical pool.
+                    value = -1;
+                    cat = MetricsEvent.ACTION_ACTIVITY_CHOOSER_PICKED_STANDARD_TARGET;
+                    break;
             }
 
             if (cat != 0) {
@@ -1842,7 +1848,7 @@ public class ChooserActivity extends ResolverActivity {
                 int offset = 0;
                 int rowsToShow = mChooserRowAdapter.getContentPreviewRowCount()
                         + mChooserRowAdapter.getServiceTargetRowCount()
-                        + mChooserRowAdapter.getCallerTargetRowCount();
+                        + mChooserRowAdapter.getCallerAndRankedTargetRowCount();
 
                 // then this is most likely not a SEND_* action, so check
                 // the app target count
@@ -1886,6 +1892,7 @@ public class ChooserActivity extends ResolverActivity {
         public static final int TARGET_CALLER = 0;
         public static final int TARGET_SERVICE = 1;
         public static final int TARGET_STANDARD = 2;
+        public static final int TARGET_STANDARD_AZ = 3;
 
         private static final int MAX_SUGGESTED_APP_TARGETS = 4;
         private static final int MAX_TARGETS_PER_SERVICE = 2;
@@ -1896,8 +1903,6 @@ public class ChooserActivity extends ResolverActivity {
         private ChooserTargetInfo mPlaceHolderTargetInfo = new PlaceHolderTargetInfo();
         private final List<ChooserTargetInfo> mServiceTargets = new ArrayList<>();
         private final List<TargetInfo> mCallerTargets = new ArrayList<>();
-        private boolean mShowServiceTargets;
-
         private boolean mTargetsNeedPruning = false;
 
         private final BaseChooserTargetComparator mBaseTargetComparator
@@ -2037,7 +2042,7 @@ public class ChooserActivity extends ResolverActivity {
 
         @Override
         public int getCount() {
-            return getStandardTargetCount() + getAlphaTargetCount()
+            return getRankedTargetCount() + getAlphaTargetCount()
                     + getSelectableServiceTargetCount() + getCallerTargetCount();
         }
 
@@ -2075,15 +2080,16 @@ public class ChooserActivity extends ResolverActivity {
             return 0;
         }
 
-        public int getStandardTargetCount() {
-            int standardCount = super.getCount();
-            return standardCount > MAX_RANKED_TARGETS ? MAX_RANKED_TARGETS : standardCount;
-        }
-
         int getAlphaTargetCount() {
             int standardCount = super.getCount();
             return standardCount > MAX_RANKED_TARGETS ? standardCount : 0;
         }
+
+        int getRankedTargetCount() {
+            int spacesAvailable = MAX_RANKED_TARGETS - getCallerTargetCount();
+            return Math.min(spacesAvailable, super.getCount());
+        }
+
 
         public int getPositionTargetType(int position) {
             int offset = 0;
@@ -2100,9 +2106,15 @@ public class ChooserActivity extends ResolverActivity {
             }
             offset += callerTargetCount;
 
-            final int standardTargetCount = getStandardTargetCount();
-            if (position - offset < standardTargetCount) {
+            final int rankedTargetCount = getRankedTargetCount();
+            if (position - offset < rankedTargetCount) {
                 return TARGET_STANDARD;
+            }
+            offset += rankedTargetCount;
+
+            final int standardTargetCount = getAlphaTargetCount();
+            if (position - offset < standardTargetCount) {
+                return TARGET_STANDARD_AZ;
             }
 
             return TARGET_BAD;
@@ -2138,23 +2150,21 @@ public class ChooserActivity extends ResolverActivity {
             }
             offset += callerTargetCount;
 
-            // Ranked app targets
-            if (position - offset < MAX_RANKED_TARGETS) {
+            // Ranked standard app targets
+            final int rankedTargetCount = getRankedTargetCount();
+            if (position - offset < rankedTargetCount) {
                 return filtered ? super.getItem(position - offset)
                         : getDisplayResolveInfo(position - offset);
             }
-            offset += MAX_RANKED_TARGETS;
+            offset += rankedTargetCount;
 
             // Alphabetical complete app target list.
-            Log.e(TAG, mSortedList.toString());
-            if (position - offset < mSortedList.size()) {
+            if (position - offset < getAlphaTargetCount() && !mSortedList.isEmpty()) {
                 return mSortedList.get(position - offset);
             }
 
             return null;
-
         }
-
 
 
         /**
@@ -2383,13 +2393,11 @@ public class ChooserActivity extends ResolverActivity {
 
         @Override
         public int getCount() {
+
             return (int) (
                     getContentPreviewRowCount()
-                            + getCallerTargetRowCount()
                             + getServiceTargetRowCount()
-                            + Math.ceil(
-                            (float) mChooserListAdapter.getStandardTargetCount()
-                                    / getMaxTargetsPerRow())
+                            + getCallerAndRankedTargetRowCount()
                             + Math.ceil(
                             (float) mChooserListAdapter.getAlphaTargetCount()
                                     / getMaxTargetsPerRow())
@@ -2408,9 +2416,10 @@ public class ChooserActivity extends ResolverActivity {
             return 1;
         }
 
-        public int getCallerTargetRowCount() {
+        public int getCallerAndRankedTargetRowCount() {
             return (int) Math.ceil(
-                    (float) mChooserListAdapter.getCallerTargetCount() / getMaxTargetsPerRow());
+                    ((float) mChooserListAdapter.getCallerTargetCount()
+                            + mChooserListAdapter.getRankedTargetCount()) / getMaxTargetsPerRow());
         }
 
         // There can be at most one row in the listview, that is internally
