@@ -18336,8 +18336,8 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             disabledSystemPs = mSettings.getDisabledSystemPkgLPr(packageName);
-            // Save this off before we delete the package. When deleting a stub application
-            // we always set the enabled state to 'disabled'.
+            // Save the enabled state before we delete the package. When deleting a stub
+            // application we always set the enabled state to 'disabled'.
             origEnabledState = uninstalledPs == null
                     ? COMPONENT_ENABLED_STATE_DEFAULT : uninstalledPs.getEnabled(userId);
             // Static shared libs can be declared by any package, so let us not
