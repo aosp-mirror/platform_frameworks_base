@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
+import android.telephony.SubscriptionManager;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -285,7 +286,13 @@ public class CellularTile extends QSTileImpl<SignalState> {
     }
 
     static Intent getCellularSettingIntent() {
-        return new Intent(Settings.ACTION_DATA_USAGE_SETTINGS);
+        Intent intent = new Intent(Settings.ACTION_NETWORK_OPERATOR_SETTINGS);
+        int dataSub = SubscriptionManager.getDefaultDataSubscriptionId();
+        if (dataSub != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
+            intent.putExtra(Settings.EXTRA_SUB_ID,
+                    SubscriptionManager.getDefaultDataSubscriptionId());
+        }
+        return intent;
     }
 
     private final class CellularDetailAdapter implements DetailAdapter {
