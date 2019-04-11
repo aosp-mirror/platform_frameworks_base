@@ -47,6 +47,7 @@
         android:layout_height="match_parent"
         android:paddingStart="@dimen/status_bar_padding_start"
         android:paddingEnd="@dimen/status_bar_padding_end"
+        android:paddingTop="@dimen/status_bar_padding_top"
         android:orientation="horizontal"
         >
         <FrameLayout
