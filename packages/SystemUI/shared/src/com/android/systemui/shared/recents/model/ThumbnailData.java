@@ -23,7 +23,6 @@ import static com.android.systemui.shared.system.WindowManagerWrapper.WINDOWING_
 import android.app.ActivityManager.TaskSnapshot;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
-import android.hardware.HardwareBuffer;
 
 /**
  * Data for a single thumbnail.
@@ -53,9 +52,7 @@ public class ThumbnailData {
     }
 
     public ThumbnailData(TaskSnapshot snapshot) {
-        thumbnail = Bitmap.wrapHardwareBuffer(
-                HardwareBuffer.createFromGraphicBuffer(snapshot.getSnapshot()),
-                snapshot.getColorSpace());
+        thumbnail = Bitmap.wrapHardwareBuffer(snapshot.getSnapshot(), snapshot.getColorSpace());
         insets = new Rect(snapshot.getContentInsets());
         orientation = snapshot.getOrientation();
         reducedResolution = snapshot.isReducedResolution();
