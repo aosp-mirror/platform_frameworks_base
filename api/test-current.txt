@@ -2699,6 +2699,7 @@ package android.telephony {
   public class TelephonyManager {
     method public int checkCarrierPrivilegesForPackage(String);
     method public int getCarrierIdListVersion();
+    method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public String getLine1AlphaTag();
     method public android.util.Pair<java.lang.Integer,java.lang.Integer> getRadioHalVersion();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void refreshUiccProfile();
     method @Deprecated public void setCarrierTestOverride(String, String, String, String, String, String, String);
