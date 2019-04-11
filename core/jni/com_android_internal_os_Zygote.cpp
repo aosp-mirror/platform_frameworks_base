@@ -1665,6 +1665,20 @@ static void UnmountStorageOnInit(JNIEnv* env) {
   UnmountTree("/storage");
 }
 
+static int DisableExecuteOnly(struct dl_phdr_info* info,
+                              size_t size [[maybe_unused]],
+                              void* data [[maybe_unused]]) {
+  // Search for any execute-only segments and mark them read+execute.
+  for (int i = 0; i < info->dlpi_phnum; i++) {
+    if ((info->dlpi_phdr[i].p_type == PT_LOAD) && (info->dlpi_phdr[i].p_flags == PF_X)) {
+      mprotect(reinterpret_cast<void*>(info->dlpi_addr + info->dlpi_phdr[i].p_vaddr),
+               info->dlpi_phdr[i].p_memsz, PROT_READ | PROT_EXEC);
+    }
+  }
+  // Return non-zero to exit dl_iterate_phdr.
+  return 0;
+}
+
 }  // anonymous namespace
 
 namespace android {
@@ -2006,24 +2020,12 @@ static void com_android_internal_os_Zygote_nativeEmptyUsapPool(JNIEnv* env, jcla
   }
 }
 
-static int disable_execute_only(struct dl_phdr_info *info, size_t size, void *data) {
-  // Search for any execute-only segments and mark them read+execute.
-  for (int i = 0; i < info->dlpi_phnum; i++) {
-    if ((info->dlpi_phdr[i].p_type == PT_LOAD) && (info->dlpi_phdr[i].p_flags == PF_X)) {
-      mprotect(reinterpret_cast<void*>(info->dlpi_addr + info->dlpi_phdr[i].p_vaddr),
-              info->dlpi_phdr[i].p_memsz, PROT_READ | PROT_EXEC);
-    }
-  }
-  // Return non-zero to exit dl_iterate_phdr.
-  return 0;
-}
-
 /**
  * @param env  Managed runtime environment
  * @return  True if disable was successful.
  */
 static jboolean com_android_internal_os_Zygote_nativeDisableExecuteOnly(JNIEnv* env, jclass) {
-  return dl_iterate_phdr(disable_execute_only, nullptr) == 0;
+  return dl_iterate_phdr(DisableExecuteOnly, nullptr) == 0;
 }
 
 static const JNINativeMethod gMethods[] = {
