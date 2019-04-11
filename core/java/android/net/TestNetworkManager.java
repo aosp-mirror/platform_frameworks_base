@@ -88,4 +88,21 @@ public class TestNetworkManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Create a tap interface for testing purposes
+     *
+     * @return A ParcelFileDescriptor of the underlying TAP interface. Close this to tear down the
+     *     TAP interface.
+     * @hide
+     */
+    @TestApi
+    public TestNetworkInterface createTapInterface() {
+        try {
+            return mService.createTapInterface();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
 }
