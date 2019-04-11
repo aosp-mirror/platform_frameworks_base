@@ -2775,6 +2775,16 @@ public class DisplayPolicy {
     }
 
     /**
+     * Calculates the stable insets if we already have the non-decor insets.
+     *
+     * @param inOutInsets The known non-decor insets. It will be modified to stable insets.
+     * @param rotation The current display rotation.
+     */
+    void convertNonDecorInsetsToStableInsets(Rect inOutInsets, int rotation) {
+        inOutInsets.top = Math.max(inOutInsets.top, mStatusBarHeightForRotation[rotation]);
+    }
+
+    /**
      * Calculates the stable insets without running a layout.
      *
      * @param displayRotation the current display rotation
@@ -2789,7 +2799,7 @@ public class DisplayPolicy {
 
         // Navigation bar and status bar.
         getNonDecorInsetsLw(displayRotation, displayWidth, displayHeight, displayCutout, outInsets);
-        outInsets.top = Math.max(outInsets.top, mStatusBarHeightForRotation[displayRotation]);
+        convertNonDecorInsetsToStableInsets(outInsets, displayRotation);
     }
 
     /**
