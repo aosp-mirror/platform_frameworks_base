@@ -119,6 +119,17 @@ public class GlobalActionsGridLayout extends MultiListLayout {
             }
         }
         updateSnapPosition();
+        updateSeparatedButtonSize();
+    }
+
+    private void updateSeparatedButtonSize() {
+        ViewGroup separated = getSeparatedView();
+        if (separated.getChildCount() == 1) {
+            View onlyChild = separated.getChildAt(0);
+            ViewGroup.LayoutParams childParams = onlyChild.getLayoutParams();
+            childParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
+            childParams.height = ViewGroup.LayoutParams.MATCH_PARENT;
+        }
     }
 
     @Override
