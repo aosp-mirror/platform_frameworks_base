@@ -10021,7 +10021,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private void destroyAppProfilesLIF(PackageParser.Package pkg, int userId) {
+    private void destroyAppProfilesLIF(PackageParser.Package pkg) {
         if (pkg == null) {
             Slog.wtf(TAG, "Package was null!", new Throwable());
             return;
@@ -18370,7 +18370,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             destroyAppDataLIF(resolvedPkg, UserHandle.USER_ALL,
                     StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
-            destroyAppProfilesLIF(resolvedPkg, UserHandle.USER_ALL);
+            destroyAppProfilesLIF(resolvedPkg);
             if (outInfo != null) {
                 outInfo.dataRemoved = true;
             }
@@ -19090,6 +19090,8 @@ public class PackageManagerService extends IPackageManager.Stub
             pkg = mPackages.get(ps.name);
         }
 
+        destroyAppProfilesLIF(pkg);
+
         final int[] userIds = (userId == UserHandle.USER_ALL) ? sUserManager.getUserIds()
                 : new int[] {userId};
         for (int nextUserId : userIds) {
@@ -19098,11 +19100,9 @@ public class PackageManagerService extends IPackageManager.Stub
                         + nextUserId);
             }
 
-            destroyAppDataLIF(pkg, userId,
+            destroyAppDataLIF(pkg, nextUserId,
                     StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
-            destroyAppProfilesLIF(pkg, userId);
-            clearDefaultBrowserIfNeededForUser(ps.name, userId);
-            removeKeystoreDataIfNeeded(nextUserId, ps.appId);
+            clearDefaultBrowserIfNeededForUser(ps.name, nextUserId);
             synchronized (mPackages) {
                 if (clearPackagePreferredActivitiesLPw(ps.name, nextUserId)) {
                     scheduleWritePackageRestrictionsLocked(nextUserId);
