@@ -4567,8 +4567,7 @@ public abstract class Context {
      * @see android.os.BugreportManager
      * @hide
      */
-    // TODO: Expose API when the implementation is more complete.
-    // @SystemApi
+    @SystemApi @TestApi
     public static final String BUGREPORT_SERVICE = "bugreport";
 
     /**
