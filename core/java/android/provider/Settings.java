@@ -8148,6 +8148,13 @@ public final class Settings {
                 BOOLEAN_VALIDATOR;
 
         /**
+         * Whether or not debugging is enabled.
+         * @hide
+         */
+        public static final String BIOMETRIC_DEBUG_ENABLED =
+                "biometric_debug_enabled";
+
+        /**
          * Whether the assist gesture should be enabled.
          *
          * @hide
