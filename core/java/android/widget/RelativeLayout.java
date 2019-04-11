@@ -21,6 +21,7 @@ import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
 import android.annotation.NonNull;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.content.res.ResourceId;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.os.Build;
@@ -1991,7 +1992,7 @@ public class RelativeLayout extends ViewGroup {
                 // dependencies for a specific set of rules
                 for (int j = 0; j < rulesCount; j++) {
                     final int rule = rules[rulesFilter[j]];
-                    if (rule > 0) {
+                    if (ResourceId.isValid(rule)) {
                         // The node this node depends on
                         final Node dependency = keyNodes.get(rule);
                         // Skip unknowns and self dependencies
