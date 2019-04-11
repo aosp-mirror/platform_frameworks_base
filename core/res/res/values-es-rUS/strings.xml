@@ -1797,7 +1797,7 @@
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Tu administrador borró este paquete"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"Aceptar"</string>
     <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"El Ahorro de batería desactiva o restringe la actividad en segundo plano, algunos efectos visuales y otras funciones que consumen mucha energía a fin de extender la duración de batería. "<annotation id="url">"Más información"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"El Ahorro de batería desactiva o restringe la actividad en segundo plano, algunos efectos visuales y otras funciones que consumen mucha energía a fin de extender la duración de batería."</string>
+    <string name="battery_saver_description" msgid="6413346684861241431">"El Ahorro de batería desactiva o restringe la actividad en segundo plano, algunos efectos visuales y otras funciones que consumen mucha energía para extender la duración de la batería."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Para reducir el uso de datos, Ahorro de datos evita que algunas apps envíen y reciban datos en segundo plano. La app que estés usando podrá acceder a los datos, pero con menor frecuencia. De esta forma, por ejemplo, las imágenes no se mostrarán hasta que las presiones."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"¿Activar Ahorro de datos?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Activar"</string>

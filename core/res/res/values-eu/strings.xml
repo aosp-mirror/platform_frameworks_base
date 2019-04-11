@@ -133,7 +133,7 @@
     <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi bidezko deiak"</string>
     <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN bidezko deia"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN bidezko deia"</string>
-    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> wifia"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Wi-Fi bidezko deiak | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
     <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Wi-Fi bidezko deiak"</string>
@@ -277,22 +277,22 @@
     <string name="managed_profile_label" msgid="8947929265267690522">"Aldatu laneko profilera"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontaktuak"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"atzitu kontaktuak"</string>
-    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari kontaktuak atzitzea baimendu nahi diozu?"</string>
+    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari kontaktuak atzitzeko baimena eman nahi diozu?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Kokapena"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"atzitu gailuaren kokapena"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari gailuaren kokapena atzitzea baimendu nahi diozu?"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari gailuaren kokapena atzitzeko baimena eman nahi diozu?"</string>
     <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"Hura erabiltzen ari zarenean soilik atzituko du aplikazioak kokapena"</string>
-    <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari gailu honen kokapena &lt;b&gt;beti&lt;/b&gt; atzitzeko baimena eman nahi diozu?"</string>
+    <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari gailuaren kokapena &lt;b&gt;beti&lt;/b&gt; atzitzeko baimena eman nahi diozu?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="4597006851453417387">"Aplikazioak hura darabilzunean atzi dezake kokapena"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Egutegia"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"atzitu egutegia"</string>
-    <string name="permgrouprequest_calendar" msgid="289900767793189421">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari egutegia atzitzea baimendu nahi diozu?"</string>
+    <string name="permgrouprequest_calendar" msgid="289900767793189421">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari egutegia atzitzeko baimena eman nahi diozu?"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS mezuak"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"bidali eta ikusi SMS mezuak"</string>
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari SMS mezuak bidaltzea eta ikustea baimendu nahi diozu?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Memoria"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"atzitu gailuko argazkiak, multimedia-edukia eta fitxategiak"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari gailuko argazkiak, multimedia-edukia eta fitxategiak atzitzea baimendu nahi diozu?"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari gailuko argazkiak, multimedia-edukia eta fitxategiak atzitzeko baimena eman nahi diozu?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofonoa"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"grabatu audioa"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari audioa grabatzea baimendu nahi diozu?"</string>
@@ -304,13 +304,13 @@
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari argazkiak ateratzea eta bideoak grabatzea baimendu nahi diozu?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"Deien erregistroa"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"irakurri telefonoko deien erregistroa eta idatzi bertan"</string>
-    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari telefonoko deien erregistroa atzitzea baimendu nahi diozu?"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari telefonoko deien erregistroa atzitzeko baimena eman nahi diozu?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefonoa"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"egin eta kudeatu telefono-deiak"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari telefono-deiak egitea eta kudeatzea baimendu nahi diozu?"</string>
     <string name="permgrouplab_sensors" msgid="4838614103153567532">"Gorputz-sentsoreak"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"atzitu bizi-konstanteei buruzko sentsorearen datuak"</string>
-    <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Bizi-konstanteei buruzko sentsorearen datuak atzitzea baimendu nahi diozu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari?"</string>
+    <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Bizi-konstanteei buruzko sentsorearen datuak atzitzeko baimena eman nahi diozu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Eskuratu leihoko edukia"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Arakatu irekita daukazun leihoko edukia."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Aktibatu \"Arakatu ukituta\""</string>
@@ -485,7 +485,7 @@
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Wi-Fi sarearen bidez gailu guztiei bidalitako paketeak jasotzeko baimena ematen die aplikazioei multidifusio-helbideak erabilita, ez tableta soilik. Multidifusiokoa ez den moduak baino bateria gehiago erabiltzen du."</string>
     <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Wi-Fi sareko gailu guztiei bidalitako paketeak jasotzea baimentzen die aplikazioei multidifusio-helbideak erabilita, ez telebista soilik. Multidifusiokoa ez den moduak baino bateria gehiago erabiltzen du."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Wi-Fi sarearen bidez gailu guztiei bidalitako paketeak jasotzeko baimena ematen die aplikazioei multidifusio-helbideak erabilita, ez telefonoa soilik. Multidifusiokoa ez den moduak baino bateria gehiago erabiltzen du."</string>
-    <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"atzitu Bluetooth-ezarpenak"</string>
+    <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"atzitu Bluetooth ezarpenak"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Tokiko Bluetooth tableta konfiguratzea eta urruneko gailuak detektatzea eta haiekin parekatzea baimentzen die aplikazioei."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Tokiko Bluetooth telebista konfiguratzea eta urruneko gailuak hautematea eta haiekin parekatzea baimentzen die aplikazioei."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Tokiko Bluetooth telefonoa konfiguratzea eta urruneko gailuak detektatzea eta haiekin parekatzea baimentzen die aplikazioei."</string>
@@ -1206,8 +1206,8 @@
     <string name="dump_heap_notification_detail" msgid="3993078784053054141">"Sortu da uneko memoria-prozesuaren txostena. Sakatu partekatzeko."</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Uneko memoria-prozesuaren txostena partekatu nahi duzu?"</string>
     <string name="dump_heap_text" msgid="8546022920319781701">"<xliff:g id="PROC">%1$s</xliff:g> prozesuak memoria-muga (<xliff:g id="SIZE">%2$s</xliff:g>) gainditu du. Uneko memoria-prozesuaren txostena sortu da, garatzailearekin parteka dezazun. Kontuz: aplikazioak atzi dezakeen informazio pertsonala izan dezake txosten horrek."</string>
-    <string name="dump_heap_system_text" msgid="3236094872980706024">"<xliff:g id="PROC">%1$s</xliff:g> prozesuak bere memoria-muga (<xliff:g id="SIZE">%2$s</xliff:g>) gainditu du. Memoria-prozesuaren txosten bat duzu erabilgarri, hura partekatu nahi baduzu ere. Kontuz: baliteke txosten horrek prozesuak atzi dezakeen kontuzko informazio pertsonala izatea, eta datu horien barnean zuk idatzitakoak egon daitezke, besteak beste."</string>
-    <string name="dump_heap_ready_text" msgid="1778041771455343067">"<xliff:g id="PROC">%1$s</xliff:g> prozesuaren memoria-prozesuaren txosten bat duzu erabilgarri, hura partekatu nahi baduzu ere. Kontuz: baliteke txosten horrek prozesuak atzi dezakeen kontuzko informazio pertsonala izatea, eta datu horien barnean zuk idatzitakoak egon daitezke, besteak beste."</string>
+    <string name="dump_heap_system_text" msgid="3236094872980706024">"<xliff:g id="PROC">%1$s</xliff:g> prozesuak bere memoria-muga (<xliff:g id="SIZE">%2$s</xliff:g>) gainditu du. Memoria-iraulketaren txosten bat duzu erabilgarri, hura partekatu nahi baduzu ere. Kontuz: baliteke txosten horrek prozesuak atzi dezakeen kontuzko informazio pertsonala izatea eta datu horien barnean zuk idatzitakoak egotea, besteak beste."</string>
+    <string name="dump_heap_ready_text" msgid="1778041771455343067">"<xliff:g id="PROC">%1$s</xliff:g> prozesuaren memoria-iraulketaren txosten bat duzu erabilgarri, hura partekatu nahi baduzu ere. Kontuz: baliteke txosten horrek prozesuak atzi dezakeen kontuzko informazio pertsonala izatea eta datu horien barnean zuk idatzitakoak egotea, besteak beste."</string>
     <string name="sendText" msgid="5209874571959469142">"Aukeratu testurako ekintza"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Tonu-jotzailearen bolumena"</string>
     <string name="volume_music" msgid="5421651157138628171">"Multimedia-edukiaren bolumena"</string>
@@ -1272,7 +1272,7 @@
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> erabiltzen ari zinen, baina <xliff:g id="NEW_NETWORK">%2$s</xliff:g> erabiltzen ari zara orain"</string>
   <string-array name="network_switch_type_name">
     <item msgid="3979506840912951943">"datu-konexioa"</item>
-    <item msgid="75483255295529161">"Wi-Fi"</item>
+    <item msgid="75483255295529161">"Wifia"</item>
     <item msgid="6862614801537202646">"Bluetooth-a"</item>
     <item msgid="5447331121797802871">"Ethernet"</item>
     <item msgid="8257233890381651999">"VPN"</item>
@@ -1845,7 +1845,7 @@
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Lanegunetako gaua"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Asteburua"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Gertaera"</string>
-    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Lo egitean"</string>
+    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Lo egiteko"</string>
     <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> soinu batzuk isilarazten ari da"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Barneko arazo bat dago zure gailuan eta agian ezegonkor egongo da jatorrizko datuak berrezartzen dituzun arte."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Barneko arazo bat dago zure gailuan. Xehetasunak jakiteko, jarri fabrikatzailearekin harremanetan."</string>

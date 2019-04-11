@@ -1843,7 +1843,7 @@
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"ავარიული პაუზა"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"სამუშაო კვირის ღამე"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"შაბათ-კვირა"</string>
-    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"მოვლენა"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"მოვლენისას"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"ძილისას"</string>
     <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ზოგიერთ ხმას ადუმებს"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"ფიქსირდება თქვენი მ ოწყობილობის შიდა პრობლემა და შეიძლება არასტაბილური იყოს, სანამ ქარხნულ მონაცემების არ განაახლებთ."</string>
