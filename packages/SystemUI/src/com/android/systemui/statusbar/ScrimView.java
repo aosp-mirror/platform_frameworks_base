@@ -16,61 +16,33 @@
 
 package com.android.systemui.statusbar;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.view.Display;
 import android.view.View;
-import android.view.WindowManager;
 
 import androidx.core.graphics.ColorUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
-import com.android.internal.colorextraction.drawable.GradientDrawable;
-import com.android.settingslib.Utils;
-import com.android.systemui.Dependency;
-import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.internal.colorextraction.drawable.ScrimDrawable;
 
 /**
  * A view which can draw a scrim
  */
-public class ScrimView extends View implements ConfigurationController.ConfigurationListener {
-    private static final String TAG = "ScrimView";
+public class ScrimView extends View {
     private final ColorExtractor.GradientColors mColors;
-    private int mDensity;
     private float mViewAlpha = 1.0f;
-    private ValueAnimator mAlphaAnimator;
     private Drawable mDrawable;
     private PorterDuffColorFilter mColorFilter;
     private int mTintColor;
-    private ValueAnimator.AnimatorUpdateListener mAlphaUpdateListener = animation -> {
-        if (mDrawable == null) {
-            Log.w(TAG, "Trying to animate null drawable");
-            return;
-        }
-        mDrawable.setAlpha((int) (255 * (float) animation.getAnimatedValue()));
-    };
-    private AnimatorListenerAdapter mClearAnimatorListener = new AnimatorListenerAdapter() {
-        @Override
-        public void onAnimationEnd(Animator animation) {
-            mAlphaAnimator = null;
-        }
-    };
     private Runnable mChangeRunnable;
-    private int mCornerRadius;
 
     public ScrimView(Context context) {
         this(context, null);
@@ -87,47 +59,10 @@ public class ScrimView extends View implements ConfigurationController.Configura
     public ScrimView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
-        mDrawable = new GradientDrawable(context);
+        mDrawable = new ScrimDrawable();
         mDrawable.setCallback(this);
         mColors = new ColorExtractor.GradientColors();
-        updateScreenSize();
         updateColorWithTint(false);
-        initView();
-        final Configuration currentConfig = mContext.getResources().getConfiguration();
-        mDensity = currentConfig.densityDpi;
-    }
-
-    private void initView() {
-        mCornerRadius = getResources().getDimensionPixelSize(
-                Utils.getThemeAttr(mContext, android.R.attr.dialogCornerRadius));
-    }
-
-    @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        int densityDpi = newConfig.densityDpi;
-        if (mDensity != densityDpi) {
-            mDensity = densityDpi;
-            initView();
-        }
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-
-        // We need to know about configuration changes to update the gradient size
-        // since it's independent from view bounds.
-        ConfigurationController config = Dependency.get(ConfigurationController.class);
-        config.addCallback(this);
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-
-        ConfigurationController config = Dependency.get(ConfigurationController.class);
-        config.removeCallback(this);
     }
 
     @Override
@@ -142,7 +77,6 @@ public class ScrimView extends View implements ConfigurationController.Configura
         mDrawable.setCallback(this);
         mDrawable.setBounds(getLeft(), getTop(), getRight(), getBottom());
         mDrawable.setAlpha((int) (255 * mViewAlpha));
-        updateScreenSize();
         invalidate();
     }
 
@@ -200,15 +134,13 @@ public class ScrimView extends View implements ConfigurationController.Configura
     }
 
     private void updateColorWithTint(boolean animated) {
-        if (mDrawable instanceof GradientDrawable) {
+        if (mDrawable instanceof ScrimDrawable) {
             // Optimization to blend colors and avoid a color filter
-            GradientDrawable drawable = (GradientDrawable) mDrawable;
+            ScrimDrawable drawable = (ScrimDrawable) mDrawable;
             float tintAmount = Color.alpha(mTintColor) / 255f;
             int mainTinted = ColorUtils.blendARGB(mColors.getMainColor(), mTintColor,
                     tintAmount);
-            int secondaryTinted = ColorUtils.blendARGB(mColors.getSecondaryColor(), mTintColor,
-                    tintAmount);
-            drawable.setColors(mainTinted, secondaryTinted, animated);
+            drawable.setColor(mainTinted, animated);
         } else {
             boolean hasAlpha = Color.alpha(mTintColor) != 0;
             if (hasAlpha) {
@@ -250,10 +182,6 @@ public class ScrimView extends View implements ConfigurationController.Configura
         if (alpha != mViewAlpha) {
             mViewAlpha = alpha;
 
-            if (mAlphaAnimator != null) {
-                mAlphaAnimator.cancel();
-            }
-
             mDrawable.setAlpha((int) (255 * alpha));
             if (mChangeRunnable != null) {
                 mChangeRunnable.run();
@@ -267,27 +195,6 @@ public class ScrimView extends View implements ConfigurationController.Configura
 
     public void setChangeRunnable(Runnable changeRunnable) {
         mChangeRunnable = changeRunnable;
-    }
-
-    @Override
-    public void onConfigChanged(Configuration newConfig) {
-        updateScreenSize();
-    }
-
-    private void updateScreenSize() {
-        if (mDrawable instanceof GradientDrawable) {
-            WindowManager wm = mContext.getSystemService(WindowManager.class);
-            if (wm == null) {
-                Log.w(TAG, "Can't resize gradient drawable to fit the screen");
-                return;
-            }
-            Display display = wm.getDefaultDisplay();
-            if (display != null) {
-                Point size = new Point();
-                display.getRealSize(size);
-                ((GradientDrawable) mDrawable).setScreenSize(size.x, size.y);
-            }
-        }
     }
 
     @Override

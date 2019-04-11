@@ -30,7 +30,7 @@ import android.view.View;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.colorextraction.ColorExtractor;
-import com.android.internal.colorextraction.drawable.GradientDrawable;
+import com.android.internal.colorextraction.drawable.ScrimDrawable;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 
@@ -70,12 +70,10 @@ public class ScrimViewTest extends LeakCheckedTest {
 
     @Test
     public void testCreation_initialColor() {
-        GradientDrawable drawable = (GradientDrawable) mView.getDrawable();
+        ScrimDrawable drawable = (ScrimDrawable) mView.getDrawable();
         ColorExtractor.GradientColors colors = mView.getColors();
         assertEquals("Main color should be set upon creation",
                 drawable.getMainColor(), colors.getMainColor());
-        assertEquals("Secondary color should be set upon creation",
-                drawable.getSecondaryColor(), colors.getSecondaryColor());
     }
 
     @Test
