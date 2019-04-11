@@ -235,6 +235,7 @@ cc_test {
         "tests/condition/CombinationConditionTracker_test.cpp",
         "tests/condition/SimpleConditionTracker_test.cpp",
         "tests/condition/StateTracker_test.cpp",
+        "tests/condition/ConditionTimer_test.cpp",
         "tests/metrics/OringDurationTracker_test.cpp",
         "tests/metrics/MaxDurationTracker_test.cpp",
         "tests/metrics/CountMetricProducer_test.cpp",
