@@ -889,6 +889,7 @@ public class BubbleStackView extends FrameLayout {
                 mFlyout.removeCallbacks(mHideFlyout);
                 mFlyout.postDelayed(mHideFlyout, FLYOUT_HIDE_AFTER);
             });
+            logBubbleEvent(bubble, StatsLog.BUBBLE_UICHANGED__ACTION__FLYOUT);
         }
     }
 
@@ -1060,7 +1061,8 @@ public class BubbleStackView extends FrameLayout {
      * @param action the user interaction enum.
      */
     private void logBubbleEvent(@Nullable Bubble bubble, int action) {
-        if (bubble == null) {
+        if (bubble == null || bubble.entry == null
+                || bubble.entry.notification == null) {
             StatsLog.write(StatsLog.BUBBLE_UI_CHANGED,
                     null /* package name */,
                     null /* notification channel */,
