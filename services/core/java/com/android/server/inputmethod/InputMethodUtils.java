@@ -1003,7 +1003,7 @@ final class InputMethodUtils {
             return res;
         }
 
-        private void putEnabledInputMethodsStr(@Nullable String str) {
+        void putEnabledInputMethodsStr(@Nullable String str) {
             if (DEBUG) {
                 Slog.d(TAG, "putEnabledInputMethodStr: " + str);
             }
