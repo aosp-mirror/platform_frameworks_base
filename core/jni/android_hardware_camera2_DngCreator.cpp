@@ -1008,9 +1008,11 @@ static inline bool unDistortWithinPreCorrArray(
         double x, double y,
         const std::array<float, 6>& distortion,
         const float cx, const float cy, const float f,
-        int preCorrW, int preCorrH) {
+        const int preCorrW, const int preCorrH, const int xMin, const int yMin) {
     undistort(x, y, distortion, cx, cy, f);
-    if (x < 0.0 || y < 0.0 || x > preCorrW - 1 || y > preCorrH - 1) {
+    int xMax = xMin + preCorrW - 1;
+    int yMax = yMin + preCorrH - 1;
+    if (x < xMin || y < yMin || x > xMax || y > yMax) {
         return false;
     }
     return true;
@@ -1019,40 +1021,48 @@ static inline bool unDistortWithinPreCorrArray(
 static inline bool boxWithinPrecorrectionArray(
         int left, int top, int right, int bottom,
         const std::array<float, 6>& distortion,
-        const float& cx, const float& cy, const float& f,
-        const int& preCorrW, const int& preCorrH){
+        const float cx, const float cy, const float f,
+        const int preCorrW, const int preCorrH, const int xMin, const int yMin){
     // Top row
-    if (!unDistortWithinPreCorrArray(left, top, distortion, cx, cy, f, preCorrW, preCorrH)) {
+    if (!unDistortWithinPreCorrArray(left, top,
+            distortion, cx, cy, f, preCorrW, preCorrH, xMin, yMin)) {
         return false;
     }
 
-    if (!unDistortWithinPreCorrArray(cx, top, distortion, cx, cy, f, preCorrW, preCorrH)) {
+    if (!unDistortWithinPreCorrArray(cx, top,
+            distortion, cx, cy, f, preCorrW, preCorrH, xMin, yMin)) {
         return false;
     }
 
-    if (!unDistortWithinPreCorrArray(right, top, distortion, cx, cy, f, preCorrW, preCorrH)) {
+    if (!unDistortWithinPreCorrArray(right, top,
+            distortion, cx, cy, f, preCorrW, preCorrH, xMin, yMin)) {
         return false;
     }
 
     // Middle row
-    if (!unDistortWithinPreCorrArray(left, cy, distortion, cx, cy, f, preCorrW, preCorrH)) {
+    if (!unDistortWithinPreCorrArray(left, cy,
+            distortion, cx, cy, f, preCorrW, preCorrH, xMin, yMin)) {
         return false;
     }
 
-    if (!unDistortWithinPreCorrArray(right, cy, distortion, cx, cy, f, preCorrW, preCorrH)) {
+    if (!unDistortWithinPreCorrArray(right, cy,
+            distortion, cx, cy, f, preCorrW, preCorrH, xMin, yMin)) {
         return false;
     }
 
     // Bottom row
-    if (!unDistortWithinPreCorrArray(left, bottom, distortion, cx, cy, f, preCorrW, preCorrH)) {
+    if (!unDistortWithinPreCorrArray(left, bottom,
+            distortion, cx, cy, f, preCorrW, preCorrH, xMin, yMin)) {
         return false;
     }
 
-    if (!unDistortWithinPreCorrArray(cx, bottom, distortion, cx, cy, f, preCorrW, preCorrH)) {
+    if (!unDistortWithinPreCorrArray(cx, bottom,
+            distortion, cx, cy, f, preCorrW, preCorrH, xMin, yMin)) {
         return false;
     }
 
-    if (!unDistortWithinPreCorrArray(right, bottom, distortion, cx, cy, f, preCorrW, preCorrH)) {
+    if (!unDistortWithinPreCorrArray(right, bottom,
+            distortion, cx, cy, f, preCorrW, preCorrH, xMin, yMin)) {
         return false;
     }
     return true;
@@ -1062,7 +1072,8 @@ static inline bool scaledBoxWithinPrecorrectionArray(
         double scale/*must be <= 1.0*/,
         const std::array<float, 6>& distortion,
         const float cx, const float cy, const float f,
-        const int preCorrW, const int preCorrH){
+        const int preCorrW, const int preCorrH,
+        const int xMin, const int yMin){
 
     double left = cx * (1.0 - scale);
     double right = (preCorrW - 1) * scale + cx * (1.0 - scale);
@@ -1070,14 +1081,14 @@ static inline bool scaledBoxWithinPrecorrectionArray(
     double bottom = (preCorrH - 1) * scale + cy * (1.0 - scale);
 
     return boxWithinPrecorrectionArray(left, top, right, bottom,
-            distortion, cx, cy, f, preCorrW, preCorrH);
+            distortion, cx, cy, f, preCorrW, preCorrH, xMin, yMin);
 }
 
 static status_t findPostCorrectionScale(
         double stepSize, double minScale,
         const std::array<float, 6>& distortion,
         const float cx, const float cy, const float f,
-        const int preCorrW, const int preCorrH,
+        const int preCorrW, const int preCorrH, const int xMin, const int yMin,
         /*out*/ double* outScale) {
     if (outScale == nullptr) {
         ALOGE("%s: outScale must not be null", __FUNCTION__);
@@ -1086,7 +1097,7 @@ static status_t findPostCorrectionScale(
 
     for (double scale = 1.0; scale > minScale; scale -= stepSize) {
         if (scaledBoxWithinPrecorrectionArray(
-                scale, distortion, cx, cy, f, preCorrW, preCorrH)) {
+                scale, distortion, cx, cy, f, preCorrW, preCorrH, xMin, yMin)) {
             *outScale = scale;
             return OK;
         }
@@ -1100,16 +1111,18 @@ static status_t findPostCorrectionScale(
 // are sampled within the precorrection array
 static void normalizeLensDistortion(
         /*inout*/std::array<float, 6>& distortion,
-        float cx, float cy, float f, int preCorrW, int preCorrH) {
-    ALOGV("%s: distortion [%f, %f, %f, %f, %f, %f], (cx,cy) (%f, %f), f %f, (W,H) (%d, %d)",
+        float cx, float cy, float f, int preCorrW, int preCorrH, int xMin = 0, int yMin = 0) {
+    ALOGV("%s: distortion [%f, %f, %f, %f, %f, %f], (cx,cy) (%f, %f), f %f, (W,H) (%d, %d)"
+            ", (xmin, ymin, xmax, ymax) (%d, %d, %d, %d)",
             __FUNCTION__, distortion[0], distortion[1], distortion[2],
             distortion[3], distortion[4], distortion[5],
-            cx, cy, f, preCorrW, preCorrH);
+            cx, cy, f, preCorrW, preCorrH,
+            xMin, yMin, xMin + preCorrW - 1, yMin + preCorrH - 1);
 
     // Only update distortion coeffients if we can find a good bounding box
     double scale = 1.0;
     if (OK == findPostCorrectionScale(0.002, 0.5,
-            distortion, cx, cy, f, preCorrW, preCorrH,
+            distortion, cx, cy, f, preCorrW, preCorrH, xMin, yMin,
             /*out*/&scale)) {
         ALOGV("%s: scaling distortion coefficients by %f", __FUNCTION__, scale);
         // The formula:
@@ -1216,6 +1229,8 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
 
     sp<TiffWriter> writer = new TiffWriter();
 
+    uint32_t preXMin = 0;
+    uint32_t preYMin = 0;
     uint32_t preWidth = 0;
     uint32_t preHeight = 0;
     uint8_t colorFilter = 0;
@@ -1225,6 +1240,8 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
         camera_metadata_entry entry =
                 characteristics.find(ANDROID_SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE);
         BAIL_IF_EMPTY_RET_NULL_SP(entry, env, TAG_IMAGEWIDTH, writer);
+        preXMin = static_cast<uint32_t>(entry.data.i32[0]);
+        preYMin = static_cast<uint32_t>(entry.data.i32[1]);
         preWidth = static_cast<uint32_t>(entry.data.i32[2]);
         preHeight = static_cast<uint32_t>(entry.data.i32[3]);
 
@@ -1966,9 +1983,16 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
                     distortion[i+1] = entry3.data.f[i];
                 }
 
-                // TODO b/118690688: deal with the case where RAW size != preCorrSize
                 if (preWidth == imageWidth && preHeight == imageHeight) {
                     normalizeLensDistortion(distortion, cx, cy, f, preWidth, preHeight);
+                } else {
+                    // image size == pixel array size (contains optical black pixels)
+                    // cx/cy is defined in preCorrArray so adding the offset
+                    // Also changes default xmin/ymin so that pixels are only
+                    // sampled within preCorrection array
+                    normalizeLensDistortion(
+                            distortion, cx + preXMin, cy + preYMin, f, preWidth, preHeight,
+                            preXMin, preYMin);
                 }
 
                 float m_x = std::fmaxf(preWidth-1 - cx, cx);
