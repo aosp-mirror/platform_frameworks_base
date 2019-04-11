@@ -113,22 +113,6 @@ public final class RoleManager {
     public static final String ROLE_HOME = "android.app.role.HOME";
 
     /**
-     * The name of the car mode dialer app role.
-     * <p>
-     * Similar to the {@link #ROLE_DIALER dialer} role, this role determines which app is
-     * responsible for showing the user interface for ongoing calls on the device. It is only used
-     * when the device is in car mode.
-     *
-     * @see #ROLE_DIALER
-     * @see android.app.UiModeManager#ACTION_ENTER_CAR_MODE
-     * @see android.telecom.InCallService
-     *
-     * TODO: STOPSHIP: Make name of required roles public API
-     * @hide
-     */
-    public static final String ROLE_CAR_MODE_DIALER = "android.app.role.CAR_MODE_DIALER";
-
-    /**
      * The name of the call redirection role.
      * <p>
      * A call redirection app provides a means to re-write the phone number for an outgoing call to
@@ -144,22 +128,6 @@ public final class RoleManager {
      * @see android.telecom.CallScreeningService
      */
     public static final String ROLE_CALL_SCREENING = "android.app.role.CALL_SCREENING";
-
-    /**
-     * The name of the call companion app role.
-     * <p>
-     * A call companion app provides no user interface for calls, but will be bound to by Telecom
-     * when there are active calls on the device. Companion apps for wearable devices are an
-     * acceptable use-case.
-     * <p>
-     * Multiple apps may hold this role at the same time.
-     *
-     * @see android.telecom.InCallService
-     *
-     * TODO: STOPSHIP: Make name of required roles public API
-     * @hide
-     */
-    public static final String ROLE_CALL_COMPANION = "android.app.role.CALL_COMPANION";
 
     /**
      * @hide
