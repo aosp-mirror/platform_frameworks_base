@@ -34,16 +34,13 @@
 #include <string>
 #include <vector>
 
+#include "TestHelpers.h"
+#include "androidfw/PosixUtils.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-
-#include "androidfw/PosixUtils.h"
-#include "private/android_filesystem_config.h"
-
 #include "idmap2/FileUtils.h"
 #include "idmap2/Idmap.h"
-
-#include "TestHelpers.h"
+#include "private/android_filesystem_config.h"
 
 using ::android::util::ExecuteBinary;
 using ::testing::NotNull;

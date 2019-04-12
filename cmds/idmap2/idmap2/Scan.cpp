@@ -15,6 +15,7 @@
  */
 
 #include <dirent.h>
+
 #include <fstream>
 #include <memory>
 #include <ostream>
@@ -24,8 +25,8 @@
 #include <utility>
 #include <vector>
 
+#include "Commands.h"
 #include "android-base/properties.h"
-
 #include "idmap2/CommandLineOptions.h"
 #include "idmap2/FileUtils.h"
 #include "idmap2/Idmap.h"
@@ -34,8 +35,6 @@
 #include "idmap2/SysTrace.h"
 #include "idmap2/Xml.h"
 #include "idmap2/ZipFile.h"
-
-#include "Commands.h"
 
 using android::idmap2::CommandLineOptions;
 using android::idmap2::Error;

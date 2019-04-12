@@ -21,7 +21,6 @@
 #include <memory>
 
 #include "androidfw/AssetManager2.h"
-
 #include "idmap2/Idmap.h"
 
 namespace android {
