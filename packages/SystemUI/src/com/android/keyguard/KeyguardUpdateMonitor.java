@@ -1665,7 +1665,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             }
             mFaceCancelSignal = new CancellationSignal();
             mFaceManager.authenticate(null, mFaceCancelSignal, 0,
-                    mFaceAuthenticationCallback, null);
+                    mFaceAuthenticationCallback, null, userId);
             setFaceRunningState(BIOMETRIC_STATE_RUNNING);
         }
     }
