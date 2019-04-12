@@ -22,6 +22,7 @@ import static com.android.server.om.OverlayManagerService.TAG;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.om.OverlayInfo;
+import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.Xml;
@@ -288,35 +289,78 @@ final class OverlayManagerSettings {
         return true;
     }
 
-    void dump(@NonNull final PrintWriter p) {
-        final IndentingPrintWriter pw = new IndentingPrintWriter(p, "  ");
-        pw.println("Settings");
-        pw.increaseIndent();
-
-        if (mItems.isEmpty()) {
-            pw.println("<none>");
-            return;
+    void dump(@NonNull final PrintWriter p, @NonNull DumpState dumpState) {
+        // select items to display
+        Stream<SettingsItem> items = mItems.stream();
+        if (dumpState.getUserId() != UserHandle.USER_ALL) {
+            items = items.filter(item -> item.mUserId == dumpState.getUserId());
+        }
+        if (dumpState.getPackageName() != null) {
+            items = items.filter(item -> item.mPackageName.equals(dumpState.getPackageName()));
         }
 
-        final int n = mItems.size();
-        for (int i = 0; i < n; i++) {
-            final SettingsItem item = mItems.get(i);
-            pw.println(item.mPackageName + ":" + item.getUserId() + " {");
-            pw.increaseIndent();
+        // display items
+        final IndentingPrintWriter pw = new IndentingPrintWriter(p, "  ");
+        if (dumpState.getField() != null) {
+            items.forEach(item -> dumpSettingsItemField(pw, item, dumpState.getField()));
+        } else {
+            items.forEach(item -> dumpSettingsItem(pw, item));
+        }
+    }
 
-            pw.println("mPackageName...........: " + item.mPackageName);
-            pw.println("mUserId................: " + item.getUserId());
-            pw.println("mTargetPackageName.....: " + item.getTargetPackageName());
-            pw.println("mTargetOverlayableName.: " + item.getTargetOverlayableName());
-            pw.println("mBaseCodePath..........: " + item.getBaseCodePath());
-            pw.println("mState.................: " + OverlayInfo.stateToString(item.getState()));
-            pw.println("mIsEnabled.............: " + item.isEnabled());
-            pw.println("mIsStatic..............: " + item.isStatic());
-            pw.println("mPriority..............: " + item.mPriority);
-            pw.println("mCategory..............: " + item.mCategory);
+    private void dumpSettingsItem(@NonNull final IndentingPrintWriter pw,
+            @NonNull final SettingsItem item) {
+        pw.println(item.mPackageName + ":" + item.getUserId() + " {");
+        pw.increaseIndent();
 
-            pw.decreaseIndent();
-            pw.println("}");
+        pw.println("mPackageName...........: " + item.mPackageName);
+        pw.println("mUserId................: " + item.getUserId());
+        pw.println("mTargetPackageName.....: " + item.getTargetPackageName());
+        pw.println("mTargetOverlayableName.: " + item.getTargetOverlayableName());
+        pw.println("mBaseCodePath..........: " + item.getBaseCodePath());
+        pw.println("mState.................: " + OverlayInfo.stateToString(item.getState()));
+        pw.println("mIsEnabled.............: " + item.isEnabled());
+        pw.println("mIsStatic..............: " + item.isStatic());
+        pw.println("mPriority..............: " + item.mPriority);
+        pw.println("mCategory..............: " + item.mCategory);
+
+        pw.decreaseIndent();
+        pw.println("}");
+    }
+
+    private void dumpSettingsItemField(@NonNull final IndentingPrintWriter pw,
+            @NonNull final SettingsItem item, @NonNull final String field) {
+        switch (field) {
+            case "packagename":
+                pw.println(item.mPackageName);
+                break;
+            case "userid":
+                pw.println(item.mUserId);
+                break;
+            case "targetpackagename":
+                pw.println(item.mTargetPackageName);
+                break;
+            case "targetoverlayablename":
+                pw.println(item.mTargetOverlayableName);
+                break;
+            case "basecodepath":
+                pw.println(item.mBaseCodePath);
+                break;
+            case "state":
+                pw.println(OverlayInfo.stateToString(item.mState));
+                break;
+            case "isenabled":
+                pw.println(item.mIsEnabled);
+                break;
+            case "isstatic":
+                pw.println(item.mIsStatic);
+                break;
+            case "priority":
+                pw.println(item.mPriority);
+                break;
+            case "category":
+                pw.println(item.mCategory);
+                break;
         }
     }
 
