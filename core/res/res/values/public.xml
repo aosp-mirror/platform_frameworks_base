@@ -2943,6 +2943,8 @@
         <public name="allowAudioPlaybackCapture"/>
         <public name="secureElementName" />
         <public name="allowExternalStorageSandbox"/>
+        <public name="ensuringStatusBarContrastWhenTransparent" />
+        <public name="ensuringNavigationBarContrastWhenTransparent" />
     </public-group>
 
     <public-group type="drawable" first-id="0x010800b4">
