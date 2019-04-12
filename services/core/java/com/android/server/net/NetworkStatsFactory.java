@@ -28,6 +28,7 @@ import android.net.NetworkStats;
 import android.os.StrictMode;
 import android.os.SystemClock;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ProcFileReader;
@@ -65,6 +66,7 @@ public class NetworkStatsFactory {
     private boolean mUseBpfStats;
 
     // A persistent Snapshot since device start for eBPF stats
+    @GuardedBy("mPersistSnapshot")
     private final NetworkStats mPersistSnapshot;
 
     // TODO: only do adjustments in NetworkStatsService and remove this.
@@ -289,15 +291,17 @@ public class NetworkStatsFactory {
                 stats = new NetworkStats(SystemClock.elapsedRealtime(), -1);
             }
             if (mUseBpfStats) {
-                if (nativeReadNetworkStatsDetail(stats, mStatsXtUid.getAbsolutePath(), UID_ALL,
-                        null, TAG_ALL, mUseBpfStats) != 0) {
-                    throw new IOException("Failed to parse network stats");
+                synchronized (mPersistSnapshot) {
+                    if (nativeReadNetworkStatsDetail(stats, mStatsXtUid.getAbsolutePath(), UID_ALL,
+                            null, TAG_ALL, mUseBpfStats) != 0) {
+                        throw new IOException("Failed to parse network stats");
+                    }
+                    mPersistSnapshot.setElapsedRealtime(stats.getElapsedRealtime());
+                    mPersistSnapshot.combineAllValues(stats);
+                    NetworkStats result = mPersistSnapshot.clone();
+                    result.filter(limitUid, limitIfaces, limitTag);
+                    return result;
                 }
-                mPersistSnapshot.setElapsedRealtime(stats.getElapsedRealtime());
-                mPersistSnapshot.combineAllValues(stats);
-                NetworkStats result = mPersistSnapshot.clone();
-                result.filter(limitUid, limitIfaces, limitTag);
-                return result;
             } else {
                 if (nativeReadNetworkStatsDetail(stats, mStatsXtUid.getAbsolutePath(), limitUid,
                         limitIfaces, limitTag, mUseBpfStats) != 0) {
