@@ -270,7 +270,7 @@ static jobject android_net_utils_resNetworkSend(JNIEnv *env, jobject thiz, jint 
     return jniCreateFileDescriptor(env, fd);
 }
 
-static jbyteArray android_net_utils_resNetworkResult(JNIEnv *env, jobject thiz, jobject javaFd) {
+static jobject android_net_utils_resNetworkResult(JNIEnv *env, jobject thiz, jobject javaFd) {
     int fd = jniGetFDFromFileDescriptor(env, javaFd);
     int rcode;
     std::vector<uint8_t> buf(MAXPACKETSIZE, 0);
@@ -291,7 +291,10 @@ static jbyteArray android_net_utils_resNetworkResult(JNIEnv *env, jobject thiz, 
                 reinterpret_cast<jbyte*>(buf.data()));
     }
 
-    return answer;
+    jclass class_DnsResponse = env->FindClass("android/net/DnsResolver$DnsResponse");
+    jmethodID ctor = env->GetMethodID(class_DnsResponse, "<init>", "([BI)V");
+
+    return env->NewObject(class_DnsResponse, ctor, answer, rcode);
 }
 
 static void android_net_utils_resNetworkCancel(JNIEnv *env, jobject thiz, jobject javaFd) {
@@ -354,7 +357,7 @@ static const JNINativeMethod gNetworkUtilMethods[] = {
     { "setupRaSocket", "(Ljava/io/FileDescriptor;I)V", (void*) android_net_utils_setupRaSocket },
     { "resNetworkSend", "(I[BII)Ljava/io/FileDescriptor;", (void*) android_net_utils_resNetworkSend },
     { "resNetworkQuery", "(ILjava/lang/String;III)Ljava/io/FileDescriptor;", (void*) android_net_utils_resNetworkQuery },
-    { "resNetworkResult", "(Ljava/io/FileDescriptor;)[B", (void*) android_net_utils_resNetworkResult },
+    { "resNetworkResult", "(Ljava/io/FileDescriptor;)Landroid/net/DnsResolver$DnsResponse;", (void*) android_net_utils_resNetworkResult },
     { "resNetworkCancel", "(Ljava/io/FileDescriptor;)V", (void*) android_net_utils_resNetworkCancel },
 };
 

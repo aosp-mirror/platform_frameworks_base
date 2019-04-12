@@ -93,6 +93,23 @@ public final class DnsResolver {
     public static final int FLAG_NO_CACHE_STORE = 1 << 1;
     public static final int FLAG_NO_CACHE_LOOKUP = 1 << 2;
 
+    @IntDef(prefix = { "ERROR_" }, value = {
+            ERROR_PARSE,
+            ERROR_SYSTEM
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface DnsError {}
+    /**
+     * Indicates that there was an error parsing the response the query.
+     * The cause of this error is available via getCause() and is a ParseException.
+     */
+    public static final int ERROR_PARSE = 0;
+    /**
+     * Indicates that there was an error sending the query.
+     * The cause of this error is available via getCause() and is an ErrnoException.
+     */
+    public static final int ERROR_SYSTEM = 1;
+
     private static final int NETID_UNSET = 0;
 
     private static final DnsResolver sInstance = new DnsResolver();
@@ -107,97 +124,57 @@ public final class DnsResolver {
     private DnsResolver() {}
 
     /**
-     * Answer parser for parsing raw answers
+     * Base interface for answer callbacks
      *
-     * @param <T> The type of the parsed answer
+     * @param <T> The type of the answer
      */
-    public interface AnswerParser<T> {
-        /**
-         * Creates a <T> answer by parsing the given raw answer.
-         *
-         * @param rawAnswer the raw answer to be parsed
-         * @return a parsed <T> answer
-         * @throws ParseException if parsing failed
-         */
-        @NonNull T parse(@NonNull byte[] rawAnswer) throws ParseException;
-    }
-
-    /**
-     * Base class for answer callbacks
-     *
-     * @param <T> The type of the parsed answer
-     */
-    public abstract static class AnswerCallback<T> {
-        /** @hide */
-        public final AnswerParser<T> parser;
-
-        public AnswerCallback(@NonNull AnswerParser<T> parser) {
-            this.parser = parser;
-        };
-
+    public interface Callback<T> {
         /**
          * Success response to
-         * {@link android.net.DnsResolver#query query()}.
+         * {@link android.net.DnsResolver#query query()} or
+         * {@link android.net.DnsResolver#rawQuery rawQuery()}.
          *
          * Invoked when the answer to a query was successfully parsed.
          *
-         * @param answer parsed answer to the query.
+         * @param answer <T> answer to the query.
+         * @param rcode The response code in the DNS response.
          *
          * {@see android.net.DnsResolver#query query()}
          */
-        public abstract void onAnswer(@NonNull T answer);
-
+        void onAnswer(@NonNull T answer, int rcode);
         /**
          * Error response to
-         * {@link android.net.DnsResolver#query query()}.
+         * {@link android.net.DnsResolver#query query()} or
+         * {@link android.net.DnsResolver#rawQuery rawQuery()}.
          *
          * Invoked when there is no valid answer to
          * {@link android.net.DnsResolver#query query()}
+         * {@link android.net.DnsResolver#rawQuery rawQuery()}.
          *
-         * @param exception a {@link ParseException} object with additional
+         * @param error a {@link DnsException} object with additional
          *    detail regarding the failure
          */
-        public abstract void onParseException(@NonNull ParseException exception);
-
-        /**
-         * Error response to
-         * {@link android.net.DnsResolver#query query()}.
-         *
-         * Invoked if an error happens when
-         * issuing the DNS query or receiving the result.
-         * {@link android.net.DnsResolver#query query()}
-         *
-         * @param exception an {@link ErrnoException} object with additional detail
-         *    regarding the failure
-         */
-        public abstract void onQueryException(@NonNull ErrnoException exception);
+        void onError(@NonNull DnsException error);
     }
 
     /**
-     * Callback for receiving raw answers
+     * Class to represent DNS error
      */
-    public abstract static class RawAnswerCallback extends AnswerCallback<byte[]> {
-        public RawAnswerCallback() {
-            super(rawAnswer -> rawAnswer);
-        }
-    }
+    public static class DnsException extends Exception {
+       /**
+        * DNS error code as one of the ERROR_* constants
+        */
+        @DnsError public final int code;
 
-    /**
-     * Callback for receiving parsed {@link InetAddress} answers
-     *
-     * Note that if the answer does not contain any IP addresses,
-     * onAnswer will be called with an empty list.
-     */
-    public abstract static class InetAddressAnswerCallback
-            extends AnswerCallback<List<InetAddress>> {
-        public InetAddressAnswerCallback() {
-            super(rawAnswer -> new DnsAddressAnswer(rawAnswer).getAddresses());
+        DnsException(@DnsError int code, @Nullable Throwable cause) {
+            super(cause);
+            this.code = code;
         }
     }
 
     /**
      * Send a raw DNS query.
-     * The answer will be provided asynchronously through the provided {@link AnswerCallback}.
+     * The answer will be provided asynchronously through the provided {@link Callback}.
      *
      * @param network {@link Network} specifying which network to query on.
      *         {@code null} for query on default network.
@@ -206,13 +183,13 @@ public final class DnsResolver {
      * @param executor The {@link Executor} that the callback should be executed on.
      * @param cancellationSignal used by the caller to signal if the query should be
      *    cancelled. May be {@code null}.
-     * @param callback an {@link AnswerCallback} which will be called to notify the caller
+     * @param callback a {@link Callback} which will be called to notify the caller
      *    of the result of dns query.
      */
-    public <T> void query(@Nullable Network network, @NonNull byte[] query, @QueryFlag int flags,
+    public void rawQuery(@Nullable Network network, @NonNull byte[] query, @QueryFlag int flags,
             @NonNull @CallbackExecutor Executor executor,
             @Nullable CancellationSignal cancellationSignal,
-            @NonNull AnswerCallback<T> callback) {
+            @NonNull Callback<? super byte[]> callback) {
         if (cancellationSignal != null && cancellationSignal.isCanceled()) {
             return;
         }
@@ -222,9 +199,7 @@ public final class DnsResolver {
             queryfd = resNetworkSend((network != null
                 ? network.netId : NETID_UNSET), query, query.length, flags);
         } catch (ErrnoException e) {
-            executor.execute(() -> {
-                callback.onQueryException(e);
-            });
+            executor.execute(() -> callback.onError(new DnsException(ERROR_SYSTEM, e)));
             return;
         }
 
@@ -237,7 +212,7 @@ public final class DnsResolver {
 
     /**
      * Send a DNS query with the specified name, class and query type.
-     * The answer will be provided asynchronously through the provided {@link AnswerCallback}.
+     * The answer will be provided asynchronously through the provided {@link Callback}.
      *
      * @param network {@link Network} specifying which network to query on.
      *         {@code null} for query on default network.
@@ -248,14 +223,14 @@ public final class DnsResolver {
      * @param executor The {@link Executor} that the callback should be executed on.
      * @param cancellationSignal used by the caller to signal if the query should be
      *    cancelled. May be {@code null}.
-     * @param callback an {@link AnswerCallback} which will be called to notify the caller
+     * @param callback a {@link Callback} which will be called to notify the caller
      *    of the result of dns query.
      */
-    public <T> void query(@Nullable Network network, @NonNull String domain,
+    public void rawQuery(@Nullable Network network, @NonNull String domain,
             @QueryClass int nsClass, @QueryType int nsType, @QueryFlag int flags,
             @NonNull @CallbackExecutor Executor executor,
             @Nullable CancellationSignal cancellationSignal,
-            @NonNull AnswerCallback<T> callback) {
+            @NonNull Callback<? super byte[]> callback) {
         if (cancellationSignal != null && cancellationSignal.isCanceled()) {
             return;
         }
@@ -265,9 +240,7 @@ public final class DnsResolver {
             queryfd = resNetworkQuery((network != null
                     ? network.netId : NETID_UNSET), domain, nsClass, nsType, flags);
         } catch (ErrnoException e) {
-            executor.execute(() -> {
-                callback.onQueryException(e);
-            });
+            executor.execute(() -> callback.onError(new DnsException(ERROR_SYSTEM, e)));
             return;
         }
         synchronized (lock)  {
@@ -277,27 +250,28 @@ public final class DnsResolver {
         }
     }
 
-    private class InetAddressAnswerAccumulator extends InetAddressAnswerCallback {
+    private class InetAddressAnswerAccumulator implements Callback<byte[]> {
         private final List<InetAddress> mAllAnswers;
-        private ParseException mParseException;
-        private ErrnoException mErrnoException;
-        private final InetAddressAnswerCallback mUserCallback;
+        private int mRcode;
+        private DnsException mDnsException;
+        private final Callback<? super List<InetAddress>> mUserCallback;
         private final int mTargetAnswerCount;
         private int mReceivedAnswerCount = 0;
 
-        InetAddressAnswerAccumulator(int size, @NonNull InetAddressAnswerCallback callback) {
+        InetAddressAnswerAccumulator(int size,
+                @NonNull Callback<? super List<InetAddress>> callback) {
             mTargetAnswerCount = size;
             mAllAnswers = new ArrayList<>();
             mUserCallback = callback;
         }
 
-        private boolean maybeReportException() {
-            if (mErrnoException != null) {
-                mUserCallback.onQueryException(mErrnoException);
+        private boolean maybeReportError() {
+            if (mRcode != 0) {
+                mUserCallback.onAnswer(mAllAnswers, mRcode);
                 return true;
             }
-            if (mParseException != null) {
-                mUserCallback.onParseException(mParseException);
+            if (mDnsException != null) {
+                mUserCallback.onError(mDnsException);
                 return true;
             }
             return false;
@@ -305,34 +279,43 @@ public final class DnsResolver {
 
         private void maybeReportAnswer() {
             if (++mReceivedAnswerCount != mTargetAnswerCount) return;
-            if (mAllAnswers.isEmpty() && maybeReportException()) return;
+            if (mAllAnswers.isEmpty() && maybeReportError()) return;
             // TODO: Do RFC6724 sort.
-            mUserCallback.onAnswer(mAllAnswers);
+            mUserCallback.onAnswer(mAllAnswers, mRcode);
         }
 
         @Override
-        public void onAnswer(@NonNull List<InetAddress> answer) {
-            mAllAnswers.addAll(answer);
+        public void onAnswer(@NonNull byte[] answer, int rcode) {
+            // If at least one query succeeded, return an rcode of 0.
+            // Otherwise, arbitrarily return the first rcode received.
+            if (mReceivedAnswerCount == 0 || rcode == 0) {
+                mRcode = rcode;
+            }
+            try {
+                mAllAnswers.addAll(new DnsAddressAnswer(answer).getAddresses());
+            } catch (ParseException e) {
+                mDnsException = new DnsException(ERROR_PARSE, e);
+            }
             maybeReportAnswer();
         }
 
         @Override
-        public void onParseException(@NonNull ParseException e) {
-            mParseException = e;
-            maybeReportAnswer();
-        }
-
-        @Override
-        public void onQueryException(@NonNull ErrnoException e) {
-            mErrnoException = e;
+        public void onError(@NonNull DnsException error) {
+            mDnsException = error;
             maybeReportAnswer();
         }
     }
 
     /**
-     * Send a DNS query with the specified name, get back a set of InetAddresses asynchronously.
-     * The answer will be provided asynchronously through the provided
-     * {@link InetAddressAnswerCallback}.
+     * Send a DNS query with the specified name on a network with both IPv4 and IPv6,
+     * get back a set of InetAddresses asynchronously.
+     *
+     * This method will examine the connection ability on given network, and query IPv4
+     * and IPv6 if connection is available.
+     *
+     * If at least one query succeeded with valid answer, rcode will be 0
+     *
+     * The answer will be provided asynchronously through the provided {@link Callback}.
      *
      * @param network {@link Network} specifying which network to query on.
      *         {@code null} for query on default network.
@@ -341,13 +324,13 @@ public final class DnsResolver {
      * @param executor The {@link Executor} that the callback should be executed on.
      * @param cancellationSignal used by the caller to signal if the query should be
      *    cancelled. May be {@code null}.
-     * @param callback an {@link InetAddressAnswerCallback} which will be called to notify the
+     * @param callback a {@link Callback} which will be called to notify the
      *    caller of the result of dns query.
      */
     public void query(@Nullable Network network, @NonNull String domain, @QueryFlag int flags,
             @NonNull @CallbackExecutor Executor executor,
             @Nullable CancellationSignal cancellationSignal,
-            @NonNull InetAddressAnswerCallback callback) {
+            @NonNull Callback<? super List<InetAddress>> callback) {
         if (cancellationSignal != null && cancellationSignal.isCanceled()) {
             return;
         }
@@ -365,9 +348,7 @@ public final class DnsResolver {
                 v6fd = resNetworkQuery((network != null
                         ? network.netId : NETID_UNSET), domain, CLASS_IN, TYPE_AAAA, flags);
             } catch (ErrnoException e) {
-                executor.execute(() -> {
-                    callback.onQueryException(e);
-                });
+                executor.execute(() -> callback.onError(new DnsException(ERROR_SYSTEM, e)));
                 return;
             }
             queryCount++;
@@ -377,7 +358,9 @@ public final class DnsResolver {
         // Avoiding gateways drop packets if queries are sent too close together
         try {
             Thread.sleep(SLEEP_TIME_MS);
-        } catch (InterruptedException ex) { }
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
 
         if (queryIpv4) {
             try {
@@ -385,9 +368,7 @@ public final class DnsResolver {
                         ? network.netId : NETID_UNSET), domain, CLASS_IN, TYPE_A, flags);
             } catch (ErrnoException e) {
                 if (queryIpv6) resNetworkCancel(v6fd);  // Closes fd, marks it invalid.
-                executor.execute(() -> {
-                    callback.onQueryException(e);
-                });
+                executor.execute(() -> callback.onError(new DnsException(ERROR_SYSTEM, e)));
                 return;
             }
             queryCount++;
@@ -413,34 +394,89 @@ public final class DnsResolver {
         }
     }
 
-    private <T> void registerFDListener(@NonNull Executor executor,
-            @NonNull FileDescriptor queryfd, @NonNull AnswerCallback<T> answerCallback,
+    /**
+     * Send a DNS query with the specified name and query type, get back a set of
+     * InetAddresses asynchronously.
+     *
+     * The answer will be provided asynchronously through the provided {@link Callback}.
+     *
+     * @param network {@link Network} specifying which network to query on.
+     *         {@code null} for query on default network.
+     * @param domain domain name to query
+     * @param nsType dns resource record (RR) type as one of the TYPE_* constants
+     * @param flags flags as a combination of the FLAGS_* constants
+     * @param executor The {@link Executor} that the callback should be executed on.
+     * @param cancellationSignal used by the caller to signal if the query should be
+     *    cancelled. May be {@code null}.
+     * @param callback a {@link Callback} which will be called to notify the caller
+     *    of the result of dns query.
+     */
+    public void query(@Nullable Network network, @NonNull String domain,
+            @QueryType int nsType, @QueryFlag int flags,
+            @NonNull @CallbackExecutor Executor executor,
+            @Nullable CancellationSignal cancellationSignal,
+            @NonNull Callback<? super List<InetAddress>> callback) {
+        if (cancellationSignal != null && cancellationSignal.isCanceled()) {
+            return;
+        }
+        final Object lock = new Object();
+        final FileDescriptor queryfd;
+        try {
+            queryfd = resNetworkQuery((network != null
+                    ? network.netId : NETID_UNSET), domain, CLASS_IN, nsType, flags);
+        } catch (ErrnoException e) {
+            executor.execute(() -> callback.onError(new DnsException(ERROR_SYSTEM, e)));
+            return;
+        }
+        final InetAddressAnswerAccumulator accumulator =
+                new InetAddressAnswerAccumulator(1, callback);
+        synchronized (lock)  {
+            registerFDListener(executor, queryfd, accumulator, cancellationSignal, lock);
+            if (cancellationSignal == null) return;
+            addCancellationSignal(cancellationSignal, queryfd, lock);
+        }
+    }
+
+    /**
+     * Class to retrieve DNS response
+     *
+     * @hide
+     */
+    public static final class DnsResponse {
+        public final @NonNull byte[] answerbuf;
+        public final int rcode;
+        public DnsResponse(@NonNull byte[] answerbuf, int rcode) {
+            this.answerbuf = answerbuf;
+            this.rcode = rcode;
+        }
+    }
+
+    private void registerFDListener(@NonNull Executor executor,
+            @NonNull FileDescriptor queryfd, @NonNull Callback<? super byte[]> answerCallback,
             @Nullable CancellationSignal cancellationSignal, @NonNull Object lock) {
         Looper.getMainLooper().getQueue().addOnFileDescriptorEventListener(
                 queryfd,
                 FD_EVENTS,
                 (fd, events) -> {
                     executor.execute(() -> {
+                        DnsResponse resp = null;
+                        ErrnoException exception = null;
                         synchronized (lock) {
                             if (cancellationSignal != null && cancellationSignal.isCanceled()) {
                                 return;
                             }
-                            byte[] answerbuf = null;
                             try {
-                                answerbuf = resNetworkResult(fd);  // Closes fd, marks it invalid.
+                                resp = resNetworkResult(fd);  // Closes fd, marks it invalid.
                             } catch (ErrnoException e) {
                                 Log.e(TAG, "resNetworkResult:" + e.toString());
-                                answerCallback.onQueryException(e);
-                                return;
-                            }
-
-                            try {
-                                answerCallback.onAnswer(
-                                        answerCallback.parser.parse(answerbuf));
-                            } catch (ParseException e) {
-                                answerCallback.onParseException(e);
+                                exception = e;
                             }
                         }
+                        if (exception != null) {
+                            answerCallback.onError(new DnsException(ERROR_SYSTEM, exception));
+                            return;
+                        }
+                        answerCallback.onAnswer(resp.answerbuf, resp.rcode);
                     });
                     // Unregister this fd listener
                     return 0;
