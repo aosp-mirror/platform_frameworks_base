@@ -145,21 +145,13 @@ interface ISub {
     int setIconTint(int tint, int subId);
 
     /**
-     * Set display name by simInfo index
-     * @param displayName the display name of SIM card
-     * @param subId the unique SubscriptionInfo index in database
-     * @return the number of records updated
-     */
-    int setDisplayName(String displayName, int subId);
-
-    /**
      * Set display name by simInfo index with name source
      * @param displayName the display name of SIM card
      * @param subId the unique SubscriptionInfo index in database
      * @param nameSource, 0: DEFAULT_SOURCE, 1: SIM_SOURCE, 2: USER_INPUT
      * @return the number of records updated
      */
-    int setDisplayNameUsingSrc(String displayName, int subId, long nameSource);
+    int setDisplayNameUsingSrc(String displayName, int subId, int nameSource);
 
     /**
      * Set phone number by subId
