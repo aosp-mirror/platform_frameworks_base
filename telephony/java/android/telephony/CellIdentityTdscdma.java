@@ -30,12 +30,18 @@ public final class CellIdentityTdscdma extends CellIdentity {
     private static final String TAG = CellIdentityTdscdma.class.getSimpleName();
     private static final boolean DBG = false;
 
+    private static final int MAX_LAC = 65535;
+    private static final int MAX_CID = 268435455;
+    private static final int MAX_CPID = 127;
+    private static final int MAX_UARFCN = 65535;
+
     // 16-bit Location Area Code, 0..65535, CellInfo.UNAVAILABLE if unknown.
     private final int mLac;
     // 28-bit UMTS Cell Identity described in TS 25.331, 0..268435455, CellInfo.UNAVAILABLE
     // if unknown.
     private final int mCid;
-    // 8-bit Cell Parameters ID described in TS 25.331, 0..127, CellInfo.UNAVAILABLE if unknown.
+    // 8-bit Cell Parameters ID described in TS 25.331 sec 10.3.6.9,
+    // 0..127, CellInfo.UNAVAILABLE if unknown.
     private final int mCpid;
     // 16-bit UMTS Absolute RF Channel Number described in TS 25.101 sec. 5.4.3
     private final int mUarfcn;
@@ -68,10 +74,10 @@ public final class CellIdentityTdscdma extends CellIdentity {
     public CellIdentityTdscdma(String mcc, String mnc, int lac, int cid, int cpid, int uarfcn,
             String alphal, String alphas) {
         super(TAG, CellInfo.TYPE_TDSCDMA, mcc, mnc, alphal, alphas);
-        mLac = lac;
-        mCid = cid;
-        mCpid = cpid;
-        mUarfcn = uarfcn;
+        mLac = inRangeOrUnavailable(lac, 0, MAX_LAC);
+        mCid = inRangeOrUnavailable(cid, 0, MAX_CID);
+        mCpid = inRangeOrUnavailable(cpid, 0, MAX_CPID);
+        mUarfcn = inRangeOrUnavailable(uarfcn, 0, MAX_UARFCN);
     }
 
     private CellIdentityTdscdma(CellIdentityTdscdma cid) {

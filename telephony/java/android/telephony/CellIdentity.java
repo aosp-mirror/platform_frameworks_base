@@ -243,4 +243,23 @@ public abstract class CellIdentity implements Parcelable {
     protected void log(String s) {
         Rlog.w(mTag, s);
     }
+
+    /** @hide */
+    protected static final int inRangeOrUnavailable(int value, int rangeMin, int rangeMax) {
+        if (value < rangeMin || value > rangeMax) return CellInfo.UNAVAILABLE;
+        return value;
+    }
+
+    /** @hide */
+    protected static final long inRangeOrUnavailable(long value, long rangeMin, long rangeMax) {
+        if (value < rangeMin || value > rangeMax) return CellInfo.UNAVAILABLE_LONG;
+        return value;
+    }
+
+    /** @hide */
+    protected static final int inRangeOrUnavailable(
+            int value, int rangeMin, int rangeMax, int special) {
+        if ((value < rangeMin || value > rangeMax) && value != special) return CellInfo.UNAVAILABLE;
+        return value;
+    }
 }
