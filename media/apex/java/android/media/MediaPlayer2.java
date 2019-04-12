@@ -273,6 +273,8 @@ import java.util.concurrent.atomic.AtomicLong;
  * Then check the <code>status</code> parameter. The value {@link #CALL_STATUS_NO_ERROR} indicates a
  * successful transition. Any other value will be an error. Call {@link #getState()} to
  * determine the current state. </p>
+ *
+ * @hide
  */
 public class MediaPlayer2 implements AutoCloseable, AudioRouting {
     static {
