@@ -5799,6 +5799,14 @@ public final class Settings {
                 "autofill_field_classification";
 
         /**
+         * Boolean indicating if the dark mode dialog shown on first toggle has been seen.
+         *
+         * @hide
+         */
+        public static final String DARK_MODE_DIALOG_SEEN =
+                "dark_mode_dialog_seen";
+
+        /**
          * Defines value returned by {@link android.service.autofill.UserData#getMaxUserDataSize()}.
          *
          * @hide
@@ -8846,6 +8854,7 @@ public final class Settings {
             SILENCE_NOTIFICATION_GESTURE_COUNT,
             SILENCE_CALL_GESTURE_COUNT,
             SILENCE_TIMER_GESTURE_COUNT,
+            DARK_MODE_DIALOG_SEEN
         };
 
         /**
@@ -9026,6 +9035,7 @@ public final class Settings {
             VALIDATORS.put(SILENCE_CALL_GESTURE_COUNT, SILENCE_GESTURE_COUNT_VALIDATOR);
             VALIDATORS.put(SILENCE_NOTIFICATION_GESTURE_COUNT, SILENCE_GESTURE_COUNT_VALIDATOR);
             VALIDATORS.put(ODI_CAPTIONS_ENABLED, ODI_CAPTIONS_ENABLED_VALIDATOR);
+            VALIDATORS.put(DARK_MODE_DIALOG_SEEN, BOOLEAN_VALIDATOR);
         }
 
         /**
