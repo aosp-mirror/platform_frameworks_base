@@ -17,7 +17,6 @@
 package android.media;
 
 import android.annotation.NonNull;
-import android.annotation.TestApi;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
@@ -32,7 +31,6 @@ import java.io.IOException;
  * <p>Users should use {@link Builder} to create {@link FileDataSourceDesc}.
  * @hide
  */
-@TestApi
 public class FileDataSourceDesc extends DataSourceDesc {
     private static final String TAG = "FileDataSourceDesc";
 
