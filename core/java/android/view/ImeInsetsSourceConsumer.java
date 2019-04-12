@@ -85,6 +85,7 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
     @Override
     public void onWindowFocusLost() {
         mHasWindowFocus = false;
+        getImm().unregisterImeConsumer(this);
     }
 
     /**

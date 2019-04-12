@@ -1951,6 +1951,23 @@ public final class InputMethodManager {
     }
 
     /**
+     * Unregister for IME state callbacks and applying visibility in
+     * {@link android.view.ImeInsetsSourceConsumer}.
+     * @hide
+     */
+    public void unregisterImeConsumer(@NonNull ImeInsetsSourceConsumer imeInsetsConsumer) {
+        if (imeInsetsConsumer == null) {
+            throw new IllegalStateException("ImeInsetsSourceConsumer cannot be null.");
+        }
+
+        synchronized (mH) {
+            if (mImeInsetsConsumer == imeInsetsConsumer) {
+                mImeInsetsConsumer = null;
+            }
+        }
+    }
+
+    /**
      * Call showSoftInput with currently focused view.
      * @return {@code true} if IME can be shown.
      * @hide
