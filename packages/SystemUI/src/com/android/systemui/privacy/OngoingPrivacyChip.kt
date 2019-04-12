@@ -16,13 +16,12 @@ package com.android.systemui.privacy
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.Gravity
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
-import com.android.systemui.Dependency
 import com.android.systemui.R
-import com.android.systemui.statusbar.policy.KeyguardMonitor
 
 class OngoingPrivacyChip @JvmOverloads constructor(
     context: Context,
@@ -51,8 +50,7 @@ class OngoingPrivacyChip @JvmOverloads constructor(
                 updateView()
             }
         }
-    @Suppress("DEPRECATION")
-    private val keyguardMonitor = Dependency.get(KeyguardMonitor::class.java)
+
     var builder = PrivacyDialogBuilder(context, emptyList<PrivacyItem>())
     var privacyList = emptyList<PrivacyItem>()
         set(value) {
@@ -94,13 +92,15 @@ class OngoingPrivacyChip @JvmOverloads constructor(
         if (!privacyList.isEmpty()) {
             generateContentDescription()
             setIcons(builder, iconsContainer)
+            val lp = iconsContainer.layoutParams as FrameLayout.LayoutParams
+            lp.gravity = Gravity.CENTER_VERTICAL or
+                    (if (expanded) Gravity.CENTER_HORIZONTAL else Gravity.END)
+            iconsContainer.layoutParams = lp
         } else {
             iconsContainer.removeAllViews()
         }
         requestLayout()
     }
-
-    private fun amISecure() = keyguardMonitor.isShowing && keyguardMonitor.isSecure
 
     private fun generateContentDescription() {
         val typesText = builder.joinTypes()
