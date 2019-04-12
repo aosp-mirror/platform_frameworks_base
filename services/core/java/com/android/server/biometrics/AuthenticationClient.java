@@ -134,7 +134,8 @@ public abstract class AuthenticationClient extends ClientMonitor {
                     + ", Owner: " + getOwnerString()
                     + ", isBP: " + isBiometricPrompt()
                     + ", listener: " + listener
-                    + ", requireConfirmation: " + mRequireConfirmation);
+                    + ", requireConfirmation: " + mRequireConfirmation
+                    + ", user: " + getTargetUserId());
 
             if (authenticated) {
                 mAlreadyDone = true;

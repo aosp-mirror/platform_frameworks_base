@@ -93,8 +93,8 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
         }
 
         @Override // binder call
-        public void onAuthenticationSucceeded(long deviceId, Face face) {
-            mHandler.obtainMessage(MSG_AUTHENTICATION_SUCCEEDED, face).sendToTarget();
+        public void onAuthenticationSucceeded(long deviceId, Face face, int userId) {
+            mHandler.obtainMessage(MSG_AUTHENTICATION_SUCCEEDED, userId, 0, face).sendToTarget();
         }
 
         @Override // binder call
@@ -168,6 +168,44 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)
     public void authenticate(@Nullable CryptoObject crypto, @Nullable CancellationSignal cancel,
             int flags, @NonNull AuthenticationCallback callback, @Nullable Handler handler) {
+        authenticate(crypto, cancel, flags, callback, handler, mContext.getUserId());
+    }
+
+    /**
+     * Use the provided handler thread for events.
+     */
+    private void useHandler(Handler handler) {
+        if (handler != null) {
+            mHandler = new MyHandler(handler.getLooper());
+        } else if (mHandler.getLooper() != mContext.getMainLooper()) {
+            mHandler = new MyHandler(mContext.getMainLooper());
+        }
+    }
+
+    /**
+     * Request authentication of a crypto object. This call operates the face recognition hardware
+     * and starts capturing images. It terminates when
+     * {@link AuthenticationCallback#onAuthenticationError(int, CharSequence)} or
+     * {@link AuthenticationCallback#onAuthenticationSucceeded(AuthenticationResult)} is called, at
+     * which point the object is no longer valid. The operation can be canceled by using the
+     * provided cancel object.
+     *
+     * @param crypto   object associated with the call or null if none required.
+     * @param cancel   an object that can be used to cancel authentication
+     * @param flags    optional flags; should be 0
+     * @param callback an object to receive authentication events
+     * @param handler  an optional handler to handle callback events
+     * @param userId   userId to authenticate for
+     * @throws IllegalArgumentException if the crypto operation is not supported or is not backed
+     *                                  by
+     *                                  <a href="{@docRoot}training/articles/keystore.html">Android
+     *                                  Keystore facility</a>.
+     * @throws IllegalStateException    if the crypto primitive is not initialized.
+     * @hide
+     */
+    public void authenticate(@Nullable CryptoObject crypto, @Nullable CancellationSignal cancel,
+            int flags, @NonNull AuthenticationCallback callback, @Nullable Handler handler,
+            int userId) {
         if (callback == null) {
             throw new IllegalArgumentException("Must supply an authentication callback");
         }
@@ -187,7 +225,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
                 mAuthenticationCallback = callback;
                 mCryptoObject = crypto;
                 long sessionId = crypto != null ? crypto.getOpId() : 0;
-                mService.authenticate(mToken, sessionId, mContext.getUserId(), mServiceReceiver,
+                mService.authenticate(mToken, sessionId, userId, mServiceReceiver,
                         flags, mContext.getOpPackageName());
             } catch (RemoteException e) {
                 Log.w(TAG, "Remote exception while authenticating: ", e);
@@ -196,20 +234,9 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
                     // try again later.
                     callback.onAuthenticationError(FACE_ERROR_HW_UNAVAILABLE,
                             getErrorString(mContext, FACE_ERROR_HW_UNAVAILABLE,
-                                0 /* vendorCode */));
+                                    0 /* vendorCode */));
                 }
             }
-        }
-    }
-
-    /**
-     * Use the provided handler thread for events.
-     */
-    private void useHandler(Handler handler) {
-        if (handler != null) {
-            mHandler = new MyHandler(handler.getLooper());
-        } else if (mHandler.getLooper() != mContext.getMainLooper()) {
-            mHandler = new MyHandler(mContext.getMainLooper());
         }
     }
 
