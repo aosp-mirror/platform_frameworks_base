@@ -29,6 +29,11 @@ import java.util.Objects;
 public final class CellIdentityNr extends CellIdentity {
     private static final String TAG = "CellIdentityNr";
 
+    private static final int MAX_PCI = 1007;
+    private static final int MAX_TAC = 65535;
+    private static final int MAX_NRARFCN = 3279165;
+    private static final long MAX_NCI = 68719476735L;
+
     private final int mNrArfcn;
     private final int mPci;
     private final int mTac;
@@ -41,6 +46,7 @@ public final class CellIdentityNr extends CellIdentity {
      * @param nrArfcn NR Absolute Radio Frequency Channel Number, in range [0, 3279165].
      * @param mccStr 3-digit Mobile Country Code in string format.
      * @param mncStr 2 or 3-digit Mobile Network Code in string format.
+     * @param nci The 36-bit NR Cell Identity in range [0, 68719476735].
      * @param alphal long alpha Operator Name String or Enhanced Operator Name String.
      * @param alphas short alpha Operator Name String or Enhanced Operator Name String.
      *
@@ -49,10 +55,10 @@ public final class CellIdentityNr extends CellIdentity {
     public CellIdentityNr(int pci, int tac, int nrArfcn, String mccStr, String mncStr,
             long nci, String alphal, String alphas) {
         super(TAG, CellInfo.TYPE_NR, mccStr, mncStr, alphal, alphas);
-        mPci = pci;
-        mTac = tac;
-        mNrArfcn = nrArfcn;
-        mNci = nci;
+        mPci = inRangeOrUnavailable(pci, 0, MAX_PCI);
+        mTac = inRangeOrUnavailable(tac, 0, MAX_TAC);
+        mNrArfcn = inRangeOrUnavailable(nrArfcn, 0, MAX_NRARFCN);
+        mNci = inRangeOrUnavailable(nci, 0, MAX_NCI);
     }
 
     /** @hide */
