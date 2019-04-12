@@ -109,8 +109,8 @@ public class InstallStart extends Activity {
         } else {
             Uri packageUri = intent.getData();
 
-            if (packageUri != null && (packageUri.getScheme().equals(ContentResolver.SCHEME_FILE)
-                    || packageUri.getScheme().equals(ContentResolver.SCHEME_CONTENT))) {
+            if (packageUri != null && packageUri.getScheme().equals(
+                    ContentResolver.SCHEME_CONTENT)) {
                 // [IMPORTANT] This path is deprecated, but should still work. Only necessary
                 // features should be added.
 
