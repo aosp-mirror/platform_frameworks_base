@@ -523,11 +523,17 @@ public class InputManagerService extends IInputManager.Stub
         }
 
 
-        InputChannel[] inputChannels = InputChannel.openInputChannelPair(inputChannelName);
-        InputMonitorHost host = new InputMonitorHost(inputChannels[0]);
-        inputChannels[0].setToken(host.asBinder());
-        nativeRegisterInputMonitor(mPtr, inputChannels[0], displayId, true /*isGestureMonitor*/);
-        return new InputMonitor(inputChannelName, inputChannels[1], host);
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            InputChannel[] inputChannels = InputChannel.openInputChannelPair(inputChannelName);
+            InputMonitorHost host = new InputMonitorHost(inputChannels[0]);
+            inputChannels[0].setToken(host.asBinder());
+            nativeRegisterInputMonitor(mPtr, inputChannels[0], displayId,
+                    true /*isGestureMonitor*/);
+            return new InputMonitor(inputChannelName, inputChannels[1], host);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     /**
