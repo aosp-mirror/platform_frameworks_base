@@ -3460,6 +3460,7 @@ struct ResTable::Header
     const uint8_t*                  dataEnd;
     size_t                          index;
     int32_t                         cookie;
+    bool                            definesOverlayable = false;
 
     ResStringPool                   values;
     uint32_t*                       resourceIDMap;
@@ -6559,7 +6560,7 @@ status_t ResTable::getEntry(
 }
 
 status_t ResTable::parsePackage(const ResTable_package* const pkg,
-                                const Header* const header, bool appAsLib, bool isSystemAsset)
+                                Header* const header, bool appAsLib, bool isSystemAsset)
 {
     const uint8_t* base = (const uint8_t*)pkg;
     status_t err = validate_chunk(&pkg->header, sizeof(*pkg) - sizeof(pkg->typeIdOffset),
@@ -6861,6 +6862,10 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
                 ALOGW("Found multiple library tables, ignoring...");
             }
         } else {
+            if (ctype == RES_TABLE_OVERLAYABLE_TYPE) {
+                header->definesOverlayable = true;
+            }
+
             status_t err = validate_chunk(chunk, sizeof(ResChunk_header),
                                           endPos, "ResTable_package:unknown");
             if (err != NO_ERROR) {
@@ -7136,6 +7141,13 @@ status_t ResTable::createIdmap(const ResTable& targetResTable,
             targetResTable.mPackageGroups[0]->packages.size() == 0) {
         ALOGE("idmap: invalid target package");
         return UNKNOWN_ERROR;
+    }
+
+    for (auto header : targetResTable.mHeaders) {
+        // Idmap is not aware of overlayable, exit since policy checks can't be done
+        if (header->definesOverlayable) {
+            return UNKNOWN_ERROR;
+        }
     }
 
     const ResTable_package* targetPackageStruct =

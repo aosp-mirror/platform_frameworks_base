@@ -2106,7 +2106,7 @@ private:
             size_t nameLen, uint32_t* outTypeSpecFlags) const;
 
     status_t parsePackage(
-        const ResTable_package* const pkg, const Header* const header,
+        const ResTable_package* const pkg, Header* const header,
         bool appAsLib, bool isSystemAsset);
 
     void print_value(const Package* pkg, const Res_value& value) const;
