@@ -395,7 +395,7 @@ TEST(VectorDrawable, drawPathWithoutIncrementingShaderRefCount) {
     bitmap.allocN32Pixels(5, 5, false);
     SkCanvas canvas(bitmap);
 
-    sk_sp<SkShader> shader = SkShader::MakeColorShader(SK_ColorBLACK);
+    sk_sp<SkShader> shader = SkShaders::Color(SK_ColorBLACK);
     // Initial ref count is 1
     EXPECT_TRUE(shader->unique());
 

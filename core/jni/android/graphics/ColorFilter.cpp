@@ -38,7 +38,7 @@ public:
 
     static jlong CreateBlendModeFilter(JNIEnv* env, jobject, jint srcColor, jint modeHandle) {
         SkBlendMode mode = static_cast<SkBlendMode>(modeHandle);
-        return reinterpret_cast<jlong>(SkColorFilter::MakeModeFilter(srcColor, mode).release());
+        return reinterpret_cast<jlong>(SkColorFilters::Blend(srcColor, mode).release());
     }
 
     static jlong CreateLightingFilter(JNIEnv* env, jobject, jint mul, jint add) {
@@ -50,7 +50,7 @@ public:
         const float* src = autoArray.ptr();
 
 #ifdef SK_SCALAR_IS_FLOAT
-        return reinterpret_cast<jlong>(SkColorFilter::MakeMatrixFilterRowMajor255(src).release());
+        return reinterpret_cast<jlong>(SkColorFilters::MatrixRowMajor255(src).release());
 #else
         SkASSERT(false);
 #endif

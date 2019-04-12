@@ -180,7 +180,7 @@ SkiaCanvas::PaintCoW&& SkiaRecordingCanvas::filterBitmap(PaintCoW&& paint,
 
         if (colorSpaceFilter) {
             if (tmpPaint.getColorFilter()) {
-                tmpPaint.setColorFilter(SkColorFilter::MakeComposeFilter(
+                tmpPaint.setColorFilter(SkColorFilters::Compose(
                         tmpPaint.refColorFilter(), std::move(colorSpaceFilter)));
             } else {
                 tmpPaint.setColorFilter(std::move(colorSpaceFilter));

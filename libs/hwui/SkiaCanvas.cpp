@@ -631,8 +631,7 @@ void SkiaCanvas::drawBitmapMesh(Bitmap& bitmap, int meshWidth, int meshHeight,
     SkPaint& tmpPaint = paintCoW.writeable();
 
     sk_sp<SkImage> image = bitmap.makeImage();
-    sk_sp<SkShader> shader =
-            image->makeShader(SkShader::kClamp_TileMode, SkShader::kClamp_TileMode);
+    sk_sp<SkShader> shader = image->makeShader();
     tmpPaint.setShader(std::move(shader));
 
     mCanvas->drawVertices(builder.detach(), SkBlendMode::kModulate,

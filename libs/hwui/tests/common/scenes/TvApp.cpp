@@ -219,7 +219,7 @@ private:
                     image.get()));
             SkPaint paint;
             sk_sp<SkColorFilter> filter(
-                    SkColorFilter::MakeModeFilter((curFrame % 150) << 24, SkBlendMode::kSrcATop));
+                    SkColorFilters::Blend((curFrame % 150) << 24, SkBlendMode::kSrcATop));
             paint.setColorFilter(filter);
             sk_sp<Bitmap> bitmap = mCachedBitmaps[ci];
             canvas->drawBitmap(*bitmap, 0, 0, &paint);
