@@ -1999,31 +1999,31 @@ public class PackageManagerService extends IPackageManager.Stub
 
             // Work that needs to happen on first install within each user
             if (firstUserIds != null && firstUserIds.length > 0) {
-                synchronized (mPackages) {
-                    for (int userId : firstUserIds) {
-                        // If this app is a browser and it's newly-installed for some
-                        // users, clear any default-browser state in those users. The
-                        // app's nature doesn't depend on the user, so we can just check
-                        // its browser nature in any user and generalize.
-                        if (packageIsBrowser(packageName, userId)) {
-                            // If this browser is restored from user's backup, do not clear
-                            // default-browser state for this user
+                for (int userId : firstUserIds) {
+                    // If this app is a browser and it's newly-installed for some
+                    // users, clear any default-browser state in those users. The
+                    // app's nature doesn't depend on the user, so we can just check
+                    // its browser nature in any user and generalize.
+                    if (packageIsBrowser(packageName, userId)) {
+                        // If this browser is restored from user's backup, do not clear
+                        // default-browser state for this user
+                        synchronized (mPackages) {
                             final PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
                             if (pkgSetting.getInstallReason(userId)
                                     != PackageManager.INSTALL_REASON_DEVICE_RESTORE) {
                                 setDefaultBrowserAsyncLPw(null, userId);
                             }
                         }
-
-                        // We may also need to apply pending (restored) runtime permission grants
-                        // within these users.
-                        mPermissionManager.restoreDelayedRuntimePermissions(packageName,
-                                UserHandle.of(userId));
-
-                        // Persistent preferred activity might have came into effect due to this
-                        // install.
-                        updateDefaultHomeLPw(userId);
                     }
+
+                    // We may also need to apply pending (restored) runtime permission grants
+                    // within these users.
+                    mPermissionManager.restoreDelayedRuntimePermissions(packageName,
+                            UserHandle.of(userId));
+
+                    // Persistent preferred activity might have came into effect due to this
+                    // install.
+                    updateDefaultHomeNotLocked(userId);
                 }
             }
 
@@ -5179,7 +5179,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             getPackagesUsingSharedLibraryLPr(libInfo, flags, userId),
                             (libInfo.getDependencies() == null
                                     ? null
-                                    : new ArrayList(libInfo.getDependencies())));
+                                    : new ArrayList<>(libInfo.getDependencies())));
 
                     if (result == null) {
                         result = new ArrayList<>();
@@ -6496,8 +6496,8 @@ public class PackageManagerService extends IPackageManager.Stub
         final List<ResolveInfo> query = queryIntentActivitiesInternal(intent, resolvedType, flags,
                 userId);
         // Find any earlier preferred or last chosen entries and nuke them
-        findPreferredActivity(intent, resolvedType,
-                flags, query, 0, false, true, false, userId);
+        findPreferredActivityNotLocked(
+                intent, resolvedType, flags, query, 0, false, true, false, userId);
         // Add the new activity as the last chosen for this filter
         addPreferredActivityInternal(filter, match, null, activity, false, userId,
                 "Setting last chosen");
@@ -6512,8 +6512,8 @@ public class PackageManagerService extends IPackageManager.Stub
         if (DEBUG_PREFERRED) Log.v(TAG, "Querying last chosen activity for " + intent);
         final List<ResolveInfo> query = queryIntentActivitiesInternal(intent, resolvedType, flags,
                 userId);
-        return findPreferredActivity(intent, resolvedType, flags, query, 0,
-                false, false, false, userId);
+        return findPreferredActivityNotLocked(
+                intent, resolvedType, flags, query, 0, false, false, false, userId);
     }
 
     /**
@@ -6626,7 +6626,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 // If we have saved a preference for a preferred activity for
                 // this Intent, use that.
-                ResolveInfo ri = findPreferredActivity(intent, resolvedType,
+                ResolveInfo ri = findPreferredActivityNotLocked(intent, resolvedType,
                         flags, query, r0.priority, true, false, debug, userId);
                 if (ri != null) {
                     return ri;
@@ -6765,9 +6765,14 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     // TODO: handle preferred activities missing while user has amnesia
-    ResolveInfo findPreferredActivity(Intent intent, String resolvedType, int flags,
+    /** <b>must not hold {@link #mPackages}</b> */
+    ResolveInfo findPreferredActivityNotLocked(Intent intent, String resolvedType, int flags,
             List<ResolveInfo> query, int priority, boolean always,
             boolean removeMatches, boolean debug, int userId) {
+        if (Thread.holdsLock(mPackages)) {
+            Slog.wtf(TAG, "Calling thread " + Thread.currentThread().getName()
+                    + " is holding mPackages", new Throwable());
+        }
         if (!sUserManager.exists(userId)) return null;
         final int callingUid = Binder.getCallingUid();
         // Do NOT hold the packages lock; this calls up into the settings provider which
@@ -18620,10 +18625,10 @@ public class PackageManagerService extends IPackageManager.Stub
         int removedAppId = -1;
 
         // writer
-        synchronized (mPackages) {
-            boolean installedStateChanged = false;
-            if (deletedPs != null) {
-                if ((flags&PackageManager.DELETE_KEEP_DATA) == 0) {
+        boolean installedStateChanged = false;
+        if (deletedPs != null) {
+            if ((flags & PackageManager.DELETE_KEEP_DATA) == 0) {
+                synchronized (mPackages) {
                     clearIntentFilterVerificationsLPw(deletedPs.name, UserHandle.USER_ALL);
                     clearDefaultBrowserIfNeeded(packageName);
                     mSettings.mKeySetManagerService.removeAppKeySetDataLPw(packageName);
@@ -18654,26 +18659,34 @@ public class PackageManagerService extends IPackageManager.Stub
                             }
                         }
                     }
-                    clearPackagePreferredActivitiesLPw(deletedPs.name, UserHandle.USER_ALL);
                 }
-                // make sure to preserve per-user disabled state if this removal was just
-                // a downgrade of a system app to the factory package
-                if (allUserHandles != null && outInfo != null && outInfo.origUsers != null) {
-                    if (DEBUG_REMOVE) {
-                        Slog.d(TAG, "Propagating install state across downgrade");
-                    }
-                    for (int userId : allUserHandles) {
-                        final boolean installed = ArrayUtils.contains(outInfo.origUsers, userId);
-                        if (DEBUG_REMOVE) {
-                            Slog.d(TAG, "    user " + userId + " => " + installed);
-                        }
-                        if (installed != deletedPs.getInstalled(userId)) {
-                            installedStateChanged = true;
-                        }
-                        deletedPs.setInstalled(installed, userId);
-                    }
+                final SparseBooleanArray changedUsers = new SparseBooleanArray();
+                clearPackagePreferredActivitiesLPw(
+                        deletedPs.name, changedUsers, UserHandle.USER_ALL);
+                if (changedUsers.size() > 0) {
+                    updateDefaultHomeNotLocked(changedUsers);
+                    postPreferredActivityChangedBroadcast(UserHandle.USER_ALL);
                 }
             }
+            // make sure to preserve per-user disabled state if this removal was just
+            // a downgrade of a system app to the factory package
+            if (allUserHandles != null && outInfo != null && outInfo.origUsers != null) {
+                if (DEBUG_REMOVE) {
+                    Slog.d(TAG, "Propagating install state across downgrade");
+                }
+                for (int userId : allUserHandles) {
+                    final boolean installed = ArrayUtils.contains(outInfo.origUsers, userId);
+                    if (DEBUG_REMOVE) {
+                        Slog.d(TAG, "    user " + userId + " => " + installed);
+                    }
+                    if (installed != deletedPs.getInstalled(userId)) {
+                        installedStateChanged = true;
+                    }
+                    deletedPs.setInstalled(installed, userId);
+                }
+            }
+        }
+        synchronized (mPackages) {
             // can downgrade to reader
             if (writeSettings) {
                 // Save settings now
@@ -19351,10 +19364,17 @@ public class PackageManagerService extends IPackageManager.Stub
             destroyAppDataLIF(pkg, nextUserId,
                     StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
             clearDefaultBrowserIfNeededForUser(ps.name, nextUserId);
-            synchronized (mPackages) {
-                if (clearPackagePreferredActivitiesLPw(ps.name, nextUserId)) {
+            removeKeystoreDataIfNeeded(nextUserId, ps.appId);
+            final SparseBooleanArray changedUsers = new SparseBooleanArray();
+            clearPackagePreferredActivitiesLPw(ps.name, changedUsers, nextUserId);
+            if (changedUsers.size() > 0) {
+                updateDefaultHomeNotLocked(changedUsers);
+                postPreferredActivityChangedBroadcast(nextUserId);
+                synchronized (mPackages) {
                     scheduleWritePackageRestrictionsLocked(nextUserId);
                 }
+            }
+            synchronized (mPackages) {
                 resetUserChangesToRuntimePermissionsAndFlagsLPw(ps, nextUserId);
             }
             // Also delete contributed media, when requested
@@ -19817,33 +19837,34 @@ public class PackageManagerService extends IPackageManager.Stub
         int callingUid = Binder.getCallingUid();
         mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                 true /* requireFullPermission */, false /* checkShell */, "add preferred activity");
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.SET_PREFERRED_APPLICATIONS)
+                != PackageManager.PERMISSION_GRANTED) {
+            if (getUidTargetSdkVersionLockedLPr(callingUid)
+                    < Build.VERSION_CODES.FROYO) {
+                Slog.w(TAG, "Ignoring addPreferredActivity() from uid "
+                        + callingUid);
+                return;
+            }
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
+        }
         if (filter.countActions() == 0) {
             Slog.w(TAG, "Cannot set a preferred activity with no filter actions");
             return;
         }
-        synchronized (mPackages) {
-            if (mContext.checkCallingOrSelfPermission(
-                    android.Manifest.permission.SET_PREFERRED_APPLICATIONS)
-                    != PackageManager.PERMISSION_GRANTED) {
-                if (getUidTargetSdkVersionLockedLPr(callingUid)
-                        < Build.VERSION_CODES.FROYO) {
-                    Slog.w(TAG, "Ignoring addPreferredActivity() from uid "
-                            + callingUid);
-                    return;
-                }
-                mContext.enforceCallingOrSelfPermission(
-                        android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
-            }
-
-            PreferredIntentResolver pir = mSettings.editPreferredActivitiesLPw(userId);
+        if (DEBUG_PREFERRED) {
             Slog.i(TAG, opname + " activity " + activity.flattenToShortString() + " for user "
                     + userId + ":");
             filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
+        }
+        if (!updateDefaultHomeNotLocked(userId)) {
+            postPreferredActivityChangedBroadcast(userId);
+        }
+        synchronized (mPackages) {
+            final PreferredIntentResolver pir = mSettings.editPreferredActivitiesLPw(userId);
             pir.addFilter(new PreferredActivity(filter, match, set, activity, always));
             scheduleWritePackageRestrictionsLocked(userId);
-            if (!updateDefaultHomeLPw(userId)) {
-                postPreferredActivityChangedBroadcast(userId);
-            }
         }
     }
 
@@ -19984,25 +20005,24 @@ public class PackageManagerService extends IPackageManager.Stub
                     && filterAppAccessLPr(ps, callingUid, UserHandle.getUserId(callingUid))) {
                 return;
             }
-            int user = UserHandle.getCallingUserId();
-            if (clearPackagePreferredActivitiesLPw(packageName, user)) {
-                scheduleWritePackageRestrictionsLocked(user);
+        }
+        int callingUserId = UserHandle.getCallingUserId();
+        final SparseBooleanArray changedUsers = new SparseBooleanArray();
+        clearPackagePreferredActivitiesLPw(packageName, changedUsers, callingUserId);
+        if (changedUsers.size() > 0) {
+            updateDefaultHomeNotLocked(changedUsers);
+            postPreferredActivityChangedBroadcast(callingUserId);
+            synchronized (mPackages) {
+                scheduleWritePackageRestrictionsLocked(callingUserId);
             }
         }
     }
 
     /** This method takes a specific user id as well as UserHandle.USER_ALL. */
     @GuardedBy("mPackages")
-    boolean clearPackagePreferredActivitiesLPw(String packageName, int userId) {
-        return clearPackagePreferredActivitiesLPw(packageName, false, userId);
-    }
-
-    /** This method takes a specific user id as well as UserHandle.USER_ALL. */
-    @GuardedBy("mPackages")
-    private boolean clearPackagePreferredActivitiesLPw(String packageName,
-            boolean skipUpdateDefaultHome, int userId) {
+    private void clearPackagePreferredActivitiesLPw(String packageName,
+            @NonNull SparseBooleanArray outUserChanged, int userId) {
         ArrayList<PreferredActivity> removed = null;
-        boolean changed = false;
         for (int i=0; i<mSettings.mPreferredActivities.size(); i++) {
             final int thisUserId = mSettings.mPreferredActivities.keyAt(i);
             PreferredIntentResolver pir = mSettings.mPreferredActivities.valueAt(i);
@@ -20028,16 +20048,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     PreferredActivity pa = removed.get(j);
                     pir.removeFilter(pa);
                 }
-                changed = true;
-                if (!skipUpdateDefaultHome) {
-                    updateDefaultHomeLPw(thisUserId);
-                }
+                outUserChanged.setValueAt(thisUserId, true);
             }
         }
-        if (changed) {
-            postPreferredActivityChangedBroadcast(userId);
-        }
-        return changed;
     }
 
     /** This method takes a specific user id as well as UserHandle.USER_ALL. */
@@ -20090,21 +20103,27 @@ public class PackageManagerService extends IPackageManager.Stub
         final long identity = Binder.clearCallingIdentity();
         // writer
         try {
+            final SparseBooleanArray changedUsers = new SparseBooleanArray();
+            clearPackagePreferredActivitiesLPw(null, changedUsers, userId);
+            if (changedUsers.size() > 0) {
+                postPreferredActivityChangedBroadcast(userId);
+            }
             synchronized (mPackages) {
-                clearPackagePreferredActivitiesLPw(null, true, userId);
                 mSettings.applyDefaultPreferredAppsLPw(userId);
-                updateDefaultHomeLPw(userId);
-                // TODO: We have to reset the default SMS and Phone. This requires
-                // significant refactoring to keep all default apps in the package
-                // manager (cleaner but more work) or have the services provide
-                // callbacks to the package manager to request a default app reset.
-                setDefaultBrowserPackageName(null, userId);
                 clearIntentFilterVerificationsLPw(userId);
                 primeDomainVerificationsLPw(userId);
                 resetUserChangesToRuntimePermissionsAndFlagsLPw(userId);
+            }
+            updateDefaultHomeNotLocked(userId);
+            // TODO: We have to reset the default SMS and Phone. This requires
+            // significant refactoring to keep all default apps in the package
+            // manager (cleaner but more work) or have the services provide
+            // callbacks to the package manager to request a default app reset.
+            setDefaultBrowserPackageName(null, userId);
+            resetNetworkPolicies(userId);
+            synchronized (mPackages) {
                 scheduleWritePackageRestrictionsLocked(userId);
             }
-            resetNetworkPolicies(userId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -20154,15 +20173,17 @@ public class PackageManagerService extends IPackageManager.Stub
             Slog.w(TAG, "Cannot set a preferred activity with no filter actions");
             return;
         }
-        synchronized (mPackages) {
-            Slog.i(TAG, "Adding persistent preferred activity " + activity + " for user " + userId +
-                    ":");
+        if (DEBUG_PREFERRED) {
+            Slog.i(TAG, "Adding persistent preferred activity " + activity
+                    + " for user " + userId + ":");
             filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
+        }
+        updateDefaultHomeNotLocked(userId);
+        postPreferredActivityChangedBroadcast(userId);
+        synchronized (mPackages) {
             mSettings.editPersistentPreferredActivitiesLPw(userId).addFilter(
                     new PersistentPreferredActivity(filter, activity));
             scheduleWritePackageRestrictionsLocked(userId);
-            postPreferredActivityChangedBroadcast(userId);
-            updateDefaultHomeLPw(userId);
         }
     }
 
@@ -20202,11 +20223,12 @@ public class PackageManagerService extends IPackageManager.Stub
                     changed = true;
                 }
             }
-
-            if (changed) {
+        }
+        if (changed) {
+            updateDefaultHomeNotLocked(userId);
+            postPreferredActivityChangedBroadcast(userId);
+            synchronized (mPackages) {
                 scheduleWritePackageRestrictionsLocked(userId);
-                postPreferredActivityChangedBroadcast(userId);
-                updateDefaultHomeLPw(userId);
             }
         }
     }
@@ -20294,8 +20316,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     (readParser, readUserId) -> {
                         synchronized (mPackages) {
                             mSettings.readPreferredActivitiesLPw(readParser, readUserId);
-                            updateDefaultHomeLPw(readUserId);
                         }
+                        updateDefaultHomeNotLocked(readUserId);
                     });
         } catch (Exception e) {
             if (DEBUG_BACKUP) {
@@ -20622,29 +20644,55 @@ public class PackageManagerService extends IPackageManager.Stub
         return null;
     }
 
+    /** <b>must not hold {@link #mPackages}</b> */
+    private void updateDefaultHomeNotLocked(SparseBooleanArray userIds) {
+        if (Thread.holdsLock(mPackages)) {
+            Slog.wtf(TAG, "Calling thread " + Thread.currentThread().getName()
+                    + " is holding mPackages", new Throwable());
+        }
+        for (int i = userIds.size() - 1; i >= 0; --i) {
+            final int userId = userIds.keyAt(i);
+            updateDefaultHomeNotLocked(userId);
+        }
+    }
+
     /**
+     * <b>must not hold {@link #mPackages}</b>
+     *
      * @return Whether the ACTION_PREFERRED_ACTIVITY_CHANGED broadcast has been scheduled.
      */
-    private boolean updateDefaultHomeLPw(int userId) {
-        Intent intent = getHomeIntent();
-        List<ResolveInfo> resolveInfos = queryIntentActivitiesInternal(intent, null,
+    private boolean updateDefaultHomeNotLocked(int userId) {
+        if (Thread.holdsLock(mPackages)) {
+            Slog.wtf(TAG, "Calling thread " + Thread.currentThread().getName()
+                    + " is holding mPackages", new Throwable());
+        }
+        final Intent intent = getHomeIntent();
+        final List<ResolveInfo> resolveInfos = queryIntentActivitiesInternal(intent, null,
                 PackageManager.GET_META_DATA, userId);
-        ResolveInfo preferredResolveInfo = findPreferredActivity(intent, null, 0, resolveInfos,
-                0, true, false, false, userId);
-        String packageName = preferredResolveInfo != null
+        final ResolveInfo preferredResolveInfo = findPreferredActivityNotLocked(
+                intent, null, 0, resolveInfos, 0, true, false, false, userId);
+        final String packageName = preferredResolveInfo != null
                 && preferredResolveInfo.activityInfo != null
                 ? preferredResolveInfo.activityInfo.packageName : null;
-        String currentPackageName = mDefaultHomeProvider.getDefaultHome(userId);
+        final PackageManagerInternal.DefaultHomeProvider provider;
+        synchronized (mPackages) {
+            provider = mDefaultHomeProvider;
+        }
+        if (provider == null) {
+            Slog.e(TAG, "Default home provider has not been set");
+            return false;
+        }
+        final String currentPackageName = provider.getDefaultHome(userId);
         if (TextUtils.equals(currentPackageName, packageName)) {
             return false;
         }
-        String[] callingPackages = getPackagesForUid(Binder.getCallingUid());
+        final String[] callingPackages = getPackagesForUid(Binder.getCallingUid());
         if (callingPackages != null && ArrayUtils.contains(callingPackages,
                 mRequiredPermissionControllerPackage)) {
             // PermissionController manages default home directly.
             return false;
         }
-        mDefaultHomeProvider.setDefaultHomeAsync(packageName, userId, (successful) -> {
+        provider.setDefaultHomeAsync(packageName, userId, (successful) -> {
             if (successful) {
                 postPreferredActivityChangedBroadcast(userId);
             }
