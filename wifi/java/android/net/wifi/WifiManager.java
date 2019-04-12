@@ -1778,7 +1778,7 @@ public class WifiManager {
     })
     public List<PasspointConfiguration> getPasspointConfigurations() {
         try {
-            return mService.getPasspointConfigurations();
+            return mService.getPasspointConfigurations(mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
