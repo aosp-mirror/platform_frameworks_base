@@ -830,4 +830,12 @@ public final class NotificationEntry {
             this.index = index;
         }
     }
+
+    /**
+     * Returns whether the notification is a foreground service. It shows that this is an ongoing
+     * bubble.
+     */
+    public boolean isForegroundService() {
+        return (notification.getNotification().flags & Notification.FLAG_FOREGROUND_SERVICE) != 0;
+    }
 }
