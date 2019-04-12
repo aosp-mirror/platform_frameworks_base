@@ -3674,7 +3674,6 @@ package android.media.audiopolicy {
     method public void setAudioPolicyStatusListener(android.media.audiopolicy.AudioPolicy.AudioPolicyStatusListener);
     method @NonNull public android.media.audiopolicy.AudioPolicy.Builder setAudioPolicyVolumeCallback(@NonNull android.media.audiopolicy.AudioPolicy.AudioPolicyVolumeCallback);
     method @NonNull public android.media.audiopolicy.AudioPolicy.Builder setIsAudioFocusPolicy(boolean);
-    method @NonNull public android.media.audiopolicy.AudioPolicy.Builder setIsTestFocusPolicy(boolean);
     method @NonNull public android.media.audiopolicy.AudioPolicy.Builder setLooper(@NonNull android.os.Looper) throws java.lang.IllegalArgumentException;
   }
 
