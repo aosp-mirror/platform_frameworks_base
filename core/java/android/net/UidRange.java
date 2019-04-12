@@ -21,6 +21,8 @@ import static android.os.UserHandle.PER_USER_RANGE;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Collection;
+
 /**
  * An inclusive range of UIDs.
  *
@@ -42,8 +44,14 @@ public final class UidRange implements Parcelable {
         return new UidRange(userId * PER_USER_RANGE, (userId + 1) * PER_USER_RANGE - 1);
     }
 
+    /** Returns the smallest user Id which is contained in this UidRange */
     public int getStartUser() {
         return start / PER_USER_RANGE;
+    }
+
+    /** Returns the largest user Id which is contained in this UidRange */
+    public int getEndUser() {
+        return stop / PER_USER_RANGE;
     }
 
     public boolean contains(int uid) {
@@ -117,4 +125,23 @@ public final class UidRange implements Parcelable {
                 return new UidRange[size];
             }
     };
+
+    /**
+     * Returns whether any of the UidRange in the collection contains the specified uid
+     *
+     * @param ranges The collection of UidRange to check
+     * @param uid the uid in question
+     * @return {@code true} if the uid is contained within the ranges, {@code false} otherwise
+     *
+     * @see UidRange#contains(int)
+     */
+    public static boolean containsUid(Collection<UidRange> ranges, int uid) {
+        if (ranges == null) return false;
+        for (UidRange range : ranges) {
+            if (range.contains(uid)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
