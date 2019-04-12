@@ -36,6 +36,7 @@ import android.view.Gravity;
 import android.view.IWindow;
 import android.view.WindowManager;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.wm.utils.WmDisplayCutout;
@@ -323,6 +324,7 @@ public class WindowFrameTests extends WindowTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 130388666)
     public void testCalculatePolicyCrop() {
         final FrameTestWindowState w = createWindow(MATCH_PARENT, MATCH_PARENT);
         w.mAttrs.gravity = Gravity.LEFT | Gravity.TOP;
@@ -423,6 +425,7 @@ public class WindowFrameTests extends WindowTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 130388666)
     public void testDisplayCutout() {
         // Regular fullscreen task and window
         WindowState w = createWindow(MATCH_PARENT, MATCH_PARENT);
@@ -446,6 +449,7 @@ public class WindowFrameTests extends WindowTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 130388666)
     public void testDisplayCutout_tempDisplayedBounds() {
         // Regular fullscreen task and window
         WindowState w = createWindow(MATCH_PARENT, MATCH_PARENT);
