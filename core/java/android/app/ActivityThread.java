@@ -2121,7 +2121,11 @@ public final class ActivityThread extends ClientTransactionHandler {
             }
 
             LoadedApk packageInfo = ref != null ? ref.get() : null;
-            if (ai != null && packageInfo != null && isLoadedApkUpToDate(packageInfo, ai)) {
+            if (ai != null && packageInfo != null) {
+                if (!isLoadedApkResourceDirsUpToDate(packageInfo, ai)) {
+                    packageInfo.updateApplicationInfo(ai, null);
+                }
+
                 if (packageInfo.isSecurityViolation()
                         && (flags&Context.CONTEXT_IGNORE_SECURITY) == 0) {
                     throw new SecurityException(
@@ -2205,9 +2209,11 @@ public final class ActivityThread extends ClientTransactionHandler {
 
             LoadedApk packageInfo = ref != null ? ref.get() : null;
 
-            boolean isUpToDate = packageInfo != null && isLoadedApkUpToDate(packageInfo, aInfo);
+            if (packageInfo != null) {
+                if (!isLoadedApkResourceDirsUpToDate(packageInfo, aInfo)) {
+                    packageInfo.updateApplicationInfo(aInfo, null);
+                }
 
-            if (isUpToDate) {
                 return packageInfo;
             }
 
@@ -2243,11 +2249,8 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
-    /**
-     * Compares overlay/resource directories for a LoadedApk to determine if it's up to date
-     * with the given ApplicationInfo.
-     */
-    private boolean isLoadedApkUpToDate(LoadedApk loadedApk, ApplicationInfo appInfo) {
+    private static boolean isLoadedApkResourceDirsUpToDate(LoadedApk loadedApk,
+            ApplicationInfo appInfo) {
         Resources packageResources = loadedApk.mResources;
         String[] overlayDirs = ArrayUtils.defeatNullable(loadedApk.getOverlayDirs());
         String[] resourceDirs = ArrayUtils.defeatNullable(appInfo.resourceDirs);
