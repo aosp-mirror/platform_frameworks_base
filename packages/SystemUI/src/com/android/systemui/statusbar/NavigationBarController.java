@@ -33,6 +33,7 @@ import android.view.View;
 import android.view.WindowManagerGlobal;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.statusbar.RegisterStatusBarResult;
 import com.android.systemui.Dependency;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
@@ -81,7 +82,7 @@ public class NavigationBarController implements Callbacks {
     @Override
     public void onDisplayReady(int displayId) {
         Display display = mDisplayManager.getDisplay(displayId);
-        createNavigationBar(display);
+        createNavigationBar(display, null);
     }
 
     // TODO(b/117478341): I use {@code includeDefaultDisplay} to make this method compatible to
@@ -91,11 +92,12 @@ public class NavigationBarController implements Callbacks {
      *
      * @param includeDefaultDisplay {@code true} to create navigation bar on default display.
      */
-    public void createNavigationBars(final boolean includeDefaultDisplay) {
+    public void createNavigationBars(final boolean includeDefaultDisplay,
+            RegisterStatusBarResult result) {
         Display[] displays = mDisplayManager.getDisplays();
         for (Display display : displays) {
             if (includeDefaultDisplay || display.getDisplayId() != DEFAULT_DISPLAY) {
-                createNavigationBar(display);
+                createNavigationBar(display, result);
             }
         }
     }
@@ -107,7 +109,7 @@ public class NavigationBarController implements Callbacks {
      * @param display the display to add navigation bar on.
      */
     @VisibleForTesting
-    void createNavigationBar(Display display) {
+    void createNavigationBar(Display display, RegisterStatusBarResult result) {
         if (display == null) {
             return;
         }
@@ -151,6 +153,12 @@ public class NavigationBarController implements Callbacks {
             navBar.setAutoHideController(autoHideController);
             navBar.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
             mNavigationBars.append(displayId, navBar);
+
+            if (result != null) {
+                navBar.setImeWindowStatus(display.getDisplayId(), result.mImeToken,
+                        result.mImeWindowVis, result.mImeBackDisposition,
+                        result.mShowImeSwitcher);
+            }
         });
     }
 
