@@ -83,6 +83,7 @@ import android.service.chooser.ChooserTarget;
 import android.service.chooser.ChooserTargetService;
 import android.service.chooser.IChooserTargetResult;
 import android.service.chooser.IChooserTargetService;
+import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.HashedStringCache;
@@ -1518,6 +1519,29 @@ public class ChooserActivity extends ResolverActivity {
         float getModifiedScore();
 
         ChooserTarget getChooserTarget();
+
+        /**
+          * Do not label as 'equals', since this doesn't quite work
+          * as intended with java 8.
+          */
+        default boolean isSimilar(ChooserTargetInfo other) {
+            if (other == null) return false;
+
+            ChooserTarget ct1 = getChooserTarget();
+            ChooserTarget ct2 = other.getChooserTarget();
+
+            // If either is null, there is not enough info to make an informed decision
+            // about equality, so just exit
+            if (ct1 == null || ct2 == null) return false;
+
+            if (ct1.getComponentName().equals(ct2.getComponentName())
+                    && TextUtils.equals(getDisplayLabel(), other.getDisplayLabel())
+                    && TextUtils.equals(getExtendedInfo(), other.getExtendedInfo())) {
+                return true;
+            }
+
+            return false;
+        }
     }
 
     /**
@@ -1596,6 +1620,7 @@ public class ChooserActivity extends ResolverActivity {
         private final DisplayResolveInfo mSourceInfo;
         private final ResolveInfo mBackupResolveInfo;
         private final ChooserTarget mChooserTarget;
+        private final String mDisplayLabel;
         private Drawable mBadgeIcon = null;
         private CharSequence mBadgeContentDescription;
         private Drawable mDisplayIcon;
@@ -1633,6 +1658,8 @@ public class ChooserActivity extends ResolverActivity {
 
             mFillInIntent = null;
             mFillInFlags = 0;
+
+            mDisplayLabel = sanitizeDisplayLabel(chooserTarget.getTitle());
         }
 
         private SelectableTargetInfo(SelectableTargetInfo other, Intent fillInIntent, int flags) {
@@ -1645,6 +1672,14 @@ public class ChooserActivity extends ResolverActivity {
             mFillInIntent = fillInIntent;
             mFillInFlags = flags;
             mModifiedScore = other.mModifiedScore;
+
+            mDisplayLabel = sanitizeDisplayLabel(mChooserTarget.getTitle());
+        }
+
+        private String sanitizeDisplayLabel(CharSequence label) {
+            SpannableStringBuilder sb = new SpannableStringBuilder(label);
+            sb.clearSpans();
+            return sb.toString();
         }
 
         public boolean isSuspended() {
@@ -1783,7 +1818,7 @@ public class ChooserActivity extends ResolverActivity {
 
         @Override
         public CharSequence getDisplayLabel() {
-            return mChooserTarget.getTitle();
+            return mDisplayLabel;
         }
 
         @Override
@@ -2196,8 +2231,6 @@ public class ChooserActivity extends ResolverActivity {
             final float baseScore = getBaseScore(origTarget, isShortcutResult);
             Collections.sort(targets, mBaseTargetComparator);
 
-
-
             float lastScore = 0;
             boolean shouldNotify = false;
             for (int i = 0, N = Math.min(targets.size(), MAX_TARGETS_PER_SERVICE); i < N; i++) {
@@ -2272,8 +2305,15 @@ public class ChooserActivity extends ResolverActivity {
                 return false;
             }
 
-            final float newScore = chooserTargetInfo.getModifiedScore();
+            // Check for duplicates and abort if found
+            for (ChooserTargetInfo otherTargetInfo : mServiceTargets) {
+                if (chooserTargetInfo.isSimilar(otherTargetInfo)) {
+                    return false;
+                }
+            }
+
             int currentSize = mServiceTargets.size();
+            final float newScore = chooserTargetInfo.getModifiedScore();
             for (int i = 0; i < Math.min(currentSize, MAX_SERVICE_TARGETS); i++) {
                 final ChooserTargetInfo serviceTarget = mServiceTargets.get(i);
                 if (serviceTarget == null) {
@@ -2360,15 +2400,11 @@ public class ChooserActivity extends ResolverActivity {
          * @return true if the view width has changed
          */
         public boolean calculateChooserTargetWidth(int width) {
-            int targetMinWidth = getResources().getDimensionPixelSize(
-                    R.dimen.chooser_target_width);
-
             if (width == 0) {
                 return false;
             }
 
-            int targetWidth =  width / getMaxTargetsPerRow();
-            int newWidth = Math.max(targetWidth, targetMinWidth);
+            int newWidth =  width / getMaxTargetsPerRow();
             if (newWidth != mChooserTargetWidth) {
                 mChooserTargetWidth = newWidth;
                 return true;
