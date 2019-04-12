@@ -51,7 +51,9 @@ import com.google.common.collect.Sets;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.HashMap;
@@ -130,6 +132,17 @@ public class ThemeOverlayManagerTest extends SysuiTestCase {
 
         for (String overlayPackage : ALL_CATEGORIES_MAP.values()) {
             verify(mOverlayManager).setEnabledExclusiveInCategory(overlayPackage, TEST_USER);
+        }
+    }
+
+    @Test
+    public void allCategoriesSpecified_enabledInOrder() {
+        mManager.applyCurrentUserOverlays(ALL_CATEGORIES_MAP, TEST_USER_HANDLES);
+
+        InOrder inOrder = Mockito.inOrder(mOverlayManager);
+        for (String category : THEME_CATEGORIES) {
+            inOrder.verify(mOverlayManager)
+                    .setEnabledExclusiveInCategory(ALL_CATEGORIES_MAP.get(category), TEST_USER);
         }
     }
 
