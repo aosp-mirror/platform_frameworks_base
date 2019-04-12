@@ -309,7 +309,7 @@ public final class BroadcastQueue {
         app.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_RECEIVER);
         mService.mProcessList.updateLruProcessLocked(app, false, null);
         if (!skipOomAdj) {
-            mService.updateOomAdjLocked();
+            mService.updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_NONE);
         }
 
         // Tell the application to launch this receiver.
@@ -791,7 +791,8 @@ public final class BroadcastQueue {
                 // are already core system stuff so don't matter for this.
                 r.curApp = filter.receiverList.app;
                 filter.receiverList.app.curReceivers.add(r);
-                mService.updateOomAdjLocked(r.curApp, true);
+                mService.updateOomAdjLocked(r.curApp, true,
+                        OomAdjuster.OOM_ADJ_REASON_START_RECEIVER);
             }
         }
         try {
@@ -1028,7 +1029,7 @@ public final class BroadcastQueue {
                     // If we had finished the last ordered broadcast, then
                     // make sure all processes have correct oom and sched
                     // adjustments.
-                    mService.updateOomAdjLocked();
+                    mService.updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_START_RECEIVER);
                 }
 
                 // when we have no more ordered broadcast on this queue, stop logging
