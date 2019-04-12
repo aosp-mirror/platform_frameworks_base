@@ -522,6 +522,18 @@ package android.provider {
     method @Deprecated public static void untrash(@NonNull android.content.Context, @NonNull android.net.Uri);
   }
 
+  public static interface MediaStore.Audio.AudioColumns extends android.provider.MediaStore.MediaColumns {
+    field public static final String DURATION = "duration";
+  }
+
+  public static interface MediaStore.Images.ImageColumns extends android.provider.MediaStore.MediaColumns {
+    field public static final String BUCKET_DISPLAY_NAME = "bucket_display_name";
+    field public static final String BUCKET_ID = "bucket_id";
+    field public static final String DATE_TAKEN = "datetaken";
+    field public static final String GROUP_ID = "group_id";
+    field public static final String ORIENTATION = "orientation";
+  }
+
   public static interface MediaStore.MediaColumns extends android.provider.BaseColumns {
     field @Deprecated public static final String HASH = "_hash";
     field @Deprecated public static final String IS_TRASHED = "is_trashed";
@@ -544,6 +556,14 @@ package android.provider {
     method @NonNull public android.os.ParcelFileDescriptor open() throws java.io.FileNotFoundException;
     method @NonNull public java.io.OutputStream openOutputStream() throws java.io.FileNotFoundException;
     method @NonNull public android.net.Uri publish();
+  }
+
+  public static interface MediaStore.Video.VideoColumns extends android.provider.MediaStore.MediaColumns {
+    field public static final String BUCKET_DISPLAY_NAME = "bucket_display_name";
+    field public static final String BUCKET_ID = "bucket_id";
+    field public static final String DATE_TAKEN = "datetaken";
+    field public static final String DURATION = "duration";
+    field public static final String GROUP_ID = "group_id";
   }
 
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
