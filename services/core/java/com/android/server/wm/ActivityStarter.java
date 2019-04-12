@@ -980,31 +980,6 @@ class ActivityStarter {
                 return false;
             }
         }
-        // If we don't have callerApp at this point, no caller was provided to startActivity().
-        // That's the case for PendingIntent-based starts, since the creator's process might not be
-        // up and alive. If that's the case, we retrieve the WindowProcessController for the send()
-        // caller, so that we can make the decision based on its foreground/whitelisted state.
-        if (callerApp == null) {
-            callerApp = mService.getProcessController(realCallingPid, realCallingUid);
-        }
-        if (callerApp != null) {
-            // don't abort if the callerApp is instrumenting with background activity starts privs
-            if (callerApp.isInstrumentingWithBackgroundActivityStartPrivileges()) {
-                return false;
-            }
-            // don't abort if the caller is currently temporarily whitelisted
-            if (callerApp.areBackgroundActivityStartsAllowed()) {
-                return false;
-            }
-            // don't abort if the caller has an activity in any foreground task
-            if (callerApp.hasActivityInVisibleTask()) {
-                return false;
-            }
-            // don't abort if the caller is bound by a UID that's currently foreground
-            if (isBoundByForegroundUid(callerApp)) {
-                return false;
-            }
-        }
         // don't abort if the callingUid has START_ACTIVITIES_FROM_BACKGROUND permission
         if (mService.checkPermission(START_ACTIVITIES_FROM_BACKGROUND, callingPid, callingUid)
                 == PERMISSION_GRANTED) {
@@ -1029,6 +1004,33 @@ class ActivityStarter {
                     + " temporarily whitelisted. This will not be supported in future Q builds.");
             return false;
         }
+        // If we don't have callerApp at this point, no caller was provided to startActivity().
+        // That's the case for PendingIntent-based starts, since the creator's process might not be
+        // up and alive. If that's the case, we retrieve the WindowProcessController for the send()
+        // caller, so that we can make the decision based on its foreground/whitelisted state.
+        int callerAppUid = callingUid;
+        if (callerApp == null) {
+            callerApp = mService.getProcessController(realCallingPid, realCallingUid);
+            callerAppUid = realCallingUid;
+        }
+        // don't abort if the callerApp or other processes of that uid are whitelisted in any way
+        if (callerApp != null) {
+            // first check the original calling process
+            if (callerApp.areBackgroundActivityStartsAllowed()) {
+                return false;
+            }
+            // only if that one wasn't whitelisted, check the other ones
+            final ArraySet<WindowProcessController> uidProcesses =
+                    mService.mProcessMap.getProcesses(callerAppUid);
+            if (uidProcesses != null) {
+                for (int i = uidProcesses.size() - 1; i >= 0; i--) {
+                    final WindowProcessController proc = uidProcesses.valueAt(i);
+                    if (proc != callerApp && proc.areBackgroundActivityStartsAllowed()) {
+                        return false;
+                    }
+                }
+            }
+        }
         // anything that has fallen through would currently be aborted
         Slog.w(TAG, "Background activity start [callingPackage: " + callingPackage
                 + "; callingUid: " + callingUid
@@ -1051,17 +1053,6 @@ class ActivityStarter {
                     (originatingPendingIntent != null));
         }
         return true;
-    }
-
-    private boolean isBoundByForegroundUid(WindowProcessController callerApp) {
-        final ArraySet<Integer> boundClientUids = callerApp.getBoundClientUids();
-        for (int i = boundClientUids.size() - 1; i >= 0; --i) {
-            final int uid = boundClientUids.valueAt(i);
-            if (mService.isUidForeground(uid)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     // TODO: remove this toast after feature development is done

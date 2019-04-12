@@ -48,6 +48,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.util.AtomicFile;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.Xml;
 
 public final class CompatModePackages {
@@ -324,8 +325,9 @@ public final class CompatModePackages {
             ActivityRecord starting = stack.restartPackage(packageName);
 
             // Tell all processes that loaded this package about the change.
-            for (int i = mService.mPidMap.size() - 1; i >= 0; i--) {
-                final WindowProcessController app = mService.mPidMap.valueAt(i);
+            SparseArray<WindowProcessController> pidMap = mService.mProcessMap.getPidMap();
+            for (int i = pidMap.size() - 1; i >= 0; i--) {
+                final WindowProcessController app = pidMap.valueAt(i);
                 if (!app.mPkgList.contains(packageName)) {
                     continue;
                 }
