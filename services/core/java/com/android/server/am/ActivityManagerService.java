@@ -543,7 +543,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private static final int NATIVE_DUMP_TIMEOUT_MS = 2000; // 2 seconds;
 
-    final OomAdjuster mOomAdjuster;
+    OomAdjuster mOomAdjuster;
     final LowMemDetector mLowMemDetector;
 
     /** All system services */
@@ -1483,7 +1483,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     final ServiceThread mProcStartHandlerThread;
     final Handler mProcStartHandler;
 
-    final ActivityManagerConstants mConstants;
+    ActivityManagerConstants mConstants;
 
     // Encapsulates the global setting "hidden_api_blacklist_exemptions"
     final HiddenApiSettings mHiddenApiBlacklist;
