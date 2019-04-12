@@ -633,10 +633,17 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(const size_t matcherIn
         flushIfNeededLocked(eventTimeNs);
     }
 
-    // For pulled data, we already check condition when we decide to pull or
-    // in onDataPulled. So take all of them.
-    // For pushed data, just check condition.
-    if (!(mIsPulled || condition)) {
+    // We should not accumulate the data for pushed metrics when the condition is false.
+    bool shouldSkipForPushMetric = !mIsPulled && !condition;
+    // For pulled metrics, there are two cases:
+    // - to compute diffs, we need to process all the state changes
+    // - for non-diffs metrics, we should ignore the data if the condition wasn't true. If we have a
+    // state change from
+    //     + True -> True: we should process the data, it might be a bucket boundary
+    //     + True -> False: we als need to process the data.
+    bool shouldSkipForPulledMetric = mIsPulled && !mUseDiff
+            && mCondition != ConditionState::kTrue;
+    if (shouldSkipForPushMetric || shouldSkipForPulledMetric) {
         VLOG("ValueMetric skip event because condition is false");
         return;
     }
