@@ -495,6 +495,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     @Override
     public void onUpdateSatelliteBlacklist(int[] constellations, int[] svids) {
         mHandler.post(() -> mGnssConfiguration.setSatelliteBlacklist(constellations, svids));
+        mGnssMetrics.resetConstellationTypes();
     }
 
     private void subscriptionOrCarrierConfigChanged(Context context) {
@@ -1442,6 +1443,13 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                         ((info.mSvidWithFlags[i] &
                                 GnssStatus.GNSS_SV_FLAGS_HAS_CARRIER_FREQUENCY) == 0
                                 ? "" : "F"));
+            }
+
+            if ((info.mSvidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_USED_IN_FIX) != 0) {
+                int constellationType =
+                        (info.mSvidWithFlags[i] >> GnssStatus.CONSTELLATION_TYPE_SHIFT_WIDTH)
+                                & GnssStatus.CONSTELLATION_TYPE_MASK;
+                mGnssMetrics.logConstellationType(constellationType);
             }
         }
         if (usedInFixCount > 0) {
