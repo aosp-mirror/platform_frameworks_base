@@ -90,6 +90,8 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
         @Override
         public void onPlaybackStateChanged(PlaybackState state) {
             if (state.getState() != PlaybackState.STATE_PLAYING) {
+                // Update the UI once, in case playback info changed while we were paused
+                mUpdatePlaybackUi.run();
                 clearTimer();
             } else if (mSeekBarTimer == null) {
                 startTimer();
