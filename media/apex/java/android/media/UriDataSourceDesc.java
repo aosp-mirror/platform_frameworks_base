@@ -18,7 +18,6 @@ package android.media;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.TestApi;
 import android.net.Uri;
 
 import java.net.HttpCookie;
@@ -36,7 +35,6 @@ import java.util.Map;
  * <p>Users should use {@link Builder} to change {@link UriDataSourceDesc}.
  * @hide
  */
-@TestApi
 public class UriDataSourceDesc extends DataSourceDesc {
     private Uri mUri;
     private Map<String, String> mHeader;
