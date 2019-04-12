@@ -281,6 +281,7 @@ public final class TextLinks implements Parcelable {
         /**
          * Returns a bundle containing custom data related to this TextLink.
          */
+        @NonNull
         public Bundle getExtras() {
             return mExtras;
         }
