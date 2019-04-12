@@ -43,15 +43,16 @@
         android:layout_gravity="center_vertical"
         android:ellipsize="end"
         android:gravity="start|top"
-        android:paddingRight="24dp"
+        android:paddingRight="@dimen/chooser_view_spacing"
         android:maxLines="2"/>
-    <Button
+    <ImageButton
         android:id="@+id/copy_button"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:padding="12dp"
         android:gravity="center"
         android:layout_gravity="center_vertical"
-        android:foreground="@drawable/ic_content_copy_gm2"
+        android:src="@drawable/ic_content_copy_gm2"
         android:clickable="true"
         android:background="?attr/selectableItemBackgroundBorderless"/>
   </LinearLayout>
@@ -63,8 +64,8 @@
       android:layout_height="wrap_content"
       android:layout_gravity="center"
       android:orientation="horizontal"
-      android:layout_marginLeft="@dimen/chooser_edge_margin_thin"
-      android:layout_marginRight="@dimen/chooser_edge_margin_thin"
+      android:layout_marginLeft="@dimen/chooser_edge_margin_normal"
+      android:layout_marginRight="@dimen/chooser_edge_margin_normal"
       android:minHeight="80dp"
       android:background="@drawable/chooser_content_preview_rounded"
       android:id="@+id/content_preview_title_layout">
@@ -87,7 +88,7 @@
         android:layout_gravity="center_vertical"
         android:ellipsize="end"
         android:maxLines="2"
-        android:textAppearance="?attr/textAppearanceMedium"/>
+        android:textSize="20sp"/>
   </LinearLayout>
 </LinearLayout>
 

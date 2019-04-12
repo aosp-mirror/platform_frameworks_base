@@ -20,9 +20,7 @@
               android:orientation="horizontal"
               android:layout_width="match_parent"
               android:layout_height="100dp"
-              android:gravity="start|top"
-              android:paddingStart="@dimen/chooser_edge_margin_normal"
-              android:paddingEnd="@dimen/chooser_edge_margin_normal">
+              android:gravity="start|top">
   <TextView
       android:id="@+id/chooser_row_text_option"
       android:layout_width="match_parent"

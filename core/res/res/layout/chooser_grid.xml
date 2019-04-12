@@ -32,11 +32,11 @@
 
         <ImageView
             android:id="@+id/drag"
-            android:layout_width="32dp"
+            android:layout_width="24dp"
             android:layout_height="4dp"
             android:src="@drawable/ic_drag_handle"
             android:clickable="true"
-            android:layout_marginTop="@dimen/chooser_view_spacing"
+            android:layout_marginTop="@dimen/chooser_edge_margin_thin"
             android:tint="@color/lighter_gray"
             android:layout_centerHorizontal="true"
             android:layout_alignParentTop="true" />
@@ -61,8 +61,9 @@
                   android:layout_width="wrap_content"
                   android:textAppearance="?attr/textAppearanceMedium"
                   android:textSize="20sp"
+                  android:textColor="?attr/textColorPrimary"
                   android:gravity="center"
-                  android:paddingTop="@dimen/chooser_view_spacing"
+                  android:paddingTop="@dimen/chooser_edge_margin_thin"
                   android:paddingBottom="@dimen/chooser_view_spacing"
                   android:paddingLeft="24dp"
                   android:paddingRight="24dp"
