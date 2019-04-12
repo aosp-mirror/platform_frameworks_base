@@ -18,37 +18,22 @@
 
 #include "core_jni_helpers.h"
 
-struct NioJNIData {
-    jclass nioAccessClass;
-
-    jmethodID getBasePointerID;
-    jmethodID getBaseArrayID;
-    jmethodID getBaseArrayOffsetID;
-};
-
-static NioJNIData gNioJNI;
-
 void* android::nio_getPointer(JNIEnv *_env, jobject buffer, jarray *array) {
     assert(array);
 
-    jlong pointer;
-    jint offset;
-    void *data;
-
-    pointer = _env->CallStaticLongMethod(gNioJNI.nioAccessClass,
-                                         gNioJNI.getBasePointerID, buffer);
+    jint position;
+    jint limit;
+    jint elementSizeShift;
+    jlong pointer = jniGetNioBufferFields(_env, buffer, &position, &limit, &elementSizeShift);
     if (pointer != 0L) {
-        *array = NULL;
-        return reinterpret_cast<void *>(pointer);
+        pointer += position << elementSizeShift;
+        return reinterpret_cast<void*>(pointer);
     }
 
-    *array = (jarray) _env->CallStaticObjectMethod(gNioJNI.nioAccessClass,
-                                               gNioJNI.getBaseArrayID, buffer);
-    offset = _env->CallStaticIntMethod(gNioJNI.nioAccessClass,
-                                       gNioJNI.getBaseArrayOffsetID, buffer);
-    data = _env->GetPrimitiveArrayCritical(*array, (jboolean *) 0);
-
-    return (void *) ((char *) data + offset);
+    jint offset = jniGetNioBufferBaseArrayOffset(_env, buffer);
+    *array = jniGetNioBufferBaseArray(_env, buffer);
+    void * data = _env->GetPrimitiveArrayCritical(*array, (jboolean *) 0);
+    return reinterpret_cast<void*>(reinterpret_cast<char*>(data) + offset);
 }
 
 
@@ -71,25 +56,4 @@ android::AutoBufferPointer::~AutoBufferPointer() {
     if (NULL != fArray) {
         android::nio_releasePointer(fEnv, fArray, fPointer, fCommit);
     }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-namespace android {
-
-int register_android_nio_utils(JNIEnv* env) {
-    jclass localClass = FindClassOrDie(env, "java/nio/NIOAccess");
-    gNioJNI.getBasePointerID = GetStaticMethodIDOrDie(env, localClass, "getBasePointer",
-                                                      "(Ljava/nio/Buffer;)J");
-    gNioJNI.getBaseArrayID = GetStaticMethodIDOrDie(env, localClass, "getBaseArray",
-                                                    "(Ljava/nio/Buffer;)Ljava/lang/Object;");
-    gNioJNI.getBaseArrayOffsetID = GetStaticMethodIDOrDie(env, localClass, "getBaseArrayOffset",
-                                                          "(Ljava/nio/Buffer;)I");
-
-    // now record a permanent version of the class ID
-    gNioJNI.nioAccessClass = MakeGlobalRefOrDie(env, localClass);
-
-    return 0;
-}
-
 }
