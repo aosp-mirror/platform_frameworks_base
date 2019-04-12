@@ -20,7 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
-import android.media.audiopolicy.AudioProductStrategies;
+import android.media.audiopolicy.AudioProductStrategy;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -783,9 +783,10 @@ public final class AudioAttributes implements Parcelable {
          */
         @UnsupportedAppUsage
         public Builder setInternalLegacyStreamType(int streamType) {
-            final AudioProductStrategies ps = new AudioProductStrategies();
-            if (ps.size() > 0) {
-                AudioAttributes attributes = ps.getAudioAttributesForLegacyStreamType(streamType);
+            if (AudioProductStrategy.getAudioProductStrategies().size() > 0) {
+                AudioAttributes attributes =
+                        AudioProductStrategy.getAudioAttributesForStrategyWithLegacyStreamType(
+                                streamType);
                 if (attributes != null) {
                     return new Builder(attributes);
                 }
@@ -1165,9 +1166,8 @@ public final class AudioAttributes implements Parcelable {
                     AudioSystem.STREAM_MUSIC : AudioSystem.STREAM_TTS;
         }
 
-        final AudioProductStrategies ps = new AudioProductStrategies();
-        if (ps.size() > 0) {
-            return ps.getLegacyStreamTypeForAudioAttributes(aa);
+        if (AudioProductStrategy.getAudioProductStrategies().size() > 0) {
+            return AudioProductStrategy.getLegacyStreamTypeForStrategyWithAudioAttributes(aa);
         }
         // usage to stream type mapping
         switch (aa.getUsage()) {
