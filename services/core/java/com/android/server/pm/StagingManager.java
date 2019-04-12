@@ -487,7 +487,7 @@ public class StagingManager {
                 }
                 try {
                     apkParentSession.addChildSessionId(apkChildSession.sessionId);
-                } catch (RemoteException e) {
+                } catch (IllegalStateException e) {
                     Slog.e(TAG, "Failed to add a child session for installing the APK files", e);
                     return false;
                 }
