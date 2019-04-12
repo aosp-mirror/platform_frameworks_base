@@ -89,7 +89,8 @@ class TaskSnapshotLoader {
             }
             ComponentName topActivityComponent = ComponentName.unflattenFromString(
                     proto.topActivityComponent);
-            return new TaskSnapshot(topActivityComponent, buffer, proto.orientation,
+            return new TaskSnapshot(topActivityComponent, buffer, bitmap.getColorSpace(),
+                    proto.orientation,
                     new Rect(proto.insetLeft, proto.insetTop, proto.insetRight, proto.insetBottom),
                     reducedResolution, reducedResolution ? mPersister.getReducedScale() : 1f,
                     proto.isRealSnapshot, proto.windowingMode, proto.systemUiVisibility,
