@@ -90,8 +90,8 @@ public final class SurfaceControl implements Parcelable {
     private static native ScreenshotGraphicBuffer nativeScreenshot(IBinder displayToken,
             Rect sourceCrop, int width, int height, boolean useIdentityTransform, int rotation,
             boolean captureSecureLayers);
-    private static native ScreenshotGraphicBuffer nativeCaptureLayers(IBinder layerHandleToken,
-            Rect sourceCrop, float frameScale, IBinder[] excludeLayers);
+    private static native ScreenshotGraphicBuffer nativeCaptureLayers(IBinder displayToken,
+            IBinder layerHandleToken, Rect sourceCrop, float frameScale, IBinder[] excludeLayers);
 
     private static native long nativeCreateTransaction();
     private static native long nativeGetNativeTransactionFinalizer();
@@ -1998,7 +1998,8 @@ public final class SurfaceControl implements Parcelable {
      */
     public static ScreenshotGraphicBuffer captureLayers(IBinder layerHandleToken, Rect sourceCrop,
             float frameScale) {
-        return nativeCaptureLayers(layerHandleToken, sourceCrop, frameScale, null);
+        final IBinder displayToken = SurfaceControl.getInternalDisplayToken();
+        return nativeCaptureLayers(displayToken, layerHandleToken, sourceCrop, frameScale, null);
     }
 
     /**
@@ -2007,7 +2008,8 @@ public final class SurfaceControl implements Parcelable {
      */
     public static ScreenshotGraphicBuffer captureLayersExcluding(IBinder layerHandleToken,
             Rect sourceCrop, float frameScale, IBinder[] exclude) {
-        return nativeCaptureLayers(layerHandleToken, sourceCrop, frameScale, exclude);
+        final IBinder displayToken = SurfaceControl.getInternalDisplayToken();
+        return nativeCaptureLayers(displayToken, layerHandleToken, sourceCrop, frameScale, exclude);
     }
 
     /**
