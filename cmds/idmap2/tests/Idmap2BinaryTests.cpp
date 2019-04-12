@@ -261,6 +261,24 @@ TEST_F(Idmap2BinaryTests, Scan) {
   ASSERT_THAT(result, NotNull());
   ASSERT_EQ(result->status, EXIT_SUCCESS) << result->stderr;
   ASSERT_EQ(result->stdout, "");
+
+  // the signature idmap failing to generate should not cause scanning to fail
+  // clang-format off
+  result = ExecuteBinary({"idmap2",
+                          "scan",
+                          "--input-directory", GetTestDataPath(),
+                          "--recursive",
+                          "--target-package-name", "test.target",
+                          "--target-apk-path", GetTargetApkPath(),
+                          "--output-directory", GetTempDirPath(),
+                          "--override-policy", "public"});
+  // clang-format on
+  ASSERT_THAT(result, NotNull());
+  ASSERT_EQ(result->status, EXIT_SUCCESS) << result->stderr;
+  ASSERT_EQ(result->stdout, expected.str());
+  unlink(idmap_static_no_name_path.c_str());
+  unlink(idmap_static_2_path.c_str());
+  unlink(idmap_static_1_path.c_str());
 }
 
 TEST_F(Idmap2BinaryTests, Lookup) {
