@@ -1054,7 +1054,8 @@ public class BiometricService extends SystemService {
                     BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
                     mCurrentAuthSession.mRequireConfirmation,
                     StatsLog.BIOMETRIC_AUTHENTICATED__STATE__CONFIRMED,
-                    latency);
+                    latency,
+                    Utils.isDebugEnabled(getContext(), mCurrentAuthSession.mUserId));
         } else {
             int error = reason == BiometricPrompt.DISMISSED_REASON_NEGATIVE
                     ? BiometricConstants.BIOMETRIC_ERROR_NEGATIVE_BUTTON
@@ -1077,7 +1078,8 @@ public class BiometricService extends SystemService {
                     BiometricsProtoEnums.ACTION_AUTHENTICATE,
                     BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
                     error,
-                    0 /* vendorCode */);
+                    0 /* vendorCode */,
+                    Utils.isDebugEnabled(getContext(), mCurrentAuthSession.mUserId));
         }
     }
 

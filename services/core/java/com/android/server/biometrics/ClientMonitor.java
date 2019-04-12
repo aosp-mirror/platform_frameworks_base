@@ -157,7 +157,7 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
      * @return true if client should be removed
      */
     public boolean onAcquired(int acquiredInfo, int vendorCode) {
-        super.logOnAcquired(acquiredInfo, vendorCode, getTargetUserId());
+        super.logOnAcquired(mContext, acquiredInfo, vendorCode, getTargetUserId());
         if (DEBUG) Slog.v(getLogTag(), "Acquired: " + acquiredInfo + " " + vendorCode);
         try {
             if (mListener != null) {
@@ -182,7 +182,7 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
      * @return true if client should be removed
      */
     public boolean onError(long deviceId, int error, int vendorCode) {
-        super.logOnError(error, vendorCode, getTargetUserId());
+        super.logOnError(mContext, error, vendorCode, getTargetUserId());
         try {
             if (mListener != null) {
                 mListener.onError(deviceId, error, vendorCode, getCookie());
