@@ -316,6 +316,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         if (savedInstanceState != null) {
             mNavigationBarView.getLightTransitionsController().restoreState(savedInstanceState);
         }
+        mNavigationBarView.setNavigationIconHints(mNavigationIconHints);
 
         prepareNavigationBarView();
         checkNavBarModes();
