@@ -38,9 +38,9 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
-public final class StretchAnalogClockControllerTest extends SysuiTestCase {
+public final class AnalogClockControllerTest extends SysuiTestCase {
 
-    private StretchAnalogClockController mClockController;
+    private AnalogClockController mClockController;
     @Mock SysuiColorExtractor mMockColorExtractor;
 
     @Before
@@ -49,7 +49,7 @@ public final class StretchAnalogClockControllerTest extends SysuiTestCase {
 
         Resources res = getContext().getResources();
         LayoutInflater layoutInflater = LayoutInflater.from(getContext());
-        mClockController = new StretchAnalogClockController(res, layoutInflater,
+        mClockController = new AnalogClockController(res, layoutInflater,
                 mMockColorExtractor);
     }
 

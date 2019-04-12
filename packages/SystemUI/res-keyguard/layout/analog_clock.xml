@@ -35,9 +35,27 @@
       android:format24Hour="@string/keyguard_widget_24_hours_format"
       android:elegantTextHeight="false"
   />
-  <com.android.keyguard.clock.StretchAnalogClock
+  <com.android.keyguard.clock.ImageClock
       android:id="@+id/analog_clock"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"
-  />
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+  >
+    <ImageView
+        android:id="@+id/hour_hand"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/analog_hour_hand"
+    />
+    <ImageView
+        android:id="@+id/minute_hand"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/analog_minute_hand"
+    />
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/analog_frame"
+    />
+  </com.android.keyguard.clock.ImageClock>
 </com.android.keyguard.clock.ClockLayout>

@@ -60,7 +60,7 @@ public class BubbleClockController implements ClockPlugin {
     /**
      * Custom clock shown on AOD screen and behind stack scroller on lock.
      */
-    private View mView;
+    private ClockLayout mView;
     private TextClock mDigitalClock;
     private ImageClock mAnalogClock;
 
@@ -90,7 +90,7 @@ public class BubbleClockController implements ClockPlugin {
     }
 
     private void createViews() {
-        mView = mLayoutInflater.inflate(R.layout.bubble_clock, null);
+        mView = (ClockLayout) mLayoutInflater.inflate(R.layout.bubble_clock, null);
         mDigitalClock = (TextClock) mView.findViewById(R.id.digital_clock);
         mAnalogClock = (ImageClock) mView.findViewById(R.id.analog_clock);
 
@@ -186,6 +186,7 @@ public class BubbleClockController implements ClockPlugin {
     @Override
     public void onTimeTick() {
         mAnalogClock.onTimeChanged();
+        mView.onTimeChanged();
         mDigitalClock.refresh();
         mLockClock.refresh();
     }

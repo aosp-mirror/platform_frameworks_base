@@ -32,6 +32,7 @@ import com.android.keyguard.R;
  */
 public class ClockLayout extends FrameLayout {
 
+    private static final int ANALOG_CLOCK_SHIFT_FACTOR = 3;
     /**
      * Clock face views.
      */
@@ -73,7 +74,14 @@ public class ClockLayout extends FrameLayout {
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
+        positionChildren();
+    }
 
+    void onTimeChanged() {
+        positionChildren();
+    }
+
+    private void positionChildren() {
         final float offsetX = getBurnInOffset(mBurnInPreventionOffsetX * 2, true)
                 - mBurnInPreventionOffsetX;
         final float offsetY = getBurnInOffset(mBurnInPreventionOffsetY * 2, false)
@@ -89,9 +97,9 @@ public class ClockLayout extends FrameLayout {
         // Put the analog clock in the middle of the screen.
         if (mAnalogClock != null) {
             mAnalogClock.setX(Math.max(0f, 0.5f * (getWidth() - mAnalogClock.getWidth()))
-                    + offsetX);
+                    + ANALOG_CLOCK_SHIFT_FACTOR * offsetX);
             mAnalogClock.setY(Math.max(0f, 0.5f * (getHeight() - mAnalogClock.getHeight()))
-                    + offsetY);
+                    + ANALOG_CLOCK_SHIFT_FACTOR * offsetY);
         }
     }
 }
