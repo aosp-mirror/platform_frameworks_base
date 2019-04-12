@@ -78,6 +78,8 @@ public abstract class ClientTransactionHandler {
     /** Set current process state. */
     public abstract void updateProcessState(int processState, boolean fromIpc);
 
+    /** Count how many activities are launching. */
+    public abstract void countLaunchingActivities(int num);
 
     // Execute phase related logic and handlers. Methods here execute actual lifecycle transactions
     // and deliver callbacks.

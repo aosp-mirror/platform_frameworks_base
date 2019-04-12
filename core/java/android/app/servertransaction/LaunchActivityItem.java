@@ -66,6 +66,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
 
     @Override
     public void preExecute(ClientTransactionHandler client, IBinder token) {
+        client.countLaunchingActivities(1);
         client.updateProcessState(mProcState, false);
         client.updatePendingConfiguration(mCurConfig);
     }
@@ -80,6 +81,12 @@ public class LaunchActivityItem extends ClientTransactionItem {
                 mProfilerInfo, client);
         client.handleLaunchActivity(r, pendingActions, null /* customIntent */);
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
+    }
+
+    @Override
+    public void postExecute(ClientTransactionHandler client, IBinder token,
+            PendingTransactionActions pendingActions) {
+        client.countLaunchingActivities(-1);
     }
 
 
