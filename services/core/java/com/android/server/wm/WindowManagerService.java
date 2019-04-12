@@ -2107,7 +2107,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (shouldRelayout) {
                 Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "relayoutWindow: viewVisibility_1");
 
-                result = win.relayoutVisibleWindow(result, attrChanges, oldVisibility);
+                result = win.relayoutVisibleWindow(result, attrChanges);
 
                 try {
                     result = createSurfaceControl(outSurfaceControl, result, win, winAnimator);

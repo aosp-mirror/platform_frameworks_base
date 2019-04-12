@@ -4446,7 +4446,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return !mLastSurfaceInsets.equals(mAttrs.surfaceInsets);
     }
 
-    int relayoutVisibleWindow(int result, int attrChanges, int oldVisibility) {
+    int relayoutVisibleWindow(int result, int attrChanges) {
         final boolean wasVisible = isVisibleLw();
 
         result |= (!wasVisible || !isDrawnLw()) ? RELAYOUT_RES_FIRST_TIME : 0;
@@ -4466,7 +4466,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mDestroying = false;
             mWmService.mDestroySurface.remove(this);
         }
-        if (oldVisibility == View.GONE) {
+        if (!wasVisible) {
             mWinAnimator.mEnterAnimationPending = true;
         }
 
