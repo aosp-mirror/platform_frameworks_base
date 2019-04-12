@@ -17,6 +17,7 @@
 package android.location;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -44,6 +45,8 @@ public final class GnssStatus {
     public static final int CONSTELLATION_GALILEO = 6;
     /** Constellation type constant for IRNSS. */
     public static final int CONSTELLATION_IRNSS = 7;
+    /** @hide */
+    public static final int CONSTELLATION_COUNT = 8;
 
     /** @hide */
     public static final int GNSS_SV_FLAGS_NONE = 0;
@@ -250,5 +253,37 @@ public final class GnssStatus {
      */
     public float getCarrierFrequencyHz(int satIndex) {
         return mCarrierFrequencies[satIndex];
+    }
+
+    /**
+     * Returns the string representation of a constellation type. For example,
+     * {@link #CONSTELLATION_GPS} is represented by the string GPS.
+     *
+     * @param constellationType the constellation type.
+     * @return the string representation.
+     * @hide
+     */
+    @NonNull
+    public static String constellationTypeToString(@ConstellationType int constellationType) {
+        switch (constellationType) {
+            case CONSTELLATION_UNKNOWN:
+                return "UNKNOWN";
+            case CONSTELLATION_GPS:
+                return "GPS";
+            case CONSTELLATION_SBAS:
+                return "SBAS";
+            case CONSTELLATION_GLONASS:
+                return "GLONASS";
+            case CONSTELLATION_QZSS:
+                return "QZSS";
+            case CONSTELLATION_BEIDOU:
+                return "BEIDOU";
+            case CONSTELLATION_GALILEO:
+                return "GALILEO";
+            case CONSTELLATION_IRNSS:
+                return "IRNSS";
+            default:
+                return Integer.toString(constellationType);
+        }
     }
 }
