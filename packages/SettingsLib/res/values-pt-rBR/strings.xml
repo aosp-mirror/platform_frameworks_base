@@ -158,7 +158,7 @@
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"Tom de voz"</string>
     <string name="tts_default_pitch_summary" msgid="1944885882882650009">"Afeta o tom da voz sintetizada"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"Idioma"</string>
-    <string name="tts_lang_use_system" msgid="2679252467416513208">"Usar idioma do sistema"</string>
+    <string name="tts_lang_use_system" msgid="2679252467416513208">"Usa o idioma do sistema"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"Idioma não selecionado"</string>
     <string name="tts_default_lang_summary" msgid="5219362163902707785">"Define a voz específica do idioma para o texto falado"</string>
     <string name="tts_play_example_title" msgid="7094780383253097230">"Ouça um exemplo"</string>
@@ -218,7 +218,7 @@
     <string name="mock_location_app_set" msgid="8966420655295102685">"App de local fictício: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"Redes"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certificação de Display sem fio"</string>
-    <string name="wifi_verbose_logging" msgid="4203729756047242344">"Ativar registro extenso de Wi-Fi"</string>
+    <string name="wifi_verbose_logging" msgid="4203729756047242344">"Ativar registro detalhado de Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Dados móveis sempre ativos"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Aceleração de hardware de tethering"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Mostrar dispositivos Bluetooth sem nomes"</string>
@@ -244,7 +244,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Informe o nome do host do provedor de DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Não foi possível conectar"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Mostrar opções de certificação de Display sem fio"</string>
-    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Aumentar o nível de registro do Wi-Fi; mostrar conforme o RSSI de SSID na Seleção de Wi-Fi"</string>
+    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Aumentar o nível de registro de Wi-Fi; mostrar conforme o RSSI do SSID no seletor de Wi-Fi"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Limitada"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Ilimitada"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Tamanhos de buffer de logger"</string>
@@ -257,8 +257,8 @@
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"Selecionar configuração USB"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"Permitir locais fictícios"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Permitir locais fictícios"</string>
-    <string name="debug_view_attributes" msgid="6485448367803310384">"Ativar visualiz. insp. atributo"</string>
-    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Sempre manter dados móveis ativos, mesmo quando o Wi-Fi estiver ativado (para troca rápida de rede)."</string>
+    <string name="debug_view_attributes" msgid="6485448367803310384">"Ativar visualização de inspeção de atributo"</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Sempre manter dados móveis ativos, mesmo quando o Wi-Fi estiver ativado (para troca rápida de rede)"</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Usar aceleração de hardware de tethering quando disponível"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Permitir a depuração USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"A depuração USB serve apenas para fins de desenvolvimento. Use-a para copiar dados entre o computador e o dispositivo, instalar apps no seu aparelho sem notificação e ler dados de registro."</string>
@@ -266,7 +266,7 @@
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"Ativar as configurações de desenvolvimento?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Essas configurações são destinadas apenas para o uso de desenvolvedores. Elas podem causar a desativação ou mau funcionamento do dispositivo e dos apps contidos nele."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verificar apps por USB"</string>
-    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Verificar comportamento nocivo em apps instalados via ADB/ADT."</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Verificar comportamento nocivo em apps instalados via ADB/ADT"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Dispositivos Bluetooth sem nomes (somente endereços MAC) serão exibidos"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Desativa o recurso Bluetooth de volume absoluto em caso de problemas com o volume em dispositivos remotos, como volume excessivamente alto ou falta de controle."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Terminal local"</string>
@@ -280,15 +280,15 @@
     <string name="select_application" msgid="5156029161289091703">"Selecionar app"</string>
     <string name="no_application" msgid="2813387563129153880">"Nada"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"Aguardar depurador"</string>
-    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"App depurado espera conexão com debugger antes de ser executado."</string>
+    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"O app depurado espera a conexão com o depurador para ser executado"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Entrada"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Desenho"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Renderização acelerada por hardware"</string>
     <string name="media_category" msgid="4388305075496848353">"Mídia"</string>
     <string name="debug_monitoring_category" msgid="7640508148375798343">"Monitoramento"</string>
-    <string name="strict_mode" msgid="1938795874357830695">"Modo rigoroso ativado"</string>
+    <string name="strict_mode" msgid="1938795874357830695">"Modo restrito ativado"</string>
     <string name="strict_mode_summary" msgid="142834318897332338">"Piscar tela se apps demorarem no processo principal"</string>
-    <string name="pointer_location" msgid="6084434787496938001">"Localização do ponteiro"</string>
+    <string name="pointer_location" msgid="6084434787496938001">"Localização do cursor"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Exibir dados de toque"</string>
     <string name="show_touches" msgid="2642976305235070316">"Mostrar toques"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"Mostrar feedback visual para toques"</string>
@@ -307,16 +307,16 @@
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Desativar roteam. autom. p/ perif. de áudio USB"</string>
     <string name="debug_layout" msgid="5981361776594526155">"Mostrar limites de layout"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Mostrar limites de corte, margens, etc."</string>
-    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Forçar dir. layout (RTL)"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Forçar direção do layout (RTL) p/ todas as localidades"</string>
+    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Forçar layout da direita p/ esquerda"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Forçar a direção do layout da direita para a esquerda para todas as localidades"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Forçar 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Ativar 4x MSAA em apps OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Depurar operações de corte não retangulares"</string>
     <string name="track_frame_time" msgid="6094365083096851167">"Classific. render. HWUI"</string>
-    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Ativar camadas depuração de GPU"</string>
-    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Permitir carreg. camadas de depuração GPU p/ apps de dep."</string>
-    <string name="window_animation_scale_title" msgid="6162587588166114700">"Escala de anim. da janela"</string>
-    <string name="transition_animation_scale_title" msgid="387527540523595875">"Escala anim. de transição"</string>
+    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Ativar camadas de depuração de GPU"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Permitir carreg. de camadas de depuração de GPU p/ apps de dep"</string>
+    <string name="window_animation_scale_title" msgid="6162587588166114700">"Escala de animação da janela"</string>
+    <string name="transition_animation_scale_title" msgid="387527540523595875">"Escala de animação de transição"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Escala de duração do Animator"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"Simular telas secundárias"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"Apps"</string>
@@ -326,9 +326,9 @@
     <string name="show_all_anrs" msgid="4924885492787069007">"Mostrar ANRs em 2º plano"</string>
     <string name="show_all_anrs_summary" msgid="6636514318275139826">"Exibir a caixa de diálogo \"App não responde\" para apps em segundo plano"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Mostrar avisos do canal de notif."</string>
-    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Exibe aviso na tela quando um app posta notificação sem canal válido"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Exibir aviso na tela quando um app posta notificação sem canal válido"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Forçar permissão de apps em armazenamento externo"</string>
-    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Qualifica apps para gravação em armazenamento externo, independentemente de valores de manifestos"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Qualificar apps para gravação em armazenamento externo, independentemente de valores de manifestos"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Forçar atividades a serem redimensionáveis"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Tornar todas as atividades redimensionáveis para várias janelas, independentemente dos valores do manifesto."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Ativar janelas de forma livre"</string>
@@ -431,7 +431,7 @@
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"Próxima"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"Senha necessária"</string>
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"Métodos ativos de entrada"</string>
-    <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"Usar idiomas do sistema"</string>
+    <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"Usa idiomas do sistema"</string>
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"Falha ao abrir as configurações de <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"Este método de entrada pode coletar todo o texto que você digita, incluindo dados pessoais, como senhas e números de cartão de crédito. É um método do app <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Usar este método de entrada?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"Observação: após uma reinicialização, não é possível iniciar este app até que você desbloqueie seu smartphone"</string>

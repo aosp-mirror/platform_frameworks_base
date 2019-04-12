@@ -295,7 +295,7 @@
     <string name="show_screen_updates" msgid="5470814345876056420">"Экран жаңыруусун көрсөтүү"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Экран жаңырганда анын үстү жарык болот"</string>
     <string name="show_hw_screen_updates" msgid="4117270979975470789">"Жаңыртууларды көрсөтүү"</string>
-    <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"Тартканда көрүүлөрдү терезелердин ичинде көрсөтүү"</string>
+    <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"Тартканда экрандын четтерин жарык кылуу"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Аппараттык жаңыртууларды көрсөтүү"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Жаңырган аппараттык деңгээлдер жашыл түскө боелот"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"GPU мүчүлүштүктөрүн оңдоо"</string>
