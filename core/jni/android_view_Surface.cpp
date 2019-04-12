@@ -212,6 +212,10 @@ static jlong nativeLockCanvas(JNIEnv* env, jclass clazz,
         return 0;
     }
 
+    if (convertPixelFormat(ANativeWindow_getFormat(surface.get())) == kUnknown_SkColorType) {
+        native_window_set_buffers_format(surface.get(), PIXEL_FORMAT_RGBA_8888);
+    }
+
     Rect dirtyRect(Rect::EMPTY_RECT);
     Rect* dirtyRectPtr = NULL;
 
