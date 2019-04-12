@@ -25,12 +25,12 @@ import android.annotation.NonNull;
 public class ParseException extends RuntimeException {
     public String response;
 
-    public ParseException(@NonNull String response) {
+    ParseException(@NonNull String response) {
         super(response);
         this.response = response;
     }
 
-    public ParseException(@NonNull String response, @NonNull Throwable cause) {
+    ParseException(@NonNull String response, @NonNull Throwable cause) {
         super(response, cause);
         this.response = response;
     }
