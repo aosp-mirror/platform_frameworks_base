@@ -535,6 +535,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         }
 
         String callerLogString = "KVBT.finishTask()";
+        String transportName = null;
 
         // If the backup data was not empty, we succeeded and this is the first time
         // we've done a backup, we can record the current backup dataset token.
@@ -542,6 +543,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         if (mHasDataToBackup && (status == BackupTransport.TRANSPORT_OK) && (currentToken == 0)) {
             try {
                 IBackupTransport transport = mTransportClient.connectOrThrow(callerLogString);
+                transportName = transport.name();
                 mBackupManagerService.setCurrentToken(transport.getCurrentRestoreSet());
                 mBackupManagerService.writeRestoreTokens();
             } catch (Exception e) {
@@ -553,7 +555,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         synchronized (mQueueLock) {
             mBackupManagerService.setBackupRunning(false);
             if (status == BackupTransport.TRANSPORT_NOT_INITIALIZED) {
-                mReporter.onTransportNotInitialized();
+                mReporter.onTransportNotInitialized(transportName);
                 try {
                     triggerTransportInitializationLocked();
                 } catch (Exception e) {
@@ -861,6 +863,8 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
             status = transport.performBackup(packageInfo, backupData, flags);
             if (status == BackupTransport.TRANSPORT_OK) {
                 status = transport.finishBackup();
+            } else if (status == BackupTransport.TRANSPORT_NOT_INITIALIZED) {
+                mReporter.onTransportNotInitialized(transport.name());
             }
         } catch (Exception e) {
             mReporter.onPackageBackupTransportError(packageName, e);
