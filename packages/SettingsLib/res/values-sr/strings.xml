@@ -213,7 +213,7 @@
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Дозволи откључавање функције за покретање"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"Желите ли да дозволите откључавање произвођача оригиналне опреме (OEM)?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"УПОЗОРЕЊЕ: Функције за заштиту уређаја неће функционисати на овом уређају док је ово подешавање укључено."</string>
-    <string name="mock_location_app" msgid="7966220972812881854">"Изабери апликацију за лажну локацију"</string>
+    <string name="mock_location_app" msgid="7966220972812881854">"Изаберите апликацију за лажну локацију"</string>
     <string name="mock_location_app_not_set" msgid="809543285495344223">"Апликација за лажну локацију није подешена"</string>
     <string name="mock_location_app_set" msgid="8966420655295102685">"Апликација за лажну локацију: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"Умрежавање"</string>
@@ -289,7 +289,7 @@
     <string name="strict_mode" msgid="1938795874357830695">"Омогућен је строги режим"</string>
     <string name="strict_mode_summary" msgid="142834318897332338">"Нека екран трепери када апликације обављају дуге операције на главној нити"</string>
     <string name="pointer_location" msgid="6084434787496938001">"Локација показивача"</string>
-    <string name="pointer_location_summary" msgid="840819275172753713">"Постав. елемент са тренутним подацима о додиру"</string>
+    <string name="pointer_location_summary" msgid="840819275172753713">"Преклопни елемент са тренутним подацима о додиру"</string>
     <string name="show_touches" msgid="2642976305235070316">"Приказуј додире"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"Приказуј визуелне повратне информације за додире"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Прикажи ажурирања површине"</string>
@@ -311,8 +311,8 @@
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Наметни смер распореда екрана здесна налево за све локалитете"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Наметни 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Омогући 4x MSAA у OpenGL ES 2.0 апликацијама"</string>
-    <string name="show_non_rect_clip" msgid="505954950474595172">"Отклони грешке у вези са радњама за исецање области које нису правоугаоног облика"</string>
-    <string name="track_frame_time" msgid="6094365083096851167">"Прик. проф. помоћу HWUI-а"</string>
+    <string name="show_non_rect_clip" msgid="505954950474595172">"Отклони грешке исецања области које нису правоугаоног облика"</string>
+    <string name="track_frame_time" msgid="6094365083096851167">"Пендеруј помоћу HWUI-а"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Омогући слојеве за отклањање грешака GPU-a"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Омогући учитавање отк. греш. GPU-a у апл. за отк. греш."</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Размера анимације прозора"</string>

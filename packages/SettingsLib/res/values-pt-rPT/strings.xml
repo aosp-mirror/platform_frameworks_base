@@ -251,7 +251,7 @@
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Selec. tam. reg. p/ mem. int. reg."</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Pretende limpar o armazenamento persistente do registo?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Quando deixamos de monitorizar com o registo persistente, é necessário apagar os dados de registo que se encontram no seu dispositivo."</string>
-    <string name="select_logpersist_title" msgid="7530031344550073166">"Arm. dados de registo persist. no disp."</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"Guardar dados de registo consistentemente"</string>
     <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"Selecionar buffers de registo para armazenamento persistente no dispositivo"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"Selecionar configuração USB"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"Selecionar configuração USB"</string>
@@ -294,7 +294,7 @@
     <string name="show_touches_summary" msgid="6101183132903926324">"Mostrar feedback visual para toques"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Atualiz. de superfície"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Destacar a superfície da janela ao atualizar"</string>
-    <string name="show_hw_screen_updates" msgid="4117270979975470789">"Most. atualiz. de vistas"</string>
+    <string name="show_hw_screen_updates" msgid="4117270979975470789">"Ver atualizações de vistas"</string>
     <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"Destacar vistas em janelas quando desenhadas"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Mostrar atual. cam. hard."</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Camadas de hard. flash verdes quando estão atuali."</string>
@@ -303,11 +303,11 @@
     <string name="disable_overlays_summary" msgid="3578941133710758592">"Utilizar sempre GPU para a composição do ecrã"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"Simular espaço da cor"</string>
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"Ativar vestígios OpenGL"</string>
-    <string name="usb_audio_disable_routing" msgid="8114498436003102671">"Desativ. encam. áudio USB"</string>
+    <string name="usb_audio_disable_routing" msgid="8114498436003102671">"Desativar encaminhamento áudio USB"</string>
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Desativar encam. auto. para periféricos áudio USB"</string>
     <string name="debug_layout" msgid="5981361776594526155">"Mostrar limit. do esquema"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Apresentar limites de clipes, margens, etc."</string>
-    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Forçar dir. do esq. RTL"</string>
+    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Forçar direção do esquema RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Forçar dir. do esq. do ecrã p. RTL tds os locais"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Forçar 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Ativar o 4x MSAA em aplicações OpenGL ES 2.0"</string>
@@ -317,7 +317,7 @@
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Permitir carreg. cam. depuração GPU p/ dep. app"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Escala de anim. da janela"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Escala de anim. de trans."</string>
-    <string name="animator_duration_scale_title" msgid="3406722410819934083">"Esc. de duração do anim."</string>
+    <string name="animator_duration_scale_title" msgid="3406722410819934083">"Escala de duração de animação"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"Simular apresentações secundárias"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"Aplicações"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"Não manter atividades"</string>

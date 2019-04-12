@@ -324,7 +324,7 @@
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"ユーザーが離れたアクティビティを直ちに破棄する"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"バックグラウンドプロセスの上限"</string>
     <string name="show_all_anrs" msgid="4924885492787069007">"バックグラウンド ANR の表示"</string>
-    <string name="show_all_anrs_summary" msgid="6636514318275139826">"バックグラウンド アプリが応答しない場合に通知"</string>
+    <string name="show_all_anrs_summary" msgid="6636514318275139826">"バックグラウンド アプリが応答しない場合にダイアログを表示"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"通知チャネルの警告を表示"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"アプリから有効なチャネルのない通知が投稿されたときに画面上に警告を表示します"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"外部ストレージへのアプリの書き込みを許可"</string>

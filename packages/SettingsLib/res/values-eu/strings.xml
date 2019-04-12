@@ -419,7 +419,7 @@
     <item msgid="1286113608943010849">"% 100"</item>
   </string-array>
     <string name="charge_length_format" msgid="8978516217024434156">"Duela <xliff:g id="ID_1">%1$s</xliff:g>"</string>
-    <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> guztiz kargatu arte"</string>
+    <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> geratzen dira"</string>
     <string name="screen_zoom_summary_small" msgid="5867245310241621570">"Txikia"</string>
     <string name="screen_zoom_summary_default" msgid="2247006805614056507">"Lehenetsia"</string>
     <string name="screen_zoom_summary_large" msgid="4835294730065424084">"Handia"</string>
