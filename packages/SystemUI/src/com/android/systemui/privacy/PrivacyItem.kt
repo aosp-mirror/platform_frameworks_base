@@ -24,10 +24,14 @@ import com.android.systemui.R
 
 typealias Privacy = PrivacyType
 
-enum class PrivacyType(val nameId: Int, val iconId: Int) {
-    TYPE_CAMERA(R.string.privacy_type_camera, R.drawable.stat_sys_camera),
-    TYPE_MICROPHONE(R.string.privacy_type_microphone, R.drawable.stat_sys_mic_none),
-    TYPE_LOCATION(R.string.privacy_type_location, R.drawable.stat_sys_location);
+enum class PrivacyType(private val nameId: Int, val iconId: Int) {
+    // This is uses the icons used by the corresponding permission groups in the AndroidManifest
+    TYPE_CAMERA(R.string.privacy_type_camera,
+            com.android.internal.R.drawable.perm_group_camera),
+    TYPE_MICROPHONE(R.string.privacy_type_microphone,
+            com.android.internal.R.drawable.perm_group_microphone),
+    TYPE_LOCATION(R.string.privacy_type_location,
+            com.android.internal.R.drawable.perm_group_location);
 
     fun getName(context: Context) = context.resources.getString(nameId)
 
