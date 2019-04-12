@@ -216,7 +216,7 @@
     <string name="mock_location_app" msgid="7966220972812881854">"Valige asukohateavet imiteeriv rakendus"</string>
     <string name="mock_location_app_not_set" msgid="809543285495344223">"Asukohateavet imiteeriv rakendus on määramata"</string>
     <string name="mock_location_app_set" msgid="8966420655295102685">"Asukohateavet imiteeriv rakendus: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="debug_networking_category" msgid="7044075693643009662">"Võrgustik"</string>
+    <string name="debug_networking_category" msgid="7044075693643009662">"Võrgundus"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Juhtmeta ekraaniühenduse sertifitseerimine"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Luba WiFi sõnaline logimine"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Hoia mobiilne andmeside alati aktiivne"</string>
@@ -294,8 +294,8 @@
     <string name="show_touches_summary" msgid="6101183132903926324">"Kuvab puudutuste visuaalse tagasiside"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Näita pinna värskendusi"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Akna pinna värskendamiseks kirjuta kogu akna pind üle"</string>
-    <string name="show_hw_screen_updates" msgid="4117270979975470789">"Kuva ekraanikuva värsk."</string>
-    <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"Joonistades kirjuta akende kuvad üle"</string>
+    <string name="show_hw_screen_updates" msgid="4117270979975470789">"Kuva ekraanikuva värskendusi"</string>
+    <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"Joonistades vilguta akende sisekuvasid"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Kuva riistvarakihtide värskendusi"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Riistvara kihid vilguvad värskendamisel roheliselt"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Silu GPU ülejoonistust"</string>

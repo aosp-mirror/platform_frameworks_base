@@ -293,7 +293,7 @@
     <string name="show_touches" msgid="2642976305235070316">"Afișați atingerile"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"Afișați feedbackul vizual pentru atingeri"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Actualizări suprafețe"</string>
-    <string name="show_screen_updates_summary" msgid="2569622766672785529">"Iluminare suprafețe toată fereastra la actualizare"</string>
+    <string name="show_screen_updates_summary" msgid="2569622766672785529">"Iluminarea întregii fereastre la actualizare"</string>
     <string name="show_hw_screen_updates" msgid="4117270979975470789">"Afiș. actualizări ecran"</string>
     <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"Iluminare ecrane din ferestre la desenare"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Actualiz. strat. hardware"</string>
@@ -326,9 +326,9 @@
     <string name="show_all_anrs" msgid="4924885492787069007">"Afișați ANR de fundal"</string>
     <string name="show_all_anrs_summary" msgid="6636514318275139826">"Afișați dialogul Aplicația nu răspunde pentru aplicațiile din fundal"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Afișați avertismentele de pe canalul de notificări"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Afișează avertisment pe ecran când o aplicație postează o notificare fără canal valid"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Afișați avertisment pe ecran când o aplicație postează o notificare fără canal valid"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Forțați accesul aplicațiilor la stocarea externă"</string>
-    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Face ca orice aplicație eligibilă să fie scrisă în stocarea externă, indiferent de valorile manifestului"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Faceți ca orice aplicație eligibilă să fie scrisă în stocarea externă, indiferent de valorile manifestului"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Forțați redimensionarea activităților"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Permiteți redimensionarea tuturor activităților pentru modul cu ferestre multiple, indiferent de valorile manifestului."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Activați ferestrele cu formă liberă"</string>

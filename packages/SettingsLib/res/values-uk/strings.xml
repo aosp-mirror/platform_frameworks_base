@@ -342,7 +342,7 @@
     <string name="loading_injected_setting_summary" msgid="4095178591461231376">"Завантаження…"</string>
   <string-array name="color_mode_names">
     <item msgid="2425514299220523812">"Насичений (за умовчанням)"</item>
-    <item msgid="8446070607501413455">"Природний"</item>
+    <item msgid="8446070607501413455">"Природні"</item>
     <item msgid="6553408765810699025">"Стандартний"</item>
   </string-array>
   <string-array name="color_mode_descriptions">
