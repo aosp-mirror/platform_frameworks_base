@@ -152,7 +152,7 @@
     <string name="launch_defaults_some" msgid="313159469856372621">"কিছু ডিফল্ট সেট করা রয়েছে"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"কোনো ডিফল্ট সেট করা নেই"</string>
     <string name="tts_settings" msgid="8186971894801348327">"পাঠ্য থেকে ভাষ্য আউটপুট সেটিংস"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"টেক্সট-থেকে-স্পীচ"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"টেক্সট-টু-স্পিচ"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"কথা বলার হার"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"যে গতিতে পাঠ্য উচ্চারিত হয়"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"পিচ"</string>
@@ -204,10 +204,10 @@
     <string name="enable_adb_summary" msgid="4881186971746056635">"USB কানেক্ট থাকাকালীন ডিবাগ মোড"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"USB ডিবাগিং অনুমতিগুলি প্রত্যাহার করুন"</string>
     <string name="bugreport_in_power" msgid="7923901846375587241">"ত্রুটি প্রতিবেদনের শর্টকাট"</string>
-    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"একটি ত্রুটি প্রতিবেদন গ্রহণের জন্য পাওয়ার মেনুতে একটি বোতাম দেখান"</string>
+    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"সমস্যার তথ্য ক্যাপচার করতে পাওয়ার মেনুতে একটি বোতাম দেখান"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"জাগিয়ে রাখুন"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"চার্জ হওয়ার স্ক্রিন কখনই নিদ্রা মোডে যাবে না"</string>
-    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"ব্লুটুথ HCI স্নুপ লগ সক্ষম করুন"</string>
+    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"ব্লুটুথ HCI স্নুপ লগ চালু করুন"</string>
     <string name="bt_hci_snoop_log_summary" msgid="8857606786588106495">"ব্লুটুথ প্যাকেট ক্যাপচার করুন। (এই সেটিং পরিবর্তন করার পরে ব্লুটুথ চালু অথবা বন্ধ করুন)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM আনলক করা হচ্ছে"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"বুট-লোডার আনলক করার অনুমতি দিন"</string>
@@ -257,7 +257,7 @@
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"USB কনফিগারেশন বেছে নিন"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"নকল অবস্থানের অনুমতি দিন"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"মক অবস্থানগুলি মঞ্জুর করুন"</string>
-    <string name="debug_view_attributes" msgid="6485448367803310384">"অ্যাট্রিবিউট পরিদর্শন দেখা সক্ষম করুন"</string>
+    <string name="debug_view_attributes" msgid="6485448367803310384">"অ্যাট্রিবিউট ইন্সপেকশন দেখা চালু করুন"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"ওয়াই-ফাই সক্রিয় থাকার সময়েও (দ্রুত নেটওয়ার্কে পাল্টানোর জন্য) সর্বদা মোবাইল ডেটা সক্রিয় রাখুন।"</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"টিথারিং হার্ডওয়্যার অ্যাক্সিলারেশন উপলব্ধ থাকলে ব্যবহার করুন"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB ডিবাগিং মঞ্জুর করবেন?"</string>
@@ -313,7 +313,7 @@
     <string name="force_msaa_summary" msgid="9123553203895817537">"OpenGL ES 2.0 অ্যাপ্লিকেশানগুলির মধ্যে 4x MSAA সক্রিয় করুন"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"অ-আয়তক্ষেত্রাকার ক্লিপ অ্যাক্টিভিটি ডিবাগ করুন"</string>
     <string name="track_frame_time" msgid="6094365083096851167">"প্রোফাইল HWUI রেন্ডারিং"</string>
-    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"GPU ডিবাগ স্তর সক্ষম করুন"</string>
+    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"GPU ডিবাগ স্তর চালু করুন"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"ডিবাগ অ্যাপের জন্য GPU ডিবাগ স্তর লোড হতে দিন"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"উইন্ডো অ্যানিমেশন স্কেল"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"ট্র্যানজিশন অ্যানিমেশন স্কেল"</string>

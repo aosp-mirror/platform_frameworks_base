@@ -291,13 +291,13 @@
     <string name="pointer_location" msgid="6084434787496938001">"Lokasi penunjuk"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Hamparan layar menampilkan data sentuhan saat ini"</string>
     <string name="show_touches" msgid="2642976305235070316">"Tampilkan tap"</string>
-    <string name="show_touches_summary" msgid="6101183132903926324">"Tampilkan masukan visual untuk ketukan"</string>
+    <string name="show_touches_summary" msgid="6101183132903926324">"Tampilkan masukan visual untuk tap"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Lihat pembaruan permukaan"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Sorot seluruh permukaan jendela saat diperbarui"</string>
     <string name="show_hw_screen_updates" msgid="4117270979975470789">"Tampilkan update tampilan"</string>
     <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"Tampilan cepat dalam jendela saat digambar"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Tunjukkan update lapisan hardware"</string>
-    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Lapisan hardware berkedip hijau saat memperbarui"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Lapisan hardware berkedip hijau saat mengupdate"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Debug overdraw oleh GPU"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"Nonaktifkan lapisan HW"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"Selalu gunakan GPU untuk pengomposisian layar"</string>
@@ -320,8 +320,8 @@
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Skala durasi animator"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"Simulasikan tampilan sekunder"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"Aplikasi"</string>
-    <string name="immediately_destroy_activities" msgid="1579659389568133959">"Jangan simpan kegiatan"</string>
-    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Hancurkan tiap kegiatan setelah ditinggal pengguna"</string>
+    <string name="immediately_destroy_activities" msgid="1579659389568133959">"Jangan simpan aktivitas"</string>
+    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Hancurkan tiap aktivitas setelah ditinggal pengguna"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"Batas proses background"</string>
     <string name="show_all_anrs" msgid="4924885492787069007">"Tampilkan ANR background"</string>
     <string name="show_all_anrs_summary" msgid="6636514318275139826">"Tampilkan dialog Aplikasi Tidak Merespons untuk aplikasi yang berjalan di background"</string>
@@ -367,7 +367,7 @@
     <string name="button_convert_fbe" msgid="5152671181309826405">"Hapus dan konversi…"</string>
     <string name="picture_color_mode" msgid="4560755008730283695">"Mode warna gambar"</string>
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"Gunakan sRGB"</string>
-    <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"Nonaktifkan"</string>
+    <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"Dinonaktifkan"</string>
     <string name="daltonizer_mode_monochromacy" msgid="8485709880666106721">"Monokromasi"</string>
     <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"Deuteromali (merah-hijau)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"Protanomali (merah-hijau)"</string>
