@@ -69,9 +69,17 @@ public final class TestUtils {
         }
     }
 
-    // TODO : fetch the creator through reflection or something instead of passing it
-    public static <T extends Parcelable, C extends Parcelable.Creator<T>>
-            void assertParcelingIsLossless(T source, C creator) {
+    /**
+     * Return a new instance of {@code T} after being parceled then unparceled.
+     */
+    public static <T extends Parcelable> T parcelingRoundTrip(T source) {
+        final Parcelable.Creator<T> creator;
+        try {
+            creator = (Parcelable.Creator<T>) source.getClass().getField("CREATOR").get(null);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            fail("Missing CREATOR field: " + e.getMessage());
+            return null;
+        }
         Parcel p = Parcel.obtain();
         source.writeToParcel(p, /* flags */ 0);
         p.setDataPosition(0);
@@ -79,7 +87,14 @@ public final class TestUtils {
         p = Parcel.obtain();
         p.unmarshall(marshalled, 0, marshalled.length);
         p.setDataPosition(0);
-        T dest = creator.createFromParcel(p);
-        assertEquals(source, dest);
+        return creator.createFromParcel(p);
+    }
+
+    /**
+     * Assert that after being parceled then unparceled, {@code source} is equal to the original
+     * object.
+     */
+    public static <T extends Parcelable> void assertParcelingIsLossless(T source) {
+        assertEquals(source, parcelingRoundTrip(source));
     }
 }
