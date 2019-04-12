@@ -16,8 +16,6 @@
 
 package com.android.server;
 
-import static android.content.pm.PackageManager.GET_PERMISSIONS;
-import static android.content.pm.PackageManager.MATCH_ANY_USER;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.NETID_UNSET;
 import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_OFF;
@@ -105,7 +103,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
@@ -274,7 +271,6 @@ public class ConnectivityServiceTest {
     @Mock IDnsResolver mMockDnsResolver;
     @Mock INetd mMockNetd;
     @Mock NetworkStackClient mNetworkStack;
-    @Mock PackageManager mPackageManager;
     @Mock UserManager mUserManager;
 
     private ArgumentCaptor<String[]> mStringArrayCaptor = ArgumentCaptor.forClass(String[].class);
@@ -358,11 +354,6 @@ public class ConnectivityServiceTest {
         @Override
         public Resources getResources() {
             return mResources;
-        }
-
-        @Override
-        public PackageManager getPackageManager() {
-            return mPackageManager;
         }
     }
 
@@ -1232,12 +1223,6 @@ public class ConnectivityServiceTest {
         when(mUserManager.getUsers(eq(true))).thenReturn(
                 Arrays.asList(new UserInfo[] {
                         new UserInfo(VPN_USER, "", 0),
-                }));
-        when(mPackageManager.getInstalledPackages(eq(GET_PERMISSIONS | MATCH_ANY_USER))).thenReturn(
-                Arrays.asList(new PackageInfo[] {
-                        buildPackageInfo(/* SYSTEM */ false, APP1_UID),
-                        buildPackageInfo(/* SYSTEM */ false, APP2_UID),
-                        buildPackageInfo(/* SYSTEM */ false, VPN_UID)
                 }));
 
         // InstrumentationTestRunner prepares a looper, but AndroidJUnitRunner does not.
@@ -6168,6 +6153,7 @@ public class ConnectivityServiceTest {
     }
 
     @Test
+    @Ignore
     public void testFullyRoutedVpnResultsInInterfaceFilteringRules() throws Exception {
         LinkProperties lp = new LinkProperties();
         lp.setInterfaceName("tun0");
@@ -6194,6 +6180,7 @@ public class ConnectivityServiceTest {
     }
 
     @Test
+    @Ignore
     public void testLegacyVpnDoesNotResultInInterfaceFilteringRule() throws Exception {
         LinkProperties lp = new LinkProperties();
         lp.setInterfaceName("tun0");
@@ -6206,6 +6193,8 @@ public class ConnectivityServiceTest {
         verify(mMockNetd, never()).firewallAddUidInterfaceRules(any(), any());
     }
 
+    @Test
+    @Ignore
     public void testLocalIpv4OnlyVpnDoesNotResultInInterfaceFilteringRule()
             throws Exception {
         LinkProperties lp = new LinkProperties();
@@ -6221,6 +6210,7 @@ public class ConnectivityServiceTest {
     }
 
     @Test
+    @Ignore
     public void testVpnHandoverChangesInterfaceFilteringRule() throws Exception {
         LinkProperties lp = new LinkProperties();
         lp.setInterfaceName("tun0");
@@ -6270,6 +6260,7 @@ public class ConnectivityServiceTest {
     }
 
     @Test
+    @Ignore
     public void testUidUpdateChangesInterfaceFilteringRule() throws Exception {
         LinkProperties lp = new LinkProperties();
         lp.setInterfaceName("tun0");
