@@ -66,6 +66,9 @@ public class FingerprintDialogView extends BiometricDialogView {
         } else if (oldState == STATE_AUTHENTICATING && newState == STATE_AUTHENTICATED) {
             // TODO(b/77328470): add animation when fingerprint is authenticated
             return false;
+        } else if (oldState == STATE_ERROR && newState == STATE_AUTHENTICATED) {
+            // TODO(b/77328470): add animation when fingerprint is authenticated
+            return false;
         }
         return false;
     }
@@ -91,6 +94,9 @@ public class FingerprintDialogView extends BiometricDialogView {
         } else if (oldState == STATE_ERROR && newState == STATE_AUTHENTICATING) {
             iconRes = R.drawable.fingerprint_dialog_error_to_fp;
         } else if (oldState == STATE_AUTHENTICATING && newState == STATE_AUTHENTICATED) {
+            // TODO(b/77328470): add animation when fingerprint is authenticated
+            iconRes = R.drawable.fingerprint_dialog_fp_to_error;
+        } else if (oldState == STATE_ERROR && newState == STATE_AUTHENTICATED) {
             // TODO(b/77328470): add animation when fingerprint is authenticated
             iconRes = R.drawable.fingerprint_dialog_fp_to_error;
         } else {
