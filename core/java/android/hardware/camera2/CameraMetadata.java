@@ -1252,6 +1252,7 @@ public abstract class CameraMetadata<TKey> {
      * fire the flash for flash power metering during precapture, and then fire the flash
      * for the final capture, if a flash is available on the device and the AE mode is set to
      * enable the flash.</p>
+     * <p>Devices that initially shipped with Android version {@link android.os.Build.VERSION_CODES#Q Q} or newer will not include any LEGACY-level devices.</p>
      *
      * @see CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
