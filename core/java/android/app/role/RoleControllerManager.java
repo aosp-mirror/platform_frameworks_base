@@ -52,7 +52,10 @@ public class RoleControllerManager {
 
     private static final String LOG_TAG = RoleControllerManager.class.getSimpleName();
 
+    private static volatile ComponentName sRemoteServiceComponentName;
+
     private static final Object sRemoteServicesLock = new Object();
+
     /**
      * Global remote services (per user) used by all {@link RoleControllerManager managers}.
      */
@@ -62,18 +65,36 @@ public class RoleControllerManager {
     @NonNull
     private final RemoteService mRemoteService;
 
-    public RoleControllerManager(@NonNull Context context, @NonNull Handler handler) {
+    /**
+     * Initialize the remote service component name once so that we can avoid acquiring the
+     * PackageManagerService lock in constructor.
+     *
+     * @see #createWithInitializedRemoteServiceComponentName(Handler, Context)
+     */
+    public static void initializeRemoteServiceComponentName(@NonNull Context context) {
+        sRemoteServiceComponentName = getRemoteServiceComponentName(context);
+    }
+
+    /**
+     * Create a {@link RoleControllerManager} instance with the initialized remote service component
+     * name so that we can avoid acquiring the PackageManagerService lock in constructor.
+     *
+     * @see #initializeRemoteServiceComponentName(Context)
+     */
+    @NonNull
+    public static RoleControllerManager createWithInitializedRemoteServiceComponentName(
+            @NonNull Handler handler, @NonNull Context context) {
+        return new RoleControllerManager(sRemoteServiceComponentName, handler, context);
+    }
+
+    private RoleControllerManager(@NonNull ComponentName remoteServiceComponentName,
+            @NonNull Handler handler, @NonNull Context context) {
         synchronized (sRemoteServicesLock) {
             int userId = context.getUserId();
             RemoteService remoteService = sRemoteServices.get(userId);
             if (remoteService == null) {
-                Intent intent = new Intent(RoleControllerService.SERVICE_INTERFACE);
-                PackageManager packageManager = context.getPackageManager();
-                intent.setPackage(packageManager.getPermissionControllerPackageName());
-                ResolveInfo resolveInfo = packageManager.resolveService(intent, 0);
-
                 remoteService = new RemoteService(context.getApplicationContext(),
-                        resolveInfo.getComponentInfo().getComponentName(), handler, userId);
+                        remoteServiceComponentName, handler, userId);
                 sRemoteServices.put(userId, remoteService);
             }
             mRemoteService = remoteService;
@@ -81,7 +102,16 @@ public class RoleControllerManager {
     }
 
     public RoleControllerManager(@NonNull Context context) {
-        this(context, context.getMainThreadHandler());
+        this(getRemoteServiceComponentName(context), context.getMainThreadHandler(), context);
+    }
+
+    @NonNull
+    private static ComponentName getRemoteServiceComponentName(@NonNull Context context) {
+        Intent intent = new Intent(RoleControllerService.SERVICE_INTERFACE);
+        PackageManager packageManager = context.getPackageManager();
+        intent.setPackage(packageManager.getPermissionControllerPackageName());
+        ResolveInfo resolveInfo = packageManager.resolveService(intent, 0);
+        return resolveInfo.getComponentInfo().getComponentName();
     }
 
     /**
