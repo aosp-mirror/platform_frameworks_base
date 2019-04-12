@@ -300,17 +300,9 @@ int ReliableSurface::hook_perform(ANativeWindow* window, int operation, ...) {
     int result = callProtected(getWrapped(window), perform, operation, args);
     va_end(args);
 
-    switch (operation) {
-        case NATIVE_WINDOW_SET_BUFFERS_FORMAT:
-        case NATIVE_WINDOW_SET_USAGE:
-        case NATIVE_WINDOW_SET_USAGE64:
-            va_start(args, operation);
-            getSelf(window)->perform(operation, args);
-            va_end(args);
-            break;
-        default:
-            break;
-    }
+    va_start(args, operation);
+    getSelf(window)->perform(operation, args);
+    va_end(args);
 
     return result;
 }
