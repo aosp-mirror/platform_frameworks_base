@@ -288,7 +288,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.sendKeyguardBouncerChanged(true);
         mTestableLooper.processAllMessages();
 
-        verify(mFaceManager).authenticate(any(), any(), anyInt(), any(), any());
+        verify(mFaceManager).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
         verify(mFaceManager).isHardwareDetected();
         verify(mFaceManager).hasEnrolledTemplates(anyInt());
     }
@@ -298,7 +298,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.dispatchStartedWakingUp();
         mTestableLooper.processAllMessages();
         mKeyguardUpdateMonitor.onKeyguardVisibilityChanged(true);
-        verify(mFaceManager).authenticate(any(), any(), anyInt(), any(), any());
+        verify(mFaceManager).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
     }
 
     @Test
@@ -317,7 +317,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.setKeyguardOccluded(true);
         mKeyguardUpdateMonitor.setAssistantVisible(true);
 
-        verify(mFaceManager).authenticate(any(), any(), anyInt(), any(), any());
+        verify(mFaceManager).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
     }
 
     @Test
