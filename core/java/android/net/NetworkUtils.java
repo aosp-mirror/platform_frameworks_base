@@ -145,9 +145,10 @@ public class NetworkUtils {
     /**
      * DNS resolver series jni method.
      * Read a result for the query associated with the {@code fd}.
-     * @return a byte array containing blob answer
+     * @return DnsResponse containing blob answer and rcode
      */
-    public static native byte[] resNetworkResult(FileDescriptor fd) throws ErrnoException;
+    public static native DnsResolver.DnsResponse resNetworkResult(FileDescriptor fd)
+            throws ErrnoException;
 
     /**
      * DNS resolver series jni method.
