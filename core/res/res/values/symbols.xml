@@ -381,6 +381,7 @@
   <java-symbol type="bool" name="config_wifi_revert_country_code_on_cellular_loss" />
   <java-symbol type="integer" name="config_wifi_logger_ring_buffer_default_size_limit_kb" />
   <java-symbol type="integer" name="config_wifi_logger_ring_buffer_verbose_size_limit_kb" />
+  <java-symbol type="array" name="config_wifi_fatal_firmware_alert_error_code_list" />
   <java-symbol type="bool" name="config_wifi_turn_off_during_emergency_call" />
   <java-symbol type="bool" name="config_supportMicNearUltrasound" />
   <java-symbol type="bool" name="config_supportSpeakerNearUltrasound" />

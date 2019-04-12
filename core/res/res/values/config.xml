@@ -572,6 +572,15 @@
     <!-- Integer size limit, in KB, for a single WifiLogger ringbuffer, in verbose logging mode -->
     <integer translatable="false" name="config_wifi_logger_ring_buffer_verbose_size_limit_kb">1024</integer>
 
+    <!-- Array indicating wifi fatal firmware alert error code list from driver -->
+    <integer-array translatable="false" name="config_wifi_fatal_firmware_alert_error_code_list">
+        <!-- Example:
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        -->
+    </integer-array>
+
     <!-- Boolean indicating whether or not wifi should turn off when emergency call is made -->
     <bool translatable="false" name="config_wifi_turn_off_during_emergency_call">false</bool>
 
