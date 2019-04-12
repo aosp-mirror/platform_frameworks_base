@@ -37,6 +37,7 @@ android_library {
         "src/**/*.java",
         ":framework-networkstack-shared-srcs",
         ":services-networkstack-shared-srcs",
+        ":statslog-networkstack-java-gen",
     ],
     static_libs: [
         "androidx.annotation_annotation",
@@ -103,4 +104,12 @@ android_app {
     defaults: ["NetworkStackAppCommon"],
     certificate: "networkstack",
     manifest: "AndroidManifest.xml",
+}
+
+genrule {
+    name: "statslog-networkstack-java-gen",
+    tools: ["stats-log-api-gen"],
+    cmd: "$(location stats-log-api-gen) --java $(out) --module network_stack" +
+         " --javaPackage com.android.networkstack.metrics --javaClass NetworkStackStatsLog",
+    out: ["com/android/networkstack/metrics/NetworkStackStatsLog.java"],
 }

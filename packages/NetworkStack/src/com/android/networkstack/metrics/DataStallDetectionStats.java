@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.net.metrics;
+package com.android.networkstack.metrics;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
