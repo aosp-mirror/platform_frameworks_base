@@ -566,7 +566,18 @@ public final class Zygote {
             System.exit(-1);
         } finally {
             IoUtils.closeQuietly(sessionSocket);
-            IoUtils.closeQuietly(usapPoolSocket);
+
+            try {
+                // This socket is closed using Os.close due to an issue with the implementation of
+                // LocalSocketImp.close.  Because the raw FD is created by init and then loaded from
+                // an environment variable (as opposed to being created by the LocalSocketImpl
+                // itself) the current implementation will not actually close the underlying FD.
+                //
+                // See b/130309968 for discussion of this issue.
+                Os.close(usapPoolSocket.getFileDescriptor());
+            } catch (ErrnoException ex) {
+                Log.e("USAP", "Failed to close USAP pool socket: " + ex.getMessage());
+            }
         }
 
         try {
