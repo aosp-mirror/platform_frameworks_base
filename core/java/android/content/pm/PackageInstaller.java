@@ -1222,7 +1222,7 @@ public class PackageInstaller {
             try {
                 mSession.addChildSessionId(sessionId);
             } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
+                e.rethrowFromSystemServer();
             }
         }
 
@@ -1236,7 +1236,7 @@ public class PackageInstaller {
             try {
                 mSession.removeChildSessionId(sessionId);
             } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
+                e.rethrowFromSystemServer();
             }
         }
     }
