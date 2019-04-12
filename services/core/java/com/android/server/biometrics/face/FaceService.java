@@ -548,7 +548,8 @@ public class FaceService extends BiometricServiceBase {
                 throws RemoteException {
             if (mFaceServiceReceiver != null) {
                 if (biometric == null || biometric instanceof Face) {
-                    mFaceServiceReceiver.onAuthenticationSucceeded(deviceId, (Face)biometric);
+                    mFaceServiceReceiver.onAuthenticationSucceeded(deviceId, (Face) biometric,
+                            userId);
                 } else {
                     Slog.e(TAG, "onAuthenticationSucceeded received non-face biometric");
                 }
