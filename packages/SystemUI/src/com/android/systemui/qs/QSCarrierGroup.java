@@ -139,43 +139,49 @@ public class QSCarrierGroup extends LinearLayout implements
 
     @Override
     public void updateCarrierInfo(CarrierTextController.CarrierTextCallbackInfo info) {
-        if (info.anySimReady) {
-            boolean[] slotSeen = new boolean[SIM_SLOTS];
-            if (info.listOfCarriers.length == info.subscriptionIds.length) {
-                for (int i = 0; i < SIM_SLOTS && i < info.listOfCarriers.length; i++) {
-                    int slot = getSlotIndex(info.subscriptionIds[i]);
-                    if (slot >= SIM_SLOTS) {
-                        Log.w(TAG, "updateInfoCarrier - slot: " + slot);
-                        continue;
+        if (info.airplaneMode) {
+            setVisibility(View.GONE);
+        } else {
+            setVisibility(View.VISIBLE);
+            if (info.anySimReady) {
+                boolean[] slotSeen = new boolean[SIM_SLOTS];
+                if (info.listOfCarriers.length == info.subscriptionIds.length) {
+                    for (int i = 0; i < SIM_SLOTS && i < info.listOfCarriers.length; i++) {
+                        int slot = getSlotIndex(info.subscriptionIds[i]);
+                        if (slot >= SIM_SLOTS) {
+                            Log.w(TAG, "updateInfoCarrier - slot: " + slot);
+                            continue;
+                        }
+                        if (slot == SubscriptionManager.INVALID_SIM_SLOT_INDEX) {
+                            Log.e(TAG,
+                                    "Invalid SIM slot index for subscription: "
+                                            + info.subscriptionIds[i]);
+                            continue;
+                        }
+                        mInfos[slot].visible = true;
+                        slotSeen[slot] = true;
+                        mCarrierGroups[slot].setCarrierText(
+                                info.listOfCarriers[i].toString().trim());
+                        mCarrierGroups[slot].setVisibility(View.VISIBLE);
                     }
-                    if (slot == SubscriptionManager.INVALID_SIM_SLOT_INDEX) {
-                        Log.e(TAG,
-                                "Invalid SIM slot index for subscription: "
-                                        + info.subscriptionIds[i]);
-                        continue;
+                    for (int i = 0; i < SIM_SLOTS; i++) {
+                        if (!slotSeen[i]) {
+                            mInfos[i].visible = false;
+                            mCarrierGroups[i].setVisibility(View.GONE);
+                        }
                     }
-                    mInfos[slot].visible = true;
-                    slotSeen[slot] = true;
-                    mCarrierGroups[slot].setCarrierText(info.listOfCarriers[i].toString().trim());
-                    mCarrierGroups[slot].setVisibility(View.VISIBLE);
-                }
-                for (int i = 0; i < SIM_SLOTS; i++) {
-                    if (!slotSeen[i]) {
-                        mInfos[i].visible = false;
-                        mCarrierGroups[i].setVisibility(View.GONE);
-                    }
+                } else {
+                    Log.e(TAG, "Carrier information arrays not of same length");
                 }
             } else {
-                Log.e(TAG, "Carrier information arrays not of same length");
-            }
-        } else {
-            mInfos[0].visible = false;
-            mCarrierGroups[0].setCarrierText(info.carrierText);
-            mCarrierGroups[0].setVisibility(View.VISIBLE);
-            for (int i = 1; i < SIM_SLOTS; i++) {
-                mInfos[i].visible = false;
-                mCarrierGroups[i].setCarrierText("");
-                mCarrierGroups[i].setVisibility(View.GONE);
+                mInfos[0].visible = false;
+                mCarrierGroups[0].setCarrierText(info.carrierText);
+                mCarrierGroups[0].setVisibility(View.VISIBLE);
+                for (int i = 1; i < SIM_SLOTS; i++) {
+                    mInfos[i].visible = false;
+                    mCarrierGroups[i].setCarrierText("");
+                    mCarrierGroups[i].setVisibility(View.GONE);
+                }
             }
         }
         handleUpdateState();
