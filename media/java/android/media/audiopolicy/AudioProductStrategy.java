@@ -323,6 +323,7 @@ public final class AudioProductStrategy implements Parcelable {
     /**
      * To avoid duplicating the logic in java and native, we shall make use of
      * native API native_get_product_strategies_from_audio_attributes
+     * Keep in sync with frameworks/av/media/libaudioclient/AudioProductStrategy::attributesMatches
      * @param refAttr {@link AudioAttributes} to be taken as the reference
      * @param attr {@link AudioAttributes} of the requester.
      */
