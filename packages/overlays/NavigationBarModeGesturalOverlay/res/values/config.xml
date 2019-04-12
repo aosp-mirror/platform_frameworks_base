@@ -34,7 +34,7 @@
     <dimen name="config_backGestureInset">20dp</dimen>
 
     <!-- Controls whether the navbar needs a scrim with
-     {@link Window#setEnsureNavigationBarContrastWhenTransparent}. -->
+     {@link Window#setEnsuringNavigationBarContrastWhenTransparent}. -->
     <bool name="config_navBarNeedsScrim">false</bool>
 
 </resources>
