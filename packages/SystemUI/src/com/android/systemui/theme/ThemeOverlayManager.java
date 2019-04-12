@@ -23,9 +23,11 @@ import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.google.android.collect.Lists;
 import com.google.android.collect.Sets;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -62,15 +64,18 @@ class ThemeOverlayManager {
     static final String OVERLAY_CATEGORY_ICON_LAUNCHER =
             "android.theme.customization.icon_pack.launcher";
 
-    /* All theme customization categories used by the system. */
-    static final Set<String> THEME_CATEGORIES = Sets.newHashSet(
-            OVERLAY_CATEGORY_COLOR,
-            OVERLAY_CATEGORY_FONT,
+    /*
+     * All theme customization categories used by the system, in order that they should be applied,
+     * starts with launcher and grouped by target package.
+     */
+    static final List<String> THEME_CATEGORIES = Lists.newArrayList(
+            OVERLAY_CATEGORY_ICON_LAUNCHER,
             OVERLAY_CATEGORY_SHAPE,
+            OVERLAY_CATEGORY_FONT,
+            OVERLAY_CATEGORY_COLOR,
             OVERLAY_CATEGORY_ICON_ANDROID,
             OVERLAY_CATEGORY_ICON_SYSUI,
-            OVERLAY_CATEGORY_ICON_SETTINGS,
-            OVERLAY_CATEGORY_ICON_LAUNCHER);
+            OVERLAY_CATEGORY_ICON_SETTINGS);
 
     /* Categories that need to applied to the current user as well as the system user. */
     @VisibleForTesting
@@ -115,29 +120,30 @@ class ThemeOverlayManager {
      */
     void applyCurrentUserOverlays(
             Map<String, String> categoryToPackage, Set<UserHandle> userHandles) {
-        final Map<Boolean, List<String>> categorySplit = THEME_CATEGORIES.stream().collect(
-                Collectors.partitioningBy((category) -> categoryToPackage.containsKey(category)));
-        final List<String> overlayCategoriesToEnable = categorySplit.get(true);
-        final List<String> overlayCategoriesToDisable = categorySplit.get(false);
-
         // Disable all overlays that have not been specified in the user setting.
-        final List<OverlayInfo> overlays = new ArrayList<>();
-        overlayCategoriesToDisable.stream()
+        final Set<String> overlayCategoriesToDisable = new HashSet<>(THEME_CATEGORIES);
+        overlayCategoriesToDisable.removeAll(categoryToPackage.keySet());
+        final Set<String> targetPackagesToQuery = overlayCategoriesToDisable.stream()
                 .map(category -> mCategoryToTargetPackage.get(category))
-                .collect(Collectors.toSet())
-                .forEach(targetPackage -> overlays.addAll(mOverlayManager
-                        .getOverlayInfosForTarget(targetPackage, UserHandle.SYSTEM)));
-        overlays.stream()
+                .collect(Collectors.toSet());
+        final List<OverlayInfo> overlays = new ArrayList<>();
+        targetPackagesToQuery.forEach(targetPackage -> overlays.addAll(mOverlayManager
+                .getOverlayInfosForTarget(targetPackage, UserHandle.SYSTEM)));
+        final Map<String, String> overlaysToDisable = overlays.stream()
                 .filter(o ->
                         mTargetPackageToCategories.get(o.targetPackageName).contains(o.category))
                 .filter(o -> overlayCategoriesToDisable.contains(o.category))
                 .filter(o -> o.isEnabled())
-                .forEach(o -> setEnabled(o.packageName, o.category, userHandles, false));
+                .collect(Collectors.toMap((o) -> o.category, (o) -> o.packageName));
 
-
-        // Enable all overlays specified in the user setting.
-        overlayCategoriesToEnable.forEach((category) ->
-                setEnabled(categoryToPackage.get(category), category, userHandles, true));
+        // Toggle overlays in the order of THEME_CATEGORIES.
+        for (String category : THEME_CATEGORIES) {
+            if (categoryToPackage.containsKey(category)) {
+                setEnabled(categoryToPackage.get(category), category, userHandles, true);
+            } else if (overlaysToDisable.containsKey(category)) {
+                setEnabled(overlaysToDisable.get(category), category, userHandles, false);
+            }
+        }
     }
 
     private void setEnabled(
