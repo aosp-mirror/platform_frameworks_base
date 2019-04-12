@@ -91,6 +91,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         if (mLayoutOrientation != newConfig.orientation) {
             mLayoutOrientation = newConfig.orientation;
             setCurrentItem(0, false);
+            mPageToRestore = 0;
         }
     }
 
@@ -101,6 +102,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             mLayoutDirection = layoutDirection;
             setAdapter(mAdapter);
             setCurrentItem(0, false);
+            mPageToRestore = 0;
         }
     }
 
@@ -110,6 +112,17 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             item = mPages.size() - 1 - item;
         }
         super.setCurrentItem(item, smoothScroll);
+    }
+
+    /**
+     * Obtains the current page number respecting RTL
+     */
+    private int getCurrentPageNumber() {
+        int page = getCurrentItem();
+        if (mLayoutDirection == LAYOUT_DIRECTION_RTL) {
+            page = mPages.size() - 1 - page;
+        }
+        return page;
     }
 
     @Override
@@ -199,7 +212,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         // marquee. This will ensure that accessibility doesn't announce the TYPE_VIEW_SELECTED
         // event on any of the children.
         setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
-        int currentItem = isLayoutRtl() ? mPages.size() - 1 - getCurrentItem() : getCurrentItem();
+        int currentItem = getCurrentPageNumber();
         for (int i = 0; i < mPages.size(); i++) {
             mPages.get(i).setSelected(i == currentItem ? selected : false);
         }
@@ -328,7 +341,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
     public int getNumVisibleTiles() {
         if (mPages.size() == 0) return 0;
-        TilePage currentPage = mPages.get(getCurrentItem());
+        TilePage currentPage = mPages.get(getCurrentPageNumber());
         return currentPage.mRecords.size();
     }
 
