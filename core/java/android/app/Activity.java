@@ -4909,10 +4909,11 @@ public class Activity extends ContextThemeWrapper
         final boolean targetPreQ = targetSdk < Build.VERSION_CODES.Q;
         if (!targetPreQ) {
             mTaskDescription.setEnsureStatusBarContrastWhenTransparent(a.getBoolean(
-                    R.styleable.ActivityTaskDescription_ensureStatusBarContrastWhenTransparent,
+                    R.styleable.ActivityTaskDescription_ensuringStatusBarContrastWhenTransparent,
                     false));
             mTaskDescription.setEnsureNavigationBarContrastWhenTransparent(a.getBoolean(
-                    R.styleable.ActivityTaskDescription_ensureNavigationBarContrastWhenTransparent,
+                    R.styleable
+                            .ActivityTaskDescription_ensuringNavigationBarContrastWhenTransparent,
                     true));
         }
 
