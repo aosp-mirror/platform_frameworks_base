@@ -22,6 +22,13 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 
 /**
+ * An {@code InputMonitor} allows privileged applications and components to monitor streams of
+ * {@link InputEvent}s without having to be the designated recipient for the event.
+ *
+ * For example, focus dispatched events would normally only go to the focused window on the
+ * targeted display, but an {@code InputMonitor} will also receive a copy of that event if they're
+ * registered to monitor that type of event on the targeted display.
+ *
  * @hide
  */
 public final class InputMonitor implements Parcelable {
