@@ -1971,10 +1971,6 @@
     <bool name="config_showDefaultEmergency">false</bool>
     <!-- Whether the default home settings should be shown. -->
     <bool name="config_showDefaultHome">true</bool>
-    <!-- The name of the package that will hold the music role by default. -->
-    <string name="config_defaultMusic" translatable="false">com.android.music</string>
-    <!-- The name of the package that will hold the gallery role by default. -->
-    <string name="config_defaultGallery" translatable="false">com.android.gallery3d</string>
 
     <!-- Enable/disable default bluetooth profiles:
         HSP_AG, ObexObjectPush, Audio, NAP -->
