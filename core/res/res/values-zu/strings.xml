@@ -136,9 +136,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Ukushaya kwe-WiFi | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Ukushaya kwe-Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"I-Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Ukushaya kwe-WiFi"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Valiwe"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Kuncanyelwa i-Wi-Fi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Kuncanyelwa iselula"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"Ikholi esebenza nge-Wi-Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"Shaya ngenethiwekhi yeselula"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"I-Wi-Fi kuphela"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Akudlulisiwe"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -430,6 +434,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Ivumela uhlelo lokusebenza ukufinyelela izici zefoni zedivayisi. Le mvume ivumela uhlelo lokusebenza ukucacisa inombolo yefoni nobunikazi bedivayisi, ukuthi noma ikholi iyasebenza, futhi nenombolo yesilawuli kude zixhunywe ngekholi."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"yanza imizila yamakholi ngesistimu"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Ivumela uhlelo lokusebenza ukwenza imizila yamakholi ngesistimu ukuze ithuthukise umuzwa wokushaya."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"bona futhi ulawule amakholi ngesistimu."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Ivumela uhlelo lokusebenza ukubona nokulawula amakholi aqhubekayo kudivayisi. Lokhu kubandakanya ulwazi olufana nezinombolo zamakholi nesimo samakholi."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"qhuba ikholi kusukela kolunye uhlelo lokusebenza"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Ivumela uhlelo lokusebenza ukuze luqhube ikholi eqalwe kolunye uhlelo lokusebenza."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"funda izinombolo zefoni"</string>
@@ -1030,7 +1036,7 @@
     <string name="add_contact_desc" msgid="4830217847004590345">"Engeza koxhumana nabo"</string>
     <string name="view_calendar" msgid="979609872939597838">"Buka"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"Buka isikhathi esikhethiwe kwikhalenda"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Ishejuli"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Shejula"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Shejula imicimbi yesikhathi esikhethiwe"</string>
     <string name="view_flight" msgid="7691640491425680214">"Landelela"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Ithrekhi ikhethe indiza"</string>
@@ -1177,8 +1183,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Ngena ngemvume kunethiwekhi"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"I-Wi-Fi ayinakho ukufinyelela kwe-inthanethi"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"I-<xliff:g id="NETWORK_SSID">%1$s</xliff:g> ayinakho ukufinyelela kwe-inthanethi"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Thepha ukuze uthole izinketho"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Kuxhunyiwe"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"I-<xliff:g id="NETWORK_SSID">%1$s</xliff:g> inokuxhumeka okukhawulelwe"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Thepha ukuze uxhume noma kunjalo"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Ushintsho kuzilungiselelo zakho ze-hotspot"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Ibhendi yakho ye-hotspot ishintshile."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Le divayisi ayisekeli okuncamelayo kwe-5GHz kuphela. Kunalokho, le divayisi izosebenzisa ibhendi ye-5GHz uma itholakala."</string>
@@ -1879,7 +1888,7 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"Amakholi nezaziso zizodlidliza"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Amakholi nezaziso zizothuliswa"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Ushintsho lwesistimu"</string>
-    <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Ungaphazamasi"</string>
+    <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Ungaphazamisi"</string>
     <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Ukungaphazamisi kufihle izaziso"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"Thepha ukuze ufunde kabanzi futhi ushintshe."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Ukungaphazamisi kushintshile"</string>

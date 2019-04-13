@@ -136,9 +136,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Wi-Fi-hívás | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Wi-Fi-hívás"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Wi-Fi-hívás"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Ki"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi előnyben részesítve"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Preferált: mobil"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"Hívás Wi-Fi-hálózaton"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"Hívás mobilhálózaton"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Csak Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: nincs átirányítva"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -430,6 +434,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Lehetővé teszi az alkalmazás számára, hogy hozzáférjen az eszköz telefonálási funkcióihoz. Az engedéllyel rendelkező alkalmazás meghatározhatja a telefonszámot és eszközazonosítókat, hogy egy hívás aktív-e, valamint híváskor a másik fél telefonszámát."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"rendszeren keresztüli hívásirányítás"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"A telefonálási élmény javítása érdekében lehetővé teszi az alkalmazás számára a rendszeren keresztüli hívásirányítást."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"Hívások megtekintése és vezérlése a rendszeren keresztül"</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Engedélyezi az alkalmazásnak az eszközön folyamatban lévő hívások megtekintését és vezérlését. Ebbe beletartoznak az olyan információk is, mint a hívásban részt vevő felek hívószáma és a hívások állapota."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"Másik alkalmazásból indított hívás folytatása"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Engedélyezi az alkalmazásnak, hogy folytassa a hívást, amelyet valamelyik másik alkalmazásban kezdtek meg."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"telefonszámok olvasása"</string>
@@ -1017,7 +1023,7 @@
     <string name="inputMethod" msgid="1653630062304567879">"Beviteli mód"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Műveletek szöveggel"</string>
     <string name="email" msgid="4560673117055050403">"E-mail"</string>
-    <string name="email_desc" msgid="3638665569546416795">"Kiválasztott cím elküldése e-mailben"</string>
+    <string name="email_desc" msgid="3638665569546416795">"E-mail küldése a kiválasztott címre"</string>
     <string name="dial" msgid="1253998302767701559">"Hívás"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Kiválasztott telefonszám hívása"</string>
     <string name="map" msgid="5441053548030107189">"Térkép"</string>
@@ -1177,8 +1183,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Bejelentkezés a hálózatba"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"A Wi-Fi-hálózaton nincs internetkapcsolat"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"A(z) <xliff:g id="NETWORK_SSID">%1$s</xliff:g> hálózaton nincs internet-hozzáférés"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Koppintson a beállítások megjelenítéséhez"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Csatlakozva"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"A(z) <xliff:g id="NETWORK_SSID">%1$s</xliff:g> hálózat korlátozott kapcsolatot biztosít"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Koppintson, ha mindenképpen csatlakozni szeretne"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"A hotspot beállításainak módosítása"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"A hotspot sávja megváltozott."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Ez az eszköz nem támogatja a csak 5 GHz-es sávra vonatkozó beállítást. Az eszköz akkor használ 5 GHz-es sávot, ha a sáv rendelkezésre áll."</string>
@@ -1249,7 +1258,7 @@
     <string name="no_permissions" msgid="7283357728219338112">"Nincs szükség engedélyre"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"ez pénzbe kerülhet Önnek"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <string name="usb_charging_notification_title" msgid="1595122345358177163">"Folyamatban van az eszköz USB-n keresztüli töltése"</string>
+    <string name="usb_charging_notification_title" msgid="1595122345358177163">"Az eszköz töltése USB-n keresztül"</string>
     <string name="usb_supplying_notification_title" msgid="4631045789893086181">"Folyamatban van a csatlakoztatott eszköz USB-n keresztüli töltése"</string>
     <string name="usb_mtp_notification_title" msgid="4238227258391151029">"Az USB-fájlátvitel be van kapcsolva"</string>
     <string name="usb_ptp_notification_title" msgid="5425857879922006878">"Az USB-n keresztüli PTP be van kapcsolva"</string>

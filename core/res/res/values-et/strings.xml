@@ -136,9 +136,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g>: WiFi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"WiFi-kõne | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g>: VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"WiFi-kõned"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"WiFi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"WiFi-kõned"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Väljas"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"WiFi eelistusega"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Eelistatud on mobiilne andmeside"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"Helista WiFi kaudu"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"Helista mobiilsidevõrgu kaudu"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Ainult WiFi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: pole suunatud"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -430,6 +434,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Annab rakendusele juurdepääsu seadme telefonifunktsioonidele. See luba võimaldab rakendusel määrata telefoninumbri ja seadme ID-d ning kontrollida, kas kõne on aktiivne ja kaugnumber on kõne kaudu telefoniga ühendatud."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"kõnede marsruutimine süsteemi kaudu"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Võimaldab rakendusel kõnesid süsteemi kaudu marsruutida, et helistamiskogemust täiustada."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"süsteemi kaudu kõnede vaatamine ja juhtimine."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Lubab rakendusel seadmes vaadata ja juhtida käimasolevaid kõnesid. See hõlmab sellist teavet nagu kõnede numbrid ja olek."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"jätka kõnet teises rakenduses"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Lubab rakendusel jätkata kõnet, mida alustati teises rakenduses."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"lugeda telefoninumbreid"</string>
@@ -1017,23 +1023,23 @@
     <string name="inputMethod" msgid="1653630062304567879">"Sisestusmeetod"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Tekstitoimingud"</string>
     <string name="email" msgid="4560673117055050403">"E-post"</string>
-    <string name="email_desc" msgid="3638665569546416795">"Valitud aadressile meili saatmine"</string>
+    <string name="email_desc" msgid="3638665569546416795">"Saada valitud aadressile meil"</string>
     <string name="dial" msgid="1253998302767701559">"Helista"</string>
-    <string name="dial_desc" msgid="6573723404985517250">"Valitud telefoninumbrile helistamine"</string>
+    <string name="dial_desc" msgid="6573723404985517250">"Helista valitud telefoninumbrile"</string>
     <string name="map" msgid="5441053548030107189">"Kaart"</string>
-    <string name="map_desc" msgid="1836995341943772348">"Valitud aadressi leidmine"</string>
+    <string name="map_desc" msgid="1836995341943772348">"Leia valitud aadress"</string>
     <string name="browse" msgid="1245903488306147205">"Ava"</string>
-    <string name="browse_desc" msgid="8220976549618935044">"Valitud URL-i avamine"</string>
+    <string name="browse_desc" msgid="8220976549618935044">"Ava valitud URL"</string>
     <string name="sms" msgid="4560537514610063430">"Saada sõnum"</string>
-    <string name="sms_desc" msgid="7526588350969638809">"Valitud telefoninumbrile sõnumi saatmine"</string>
+    <string name="sms_desc" msgid="7526588350969638809">"Saada valitud telefoninumbrile sõnum"</string>
     <string name="add_contact" msgid="7867066569670597203">"Lisa"</string>
-    <string name="add_contact_desc" msgid="4830217847004590345">"Kontaktide hulka lisamine"</string>
+    <string name="add_contact_desc" msgid="4830217847004590345">"Lisa kontaktide hulka"</string>
     <string name="view_calendar" msgid="979609872939597838">"Kuva"</string>
-    <string name="view_calendar_desc" msgid="5828320291870344584">"Valitud aja vaatamine kalendris"</string>
+    <string name="view_calendar_desc" msgid="5828320291870344584">"Kuva valitud aeg kalendris"</string>
     <string name="add_calendar_event" msgid="1953664627192056206">"Lisa ajakavasse"</string>
-    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Ürituse ajastamine valitud ajale"</string>
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Ajasta üritus valitud ajale"</string>
     <string name="view_flight" msgid="7691640491425680214">"Jälgi"</string>
-    <string name="view_flight_desc" msgid="3876322502674253506">"Valitud lennu jälgimine"</string>
+    <string name="view_flight_desc" msgid="3876322502674253506">"Jälgi valitud lendu"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Talletusruum saab täis"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Mõned süsteemifunktsioonid ei pruugi töötada"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Süsteemis pole piisavalt talletusruumi. Veenduge, et seadmes oleks 250 MB vaba ruumi, ja käivitage seade uuesti."</string>
@@ -1177,8 +1183,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Võrku sisselogimine"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"WiFi-võrgul pole juurdepääsu Internetile"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"Võrgul <xliff:g id="NETWORK_SSID">%1$s</xliff:g> puudub Interneti-ühendus"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Puudutage valikute nägemiseks"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Ühendatud"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"Võrgu <xliff:g id="NETWORK_SSID">%1$s</xliff:g> ühendus on piiratud"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Puudutage, kui soovite siiski ühenduse luua"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Muudatused teie leviala seadetes"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Teie leviala riba on muutunud."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"See seade ei toeta teie eelistatud ainult 5 GHz riba. Seade kasutab 5 GHz riba ainult siis, kui see on saadaval."</string>

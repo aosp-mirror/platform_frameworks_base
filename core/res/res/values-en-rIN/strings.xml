@@ -136,9 +136,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Wi-Fi Calling | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Wi-Fi Calling"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Wi-Fi Calling"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Off"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi preferred"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Mobile preferred"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"Call over Wi-Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"Call over mobile network"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi-Fi only"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Not forwarded"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -430,6 +434,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Allows the app to access the phone features of the device. This permission allows the app to determine the phone number and device IDs, whether a call is active and the remote number connected by a call."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"route calls through the system"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Allows the app to route its calls through the system in order to improve the calling experience."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"see and control calls through the system."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Allows the app to see and control ongoing calls on the device. This includes information such as call numbers for calls and the state of the calls."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"continue a call from another app"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Allows the app to continue a call which was started in another app."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"read phone numbers"</string>
@@ -592,7 +598,7 @@
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Change the screen lock."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Lock the screen"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Control how and when the screen locks."</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"Erase all data"</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"Delete all data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Erase the tablet\'s data without warning by performing a factory data reset."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Erase the TV\'s data without warning by performing a factory data reset."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Erase the phone\'s data without warning by performing a factory data reset."</string>
@@ -783,7 +789,7 @@
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Forgotten pattern?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Account unlock"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"Too many pattern attempts"</string>
-    <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"To unlock, sign in with your Google account."</string>
+    <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"To unlock, sign in with your Google Account."</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Username (email)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Password"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Sign in"</string>
@@ -1177,8 +1183,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Sign in to network"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi has no Internet access"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> has no Internet access"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Tap for options"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Connected"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> has limited connectivity"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Tap to connect anyway"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Changes to your hotspot settings"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Your hotspot band has changed."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"This device doesn’t support your preference for 5 GHz only. Instead, this device will use the 5 GHz band when available."</string>
@@ -1536,7 +1545,7 @@
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Re-enter the correct PUK code. Repeated attempts will permanently disable the SIM."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN codes do not match"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Too many pattern attempts"</string>
-    <string name="kg_login_instructions" msgid="1100551261265506448">"To unlock, sign in with your Google account."</string>
+    <string name="kg_login_instructions" msgid="1100551261265506448">"To unlock, sign in with your Google Account."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"Username (email)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Password"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Sign in"</string>

@@ -136,9 +136,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"‏درحال تماس ازطریق WiFi | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"‏تماس ازطریق Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"‏تماس ازطریق WiFi"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"خاموش"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"‏Wi-Fi ترجیحی"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"داده شبکه تلفن همراه ارجح است"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"‏تماس ازطریق Wi-Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"تماس ازطریق شبکه تلفن همراه"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"‏فقط Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: هدایت نشده"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -430,6 +434,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"به برنامه اجازه می‌دهد به ویژگی‌های تلفن دستگاه شما دسترسی پیدا کند. این مجوز به برنامه اجازه می‌دهد شماره تلفن و شناسه‌های دستگاه، فعال بودن یک تماس و شماره راه دوری که با یک تماس متصل شده است را مشخص کند."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"برقرار کردن تماس‌ها ازطریق سیستم"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"به برنامه امکان می‌دهد برای بهبود تجربه تماس، تماس‌هایش را ازطریق سیستم برقرار کند."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"دیدن و کنترل تماس‌ها ازطریق سیستم."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"به برنامه‌ها اجازه می‌دهد تماس‌های درحال انجام را در این دستگاه ببیند و کنترل کند. این مورد شامل اطلاعاتی مانند شماره تلفن برای تماس‌ها و وضعیت تماس‌ها است."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"ادامه دادن تماس از برنامه‌ای دیگر"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"به برنامه اجازه می‌دهد تماسی را که در برنامه دیگری شروع شده ادامه دهد."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"خواندن شماره تلفن‌ها"</string>
@@ -877,7 +883,7 @@
     <string name="save_password_remember" msgid="6491879678996749466">"به خاطر سپردن"</string>
     <string name="save_password_never" msgid="8274330296785855105">"هیچ‌وقت"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"شما اجازه بازکردن این صفحه را ندارید."</string>
-    <string name="text_copied" msgid="4985729524670131385">"متن در کلیپ بورد کپی شد."</string>
+    <string name="text_copied" msgid="4985729524670131385">"متن در بریده‌دان کپی شد."</string>
     <string name="more_item_label" msgid="4650918923083320495">"بیشتر"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"منو+"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"‎Meta+‎"</string>
@@ -1001,7 +1007,7 @@
     <string name="selectAll" msgid="6876518925844129331">"انتخاب همه"</string>
     <string name="cut" msgid="3092569408438626261">"برش"</string>
     <string name="copy" msgid="2681946229533511987">"کپی"</string>
-    <string name="failed_to_copy_to_clipboard" msgid="1833662432489814471">"در کلیپ‌بورد کپی نشد"</string>
+    <string name="failed_to_copy_to_clipboard" msgid="1833662432489814471">"در بریده‌دان کپی نشد"</string>
     <string name="paste" msgid="5629880836805036433">"جای‌گذاری"</string>
     <string name="paste_as_plain_text" msgid="5427792741908010675">"جای‌گذاری به عنوان متن ساده"</string>
     <string name="replace" msgid="5781686059063148930">"جایگزین شود..."</string>
@@ -1016,23 +1022,23 @@
     <string name="deleteText" msgid="6979668428458199034">"حذف"</string>
     <string name="inputMethod" msgid="1653630062304567879">"روش ورودی"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"کنش‌های متنی"</string>
-    <string name="email" msgid="4560673117055050403">"ایمیل"</string>
+    <string name="email" msgid="4560673117055050403">"فرستادن ایمیل"</string>
     <string name="email_desc" msgid="3638665569546416795">"ارسال ایمیل به نشانی انتخابی"</string>
-    <string name="dial" msgid="1253998302767701559">"تماس"</string>
+    <string name="dial" msgid="1253998302767701559">"تماس گرفتن"</string>
     <string name="dial_desc" msgid="6573723404985517250">"تماس با شماره تلفن انتخابی"</string>
     <string name="map" msgid="5441053548030107189">"نقشه"</string>
     <string name="map_desc" msgid="1836995341943772348">"مکان‌یابی نشانی انتخاب‌شده"</string>
     <string name="browse" msgid="1245903488306147205">"باز کردن"</string>
     <string name="browse_desc" msgid="8220976549618935044">"باز کردن نشانی وب انتخابی"</string>
-    <string name="sms" msgid="4560537514610063430">"پیام"</string>
+    <string name="sms" msgid="4560537514610063430">"فرستادن پیام"</string>
     <string name="sms_desc" msgid="7526588350969638809">"ارسال پیام به شماره تلفن انتخابی"</string>
     <string name="add_contact" msgid="7867066569670597203">"افزودن"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"افزودن به مخاطبین"</string>
     <string name="view_calendar" msgid="979609872939597838">"مشاهده"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"مشاهده زمان انتخابی در تقویم"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"زمان‌بندی"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"زمان‌بندی کردن"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"زمان‌بندی رویداد برای زمان انتخابی"</string>
-    <string name="view_flight" msgid="7691640491425680214">"پیگیری"</string>
+    <string name="view_flight" msgid="7691640491425680214">"انجام پیگیری"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"ردیابی پرواز انتخابی"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"حافظه درحال پر شدن است"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"برخی از عملکردهای سیستم ممکن است کار نکنند"</string>
@@ -1177,8 +1183,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"ورود به سیستم شبکه"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"‏Wi-Fi به اینترنت دسترسی ندارد"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> به اینترنت دسترسی ندارد"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"برای گزینه‌ها ضربه بزنید"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"متصل"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> اتصال محدودی دارد"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"به‌هرصورت، برای اتصال ضربه بزنید"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"تغییرات در تنظیمات نقطه اتصال"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"نوار نقطه اتصال شما تغییر کرد."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"این دستگاه از اولویت فقط ۵ گیگاهرتز شما پشتیبانی نمی‌کند. هرزمان نوار ۵ گیگاهرتزی دردسترس باشد این دستگاه از آن استفاده خواهد کرد."</string>

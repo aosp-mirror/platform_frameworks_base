@@ -136,9 +136,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Wi-Fi დარეკვა | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Wi-Fi დარეკვა"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"WiFi დარეკვა"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"გამორთული"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"სასურველია Wi-Fi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"უპირატესობა მიენიჭოს მობილურს"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"დარეკვა Wi-Fi-ის მეშვეობით"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"დარეკვა მობილური ქსელის მეშვეობით"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"მხოლოდ Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: არ არის გადამისამართებული"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -430,6 +434,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"აპს შეეძლება ჰქონდეს წვდომა მოწყობილობის სატელეფონო ფუნქციებზე. აპმა მსგავსი უფლებით შეძლებს დაადგინოს ტელეფონის ნომერი, მისი სერიული გამოცემა, აქტიური ზარი, დაკავშირებული ნომერი და მსგავსი."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"ზარების სისტემის მეშვეობით მარშრუტიზაცია"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"დარეკვის ხარისხის გაუმჯობესების მიზნით, აპს ზარების სისტემის მეშვეობით მარშრუტიზაციის საშუალებას აძლევს."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"ზარების ნახვა და გაკონტროლება სისტემის მეშვეობით."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"საშუალებას აძლევს აპს, იხილოს და გააკონტროლოს მიმდინარე ზარები მოწყობილობაზე. აღნიშნული მოიცავს ისეთ ინფორმაციას, როგორიცაა ზარებთან დაკავშირებული აბონენტების ნომრები და ზარების მდგომარეობა."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"ზარის სხვა აპიდან გაგრძელება"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"ნებას რთავს აპს, გააგრძელოს ზარი, რომელიც სხვა აპშია წამოწყებული."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"ტელეფონის ნომრების წაკითხვა"</string>
@@ -1016,11 +1022,11 @@
     <string name="deleteText" msgid="6979668428458199034">"წაშლა"</string>
     <string name="inputMethod" msgid="1653630062304567879">"შეყვანის მეთოდი"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"ქმედებები ტექსტზე"</string>
-    <string name="email" msgid="4560673117055050403">"ელფოსტა"</string>
+    <string name="email" msgid="4560673117055050403">"ელფოსტის გაგზავნა"</string>
     <string name="email_desc" msgid="3638665569546416795">"არჩეულ მისამართზე ელფოსტის გაგზავნა"</string>
     <string name="dial" msgid="1253998302767701559">"ზარი"</string>
     <string name="dial_desc" msgid="6573723404985517250">"არჩეულ ტელეფონის ნომერზე დარეკვა"</string>
-    <string name="map" msgid="5441053548030107189">"რუკა"</string>
+    <string name="map" msgid="5441053548030107189">"რუკის გახსნა"</string>
     <string name="map_desc" msgid="1836995341943772348">"არჩეული მისამართის მდებარეობის დადგენა"</string>
     <string name="browse" msgid="1245903488306147205">"გახსნა"</string>
     <string name="browse_desc" msgid="8220976549618935044">"არჩეული URL-ის გახსნა"</string>
@@ -1030,9 +1036,9 @@
     <string name="add_contact_desc" msgid="4830217847004590345">"დამატება"</string>
     <string name="view_calendar" msgid="979609872939597838">"ნახვა"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"არჩეული დროის კალენდარში ნახვა"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"განრიგი"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"დაგეგმვა"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"მოვლენის არჩეული დროისთვის დაგეგმვა"</string>
-    <string name="view_flight" msgid="7691640491425680214">"ჩანაწერი"</string>
+    <string name="view_flight" msgid="7691640491425680214">"მიდევნება"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"არჩეული ფრენისთვის თვალის მიდევნება"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"თავისუფალი ადგილი იწურება"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"სისტემის ზოგიერთმა ფუნქციამ შესაძლოა არ იმუშავოს"</string>
@@ -1177,8 +1183,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"ქსელში შესვლა"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi‑Fi ქსელს ინტერნეტზე წვდომა არ აქვს"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g>-ს არ აქვს ინტერნეტზე წვდომა"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"შეეხეთ ვარიანტების სანახავად"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"დაკავშირებულია"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g>-ის კავშირები შეზღუდულია"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"შეეხეთ, თუ მაინც გსურთ დაკავშირება"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"თქვენი უსადენო ქსელის პარამეტრების ცვლილება"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"თქვენი უსადენო ქსელის დიაპაზონი შეიცვალა."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"ამ მოწყობილობას არ შეუძლია მხოლოდ 5 გჰც სიხშირეზე მუშაობა. აღნიშნული სიხშირის გამოყენება მოხდება მაშინ, როცა ეს შესაძლებელია."</string>
@@ -1747,7 +1756,7 @@
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"ავარიული პაუზა"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"სამუშაო კვირის ღამე"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"შაბათ-კვირა"</string>
-    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"მოვლენა"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"მოვლენისას"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"ძილისას"</string>
     <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ზოგიერთ ხმას ადუმებს"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"ფიქსირდება თქვენი მ ოწყობილობის შიდა პრობლემა და შეიძლება არასტაბილური იყოს, სანამ ქარხნულ მონაცემების არ განაახლებთ."</string>

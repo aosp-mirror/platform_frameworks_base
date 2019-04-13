@@ -136,9 +136,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Wi-Fi símtal | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Wi-Fi símtöl"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"WiFi símtöl"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Slökkt"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi í forgangi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Farsímakerfi í forgangi"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"Hringja í gegnum Wi-Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"Hringja í gegnum farsímakerfi"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi-Fi eingöngu"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Ekki áframsent"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -430,6 +434,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Leyfir forriti að fá aðgang að símaeiginleikum tækisins. Þessi heimild gerir forritinu kleift að komast að símanúmeri og auðkennum tækisins, hvort símtal er í gangi og símanúmeri viðmælanda í símtali."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"senda símtöl gegnum kerfið"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Heimilar forritinu að senda símtöl sín gegnum kerfið til að bæta gæði símtalsins."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"sjá og stjórna símtölum í gegnum kerfið."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Leyfir forritinu að sjá og stjórna hringdum símtölum í tækinu. Þar á meðal eru upplýsingar á borð við símanúmer í símtölum og stöður símtala."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"halda áfram með símtal úr öðru forriti"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Leyfir forritinu að halda áfram með símtal sem hófst í öðru forriti."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"lesa símanúmer"</string>
@@ -1016,7 +1022,7 @@
     <string name="deleteText" msgid="6979668428458199034">"Eyða"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Innsláttaraðferð"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Textaaðgerðir"</string>
-    <string name="email" msgid="4560673117055050403">"Tölvupóstur"</string>
+    <string name="email" msgid="4560673117055050403">"Senda tölvupóst"</string>
     <string name="email_desc" msgid="3638665569546416795">"Senda á valið netfang"</string>
     <string name="dial" msgid="1253998302767701559">"Símtal"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Hringja í valið símanúmer"</string>
@@ -1024,7 +1030,7 @@
     <string name="map_desc" msgid="1836995341943772348">"Finna valið heimilisfang"</string>
     <string name="browse" msgid="1245903488306147205">"Opna"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Opna valda vefslóð"</string>
-    <string name="sms" msgid="4560537514610063430">"Skilaboð"</string>
+    <string name="sms" msgid="4560537514610063430">"Senda skilaboð"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Senda skilaboð í valið símanúmer"</string>
     <string name="add_contact" msgid="7867066569670597203">"Bæta við"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Bæta við tengiliði"</string>
@@ -1177,8 +1183,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Skrá inn á net"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi er ekki með tengingu við internetið"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> er ekki með internetaðgang"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Ýttu til að sjá valkosti"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Tengt"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"Tengigeta <xliff:g id="NETWORK_SSID">%1$s</xliff:g> er takmörkuð"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Ýttu til að tengjast samt"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Breytingar á stillingum heits reits"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Tíðnisvið heita reitsins hefur breyst."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Þetta tæki styður ekki val þitt fyrir aðeins 5 GHz. Í staðinn mun þetta tæki nota 5 GHz tíðnisvið þegar það er í boði."</string>

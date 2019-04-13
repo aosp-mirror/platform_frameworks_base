@@ -136,9 +136,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> ವೈ-ಫೈ"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"ವೈಫೈ ಕರೆಮಾಡುವಿಕೆ | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"ವೈ-ಫೈ ಕರೆ ಮಾಡುವಿಕೆ"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"ವೈ-ಫೈ"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"ವೈಫೈ ಕರೆ ಮಾಡುವಿಕೆ"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ಆಫ್"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"ವೈ-ಫೈಗೆ ಆದ್ಯತೆ"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"ಮೊಬೈಲ್‌ಗೆ ಆದ್ಯತೆ"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"ವೈ-ಫೈ ಬಳಸಿ ಕರೆ ಮಾಡಿ"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"ಮೊಬೈಲ್‌ ನೆಟ್‌ವರ್ಕ್ ಬಳಸಿ ಕರೆ ಮಾಡಿ"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"ವೈ-ಫೈ ಮಾತ್ರ"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ಫಾರ್ವರ್ಡ್ ಮಾಡಲಾಗಿಲ್ಲ"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -279,7 +283,7 @@
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"ನಿಮ್ಮ ಸಂಪರ್ಕಗಳನ್ನು ಪ್ರವೇಶಿಸಲು &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ಗೆ ಅನುಮತಿಸಬೇಕೇ?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"ಸ್ಥಳ"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"ಈ ಸಾಧನದ ಸ್ಥಳವನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"ಈ ಸಾಧನದ ಸ್ಥಳವನ್ನು ಪ್ರವೇಶಿಸಲು &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ಗೆ ಅನುಮತಿಸಬೇಕೇ?"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"ಈ ಸಾಧನದ ಸ್ಥಳವನ್ನು ಪ್ರವೇಶಿಸಲು &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ಗೆ ಅನುಮತಿಸಬೇಕೇ?"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ಕ್ಯಾಲೆಂಡರ್"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"ನಿಮ್ಮ ಕ್ಯಾಲೆಂಡರ್ ಪ್ರವೇಶಿಸಲು"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"ನಿಮ್ಮ ಕ್ಯಾಲೆಂಡರ್ ಪ್ರವೇಶಿಸಲು &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ಗೆ ಅನುಮತಿಸಬೇಕೇ?"</string>
@@ -430,6 +434,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"ಸಾಧನದ ಫೋನ್ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಪ್ರವೇಶಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ. ಈ ಅನುಮತಿಯು ಫೋನ್ ಸಂಖ್ಯೆ ಮತ್ತು ಸಾಧನದ ID ಗಳನ್ನು ನಿರ್ಧರಿಸಲು, ಕರೆಯು ಸಕ್ರಿಯವಾಗಿದೆಯೇ ಮತ್ತು ಕರೆಯ ಮೂಲಕ ರಿಮೋಟ್ ಸಂಖ್ಯೆಯು ಸಂಪರ್ಕಗೊಂಡಿವೆಯೇ ಎಂಬುದನ್ನೂ ನಿರ್ಧರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅವಕಾಶ ಕಲ್ಪಿಸುತ್ತದೆ."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"ಕರೆಗಳನ್ನು ಸಿಸ್ಟಂ ಮೂಲಕ ರವಾನಿಸಿ"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"ಕರೆಯ ಅನುಭವವನ್ನು ಸುಧಾರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ನ ಕರೆಗಳನ್ನು ಸಿಸ್ಟಂ ಮೂಲಕ ರವಾನಿಸಲು ಅನುಮತಿಸುತ್ತದೆ."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"ಸಿಸ್ಟಂ ಮೂಲಕ ಕರೆಗಳನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ನಿಯಂತ್ರಿಸಿ."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"ಸಾಧನದಲ್ಲಿನ ಚಾಲ್ತಿಯಲ್ಲಿರುವ ಕರೆಗಳನ್ನು ವೀಕ್ಷಿಸಲು ಮತ್ತು ನಿಯಂತ್ರಿಸಲು ಆ್ಯಪ್ ಅನುಮತಿಸುತ್ತದೆ. ಕರೆಗಳಿಗೆ ಸಂಬಂಧಿಸಿದ ಕರೆ ಸಂಖ್ಯೆಗಳು ಮತ್ತು ಕರೆ ಮಾಡಿದ ರಾಜ್ಯದಂತಹ ಮಾಹಿತಿಯನ್ನು ಇದು ಒಳಗೊಂಡಿರುತ್ತದೆ."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"ಮತ್ತೊಂದು ಅಪ್ಲಿಕೇಶನ್‌ ಮೂಲಕ ಕರೆಯನ್ನು ಮುಂದುವರಿಸಿ"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"ಮತ್ತೊಂದು ಅಪ್ಲಿಕೇಶನ್‌ನಲ್ಲಿ ಪ್ರಾರಂಭವಾದ ಕರೆಯನ್ನು ಮುಂದುವರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡಿ."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"ಫೋನ್‌ ಸಂಖ್ಯೆಗಳನ್ನು ಓದಿ"</string>
@@ -498,7 +504,7 @@
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"ಪ್ರಮಾಣೀಕರಣಕ್ಕಾಗಿ ಬೆರಳಚ್ಚು ಹಾರ್ಡ್‌ವೇರ್ ಬಳಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"ಭಾಗಶಃ ಬೆರಳಚ್ಚು ಪತ್ತೆಯಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"ಬೆರಳಚ್ಚು ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"ಬೆರಳಚ್ಚು ಸೆನ್ಸಾರ್ ಕೊಳೆಯಾಗಿದೆ. ದಯವಿಟ್ಟು ಅದನ್ನು ಸ್ವಚ್ಛಗೊಳಿಸಿ ಹಾಗೂ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"ಬೆರಳಚ್ಚು ಸೆನ್ಸರ್ ಮಲಿನಗೊಂಡಿದೆ. ದಯವಿಟ್ಟು ಅದನ್ನು ಸ್ವಚ್ಛಗೊಳಿಸಿ ಹಾಗೂ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"ಬೆರಳನ್ನು ಅತಿ ವೇಗವಾಗಿ ಸರಿಸಲಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"ಬೆರಳನ್ನು ತುಂಬಾ ನಿಧಾನವಾಗಿ ಸರಿಸಲಾಗಿದೆ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -1016,23 +1022,23 @@
     <string name="deleteText" msgid="6979668428458199034">"ಅಳಿಸಿ"</string>
     <string name="inputMethod" msgid="1653630062304567879">"ಇನ್‌ಪುಟ್ ವಿಧಾನ"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"ಪಠ್ಯದ ಕ್ರಮಗಳು"</string>
-    <string name="email" msgid="4560673117055050403">"ಇಮೇಲ್"</string>
+    <string name="email" msgid="4560673117055050403">"ಇಮೇಲ್ ಮಾಡಿ"</string>
     <string name="email_desc" msgid="3638665569546416795">"ಆಯ್ಕೆಮಾಡಿದ ವಿಳಾಸಕ್ಕೆ ಇಮೇಲ್‌ ಮಾಡಿ"</string>
-    <string name="dial" msgid="1253998302767701559">"ಕರೆ"</string>
+    <string name="dial" msgid="1253998302767701559">"ಕರೆ ಮಾಡಿ"</string>
     <string name="dial_desc" msgid="6573723404985517250">"ಆಯ್ಕೆಮಾಡಿದ ಫೋನ್ ಸಂಖ್ಯೆಗೆ ಕರೆ ಮಾಡಿ"</string>
     <string name="map" msgid="5441053548030107189">"ನಕ್ಷೆ"</string>
     <string name="map_desc" msgid="1836995341943772348">"ಆಯ್ಕೆ ಮಾಡಿದ ವಿಳಾಸವನ್ನು ಗುರುತಿಸಿ"</string>
-    <string name="browse" msgid="1245903488306147205">"ತೆರೆ"</string>
+    <string name="browse" msgid="1245903488306147205">"ತೆರೆಯಿರಿ"</string>
     <string name="browse_desc" msgid="8220976549618935044">"ಆಯ್ಕೆ ಮಾಡಿದ URL ತೆರೆಯಿರಿ"</string>
-    <string name="sms" msgid="4560537514610063430">"ಸಂದೇಶ"</string>
+    <string name="sms" msgid="4560537514610063430">"ಸಂದೇಶ ಕಳುಹಿಸಿ"</string>
     <string name="sms_desc" msgid="7526588350969638809">"ಆಯ್ಕೆಮಾಡಿದ ಫೋನ್ ಸಂಖ್ಯೆಗೆ ಸಂದೇಶ ಕಳುಹಿಸಿ"</string>
     <string name="add_contact" msgid="7867066569670597203">"ಸೇರಿಸಿ"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"ಸಂಪರ್ಕಗಳಿಗೆ ಸೇರಿಸಿ"</string>
     <string name="view_calendar" msgid="979609872939597838">"ವೀಕ್ಷಿಸಿ"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"ಕ್ಯಾಲೆಂಡರ್‌ನಲ್ಲಿ ಆಯ್ಕೆಮಾಡಿದ ಸಮಯವನ್ನು ವೀಕ್ಷಿಸಿ"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"ಅವಧಿ"</string>
-    <string name="add_calendar_event_desc" msgid="4326891793260687388">"ಆಯ್ಕೆ ಮಾಡಿದ ಸಮಯಕ್ಕೆ ಈವೆಂಟ್ ನಿಗದಿಪಡಿಸಿ"</string>
-    <string name="view_flight" msgid="7691640491425680214">"ಟ್ರ್ಯಾಕ್"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"ಸಮಯ ನಿಗದಿಗೊಳಿಸಿ"</string>
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"ಆಯ್ಕೆ ಮಾಡಿದ ಸಮಯಕ್ಕೆ ಈವೆಂಟ್ ನಿಗದಿಗೊಳಿಸಿ"</string>
+    <string name="view_flight" msgid="7691640491425680214">"ಟ್ರ್ಯಾಕ್ ಮಾಡಿ"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"ಆಯ್ಕೆಮಾಡಿದ ವಿಮಾನವನ್ನು ಟ್ರ್ಯಾಕ್‌ ಮಾಡಿ"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"ಸಂಗ್ರಹಣೆ ಸ್ಥಳವು ತುಂಬಿದೆ"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"ಕೆಲವು ಸಿಸ್ಟಂ ಕಾರ್ಯವಿಧಾನಗಳು ಕಾರ್ಯನಿರ್ವಹಿಸದೇ ಇರಬಹುದು"</string>
@@ -1177,8 +1183,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಸೈನ್ ಇನ್ ಮಾಡಿ"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"ವೈ ಫೈ ಯಾವುದೇ ಇಂಟರ್ನೆಟ್ ಪ್ರವೇಶವನ್ನು ಹೊಂದಿಲ್ಲ"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> ಯಾವುದೇ ಇಂಟರ್ನೆಟ್ ಸಂಪರ್ಕವನ್ನು ಹೊಂದಿಲ್ಲ"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"ಆಯ್ಕೆಗಳಿಗೆ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"ಸಂಪರ್ಕಿಸಲಾಗಿದೆ"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> ಸೀಮಿತ ಸಂಪರ್ಕ ಕಲ್ಪಿಸುವಿಕೆಯನ್ನು ಹೊಂದಿದೆ"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"ಹೇಗಾದರೂ ಸಂಪರ್ಕಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"ನಿಮ್ಮ ಹಾಟ್‌ಸ್ಪಾಟ್‌ ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಗೆ ಬದಲಾವಣೆಗಳು"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"ನಿಮ್ಮ ಹಾಟ್‌ಸ್ಪಾಟ್‌ ಬ್ಯಾಂಡ್ ಬದಲಾಗಿದೆ."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"ಈ ಸಾಧನವು 5GHz ಗೆ ಮಾತ್ರ ನಿಮ್ಮ ಆದ್ಯತೆಯನ್ನು ಬೆಂಬಲಿಸುವುದಿಲ್ಲ. ಬದಲಿಗೆ, ಈ ಸಾಧನವು 5GHz ಬ್ಯಾಂಡ್ ಅನ್ನು ಲಭ್ಯವಿರುವಾಗ ಬಳಸುತ್ತದೆ."</string>
@@ -1261,7 +1270,7 @@
     <string name="usb_power_notification_message" msgid="4647527153291917218">"ಸಂಪರ್ಕಗೊಂಡಿರುವ ಸಾಧನವನ್ನು ಚಾರ್ಜ್ ಮಾಡಲಾಗುತ್ತಿದೆ. ಹೆಚ್ಚಿನ ಆಯ್ಕೆಗಳಿಗಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"ಅನ್‌ಲಾಗ್ ಆಡಿಯೋ ಪರಿಕರ ಪತ್ತೆಯಾಗಿದೆ"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"ಲಗತ್ತಿಸಲಾದ ಸಾಧನವು ಈ ಫೋನಿನೊಂದಿಗೆ ಹೊಂದಿಕೆಯಾಗುವುದಿಲ್ಲ. ಇನ್ನಷ್ಟು ತಿಳಿಯಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ಡೀಬಗಿಂಗ್‌‌ ಸಂಪರ್ಕ"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ಡೀಬಗಿಂಗ್‌‌ ಸಂಪರ್ಕಗೊಂಡಿದೆ"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"USB ಡೀಬಗ್‌ ಮಾಡುವಿಕೆಯನ್ನು ಆಫ್‌ ಮಾಡಲು ಟ್ಯಾಪ್‌ ಮಾಡಿ"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB ಡೀಬಗ್‌ ಮಾಡುವಿಕೆಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ಆಯ್ಕೆ ಮಾಡಿ."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"ದೋಷದ ವರದಿಯನ್ನು ತೆಗೆದುಕೊಳ್ಳಲಾಗುತ್ತಿದೆ…"</string>

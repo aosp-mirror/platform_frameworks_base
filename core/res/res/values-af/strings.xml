@@ -136,9 +136,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g>-Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Wi-Fi-oproepe | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g>-VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Wi-Fi-oproepe"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Wi-Fi-oproepe"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Af"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Verkies Wi-Fi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Verkies mobiel"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"Bel oor Wi-Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"Bel oor mobiele netwerk"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Net Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Nie aangestuur nie"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -430,6 +434,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Laat die program toe om toegang tot die foonfunksies van die toestel te verkry. Hierdie toestemming laat die program toe om te bepaal wat die foonnommer en toestel-IDs is, of die oproep aan die gang is, en die afgeleë nommer wat deur \'n oproep verbind word."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"roeteer oproepe deur die stelsel"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Laat die program toe om sy oproepe deur die stelsel te stuur om die oproepervaring te verbeter."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"sien en beheer oproepe deur die stelsel."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Laat die program toe om deurlopende oproepe op die toestel te sien en te beheer. Dit sluit inligting in soos oproepnommers vir oproepe en die toedrag van die oproepe."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"gaan voort met \'n oproep uit \'n ander program"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Laat die program toe om \'n oproep voort te sit wat in \'n ander program begin is."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"lees foonnommers"</string>
@@ -1019,7 +1025,7 @@
     <string name="email" msgid="4560673117055050403">"E-pos"</string>
     <string name="email_desc" msgid="3638665569546416795">"Stuur e-pos aan gekose adres"</string>
     <string name="dial" msgid="1253998302767701559">"Bel"</string>
-    <string name="dial_desc" msgid="6573723404985517250">"Bel gekose foonnommer"</string>
+    <string name="dial_desc" msgid="6573723404985517250">"Bel dié foonnommer"</string>
     <string name="map" msgid="5441053548030107189">"Kaart"</string>
     <string name="map_desc" msgid="1836995341943772348">"Soek geselekteerde adres"</string>
     <string name="browse" msgid="1245903488306147205">"Maak oop"</string>
@@ -1177,8 +1183,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Meld by netwerk aan"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi‑Fi het geen internettoegang nie"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> het geen internettoegang nie"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Tik vir opsies"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Gekoppel"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> het beperkte konnektiwiteit"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Tik om in elk geval te koppel"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Veranderings aan jou warmkolinstellings"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Jou warmkolband het verander."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Hierdie toestel steun nie jou voorkeur vir net 5 GHz nie. Hierdie toestel sal in plaas daarvan die 5 GHz-band gebruik wanneer dit beskikbaar is."</string>

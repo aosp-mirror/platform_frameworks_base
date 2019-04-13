@@ -136,9 +136,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"‏WiFi کالنگ | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"‏Wi-Fi کالنگ"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"‏Wi-Fi کالنگ"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"آف"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"‏Wi-Fi ترجیحی"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"موبائل ترجیحی"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"‏Wi-Fi پر کال کریں"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"موبائل نیٹ ورک پر کال کریں"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"‏صرف Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g> : فارورڈ نہیں کی گئی"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -430,6 +434,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"‏ایپ کو آلے کی فون والی خصوصیات تک رسائی حاصل کرنے کی اجازت دیتا ہے۔ یہ اجازت ایپ کو فون نمبر اور آلے کے IDs کا تعین کرنے، آیا کوئی کال فعال ہے، اور کال کے ذریعہ مربوط ریموٹ نمبر کا تعین کرنے دیتی ہے۔"</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"سسٹم کے ذریعہ کالز روٹ کریں"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"کالںگ کا تجربہ بہتر بنانے کے لیے سسٹم کے ذریعہ ایپ کو کالز روٹ کرنے کی اجازت دیتا ہے۔"</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"سسٹم کے ذریعے کالز دیکھیں اور کنٹرول کریں۔"</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"ایپ کو آلہ پر جاری کالز دیکھنے اور کنٹرول کرنے کی اجازت دیں۔ اس میں کالز کیلئے کال نمبرز اور کالز کی حالت جیسی معلومات شامل ہیں۔"</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"دوسری ایپ کی کال جاری رکھیں"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"ایپ کو دوسری ایپ میں شروع کردہ کال کو جاری رکھنے کی اجازت ملتی ہے۔"</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"فون نمبرز پڑھیں"</string>
@@ -1016,15 +1022,15 @@
     <string name="deleteText" msgid="6979668428458199034">"حذف کریں"</string>
     <string name="inputMethod" msgid="1653630062304567879">"اندراج کا طریقہ"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"متن کی کارروائیاں"</string>
-    <string name="email" msgid="4560673117055050403">"ای میل"</string>
+    <string name="email" msgid="4560673117055050403">"ای میل بھیجیں"</string>
     <string name="email_desc" msgid="3638665569546416795">"منتخب کردہ پتہ پر ای میل کریں"</string>
     <string name="dial" msgid="1253998302767701559">"کال کریں"</string>
     <string name="dial_desc" msgid="6573723404985517250">"منتخب کردہ فون نمبر پر کال کریں"</string>
-    <string name="map" msgid="5441053548030107189">"نقشہ"</string>
+    <string name="map" msgid="5441053548030107189">"نقشہ کی ایپ کھولیں"</string>
     <string name="map_desc" msgid="1836995341943772348">"منتخب کردہ پتہ تلاش کریں"</string>
     <string name="browse" msgid="1245903488306147205">"کھولیں"</string>
     <string name="browse_desc" msgid="8220976549618935044">"‏منتخب کردہ URL کھولیں"</string>
-    <string name="sms" msgid="4560537514610063430">"پیغام"</string>
+    <string name="sms" msgid="4560537514610063430">"پیغام بھیجیں"</string>
     <string name="sms_desc" msgid="7526588350969638809">"منتخب کردہ فون نمبر پر پیغام بھیجیں"</string>
     <string name="add_contact" msgid="7867066569670597203">"شامل کریں"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"رابطوں میں شامل کریں"</string>
@@ -1177,8 +1183,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"نیٹ ورک میں سائن ان کریں"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"‏Wi-Fi کو انٹرنیٹ تک رسائی نہیں ہے"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> کو انٹرنیٹ تک رسائی حاصل نہیں ہے"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"اختیارات کیلئے تھپتھپائیں"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"منسلک ہے"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> کی کنیکٹوٹی محدود ہے"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"بہر حال منسلک کرنے کے لیے تھپتھپائیں"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"اپنے ہاٹ اسپاٹ کی ترتیبات میں تبدیلیاں"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"آپ کا ہاٹ اسپات بینڈ تبدیل ہو گیا۔"</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"‏یہ آلہ صرف 5GHz کے لئے آپ کی ترجیح کا تعاون نہیں کرے گا۔ بلکہ 5GHz بینڈ کے دستیاب ہونے پر اس کا استعمال کرے گا۔"</string>
@@ -1372,7 +1381,7 @@
     <string name="vpn_lockdown_config" msgid="8151951501116759194">"‏نیٹ ورک یا VPN کی ترتیبات تبدیل کریں"</string>
     <string name="upload_file" msgid="2897957172366730416">"فائل منتخب کریں"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"کوئی فائل منتخب نہیں کی گئی"</string>
-    <string name="reset" msgid="2448168080964209908">"دوبارہ ترتیب دیں"</string>
+    <string name="reset" msgid="2448168080964209908">"ری سیٹ کریں"</string>
     <string name="submit" msgid="1602335572089911941">"جمع کرائیں"</string>
     <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"ڈرائیونگ ایپ چل رہی ہے"</string>
     <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"ڈرائیونگ ایپ سے باہر نکلنے کے لئے تھپتھپائيں۔"</string>
