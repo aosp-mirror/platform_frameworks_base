@@ -562,6 +562,7 @@ package android.app {
     method @Deprecated @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public boolean addConfiguration(long, byte[]);
     method @Deprecated @Nullable @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public byte[] getData(long);
     method @Deprecated @Nullable @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public byte[] getMetadata();
+    method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public long[] getRegisteredExperimentIds() throws android.app.StatsManager.StatsUnavailableException;
     method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public byte[] getReports(long) throws android.app.StatsManager.StatsUnavailableException;
     method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public byte[] getStatsMetadata() throws android.app.StatsManager.StatsUnavailableException;
     method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public void removeConfig(long) throws android.app.StatsManager.StatsUnavailableException;
