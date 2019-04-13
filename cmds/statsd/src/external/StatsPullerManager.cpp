@@ -254,6 +254,9 @@ std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // AppsOnExternalStorageInfo
         {android::util::APPS_ON_EXTERNAL_STORAGE_INFO,
          {.puller = new StatsCompanionServicePuller(android::util::APPS_ON_EXTERNAL_STORAGE_INFO)}},
+        // Face Settings
+        {android::util::FACE_SETTINGS,
+         {.puller = new StatsCompanionServicePuller(android::util::FACE_SETTINGS)}},
 };
 
 StatsPullerManager::StatsPullerManager() : mNextPullTimeNs(NO_ALARM_UPDATE) {
