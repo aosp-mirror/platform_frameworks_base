@@ -136,9 +136,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Κλήση Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Κλήση Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Κλήση Wi-Fi"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Ανενεργό"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Προτίμηση Wi-Fi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Προτίμηση δικτύου κινητής τηλεφωνίας"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"Κλήση μέσω Wi-Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"Κλήση μέσω δικτύου κινητής τηλεφωνίας"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Μόνο Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Δεν προωθήθηκε"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -430,6 +434,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Επιτρέπει στην εφαρμογή την πρόσβαση στις λειτουργίες τηλεφώνου της συσκευής. Αυτή η άδεια δίνει τη δυνατότητα στην εφαρμογή να καθορίζει τον αριθμό τηλεφώνου και τα αναγνωριστικά συσκευών, εάν μια κλήση είναι ενεργή, καθώς και τον απομακρυσμένο αριθμό που συνδέεται από μια κλήση."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"δρομολόγηση κλήσεων μέσω του συστήματος"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Επιτρέπει στην εφαρμογή να δρομολογεί τις κλήσεις της μέσω του συστήματος για να βελτιώσει την εμπειρία κλήσης."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"προβολή και έλεγχος κλήσεων μέσω του συστήματος."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Επιτρέπει στην εφαρμογή να βλέπει και να ελέγχει τις εισερχόμενες κλήσεις στη συσκευή. Αυτό περιλαμβάνει πληροφορίες όπως τους αριθμούς κλήσεων για τις κλήσεις και την κατάσταση των κλήσεων."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"συνέχιση κλήσης από άλλη συσκευή"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Επιτρέπει στην εφαρμογή να συνεχίσει μια κλήση η οποία ξεκίνησε σε άλλη εφαρμογή."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"ανάγνωση αριθμών τηλεφώνου"</string>
@@ -1030,7 +1036,7 @@
     <string name="add_contact_desc" msgid="4830217847004590345">"Προσθήκη στις επαφές"</string>
     <string name="view_calendar" msgid="979609872939597838">"Προβολή"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"Προβολή επιλεγμένης ώρας στο ημερολόγιο"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Χρονοδιάγραμμα"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Πρόγραμμα"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Προγραμματισμός συμβάντος για επιλεγμένο χρόνο"</string>
     <string name="view_flight" msgid="7691640491425680214">"Κομμάτι"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Παρακολούθηση επιλεγμένης πτήσης"</string>
@@ -1177,8 +1183,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Σύνδεση στο δίκτυο"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Το Wi-Fi δεν έχει πρόσβαση στο διαδίκτυο"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"Η εφαρμογή <xliff:g id="NETWORK_SSID">%1$s</xliff:g> δεν έχει πρόσβαση στο διαδίκτυο"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Πατήστε για να δείτε τις επιλογές"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Συνδέθηκε"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"Το δίκτυο <xliff:g id="NETWORK_SSID">%1$s</xliff:g> έχει περιορισμένη συνδεσιμότητα"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Πατήστε για σύνδεση ούτως ή άλλως"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Αλλαγές στις ρυθμίσεις σημείου πρόσβασης Wi-Fi"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Το εύρος σημείου πρόσβασης Wi-Fi άλλαξε."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Αυτή η συσκευή δεν υποστηρίζει την προτίμησή σας για τη ζώνη 5 GHz μόνο. Αντ\' αυτού, αυτή η συσκευή θα χρησιμοποιεί τη ζώνη 5 GHz όταν είναι διαθέσιμη."</string>
@@ -1261,7 +1270,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Εντοπίστηκε αναλογικό αξεσουάρ ήχου"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Η συνδεδεμένη συσκευή δεν είναι συμβατή με αυτό το τηλέφωνο. Πατήστε για να μάθετε περισσότερα."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Συνδέθηκε ο εντοπισμός σφαλμάτων USB"</string>
-    <string name="adb_active_notification_message" msgid="7463062450474107752">"Πατήστε για να απενεργοποιήσετε τον εντοπισμό και τη διόρθωση σφαλμάτων USB"</string>
+    <string name="adb_active_notification_message" msgid="7463062450474107752">"Απενεργοποιήστε τον εντοπισμό/διόρθ. σφαλμάτων USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Επιλογή για απενεργοποίηση του εντοπισμού σφαλμάτων USB."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Λήψη αναφοράς σφάλματος…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Κοινή χρήση αναφοράς σφάλματος;"</string>

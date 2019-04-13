@@ -136,9 +136,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Wifi कलिङ | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Wi-Fi कलिङ"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"WiFi कलिङ"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"निष्क्रिय"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi मनपराइयो"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"रूचाइएको मोबाइल"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"Wi-Fi मार्फत कल गर्नुहोस्"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"मोबाइल नेटवर्कमार्फत कल गर्नुहोस्"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi-Fi मात्र"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: अगाडि पठाइएको छैन"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -430,6 +434,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"उपकरणको फोन विशेषताहरूको पहुँच गर्न अनुप्रयोगलाई अनुमति दिन्छ। यस अनुमतिले फोन नम्बर र उपकरणको IDs, कल सक्षम छ कि छैन र कलद्वारा जोडिएको टाढाको नम्बर निर्धारण गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"प्रणाली मार्फत कल गर्न दिनुहोस्‌"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"कल गर्दाको अनुभवलाई सुधार्न यस अनुप्रयोगलाई प्रणाली मार्फत कलहरू गर्न अनुमति दिन्छ।"</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"प्रणालीमार्फत कलहरू हेर्नुका साथै तिनीहरूलाई नियन्त्रण गर्नुहोस्‌।"</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"अनुप्रयोगलाई यन्त्रमा जारी रहेका कलहरू हेर्नुका साथै तिनीहरूलाई गर्ने अनुमति दिनुहोस्‌। यसमा गरिएका कलहरूको सङ्ख्या र कलहरूको अवस्था जस्ता जानकारी समावेश हुन्छन्‌।"</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"अर्को अनुप्रयोगमा सुरु गरिएको कल जारी राख्नुहोस्"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"यस अनुप्रयोगलाई अर्को अनुप्रयोगमा सुरु गरिएको कल जारी राख्ने अनुमति दिन्छ।"</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"फोन नम्बरहरू पढ्ने"</string>
@@ -1016,21 +1022,21 @@
     <string name="deleteText" msgid="6979668428458199034">"मेट्नुहोस्"</string>
     <string name="inputMethod" msgid="1653630062304567879">"निवेश विधि"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"पाठ कार्यहरू"</string>
-    <string name="email" msgid="4560673117055050403">"इमेल"</string>
+    <string name="email" msgid="4560673117055050403">"इमेल गर्नुहोस्"</string>
     <string name="email_desc" msgid="3638665569546416795">"चयन गरिएको ठेगानामा इमेल पठाउनुहोस्"</string>
-    <string name="dial" msgid="1253998302767701559">"कल"</string>
+    <string name="dial" msgid="1253998302767701559">"कल गर्नुहोस्"</string>
     <string name="dial_desc" msgid="6573723404985517250">"चयन गरिएको फोन नम्बरमा कल गर्नुहोस्"</string>
-    <string name="map" msgid="5441053548030107189">"नक्सा"</string>
+    <string name="map" msgid="5441053548030107189">"नक्सा अनुप्रयोग खोल्नुहोस्"</string>
     <string name="map_desc" msgid="1836995341943772348">"चयन गरिएको ठेगाना पत्ता लगाउनुहोस्"</string>
     <string name="browse" msgid="1245903488306147205">"खोल्नुहोस्"</string>
     <string name="browse_desc" msgid="8220976549618935044">"चयन गरिएको URL खोल्नुहोस्"</string>
-    <string name="sms" msgid="4560537514610063430">"सन्देश"</string>
+    <string name="sms" msgid="4560537514610063430">"सन्देश पठाउनुहोस्"</string>
     <string name="sms_desc" msgid="7526588350969638809">"चयन गरिएको फोन नम्बरमा सन्देश पठाउनुहोस्‌"</string>
     <string name="add_contact" msgid="7867066569670597203">"थप्नुहोस्"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"सम्पर्क सूचीमा थप्नुहोस्"</string>
     <string name="view_calendar" msgid="979609872939597838">"हेर्नुहोस्"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"पात्रोमा चयन गरिएको समय हेर्नुहोस्"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"समयतालिका"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"समयतालिका बनाउनुहोस्"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"चयन गरिएको समयका लागि कार्यक्रमको समयतालिका बनाउनुहोस्‌"</string>
     <string name="view_flight" msgid="7691640491425680214">"ट्र्याक गर्नुहोस्"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"चयन गरिएको उडान ट्रयाक गर्नुहोस्"</string>
@@ -1183,8 +1189,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"सञ्जालमा साइन इन गर्नुहोस्"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi मार्फत इन्टरनेटमाथि पहुँच राख्न सकिँदैन"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> को इन्टरनेटमाथि पहुँच छैन"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"विकल्पहरूका लागि ट्याप गर्नुहोस्"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"जोडियो"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> को जडान सीमित छ"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"जसरी भए पनि जडान गर्न ट्याप गर्नुहोस्"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"तपाईंको हटस्पट सेटिङहरूमा परिवर्तन हुन्छ"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"तपाईंको हटस्पट ब्यान्ड परिवर्तन भएको छ।"</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"यो यन्त्रले तपाईंको 5GHz मात्रको प्राथमिकतालाई समर्थन गर्दैन। बरु, उपलब्ध भएको खण्डमा यो यन्त्रले 5GHz ब्यान्ड प्रयोग गर्छ।"</string>
@@ -1672,7 +1681,7 @@
     <string name="reason_service_unavailable" msgid="7824008732243903268">"प्रिन्ट सेवा सक्षम गरिएको छैन"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"<xliff:g id="NAME">%s</xliff:g> सेवा स्थापित भयो"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"सक्षम पार्न ट्याप गर्नुहोस्"</string>
-    <string name="restr_pin_enter_admin_pin" msgid="8641662909467236832">"प्रशासकको PIN प्रविष्ट गर्नुहोस्"</string>
+    <string name="restr_pin_enter_admin_pin" msgid="8641662909467236832">"प्रशासकको PIN प्रविष्टि गर्नुहोस्"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"PIN प्रविष्टि गर्नुहोस्"</string>
     <string name="restr_pin_incorrect" msgid="8571512003955077924">"गलत"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"वर्तमान PIN"</string>
@@ -1833,7 +1842,7 @@
     <string name="time_picker_hour_label" msgid="2979075098868106450">"घन्टा"</string>
     <string name="time_picker_minute_label" msgid="5168864173796598399">"मिनेट"</string>
     <string name="time_picker_header_text" msgid="143536825321922567">"समय सेट गर्नुहोस्"</string>
-    <string name="time_picker_input_error" msgid="7574999942502513765">"मान्य समय प्रविष्ट गर्नुहोस्"</string>
+    <string name="time_picker_input_error" msgid="7574999942502513765">"मान्य समय प्रविष्टि गर्नुहोस्"</string>
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"समय टाइप गर्नुहोस्‌"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"समय इनपुट गर्न पाठ इनपुट मोडमा स्विच गर्नुहोस्।"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"समय इनपुट गर्न घडी मोडमा स्विच गर्नुहोस्।"</string>

@@ -138,9 +138,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> „Wi-Fi“"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"„Wi-Fi“ skambinimas | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> „VoWifi“"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"„Wi-Fi“ skambinimas"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"„Wi-Fi“ skambinimas"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Išjungta"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Pageidautinas „Wi-Fi“ ryšys"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Pirmenybė mobiliojo ryšio tinklui"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"Skambinimas naudojant „Wi-Fi“"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"Skambinimas naudojant mobiliojo ryšio tinklą"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Tik „Wi-Fi“"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: neperadresuota"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -436,6 +440,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Leidžiama programai pasiekti telefono funkcijas įrenginyje. Šis leidimas suteikia teisę programai nustatyti telefono numerį ir įrenginio ID, tai, ar skambutis aktyvus, ir skambučiu prijungtą nuotolinį numerį."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"nukreipti skambučius per sistemą"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Programai leidžiama nukreipti jos skambučius per sistemą siekiant pagerinti skambinimo paslaugas."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"matyti ir valdyti skambučius per sistemą."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Programai leidžiama matyti ir valdyti vykstančius skambučius įrenginyje. Tai apima tokią informaciją kaip skambučių telefono numeriai ir skambučių būsena."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"tęsti skambutį naudojant kitą programą"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Programai leidžiama tęsti skambutį, kuris buvo pradėtas naudojant kitą programą."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"skaityti telefonų numerius"</string>
@@ -1064,7 +1070,7 @@
     <string name="map_desc" msgid="1836995341943772348">"Rasti vietą pasirinktu adresu"</string>
     <string name="browse" msgid="1245903488306147205">"Atidaryti"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Atidaryti pasirinktą URL"</string>
-    <string name="sms" msgid="4560537514610063430">"Pranešimas"</string>
+    <string name="sms" msgid="4560537514610063430">"Rašyti pranešimą"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Siųsti pranešimą pasirinktu telefono numeriu"</string>
     <string name="add_contact" msgid="7867066569670597203">"Pridėti"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Pridėti prie kontaktų"</string>
@@ -1221,8 +1227,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Prisijungti prie tinklo"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"„Wi‑Fi“ tinkle nėra interneto ryšio"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"„<xliff:g id="NETWORK_SSID">%1$s</xliff:g>“ negali pasiekti interneto"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Palieskite, kad būtų rodomos parinktys."</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Prisijungta"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"„<xliff:g id="NETWORK_SSID">%1$s</xliff:g>“ ryšys apribotas"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Palieskite, jei vis tiek norite prisijungti"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Viešosios interneto prieigos taško nustatymų pakeitimai"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Viešosios prieigos taško dažnio juosta pasikeitė."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Šiame įrenginyje nepalaikoma tik 5 GHz nuostata. Vietoj to šiame įrenginyje bus naudojama 5 GHz dažnio juosta, kai bus pasiekiama."</string>

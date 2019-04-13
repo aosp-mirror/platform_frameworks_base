@@ -136,9 +136,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Wi-Fi 通話 | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Wi-Fi 通話"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Wi-Fi 通話"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"關閉"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi 優先"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"行動網路優先"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"透過 Wi-Fi 進行通話"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"透過行動網路進行通話"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"只限 Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：未轉接"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -430,6 +434,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"允許應用程式使用裝置的電話功能。這項權限可讓應用程式判讀手機號碼和裝置 ID、是否正在通話中，以及所撥打的對方號碼。"</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"透過系統接通來電"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"允許應用程式透過系統接通來電，以改善通話品質。"</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"查看及控管透過系統撥打的電話。"</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"允許應用程式查看及控管在裝置上撥出的電話，包括撥打的電話號碼和通話狀態等資訊。"</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"繼續進行來自其他應用程式的通話"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"允許應用程式繼續進行在其他應用程式中發起的通話。"</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"讀取電話號碼"</string>
@@ -1016,24 +1022,24 @@
     <string name="deleteText" msgid="6979668428458199034">"刪除"</string>
     <string name="inputMethod" msgid="1653630062304567879">"輸入法"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"文字動作"</string>
-    <string name="email" msgid="4560673117055050403">"電子郵件"</string>
-    <string name="email_desc" msgid="3638665569546416795">"將電子郵件寄到所選地址"</string>
-    <string name="dial" msgid="1253998302767701559">"通話"</string>
-    <string name="dial_desc" msgid="6573723404985517250">"撥打所選電話號碼"</string>
-    <string name="map" msgid="5441053548030107189">"地圖"</string>
-    <string name="map_desc" msgid="1836995341943772348">"尋找所選地址"</string>
+    <string name="email" msgid="4560673117055050403">"發送電子郵件"</string>
+    <string name="email_desc" msgid="3638665569546416795">"將電子郵件寄到選取的地址"</string>
+    <string name="dial" msgid="1253998302767701559">"撥號通話"</string>
+    <string name="dial_desc" msgid="6573723404985517250">"撥打選取的電話號碼"</string>
+    <string name="map" msgid="5441053548030107189">"查看地圖"</string>
+    <string name="map_desc" msgid="1836995341943772348">"尋找選取的地址"</string>
     <string name="browse" msgid="1245903488306147205">"開啟"</string>
-    <string name="browse_desc" msgid="8220976549618935044">"開啟所選網址"</string>
-    <string name="sms" msgid="4560537514610063430">"訊息"</string>
-    <string name="sms_desc" msgid="7526588350969638809">"將訊息傳送到所選電話號碼"</string>
+    <string name="browse_desc" msgid="8220976549618935044">"開啟選取的網址"</string>
+    <string name="sms" msgid="4560537514610063430">"發送訊息"</string>
+    <string name="sms_desc" msgid="7526588350969638809">"將訊息傳送到選取的電話號碼"</string>
     <string name="add_contact" msgid="7867066569670597203">"新增"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"新增至聯絡人"</string>
     <string name="view_calendar" msgid="979609872939597838">"查看"</string>
-    <string name="view_calendar_desc" msgid="5828320291870344584">"在日曆中查看所選時間"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"時間表"</string>
-    <string name="add_calendar_event_desc" msgid="4326891793260687388">"將活動安排在所選時間"</string>
+    <string name="view_calendar_desc" msgid="5828320291870344584">"在日曆中查看選取的時間"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"加入日曆"</string>
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"將活動安排在選取的時間"</string>
     <string name="view_flight" msgid="7691640491425680214">"追蹤"</string>
-    <string name="view_flight_desc" msgid="3876322502674253506">"追蹤所選航班"</string>
+    <string name="view_flight_desc" msgid="3876322502674253506">"追蹤選取的航班"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"儲存空間即將用盡"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"部分系統功能可能無法運作"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"系統儲存空間不足。請確定你已釋出 250MB 的可用空間，然後重新啟動。"</string>
@@ -1177,8 +1183,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"登入網路"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi 沒有網際網路連線"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> 沒有網際網路連線"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"輕觸即可查看選項"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"已連線"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> 的連線能力受限"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"輕觸即可繼續連線"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"無線基地台設定變更"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"你的無線基地台頻帶已變更。"</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"這個裝置不支援你的偏好設定 (僅限 5GHz)，而是會在 5GHz 可用時使用該頻帶。"</string>
@@ -1336,7 +1345,7 @@
     <string name="ime_action_go" msgid="8320845651737369027">"開始"</string>
     <string name="ime_action_search" msgid="658110271822807811">"搜尋"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"傳送"</string>
-    <string name="ime_action_next" msgid="3138843904009813834">"下一頁"</string>
+    <string name="ime_action_next" msgid="3138843904009813834">"下一步"</string>
     <string name="ime_action_done" msgid="8971516117910934605">"完成"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"上一步"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"執行"</string>

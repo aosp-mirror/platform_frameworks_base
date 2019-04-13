@@ -136,9 +136,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"WiFi Calling | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"ການ​ໂທ Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"ການໂທ Wi-Fi"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ປິດ"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"ເລືອກໃຊ້ Wi​-Fi ກ່ອນ"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"ຕ້ອງການໃຊ້ມືຖື"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"ໂທຜ່ານ Wi-Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"ໂທຜ່ານເຄືອຂ່າຍມືຖື"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi​-Fi ເທົ່າ​ນັ້ນ"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ບໍ່ຖືກສົ່ງຕໍ່"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -430,6 +434,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"ອະນຸຍາດໃຫ້ແອັບຯ ເຂົ້າເຖິງຄວາມສາມາດການໂທລະສັບຂອງອຸປະກອນ. ການກຳນົດສິດນີ້ເຮັດໃຫ້ແອັບຯສາມາດກວດສອບເບີໂທລະສັບ ແລະ ID ຂອງອຸປະກອນ, ບໍ່ວ່າການໂທຈະຍັງດຳເນີນຢູ່ ແລະເບີປາຍທາງເຊື່ອມຕໍ່ຢູ່ຫຼືບໍ່ກໍຕາມ."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"route calls through the system"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Allows the app to route its calls through the system in order to improve the calling experience."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"ເຫັນ ແລະ ຄວບຄຸມການໂທຜ່ານລະບົບ."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"ອະນຸຍາດໃຫ້ແອັບເຫັນ ແລະ ຄວບຄຸມການໂທທີ່ກຳລັງດຳເນີນຢູ່ອຸປະກອນ. ນີ້ຮວມເຖິງຂໍ້ມູນ ເຊັ່ນ: ເບີໂທສຳລັບການໂທ ແລະ ສະຖານະຂອງການໂທນຳ."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"ສືບຕໍ່ການໂທຈາກແອັບອື່ນ"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"ອະນຸຍາດໃຫ້ແອັບສືບຕໍ່ການໂທເຊິ່ງອາດຖືກເລີ່ມຕົ້ນໃນແອັບອື່ນ."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"ອ່ານເບີໂທລະສັບ"</string>
@@ -1030,9 +1036,9 @@
     <string name="add_contact_desc" msgid="4830217847004590345">"ເພີ່ມໃສ່ລາຍຊື່ຜູ້ຕິດຕໍ່"</string>
     <string name="view_calendar" msgid="979609872939597838">"ເບິ່ງ"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"ເບິ່ງເວລາທີ່ເລືອກໃນປະຕິທິນ"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"ຕັ້ງເວລາ"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"ກຳນົດເວລາ"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"ກຳນົດເວລາສຳລັບເວລາທີ່ເລືອກ"</string>
-    <string name="view_flight" msgid="7691640491425680214">"ແທຣັກ"</string>
+    <string name="view_flight" msgid="7691640491425680214">"ຕິດຕາມ"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"ຕິດຕາມຖ້ຽວບິນທີ່ເລືອກ"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"ພື້ນທີ່ຈັດເກັບຂໍ້ມູນກຳລັງຈະເຕັມ"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"ການເຮັດວຽກບາງຢ່າງຂອງລະບົບບາງອາດຈະໃຊ້ບໍ່ໄດ້"</string>
@@ -1177,8 +1183,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"ລົງຊື່ເຂົ້າເຄືອຂ່າຍ"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi ບໍ່ມີສັນຍານອິນເຕີເນັດ"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> ບໍ່ມີການເຊື່ອມຕໍ່ອິນເຕີເນັດ"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"ແຕະເພື່ອເບິ່ງຕົວເລືອກ"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"ເຊື່ອມຕໍ່ແລ້ວ"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> ມີການເຊື່ອມຕໍ່ທີ່ຈຳກັດ"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"ແຕະເພື່ອຢືນຢັນການເຊື່ອມຕໍ່"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"ການປ່ຽນແປງການຕັ້ງຄ່າຮັອດສະປອດຂອງທ່ານ"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"ຄື້ນຄວາມຖີ່ຮັອດສະປອດຂອງທ່ານປ່ຽນແປງແລ້ວ."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"ອຸປະກອນນີ້ບໍ່ຮອງຮັບການຕັ້ງຄ່າຂອງທ່ານສຳລັບ 5GHz ເທົ່ານັ້ນ. ແຕ່ວ່າອຸປະກອນນີ້ຈະໃຊ້ຄື້ນຄວາມຖີ່ 5GHz ເມື່ອສາມາດໃຊ້ໄດ້."</string>

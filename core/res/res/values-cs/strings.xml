@@ -138,9 +138,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g>: Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Volání přes Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g>: VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Volání přes Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Volání přes WiFi"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Vypnuto"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Preferována síť W-Fi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Preferována mobilní data"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"Volání přes Wi-Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"Volání přes mobilní síť"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Pouze Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Nepřesměrováno"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -387,13 +391,13 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"Umožňuje aplikaci odesílat trvalá vysílání, která přetrvávají i po skončení vysílání. Nadměrné používání může televizi zpomalit či způsobit její nestabilitu, protože bude používat příliš mnoho paměti."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Umožňuje aplikaci odesílat trvalá vysílání, která přetrvávají i po skončení vysílání. Nadměrné používání může telefon zpomalit či způsobit jeho nestabilitu, protože bude používat příliš mnoho paměti."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"čtení kontaktů"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Umožňuje aplikaci číst údaje o kontaktech uložených v tabletu, včetně toho, jak často voláte, posíláte e-maily nebo jinak komunikujete s konkrétními osobami. Toto oprávnění umožňuje aplikacím ukládat údaje o kontaktech. Škodlivé aplikace mohou tyto údaje bez vašeho vědomí sdílet."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"Umožňuje aplikaci číst údaje o kontaktech uložených v televizi včetně toho, jak často voláte, posíláte e-maily nebo jinými způsoby komunikujete s konkrétními kontakty. Toto oprávnění umožňuje aplikacím ukládat údaje o vašich kontaktech a škodlivé aplikace mohou sdílet údaje o kontaktech bez vašeho vědomí."</string>
-    <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Umožňuje aplikaci číst údaje o kontaktech uložených v telefonu, včetně toho, jak často voláte, posíláte e-maily nebo komunikujete jinými způsoby s konkrétními osobami. Toto oprávnění umožňuje aplikacím ukládat údaje o kontaktech. Škodlivé aplikace mohou tyto údaje bez vašeho vědomí sdílet."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Umožňuje aplikaci číst údaje o kontaktech uložených v tabletu, včetně toho, jak často voláte, posíláte e‑maily nebo jinak komunikujete s konkrétními osobami. Toto oprávnění umožňuje aplikacím ukládat údaje o kontaktech. Škodlivé aplikace mohou tyto údaje bez vašeho vědomí sdílet."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"Umožňuje aplikaci číst údaje o kontaktech uložených v televizi včetně toho, jak často voláte, posíláte e‑maily nebo jinými způsoby komunikujete s konkrétními kontakty. Toto oprávnění umožňuje aplikacím ukládat údaje o vašich kontaktech a škodlivé aplikace mohou sdílet údaje o kontaktech bez vašeho vědomí."</string>
+    <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Umožňuje aplikaci číst údaje o kontaktech uložených v telefonu, včetně toho, jak často voláte, posíláte e‑maily nebo komunikujete jinými způsoby s konkrétními osobami. Toto oprávnění umožňuje aplikacím ukládat údaje o kontaktech. Škodlivé aplikace mohou tyto údaje bez vašeho vědomí sdílet."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"úprava kontaktů"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Umožňuje aplikaci upravit údaje o kontaktech uložených v tabletu včetně toho, jak často voláte, posíláte e-maily nebo komunikujete jinými způsoby s konkrétními kontakty. Toto oprávnění aplikacím umožňuje mazat údaje o kontaktech."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Umožňuje aplikaci upravit údaje o kontaktech uložených v televizi včetně toho, jak často voláte, posíláte e-maily nebo jinými způsoby komunikujete s konkrétními kontakty. Toto oprávnění aplikacím umožňuje mazat údaje o kontaktech."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Umožňuje aplikaci upravit údaje o kontaktech uložených v telefonu včetně toho, jak často voláte, posíláte e-maily nebo komunikujete jinými způsoby s konkrétními kontakty. Toto oprávnění aplikacím umožňuje mazat údaje o kontaktech."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Umožňuje aplikaci upravit údaje o kontaktech uložených v tabletu včetně toho, jak často voláte, posíláte e‑maily nebo komunikujete jinými způsoby s konkrétními kontakty. Toto oprávnění aplikacím umožňuje mazat údaje o kontaktech."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Umožňuje aplikaci upravit údaje o kontaktech uložených v televizi včetně toho, jak často voláte, posíláte e‑maily nebo jinými způsoby komunikujete s konkrétními kontakty. Toto oprávnění aplikacím umožňuje mazat údaje o kontaktech."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Umožňuje aplikaci upravit údaje o kontaktech uložených v telefonu včetně toho, jak často voláte, posíláte e‑maily nebo komunikujete jinými způsoby s konkrétními kontakty. Toto oprávnění aplikacím umožňuje mazat údaje o kontaktech."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"čtení seznamu hovorů"</string>
     <string name="permdesc_readCallLog" msgid="3204122446463552146">"Tato aplikace může číst historii volání."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"zápis do seznamu hovorů"</string>
@@ -436,6 +440,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Umožňuje aplikaci získat přístup k telefonním funkcím zařízení. Toto oprávnění umožňuje aplikaci zjistit telefonní číslo telefonu, identifikační čísla zařízení, zda zrovna probíhá hovor, a vzdálené číslo, ke kterému je hovor připojen."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"směrování volání prostřednictvím systému"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Umožňuje aplikaci směrovat volání prostřednictvím systému za účelem vylepšení funkcí volání."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"zobrazení a ovládání hovorů v systému."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Umožňuje aplikaci zobrazit a ovládat probíhající hovory v zařízení. Zahrnuje to informace jako zúčastněna čísla a stav hovoru."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"pokračování v hovoru v jiné aplikaci"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Umožňuje aplikace pokračovat v hovoru, který byl zahájen v jiné aplikaci."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"přístup k telefonním číslům"</string>
@@ -1064,7 +1070,7 @@
     <string name="map_desc" msgid="1836995341943772348">"Vyhledat vybranou adresu"</string>
     <string name="browse" msgid="1245903488306147205">"Otevřít"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Otevřít vybranou adresu URL"</string>
-    <string name="sms" msgid="4560537514610063430">"Zpráva"</string>
+    <string name="sms" msgid="4560537514610063430">"Napsat zprávu"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Napsat SMS na vybrané telefonní číslo"</string>
     <string name="add_contact" msgid="7867066569670597203">"Přidat"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Přidat do kontaktů"</string>
@@ -1221,8 +1227,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Přihlásit se k síti"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi nemá přístup k internetu"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"Síť <xliff:g id="NETWORK_SSID">%1$s</xliff:g> nemá přístup k internetu"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Klepnutím zobrazíte možnosti"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Připojeno"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"Síť <xliff:g id="NETWORK_SSID">%1$s</xliff:g> umožňuje jen omezené připojení"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Klepnutím se i přesto připojíte"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Změny nastavení hotspotu"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Pásmo hotspotu se změnilo."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Toto zařízení nepodporuje vaše nastavení jen 5GHz pásma. Zařízení použije pásmo 5 GHz, jen když bude dostupné."</string>

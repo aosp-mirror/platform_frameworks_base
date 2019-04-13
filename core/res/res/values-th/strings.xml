@@ -136,9 +136,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"การโทรผ่าน Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"การโทรผ่าน Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"การโทรผ่าน Wi-Fi"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ปิด"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"ต้องการใช้ Wi-Fi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"ต้องการใช้อินเทอร์เน็ตมือถือ"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"โทรผ่าน Wi-Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"โทรผ่านเครือข่ายมือถือ"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi-Fi เท่านั้น"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ไม่ได้โอนสาย"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -430,6 +434,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"อนุญาตให้แอปพลิเคชันเข้าถึงฟีเจอร์โทรศัพท์ของอุปกรณ์ การอนุญาตนี้ทำให้แอปพลิเคชันสามารถตรวจสอบหมายเลขโทรศัพท์และรหัสอุปกรณ์ ตรวจสอบว่ามีการโทรที่ทำงานอยู่หรือไม่ และตรวจสอบหมายเลขระยะไกลที่เชื่อมต่อด้วยการโทร"</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"กำหนดเส้นทางการโทรผ่านระบบ"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"อนุญาตให้แอปกำหนดเส้นทางการโทรของแอปผ่านระบบเพื่อปรับปรุงประสบการณ์ในการโทร"</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"ดูและจัดการการติดต่อผ่านระบบ"</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"อนุญาตให้แอปดูและจัดการการติดต่อในอุปกรณ์ ซึ่งรวมถึงข้อมูลอย่างเช่น หมายเลขที่ใช้ในการติดต่อและสถานะการติดต่อ"</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"ต่อสายจากแอปอื่น"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"อนุญาตให้แอปต่อสายที่เริ่มจากแอปอื่น"</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"อ่านหมายเลขโทรศัพท์"</string>
@@ -497,7 +503,7 @@
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"ใช้ฮาร์ดแวร์ลายนิ้วมือ"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"อนุญาตให้แอปใช้ฮาร์ดแวร์ลายนิ้วมือเพื่อตรวจสอบสิทธิ์"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"ตรวจพบลายนิ้วมือเพียงบางส่วน โปรดลองอีกครั้ง"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"ไม่สามารถประมวลผลลายนิ้วมือได้ โปรดลองอีกครั้ง"</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"ประมวลผลลายนิ้วมือไม่ได้ โปรดลองอีกครั้ง"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"เซ็นเซอร์ลายนิ้วมือไม่สะอาด โปรดทำความสะอาดและลองอีกครั้ง"</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"เคลื่อนนิ้วเร็วเกินไป โปรดลองอีกครั้ง"</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"นิ้วเคลื่อนที่ช้าเกินไป โปรดลองอีกครั้ง"</string>
@@ -595,7 +601,7 @@
     <string name="policylab_wipeData" msgid="3910545446758639713">"ลบข้อมูลทั้งหมด"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"ลบข้อมูลของแท็บเล็ตโดยไม่มีการเตือน ด้วยการดำเนินการรีเซ็ตข้อมูลเป็นค่าเริ่มต้น"</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"ลบข้อมูลของทีวีโดยไม่ต้องมีคำเตือนโดยการรีเซ็ตข้อมูลเป็นค่าเริ่มต้น"</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"ลบข้อมูลของโทรศัพท์โดยไม่มีการเตือน ด้วยการดำเนินการรีเซ็ตข้อมูลเป็นค่าเริ่มต้น"</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"ลบข้อมูลโทรศัพท์โดยไม่มีการเตือน ด้วยการรีเซ็ตข้อมูลเป็นค่าเริ่มต้น"</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"ลบข้อมูลผู้ใช้"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"ลบข้อมูลของผู้ใช้นี้ในแท็บเล็ตเครื่องนี้โดยไม่มีการเตือน"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"ลบข้อมูลของผู้ใช้นี้ในทีวีเครื่องนี้โดยไม่มีการเตือน"</string>
@@ -1030,9 +1036,9 @@
     <string name="add_contact_desc" msgid="4830217847004590345">"เพิ่มในรายชื่อติดต่อ"</string>
     <string name="view_calendar" msgid="979609872939597838">"ดู"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"ดูเวลาที่เลือกในปฏิทิน"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"กำหนดการ"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"ตั้งเวลา"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"ตั้งเวลากิจกรรมสำหรับเวลาที่เลือก"</string>
-    <string name="view_flight" msgid="7691640491425680214">"แทร็ก"</string>
+    <string name="view_flight" msgid="7691640491425680214">"ติดตาม"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"ติดตามเที่ยวบินที่เลือก"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"พื้นที่จัดเก็บเหลือน้อย"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"บางฟังก์ชันระบบอาจไม่ทำงาน"</string>
@@ -1177,8 +1183,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"ลงชื่อเข้าใช้เครือข่าย"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi เชื่อมต่ออินเทอร์เน็ตไม่ได้"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> เข้าถึงอินเทอร์เน็ตไม่ได้"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"แตะเพื่อดูตัวเลือก"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"เชื่อมต่อแล้ว"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> มีการเชื่อมต่อจำกัด"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"แตะเพื่อเชื่อมต่อ"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"มีการเปลี่ยนแปลงการตั้งค่าฮอตสปอต"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"ย่านความถี่ฮอตสปอตมีการเปลี่ยนแปลง"</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"อุปกรณ์นี้ไม่รองรับค่ากำหนดของคุณเฉพาะสำหรับ 5 GHz เท่านั้น และจะใช้ย่านความถี่ 5 GHz แทน เมื่อใช้ได้"</string>
@@ -1260,7 +1269,7 @@
     <string name="usb_power_notification_message" msgid="4647527153291917218">"กำลังชาร์จอุปกรณ์ที่เชื่อมต่อ แตะเพื่อดูตัวเลือกเพิ่มเติม"</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"ตรวจพบอุปกรณ์เสริมสำหรับเสียงแบบแอนะล็อก"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"อุปกรณ์ที่พ่วงไม่สามารถใช้งานร่วมกับโทรศัพท์นี้ แตะเพื่อดูข้อมูลเพิ่มเติม"</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"เชื่อมต่อการแก้ไขข้อบกพร่องผ่าน USB แล้ว"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"เชื่อมต่อการแก้ไขข้อบกพร่อง USB แล้ว"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"แตะเพื่อปิดการแก้ไขข้อบกพร่อง USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"เลือกเพื่อปิดใช้งานการแก้ไขข้อบกพร่อง USB"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"กำลังสร้างรายงานข้อบกพร่อง…"</string>
@@ -1522,7 +1531,7 @@
       <item quantity="other">ลองอีกครั้งใน <xliff:g id="NUMBER">%d</xliff:g> วินาที</item>
       <item quantity="one">ลองอีกครั้งใน 1 วินาที</item>
     </plurals>
-    <string name="kg_pattern_instructions" msgid="398978611683075868">"วาดรูปแบบของคุณ"</string>
+    <string name="kg_pattern_instructions" msgid="398978611683075868">"ลากรูปแบบของคุณ"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"ป้อน PIN ของซิม"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"ป้อน PIN"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"ป้อนรหัสผ่าน"</string>
