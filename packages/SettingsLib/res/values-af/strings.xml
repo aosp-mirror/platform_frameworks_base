@@ -40,6 +40,7 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Gekoppel via %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Beskikbaar via %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Gekoppel, geen internet nie"</string>
+    <string name="wifi_limited_connection" msgid="7717855024753201527">"Beperkte verbinding"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"Geen internet nie"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"Aanmelding word vereis"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Toegangspunt is tydelik vol"</string>
@@ -80,8 +81,8 @@
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM-toegang"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"HD-oudio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"HD oudio"</string>
-    <string name="bluetooth_profile_hearing_aid" msgid="7999237886427812595">"Gehoortoestel"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="7188282786730266159">"Gekoppel aan gehoortoestel"</string>
+    <string name="bluetooth_profile_hearing_aid" msgid="6680721080542444257">"Gehoortoestelle"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="3051944447369418317">"Gekoppel aan gehoortoestelle"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Gekoppel aan media-oudio"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Gekoppel aan foonoudio"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Gekoppel aan lêeroordragbediener"</string>
@@ -98,7 +99,7 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Gebruik vir foonoudio"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Gebruik vir lêeroordrag"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"Gebruik vir invoer"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="908775281788309484">"Gebruik vir gehoortoestel"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="8843499209204010224">"Gebruik vir gehoortoestelle"</string>
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Bind saam"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"BIND SAAM"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Kanselleer"</string>
@@ -284,7 +285,7 @@
     <string name="show_touches" msgid="2642976305235070316">"Wys tikke"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"Wys visuele terugvoer vir tikke"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Wys oppervlakopdaterings"</string>
-    <string name="show_screen_updates_summary" msgid="2569622766672785529">"Flits vensteroppervlaktes in geheel wanneer dit opdateer"</string>
+    <string name="show_screen_updates_summary" msgid="2569622766672785529">"Flits totale vensteroppervlakke wanneer dit opdateer"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"Wys GPU-aansigopdaterings"</string>
     <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"Flits aansigte binne die vensters wanneer dit met die GPU geskets is"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Wys hardewarelae se opdaterings"</string>
@@ -307,7 +308,7 @@
     <string name="show_non_rect_clip" msgid="505954950474595172">"Ontfout nie-reghoekige knipbedrywighede"</string>
     <string name="track_frame_time" msgid="6146354853663863443">"Profiel se GPU-lewering"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Aktiveer GPU-ontfoutlae"</string>
-    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Laat laai van GPU-ontfoutlae vir ontfoutapps toe"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Laat laai van GPU-ontfoutlae vir ontfoutprogramme toe"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Vensteranimasieskaal"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Oorganganimasieskaal"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Animator-tydsduurskaal"</string>
@@ -347,7 +348,7 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aktief. Tik om te wissel."</string>
     <string name="standby_bucket_summary" msgid="6567835350910684727">"Programbystandstatus:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Lopende dienste"</string>
-    <string name="runningservices_settings_summary" msgid="854608995821032748">"Sien en beheer dienste wat tans loop"</string>
+    <string name="runningservices_settings_summary" msgid="854608995821032748">"Sien en beheer dienste wat tans aktief is"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView-implementering"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Stel WebView-implementering"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Hierdie keuse is nie meer geldig nie. Probeer weer."</string>

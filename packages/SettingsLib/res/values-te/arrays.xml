@@ -173,7 +173,7 @@
     <item msgid="2850427388488887328">"కెర్నెల్ మాత్రమే"</item>
   </string-array>
   <string-array name="select_logpersist_summaries">
-    <item msgid="2216470072500521830">"ఆఫ్ చేయి"</item>
+    <item msgid="2216470072500521830">"ఆఫ్"</item>
     <item msgid="172978079776521897">"అన్ని లాగ్ బఫర్‌లు"</item>
     <item msgid="3873873912383879240">"అన్నీ కానీ రేడియో లాగ్ బఫర్‌లు"</item>
     <item msgid="8489661142527693381">"కెర్నెల్ లాగ్ బఫర్ మాత్రమే"</item>

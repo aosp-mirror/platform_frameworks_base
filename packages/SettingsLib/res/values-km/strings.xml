@@ -40,6 +40,7 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"បានភ្ជាប់តាមរយៈ %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"មានតាមរយៈ %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"បាន​ភ្ជាប់ ប៉ុន្តែ​គ្មាន​អ៊ីនធឺណិត​ទេ"</string>
+    <string name="wifi_limited_connection" msgid="7717855024753201527">"ការតភ្ជាប់មានកម្រិត"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"គ្មាន​អ៊ីនធឺណិតទេ"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"តម្រូវ​ឱ្យ​ចូល​គណនី"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"ចំណុចចូលប្រើពេញជាបណ្តោះអាសន្ន"</string>
@@ -80,8 +81,8 @@
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"ការចូលដំណើរការស៊ីម"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"សំឡេងកម្រិត HD៖ <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"សំឡេងកម្រិត HD"</string>
-    <string name="bluetooth_profile_hearing_aid" msgid="7999237886427812595">"ឧបករណ៍​ជំនួយការ​ស្ដាប់"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="7188282786730266159">"បាន​ភ្ជាប់ទៅ​ឧបករណ៍​ជំនួយការ​ស្តាប់"</string>
+    <string name="bluetooth_profile_hearing_aid" msgid="6680721080542444257">"ឧបករណ៍​ជំនួយការ​ស្ដាប់"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="3051944447369418317">"បាន​ភ្ជាប់ទៅ​ឧបករណ៍​ជំនួយការ​ស្ដាប់"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"បា​ន​ភ្ជាប់​ទៅ​អូឌីយ៉ូ​មេឌៀ"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"តភ្ជាប់​ទៅ​អូឌីយ៉ូ​ទូរស័ព្ទ"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"បាន​តភ្ជាប់​ទៅ​ម៉ាស៊ីន​មេ​ផ្ទេរ​ឯកសារ"</string>
@@ -98,7 +99,7 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"ប្រើ​សម្រាប់​​អូឌីយ៉ូ​ទូរស័ព្ទ"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"ប្រើ​សម្រាប់​ផ្ទេរ​ឯកសារ"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"ប្រើ​សម្រាប់​បញ្ចូល"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="908775281788309484">"ប្រើ​សម្រាប់​ឧបករណ៍​ជំនួយការ​ស្តាប់"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="8843499209204010224">"ប្រើ​សម្រាប់​ឧបករណ៍​ជំនួយការ​ស្តាប់"</string>
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"ផ្គូផ្គង"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"ផ្គូផ្គង"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"បោះ​បង់​"</string>
@@ -234,7 +235,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"បញ្ចូលឈ្មោះម៉ាស៊ីនរបស់ក្រុមហ៊ុនផ្ដល់សេវា DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"មិន​អាចភ្ជាប់​បានទេ"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"បង្ហាញ​ជម្រើស​សម្រាប់​សេចក្តីបញ្ជាក់ការបង្ហាញ​ឥត​ខ្សែ"</string>
-    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"បង្កើនកម្រិតកំណត់ហេតុវ៉ាយហ្វាយបង្ហាញក្នុង SSID RSSI ក្នុងកម្មវិធីជ្រើស​វ៉ាយហ្វាយ"</string>
+    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"បង្កើនកម្រិតកំណត់ហេតុ Wi-Fi បង្ហាញក្នុង SSID RSSI ក្នុងកម្មវិធីជ្រើសរើស Wi-Fi"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"ជ្រើសរើសអាសយដ្ឋាន MAC ដោយចៃដន្យ នៅពេល​ភ្ជាប់​បណ្តាញ Wi‑Fi"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"មានការកំណត់"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"មិនមានការកំណត់"</string>
@@ -299,7 +300,7 @@
     <string name="debug_layout" msgid="5981361776594526155">"បង្ហាញ​ព្រំដែន​ប្លង់"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"បង្ហាញ​ការ​ភ្ជាប់​អត្ថបទ​សម្រង់ រឹម ។ល។"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"បង្ខំ​ទិស​ប្លង់ RTL"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"បង្ខំ​ទិស​ប្លង់​អេក្រង់​ទៅកាន់ RTL សម្រាប់​មូលដ្ឋាន​ទាំងអស់"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"ប្តូរទិស​ប្លង់​អេក្រង់​ទៅជា RTL សម្រាប់​គ្រប់ភាសា​ទាំងអស់"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"បង្ខំ​ឲ្យ​បង្ហាញ GPU"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"បង្ខំ​ប្រើ GPU សម្រាប់​ការ​គូរ​ 2D"</string>
     <string name="force_msaa" msgid="7920323238677284387">"បង្ខំ 4x MSAA"</string>

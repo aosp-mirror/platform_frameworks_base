@@ -40,6 +40,7 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Під’єднано через %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Доступ через %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Під’єднано, але немає доступу до Інтернету"</string>
+    <string name="wifi_limited_connection" msgid="7717855024753201527">"Обмежене з’єднання"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"Немає Інтернету"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"Потрібно ввійти в обліковий запис"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Точка доступу тимчасово переповнена"</string>
@@ -80,8 +81,8 @@
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Доступ до SIM-карти"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"HD-аудіо: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"HD-аудіо"</string>
-    <string name="bluetooth_profile_hearing_aid" msgid="7999237886427812595">"Слуховий апарат"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="7188282786730266159">"Під’єднано до слухового апарата"</string>
+    <string name="bluetooth_profile_hearing_aid" msgid="6680721080542444257">"Слухові апарати"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="3051944447369418317">"Підключено до слухових апаратів"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Підключено до аудіоджерела"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Підключено до звуку телеф."</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Підключ. до сервера передачі файлів"</string>
@@ -98,7 +99,7 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Викор. для звуку тел."</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Викор. для перед. файлів"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"Викор. для введ."</string>
-    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="908775281788309484">"Використовувати для слухового апарата"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="8843499209204010224">"Використовувати для слухових апаратів"</string>
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Підключити"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"ПІДКЛЮЧИТИСЯ"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Скасувати"</string>
@@ -270,7 +271,7 @@
     <string name="debug_app_set" msgid="2063077997870280017">"Програма для налагодження: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="5156029161289091703">"Вибір додатка"</string>
     <string name="no_application" msgid="2813387563129153880">"Нічого"</string>
-    <string name="wait_for_debugger" msgid="1202370874528893091">"Зачекайте на налагоджувач"</string>
+    <string name="wait_for_debugger" msgid="1202370874528893091">"Очікування налагоджувача"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Додаток очікує підключення налагоджувача"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Ввід"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Рисування"</string>
@@ -334,7 +335,7 @@
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Не вдалося зберегти пароль"</string>
   <string-array name="color_mode_names">
     <item msgid="2425514299220523812">"Насичений (за умовчанням)"</item>
-    <item msgid="8446070607501413455">"Природний"</item>
+    <item msgid="8446070607501413455">"Природні"</item>
     <item msgid="6553408765810699025">"Стандартний"</item>
   </string-array>
   <string-array name="color_mode_descriptions">
@@ -346,8 +347,8 @@
     <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"Неактивний додаток. Торкніться, щоб активувати."</string>
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Активний додаток. Торкніться, щоб дезактивувати."</string>
     <string name="standby_bucket_summary" msgid="6567835350910684727">"Режим очікування: <xliff:g id="BUCKET"> %s</xliff:g>"</string>
-    <string name="runningservices_settings_title" msgid="8097287939865165213">"Запущені служби"</string>
-    <string name="runningservices_settings_summary" msgid="854608995821032748">"Перегляд і керування запущеними службами"</string>
+    <string name="runningservices_settings_title" msgid="8097287939865165213">"Запущені сервіси"</string>
+    <string name="runningservices_settings_summary" msgid="854608995821032748">"Переглянути й налаштувати запущені сервіси"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Застосування WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Налаштувати застосування WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Ця опція більше не дійсна. Повторіть спробу."</string>
