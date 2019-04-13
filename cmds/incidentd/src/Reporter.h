@@ -58,7 +58,7 @@ public:
 
     bool ok();  // returns true if the request is ok for write.
 
-    bool containsSection(int sectionId) const { return args.containsSection(sectionId); }
+    bool containsSection(int sectionId) const;
 
     sp<IIncidentReportStatusListener> getListener() { return mListener; }
 
