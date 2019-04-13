@@ -1693,7 +1693,7 @@ static void android_location_GnssLocationProvider_init_once(JNIEnv* env, jclass 
     // 1.1@IGnss can be paired {1.0, 1.1}@IGnssMeasurement
     // 1.0@IGnss is paired with 1.0@IGnssMeasurement
     gnssMeasurementIface = nullptr;
-    if (gnssHal_V2_0 != nullptr && gnssMeasurementIface == nullptr) {
+    if (gnssHal_V2_0 != nullptr) {
         auto gnssMeasurement = gnssHal_V2_0->getExtensionGnssMeasurement_2_0();
         if (!gnssMeasurement.isOk()) {
             ALOGD("Unable to get a handle to GnssMeasurement_V2_0");
@@ -1730,6 +1730,10 @@ static void android_location_GnssLocationProvider_init_once(JNIEnv* env, jclass 
         }
     }
 
+    // Allow all causal combinations between IGnss.hal and IGnssDebug.hal. That means,
+    // 2.0@IGnss can be paired with {1.0, 2.0}@IGnssDebug
+    // 1.0@IGnss is paired with 1.0@IGnssDebug
+    gnssDebugIface = nullptr;
     if (gnssHal_V2_0 != nullptr) {
         auto gnssDebug = gnssHal_V2_0->getExtensionGnssDebug_2_0();
         if (!gnssDebug.isOk()) {
@@ -1738,7 +1742,8 @@ static void android_location_GnssLocationProvider_init_once(JNIEnv* env, jclass 
             gnssDebugIface_V2_0 = gnssDebug;
             gnssDebugIface = gnssDebugIface_V2_0;
         }
-    } else {
+    }
+    if (gnssDebugIface == nullptr) {
         auto gnssDebug = gnssHal->getExtensionGnssDebug();
         if (!gnssDebug.isOk()) {
             ALOGD("Unable to get a handle to GnssDebug");

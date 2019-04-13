@@ -26,6 +26,7 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
 import android.os.Binder;
 import android.os.Environment;
+import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
@@ -209,8 +210,11 @@ class Owners {
     }
 
     private void pushToActivityTaskManagerLocked() {
-        mActivityTaskManagerInternal.setDeviceOwnerPackageName(mDeviceOwner != null
-                ? mDeviceOwner.packageName : null);
+        final int uid = mDeviceOwner != null ? mPackageManagerInternal.getPackageUid(
+                mDeviceOwner.packageName,
+                PackageManager.MATCH_ALL | PackageManager.MATCH_KNOWN_PACKAGES, mDeviceOwnerUserId)
+                : Process.INVALID_UID;
+        mActivityTaskManagerInternal.setDeviceOwnerUid(uid);
     }
 
     String getDeviceOwnerPackageName() {

@@ -344,11 +344,19 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
      * {@link #getTimeoutIdleBindMillis() idle timeout} expires.
      */
     protected void scheduleUnbind() {
-        final long unbindDelay = getTimeoutIdleBindMillis();
+        scheduleUnbind(true);
+    }
 
-        if (unbindDelay <= 0) {
+    private void scheduleUnbind(boolean delay) {
+        long unbindDelay = getTimeoutIdleBindMillis();
+
+        if (unbindDelay <= PERMANENT_BOUND_TIMEOUT_MS) {
             if (mVerbose) Slog.v(mTag, "not scheduling unbind when value is " + unbindDelay);
             return;
+        }
+
+        if (!delay) {
+            unbindDelay = 0;
         }
 
         cancelScheduledUnbind();
@@ -462,8 +470,15 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
+            if (mVerbose) Slog.v(mTag, "onServiceDisconnected()");
             mBinding = true;
             mService = null;
+        }
+
+        @Override
+        public void onBindingDied(ComponentName name) {
+            if (mVerbose) Slog.v(mTag, "onBindingDied()");
+            scheduleUnbind(false);
         }
     }
 

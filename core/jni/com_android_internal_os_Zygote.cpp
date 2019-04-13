@@ -76,6 +76,7 @@
 #include <cutils/ashmem.h>
 #include <cutils/fs.h>
 #include <cutils/multiuser.h>
+#include <cutils/sockets.h>
 #include <private/android_filesystem_config.h>
 #include <utils/String8.h>
 #include <utils/Trace.h>
@@ -134,13 +135,6 @@ static bool gIsSecurityEnforced = true;
  * process name may contain.
  */
 static constexpr size_t MAX_NAME_LENGTH = 15;
-
-/**
- * The prefix string for environmental variables storing socket FDs created by
- * init.
- */
-
-static constexpr std::string_view ANDROID_SOCKET_PREFIX("ANDROID_SOCKET_");
 
 /**
  * The file descriptor for the Zygote socket opened by init.
@@ -1665,6 +1659,20 @@ static void UnmountStorageOnInit(JNIEnv* env) {
   UnmountTree("/storage");
 }
 
+static int DisableExecuteOnly(struct dl_phdr_info* info,
+                              size_t size [[maybe_unused]],
+                              void* data [[maybe_unused]]) {
+  // Search for any execute-only segments and mark them read+execute.
+  for (int i = 0; i < info->dlpi_phnum; i++) {
+    if ((info->dlpi_phdr[i].p_type == PT_LOAD) && (info->dlpi_phdr[i].p_flags == PF_X)) {
+      mprotect(reinterpret_cast<void*>(info->dlpi_addr + info->dlpi_phdr[i].p_vaddr),
+               info->dlpi_phdr[i].p_memsz, PROT_READ | PROT_EXEC);
+    }
+  }
+  // Return non-zero to exit dl_iterate_phdr.
+  return 0;
+}
+
 }  // anonymous namespace
 
 namespace android {
@@ -1882,22 +1890,17 @@ static void com_android_internal_os_Zygote_nativeInitNativeState(JNIEnv* env, jc
    * Obtain file descriptors created by init from the environment.
    */
 
-  std::string android_socket_prefix(ANDROID_SOCKET_PREFIX);
-  std::string env_var_name = android_socket_prefix + (is_primary ? "zygote" : "zygote_secondary");
-  char* env_var_val = getenv(env_var_name.c_str());
-
-  if (env_var_val != nullptr) {
-    gZygoteSocketFD = atoi(env_var_val);
+  gZygoteSocketFD =
+      android_get_control_socket(is_primary ? "zygote" : "zygote_secondary");
+  if (gZygoteSocketFD >= 0) {
     ALOGV("Zygote:zygoteSocketFD = %d", gZygoteSocketFD);
   } else {
     ALOGE("Unable to fetch Zygote socket file descriptor");
   }
 
-  env_var_name = android_socket_prefix + (is_primary ? "usap_pool_primary" : "usap_pool_secondary");
-  env_var_val = getenv(env_var_name.c_str());
-
-  if (env_var_val != nullptr) {
-    gUsapPoolSocketFD = atoi(env_var_val);
+  gUsapPoolSocketFD =
+      android_get_control_socket(is_primary ? "usap_pool_primary" : "usap_pool_secondary");
+  if (gUsapPoolSocketFD >= 0) {
     ALOGV("Zygote:usapPoolSocketFD = %d", gUsapPoolSocketFD);
   } else {
     ALOGE("Unable to fetch USAP pool socket file descriptor");
@@ -2006,24 +2009,12 @@ static void com_android_internal_os_Zygote_nativeEmptyUsapPool(JNIEnv* env, jcla
   }
 }
 
-static int disable_execute_only(struct dl_phdr_info *info, size_t size, void *data) {
-  // Search for any execute-only segments and mark them read+execute.
-  for (int i = 0; i < info->dlpi_phnum; i++) {
-    if ((info->dlpi_phdr[i].p_type == PT_LOAD) && (info->dlpi_phdr[i].p_flags == PF_X)) {
-      mprotect(reinterpret_cast<void*>(info->dlpi_addr + info->dlpi_phdr[i].p_vaddr),
-              info->dlpi_phdr[i].p_memsz, PROT_READ | PROT_EXEC);
-    }
-  }
-  // Return non-zero to exit dl_iterate_phdr.
-  return 0;
-}
-
 /**
  * @param env  Managed runtime environment
  * @return  True if disable was successful.
  */
 static jboolean com_android_internal_os_Zygote_nativeDisableExecuteOnly(JNIEnv* env, jclass) {
-  return dl_iterate_phdr(disable_execute_only, nullptr) == 0;
+  return dl_iterate_phdr(DisableExecuteOnly, nullptr) == 0;
 }
 
 static const JNINativeMethod gMethods[] = {

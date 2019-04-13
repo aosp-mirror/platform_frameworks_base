@@ -1484,6 +1484,7 @@
   <java-symbol type="drawable" name="ic_settings_print" />
   <java-symbol type="drawable" name="ic_signal_location" />
   <java-symbol type="drawable" name="ic_info_outline_24" />
+  <java-symbol type="drawable" name="ic_qs_ui_mode_night" />
 
   <java-symbol type="drawable" name="stat_notify_mmcc_indication_icn" />
   <java-symbol type="drawable" name="autofilled_highlight"/>
@@ -1909,6 +1910,7 @@
   <java-symbol type="array" name="config_testLocationProviders" />
   <java-symbol type="array" name="config_defaultNotificationVibePattern" />
   <java-symbol type="array" name="config_notificationFallbackVibePattern" />
+  <java-symbol type="bool" name="config_enableServerNotificationEffectsForAutomotive" />
   <java-symbol type="bool" name="config_useAttentionLight" />
   <java-symbol type="bool" name="config_adaptive_sleep_available" />
   <java-symbol type="bool" name="config_animateScreenLights" />
@@ -2228,6 +2230,7 @@
   <java-symbol type="id" name="button_always" />
   <java-symbol type="id" name="button_app_settings" />
   <java-symbol type="integer" name="config_globalActionsKeyTimeout" />
+  <java-symbol type="integer" name="config_screenshotChordKeyTimeout" />
   <java-symbol type="integer" name="config_maxResolverActivityColumns" />
   <java-symbol type="array" name="config_notificationSignalExtractors" />
 
@@ -2848,6 +2851,7 @@
   <java-symbol type="integer" name="config_navBarInteractionMode" />
   <java-symbol type="bool" name="config_navBarCanMove" />
   <java-symbol type="bool" name="config_navBarTapThrough" />
+  <java-symbol type="bool" name="config_navBarNeedsScrim" />
   <java-symbol type="dimen" name="config_backGestureInset" />
   <java-symbol type="color" name="system_bar_background_semi_transparent" />
 
@@ -3748,4 +3752,9 @@
   <!-- For DropBox -->
   <java-symbol type="integer" name="config_dropboxLowPriorityBroadcastRateLimitPeriod" />
   <java-symbol type="array" name="config_dropboxLowPriorityTags" />
+
+  <!-- For Privacy Type -->
+  <java-symbol type="drawable" name="perm_group_camera" />
+  <java-symbol type="drawable" name="perm_group_location" />
+  <java-symbol type="drawable" name="perm_group_microphone" />
 </resources>

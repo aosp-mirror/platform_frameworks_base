@@ -17,6 +17,7 @@
 package android.media;
 
 import android.media.IMediaRouterClient;
+import android.media.IMediaRouter2ManagerClient;
 import android.media.MediaRouterClientState;
 
 /**
@@ -29,8 +30,15 @@ interface IMediaRouterService {
     MediaRouterClientState getState(IMediaRouterClient client);
     boolean isPlaybackActive(IMediaRouterClient client);
 
+    void setControlCategories(IMediaRouterClient client, in List<String> categories);
     void setDiscoveryRequest(IMediaRouterClient client, int routeTypes, boolean activeScan);
     void setSelectedRoute(IMediaRouterClient client, String routeId, boolean explicit);
     void requestSetVolume(IMediaRouterClient client, String routeId, int volume);
     void requestUpdateVolume(IMediaRouterClient client, String routeId, int direction);
+
+    void registerManagerAsUser(IMediaRouter2ManagerClient callback,
+            String packageName, int userId);
+    void unregisterManager(IMediaRouter2ManagerClient callback);
+    void setRemoteRoute(IMediaRouter2ManagerClient callback,
+            int uid, String routeId, boolean explicit);
 }

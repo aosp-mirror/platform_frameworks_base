@@ -407,7 +407,7 @@
     <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"Ky aplikacion mund të lexojë të gjitha ngjarjet e kalendarit të ruajtura në tabletin tënd dhe të ndajë ose të ruajë të dhënat e kalendarit."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"Ky aplikacion mund të lexojë të gjitha ngjarjet e kalendarit të ruajtura në televizorin tënd dhe të ndajë ose të ruajë të dhënat e kalendarit."</string>
     <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"Ky aplikacion mund të lexojë të gjitha ngjarjet e kalendarit të ruajtura në telefonin tënd dhe të ndajë ose të ruajë të dhënat e kalendarit."</string>
-    <string name="permlab_writeCalendar" msgid="8438874755193825647">"shto ose modifiko ngjarjet e kalendarit dhe dërgoju mail të ftuarve, pa dijeninë e zotëruesve"</string>
+    <string name="permlab_writeCalendar" msgid="8438874755193825647">"shto ose modifiko ngjarjet e kalendarit dhe dërgoju email të ftuarve pa dijeninë e zotëruesve"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"Ky aplikacion mund të shtojë, të heqë ose të ndryshojë ngjarjet e kalendarit në tabletin tënd. Ky aplikacion mund të dërgojë mesazhe që mund të duket se vijnë nga zotëruesit e kalendarit ose të ndryshojë ngjarjet pa i njoftuar zotëruesit e tyre."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"Ky aplikacion mund të shtojë, të heqë ose të ndryshojë ngjarjet e kalendarit në televizorin tënd. Ky aplikacion mund të dërgojë mesazhe që mund të duket se vijnë nga zotëruesit e kalendarit ose të ndryshojë ngjarjet pa i njoftuar zotëruesit e tyre."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Ky aplikacion mund të shtojë, të heqë ose të ndryshojë ngjarjet e kalendarit në telefonin tënd. Ky aplikacion mund të dërgojë mesazhe që mund të duket se vijnë nga zotëruesit e kalendarit ose të ndryshojë ngjarjet pa i njoftuar zotëruesit e tyre."</string>
@@ -1153,7 +1153,7 @@
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> vazhdon të ndalojë"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> vazhdon të ndalojë"</string>
     <string name="aerr_restart" msgid="7581308074153624475">"Hap përsëri aplikacionin"</string>
-    <string name="aerr_report" msgid="5371800241488400617">"Dërgo komentin"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"Dërgo koment"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Mbyll"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Vendose në heshtje deri kur të riniset pajisja"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Prit!"</string>
@@ -1924,7 +1924,7 @@
     <string name="time_picker_minute_label" msgid="5168864173796598399">"minutë"</string>
     <string name="time_picker_header_text" msgid="143536825321922567">"Vendos orën"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"Fut një kohë të vlefshme"</string>
-    <string name="time_picker_prompt_label" msgid="7588093983899966783">"Shkruaj kohën"</string>
+    <string name="time_picker_prompt_label" msgid="7588093983899966783">"Shkruaj orën"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Kalo te modaliteti i hyrjes së tekstit për hyrjen e kohës."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Kalo te modaliteti i orës për hyrjen e kohës."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Opsionet e plotësimit automatik"</string>

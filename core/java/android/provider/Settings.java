@@ -955,6 +955,20 @@ public final class Settings {
             "android.settings.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS";
 
     /**
+     * Activity Action: Open the advanced power usage details page of an associated app.
+     * <p>
+     * Input: Intent's data URI set with an application name, using the
+     * "package" schema (like "package:com.my.app")
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_VIEW_ADVANCED_POWER_USAGE_DETAIL =
+            "android.settings.VIEW_ADVANCED_POWER_USAGE_DETAIL";
+
+    /**
      * Activity Action: Show screen for controlling background data
      * restrictions for a particular application.
      * <p>
@@ -1059,6 +1073,22 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_ADD_ACCOUNT =
             "android.settings.ADD_ACCOUNT_SETTINGS";
+
+    /**
+     * Activity Action: Show settings for enabling or disabling data saver
+     * <p></p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_DATA_SAVER_SETTINGS =
+            "android.settings.DATA_SAVER_SETTINGS";
 
     /**
      * Activity Action: Show settings for selecting the network operator.
@@ -8132,6 +8162,13 @@ public final class Settings {
 
         private static final Validator FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION_VALIDATOR =
                 BOOLEAN_VALIDATOR;
+
+        /**
+         * Whether or not debugging is enabled.
+         * @hide
+         */
+        public static final String BIOMETRIC_DEBUG_ENABLED =
+                "biometric_debug_enabled";
 
         /**
          * Whether the assist gesture should be enabled.

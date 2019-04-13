@@ -455,6 +455,7 @@ public class NotificationManagerService extends SystemService {
     private int mAutoGroupAtCount;
     private boolean mIsTelevision;
     private boolean mIsAutomotive;
+    private boolean mNotificationEffectsEnabledForAutomotive;
 
     private MetricsLogger mMetricsLogger;
     private TriPredicate<String, Integer, String> mAllowedManagedServicePackages;
@@ -1516,6 +1517,11 @@ public class NotificationManagerService extends SystemService {
     }
 
     @VisibleForTesting
+    void setZenHelper(ZenModeHelper zenHelper) {
+        mZenModeHelper = zenHelper;
+    }
+
+    @VisibleForTesting
     void setIsAutomotive(boolean isAutomotive) {
         mIsAutomotive = isAutomotive;
     }
@@ -1681,6 +1687,8 @@ public class NotificationManagerService extends SystemService {
 
         mIsAutomotive =
                 mPackageManagerClient.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE, 0);
+        mNotificationEffectsEnabledForAutomotive =
+                resources.getBoolean(R.bool.config_enableServerNotificationEffectsForAutomotive);
 
         mPreferencesHelper.lockChannelsForOEM(getContext().getResources().getStringArray(
                 com.android.internal.R.array.config_nonBlockableNotificationPackages));
@@ -2856,7 +2864,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public List<String> getAllowedAssistantCapabilities(String pkg) {
+        public List<String> getAllowedAssistantAdjustments(String pkg) {
             checkCallerIsSystemOrSameApp(pkg);
 
             if (!isCallerSystemOrPhone()
@@ -2864,11 +2872,11 @@ public class NotificationManagerService extends SystemService {
                     throw new SecurityException("Not currently an assistant");
             }
 
-            return mAssistants.getAllowedAssistantCapabilities();
+            return mAssistants.getAllowedAssistantAdjustments();
         }
 
         @Override
-        public void allowAssistantCapability(String adjustmentType) {
+        public void allowAssistantAdjustment(String adjustmentType) {
             checkCallerIsSystemOrSystemUiOrShell();
             mAssistants.allowAdjustmentType(adjustmentType);
 
@@ -2876,7 +2884,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void disallowAssistantCapability(String adjustmentType) {
+        public void disallowAssistantAdjustment(String adjustmentType) {
             checkCallerIsSystemOrSystemUiOrShell();
             mAssistants.disallowAdjustmentType(adjustmentType);
 
@@ -3563,7 +3571,7 @@ public class NotificationManagerService extends SystemService {
                 return;
             }
             boolean accessAllowed = false;
-            String[] packages = getContext().getPackageManager().getPackagesForUid(uid);
+            String[] packages = mPackageManagerClient.getPackagesForUid(uid);
             final int packageCount = packages.length;
             for (int i = 0; i < packageCount; i++) {
                 if (mConditionProviders.isPackageOrComponentAllowed(
@@ -5555,6 +5563,9 @@ public class NotificationManagerService extends SystemService {
     @VisibleForTesting
     @GuardedBy("mNotificationLock")
     void buzzBeepBlinkLocked(NotificationRecord record) {
+        if (mIsAutomotive && !mNotificationEffectsEnabledForAutomotive) {
+            return;
+        }
         boolean buzz = false;
         boolean beep = false;
         boolean blink = false;
@@ -7410,7 +7421,7 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
-        protected List<String> getAllowedAssistantCapabilities() {
+        protected List<String> getAllowedAssistantAdjustments() {
             synchronized (mLock) {
                 List<String> types = new ArrayList<>();
                 types.addAll(mAllowedAdjustments);
@@ -7470,7 +7481,7 @@ public class NotificationManagerService extends SystemService {
         private void notifyCapabilitiesChanged(final ManagedServiceInfo info) {
             final INotificationListener assistant = (INotificationListener) info.service;
             try {
-                assistant.onCapabilitiesChanged();
+                assistant.onAllowedAdjustmentsChanged();
             } catch (RemoteException ex) {
                 Slog.e(TAG, "unable to notify assistant (capabilities): " + assistant, ex);
             }

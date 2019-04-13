@@ -172,6 +172,8 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <!-- no translation found for data_connection_5ge (4699478963278829331) -->
+    <skip />
     <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
     <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
@@ -277,8 +279,7 @@
       <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> વધુ સૂચના અંદર છે.</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> વધુ સૂચના અંદર છે.</item>
     </plurals>
-    <!-- no translation found for notification_summary_message_format (715071952312553396) -->
-    <skip />
+    <string name="notification_summary_message_format" msgid="715071952312553396">"<xliff:g id="CONTACT_NAME">%1$s</xliff:g>: <xliff:g id="MESSAGE_CONTENT">%2$s</xliff:g>"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"સૂચનાઓની સેટિંગ્સ"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> સેટિંગ્સ"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"સ્ક્રીન આપમેળે ફરશે."</string>
@@ -620,30 +621,24 @@
     <string name="notification_channel_unsilenced" msgid="4790904571552394137">"આ બધા નોટિફિકેશન તમને અલર્ટ કરશે"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"તમે સામાન્ય રીતે આ નોટીફિકેશનને છોડી દો છો. \nતેમને બતાવવાનું ચાલુ રાખીએ?"</string>
     <string name="inline_done_button" msgid="492513001558716452">"થઈ ગયું"</string>
-    <!-- no translation found for inline_ok_button (975600017662930615) -->
-    <skip />
+    <string name="inline_ok_button" msgid="975600017662930615">"લાગુ કરો"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"આ નોટિફિકેશન બતાવવાનું ચાલુ રાખીએ?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"નોટિફિકેશન બંધ કરો"</string>
     <string name="inline_deliver_silently_button" msgid="7756289895745629140">"ચુપચાપ મોકલો"</string>
     <string name="inline_block_button" msgid="8735843688021655065">"બ્લૉક કરો"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"બતાવવાનું ચાલુ રાખો"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"નાનું કરો"</string>
-    <!-- no translation found for inline_silent_button_silent (6904727667411781466) -->
-    <skip />
+    <string name="inline_silent_button_silent" msgid="6904727667411781466">"સાઇલન્ટ નોટિફિકેશન"</string>
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"સાઇલન્ટ મોડ ચાલુ રાખો"</string>
-    <!-- no translation found for inline_silent_button_alert (2449191160203602471) -->
-    <skip />
+    <string name="inline_silent_button_alert" msgid="2449191160203602471">"વિક્ષેપ કરી શકતા"</string>
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"અલર્ટ કરવાનું ચાલુ રાખો"</string>
-    <!-- no translation found for inline_turn_off_notifications (8635596135532202355) -->
-    <skip />
+    <string name="inline_turn_off_notifications" msgid="8635596135532202355">"નોટિફિકેશન બંધ કરો"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"આ ઍપમાંથી નોટિફિકેશન બતાવવાનું ચાલુ રાખીએ?"</string>
     <string name="hint_text_block" msgid="3554459167504485284">"બ્લૉક કરેલાં નોટિફિકેશન ક્યાંય દેખાતાં નથી કે અવાજ સંભળાવતાં નથી. તમે સેટિંગમાં જઈને નોટિફિકેશનને અનબ્લૉક કરી શકો છો."</string>
     <string name="hint_text_silent" msgid="859468056340177016">"સાઇલન્ટ નોટિફિકેશન શેડમાં દેખાય છે, પણ લૉક સ્ક્રીન પર દેખાતાં નથી, બૅનર પ્રસ્તુત કરે છે અથવા ધ્વનિ વગાડે છે."</string>
-    <!-- no translation found for hint_text_alert (2721169810318722524) -->
-    <skip />
+    <string name="hint_text_alert" msgid="2721169810318722524">"આ બધા નોટિફિકેશન કોઈ સાઉન્ડ વગાડશે અને તે નોટિફિકેશન ડ્રોઅર, સ્ટેટસ બાર તેમજ લૉક સ્ક્રીનમાં પણ દેખાશે"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"આ નોટિફિકેશન બંધ કરી શકશો નહીં"</string>
-    <!-- no translation found for notification_multichannel_desc (4695920306092240550) -->
-    <skip />
+    <string name="notification_multichannel_desc" msgid="4695920306092240550">"નોટિફિકેશનના આ ગ્રૂપની ગોઠવણી અહીં કરી શકાશે નહીં"</string>
     <string name="notification_delegate_header" msgid="9167022191405284627">"<xliff:g id="APP_NAME">%1$s</xliff:g> મારફતે"</string>
     <string name="appops_camera" msgid="8100147441602585776">"આ ઍપ કૅમેરાનો ઉપયોગ કરી રહી છે."</string>
     <string name="appops_microphone" msgid="741508267659494555">"આ ઍપ માઇક્રોફોનનો ઉપયોગ કરી રહી છે."</string>

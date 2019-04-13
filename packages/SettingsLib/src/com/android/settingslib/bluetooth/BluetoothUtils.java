@@ -28,6 +28,8 @@ public class BluetoothUtils {
     public static final boolean V = false; // verbose logging
     public static final boolean D = true;  // regular logging
 
+    public static final int META_INT_ERROR = -1;
+
     private static ErrorListener sErrorListener;
 
     public static int getConnectionStateSummary(int connectionState) {
@@ -133,20 +135,16 @@ public class BluetoothUtils {
         final Pair<Drawable, String> pair = BluetoothUtils.getBtClassDrawableWithDescription(
                 context, cachedDevice);
         final BluetoothDevice bluetoothDevice = cachedDevice.getDevice();
-        final boolean untetheredHeadset = bluetoothDevice != null
-                ? Boolean.parseBoolean(bluetoothDevice.getMetadata(
-                BluetoothDevice.METADATA_IS_UNTHETHERED_HEADSET))
-                : false;
+        final boolean untetheredHeadset = getBooleanMetaData(
+                bluetoothDevice, BluetoothDevice.METADATA_IS_UNTETHERED_HEADSET);
         final int iconSize = context.getResources().getDimensionPixelSize(
                 R.dimen.bt_nearby_icon_size);
         final Resources resources = context.getResources();
 
         // Deal with untethered headset
         if (untetheredHeadset) {
-            final String uriString = bluetoothDevice != null
-                    ? bluetoothDevice.getMetadata(BluetoothDevice.METADATA_MAIN_ICON)
-                    : null;
-            final Uri iconUri = uriString != null ? Uri.parse(uriString) : null;
+            final Uri iconUri = getUriMetaData(bluetoothDevice,
+                    BluetoothDevice.METADATA_MAIN_ICON);
             if (iconUri != null) {
                 try {
                     context.getContentResolver().takePersistableUriPermission(iconUri,
@@ -193,5 +191,78 @@ public class BluetoothUtils {
         ((AdaptiveIcon) adaptiveIcon).setBackgroundColor(iconBgColors[index]);
 
         return adaptiveIcon;
+    }
+
+    /**
+     * Get boolean Bluetooth metadata
+     *
+     * @param bluetoothDevice the BluetoothDevice to get metadata
+     * @param key key value within the list of BluetoothDevice.METADATA_*
+     * @return the boolean metdata
+     */
+    public static boolean getBooleanMetaData(BluetoothDevice bluetoothDevice, int key) {
+        if (bluetoothDevice == null) {
+            return false;
+        }
+        final byte[] data = bluetoothDevice.getMetadata(key);
+        if (data == null) {
+            return false;
+        }
+        return Boolean.parseBoolean(new String(data));
+    }
+
+    /**
+     * Get String Bluetooth metadata
+     *
+     * @param bluetoothDevice the BluetoothDevice to get metadata
+     * @param key key value within the list of BluetoothDevice.METADATA_*
+     * @return the String metdata
+     */
+    public static String getStringMetaData(BluetoothDevice bluetoothDevice, int key) {
+        if (bluetoothDevice == null) {
+            return null;
+        }
+        final byte[] data = bluetoothDevice.getMetadata(key);
+        if (data == null) {
+            return null;
+        }
+        return new String(data);
+    }
+
+    /**
+     * Get integer Bluetooth metadata
+     *
+     * @param bluetoothDevice the BluetoothDevice to get metadata
+     * @param key key value within the list of BluetoothDevice.METADATA_*
+     * @return the int metdata
+     */
+    public static int getIntMetaData(BluetoothDevice bluetoothDevice, int key) {
+        if (bluetoothDevice == null) {
+            return META_INT_ERROR;
+        }
+        final byte[] data = bluetoothDevice.getMetadata(key);
+        if (data == null) {
+            return META_INT_ERROR;
+        }
+        try {
+            return Integer.parseInt(new String(data));
+        } catch (NumberFormatException e) {
+            return META_INT_ERROR;
+        }
+    }
+
+    /**
+     * Get URI Bluetooth metadata
+     *
+     * @param bluetoothDevice the BluetoothDevice to get metadata
+     * @param key key value within the list of BluetoothDevice.METADATA_*
+     * @return the URI metdata
+     */
+    public static Uri getUriMetaData(BluetoothDevice bluetoothDevice, int key) {
+        String data = getStringMetaData(bluetoothDevice, key);
+        if (data == null) {
+            return null;
+        }
+        return Uri.parse(data);
     }
 }

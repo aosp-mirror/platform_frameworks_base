@@ -87,13 +87,13 @@ import com.android.systemui.recents.events.ui.focus.FocusPreviousTaskViewEvent;
 import com.android.systemui.recents.events.ui.focus.NavigateTaskViewEvent;
 import com.android.systemui.recents.events.ui.focus.NavigateTaskViewEvent.Direction;
 import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.utilities.Utilities;
 import com.android.systemui.recents.model.RecentsTaskLoadPlan;
 import com.android.systemui.recents.model.RecentsTaskLoader;
-import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
+import com.android.systemui.recents.utilities.Utilities;
 import com.android.systemui.recents.views.RecentsView;
 import com.android.systemui.recents.views.SystemBarScrimViews;
+import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 
 import java.io.FileDescriptor;
@@ -370,8 +370,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         MetricsLogger.visible(this, MetricsEvent.OVERVIEW_ACTIVITY);
 
         // Getting system scrim colors ignoring wallpaper visibility since it should never be grey.
-        ColorExtractor.GradientColors systemColors = mColorExtractor.getColors(
-                ColorExtractor.TYPE_DARK, WallpaperManager.FLAG_SYSTEM, true);
+        ColorExtractor.GradientColors systemColors = mColorExtractor.getNeutralColors();
         // We don't want to interpolate colors because we're defining the initial state.
         // Gradient should be set/ready when you open "Recents".
         mRecentsView.setScrimColors(systemColors, false);
@@ -397,9 +396,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         if ((which & WallpaperManager.FLAG_SYSTEM) != 0) {
             // Recents doesn't care about the wallpaper being visible or not, it always
             // wants to scrim with wallpaper colors
-            ColorExtractor.GradientColors colors = mColorExtractor.getColors(
-                    WallpaperManager.FLAG_SYSTEM,
-                    ColorExtractor.TYPE_DARK, true /* ignoreVis */);
+            ColorExtractor.GradientColors colors = mColorExtractor.getNeutralColors();
             boolean darkText = colors.supportsDarkText();
             if (darkText != mUsingDarkText) {
                 mUsingDarkText = darkText;

@@ -172,6 +172,8 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <!-- no translation found for data_connection_5ge (4699478963278829331) -->
+    <skip />
     <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
     <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
@@ -225,8 +227,8 @@
     <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"үнсіз"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"тек дабылдар"</string>
     <string name="accessibility_quick_settings_dnd" msgid="5555155552520665891">"Мазаламау."</string>
-    <string name="accessibility_quick_settings_dnd_changed_off" msgid="2757071272328547807">"Мазаламау режимі өшірілді."</string>
-    <string name="accessibility_quick_settings_dnd_changed_on" msgid="6808220653747701059">"мазаламау режимі қосылды."</string>
+    <string name="accessibility_quick_settings_dnd_changed_off" msgid="2757071272328547807">"\"Мазаламау\" режимі өшірілді."</string>
+    <string name="accessibility_quick_settings_dnd_changed_on" msgid="6808220653747701059">"\"Мазаламау\" режимі қосылды."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth."</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"Bluetooth өшірулі."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"Bluetooth қосулы."</string>
@@ -441,8 +443,8 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"Battery saver қосулы"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Өнімділікті және фондық деректерді азайтады"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Battery saver функциясын өшіру"</string>
-    <string name="media_projection_dialog_text" msgid="5751657130671431216">"Жазу және трансляциялау кезінде <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> сіз ойнайтын аудиомазмұн және құпия сөздер, төлем ақпараттары, фотосуреттер және хабарлар сияқты кез келген құпия ақпаратты сақтай аласыз."</string>
-    <string name="media_projection_dialog_title" msgid="8124184308671641248">"Трансляциялау/Жазу кезінде құпия ақпаратты көрсету"</string>
+    <string name="media_projection_dialog_text" msgid="5751657130671431216">"Жазу және трансляциялау кезінде <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ойнатылған аудиомазмұн, құпия сөздер, төлем мәліметтері, фотосуреттер және хабарлар сияқты кез келген құпия ақпаратты сақтай алады."</string>
+    <string name="media_projection_dialog_title" msgid="8124184308671641248">"Трансляциялау/жазу кезінде құпия ақпаратты көрсету"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Қайта көрсетпеу"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Барлығын тазалау"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Басқару"</string>
@@ -632,8 +634,8 @@
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"Хабарландырулар келе берсін"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"Хабарландыруларды өшіру"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Осы қолданбаның хабарландырулары көрсетілсін бе?"</string>
-    <string name="hint_text_block" msgid="3554459167504485284">"Тыйым салынған хабарландырулар еш жерде көрсетілмейді немесе дыбыс шығармайды. Хабарландыруларды параметрлерден бөгей алмайсыз."</string>
-    <string name="hint_text_silent" msgid="859468056340177016">"Дыбыссыз хабарландырулар көлеңкеде шығады, бірақ құлыптау экранына шықпайды, баннерде ұсынылады және дыбысты ойнатады."</string>
+    <string name="hint_text_block" msgid="3554459167504485284">"Тыйым салынған хабарландырулар еш жерде көрсетілмейді немесе дыбыс шығармайды. Тыйымды алу үшін параметрлерге өтіңіз."</string>
+    <string name="hint_text_silent" msgid="859468056340177016">"Дыбыссыз хабарландырулар көлеңкеде шығады, бірақ құлып экранына шықпайды, баннерде ұсынылады және дыбысты ойнатады."</string>
     <string name="hint_text_alert" msgid="2721169810318722524">"Бұл дыбыстық хабарландырулар хабарландыру тартпасында, күй жолағында және құлып экранында көрсетіледі."</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"Хабарландыруларды өшіру мүмкін емес"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Мұндай хабарландырулар бұл жерде конфигурацияланбайды."</string>
@@ -717,7 +719,7 @@
     <string name="tuner_full_zen_title" msgid="4540823317772234308">"Дыбыс деңгейін басқару элементтерімен бірге көрсету"</string>
     <string name="volume_and_do_not_disturb" msgid="1750270820297253561">"Мазаламау"</string>
     <string name="volume_dnd_silent" msgid="4363882330723050727">"Дыбыс деңгейі түймелерінің төте жолы"</string>
-    <string name="volume_up_silent" msgid="7545869833038212815">"Дыбысы арттырылған кезде, мазаламау режимінен шығу"</string>
+    <string name="volume_up_silent" msgid="7545869833038212815">"Дыбысы арттырылған кезде, \"Мазаламау\" режимінен шығу"</string>
     <string name="battery" msgid="7498329822413202973">"Батарея"</string>
     <string name="clock" msgid="7416090374234785905">"Сағат"</string>
     <string name="headset" msgid="4534219457597457353">"Құлақаспап жинағы"</string>
@@ -898,10 +900,10 @@
     <string name="sensor_privacy_mode" msgid="8982771253020769598">"Датчиктер өшірулі"</string>
     <string name="device_services" msgid="1191212554435440592">"Құрылғы қызметтері"</string>
     <string name="music_controls_no_title" msgid="5236895307087002011">"Атауы жоқ"</string>
-    <string name="restart_button_description" msgid="2035077840254950187">"Бұл қолданбаны іске қосу үшін түртіп, толық экранға өтіңіз."</string>
+    <string name="restart_button_description" msgid="2035077840254950187">"Бұл қолданбаны қайта қосып, толық экранға өту үшін түртіңіз."</string>
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"<xliff:g id="APP_NAME">%1$s</xliff:g> қолданбасын ашу"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"<xliff:g id="APP_NAME">%1$s</xliff:g> қалқымалы анықтамаларының параметрлері"</string>
-    <string name="bubbles_prompt" msgid="8807968030159469710">"<xliff:g id="APP_NAME">%1$s</xliff:g> қолданбасында қалқымалы анықтамаларға рұқсат етілсін бе?"</string>
+    <string name="bubbles_prompt" msgid="8807968030159469710">"<xliff:g id="APP_NAME">%1$s</xliff:g> қолданбасының қалқымалы анықтамаларына рұқсат етілсін бе?"</string>
     <string name="no_bubbles" msgid="337101288173078247">"Тыйым салу"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Рұқсат беру"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Кейінірек сұралсын"</string>

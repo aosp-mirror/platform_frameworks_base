@@ -894,7 +894,6 @@ public class PackageManagerSettingsTests {
                 + "<permissions>"
                 + "<item name=\"android.permission.WRITE_CALL_LOG\" package=\"android\" protection=\"1\" />"
                 + "<item name=\"android.permission.ASEC_ACCESS\" package=\"android\" protection=\"2\" />"
-                + "<item name=\"android.permission.ACCESS_WIMAX_STATE\" package=\"android\" />"
                 + "<item name=\"android.permission.REBOOT\" package=\"android\" protection=\"18\" />"
                 + "</permissions>"
                 + "<package name=\"com.android.app1\" codePath=\"/system/app/app1.apk\" nativeLibraryPath=\"/data/data/com.android.app1/lib\" flags=\"1\" ft=\"1360e2caa70\" it=\"135f2f80d08\" ut=\"1360e2caa70\" version=\"1109\" sharedUserId=\"11000\">"

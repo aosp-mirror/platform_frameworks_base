@@ -24,10 +24,14 @@ import static android.net.NetworkStats.UID_ALL;
 import static com.android.server.NetworkManagementSocketTagger.kernelToTag;
 
 import android.annotation.Nullable;
+import android.net.INetd;
 import android.net.NetworkStats;
+import android.net.util.NetdService;
+import android.os.RemoteException;
 import android.os.StrictMode;
 import android.os.SystemClock;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ProcFileReader;
@@ -64,7 +68,10 @@ public class NetworkStatsFactory {
 
     private boolean mUseBpfStats;
 
+    private INetd mNetdService;
+
     // A persistent Snapshot since device start for eBPF stats
+    @GuardedBy("mPersistSnapshot")
     private final NetworkStats mPersistSnapshot;
 
     // TODO: only do adjustments in NetworkStatsService and remove this.
@@ -272,6 +279,19 @@ public class NetworkStatsFactory {
         return stats;
     }
 
+    @GuardedBy("mPersistSnapshot")
+    private void requestSwapActiveStatsMapLocked() throws RemoteException {
+        // Ask netd to do a active map stats swap. When the binder call successfully returns,
+        // the system server should be able to safely read and clean the inactive map
+        // without race problem.
+        if (mUseBpfStats) {
+            if (mNetdService == null) {
+                mNetdService = NetdService.getInstance();
+            }
+            mNetdService.trafficSwapActiveStatsMap();
+        }
+    }
+
     // TODO: delete the lastStats parameter
     private NetworkStats readNetworkStatsDetailInternal(int limitUid, String[] limitIfaces,
             int limitTag, NetworkStats lastStats) throws IOException {
@@ -284,15 +304,24 @@ public class NetworkStatsFactory {
                 stats = new NetworkStats(SystemClock.elapsedRealtime(), -1);
             }
             if (mUseBpfStats) {
-                if (nativeReadNetworkStatsDetail(stats, mStatsXtUid.getAbsolutePath(), UID_ALL,
-                        null, TAG_ALL, mUseBpfStats) != 0) {
-                    throw new IOException("Failed to parse network stats");
+                synchronized (mPersistSnapshot) {
+                    try {
+                        requestSwapActiveStatsMapLocked();
+                    } catch (RemoteException e) {
+                        throw new IOException(e);
+                    }
+                    // Stats are always read from the inactive map, so they must be read after the
+                    // swap
+                    if (nativeReadNetworkStatsDetail(stats, mStatsXtUid.getAbsolutePath(), UID_ALL,
+                            null, TAG_ALL, mUseBpfStats) != 0) {
+                        throw new IOException("Failed to parse network stats");
+                    }
+                    mPersistSnapshot.setElapsedRealtime(stats.getElapsedRealtime());
+                    mPersistSnapshot.combineAllValues(stats);
+                    NetworkStats result = mPersistSnapshot.clone();
+                    result.filter(limitUid, limitIfaces, limitTag);
+                    return result;
                 }
-                mPersistSnapshot.setElapsedRealtime(stats.getElapsedRealtime());
-                mPersistSnapshot.combineAllValues(stats);
-                NetworkStats result = mPersistSnapshot.clone();
-                result.filter(limitUid, limitIfaces, limitTag);
-                return result;
             } else {
                 if (nativeReadNetworkStatsDetail(stats, mStatsXtUid.getAbsolutePath(), limitUid,
                         limitIfaces, limitTag, mUseBpfStats) != 0) {

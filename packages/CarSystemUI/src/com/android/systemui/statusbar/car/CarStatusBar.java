@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.car;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.car.drivingstate.CarDrivingStateEvent;
@@ -39,6 +40,7 @@ import com.android.car.notification.CarUxRestrictionManagerWrapper;
 import com.android.car.notification.NotificationClickHandlerFactory;
 import com.android.car.notification.NotificationViewController;
 import com.android.car.notification.PreprocessingManager;
+import com.android.internal.statusbar.RegisterStatusBarResult;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.CarSystemUIFactory;
@@ -187,11 +189,13 @@ public class CarStatusBar extends StatusBar implements
         if (mIsKeyguard) {
             updateNavBarForKeyguardContent();
         }
+        // CarFacetButtonController was reset therefore we need to re-add the status bar elements
+        // to the controller.
+        mCarFacetButtonController.addAllFacetButtons(mStatusBarWindow);
     }
 
     private void addTemperatureViewToController(View v) {
         if (v instanceof TemperatureView) {
-            Log.d(TAG, "addTemperatureViewToController: found ");
             mHvacController.addHvacTextView((TemperatureView) v);
         } else if (v instanceof ViewGroup) {
             ViewGroup viewGroup = (ViewGroup) v;
@@ -257,8 +261,8 @@ public class CarStatusBar extends StatusBar implements
 
 
     @Override
-    protected void makeStatusBarView() {
-        super.makeStatusBarView();
+    protected void makeStatusBarView(@Nullable RegisterStatusBarResult result) {
+        super.makeStatusBarView(result);
         mHvacController = new HvacController(mContext);
 
         CarSystemUIFactory factory = SystemUIFactory.getInstance();
@@ -430,7 +434,7 @@ public class CarStatusBar extends StatusBar implements
     }
 
     @Override
-    protected void createNavigationBar() {
+    protected void createNavigationBar(@Nullable RegisterStatusBarResult result) {
         mShowBottom = mContext.getResources().getBoolean(R.bool.config_enableBottomNavigationBar);
         mShowLeft = mContext.getResources().getBoolean(R.bool.config_enableLeftNavigationBar);
         mShowRight = mContext.getResources().getBoolean(R.bool.config_enableRightNavigationBar);
@@ -441,7 +445,7 @@ public class CarStatusBar extends StatusBar implements
 
         // There has been a car customized nav bar on the default display, so just create nav bars
         // on external displays.
-        mNavigationBarController.createNavigationBars(false /* includeDefaultDisplay */);
+        mNavigationBarController.createNavigationBars(false /* includeDefaultDisplay */, result);
     }
 
     private void buildNavBarContent() {

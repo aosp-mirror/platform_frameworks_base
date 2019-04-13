@@ -1520,18 +1520,6 @@
     <permission android:name="android.permission.OVERRIDE_WIFI_CONFIG"
         android:protectionLevel="signature|privileged" />
 
-    <!-- @hide -->
-    <permission android:name="android.permission.ACCESS_WIMAX_STATE"
-        android:description="@string/permdesc_accessWimaxState"
-        android:label="@string/permlab_accessWimaxState"
-        android:protectionLevel="normal" />
-
-    <!-- @hide -->
-    <permission android:name="android.permission.CHANGE_WIMAX_STATE"
-        android:description="@string/permdesc_changeWimaxState"
-        android:label="@string/permlab_changeWimaxState"
-        android:protectionLevel="normal" />
-
     <!-- Allows applications to act as network scorers. @hide @SystemApi-->
     <permission android:name="android.permission.SCORE_NETWORKS"
         android:protectionLevel="signature|privileged" />
@@ -1601,12 +1589,6 @@
     <permission android:name="android.permission.MANAGE_LOWPAN_INTERFACES"
         android:protectionLevel="signature|privileged" />
 
-    <!-- @hide Allows internal management of Wi-Fi connectivity state when on
-         wireless consent mode.
-         <p>Not for use by third-party applications. -->
-    <permission android:name="android.permission.MANAGE_WIFI_WHEN_WIRELESS_CONSENT_REQUIRED"
-        android:protectionLevel="signature" />
-
     <!-- #SystemApi @hide Allows an app to bypass Private DNS.
          <p>Not for use by third-party applications.
          TODO: publish as system API in next API release. -->
@@ -1637,8 +1619,8 @@
         android:label="@string/permlab_bluetooth"
         android:protectionLevel="normal" />
 
-    <!-- @SystemApi Allows an application to suspend other apps, which will prevent the user
-         from using them until they are unsuspended.
+    <!-- @SystemApi @TestApi Allows an application to suspend other apps, which will prevent the
+         user from using them until they are unsuspended.
          @hide
     -->
     <permission android:name="android.permission.SUSPEND_APPS"

@@ -39,7 +39,7 @@
 using namespace android;
 
 // ----------------------------------------------------------------------------
-static const char* const kClassPathName = "android/media/audiopolicy/AudioVolumeGroups";
+static const char* const kClassPathName = "android/media/audiopolicy/AudioVolumeGroup";
 static const char* const kAudioVolumeGroupClassPathName =
         "android/media/audiopolicy/AudioVolumeGroup";
 

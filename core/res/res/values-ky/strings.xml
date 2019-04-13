@@ -655,7 +655,7 @@
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Экрандын кулпусун ачуу учурунда туура эмес терилген сырсөздөрдү тескөө жана сырсөз өтө көп жолу туура эмес терилген болсо, сыналгыны кулпулап же бул колдонуучунун бардык дайындарын тазалап салуу."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Экрандын кулпусун ачуу учурунда туура эмес терилген сырсөздөрдү тескөө жана сырсөз өтө көп жолу туура эмес терилген болсо, телефонду кулпулап же бул колдонуучунун бардык дайындарын тазалап салуу."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Экран кулпусун өзгөртүү"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Экран кулпусун өзгөртүү."</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Экран кулпусун өзгөртөт."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Экранды кулпулоо"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Экран качан жана кантип кулпулана турганын башкарат."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Бардык маалыматты өчүрүү"</string>
@@ -675,7 +675,7 @@
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Камераларды өчүрүү"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Түзмөктүн бардык камераларын колдонууга тыюу салуу."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Функцияларды өчүрүү"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Экранды кулпулоо функцияларынын айрымдарын колдонууга тыюу салуу"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Экранды кулпулаган функциялардын айрымдарын колдонууга тыюу салат."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Үй"</item>
     <item msgid="869923650527136615">"Мобилдик"</item>

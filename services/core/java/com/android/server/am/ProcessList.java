@@ -62,6 +62,7 @@ import android.os.AppZygote;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.GraphicsEnvironment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -701,6 +702,13 @@ public final class ProcessList {
             return prefix + (compact ? "+" : "+ ") + Integer.toString(diff);
         }
         return prefix + "+" + Integer.toString(diff);
+    }
+
+    private static boolean shouldUseSystemGraphicsDriver(Context context, Bundle coreSettings,
+            ApplicationInfo applicationInfo) {
+        final boolean shouldUseGameDriver =
+                GraphicsEnvironment.shouldUseGameDriver(context, coreSettings, applicationInfo);
+        return !shouldUseGameDriver;
     }
 
     public static String makeOomAdjString(int setAdj, boolean compact) {
@@ -1783,6 +1791,8 @@ public final class ProcessList {
             final StorageManagerInternal storageManagerInternal =
                     LocalServices.getService(StorageManagerInternal.class);
             final String sandboxId = storageManagerInternal.getSandboxId(app.info.packageName);
+            final boolean useSystemGraphicsDriver = shouldUseSystemGraphicsDriver(mService.mContext,
+                    mService.mCoreSettingsObserver.getCoreSettingsLocked(), app.info);
             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "Start proc: " +
                     app.processName);
             checkSlow(startTime, "startProcess: asking zygote to start proc");
@@ -1793,7 +1803,8 @@ public final class ProcessList {
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
                         app.info.dataDir, null, app.info.packageName,
                         packageNames, sandboxId,
-                        new String[] {PROC_START_SEQ_IDENT + app.startSeq});
+                        new String[] {PROC_START_SEQ_IDENT + app.startSeq},
+                        useSystemGraphicsDriver);
             } else if (hostingType.equals("app_zygote")) {
                 final AppZygote appZygote = createAppZygoteForProcessIfNeeded(app);
 
@@ -1802,14 +1813,16 @@ public final class ProcessList {
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
                         app.info.dataDir, null, app.info.packageName,
                         packageNames, sandboxId, /*useUnspecializedAppProcessPool=*/ false,
-                        new String[] {PROC_START_SEQ_IDENT + app.startSeq});
+                        new String[] {PROC_START_SEQ_IDENT + app.startSeq},
+                        useSystemGraphicsDriver);
             } else {
                 startResult = Process.start(entryPoint,
                         app.processName, uid, uid, gids, runtimeFlags, mountExternal,
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
                         app.info.dataDir, invokeWith, app.info.packageName,
                         packageNames, sandboxId,
-                        new String[] {PROC_START_SEQ_IDENT + app.startSeq});
+                        new String[] {PROC_START_SEQ_IDENT + app.startSeq},
+                        useSystemGraphicsDriver);
             }
             checkSlow(startTime, "startProcess: returned from zygote!");
             return startResult;

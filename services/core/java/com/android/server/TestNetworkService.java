@@ -60,6 +60,7 @@ class TestNetworkService extends ITestNetworkManager.Stub {
     @NonNull private static final String TAG = TestNetworkService.class.getSimpleName();
     @NonNull private static final String TEST_NETWORK_TYPE = "TEST_NETWORK";
     @NonNull private static final String TEST_TUN_PREFIX = "testtun";
+    @NonNull private static final String TEST_TAP_PREFIX = "testtap";
     @NonNull private static final AtomicInteger sTestTunIndex = new AtomicInteger();
 
     @NonNull private final Context mContext;
@@ -70,7 +71,7 @@ class TestNetworkService extends ITestNetworkManager.Stub {
     @NonNull private final Handler mHandler;
 
     // Native method stubs
-    private static native int jniCreateTun(@NonNull String iface);
+    private static native int jniCreateTunTap(boolean isTun, @NonNull String iface);
 
     @VisibleForTesting
     protected TestNetworkService(
@@ -85,23 +86,23 @@ class TestNetworkService extends ITestNetworkManager.Stub {
     }
 
     /**
-     * Create a TUN interface with the given interface name and link addresses
+     * Create a TUN or TAP interface with the given interface name and link addresses
      *
-     * <p>This method will return the FileDescriptor to the TUN interface. Close it to tear down the
-     * TUN interface.
+     * <p>This method will return the FileDescriptor to the interface. Close it to tear down the
+     * interface.
      */
-    @Override
-    public TestNetworkInterface createTunInterface(@NonNull LinkAddress[] linkAddrs) {
+    private TestNetworkInterface createInterface(boolean isTun, LinkAddress[] linkAddrs) {
         enforceTestNetworkPermissions(mContext);
 
         checkNotNull(linkAddrs, "missing linkAddrs");
 
-        String iface = TEST_TUN_PREFIX + sTestTunIndex.getAndIncrement();
+        String ifacePrefix = isTun ? TEST_TUN_PREFIX : TEST_TAP_PREFIX;
+        String iface = ifacePrefix + sTestTunIndex.getAndIncrement();
         return Binder.withCleanCallingIdentity(
                 () -> {
                     try {
                         ParcelFileDescriptor tunIntf =
-                                ParcelFileDescriptor.adoptFd(jniCreateTun(iface));
+                                ParcelFileDescriptor.adoptFd(jniCreateTunTap(isTun, iface));
                         for (LinkAddress addr : linkAddrs) {
                             mNetd.interfaceAddAddress(
                                     iface,
@@ -114,6 +115,28 @@ class TestNetworkService extends ITestNetworkManager.Stub {
                         throw e.rethrowFromSystemServer();
                     }
                 });
+    }
+
+    /**
+     * Create a TUN interface with the given interface name and link addresses
+     *
+     * <p>This method will return the FileDescriptor to the TUN interface. Close it to tear down the
+     * TUN interface.
+     */
+    @Override
+    public TestNetworkInterface createTunInterface(@NonNull LinkAddress[] linkAddrs) {
+        return createInterface(true, linkAddrs);
+    }
+
+    /**
+     * Create a TAP interface with the given interface name
+     *
+     * <p>This method will return the FileDescriptor to the TAP interface. Close it to tear down the
+     * TAP interface.
+     */
+    @Override
+    public TestNetworkInterface createTapInterface() {
+        return createInterface(false, new LinkAddress[0]);
     }
 
     // Tracker for TestNetworkAgents
@@ -310,7 +333,7 @@ class TestNetworkService extends ITestNetworkManager.Stub {
     public void teardownTestNetwork(int netId) {
         enforceTestNetworkPermissions(mContext);
 
-        TestNetworkAgent agent;
+        final TestNetworkAgent agent;
         synchronized (mTestNetworkTracker) {
             agent = mTestNetworkTracker.get(netId);
         }
@@ -325,14 +348,10 @@ class TestNetworkService extends ITestNetworkManager.Stub {
         agent.teardown();
     }
 
-    // STOPSHIP: Change this back to android.Manifest.permission.MANAGE_TEST_NETWORKS
-    private static final String PERMISSION_NAME = "dummy";
+    private static final String PERMISSION_NAME =
+            android.Manifest.permission.MANAGE_TEST_NETWORKS;
 
     public static void enforceTestNetworkPermissions(@NonNull Context context) {
-        // STOPSHIP: Re-enable these checks. Disabled until adoptShellPermissionIdentity() can be
-        //           called from CTS test code.
-        if (false) {
-            context.enforceCallingOrSelfPermission(PERMISSION_NAME, "TestNetworkService");
-        }
+        context.enforceCallingOrSelfPermission(PERMISSION_NAME, "TestNetworkService");
     }
 }

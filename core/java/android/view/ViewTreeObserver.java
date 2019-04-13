@@ -932,7 +932,8 @@ public final class ViewTreeObserver {
      * @param listener listener to add
      * @see View#setSystemGestureExclusionRects(List)
      */
-    public void addOnSystemGestureExclusionRectsChangedListener(Consumer<List<Rect>> listener) {
+    public void addOnSystemGestureExclusionRectsChangedListener(
+            @NonNull Consumer<List<Rect>> listener) {
         checkIsAlive();
         if (mGestureExclusionListeners == null) {
             mGestureExclusionListeners = new CopyOnWriteArray<>();
@@ -945,7 +946,8 @@ public final class ViewTreeObserver {
      * @see #addOnSystemGestureExclusionRectsChangedListener(Consumer)
      * @see View#setSystemGestureExclusionRects(List)
      */
-    public void removeOnSystemGestureExclusionRectsChangedListener(Consumer<List<Rect>> listener) {
+    public void removeOnSystemGestureExclusionRectsChangedListener(
+            @NonNull Consumer<List<Rect>> listener) {
         checkIsAlive();
         if (mGestureExclusionListeners == null) {
             return;

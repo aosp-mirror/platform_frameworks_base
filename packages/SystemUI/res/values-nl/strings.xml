@@ -25,10 +25,10 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Actief"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Meldingen"</string>
     <string name="battery_low_title" msgid="9187898087363540349">"Batterij is bijna leeg"</string>
-    <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> resterend"</string>
-    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> resterend, nog ongeveer <xliff:g id="TIME">%2$s</xliff:g> over op basis van je gebruik"</string>
-    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> resterend, nog ongeveer <xliff:g id="TIME">%2$s</xliff:g> over"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> resterend. Batterijbesparing is ingeschakeld."</string>
+    <string name="battery_low_percent_format" msgid="2900940511201380775">"Nog <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"Nog <xliff:g id="PERCENTAGE">%1$s</xliff:g>, dat is ongeveer <xliff:g id="TIME">%2$s</xliff:g> op basis van je gebruik"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"Nog <xliff:g id="PERCENTAGE">%1$s</xliff:g>, dat is ongeveer <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"Nog <xliff:g id="PERCENTAGE">%s</xliff:g>. Batterijbesparing is ingeschakeld."</string>
     <string name="invalid_charger" msgid="2741987096648693172">"Kan niet opladen via USB. Gebruik de oplader die bij je apparaat is geleverd."</string>
     <string name="invalid_charger_title" msgid="2836102177577255404">"Kan niet opladen via USB"</string>
     <string name="invalid_charger_text" msgid="6480624964117840005">"Gebruik de oplader die bij je apparaat is geleverd"</string>
@@ -172,6 +172,7 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <string name="data_connection_5ge" msgid="4699478963278829331">"5GE"</string>
     <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
     <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
@@ -795,7 +796,7 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g>-melding: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"App werkt mogelijk niet met gesplitst scherm."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"App biedt geen ondersteuning voor gesplitst scherm."</string>
-    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"App werkt mogelijk niet op een secundair display."</string>
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"App werkt mogelijk niet op een secundair scherm."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"App kan niet op secundaire displays worden gestart."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Instellingen openen."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Snelle instellingen openen."</string>

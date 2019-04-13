@@ -292,9 +292,9 @@ class TaskSnapshotController {
         }
         final boolean isWindowTranslucent = mainWindow.getAttrs().format != PixelFormat.OPAQUE;
         return new TaskSnapshot(appWindowToken.mActivityComponent, buffer,
-                appWindowToken.getConfiguration().orientation, getInsets(mainWindow),
-                isLowRamDevice /* reduced */, scaleFraction /* scale */, true /* isRealSnapshot */,
-                task.getWindowingMode(), getSystemUiVisibility(task),
+                screenshotBuffer.getColorSpace(), appWindowToken.getConfiguration().orientation,
+                getInsets(mainWindow), isLowRamDevice /* reduced */, scaleFraction /* scale */,
+                true /* isRealSnapshot */, task.getWindowingMode(), getSystemUiVisibility(task),
                 !appWindowToken.fillsParent() || isWindowTranslucent);
     }
 
@@ -362,11 +362,9 @@ class TaskSnapshotController {
         }
         final int color = ColorUtils.setAlphaComponent(
                 task.getTaskDescription().getBackgroundColor(), 255);
-        final int statusBarColor = task.getTaskDescription().getStatusBarColor();
-        final int navigationBarColor = task.getTaskDescription().getNavigationBarColor();
         final LayoutParams attrs = mainWindow.getAttrs();
         final SystemBarBackgroundPainter decorPainter = new SystemBarBackgroundPainter(attrs.flags,
-                attrs.privateFlags, attrs.systemUiVisibility, statusBarColor, navigationBarColor);
+                attrs.privateFlags, attrs.systemUiVisibility, task.getTaskDescription());
         final int width = mainWindow.getFrameLw().width();
         final int height = mainWindow.getFrameLw().height();
 
@@ -385,10 +383,10 @@ class TaskSnapshotController {
         // Note, the app theme snapshot is never translucent because we enforce a non-translucent
         // color above
         return new TaskSnapshot(topChild.mActivityComponent, hwBitmap.createGraphicBufferHandle(),
-                topChild.getConfiguration().orientation, mainWindow.getStableInsets(),
-                ActivityManager.isLowRamDeviceStatic() /* reduced */, 1.0f /* scale */,
-                false /* isRealSnapshot */, task.getWindowingMode(), getSystemUiVisibility(task),
-                false);
+                hwBitmap.getColorSpace(), topChild.getConfiguration().orientation,
+                mainWindow.getStableInsets(), ActivityManager.isLowRamDeviceStatic() /* reduced */,
+                1.0f /* scale */, false /* isRealSnapshot */, task.getWindowingMode(),
+                getSystemUiVisibility(task), false);
     }
 
     /**

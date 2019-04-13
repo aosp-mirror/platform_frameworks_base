@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -71,6 +72,8 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     private UnlockMethodCache mUnlockMethodCache;
     @Mock
     private TunerService mTunerService;
+    @Mock
+    private Handler mHandler;
     private BiometricUnlockController mBiometricUnlockController;
 
     @Before
@@ -172,12 +175,24 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
         verify(mStatusBarKeyguardViewManager, never()).animateCollapsePanels(anyFloat());
     }
 
+    @Test
+    public void onFinishedGoingToSleep_authenticatesWhenPending() {
+        when(mUpdateMonitor.isGoingToSleep()).thenReturn(true);
+        mBiometricUnlockController.onFinishedGoingToSleep(-1);
+        verify(mHandler, never()).post(any());
+
+        mBiometricUnlockController.onBiometricAuthenticated(1 /* userId */,
+                BiometricSourceType.FACE);
+        mBiometricUnlockController.onFinishedGoingToSleep(-1);
+        verify(mHandler).post(any());
+    }
+
     private class TestableBiometricUnlockController extends BiometricUnlockController {
 
         TestableBiometricUnlockController(boolean faceDismissesKeyguard) {
             super(mContext, mDozeScrimController,
                     mKeyguardViewMediator, mScrimController, mStatusBar, mUnlockMethodCache,
-                    new Handler(), mUpdateMonitor, mTunerService, 0 /* wakeUpDelay */,
+                    mHandler, mUpdateMonitor, mTunerService, 0 /* wakeUpDelay */,
                     faceDismissesKeyguard);
             mFaceDismissesKeyguard = faceDismissesKeyguard;
         }

@@ -678,6 +678,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
     char lockProfThresholdBuf[sizeof("-Xlockprofthreshold:")-1 + PROPERTY_VALUE_MAX];
     char nativeBridgeLibrary[sizeof("-XX:NativeBridge=") + PROPERTY_VALUE_MAX];
     char cpuAbiListBuf[sizeof("--cpu-abilist=") + PROPERTY_VALUE_MAX];
+    char corePlatformApiPolicyBuf[sizeof("-Xcore-platform-api-policy:") + PROPERTY_VALUE_MAX];
     char methodTraceFileBuf[sizeof("-Xmethod-trace-file:") + PROPERTY_VALUE_MAX];
     char methodTraceFileSizeBuf[sizeof("-Xmethod-trace-file-size:") + PROPERTY_VALUE_MAX];
     std::string fingerprintBuf;
@@ -1022,6 +1023,16 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
     if (property_get_bool("dalvik.vm.minidebuginfo", 0)) {
         addOption("-Xcompiler-option");
         addOption("--generate-mini-debug-info");
+    }
+
+    // If set, the property below can be used to enable core platform API violation reporting.
+    property_get("persist.debug.dalvik.vm.core_platform_api_policy", propBuf, "");
+    if (propBuf[0] != '\0') {
+      snprintf(corePlatformApiPolicyBuf,
+               sizeof(corePlatformApiPolicyBuf),
+               "-Xcore-platform-api-policy:%s",
+               propBuf);
+      addOption(corePlatformApiPolicyBuf);
     }
 
     /*

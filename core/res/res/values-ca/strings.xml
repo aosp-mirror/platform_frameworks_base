@@ -94,7 +94,7 @@
     <string name="notification_channel_sms" msgid="3441746047346135073">"Missatges SMS"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Missatges de veu"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Trucades per Wi-Fi"</string>
-    <string name="notification_channel_sim" msgid="4052095493875188564">"Estat de la targeta SIM"</string>
+    <string name="notification_channel_sim" msgid="4052095493875188564">"Estat de la SIM"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"L\'altre dispositiu ha sol·licitat el mode TTY COMPLET."</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"L\'altre dispositiu ha sol·licitat el mode TTY HCO."</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"L\'altre dispositiu ha sol·licitat el mode TTY VCO."</string>
@@ -300,8 +300,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"accedir a la teva activitat física"</string>
     <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"Vols permetre que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; accedeixi a la teva activitat física?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Càmera"</string>
-    <string name="permgroupdesc_camera" msgid="3250611594678347720">"fer fotos i vídeos"</string>
-    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Vols permetre que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; faci fotos i vídeos?"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"fer fotos i gravar vídeos"</string>
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Vols permetre que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; faci fotos i gravi vídeos?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"Registres de trucades"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"llegir i editar el registre de trucades del telèfon"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Vols permetre que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; accedeixi als registres de trucades del telèfon?"</string>
@@ -655,7 +655,7 @@
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Fa un seguiment del nombre de contrasenyes incorrectes que s\'han escrit en intentar desbloquejar la pantalla i bloqueja el televisor o n\'esborra totes les dades de l\'usuari si s\'escriuen massa contrasenyes incorrectes."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Fa un seguiment del nombre de contrasenyes incorrectes que s\'han escrit en intentar desbloquejar la pantalla i bloqueja el telèfon o n\'esborra totes les dades de l\'usuari si s\'escriuen massa contrasenyes incorrectes."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Canviar el bloqueig de pantalla"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Canvia el bloqueig de pantalla"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Canvia el bloqueig de pantalla."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Bloquejar la pantalla"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Controla com i quan es bloqueja la pantalla."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Esborrar totes les dades"</string>
@@ -1796,8 +1796,8 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Actualitzat per l\'administrador"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Suprimit per l\'administrador"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"D\'acord"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Per tal d\'allargar la durada de la bateria, l\'estalvi de bateria desactiva o restringeix les activitats en segon pla, alguns efectes visuals i altres funcions que consumeixen molta energia. "<annotation id="url">"Més informació"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Per tal d\'allargar la durada de la bateria, l\'estalvi de bateria desactiva o restringeix les activitats en segon pla, alguns efectes visuals i altres funcions que consumeixen molta energia."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Per tal de prolongar la durada de la bateria, el mode Estalvi de bateria desactiva o restringeix les activitats en segon pla, alguns efectes visuals i altres funcions que consumeixen molta energia. "<annotation id="url">"Més informació"</annotation></string>
+    <string name="battery_saver_description" msgid="6413346684861241431">"Per tal de prolongar la durada de la bateria, el mode Estalvi de bateria desactiva o restringeix les activitats en segon pla, alguns efectes visuals i altres funcions que consumeixen molta energia."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Per reduir l\'ús de dades, la funció Economitzador de dades evita que determinades aplicacions enviïn o rebin dades en segon pla. L\'aplicació que estiguis fent servir podrà accedir a dades, però potser ho farà menys sovint. Això vol dir, per exemple, que les imatges no es mostraran fins que no les toquis."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Activar Economitzador de dades?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Activa"</string>
@@ -1991,7 +1991,7 @@
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"es mostra sobre altres aplicacions a la pantalla"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"Notificació d\'informació del mode de rutina"</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"És possible que la bateria s\'esgoti abans de la càrrega habitual"</string>
-    <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"S\'ha activat l\'estalvi de bateria per allargar-ne la durada"</string>
+    <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"S\'ha activat l\'estalvi de bateria per prolongar-ne la durada"</string>
     <string name="battery_saver_notification_channel_name" msgid="2083316159716201806">"Estalvi de bateria"</string>
     <string name="battery_saver_sticky_disabled_notification_title" msgid="6376147579378764641">"L\'estalvi de bateria no es tornarà a activar fins que no tornis a tenir poca bateria"</string>
     <string name="battery_saver_sticky_disabled_notification_summary" msgid="8090192609249817945">"La bateria ja està suficientment carregada. L\'estalvi de bateria no es tornarà a activar fins que no tornis a tenir poca bateria."</string>

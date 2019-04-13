@@ -759,8 +759,8 @@ class ActivityStarter {
             try {
                 Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
                         "shouldAbortBackgroundActivityStart");
-                abortBackgroundStart = shouldAbortBackgroundActivityStart(callingUid, callingPid,
-                        callingPackage, realCallingUid, realCallingPid, callerApp,
+                abortBackgroundStart = shouldAbortBackgroundActivityStart(callingUid,
+                        callingPid, callingPackage, realCallingUid, realCallingPid, callerApp,
                         originatingPendingIntent, allowBackgroundActivityStart, intent);
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
@@ -768,14 +768,7 @@ class ActivityStarter {
             abort |= (abortBackgroundStart && !mService.isBackgroundActivityStartsEnabled());
             // TODO: remove this toast after feature development is done
             if (abortBackgroundStart) {
-                final Resources res = mService.mContext.getResources();
-                final String toastMsg = res.getString(abort
-                            ? R.string.activity_starter_block_bg_activity_starts_enforcing
-                            : R.string.activity_starter_block_bg_activity_starts_permissive,
-                        callingPackage);
-                mService.mUiHandler.post(() -> {
-                    Toast.makeText(mService.mContext, toastMsg, Toast.LENGTH_LONG).show();
-                });
+                showBackgroundActivityBlockedToast(abort, callingPackage);
             }
         }
 
@@ -935,7 +928,7 @@ class ActivityStarter {
         return res;
     }
 
-    private boolean shouldAbortBackgroundActivityStart(int callingUid, int callingPid,
+    boolean shouldAbortBackgroundActivityStart(int callingUid, int callingPid,
             final String callingPackage, int realCallingUid, int realCallingPid,
             WindowProcessController callerApp, PendingIntentRecord originatingPendingIntent,
             boolean allowBackgroundActivityStart, Intent intent) {
@@ -1025,11 +1018,11 @@ class ActivityStarter {
         if (mSupervisor.mRecentTasks.isCallerRecents(callingUid)) {
             return false;
         }
-        // don't abort if the callingPackage is the device owner
-        if (mService.isDeviceOwner(callingPackage)) {
+        // don't abort if the callingUid is the device owner
+        if (mService.isDeviceOwner(callingUid)) {
             return false;
         }
-        // don't abort if the callingPackage has companion device
+        // don't abort if the callingUid has companion device
         final int callingUserId = UserHandle.getUserId(callingUid);
         if (mService.isAssociatedCompanionApp(callingUserId, callingUid)) {
             return false;
@@ -1048,7 +1041,7 @@ class ActivityStarter {
                 + "; realCallingUid: " + realCallingUid
                 + "; isRealCallingUidForeground: " + isRealCallingUidForeground
                 + "; isRealCallingUidPersistentSystemProcess: "
-                        + isRealCallingUidPersistentSystemProcess
+                + isRealCallingUidPersistentSystemProcess
                 + "; originatingPendingIntent: " + originatingPendingIntent
                 + "; isBgStartWhitelisted: " + allowBackgroundActivityStart
                 + "; intent: " + intent
@@ -1074,6 +1067,18 @@ class ActivityStarter {
             }
         }
         return false;
+    }
+
+    // TODO: remove this toast after feature development is done
+    void showBackgroundActivityBlockedToast(boolean abort, String callingPackage) {
+        final Resources res = mService.mContext.getResources();
+        final String toastMsg = res.getString(abort
+                        ? R.string.activity_starter_block_bg_activity_starts_enforcing
+                        : R.string.activity_starter_block_bg_activity_starts_permissive,
+                callingPackage);
+        mService.mUiHandler.post(() -> {
+            Toast.makeText(mService.mContext, toastMsg, Toast.LENGTH_LONG).show();
+        });
     }
 
     /**

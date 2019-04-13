@@ -96,21 +96,21 @@ public class NavigationBarControllerTest extends SysuiTestCase {
     @Test
     public void testCreateNavigationBarsIncludeDefaultTrue() {
         initializeDisplayManager();
-        doNothing().when(mNavigationBarController).createNavigationBar(any());
+        doNothing().when(mNavigationBarController).createNavigationBar(any(), any());
 
-        mNavigationBarController.createNavigationBars(true);
+        mNavigationBarController.createNavigationBars(true, null);
 
-        verify(mNavigationBarController).createNavigationBar(any(Display.class));
+        verify(mNavigationBarController).createNavigationBar(any(Display.class), any());
     }
 
     @Test
     public void testCreateNavigationBarsIncludeDefaultFalse() {
         initializeDisplayManager();
-        doNothing().when(mNavigationBarController).createNavigationBar(any());
+        doNothing().when(mNavigationBarController).createNavigationBar(any(), any());
 
-        mNavigationBarController.createNavigationBars(false);
+        mNavigationBarController.createNavigationBars(false, null);
 
-        verify(mNavigationBarController, never()).createNavigationBar(any());
+        verify(mNavigationBarController, never()).createNavigationBar(any(), any());
     }
 
     private void initializeDisplayManager() {

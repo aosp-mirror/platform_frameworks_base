@@ -633,7 +633,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     private FontScaleSettingObserver mFontScaleSettingObserver;
 
-    private String mDeviceOwnerPackageName;
+    private int mDeviceOwnerUid = Process.INVALID_UID;
 
     private final class FontScaleSettingObserver extends ContentObserver {
         private final Uri mFontScaleUri = Settings.System.getUriFor(FONT_SCALE);
@@ -2281,25 +2281,48 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      * TODO: Add mController hook
      */
     @Override
-    public void moveTaskToFront(int taskId, int flags, Bundle bOptions) {
+    public void moveTaskToFront(IApplicationThread appThread, String callingPackage, int taskId,
+            int flags, Bundle bOptions) {
         mAmInternal.enforceCallingPermission(android.Manifest.permission.REORDER_TASKS, "moveTaskToFront()");
 
         if (DEBUG_STACK) Slog.d(TAG_STACK, "moveTaskToFront: moving taskId=" + taskId);
         synchronized (mGlobalLock) {
-            moveTaskToFrontLocked(taskId, flags, SafeActivityOptions.fromBundle(bOptions),
-                    false /* fromRecents */);
+            moveTaskToFrontLocked(appThread, callingPackage, taskId, flags,
+                    SafeActivityOptions.fromBundle(bOptions), false /* fromRecents */);
         }
     }
 
-    void moveTaskToFrontLocked(int taskId, int flags, SafeActivityOptions options,
+    void moveTaskToFrontLocked(@Nullable IApplicationThread appThread,
+            @Nullable String callingPackage, int taskId, int flags, SafeActivityOptions options,
             boolean fromRecents) {
 
-        if (!checkAppSwitchAllowedLocked(Binder.getCallingPid(),
-                Binder.getCallingUid(), -1, -1, "Task to front")) {
+        final int callingPid = Binder.getCallingPid();
+        final int callingUid = Binder.getCallingUid();
+        if (!isSameApp(callingUid, callingPackage)) {
+            String msg = "Permission Denial: moveTaskToFrontLocked() from pid="
+                    + Binder.getCallingPid() + " as package " + callingPackage;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
+        if (!checkAppSwitchAllowedLocked(callingPid, callingUid, -1, -1, "Task to front")) {
             SafeActivityOptions.abort(options);
             return;
         }
         final long origId = Binder.clearCallingIdentity();
+        WindowProcessController callerApp = null;
+        if (appThread != null) {
+            callerApp = getProcessController(appThread);
+        }
+        final ActivityStarter starter = getActivityStartController().obtainStarter(
+                null /* intent */, "moveTaskToFront");
+        if (starter.shouldAbortBackgroundActivityStart(callingUid, callingPid, callingPackage, -1,
+                -1, callerApp, null, false, null)) {
+            boolean abort = !isBackgroundActivityStartsEnabled();
+            starter.showBackgroundActivityBlockedToast(abort, callingPackage);
+            if (abort) {
+                return;
+            }
+        }
         try {
             final TaskRecord task = mRootActivityContainer.anyTaskForId(taskId);
             if (task == null) {
@@ -2329,6 +2352,26 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
+    }
+
+    /**
+     * Return true if callingUid is system, or packageName belongs to that callingUid.
+     */
+    boolean isSameApp(int callingUid, @Nullable String packageName) {
+        try {
+            if (callingUid != 0 && callingUid != SYSTEM_UID) {
+                if (packageName == null) {
+                    return false;
+                }
+                final int uid = AppGlobals.getPackageManager().getPackageUid(packageName,
+                        PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
+                        UserHandle.getUserId(callingUid));
+                return UserHandle.isSameApp(callingUid, uid);
+            }
+        } catch (RemoteException e) {
+            // Should not happen
+        }
+        return true;
     }
 
     boolean checkAppSwitchAllowedLocked(int sourcePid, int sourceUid,
@@ -5291,7 +5334,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return mAmInternal.isBackgroundActivityStartsEnabled();
     }
 
-    boolean isPackageNameWhitelistedForBgActivityStarts(String packageName) {
+    boolean isPackageNameWhitelistedForBgActivityStarts(@Nullable String packageName) {
+        if (packageName == null) {
+            return false;
+        }
         return mAmInternal.isPackageNameWhitelistedForBgActivityStarts(packageName);
     }
 
@@ -5830,15 +5876,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 || mWindowManager.mRoot.isAnyNonToastWindowVisibleForUid(uid);
     }
 
-    boolean isDeviceOwner(String packageName) {
-        if (packageName == null) {
-            return false;
-        }
-        return packageName.equals(mDeviceOwnerPackageName);
+    boolean isDeviceOwner(int uid) {
+        return uid >= 0 && mDeviceOwnerUid == uid;
     }
 
-    void setDeviceOwnerPackageName(String deviceOwnerPkg) {
-        mDeviceOwnerPackageName = deviceOwnerPkg;
+    void setDeviceOwnerUid(int uid) {
+        mDeviceOwnerUid = uid;
     }
 
     /**
@@ -7288,9 +7331,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public void setDeviceOwnerPackageName(String deviceOwnerPkg) {
+        public void setDeviceOwnerUid(int uid) {
             synchronized (mGlobalLock) {
-                ActivityTaskManagerService.this.setDeviceOwnerPackageName(deviceOwnerPkg);
+                ActivityTaskManagerService.this.setDeviceOwnerUid(uid);
             }
         }
 

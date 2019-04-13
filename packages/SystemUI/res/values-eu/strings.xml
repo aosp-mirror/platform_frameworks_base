@@ -38,12 +38,12 @@
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Aktibatu"</string>
     <string name="battery_saver_start_action" msgid="8187820911065797519">"Aktibatu bateria-aurrezlea"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Ezarpenak"</string>
-    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
+    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wifia"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Biratu pantaila automatikoki"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"DESAKTIBATU AUDIOA"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"AUTO"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Jakinarazpenak"</string>
-    <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetootha konektatu da"</string>
+    <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth-a konektatu da"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Konfiguratu idazketa-metodoak"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Teklatu fisikoa"</string>
     <string name="usb_device_permission_prompt" msgid="1825685909587559679">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> atzitzeko baimena eman nahi diozu <xliff:g id="APPLICATION">%1$s</xliff:g> aplikazioari?"</string>
@@ -125,8 +125,8 @@
     <string name="accessibility_face_dialog_face_icon" msgid="2658119009870383490">"Aurpegiaren ikonoa"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Zoom-bateragarritasunaren botoia."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Handiagotu pantaila txikia."</string>
-    <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetootha konektatuta."</string>
-    <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"Bluetootha deskonektatuta."</string>
+    <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth-a konektatuta."</string>
+    <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"Bluetooth-a deskonektatuta."</string>
     <string name="accessibility_no_battery" msgid="358343022352820946">"Ez dago bateriarik."</string>
     <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"Bateriak barra bat du."</string>
     <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"Bateriak bi barra ditu."</string>
@@ -172,6 +172,7 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <string name="data_connection_5ge" msgid="4699478963278829331">"5Ge"</string>
     <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
     <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
@@ -295,8 +296,8 @@
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Alarmak soilik"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Isiltasun osoa"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth-a"</string>
-    <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetootha (<xliff:g id="NUMBER">%d</xliff:g> gailu)"</string>
-    <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetootha desaktibatuta"</string>
+    <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth-a (<xliff:g id="NUMBER">%d</xliff:g> gailu)"</string>
+    <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth-a desaktibatuta"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"Ez dago parekatutako gailurik erabilgarri"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="7106697106764717416">"Bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"Audioa"</string>
@@ -668,7 +669,7 @@
       <item quantity="other">%d minutu</item>
       <item quantity="one">%d minutu</item>
     </plurals>
-    <string name="battery_panel_title" msgid="7944156115535366613">"Bateriaren erabilera"</string>
+    <string name="battery_panel_title" msgid="7944156115535366613">"Bateria-erabilera"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Bateria-aurrezlea ez dago erabilgarri gailua kargatzen ari denean"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Bateria-aurrezlea"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Errendimendua eta atzeko planoko datuen erabilera murrizten ditu"</string>

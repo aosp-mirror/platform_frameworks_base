@@ -238,6 +238,9 @@
     <!-- the padding on the end of the statusbar -->
     <dimen name="status_bar_padding_end">8dp</dimen>
 
+    <!-- the padding on the top of the statusbar (usually 0) -->
+    <dimen name="status_bar_padding_top">0dp</dimen>
+
     <!-- the radius of the overflow dot in the status bar -->
     <dimen name="overflow_dot_radius">2dp</dimen>
 
@@ -1041,7 +1044,7 @@
     <!-- Margin between icons of Ongoing App Ops chip when QS-->
     <dimen name="ongoing_appops_chip_icon_margin_expanded">2dp</dimen>
     <!-- Icon size of Ongoing App Ops chip -->
-    <dimen name="ongoing_appops_chip_icon_size">@*android:dimen/status_bar_icon_size</dimen>
+    <dimen name="ongoing_appops_chip_icon_size">@dimen/status_bar_icon_drawing_size</dimen>
     <!-- Radius of Ongoing App Ops chip corners -->
     <dimen name="ongoing_appops_chip_bg_corner_radius">16dp</dimen>
 

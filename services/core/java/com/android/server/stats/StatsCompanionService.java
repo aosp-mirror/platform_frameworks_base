@@ -92,6 +92,7 @@ import android.os.UserManager;
 import android.os.storage.DiskInfo;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
+import android.provider.Settings;
 import android.stats.storage.StorageEnums;
 import android.telephony.ModemActivityInfo;
 import android.telephony.TelephonyManager;
@@ -1458,8 +1459,18 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     private void pullNumBiometricsEnrolled(int modality, int tagId, long elapsedNanos,
             long wallClockNanos, List<StatsLogEventWrapper> pulledData) {
-        FingerprintManager fingerprintManager = mContext.getSystemService(FingerprintManager.class);
-        FaceManager faceManager = mContext.getSystemService(FaceManager.class);
+        final PackageManager pm = mContext.getPackageManager();
+        FingerprintManager fingerprintManager = null;
+        FaceManager faceManager = null;
+
+        if (pm.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
+            fingerprintManager = mContext.getSystemService(
+                    FingerprintManager.class);
+        }
+        if (pm.hasSystemFeature(PackageManager.FEATURE_FACE)) {
+            faceManager = mContext.getSystemService(FaceManager.class);
+        }
+
         if (modality == BiometricsProtoEnums.MODALITY_FINGERPRINT && fingerprintManager == null) {
             return;
         }
@@ -2047,6 +2058,40 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
+    private void pullFaceSettings(int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        long callingToken = Binder.clearCallingIdentity();
+        try {
+            List<UserInfo> users = mContext.getSystemService(UserManager.class).getUsers();
+            int numUsers = users.size();
+            for (int userNum = 0; userNum < numUsers; userNum++) {
+                int userId = users.get(userNum).getUserHandle().getIdentifier();
+
+                StatsLogEventWrapper e =
+                        new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+                e.writeBoolean(Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.FACE_UNLOCK_KEYGUARD_ENABLED, 1,
+                        userId) != 0);
+                e.writeBoolean(Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.FACE_UNLOCK_DISMISSES_KEYGUARD,
+                        0, userId) != 0);
+                e.writeBoolean(Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.FACE_UNLOCK_ATTENTION_REQUIRED, 1,
+                        userId) != 0);
+                e.writeBoolean(Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.FACE_UNLOCK_APP_ENABLED, 1,
+                        userId) != 0);
+                e.writeBoolean(Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION, 0,
+                        userId) != 0);
+
+                pulledData.add(e);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(callingToken);
+        }
+    }
+
     /**
      * Pulls various data.
      */
@@ -2249,6 +2294,10 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             case StatsLog.APPS_ON_EXTERNAL_STORAGE_INFO: {
                 pullAppsOnExternalStorageInfo(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.FACE_SETTINGS: {
+                pullFaceSettings(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
             default:

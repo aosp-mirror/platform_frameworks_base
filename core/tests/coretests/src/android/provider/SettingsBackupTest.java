@@ -708,7 +708,8 @@ public class SettingsBackupTest {
                  Settings.Secure.FLASHLIGHT_ENABLED,
                  Settings.Secure.CROSS_PROFILE_CALENDAR_ENABLED,
                  Settings.Secure.LOCATION_ACCESS_CHECK_INTERVAL_MILLIS,
-                 Settings.Secure.LOCATION_ACCESS_CHECK_DELAY_MILLIS);
+                 Settings.Secure.LOCATION_ACCESS_CHECK_DELAY_MILLIS,
+                 Settings.Secure.BIOMETRIC_DEBUG_ENABLED);
 
     @Test
     public void systemSettingsBackedUpOrBlacklisted() {

@@ -521,7 +521,7 @@ public final class TextClassification implements Parcelable {
         }
 
         private Bundle buildExtras(EntityConfidence entityConfidence) {
-            final Bundle extras = mExtras == null ? new Bundle() : mExtras.deepCopy();
+            final Bundle extras = mExtras == null ? new Bundle() : mExtras;
             if (mActionIntents.stream().anyMatch(Objects::nonNull)) {
                 ExtrasUtils.putActionsIntents(extras, mActionIntents);
             }
@@ -713,7 +713,7 @@ public final class TextClassification implements Parcelable {
             public Request build() {
                 return new Request(new SpannedString(mText), mStartIndex, mEndIndex,
                         mDefaultLocales, mReferenceTime,
-                        mExtras == null ? Bundle.EMPTY : mExtras.deepCopy());
+                        mExtras == null ? Bundle.EMPTY : mExtras);
             }
         }
 

@@ -507,9 +507,9 @@ public abstract class ActivityTaskManagerInternal {
     public abstract boolean isUidForeground(int uid);
 
     /**
-     * Called by DevicePolicyManagerService to set the package name of the device owner.
+     * Called by DevicePolicyManagerService to set the uid of the device owner.
      */
-    public abstract void setDeviceOwnerPackageName(String deviceOwnerPkg);
+    public abstract void setDeviceOwnerUid(int uid);
 
     /** Set all associated companion app that belongs to an userId. */
     public abstract void setCompanionAppPackages(int userId, Set<String> companionAppPackages);

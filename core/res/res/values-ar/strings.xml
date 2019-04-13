@@ -309,8 +309,8 @@
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"تسجيل الصوت"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بتسجيل الصوت؟"</string>
     <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"النشاط البدني"</string>
-    <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"الوصول إلى نشاطك البدني"</string>
-    <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"‏هل تريد السماح للتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالوصول إلى نشاطك البدني؟"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"الوصول إلى بيانات نشاطك البدني"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"‏هل تريد السماح للتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالوصول إلى بيانات نشاطك البدني؟"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"الكاميرا"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"التقاط صور وتسجيل فيديو"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالتقاط صور وتسجيل فيديو؟"</string>
@@ -1897,7 +1897,7 @@
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"تم الحذف بواسطة المشرف"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"موافق"</string>
     <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"لإطالة عمر البطارية، تساعد ميزة \"توفير شحن البطارية\" على إيقاف أو تقييد نشاط الخلفية وبعض التأثيرات المرئية وغيرها من الميزات التي تستنفد طاقة البطارية. "<annotation id="url">"مزيد من المعلومات"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"لإطالة عمر البطارية، تساعد ميزة \"توفير شحن البطارية\" على إيقاف أو تقييد نشاط الخلفية وبعض التأثيرات المرئية وغيرها من الميزات التي تستنفد طاقة البطارية."</string>
+    <string name="battery_saver_description" msgid="6413346684861241431">"لإطالة عمر البطارية، تساعد ميزة \"توفير شحن البطارية\" على إيقاف أو تقييد النشاط في الخلفية وبعض التأثيرات المرئية وغيرها من الميزات التي تستنفد طاقة البطارية."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"للمساعدة في خفض استخدام البيانات، يمنع توفير البيانات بعض التطبيقات من إرسال البيانات وتلقيها في الخلفية. يمكن للتطبيق الذي تستخدمه الآن الوصول إلى البيانات، ولكن لا يمكنه تنفيذ ذلك كثيرًا. وهذا يعني أن الصور على سبيل المثال لا تظهر حتى تنقر عليها."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"هل تريد تشغيل توفير البيانات؟"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"تشغيل"</string>

@@ -428,7 +428,7 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Özel (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"Menü"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"Demo modunda sıfırlamak için şifreyi girin"</string>
-    <string name="retail_demo_reset_next" msgid="8356731459226304963">"Sonraki"</string>
+    <string name="retail_demo_reset_next" msgid="8356731459226304963">"İleri"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"Şifre gerekli"</string>
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"Etkin giriş yöntemleri"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"Sistem dillerini kullan"</string>

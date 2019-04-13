@@ -34,6 +34,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.AdaptiveIconDrawable;
@@ -56,7 +58,7 @@ import java.nio.ByteBuffer;
 /**
  * @deprecated Use the Launcher3 Iconloaderlib at packages/apps/Launcher3/iconloaderlib. This class
  * is a temporary fork of Iconloader. It combines all necessary methods to render app icons that are
- * possibly badged. It is intended to be used only by Sharesheet for the Q release.
+ * possibly badged. It is intended to be used only by Sharesheet for the Q release with custom code.
  */
 @Deprecated
 public class SimpleIconFactory {
@@ -202,6 +204,7 @@ public class SimpleIconFactory {
     /**
      * Creates bitmap using the source drawable and flattened pre-rendered app icon.
      * The bitmap is visually normalized with other icons and has enough spacing to add shadow.
+     * This is custom functionality added to Iconloaderlib that will need to be ported.
      *
      * @param icon                      source of the icon associated with a user that has no badge
      * @param renderedAppIcon           pre-rendered app icon to use as a badge, likely the output
@@ -212,32 +215,68 @@ public class SimpleIconFactory {
      */
     @Deprecated
     Bitmap createAppBadgedIconBitmap(@Nullable Drawable icon, Bitmap renderedAppIcon) {
-        // Flatten the passed in icon
-        float [] scale = new float[1];
-
         // If no icon is provided use the system default
         if (icon == null) {
             icon = getFullResDefaultActivityIcon(mFillResIconDpi);
         }
-        icon = normalizeAndWrapToAdaptiveIcon(icon, null, scale);
-        Bitmap bitmap = createIconBitmap(icon, scale[0]);
-        if (icon instanceof AdaptiveIconDrawable) {
-            mCanvas.setBitmap(bitmap);
-            recreateIcon(Bitmap.createBitmap(bitmap), mCanvas);
-            mCanvas.setBitmap(null);
+
+        // Direct share icons cannot be adaptive, most will arrive as bitmaps. To get reliable
+        // presentation, force all DS icons to be circular. Scale DS image so it completely fills.
+        int w = icon.getIntrinsicWidth();
+        int h = icon.getIntrinsicHeight();
+        float scale = 1;
+        if (h > w && w > 0) {
+            scale = (float) h / w;
+        } else if (w > h && h > 0) {
+            scale = (float) w / h;
+        }
+        Bitmap bitmap = createIconBitmap(icon, scale);
+        bitmap = maskBitmapToCircle(bitmap);
+        icon = new BitmapDrawable(mContext.getResources(), bitmap);
+
+        // We now have a circular masked and scaled icon, inset and apply shadow
+        scale = getScale(icon, null);
+        bitmap = createIconBitmap(icon, scale);
+
+        mCanvas.setBitmap(bitmap);
+        recreateIcon(Bitmap.createBitmap(bitmap), mCanvas);
+
+        if (renderedAppIcon != null) {
+            // Now scale down and apply the badge to the bottom right corner of the flattened icon
+            renderedAppIcon = Bitmap.createScaledBitmap(renderedAppIcon, mBadgeBitmapSize,
+                    mBadgeBitmapSize, false);
+
+            // Paint the provided badge on top of the flattened icon
+            mCanvas.drawBitmap(renderedAppIcon, mIconBitmapSize - mBadgeBitmapSize,
+                    mIconBitmapSize - mBadgeBitmapSize, null);
         }
 
-        // Now scale down and apply the badge to the bottom right corner of the flattened icon
-        renderedAppIcon = Bitmap.createScaledBitmap(renderedAppIcon, mBadgeBitmapSize,
-                mBadgeBitmapSize, false);
-
-        // Paint the provided badge on top of the flattened icon
-        mCanvas.setBitmap(bitmap);
-        mCanvas.drawBitmap(renderedAppIcon, mIconBitmapSize - mBadgeBitmapSize,
-                mIconBitmapSize - mBadgeBitmapSize, null);
         mCanvas.setBitmap(null);
 
         return bitmap;
+    }
+
+    private Bitmap maskBitmapToCircle(Bitmap bitmap) {
+        final Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
+                bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        final Canvas canvas = new Canvas(output);
+        final Paint paint = new Paint();
+        paint.setAntiAlias(true);
+
+        // Draw mask
+        paint.setColor(0xffffffff);
+        canvas.drawARGB(0, 0, 0, 0);
+        canvas.drawCircle(bitmap.getWidth() / 2f,
+                bitmap.getHeight() / 2f,
+                bitmap.getWidth() / 2f - 1 /* -1 to avoid circles with flat sides */,
+                paint);
+
+        // Draw masked bitmap
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+        canvas.drawBitmap(bitmap, rect, rect, paint);
+
+        return output;
     }
 
     private static Drawable getFullResDefaultActivityIcon(int iconDpi) {

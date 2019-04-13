@@ -34,6 +34,7 @@ import com.android.internal.colorextraction.types.ExtractionType;
 import com.android.internal.colorextraction.types.Tonal;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dumpable;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -46,7 +47,8 @@ import javax.inject.Singleton;
  * ColorExtractor aware of wallpaper visibility
  */
 @Singleton
-public class SysuiColorExtractor extends ColorExtractor implements Dumpable {
+public class SysuiColorExtractor extends ColorExtractor implements Dumpable,
+        ConfigurationController.ConfigurationListener {
     private static final String TAG = "SysuiColorExtractor";
     private final Tonal mTonal;
     private boolean mWallpaperVisible;
@@ -55,15 +57,17 @@ public class SysuiColorExtractor extends ColorExtractor implements Dumpable {
     private final GradientColors mWpHiddenColors;
 
     @Inject
-    public SysuiColorExtractor(Context context) {
-        this(context, new Tonal(context), true);
+    public SysuiColorExtractor(Context context, ConfigurationController configurationController) {
+        this(context, new Tonal(context), configurationController, true);
     }
 
     @VisibleForTesting
-    public SysuiColorExtractor(Context context, ExtractionType type, boolean registerVisibility) {
+    public SysuiColorExtractor(Context context, ExtractionType type,
+            ConfigurationController configurationController, boolean registerVisibility) {
         super(context, type, false /* immediately */);
         mTonal = type instanceof Tonal ? (Tonal) type : new Tonal(context);
         mWpHiddenColors = new GradientColors();
+        configurationController.addCallback(this);
 
         WallpaperColors systemColors = getWallpaperColors(WallpaperManager.FLAG_SYSTEM);
         updateDefaultGradients(systemColors);
@@ -113,8 +117,21 @@ public class SysuiColorExtractor extends ColorExtractor implements Dumpable {
         }
     }
 
-    @VisibleForTesting
-    GradientColors getFallbackColors() {
+    @Override
+    public void onUiModeChanged() {
+        WallpaperColors systemColors = getWallpaperColors(WallpaperManager.FLAG_SYSTEM);
+        updateDefaultGradients(systemColors);
+    }
+
+    /**
+     * Colors the should be using for scrims.
+     *
+     * They will be:
+     * - A light gray if the wallpaper is light
+     * - A dark gray if the wallpaper is very dark or we're in night mode.
+     * - Black otherwise
+     */
+    public GradientColors getNeutralColors() {
         return mWpHiddenColors;
     }
 

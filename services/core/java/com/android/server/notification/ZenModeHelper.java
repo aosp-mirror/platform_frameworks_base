@@ -389,8 +389,8 @@ public class ZenModeHelper {
             if (mConfig == null) return;
 
             newConfig = mConfig.copy();
+            setAutomaticZenRuleStateLocked(newConfig, newConfig.automaticRules.get(id), condition);
         }
-        setAutomaticZenRuleState(newConfig, newConfig.automaticRules.get(id), condition);
     }
 
     public void setAutomaticZenRuleState(Uri ruleDefinition, Condition condition) {
@@ -398,14 +398,15 @@ public class ZenModeHelper {
         synchronized (mConfig) {
             if (mConfig == null) return;
             newConfig = mConfig.copy();
-        }
 
-        setAutomaticZenRuleState(newConfig,
-                findMatchingRule(newConfig, ruleDefinition, condition),
-                condition);
+            setAutomaticZenRuleStateLocked(newConfig,
+                    findMatchingRule(newConfig, ruleDefinition, condition),
+                    condition);
+        }
     }
 
-    private void setAutomaticZenRuleState(ZenModeConfig config, ZenRule rule, Condition condition) {
+    private void setAutomaticZenRuleStateLocked(ZenModeConfig config, ZenRule rule,
+            Condition condition) {
         if (rule == null) return;
 
         rule.condition = condition;

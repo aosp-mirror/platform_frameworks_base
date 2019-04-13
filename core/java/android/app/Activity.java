@@ -132,6 +132,7 @@ import android.widget.AdapterView;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
@@ -4902,6 +4903,18 @@ public class Activity extends ContextThemeWrapper
                 com.android.internal.R.styleable.ActivityTaskDescription_navigationBarColor, 0);
         if (navigationBarColor != 0) {
             mTaskDescription.setNavigationBarColor(navigationBarColor);
+        }
+
+        final int targetSdk = getApplicationInfo().targetSdkVersion;
+        final boolean targetPreQ = targetSdk < Build.VERSION_CODES.Q;
+        if (!targetPreQ) {
+            mTaskDescription.setEnsureStatusBarContrastWhenTransparent(a.getBoolean(
+                    R.styleable.ActivityTaskDescription_ensuringStatusBarContrastWhenTransparent,
+                    false));
+            mTaskDescription.setEnsureNavigationBarContrastWhenTransparent(a.getBoolean(
+                    R.styleable
+                            .ActivityTaskDescription_ensuringNavigationBarContrastWhenTransparent,
+                    true));
         }
 
         a.recycle();

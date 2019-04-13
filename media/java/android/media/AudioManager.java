@@ -17,6 +17,7 @@
 package android.media;
 
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -36,9 +37,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.audiopolicy.AudioPolicy;
 import android.media.audiopolicy.AudioPolicy.AudioPolicyFocusListener;
-import android.media.audiopolicy.AudioProductStrategies;
+import android.media.audiopolicy.AudioProductStrategy;
+import android.media.audiopolicy.AudioVolumeGroup;
 import android.media.audiopolicy.AudioVolumeGroupChangeHandler;
-import android.media.audiopolicy.AudioVolumeGroups;
 import android.media.projection.MediaProjection;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
@@ -1204,6 +1205,7 @@ public class AudioManager {
      * @hide
      */
     @SystemApi
+    @IntRange(from = 0)
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public int getVolumeIndexForAttributes(@NonNull AudioAttributes attr) {
         Preconditions.checkNotNull(attr, "attr must not be null");
@@ -1224,6 +1226,7 @@ public class AudioManager {
      * @hide
      */
     @SystemApi
+    @IntRange(from = 0)
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public int getMaxVolumeIndexForAttributes(@NonNull AudioAttributes attr) {
         Preconditions.checkNotNull(attr, "attr must not be null");
@@ -1244,6 +1247,7 @@ public class AudioManager {
      * @hide
      */
     @SystemApi
+    @IntRange(from = 0)
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public int getMinVolumeIndexForAttributes(@NonNull AudioAttributes attr) {
         Preconditions.checkNotNull(attr, "attr must not be null");
@@ -5402,8 +5406,9 @@ public class AudioManager {
      *         {@see android.media.audiopolicy.AudioProductStrategy} objects.
      */
     @SystemApi
+    @NonNull
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-    public @NonNull AudioProductStrategies getAudioProductStrategies() {
+    public static List<AudioProductStrategy> getAudioProductStrategies() {
         final IAudioService service = getService();
         try {
             return service.getAudioProductStrategies();
@@ -5417,15 +5422,16 @@ public class AudioManager {
      * Introspection API to retrieve audio volume groups.
      * When implementing {Car|Oem}AudioManager, use this method  to retrieve the collection of
      * audio volume groups.
-     * @return a (possibly zero-length) array of
-     *         {@see android.media.audiopolicy.AudioVolumeGroups} objects.
+     * @return a (possibly zero-length) List of
+     *         {@see android.media.audiopolicy.AudioVolumeGroup} objects.
      */
     @SystemApi
+    @NonNull
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-    public @NonNull AudioVolumeGroups getAudioVolumeGroups() {
+    public static List<AudioVolumeGroup> getAudioVolumeGroups() {
         final IAudioService service = getService();
         try {
-            return service.listAudioVolumeGroups();
+            return service.getAudioVolumeGroups();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

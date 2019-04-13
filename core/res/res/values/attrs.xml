@@ -2091,6 +2091,38 @@
              Corresponds to {@link android.view.Window#setNavigationBarDividerColor(int)}. -->
         <attr name="navigationBarDividerColor" format="color" />
 
+        <!-- Sets whether the system should ensure that the status bar has enough
+             contrast when a fully transparent background is requested.
+
+             <p>If set to this value, the system will determine whether a scrim is necessary
+             to ensure that the status bar has enough contrast with the contents of
+             this app, and set an appropriate effective bar background color accordingly.
+
+             <p>When the status bar color has a non-zero alpha value, the value of this
+             attribute has no effect.
+
+             <p>If the app does not target at least {@link android.os.Build.VERSION_CODES#Q Q},
+             this attribute is ignored.
+
+             @see android.view.Window#setEnsuringStatusBarContrastWhenTransparent -->
+        <attr name="ensuringStatusBarContrastWhenTransparent" format="boolean" />
+
+        <!-- Sets whether the system should ensure that the navigation bar has enough
+             contrast when a fully transparent background is requested.
+
+             <p>If set to this value, the system will determine whether a scrim is necessary
+             to ensure that the navigation bar has enough contrast with the contents of
+             this app, and set an appropriate effective bar background color accordingly.
+
+             <p>When the navigation bar color has a non-zero alpha value, the value of this
+             attribute has no effect.
+
+             <p>If the app does not target at least {@link android.os.Build.VERSION_CODES#Q Q},
+             this attribute is ignored.
+
+             @see android.view.Window#setEnsuringNavigationBarContrastWhenTransparent -->
+        <attr name="ensuringNavigationBarContrastWhenTransparent" format="boolean" />
+
         <!-- The duration, in milliseconds, of the window background fade duration
              when transitioning into or away from an Activity when called with an
              Activity Transition. Corresponds to
@@ -8980,6 +9012,10 @@
         <!-- @hide From Theme.navigationBarColor, used for the TaskDescription navigation bar
                    color. -->
         <attr name="navigationBarColor"/>
+        <!-- @hide From Window.ensuringStatusBarContrastWhenTransparent -->
+        <attr name="ensuringStatusBarContrastWhenTransparent"/>
+        <!-- @hide From Window.ensuringNavigationBarContrastWhenTransparent -->
+        <attr name="ensuringNavigationBarContrastWhenTransparent"/>
     </declare-styleable>
 
     <declare-styleable name="Shortcut">

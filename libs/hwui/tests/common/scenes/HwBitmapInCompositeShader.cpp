@@ -60,10 +60,10 @@ public:
         colors[0] = Color::Black;
         colors[1] = Color::White;
         sk_sp<SkShader> gradientShader = SkGradientShader::MakeRadial(
-                center, 50, colors, nullptr, 2, SkShader::TileMode::kRepeat_TileMode);
+                center, 50, colors, nullptr, 2, SkTileMode::kRepeat);
 
         sk_sp<SkShader> compositeShader(
-                SkShader::MakeComposeShader(hardwareShader, gradientShader, SkBlendMode::kDstATop));
+                SkShaders::Blend(SkBlendMode::kDstATop, hardwareShader, gradientShader));
 
         SkPaint paint;
         paint.setShader(std::move(compositeShader));
@@ -74,7 +74,6 @@ public:
 
     sk_sp<SkShader> createBitmapShader(Bitmap& bitmap) {
         sk_sp<SkImage> image = bitmap.makeImage();
-        return image->makeShader(SkShader::TileMode::kClamp_TileMode,
-                                 SkShader::TileMode::kClamp_TileMode);
+        return image->makeShader();
     }
 };

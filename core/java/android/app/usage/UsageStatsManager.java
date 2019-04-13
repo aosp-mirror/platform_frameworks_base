@@ -678,29 +678,6 @@ public final class UsageStatsManager {
         }
     }
 
-
-    /**
-     * @deprecated use {@link #registerUsageSessionObserver(int, String[], Duration, Duration,
-     *                                                      PendingIntent, PendingIntent)}.
-     *
-     * @hide
-     */
-    @Deprecated
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.OBSERVE_APP_USAGE)
-    // STOPSHIP b/128455269: remove this method
-    public void registerUsageSessionObserver(int sessionObserverId,
-            @NonNull String[] observedEntities, long timeLimit, @NonNull TimeUnit timeUnit,
-            long sessionThresholdTime,  @NonNull TimeUnit sessionThresholdTimeUnit,
-            @NonNull PendingIntent limitReachedCallbackIntent,
-            @Nullable PendingIntent sessionEndCallbackIntent) {
-        final Duration timeLimitDuration = Duration.ofMillis(timeUnit.toMillis(timeLimit));
-        final Duration sessionThresholdDuration =
-                Duration.ofMillis(sessionThresholdTimeUnit.toMillis(sessionThresholdTime));
-        registerUsageSessionObserver(sessionObserverId, observedEntities, timeLimitDuration,
-                sessionThresholdDuration, limitReachedCallbackIntent, sessionEndCallbackIntent);
-    }
-
     /**
      * Register a usage session observer that receives a callback on the provided {@code
      * limitReachedCallbackIntent} when the sum of usages of apps and tokens in the {@code

@@ -16,26 +16,26 @@
 
 package com.android.internal.location.gnssmetrics;
 
+import android.location.GnssStatus;
 import android.os.SystemClock;
-import android.os.connectivity.GpsBatteryStats;
 import android.os.SystemProperties;
-
+import android.os.connectivity.GpsBatteryStats;
 import android.server.location.ServerLocationProtoEnums;
-
 import android.text.format.DateUtils;
 import android.util.Base64;
 import android.util.Log;
 import android.util.StatsLog;
 import android.util.TimeUtils;
 
-import java.util.Arrays;
-
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.location.nano.GnssLogsProto.GnssLog;
 import com.android.internal.location.nano.GnssLogsProto.PowerMetrics;
 
+import java.util.Arrays;
+
 /**
  * GnssMetrics: Is used for logging GNSS metrics
+ *
  * @hide
  */
 public class GnssMetrics {
@@ -65,6 +65,11 @@ public class GnssMetrics {
 
   /* GNSS power metrics */
   private GnssPowerMetrics mGnssPowerMetrics;
+
+    /**
+     * A boolean array indicating whether the constellation types have been used in fix.
+     */
+    private boolean[] mConstellationTypes;
 
   /** Constructor */
   public GnssMetrics(IBatteryStats stats) {
@@ -156,6 +161,18 @@ public class GnssMetrics {
     return;
   }
 
+
+    /**
+     * Logs that a constellation type has been observed.
+     */
+    public void logConstellationType(int constellationType) {
+        if (constellationType >= mConstellationTypes.length) {
+            Log.e(TAG, "Constellation type " + constellationType + " is not valid.");
+            return;
+        }
+        mConstellationTypes[constellationType] = true;
+    }
+
   /**
    * Dumps GNSS metrics as a proto string
    * @return
@@ -232,6 +249,13 @@ public class GnssMetrics {
       s.append("  Top 4 Avg CN0 standard deviation (dB-Hz): ").append(
           topFourAverageCn0Statistics.getStandardDeviation()).append("\n");
     }
+        s.append("  Used-in-fix constellation types: ");
+        for (int i = 0; i < mConstellationTypes.length; i++) {
+            if (mConstellationTypes[i]) {
+                s.append(GnssStatus.constellationTypeToString(i)).append(" ");
+            }
+        }
+        s.append("\n");
     s.append("GNSS_KPI_END").append("\n");
     GpsBatteryStats stats = mGnssPowerMetrics.getGpsBatteryStats();
     if (stats != null) {
@@ -320,8 +344,14 @@ public class GnssMetrics {
     timeToFirstFixSecStatistics.reset();
     positionAccuracyMeterStatistics.reset();
     topFourAverageCn0Statistics.reset();
+        resetConstellationTypes();
     return;
   }
+
+    /** Resets {@link #mConstellationTypes} as an all-false boolean array. */
+    public void resetConstellationTypes() {
+        mConstellationTypes = new boolean[GnssStatus.CONSTELLATION_COUNT];
+    }
 
   /* Class for handling GNSS power related metrics */
   private class GnssPowerMetrics {

@@ -266,7 +266,7 @@
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"विकास सेटिंग्जला अनुमती द्यायची?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"या सेटिंग्जचा हेतू फक्त विकास वापरासाठी आहे. त्यामुळे तुमचे डिव्हाइस आणि त्यावरील अॅप्लिकेशन ब्रेक होऊ शकतात किंवा नेहमीपेक्षा वेगळे वर्तन करू शकतात."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB वर अॅप्स पडताळून पाहा"</string>
-    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"हानिकारक वर्तनासाठी ADB/ADT द्वारे इंस्टॉल अॅप्स तपासा."</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"हानिकारक वर्तनासाठी ADB/ADT द्वारे इंस्टॉल अ‍ॅप्स तपासा."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"नावांशिवाय ब्‍लूटूथ डीव्‍हाइस (फक्‍त MAC पत्‍ते) दाखवले जातील"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"रिमोट डिव्हाइसमध्ये सहन न होणारा मोठा आवाज किंवा नियंत्रणाचा अभाव यासारखी आवाजाची समस्या असल्यास ब्लूटूथ संपूर्ण आवाज वैशिष्ट्य बंद करते."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"स्थानिक टर्मिनल"</string>
@@ -314,7 +314,7 @@
     <string name="show_non_rect_clip" msgid="505954950474595172">"आयताकृती नसलेले क्लिप ऑपरेशन डीबग करा"</string>
     <string name="track_frame_time" msgid="6094365083096851167">"प्रोफाइल HWUI रेंडरिंग"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"GPU डीबग स्तर सुरू करा"</string>
-    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"डीबग अॅप्ससाठी GPU डीबग स्तर लोड करण्याची अनुमती द्या"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"डीबग अ‍ॅप्ससाठी GPU डीबग स्तर लोड करण्याची अनुमती द्या"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"विंडो अॅनिमेशन स्केल"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"ट्रांझिशन अॅनिमेशन स्केल"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"अॅनिमेटर कालावधी स्केल"</string>
@@ -330,7 +330,7 @@
     <string name="force_allow_on_external" msgid="3215759785081916381">"बाह्यवर अॅप्सना अनुमती देण्याची सक्ती करा"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"manifest मूल्यांकडे दुर्लक्ष करून, कोणत्याही अॅपला बाह्य स्टोरेजवर लेखन केले जाण्यासाठी पात्र बनविते"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"अॅक्टिव्हिटीचा आकार बदलण्यायोग्य होण्याची सक्ती करा"</string>
-    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"manifest मूल्यांकडे दुर्लक्ष करून, एकाधिक-विंडोसाठी सर्व क्रियाकलापांचा आकार बदलण्यायोग्य करा."</string>
+    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"manifest मूल्यांकडे दुर्लक्ष करून, एकाहून अधिक-विंडोसाठी सर्व अ‍ॅक्टिव्हिटींचा आकार बदलण्यायोग्य करा."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"freeform विंडो सुरू करा"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"प्रायोगिक मुक्तस्वरूपाच्या विंडोसाठी समर्थन सुरू करा."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"डेस्कटॉप बॅकअप पासवर्ड"</string>

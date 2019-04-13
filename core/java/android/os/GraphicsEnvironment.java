@@ -72,6 +72,14 @@ public class GraphicsEnvironment {
     private static final String INTENT_KEY_A4A_TOAST_MESSAGE = "A4A Toast Message";
     private static final String GAME_DRIVER_WHITELIST_ALL = "*";
 
+    // GAME_DRIVER_ALL_APPS
+    // 0: Default (Invalid values fallback to default as well)
+    // 1: All apps use Game Driver
+    // 2: All apps use system graphics driver
+    private static final int GAME_DRIVER_GLOBAL_OPT_IN_DEFAULT = 0;
+    private static final int GAME_DRIVER_GLOBAL_OPT_IN_ALL = 1;
+    private static final int GAME_DRIVER_GLOBAL_OPT_IN_NONE = 2;
+
     private ClassLoader mClassLoader;
     private String mLayerPath;
     private String mDebugLayerPath;
@@ -94,6 +102,65 @@ public class GraphicsEnvironment {
                     SystemProperties.getLong(PROPERTY_GFX_DRIVER_BUILD_TIME, 0), packageName);
         }
         Trace.traceEnd(Trace.TRACE_TAG_GRAPHICS);
+    }
+
+    /**
+     * Allow to query whether an application will use Game Driver.
+     */
+    public static boolean shouldUseGameDriver(Context context, Bundle coreSettings,
+            ApplicationInfo applicationInfo) {
+        final String driverPackageName = SystemProperties.get(PROPERTY_GFX_DRIVER);
+        if (driverPackageName == null || driverPackageName.isEmpty()) {
+            return false;
+        }
+
+        // To minimize risk of driver updates crippling the device beyond user repair, never use an
+        // updated driver for privileged or non-updated system apps. Presumably pre-installed apps
+        // were tested thoroughly with the pre-installed driver.
+        if (applicationInfo.isPrivilegedApp() || (applicationInfo.isSystemApp()
+                && !applicationInfo.isUpdatedSystemApp())) {
+            if (DEBUG) Log.v(TAG, "ignoring driver package for privileged/non-updated system app");
+            return false;
+        }
+        final ContentResolver contentResolver = context.getContentResolver();
+        final String packageName = applicationInfo.packageName;
+        final int globalOptIn;
+        if (coreSettings != null) {
+            globalOptIn = coreSettings.getInt(Settings.Global.GAME_DRIVER_ALL_APPS, 0);
+        } else {
+            globalOptIn = Settings.Global.getInt(contentResolver,
+                    Settings.Global.GAME_DRIVER_ALL_APPS, 0);
+        }
+        if (globalOptIn == GAME_DRIVER_GLOBAL_OPT_IN_ALL) {
+            return true;
+        }
+        if (globalOptIn == GAME_DRIVER_GLOBAL_OPT_IN_NONE) {
+            return false;
+        }
+
+        // GAME_DRIVER_OPT_OUT_APPS has higher priority than GAME_DRIVER_OPT_IN_APPS
+        if (getGlobalSettingsString(contentResolver, coreSettings,
+                Settings.Global.GAME_DRIVER_OPT_OUT_APPS).contains(packageName)) {
+            return false;
+        }
+        final boolean isOptIn = getGlobalSettingsString(contentResolver, coreSettings,
+                Settings.Global.GAME_DRIVER_OPT_IN_APPS).contains(packageName);
+        final List<String> whitelist = getGlobalSettingsString(contentResolver, coreSettings,
+                Settings.Global.GAME_DRIVER_WHITELIST);
+        if (!isOptIn && whitelist.indexOf(GAME_DRIVER_WHITELIST_ALL) != 0
+                && !whitelist.contains(packageName)) {
+            return false;
+        }
+
+        // If the application is not opted-in, then check whether it's on the blacklist,
+        // terminate early if it's on the blacklist and fallback to system driver.
+        if (!isOptIn
+                && getGlobalSettingsString(contentResolver, coreSettings,
+                                       Settings.Global.GAME_DRIVER_BLACKLIST)
+                        .contains(packageName)) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -188,11 +255,16 @@ public class GraphicsEnvironment {
 
                     if (gpuDebugLayerApp != null && !gpuDebugLayerApp.isEmpty()) {
                         Log.i(TAG, "GPU debug layer app: " + gpuDebugLayerApp);
-                        final String paths = getDebugLayerAppPaths(pm, gpuDebugLayerApp);
-                        if (paths != null) {
-                            // Append the path so files placed in the app's base directory will
-                            // override the external path
-                            layerPaths += paths + ":";
+                        // If a colon is present, treat this as multiple apps, so Vulkan and GLES
+                        // layer apps can be provided at the same time.
+                        String[] layerApps = gpuDebugLayerApp.split(":");
+                        for (int i = 0; i < layerApps.length; i++) {
+                            String paths = getDebugLayerAppPaths(pm, layerApps[i]);
+                            if (paths != null) {
+                                // Append the path so files placed in the app's base directory will
+                                // override the external path
+                                layerPaths += paths + ":";
+                            }
                         }
                     }
 
@@ -660,57 +732,8 @@ public class GraphicsEnvironment {
             return false;
         }
 
-        // To minimize risk of driver updates crippling the device beyond user repair, never use an
-        // updated driver for privileged or non-updated system apps. Presumably pre-installed apps
-        // were tested thoroughly with the pre-installed driver.
-        final ApplicationInfo ai = context.getApplicationInfo();
-        if (ai.isPrivilegedApp() || (ai.isSystemApp() && !ai.isUpdatedSystemApp())) {
-            if (DEBUG) Log.v(TAG, "ignoring driver package for privileged/non-updated system app");
+        if (!shouldUseGameDriver(context, coreSettings, context.getApplicationInfo())) {
             return false;
-        }
-
-        // GAME_DRIVER_ALL_APPS
-        // 0: Default (Invalid values fallback to default as well)
-        // 1: All apps use Game Driver
-        // 2: All apps use system graphics driver
-        final int gameDriverAllApps = coreSettings.getInt(Settings.Global.GAME_DRIVER_ALL_APPS, 0);
-        if (gameDriverAllApps == 2) {
-            if (DEBUG) {
-                Log.w(TAG, "Game Driver is turned off on this device");
-            }
-            return false;
-        }
-
-        if (gameDriverAllApps != 1) {
-            // GAME_DRIVER_OPT_OUT_APPS has higher priority than GAME_DRIVER_OPT_IN_APPS
-            if (getGlobalSettingsString(null, coreSettings,
-                    Settings.Global.GAME_DRIVER_OPT_OUT_APPS).contains(packageName)) {
-                if (DEBUG) {
-                    Log.w(TAG, packageName + " opts out from Game Driver.");
-                }
-                return false;
-            }
-            final boolean isOptIn =
-                    getGlobalSettingsString(null, coreSettings,
-                            Settings.Global.GAME_DRIVER_OPT_IN_APPS).contains(packageName);
-            final List<String> whitelist = getGlobalSettingsString(null, coreSettings,
-                    Settings.Global.GAME_DRIVER_WHITELIST);
-            if (!isOptIn && whitelist.indexOf(GAME_DRIVER_WHITELIST_ALL) != 0
-                    && !whitelist.contains(packageName)) {
-                if (DEBUG) {
-                    Log.w(TAG, packageName + " is not on the whitelist.");
-                }
-                return false;
-            }
-
-            // If the application is not opted-in and check whether it's on the blacklist,
-            // terminate early if it's on the blacklist and fallback to system driver.
-            if (!isOptIn
-                    && getGlobalSettingsString(null, coreSettings,
-                                               Settings.Global.GAME_DRIVER_BLACKLIST)
-                            .contains(ai.packageName)) {
-                return false;
-            }
         }
 
         final String abi = chooseAbi(driverAppInfo);

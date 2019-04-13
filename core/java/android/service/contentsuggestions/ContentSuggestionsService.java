@@ -31,7 +31,6 @@ import android.app.contentsuggestions.SelectionsRequest;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.GraphicBuffer;
-import android.hardware.HardwareBuffer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -67,8 +66,7 @@ public abstract class ContentSuggestionsService extends Service {
 
             Bitmap wrappedBuffer = null;
             if (contextImage != null) {
-                wrappedBuffer = Bitmap.wrapHardwareBuffer(
-                        HardwareBuffer.createFromGraphicBuffer(contextImage), null);
+                wrappedBuffer = Bitmap.wrapHardwareBuffer(contextImage, null);
             }
 
             mHandler.sendMessage(

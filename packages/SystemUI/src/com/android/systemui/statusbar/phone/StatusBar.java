@@ -660,7 +660,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mDisplayId = mDisplay.getDisplayId();
         updateDisplaySize();
 
-        Resources res = mContext.getResources();
         mVibrateOnOpening = mContext.getResources().getBoolean(
                 R.bool.config_vibrateOnIconAnimation);
         mVibratorHelper = Dependency.get(VibratorHelper.class);
@@ -696,7 +695,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             ex.rethrowFromSystemServer();
         }
 
-        createAndAddWindows();
+        createAndAddWindows(result);
 
         // Make sure we always have the most current wallpaper info.
         IntentFilter wallpaperChangedFilter = new IntentFilter(Intent.ACTION_WALLPAPER_CHANGED);
@@ -778,7 +777,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     // ================================================================================
     // Constructing the view
     // ================================================================================
-    protected void makeStatusBarView() {
+    protected void makeStatusBarView(@Nullable RegisterStatusBarResult result) {
         final Context context = mContext;
         updateDisplaySize(); // populates mDisplayMetrics
         updateResources();
@@ -871,7 +870,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationLogger.setHeadsUpManager(mHeadsUpManager);
         putComponent(HeadsUpManager.class, mHeadsUpManager);
 
-        createNavigationBar();
+        createNavigationBar(result);
 
         if (ENABLE_LOCKSCREEN_WALLPAPER) {
             mLockscreenWallpaper = new LockscreenWallpaper(mContext, this, mHandler);
@@ -1118,8 +1117,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     // TODO(b/117478341): This was left such that CarStatusBar can override this method.
     // Try to remove this.
-    protected void createNavigationBar() {
-        mNavigationBarController.createNavigationBars(true /* includeDefaultDisplay */);
+    protected void createNavigationBar(@Nullable RegisterStatusBarResult result) {
+        mNavigationBarController.createNavigationBars(true /* includeDefaultDisplay */, result);
     }
 
     /**
@@ -1152,7 +1151,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mBrightnessMirrorController != null) {
             mBrightnessMirrorController.onDensityOrFontScaleChanged();
         }
-        mStatusBarKeyguardViewManager.onDensityOrFontScaleChanged();
         // TODO: Bring these out of StatusBar.
         ((UserInfoControllerImpl) Dependency.get(UserInfoController.class))
                 .onDensityOrFontScaleChanged();
@@ -2402,12 +2400,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         pw.println(BarTransitions.modeToString(transitions.getMode()));
     }
 
-    public void createAndAddWindows() {
-        addStatusBarWindow();
-    }
-
-    private void addStatusBarWindow() {
-        makeStatusBarView();
+    public void createAndAddWindows(@Nullable RegisterStatusBarResult result) {
+        makeStatusBarView(result);
         mStatusBarWindowController = Dependency.get(StatusBarWindowController.class);
         mStatusBarWindowController.add(mStatusBarWindow, getStatusBarHeight());
     }
@@ -3949,6 +3943,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 }
 
                 private void setPulsing(boolean pulsing) {
+                    mStatusBarKeyguardViewManager.setPulsing(pulsing);
                     mKeyguardViewMediator.setPulsing(pulsing);
                     mNotificationPanel.setPulsing(pulsing);
                     mVisualStabilityManager.setPulsing(pulsing);

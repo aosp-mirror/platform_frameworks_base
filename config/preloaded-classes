@@ -151,7 +151,6 @@ android.app.ActivityOptions
 android.app.ActivityTaskManager$1
 android.app.ActivityTaskManager
 android.app.ActivityThread$1
-android.app.ActivityThread$2
 android.app.ActivityThread$ActivityClientRecord
 android.app.ActivityThread$AndroidOs
 android.app.ActivityThread$AppBindData
@@ -374,6 +373,7 @@ android.app.SystemServiceRegistry$112
 android.app.SystemServiceRegistry$113
 android.app.SystemServiceRegistry$114
 android.app.SystemServiceRegistry$115
+android.app.SystemServiceRegistry$116
 android.app.SystemServiceRegistry$11
 android.app.SystemServiceRegistry$12
 android.app.SystemServiceRegistry$13
@@ -479,6 +479,7 @@ android.app.SystemServiceRegistry$StaticServiceFetcher
 android.app.SystemServiceRegistry
 android.app.TaskInfo
 android.app.UiModeManager
+android.app.UriGrantsManager$1
 android.app.UriGrantsManager
 android.app.UserSwitchObserver
 android.app.VrManager
@@ -489,22 +490,27 @@ android.app.WallpaperManager$Globals
 android.app.WallpaperManager
 android.app.WindowConfiguration$1
 android.app.WindowConfiguration
+android.app.admin.-$$Lambda$DevicePolicyManager$aBAov4sAc4DWENs1-hCXh31NAg0
+android.app.admin.-$$Lambda$DevicePolicyManager$w2TynM9H41ejac4JVpNbnemNVWk
 android.app.admin.DeviceAdminInfo$1
 android.app.admin.DeviceAdminInfo$PolicyInfo
 android.app.admin.DeviceAdminInfo
 android.app.admin.DevicePolicyManager$1
 android.app.admin.DevicePolicyManager$2
+android.app.admin.DevicePolicyManager$InstallSystemUpdateCallback
 android.app.admin.DevicePolicyManager$OnClearApplicationUserDataListener
 android.app.admin.DevicePolicyManager
 android.app.admin.IDevicePolicyManager$Stub$Proxy
 android.app.admin.IDevicePolicyManager$Stub
 android.app.admin.IDevicePolicyManager
+android.app.admin.PasswordMetrics$1
 android.app.admin.PasswordMetrics
 android.app.admin.SecurityLog$SecurityEvent$1
 android.app.admin.SecurityLog$SecurityEvent
 android.app.admin.SecurityLog
 android.app.admin.StartInstallingUpdateCallback$Stub
 android.app.admin.StartInstallingUpdateCallback
+android.app.admin.SystemUpdateInfo$1
 android.app.admin.SystemUpdateInfo
 android.app.admin.SystemUpdatePolicy$1
 android.app.admin.SystemUpdatePolicy
@@ -568,10 +574,10 @@ android.app.prediction.AppPredictionManager
 android.app.role.IRoleManager$Stub$Proxy
 android.app.role.IRoleManager$Stub
 android.app.role.IRoleManager
-android.app.role.IRoleManagerCallback$Stub
-android.app.role.IRoleManagerCallback
+android.app.role.RoleControllerManager
 android.app.role.RoleManager
 android.app.servertransaction.ActivityLifecycleItem
+android.app.servertransaction.ActivityRelaunchItem$1
 android.app.servertransaction.ActivityRelaunchItem
 android.app.servertransaction.ActivityResultItem$1
 android.app.servertransaction.ActivityResultItem
@@ -633,6 +639,7 @@ android.app.usage.CacheQuotaService$CacheQuotaServiceWrapper
 android.app.usage.CacheQuotaService$ServiceHandler
 android.app.usage.CacheQuotaService
 android.app.usage.ICacheQuotaService$Stub
+android.app.usage.ICacheQuotaService
 android.app.usage.IStorageStatsManager$Stub$Proxy
 android.app.usage.IStorageStatsManager$Stub
 android.app.usage.IStorageStatsManager
@@ -757,6 +764,8 @@ android.content.AsyncQueryHandler$WorkerArgs
 android.content.AsyncQueryHandler$WorkerHandler
 android.content.AsyncQueryHandler
 android.content.AsyncTaskLoader
+android.content.AutofillOptions$1
+android.content.AutofillOptions
 android.content.BroadcastReceiver$PendingResult$1
 android.content.BroadcastReceiver$PendingResult
 android.content.BroadcastReceiver
@@ -766,6 +775,7 @@ android.content.ComponentCallbacks2
 android.content.ComponentCallbacks
 android.content.ComponentName$1
 android.content.ComponentName
+android.content.ContentCaptureOptions
 android.content.ContentInterface
 android.content.ContentProvider$PipeDataWriter
 android.content.ContentProvider$Transport
@@ -899,6 +909,7 @@ android.content.pm.IPackageManager$Stub$Proxy
 android.content.pm.IPackageManager$Stub
 android.content.pm.IPackageManager
 android.content.pm.IPackageStatsObserver$Stub
+android.content.pm.IPackageStatsObserver
 android.content.pm.IShortcutService$Stub$Proxy
 android.content.pm.IShortcutService$Stub
 android.content.pm.IShortcutService
@@ -926,8 +937,6 @@ android.content.pm.PackageManager$NameNotFoundException
 android.content.pm.PackageManager$OnPermissionsChangedListener
 android.content.pm.PackageManager
 android.content.pm.PackageParser$1
-android.content.pm.PackageParser$2
-android.content.pm.PackageParser$AbstractVersionsAccessor
 android.content.pm.PackageParser$Activity$1
 android.content.pm.PackageParser$Activity
 android.content.pm.PackageParser$ActivityIntentInfo
@@ -976,9 +985,11 @@ android.content.pm.ShortcutManager
 android.content.pm.Signature$1
 android.content.pm.Signature
 android.content.pm.SigningInfo$1
+android.content.pm.StringParceledListSlice$1
 android.content.pm.StringParceledListSlice
 android.content.pm.UserInfo$1
 android.content.pm.UserInfo
+android.content.pm.VerifierInfo$1
 android.content.pm.VerifierInfo
 android.content.pm.VersionedPackage$1
 android.content.pm.VersionedPackage
@@ -1140,6 +1151,7 @@ android.graphics.BitmapFactory$Options
 android.graphics.BitmapFactory
 android.graphics.BitmapRegionDecoder
 android.graphics.BitmapShader
+android.graphics.BlendMode
 android.graphics.BlendModeColorFilter
 android.graphics.BlurMaskFilter$Blur
 android.graphics.BlurMaskFilter
@@ -1187,6 +1199,7 @@ android.graphics.ImageDecoder$InputStreamSource
 android.graphics.ImageDecoder$OnHeaderDecodedListener
 android.graphics.ImageDecoder$Source
 android.graphics.ImageDecoder
+android.graphics.Insets$1
 android.graphics.Insets
 android.graphics.Interpolator$Result
 android.graphics.Interpolator
@@ -1236,6 +1249,7 @@ android.graphics.Region$1
 android.graphics.Region$Op
 android.graphics.Region
 android.graphics.RegionIterator
+android.graphics.RenderNode$AnimationHost
 android.graphics.RenderNode$NoImagePreloadHolder
 android.graphics.RenderNode$PositionUpdateListener
 android.graphics.RenderNode
@@ -1489,6 +1503,10 @@ android.hardware.camera2.params.ColorSpaceTransform
 android.hardware.camera2.params.Face
 android.hardware.camera2.params.HighSpeedVideoConfiguration
 android.hardware.camera2.params.LensShadingMap
+android.hardware.camera2.params.MandatoryStreamCombination$ReprocessType
+android.hardware.camera2.params.MandatoryStreamCombination$SizeThreshold
+android.hardware.camera2.params.MandatoryStreamCombination$StreamCombinationTemplate
+android.hardware.camera2.params.MandatoryStreamCombination$StreamTemplate
 android.hardware.camera2.params.MandatoryStreamCombination
 android.hardware.camera2.params.MeteringRectangle
 android.hardware.camera2.params.OisSample
@@ -1518,6 +1536,7 @@ android.hardware.display.DisplayManagerGlobal
 android.hardware.display.DisplayedContentSample
 android.hardware.display.DisplayedContentSamplingAttributes
 android.hardware.display.IColorDisplayManager$Stub$Proxy
+android.hardware.display.IColorDisplayManager
 android.hardware.display.IDisplayManager$Stub$Proxy
 android.hardware.display.IDisplayManager$Stub
 android.hardware.display.IDisplayManager
@@ -2374,6 +2393,15 @@ android.media.audiofx.AudioEffect$Descriptor
 android.media.audiopolicy.AudioMix
 android.media.audiopolicy.AudioMixingRule$AudioMixMatchCriterion
 android.media.audiopolicy.AudioMixingRule
+android.media.audiopolicy.AudioProductStrategies
+android.media.audiopolicy.AudioProductStrategy$1
+android.media.audiopolicy.AudioProductStrategy$AudioAttributesGroup$1
+android.media.audiopolicy.AudioProductStrategy$AudioAttributesGroup
+android.media.audiopolicy.AudioProductStrategy
+android.media.audiopolicy.AudioVolumeGroup$1
+android.media.audiopolicy.AudioVolumeGroup
+android.media.audiopolicy.AudioVolumeGroupChangeHandler
+android.media.audiopolicy.AudioVolumeGroups
 android.media.browse.MediaBrowser$1
 android.media.browse.MediaBrowser$2
 android.media.browse.MediaBrowser$6
@@ -2394,7 +2422,6 @@ android.media.midi.MidiDeviceInfo$1
 android.media.midi.MidiDeviceInfo
 android.media.midi.MidiManager
 android.media.projection.MediaProjectionManager
-android.media.session.ControllerCallbackLink$CallbackStub
 android.media.session.IActiveSessionsListener$Stub
 android.media.session.IActiveSessionsListener
 android.media.session.ICallback$Stub
@@ -2405,6 +2432,7 @@ android.media.session.IOnVolumeKeyLongPressListener$Stub
 android.media.session.IOnVolumeKeyLongPressListener
 android.media.session.ISession$Stub$Proxy
 android.media.session.ISession$Stub
+android.media.session.ISession2TokensListener$Stub$Proxy
 android.media.session.ISession2TokensListener$Stub
 android.media.session.ISession2TokensListener
 android.media.session.ISession
@@ -2424,6 +2452,7 @@ android.media.session.MediaController$MessageHandler
 android.media.session.MediaController$TransportControls
 android.media.session.MediaController
 android.media.session.MediaSession$Callback
+android.media.session.MediaSession$CallbackStub
 android.media.session.MediaSession$QueueItem$1
 android.media.session.MediaSession$QueueItem
 android.media.session.MediaSession$Token$1
@@ -2449,8 +2478,6 @@ android.media.session.PlaybackState$Builder
 android.media.session.PlaybackState$CustomAction$1
 android.media.session.PlaybackState$CustomAction
 android.media.session.PlaybackState
-android.media.session.SessionCallbackLink
-android.media.session.SessionLink
 android.media.soundtrigger.SoundTriggerManager
 android.media.tv.TvInputManager
 android.metrics.LogMaker
@@ -2481,6 +2508,8 @@ android.net.INetworkPolicyListener
 android.net.INetworkPolicyManager$Stub$Proxy
 android.net.INetworkPolicyManager$Stub
 android.net.INetworkPolicyManager
+android.net.INetworkScoreCache$Stub
+android.net.INetworkScoreCache
 android.net.INetworkScoreService$Stub$Proxy
 android.net.INetworkScoreService$Stub
 android.net.INetworkScoreService
@@ -2491,7 +2520,6 @@ android.net.IpConfiguration$1
 android.net.IpConfiguration$IpAssignment
 android.net.IpConfiguration$ProxySettings
 android.net.IpConfiguration
-android.net.IpMemoryStore
 android.net.IpPrefix$1
 android.net.IpPrefix$2
 android.net.IpPrefix
@@ -2555,12 +2583,11 @@ android.net.StaticIpConfiguration$1
 android.net.StaticIpConfiguration
 android.net.StringNetworkSpecifier$1
 android.net.StringNetworkSpecifier
+android.net.TestNetworkManager
 android.net.TrafficStats
 android.net.TransportInfo
 android.net.UidRange$1
 android.net.UidRange
-android.net.UidRangeParcel$1
-android.net.UidRangeParcel
 android.net.Uri$1
 android.net.Uri$AbstractHierarchicalUri
 android.net.Uri$AbstractPart
@@ -2582,6 +2609,8 @@ android.net.http.HttpResponseCache
 android.net.http.X509TrustManagerExtensions
 android.net.lowpan.LowpanManager
 android.net.nsd.NsdManager
+android.net.sip.ISipService$Stub
+android.net.sip.ISipService
 android.net.sip.SipManager
 android.net.wifi.IWifiManager$Stub$Proxy
 android.net.wifi.IWifiManager$Stub
@@ -2611,6 +2640,7 @@ android.net.wifi.WifiSsid$1
 android.net.wifi.WifiSsid
 android.net.wifi.aware.WifiAwareManager
 android.net.wifi.p2p.IWifiP2pManager$Stub
+android.net.wifi.p2p.IWifiP2pManager
 android.net.wifi.p2p.WifiP2pManager
 android.net.wifi.rtt.WifiRttManager
 android.nfc.IAppCallback$Stub
@@ -2670,6 +2700,7 @@ android.os.AsyncResult
 android.os.AsyncTask$1
 android.os.AsyncTask$2
 android.os.AsyncTask$3
+android.os.AsyncTask$4
 android.os.AsyncTask$AsyncTaskResult
 android.os.AsyncTask$InternalHandler
 android.os.AsyncTask$SerialExecutor$1
@@ -2832,6 +2863,7 @@ android.os.RecoverySystem
 android.os.Registrant
 android.os.RegistrantList
 android.os.RemoteCallback$3
+android.os.RemoteCallback$OnResultListener
 android.os.RemoteCallback
 android.os.RemoteCallbackList$Callback
 android.os.RemoteCallbackList
@@ -2926,6 +2958,7 @@ android.os.strictmode.InstanceCountViolation
 android.os.strictmode.Violation
 android.permission.-$$Lambda$PermissionControllerManager$RemoteService$L8N-TbqIPWKu7tyiOxbu_00YKss
 android.permission.IPermissionController$Stub$Proxy
+android.permission.IPermissionController
 android.permission.PermissionControllerManager$RemoteService
 android.permission.PermissionControllerManager
 android.preference.Preference$OnPreferenceChangeListener
@@ -3032,8 +3065,6 @@ android.provider.Telephony$ServiceStateTable
 android.provider.Telephony$Sms
 android.provider.Telephony$TextBasedSmsColumns
 android.renderscript.RenderScriptCacheDir
-android.rolecontrollerservice.IRoleControllerService$Stub
-android.rolecontrollerservice.IRoleControllerService
 android.security.AttestedKeyPair
 android.security.Credentials
 android.security.IKeyChainAliasCallback$Stub
@@ -3058,6 +3089,7 @@ android.security.keymaster.KeymasterArguments
 android.security.keymaster.KeymasterBlob$1
 android.security.keymaster.KeymasterBlob
 android.security.keymaster.KeymasterBlobArgument
+android.security.keymaster.KeymasterCertificateChain$1
 android.security.keymaster.KeymasterCertificateChain
 android.security.keymaster.KeymasterIntArgument
 android.security.keymaster.OperationResult$1
@@ -3079,6 +3111,7 @@ android.security.keystore.IKeystoreService$Stub
 android.security.keystore.IKeystoreService
 android.security.keystore.KeyAttestationException
 android.security.keystore.KeyGenParameterSpec
+android.security.keystore.KeyPermanentlyInvalidatedException
 android.security.keystore.KeyProperties$KeyAlgorithm
 android.security.keystore.KeyStoreCryptoOperation
 android.security.keystore.KeyStoreCryptoOperationChunkedStreamer$MainDataStream
@@ -3086,6 +3119,7 @@ android.security.keystore.KeyStoreCryptoOperationChunkedStreamer$Stream
 android.security.keystore.KeyStoreCryptoOperationChunkedStreamer
 android.security.keystore.KeyStoreCryptoOperationStreamer
 android.security.keystore.KeyStoreCryptoOperationUtils
+android.security.keystore.ParcelableKeyGenParameterSpec$1
 android.security.keystore.ParcelableKeyGenParameterSpec
 android.security.keystore.StrongBoxUnavailableException
 android.security.keystore.UserAuthArgs
@@ -3122,6 +3156,7 @@ android.service.carrier.CarrierIdentifier$1
 android.service.carrier.CarrierIdentifier
 android.service.dreams.IDreamManager$Stub$Proxy
 android.service.dreams.IDreamManager$Stub
+android.service.dreams.IDreamManager
 android.service.media.IMediaBrowserService$Stub$Proxy
 android.service.media.IMediaBrowserService$Stub
 android.service.media.IMediaBrowserService
@@ -3189,6 +3224,8 @@ android.speech.tts.TextToSpeech$Connection
 android.speech.tts.TextToSpeech$OnInitListener
 android.speech.tts.TextToSpeech
 android.speech.tts.TtsEngines
+android.sysprop.CryptoProperties$state_values
+android.sysprop.CryptoProperties$type_values
 android.sysprop.CryptoProperties
 android.sysprop.DisplayProperties
 android.sysprop.VoldProperties
@@ -3259,9 +3296,8 @@ android.telephony.CellSignalStrengthWcdma$1
 android.telephony.CellSignalStrengthWcdma
 android.telephony.ClientRequestStats$1
 android.telephony.ClientRequestStats
-android.telephony.DataSpecificRegistrationStates$1
-android.telephony.DataSpecificRegistrationStates
-android.telephony.DebugEventReporter
+android.telephony.DataSpecificRegistrationInfo$1
+android.telephony.DataSpecificRegistrationInfo
 android.telephony.INetworkService$Stub
 android.telephony.INetworkService
 android.telephony.INetworkServiceCallback$Stub
@@ -3273,8 +3309,8 @@ android.telephony.ModemActivityInfo$1
 android.telephony.ModemActivityInfo
 android.telephony.ModemInfo$1
 android.telephony.ModemInfo
-android.telephony.NetworkRegistrationState$1
-android.telephony.NetworkRegistrationState
+android.telephony.NetworkRegistrationInfo$1
+android.telephony.NetworkRegistrationInfo
 android.telephony.NetworkService$INetworkServiceWrapper
 android.telephony.NetworkService$NetworkServiceHandler
 android.telephony.NetworkService$NetworkServiceProvider
@@ -3302,13 +3338,14 @@ android.telephony.SubscriptionManager
 android.telephony.TelephonyHistogram$1
 android.telephony.TelephonyHistogram
 android.telephony.TelephonyManager$5
+android.telephony.TelephonyManager$7
 android.telephony.TelephonyManager$MultiSimVariants
 android.telephony.TelephonyManager
 android.telephony.UiccAccessRule$1
 android.telephony.UiccSlotInfo$1
 android.telephony.UiccSlotInfo
-android.telephony.VoiceSpecificRegistrationStates$1
-android.telephony.VoiceSpecificRegistrationStates
+android.telephony.VoiceSpecificRegistrationInfo$1
+android.telephony.VoiceSpecificRegistrationInfo
 android.telephony.data.ApnSetting$1
 android.telephony.data.ApnSetting
 android.telephony.data.DataService$DataServiceHandler
@@ -3342,6 +3379,7 @@ android.telephony.ims.ImsUtListener
 android.telephony.ims.ProvisioningManager$Callback$CallbackBinder
 android.telephony.ims.ProvisioningManager$Callback
 android.telephony.ims.RcsManager
+android.telephony.ims.RcsMessageStore
 android.telephony.ims.aidl.IImsCapabilityCallback$Stub
 android.telephony.ims.aidl.IImsCapabilityCallback
 android.telephony.ims.aidl.IImsConfig$Stub
@@ -3689,6 +3727,7 @@ android.view.Choreographer$FrameCallback
 android.view.Choreographer$FrameDisplayEventReceiver
 android.view.Choreographer$FrameHandler
 android.view.Choreographer
+android.view.CompositionSamplingListener
 android.view.ContextMenu$ContextMenuInfo
 android.view.ContextMenu
 android.view.ContextThemeWrapper
@@ -3697,6 +3736,7 @@ android.view.Display$HdrCapabilities
 android.view.Display$Mode$1
 android.view.Display$Mode
 android.view.Display
+android.view.DisplayAddress
 android.view.DisplayAdjustments
 android.view.DisplayCutout$Bounds
 android.view.DisplayCutout$ParcelableWrapper$1
@@ -3811,6 +3851,7 @@ android.view.SurfaceControl$Builder
 android.view.SurfaceControl$CieXyz
 android.view.SurfaceControl$DisplayPrimaries
 android.view.SurfaceControl$PhysicalDisplayInfo
+android.view.SurfaceControl$ScreenshotGraphicBuffer
 android.view.SurfaceControl$Transaction
 android.view.SurfaceControl
 android.view.SurfaceHolder$Callback2
@@ -3834,6 +3875,7 @@ android.view.View$10
 android.view.View$11
 android.view.View$12
 android.view.View$13
+android.view.View$14
 android.view.View$1
 android.view.View$2
 android.view.View$3
@@ -3965,6 +4007,7 @@ android.view.WindowContentFrameStats
 android.view.WindowId$1
 android.view.WindowInsets$Type
 android.view.WindowInsets
+android.view.WindowInsetsController
 android.view.WindowLeaked
 android.view.WindowManager$BadTokenException
 android.view.WindowManager$LayoutParams$1
@@ -4028,7 +4071,6 @@ android.view.animation.PathInterpolator
 android.view.animation.ScaleAnimation
 android.view.animation.Transformation
 android.view.animation.TranslateAnimation
-android.view.autofill.-$$Lambda$AutofillManager$AutofillManagerClient$V-s28jF4_S72cRk4llkGpwbJnmk
 android.view.autofill.-$$Lambda$AutofillManager$V76JiQu509LCUz3-ckpb-nB3JhA
 android.view.autofill.-$$Lambda$AutofillManager$YfpJNFodEuj5lbXfPlc77fsEvC8
 android.view.autofill.AutofillId$1
@@ -4046,6 +4088,7 @@ android.view.autofill.IAutoFillManager
 android.view.autofill.IAutoFillManagerClient$Stub
 android.view.autofill.IAutoFillManagerClient
 android.view.autofill.IAutofillWindowPresenter
+android.view.contentcapture.ContentCaptureManager$ContentCaptureClient
 android.view.contentcapture.ContentCaptureManager
 android.view.inputmethod.BaseInputConnection
 android.view.inputmethod.ComposingText
@@ -4073,6 +4116,7 @@ android.view.inputmethod.InputMethodSystemProperty
 android.view.textclassifier.-$$Lambda$0biFK4yZBmWN1EO2wtnXskzuEcE
 android.view.textclassifier.-$$Lambda$9N8WImc0VBjy2oxI_Gk5_Pbye_A
 android.view.textclassifier.-$$Lambda$EntityConfidence$YPh8hwgSYYK8OyQ1kFlQngc71Q0
+android.view.textclassifier.-$$Lambda$L_UQMPjXwBN0ch4zL2dD82nf9RI
 android.view.textclassifier.-$$Lambda$NxwbyZSxofZ4Z5SQhfXmtLQ1nxk
 android.view.textclassifier.-$$Lambda$TextClassificationManager$JIaezIJbMig_-kVzN6oArzkTsJE
 android.view.textclassifier.-$$Lambda$TextClassifierImpl$RRbXefHgcUymI9-P95ArUyMvfbw
@@ -4081,14 +4125,10 @@ android.view.textclassifier.-$$Lambda$jJq8RXuVdjYF3lPq-77PEw1NJLM
 android.view.textclassifier.EntityConfidence$1
 android.view.textclassifier.EntityConfidence
 android.view.textclassifier.GenerateLinksLogger
-android.view.textclassifier.IntentFactory
-android.view.textclassifier.LegacyIntentFactory
 android.view.textclassifier.ModelFileManager$ModelFileSupplierImpl
 android.view.textclassifier.ModelFileManager
 android.view.textclassifier.SelectionSessionLogger
 android.view.textclassifier.SystemTextClassifier
-android.view.textclassifier.TemplateClassificationIntentFactory
-android.view.textclassifier.TemplateIntentFactory
 android.view.textclassifier.TextClassification$1
 android.view.textclassifier.TextClassification$Builder
 android.view.textclassifier.TextClassification
@@ -4499,8 +4539,10 @@ com.android.internal.graphics.drawable.AnimationScaleListDrawable$AnimationScale
 com.android.internal.graphics.drawable.AnimationScaleListDrawable
 com.android.internal.infra.-$$Lambda$AbstractRemoteService$MDW40b8CzodE5xRowI9wDEyXEnw
 com.android.internal.infra.AbstractMultiplePendingRequestsRemoteService
+com.android.internal.infra.AbstractRemoteService$BasePendingRequest
 com.android.internal.infra.AbstractRemoteService$PendingRequest
 com.android.internal.infra.AbstractRemoteService$RemoteServiceConnection
+com.android.internal.infra.AbstractRemoteService$VultureCallback
 com.android.internal.infra.AbstractRemoteService
 com.android.internal.logging.AndroidConfig
 com.android.internal.logging.AndroidHandler$1
@@ -4509,6 +4551,8 @@ com.android.internal.logging.EventLogTags
 com.android.internal.logging.MetricsLogger
 com.android.internal.net.NetworkStatsFactory
 com.android.internal.os.-$$Lambda$RuntimeInit$ep4ioD9YINkHI5Q1wZ0N_7VFAOg
+com.android.internal.os.-$$Lambda$ZygoteConnection$KxVsZ-s4KsanePOHCU5JcuypPik
+com.android.internal.os.-$$Lambda$ZygoteConnection$xjqM7qW7vAjTqh2tR5XRF5Vn5mk
 com.android.internal.os.AndroidPrintStream
 com.android.internal.os.AtomicDirectory
 com.android.internal.os.BackgroundThread
@@ -4641,9 +4685,6 @@ com.android.internal.telephony.-$$Lambda$SubscriptionController$u5xE-urXR6ElZ503
 com.android.internal.telephony.-$$Lambda$SubscriptionInfoUpdater$-zZXM9oMRZ3vZz7dJOG19J00Bmw
 com.android.internal.telephony.-$$Lambda$SubscriptionInfoUpdater$D5yF1HbS4cvCyoAj3FESkPtA_0g
 com.android.internal.telephony.-$$Lambda$SubscriptionInfoUpdater$MMx9iQX0JVqqMPLTUZhdBubFSzU
-com.android.internal.telephony.-$$Lambda$TelephonyComponentFactory$InjectedComponents$JvIoCy0AgfF5fVN1H6UnTpH4kxc
-com.android.internal.telephony.-$$Lambda$TelephonyComponentFactory$InjectedComponents$lPb9esCECA9I6VLqv3Aq2ZDh9Iw
-com.android.internal.telephony.-$$Lambda$TelephonyComponentFactory$InjectedComponents$tidvzo4mrKSDaluwYNp7qAWJEV8
 com.android.internal.telephony.-$$Lambda$TelephonyPermissions$LxEEC4irBSbjD1lSC4EeVLgFY9I
 com.android.internal.telephony.AppSmsManager
 com.android.internal.telephony.BaseCommands
@@ -4724,6 +4765,8 @@ com.android.internal.telephony.IPhoneStateListener
 com.android.internal.telephony.IPhoneSubInfo$Stub$Proxy
 com.android.internal.telephony.IPhoneSubInfo$Stub
 com.android.internal.telephony.IPhoneSubInfo
+com.android.internal.telephony.ISetOpportunisticDataCallback$Stub
+com.android.internal.telephony.ISetOpportunisticDataCallback
 com.android.internal.telephony.ISms$Stub
 com.android.internal.telephony.ISms
 com.android.internal.telephony.ISmsImplBase
@@ -4870,6 +4913,7 @@ com.android.internal.telephony.WakeLockStateMachine
 com.android.internal.telephony.WapPushOverSms$1
 com.android.internal.telephony.WapPushOverSms$BindServiceThread
 com.android.internal.telephony.WapPushOverSms
+com.android.internal.telephony.cat.AppInterface
 com.android.internal.telephony.cat.CatLog
 com.android.internal.telephony.cat.CatService
 com.android.internal.telephony.cdma.CdmaInboundSmsHandler
@@ -5286,6 +5330,8 @@ com.android.okhttp.internal.io.FileSystem$1
 com.android.okhttp.internal.io.FileSystem
 com.android.okhttp.internal.io.RealConnection
 com.android.okhttp.internal.tls.OkHostnameVerifier
+com.android.okhttp.internal.tls.RealTrustRootIndex
+com.android.okhttp.internal.tls.TrustRootIndex
 com.android.okhttp.internalandroidapi.HasCacheHolder
 com.android.okhttp.okio.AsyncTimeout$1
 com.android.okhttp.okio.AsyncTimeout$2
@@ -5353,11 +5399,15 @@ com.android.org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers
 com.android.org.bouncycastle.asn1.x509.AlgorithmIdentifier
 com.android.org.bouncycastle.asn1.x509.SubjectPublicKeyInfo
 com.android.org.bouncycastle.asn1.x509.X509ObjectIdentifiers
+com.android.org.bouncycastle.asn1.x9.X9ECParameters
 com.android.org.bouncycastle.asn1.x9.X9ObjectIdentifiers
 com.android.org.bouncycastle.crypto.BlockCipher
 com.android.org.bouncycastle.crypto.BufferedBlockCipher
 com.android.org.bouncycastle.crypto.CipherParameters
 com.android.org.bouncycastle.crypto.CryptoException
+com.android.org.bouncycastle.crypto.CryptoServicesPermission
+com.android.org.bouncycastle.crypto.CryptoServicesRegistrar$Property
+com.android.org.bouncycastle.crypto.CryptoServicesRegistrar
 com.android.org.bouncycastle.crypto.DataLengthException
 com.android.org.bouncycastle.crypto.Digest
 com.android.org.bouncycastle.crypto.ExtendedDigest
@@ -5375,8 +5425,13 @@ com.android.org.bouncycastle.crypto.engines.AESEngine
 com.android.org.bouncycastle.crypto.paddings.BlockCipherPadding
 com.android.org.bouncycastle.crypto.paddings.PKCS7Padding
 com.android.org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher
+com.android.org.bouncycastle.crypto.params.AsymmetricKeyParameter
+com.android.org.bouncycastle.crypto.params.DHParameters
+com.android.org.bouncycastle.crypto.params.DHValidationParameters
+com.android.org.bouncycastle.crypto.params.DSAKeyParameters
 com.android.org.bouncycastle.crypto.params.DSAParameters
 com.android.org.bouncycastle.crypto.params.DSAPublicKeyParameters
+com.android.org.bouncycastle.crypto.params.DSAValidationParameters
 com.android.org.bouncycastle.crypto.params.KeyParameter
 com.android.org.bouncycastle.crypto.params.ParametersWithIV
 com.android.org.bouncycastle.crypto.params.ParametersWithRandom
@@ -5453,6 +5508,7 @@ com.android.org.bouncycastle.jcajce.provider.symmetric.util.BaseBlockCipher
 com.android.org.bouncycastle.jcajce.provider.symmetric.util.BaseSecretKeyFactory
 com.android.org.bouncycastle.jcajce.provider.symmetric.util.BaseWrapCipher
 com.android.org.bouncycastle.jcajce.provider.symmetric.util.BlockCipherProvider
+com.android.org.bouncycastle.jcajce.provider.symmetric.util.ClassUtil
 com.android.org.bouncycastle.jcajce.provider.symmetric.util.PBE$Util
 com.android.org.bouncycastle.jcajce.provider.symmetric.util.PBE
 com.android.org.bouncycastle.jcajce.provider.util.AlgorithmProvider
@@ -5471,10 +5527,14 @@ com.android.org.bouncycastle.jce.provider.BouncyCastleProviderConfiguration
 com.android.org.bouncycastle.jce.provider.CertStoreCollectionSpi
 com.android.org.bouncycastle.util.Arrays
 com.android.org.bouncycastle.util.Encodable
+com.android.org.bouncycastle.util.Integers
 com.android.org.bouncycastle.util.Iterable
 com.android.org.bouncycastle.util.Pack
 com.android.org.bouncycastle.util.Strings$1
 com.android.org.bouncycastle.util.Strings
+com.android.org.bouncycastle.util.encoders.Encoder
+com.android.org.bouncycastle.util.encoders.Hex
+com.android.org.bouncycastle.util.encoders.HexEncoder
 com.android.org.bouncycastle.util.io.Streams
 com.android.org.kxml2.io.KXmlParser$ValueContext
 com.android.org.kxml2.io.KXmlParser
@@ -5506,7 +5566,7 @@ com.google.android.mms.MmsException
 com.sun.security.cert.internal.x509.X509V1CertImpl
 dalvik.annotation.optimization.CriticalNative
 dalvik.annotation.optimization.FastNative
-dalvik.system.-$$Lambda$DexPathList$8b_maZ6RkV67r03QVmaVjC7Wj6M
+dalvik.system.-$$Lambda$DexPathList$_CyMypnZmV6ArWiPOPB4EkAIeUc
 dalvik.system.BaseDexClassLoader$Reporter
 dalvik.system.BaseDexClassLoader
 dalvik.system.BlockGuard$1
@@ -5633,6 +5693,7 @@ java.io.SerializablePermission
 java.io.StreamCorruptedException
 java.io.StringReader
 java.io.StringWriter
+java.io.UncheckedIOException
 java.io.UnixFileSystem
 java.io.UnsupportedEncodingException
 java.io.Writer
@@ -5805,6 +5866,7 @@ java.lang.invoke.MethodType$ConcurrentWeakInternSet$WeakEntry
 java.lang.invoke.MethodType$ConcurrentWeakInternSet
 java.lang.invoke.MethodType
 java.lang.invoke.MethodTypeForm
+java.lang.invoke.SerializedLambda
 java.lang.invoke.Transformers$AlwaysThrow
 java.lang.invoke.Transformers$BindTo
 java.lang.invoke.Transformers$CatchException
@@ -6900,6 +6962,7 @@ java.util.stream.-$$Lambda$Collectors$f68RHYk8qNU7alEHPPrPoFuCJO4
 java.util.stream.-$$Lambda$Collectors$iab6bVO3ydceISRiUEq_MRHYzoU
 java.util.stream.-$$Lambda$Collectors$pzPeDl3rCgtNVSeZPHZk5f2se60
 java.util.stream.-$$Lambda$Drw47GGUtPrz9CklhlT0v26u-5c
+java.util.stream.-$$Lambda$MatchOps$_LtFSpSMfVwoPv-8p_1cMGGcaHA
 java.util.stream.-$$Lambda$ReferencePipeline$mk6xSsLZAKvG89IyN8pzBoM6otw
 java.util.stream.-$$Lambda$bjSXRjZ5UYwAzkW-XPKwqbJ9BRQ
 java.util.stream.-$$Lambda$dplkPhACWDPIy18ogwdupEQaN40
@@ -6928,11 +6991,29 @@ java.util.stream.ForEachOps$ForEachOp
 java.util.stream.ForEachOps
 java.util.stream.IntPipeline$4$1
 java.util.stream.IntPipeline$4
+java.util.stream.IntPipeline$StatelessOp
 java.util.stream.IntPipeline
 java.util.stream.IntStream
 java.util.stream.LongPipeline$StatelessOp
 java.util.stream.LongPipeline
 java.util.stream.LongStream
+java.util.stream.MatchOps$1MatchSink
+java.util.stream.MatchOps$BooleanTerminalSink
+java.util.stream.MatchOps$MatchKind
+java.util.stream.MatchOps$MatchOp
+java.util.stream.MatchOps
+java.util.stream.Node$Builder
+java.util.stream.Node$OfDouble
+java.util.stream.Node$OfInt
+java.util.stream.Node$OfLong
+java.util.stream.Node$OfPrimitive
+java.util.stream.Node
+java.util.stream.Nodes$EmptyNode$OfDouble
+java.util.stream.Nodes$EmptyNode$OfInt
+java.util.stream.Nodes$EmptyNode$OfLong
+java.util.stream.Nodes$EmptyNode$OfRef
+java.util.stream.Nodes$EmptyNode
+java.util.stream.Nodes
 java.util.stream.PipelineHelper
 java.util.stream.ReduceOps$1
 java.util.stream.ReduceOps$1ReducingSink
@@ -6948,6 +7029,8 @@ java.util.stream.ReferencePipeline$2$1
 java.util.stream.ReferencePipeline$2
 java.util.stream.ReferencePipeline$3$1
 java.util.stream.ReferencePipeline$3
+java.util.stream.ReferencePipeline$4$1
+java.util.stream.ReferencePipeline$4
 java.util.stream.ReferencePipeline$5$1
 java.util.stream.ReferencePipeline$5
 java.util.stream.ReferencePipeline$Head
@@ -6956,6 +7039,7 @@ java.util.stream.ReferencePipeline$StatelessOp
 java.util.stream.ReferencePipeline
 java.util.stream.Sink$ChainedInt
 java.util.stream.Sink$ChainedReference
+java.util.stream.Sink$OfInt
 java.util.stream.Sink$OfLong
 java.util.stream.Sink
 java.util.stream.SliceOps$1$1
@@ -7085,6 +7169,7 @@ javax.security.cert.CertificateEncodingException
 javax.security.cert.CertificateException
 javax.security.cert.X509Certificate$1
 javax.security.cert.X509Certificate
+javax.sip.SipException
 javax.xml.parsers.DocumentBuilder
 javax.xml.parsers.DocumentBuilderFactory
 javax.xml.parsers.ParserConfigurationException

@@ -19,6 +19,7 @@ package com.android.settingslib.fuelgauge;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
@@ -33,7 +34,25 @@ import android.util.Slog;
 public class BatterySaverUtils {
 
     private static final String TAG = "BatterySaverUtils";
-    public static final String EXTRA_CONFIRM_ONLY = "extra_confirm_only";
+    /**
+     * When set to "true" the notification will be a generic confirm message instead of asking the
+     * user if they want to turn on battery saver. If set to false the dialog will specifically
+     * talk about turning on battery saver and provide a button for taking the action.
+     */
+    public static final String EXTRA_CONFIRM_TEXT_ONLY = "extra_confirm_only";
+    /**
+     * Ignored if {@link #EXTRA_CONFIRM_TEXT_ONLY} is "false". Can be set to any of the values in
+     * {@link PowerManager.AutoPowerSaveModeTriggers}. If set the dialog will set the power
+     * save mode trigger to the specified value after the user acknowledges the trigger.
+     */
+    public static final String EXTRA_POWER_SAVE_MODE_TRIGGER = "extra_power_save_mode_trigger";
+    /**
+     * Ignored if {@link #EXTRA_CONFIRM_TEXT_ONLY} is "false". can be set to any value between
+     * 0-100 that will be used if {@link #EXTRA_POWER_SAVE_MODE_TRIGGER} is
+     * {@link PowerManager#POWER_SAVE_MODE_TRIGGER_PERCENTAGE}.
+     */
+    public static final String EXTRA_POWER_SAVE_MODE_TRIGGER_LEVEL =
+            "extra_power_save_mode_trigger_level";
 
     private BatterySaverUtils() {
     }
@@ -98,7 +117,10 @@ public class BatterySaverUtils {
         }
         final ContentResolver cr = context.getContentResolver();
 
-        if (enable && needFirstTimeWarning && maybeShowBatterySaverConfirmation(context, false)) {
+        final Bundle confirmationExtras = new Bundle(1);
+        confirmationExtras.putBoolean(EXTRA_CONFIRM_TEXT_ONLY, false);
+        if (enable && needFirstTimeWarning
+                && maybeShowBatterySaverConfirmation(context, confirmationExtras)) {
             return false;
         }
         if (enable && !needFirstTimeWarning) {
@@ -118,7 +140,7 @@ public class BatterySaverUtils {
                         && Global.getInt(cr, Global.LOW_POWER_MODE_TRIGGER_LEVEL, 0) == 0
                         && Secure.getInt(cr,
                         Secure.SUPPRESS_AUTO_BATTERY_SAVER_SUGGESTION, 0) == 0) {
-                    showAutoBatterySaverSuggestion(context, false);
+                    showAutoBatterySaverSuggestion(context, confirmationExtras);
                 }
             }
 
@@ -129,34 +151,36 @@ public class BatterySaverUtils {
 
     /**
      * Shows the battery saver confirmation warning if it hasn't been acknowledged by the user in
-     * the past before. When confirmOnly is true, the dialog will have generic info about battery
-     * saver but will only update that the user has been shown the notification and take no
-     * further action. if confirmOnly is false it will show a more specific version of the dialog
-     * that toggles battery saver when acknowledged
+     * the past before. Various extras can be provided that will change the behavior of this
+     * notification as well as the ui for it.
      * @param context A valid context
-     * @param confirmOnly Whether to show the actionless generic dialog (true) or the specific one
-     * that toggles battery saver (false)
+     * @param extras Any extras to include in the intent to trigger this confirmation that will
+     * help the system disambiguate what to show/do
+     *
      * @return True if it showed the notification because it has not been previously acknowledged.
+     * @see #EXTRA_CONFIRM_TEXT_ONLY
+     * @see #EXTRA_POWER_SAVE_MODE_TRIGGER
+     * @see #EXTRA_POWER_SAVE_MODE_TRIGGER_LEVEL
      */
-    public static boolean maybeShowBatterySaverConfirmation(Context context, boolean confirmOnly) {
+    public static boolean maybeShowBatterySaverConfirmation(Context context, Bundle extras) {
         if (Secure.getInt(context.getContentResolver(),
                 Secure.LOW_POWER_WARNING_ACKNOWLEDGED, 0) != 0) {
             return false; // Already shown.
         }
         context.sendBroadcast(
-                getSystemUiBroadcast(ACTION_SHOW_START_SAVER_CONFIRMATION, confirmOnly));
+                getSystemUiBroadcast(ACTION_SHOW_START_SAVER_CONFIRMATION, extras));
         return true;
     }
 
-    private static void showAutoBatterySaverSuggestion(Context context, boolean confirmOnly) {
-        context.sendBroadcast(getSystemUiBroadcast(ACTION_SHOW_AUTO_SAVER_SUGGESTION, confirmOnly));
+    private static void showAutoBatterySaverSuggestion(Context context, Bundle extras) {
+        context.sendBroadcast(getSystemUiBroadcast(ACTION_SHOW_AUTO_SAVER_SUGGESTION, extras));
     }
 
-    private static Intent getSystemUiBroadcast(String action, boolean confirmOnly) {
+    private static Intent getSystemUiBroadcast(String action, Bundle extras) {
         final Intent i = new Intent(action);
         i.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         i.setPackage(SYSUI_PACKAGE);
-        i.putExtra(EXTRA_CONFIRM_ONLY, confirmOnly);
+        i.putExtras(extras);
         return i;
     }
 

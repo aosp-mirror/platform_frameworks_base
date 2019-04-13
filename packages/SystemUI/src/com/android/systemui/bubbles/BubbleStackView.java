@@ -441,40 +441,15 @@ public class BubbleStackView extends FrameLayout {
      * Sets the bubble that should be expanded and expands if needed.
      *
      * @param key the {@link NotificationEntry#key} associated with the bubble to expand.
+     * @deprecated replaced by setSelectedBubble(Bubble) + setExpanded(true)
      */
+    @Deprecated
     void setExpandedBubble(String key) {
         Bubble bubbleToExpand = mBubbleData.getBubble(key);
-        if (mIsExpanded && !bubbleToExpand.equals(mExpandedBubble)) {
-            // Previously expanded, notify that this bubble is no longer expanded
-            notifyExpansionChanged(mExpandedBubble.entry, false /* expanded */);
-        }
-        Bubble prevBubble = mExpandedBubble;
-        mExpandedBubble = bubbleToExpand;
-        if (!mIsExpanded) {
-            // If we weren't previously expanded we should animate open.
-            animateExpansion(true /* expand */);
-            logBubbleEvent(mExpandedBubble, StatsLog.BUBBLE_UICHANGED__ACTION__EXPANDED);
-            mExpandedBubble.entry.setShowInShadeWhenBubble(false);
-            notifyExpansionChanged(mExpandedBubble.entry, true /* expanded */);
-        } else {
-            // Make the container of the expanded view transparent before removing the expanded view
-            // from it. Otherwise a punch hole created by {@link android.view.SurfaceView} in the
-            // expanded view becomes visible on the screen. See b/126856255
-            mExpandedViewContainer.setAlpha(0.0f);
-
-            mSurfaceSynchronizer.syncSurfaceAndRun(new Runnable() {
-                @Override
-                public void run() {
-                    updateExpandedBubble();
-                    updatePointerPosition();
-                    requestUpdate();
-                    logBubbleEvent(prevBubble, StatsLog.BUBBLE_UICHANGED__ACTION__COLLAPSED);
-                    logBubbleEvent(mExpandedBubble,
-                            StatsLog.BUBBLE_UICHANGED__ACTION__EXPANDED);
-                    mExpandedBubble.entry.setShowInShadeWhenBubble(false);
-                    notifyExpansionChanged(mExpandedBubble.entry, true /* expanded */);
-                }
-            });
+        if (bubbleToExpand != null) {
+            setSelectedBubble(bubbleToExpand);
+            bubbleToExpand.entry.setShowInShadeWhenBubble(false);
+            setExpanded(true);
         }
     }
 
@@ -489,6 +464,57 @@ public class BubbleStackView extends FrameLayout {
                 setExpandedBubble(entry.key);
             }
         }
+    }
+
+    /**
+     * Changes the currently selected bubble. If the stack is already expanded, the newly selected
+     * bubble will be shown immediately. This does not change the expanded state or change the
+     * position of any bubble.
+     */
+    public void setSelectedBubble(Bubble bubbleToSelect) {
+        if (mExpandedBubble != null && mExpandedBubble.equals(bubbleToSelect)) {
+            return;
+        }
+        final Bubble previouslySelected = mExpandedBubble;
+        mExpandedBubble = bubbleToSelect;
+        if (mIsExpanded) {
+            // Make the container of the expanded view transparent before removing the expanded view
+            // from it. Otherwise a punch hole created by {@link android.view.SurfaceView} in the
+            // expanded view becomes visible on the screen. See b/126856255
+            mExpandedViewContainer.setAlpha(0.0f);
+            mSurfaceSynchronizer.syncSurfaceAndRun(() -> {
+                updateExpandedBubble();
+                updatePointerPosition();
+                requestUpdate();
+                logBubbleEvent(previouslySelected, StatsLog.BUBBLE_UICHANGED__ACTION__COLLAPSED);
+                logBubbleEvent(bubbleToSelect, StatsLog.BUBBLE_UICHANGED__ACTION__EXPANDED);
+                notifyExpansionChanged(previouslySelected.entry, false /* expanded */);
+                notifyExpansionChanged(bubbleToSelect.entry, true /* expanded */);
+            });
+        }
+    }
+
+    /**
+     * Changes the expanded state of the stack.
+     *
+     * @param expanded whether the bubble stack should appear expanded
+     */
+    public void setExpanded(boolean expanded) {
+        if (expanded == mIsExpanded) {
+            return;
+        }
+        if (mIsExpanded) {
+            // Collapse the stack
+            animateExpansion(false /* expand */);
+            logBubbleEvent(mExpandedBubble, StatsLog.BUBBLE_UICHANGED__ACTION__COLLAPSED);
+        } else {
+            // Expand the stack
+            animateExpansion(true /* expand */);
+            // TODO: move next line to BubbleData
+            logBubbleEvent(mExpandedBubble, StatsLog.BUBBLE_UICHANGED__ACTION__EXPANDED);
+            logBubbleEvent(mExpandedBubble, StatsLog.BUBBLE_UICHANGED__ACTION__STACK_EXPANDED);
+        }
+        notifyExpansionChanged(mExpandedBubble.entry, mIsExpanded);
     }
 
     /**
@@ -652,7 +678,10 @@ public class BubbleStackView extends FrameLayout {
      * Collapses the stack of bubbles.
      * <p>
      * Must be called from the main thread.
+     *
+     * @deprecated use {@link #setExpanded(boolean)} and {@link #setSelectedBubble(Bubble)}
      */
+    @Deprecated
     @MainThread
     public void collapseStack() {
         if (mIsExpanded) {
@@ -663,6 +692,11 @@ public class BubbleStackView extends FrameLayout {
         }
     }
 
+    /**
+     * @deprecated use {@link #setExpanded(boolean)} and {@link #setSelectedBubble(Bubble)}
+     */
+    @Deprecated
+    @MainThread
     void collapseStack(Runnable endRunnable) {
         collapseStack();
         // TODO - use the runnable at end of animation
@@ -673,7 +707,10 @@ public class BubbleStackView extends FrameLayout {
      * Expands the stack of bubbles.
      * <p>
      * Must be called from the main thread.
+     *
+     * @deprecated use {@link #setExpanded(boolean)} and {@link #setSelectedBubble(Bubble)}
      */
+    @Deprecated
     @MainThread
     public void expandStack() {
         if (!mIsExpanded) {
@@ -889,6 +926,7 @@ public class BubbleStackView extends FrameLayout {
                 mFlyout.removeCallbacks(mHideFlyout);
                 mFlyout.postDelayed(mHideFlyout, FLYOUT_HIDE_AFTER);
             });
+            logBubbleEvent(bubble, StatsLog.BUBBLE_UICHANGED__ACTION__FLYOUT);
         }
     }
 
@@ -1060,7 +1098,8 @@ public class BubbleStackView extends FrameLayout {
      * @param action the user interaction enum.
      */
     private void logBubbleEvent(@Nullable Bubble bubble, int action) {
-        if (bubble == null) {
+        if (bubble == null || bubble.entry == null
+                || bubble.entry.notification == null) {
             StatsLog.write(StatsLog.BUBBLE_UI_CHANGED,
                     null /* package name */,
                     null /* notification channel */,
@@ -1070,7 +1109,9 @@ public class BubbleStackView extends FrameLayout {
                     action,
                     getNormalizedXPosition(),
                     getNormalizedYPosition(),
-                    false /* unread notification */);
+                    false /* unread bubble */,
+                    false /* on-going bubble */,
+                    false /* foreground bubble */);
         } else {
             StatusBarNotification notification = bubble.entry.notification;
             StatsLog.write(StatsLog.BUBBLE_UI_CHANGED,
@@ -1082,7 +1123,9 @@ public class BubbleStackView extends FrameLayout {
                     action,
                     getNormalizedXPosition(),
                     getNormalizedYPosition(),
-                    bubble.entry.showInShadeWhenBubble());
+                    bubble.entry.showInShadeWhenBubble(),
+                    bubble.entry.isForegroundService(),
+                    BubbleController.isForegroundApp(mContext, notification.getPackageName()));
         }
     }
 

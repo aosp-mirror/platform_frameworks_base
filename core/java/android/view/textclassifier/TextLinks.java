@@ -281,6 +281,7 @@ public final class TextLinks implements Parcelable {
         /**
          * Returns a bundle containing custom data related to this TextLink.
          */
+        @NonNull
         public Bundle getExtras() {
             return mExtras;
         }
@@ -493,7 +494,7 @@ public final class TextLinks implements Parcelable {
                 return new Request(
                         mText, mDefaultLocales, mEntityConfig,
                         mLegacyFallback,
-                        mExtras == null ? Bundle.EMPTY : mExtras.deepCopy());
+                        mExtras == null ? Bundle.EMPTY : mExtras);
             }
         }
 
@@ -702,7 +703,7 @@ public final class TextLinks implements Parcelable {
         @NonNull
         public TextLinks build() {
             return new TextLinks(mFullText, mLinks,
-                    mExtras == null ? Bundle.EMPTY : mExtras.deepCopy());
+                    mExtras == null ? Bundle.EMPTY : mExtras);
         }
     }
 }

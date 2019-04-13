@@ -25,7 +25,10 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.util.DisplayMetrics.DENSITY_DEFAULT;
+import static android.view.Surface.ROTATION_0;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static org.hamcrest.Matchers.not;
@@ -35,6 +38,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 
 import android.app.ActivityManager;
@@ -357,6 +362,7 @@ public class TaskRecordTests extends ActivityTestsBase {
         parentConfig.densityDpi = 400;
         parentConfig.screenHeightDp = 200; // 200 * 400 / 160 = 500px
         parentConfig.screenWidthDp = 100; // 100 * 400 / 160 = 250px
+        parentConfig.windowConfiguration.setRotation(ROTATION_0);
 
         // Portrait bounds.
         inOutConfig.windowConfiguration.getBounds().set(0, 0, shortSide, longSide);
@@ -370,12 +376,27 @@ public class TaskRecordTests extends ActivityTestsBase {
         inOutConfig.setToDefaults();
         // Landscape bounds.
         inOutConfig.windowConfiguration.getBounds().set(0, 0, longSide, shortSide);
+
+        // Setup the display with a top stable inset. The later assertion will ensure the inset is
+        // excluded from screenHeightDp.
+        final int statusBarHeight = 100;
+        final DisplayContent displayContent = mock(DisplayContent.class);
+        final DisplayPolicy policy = mock(DisplayPolicy.class);
+        doAnswer(invocationOnMock -> {
+            final Rect insets = invocationOnMock.<Rect>getArgument(0);
+            insets.top = statusBarHeight;
+            return null;
+        }).when(policy).convertNonDecorInsetsToStableInsets(any(), eq(ROTATION_0));
+        doReturn(policy).when(displayContent).getDisplayPolicy();
+        doReturn(mock(DisplayInfo.class)).when(displayContent).getDisplayInfo();
+
         // Without limiting to be inside the parent bounds, the out screen size should keep relative
         // to the input bounds.
-        task.computeConfigResourceOverrides(inOutConfig, parentConfig,
-                false /* insideParentBounds */);
+        final ActivityRecord.CompatDisplayInsets compatIntsets =
+                new ActivityRecord.CompatDisplayInsets(displayContent);
+        task.computeConfigResourceOverrides(inOutConfig, parentConfig, compatIntsets);
 
-        assertEquals(shortSide * DENSITY_DEFAULT / parentConfig.densityDpi,
+        assertEquals((shortSide - statusBarHeight) * DENSITY_DEFAULT / parentConfig.densityDpi,
                 inOutConfig.screenHeightDp);
         assertEquals(longSide * DENSITY_DEFAULT / parentConfig.densityDpi,
                 inOutConfig.screenWidthDp);

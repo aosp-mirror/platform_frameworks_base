@@ -439,6 +439,8 @@ message StatsdConfig {
 
   optional bool installer_in_metric_report = 19;
 
+  optional bool persist_locally = 20 [default = false];
+
   // Field number 1000 is reserved for later use.
   reserved 1000;
 }

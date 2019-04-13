@@ -83,28 +83,6 @@ public class InstallInstalling extends AlertActivity {
         ApplicationInfo appInfo = getIntent()
                 .getParcelableExtra(PackageUtil.INTENT_ATTR_APPLICATION_INFO);
         mPackageURI = getIntent().getData();
-        final File sourceFile = new File(mPackageURI.getPath());
-        PackageUtil.AppSnippet as = PackageUtil.getAppSnippet(this, appInfo, sourceFile);
-
-        mAlert.setIcon(as.icon);
-        mAlert.setTitle(as.label);
-        mAlert.setView(R.layout.install_content_view);
-        mAlert.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.cancel),
-                (ignored, ignored2) -> {
-                    if (mInstallingTask != null) {
-                        mInstallingTask.cancel(true);
-                    }
-
-                    if (mSessionId > 0) {
-                        getPackageManager().getPackageInstaller().abandonSession(mSessionId);
-                        mSessionId = 0;
-                    }
-
-                    setResult(RESULT_CANCELED);
-                    finish();
-                }, null);
-        setupAlert();
-        requireViewById(R.id.installing).setVisibility(View.VISIBLE);
 
         if ("package".equals(mPackageURI.getScheme())) {
             try {
@@ -114,6 +92,29 @@ public class InstallInstalling extends AlertActivity {
                 launchFailure(PackageManager.INSTALL_FAILED_INTERNAL_ERROR, null);
             }
         } else {
+            final File sourceFile = new File(mPackageURI.getPath());
+            PackageUtil.AppSnippet as = PackageUtil.getAppSnippet(this, appInfo, sourceFile);
+
+            mAlert.setIcon(as.icon);
+            mAlert.setTitle(as.label);
+            mAlert.setView(R.layout.install_content_view);
+            mAlert.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.cancel),
+                    (ignored, ignored2) -> {
+                        if (mInstallingTask != null) {
+                            mInstallingTask.cancel(true);
+                        }
+
+                        if (mSessionId > 0) {
+                            getPackageManager().getPackageInstaller().abandonSession(mSessionId);
+                            mSessionId = 0;
+                        }
+
+                        setResult(RESULT_CANCELED);
+                        finish();
+                    }, null);
+            setupAlert();
+            requireViewById(R.id.installing).setVisibility(View.VISIBLE);
+
             if (savedInstanceState != null) {
                 mSessionId = savedInstanceState.getInt(SESSION_ID);
                 mInstallId = savedInstanceState.getInt(INSTALL_ID);

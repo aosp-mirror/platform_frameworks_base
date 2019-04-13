@@ -3790,6 +3790,7 @@ public class TelephonyManager {
      * @hide
      * nobody seems to call this.
      */
+    @TestApi
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public String getLine1AlphaTag() {
         return getLine1AlphaTag(getSubId());
