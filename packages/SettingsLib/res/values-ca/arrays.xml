@@ -160,11 +160,11 @@
   </string-array>
   <string-array name="select_logd_size_summaries">
     <item msgid="6921048829791179331">"No"</item>
-    <item msgid="2969458029344750262">"64 K / memòria intermèdia reg."</item>
-    <item msgid="1342285115665698168">"256 K / memòria intermèdia reg."</item>
+    <item msgid="2969458029344750262">"64 K / memòria intermèdia del registre"</item>
+    <item msgid="1342285115665698168">"256 K / memòria intermèdia del registre"</item>
     <item msgid="1314234299552254621">"1 M / memòria intermèdia reg."</item>
-    <item msgid="3606047780792894151">"4 M / memòria intermèdia reg."</item>
-    <item msgid="5431354956856655120">"16 M / memòria intermèdia reg."</item>
+    <item msgid="3606047780792894151">"4 M / memòria intermèdia del registre"</item>
+    <item msgid="5431354956856655120">"16 M / memòria intermèdia del registre"</item>
   </string-array>
   <string-array name="select_logpersist_titles">
     <item msgid="1744840221860799971">"Desactivat"</item>

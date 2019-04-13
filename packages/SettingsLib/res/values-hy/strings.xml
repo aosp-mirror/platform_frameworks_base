@@ -40,6 +40,7 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Կապակցված է %1$s-ի միջոցով"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Հասանելի է %1$s-ի միջոցով"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Միացված է, սակայն ինտերնետ կապ չկա"</string>
+    <string name="wifi_limited_connection" msgid="7717855024753201527">"Սահմանափակ կապ"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"Ինտերնետ կապ չկա"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"Անհրաժեշտ է մուտք գործել"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Հասանելիության կետը ժամանակավորապես լիքն է"</string>
@@ -80,8 +81,8 @@
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM քարտի հասանելիություն"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"HD աուդիո՝ <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"HD աուդիո"</string>
-    <string name="bluetooth_profile_hearing_aid" msgid="7999237886427812595">"Լսողական ապարատ"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="7188282786730266159">"Միացված է լսողական ապարատին"</string>
+    <string name="bluetooth_profile_hearing_aid" msgid="6680721080542444257">"Լսողական ապարատ"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="3051944447369418317">"Լսողական ապարատը միացված է"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Միացված է մեդիա աուդիոյին"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Միացված է հեռախոսի ձայնային տվյալներին"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Միացված է ֆայլերի փոխանցման սերվերին"</string>
@@ -98,7 +99,7 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Օգտագործել հեռախոսի աուդիոյի համար"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Օգտագործել ֆայլի փոխանցման համար"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"Օգտագործել ներմուծման համար"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="908775281788309484">"Օգտագործել լսողական ապարատի համար"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="8843499209204010224">"Օգտագործել լսողական ապարատի համար"</string>
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Զուգավորել"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"Զուգավորել"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Չեղարկել"</string>
@@ -227,7 +228,7 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="6893955536658137179">"Գործարկել Bluetooth աուդիո LDAC կոդեկը\nԸնտրություն՝ նվագարկման որակ"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Հեռարձակում՝ <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Մասնավոր DNS սերվեր"</string>
-    <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Ընտրեք անհատական DNS սերվերի ռեժիմը"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Ընտրեք մասնավոր DNS-ի ռեժիմը"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"Անջատված է"</string>
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Ավտոմատ"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Մասնավոր DNS ծառայության մատակարարի խնամորդի անունը"</string>
@@ -279,7 +280,7 @@
     <string name="debug_monitoring_category" msgid="7640508148375798343">"Մշտադիտարկում"</string>
     <string name="strict_mode" msgid="1938795874357830695">"Խիստ ռեժիմն ակտիվացված է"</string>
     <string name="strict_mode_summary" msgid="142834318897332338">"Լուսավորել էկրանը` ծրագրի գլխավոր շղթայի վրա երկար աշխատելիս"</string>
-    <string name="pointer_location" msgid="6084434787496938001">"Նշիչի տեղադրություն"</string>
+    <string name="pointer_location" msgid="6084434787496938001">"Նշորդի տեղադրությունը"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Էկրանի վերադրումը ցույց է տալիս ընթացիկ հպման տվյալները"</string>
     <string name="show_touches" msgid="2642976305235070316">"Ցույց տալ հպումները"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"Ցույց տալ հպումների տեսանելի արձագանքը"</string>
@@ -296,10 +297,10 @@
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"Ակտիվացնել OpenGL հետքերը"</string>
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"Անջատել USB աուդիո երթուղումը"</string>
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Անջատել ավտոմատ երթուղումը դեպի USB աուդիո սարքեր"</string>
-    <string name="debug_layout" msgid="5981361776594526155">"Ցույց տալ տարրերի չափսերը"</string>
+    <string name="debug_layout" msgid="5981361776594526155">"Ցույց տալ տարրերի չափերը"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Ցույց տալ կտրվածքի սահմանները, լուսանցքները և այլն"</string>
-    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Փոխել RTL-ի դասավորության ուղղությունը"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Դարձնել էկրանի դասավորության ուղղությունը դեպի RTL բոլոր լեզուների համար"</string>
+    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Ուղղությունը դարձնել RTL"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Բոլոր լեզուների համար էկրանի տեքստի ուղղությունը դարձնել աջից ձախ"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Ստիպել GPU-ին մատուցել"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Ստիպողաբար GPU-ի օգտագործում 2-րդ պատկերի համար"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Ստիպել  4x MSAA"</string>
@@ -419,7 +420,7 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Հատուկ (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"Օգնություն և հետադարձ կապ"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"Ընտրացանկ"</string>
-    <string name="retail_demo_reset_message" msgid="118771671364131297">"Մուտքագրեք գաղտնաբառը՝ ցուցադրական ռեժիմում գործարանային վերակայում կատարելու համար"</string>
+    <string name="retail_demo_reset_message" msgid="118771671364131297">"Մուտքագրեք գաղտնաբառը՝ ցուցադրական ռեժիմում գործարանային կարգավորումների վերականգնում կատարելու համար"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"Հաջորդը"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"Պահանջվում է գաղտնաբառ"</string>
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"Մուտքագրման ակտիվ տարբերակներ"</string>

@@ -40,6 +40,7 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"已通过%1$s连接"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"可通过%1$s连接"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"已连接，但无法访问互联网"</string>
+    <string name="wifi_limited_connection" msgid="7717855024753201527">"网络连接受限"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"无法访问互联网"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"必须登录"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"接入点暂时满载"</string>
@@ -80,8 +81,8 @@
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM 卡存取权限"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"HD 音频：<xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"HD 音频"</string>
-    <string name="bluetooth_profile_hearing_aid" msgid="7999237886427812595">"助听器"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="7188282786730266159">"已连接到助听器"</string>
+    <string name="bluetooth_profile_hearing_aid" msgid="6680721080542444257">"助听器"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="3051944447369418317">"已连接到助听器"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"已连接到媒体音频"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"已连接到手机音频"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"已连接到文件传输服务器"</string>
@@ -98,7 +99,7 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"用于手机音频"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"用于文件传输"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"用于输入"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="908775281788309484">"用于助听器"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="8843499209204010224">"用于助听器"</string>
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"配对"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"配对"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"取消"</string>
@@ -256,8 +257,8 @@
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"是否针对您之前授权的所有计算机撤消 USB 调试的访问权限？"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"允许开发设置？"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"这些设置仅适用于开发工作。一旦启用，会导致您的设备以及设备上的应用崩溃或出现异常。"</string>
-    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"通过USB验证应用"</string>
-    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"通过 ADB/ADT 检查安装的应用是否存在有害行为。"</string>
+    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"通过 USB 验证应用"</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"检查通过 ADB/ADT 安装的应用是否存在有害行为。"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"系统将显示没有名称（只有 MAC 地址）的蓝牙设备"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"停用蓝牙绝对音量功能，即可避免在连接到远程设备时出现音量问题（例如音量高得让人无法接受或无法控制音量等）。"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"本地终端"</string>
@@ -373,10 +374,10 @@
     <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"根据您的使用情况，大约还可使用 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"根据您的使用情况，大约还可使用 <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"还可使用 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"根据您的使用情况，估计大约还能用到<xliff:g id="TIME">%1$s</xliff:g>（目前电量为 <xliff:g id="LEVEL">%2$s</xliff:g>）"</string>
-    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"根据您的使用情况，估计大约还能用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by" msgid="6453537733650125582">"目前电量为 <xliff:g id="LEVEL">%2$s</xliff:g>，估计大约还能用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by_only" msgid="107616694963545745">"估计大约还能用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"根据您的使用情况，估计能用到<xliff:g id="TIME">%1$s</xliff:g>（目前电量为 <xliff:g id="LEVEL">%2$s</xliff:g>）"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"根据您的使用情况，估计能用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by" msgid="6453537733650125582">"目前电量为 <xliff:g id="LEVEL">%2$s</xliff:g>，估计能用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_only" msgid="107616694963545745">"估计能用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"剩余电池续航时间不到 <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"电量剩余使用时间不到 <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"电量剩余使用时间超过 <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
