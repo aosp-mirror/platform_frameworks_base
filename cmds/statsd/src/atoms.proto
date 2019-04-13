@@ -5584,6 +5584,7 @@ message BubbleUIChanged {
         SWIPE_LEFT = 13;
         SWIPE_RIGHT = 14;
         STACK_EXPANDED = 15;
+        FLYOUT = 16;
     }
     optional Action action = 6;
 
