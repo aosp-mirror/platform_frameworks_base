@@ -2987,10 +2987,6 @@
       <public name="config_defaultDialer" />
       <!-- @hide @SystemApi -->
       <public name="config_defaultSms" />
-      <!-- @hide @SystemApi -->
-      <public name="config_defaultMusic" />
-      <!-- @hide @SystemApi -->
-      <public name="config_defaultGallery" />
     </public-group>
 
     <public-group type="bool" first-id="0x01110000">
