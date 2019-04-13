@@ -63,14 +63,24 @@ public class ResolverListController {
             Intent targetIntent,
             String referrerPackage,
             int launchedFromUid) {
+        this(context, pm, targetIntent, referrerPackage, launchedFromUid,
+                    new ResolverRankerServiceResolverComparator(
+                        context, targetIntent, referrerPackage, null));
+    }
+
+    public ResolverListController(
+            Context context,
+            PackageManager pm,
+            Intent targetIntent,
+            String referrerPackage,
+            int launchedFromUid,
+            AbstractResolverComparator resolverComparator) {
         mContext = context;
         mpm = pm;
         mLaunchedFromUid = launchedFromUid;
         mTargetIntent = targetIntent;
         mReferrerPackage = referrerPackage;
-        mResolverComparator =
-                new ResolverRankerServiceResolverComparator(
-                    mContext, mTargetIntent, mReferrerPackage, null);
+        mResolverComparator = resolverComparator;
     }
 
     @VisibleForTesting
