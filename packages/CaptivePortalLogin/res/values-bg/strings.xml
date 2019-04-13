@@ -9,16 +9,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"Мрежата, към която опитвате да се присъедините, има проблеми със сигурността."</string>
     <string name="ssl_error_example" msgid="647898534624078900">"Например страницата за вход може да не принадлежи на показаната организация."</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"Продължаване през браузър въпреки това"</string>
-    <string name="ok" msgid="1509280796718850364">"OK"</string>
-    <string name="page_info" msgid="4048529256302257195">"Данни за страницата"</string>
-    <string name="page_info_address" msgid="2222306609532903254">"Адрес:"</string>
-    <string name="ssl_security_warning_title" msgid="6607795404322797541">"Предупреждение относно защитата"</string>
-    <string name="ssl_error_view_certificate" msgid="1472768887529093862">"Преглед на сертификата"</string>
-    <string name="ssl_error_untrusted" msgid="7754507359360636447">"Сертификатът не е от надежден орган."</string>
-    <string name="ssl_error_mismatch" msgid="3809794439740523641">"Името на сайта не съответства на името в сертификата."</string>
-    <string name="ssl_error_expired" msgid="5739349389499575559">"Сертификатът е изтекъл."</string>
-    <string name="ssl_error_not_yet_valid" msgid="8193083327719048247">"Сертификатът още не е валиден."</string>
-    <string name="ssl_error_date_invalid" msgid="3705563379257285534">"Този сертификат е с невалидна дата."</string>
-    <string name="ssl_error_invalid" msgid="9041704741505449967">"Този сертификат е невалиден."</string>
-    <string name="ssl_error_unknown" msgid="5679243486524754571">"Неизвестна грешка в сертификата."</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"Този сертификат не е от надежден орган."</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"Името на сайта не съответства на името в сертификата."</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"Този сертификат е изтекъл."</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"Този сертификат още не е валиден."</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"Този сертификат е с невалидна дата."</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"Този сертификат е невалиден."</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"Неизвестна грешка в сертификата."</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"Предупреждение относно сигурността"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"Преглед на сертификата"</string>
+    <string name="ok" msgid="2817931639040794018">"OK"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"Адрес:"</string>
+    <string name="page_info" msgid="4416941086705172545">"Данни за страницата"</string>
 </resources>

@@ -9,4 +9,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"သင်ချိတ်ဆက်ရန် ကြိုးစားနေသည့် ကွန်ရက်သည် လုံခြုံရေးပြဿနာ ရှိနေသည်။"</string>
     <string name="ssl_error_example" msgid="647898534624078900">"ဥပမာ၊ ဝင်ရောက်ရန် စာမျက်နှာသည် ပြသထားသည့် အဖွဲ့အစည်းနှင့် သက်ဆိုင်မှု မရှိနိုင်ပါ။"</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"ဘရောက်ဇာမှတစ်ဆင့် ဆက်လုပ်ရန်"</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"ဤအသိအမှတ်ပြုလက်မှတ်သည် ယုံကြည်ရသော စစ်ဆေးရေးအဖွဲ့ထံမှ မဟုတ်ပါ။"</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"ဝဘ်ဆိုက်အမည်သည် အသိအမှတ်ပြုလက်မှတ်ရှိ အမည်နှင့် မကိုက်ညီပါ။"</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"ဤအသိအမှတ်ပြုလက်မှတ် သက်တမ်းကုန်နေပါပြီ။"</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"ဤအသိအမှတ်ပြုလက်မှတ်သည် မမှန်ကန်သေးပါ။"</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"ဤအသိအမှတ်ပြုလက်မှတ်ရှိ ရက်စွဲ မမှန်ကန်ပါ။"</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"ဤအသိအမှတ်ပြုလက်မှတ် မမှန်ကန်ပါ။"</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"အသိအမှတ်ပြုလက်မှတ်ဆိုင်ရာ အမျိုးအမည်မသိ အမှား။"</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"လုံခြုံရေး သတိပေးချက်"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"အသိအမှတ်ပြုလက်မှတ်ကို ကြည့်ရန်"</string>
+    <string name="ok" msgid="2817931639040794018">"OK"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"လိပ်စာ-"</string>
+    <string name="page_info" msgid="4416941086705172545">"စာမျက်နှာ အချက်အလက်"</string>
 </resources>

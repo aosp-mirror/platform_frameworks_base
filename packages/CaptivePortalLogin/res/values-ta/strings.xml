@@ -9,4 +9,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"நீங்கள் சேர முயற்சிக்கும் நெட்வொர்க்கில் பாதுகாப்புச் சிக்கல்கள் உள்ளன."</string>
     <string name="ssl_error_example" msgid="647898534624078900">"எடுத்துக்காட்டாக, உள்நுழைவுப் பக்கமானது காட்டப்படும் அமைப்பிற்குச் சொந்தமானதாக இல்லாமல் இருக்கலாம்."</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"பரவாயில்லை, உலாவி வழியாகத் தொடரவும்"</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"இந்தச் சான்றிதழ் நம்பகமான நிறுவனத்தால் அங்கீகரிக்கப்படவில்லை."</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"சான்றிதழிலுள்ள பெயருடன் வலைதளத்தின் பெயர் பொருந்தவில்லை."</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"இந்தச் சான்றிதழ் காலாவதியாகிவிட்டது."</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"இந்தச் சான்றிதழ் இன்னும் செல்லாததாக உள்ளது."</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"இந்தச் சான்றிதழில் தவறான தேதி உள்ளது."</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"இந்தச் சான்றிதழ் செல்லாதது."</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"சான்றிதழில் அறியப்படாத பிழை உள்ளது."</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"பாதுகாப்பு எச்சரிக்கை"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"சான்றிதழைக் காட்டு"</string>
+    <string name="ok" msgid="2817931639040794018">"சரி"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"முகவரி:"</string>
+    <string name="page_info" msgid="4416941086705172545">"பக்கத் தகவல்"</string>
 </resources>

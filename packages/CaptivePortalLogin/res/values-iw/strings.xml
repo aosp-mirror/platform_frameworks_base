@@ -9,16 +9,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"יש בעיות אבטחה ברשת שאליה אתה מנסה להתחבר."</string>
     <string name="ssl_error_example" msgid="647898534624078900">"לדוגמה, ייתכן שדף ההתחברות אינו שייך לארגון המוצג."</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"המשך בכל זאת באמצעות דפדפן"</string>
-    <string name="ok" msgid="1509280796718850364">"אישור"</string>
-    <string name="page_info" msgid="4048529256302257195">"פרטי דף"</string>
-    <string name="page_info_address" msgid="2222306609532903254">"כתובת:"</string>
-    <string name="ssl_security_warning_title" msgid="6607795404322797541">"אזהרת אבטחה"</string>
-    <string name="ssl_error_view_certificate" msgid="1472768887529093862">"הצג אישור"</string>
-    <string name="ssl_error_untrusted" msgid="7754507359360636447">"אישור זה אינו מגיע מרשות אמינה."</string>
-    <string name="ssl_error_mismatch" msgid="3809794439740523641">"שם האתר לא תואם לשם באישור."</string>
-    <string name="ssl_error_expired" msgid="5739349389499575559">"פג תוקפו של אישור זה."</string>
-    <string name="ssl_error_not_yet_valid" msgid="8193083327719048247">"אישור זה אינו חוקי עדיין."</string>
-    <string name="ssl_error_date_invalid" msgid="3705563379257285534">"לאישור זה יש תאריך בלתי חוקי."</string>
-    <string name="ssl_error_invalid" msgid="9041704741505449967">"אישור זה אינו חוקי."</string>
-    <string name="ssl_error_unknown" msgid="5679243486524754571">"שגיאת אישור לא ידועה."</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"אישור זה אינו מגיע מרשות אמינה."</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"שם האתר לא תואם לשם באישור."</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"פג תוקפו של אישור זה."</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"אישור זה אינו חוקי עדיין."</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"לאישור זה יש תאריך בלתי חוקי."</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"אישור זה אינו חוקי."</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"שגיאת אישור לא ידועה."</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"אזהרת אבטחה"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"הצגת אישור"</string>
+    <string name="ok" msgid="2817931639040794018">"אישור"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"כתובת:"</string>
+    <string name="page_info" msgid="4416941086705172545">"פרטי דף"</string>
 </resources>

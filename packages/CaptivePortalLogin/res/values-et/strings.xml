@@ -9,16 +9,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"Võrgul, millega üritate ühenduse luua, on turvaprobleeme."</string>
     <string name="ssl_error_example" msgid="647898534624078900">"Näiteks ei pruugi sisselogimisleht kuuluda kuvatavale organisatsioonile."</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"Jätka siiski brauseris"</string>
-    <string name="ok" msgid="1509280796718850364">"OK"</string>
-    <string name="page_info" msgid="4048529256302257195">"Lehe teave"</string>
-    <string name="page_info_address" msgid="2222306609532903254">"Aadress:"</string>
-    <string name="ssl_security_warning_title" msgid="6607795404322797541">"Turvahoiatus"</string>
-    <string name="ssl_error_view_certificate" msgid="1472768887529093862">"Kuva sertifikaat"</string>
-    <string name="ssl_error_untrusted" msgid="7754507359360636447">"See sertifikaat ei pärine usaldusväärselt asutuselt."</string>
-    <string name="ssl_error_mismatch" msgid="3809794439740523641">"Saidi nimi ei vasta sertifikaadil olevale nimele."</string>
-    <string name="ssl_error_expired" msgid="5739349389499575559">"See sertifikaat on aegunud."</string>
-    <string name="ssl_error_not_yet_valid" msgid="8193083327719048247">"See sertifikaat pole veel kehtiv."</string>
-    <string name="ssl_error_date_invalid" msgid="3705563379257285534">"Sellel sertifikaadil on kehtetu kuupäev."</string>
-    <string name="ssl_error_invalid" msgid="9041704741505449967">"See sertifikaat on kehtetu."</string>
-    <string name="ssl_error_unknown" msgid="5679243486524754571">"Tundmatu sertifikaadiviga."</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"See sertifikaat ei pärine usaldusväärselt asutuselt."</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"Saidi nimi ei vasta sertifikaadil olevale nimele."</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"See sertifikaat on aegunud."</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"See sertifikaat pole veel kehtiv."</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"Sellel sertifikaadil on kehtetu kuupäev."</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"See sertifikaat on kehtetu."</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"Tundmatu sertifikaadiviga."</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"Turvahoiatus"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"Kuva sertifikaat"</string>
+    <string name="ok" msgid="2817931639040794018">"OK"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"Aadress:"</string>
+    <string name="page_info" msgid="4416941086705172545">"Lehe teave"</string>
 </resources>

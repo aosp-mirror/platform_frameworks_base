@@ -9,16 +9,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"A rede à qual está a tentar aceder tem problemas de segurança."</string>
     <string name="ssl_error_example" msgid="647898534624078900">"Por exemplo, a página de início de sessão pode não pertencer à entidade apresentada."</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"Continuar mesmo assim através do navegador"</string>
-    <string name="ok" msgid="1509280796718850364">"OK"</string>
-    <string name="page_info" msgid="4048529256302257195">"Informações da página"</string>
-    <string name="page_info_address" msgid="2222306609532903254">"Endereço:"</string>
-    <string name="ssl_security_warning_title" msgid="6607795404322797541">"Aviso de segurança"</string>
-    <string name="ssl_error_view_certificate" msgid="1472768887529093862">"Ver certificado"</string>
-    <string name="ssl_error_untrusted" msgid="7754507359360636447">"Este certificado não pertence a uma autoridade fidedigna."</string>
-    <string name="ssl_error_mismatch" msgid="3809794439740523641">"O nome do Web site não corresponde ao nome constante no certificado."</string>
-    <string name="ssl_error_expired" msgid="5739349389499575559">"Este certificado expirou."</string>
-    <string name="ssl_error_not_yet_valid" msgid="8193083327719048247">"Este certificado ainda não é válido."</string>
-    <string name="ssl_error_date_invalid" msgid="3705563379257285534">"Este certificado tem uma data inválida."</string>
-    <string name="ssl_error_invalid" msgid="9041704741505449967">"Este certificado é inválido."</string>
-    <string name="ssl_error_unknown" msgid="5679243486524754571">"Erro: certificado desconhecido."</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"Este certificado não pertence a uma autoridade fidedigna."</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"O nome do site não corresponde ao nome constante no certificado."</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"Este certificado expirou."</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"Este certificado ainda não é válido."</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"Este certificado tem uma data inválida."</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"Este certificado é inválido."</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"Erro de certificado desconhecido."</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"Aviso de segurança"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"Ver certificado"</string>
+    <string name="ok" msgid="2817931639040794018">"OK"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"Endereço:"</string>
+    <string name="page_info" msgid="4416941086705172545">"Informações da página"</string>
 </resources>

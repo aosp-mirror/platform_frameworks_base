@@ -9,16 +9,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"Biztonsági problémák vannak azzal a hálózattal, amelyhez csatlakozni szeretne."</string>
     <string name="ssl_error_example" msgid="647898534624078900">"Például lehet, hogy a bejelentkezési oldal nem a megjelenített szervezethez tartozik."</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"Folytatás ennek ellenére böngészőn keresztül"</string>
-    <string name="ok" msgid="1509280796718850364">"OK"</string>
-    <string name="page_info" msgid="4048529256302257195">"Oldaladatok"</string>
-    <string name="page_info_address" msgid="2222306609532903254">"Cím:"</string>
-    <string name="ssl_security_warning_title" msgid="6607795404322797541">"Biztonsági figyelmeztetés"</string>
-    <string name="ssl_error_view_certificate" msgid="1472768887529093862">"Tanúsítvány megtekintése"</string>
-    <string name="ssl_error_untrusted" msgid="7754507359360636447">"Ez a tanúsítvány nem hiteles tanúsítványkibocsátótól származik."</string>
-    <string name="ssl_error_mismatch" msgid="3809794439740523641">"A webhely neve nem egyezik a tanúsítványon lévő névvel."</string>
-    <string name="ssl_error_expired" msgid="5739349389499575559">"A tanúsítvány lejárt."</string>
-    <string name="ssl_error_not_yet_valid" msgid="8193083327719048247">"A tanúsítvány még nem érvényes."</string>
-    <string name="ssl_error_date_invalid" msgid="3705563379257285534">"A tanúsítvány dátuma érvénytelen."</string>
-    <string name="ssl_error_invalid" msgid="9041704741505449967">"Ez a tanúsítvány érvénytelen."</string>
-    <string name="ssl_error_unknown" msgid="5679243486524754571">"Ismeretlen tanúsítványhiba."</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"Ez a tanúsítvány nem hiteles tanúsítványkibocsátótól származik."</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"A webhely neve nem egyezik a tanúsítványon lévő névvel."</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"A tanúsítvány lejárt."</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"A tanúsítvány még nem érvényes."</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"A tanúsítvány dátuma érvénytelen."</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"Ez a tanúsítvány érvénytelen."</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"Ismeretlen tanúsítványhiba."</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"Biztonsági figyelmeztetés"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"Tanúsítvány megtekintése"</string>
+    <string name="ok" msgid="2817931639040794018">"OK"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"Cím:"</string>
+    <string name="page_info" msgid="4416941086705172545">"Oldaladatok"</string>
 </resources>

@@ -11,16 +11,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"الشبكة التي تحاول الانضمام إليها بها مشاكل أمنية."</string>
     <string name="ssl_error_example" msgid="647898534624078900">"على سبيل المثال، قد لا تنتمي صفحة تسجيل الدخول إلى المنظمة المعروضة."</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"المتابعة على أي حال عبر المتصفح"</string>
-    <string name="ok" msgid="1509280796718850364">"موافق"</string>
-    <string name="page_info" msgid="4048529256302257195">"معلومات الصفحة"</string>
-    <string name="page_info_address" msgid="2222306609532903254">"العنوان:"</string>
-    <string name="ssl_security_warning_title" msgid="6607795404322797541">"تحذير أمان"</string>
-    <string name="ssl_error_view_certificate" msgid="1472768887529093862">"عرض الشهادة"</string>
-    <string name="ssl_error_untrusted" msgid="7754507359360636447">"هذه الشهادة ليست من جهة موثوق بها."</string>
-    <string name="ssl_error_mismatch" msgid="3809794439740523641">"لا يتطابق اسم الموقع مع الاسم على الشهادة."</string>
-    <string name="ssl_error_expired" msgid="5739349389499575559">"انتهت صلاحية هذه الشهادة."</string>
-    <string name="ssl_error_not_yet_valid" msgid="8193083327719048247">"هذه الشهادة ليست صالحة بعد."</string>
-    <string name="ssl_error_date_invalid" msgid="3705563379257285534">"تشتمل هذه الشهادة على تاريخ غير صالح."</string>
-    <string name="ssl_error_invalid" msgid="9041704741505449967">"هذه الشهادة غير صالحة."</string>
-    <string name="ssl_error_unknown" msgid="5679243486524754571">"حدث خطأ غير معروف بالشهادة."</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"هذه الشهادة ليست من جهة موثوق بها."</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"لا يتطابق اسم الموقع مع الاسم على الشهادة."</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"انتهت صلاحية هذه الشهادة."</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"هذه الشهادة ليست صالحة بعد."</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"تشتمل هذه الشهادة على تاريخ غير صالح."</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"هذه الشهادة غير صالحة."</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"حدث خطأ غير معروف بالشهادة."</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"تحذير أمني"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"عرض الشهادة"</string>
+    <string name="ok" msgid="2817931639040794018">"حسنًا"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"العنوان:"</string>
+    <string name="page_info" msgid="4416941086705172545">"معلومات الصفحة"</string>
 </resources>

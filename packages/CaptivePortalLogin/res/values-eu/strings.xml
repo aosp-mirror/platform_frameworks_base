@@ -9,4 +9,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"Erabili nahi duzun sareak segurtasun-arazoak ditu."</string>
     <string name="ssl_error_example" msgid="647898534624078900">"Adibidez, baliteke saioa hasteko orria adierazitako erakundearena ez izatea."</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"Jarraitu arakatzailearen bidez, halere"</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"Ziurtagiria ez da autoritate fidagarri batena."</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"Webgunearen izena ez dator bat ziurtagirian agertzen den izenarekin."</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"Ziurtagiria iraungi da."</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"Ziurtagiriak ez du balio oraindik."</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"Ziurtagiriaren datak ez du balio."</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"Ziurtagiriak ez du balio."</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"Errore ezezagun bat gertatu da ziurtagiriarekin."</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"Segurtasun-abisua"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"Ikusi ziurtagiria"</string>
+    <string name="ok" msgid="2817931639040794018">"Ados"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"Helbidea:"</string>
+    <string name="page_info" msgid="4416941086705172545">"Orriari buruzko informazioa"</string>
 </resources>

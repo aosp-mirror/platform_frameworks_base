@@ -9,4 +9,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"Мрежата на која се обидувате да се придружите има проблеми со безбедноста."</string>
     <string name="ssl_error_example" msgid="647898534624078900">"На пример, страницата за најавување може да не припаѓа на организацијата што е прикажана."</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"Сепак продолжи преку прелистувач"</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"Сертификатов не е од доверлив орган."</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"Името на сајтот не се совпаѓа со името на сертификатот."</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"Сертификатов е истечен."</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"Сертификатов сѐ уште не е важечки."</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"Сертификатов има неважечки датум."</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"Сертификатов е неважечки."</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"Непозната грешка на сертификатот."</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"Предупредување за безбедност"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"Прикажи го сертификатот"</string>
+    <string name="ok" msgid="2817931639040794018">"Во ред"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"Адреса:"</string>
+    <string name="page_info" msgid="4416941086705172545">"Информации за страницата"</string>
 </resources>

@@ -9,16 +9,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"เครือข่ายที่คุณพยายามเข้าร่วมมีปัญหาด้านความปลอดภัย"</string>
     <string name="ssl_error_example" msgid="647898534624078900">"ตัวอย่างเช่น หน้าเข้าสู่ระบบอาจไม่ใช่ขององค์กรที่แสดงไว้"</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"ดำเนินการต่อผ่านเบราว์เซอร์"</string>
-    <string name="ok" msgid="1509280796718850364">"ตกลง"</string>
-    <string name="page_info" msgid="4048529256302257195">"ข้อมูลหน้าเว็บ"</string>
-    <string name="page_info_address" msgid="2222306609532903254">"ที่อยู่:"</string>
-    <string name="ssl_security_warning_title" msgid="6607795404322797541">"คำเตือนเกี่ยวกับความปลอดภัย"</string>
-    <string name="ssl_error_view_certificate" msgid="1472768887529093862">"ดูใบรับรอง"</string>
-    <string name="ssl_error_untrusted" msgid="7754507359360636447">"ใบรับรองนี้ไม่ได้มาจากผู้ออกที่เชื่อถือได้"</string>
-    <string name="ssl_error_mismatch" msgid="3809794439740523641">"ชื่อไซต์ไม่ตรงกับในใบรับรอง"</string>
-    <string name="ssl_error_expired" msgid="5739349389499575559">"ใบรับรองนี้หมดอายุแล้ว"</string>
-    <string name="ssl_error_not_yet_valid" msgid="8193083327719048247">"ใบรับรองนี้ยังใช้งานไม่ได้"</string>
-    <string name="ssl_error_date_invalid" msgid="3705563379257285534">"ใบรับรองนี้มีวันที่ไม่ถูกต้อง"</string>
-    <string name="ssl_error_invalid" msgid="9041704741505449967">"ใบรับรองนี้ไม่ถูกต้อง"</string>
-    <string name="ssl_error_unknown" msgid="5679243486524754571">"ข้อผิดพลาดใบรับรองที่ไม่รู้จัก"</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"ใบรับรองนี้ไม่ได้มาจากผู้ออกที่เชื่อถือได้"</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"ชื่อเว็บไซต์ไม่ตรงกับในใบรับรอง"</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"ใบรับรองนี้หมดอายุแล้ว"</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"ใบรับรองนี้ยังใช้งานไม่ได้"</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"วันที่ในใบรับรองนี้ไม่ถูกต้อง"</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"ใบรับรองนี้ไม่ถูกต้อง"</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"ข้อผิดพลาดใบรับรองที่ไม่รู้จัก"</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"การแจ้งเตือนเกี่ยวกับความปลอดภัย"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"ดูใบรับรอง"</string>
+    <string name="ok" msgid="2817931639040794018">"ตกลง"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"ที่อยู่:"</string>
+    <string name="page_info" msgid="4416941086705172545">"ข้อมูลหน้าเว็บ"</string>
 </resources>

@@ -9,4 +9,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"Қосылайын деп жатқан желіңіз қауіпсіз болуы мүмкін."</string>
     <string name="ssl_error_example" msgid="647898534624078900">"Мысалы, кіру беті көрсетілген ұйымға тиесілі болмауы мүмкін."</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"Бәрібір браузер арқылы жалғастыру"</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"Сертификатты сенімді орган бермеген."</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"Сайттың атауы мен сертификатта көрсетілген атау сәйкес келмейді."</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"Сертификаттың жарамдылық мерзімі аяқталған."</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"Сертификат әлі жарамсыз."</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"Сертификат күні жарамсыз."</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"Сертификат жарамсыз."</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"Сертификатқа қатысты белгісіз қате."</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"Қауіпсіздік туралы ескерту"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"Сертификатты көру"</string>
+    <string name="ok" msgid="2817931639040794018">"Жарайды"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"Мекенжай:"</string>
+    <string name="page_info" msgid="4416941086705172545">"Бет туралы ақпарат"</string>
 </resources>

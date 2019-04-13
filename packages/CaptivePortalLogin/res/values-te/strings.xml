@@ -9,4 +9,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"మీరు చేరడానికి ప్రయత్నిస్తున్న నెట్‌వర్క్ భద్రతా సమస్యలను కలిగి ఉంది."</string>
     <string name="ssl_error_example" msgid="647898534624078900">"ఉదాహరణకు, లాగిన్ పేజీ చూపిన సంస్థకు చెందినది కాకపోవచ్చు."</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"ఏదేమైనా బ్రౌజర్ ద్వారా కొనసాగించు"</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"ఈ సర్టిఫికెట్ విశ్వసనీయ అధికార సంస్థ నుండి కాదు."</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"సైట్ యొక్క పేరు సర్టిఫికెట్‌లోని పేరుతో సరిపోలలేదు."</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"ఈ సర్టిఫికెట్ గడువు ముగిసింది."</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"ఈ సర్టిఫికెట్ ఇప్పటికీ చెల్లదు."</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"ఈ సర్టిఫికెట్ చెల్లని తేదీని కలిగి ఉంది."</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"ఈ సర్టిఫికెట్ చెల్లుబాటు కాదు."</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"తెలియని సర్టిఫికెట్ ఎర్రర్."</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"భద్రతా హెచ్చరిక"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"సర్టిఫికెట్‌ని చూడండి"</string>
+    <string name="ok" msgid="2817931639040794018">"సరే"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"చిరునామా:"</string>
+    <string name="page_info" msgid="4416941086705172545">"పేజీ సమాచారం"</string>
 </resources>
