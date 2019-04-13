@@ -65,6 +65,7 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"允许 USB 调试吗？"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"这台计算机的 RSA 密钥指纹如下：\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"一律允许使用这台计算机进行调试"</string>
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"允许"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"不允许使用 USB 调试功能"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"目前已登录此设备的用户无法开启 USB 调试功能。要使用此功能，请切换为主要用户的帐号。"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"缩放以填满屏幕"</string>
@@ -156,6 +157,8 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
+    <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"漫游"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
@@ -286,9 +289,10 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"音频"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"耳机"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"输入"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="4930931771490695395">"助听器"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"正在开启…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"亮度"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"自动旋转"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"自动旋转屏幕"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"自动旋转屏幕"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="8187398200140760213">"<xliff:g id="ID_1">%s</xliff:g>模式"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"屏幕方向：锁定"</string>
@@ -678,7 +682,7 @@
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"键盘快捷键"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"切换输入法"</string>
     <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"应用"</string>
-    <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"助手应用"</string>
+    <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"助理"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"浏览器"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2064197111278436375">"通讯录"</string>
     <string name="keyboard_shortcut_group_applications_email" msgid="6257036897441939004">"电子邮件"</string>

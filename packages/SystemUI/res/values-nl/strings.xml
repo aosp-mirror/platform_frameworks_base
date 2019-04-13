@@ -33,10 +33,10 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Actief"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Meldingen"</string>
     <string name="battery_low_title" msgid="9187898087363540349">"Batterij is bijna leeg"</string>
-    <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> resterend"</string>
-    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> resterend, nog ongeveer <xliff:g id="TIME">%s</xliff:g> over op basis van je gebruik"</string>
-    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> resterend, nog ongeveer <xliff:g id="TIME">%s</xliff:g> over"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> resterend. Batterijbesparing is ingeschakeld."</string>
+    <string name="battery_low_percent_format" msgid="2900940511201380775">"Nog <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"Nog <xliff:g id="PERCENTAGE">%s</xliff:g>, dat is ongeveer <xliff:g id="TIME">%s</xliff:g> op basis van je gebruik"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"Nog <xliff:g id="PERCENTAGE">%s</xliff:g>, dat is ongeveer <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"Nog <xliff:g id="PERCENTAGE">%s</xliff:g>. Batterijbesparing is ingeschakeld."</string>
     <string name="invalid_charger" msgid="2741987096648693172">"Kan niet opladen via USB. Gebruik de oplader die bij je apparaat is geleverd."</string>
     <string name="invalid_charger_title" msgid="2836102177577255404">"Kan niet opladen via USB"</string>
     <string name="invalid_charger_text" msgid="6480624964117840005">"Gebruik de oplader die bij je apparaat is geleverd"</string>
@@ -65,6 +65,7 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB-foutopsporing toestaan?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"De vingerafdruk voor de RSA-sleutel van de computer is:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Altijd toestaan vanaf deze computer"</string>
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"Toestaan"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB-foutopsporing niet toegestaan"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"De gebruiker die momenteel is ingelogd op dit apparaat, kan USB-foutopsporing niet inschakelen. Als je deze functie wilt gebruiken, schakel je naar de primaire gebruiker."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom om scherm te vullen"</string>
@@ -156,6 +157,8 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
+    <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"Roaming"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
@@ -286,6 +289,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"Headset"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"Invoer"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="4930931771490695395">"Gehoorapparaten"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"Inschakelen..."</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Helderheid"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Automatisch draaien"</string>
@@ -601,7 +605,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Uit"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Met beheeropties voor meldingen met betrekking tot stroomverbruik kun je een belangrijkheidsniveau van 0 tot 5 instellen voor de meldingen van een app. \n\n"<b>"Niveau 5"</b>" \n- Boven aan de lijst met meldingen weergeven \n- Onderbreking op volledig scherm toestaan \n- Altijd korte weergave \n\n"<b>"Niveau 4"</b>" \n- Geen onderbreking op volledig scherm \n- Altijd korte weergave \n\n"<b>"Niveau 3"</b>" \n- Geen onderbreking op volledig scherm \n- Nooit korte weergave \n\n"<b>"Niveau 2"</b>" \n- Geen onderbreking op volledig scherm \n- Nooit korte weergave \n- Nooit geluid laten horen of trillen \n\n"<b>"Niveau 1"</b>" \n- Geen onderbreking op volledig scherm \n- Nooit korte weergave \n- Nooit geluid laten horen of trillen \n- Verbergen op vergrendelingsscherm en statusbalk \n- Onder aan de lijst met meldingen weergeven \n\n"<b>"Niveau 0"</b>" \n- Alle meldingen van de app blokkeren"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Meldingen"</string>
-    <string name="notification_channel_disabled" msgid="344536703863700565">"Deze meldingen worden niet meer weergegeven"</string>
+    <string name="notification_channel_disabled" msgid="344536703863700565">"Meldingen worden niet meer weergegeven"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"Deze meldingen worden geminimaliseerd"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"Meestal sluit je deze meldingen. \nWil je ze blijven weergeven?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"Deze meldingen blijven weergeven?"</string>
@@ -640,7 +644,7 @@
       <item quantity="other">%d minuten</item>
       <item quantity="one">%d minuut</item>
     </plurals>
-    <string name="battery_panel_title" msgid="7944156115535366613">"Accugebruik"</string>
+    <string name="battery_panel_title" msgid="7944156115535366613">"Batterijgebruik"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Batterijbesparing niet beschikbaar tijdens opladen"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Batterijbesparing"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Vermindert de prestaties en achtergrondgegevens"</string>
@@ -767,7 +771,7 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g>-melding: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"App werkt mogelijk niet met gesplitst scherm."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"App biedt geen ondersteuning voor gesplitst scherm."</string>
-    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"App werkt mogelijk niet op een secundair display."</string>
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"App werkt mogelijk niet op een secundair scherm."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"App kan niet op secundaire displays worden gestart."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Instellingen openen."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Snelle instellingen openen."</string>
@@ -779,7 +783,7 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g>-instellingen openen."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Volgorde van instellingen bewerken."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Pagina <xliff:g id="ID_1">%1$d</xliff:g> van <xliff:g id="ID_2">%2$d</xliff:g>"</string>
-    <string name="tuner_lock_screen" msgid="5755818559638850294">"Scherm vergrendelen"</string>
+    <string name="tuner_lock_screen" msgid="5755818559638850294">"Vergrendelingsscherm"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"Uitvouwen"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimaliseren"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Sluiten"</string>

@@ -65,6 +65,7 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"Benarkan penyahpepijatan USB?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Cap jari kekunci RSA komputer ialah:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Sentiasa benarkan komputer ini"</string>
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"Benarkan"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Penyahpepijatan USB tidak dibenarkan"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Pengguna yang log masuk ke peranti ini pada masa ini tidak boleh menghidupkan penyahpepijatan USB. Untuk menggunakan ciri ini, tukar kepada pengguna utama."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zum untuk memenuhi skrin"</string>
@@ -156,6 +157,8 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
+    <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"Perayauan"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
@@ -286,6 +289,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"Set Kepala"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"Input"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="4930931771490695395">"Alat Bantu Dengar"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"Menghidupkan…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Kecerahan"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Autoputar"</string>

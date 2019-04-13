@@ -65,6 +65,7 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"Թույլատրե՞լ USB-ի կարգաբերումը:"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Համակարգչի RSA-ի բանալի մատնահետքն է`\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Միշտ թույլատրել այս համակարգչից"</string>
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"Թույլատրել"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB վրիպազերծումը արգելված է"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Ընթացիկ հաշվի օգտատերը չի կարող միացնել USB վրիպազերծումը: Այս գործառույթը միացնելու համար մուտք գործեք հիմնական օգտատիրոջ հաշվով:"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Խոշորացնել` էկրանը լցնելու համար"</string>
@@ -156,6 +157,8 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
+    <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"Ռոումինգ"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
@@ -166,7 +169,7 @@
     <string name="cell_data_off_content_description" msgid="4356113230238585072">"Բջջային ինտերնետն անջատված է"</string>
     <string name="cell_data_off" msgid="1051264981229902873">"Անջատված է"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth մոդեմ"</string>
-    <string name="accessibility_airplane_mode" msgid="834748999790763092">"Ինքնաթիռի ռեժիմ"</string>
+    <string name="accessibility_airplane_mode" msgid="834748999790763092">"Ավիառեժիմ"</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"Միացնել VPN-ը։"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM քարտ չկա:"</string>
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"Օպերատորի ցանցի փոփոխություն"</string>
@@ -204,10 +207,10 @@
     <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"Wifi-ը միացավ:"</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"Շարժական <xliff:g id="SIGNAL">%1$s</xliff:g>: <xliff:g id="TYPE">%2$s</xliff:g>: <xliff:g id="NETWORK">%3$s</xliff:g>:"</string>
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"Մարտկոցը <xliff:g id="STATE">%s</xliff:g> է:"</string>
-    <string name="accessibility_quick_settings_airplane_off" msgid="7786329360056634412">"Ինքնաթիռի ռեժիմն անջատված է:"</string>
-    <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Ինքնաթիռի ռեժիմը միացված է:"</string>
-    <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Ինքնաթիռի ռեժիմն անջատվեց:"</string>
-    <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Ինքնաթիռի ռեժիմը միացավ:"</string>
+    <string name="accessibility_quick_settings_airplane_off" msgid="7786329360056634412">"Ավիառեժիմն անջատված է:"</string>
+    <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Ավիառեժիմը միացված է:"</string>
+    <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Ավիառեժիմն անջատվեց:"</string>
+    <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Ավիառեժիմը միացավ:"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"կատարյալ լռություն"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"միայն զարթուցիչը"</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Չանհանգստացնել:"</string>
@@ -286,6 +289,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"Աուդիո"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"Ականջակալ"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"Մուտքագրում"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="4930931771490695395">"Լսողական ապարատ"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"Միացում…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Պայծառություն"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Ինքնապտտում"</string>
@@ -566,7 +570,7 @@
     <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="8536256753575881818">"Զարթուցիչ"</string>
     <string name="status_bar_work" msgid="6022553324802866373">"Android for Work-ի պրոֆիլ"</string>
-    <string name="status_bar_airplane" msgid="7057575501472249002">"Ինքնաթիռի ռեժիմ"</string>
+    <string name="status_bar_airplane" msgid="7057575501472249002">"Ավիառեժիմ"</string>
     <string name="add_tile" msgid="2995389510240786221">"Սալիկի ավելացում"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Սալիկի հեռարձակում"</string>
     <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Ժամը <xliff:g id="WHEN">%1$s</xliff:g>-ի զարթուցիչը չի զանգի, եթե մինչ այդ չանջատեք այս կարգավորումը"</string>
@@ -601,7 +605,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Անջատել"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Ծանուցումների ընդլայնված կառավարման օգնությամբ կարող եք յուրաքանչյուր հավելվածի ծանուցումների համար նշանակել կարևորության աստիճան՝ 0-5 սահմաններում: \n\n"<b>"5-րդ աստիճան"</b>" \n- Ցուցադրել ծանուցումների ցանկի վերևում \n- Թույլատրել լիաէկրան ընդհատումները \n- Միշտ ցուցադրել կարճ ծանուցումները \n\n"<b>"4-րդ աստիճան"</b>" \n- Արգելել լիաէկրան ընդհատումները \n- Միշտ ցուցադրել կարճ ծանուցումները \n\n"<b>"3-րդ աստիճան"</b>" \n- Արգելել լիաէկրան ընդհատումները \n- Արգելել կարճ ծանուցումների ցուցադրումը \n\n"<b>"2-րդ աստիճան"</b>" \n- Արգելել լիաէկրան ընդհատումները \n- Արգելել կարճ ծանուցումների ցուցադրումը \n- Անջատել ձայնը և թրթռումը \n\n"<b>"1-ին աստիճան"</b>" \n- Արգելել լիաէկրան ընդհատումները \n- Արգելել կարճ ծանուցումների ցուցադրումը \n- Անջատել ձայնը և թրթռումը \n- Չցուցադրել կողպէկրանում և կարգավիճակի գոտում \n- Ցուցադրել ծանուցումների ցանկի ներքևում \n\n"<b>"0-րդ աստիճան"</b>\n"- Արգելափակել հավելվածի բոլոր ծանուցումները"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Ծանուցումներ"</string>
-    <string name="notification_channel_disabled" msgid="344536703863700565">"Դուք այլևս չեք ստանա այս ծանուցումները"</string>
+    <string name="notification_channel_disabled" msgid="344536703863700565">"Այլևս չեք ստանա նման ծանուցումներ"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"Այս ծանուցումները կծալվեն:"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"Դուք սովորաբար փակում եք այս ծանուցումները: \nՇարունակե՞լ ցուցադրել դրանք:"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"Ցուցադրե՞լ այս ծանուցումները։"</string>

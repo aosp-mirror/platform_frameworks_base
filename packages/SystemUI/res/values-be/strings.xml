@@ -67,6 +67,7 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"Дазволіць адладку USB?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Адбiтак ключа RSA на гэтым камп\'ютары:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Заўсёды дазваляць з гэтага камп\'ютара"</string>
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"Дазволіць"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Адладка USB не дапускаецца"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Карыстальнік, які зараз увайшоў у гэту прыладу, не можа ўключыць адладку USB. Каб выкарыстоўваць гэту функцыю, пераключыцеся на асноўнага карыстальніка."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Павял. на ўвесь экран"</string>
@@ -158,6 +159,8 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
+    <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"Роўмінг"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
@@ -165,7 +168,7 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Няма SIM-карты."</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Мабільная перадача даных"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Мабільная перадача даных уключана"</string>
-    <string name="cell_data_off_content_description" msgid="4356113230238585072">"Мабільны інтэрнэт выключаны"</string>
+    <string name="cell_data_off_content_description" msgid="4356113230238585072">"Мабільная перадача даных выключана"</string>
     <string name="cell_data_off" msgid="1051264981229902873">"Выключаны"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Сувязь па Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Рэжым палёту."</string>
@@ -292,6 +295,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"Гук"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"Гарнітура"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"Увод"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="4930931771490695395">"Слыхавыя апараты"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"Уключэнне…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Яркасць"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Аўтапаварот"</string>
@@ -847,7 +851,7 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Замяніць"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Праграмы, якія працуюць у фонавым рэжыме"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Дакраніцеся, каб даведацца пра выкарыстанне трафіка і акумулятара"</string>
-    <string name="mobile_data_disable_title" msgid="1068272097382942231">"Адключыць мабільны інтэрнэт?"</string>
+    <string name="mobile_data_disable_title" msgid="1068272097382942231">"Выключыць мабільную перадачу даных?"</string>
     <string name="mobile_data_disable_message" msgid="4756541658791493506">"У вас не будзе доступу да даных ці інтэрнэту праз аператара <xliff:g id="CARRIER">%s</xliff:g>. Інтэрнэт будзе даступны толькі праз Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"ваш аператар"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"Праграма хавае запыт на дазвол, таму ваш адказ немагчыма спраўдзіць у Наладах."</string>

@@ -22,7 +22,7 @@
     <string name="app_label" msgid="7164937344850004466">"सिस्‍टम यूआई"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"साफ़ करें"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"सूची से निकालें"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"ऐप की जानकारी"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"ऐप्लिकेशन की जानकारी"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"आपकी हाल की स्‍क्रीन यहां दिखाई देती हैं"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"हाल ही के ऐप्स  खारिज करें"</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
@@ -34,8 +34,8 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"सूचनाएं"</string>
     <string name="battery_low_title" msgid="9187898087363540349">"बैटरी जल्दी ही खत्म हो जाएगी"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> शेष"</string>
-    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> बची है, आपके इस्तेमाल करने के तरीके के हिसाब से बैटरी लगभग <xliff:g id="TIME">%s</xliff:g> चलेगी"</string>
-    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> बची है, बैटरी लगभग <xliff:g id="TIME">%s</xliff:g> चलेगी"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> बची है, आपके इस्तेमाल करने के हिसाब से बैटरी करीब <xliff:g id="TIME">%s</xliff:g> चलेगी"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> बची है, बैटरी करीब <xliff:g id="TIME">%s</xliff:g> चलेगी"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> बैटरी बची है. बैटरी सेवर चालू है."</string>
     <string name="invalid_charger" msgid="2741987096648693172">"यूएसबी के ज़रिए चार्ज नहीं किया जा सकता. अपने डिवाइस के साथ मिलने वाले चार्जर का इस्तेमाल करें."</string>
     <string name="invalid_charger_title" msgid="2836102177577255404">"यूएसबी के ज़रिए चार्ज नहीं किया जा सकता"</string>
@@ -65,6 +65,7 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB डीबगिंग करने दें?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"कंप्यूटर का RSA कुंजी फ़िंगरप्रिंट है:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"इस कंप्यूटर से हमेशा अनुमति दें"</string>
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"अनुमति दें"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB डीबगिंग की अनुमति नहीं है"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"अभी इस डिवाइस में जिस उपयोगकर्ता ने साइन इन किया है, वो USB डीबगिंग चालू नहीं कर सकता. इस सुविधा का इस्तेमाल करने के लिए, प्राथमिक उपयोगकर्ता में बदलें."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"स्‍क्रीन भरने के लिए ज़ूम करें"</string>
@@ -156,6 +157,8 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"एलटीई"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
+    <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"रोमिंग"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
@@ -286,6 +289,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"ऑडियो"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"हेडसेट"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"इनपुट"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="4930931771490695395">"सुनने में मददगार डिवाइस"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"ब्लूटूथ चालू हो रहा है…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"स्क्रीन की रोशनी"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"स्वत: घुमाएं"</string>
@@ -385,7 +389,7 @@
     <string name="zen_silence_introduction" msgid="3137882381093271568">"इससे अलार्म, संगीत, वीडियो और गेम सहित सभी आवाज़ और कंपन (वाइब्रेशन) रोक दिए जाते हैं."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"कम अत्यावश्यक सूचनाएं नीचे दी गई हैं"</string>
-    <string name="notification_tap_again" msgid="7590196980943943842">"खोलने के लिए पुन: टैप करें"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"खोलने के लिए फिर से टैप करें"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"अनलॉक करने के लिए ऊपर स्वाइप करें"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"इस डिवाइस का प्रबंधन आपका संगठन करता है"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"इस डिवाइस के प्रबंधक <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> हैं"</string>
@@ -414,7 +418,7 @@
     <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"अतिथि को निकालें?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"इस सत्र के सभी ऐप्स और डेटा को हटा दिया जाएगा."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"निकालें"</string>
-    <string name="guest_wipe_session_title" msgid="6419439912885956132">"अतिथि, आपका पुन: स्वागत है!"</string>
+    <string name="guest_wipe_session_title" msgid="6419439912885956132">"अतिथि, आपका फिर से स्वागत है!"</string>
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"क्‍या आप अपना सत्र जारी रखना चाहते हैं?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"फिर से शुरू करें"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"हां, जारी रखें"</string>
@@ -586,7 +590,7 @@
     <string name="activity_not_found" msgid="348423244327799974">"ऐप्लिकेशन आपके डिवाइस पर इंस्टॉल नहीं है"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"घड़ी के सेकंड दिखाएं"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"स्टेटस बार में सेकंड में समय दिखाएं. इससे बैटरी लाइफ़ पर असर पड़ सकता है."</string>
-    <string name="qs_rearrange" msgid="8060918697551068765">"त्वरित सेटिंग को पुन: व्यवस्थित करें"</string>
+    <string name="qs_rearrange" msgid="8060918697551068765">"त्वरित सेटिंग को फिर से व्यवस्थित करें"</string>
     <string name="show_brightness" msgid="6613930842805942519">"त्वरित सेटिंग में स्क्रीन की रोशनी दिखाएं"</string>
     <string name="experimental" msgid="6198182315536726162">"प्रयोगात्मक"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"ब्लूटूथ चालू करें?"</string>
@@ -600,7 +604,7 @@
     <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"चालू"</string>
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"बंद"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"पावर सूचना नियंत्रण के ज़रिये, आप किसी ऐप की सूचना को उसकी अहमियत के हिसाब से 0 से 5 के लेवल पर सेट कर सकते हैं.\n\n"<b>"लेवल 5"</b>" \n- सूचना सूची में सबसे ऊपर दिखाएं \n- पूरे स्क्रीन को ढंकने की अनुमति दें \n- लगातार देखते रहें \n\n"<b>" लेवल 4"</b>" \n- पूरे स्क्रीन को ढंकें \n- लगातार देखते रहें \n\n"<b>"लेवल 3"</b>" \n- पूरे स्क्रीन को ढंकने से रोकें \n-कभी भी न देखें \n\n"<b>"लेवल 2"</b>" \n- पूरे स्क्रीन को ढंकने से रोकें \n- कभी भी देखें \n- कभी भी आवाज़ या कंपन (वाइब्रेशन) न करें \n\n"<b>"लेवल 1"</b>" \n- पूरे स्क्रीन को ढंकने से रोकें \n- कभी भी न देखें \n- कभी भी आवाज़ या कंपन (वाइब्रेशन) न करें \n- लॉक स्क्रीन और स्टेटस बार से छिपाएं \n- सूचना सूची के नीचे दिखाएं \n\n"<b>"लेवल 0"</b>" \n- ऐप्लिकेशन की सभी सूचनाएं रोक दें"</string>
-    <string name="notification_header_default_channel" msgid="7506845022070889909">"सूचना"</string>
+    <string name="notification_header_default_channel" msgid="7506845022070889909">"सूचनाएं"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"अब आपको ये सूचनाएं दिखाई नहीं देंगी"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"इन सूचनाओं को छोटा कर दिया जाएगा"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"अाप अक्सर इन सूचनाओं को खारिज कर देते हैं. \nआगे भी इन्हें देखना जारी रखना चाहते हैं?"</string>
@@ -820,7 +824,7 @@
     <string name="notification_channel_hints" msgid="7323870212489152689">"संकेत"</string>
     <string name="instant_apps" msgid="6647570248119804907">"इंस्टेंट ऐप"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"झटपट ऐप्स के लिए इंस्टॉलेशन ज़रूरी नहीं है."</string>
-    <string name="app_info" msgid="6856026610594615344">"ऐप की जानकारी"</string>
+    <string name="app_info" msgid="6856026610594615344">"ऐप्लिकेशन की जानकारी"</string>
     <string name="go_to_web" msgid="2650669128861626071">"ब्राउज़र पर जाएं"</string>
     <string name="mobile_data" msgid="7094582042819250762">"मोबाइल डेटा"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%s</xliff:g> — <xliff:g id="ID_2">%s</xliff:g>"</string>

@@ -65,6 +65,7 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"Vil du tillate USB-feilsøking?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Datamaskinens nøkkelfingeravtrykk for RSA er:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Tillat alltid fra denne datamaskinen"</string>
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"Tillat"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB-feilsøking er ikke tillatt"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Brukeren som for øyeblikket er logget på denne enheten, kan ikke slå på USB-feilsøking. For å bruke denne funksjonen, bytt til hovedbrukeren."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom for å fylle skjermen"</string>
@@ -156,6 +157,8 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
+    <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"Roaming"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
@@ -286,6 +289,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"Lyd"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"Hodetelefoner"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"Innenhet"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="4930931771490695395">"Høreapparater"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"Slår på …"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Lysstyrke"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Rotér automatisk"</string>
@@ -560,7 +564,7 @@
     <string name="quick_settings" msgid="10042998191725428">"Hurtiginnstillinger"</string>
     <string name="status_bar" msgid="4877645476959324760">"Statusrad"</string>
     <string name="overview" msgid="4018602013895926956">"Oversikt"</string>
-    <string name="demo_mode" msgid="2532177350215638026">"Demomodus for systembrukergrensesnittet"</string>
+    <string name="demo_mode" msgid="2532177350215638026">"Demomodus for systemgrensesnitt"</string>
     <string name="enable_demo_mode" msgid="4844205668718636518">"Slå på demo-modus"</string>
     <string name="show_demo_mode" msgid="2018336697782464029">"Vis demo-modus"</string>
     <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>
@@ -774,7 +778,7 @@
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Lukk hurtiginnstillingene."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Alarm er angitt."</string>
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"Logget på som <xliff:g id="ID_1">%s</xliff:g>"</string>
-    <string name="data_connection_no_internet" msgid="4503302451650972989">"Ingen Internett-tilkobling"</string>
+    <string name="data_connection_no_internet" msgid="4503302451650972989">"Ingen internettilkobling"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Åpne informasjonen."</string>
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Åpne <xliff:g id="ID_1">%s</xliff:g>-innstillingene."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Endre rekkefølgen på innstillingene."</string>

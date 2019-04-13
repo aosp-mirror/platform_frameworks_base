@@ -65,6 +65,7 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"Cho phép gỡ lỗi USB?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Tệp tham chiếu khóa RSA của máy tính là:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Luôn cho phép từ máy tính này"</string>
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"Cho phép"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Tính năng gỡ lỗi USB không được phép"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Người dùng hiện đã đăng nhập vào thiết bị này không thể bật tính năng gỡ lỗi USB. Để sử dụng tính năng này, hãy chuyển sang người dùng chính."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"T.phóng để lấp đầy m.hình"</string>
@@ -156,6 +157,8 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
+    <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G trở lên"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"Chuyển vùng"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
@@ -286,6 +289,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"Âm thanh"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"Tai nghe"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"Thiết bị đầu vào"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="4930931771490695395">"Thiết bị trợ thính"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"Đang bật…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Độ sáng"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Tự động xoay"</string>
@@ -344,7 +348,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Giới hạn <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Cảnh báo <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="7608026833638817218">"Hồ sơ công việc"</string>
-    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Chế độ ánh sáng ban đêm"</string>
+    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Ánh sáng đêm"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"Bật khi trời tối"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Cho đến khi trời sáng"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Bật vào lúc <xliff:g id="TIME">%s</xliff:g>"</string>
