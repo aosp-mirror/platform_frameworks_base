@@ -498,7 +498,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         mSysUiStateFlags = 0;
         mSysUiStateFlags |= ActivityManagerWrapper.getInstance().isScreenPinningActive()
                 ? SYSUI_STATE_SCREEN_PINNING : 0;
-        mSysUiStateFlags |= (navBarFragment == null || !navBarFragment.isNavBarWindowVisible())
+        mSysUiStateFlags |= (navBarFragment != null && !navBarFragment.isNavBarWindowVisible())
                 ? SYSUI_STATE_NAV_BAR_HIDDEN : 0;
         mSysUiStateFlags |= panelExpanded
                 ? SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED : 0;
