@@ -66,6 +66,7 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"Želite li da dozvolite otklanjanje USB grešaka?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Digitalni otisak RSA ključa ovog računara je:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Uvek dozvoli sa ovog računara"</string>
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"Dozvoli"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Otklanjanje grešaka na USB-u nije dozvoljeno"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Korisnik koji je trenutno prijavljen na ovaj uređaj ne može da uključi otklanjanje grešaka na USB-u. Da biste koristili ovu funkciju, prebacite na primarnog korisnika."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zumiraj na celom ekranu"</string>
@@ -157,6 +158,8 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
+    <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"Roming"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
@@ -288,6 +291,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"Slušalice"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"Unos"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="4930931771490695395">"Slušni aparati"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"Uključuje se..."</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Osvetljenost"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Automatska rotacija"</string>
@@ -374,7 +378,7 @@
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Podeli ekran nadesno"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7171470775439860480">"Uključi/isključi pregled"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Napunjena je"</string>
-    <string name="expanded_header_battery_charging" msgid="205623198487189724">"Punjenje"</string>
+    <string name="expanded_header_battery_charging" msgid="205623198487189724">"Puni se"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> do kraja punjenja"</string>
     <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"Ne puni se"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"Mreža se možda\nnadgleda"</string>

@@ -65,6 +65,7 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB නිදොස්කරණයට අවසර දෙනවද?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"මෙම පරිගණකයේ RSA යතුරු ඇඟිලි සටහන වන්නේ:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"සැම විටම මෙම පරිගණකයෙන් ඉඩ ලබා දෙන්න"</string>
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"ඉඩ දෙන්න"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB නිදොස්කරණය වෙත අවසර නැහැ"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"දැනට මෙම උපාංගයට පුරා ඇති පරිශීලකයාට USB නිදොස්කරණය ක්‍රියාත්මක කළ නොහැක. මෙම විශේෂාංගය භාවිතා කිරීම සඳහා, මූලික පරිශීලකයා වෙත මාරු වෙන්න."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"තිරය පිරවීමට විශාලනය කරන්න"</string>
@@ -156,6 +157,8 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
+    <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"රෝමිං"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
@@ -286,6 +289,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"ශ්‍රව්‍ය"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"හෙඩ්සෙටය"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"ආදානය"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="4930931771490695395">"ශ්‍රවණාධාරක"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"ක්‍රියාත්මක කරමින්…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"දීප්තිය"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"ස්වයංක්‍රීය කරකැවීම"</string>

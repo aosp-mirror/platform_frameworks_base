@@ -65,6 +65,7 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"Permitir a depuración de erros de USB?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"A impresión dixital da clave de RSA do ordenador é:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Permitir sempre desde este ordenador"</string>
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"Permitir"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Non se permite a depuración por USB"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"O usuario coa sesión iniciada actualmente neste dispositivo non pode activar a depuración por USB. Para utilizar esta función, cambia ao usuario principal."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Ampliar ata ocupar todo"</string>
@@ -156,6 +157,8 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
+    <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"Itinerancia"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
@@ -211,8 +214,8 @@
     <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"silencio total"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"só alarmas"</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Non molestar."</string>
-    <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Desactivouse a opción Non molestar."</string>
-    <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Activouse a opción Non molestar."</string>
+    <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Desactivouse o modo Non molestar."</string>
+    <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Activouse o modo Non molestar."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth."</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"Bluetooth desactivado."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"Bluetooth activado."</string>
@@ -286,6 +289,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"Auriculares"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"Entrada"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="4930931771490695395">"Audiófonos"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"Activando…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Brillo"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Xirar automaticamente"</string>
@@ -299,7 +303,7 @@
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Localización desactivada"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Dispositivo multimedia"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
-    <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Só chamadas de urxencia"</string>
+    <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Só chamadas de emerxencia"</string>
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"Configuración"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"Hora"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"Eu"</string>

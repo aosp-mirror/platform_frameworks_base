@@ -68,7 +68,7 @@
       <item quantity="other">ลองอีกครั้งใน <xliff:g id="NUMBER">%d</xliff:g> วินาที</item>
       <item quantity="one">ลองอีกครั้งใน 1 วินาที</item>
     </plurals>
-    <string name="kg_pattern_instructions" msgid="5547646893001491340">"วาดรูปแบบของคุณ"</string>
+    <string name="kg_pattern_instructions" msgid="5547646893001491340">"ลากรูปแบบของคุณ"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"ป้อน PIN ของซิม"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"ป้อน PIN ของซิมสำหรับ \"<xliff:g id="CARRIER">%1$s</xliff:g>\""</string>
     <string name="kg_sim_lock_esim_instructions" msgid="4416732549172148542">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> ปิดใช้ eSIM เพื่อใช้อุปกรณ์โดยไม่มีบริการมือถือ"</string>

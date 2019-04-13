@@ -65,6 +65,7 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB အမှားရှာဖွေပြင်ဆင်ခြင်း ခွင့်ပြုပါမည်လား?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"ဒီကွန်ပျူတာရဲ့ RSA key fingerprint ကတော့:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g> ဖြစ်ပါသည်"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"ဒီကွန်ပျူတာမှ အမြဲခွင့်ပြုရန်"</string>
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"ခွင့်ပြုရန်"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB အမှားပြင်ဆင်ခြင်း ခွင့်မပြုပါ"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"ဤစက်ပစ္စည်းသို့ လက်ရှိဝင်ရောက်ထားသည့် အသုံးပြုသူသည် USB အမှားပြင်ဆင်ခြင်းကို ဖွင့်၍မရပါ။ ဤဝန်ဆောင်မှုကို အသုံးပြုရန် အဓိကအသုံးပြုသူအဖြစ်သို့ ပြောင်းပါ။"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"ဇူးမ်အပြည့်ဆွဲခြင်း"</string>
@@ -156,6 +157,8 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
+    <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"ပြင်ပကွန်ရက်နှင့် ချိတ်ဆက်ခြင်း"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
@@ -286,6 +289,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"အသံ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"မိုက်ခွက်ပါနားကြပ်"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"အဝင်"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="4930931771490695395">"နားကြားကိရိယာ"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"ဖွင့်နေသည်…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"အလင်းတောက်ပမှု"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"အော်တို-လည်"</string>
@@ -672,7 +676,7 @@
     <string name="keyboard_key_numpad_template" msgid="8729216555174634026">"ဂဏန်းကွက်<xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"စနစ်"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"ပင်မ"</string>
-    <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"မကြာသေးခင်က"</string>
+    <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"လတ်တလော"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"နောက်သို့"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"အကြောင်းကြားချက်များ"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"ကီးဘုတ် ဖြတ်လမ်းများ"</string>

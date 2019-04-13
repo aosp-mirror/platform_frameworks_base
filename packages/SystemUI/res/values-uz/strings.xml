@@ -65,6 +65,7 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB orqali nosozliklarni tuzatishga ruxsat berilsinmi?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Kompyuterning RSA tugmasi barmoq izlari:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Doimo ushbu kompyuterdan ruxsat berilsin"</string>
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"Ruxsat berish"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB orqali nosozliklarni tuzatishga ruxsat berilmagan"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Ayni paytda ushbu qurilmaga o‘z hisobi bilan kirgan foydalanuvchi USB orqali nosozliklarni tuzatish funksiyasini yoqa olmaydi. Bu funksiyadan foydalanish uchun asosiy foydalanuvchi profiliga o‘ting."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Ekranga moslashtirish"</string>
@@ -144,7 +145,7 @@
     <string name="accessibility_three_bars" msgid="2648241415119396648">"Uchta ustun."</string>
     <string name="accessibility_signal_full" msgid="9122922886519676839">"Signal to‘liq."</string>
     <string name="accessibility_desc_on" msgid="2385254693624345265">"Yoniq"</string>
-    <string name="accessibility_desc_off" msgid="6475508157786853157">"O‘chiq"</string>
+    <string name="accessibility_desc_off" msgid="6475508157786853157">"Yoqilmagan"</string>
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"Ulangan."</string>
     <string name="accessibility_desc_connecting" msgid="3812924520316280149">"Ulanmoqda…"</string>
     <string name="data_connection_gprs" msgid="7652872568358508452">"GPRS"</string>
@@ -156,6 +157,8 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
+    <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"Rouming"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
@@ -170,7 +173,7 @@
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN yoniq."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM karta yo‘q."</string>
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"Mobil tarmoqni o‘zgartirish"</string>
-    <string name="accessibility_battery_details" msgid="7645516654955025422">"Batareya quvvati sarfi haqida ma’lumot"</string>
+    <string name="accessibility_battery_details" msgid="7645516654955025422">"Quvvat sarfi tafsilotlari"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Batareya <xliff:g id="NUMBER">%d</xliff:g> foiz."</string>
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Batareya quvvat olmoqda (<xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%)."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Tizim sozlamalari."</string>
@@ -286,6 +289,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"Garnitura"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"Kirish"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="4930931771490695395">"Eshitish apparatlari"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"Yoqilmoqda…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Yorqinlik"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Avtomatik burilish"</string>
@@ -592,13 +596,13 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bluetooth yoqilsinmi?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Klaviaturani planshetingizga ulash uchun Bluetooth xizmatini yoqishingiz kerak."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Yoqish"</string>
-    <string name="show_silently" msgid="6841966539811264192">"Bildirishnomalar ovozsiz ko‘rsatilsin"</string>
+    <string name="show_silently" msgid="6841966539811264192">"Tovushsiz chiqsin"</string>
     <string name="block" msgid="2734508760962682611">"Barcha bildirishnomalar bloklansin"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"Ovozi o‘chirilmasin"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"Ovozi o‘chirilmasin yoki bloklanmasin"</string>
     <string name="tuner_full_importance_settings" msgid="3207312268609236827">"Bildirishnomalar uchun kengaytirilgan boshqaruv"</string>
     <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"Yoniq"</string>
-    <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"O‘chiq"</string>
+    <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Yoqilmagan"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Bildirishnomalar uchun kengaytirilgan boshqaruv yordamida ilova bildirishnomalarining muhimlik darajasini (0-5) sozlash mumkin. \n\n"<b>"5-daraja"</b>" \n- Bildirishnomani ro‘yxatning boshida ko‘rsatish \n- To‘liq ekranli bildirishnomalarni ko‘rsatish \n- Qalqib chiquvchi bildirishnomalarni ko‘rsatish \n\n"<b>"4-daraja"</b>" \n- To‘liq ekranli bildirishnomalarni ko‘rsatmaslik \n- Qalqib chiquvchi bildirishnomalarni ko‘rsatish \n\n"<b>"3-daraja"</b>" \n- To‘liq ekranli bildirishnomalarni ko‘rsatmaslik \n- Qalqib chiquvchi bildirishnomalarni ko‘rsatmaslik \n\n"<b>"2-daraja"</b>" \n- To‘liq ekranli bildirishnomalarni ko‘rsatmaslik \n- Qalqib chiquvchi bildirishnomalarni ko‘rsatmaslik \n- Ovoz va tebranishdan foydalanmaslik \n\n"<b>"1-daraja"</b>" \n- To‘liq ekranli bildirishnomalarni ko‘rsatmaslik \n- Qalqib chiquvchi bildirishnomalarni ko‘rsatmaslik \n- Ovoz va tebranishdan foydalanmaslik \n- Ekran qulfi va holat qatorida ko‘rsatmaslik \n- Bildirishnomani ro‘yxatning oxirida ko‘rsatish \n\n"<b>"0-daraja"</b>" \n- Ilovadan keladigan barcha bildirishnomalarni bloklash"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Bildirishnomalar"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"Bu bildirishnomalar endi chiqmaydi"</string>
@@ -700,7 +704,7 @@
     <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Trafik tejash yoniq"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Trafik tejash o‘chiq"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"Yoniq"</string>
-    <string name="switch_bar_off" msgid="8803270596930432874">"O‘chiq"</string>
+    <string name="switch_bar_off" msgid="8803270596930432874">"Yoqilmagan"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Navigatsiya paneli"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"Sxema"</string>
     <string name="left_nav_bar_button_type" msgid="8555981238887546528">"Qo‘shimcha Chapga tugmasi turi"</string>

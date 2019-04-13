@@ -65,6 +65,7 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB ഡീബഗ്ഗിംഗ് അനുവദിക്കണോ?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"ഈ കമ്പ്യൂട്ടറിന്റെ RSA കീ ഫിംഗർപ്രിന്റ് ഇതാണ്:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"ഈ കമ്പ്യൂട്ടറിൽ നിന്ന് എല്ലായ്പ്പോഴും അനുവദിക്കുക"</string>
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"അനുവദിക്കുക"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB ഡീബഗ്ഗിംഗ് അനുവദനീയമല്ല"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"ഉപകരണത്തിൽ ഇപ്പോൾ സൈൻ ഇൻ ചെയ്‌തിരിക്കുന്ന ഉപയോക്താവിന് USB ഡീബഗ്ഗിംഗ് ഓണാക്കാനാകില്ല. ഈ ഫീച്ചർ ഉപയോഗിക്കാൻ പ്രാഥമിക ഉപയോക്താവിലേക്ക് മാറുക."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"സ്‌ക്രീനിൽ ഉൾക്കൊള്ളിക്കാൻ സൂം ചെയ്യുക"</string>
@@ -156,6 +157,8 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
+    <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"റോമിംഗ്"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDG"</string>
@@ -245,7 +248,7 @@
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"ഡാറ്റ സേവർ ഓഫാക്കി."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"ഡാറ്റ സേവർ ഓണാക്കി."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"ഡിസ്പ്ലേ തെളിച്ചം"</string>
-    <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"ചാർജ്ജുചെയ്യുന്നു"</string>
+    <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"ചാർജ് ചെയ്യുന്നു"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G ഡാറ്റ താൽക്കാലികമായി നിർത്തി"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G ഡാറ്റ താൽക്കാലികമായി നിർത്തി"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"മൊബൈൽ ഡാറ്റ തല്‍ക്കാലം നിര്‍ത്തിയിരിക്കുന്നു"</string>
@@ -286,6 +289,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"ഓഡിയോ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"ഹെഡ്‌സെറ്റ്"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"ഇൻപുട്ട്"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="4930931771490695395">"ശ്രവണ സഹായികൾ"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"ഓണാക്കുന്നു…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"തെളിച്ചം"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"സ്‌ക്രീൻ സ്വമേധയാ തിരിയുക"</string>
@@ -337,7 +341,7 @@
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"അറിയിപ്പുകൾ"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"ടോർച്ച്"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"മൊബൈൽ ഡാറ്റ"</string>
-    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"ഡാറ്റ ഉപയോഗം"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"ഡാറ്റാ ഉപയോഗം"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"ശേഷിക്കുന്ന ഡാറ്റ"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"പരിധി കഴിഞ്ഞു"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> ഉപയോഗിച്ചു"</string>
@@ -371,7 +375,7 @@
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"സ്ക്രീൻ വലതുവശത്തേക്ക് പിളർത്തുക"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7171470775439860480">"അവലോകനം മാറ്റുക"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"ചാർജായി"</string>
-    <string name="expanded_header_battery_charging" msgid="205623198487189724">"ചാർജ്ജുചെയ്യുന്നു"</string>
+    <string name="expanded_header_battery_charging" msgid="205623198487189724">"ചാർജ് ചെയ്യുന്നു"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"ഫുൾ ചാർജാകാൻ, <xliff:g id="CHARGING_TIME">%s</xliff:g>"</string>
     <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"ചാർജ്ജുചെയ്യുന്നില്ല"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"നെറ്റ്‌വർക്ക്\nനിരീക്ഷിക്കപ്പെടാം"</string>

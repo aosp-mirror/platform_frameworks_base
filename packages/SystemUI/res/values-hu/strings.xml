@@ -65,6 +65,7 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"Engedélyezi az USB hibakeresést?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"A számítógép RSA kulcs ujjlenyomata:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Mindig engedélyezze erről a számítógépről"</string>
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"Engedélyezés"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Az USB hibakeresése nem engedélyezett"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Az eszközre jelenleg bejelentkezett felhasználó nem engedélyezheti az USB-hibakeresést. A funkció használatához váltson az elsődleges felhasználóra."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Nagyítás a kitöltéshez"</string>
@@ -156,6 +157,8 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
+    <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"Barangolás"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
@@ -286,13 +289,14 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"Hang"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"Headset"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"Bevitel"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="4930931771490695395">"Hallókészülékek"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"Bekapcsolás…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Fényerő"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Automatikus elforgatás"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Automatikus képernyőforgatás"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="8187398200140760213">"<xliff:g id="ID_1">%s</xliff:g> mód"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Elforgatás zárolva"</string>
-    <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Álló"</string>
+    <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Portré"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"Fekvő"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Beviteli módszer"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"Tartózkodási hely"</string>

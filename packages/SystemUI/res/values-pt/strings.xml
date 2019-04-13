@@ -65,6 +65,7 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"Permitir a depuração USB?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"A impressão digital da chave RSA deste computador é:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Sempre permitir a partir deste computador"</string>
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"Permitir"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Depuração USB não permitida"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"O usuário conectado a este dispositivo não pode ativar a depuração USB. Para usar esse recurso, mude para o usuário principal \"NAME\"."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom p/ preencher a tela"</string>
@@ -156,6 +157,8 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
+    <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"Roaming"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
@@ -286,6 +289,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"Áudio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"Fone de ouvido"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"Entrada"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="4930931771490695395">"Aparelhos auditivos"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"Ativando…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Brilho"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Girar automaticamente"</string>
@@ -845,11 +849,11 @@
     <string name="slice_permission_checkbox" msgid="7986504458640562900">"Permitir que <xliff:g id="APP">%1$s</xliff:g> mostre partes de qualquer app"</string>
     <string name="slice_permission_allow" msgid="2340244901366722709">"Permitir"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"Negar"</string>
-    <string name="auto_saver_title" msgid="1217959994732964228">"Toque para programar o recurso \"Economia de bateria\""</string>
+    <string name="auto_saver_title" msgid="1217959994732964228">"Toque para programar o recurso Economia de bateria"</string>
     <string name="auto_saver_text" msgid="6324376061044218113">"Ativar automaticamente quando a bateria estiver em <xliff:g id="PERCENTAGE">%d</xliff:g>%%"</string>
     <string name="no_auto_saver_action" msgid="8086002101711328500">"Não"</string>
-    <string name="auto_saver_enabled_title" msgid="6726474226058316862">"Programação do recurso \"Economia de bateria\" ativada"</string>
-    <string name="auto_saver_enabled_text" msgid="874711029884777579">"O recurso \"Economia de bateria\" será ativado automaticamente depois que a bateria ficar abaixo de <xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
+    <string name="auto_saver_enabled_title" msgid="6726474226058316862">"Programação do recurso Economia de bateria ativada"</string>
+    <string name="auto_saver_enabled_text" msgid="874711029884777579">"O recurso Economia de bateria será ativado automaticamente depois que a bateria ficar abaixo de <xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Configurações"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"Ok"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"Despejar pilha SysUI"</string>
