@@ -220,7 +220,8 @@ public class AppOpsService extends IAppOpsService.Stub {
      * global Settings. Any access to this class or its fields should be done while
      * holding the AppOpsService lock.
      */
-    private final class Constants extends ContentObserver {
+    @VisibleForTesting
+    final class Constants extends ContentObserver {
         // Key names stored in the settings value.
         private static final String KEY_TOP_STATE_SETTLE_TIME = "top_state_settle_time";
         private static final String KEY_FG_SERVICE_STATE_SETTLE_TIME
@@ -305,7 +306,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
-    private final Constants mConstants;
+    @VisibleForTesting
+    final Constants mConstants;
 
     @VisibleForTesting
     static final class UidState {
