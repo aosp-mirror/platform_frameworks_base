@@ -9,16 +9,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"Мрежа којој покушавате да се придружите има безбедносних проблема."</string>
     <string name="ssl_error_example" msgid="647898534624078900">"На пример, страница за пријављивање можда не припада приказаној организацији."</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"Ипак настави преко прегледача"</string>
-    <string name="ok" msgid="1509280796718850364">"Потврди"</string>
-    <string name="page_info" msgid="4048529256302257195">"Информације о страници"</string>
-    <string name="page_info_address" msgid="2222306609532903254">"Адреса:"</string>
-    <string name="ssl_security_warning_title" msgid="6607795404322797541">"Безбедносно упозорење"</string>
-    <string name="ssl_error_view_certificate" msgid="1472768887529093862">"Прикажи сертификат"</string>
-    <string name="ssl_error_untrusted" msgid="7754507359360636447">"Овај сертификат не потиче од поузданог ауторитета."</string>
-    <string name="ssl_error_mismatch" msgid="3809794439740523641">"Назив сајта се не подудара са називом на сертификату."</string>
-    <string name="ssl_error_expired" msgid="5739349389499575559">"Овај сертификат је истекао."</string>
-    <string name="ssl_error_not_yet_valid" msgid="8193083327719048247">"Овај сертификат још увек није важећи."</string>
-    <string name="ssl_error_date_invalid" msgid="3705563379257285534">"Датум овог сертификата је неважећи."</string>
-    <string name="ssl_error_invalid" msgid="9041704741505449967">"Овај сертификат је неважећи."</string>
-    <string name="ssl_error_unknown" msgid="5679243486524754571">"Непозната грешка сертификата."</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"Овај сертификат не потиче из поузданог извора."</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"Назив сајта се не подудара са називом на сертификату."</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"Овај сертификат је истекао."</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"Овај сертификат још увек није важећи."</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"Датум овог сертификата је неважећи."</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"Овај сертификат је неважећи."</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"Непозната грешка сертификата."</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"Безбедносно упозорење"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"Прикажи сертификат"</string>
+    <string name="ok" msgid="2817931639040794018">"Потврди"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"Адреса:"</string>
+    <string name="page_info" msgid="4416941086705172545">"Информације о страници"</string>
 </resources>

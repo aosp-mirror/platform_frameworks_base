@@ -9,4 +9,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"Mreža kojoj pokušavate da se pridružite ima bezbednosnih problema."</string>
     <string name="ssl_error_example" msgid="647898534624078900">"Na primer, stranica za prijavljivanje možda ne pripada prikazanoj organizaciji."</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"Ipak nastavi preko pregledača"</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"Ovaj sertifikat ne potiče iz pouzdanog izvora."</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"Naziv sajta se ne podudara sa nazivom na sertifikatu."</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"Ovaj sertifikat je istekao."</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"Ovaj sertifikat još uvek nije važeći."</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"Datum ovog sertifikata je nevažeći."</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"Ovaj sertifikat je nevažeći."</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"Nepoznata greška sertifikata."</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"Bezbednosno upozorenje"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"Prikaži sertifikat"</string>
+    <string name="ok" msgid="2817931639040794018">"Potvrdi"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"Adresa:"</string>
+    <string name="page_info" msgid="4416941086705172545">"Informacije o stranici"</string>
 </resources>

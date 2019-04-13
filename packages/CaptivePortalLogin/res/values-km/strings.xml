@@ -9,4 +9,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"បណ្តាញដែលអ្នកកំពុងព្យាយាមចូលមានបញ្ហាសុវត្ថិភាព។"</string>
     <string name="ssl_error_example" msgid="647898534624078900">"ឧបករណ៍៖ ទំព័រចូលនេះអាចនឹងមិនមែនជាកម្មសិទ្ធិរបស់ស្ថាប័នដែលបានបង្ហាញនេះទេ។"</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"យ៉ាងណាក៏ដោយនៅតែបន្តតាមរយៈកម្មវិធីរុករក"</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"វិញ្ញាបនបត្រនេះ​មិនបានចេញ​ដោយ​អាជ្ញាធរដែល​គួរ​ឱ្យ​ទុកចិត្ត​ទេ។"</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"ឈ្មោះ​គេហទំព័រ​នេះ​មិន​ត្រូវនឹង​ឈ្មោះ​នៅលើវិញ្ញាបនបត្រទេ។"</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"វិញ្ញាបនបត្រនេះ​ផុត​កំណត់​ហើយ។"</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"វិញ្ញាបនបត្រនេះមិន​ទាន់​មាន​សុពលភាពនៅ​ឡើយ​ទេ។"</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"វិញ្ញាបនបត្រនេះ​មាន​កាល​បរិច្ឆេទដែលគ្មាន​សុពលភាព។"</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"វិញ្ញាបនបត្រនេះគ្មាន​សុពលភាពទេ។"</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"មានបញ្ហា​ដោយសារ​មិនស្គាល់វិញ្ញាបនបត្រ។"</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"ការព្រមានផ្នែកសុវត្ថិភាព"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"មើល​វិញ្ញាបនបត្រ"</string>
+    <string name="ok" msgid="2817931639040794018">"យល់ព្រម"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"អាសយដ្ឋាន៖"</string>
+    <string name="page_info" msgid="4416941086705172545">"ព័ត៌មាន​ទំព័រ"</string>
 </resources>

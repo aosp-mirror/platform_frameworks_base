@@ -9,4 +9,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"Rrjeti në të cilin po përpiqesh të bashkohesh ka probleme sigurie."</string>
     <string name="ssl_error_example" msgid="647898534624078900">"për shembull, faqja e identifikimit mund të mos i përkasë organizatës së shfaqur."</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"Vazhdo gjithsesi nëpërmjet shfletuesit"</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"Kjo certifikatë nuk është nga një autoritet i besuar."</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"Emri i sajtit nuk përputhet me emrin në certifikatë."</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"Kjo certifikatë ka skaduar."</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"Kjo certifikatë nuk është ende e vlefshme."</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"Kjo certifikatë ka një datë të pavlefshme."</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"Kjo certifikatë është e pavlefshme."</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"Gabim i panjohur i certifikatës."</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"Paralajmërim për sigurinë"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"Shiko certifikatën"</string>
+    <string name="ok" msgid="2817931639040794018">"Në rregull"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"Adresa:"</string>
+    <string name="page_info" msgid="4416941086705172545">"Informacionet e faqes"</string>
 </resources>

@@ -9,4 +9,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"ເຄືອ​ຂ່າຍ​ທີ່​ທ່ານ​ກຳ​ລັງ​ເຂົ້າ​ຮ່ວມ​ມີ​ບັນ​ຫາ​ຄວາມ​ປອດ​ໄພ."</string>
     <string name="ssl_error_example" msgid="647898534624078900">"ຕົວ​ຢ່າງ, ໜ້າ​ລົງ​ຊື່​ເຂົ້າ​ໃຊ້​ອາດ​ຈະ​ບໍ່​ເປັນ​ຂອງ​ອົງ​ການ​ທີ່​ສະ​ແດງ​ຂຶ້ນ."</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"ແນວ​ໃດ​ກໍ່​ສືບ​ຕໍ່​ຜ່ານບ​ຣາວ​ເຊີ"</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"ໃບຮັບຮອງນີ້ບໍ່ໄດ້ມາຈາກໜ່ວຍງານທີ່ເຊື່ອຖືໄດ້."</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"ຊື່ຂອງເວັບໄຊບໍ່ກົງກັບຊື່ຢູ່ໃບຮັບຮອງ."</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"ໃບຮັບຮອງນີ້ຫມົດອາຍຸແລ້ວ."</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"ໃບຮັບຮອງນີ້ບໍ່ຖືກຕ້ອງເທື່ອ."</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"ໃບຮັບຮອງນີ້ມີວັນທີບໍ່ຖືກຕ້ອງ."</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"ໃບຮັບຮອງນີ້ບໍ່ຖືກຕ້ອງ."</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"ໃບຮັບຮອງມີຄວາມຜິດພາດທີ່ບໍ່ຮູ້ຈັກ."</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"ຄຳເຕືອນຄວາມປອດໄພ"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"ເບິ່ງໃບຮັບຮອງ"</string>
+    <string name="ok" msgid="2817931639040794018">"ຕົກລົງ"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"ທີ່ຢູ່:"</string>
+    <string name="page_info" msgid="4416941086705172545">"ຂໍ້ມູນໜ້າ"</string>
 </resources>

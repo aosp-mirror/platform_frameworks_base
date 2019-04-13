@@ -9,16 +9,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"Inethiwekhi ozama ukuyijoyina inezinkinga zokuvikela."</string>
     <string name="ssl_error_example" msgid="647898534624078900">"Isibonelo, ikhasi lokungena ngemvume kungenzeka lingelenhlangano ebonisiwe."</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"Qhubeka noma kunjalo ngesiphequluli"</string>
-    <string name="ok" msgid="1509280796718850364">"KULUNGILE"</string>
-    <string name="page_info" msgid="4048529256302257195">"Ulwazi lekhasi"</string>
-    <string name="page_info_address" msgid="2222306609532903254">"Ikheli:"</string>
-    <string name="ssl_security_warning_title" msgid="6607795404322797541">"Isexwayiso sokuvikeleka"</string>
-    <string name="ssl_error_view_certificate" msgid="1472768887529093862">"Buka isitifiketi"</string>
-    <string name="ssl_error_untrusted" msgid="7754507359360636447">"Lesi sitifiketi asiphumi embusweni othembekile."</string>
-    <string name="ssl_error_mismatch" msgid="3809794439740523641">"Igama lale ngosi alifani negama elikusitifiketi."</string>
-    <string name="ssl_error_expired" msgid="5739349389499575559">"Lesi sitifiketi siphelelwe yisikhathi"</string>
-    <string name="ssl_error_not_yet_valid" msgid="8193083327719048247">"Lesi sitifiketi asilungile okwamanje"</string>
-    <string name="ssl_error_date_invalid" msgid="3705563379257285534">"Lesi sitifiketi sinosuku olungalungile."</string>
-    <string name="ssl_error_invalid" msgid="9041704741505449967">"Lesi sitifiketi asilungile."</string>
-    <string name="ssl_error_unknown" msgid="5679243486524754571">"Iphutha lesitifiketi elingaziwa."</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"Lesi sitifiketi asisuki kusiphathimandla esithembekile."</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"Igama lesayithi alifani negama elikusitifiketi."</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"Lesi sitifiketi siphelelwe yisikhathi"</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"Lesi sitifiketi asivumelekile okwamanje."</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"Lesi sitifiketi sinosuku olungalungile."</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"Lesi sitifiketi asilungile."</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"Iphutha lesitifiketi elingaziwa."</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"Isexwayiso sokuvikeleka"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"Buka isitifiketi"</string>
+    <string name="ok" msgid="2817931639040794018">"KULUNGILE"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"Ikheli:"</string>
+    <string name="page_info" msgid="4416941086705172545">"Ulwazi lekhasi"</string>
 </resources>

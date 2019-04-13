@@ -9,4 +9,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"Öryggisvandamál eru á netinu sem þú ert að reyna að tengjast."</string>
     <string name="ssl_error_example" msgid="647898534624078900">"Til dæmis getur verið að innskráningarsíðan tilheyri ekki fyrirtækinu sem birtist."</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"Halda samt áfram í vafra"</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"Þetta vottorð er ekki frá traustum aðila."</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"Nafnið á síðunni passar ekki við nafnið á vottorðinu."</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"Þetta vottorð er útrunnið."</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"Þetta vottorð hefur ekki enn tekið gildi."</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"Þetta vottorð er með ógilda dagsetningu."</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"Þetta vottorð er ógilt."</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"Óþekkt vottorðsvilla."</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"Öryggisviðvörun"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"Skoða vottorð"</string>
+    <string name="ok" msgid="2817931639040794018">"Í lagi"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"Netfang:"</string>
+    <string name="page_info" msgid="4416941086705172545">"Upplýsingar um síðu"</string>
 </resources>

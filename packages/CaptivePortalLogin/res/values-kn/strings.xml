@@ -9,4 +9,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"ನೀವು ಸೇರಬೇಕೆಂದಿರುವ ನೆಟ್‌ವರ್ಕ್ ಭದ್ರತೆ ಸಮಸ್ಯೆಗಳನ್ನು ಹೊಂದಿದೆ."</string>
     <string name="ssl_error_example" msgid="647898534624078900">"ಉದಾಹರಣೆಗೆ, ಲಾಗಿನ್ ಪುಟವು ತೋರಿಸಲಾಗಿರುವ ಸಂಸ್ಥೆಗೆ ಸಂಬಂಧಿಸಿರುವುದಿಲ್ಲ."</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"ಹೇಗಾದರೂ ಬ್ರೌಸರ್ ಮೂಲಕ ಮುಂದುವರಿಸಿ"</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"ಈ ಪ್ರಮಾಣಪತ್ರವು ವಿಶ್ವಾಸಾರ್ಹ ಪ್ರಾಧಿಕಾರದಿಂದ ಬಂದಿಲ್ಲ."</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"ಸೈಟ್‌ನ ಹೆಸರು ಪ್ರಮಾಣಪತ್ರದಲ್ಲಿನ ಹೆಸರಿನ ಜೊತೆಗೆ ಹೊಂದಾಣಿಕೆಯಾಗುತ್ತಿಲ್ಲ."</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"ಈ ಪ್ರಮಾಣಪತ್ರದ ಅವಧಿ ಮೀರಿದೆ."</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"ಈ ಪ್ರಮಾಣಪತ್ರವು ಇನ್ನೂ ಮಾನ್ಯವಾಗಿಲ್ಲ."</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"ಈ ಪ್ರಮಾಣಪತ್ರವು ಅಮಾನ್ಯವಾದ ದಿನಾಂಕವನ್ನು ಹೊಂದಿದೆ."</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"ಈ ಪ್ರಮಾಣಪತ್ರವು ಅಮಾನ್ಯವಾಗಿದೆ."</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"ಪ್ರಮಾಣಪತ್ರದ ಅಜ್ಞಾತ ದೋಷ."</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"ಭದ್ರತಾ ಎಚ್ಚರಿಕೆ"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"ಪ್ರಮಾಣಪತ್ರವನ್ನು ವೀಕ್ಷಿಸಿ"</string>
+    <string name="ok" msgid="2817931639040794018">"ಸರಿ"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"ವಿಳಾಸ:"</string>
+    <string name="page_info" msgid="4416941086705172545">"ಪುಟದ ಮಾಹಿತಿ"</string>
 </resources>

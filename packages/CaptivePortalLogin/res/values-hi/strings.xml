@@ -9,16 +9,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"आप जिस नेटवर्क में शामिल होने का प्रयास कर रहे हैं उसमें सुरक्षा समस्‍याएं हैं."</string>
     <string name="ssl_error_example" msgid="647898534624078900">"उदाहरण के लिए, हो सकता है कि लॉगिन पृष्‍ठ दिखाए गए संगठन से संबद्ध ना हो."</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"ब्राउज़र के द्वारा फिर जारी रखें"</string>
-    <string name="ok" msgid="1509280796718850364">"ठीक"</string>
-    <string name="page_info" msgid="4048529256302257195">"पृष्ठ जानकारी"</string>
-    <string name="page_info_address" msgid="2222306609532903254">"पता:"</string>
-    <string name="ssl_security_warning_title" msgid="6607795404322797541">"सुरक्षा चेतावनी"</string>
-    <string name="ssl_error_view_certificate" msgid="1472768887529093862">"प्रमाणपत्र देखें"</string>
-    <string name="ssl_error_untrusted" msgid="7754507359360636447">"यह प्रमाणपत्र किसी विश्वस्त प्राधिकारी का नहीं है."</string>
-    <string name="ssl_error_mismatch" msgid="3809794439740523641">"साइट का नाम, प्रमाणपत्र के नाम से मिलान नहीं करता."</string>
-    <string name="ssl_error_expired" msgid="5739349389499575559">"इस प्रमाणपत्र की समय सीमा समाप्त हो गई है."</string>
-    <string name="ssl_error_not_yet_valid" msgid="8193083327719048247">"यह प्रमाणपत्र अभी तक मान्य नहीं है."</string>
-    <string name="ssl_error_date_invalid" msgid="3705563379257285534">"इस प्रमाणपत्र में एक अमान्‍य दिनांक है."</string>
-    <string name="ssl_error_invalid" msgid="9041704741505449967">"यह प्रमाणपत्र अमान्य है."</string>
-    <string name="ssl_error_unknown" msgid="5679243486524754571">"अज्ञात प्रमाणपत्र त्रुटि."</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"यह प्रमाणपत्र किसी भरोसेमंद अधिकारी का नहीं है."</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"साइट के नाम का मिलान प्रमाणपत्र में दिए नाम से नहीं हो रहा है."</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"इस प्रमाणपत्र की समय-सीमा खत्म हो चुकी है."</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"यह प्रमाणपत्र अभी तक मान्य नहीं है."</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"इस प्रमाणपत्र की तारीख गलत है."</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"यह प्रमाणपत्र अमान्य है."</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"प्रमाणपत्र में अनजान गड़बड़ी."</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"सुरक्षा चेतावनी"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"प्रमाणपत्र देखें"</string>
+    <string name="ok" msgid="2817931639040794018">"ठीक है"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"पता:"</string>
+    <string name="page_info" msgid="4416941086705172545">"पेज की जानकारी"</string>
 </resources>
