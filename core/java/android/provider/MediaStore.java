@@ -31,7 +31,6 @@ import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
 import android.app.AppGlobals;
 import android.content.ClipData;
-import android.content.ContentInterface;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -1410,7 +1409,10 @@ public final class MediaStore {
 
         /**
          * The description of the download.
+         *
+         * @removed
          */
+        @Deprecated
         @Column(Cursor.FIELD_TYPE_STRING)
         String DESCRIPTION = "description";
     }
