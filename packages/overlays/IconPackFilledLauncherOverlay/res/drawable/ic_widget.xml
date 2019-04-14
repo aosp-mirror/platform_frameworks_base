@@ -16,19 +16,19 @@
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:height="24dp"
-    android:viewportHeight="24"
+    android:viewportHeight="24" android:tint="?android:attr/textColorPrimary"
     android:viewportWidth="24"
     android:width="24dp" >
     <path
-        android:fillColor="#000000"
+        android:fillColor="@android:color/white"
         android:pathData="M17.7,2.3c-0.4-0.4-1-0.4-1.4,0l-4,4c-0.4,0.4-0.4,1,0,1.4l4,4c0.4,0.4,1,0.4,1.4,0l4-4c0.4-0.4,0.4-1,0-1.4L17.7,2.3z" />
     <path
-        android:fillColor="#000000"
+        android:fillColor="@android:color/white"
         android:pathData="M11,4c0-0.5-0.4-1-1-1H4C3.5,3,3,3.5,3,4v6c0,0.6,0.5,1,1,1h6c0.6,0,1-0.4,1-1V4z" />
     <path
-        android:fillColor="#000000"
+        android:fillColor="@android:color/white"
         android:pathData="M20,21c0.5,0,1-0.5,1-1v-6c0-0.6-0.5-1-1-1h-6c-0.6,0-1,0.4-1,1v6c0,0.5,0.4,1,1,1H20z" />
     <path
-        android:fillColor="#000000"
+        android:fillColor="@android:color/white"
         android:pathData="M10,13H4c-0.5,0-1,0.4-1,1v6c0,0.5,0.5,1,1,1h6c0.6,0,1-0.5,1-1v-6C11,13.4,10.6,13,10,13z" />
 </vector>
