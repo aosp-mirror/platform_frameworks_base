@@ -526,6 +526,10 @@ package android.provider {
     field public static final String DURATION = "duration";
   }
 
+  public static interface MediaStore.DownloadColumns extends android.provider.MediaStore.MediaColumns {
+    field @Deprecated public static final String DESCRIPTION = "description";
+  }
+
   public static interface MediaStore.Images.ImageColumns extends android.provider.MediaStore.MediaColumns {
     field public static final String BUCKET_DISPLAY_NAME = "bucket_display_name";
     field public static final String BUCKET_ID = "bucket_id";
