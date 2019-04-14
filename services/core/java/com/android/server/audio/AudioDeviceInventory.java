@@ -819,11 +819,12 @@ public final class AudioDeviceInventory {
         if (((device == musicDevice) || mDeviceBroker.isInCommunication())
                 && (device == devices) && !mDeviceBroker.hasMediaDynamicPolicy()
                         && ((musicDevice & AudioSystem.DEVICE_OUT_REMOTE_SUBMIX) == 0)) {
-            if (!AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0 /*not looking in past*/)) {
+            if (!AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0 /*not looking in past*/)
+                    && !mDeviceBroker.hasAudioFocusUsers()) {
                 // no media playback, not a "becoming noisy" situation, otherwise it could cause
                 // the pausing of some apps that are playing remotely
                 AudioService.sDeviceLogger.log((new AudioEventLogger.StringEvent(
-                        "dropping ACTION_AUDIO_BECOMING_NOISY, no media playback")).printLog(TAG));
+                        "dropping ACTION_AUDIO_BECOMING_NOISY")).printLog(TAG));
                 return 0;
             }
             mDeviceBroker.postBroadcastBecomingNoisy();
