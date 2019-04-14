@@ -3700,9 +3700,9 @@ public class PackageParser {
         }
 
         if (sa.getBoolean(
-                R.styleable.AndroidManifestApplication_allowExternalStorageSandbox,
-                owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.Q)) {
-            ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_ALLOW_EXTERNAL_STORAGE_SANDBOX;
+                R.styleable.AndroidManifestApplication_requestLegacyExternalStorage,
+                owner.applicationInfo.targetSdkVersion < Build.VERSION_CODES.Q)) {
+            ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_REQUEST_LEGACY_EXTERNAL_STORAGE;
         }
 
         ai.maxAspectRatio = sa.getFloat(R.styleable.AndroidManifestApplication_maxAspectRatio, 0);

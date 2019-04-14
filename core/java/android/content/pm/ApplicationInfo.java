@@ -679,13 +679,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int PRIVATE_FLAG_IS_RESOURCE_OVERLAY = 1 << 28;
 
     /**
-     * Value for {@link #privateFlags}: If {@code true} this app allows
-     * shared/external storage media to be a sandboxed view that only contains
-     * files owned by the app.
+     * Value for {@link #privateFlags}: If {@code true} this app requests
+     * full external storage access. The request may not be honored due to
+     * policy or other reasons.
      *
      * @hide
      */
-    public static final int PRIVATE_FLAG_ALLOW_EXTERNAL_STORAGE_SANDBOX = 1 << 29;
+    public static final int PRIVATE_FLAG_REQUEST_LEGACY_EXTERNAL_STORAGE = 1 << 29;
 
     /**
      * Value for {@link #privateFlags}: whether this app is pre-installed on the
@@ -723,7 +723,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             PRIVATE_FLAG_HAS_FRAGILE_USER_DATA,
             PRIVATE_FLAG_ALLOW_CLEAR_USER_DATA_ON_FAILED_RESTORE,
             PRIVATE_FLAG_ALLOW_AUDIO_PLAYBACK_CAPTURE,
-            PRIVATE_FLAG_ALLOW_EXTERNAL_STORAGE_SANDBOX,
+            PRIVATE_FLAG_REQUEST_LEGACY_EXTERNAL_STORAGE,
             PRIVATE_FLAG_ODM,
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -1858,13 +1858,12 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     }
 
     /**
-     * If {@code true} this app allows shared/external storage media to be a
-     * sandboxed view that only contains files owned by the app.
+     * If {@code true} this app requested to run in the legacy storage mode.
      *
      * @hide
      */
-    public boolean isExternalStorageSandboxAllowed() {
-        return (privateFlags & PRIVATE_FLAG_ALLOW_EXTERNAL_STORAGE_SANDBOX) != 0;
+    public boolean hasRequestedLegacyExternalStorage() {
+        return (privateFlags & PRIVATE_FLAG_REQUEST_LEGACY_EXTERNAL_STORAGE) != 0;
     }
 
     private boolean isAllowedToUseHiddenApis() {

@@ -341,6 +341,17 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_SOFT_RESTRICTED = 1<<3;
 
     /**
+     * Flag for {@link #flags}, corresponding to <code>immutablyRestricted</code>
+     * value of {@link android.R.attr#permissionFlags}.
+     *
+     * <p>This permission is restricted immutably which means that its
+     * restriction state may be specified only on the first install of
+     * the app and will stay in this initial whitelist state until
+     * the app is uninstalled.
+     */
+    public static final int FLAG_IMMUTABLY_RESTRICTED = 1<<4;
+
+    /**
      * Flag for {@link #flags}, indicating that this permission has been
      * installed into the system's globally defined permissions.
      */

@@ -19,6 +19,7 @@ package com.android.server.policy;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -36,9 +37,7 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.permission.PermissionControllerManager;
 import android.permission.PermissionManagerInternal;
-import android.util.ArraySet;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 import com.android.server.FgThread;
@@ -46,7 +45,6 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -57,17 +55,10 @@ import java.util.concurrent.CountDownLatch;
  * and app ops - and vise versa.
  */
 public final class PermissionPolicyService extends SystemService {
-    private static final String PLATFORM_PACKAGE = "android";
-
     private static final String LOG_TAG = PermissionPolicyService.class.getSimpleName();
-
-    // No need to lock as this is populated on boot when the OS is
-    // single threaded and is never mutated until a reboot.
-    private static final ArraySet<String> sAllRestrictedPermissions = new ArraySet<>();
 
     public PermissionPolicyService(@NonNull Context context) {
         super(context);
-        cacheAllRestrictedPermissions(context);
     }
 
     @Override
@@ -99,20 +90,6 @@ public final class PermissionPolicyService extends SystemService {
         grantOrUpgradeDefaultRuntimePermissionsInNeeded(getContext(), userId);
         synchronizePermissionsAndAppOpsForUser(getContext(), userId);
         startWatchingRuntimePermissionChanges(getContext(), userId);
-    }
-
-    private static void cacheAllRestrictedPermissions(@NonNull Context context) {
-        try {
-            final PackageInfo packageInfo = context.getPackageManager()
-                    .getPackageInfo(PLATFORM_PACKAGE, PackageManager.GET_PERMISSIONS);
-            for (PermissionInfo permissionInfo : packageInfo.permissions) {
-                if (permissionInfo.isRestricted()) {
-                    sAllRestrictedPermissions.add(permissionInfo.name);
-                }
-            }
-        } catch (NameNotFoundException impossible) {
-            /* cannot happen */
-        }
     }
 
     private static void grantOrUpgradeDefaultRuntimePermissionsInNeeded(@NonNull Context context,
@@ -162,7 +139,7 @@ public final class PermissionPolicyService extends SystemService {
     }
 
     private static @Nullable Context getUserContext(@NonNull Context context,
-            @NonNull UserHandle user) {
+            @Nullable UserHandle user) {
         if (context.getUser().equals(user)) {
             return context;
         } else {
@@ -230,18 +207,31 @@ public final class PermissionPolicyService extends SystemService {
         private final @NonNull SparseIntArray mAllUids = new SparseIntArray();
 
         /**
-         * All ops that need to be restricted
+         * All ops that need to be set to default
+         *
+         * Currently, only used by the restricted permissions logic.
          *
          * @see #syncRestrictedOps
          */
-        private final @NonNull ArrayList<OpToRestrict> mOpsToRestrict = new ArrayList<>();
+        private final @NonNull ArrayList<OpToRestrict> mOpsToDefault = new ArrayList<>();
 
         /**
-         * All ops that need to be unrestricted
+         * All ops that need to be flipped to allow if default.
+         *
+         * Currently, only used by the restricted permissions logic.
          *
          * @see #syncRestrictedOps
          */
-        private final @NonNull ArrayList<OpToUnrestrict> mOpsToUnrestrict = new ArrayList<>();
+        private final @NonNull ArrayList<OpToUnrestrict> mOpsToAllow = new ArrayList<>();
+
+        /**
+         * All ops that need to be flipped to ignore if default.
+         *
+         * Currently, only used by the restricted permissions logic.
+         *
+         * @see #syncRestrictedOps
+         */
+        private final @NonNull ArrayList<OpToUnrestrict> mOpsToIgnore = new ArrayList<>();
 
         /**
          * All foreground permissions
@@ -262,89 +252,20 @@ public final class PermissionPolicyService extends SystemService {
          * <p>This processes ops previously added by {@link #addOpIfRestricted}
          */
         private void syncRestrictedOps() {
-            final SparseIntArray unprocessedUids = mAllUids.clone();
-
-            // TRICKY: we set the app op for a restricted permission to allow if the app
-            // requesting the permission is whitelisted and to deny if the app requesting
-            // the permission is not whitelisted. However, there is another case where an
-            // app in a shared user can access a component in another app in the same shared
-            // user due to being in the same shared user and not by having the permission
-            // that guards the component form the rest of the world. We need to handle this.
-            // The way we do this is by setting app ops corresponding to non requested
-            // restricted permissions to allow as this would allow the shared uid access
-            // case and be okay for other apps as they would not have the permission and
-            // would fail on the permission checks before reaching the app op check.
-            final SparseArray<List<String>> unrequestedRestrictedPermissionsForUid =
-                    new SparseArray<>();
-
-            final int unrestrictCount = mOpsToUnrestrict.size();
-            for (int i = 0; i < unrestrictCount; i++) {
-                final OpToUnrestrict op = mOpsToUnrestrict.get(i);
-                setUidModeAllowed(op.code, op.uid, op.packageName);
-
-                // Keep track this permission was requested by the UID.
-                List<String> unrequestedRestrictedPermissions =
-                        unrequestedRestrictedPermissionsForUid.get(op.uid);
-                if (unrequestedRestrictedPermissions == null) {
-                    unrequestedRestrictedPermissions = new ArrayList<>(sAllRestrictedPermissions);
-                    unrequestedRestrictedPermissionsForUid.put(op.uid,
-                            unrequestedRestrictedPermissions);
-                }
-                unrequestedRestrictedPermissions.remove(AppOpsManager.opToPermission(op.code));
-
-                unprocessedUids.delete(op.uid);
+            final int allowCount = mOpsToAllow.size();
+            for (int i = 0; i < allowCount; i++) {
+                final OpToUnrestrict op = mOpsToAllow.get(i);
+                setUidModeAllowedIfDefault(op.code, op.uid, op.packageName);
             }
-            final int restrictCount = mOpsToRestrict.size();
-            for (int i = 0; i < restrictCount; i++) {
-                final OpToRestrict op = mOpsToRestrict.get(i);
+            final int ignoreCount = mOpsToIgnore.size();
+            for (int i = 0; i < ignoreCount; i++) {
+                final OpToUnrestrict op = mOpsToIgnore.get(i);
+                setUidModeIgnoredIfDefault(op.code, op.uid, op.packageName);
+            }
+            final int defaultCount = mOpsToDefault.size();
+            for (int i = 0; i < defaultCount; i++) {
+                final OpToRestrict op = mOpsToDefault.get(i);
                 setUidModeDefault(op.code, op.uid);
-
-                // Keep track this permission was requested by the UID.
-                List<String> unrequestedRestrictedPermissions =
-                        unrequestedRestrictedPermissionsForUid.get(op.uid);
-                if (unrequestedRestrictedPermissions == null) {
-                    unrequestedRestrictedPermissions = new ArrayList<>(sAllRestrictedPermissions);
-                    unrequestedRestrictedPermissionsForUid.put(op.uid,
-                            unrequestedRestrictedPermissions);
-                }
-                unrequestedRestrictedPermissions.remove(AppOpsManager.opToPermission(op.code));
-
-                unprocessedUids.delete(op.uid);
-            }
-
-            // Give root access
-            unprocessedUids.put(Process.ROOT_UID, Process.ROOT_UID);
-
-            // Add records for UIDs that don't use any restricted permissions.
-            final int uidCount = unprocessedUids.size();
-            for (int i = 0; i < uidCount; i++) {
-                final int uid = unprocessedUids.keyAt(i);
-                unrequestedRestrictedPermissionsForUid.put(uid,
-                        new ArrayList<>(sAllRestrictedPermissions));
-            }
-
-            // Flip ops for all unrequested restricted permission for the UIDs.
-            final int unrequestedUidCount = unrequestedRestrictedPermissionsForUid.size();
-            for (int i = 0; i < unrequestedUidCount; i++) {
-                final List<String> unrequestedRestrictedPermissions =
-                        unrequestedRestrictedPermissionsForUid.valueAt(i);
-                if (unrequestedRestrictedPermissions != null) {
-                    final int uid = unrequestedRestrictedPermissionsForUid.keyAt(i);
-                    final String[] packageNames = (uid != Process.ROOT_UID)
-                            ? mPackageManager.getPackagesForUid(uid)
-                            : new String[] {"root"};
-                    if (packageNames == null) {
-                        continue;
-                    }
-                    final int permissionCount = unrequestedRestrictedPermissions.size();
-                    for (int j = 0; j < permissionCount; j++) {
-                        final String permission = unrequestedRestrictedPermissions.get(j);
-                        for (String packageName : packageNames) {
-                            setUidModeAllowed(AppOpsManager.permissionToOpCode(permission), uid,
-                                    packageName);
-                        }
-                    }
-                }
             }
         }
 
@@ -411,12 +332,27 @@ public final class PermissionPolicyService extends SystemService {
 
             if (permissionInfo.isHardRestricted()) {
                 if (applyRestriction) {
-                    mOpsToRestrict.add(new OpToRestrict(uid, opCode));
+                    mOpsToDefault.add(new OpToRestrict(uid, opCode));
                 } else {
-                    mOpsToUnrestrict.add(new OpToUnrestrict(uid, pkg.packageName, opCode));
+                    mOpsToAllow.add(new OpToUnrestrict(uid, pkg.packageName, opCode));
                 }
             } else if (permissionInfo.isSoftRestricted()) {
-                //TODO: Implement soft restrictions like storage here.
+                // Storage uses a special app op to decide the mount state and
+                // supports soft restriction where the restricted state allows
+                // the permission but only for accessing the medial collections.
+                if (Manifest.permission.READ_EXTERNAL_STORAGE.equals(permission)
+                        || Manifest.permission.WRITE_EXTERNAL_STORAGE.equals(permission)) {
+                    if (applyRestriction) {
+                        mOpsToDefault.add(new OpToRestrict(uid,
+                                AppOpsManager.OP_LEGACY_STORAGE));
+                    } else if (pkg.applicationInfo.hasRequestedLegacyExternalStorage()) {
+                        mOpsToAllow.add(new OpToUnrestrict(uid, pkg.packageName,
+                                AppOpsManager.OP_LEGACY_STORAGE));
+                    } else {
+                        mOpsToIgnore.add(new OpToUnrestrict(uid, pkg.packageName,
+                                AppOpsManager.OP_LEGACY_STORAGE));
+                    }
+                }
             }
         }
 
@@ -474,11 +410,20 @@ public final class PermissionPolicyService extends SystemService {
             }
         }
 
-        private void setUidModeAllowed(int opCode, int uid, @NonNull String packageName) {
+        private void setUidModeAllowedIfDefault(int opCode, int uid, @NonNull String packageName) {
+            setUidModeIfDefault(opCode, uid, AppOpsManager.MODE_ALLOWED, packageName);
+        }
+
+        private void setUidModeIgnoredIfDefault(int opCode, int uid, @NonNull String packageName) {
+            setUidModeIfDefault(opCode, uid, AppOpsManager.MODE_IGNORED, packageName);
+        }
+
+        private void setUidModeIfDefault(int opCode, int uid, int mode,
+                @NonNull String packageName) {
             final int currentMode = mAppOpsManager.unsafeCheckOpRaw(AppOpsManager
                     .opToPublicName(opCode), uid, packageName);
             if (currentMode == AppOpsManager.MODE_DEFAULT) {
-                mAppOpsManager.setUidMode(opCode, uid, AppOpsManager.MODE_ALLOWED);
+                mAppOpsManager.setUidMode(opCode, uid, mode);
             }
         }
 

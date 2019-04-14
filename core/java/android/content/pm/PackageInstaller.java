@@ -1505,13 +1505,14 @@ public class PackageInstaller {
          * allows the app to hold that permission and whitelisting a soft restricted
          * permission allows the app to hold the permission in its full, unrestricted form.
          *
-         * <p>The whitelisted permissions would be applied as the {@link
-         * PackageManager#FLAG_PERMISSION_WHITELIST_INSTALLER installer whitelist}.
+         * <p> Permissions can also be immutably restricted which means that the whitelist
+         * state of the permission can be determined only at install time and cannot be
+         * changed on updated or at a later point via the package manager APIs.
          *
-         * @param permissions The restricted permissions to whitelist. Pass
-         * {@link #RESTRICTED_PERMISSIONS_ALL} to whitelist all permissions and
-         * <code>null</code> to clear. If you want to whitelist some permissions
-         * (not all) the list must contain at least one permission.
+         * <p>The whitelisted non-immutably restricted permissions would be added to
+         * the {@link PackageManager#FLAG_PERMISSION_WHITELIST_INSTALLER installer whitelist}
+         * while the immutably restricted permissions would be added to the {@link
+         * PackageManager#FLAG_PERMISSION_WHITELIST_SYSTEM system whitelist}
          *
          * @see PackageManager#addWhitelistedRestrictedPermission(String, String, int)
          * @see PackageManager#removeWhitelistedRestrictedPermission(String, String, int)
