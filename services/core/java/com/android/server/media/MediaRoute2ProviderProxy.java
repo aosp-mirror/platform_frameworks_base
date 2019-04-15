@@ -20,8 +20,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.media.IMediaRoute2Callback;
 import android.media.IMediaRoute2Provider;
+import android.media.IMediaRoute2ProviderClient;
+import android.media.MediaRoute2ProviderInfo;
 import android.media.MediaRoute2ProviderService;
 import android.os.Handler;
 import android.os.IBinder;
@@ -48,9 +49,8 @@ final class MediaRoute2ProviderProxy implements ServiceConnection {
 
     private Callback mCallback;
 
-    // Selected Route info
-    public int mSelectedUid;
-    public String mSelectedRouteId;
+    //TODO: make it nonnull
+    private MediaRoute2ProviderInfo mProviderInfo;
 
     // Connection state
     private boolean mRunning;
@@ -83,6 +83,10 @@ final class MediaRoute2ProviderProxy implements ServiceConnection {
             mActiveConnection.selectRoute(uid, routeId);
             updateBinding();
         }
+    }
+
+    public MediaRoute2ProviderInfo getProviderInfo() {
+        return mProviderInfo;
     }
 
     public boolean hasComponentName(String packageName, String className) {
@@ -223,15 +227,25 @@ final class MediaRoute2ProviderProxy implements ServiceConnection {
     }
 
     private void onRouteSelected(Connection connection, int uid, String routeId) {
-        mSelectedUid = uid;
-        mSelectedRouteId = routeId;
-
-        if (mActiveConnection == connection) {
-            if (DEBUG) {
-                Slog.d(TAG, this + ": State changed ");
-            }
-            mHandler.post(mStateChanged);
+        if (mActiveConnection != connection) {
+            return;
         }
+
+        if (DEBUG) {
+            Slog.d(TAG, this + ": State changed ");
+        }
+        mHandler.post(mStateChanged);
+    }
+
+    private void onProviderInfoUpdated(Connection connection, MediaRoute2ProviderInfo info) {
+        if (mActiveConnection != connection) {
+            return;
+        }
+        mProviderInfo = info;
+        if (DEBUG) {
+            Slog.d(TAG, this + ": State changed ");
+        }
+        mHandler.post(mStateChanged);
     }
 
     private void disconnect() {
@@ -262,23 +276,18 @@ final class MediaRoute2ProviderProxy implements ServiceConnection {
 
     private final class Connection implements DeathRecipient {
         private final IMediaRoute2Provider mProvider;
-        private final ProviderCallback mCallback;
+        private final ProviderClient mClient;
 
         Connection(IMediaRoute2Provider provider) {
             mProvider = provider;
-            mCallback = new ProviderCallback(this);
+            mClient = new ProviderClient(this);
         }
 
         public boolean register() {
             try {
                 mProvider.asBinder().linkToDeath(this, 0);
-                mProvider.setCallback(mCallback);
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        onConnectionReady(Connection.this);
-                    }
-                });
+                mProvider.registerClient(mClient);
+                mHandler.post((Runnable) () -> onConnectionReady(Connection.this));
                 return true;
             } catch (RemoteException ex) {
                 binderDied();
@@ -288,7 +297,7 @@ final class MediaRoute2ProviderProxy implements ServiceConnection {
 
         public void dispose() {
             mProvider.asBinder().unlinkToDeath(this, 0);
-            mCallback.dispose();
+            mClient.dispose();
         }
 
         public void selectRoute(int uid, String id) {
@@ -301,29 +310,23 @@ final class MediaRoute2ProviderProxy implements ServiceConnection {
 
         @Override
         public void binderDied() {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    onConnectionDied(Connection.this);
-                }
-            });
+            mHandler.post(() -> onConnectionDied(Connection.this));
         }
 
         void postRouteSelected(int uid, String routeId) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    onRouteSelected(Connection.this, uid, routeId);
-                }
-            });
+            mHandler.post(() -> onRouteSelected(Connection.this, uid, routeId));
+        }
+
+        void postProviderUpdated(MediaRoute2ProviderInfo info) {
+            mHandler.post(() -> onProviderInfoUpdated(Connection.this, info));
         }
     }
 
-    private static final class ProviderCallback extends IMediaRoute2Callback.Stub  {
+    private static final class ProviderClient extends IMediaRoute2ProviderClient.Stub  {
         private final WeakReference<Connection> mConnectionRef;
 
-        ProviderCallback(Connection connection) {
-            mConnectionRef = new WeakReference<Connection>(connection);
+        ProviderClient(Connection connection) {
+            mConnectionRef = new WeakReference<>(connection);
         }
 
         public void dispose() {
@@ -331,10 +334,18 @@ final class MediaRoute2ProviderProxy implements ServiceConnection {
         }
 
         @Override
-        public void onRouteSelected(int uid, String routeId) throws RemoteException {
+        public void notifyRouteSelected(int uid, String routeId) throws RemoteException {
             Connection connection = mConnectionRef.get();
             if (connection != null) {
                 connection.postRouteSelected(uid, routeId);
+            }
+        }
+
+        @Override
+        public void notifyProviderInfoUpdated(MediaRoute2ProviderInfo info) {
+            Connection connection = mConnectionRef.get();
+            if (connection != null) {
+                connection.postProviderUpdated(info);
             }
         }
     }

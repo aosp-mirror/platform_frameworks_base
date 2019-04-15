@@ -16,10 +16,4 @@
 
 package android.media;
 
-/**
- * {@hide}
- */
-oneway interface IMediaRouter2ManagerClient {
-    void onRouteSelected(int uid, String routeId);
-    void onControlCategoriesChanged(int uid, in List<String> categories);
-}
+parcelable MediaRoute2ProviderInfo;

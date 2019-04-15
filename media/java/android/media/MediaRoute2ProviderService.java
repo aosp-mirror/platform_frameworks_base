@@ -36,7 +36,9 @@ public abstract class MediaRoute2ProviderService extends Service {
 
     private final Handler mHandler;
     private ProviderStub mStub;
-    private IMediaRoute2Callback mCallback;
+    //TODO: Should allow multiple clients
+    private IMediaRoute2ProviderClient mClient;
+    private MediaRoute2ProviderInfo mProviderInfo;
 
     public MediaRoute2ProviderService() {
         mHandler = new Handler(Looper.getMainLooper());
@@ -70,10 +72,10 @@ public abstract class MediaRoute2ProviderService extends Service {
      * @param routeId
      */
     public void updateProvider(int uid, String routeId) {
-        if (mCallback != null) {
+        if (mClient != null) {
             try {
                 //TODO: After publishState() is fully implemented, delete this.
-                mCallback.onRouteSelected(uid, routeId);
+                mClient.notifyRouteSelected(uid, routeId);
             } catch (RemoteException ex) {
                 Log.d(TAG, "Failed to update provider");
             }
@@ -81,22 +83,37 @@ public abstract class MediaRoute2ProviderService extends Service {
         publishState();
     }
 
-    void setCallback(IMediaRoute2Callback callback) {
-        mCallback = callback;
+    /**
+     * Updates provider info and publish routes
+     */
+    public final void setProviderInfo(MediaRoute2ProviderInfo info) {
+        mProviderInfo = info;
+        publishState();
+    }
+
+    void registerClient(IMediaRoute2ProviderClient client) {
+        mClient = client;
         publishState();
     }
 
     void publishState() {
-        //TODO: Send provider descriptor to the MediaRouterService
+        if (mClient == null) {
+            return;
+        }
+        try {
+            mClient.notifyProviderInfoUpdated(mProviderInfo);
+        } catch (RemoteException ex) {
+            Log.w(TAG, "Failed to send onProviderInfoUpdated");
+        }
     }
 
     final class ProviderStub extends IMediaRoute2Provider.Stub {
         ProviderStub() { }
 
         @Override
-        public void setCallback(IMediaRoute2Callback callback) {
-            mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::setCallback,
-                    MediaRoute2ProviderService.this, callback));
+        public void registerClient(IMediaRoute2ProviderClient client) {
+            mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::registerClient,
+                    MediaRoute2ProviderService.this, client));
         }
 
         @Override

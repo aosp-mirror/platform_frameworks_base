@@ -96,6 +96,16 @@ public final class MediaRoute2Info implements Parcelable {
         dest.writeBundle(mExtras);
     }
 
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder()
+                .append("MediaRouteInfo{ ")
+                .append("id=").append(getId())
+                .append(", name=").append(getName())
+                .append(" }");
+        return result.toString();
+    }
+
     /**
      * Builder for {@link MediaRoute2Info media route info}.
      */

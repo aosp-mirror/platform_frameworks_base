@@ -17,7 +17,7 @@
 package android.media;
 
 import android.media.IMediaRouterClient;
-import android.media.IMediaRouter2ManagerClient;
+import android.media.IMediaRouter2Manager;
 import android.media.MediaRouterClientState;
 
 /**
@@ -36,9 +36,9 @@ interface IMediaRouterService {
     void requestSetVolume(IMediaRouterClient client, String routeId, int volume);
     void requestUpdateVolume(IMediaRouterClient client, String routeId, int direction);
 
-    void registerManagerAsUser(IMediaRouter2ManagerClient callback,
+    void registerManagerAsUser(IMediaRouter2Manager manager,
             String packageName, int userId);
-    void unregisterManager(IMediaRouter2ManagerClient callback);
-    void setRemoteRoute(IMediaRouter2ManagerClient callback,
+    void unregisterManager(IMediaRouter2Manager manager);
+    void setRemoteRoute(IMediaRouter2Manager manager,
             int uid, String routeId, boolean explicit);
 }
