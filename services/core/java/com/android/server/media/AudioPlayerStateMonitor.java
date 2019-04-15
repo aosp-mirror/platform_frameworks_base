@@ -142,7 +142,8 @@ class AudioPlayerStateMonitor {
 
     /**
      * Returns the sorted list of UIDs that have had active audio playback. (i.e. playing an
-     * audio/video) The UID whose audio playback becomes active at the last comes first.
+     * audio/video) The UID whose audio is currently playing comes first, then the UID whose audio
+     * playback becomes active at the last comes next.
      */
     public IntArray getSortedAudioPlaybackClientUids() {
         IntArray sortedAudioPlaybackClientUids = new IntArray();
@@ -253,6 +254,26 @@ class AudioPlayerStateMonitor {
                         mSortedAudioPlaybackClientUids.add(0, uid);
                     }
                 }
+
+                if (mActiveAudioUids.size() > 0
+                        && !mActiveAudioUids.contains(mSortedAudioPlaybackClientUids.get(0))) {
+                    int firstActiveUid = -1;
+                    int firatActiveUidIndex = -1;
+                    for (int i = 1; i < mSortedAudioPlaybackClientUids.size(); ++i) {
+                        int uid = mSortedAudioPlaybackClientUids.get(i);
+                        if (mActiveAudioUids.contains(uid)) {
+                            firatActiveUidIndex = i;
+                            firstActiveUid = uid;
+                            break;
+                        }
+                    }
+                    for (int i = firatActiveUidIndex; i > 0; --i) {
+                        mSortedAudioPlaybackClientUids.set(i,
+                                mSortedAudioPlaybackClientUids.get(i - 1));
+                    }
+                    mSortedAudioPlaybackClientUids.set(0, firstActiveUid);
+                }
+
                 // Notify the active state change of audio players.
                 for (AudioPlaybackConfiguration config : configs) {
                     final int pii = config.getPlayerInterfaceId();
