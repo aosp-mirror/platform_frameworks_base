@@ -214,14 +214,15 @@ TEST(ResourceUtilsTest, ItemsWithWhitespaceAreParsedCorrectly) {
 }
 
 TEST(ResourceUtilsTest, ParseSdkVersionWithCodename) {
-  const android::StringPiece codename =
-      GetDevelopmentSdkCodeNameAndVersion().first;
-  const int version = GetDevelopmentSdkCodeNameAndVersion().second;
-
-  EXPECT_THAT(ResourceUtils::ParseSdkVersion(codename), Eq(Maybe<int>(version)));
+  EXPECT_THAT(ResourceUtils::ParseSdkVersion("Q"), Eq(Maybe<int>(10000)));
   EXPECT_THAT(
-      ResourceUtils::ParseSdkVersion(codename.to_string() + ".fingerprint"),
-      Eq(Maybe<int>(version)));
+      ResourceUtils::ParseSdkVersion("Q.fingerprint"),
+      Eq(Maybe<int>(10000)));
+
+  EXPECT_THAT(ResourceUtils::ParseSdkVersion("R"), Eq(Maybe<int>(10000)));
+  EXPECT_THAT(
+      ResourceUtils::ParseSdkVersion("R.fingerprint"),
+      Eq(Maybe<int>(10000)));
 }
 
 TEST(ResourceUtilsTest, StringBuilderWhitespaceRemoval) {
