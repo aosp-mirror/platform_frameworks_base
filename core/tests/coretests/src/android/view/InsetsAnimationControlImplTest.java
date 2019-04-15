@@ -40,7 +40,6 @@ import android.util.SparseArray;
 import android.view.SurfaceControl.Transaction;
 import android.view.SyncRtSurfaceTransactionApplier.SurfaceParams;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
@@ -62,7 +61,6 @@ import java.util.List;
  * {@link com.android.server.wm.test.filters.FrameworksTestsFilter}.
  */
 @Presubmit
-@FlakyTest(detail = "Promote once confirmed non-flaky")
 @RunWith(AndroidJUnit4.class)
 public class InsetsAnimationControlImplTest {
 

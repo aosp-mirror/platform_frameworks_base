@@ -24,7 +24,6 @@ import android.graphics.Insets;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
@@ -41,7 +40,6 @@ import org.junit.runner.RunWith;
  * {@link com.android.server.wm.test.filters.FrameworksTestsFilter}.
  */
 @Presubmit
-@FlakyTest(detail = "Promote once confirmed non-flaky")
 @RunWith(AndroidJUnit4.class)
 public class InsetsSourceTest {
 
