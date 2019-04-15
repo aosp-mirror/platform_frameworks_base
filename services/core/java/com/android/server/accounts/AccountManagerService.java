@@ -693,7 +693,7 @@ public class AccountManagerService
             return visibility;
         }
 
-        boolean isPrivileged = isPermittedForPackage(packageName, uid, accounts.userId,
+        boolean isPrivileged = isPermittedForPackage(packageName, accounts.userId,
                 Manifest.permission.GET_ACCOUNTS_PRIVILEGED);
 
         // Device/Profile owner gets visibility by default.
@@ -703,8 +703,8 @@ public class AccountManagerService
 
         boolean preO = isPreOApplication(packageName);
         if ((signatureCheckResult != SIGNATURE_CHECK_MISMATCH)
-                || (preO && checkGetAccountsPermission(packageName, uid, accounts.userId))
-                || (checkReadContactsPermission(packageName, uid, accounts.userId)
+                || (preO && checkGetAccountsPermission(packageName, accounts.userId))
+                || (checkReadContactsPermission(packageName, accounts.userId)
                     && accountTypeManagesContacts(account.type, accounts.userId))
                 || isPrivileged) {
             // Use legacy for preO apps with GET_ACCOUNTS permission or pre/postO with signature
@@ -3317,8 +3317,8 @@ public class AccountManagerService
         options.putInt(AccountManager.KEY_CALLER_PID, pid);
 
         // Check to see if the Password should be included to the caller.
-        String callerPkg = optionsIn.getString(AccountManager.KEY_ANDROID_PACKAGE_NAME);
-        boolean isPasswordForwardingAllowed = isPermitted(
+        String callerPkg = options.getString(AccountManager.KEY_ANDROID_PACKAGE_NAME);
+        boolean isPasswordForwardingAllowed = checkPermissionAndNote(
                 callerPkg, uid, Manifest.permission.GET_PASSWORD);
 
         long identityToken = clearCallingIdentity();
@@ -3743,7 +3743,7 @@ public class AccountManagerService
 
         // Check to see if the Password should be included to the caller.
         String callerPkg = loginOptions.getString(AccountManager.KEY_ANDROID_PACKAGE_NAME);
-        boolean isPasswordForwardingAllowed = isPermitted(
+        boolean isPasswordForwardingAllowed = checkPermissionAndNote(
                 callerPkg, uid, Manifest.permission.GET_PASSWORD);
 
         long identityToken = clearCallingIdentity();
@@ -5318,31 +5318,36 @@ public class AccountManagerService
         }
     }
 
-    private boolean isPermittedForPackage(String packageName, int uid, int userId,
-            String... permissions) {
+    private boolean isPermittedForPackage(String packageName, int userId, String... permissions) {
         final long identity = Binder.clearCallingIdentity();
         try {
+            final int uid = mPackageManager.getPackageUidAsUser(packageName, userId);
             IPackageManager pm = ActivityThread.getPackageManager();
             for (String perm : permissions) {
                 if (pm.checkPermission(perm, packageName, userId)
                         == PackageManager.PERMISSION_GRANTED) {
                     // Checks runtime permission revocation.
                     final int opCode = AppOpsManager.permissionToOpCode(perm);
-                    if (opCode == AppOpsManager.OP_NONE || mAppOpsManager.noteOpNoThrow(
+                    if (opCode == AppOpsManager.OP_NONE || mAppOpsManager.checkOpNoThrow(
                             opCode, uid, packageName) == AppOpsManager.MODE_ALLOWED) {
                         return true;
                     }
                 }
             }
-        } catch (RemoteException e) {
-            /* ignore - local call */
+        } catch (NameNotFoundException | RemoteException e) {
+            // Assume permission is not granted if an error accrued.
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
         return false;
     }
 
-    private boolean isPermitted(String opPackageName, int callingUid, String... permissions) {
+    /**
+     * Checks that package has at least one of given permissions and makes note of app
+     * performing the action.
+     */
+    private boolean checkPermissionAndNote(String opPackageName, int callingUid,
+            String... permissions) {
         for (String perm : permissions) {
             if (mContext.checkCallingOrSelfPermission(perm) == PackageManager.PERMISSION_GRANTED) {
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -5447,13 +5452,13 @@ public class AccountManagerService
     // Method checks visibility for applications targeing API level below {@link
     // android.os.Build.VERSION_CODES#O},
     // returns true if the the app has GET_ACCOUNTS or GET_ACCOUNTS_PRIVILEGED permission.
-    private boolean checkGetAccountsPermission(String packageName, int uid, int userId) {
-        return isPermittedForPackage(packageName, uid, userId, Manifest.permission.GET_ACCOUNTS,
+    private boolean checkGetAccountsPermission(String packageName, int userId) {
+        return isPermittedForPackage(packageName, userId, Manifest.permission.GET_ACCOUNTS,
                 Manifest.permission.GET_ACCOUNTS_PRIVILEGED);
     }
 
-    private boolean checkReadContactsPermission(String packageName, int uid, int userId) {
-        return isPermittedForPackage(packageName, uid, userId, Manifest.permission.READ_CONTACTS);
+    private boolean checkReadContactsPermission(String packageName, int userId) {
+        return isPermittedForPackage(packageName, userId, Manifest.permission.READ_CONTACTS);
     }
 
     // Heuristic to check that account type may be associated with some contacts data and
@@ -5473,7 +5478,7 @@ public class AccountManagerService
         for (RegisteredServicesCache.ServiceInfo<AuthenticatorDescription> serviceInfo
                 : serviceInfos) {
             if (accountType.equals(serviceInfo.type.type)) {
-                return isPermittedForPackage(serviceInfo.type.packageName, serviceInfo.uid, userId,
+                return isPermittedForPackage(serviceInfo.type.packageName, userId,
                     Manifest.permission.WRITE_CONTACTS);
             }
         }
