@@ -5872,8 +5872,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     boolean isUidForeground(int uid) {
-        return (getUidState(uid) == ActivityManager.PROCESS_STATE_TOP)
-                || mWindowManager.mRoot.isAnyNonToastWindowVisibleForUid(uid);
+        // A uid is considered to be foreground if it has a visible non-toast window.
+        return mWindowManager.mRoot.isAnyNonToastWindowVisibleForUid(uid);
     }
 
     boolean isDeviceOwner(int uid) {
