@@ -261,13 +261,13 @@ public class StagingManager {
             if (storageManager.supportsCheckpoint()) {
                 storageManager.startCheckpoint(1 /* numRetries */);
             }
-        } catch (RemoteException e) {
+        } catch (Exception e) { // TODO(b/130190815) make a RemoteException again
             // While StorageManager lives in the same process, the native implementation
             // it calls through lives in 'vold'; so, this call can fail if 'vold' isn't
             // reachable.
             // Since we can live without filesystem checkpointing, just warn in this case
             // and continue.
-            Slog.w(TAG, "Could not start filesystem checkpoint.");
+            Slog.w(TAG, "Could not start filesystem checkpoint:", e);
         }
 
         session.setStagedSessionReady();
