@@ -1498,6 +1498,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private ParcelFileDescriptor[] mLifeMonitorFds;
 
+    static final HostingRecord sNullHostingRecord = new HostingRecord(null);
     /**
      * Used to notify activity lifecycle events.
      */
@@ -1963,7 +1964,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 ProcessRecord app = mProcessList.newProcessRecordLocked(info, info.processName,
                         false,
                         0,
-                        false);
+                        new HostingRecord("system"));
                 app.setPersistent(true);
                 app.pid = MY_PID;
                 app.getWindowProcessController().setPid(MY_PID);
@@ -2894,8 +2895,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             info.seInfoUser = SELinuxUtil.COMPLETE_STR;
             info.targetSdkVersion = Build.VERSION.SDK_INT;
             ProcessRecord proc = mProcessList.startProcessLocked(processName, info /* info */,
-                    false /* knownToBeDead */, 0 /* intentFlags */, ""  /* hostingType */,
-                    null /* hostingName */, true /* allowWhileBooting */, true /* isolated */,
+                    false /* knownToBeDead */, 0 /* intentFlags */,
+                    sNullHostingRecord  /* hostingRecord */,
+                    true /* allowWhileBooting */, true /* isolated */,
                     uid, true /* keepIfLarge */, abiOverride, entryPoint, entryPointArgs,
                     crashHandler);
             return proc != null;
@@ -2905,11 +2907,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     @GuardedBy("this")
     final ProcessRecord startProcessLocked(String processName,
             ApplicationInfo info, boolean knownToBeDead, int intentFlags,
-            String hostingType, ComponentName hostingName, boolean allowWhileBooting,
+            HostingRecord hostingRecord, boolean allowWhileBooting,
             boolean isolated, boolean keepIfLarge) {
         return mProcessList.startProcessLocked(processName, info, knownToBeDead, intentFlags,
-                hostingType,
-                hostingName, allowWhileBooting, isolated, 0 /* isolatedUid */, keepIfLarge,
+                hostingRecord, allowWhileBooting, isolated, 0 /* isolatedUid */, keepIfLarge,
                 null /* ABI override */, null /* entryPoint */, null /* entryPointArgs */,
                 null /* crashHandler */);
     }
@@ -4692,7 +4693,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             app.deathRecipient = adr;
         } catch (RemoteException e) {
             app.resetPackageList(mProcessStats);
-            mProcessList.startProcessLocked(app, "link fail", processName);
+            mProcessList.startProcessLocked(app,
+                    new HostingRecord("link fail", processName));
             return false;
         }
 
@@ -4931,7 +4933,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             app.resetPackageList(mProcessStats);
             app.unlinkDeathRecipient();
-            mProcessList.startProcessLocked(app, "bind fail", processName);
+            mProcessList.startProcessLocked(app, new HostingRecord("bind-fail", processName));
             return false;
         }
 
@@ -5013,8 +5015,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 app.startTime,
                 (int) (bindApplicationTimeMillis - app.startTime),
                 (int) (SystemClock.elapsedRealtime() - app.startTime),
-                app.hostingType,
-                (app.hostingNameStr != null ? app.hostingNameStr : ""));
+                app.hostingRecord.getType(),
+                (app.hostingRecord.getName() != null ? app.hostingRecord.getName() : ""));
         return true;
     }
 
@@ -5123,7 +5125,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 for (int ip=0; ip<NP; ip++) {
                     if (DEBUG_PROCESSES) Slog.v(TAG_PROCESSES, "Starting process on hold: "
                             + procs.get(ip));
-                    mProcessList.startProcessLocked(procs.get(ip), "on-hold", null);
+                    mProcessList.startProcessLocked(procs.get(ip), new HostingRecord("on-hold"));
                 }
             }
             if (mFactoryTest == FactoryTest.FACTORY_TEST_LOW_LEVEL) {
@@ -6915,9 +6917,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                         } else {
                             checkTime(startTime, "getContentProviderImpl: before start process");
                             proc = startProcessLocked(cpi.processName,
-                                    cpr.appInfo, false, 0, "content provider",
+                                    cpr.appInfo, false, 0,
+                                    new HostingRecord("content provider",
                                     new ComponentName(cpi.applicationInfo.packageName,
-                                            cpi.name), false, false, false);
+                                            cpi.name)), false, false, false);
                             checkTime(startTime, "getContentProviderImpl: after start process");
                             if (proc == null) {
                                 Slog.w(TAG, "Unable to launch app "
@@ -7638,7 +7641,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         if (app == null) {
-            app = mProcessList.newProcessRecordLocked(info, customProcess, isolated, 0, false);
+            app = mProcessList.newProcessRecordLocked(info, customProcess, isolated, 0,
+                    new HostingRecord("added application",
+                            customProcess != null ? customProcess : info.processName));
             mProcessList.updateLruProcessLocked(app, false, null);
             updateOomAdjLocked();
         }
@@ -7659,9 +7664,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         if (app.thread == null && mPersistentStartingProcesses.indexOf(app) < 0) {
             mPersistentStartingProcesses.add(app);
-            mProcessList.startProcessLocked(app, "added application",
-                    customProcess != null ? customProcess : app.processName, disableHiddenApiChecks,
-                    mountExtStorageFull, abiOverride);
+            mProcessList.startProcessLocked(app, new HostingRecord("added application",
+                    customProcess != null ? customProcess : app.processName),
+                    disableHiddenApiChecks, mountExtStorageFull, abiOverride);
         }
 
         return app;
@@ -13611,7 +13616,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             mProcessList.addProcessNameLocked(app);
             app.pendingStart = false;
-            mProcessList.startProcessLocked(app, "restart", app.processName);
+            mProcessList.startProcessLocked(app,
+                    new HostingRecord("restart", app.processName));
             return true;
         } else if (app.pid > 0 && app.pid != MY_PID) {
             // Goodbye!
@@ -13952,9 +13958,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                     (backupMode == ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL)
                             ? new ComponentName(app.packageName, app.backupAgentName)
                             : new ComponentName("android", "FullBackupAgent");
+
             // startProcessLocked() returns existing proc's record if it's already running
             ProcessRecord proc = startProcessLocked(app.processName, app,
-                    false, 0, "backup", hostingName, false, false, false);
+                    false, 0,
+                    new HostingRecord("backup", hostingName),
+                    false, false, false);
             if (proc == null) {
                 Slog.e(TAG, "Unable to start backup agent process " + r);
                 return false;
@@ -18163,8 +18172,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
                 synchronized (ActivityManagerService.this) {
                     startProcessLocked(processName, info, knownToBeDead, 0 /* intentFlags */,
-                            hostingType, hostingName, false /* allowWhileBooting */,
-                            false /* isolated */, true /* keepIfLarge */);
+                            new HostingRecord(hostingType, hostingName),
+                            false /* allowWhileBooting */, false /* isolated */,
+                            true /* keepIfLarge */);
                 }
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
