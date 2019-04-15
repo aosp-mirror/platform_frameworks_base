@@ -129,12 +129,20 @@ class ValueBodyPrinter : public ConstValueVisitor {
     constexpr uint32_t kMask = android::ResTable_map::TYPE_ENUM | android::ResTable_map::TYPE_FLAGS;
     if (attr->type_mask & kMask) {
       for (const auto& symbol : attr->symbols) {
-        printer_->Print(symbol.symbol.name.value().entry);
-        if (symbol.symbol.id) {
-          printer_->Print("(");
+        if (symbol.symbol.name) {
+          printer_->Print(symbol.symbol.name.value().entry);
+
+          if (symbol.symbol.id) {
+            printer_->Print("(");
+            printer_->Print(symbol.symbol.id.value().to_string());
+            printer_->Print(")");
+          }
+        } else if (symbol.symbol.id) {
           printer_->Print(symbol.symbol.id.value().to_string());
-          printer_->Print(")");
+        } else {
+          printer_->Print("???");
         }
+
         printer_->Println(StringPrintf("=0x%08x", symbol.value));
       }
     }
