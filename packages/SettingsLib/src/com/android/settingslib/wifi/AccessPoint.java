@@ -337,6 +337,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
         mContext = context;
         networkId = config.networkId;
         mConfig = config;
+        mFqdn = config.FQDN;
         setScanResultsPasspoint(homeScans, roamingScans);
         updateKey();
     }
@@ -671,6 +672,13 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
     public String getKey() {
         return mKey;
+    }
+
+    /**
+     * Determines if the other AccessPoint represents the same network as this AccessPoint
+     */
+    public boolean matches(AccessPoint other) {
+        return getKey().equals(other.getKey());
     }
 
     public boolean matches(WifiConfiguration config) {
