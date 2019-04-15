@@ -46,6 +46,7 @@ import static com.android.server.am.ActivityManagerService.TAG_PSS;
 import static com.android.server.am.ActivityManagerService.TAG_UID_OBSERVERS;
 
 import android.app.ActivityManager;
+import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.AppProtoEnums;
 import android.app.IApplicationThread;
@@ -2485,21 +2486,25 @@ public final class ProcessList {
         }
     }
 
-    @GuardedBy("mService")
-    void setAllHttpProxyLocked() {
-        for (int i = mLruProcesses.size() - 1; i >= 0; i--) {
-            ProcessRecord r = mLruProcesses.get(i);
-            // Don't dispatch to isolated processes as they can't access
-            // ConnectivityManager and don't have network privileges anyway.
-            if (r.thread != null && !r.isolated) {
-                try {
-                    r.thread.updateHttpProxy();
-                } catch (RemoteException ex) {
-                    Slog.w(TAG, "Failed to update http proxy for: " +
-                            r.info.processName);
+    void setAllHttpProxy() {
+        // Update the HTTP proxy for each application thread.
+        synchronized (mService) {
+            for (int i = mLruProcesses.size() - 1 ; i >= 0 ; i--) {
+                ProcessRecord r = mLruProcesses.get(i);
+                // Don't dispatch to isolated processes as they can't access ConnectivityManager and
+                // don't have network privileges anyway. Exclude system server and update it
+                // separately outside the AMS lock, to avoid deadlock with Connectivity Service.
+                if (r.pid != ActivityManagerService.MY_PID && r.thread != null && !r.isolated) {
+                    try {
+                        r.thread.updateHttpProxy();
+                    } catch (RemoteException ex) {
+                        Slog.w(TAG, "Failed to update http proxy for: "
+                                + r.info.processName);
+                    }
                 }
             }
         }
+        ActivityThread.updateHttpProxy(mService.mContext);
     }
 
     @GuardedBy("mService")
