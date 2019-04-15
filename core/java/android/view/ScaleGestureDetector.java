@@ -551,7 +551,7 @@ public class ScaleGestureDetector {
                     (mEventBeforeOrAboveStartingGestureEvent && (mCurrSpan < mPrevSpan)) ||
                     (!mEventBeforeOrAboveStartingGestureEvent && (mCurrSpan > mPrevSpan));
             final float spanDiff = (Math.abs(1 - (mCurrSpan / mPrevSpan)) * SCALE_FACTOR);
-            return mPrevSpan <= 0 ? 1 : scaleUp ? (1 + spanDiff) : (1 - spanDiff);
+            return mPrevSpan <= mSpanSlop ? 1 : scaleUp ? (1 + spanDiff) : (1 - spanDiff);
         }
         return mPrevSpan > 0 ? mCurrSpan / mPrevSpan : 1;
     }
