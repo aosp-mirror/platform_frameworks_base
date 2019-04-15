@@ -455,6 +455,7 @@ public class NotificationManagerService extends SystemService {
     private int mAutoGroupAtCount;
     private boolean mIsTelevision;
     private boolean mIsAutomotive;
+    private boolean mNotificationEffectsEnabledForAutomotive;
 
     private MetricsLogger mMetricsLogger;
     private TriPredicate<String, Integer, String> mAllowedManagedServicePackages;
@@ -1526,6 +1527,11 @@ public class NotificationManagerService extends SystemService {
     }
 
     @VisibleForTesting
+    void setNotificationEffectsEnabledForAutomotive(boolean isEnabled) {
+        mNotificationEffectsEnabledForAutomotive = isEnabled;
+    }
+
+    @VisibleForTesting
     void setIsTelevision(boolean isTelevision) {
         mIsTelevision = isTelevision;
     }
@@ -1686,6 +1692,8 @@ public class NotificationManagerService extends SystemService {
 
         mIsAutomotive =
                 mPackageManagerClient.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE, 0);
+        mNotificationEffectsEnabledForAutomotive =
+                resources.getBoolean(R.bool.config_enableServerNotificationEffectsForAutomotive);
 
         mPreferencesHelper.lockChannelsForOEM(getContext().getResources().getStringArray(
                 com.android.internal.R.array.config_nonBlockableNotificationPackages));
@@ -5560,6 +5568,9 @@ public class NotificationManagerService extends SystemService {
     @VisibleForTesting
     @GuardedBy("mNotificationLock")
     void buzzBeepBlinkLocked(NotificationRecord record) {
+        if (mIsAutomotive && !mNotificationEffectsEnabledForAutomotive) {
+            return;
+        }
         boolean buzz = false;
         boolean beep = false;
         boolean blink = false;
