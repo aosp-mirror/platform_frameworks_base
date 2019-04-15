@@ -34,13 +34,13 @@ struct SurfaceExposer : Surface {
     // Make warnings happy
     SurfaceExposer() = delete;
 
-    using Surface::setBufferCount;
-    using Surface::setSwapInterval;
-    using Surface::dequeueBuffer;
-    using Surface::queueBuffer;
     using Surface::cancelBuffer;
+    using Surface::dequeueBuffer;
     using Surface::lockBuffer_DEPRECATED;
     using Surface::perform;
+    using Surface::queueBuffer;
+    using Surface::setBufferCount;
+    using Surface::setSwapInterval;
 };
 
 #define callProtected(surface, func, ...) ((*surface).*&SurfaceExposer::func)(__VA_ARGS__)

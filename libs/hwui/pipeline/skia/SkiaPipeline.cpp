@@ -250,8 +250,9 @@ SkCanvas* SkiaPipeline::tryCapture(SkSurface* surface) {
         }
         if (mCaptureSequence > 0 || mPictureCapturedCallback) {
             mRecorder.reset(new SkPictureRecorder());
-            SkCanvas* pictureCanvas = mRecorder->beginRecording(surface->width(), surface->height(), nullptr,
-                                                                SkPictureRecorder::kPlaybackDrawPicture_RecordFlag);
+            SkCanvas* pictureCanvas =
+                    mRecorder->beginRecording(surface->width(), surface->height(), nullptr,
+                                              SkPictureRecorder::kPlaybackDrawPicture_RecordFlag);
             mNwayCanvas = std::make_unique<SkNWayCanvas>(surface->width(), surface->height());
             mNwayCanvas->addCanvas(surface->getCanvas());
             mNwayCanvas->addCanvas(pictureCanvas);
@@ -276,8 +277,7 @@ void SkiaPipeline::endCapture(SkSurface* surface) {
                 if (1 == mCaptureSequence) {
                     savePictureAsync(data, mCapturedFile);
                 } else {
-                    savePictureAsync(data,
-                            mCapturedFile + "_" + std::to_string(mCaptureSequence));
+                    savePictureAsync(data, mCapturedFile + "_" + std::to_string(mCaptureSequence));
                 }
                 mCaptureSequence--;
             }
@@ -327,7 +327,7 @@ static Rect nodeBounds(RenderNode& node) {
     auto& props = node.properties();
     return Rect(props.getLeft(), props.getTop(), props.getRight(), props.getBottom());
 }
-}
+}  // namespace
 
 void SkiaPipeline::renderFrameImpl(const LayerUpdateQueue& layers, const SkRect& clip,
                                    const std::vector<sp<RenderNode>>& nodes, bool opaque,
@@ -464,10 +464,20 @@ void SkiaPipeline::setSurfaceColorProperties(ColorMode colorMode) {
 // (3) Requires RGBA colors (instead of BGRA).
 static const uint32_t kOverdrawColors[2][6] = {
         {
-                0x00000000, 0x00000000, 0x2f2f0000, 0x2f002f00, 0x3f00003f, 0x7f00007f,
+                0x00000000,
+                0x00000000,
+                0x2f2f0000,
+                0x2f002f00,
+                0x3f00003f,
+                0x7f00007f,
         },
         {
-                0x00000000, 0x00000000, 0x2f2f0000, 0x4f004f4f, 0x5f50335f, 0x7f00007f,
+                0x00000000,
+                0x00000000,
+                0x2f2f0000,
+                0x4f004f4f,
+                0x5f50335f,
+                0x7f00007f,
         },
 };
 

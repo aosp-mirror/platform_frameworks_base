@@ -43,7 +43,7 @@ public:
                      FrameInfo* currentFrameInfo, bool* requireSwap) override;
     DeferredLayerUpdater* createTextureLayer() override;
     bool setSurface(ANativeWindow* surface, renderthread::SwapBehavior swapBehavior,
-                    renderthread::ColorMode colorMode) override;
+                    renderthread::ColorMode colorMode, uint32_t extraBuffers) override;
     void onStop() override;
     bool isSurfaceReady() override;
     bool isContextReady() override;
