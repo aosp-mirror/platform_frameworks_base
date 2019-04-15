@@ -194,8 +194,17 @@ class AbUpdateInstaller extends UpdateInstaller {
         }
 
         UpdateEngine updateEngine = buildBoundUpdateEngine();
-        updateEngine.applyPayload(
-                updatePath, mOffsetForUpdate, mSizeForUpdate, headerKeyValuePairs);
+        try {
+            updateEngine.applyPayload(
+                    updatePath, mOffsetForUpdate, mSizeForUpdate, headerKeyValuePairs);
+        } catch (Exception e) {
+            // Prevent an automatic restart when an update is already being processed
+            // (http://b/124106342).
+            Log.w(UpdateInstaller.TAG, "Failed to install update from file.", e);
+            notifyCallbackOnError(
+                    InstallSystemUpdateCallback.UPDATE_ERROR_UNKNOWN,
+                    "Failed to install update from file.");
+        }
     }
 
     private boolean updateStateForPayload() throws IOException {
