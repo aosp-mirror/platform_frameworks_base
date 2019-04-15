@@ -332,33 +332,11 @@ public abstract class FileSystemProvider extends DocumentsProvider {
     }
 
     private void moveInMediaStore(@Nullable File oldVisibleFile, @Nullable File newVisibleFile) {
-        // visibleFolders are null if we're moving a document in external thumb drive or SD card.
-        //
-        // They should be all null or not null at the same time. File#renameTo() doesn't work across
-        // volumes so an exception will be thrown before calling this method.
-        if (oldVisibleFile != null && newVisibleFile != null) {
-            final long token = Binder.clearCallingIdentity();
-
-            try {
-                final ContentResolver resolver = getContext().getContentResolver();
-                final Uri externalUri = newVisibleFile.isDirectory()
-                        ? MediaStore.Files.getDirectoryUri("external")
-                        : MediaStore.Files.getContentUri("external");
-
-                ContentValues values = new ContentValues();
-                values.put(MediaStore.Files.FileColumns.DATA, newVisibleFile.getAbsolutePath());
-
-                // Logic borrowed from MtpDatabase.
-                // note - we are relying on a special case in MediaProvider.update() to update
-                // the paths for all children in the case where this is a directory.
-                final String path = oldVisibleFile.getAbsolutePath();
-                resolver.update(externalUri,
-                        values,
-                        "_data LIKE ? AND lower(_data)=lower(?)",
-                        new String[]{path, path});
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
+        if (oldVisibleFile != null) {
+            MediaStore.scanFile(getContext(), oldVisibleFile);
+        }
+        if (newVisibleFile != null) {
+            MediaStore.scanFile(getContext(), newVisibleFile);
         }
     }
 
