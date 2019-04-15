@@ -161,8 +161,6 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.AnimationUtils;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
-import android.view.contentcapture.ContentCaptureManager;
-import android.view.contentcapture.ContentCaptureSession;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
@@ -977,9 +975,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // TextView is important by default, unless app developer overrode attribute.
         if (getImportantForAutofill() == IMPORTANT_FOR_AUTOFILL_AUTO) {
             setImportantForAutofill(IMPORTANT_FOR_AUTOFILL_YES);
-        }
-        if (getImportantForContentCapture() == IMPORTANT_FOR_CONTENT_CAPTURE_AUTO) {
-            setImportantForContentCapture(IMPORTANT_FOR_CONTENT_CAPTURE_YES);
         }
 
         setTextInternal("");
@@ -10520,8 +10515,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Notify managers (such as {@link AutofillManager} and {@link ContentCaptureManager}) that are
-     * interested on text changes.
+     * Notify managers (such as {@link AutofillManager}) that are interested in text changes.
      */
     private void notifyListeningManagersAfterTextChanged() {
 
@@ -10535,22 +10529,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     Log.v(LOG_TAG, "notifyAutoFillManagerAfterTextChanged");
                 }
                 afm.notifyValueChanged(TextView.this);
-            }
-        }
-
-        // TODO(b/121045053): should use a flag / boolean to keep status of SHOWN / HIDDEN instead
-        // of using isLaidout(), so it's not called in cases where it's laid out but a
-        // notifyAppeared was not sent.
-
-        // ContentCapture
-        if (isLaidOut() && isImportantForContentCapture() && isTextEditable()) {
-            final ContentCaptureManager cm = mContext.getSystemService(ContentCaptureManager.class);
-            if (cm != null && cm.isContentCaptureEnabled()) {
-                final ContentCaptureSession session = getContentCaptureSession();
-                if (session != null) {
-                    // TODO(b/111276913): pass flags when edited by user / add CTS test
-                    session.notifyViewTextChanged(getAutofillId(), getText());
-                }
             }
         }
     }
@@ -11386,8 +11364,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         final boolean isPassword = hasPasswordTransformationMethod()
                 || isPasswordInputType(getInputType());
-        if (viewFor == VIEW_STRUCTURE_FOR_AUTOFILL
-                || viewFor == VIEW_STRUCTURE_FOR_CONTENT_CAPTURE) {
+        if (viewFor == VIEW_STRUCTURE_FOR_AUTOFILL) {
             if (viewFor == VIEW_STRUCTURE_FOR_AUTOFILL) {
                 structure.setDataIsSensitive(!mTextSetFromXmlOrResourceId);
             }
@@ -11403,12 +11380,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
-        if (!isPassword || viewFor == VIEW_STRUCTURE_FOR_AUTOFILL
-                || viewFor == VIEW_STRUCTURE_FOR_CONTENT_CAPTURE) {
+        if (!isPassword || viewFor == VIEW_STRUCTURE_FOR_AUTOFILL) {
             if (mLayout == null) {
-                if (viewFor == VIEW_STRUCTURE_FOR_CONTENT_CAPTURE) {
-                    Log.w(LOG_TAG, "onProvideContentCaptureStructure(): calling assumeLayout()");
-                }
                 assumeLayout();
             }
             Layout layout = mLayout;
@@ -11496,8 +11469,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
             }
 
-            if (viewFor == VIEW_STRUCTURE_FOR_ASSIST
-                    || viewFor == VIEW_STRUCTURE_FOR_CONTENT_CAPTURE) {
+            if (viewFor == VIEW_STRUCTURE_FOR_ASSIST) {
                 // Extract style information that applies to the TextView as a whole.
                 int style = 0;
                 int typefaceStyle = getTypefaceStyle();
@@ -11525,8 +11497,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 structure.setTextStyle(getTextSize(), getCurrentTextColor(),
                         AssistStructure.ViewNode.TEXT_COLOR_UNDEFINED /* bgColor */, style);
             }
-            if (viewFor == VIEW_STRUCTURE_FOR_AUTOFILL
-                    || viewFor == VIEW_STRUCTURE_FOR_CONTENT_CAPTURE) {
+            if (viewFor == VIEW_STRUCTURE_FOR_AUTOFILL) {
                 structure.setMinTextEms(getMinEms());
                 structure.setMaxTextEms(getMaxEms());
                 int maxLength = -1;

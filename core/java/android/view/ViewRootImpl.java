@@ -105,11 +105,7 @@ import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
-import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
-import android.view.contentcapture.ContentCaptureManager;
-import android.view.contentcapture.ContentCaptureSession;
-import android.view.contentcapture.MainContentCaptureSession;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Scroller;
 
@@ -223,21 +219,6 @@ public final class ViewRootImpl implements ViewParent,
      * a key event, before resetting the counters.
      */
     static final int MAX_TRACKBALL_DELAY = 250;
-
-    /**
-     * Initial value for {@link #mContentCaptureEnabled}.
-     */
-    private static final int CONTENT_CAPTURE_ENABLED_NOT_CHECKED = 0;
-
-    /**
-     * Value for {@link #mContentCaptureEnabled} when it was checked and set to {@code true}.
-     */
-    private static final int CONTENT_CAPTURE_ENABLED_TRUE = 1;
-
-    /**
-     * Value for {@link #mContentCaptureEnabled} when it was checked and set to {@code false}.
-     */
-    private static final int CONTENT_CAPTURE_ENABLED_FALSE = 2;
 
     @UnsupportedAppUsage
     static final ThreadLocal<HandlerActionQueue> sRunQueues = new ThreadLocal<HandlerActionQueue>();
@@ -434,10 +415,6 @@ public final class ViewRootImpl implements ViewParent,
     boolean mApplyInsetsRequested;
     boolean mLayoutRequested;
     boolean mFirst;
-
-    @Nullable
-    int mContentCaptureEnabled = CONTENT_CAPTURE_ENABLED_NOT_CHECKED;
-    boolean mPerformContentCapture;
 
     boolean mReportNextDraw;
     boolean mFullRedrawNeeded;
@@ -637,7 +614,6 @@ public final class ViewRootImpl implements ViewParent,
         mTransparentRegion = new Region();
         mPreviousTransparentRegion = new Region();
         mFirst = true; // true for the first time the view is added
-        mPerformContentCapture = true; // also true for the first time the view is added
         mAdded = false;
         mAttachInfo = new View.AttachInfo(mWindowSession, mWindow, display, this, mHandler, this,
                 context);
@@ -2787,53 +2763,7 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
-        if (mAttachInfo.mContentCaptureEvents != null) {
-            notifyContentCatpureEvents();
-        }
-
         mIsInTraversal = false;
-    }
-
-    private void notifyContentCatpureEvents() {
-        Trace.traceBegin(Trace.TRACE_TAG_VIEW, "notifyContentCaptureEvents");
-        try {
-            MainContentCaptureSession mainSession = mAttachInfo.mContentCaptureManager
-                    .getMainContentCaptureSession();
-            for (int i = 0; i < mAttachInfo.mContentCaptureEvents.size(); i++) {
-                int sessionId = mAttachInfo.mContentCaptureEvents.keyAt(i);
-                mainSession.notifyViewTreeEvent(sessionId, /* started= */ true);
-                ArrayList<Object> events = mAttachInfo.mContentCaptureEvents
-                        .valueAt(i);
-                for_each_event: for (int j = 0; j < events.size(); j++) {
-                    Object event = events.get(j);
-                    if (event instanceof AutofillId) {
-                        mainSession.notifyViewDisappeared(sessionId, (AutofillId) event);
-                    } else if (event instanceof View) {
-                        View view = (View) event;
-                        ContentCaptureSession session = view.getContentCaptureSession();
-                        if (session == null) {
-                            Log.w(mTag, "no content capture session on view: " + view);
-                            continue for_each_event;
-                        }
-                        int actualId = session.getId();
-                        if (actualId != sessionId) {
-                            Log.w(mTag, "content capture session mismatch for view (" + view
-                                    + "): was " + sessionId + " before, it's " + actualId + " now");
-                            continue for_each_event;
-                        }
-                        ViewStructure structure = session.newViewStructure(view);
-                        view.onProvideContentCaptureStructure(structure, /* flags= */ 0);
-                        session.notifyViewAppeared(structure);
-                    } else {
-                        Log.w(mTag, "invalid content capture event: " + event);
-                    }
-                }
-                mainSession.notifyViewTreeEvent(sessionId, /* started= */ false);
-            }
-            mAttachInfo.mContentCaptureEvents = null;
-        } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
-        }
     }
 
     private void notifySurfaceDestroyed() {
@@ -2966,13 +2896,6 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
         mFirstInputStage.onWindowFocusChanged(hasWindowFocus);
-
-        // NOTE: there's no view visibility (appeared / disapparead) events when the windows focus
-        // is lost, so we don't need to to force a flush - there might be other events such as
-        // text changes, but these should be flushed independently.
-        if (hasWindowFocus) {
-            handleContentCaptureFlush();
-        }
     }
 
     private void fireAccessibilityFocusEventIfHasFocusedNode() {
@@ -3538,86 +3461,6 @@ public final class ViewRootImpl implements ViewParent,
                 }
                 pendingDrawFinished();
             }
-        }
-        if (mPerformContentCapture) {
-            performContentCaptureInitialReport();
-        }
-    }
-
-    /**
-     * Checks (and caches) if content capture is enabled for this context.
-     */
-    private boolean isContentCaptureEnabled() {
-        switch (mContentCaptureEnabled) {
-            case CONTENT_CAPTURE_ENABLED_TRUE:
-                return true;
-            case CONTENT_CAPTURE_ENABLED_FALSE:
-                return false;
-            case CONTENT_CAPTURE_ENABLED_NOT_CHECKED:
-                final boolean reallyEnabled = isContentCaptureReallyEnabled();
-                mContentCaptureEnabled = reallyEnabled ? CONTENT_CAPTURE_ENABLED_TRUE
-                        : CONTENT_CAPTURE_ENABLED_FALSE;
-                return reallyEnabled;
-            default:
-                Log.w(TAG, "isContentCaptureEnabled(): invalid state " + mContentCaptureEnabled);
-                return false;
-        }
-
-    }
-
-    /**
-     * Checks (without caching) if content capture is enabled for this context.
-     */
-    private boolean isContentCaptureReallyEnabled() {
-        // First check if context supports it, so it saves a service lookup when it doesn't
-        if (mContext.getContentCaptureOptions() == null) return false;
-
-        final ContentCaptureManager ccm = mAttachInfo.getContentCaptureManager(mContext);
-        // Then check if it's enabled in the contex itself.
-        if (ccm == null || !ccm.isContentCaptureEnabled()) return false;
-
-        return true;
-    }
-
-    private void performContentCaptureInitialReport() {
-        mPerformContentCapture = false; // One-time offer!
-        final View rootView = mView;
-        if (DEBUG_CONTENT_CAPTURE) {
-            Log.v(mTag, "performContentCaptureInitialReport() on " + rootView);
-        }
-        if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
-            Trace.traceBegin(Trace.TRACE_TAG_VIEW, "dispatchContentCapture() for "
-                    + getClass().getSimpleName());
-        }
-        try {
-            if (!isContentCaptureEnabled()) return;
-
-            // Content capture is a go!
-            rootView.dispatchInitialProvideContentCaptureStructure();
-        } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
-        }
-    }
-
-    private void handleContentCaptureFlush() {
-        if (DEBUG_CONTENT_CAPTURE) {
-            Log.v(mTag, "handleContentCaptureFlush()");
-        }
-        if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
-            Trace.traceBegin(Trace.TRACE_TAG_VIEW, "flushContentCapture for "
-                    + getClass().getSimpleName());
-        }
-        try {
-            if (!isContentCaptureEnabled()) return;
-
-            final ContentCaptureManager ccm = mAttachInfo.mContentCaptureManager;
-            if (ccm == null) {
-                Log.w(TAG, "No ContentCapture on AttachInfo");
-                return;
-            }
-            ccm.flush(ContentCaptureSession.FLUSH_REASON_VIEW_ROOT_ENTERED);
-        } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
         }
     }
 
