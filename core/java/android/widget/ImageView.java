@@ -27,6 +27,7 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.BlendMode;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.ImageDecoder;
@@ -127,9 +128,9 @@ public class ImageView extends View {
     @UnsupportedAppUsage
     private BitmapDrawable mRecycleableBitmapDrawable = null;
     private ColorStateList mDrawableTintList = null;
-    private PorterDuff.Mode mDrawableTintMode = null;
+    private BlendMode mDrawableBlendMode = null;
     private boolean mHasDrawableTint = false;
-    private boolean mHasDrawableTintMode = false;
+    private boolean mHasDrawableBlendMode = false;
 
     private int[] mState = null;
     private boolean mMergeState = false;
@@ -226,14 +227,14 @@ public class ImageView extends View {
 
             // Prior to L, this attribute would always set a color filter with
             // blending mode SRC_ATOP. Preserve that default behavior.
-            mDrawableTintMode = PorterDuff.Mode.SRC_ATOP;
-            mHasDrawableTintMode = true;
+            mDrawableBlendMode = BlendMode.SRC_ATOP;
+            mHasDrawableBlendMode = true;
         }
 
         if (a.hasValue(R.styleable.ImageView_tintMode)) {
-            mDrawableTintMode = Drawable.parseTintMode(a.getInt(
-                    R.styleable.ImageView_tintMode, -1), mDrawableTintMode);
-            mHasDrawableTintMode = true;
+            mDrawableBlendMode = Drawable.parseBlendMode(a.getInt(
+                    R.styleable.ImageView_tintMode, -1), mDrawableBlendMode);
+            mHasDrawableBlendMode = true;
         }
 
         applyImageTint();
@@ -674,8 +675,23 @@ public class ImageView extends View {
      * @see Drawable#setTintMode(PorterDuff.Mode)
      */
     public void setImageTintMode(@Nullable PorterDuff.Mode tintMode) {
-        mDrawableTintMode = tintMode;
-        mHasDrawableTintMode = true;
+        setImageTintBlendMode(tintMode != null ? BlendMode.fromValue(tintMode.nativeInt) : null);
+    }
+
+    /**
+     * Specifies the blending mode used to apply the tint specified by
+     * {@link #setImageTintList(ColorStateList)}} to the image drawable. The default
+     * mode is {@link BlendMode#SRC_IN}.
+     *
+     * @param blendMode the blending mode used to apply the tint, may be
+     *                 {@code null} to clear tint
+     * @attr ref android.R.styleable#ImageView_tintMode
+     * @see #getImageTintMode()
+     * @see Drawable#setTintBlendMode(BlendMode)
+     */
+    public void setImageTintBlendMode(@Nullable BlendMode blendMode) {
+        mDrawableBlendMode = blendMode;
+        mHasDrawableBlendMode = true;
 
         applyImageTint();
     }
@@ -689,19 +705,32 @@ public class ImageView extends View {
     @Nullable
     @InspectableProperty(name = "tintMode")
     public PorterDuff.Mode getImageTintMode() {
-        return mDrawableTintMode;
+        return mDrawableBlendMode != null
+                ? BlendMode.blendModeToPorterDuffMode(mDrawableBlendMode) : null;
+    }
+
+    /**
+     * Gets the blending mode used to apply the tint to the image Drawable
+     * @return the blending mode used to apply the tint to the image Drawable
+     * @attr ref android.R.styleable#ImageView_tintMode
+     * @see #setImageTintBlendMode(BlendMode)
+     */
+    @Nullable
+    @InspectableProperty(name = "blendMode", attributeId = android.R.styleable.ImageView_tintMode)
+    public BlendMode getImageTintBlendMode() {
+        return mDrawableBlendMode;
     }
 
     private void applyImageTint() {
-        if (mDrawable != null && (mHasDrawableTint || mHasDrawableTintMode)) {
+        if (mDrawable != null && (mHasDrawableTint || mHasDrawableBlendMode)) {
             mDrawable = mDrawable.mutate();
 
             if (mHasDrawableTint) {
                 mDrawable.setTintList(mDrawableTintList);
             }
 
-            if (mHasDrawableTintMode) {
-                mDrawable.setTintMode(mDrawableTintMode);
+            if (mHasDrawableBlendMode) {
+                mDrawable.setTintBlendMode(mDrawableBlendMode);
             }
 
             // The drawable (or one of its children) may not have been

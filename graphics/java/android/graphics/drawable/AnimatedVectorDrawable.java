@@ -477,8 +477,8 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
     }
 
     @Override
-    public void setTintMode(@NonNull BlendMode blendMode) {
-        mAnimatedVectorState.mVectorDrawable.setTintMode(blendMode);
+    public void setTintBlendMode(@NonNull BlendMode blendMode) {
+        mAnimatedVectorState.mVectorDrawable.setTintBlendMode(blendMode);
     }
 
     @Override

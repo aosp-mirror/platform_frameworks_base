@@ -349,7 +349,7 @@ public class NinePatchDrawable extends Drawable {
     }
 
     @Override
-    public void setTintMode(@Nullable BlendMode blendMode) {
+    public void setTintBlendMode(@Nullable BlendMode blendMode) {
         mNinePatchState.mBlendMode = blendMode;
         mBlendModeFilter = updateBlendModeFilter(mBlendModeFilter, mNinePatchState.mTint,
                 blendMode);

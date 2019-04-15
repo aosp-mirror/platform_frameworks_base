@@ -1211,7 +1211,7 @@ public class GradientDrawable extends Drawable {
     }
 
     @Override
-    public void setTintMode(@NonNull BlendMode blendMode) {
+    public void setTintBlendMode(@NonNull BlendMode blendMode) {
         mGradientState.mBlendMode = blendMode;
         mBlendModeColorFilter = updateBlendModeFilter(mBlendModeColorFilter, mGradientState.mTint,
                 blendMode);

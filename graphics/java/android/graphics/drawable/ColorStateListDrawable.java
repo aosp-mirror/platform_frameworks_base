@@ -114,9 +114,9 @@ public class ColorStateListDrawable extends Drawable implements Drawable.Callbac
     }
 
     @Override
-    public void setTintMode(@NonNull BlendMode blendMode) {
+    public void setTintBlendMode(@NonNull BlendMode blendMode) {
         mState.mBlendMode = blendMode;
-        mColorDrawable.setTintMode(blendMode);
+        mColorDrawable.setTintBlendMode(blendMode);
         onStateChange(getState());
     }
 
@@ -293,7 +293,7 @@ public class ColorStateListDrawable extends Drawable implements Drawable.Callbac
         }
 
         if (mState.mBlendMode != DEFAULT_BLEND_MODE) {
-            mColorDrawable.setTintMode(mState.mBlendMode);
+            mColorDrawable.setTintBlendMode(mState.mBlendMode);
         }
     }
 }

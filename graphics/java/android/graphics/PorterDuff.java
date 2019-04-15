@@ -24,9 +24,8 @@ import android.annotation.UnsupportedAppUsage;
  * of {@link Paint}'s {@link Paint#setXfermode(Xfermode) transfer mode}.
  * All the available modes can be found in the {@link Mode} enum.</p>
  *
- * @deprecated Use {@link BlendMode} with {@link Paint#setBlendMode(BlendMode)} instead
+ * Consider using {@link BlendMode} instead as it provides a wider variety of tinting options
  */
-@Deprecated
 public class PorterDuff {
     /**
      * {@usesMathJax}

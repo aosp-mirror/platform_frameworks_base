@@ -324,7 +324,7 @@ public final class Icon implements Parcelable {
         if (result != null && (mTintList != null || mBlendMode != DEFAULT_BLEND_MODE)) {
             result.mutate();
             result.setTintList(mTintList);
-            result.setTintMode(mBlendMode);
+            result.setTintBlendMode(mBlendMode);
         }
         return result;
     }
@@ -696,10 +696,7 @@ public final class Icon implements Parcelable {
      *
      * @param mode a blending mode, as in {@link Drawable#setTintMode(PorterDuff.Mode)}, may be null
      * @return this same object, for use in chained construction
-     *
-     * @deprecated use {@link #setTintMode(BlendMode)} instead
      */
-    @Deprecated
     public @NonNull Icon setTintMode(@NonNull PorterDuff.Mode mode) {
         mBlendMode = BlendMode.fromValue(mode.nativeInt);
         return this;
@@ -711,7 +708,7 @@ public final class Icon implements Parcelable {
      * @param mode a blending mode, as in {@link Drawable#setTintMode(PorterDuff.Mode)}, may be null
      * @return this same object, for use in chained construction
      */
-    public @NonNull Icon setTintMode(@NonNull BlendMode mode) {
+    public @NonNull Icon setTintBlendMode(@NonNull BlendMode mode) {
         mBlendMode = mode;
         return this;
     }

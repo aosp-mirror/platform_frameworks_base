@@ -1397,13 +1397,13 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     }
 
     @Override
-    public void setTintMode(@NonNull BlendMode blendMode) {
+    public void setTintBlendMode(@NonNull BlendMode blendMode) {
         final ChildDrawable[] array = mLayerState.mChildren;
         final int N = mLayerState.mNumChildren;
         for (int i = 0; i < N; i++) {
             final Drawable dr = array[i].mDrawable;
             if (dr != null) {
-                dr.setTintMode(blendMode);
+                dr.setTintBlendMode(blendMode);
             }
         }
     }

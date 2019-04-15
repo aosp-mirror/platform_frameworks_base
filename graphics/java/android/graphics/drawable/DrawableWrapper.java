@@ -324,9 +324,9 @@ public abstract class DrawableWrapper extends Drawable implements Drawable.Callb
     }
 
     @Override
-    public void setTintMode(@NonNull BlendMode blendMode) {
+    public void setTintBlendMode(@NonNull BlendMode blendMode) {
         if (mDrawable != null) {
-            mDrawable.setTintMode(blendMode);
+            mDrawable.setTintBlendMode(blendMode);
         }
     }
 

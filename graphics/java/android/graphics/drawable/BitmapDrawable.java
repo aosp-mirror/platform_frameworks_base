@@ -685,7 +685,7 @@ public class BitmapDrawable extends Drawable {
     }
 
     @Override
-    public void setTintMode(@NonNull BlendMode blendMode) {
+    public void setTintBlendMode(@NonNull BlendMode blendMode) {
         final BitmapState state = mBitmapState;
         if (state.mBlendMode != blendMode) {
             state.mBlendMode = blendMode;

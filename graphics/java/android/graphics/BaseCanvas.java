@@ -243,10 +243,6 @@ public abstract class BaseCanvas {
         nDrawColor(mNativeCanvasWrapper, color, BlendMode.SRC_OVER.getXfermode().porterDuffMode);
     }
 
-    /**
-     * @deprecated use {@link Canvas#drawColor(int, BlendMode)}
-     */
-    @Deprecated
     public void drawColor(@ColorInt int color, @NonNull PorterDuff.Mode mode) {
         nDrawColor(mNativeCanvasWrapper, color, mode.nativeInt);
     }

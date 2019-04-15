@@ -39,9 +39,7 @@ public class ComposeShader extends Shader {
      * @param shaderB  The colors from this shader are seen as the "src" by the mode
      * @param mode     The mode that combines the colors from the two shaders. If mode
      *                 is null, then SRC_OVER is assumed.
-     *
-     * @deprecated use {@link #ComposeShader(Shader, Shader, BlendMode)} instead
-    */
+     */
     @Deprecated
     public ComposeShader(@NonNull Shader shaderA, @NonNull Shader shaderB, @NonNull Xfermode mode) {
         this(shaderA, shaderB, mode.porterDuffMode);
@@ -56,9 +54,7 @@ public class ComposeShader extends Shader {
      * @param shaderB  The colors from this shader are seen as the "src" by the mode
      * @param mode     The PorterDuff mode that combines the colors from the two shaders.
      *
-     * @deprecated use {@link #ComposeShader(Shader, Shader, BlendMode)} instead
      */
-    @Deprecated
     public ComposeShader(@NonNull Shader shaderA, @NonNull Shader shaderB,
             @NonNull PorterDuff.Mode mode) {
         this(shaderA, shaderB, mode.nativeInt);

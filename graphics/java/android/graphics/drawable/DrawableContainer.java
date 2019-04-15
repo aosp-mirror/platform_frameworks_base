@@ -196,14 +196,14 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     }
 
     @Override
-    public void setTintMode(@NonNull BlendMode blendMode) {
+    public void setTintBlendMode(@NonNull BlendMode blendMode) {
         mDrawableContainerState.mHasTintMode = true;
 
         if (mDrawableContainerState.mBlendMode != blendMode) {
             mDrawableContainerState.mBlendMode = blendMode;
 
             if (mCurrDrawable != null) {
-                mCurrDrawable.setTintMode(blendMode);
+                mCurrDrawable.setTintBlendMode(blendMode);
             }
         }
     }
@@ -544,7 +544,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                     d.setTintList(mDrawableContainerState.mTintList);
                 }
                 if (mDrawableContainerState.mHasTintMode) {
-                    d.setTintMode(mDrawableContainerState.mBlendMode);
+                    d.setTintBlendMode(mDrawableContainerState.mBlendMode);
                 }
             }
 
