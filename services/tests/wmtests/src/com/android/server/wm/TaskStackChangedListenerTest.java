@@ -39,6 +39,7 @@ import android.platform.test.annotations.Presubmit;
 import android.support.test.uiautomator.UiDevice;
 import android.text.TextUtils;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.MediumTest;
 
 import com.android.internal.annotations.GuardedBy;
@@ -78,6 +79,7 @@ public class TaskStackChangedListenerTest {
 
     @Test
     @Presubmit
+    @FlakyTest(bugId = 130388819)
     public void testTaskStackChanged_afterFinish() throws Exception {
         registerTaskStackChangedListener(new TaskStackListener() {
             @Override
@@ -159,6 +161,7 @@ public class TaskStackChangedListenerTest {
      */
     @Test
     @Presubmit
+    @FlakyTest(bugId = 130388819)
     public void testTaskChangeCallBacks() throws Exception {
         final Object[] params = new Object[2];
         final CountDownLatch taskCreatedLaunchLatch = new CountDownLatch(1);
