@@ -1003,9 +1003,8 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
 
         public void updateHttpProxy() {
-            final ConnectivityManager cm = ConnectivityManager.from(
+            ActivityThread.updateHttpProxy(
                     getApplication() != null ? getApplication() : getSystemContext());
-            Proxy.setHttpProxySystemProperty(cm.getDefaultProxy());
         }
 
         public void processInBackground() {
@@ -6688,6 +6687,11 @@ public final class ActivityThread extends ClientTransactionHandler {
         ActivityThread thread = new ActivityThread();
         thread.attach(true, 0);
         return thread;
+    }
+
+    public static void updateHttpProxy(@NonNull Context context) {
+        final ConnectivityManager cm = ConnectivityManager.from(context);
+        Proxy.setHttpProxySystemProperty(cm.getDefaultProxy());
     }
 
     @UnsupportedAppUsage
