@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.BlendMode;
 import android.graphics.Canvas;
 import android.graphics.Insets;
 import android.graphics.Paint;
@@ -98,14 +99,14 @@ public class Switch extends CompoundButton {
     @UnsupportedAppUsage
     private Drawable mThumbDrawable;
     private ColorStateList mThumbTintList = null;
-    private PorterDuff.Mode mThumbTintMode = null;
+    private BlendMode mThumbBlendMode = null;
     private boolean mHasThumbTint = false;
     private boolean mHasThumbTintMode = false;
 
     @UnsupportedAppUsage
     private Drawable mTrackDrawable;
     private ColorStateList mTrackTintList = null;
-    private PorterDuff.Mode mTrackTintMode = null;
+    private BlendMode mTrackBlendMode = null;
     private boolean mHasTrackTint = false;
     private boolean mHasTrackTintMode = false;
 
@@ -268,10 +269,11 @@ public class Switch extends CompoundButton {
             mThumbTintList = thumbTintList;
             mHasThumbTint = true;
         }
-        PorterDuff.Mode thumbTintMode = Drawable.parseTintMode(
-                a.getInt(com.android.internal.R.styleable.Switch_thumbTintMode, -1), null);
-        if (mThumbTintMode != thumbTintMode) {
-            mThumbTintMode = thumbTintMode;
+        BlendMode thumbTintMode = Drawable.parseBlendMode(
+                a.getInt(com.android.internal.R.styleable.Switch_thumbTintMode, -1),
+                null);
+        if (mThumbBlendMode != thumbTintMode) {
+            mThumbBlendMode = thumbTintMode;
             mHasThumbTintMode = true;
         }
         if (mHasThumbTint || mHasThumbTintMode) {
@@ -284,10 +286,11 @@ public class Switch extends CompoundButton {
             mTrackTintList = trackTintList;
             mHasTrackTint = true;
         }
-        PorterDuff.Mode trackTintMode = Drawable.parseTintMode(
-                a.getInt(com.android.internal.R.styleable.Switch_trackTintMode, -1), null);
-        if (mTrackTintMode != trackTintMode) {
-            mTrackTintMode = trackTintMode;
+        BlendMode trackTintMode = Drawable.parseBlendMode(
+                a.getInt(com.android.internal.R.styleable.Switch_trackTintMode, -1),
+                null);
+        if (mTrackBlendMode != trackTintMode) {
+            mTrackBlendMode = trackTintMode;
             mHasTrackTintMode = true;
         }
         if (mHasTrackTint || mHasTrackTintMode) {
@@ -587,7 +590,22 @@ public class Switch extends CompoundButton {
      * @see Drawable#setTintMode(PorterDuff.Mode)
      */
     public void setTrackTintMode(@Nullable PorterDuff.Mode tintMode) {
-        mTrackTintMode = tintMode;
+        setTrackTintBlendMode(tintMode != null ? BlendMode.fromValue(tintMode.nativeInt) : null);
+    }
+
+    /**
+     * Specifies the blending mode used to apply the tint specified by
+     * {@link #setTrackTintList(ColorStateList)}} to the track drawable.
+     * The default mode is {@link BlendMode#SRC_IN}.
+     *
+     * @param blendMode the blending mode used to apply the tint, may be
+     *                 {@code null} to clear tint
+     * @attr ref android.R.styleable#Switch_trackTintMode
+     * @see #getTrackTintMode()
+     * @see Drawable#setTintBlendMode(BlendMode)
+     */
+    public void setTrackTintBlendMode(@Nullable BlendMode blendMode) {
+        mTrackBlendMode = blendMode;
         mHasTrackTintMode = true;
 
         applyTrackTint();
@@ -602,7 +620,20 @@ public class Switch extends CompoundButton {
     @InspectableProperty
     @Nullable
     public PorterDuff.Mode getTrackTintMode() {
-        return mTrackTintMode;
+        BlendMode mode = getTrackTintBlendMode();
+        return mode != null ? BlendMode.blendModeToPorterDuffMode(mode) : null;
+    }
+
+    /**
+     * @return the blending mode used to apply the tint to the track
+     *         drawable
+     * @attr ref android.R.styleable#Switch_trackTintMode
+     * @see #setTrackTintBlendMode(BlendMode)
+     */
+    @InspectableProperty(attributeId = com.android.internal.R.styleable.Switch_trackTintMode)
+    @Nullable
+    public BlendMode getTrackTintBlendMode() {
+        return mTrackBlendMode;
     }
 
     private void applyTrackTint() {
@@ -614,7 +645,7 @@ public class Switch extends CompoundButton {
             }
 
             if (mHasTrackTintMode) {
-                mTrackDrawable.setTintMode(mTrackTintMode);
+                mTrackDrawable.setTintBlendMode(mTrackBlendMode);
             }
 
             // The drawable (or one of its children) may not have been
@@ -713,7 +744,22 @@ public class Switch extends CompoundButton {
      * @see Drawable#setTintMode(PorterDuff.Mode)
      */
     public void setThumbTintMode(@Nullable PorterDuff.Mode tintMode) {
-        mThumbTintMode = tintMode;
+        setThumbTintBlendMode(tintMode != null ? BlendMode.fromValue(tintMode.nativeInt) : null);
+    }
+
+    /**
+     * Specifies the blending mode used to apply the tint specified by
+     * {@link #setThumbTintList(ColorStateList)}} to the thumb drawable.
+     * The default mode is {@link PorterDuff.Mode#SRC_IN}.
+     *
+     * @param blendMode the blending mode used to apply the tint, may be
+     *                 {@code null} to clear tint
+     * @attr ref android.R.styleable#Switch_thumbTintMode
+     * @see #getThumbTintMode()
+     * @see Drawable#setTintBlendMode(BlendMode)
+     */
+    public void setThumbTintBlendMode(@Nullable BlendMode blendMode) {
+        mThumbBlendMode = blendMode;
         mHasThumbTintMode = true;
 
         applyThumbTint();
@@ -728,7 +774,20 @@ public class Switch extends CompoundButton {
     @InspectableProperty
     @Nullable
     public PorterDuff.Mode getThumbTintMode() {
-        return mThumbTintMode;
+        BlendMode mode = getThumbTintBlendMode();
+        return mode != null ? BlendMode.blendModeToPorterDuffMode(mode) : null;
+    }
+
+    /**
+     * @return the blending mode used to apply the tint to the thumb
+     *         drawable
+     * @attr ref android.R.styleable#Switch_thumbTintMode
+     * @see #setThumbTintBlendMode(BlendMode)
+     */
+    @InspectableProperty(attributeId = com.android.internal.R.styleable.Switch_thumbTintMode)
+    @Nullable
+    public BlendMode getThumbTintBlendMode() {
+        return mThumbBlendMode;
     }
 
     private void applyThumbTint() {
@@ -740,7 +799,7 @@ public class Switch extends CompoundButton {
             }
 
             if (mHasThumbTintMode) {
-                mThumbDrawable.setTintMode(mThumbTintMode);
+                mThumbDrawable.setTintBlendMode(mThumbBlendMode);
             }
 
             // The drawable (or one of its children) may not have been

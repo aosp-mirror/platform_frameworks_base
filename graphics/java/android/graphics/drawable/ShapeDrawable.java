@@ -297,7 +297,7 @@ public class ShapeDrawable extends Drawable {
     }
 
     @Override
-    public void setTintMode(@NonNull BlendMode blendMode) {
+    public void setTintBlendMode(@NonNull BlendMode blendMode) {
         mShapeState.mBlendMode = blendMode;
         mBlendModeColorFilter = updateBlendModeFilter(mBlendModeColorFilter, mShapeState.mTint,
                 blendMode);

@@ -203,10 +203,6 @@ public class BaseRecordingCanvas extends Canvas {
         nDrawColor(mNativeCanvasWrapper, color, BlendMode.SRC_OVER.getXfermode().porterDuffMode);
     }
 
-    /**
-     * @deprecated use {@link #drawColor(int, BlendMode)} instead
-     */
-    @Deprecated
     @Override
     public final void drawColor(@ColorInt int color, @NonNull PorterDuff.Mode mode) {
         nDrawColor(mNativeCanvasWrapper, color, mode.nativeInt);
