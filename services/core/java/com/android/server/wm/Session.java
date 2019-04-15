@@ -283,10 +283,10 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
-    public void cancelDragAndDrop(IBinder dragToken) {
+    public void cancelDragAndDrop(IBinder dragToken, boolean skipAnimation) {
         final long ident = Binder.clearCallingIdentity();
         try {
-            mDragDropController.cancelDragAndDrop(dragToken);
+            mDragDropController.cancelDragAndDrop(dragToken, skipAnimation);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }

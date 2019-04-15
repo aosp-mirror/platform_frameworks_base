@@ -137,7 +137,7 @@ public class DragDropControllerTests extends WindowTestsBase {
                 return;
             }
             if (mToken != null) {
-                mTarget.cancelDragAndDrop(mToken);
+                mTarget.cancelDragAndDrop(mToken, false);
             }
             latch = new CountDownLatch(1);
             mTarget.setOnClosedCallbackLocked(latch::countDown);
