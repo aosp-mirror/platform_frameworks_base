@@ -18,16 +18,16 @@
 #define VULKANMANAGER_H
 
 #if !defined(VK_USE_PLATFORM_ANDROID_KHR)
-#  define VK_USE_PLATFORM_ANDROID_KHR
+#define VK_USE_PLATFORM_ANDROID_KHR
 #endif
 #include <vulkan/vulkan.h>
 
 #include <GrContextOptions.h>
-#include <vk/GrVkExtensions.h>
 #include <SkSurface.h>
 #include <ui/Fence.h>
 #include <utils/StrongPointer.h>
 #include <vk/GrVkBackendContext.h>
+#include <vk/GrVkExtensions.h>
 #include "Frame.h"
 #include "IRenderPipeline.h"
 #include "VulkanSurface.h"
@@ -59,8 +59,8 @@ public:
     // Create and destroy functions for wrapping an ANativeWindow in a VulkanSurface
     VulkanSurface* createSurface(ANativeWindow* window, ColorMode colorMode,
                                  sk_sp<SkColorSpace> surfaceColorSpace,
-                                 SkColorType surfaceColorType,
-                                 GrContext* grContext);
+                                 SkColorType surfaceColorType, GrContext* grContext,
+                                 uint32_t extraBuffers);
     void destroySurface(VulkanSurface* surface);
 
     Frame dequeueNextBuffer(VulkanSurface* surface);

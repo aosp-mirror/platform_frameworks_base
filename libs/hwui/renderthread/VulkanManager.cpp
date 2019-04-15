@@ -29,7 +29,6 @@
 #include <GrBackendSurface.h>
 #include <GrContext.h>
 #include <GrTypes.h>
-#include <GrTypes.h>
 #include <vk/GrVkExtensions.h>
 #include <vk/GrVkTypes.h>
 
@@ -43,7 +42,7 @@ static void free_features_extensions_structs(const VkPhysicalDeviceFeatures2& fe
     // so we can get access to the pNext for the next struct.
     struct CommonVulkanHeader {
         VkStructureType sType;
-        void*           pNext;
+        void* pNext;
     };
 
     void* pNext = features.pNext;
@@ -94,13 +93,13 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
     VkResult err;
 
     constexpr VkApplicationInfo app_info = {
-        VK_STRUCTURE_TYPE_APPLICATION_INFO, // sType
-        nullptr,                            // pNext
-        "android framework",                // pApplicationName
-        0,                                  // applicationVersion
-        "android framework",                // pEngineName
-        0,                                  // engineVerison
-        mAPIVersion,                        // apiVersion
+            VK_STRUCTURE_TYPE_APPLICATION_INFO,  // sType
+            nullptr,                             // pNext
+            "android framework",                 // pApplicationName
+            0,                                   // applicationVersion
+            "android framework",                 // pEngineName
+            0,                                   // engineVerison
+            mAPIVersion,                         // apiVersion
     };
 
     {
@@ -128,14 +127,14 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
     }
 
     const VkInstanceCreateInfo instance_create = {
-        VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,    // sType
-        nullptr,                                   // pNext
-        0,                                         // flags
-        &app_info,                                 // pApplicationInfo
-        0,                                         // enabledLayerNameCount
-        nullptr,                                   // ppEnabledLayerNames
-        (uint32_t) mInstanceExtensions.size(),     // enabledExtensionNameCount
-        mInstanceExtensions.data(),                // ppEnabledExtensionNames
+            VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,  // sType
+            nullptr,                                 // pNext
+            0,                                       // flags
+            &app_info,                               // pApplicationInfo
+            0,                                       // enabledLayerNameCount
+            nullptr,                                 // ppEnabledLayerNames
+            (uint32_t)mInstanceExtensions.size(),    // enabledExtensionNameCount
+            mInstanceExtensions.data(),              // ppEnabledExtensionNames
     };
 
     GET_PROC(CreateInstance);
@@ -200,11 +199,11 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
     {
         uint32_t extensionCount = 0;
         err = mEnumerateDeviceExtensionProperties(mPhysicalDevice, nullptr, &extensionCount,
-                nullptr);
+                                                  nullptr);
         LOG_ALWAYS_FATAL_IF(VK_SUCCESS != err);
         mDeviceExtensionsOwner.resize(extensionCount);
         err = mEnumerateDeviceExtensionProperties(mPhysicalDevice, nullptr, &extensionCount,
-                mDeviceExtensionsOwner.data());
+                                                  mDeviceExtensionsOwner.data());
         LOG_ALWAYS_FATAL_IF(VK_SUCCESS != err);
         bool hasKHRSwapchainExtension = false;
         for (const VkExtensionProperties& extension : mDeviceExtensionsOwner) {
@@ -216,7 +215,7 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
         LOG_ALWAYS_FATAL_IF(!hasKHRSwapchainExtension);
     }
 
-    auto getProc = [] (const char* proc_name, VkInstance instance, VkDevice device) {
+    auto getProc = [](const char* proc_name, VkInstance instance, VkDevice device) {
         if (device != VK_NULL_HANDLE) {
             return vkGetDeviceProcAddr(device, proc_name);
         }
@@ -224,7 +223,8 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
     };
 
     grExtensions.init(getProc, mInstance, mPhysicalDevice, mInstanceExtensions.size(),
-            mInstanceExtensions.data(), mDeviceExtensions.size(), mDeviceExtensions.data());
+                      mInstanceExtensions.data(), mDeviceExtensions.size(),
+                      mDeviceExtensions.data());
 
     LOG_ALWAYS_FATAL_IF(!grExtensions.hasExtension(VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME, 1));
 
@@ -237,7 +237,7 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
 
     if (grExtensions.hasExtension(VK_EXT_BLEND_OPERATION_ADVANCED_EXTENSION_NAME, 2)) {
         VkPhysicalDeviceBlendOperationAdvancedFeaturesEXT* blend;
-        blend = (VkPhysicalDeviceBlendOperationAdvancedFeaturesEXT*) malloc(
+        blend = (VkPhysicalDeviceBlendOperationAdvancedFeaturesEXT*)malloc(
                 sizeof(VkPhysicalDeviceBlendOperationAdvancedFeaturesEXT));
         LOG_ALWAYS_FATAL_IF(!blend);
         blend->sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BLEND_OPERATION_ADVANCED_FEATURES_EXT;
@@ -247,7 +247,7 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
     }
 
     VkPhysicalDeviceSamplerYcbcrConversionFeatures* ycbcrFeature;
-    ycbcrFeature = (VkPhysicalDeviceSamplerYcbcrConversionFeatures*) malloc(
+    ycbcrFeature = (VkPhysicalDeviceSamplerYcbcrConversionFeatures*)malloc(
             sizeof(VkPhysicalDeviceSamplerYcbcrConversionFeatures));
     LOG_ALWAYS_FATAL_IF(!ycbcrFeature);
     ycbcrFeature->sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SAMPLER_YCBCR_CONVERSION_FEATURES;
@@ -261,17 +261,17 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
     // and we can't depend on it on all platforms
     features.features.robustBufferAccess = VK_FALSE;
 
-    float queuePriorities[1] = { 0.0 };
+    float queuePriorities[1] = {0.0};
 
     void* queueNextPtr = nullptr;
 
     VkDeviceQueueGlobalPriorityCreateInfoEXT queuePriorityCreateInfo;
 
-    if (Properties::contextPriority != 0
-            && grExtensions.hasExtension(VK_EXT_GLOBAL_PRIORITY_EXTENSION_NAME, 2)) {
+    if (Properties::contextPriority != 0 &&
+        grExtensions.hasExtension(VK_EXT_GLOBAL_PRIORITY_EXTENSION_NAME, 2)) {
         memset(&queuePriorityCreateInfo, 0, sizeof(VkDeviceQueueGlobalPriorityCreateInfoEXT));
         queuePriorityCreateInfo.sType =
-            VK_STRUCTURE_TYPE_DEVICE_QUEUE_GLOBAL_PRIORITY_CREATE_INFO_EXT;
+                VK_STRUCTURE_TYPE_DEVICE_QUEUE_GLOBAL_PRIORITY_CREATE_INFO_EXT;
         queuePriorityCreateInfo.pNext = nullptr;
         switch (Properties::contextPriority) {
             case EGL_CONTEXT_PRIORITY_LOW_IMG:
@@ -285,41 +285,40 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
                 break;
             default:
                 LOG_ALWAYS_FATAL("Unsupported context priority");
-         }
-         queueNextPtr = &queuePriorityCreateInfo;
+        }
+        queueNextPtr = &queuePriorityCreateInfo;
     }
 
     const VkDeviceQueueCreateInfo queueInfo[2] = {
-        {
-            VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO, // sType
-            queueNextPtr,                               // pNext
-            0,                                          // VkDeviceQueueCreateFlags
-            mGraphicsQueueIndex,                        // queueFamilyIndex
-            1,                                          // queueCount
-            queuePriorities,                            // pQueuePriorities
-        },
-        {
-            VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO, // sType
-            queueNextPtr,                               // pNext
-            0,                                          // VkDeviceQueueCreateFlags
-            mPresentQueueIndex,                         // queueFamilyIndex
-            1,                                          // queueCount
-            queuePriorities,                            // pQueuePriorities
-        }
-    };
+            {
+                    VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,  // sType
+                    queueNextPtr,                                // pNext
+                    0,                                           // VkDeviceQueueCreateFlags
+                    mGraphicsQueueIndex,                         // queueFamilyIndex
+                    1,                                           // queueCount
+                    queuePriorities,                             // pQueuePriorities
+            },
+            {
+                    VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,  // sType
+                    queueNextPtr,                                // pNext
+                    0,                                           // VkDeviceQueueCreateFlags
+                    mPresentQueueIndex,                          // queueFamilyIndex
+                    1,                                           // queueCount
+                    queuePriorities,                             // pQueuePriorities
+            }};
     uint32_t queueInfoCount = (mPresentQueueIndex != mGraphicsQueueIndex) ? 2 : 1;
 
     const VkDeviceCreateInfo deviceInfo = {
-        VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,    // sType
-        &features,                               // pNext
-        0,                                       // VkDeviceCreateFlags
-        queueInfoCount,                          // queueCreateInfoCount
-        queueInfo,                               // pQueueCreateInfos
-        0,                                       // layerCount
-        nullptr,                                 // ppEnabledLayerNames
-        (uint32_t) mDeviceExtensions.size(),     // extensionCount
-        mDeviceExtensions.data(),                // ppEnabledExtensionNames
-        nullptr,                                 // ppEnabledFeatures
+            VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,  // sType
+            &features,                             // pNext
+            0,                                     // VkDeviceCreateFlags
+            queueInfoCount,                        // queueCreateInfoCount
+            queueInfo,                             // pQueueCreateInfos
+            0,                                     // layerCount
+            nullptr,                               // ppEnabledLayerNames
+            (uint32_t)mDeviceExtensions.size(),    // extensionCount
+            mDeviceExtensions.data(),              // ppEnabledExtensionNames
+            nullptr,                               // ppEnabledFeatures
     };
 
     LOG_ALWAYS_FATAL_IF(mCreateDevice(mPhysicalDevice, &deviceInfo, nullptr, &mDevice));
@@ -371,8 +370,8 @@ void VulkanManager::initialize() {
         // this needs to be on the render queue
         commandPoolInfo.queueFamilyIndex = mGraphicsQueueIndex;
         commandPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-        SkDEBUGCODE(VkResult res =) mCreateCommandPool(mDevice, &commandPoolInfo, nullptr,
-                &mCommandPool);
+        SkDEBUGCODE(VkResult res =)
+                mCreateCommandPool(mDevice, &commandPoolInfo, nullptr, &mCommandPool);
         SkASSERT(VK_SUCCESS == res);
     }
     LOG_ALWAYS_FATAL_IF(mCommandPool == VK_NULL_HANDLE);
@@ -391,7 +390,7 @@ void VulkanManager::initialize() {
 }
 
 sk_sp<GrContext> VulkanManager::createContext(const GrContextOptions& options) {
-    auto getProc = [] (const char* proc_name, VkInstance instance, VkDevice device) {
+    auto getProc = [](const char* proc_name, VkInstance instance, VkDevice device) {
         if (device != VK_NULL_HANDLE) {
             return vkGetDeviceProcAddr(device, proc_name);
         }
@@ -431,7 +430,6 @@ VkFunctorInitParams VulkanManager::getVkFunctorInitParams() const {
 }
 
 Frame VulkanManager::dequeueNextBuffer(VulkanSurface* surface) {
-
     VulkanSurface::NativeBufferInfo* bufferInfo = surface->dequeueNativeBuffer();
 
     if (bufferInfo == nullptr) {
@@ -480,7 +478,7 @@ Frame VulkanManager::dequeueNextBuffer(VulkanSurface* surface) {
                 bufferInfo->skSurface->wait(1, &backendSemaphore);
                 // The following flush blocks the GPU immediately instead of waiting for other
                 // drawing ops. It seems dequeue_fence is not respected otherwise.
-                //TODO: remove the flush after finding why backendSemaphore is not working.
+                // TODO: remove the flush after finding why backendSemaphore is not working.
                 bufferInfo->skSurface->flush();
             }
         }
@@ -557,15 +555,15 @@ void VulkanManager::destroySurface(VulkanSurface* surface) {
 
 VulkanSurface* VulkanManager::createSurface(ANativeWindow* window, ColorMode colorMode,
                                             sk_sp<SkColorSpace> surfaceColorSpace,
-                                            SkColorType surfaceColorType,
-                                            GrContext* grContext) {
+                                            SkColorType surfaceColorType, GrContext* grContext,
+                                            uint32_t extraBuffers) {
     LOG_ALWAYS_FATAL_IF(!hasVkContext(), "Not initialized");
     if (!window) {
         return nullptr;
     }
 
     return VulkanSurface::Create(window, colorMode, surfaceColorType, surfaceColorSpace, grContext,
-                                  *this);
+                                 *this, extraBuffers);
 }
 
 bool VulkanManager::setupDummyCommandBuffer() {

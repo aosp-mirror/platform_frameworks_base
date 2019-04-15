@@ -17,6 +17,7 @@
 #include "CanvasContext.h"
 #include <GpuMemoryTracker.h>
 
+#include "../Properties.h"
 #include "AnimationContext.h"
 #include "EglManager.h"
 #include "Frame.h"
@@ -31,7 +32,6 @@
 #include "utils/GLUtils.h"
 #include "utils/TimeUtils.h"
 #include "utils/TraceUtils.h"
-#include "../Properties.h"
 
 #include <cutils/properties.h>
 #include <private/hwui/DrawGlInfo.h>
@@ -153,7 +153,8 @@ void CanvasContext::setSurface(sp<Surface>&& surface) {
     }
 
     ColorMode colorMode = mWideColorGamut ? ColorMode::WideColorGamut : ColorMode::SRGB;
-    bool hasSurface = mRenderPipeline->setSurface(mNativeSurface.get(), mSwapBehavior, colorMode);
+    bool hasSurface = mRenderPipeline->setSurface(mNativeSurface.get(), mSwapBehavior, colorMode,
+                                                  mRenderAheadDepth);
 
     mFrameNumber = -1;
 
@@ -298,7 +299,7 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t sy
 
     mAnimationContext->startFrame(info.mode);
     mRenderPipeline->onPrepareTree();
-    for (const sp<RenderNode> &node : mRenderNodes) {
+    for (const sp<RenderNode>& node : mRenderNodes) {
         // Only the primary target node will be drawn full - all other nodes would get drawn in
         // real time mode. In case of a window, the primary node is the window content and the other
         // node(s) are non client / filler nodes.
@@ -322,7 +323,7 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t sy
 
     if (CC_LIKELY(mSwapHistory.size() && !Properties::forceDrawFrame)) {
         nsecs_t latestVsync = mRenderThread.timeLord().latestVsync();
-        SwapHistory &lastSwap = mSwapHistory.back();
+        SwapHistory& lastSwap = mSwapHistory.back();
         nsecs_t vsyncDelta = std::abs(lastSwap.vsyncTime - latestVsync);
         // The slight fudge-factor is to deal with cases where
         // the vsync was estimated due to being slow handling the signal.
@@ -405,8 +406,7 @@ void CanvasContext::draw() {
     SkRect dirty;
     mDamageAccumulator.finish(&dirty);
 
-    if (dirty.isEmpty() && Properties::skipEmptyFrames
-            && !surfaceRequiresRedraw()) {
+    if (dirty.isEmpty() && Properties::skipEmptyFrames && !surfaceRequiresRedraw()) {
         mCurrentFrameInfo->addFlag(FrameInfoFlags::SkippedFrame);
         return;
     }
@@ -416,20 +416,20 @@ void CanvasContext::draw() {
     Frame frame = mRenderPipeline->getFrame();
 
     SkRect windowDirty = computeDirtyRect(frame, &dirty);
+    if (mRenderAheadDepth) {
+        auto presentTime =
+                mCurrentFrameInfo->get(FrameInfoIndex::Vsync) +
+                (mRenderThread.timeLord().frameIntervalNanos() * (mRenderAheadDepth + 1));
+        native_window_set_buffers_timestamp(mNativeSurface.get(), presentTime);
+    }
 
     bool drew = mRenderPipeline->draw(frame, windowDirty, dirty, mLightGeometry, &mLayerUpdateQueue,
-                                      mContentDrawBounds, mOpaque, mLightInfo,
-                                      mRenderNodes, &(profiler()));
+                                      mContentDrawBounds, mOpaque, mLightInfo, mRenderNodes,
+                                      &(profiler()));
 
     int64_t frameCompleteNr = mFrameCompleteCallbacks.size() ? getFrameNumber() : -1;
 
     waitOnFences();
-
-    if (mRenderAheadDepth) {
-        auto presentTime = mCurrentFrameInfo->get(FrameInfoIndex::Vsync) +
-                (mRenderThread.timeLord().frameIntervalNanos() * (mRenderAheadDepth + 1));
-        native_window_set_buffers_timestamp(mNativeSurface.get(), presentTime);
-    }
 
     bool requireSwap = false;
     bool didSwap =
@@ -645,21 +645,13 @@ bool CanvasContext::surfaceRequiresRedraw() {
 }
 
 void CanvasContext::applyRenderAheadSettings() {
-    if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
-        // TODO: Fix SkiaVulkan's assumptions on buffer counts. And SIGBUS crashes.
-        mRenderAheadDepth = 0;
-        return;
-    }
-    if (mNativeSurface) {
-        native_window_set_buffer_count(mNativeSurface.get(), 3 + mRenderAheadDepth);
-        if (!mRenderAheadDepth) {
-            native_window_set_buffers_timestamp(mNativeSurface.get(), NATIVE_WINDOW_TIMESTAMP_AUTO);
-        }
+    if (mNativeSurface && !mRenderAheadDepth) {
+        native_window_set_buffers_timestamp(mNativeSurface.get(), NATIVE_WINDOW_TIMESTAMP_AUTO);
     }
 }
 
-void CanvasContext::setRenderAheadDepth(int renderAhead) {
-    if (renderAhead < 0 || renderAhead > 2 || renderAhead == mRenderAheadDepth) {
+void CanvasContext::setRenderAheadDepth(uint32_t renderAhead) {
+    if (renderAhead > 2 || renderAhead == mRenderAheadDepth || mNativeSurface) {
         return;
     }
     mRenderAheadDepth = renderAhead;
