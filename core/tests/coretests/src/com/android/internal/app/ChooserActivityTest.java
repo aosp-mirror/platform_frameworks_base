@@ -42,6 +42,7 @@ import android.content.ClipboardManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -53,7 +54,6 @@ import android.metrics.LogMaker;
 import android.net.Uri;
 import android.service.chooser.ChooserTarget;
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
 
@@ -62,10 +62,14 @@ import com.android.internal.app.ResolverActivity.ResolvedComponentInfo;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.function.Function;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -75,21 +79,48 @@ import java.util.List;
 /**
  * Chooser activity instrumentation tests
  */
-@RunWith(AndroidJUnit4.class)
+@RunWith(Parameterized.class)
 public class ChooserActivityTest {
+
+    private static final Function<PackageManager, PackageManager> DEFAULT_PM = pm -> pm;
+    private static final Function<PackageManager, PackageManager> NO_APP_PREDICTION_SERVICE_PM =
+            pm -> {
+                PackageManager mock = Mockito.spy(pm);
+                when(mock.getAppPredictionServicePackageName()).thenReturn(null);
+                return mock;
+            };
+
+    @Parameterized.Parameters
+    public static Collection packageManagers() {
+        return Arrays.asList(new Object[][] {
+                {0, "Default PackageManager", DEFAULT_PM},
+                {1, "No App Prediction Service", NO_APP_PREDICTION_SERVICE_PM}
+        });
+    }
 
     private static final int CONTENT_PREVIEW_IMAGE = 1;
     private static final int CONTENT_PREVIEW_FILE = 2;
     private static final int CONTENT_PREVIEW_TEXT = 3;
+    private Function<PackageManager, PackageManager> mPackageManagerOverride;
+    private int mTestNum;
 
     @Rule
     public ActivityTestRule<ChooserWrapperActivity> mActivityRule =
             new ActivityTestRule<>(ChooserWrapperActivity.class, false,
                     false);
 
+    public ChooserActivityTest(
+                int testNum,
+                String testName,
+                Function<PackageManager, PackageManager> packageManagerOverride) {
+        mPackageManagerOverride = packageManagerOverride;
+        mTestNum = testNum;
+    }
+
     @Before
     public void cleanOverrideData() {
         sOverrides.reset();
+        sOverrides.createPackageManager = mPackageManagerOverride;
     }
 
     @Test
