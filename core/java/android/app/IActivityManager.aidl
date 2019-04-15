@@ -223,7 +223,7 @@ interface IActivityManager {
     void enterSafeMode();
     void noteWakeupAlarm(in IIntentSender sender, in WorkSource workSource, int sourceUid,
             in String sourcePkg, in String tag);
-    void removeContentProvider(in IBinder connection, boolean stable);
+    oneway void removeContentProvider(in IBinder connection, boolean stable);
     @UnsupportedAppUsage
     void setRequestedOrientation(in IBinder token, int requestedOrientation);
     void unbindFinished(in IBinder token, in Intent service, boolean doRebind);

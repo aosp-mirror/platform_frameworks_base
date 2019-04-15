@@ -224,6 +224,12 @@ public final class ActivityThread extends ClientTransactionHandler {
     private static final boolean DEBUG_PROVIDER = false;
     public static final boolean DEBUG_ORDER = false;
     private static final long MIN_TIME_BETWEEN_GCS = 5*1000;
+    /**
+     * The delay to release the provider when it has no more references. It reduces the number of
+     * transactions for acquiring and releasing provider if the client accesses the provider
+     * frequently in a short time.
+     */
+    private static final long CONTENT_PROVIDER_RETAIN_TIME = 1000;
     private static final int SQLITE_MEM_RELEASED_EVENT_LOG_TAG = 75003;
 
     /** Type for IActivityManager.serviceDoneExecuting: anonymous operation */
@@ -6498,16 +6504,13 @@ public final class ActivityThread extends ClientTransactionHandler {
                 if (!prc.removePending) {
                     // Schedule the actual remove asynchronously, since we don't know the context
                     // this will be called in.
-                    // TODO: it would be nice to post a delayed message, so
-                    // if we come back and need the same provider quickly
-                    // we will still have it available.
                     if (DEBUG_PROVIDER) {
                         Slog.v(TAG, "releaseProvider: Enqueueing pending removal - "
                                 + prc.holder.info.name);
                     }
                     prc.removePending = true;
                     Message msg = mH.obtainMessage(H.REMOVE_PROVIDER, prc);
-                    mH.sendMessage(msg);
+                    mH.sendMessageDelayed(msg, CONTENT_PROVIDER_RETAIN_TIME);
                 } else {
                     Slog.w(TAG, "Duplicate remove pending of provider " + prc.holder.info.name);
                 }
