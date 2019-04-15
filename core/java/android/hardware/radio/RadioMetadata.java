@@ -258,6 +258,11 @@ public final class RadioMetadata implements Parcelable {
     private final Bundle mBundle;
 
     @Override
+    public int hashCode() {
+        return mBundle.hashCode();
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (!(obj instanceof RadioMetadata)) return false;
