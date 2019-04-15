@@ -48,6 +48,7 @@ import android.platform.test.annotations.Presubmit;
 import android.util.Log;
 import android.view.IWindowManager;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.MediumTest;
 
 import com.android.server.am.AssistDataRequester;
@@ -150,6 +151,7 @@ public class AssistDataRequesterTest extends ActivityTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 130388718)
     public void testRequestData() throws Exception {
         setupMocks(CURRENT_ACTIVITY_ASSIST_ALLOWED, CALLER_ASSIST_STRUCTURE_ALLOWED,
                 CALLER_ASSIST_SCREENSHOT_ALLOWED);
@@ -250,6 +252,7 @@ public class AssistDataRequesterTest extends ActivityTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 130388718)
     public void testNoFetchScreenshots_expectNoScreenshotCallbacks() throws Exception {
         setupMocks(CURRENT_ACTIVITY_ASSIST_ALLOWED, CALLER_ASSIST_STRUCTURE_ALLOWED,
                 CALLER_ASSIST_SCREENSHOT_ALLOWED);
@@ -260,6 +263,7 @@ public class AssistDataRequesterTest extends ActivityTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 130388718)
     public void testDisallowAssistScreenshot_expectNullScreenshotCallback() throws Exception {
         setupMocks(CURRENT_ACTIVITY_ASSIST_ALLOWED, CALLER_ASSIST_STRUCTURE_ALLOWED,
                 !CALLER_ASSIST_SCREENSHOT_ALLOWED);
