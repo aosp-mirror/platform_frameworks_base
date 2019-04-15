@@ -44,6 +44,7 @@ import android.app.IApplicationThread;
 import android.app.ProfilerInfo;
 import android.app.servertransaction.ConfigurationChangeItem;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.os.Message;
@@ -771,13 +772,12 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 WindowProcessListener::clearProfilerIfNeeded, mListener));
     }
 
-    void updateProcessInfo(boolean updateServiceConnectionActivities, boolean updateLru,
-            boolean activityChange, boolean updateOomAdj) {
+    void updateProcessInfo(boolean updateServiceConnectionActivities, boolean activityChange,
+            boolean updateOomAdj) {
         if (mListener == null) return;
         // Posting on handler so WM lock isn't held when we call into AM.
         final Message m = PooledLambda.obtainMessage(WindowProcessListener::updateProcessInfo,
-                mListener, updateServiceConnectionActivities, updateLru, activityChange,
-                updateOomAdj);
+                mListener, updateServiceConnectionActivities, activityChange, updateOomAdj);
         mAtm.mH.sendMessage(m);
     }
 
@@ -801,53 +801,44 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         return mListener == null ? false : mListener.isRemoved();
     }
 
-    void clearWaitingToKill() {
-        if (mListener == null) return;
-        // Posting on handler so WM lock isn't held when we call into AM.
-        final Message m = PooledLambda.obtainMessage(
-                WindowProcessListener::clearWaitingToKill, mListener);
-        mAtm.mH.sendMessage(m);
+    private boolean shouldSetProfileProc() {
+        return mAtm.mProfileApp != null && mAtm.mProfileApp.equals(mName)
+                && (mAtm.mProfileProc == null || mAtm.mProfileProc == this);
     }
 
-    void addPackage(String pkg, long versionCode) {
-        if (mListener == null) return;
-        // Posting on handler so WM lock isn't held when we call into AM.
-        final Message m = PooledLambda.obtainMessage(
-                WindowProcessListener::addPackage, mListener, pkg, versionCode);
-        mAtm.mH.sendMessage(m);
-    }
-
-    ProfilerInfo onStartActivity(int topProcessState) {
-        ProfilerInfo profilerInfo = null;
-        boolean setProfileProc = false;
-        if (mAtm.mProfileApp != null
-                && mAtm.mProfileApp.equals(mName)) {
-            if (mAtm.mProfileProc == null || mAtm.mProfileProc == this) {
-                setProfileProc = true;
-                final ProfilerInfo profilerInfoSvc = mAtm.mProfilerInfo;
-                if (profilerInfoSvc != null && profilerInfoSvc.profileFile != null) {
-                    if (profilerInfoSvc.profileFd != null) {
-                        try {
-                            profilerInfoSvc.profileFd = profilerInfoSvc.profileFd.dup();
-                        } catch (IOException e) {
-                            profilerInfoSvc.closeFd();
-                        }
-                    }
-
-                    profilerInfo = new ProfilerInfo(profilerInfoSvc);
-                }
+    ProfilerInfo createProfilerInfoIfNeeded() {
+        final ProfilerInfo currentProfilerInfo = mAtm.mProfilerInfo;
+        if (currentProfilerInfo == null || currentProfilerInfo.profileFile == null
+                || !shouldSetProfileProc()) {
+            return null;
+        }
+        if (currentProfilerInfo.profileFd != null) {
+            try {
+                currentProfilerInfo.profileFd = currentProfilerInfo.profileFd.dup();
+            } catch (IOException e) {
+                currentProfilerInfo.closeFd();
             }
         }
+        return new ProfilerInfo(currentProfilerInfo);
+    }
 
-
-        if (mListener != null) {
-            // Posting on handler so WM lock isn't held when we call into AM.
-            final Message m = PooledLambda.obtainMessage(WindowProcessListener::onStartActivity,
-                    mListener, topProcessState, setProfileProc);
-            mAtm.mH.sendMessage(m);
+    void onStartActivity(int topProcessState, ActivityInfo info) {
+        if (mListener == null) return;
+        String packageName = null;
+        if ((info.flags & ActivityInfo.FLAG_MULTIPROCESS) == 0
+                || !"android".equals(info.packageName)) {
+            // Don't add this if it is a platform component that is marked to run in multiple
+            // processes, because this is actually part of the framework so doesn't make sense
+            // to track as a separate apk in the process.
+            packageName = info.packageName;
         }
-
-        return profilerInfo;
+        // Posting the message at the front of queue so WM lock isn't held when we call into AM,
+        // and the process state of starting activity can be updated quicker which will give it a
+        // higher scheduling group.
+        final Message m = PooledLambda.obtainMessage(WindowProcessListener::onStartActivity,
+                mListener, topProcessState, shouldSetProfileProc(), packageName,
+                info.applicationInfo.longVersionCode);
+        mAtm.mH.sendMessageAtFrontOfQueue(m);
     }
 
     public void appDied() {

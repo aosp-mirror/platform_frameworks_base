@@ -41,8 +41,8 @@ public interface WindowProcessListener {
     void setPendingUiCleanAndForceProcessStateUpTo(int newState);
 
     /** Update the process information. */
-    void updateProcessInfo(boolean updateServiceConnectionActivities, boolean updateLru,
-            boolean activityChange, boolean updateOomAdj);
+    void updateProcessInfo(boolean updateServiceConnectionActivities, boolean activityChange,
+            boolean updateOomAdj);
 
     /**
      * Returns true if the process is removed and we should completely clean up the related records
@@ -53,14 +53,9 @@ public interface WindowProcessListener {
     /** Returns the total time (in milliseconds) spent executing in both user and system code. */
     long getCpuTime();
 
-    /** Clears the waiting to kill reason for this process. */
-    void clearWaitingToKill();
-
-    /** Adds the package to the process. */
-    void addPackage(String pkg, long versionCode);
-
     /** Called when we are in the process on starting an activity. */
-    void onStartActivity(int topProcessState, boolean setProfileProc);
+    void onStartActivity(int topProcessState, boolean setProfileProc, String packageName,
+            long versionCode);
 
     /** App died :(...oh well */
     void appDied();

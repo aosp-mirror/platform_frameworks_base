@@ -876,13 +876,6 @@ class ProcessRecord implements WindowProcessListener {
         return null;
     }
 
-    @Override
-    public void addPackage(String pkg, long versionCode) {
-        synchronized (mService) {
-            addPackage(pkg, versionCode, mService.mProcessStats);
-        }
-    }
-
     /*
      *  Return true if package has been added false if not
      */
@@ -1300,15 +1293,13 @@ class ProcessRecord implements WindowProcessListener {
     }
 
     @Override
-    public void updateProcessInfo(boolean updateServiceConnectionActivities, boolean updateLru,
-            boolean activityChange, boolean updateOomAdj) {
+    public void updateProcessInfo(boolean updateServiceConnectionActivities, boolean activityChange,
+            boolean updateOomAdj) {
         synchronized (mService) {
             if (updateServiceConnectionActivities) {
                 mService.mServices.updateServiceConnectionActivitiesLocked(this);
             }
-            if (updateLru) {
-                mService.mProcessList.updateLruProcessLocked(this, activityChange, null);
-            }
+            mService.mProcessList.updateLruProcessLocked(this, activityChange, null /* client */);
             if (updateOomAdj) {
                 mService.updateOomAdjLocked();
             }
@@ -1330,19 +1321,20 @@ class ProcessRecord implements WindowProcessListener {
     }
 
     @Override
-    public void clearWaitingToKill() {
+    public void onStartActivity(int topProcessState, boolean setProfileProc, String packageName,
+            long versionCode) {
         synchronized (mService) {
             waitingToKill = null;
-        }
-    }
-
-    @Override
-    public void onStartActivity(int topProcessState, boolean setProfileProc) {
-        synchronized (mService) {
             if (setProfileProc) {
                 mService.mProfileData.setProfileProc(this);
             }
+            if (packageName != null) {
+                addPackage(packageName, versionCode, mService.mProcessStats);
+            }
 
+            // Update oom adj first, we don't want the additional states are involved in this round.
+            updateProcessInfo(false /* updateServiceConnectionActivities */,
+                    true /* activityChange */, true /* updateOomAdj */);
             hasShownUi = true;
             setPendingUiClean(true);
             forceProcessStateUpTo(topProcessState);
