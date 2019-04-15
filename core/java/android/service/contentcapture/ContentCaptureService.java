@@ -86,11 +86,28 @@ public abstract class ContentCaptureService extends Service {
      * <code>&lt;{@link
      * android.R.styleable#ContentCaptureService content-capture-service}&gt;</code> tag.
      *
-     * <p>This is a a sample XML file configuring a ContentCaptureService:
-     * <pre> &lt;content-capture-service
-     *     android:settingsActivity="foo.bar.SettingsActivity"
-     *     . . .
-     * /&gt;</pre>
+     * <p>Here's an example of how to use it on {@code AndroidManifest.xml}:
+     *
+     * <pre>
+     * &lt;service android:name=".MyContentCaptureService"
+     *     android:permission="android.permission.BIND_CONTENT_CAPTURE_SERVICE"&gt;
+     *   &lt;intent-filter&gt;
+     *     &lt;action android:name="android.service.contentcapture.ContentCaptureService" /&gt;
+     *   &lt;/intent-filter&gt;
+     *
+     *   &lt;meta-data
+     *       android:name="android.content_capture"
+     *       android:resource="@xml/my_content_capture_service"/&gt;
+     * &lt;/service&gt;
+     * </pre>
+     *
+     * <p>And then on {@code res/xml/my_content_capture_service.xml}:
+     *
+     * <pre>
+     *   &lt;content-capture-service xmlns:android="http://schemas.android.com/apk/res/android"
+     *       android:settingsActivity="my.package.MySettingsActivity"&gt;
+     *   &lt;/content-capture-service&gt;
+     * </pre>
      */
     public static final String SERVICE_META_DATA = "android.content_capture";
 
