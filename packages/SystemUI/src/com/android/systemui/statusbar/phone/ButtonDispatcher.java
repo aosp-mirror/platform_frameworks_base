@@ -141,6 +141,11 @@ public class ButtonDispatcher {
 
     public void setVisibility(int visibility) {
         if (mVisibility == visibility) return;
+        if (mFadeAnimator != null) {
+            mFadeAnimator.cancel();
+            mFadeAnimator = null;
+        }
+
         mVisibility = visibility;
         final int N = mViews.size();
         for (int i = 0; i < N; i++) {
