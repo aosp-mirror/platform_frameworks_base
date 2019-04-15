@@ -22,12 +22,15 @@ import android.location.ILocationManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationProvider;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.WorkSource;
 import android.util.Log;
+
+import androidx.annotation.RequiresApi;
 
 import com.android.internal.location.ILocationProvider;
 import com.android.internal.location.ILocationProviderManager;
@@ -125,6 +128,7 @@ public abstract class LocationProviderBase {
      * taken into account in the parent's enabled/disabled state. For most providers, it is expected
      * that they will be always enabled.
      */
+    @RequiresApi(VERSION_CODES.Q)
     public void setEnabled(boolean enabled) {
         synchronized (mBinder) {
             if (mEnabled == enabled) {
@@ -148,6 +152,7 @@ public abstract class LocationProviderBase {
      * Sets the provider properties that may be queried by clients. Generally speaking, providers
      * should try to avoid changing their properties after construction.
      */
+    @RequiresApi(VERSION_CODES.Q)
     public void setProperties(ProviderPropertiesUnbundled properties) {
         synchronized (mBinder) {
             mProperties = properties.getProviderProperties();
@@ -170,6 +175,7 @@ public abstract class LocationProviderBase {
      * providing location. This will inform location services to treat the other packages as
      * location providers as well.
      */
+    @RequiresApi(VERSION_CODES.Q)
     public void setAdditionalProviderPackages(List<String> packageNames) {
         synchronized (mBinder) {
             mAdditionalProviderPackages.clear();
@@ -190,6 +196,7 @@ public abstract class LocationProviderBase {
      * Returns true if this provider has been set as enabled. This will be true unless explicitly
      * set otherwise.
      */
+    @RequiresApi(VERSION_CODES.Q)
     public boolean isEnabled() {
         return mEnabled;
     }

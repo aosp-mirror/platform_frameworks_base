@@ -9,7 +9,7 @@ package com.android.location.provider {
   public abstract class LocationProviderBase {
     ctor public LocationProviderBase(String, com.android.location.provider.ProviderPropertiesUnbundled);
     method public android.os.IBinder getBinder();
-    method public boolean isEnabled();
+    method @RequiresApi(android.os.Build.VERSION_CODES.Q) public boolean isEnabled();
     method @Deprecated protected void onDisable();
     method @Deprecated protected void onDump(java.io.FileDescriptor, java.io.PrintWriter, String[]);
     method @Deprecated protected void onEnable();
@@ -19,9 +19,9 @@ package com.android.location.provider {
     method protected boolean onSendExtraCommand(@Nullable String, @Nullable android.os.Bundle);
     method protected abstract void onSetRequest(com.android.location.provider.ProviderRequestUnbundled, android.os.WorkSource);
     method public void reportLocation(android.location.Location);
-    method public void setAdditionalProviderPackages(java.util.List<java.lang.String>);
-    method public void setEnabled(boolean);
-    method public void setProperties(com.android.location.provider.ProviderPropertiesUnbundled);
+    method @RequiresApi(android.os.Build.VERSION_CODES.Q) public void setAdditionalProviderPackages(java.util.List<java.lang.String>);
+    method @RequiresApi(android.os.Build.VERSION_CODES.Q) public void setEnabled(boolean);
+    method @RequiresApi(android.os.Build.VERSION_CODES.Q) public void setProperties(com.android.location.provider.ProviderPropertiesUnbundled);
     field public static final String EXTRA_NO_GPS_LOCATION = "noGPSLocation";
     field public static final String FUSED_PROVIDER = "fused";
   }
@@ -48,7 +48,7 @@ package com.android.location.provider {
     method public long getInterval();
     method public java.util.List<com.android.location.provider.LocationRequestUnbundled> getLocationRequests();
     method public boolean getReportLocation();
-    method public boolean isLocationSettingsIgnored();
+    method @RequiresApi(android.os.Build.VERSION_CODES.Q) public boolean isLocationSettingsIgnored();
   }
 
 }
