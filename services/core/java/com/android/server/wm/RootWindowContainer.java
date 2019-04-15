@@ -314,9 +314,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
      * Returns true if the callingUid has any non-toast window currently visible to the user.
      */
     boolean isAnyNonToastWindowVisibleForUid(int callingUid) {
-        return forAllWindows(w -> {
-            return w.getOwningUid() == callingUid && w.isVisible() && w.mAttrs.type != TYPE_TOAST;
-        }, true /* traverseTopToBottom */);
+        return forAllWindows(w ->
+                        w.getOwningUid() == callingUid && w.mAttrs.type != TYPE_TOAST
+                        && w.isVisibleNow(),
+                true /* traverseTopToBottom */);
     }
 
     /**
