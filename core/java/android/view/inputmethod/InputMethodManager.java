@@ -2887,6 +2887,16 @@ public final class InputMethodManager {
         }
     }
 
+    /**
+     * <p>This is used for CTS test only. Do not use this method outside of CTS package.<p/>
+     * @return the ID of this display which this {@link InputMethodManager} resides
+     * @hide
+     */
+    @TestApi
+    public int getDisplayId() {
+        return mDisplayId;
+    }
+
     void doDump(FileDescriptor fd, PrintWriter fout, String[] args) {
         final Printer p = new PrintWriterPrinter(fout);
         p.println("Input method client state for " + this + ":");
