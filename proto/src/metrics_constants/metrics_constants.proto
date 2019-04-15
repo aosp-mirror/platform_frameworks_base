@@ -7197,6 +7197,15 @@ message MetricsEvent {
     // OS: Q
     DIALOG_PREFERRED_SIM_PICKER = 1709;
 
+    // ACTION: Share a Wi-Fi network by generating a QR code
+    ACTION_SETTINGS_SHARE_WIFI_QR_CODE = 1710;
+
+    // ACTION: Connect to a Wi-Fi network by scanning a QR code
+    ACTION_SETTINGS_ENROLL_WIFI_QR_CODE = 1711;
+
+    // ACTION: Share Wi-Fi hotspot by generating a QR code
+    ACTION_SETTINGS_SHARE_WIFI_HOTSPOT_QR_CODE = 1712;
+
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
