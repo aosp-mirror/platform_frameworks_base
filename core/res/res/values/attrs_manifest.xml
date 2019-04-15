@@ -1684,18 +1684,27 @@
              This flag is turned on by default. <em>This attribute is usable only by system apps.
              </em> -->
         <attr name="allowClearUserDataOnFailedRestore"/>
-        <!-- If {@code true} the app's non sensitive audio can be capture by other apps with
-             {@code AudioPlaybackCaptureConfiguration} and a {@code MediaProjection}.
+        <!-- If {@code true} the app's non sensitive audio can be captured by other apps with
+             {@link android.media.AudioPlaybackCaptureConfiguration} and a
+             {@link android.media.projection.MediaProjection}.
+
+             If {@code false} the audio played by the application will never be captured by non
+             system apps. It is equivalent to limiting
+             {@link android.media.AudioManager#setAllowedCapturePolicy(int)} to
+             {@link android.media.AudioAttributes#ALLOW_CAPTURE_BY_SYSTEM}.
 
              <p>
              Non sensitive audio is defined as audio whose {@code AttributeUsage} is
              {@code USAGE_UNKNOWN}), {@code USAGE_MEDIA}) or {@code USAGE_GAME}).
-             All other usages (eg. {@code USAGE_VOICE_COMMUNICATION}) will not be captured.
+             All other usages like {@code USAGE_VOICE_COMMUNICATION} will not be captured.
 
              <p>
              The default value is:
                  - {@code true} for apps with targetSdkVersion >= 29 (Q).
                  - {@code false} for apps with targetSdkVersion < 29.
+
+             <p>
+             See {@link android.media.AudioPlaybackCaptureConfiguration} for more detail.
              -->
         <attr name="allowAudioPlaybackCapture" format="boolean" />
         <!-- If {@code true} this app allows shared/external storage media to be
