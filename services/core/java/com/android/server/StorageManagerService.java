@@ -1074,6 +1074,15 @@ class StorageManagerService extends IStorageManager.Stub
         mVold.onUserStarted(userId, packages, appIds, sandboxIds);
     }
 
+     private boolean supportsBlockCheckpoint() throws RemoteException {
+        // Only the system process is permitted to start checkpoints
+        if (Binder.getCallingUid() != android.os.Process.SYSTEM_UID) {
+            throw new SecurityException("no permission to check block based checkpoint support");
+        }
+
+        return mVold.supportsBlockCheckpoint();
+    }
+
     @Override
     public void onAwakeStateChanged(boolean isAwake) {
         // Ignored
@@ -2116,37 +2125,45 @@ class StorageManagerService extends IStorageManager.Stub
         enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
 
         try {
-            mVold.fstrim(flags, new IVoldTaskListener.Stub() {
-                @Override
-                public void onStatus(int status, PersistableBundle extras) {
-                    dispatchOnStatus(listener, status, extras);
+            // Block based checkpoint process runs fstrim. So, if checkpoint is in progress
+            // (first boot after OTA), We skip idle maintenance and make sure the last
+            // fstrim time is still updated. If file based checkpoints are used, we run
+            // idle maintenance (GC + fstrim) regardless of checkpoint status.
+            if (!needsCheckpoint() || !supportsBlockCheckpoint()) {
+                mVold.fstrim(flags, new IVoldTaskListener.Stub() {
+                    @Override
+                    public void onStatus(int status, PersistableBundle extras) {
+                        dispatchOnStatus(listener, status, extras);
 
-                    // Ignore trim failures
-                    if (status != 0) return;
+                        // Ignore trim failures
+                        if (status != 0) return;
 
-                    final String path = extras.getString("path");
-                    final long bytes = extras.getLong("bytes");
-                    final long time = extras.getLong("time");
+                        final String path = extras.getString("path");
+                        final long bytes = extras.getLong("bytes");
+                        final long time = extras.getLong("time");
 
-                    final DropBoxManager dropBox = mContext.getSystemService(DropBoxManager.class);
-                    dropBox.addText(TAG_STORAGE_TRIM, scrubPath(path) + " " + bytes + " " + time);
+                        final DropBoxManager dropBox = mContext.getSystemService(DropBoxManager.class);
+                        dropBox.addText(TAG_STORAGE_TRIM, scrubPath(path) + " " + bytes + " " + time);
 
-                    synchronized (mLock) {
-                        final VolumeRecord rec = findRecordForPath(path);
-                        if (rec != null) {
-                            rec.lastTrimMillis = System.currentTimeMillis();
-                            writeSettingsLocked();
+                        synchronized (mLock) {
+                            final VolumeRecord rec = findRecordForPath(path);
+                            if (rec != null) {
+                                rec.lastTrimMillis = System.currentTimeMillis();
+                                writeSettingsLocked();
+                            }
                         }
                     }
-                }
 
-                @Override
-                public void onFinished(int status, PersistableBundle extras) {
-                    dispatchOnFinished(listener, status, extras);
+                    @Override
+                    public void onFinished(int status, PersistableBundle extras) {
+                        dispatchOnFinished(listener, status, extras);
 
-                    // TODO: benchmark when desired
-                }
-            });
+                        // TODO: benchmark when desired
+                    }
+                });
+            } else {
+                Slog.i(TAG, "Skipping fstrim - block based checkpoint in progress");
+            }
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -2156,18 +2173,26 @@ class StorageManagerService extends IStorageManager.Stub
         enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
 
         try {
-            mVold.runIdleMaint(new IVoldTaskListener.Stub() {
-                @Override
-                public void onStatus(int status, PersistableBundle extras) {
-                    // Not currently used
-                }
-                @Override
-                public void onFinished(int status, PersistableBundle extras) {
-                    if (callback != null) {
-                        BackgroundThread.getHandler().post(callback);
+            // Block based checkpoint process runs fstrim. So, if checkpoint is in progress
+            // (first boot after OTA), We skip idle maintenance and make sure the last
+            // fstrim time is still updated. If file based checkpoints are used, we run
+            // idle maintenance (GC + fstrim) regardless of checkpoint status.
+            if (!needsCheckpoint() || !supportsBlockCheckpoint()) {
+                mVold.runIdleMaint(new IVoldTaskListener.Stub() {
+                    @Override
+                    public void onStatus(int status, PersistableBundle extras) {
+                        // Not currently used
                     }
-                }
-            });
+                    @Override
+                    public void onFinished(int status, PersistableBundle extras) {
+                        if (callback != null) {
+                            BackgroundThread.getHandler().post(callback);
+                        }
+                    }
+                });
+            } else {
+                Slog.i(TAG, "Skipping idle maintenance - block based checkpoint in progress");
+            }
         } catch (Exception e) {
             Slog.wtf(TAG, e);
         }
