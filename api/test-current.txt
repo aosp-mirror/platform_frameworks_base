@@ -1100,6 +1100,7 @@ package android.media {
 
   public class AudioManager {
     method @RequiresPermission("android.permission.MODIFY_AUDIO_ROUTING") public int dispatchAudioFocusChange(@NonNull android.media.AudioFocusInfo, int, @NonNull android.media.audiopolicy.AudioPolicy);
+    method public boolean hasRegisteredDynamicPolicy();
     method @RequiresPermission("android.permission.MODIFY_AUDIO_ROUTING") public int registerAudioPolicy(@NonNull android.media.audiopolicy.AudioPolicy);
     method @RequiresPermission("android.permission.MODIFY_AUDIO_ROUTING") public void setFocusRequestResult(@NonNull android.media.AudioFocusInfo, int, @NonNull android.media.audiopolicy.AudioPolicy);
     method @RequiresPermission("android.permission.MODIFY_AUDIO_ROUTING") public void unregisterAudioPolicy(@NonNull android.media.audiopolicy.AudioPolicy);

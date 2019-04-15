@@ -3431,6 +3431,20 @@ public class AudioManager {
         }
     }
 
+    /**
+     * @hide
+     * @return true if an AudioPolicy was previously registered
+     */
+    @TestApi
+    public boolean hasRegisteredDynamicPolicy() {
+        final IAudioService service = getService();
+        try {
+            return service.hasRegisteredDynamicPolicy();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     //====================================================================
     // Notification of playback activity & playback configuration
     /**
