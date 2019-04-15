@@ -17,7 +17,6 @@ package android.net;
 
 import android.annotation.NonNull;
 import android.annotation.TestApi;
-import android.content.Context;
 import android.os.IBinder;
 import android.os.RemoteException;
 
@@ -33,11 +32,9 @@ public class TestNetworkManager {
     @NonNull private static final String TAG = TestNetworkManager.class.getSimpleName();
 
     @NonNull private final ITestNetworkManager mService;
-    @NonNull private final Context mContext;
 
     /** @hide */
-    public TestNetworkManager(@NonNull Context context, @NonNull ITestNetworkManager service) {
-        mContext = Preconditions.checkNotNull(context, "missing Context");
+    public TestNetworkManager(@NonNull ITestNetworkManager service) {
         mService = Preconditions.checkNotNull(service, "missing ITestNetworkManager");
     }
 
@@ -88,4 +85,21 @@ public class TestNetworkManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Create a tap interface for testing purposes
+     *
+     * @return A ParcelFileDescriptor of the underlying TAP interface. Close this to tear down the
+     *     TAP interface.
+     * @hide
+     */
+    @TestApi
+    public TestNetworkInterface createTapInterface() {
+        try {
+            return mService.createTapInterface();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
 }

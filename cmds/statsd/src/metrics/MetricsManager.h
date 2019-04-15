@@ -78,6 +78,10 @@ public:
         return mNoReportMetricIds.size() != mAllMetricProducers.size();
     }
 
+    bool shouldPersistLocalHistory() const {
+        return mShouldPersistHistory;
+    }
+
     void dumpStates(FILE* out, bool verbose);
 
     inline bool isInTtl(const int64_t timestampNs) const {
@@ -183,6 +187,8 @@ private:
 
     // Contains the annotations passed in with StatsdConfig.
     std::list<std::pair<const int64_t, const int32_t>> mAnnotations;
+
+    const bool mShouldPersistHistory;
 
     // To guard access to mAllowedLogSources
     mutable std::mutex mAllowedLogSourcesMutex;

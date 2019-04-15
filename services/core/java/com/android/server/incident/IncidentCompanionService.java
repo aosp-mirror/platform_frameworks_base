@@ -55,7 +55,8 @@ public class IncidentCompanionService extends SystemService {
      * Dump argument for proxying restricted image dumps to the services
      * listed in the config.
      */
-    private static String[] RESTRICTED_IMAGE_DUMP_ARGS = new String[] { "--restricted_image" };
+    private static String[] RESTRICTED_IMAGE_DUMP_ARGS = new String[] {
+        "--hal", "--restricted_image" };
 
     /**
      * The two permissions, for sendBroadcastAsUserMultiplePermissions.

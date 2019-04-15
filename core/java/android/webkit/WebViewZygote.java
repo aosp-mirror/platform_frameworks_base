@@ -17,7 +17,6 @@
 package android.webkit;
 
 import android.content.pm.PackageInfo;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.ChildZygoteProcess;
 import android.os.Process;
@@ -81,17 +80,9 @@ public class WebViewZygote {
         synchronized (sLock) {
             sMultiprocessEnabled = enabled;
 
-            // When toggling between multi-process being on/off, start or stop the
-            // zygote. If it is enabled and the zygote is not yet started, launch it.
-            // Otherwise, kill it. The name may be null if the package information has
-            // not yet been resolved.
-            if (enabled) {
-                // Run on a background thread as this waits for the zygote to start and we don't
-                // want to block the caller on this. It's okay if this is delayed as anyone trying
-                // to use the zygote will call it first anyway.
-                AsyncTask.THREAD_POOL_EXECUTOR.execute(WebViewZygote::getProcess);
-            } else {
-                // No need to run this in the background, it's very brief.
+            // When multi-process is disabled, kill the zygote. When it is enabled,
+            // the zygote will be started when it is first needed in getProcess().
+            if (!enabled) {
                 stopZygoteLocked();
             }
         }

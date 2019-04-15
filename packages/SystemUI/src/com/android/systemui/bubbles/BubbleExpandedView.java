@@ -229,6 +229,9 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                 true /* singleTaskInstance */);
         addView(mActivityView);
 
+        // Make sure pointer is below activity view
+        bringChildToFront(mPointerView);
+
         setOnApplyWindowInsetsListener((View view, WindowInsets insets) -> {
             // Keep track of IME displaying because we should not make any adjustments that might
             // cause a config change while the IME is displayed otherwise it'll loose focus.
@@ -720,7 +723,9 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                 action,
                 mStackView.getNormalizedXPosition(),
                 mStackView.getNormalizedYPosition(),
-                entry.showInShadeWhenBubble());
+                entry.showInShadeWhenBubble(),
+                entry.isForegroundService(),
+                BubbleController.isForegroundApp(mContext, notification.getPackageName()));
     }
 
     private int getDimenForPackageUser(int resId, String pkg, int userId) {

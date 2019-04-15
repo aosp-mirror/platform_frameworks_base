@@ -271,7 +271,12 @@ public class EdgeBackGestureHandler implements DisplayListener {
         if (x > mEdgeWidth && x < (mDisplaySize.x - mEdgeWidth)) {
             return false;
         }
-        return !mExcludeRegion.contains(x, y);
+        boolean isInExcludedRegion = mExcludeRegion.contains(x, y);
+        if (isInExcludedRegion) {
+            mOverviewProxyService.notifyBackAction(false /* completed */, -1, -1,
+                    false /* isButton */, !mIsOnLeftEdge);
+        }
+        return !isInExcludedRegion;
     }
 
     private void onMotionEvent(MotionEvent ev) {

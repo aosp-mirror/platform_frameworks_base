@@ -20,7 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
-import android.media.audiopolicy.AudioProductStrategies;
+import android.media.audiopolicy.AudioProductStrategy;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -535,6 +535,23 @@ public final class AudioAttributes implements Parcelable {
     }
 
     /**
+     * Return the capture policy.
+     * @return the capture policy set by {@link Builder#setAllowedCapturePolicy(int)} or
+     *         the default if it was not called.
+     */
+    @CapturePolicy
+    public int getAllowedCapturePolicy() {
+        if ((mFlags & FLAG_NO_SYSTEM_CAPTURE) == FLAG_NO_SYSTEM_CAPTURE) {
+            return ALLOW_CAPTURE_BY_NONE;
+        }
+        if ((mFlags & FLAG_NO_MEDIA_PROJECTION) == FLAG_NO_MEDIA_PROJECTION) {
+            return ALLOW_CAPTURE_BY_SYSTEM;
+        }
+        return ALLOW_CAPTURE_BY_ALL;
+    }
+
+
+    /**
      * Builder class for {@link AudioAttributes} objects.
      * <p> Here is an example where <code>Builder</code> is used to define the
      * {@link AudioAttributes} to be used by a new <code>AudioTrack</code> instance:
@@ -696,12 +713,19 @@ public final class AudioAttributes implements Parcelable {
         }
 
         /**
-         * Specifying if audio may or may not be captured by other apps or the system.
+         * Specifies weather the audio may or may not be captured by other apps or the system.
          *
          * The default is {@link AudioAttributes#ALLOW_CAPTURE_BY_ALL}.
          *
-         * Note that an application can also set its global policy, in which case the most
-         * restrictive policy is always applied.
+         * There are multiple ways to set this policy:
+         *  - for each tracks independently, with this method
+         *  - application wide at runtime, with {@link AudioManager#setAllowedCapturePolicy(int)}
+         *  - application wide at build time, see {@code allowAudioPlaybackCapture} in the
+         *    application manifest.
+         * The most restrictive policy is always applied.
+         *
+         * See {@link AudioPlaybackCaptureConfiguration} for more details on the restrictions
+         * which audio signals can be captured.
          *
          * @param capturePolicy one of
          *     {@link #ALLOW_CAPTURE_BY_ALL},
@@ -783,9 +807,10 @@ public final class AudioAttributes implements Parcelable {
          */
         @UnsupportedAppUsage
         public Builder setInternalLegacyStreamType(int streamType) {
-            final AudioProductStrategies ps = new AudioProductStrategies();
-            if (ps.size() > 0) {
-                AudioAttributes attributes = ps.getAudioAttributesForLegacyStreamType(streamType);
+            if (AudioProductStrategy.getAudioProductStrategies().size() > 0) {
+                AudioAttributes attributes =
+                        AudioProductStrategy.getAudioAttributesForStrategyWithLegacyStreamType(
+                                streamType);
                 if (attributes != null) {
                     return new Builder(attributes);
                 }
@@ -1165,9 +1190,8 @@ public final class AudioAttributes implements Parcelable {
                     AudioSystem.STREAM_MUSIC : AudioSystem.STREAM_TTS;
         }
 
-        final AudioProductStrategies ps = new AudioProductStrategies();
-        if (ps.size() > 0) {
-            return ps.getLegacyStreamTypeForAudioAttributes(aa);
+        if (AudioProductStrategy.getAudioProductStrategies().size() > 0) {
+            return AudioProductStrategy.getLegacyStreamTypeForStrategyWithAudioAttributes(aa);
         }
         // usage to stream type mapping
         switch (aa.getUsage()) {

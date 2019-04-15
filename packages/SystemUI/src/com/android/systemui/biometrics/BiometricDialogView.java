@@ -308,7 +308,7 @@ public abstract class BiometricDialogView extends LinearLayout {
     protected void updateIcon(int lastState, int newState) {
         final Drawable icon = getAnimationForTransition(lastState, newState);
         if (icon == null) {
-            Log.e(TAG, "Animation not found");
+            Log.e(TAG, "Animation not found, " + lastState + " -> " + newState);
             return;
         }
 

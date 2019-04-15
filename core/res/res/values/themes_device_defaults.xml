@@ -1725,5 +1725,7 @@ easier.
     </style>
 
     <!-- @hide DeviceDefault theme for the DocumentsUI app.  -->
-    <style name="Theme.DeviceDefault.DocumentsUI" parent="Theme.DeviceDefault.DayNight" />
+    <style name="Theme.DeviceDefault.DocumentsUI" parent="Theme.DeviceDefault.DayNight">
+        <item name="actionModeCloseDrawable">@drawable/ic_clear_material</item>
+    </style>
 </resources>

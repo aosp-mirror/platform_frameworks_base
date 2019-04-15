@@ -61,5 +61,7 @@ public interface SystemInterface {
     public int getMultiProcessSetting(Context context);
     public void setMultiProcessSetting(Context context, int value);
     public void notifyZygote(boolean enableMultiProcess);
+    /** Start the zygote if it's not already running. */
+    public void ensureZygoteStarted();
     public boolean isMultiProcessDefaultEnabled();
 }

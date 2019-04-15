@@ -34,6 +34,8 @@ import java.util.Map;
  *
  * Used by {@link MediaPlayer2#setDataSource}, {@link MediaPlayer2#setNextDataSource} and
  * {@link MediaPlayer2#setNextDataSources} to set data source for playback.
+ *
+ * @hide
  */
 public class DataSourceDesc {
     // intentionally less than long.MAX_VALUE

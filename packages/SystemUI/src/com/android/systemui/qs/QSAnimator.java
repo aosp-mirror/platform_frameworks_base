@@ -213,7 +213,11 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                 } else { // These tiles disappear when expanding
                     firstPageBuilder.addFloat(quickTileView, "alpha", 1, 0);
                     translationYBuilder.addFloat(quickTileView, "translationY", 0, yDiff);
-                    translationXBuilder.addFloat(quickTileView, "translationX", 0, xDiff + width);
+
+                    // xDiff is negative here and this makes it "more" negative
+                    final int translationX = mQsPanel.isLayoutRtl() ? xDiff - width : xDiff + width;
+                    translationXBuilder.addFloat(quickTileView, "translationX", 0,
+                            translationX);
                 }
 
                 mQuickQsViews.add(tileView.getIconWithBackground());

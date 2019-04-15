@@ -841,6 +841,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @Override
     public void commit(@NonNull IntentSender statusReceiver, boolean forTransfer) {
+        if (hasParentSessionId()) {
+            throw new IllegalStateException(
+                    "Session " + sessionId + " is a child of multi-package session "
+                            + mParentSessionId +  " and may not be committed directly.");
+        }
         if (!markAsCommitted(statusReceiver, forTransfer)) {
             return;
         }
@@ -2037,6 +2042,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @Override
     public void abandon() {
+        if (hasParentSessionId()) {
+            throw new IllegalStateException(
+                    "Session " + sessionId + " is a child of multi-package session "
+                            + mParentSessionId +  " and may not be abandoned directly.");
+        }
         synchronized (mLock) {
             assertCallerIsOwnerOrRootLocked();
 
@@ -2079,13 +2089,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     @Override
-    public void addChildSessionId(int childSessionId) throws RemoteException {
+    public void addChildSessionId(int childSessionId) {
         final PackageInstallerSession childSession = mSessionProvider.getSession(childSessionId);
-        if (childSession == null) {
-            throw new RemoteException("Unable to add child.",
-                    new PackageManagerException("Child session " + childSessionId
-                            + " does not exist"),
-                    false, true).rethrowAsRuntimeException();
+        if (childSession == null
+                || (childSession.hasParentSessionId() && childSession.mParentSessionId != sessionId)
+                || childSession.mCommitted
+                || childSession.mDestroyed) {
+            throw new IllegalStateException("Unable to add child session " + childSessionId
+                            + " as it does not exist or is in an invalid state.");
         }
         synchronized (mLock) {
             assertCallerIsOwnerOrRootLocked();
@@ -2124,11 +2135,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         synchronized (mLock) {
             if (parentSessionId != SessionInfo.INVALID_ID
                     && mParentSessionId != SessionInfo.INVALID_ID) {
-                throw new RemoteException("Unable to set parent session.",
-                        new PackageManagerException(
-                                "The parent of " + sessionId + " is" + " already set to "
-                                        + mParentSessionId), false,
-                        true).rethrowAsRuntimeException();
+                throw new IllegalStateException("The parent of " + sessionId + " is" + " already"
+                        + "set to " + mParentSessionId);
             }
             this.mParentSessionId = parentSessionId;
         }

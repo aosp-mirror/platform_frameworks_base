@@ -28,6 +28,7 @@ import static android.net.INetworkMonitor.NETWORK_TEST_RESULT_PARTIAL_CONNECTIVI
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
+import static android.net.captiveportal.CaptivePortalProbeSpec.parseCaptivePortalProbeSpecs;
 import static android.net.metrics.ValidationProbeEvent.DNS_FAILURE;
 import static android.net.metrics.ValidationProbeEvent.DNS_SUCCESS;
 import static android.net.metrics.ValidationProbeEvent.PROBE_FALLBACK;
@@ -52,6 +53,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.INetworkMonitor;
 import android.net.INetworkMonitorCallbacks;
@@ -63,8 +65,6 @@ import android.net.TrafficStats;
 import android.net.Uri;
 import android.net.captiveportal.CaptivePortalProbeResult;
 import android.net.captiveportal.CaptivePortalProbeSpec;
-import android.net.metrics.DataStallDetectionStats;
-import android.net.metrics.DataStallStatsUtils;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.NetworkEvent;
 import android.net.metrics.ValidationProbeEvent;
@@ -91,11 +91,16 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 
+import androidx.annotation.ArrayRes;
+import androidx.annotation.StringRes;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.RingBufferIndices;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 import com.android.networkstack.R;
+import com.android.networkstack.metrics.DataStallDetectionStats;
+import com.android.networkstack.metrics.DataStallStatsUtils;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -105,7 +110,6 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -113,6 +117,7 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 /**
  * {@hide}
@@ -122,15 +127,6 @@ public class NetworkMonitor extends StateMachine {
     private static final boolean DBG  = true;
     private static final boolean VDBG = false;
     private static final boolean VDBG_STALL = Log.isLoggable(TAG, Log.DEBUG);
-    // TODO: use another permission for CaptivePortalLoginActivity once it has its own certificate
-    private static final String PERMISSION_NETWORK_SETTINGS = "android.permission.NETWORK_SETTINGS";
-    // Default configuration values for captive portal detection probes.
-    // TODO: append a random length parameter to the default HTTPS url.
-    // TODO: randomize browser version ids in the default User-Agent String.
-    private static final String DEFAULT_HTTPS_URL = "https://www.google.com/generate_204";
-    private static final String DEFAULT_FALLBACK_URL  = "http://www.google.com/gen_204";
-    private static final String DEFAULT_OTHER_FALLBACK_URLS =
-            "http://play.googleapis.com/generate_204";
     private static final String DEFAULT_USER_AGENT    = "Mozilla/5.0 (X11; Linux x86_64) "
                                                       + "AppleWebKit/537.36 (KHTML, like Gecko) "
                                                       + "Chrome/60.0.3112.32 Safari/537.36";
@@ -378,7 +374,7 @@ public class NetworkMonitor extends StateMachine {
         mUseHttps = getUseHttpsValidation();
         mCaptivePortalUserAgent = getCaptivePortalUserAgent();
         mCaptivePortalHttpsUrl = makeURL(getCaptivePortalServerHttpsUrl());
-        mCaptivePortalHttpUrl = makeURL(deps.getCaptivePortalServerHttpUrl(context));
+        mCaptivePortalHttpUrl = makeURL(getCaptivePortalServerHttpUrl());
         mCaptivePortalFallbackUrls = makeCaptivePortalFallbackUrls();
         mCaptivePortalFallbackSpecs = makeCaptivePortalFallbackProbeSpecs();
         mRandom = deps.getRandom();
@@ -1178,8 +1174,22 @@ public class NetworkMonitor extends StateMachine {
     }
 
     private String getCaptivePortalServerHttpsUrl() {
-        return mDependencies.getSetting(mContext,
-                Settings.Global.CAPTIVE_PORTAL_HTTPS_URL, DEFAULT_HTTPS_URL);
+        return getSettingFromResource(mContext, R.string.config_captive_portal_https_url,
+                R.string.default_captive_portal_https_url,
+                Settings.Global.CAPTIVE_PORTAL_HTTPS_URL);
+    }
+
+    /**
+     * Get the captive portal server HTTP URL that is configured on the device.
+     *
+     * NetworkMonitor does not use {@link ConnectivityManager#getCaptivePortalServerUrl()} as
+     * it has its own updatable strategies to detect captive portals. The framework only advises
+     * on one URL that can be used, while NetworkMonitor may implement more complex logic.
+     */
+    public String getCaptivePortalServerHttpUrl() {
+        return getSettingFromResource(mContext, R.string.config_captive_portal_http_url,
+                R.string.default_captive_portal_http_url,
+                Settings.Global.CAPTIVE_PORTAL_HTTP_URL);
     }
 
     private int getConsecutiveDnsTimeoutThreshold() {
@@ -1208,24 +1218,23 @@ public class NetworkMonitor extends StateMachine {
 
     private URL[] makeCaptivePortalFallbackUrls() {
         try {
-            String separator = ",";
-            String firstUrl = mDependencies.getSetting(mContext,
-                    Settings.Global.CAPTIVE_PORTAL_FALLBACK_URL, DEFAULT_FALLBACK_URL);
-            String joinedUrls = firstUrl + separator + mDependencies.getSetting(mContext,
-                    Settings.Global.CAPTIVE_PORTAL_OTHER_FALLBACK_URLS,
-                    DEFAULT_OTHER_FALLBACK_URLS);
-            List<URL> urls = new ArrayList<>();
-            for (String s : joinedUrls.split(separator)) {
-                URL u = makeURL(s);
-                if (u == null) {
-                    continue;
-                }
-                urls.add(u);
+            final String firstUrl = mDependencies.getSetting(mContext,
+                    Settings.Global.CAPTIVE_PORTAL_FALLBACK_URL, null);
+
+            final URL[] settingProviderUrls;
+            if (!TextUtils.isEmpty(firstUrl)) {
+                final String otherUrls = mDependencies.getSetting(mContext,
+                        Settings.Global.CAPTIVE_PORTAL_OTHER_FALLBACK_URLS, "");
+                // otherUrls may be empty, but .split() ignores trailing empty strings
+                final String separator = ",";
+                final String[] urls = (firstUrl + separator + otherUrls).split(separator);
+                settingProviderUrls = convertStrings(urls, this::makeURL, new URL[0]);
+            } else {
+                settingProviderUrls = new URL[0];
             }
-            if (urls.isEmpty()) {
-                Log.e(TAG, String.format("could not create any url from %s", joinedUrls));
-            }
-            return urls.toArray(new URL[urls.size()]);
+
+            return getArrayConfig(settingProviderUrls, R.array.config_captive_portal_fallback_urls,
+                    R.array.default_captive_portal_fallback_urls, this::makeURL);
         } catch (Exception e) {
             // Don't let a misconfiguration bootloop the system.
             Log.e(TAG, "Error parsing configured fallback URLs", e);
@@ -1237,20 +1246,96 @@ public class NetworkMonitor extends StateMachine {
         try {
             final String settingsValue = mDependencies.getSetting(
                     mContext, Settings.Global.CAPTIVE_PORTAL_FALLBACK_PROBE_SPECS, null);
-            // Probe specs only used if configured in settings
-            if (TextUtils.isEmpty(settingsValue)) {
-                return null;
-            }
+            final CaptivePortalProbeSpec[] emptySpecs = new CaptivePortalProbeSpec[0];
+            final CaptivePortalProbeSpec[] providerValue = TextUtils.isEmpty(settingsValue)
+                    ? emptySpecs
+                    : parseCaptivePortalProbeSpecs(settingsValue).toArray(emptySpecs);
 
-            final Collection<CaptivePortalProbeSpec> specs =
-                    CaptivePortalProbeSpec.parseCaptivePortalProbeSpecs(settingsValue);
-            final CaptivePortalProbeSpec[] specsArray = new CaptivePortalProbeSpec[specs.size()];
-            return specs.toArray(specsArray);
+            return getArrayConfig(providerValue, R.array.config_captive_portal_fallback_probe_specs,
+                    R.array.default_captive_portal_fallback_probe_specs,
+                    CaptivePortalProbeSpec::parseSpecOrNull);
         } catch (Exception e) {
             // Don't let a misconfiguration bootloop the system.
             Log.e(TAG, "Error parsing configured fallback probe specs", e);
             return null;
         }
+    }
+
+    /**
+     * Read a setting from a resource or the settings provider.
+     *
+     * <p>The configuration resource is prioritized, then the provider value, then the default
+     * resource value.
+     * @param context The context
+     * @param configResource The resource id for the configuration parameter
+     * @param defaultResource The resource id for the default value
+     * @param symbol The symbol in the settings provider
+     * @return The best available value
+     */
+    @NonNull
+    private String getSettingFromResource(@NonNull final Context context,
+            @StringRes int configResource, @StringRes int defaultResource,
+            @NonNull String symbol) {
+        final Resources res = context.getResources();
+        String setting = res.getString(configResource);
+
+        if (!TextUtils.isEmpty(setting)) return setting;
+
+        setting = mDependencies.getSetting(context, symbol, null);
+        if (!TextUtils.isEmpty(setting)) return setting;
+
+        return res.getString(defaultResource);
+    }
+
+    /**
+     * Get an array configuration from resources or the settings provider.
+     *
+     * <p>The configuration resource is prioritized, then the provider values, then the default
+     * resource values.
+     * @param providerValue Values obtained from the setting provider.
+     * @param configResId ID of the configuration resource.
+     * @param defaultResId ID of the default resource.
+     * @param resourceConverter Converter from the resource strings to stored setting class. Null
+     *                          return values are ignored.
+     */
+    private <T> T[] getArrayConfig(@NonNull T[] providerValue, @ArrayRes int configResId,
+            @ArrayRes int defaultResId, @NonNull Function<String, T> resourceConverter) {
+        final Resources res = mContext.getResources();
+        String[] configValue = res.getStringArray(configResId);
+
+        if (configValue.length == 0) {
+            if (providerValue.length > 0) {
+                return providerValue;
+            }
+
+            configValue = res.getStringArray(defaultResId);
+        }
+
+        return convertStrings(configValue, resourceConverter, Arrays.copyOf(providerValue, 0));
+    }
+
+    /**
+     * Convert a String array to an array of some other type using the specified converter.
+     *
+     * <p>Any null value, or value for which the converter throws a {@link RuntimeException}, will
+     * not be added to the output array, so the output array may be smaller than the input.
+     */
+    private <T> T[] convertStrings(
+            @NonNull String[] strings, Function<String, T> converter, T[] emptyArray) {
+        final ArrayList<T> convertedValues = new ArrayList<>(strings.length);
+        for (String configString : strings) {
+            T convertedValue = null;
+            try {
+                convertedValue = converter.apply(configString);
+            } catch (Exception e) {
+                Log.e(TAG, "Error parsing configuration", e);
+                // Fall through
+            }
+            if (convertedValue != null) {
+                convertedValues.add(convertedValue);
+            }
+        }
+        return convertedValues.toArray(emptyArray);
     }
 
     private String getCaptivePortalUserAgent() {
@@ -1691,19 +1776,6 @@ public class NetworkMonitor extends StateMachine {
 
         public Random getRandom() {
             return new Random();
-        }
-
-        /**
-         * Get the captive portal server HTTP URL that is configured on the device.
-         *
-         * NetworkMonitor does not use {@link ConnectivityManager#getCaptivePortalServerUrl()} as
-         * it has its own updatable strategies to detect captive portals. The framework only advises
-         * on one URL that can be used, while  NetworkMonitor may implement more complex logic.
-         */
-        public String getCaptivePortalServerHttpUrl(Context context) {
-            final String defaultUrl =
-                    context.getResources().getString(R.string.config_captive_portal_http_url);
-            return NetworkMonitorUtils.getCaptivePortalServerHttpUrl(context, defaultUrl);
         }
 
         /**

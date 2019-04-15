@@ -41,7 +41,6 @@ import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.hardware.HardwareBuffer;
 import android.hardware.display.DisplayedContentSample;
 import android.hardware.display.DisplayedContentSamplingAttributes;
 import android.os.Build;
@@ -91,8 +90,8 @@ public final class SurfaceControl implements Parcelable {
     private static native ScreenshotGraphicBuffer nativeScreenshot(IBinder displayToken,
             Rect sourceCrop, int width, int height, boolean useIdentityTransform, int rotation,
             boolean captureSecureLayers);
-    private static native ScreenshotGraphicBuffer nativeCaptureLayers(IBinder layerHandleToken,
-            Rect sourceCrop, float frameScale, IBinder[] excludeLayers);
+    private static native ScreenshotGraphicBuffer nativeCaptureLayers(IBinder displayToken,
+            IBinder layerHandleToken, Rect sourceCrop, float frameScale, IBinder[] excludeLayers);
 
     private static native long nativeCreateTransaction();
     private static native long nativeGetNativeTransactionFinalizer();
@@ -1917,9 +1916,7 @@ public final class SurfaceControl implements Parcelable {
             Log.w(TAG, "Failed to take screenshot");
             return null;
         }
-        return Bitmap.wrapHardwareBuffer(
-                HardwareBuffer.createFromGraphicBuffer(buffer.getGraphicBuffer()),
-                buffer.getColorSpace());
+        return Bitmap.wrapHardwareBuffer(buffer.getGraphicBuffer(), buffer.getColorSpace());
     }
 
     /**
@@ -2001,7 +1998,8 @@ public final class SurfaceControl implements Parcelable {
      */
     public static ScreenshotGraphicBuffer captureLayers(IBinder layerHandleToken, Rect sourceCrop,
             float frameScale) {
-        return nativeCaptureLayers(layerHandleToken, sourceCrop, frameScale, null);
+        final IBinder displayToken = SurfaceControl.getInternalDisplayToken();
+        return nativeCaptureLayers(displayToken, layerHandleToken, sourceCrop, frameScale, null);
     }
 
     /**
@@ -2010,7 +2008,8 @@ public final class SurfaceControl implements Parcelable {
      */
     public static ScreenshotGraphicBuffer captureLayersExcluding(IBinder layerHandleToken,
             Rect sourceCrop, float frameScale, IBinder[] exclude) {
-        return nativeCaptureLayers(layerHandleToken, sourceCrop, frameScale, exclude);
+        final IBinder displayToken = SurfaceControl.getInternalDisplayToken();
+        return nativeCaptureLayers(displayToken, layerHandleToken, sourceCrop, frameScale, exclude);
     }
 
     /**

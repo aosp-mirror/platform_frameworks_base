@@ -254,8 +254,6 @@ package android {
     field public static final int config_defaultAssistant = 17039393; // 0x1040021
     field public static final int config_defaultBrowser = 17039394; // 0x1040022
     field public static final int config_defaultDialer = 17039395; // 0x1040023
-    field public static final int config_defaultGallery = 17039398; // 0x1040026
-    field public static final int config_defaultMusic = 17039397; // 0x1040025
     field public static final int config_defaultSms = 17039396; // 0x1040024
     field public static final int config_feedbackIntentExtraKey = 17039391; // 0x104001f
     field public static final int config_feedbackIntentNameKey = 17039392; // 0x1040020
@@ -564,6 +562,7 @@ package android.app {
     method @Deprecated @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public boolean addConfiguration(long, byte[]);
     method @Deprecated @Nullable @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public byte[] getData(long);
     method @Deprecated @Nullable @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public byte[] getMetadata();
+    method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public long[] getRegisteredExperimentIds() throws android.app.StatsManager.StatsUnavailableException;
     method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public byte[] getReports(long) throws android.app.StatsManager.StatsUnavailableException;
     method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public byte[] getStatsMetadata() throws android.app.StatsManager.StatsUnavailableException;
     method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public void removeConfig(long) throws android.app.StatsManager.StatsUnavailableException;
@@ -1217,7 +1216,6 @@ package android.app.usage {
     method public int getUsageSource();
     method @RequiresPermission(allOf={android.Manifest.permission.SUSPEND_APPS, android.Manifest.permission.OBSERVE_APP_USAGE}) public void registerAppUsageLimitObserver(int, @NonNull String[], @NonNull java.time.Duration, @NonNull java.time.Duration, @Nullable android.app.PendingIntent);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_APP_USAGE) public void registerAppUsageObserver(int, @NonNull String[], long, @NonNull java.util.concurrent.TimeUnit, @NonNull android.app.PendingIntent);
-    method @Deprecated @RequiresPermission(android.Manifest.permission.OBSERVE_APP_USAGE) public void registerUsageSessionObserver(int, @NonNull String[], long, @NonNull java.util.concurrent.TimeUnit, long, @NonNull java.util.concurrent.TimeUnit, @NonNull android.app.PendingIntent, @Nullable android.app.PendingIntent);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_APP_USAGE) public void registerUsageSessionObserver(int, @NonNull String[], @NonNull java.time.Duration, @NonNull java.time.Duration, @NonNull android.app.PendingIntent, @Nullable android.app.PendingIntent);
     method public void reportUsageStart(@NonNull android.app.Activity, @NonNull String);
     method public void reportUsageStart(@NonNull android.app.Activity, @NonNull String, long);
@@ -1242,30 +1240,29 @@ package android.app.usage {
 package android.bluetooth {
 
   public final class BluetoothAdapter {
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean addOnMetadataChangedListener(@NonNull android.bluetooth.BluetoothDevice, @NonNull java.util.concurrent.Executor, @NonNull android.bluetooth.BluetoothAdapter.OnMetadataChangedListener);
     method public boolean disableBLE();
     method public boolean enableBLE();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean enableNoAutoConnect();
     method public boolean isBleScanAlwaysAvailable();
     method public boolean isLeEnabled();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean registerMetadataListener(android.bluetooth.BluetoothDevice, android.bluetooth.BluetoothAdapter.MetadataListener, android.os.Handler);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean unregisterMetadataListener(android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean removeOnMetadataChangedListener(@NonNull android.bluetooth.BluetoothDevice, @NonNull android.bluetooth.BluetoothAdapter.OnMetadataChangedListener);
     field public static final String ACTION_BLE_STATE_CHANGED = "android.bluetooth.adapter.action.BLE_STATE_CHANGED";
     field public static final String ACTION_REQUEST_BLE_SCAN_ALWAYS_AVAILABLE = "android.bluetooth.adapter.action.REQUEST_BLE_SCAN_ALWAYS_AVAILABLE";
   }
 
-  public abstract static class BluetoothAdapter.MetadataListener {
-    ctor public BluetoothAdapter.MetadataListener();
-    method public void onMetadataChanged(android.bluetooth.BluetoothDevice, int, String);
+  public static interface BluetoothAdapter.OnMetadataChangedListener {
+    method public void onMetadataChanged(@NonNull android.bluetooth.BluetoothDevice, int, @Nullable byte[]);
   }
 
   public final class BluetoothDevice implements android.os.Parcelable {
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean cancelBondProcess();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public String getMetadata(int);
+    method @Nullable @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public byte[] getMetadata(int);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public boolean isConnected();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public boolean isEncrypted();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean isInSilenceMode();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean removeBond();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setMetadata(int, String);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setMetadata(int, @NonNull byte[]);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setPhonebookAccessPermission(int);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setSilenceMode(boolean);
     field public static final int ACCESS_ALLOWED = 1; // 0x1
@@ -1275,21 +1272,21 @@ package android.bluetooth {
     field public static final int METADATA_COMPANION_APP = 4; // 0x4
     field public static final int METADATA_ENHANCED_SETTINGS_UI_URI = 16; // 0x10
     field public static final int METADATA_HARDWARE_VERSION = 3; // 0x3
-    field public static final int METADATA_IS_UNTHETHERED_HEADSET = 6; // 0x6
+    field public static final int METADATA_IS_UNTETHERED_HEADSET = 6; // 0x6
     field public static final int METADATA_MAIN_ICON = 5; // 0x5
     field public static final int METADATA_MANUFACTURER_NAME = 0; // 0x0
     field public static final int METADATA_MAX_LENGTH = 2048; // 0x800
     field public static final int METADATA_MODEL_NAME = 1; // 0x1
     field public static final int METADATA_SOFTWARE_VERSION = 2; // 0x2
-    field public static final int METADATA_UNTHETHERED_CASE_BATTERY = 12; // 0xc
-    field public static final int METADATA_UNTHETHERED_CASE_CHARGING = 15; // 0xf
-    field public static final int METADATA_UNTHETHERED_CASE_ICON = 9; // 0x9
-    field public static final int METADATA_UNTHETHERED_LEFT_BATTERY = 10; // 0xa
-    field public static final int METADATA_UNTHETHERED_LEFT_CHARGING = 13; // 0xd
-    field public static final int METADATA_UNTHETHERED_LEFT_ICON = 7; // 0x7
-    field public static final int METADATA_UNTHETHERED_RIGHT_BATTERY = 11; // 0xb
-    field public static final int METADATA_UNTHETHERED_RIGHT_CHARGING = 14; // 0xe
-    field public static final int METADATA_UNTHETHERED_RIGHT_ICON = 8; // 0x8
+    field public static final int METADATA_UNTETHERED_CASE_BATTERY = 12; // 0xc
+    field public static final int METADATA_UNTETHERED_CASE_CHARGING = 15; // 0xf
+    field public static final int METADATA_UNTETHERED_CASE_ICON = 9; // 0x9
+    field public static final int METADATA_UNTETHERED_LEFT_BATTERY = 10; // 0xa
+    field public static final int METADATA_UNTETHERED_LEFT_CHARGING = 13; // 0xd
+    field public static final int METADATA_UNTETHERED_LEFT_ICON = 7; // 0x7
+    field public static final int METADATA_UNTETHERED_RIGHT_BATTERY = 11; // 0xb
+    field public static final int METADATA_UNTETHERED_RIGHT_CHARGING = 14; // 0xe
+    field public static final int METADATA_UNTETHERED_RIGHT_ICON = 8; // 0x8
   }
 
   public final class BluetoothHeadset implements android.bluetooth.BluetoothProfile {
@@ -1363,6 +1360,7 @@ package android.content {
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public void startActivityAsUser(@RequiresPermission @NonNull android.content.Intent, @NonNull android.os.UserHandle);
     field public static final String APP_PREDICTION_SERVICE = "app_prediction";
     field public static final String BACKUP_SERVICE = "backup";
+    field public static final String BUGREPORT_SERVICE = "bugreport";
     field public static final String CONTENT_SUGGESTIONS_SERVICE = "content_suggestions";
     field public static final String CONTEXTHUB_SERVICE = "contexthub";
     field public static final String EUICC_CARD_SERVICE = "euicc_card";
@@ -3498,11 +3496,11 @@ package android.media {
     method @Deprecated public int abandonAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, android.media.AudioAttributes);
     method public void clearAudioServerStateCallback();
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int dispatchAudioFocusChange(@NonNull android.media.AudioFocusInfo, int, @NonNull android.media.audiopolicy.AudioPolicy);
-    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public android.media.audiopolicy.AudioProductStrategies getAudioProductStrategies();
-    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public android.media.audiopolicy.AudioVolumeGroups getAudioVolumeGroups();
-    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getMaxVolumeIndexForAttributes(@NonNull android.media.AudioAttributes);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getMinVolumeIndexForAttributes(@NonNull android.media.AudioAttributes);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getVolumeIndexForAttributes(@NonNull android.media.AudioAttributes);
+    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static java.util.List<android.media.audiopolicy.AudioProductStrategy> getAudioProductStrategies();
+    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static java.util.List<android.media.audiopolicy.AudioVolumeGroup> getAudioVolumeGroups();
+    method @IntRange(from=0) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getMaxVolumeIndexForAttributes(@NonNull android.media.AudioAttributes);
+    method @IntRange(from=0) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getMinVolumeIndexForAttributes(@NonNull android.media.AudioAttributes);
+    method @IntRange(from=0) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getVolumeIndexForAttributes(@NonNull android.media.AudioAttributes);
     method public boolean isAudioServerRunning();
     method public boolean isHdmiSystemAudioSupported();
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int registerAudioPolicy(@NonNull android.media.audiopolicy.AudioPolicy);
@@ -3678,27 +3676,10 @@ package android.media.audiopolicy {
     method @NonNull public android.media.audiopolicy.AudioPolicy.Builder setLooper(@NonNull android.os.Looper) throws java.lang.IllegalArgumentException;
   }
 
-  public final class AudioProductStrategies implements java.lang.Iterable<android.media.audiopolicy.AudioProductStrategy> android.os.Parcelable {
-    ctor public AudioProductStrategies();
-    method public int describeContents();
-    method @NonNull public android.media.AudioAttributes getAudioAttributesForLegacyStreamType(int);
-    method @NonNull public android.media.AudioAttributes getAudioAttributesForProductStrategy(@NonNull android.media.audiopolicy.AudioProductStrategy);
-    method @Nullable public android.media.audiopolicy.AudioProductStrategy getById(int);
-    method public int getLegacyStreamTypeForAudioAttributes(@NonNull android.media.AudioAttributes);
-    method @Nullable public android.media.audiopolicy.AudioProductStrategy getProductStrategyForAudioAttributes(@NonNull android.media.AudioAttributes);
-    method public int getVolumeGroupIdForAttributes(@NonNull android.media.AudioAttributes);
-    method public int getVolumeGroupIdForLegacyStreamType(int);
-    method @NonNull public java.util.Iterator<android.media.audiopolicy.AudioProductStrategy> iterator();
-    method public int size();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.media.audiopolicy.AudioProductStrategies> CREATOR;
-  }
-
   public final class AudioProductStrategy implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public android.media.AudioAttributes getAudioAttributes();
     method public int getId();
-    method @NonNull public String name();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.media.audiopolicy.AudioProductStrategy> CREATOR;
   }
@@ -3711,16 +3692,6 @@ package android.media.audiopolicy {
     method @NonNull public String name();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.media.audiopolicy.AudioVolumeGroup> CREATOR;
-  }
-
-  public final class AudioVolumeGroups implements java.lang.Iterable<android.media.audiopolicy.AudioVolumeGroup> android.os.Parcelable {
-    ctor public AudioVolumeGroups();
-    method public int describeContents();
-    method @Nullable public android.media.audiopolicy.AudioVolumeGroup getById(int);
-    method @NonNull public java.util.Iterator<android.media.audiopolicy.AudioVolumeGroup> iterator();
-    method public int size();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.media.audiopolicy.AudioVolumeGroups> CREATOR;
     field public static final int DEFAULT_VOLUME_GROUP = -1; // 0xffffffff
   }
 
@@ -6816,7 +6787,7 @@ package android.service.textclassifier {
 
   public abstract class TextClassifierService extends android.app.Service {
     ctor public TextClassifierService();
-    method public static android.view.textclassifier.TextClassifier getDefaultTextClassifierImplementation(@NonNull android.content.Context);
+    method @NonNull public static android.view.textclassifier.TextClassifier getDefaultTextClassifierImplementation(@NonNull android.content.Context);
     method @Deprecated public final android.view.textclassifier.TextClassifier getLocalTextClassifier();
     method @Nullable public final android.os.IBinder onBind(android.content.Intent);
     method @MainThread public abstract void onClassifyText(@Nullable android.view.textclassifier.TextClassificationSessionId, @NonNull android.view.textclassifier.TextClassification.Request, @NonNull android.os.CancellationSignal, @NonNull android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextClassification>);
@@ -7234,6 +7205,7 @@ package android.telephony {
   }
 
   public static final class CarrierRestrictionRules.Builder {
+    ctor public CarrierRestrictionRules.Builder();
     method @NonNull public android.telephony.CarrierRestrictionRules build();
     method @NonNull public android.telephony.CarrierRestrictionRules.Builder setAllCarriersAllowed();
     method @NonNull public android.telephony.CarrierRestrictionRules.Builder setAllowedCarriers(@NonNull java.util.List<android.service.carrier.CarrierIdentifier>);
@@ -9419,8 +9391,6 @@ package android.telephony.mbms.vendor {
     method public int cancelDownload(android.telephony.mbms.DownloadRequest) throws android.os.RemoteException;
     method public void dispose(int) throws android.os.RemoteException;
     method public int download(android.telephony.mbms.DownloadRequest) throws android.os.RemoteException;
-    method public static String getDefaultTransactionName(int);
-    method public String getTransactionName(int);
     method public int initialize(int, android.telephony.mbms.MbmsDownloadSessionCallback) throws android.os.RemoteException;
     method @NonNull public java.util.List<android.telephony.mbms.DownloadRequest> listPendingDownloads(int) throws android.os.RemoteException;
     method public void onAppCallbackDied(int, int);
@@ -9448,9 +9418,7 @@ package android.telephony.mbms.vendor {
     ctor public MbmsStreamingServiceBase();
     method public android.os.IBinder asBinder();
     method public void dispose(int) throws android.os.RemoteException;
-    method public static String getDefaultTransactionName(int);
     method @Nullable public android.net.Uri getPlaybackUri(int, String) throws android.os.RemoteException;
-    method public String getTransactionName(int);
     method public int initialize(android.telephony.mbms.MbmsStreamingSessionCallback, int) throws android.os.RemoteException;
     method public void onAppCallbackDied(int, int);
     method public boolean onTransact(int, android.os.Parcel, android.os.Parcel, int) throws android.os.RemoteException;
@@ -9480,22 +9448,6 @@ package android.telephony.mbms.vendor {
 
 package android.util {
 
-  public class DocumentsStatsLog {
-    method public static void logActivityLaunch(int, boolean, int, int);
-    method public static void logFileOperation(int, int);
-    method public static void logFileOperationCanceled(int);
-    method public static void logFileOperationCopyMoveMode(int, int);
-    method public static void logFileOperationFailure(int, int);
-    method public static void logFilePick(int, long, int, boolean, int, int, int);
-    method public static void logInvalidScopedAccessRequest(int);
-    method public static void logPickerLaunchedFrom(@Nullable String);
-    method public static void logRootVisited(int, int);
-    method public static void logSearchMode(int);
-    method public static void logSearchType(int);
-    method public static void logStartupMs(int);
-    method public static void logUserAction(int);
-  }
-
   public class EventLog {
     method public static void readEventsOnWrapping(int[], long, java.util.Collection<android.util.EventLog.Event>) throws java.io.IOException;
   }
@@ -9506,22 +9458,6 @@ package android.util {
 
   public final class StatsLog {
     method public static void writeRaw(@NonNull byte[], int);
-  }
-
-  public class StatsLogAtoms {
-    field public static final int PERMISSION_GRANT_REQUEST_RESULT_REPORTED = 170; // 0xaa
-    field public static final int PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__AUTO_DENIED = 8; // 0x8
-    field public static final int PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__AUTO_GRANTED = 5; // 0x5
-    field public static final int PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__IGNORED = 1; // 0x1
-    field public static final int PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__IGNORED_POLICY_FIXED = 3; // 0x3
-    field public static final int PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__IGNORED_RESTRICTED_PERMISSION = 9; // 0x9
-    field public static final int PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__IGNORED_USER_FIXED = 2; // 0x2
-    field public static final int PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__USER_DENIED = 6; // 0x6
-    field public static final int PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__USER_DENIED_WITH_PREJUDICE = 7; // 0x7
-    field public static final int PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__USER_GRANTED = 4; // 0x4
-  }
-
-  @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) @IntDef(prefix="PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__", value={android.util.StatsLogAtoms.PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__IGNORED, android.util.StatsLogAtoms.PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__IGNORED_USER_FIXED, android.util.StatsLogAtoms.PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__IGNORED_POLICY_FIXED, android.util.StatsLogAtoms.PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__USER_GRANTED, android.util.StatsLogAtoms.PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__AUTO_GRANTED, android.util.StatsLogAtoms.PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__USER_DENIED, android.util.StatsLogAtoms.PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__USER_DENIED_WITH_PREJUDICE, android.util.StatsLogAtoms.PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__AUTO_DENIED}) public static @interface StatsLogAtoms.PermissionGrantRequestResultReported_Result {
   }
 
 }

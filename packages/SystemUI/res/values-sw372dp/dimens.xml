@@ -17,6 +17,5 @@
 -->
 <resources>
     <dimen name="nav_content_padding">8dp</dimen>
-    <dimen name="rounded_corner_content_padding">8dp</dimen>
     <dimen name="qs_header_tile_margin_horizontal">13dp</dimen>
 </resources>

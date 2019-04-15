@@ -17,6 +17,7 @@
 package android.media;
 
 import static android.media.MediaConstants.KEY_ALLOWED_COMMANDS;
+import static android.media.MediaConstants.KEY_CONNECTION_HINTS;
 import static android.media.MediaConstants.KEY_PACKAGE_NAME;
 import static android.media.MediaConstants.KEY_PID;
 import static android.media.MediaConstants.KEY_PLAYBACK_ACTIVE;
@@ -91,24 +92,16 @@ public class MediaController2 implements AutoCloseable {
      * Create a {@link MediaController2} from the {@link Session2Token}.
      * This connects to the session and may wake up the service if it's not available.
      *
-     * @param context Context
+     * @param context context
      * @param token token to connect to
-     */
-    public MediaController2(@NonNull Context context, @NonNull Session2Token token) {
-        this(context, token, context.getMainExecutor(), new ControllerCallback() {});
-    }
-
-    /**
-     * Create a {@link MediaController2} from the {@link Session2Token}.
-     * This connects to the session and may wake up the service if it's not available.
-     *
-     * @param context Context
-     * @param token token to connect to
+     * @param connectionHints a session-specific argument to send to the session when connecting.
+     *                        The contents of this bundle may affect the connection result.
      * @param executor executor to run callbacks on.
      * @param callback controller callback to receive changes in.
      */
-    public MediaController2(@NonNull Context context, @NonNull Session2Token token,
-            @NonNull Executor executor, @NonNull ControllerCallback callback) {
+    MediaController2(@NonNull Context context, @NonNull Session2Token token,
+            @Nullable Bundle connectionHints, @NonNull Executor executor,
+            @NonNull ControllerCallback callback) {
         if (context == null) {
             throw new IllegalArgumentException("context shouldn't be null");
         }
@@ -130,9 +123,9 @@ public class MediaController2 implements AutoCloseable {
         boolean connectRequested;
         if (token.getType() == TYPE_SESSION) {
             mServiceConnection = null;
-            connectRequested = requestConnectToSession();
+            connectRequested = requestConnectToSession(connectionHints);
         } else {
-            mServiceConnection = new SessionServiceConnection();
+            mServiceConnection = new SessionServiceConnection(connectionHints);
             connectRequested = requestConnectToService();
         }
         if (!connectRequested) {
@@ -350,16 +343,17 @@ public class MediaController2 implements AutoCloseable {
         }
     }
 
-    private Bundle createConnectionRequest() {
+    private Bundle createConnectionRequest(@Nullable Bundle connectionHints) {
         Bundle connectionRequest = new Bundle();
         connectionRequest.putString(KEY_PACKAGE_NAME, mContext.getPackageName());
         connectionRequest.putInt(KEY_PID, Process.myPid());
+        connectionRequest.putBundle(KEY_CONNECTION_HINTS, connectionHints);
         return connectionRequest;
     }
 
-    private boolean requestConnectToSession() {
+    private boolean requestConnectToSession(@Nullable Bundle connectionHints) {
         Session2Link sessionBinder = mSessionToken.getSessionLink();
-        Bundle connectionRequest = createConnectionRequest();
+        Bundle connectionRequest = createConnectionRequest(connectionHints);
         try {
             sessionBinder.connect(mControllerStub, getNextSeqNumber(), connectionRequest);
         } catch (RuntimeException e) {
@@ -399,6 +393,93 @@ public class MediaController2 implements AutoCloseable {
             }
         }
         return true;
+    }
+
+    /**
+     * Builder for {@link MediaController2}.
+     * <p>
+     * Any incoming event from the {@link MediaSession2} will be handled on the callback
+     * executor. If it's not set, {@link Context#getMainExecutor()} will be used by default.
+     */
+    public static final class Builder {
+        private Context mContext;
+        private Session2Token mToken;
+        private Bundle mConnectionHints;
+        private Executor mCallbackExecutor;
+        private ControllerCallback mCallback;
+
+        /**
+         * Creates a builder for {@link MediaController2}.
+         *
+         * @param context context
+         * @param token token of the session to connect to
+         */
+        public Builder(@NonNull Context context, @NonNull Session2Token token) {
+            if (context == null) {
+                throw new IllegalArgumentException("context shouldn't be null");
+            }
+            if (token == null) {
+                throw new IllegalArgumentException("token shouldn't be null");
+            }
+            mContext = context;
+            mToken = token;
+        }
+
+        /**
+         * Set the connection hints for the controller.
+         * <p>
+         * {@code connectionHints} is a session-specific argument to send to the session when
+         * connecting. The contents of this bundle may affect the connection result.
+         *
+         * @param connectionHints a bundle which contains the connection hints
+         * @return The Builder to allow chaining
+         */
+        @NonNull
+        public Builder setConnectionHints(@NonNull Bundle connectionHints) {
+            if (connectionHints == null) {
+                throw new IllegalArgumentException("connectionHints shouldn't be null");
+            }
+            mConnectionHints = new Bundle(connectionHints);
+            return this;
+        }
+
+        /**
+         * Set callback for the controller and its executor.
+         *
+         * @param executor callback executor
+         * @param callback session callback.
+         * @return The Builder to allow chaining
+         */
+        @NonNull
+        public Builder setControllerCallback(@NonNull Executor executor,
+                @NonNull ControllerCallback callback) {
+            if (executor == null) {
+                throw new IllegalArgumentException("executor shouldn't be null");
+            }
+            if (callback == null) {
+                throw new IllegalArgumentException("callback shouldn't be null");
+            }
+            mCallbackExecutor = executor;
+            mCallback = callback;
+            return this;
+        }
+
+        /**
+         * Build {@link MediaController2}.
+         *
+         * @return a new controller
+         */
+        @NonNull
+        public MediaController2 build() {
+            if (mCallbackExecutor == null) {
+                mCallbackExecutor = mContext.getMainExecutor();
+            }
+            if (mCallback == null) {
+                mCallback = new ControllerCallback() {};
+            }
+            return new MediaController2(
+                    mContext, mToken, mConnectionHints, mCallbackExecutor, mCallback);
+        }
     }
 
     /**
@@ -469,7 +550,10 @@ public class MediaController2 implements AutoCloseable {
 
     // This will be called on the main thread.
     private class SessionServiceConnection implements ServiceConnection {
-        SessionServiceConnection() {
+        private final Bundle mConnectionHints;
+
+        SessionServiceConnection(@Nullable Bundle connectionHints) {
+            mConnectionHints = connectionHints;
         }
 
         @Override
@@ -491,7 +575,7 @@ public class MediaController2 implements AutoCloseable {
                     Log.wtf(TAG, "Service interface is missing.");
                     return;
                 }
-                Bundle connectionRequest = createConnectionRequest();
+                Bundle connectionRequest = createConnectionRequest(mConnectionHints);
                 iService.connect(mControllerStub, getNextSeqNumber(), connectionRequest);
                 connectRequested = true;
             } catch (RemoteException e) {

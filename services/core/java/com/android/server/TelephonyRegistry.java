@@ -1172,7 +1172,11 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     .filter(i -> TelephonyPermissions.checkCarrierPrivilegeForSubId(i))
                     .findFirst().getAsInt();
         } catch (NoSuchElementException ex) {
-            log("notifyCarrierNetworkChange without carrier privilege");
+            loge("notifyCarrierNetworkChange without carrier privilege");
+        }
+        // the active subId does not have carrier privilege. 
+        if (subId == SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
+            throw new SecurityException("notifyCarrierNetworkChange without carrier privilege");
         }
         int phoneId = SubscriptionManager.getPhoneId(subId);
 
@@ -2270,6 +2274,10 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private static void log(String s) {
         Rlog.d(TAG, s);
+    }
+
+    private static void loge(String s) {
+        Rlog.e(TAG, s);
     }
 
     boolean idMatch(int rSubId, int subId, int phoneId) {

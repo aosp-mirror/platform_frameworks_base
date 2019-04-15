@@ -140,7 +140,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Wi-Fi chaqiruv"</string>
     <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWi-Fi"</string>
-    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"O‘chiq"</string>
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Yoqilmagan"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"Wi-Fi orqali chaqiruv"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"Mobil tarmoq orqali chaqiruv"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Faqat Wi-Fi"</string>
@@ -280,9 +280,9 @@
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun kontaktlaringizga ruxsat berilsinmi?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Joylashuv"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"shu qurilmaning joylashuvi haqidagi axborotga kirish"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun bu qurilmaning joylashuvi haqidagi axborotdan foydalanishiga ruxsat berilsinmi?"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun bu qurilmaning joylashuvi haqidagi axborotdan foydalanishga ruxsat berilsinmi?"</string>
     <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"Bu ilovadan foydalanilayotdangina u joylashuv axborotidan foydalana oladi"</string>
-    <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ilovasiga bu qurilmaning joylashuv axboroti uchun &lt;b&gt;doimiy&lt;/b&gt; ruxsat berilsinmi?"</string>
+    <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun bu qurilmaning joylashuvi haqidagi axborotdan &lt;b&gt;doim&lt;/b&gt; foydalanish ruxsati berilsinmi?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="4597006851453417387">"Ilova hozirda joylashuv axborotidan faqat ilova ishlatilayotgandagina foydala oladi"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Taqvim"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"taqvimingizga kirish"</string>
@@ -981,8 +981,8 @@
     <string name="days" msgid="4774547661021344602">"kun"</string>
     <string name="hour" msgid="2126771916426189481">"soat"</string>
     <string name="hours" msgid="894424005266852993">"soat"</string>
-    <string name="minute" msgid="9148878657703769868">"daq."</string>
-    <string name="minutes" msgid="5646001005827034509">"daq."</string>
+    <string name="minute" msgid="9148878657703769868">"daqiqa"</string>
+    <string name="minutes" msgid="5646001005827034509">"daqiqa"</string>
     <string name="second" msgid="3184235808021478">"sek"</string>
     <string name="seconds" msgid="3161515347216589235">"sek"</string>
     <string name="week" msgid="5617961537173061583">"hafta"</string>
@@ -1836,8 +1836,8 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> gacha"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> gacha (keyingi signal)"</string>
-    <string name="zen_mode_forever" msgid="931849471004038757">"O‘chirmaguningizcha"</string>
-    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"“Bezovta qilinmasin” rejimi o‘chirilmaguncha"</string>
+    <string name="zen_mode_forever" msgid="931849471004038757">"Rejimdan chiqilgunicha"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Bezovta qilinmasin rejimidan chiqilgunicha"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Yig‘ish"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Bezovta qilinmasin"</string>

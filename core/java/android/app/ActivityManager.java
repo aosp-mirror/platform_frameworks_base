@@ -1838,17 +1838,17 @@ public class ActivityManager {
         private final float mScale;
         private final int mSystemUiVisibility;
         private final boolean mIsTranslucent;
-
-        // TODO(b/116112787) TaskSnapshot must also book keep the color space from hardware bitmap
-        // when created.
-        private final ColorSpace mColorSpace = ColorSpace.get(ColorSpace.Named.SRGB);
+        // Must be one of the named color spaces, otherwise, always use SRGB color space.
+        private final ColorSpace mColorSpace;
 
         public TaskSnapshot(@NonNull ComponentName topActivityComponent, GraphicBuffer snapshot,
-                int orientation, Rect contentInsets, boolean reducedResolution, float scale,
-                boolean isRealSnapshot, int windowingMode, int systemUiVisibility,
-                boolean isTranslucent) {
+                @NonNull ColorSpace colorSpace, int orientation, Rect contentInsets,
+                boolean reducedResolution, float scale, boolean isRealSnapshot, int windowingMode,
+                int systemUiVisibility, boolean isTranslucent) {
             mTopActivityComponent = topActivityComponent;
             mSnapshot = snapshot;
+            mColorSpace = colorSpace.getId() < 0
+                    ? ColorSpace.get(ColorSpace.Named.SRGB) : colorSpace;
             mOrientation = orientation;
             mContentInsets = new Rect(contentInsets);
             mReducedResolution = reducedResolution;
@@ -1862,6 +1862,10 @@ public class ActivityManager {
         private TaskSnapshot(Parcel source) {
             mTopActivityComponent = ComponentName.readFromParcel(source);
             mSnapshot = source.readParcelable(null /* classLoader */);
+            int colorSpaceId = source.readInt();
+            mColorSpace = colorSpaceId >= 0
+                    ? ColorSpace.get(ColorSpace.Named.values()[colorSpaceId])
+                    : ColorSpace.get(ColorSpace.Named.SRGB);
             mOrientation = source.readInt();
             mContentInsets = source.readParcelable(null /* classLoader */);
             mReducedResolution = source.readBoolean();
@@ -1968,6 +1972,7 @@ public class ActivityManager {
         public void writeToParcel(Parcel dest, int flags) {
             ComponentName.writeToParcel(mTopActivityComponent, dest);
             dest.writeParcelable(mSnapshot, 0);
+            dest.writeInt(mColorSpace.getId());
             dest.writeInt(mOrientation);
             dest.writeParcelable(mContentInsets, 0);
             dest.writeBoolean(mReducedResolution);
@@ -1985,6 +1990,7 @@ public class ActivityManager {
             return "TaskSnapshot{"
                     + " mTopActivityComponent=" + mTopActivityComponent.flattenToShortString()
                     + " mSnapshot=" + mSnapshot + " (" + width + "x" + height + ")"
+                    + " mColorSpace=" + mColorSpace.toString()
                     + " mOrientation=" + mOrientation
                     + " mContentInsets=" + mContentInsets.toShortString()
                     + " mReducedResolution=" + mReducedResolution + " mScale=" + mScale
@@ -2052,7 +2058,10 @@ public class ActivityManager {
     @RequiresPermission(android.Manifest.permission.REORDER_TASKS)
     public void moveTaskToFront(int taskId, @MoveTaskFlags int flags, Bundle options) {
         try {
-            getTaskService().moveTaskToFront(taskId, flags, options);
+            ActivityThread thread = ActivityThread.currentActivityThread();
+            IApplicationThread appThread = thread.getApplicationThread();
+            String packageName = mContext.getPackageName();
+            getTaskService().moveTaskToFront(appThread, packageName, taskId, flags, options);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -4263,7 +4272,10 @@ public class ActivityManager {
          */
         public void moveToFront() {
             try {
-                mAppTaskImpl.moveToFront();
+                ActivityThread thread = ActivityThread.currentActivityThread();
+                IApplicationThread appThread = thread.getApplicationThread();
+                String packageName = ActivityThread.currentPackageName();
+                mAppTaskImpl.moveToFront(appThread, packageName);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

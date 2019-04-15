@@ -628,6 +628,7 @@ package android.content {
     method public int getUserId();
     method public void setAutofillOptions(@Nullable android.content.AutofillOptions);
     method public void setContentCaptureOptions(@Nullable android.content.ContentCaptureOptions);
+    field public static final String BUGREPORT_SERVICE = "bugreport";
     field public static final String ROLLBACK_SERVICE = "rollback";
     field public static final String TEST_NETWORK_SERVICE = "test_network";
   }
@@ -1123,13 +1124,6 @@ package android.media {
     method public android.media.BufferingParams.Builder setResumePlaybackMarkMs(int);
   }
 
-  public class FileDataSourceDesc extends android.media.DataSourceDesc {
-    method public long getLength();
-    method public long getOffset();
-    method @NonNull public android.os.ParcelFileDescriptor getParcelFileDescriptor();
-    field public static final long FD_LENGTH_UNKNOWN = 576460752303423487L; // 0x7ffffffffffffffL
-  }
-
   public static final class MediaCodecInfo.VideoCapabilities.PerformancePoint {
     ctor public MediaCodecInfo.VideoCapabilities.PerformancePoint(int, int, int, int, @NonNull android.util.Size);
     ctor public MediaCodecInfo.VideoCapabilities.PerformancePoint(@NonNull android.media.MediaCodecInfo.VideoCapabilities.PerformancePoint, @NonNull android.util.Size);
@@ -1138,26 +1132,9 @@ package android.media {
     method public int getMaxMacroBlocks();
   }
 
-  public class MediaPlayer2 implements android.media.AudioRouting java.lang.AutoCloseable {
-    method public android.media.MediaPlayer2.DrmInfo getDrmInfo(@NonNull android.media.DataSourceDesc);
-    method public android.media.MediaDrm.KeyRequest getDrmKeyRequest(@NonNull android.media.DataSourceDesc, @Nullable byte[], @Nullable byte[], @Nullable String, int, @Nullable java.util.Map<java.lang.String,java.lang.String>) throws android.media.MediaPlayer2.NoDrmSchemeException;
-    method public String getDrmPropertyString(@NonNull android.media.DataSourceDesc, @NonNull String) throws android.media.MediaPlayer2.NoDrmSchemeException;
-    method @NonNull public Object prepareDrm(@NonNull android.media.DataSourceDesc, @NonNull java.util.UUID);
-    method public byte[] provideDrmKeyResponse(@NonNull android.media.DataSourceDesc, @Nullable byte[], @NonNull byte[]) throws android.media.DeniedByServerException, android.media.MediaPlayer2.NoDrmSchemeException;
-    method public void releaseDrm(@NonNull android.media.DataSourceDesc) throws android.media.MediaPlayer2.NoDrmSchemeException;
-    method public void restoreDrmKeys(@NonNull android.media.DataSourceDesc, @NonNull byte[]) throws android.media.MediaPlayer2.NoDrmSchemeException;
-    method public void setDrmPropertyString(@NonNull android.media.DataSourceDesc, @NonNull String, @NonNull String) throws android.media.MediaPlayer2.NoDrmSchemeException;
-  }
-
   public final class PlaybackParams implements android.os.Parcelable {
     method public int getAudioStretchMode();
     method public android.media.PlaybackParams setAudioStretchMode(int);
-  }
-
-  public class UriDataSourceDesc extends android.media.DataSourceDesc {
-    method @Nullable public java.util.List<java.net.HttpCookie> getCookies();
-    method @Nullable public java.util.Map<java.lang.String,java.lang.String> getHeaders();
-    method @NonNull public android.net.Uri getUri();
   }
 
   public static final class VolumeShaper.Configuration.Builder {
@@ -1365,6 +1342,7 @@ package android.net {
   }
 
   public class TestNetworkManager {
+    method public android.net.TestNetworkInterface createTapInterface();
     method public android.net.TestNetworkInterface createTunInterface(@NonNull android.net.LinkAddress[]);
     method public void setupTestNetwork(@NonNull String, @NonNull android.os.IBinder);
     method public void teardownTestNetwork(@NonNull android.net.Network);
@@ -1572,6 +1550,34 @@ package android.os {
 
   public class BatteryManager {
     method @RequiresPermission("android.permission.POWER_SAVER") public boolean setChargingStateUpdateDelayMillis(int);
+  }
+
+  public final class BugreportManager {
+    method @RequiresPermission(android.Manifest.permission.DUMP) public void cancelBugreport();
+    method @RequiresPermission(android.Manifest.permission.DUMP) public void startBugreport(@NonNull android.os.ParcelFileDescriptor, @Nullable android.os.ParcelFileDescriptor, @NonNull android.os.BugreportParams, @NonNull java.util.concurrent.Executor, @NonNull android.os.BugreportManager.BugreportCallback);
+  }
+
+  public abstract static class BugreportManager.BugreportCallback {
+    ctor public BugreportManager.BugreportCallback();
+    method public void onError(int);
+    method public void onFinished();
+    method public void onProgress(@FloatRange(from=0.0f, to=100.0f) float);
+    field public static final int BUGREPORT_ERROR_ANOTHER_REPORT_IN_PROGRESS = 5; // 0x5
+    field public static final int BUGREPORT_ERROR_INVALID_INPUT = 1; // 0x1
+    field public static final int BUGREPORT_ERROR_RUNTIME = 2; // 0x2
+    field public static final int BUGREPORT_ERROR_USER_CONSENT_TIMED_OUT = 4; // 0x4
+    field public static final int BUGREPORT_ERROR_USER_DENIED_CONSENT = 3; // 0x3
+  }
+
+  public final class BugreportParams {
+    ctor public BugreportParams(int);
+    method public int getMode();
+    field public static final int BUGREPORT_MODE_FULL = 0; // 0x0
+    field public static final int BUGREPORT_MODE_INTERACTIVE = 1; // 0x1
+    field public static final int BUGREPORT_MODE_REMOTE = 2; // 0x2
+    field public static final int BUGREPORT_MODE_TELEPHONY = 4; // 0x4
+    field public static final int BUGREPORT_MODE_WEAR = 3; // 0x3
+    field public static final int BUGREPORT_MODE_WIFI = 5; // 0x5
   }
 
   public class Build {
@@ -2751,8 +2757,6 @@ package android.telephony.mbms.vendor {
     method public int cancelDownload(android.telephony.mbms.DownloadRequest) throws android.os.RemoteException;
     method public void dispose(int) throws android.os.RemoteException;
     method public int download(android.telephony.mbms.DownloadRequest) throws android.os.RemoteException;
-    method public static String getDefaultTransactionName(int);
-    method public String getTransactionName(int);
     method public int initialize(int, android.telephony.mbms.MbmsDownloadSessionCallback) throws android.os.RemoteException;
     method @NonNull public java.util.List<android.telephony.mbms.DownloadRequest> listPendingDownloads(int) throws android.os.RemoteException;
     method public void onAppCallbackDied(int, int);
@@ -2780,9 +2784,7 @@ package android.telephony.mbms.vendor {
     ctor public MbmsStreamingServiceBase();
     method public android.os.IBinder asBinder();
     method public void dispose(int) throws android.os.RemoteException;
-    method public static String getDefaultTransactionName(int);
     method @Nullable public android.net.Uri getPlaybackUri(int, String) throws android.os.RemoteException;
-    method public String getTransactionName(int);
     method public int initialize(android.telephony.mbms.MbmsStreamingSessionCallback, int) throws android.os.RemoteException;
     method public void onAppCallbackDied(int, int);
     method public boolean onTransact(int, android.os.Parcel, android.os.Parcel, int) throws android.os.RemoteException;

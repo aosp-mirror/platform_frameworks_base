@@ -57,6 +57,7 @@ import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.util.MergedConfiguration;
 import android.util.MutableBoolean;
+import android.view.DisplayInfo;
 
 import androidx.test.filters.MediumTest;
 
@@ -87,6 +88,10 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
         doReturn(false).when(mService).isBooting();
         doReturn(true).when(mService).isBooted();
+
+        final DisplayContent displayContent = mStack.getDisplay().mDisplayContent;
+        doReturn(mock(DisplayPolicy.class)).when(displayContent).getDisplayPolicy();
+        doReturn(mock(DisplayInfo.class)).when(displayContent).getDisplayInfo();
     }
 
     @Test

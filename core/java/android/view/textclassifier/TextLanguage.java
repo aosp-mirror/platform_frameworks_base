@@ -113,12 +113,11 @@ public final class TextLanguage implements Parcelable {
      * Returns a bundle containing non-structured extra information about this result. What is
      * returned in the extras is specific to the {@link TextClassifier} implementation.
      *
-     * <p><b>NOTE: </b>Each call to this method returns a new bundle copy so clients should prefer
-     * to hold a reference to the returned bundle rather than frequently calling this method.
+     * <p><b>NOTE: </b>Do not modify this bundle.
      */
     @NonNull
     public Bundle getExtras() {
-        return mBundle.deepCopy();
+        return mBundle;
     }
 
     @Override
@@ -199,7 +198,7 @@ public final class TextLanguage implements Parcelable {
          */
         @NonNull
         public TextLanguage build() {
-            mBundle = mBundle == null ? new Bundle() : mBundle.deepCopy();
+            mBundle = mBundle == null ? Bundle.EMPTY : mBundle;
             return new TextLanguage(
                     mId,
                     new EntityConfidence(mEntityConfidenceMap),
@@ -263,13 +262,11 @@ public final class TextLanguage implements Parcelable {
         /**
          * Returns a bundle containing non-structured extra information about this request.
          *
-         * <p><b>NOTE: </b>Each call to this method returns a new bundle copy so clients should
-         * prefer to hold a reference to the returned bundle rather than frequently calling this
-         * method.
+         * <p><b>NOTE: </b>Do not modify this bundle.
          */
         @NonNull
         public Bundle getExtras() {
-            return mExtra.deepCopy();
+            return mExtra;
         }
 
         @Override
@@ -327,8 +324,7 @@ public final class TextLanguage implements Parcelable {
              */
             @NonNull
             public Request build() {
-                mBundle = mBundle == null ? new Bundle() : mBundle.deepCopy();
-                return new Request(mText.toString(), mBundle);
+                return new Request(mText.toString(), mBundle == null ? Bundle.EMPTY : mBundle);
             }
         }
     }

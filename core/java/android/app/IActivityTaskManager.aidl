@@ -149,7 +149,8 @@ interface IActivityTaskManager {
     boolean shouldUpRecreateTask(in IBinder token, in String destAffinity);
     boolean navigateUpTo(in IBinder token, in Intent target, int resultCode,
             in Intent resultData);
-    void moveTaskToFront(int task, int flags, in Bundle options);
+    void moveTaskToFront(in IApplicationThread app, in String callingPackage, int task,
+            int flags, in Bundle options);
     int getTaskForActivity(in IBinder token, in boolean onlyRoot);
     void finishSubActivity(in IBinder token, in String resultWho, int requestCode);
     ParceledListSlice getRecentTasks(int maxNum, int flags, int userId);

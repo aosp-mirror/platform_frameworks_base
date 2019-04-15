@@ -187,26 +187,6 @@ public final class StatsLog extends StatsLogInternal {
     }
 
     /**
-     * Add a log to the stats log.
-     *
-     * @param id     The id of the atom
-     * @param params The parameters of the atom's message.
-     */
-    public static void write(int id, @NonNull Object... params) {
-        switch (id) {
-            case PERMISSION_GRANT_REQUEST_RESULT_REPORTED:
-                write(id, (long) params[0], (int) params[1], (String) params[2], (String) params[3],
-                        (boolean) params[4], (int) params[5]);
-                break;
-            case DATA_STALL_EVENT:
-                // Refer to the defintion in frameworks/base/cmds/statsd/src/atoms.proto.
-                write(id, (int) params[0], (int) params[1], (int) params[2], (byte[]) params[3],
-                        (byte[]) params[4], (byte[]) params[5]);
-                break;
-        }
-    }
-
-    /**
      * Write an event to stats log using the raw format.
      *
      * @param buffer    The encoded buffer of data to write..

@@ -124,9 +124,14 @@ oneway interface IOverviewProxy {
      */
     void onAssistantVisibilityChanged(float visibility) = 14;
 
-    /*
+    /**
      * Sent when back is triggered.
      */
     void onBackAction(boolean completed, int downX, int downY, boolean isButton,
             boolean gestureSwipeLeft) = 15;
+
+    /**
+     * Sent when some system ui state changes.
+     */
+    void onSystemUiStateChanged(int stateFlags) = 16;
 }

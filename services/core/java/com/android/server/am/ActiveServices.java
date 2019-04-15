@@ -2117,6 +2117,12 @@ public final class ActiveServices {
                     Slog.w(TAG, "Service lookup failed: " + msg);
                     return new ServiceLookupResult(null, msg);
                 }
+
+                // Store the defining packageName and uid, as they might be changed in
+                // the ApplicationInfo for external services (which run with the package name
+                // and uid of the caller).
+                String definingPackageName = sInfo.applicationInfo.packageName;
+                int definingUid = sInfo.applicationInfo.uid;
                 if ((sInfo.flags & ServiceInfo.FLAG_EXTERNAL_SERVICE) != 0) {
                     if (isBindExternal) {
                         if (!sInfo.exported) {
@@ -2175,8 +2181,8 @@ public final class ActiveServices {
                                 sInfo.applicationInfo.uid, name.getPackageName(),
                                 name.getClassName());
                     }
-                    r = new ServiceRecord(mAm, ss, className, name, filter, sInfo,
-                            callingFromFg, res);
+                    r = new ServiceRecord(mAm, ss, className, name, definingPackageName,
+                            definingUid, filter, sInfo, callingFromFg, res);
                     res.setService(r);
                     smap.mServicesByInstanceName.put(name, r);
                     smap.mServicesByIntent.put(filter, r);
@@ -2557,7 +2563,7 @@ public final class ActiveServices {
 
         final boolean isolated = (r.serviceInfo.flags&ServiceInfo.FLAG_ISOLATED_PROCESS) != 0;
         final String procName = r.processName;
-        String hostingType = "service";
+        HostingRecord hostingRecord = new HostingRecord("service", r.instanceName);
         ProcessRecord app;
 
         if (!isolated) {
@@ -2588,10 +2594,11 @@ public final class ActiveServices {
             app = r.isolatedProc;
             if (WebViewZygote.isMultiprocessEnabled()
                     && r.serviceInfo.packageName.equals(WebViewZygote.getPackageName())) {
-                hostingType = "webview_service";
+                hostingRecord = HostingRecord.byWebviewZygote(r.instanceName);
             }
             if ((r.serviceInfo.flags & ServiceInfo.FLAG_USE_APP_ZYGOTE) != 0) {
-                hostingType = "app_zygote";
+                hostingRecord = HostingRecord.byAppZygote(r.instanceName, r.definingPackageName,
+                        r.definingUid);
             }
         }
 
@@ -2599,7 +2606,7 @@ public final class ActiveServices {
         // to be executed when the app comes up.
         if (app == null && !permissionsReviewRequired) {
             if ((app=mAm.startProcessLocked(procName, r.appInfo, true, intentFlags,
-                    hostingType, r.instanceName, false, isolated, false)) == null) {
+                    hostingRecord, false, isolated, false)) == null) {
                 String msg = "Unable to launch app "
                         + r.appInfo.packageName + "/"
                         + r.appInfo.uid + " for service "

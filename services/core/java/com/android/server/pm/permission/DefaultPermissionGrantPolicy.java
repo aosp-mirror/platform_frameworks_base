@@ -108,7 +108,10 @@ public final class DefaultPermissionGrantPolicy {
 
     @PackageManager.PackageInfoFlags
     private static final int DEFAULT_PACKAGE_INFO_QUERY_FLAGS =
-            PackageManager.MATCH_UNINSTALLED_PACKAGES | PackageManager.GET_PERMISSIONS;
+            PackageManager.MATCH_UNINSTALLED_PACKAGES
+                    | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS
+                    | PackageManager.MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS
+                    | PackageManager.GET_PERMISSIONS;
 
     private static final String AUDIO_MIME_TYPE = "audio/mpeg";
 
@@ -1353,8 +1356,7 @@ public final class DefaultPermissionGrantPolicy {
     }
 
     private PackageInfo getSystemPackageInfo(String pkg) {
-        //TODO not MATCH_SYSTEM_ONLY?
-        return getPackageInfo(pkg, PackageManager.MATCH_FACTORY_ONLY);
+        return getPackageInfo(pkg, PackageManager.MATCH_SYSTEM_ONLY);
     }
 
     private PackageInfo getPackageInfo(String pkg) {

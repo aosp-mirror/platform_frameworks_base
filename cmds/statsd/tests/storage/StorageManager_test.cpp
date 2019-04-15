@@ -110,6 +110,21 @@ TEST(StorageManagerTest, TrainInfoReadWriteTrainNameSizeOneTest) {
     EXPECT_EQ(trainInfo.experimentIds, trainInfoResult.experimentIds);
 }
 
+TEST(StorageManagerTest, SortFileTest) {
+    vector<StorageManager::FileInfo> list;
+    // assume now sec is 500
+    list.emplace_back("200_5000_123454", false, 20, 300);
+    list.emplace_back("300_2000_123454_history", true, 30, 200);
+    list.emplace_back("400_100009_123454_history", true, 40, 100);
+    list.emplace_back("100_2000_123454", false, 50, 400);
+
+    StorageManager::sortFiles(&list);
+    EXPECT_EQ("200_5000_123454", list[0].mFileName);
+    EXPECT_EQ("100_2000_123454", list[1].mFileName);
+    EXPECT_EQ("400_100009_123454_history", list[2].mFileName);
+    EXPECT_EQ("300_2000_123454_history", list[3].mFileName);
+}
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

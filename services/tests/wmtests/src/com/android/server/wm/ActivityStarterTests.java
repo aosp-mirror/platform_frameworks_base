@@ -577,12 +577,27 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
                 UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
                 false, false, false, false, false, false);
+        runAndVerifyBackgroundActivityStartsSubtest(
+                "disallowed_callingUidProcessStateTop_aborted", true,
+                UNIMPORTANT_UID, false, PROCESS_STATE_TOP,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
+                false, false, false, false, false, false);
+        runAndVerifyBackgroundActivityStartsSubtest(
+                "disallowed_realCallingUidProcessStateTop_aborted", true,
+                UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP,
+                false, false, false, false, false, false);
+        runAndVerifyBackgroundActivityStartsSubtest(
+                "disallowed_hasForegroundActivities_aborted", true,
+                UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
+                true, false, false, false, false, false);
     }
 
     /**
      * This test ensures that supported usecases aren't aborted when background starts are
      * disallowed.
-     * The scenarios each have only one condidion that makes them supported.
+     * The scenarios each have only one condition that makes them supported.
      */
     @Test
     public void testBackgroundActivityStartsDisallowed_supportedStartsNotAborted() {
@@ -606,25 +621,10 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
                 false, false, false, false, false, false);
         runAndVerifyBackgroundActivityStartsSubtest(
-                "disallowed_callingUidProcessStateTop_notAborted", false,
-                UNIMPORTANT_UID, false, PROCESS_STATE_TOP,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
-                false, false, false, false, false, false);
-        runAndVerifyBackgroundActivityStartsSubtest(
                 "disallowed_realCallingUidHasVisibleWindow_notAborted", false,
                 UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
                 UNIMPORTANT_UID2, true, PROCESS_STATE_TOP + 1,
                 false, false, false, false, false, false);
-        runAndVerifyBackgroundActivityStartsSubtest(
-                "disallowed_realCallingUidProcessStateTop_notAborted", false,
-                UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP,
-                false, false, false, false, false, false);
-        runAndVerifyBackgroundActivityStartsSubtest(
-                "disallowed_hasForegroundActivities_notAborted", false,
-                UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
-                true, false, false, false, false, false);
         runAndVerifyBackgroundActivityStartsSubtest(
                 "disallowed_callerIsRecents_notAborted", false,
                 UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
@@ -659,7 +659,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
             boolean hasForegroundActivities, boolean callerIsRecents,
             boolean callerIsTempWhitelisted,
             boolean callerIsInstrumentingWithBackgroundActivityStartPrivileges,
-            boolean isCallingPackageNameDeviceOwner, boolean isCallingPackageTempWhitelisted) {
+            boolean isCallingUidDeviceOwner, boolean isCallingPackageTempWhitelisted) {
         // window visibility
         doReturn(callingUidHasVisibleWindow).when(mService.mWindowManager.mRoot)
                 .isAnyNonToastWindowVisibleForUid(callingUid);
@@ -685,8 +685,8 @@ public class ActivityStarterTests extends ActivityTestsBase {
         // caller is instrumenting with background activity starts privileges
         callerApp.setInstrumenting(callerIsInstrumentingWithBackgroundActivityStartPrivileges,
                 callerIsInstrumentingWithBackgroundActivityStartPrivileges);
-        // calling package name is the device owner
-        doReturn(isCallingPackageNameDeviceOwner).when(mService).isDeviceOwner(any());
+        // callingUid is the device owner
+        doReturn(isCallingUidDeviceOwner).when(mService).isDeviceOwner(callingUid);
         // calling package name is temporarily whitelisted
         doReturn(isCallingPackageTempWhitelisted).when(mService)
                 .isPackageNameWhitelistedForBgActivityStarts("com.whatever.dude");

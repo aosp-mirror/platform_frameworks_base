@@ -414,7 +414,6 @@ public final class StatsManager {
      * Returns the experiments IDs registered with statsd, or an empty array if there aren't any.
      *
      * @throws StatsUnavailableException if unsuccessful due to failing to connect to stats service
-     * @hide
      */
     @RequiresPermission(allOf = {DUMP, PACKAGE_USAGE_STATS})
     public long[] getRegisteredExperimentIds()

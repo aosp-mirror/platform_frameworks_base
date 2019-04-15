@@ -31,7 +31,6 @@ import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
 import android.app.AppGlobals;
 import android.content.ClipData;
-import android.content.ContentInterface;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -968,6 +967,13 @@ public final class MediaStore {
         public static final String DATE_MODIFIED = "date_modified";
 
         /**
+         * The time the media item was taken.
+         */
+        @CurrentTimeMillisLong
+        @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
+        public static final String DATE_TAKEN = "datetaken";
+
+        /**
          * The MIME type of the media item.
          * <p>
          * This is typically defined based on the file extension of the media
@@ -1117,6 +1123,38 @@ public final class MediaStore {
         public static final String SECONDARY_DIRECTORY = "secondary_directory";
 
         /**
+         * The primary bucket ID of this media item. This can be useful to
+         * present the user a first-level clustering of related media items.
+         * This is a read-only column that is automatically computed.
+         */
+        @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
+        public static final String BUCKET_ID = "bucket_id";
+
+        /**
+         * The primary bucket display name of this media item. This can be
+         * useful to present the user a first-level clustering of related
+         * media items. This is a read-only column that is automatically
+         * computed.
+         */
+        @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
+        public static final String BUCKET_DISPLAY_NAME = "bucket_display_name";
+
+        /**
+         * The group ID of this media item. This can be useful to present
+         * the user a grouping of related media items, such a burst of
+         * images, or a {@code JPG} and {@code DNG} version of the same
+         * image.
+         * <p>
+         * This is a read-only column that is automatically computed based
+         * on the first portion of the filename. For example,
+         * {@code IMG1024.BURST001.JPG} and {@code IMG1024.BURST002.JPG}
+         * will have the same {@link #GROUP_ID} because the first portion of
+         * their filenames is identical.
+         */
+        @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
+        public static final String GROUP_ID = "group_id";
+
+        /**
          * The "document ID" GUID as defined by the <em>XMP Media
          * Management</em> standard, extracted from any XMP metadata contained
          * within this media item. The value is {@code null} when no metadata
@@ -1152,6 +1190,20 @@ public final class MediaStore {
          */
         @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
         public static final String ORIGINAL_DOCUMENT_ID = "original_document_id";
+
+        /**
+         * The duration of the media item.
+         */
+        @DurationMillisLong
+        @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
+        public static final String DURATION = "duration";
+
+        /**
+         * The orientation for the media item, expressed in degrees. For
+         * example, 0, 90, 180, or 270 degrees.
+         */
+        @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
+        public static final String ORIENTATION = "orientation";
     }
 
     /**
@@ -1357,7 +1409,10 @@ public final class MediaStore {
 
         /**
          * The description of the download.
+         *
+         * @removed
          */
+        @Deprecated
         @Column(Cursor.FIELD_TYPE_STRING)
         String DESCRIPTION = "description";
     }
@@ -1573,18 +1628,9 @@ public final class MediaStore {
             @Column(value = Cursor.FIELD_TYPE_FLOAT, readOnly = true)
             public static final String LONGITUDE = "longitude";
 
-            /**
-             * The time the media item was taken.
-             */
-            @CurrentTimeMillisLong
-            @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
+            /** @removed promoted to parent interface */
             public static final String DATE_TAKEN = "datetaken";
-
-            /**
-             * The orientation for the image expressed as degrees.
-             * Only degrees 0, 90, 180, 270 will work.
-             */
-            @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
+            /** @removed promoted to parent interface */
             public static final String ORIENTATION = "orientation";
 
             /**
@@ -1598,36 +1644,11 @@ public final class MediaStore {
             @Column(Cursor.FIELD_TYPE_INTEGER)
             public static final String MINI_THUMB_MAGIC = "mini_thumb_magic";
 
-            /**
-             * The primary bucket ID of this media item. This can be useful to
-             * present the user a first-level clustering of related media items.
-             * This is a read-only column that is automatically computed.
-             */
-            @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
+            /** @removed promoted to parent interface */
             public static final String BUCKET_ID = "bucket_id";
-
-            /**
-             * The primary bucket display name of this media item. This can be
-             * useful to present the user a first-level clustering of related
-             * media items. This is a read-only column that is automatically
-             * computed.
-             */
-            @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
+            /** @removed promoted to parent interface */
             public static final String BUCKET_DISPLAY_NAME = "bucket_display_name";
-
-            /**
-             * The group ID of this media item. This can be useful to present
-             * the user a grouping of related media items, such a burst of
-             * images, or a {@code JPG} and {@code DNG} version of the same
-             * image.
-             * <p>
-             * This is a read-only column that is automatically computed based
-             * on the first portion of the filename. For example,
-             * {@code IMG1024.BURST001.JPG} and {@code IMG1024.BURST002.JPG}
-             * will have the same {@link #GROUP_ID} because the first portion of
-             * their filenames is identical.
-             */
-            @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
+            /** @removed promoted to parent interface */
             public static final String GROUP_ID = "group_id";
         }
 
@@ -2048,11 +2069,7 @@ public final class MediaStore {
             @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
             public static final String TITLE_KEY = "title_key";
 
-            /**
-             * The duration of the audio item.
-             */
-            @DurationMillisLong
-            @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
+            /** @removed promoted to parent interface */
             public static final String DURATION = "duration";
 
             /**
@@ -2885,12 +2902,7 @@ public final class MediaStore {
          * Video metadata columns.
          */
         public interface VideoColumns extends MediaColumns {
-
-            /**
-             * The duration of the video item.
-             */
-            @DurationMillisLong
-            @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
+            /** @removed promoted to parent interface */
             public static final String DURATION = "duration";
 
             /**
@@ -2965,11 +2977,7 @@ public final class MediaStore {
             @Column(value = Cursor.FIELD_TYPE_FLOAT, readOnly = true)
             public static final String LONGITUDE = "longitude";
 
-            /**
-             * The time the media item was taken.
-             */
-            @CurrentTimeMillisLong
-            @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
+            /** @removed promoted to parent interface */
             public static final String DATE_TAKEN = "datetaken";
 
             /**
@@ -2983,36 +2991,11 @@ public final class MediaStore {
             @Column(Cursor.FIELD_TYPE_INTEGER)
             public static final String MINI_THUMB_MAGIC = "mini_thumb_magic";
 
-            /**
-             * The primary bucket ID of this media item. This can be useful to
-             * present the user a first-level clustering of related media items.
-             * This is a read-only column that is automatically computed.
-             */
-            @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
+            /** @removed promoted to parent interface */
             public static final String BUCKET_ID = "bucket_id";
-
-            /**
-             * The primary bucket display name of this media item. This can be
-             * useful to present the user a first-level clustering of related
-             * media items. This is a read-only column that is automatically
-             * computed.
-             */
-            @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
+            /** @removed promoted to parent interface */
             public static final String BUCKET_DISPLAY_NAME = "bucket_display_name";
-
-            /**
-             * The group ID of this media item. This can be useful to present
-             * the user a grouping of related media items, such a burst of
-             * images, or a {@code JPG} and {@code DNG} version of the same
-             * image.
-             * <p>
-             * This is a read-only column that is automatically computed based
-             * on the first portion of the filename. For example,
-             * {@code IMG1024.BURST001.JPG} and {@code IMG1024.BURST002.JPG}
-             * will have the same {@link #GROUP_ID} because the first portion of
-             * their filenames is identical.
-             */
-            @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
+            /** @removed promoted to parent interface */
             public static final String GROUP_ID = "group_id";
 
             /**

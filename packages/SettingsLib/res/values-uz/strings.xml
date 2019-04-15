@@ -23,7 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Tarmoqlarni tekshirib chiqishni iloji bo‘lmadi"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Hech qanday"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Saqlandi"</string>
-    <string name="wifi_disabled_generic" msgid="4259794910584943386">"O‘chiq"</string>
+    <string name="wifi_disabled_generic" msgid="4259794910584943386">"Yoqilmagan"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP manzilini sozlab bo‘lmadi"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Sifatsiz tarmoq sababli ulanib bo‘lmadi"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Wi-Fi ulanishini o‘rnatib bo‘lmadi"</string>
@@ -238,7 +238,7 @@
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Translatsiya: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Shaxsiy DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Shaxsiy DNS rejimini tanlang"</string>
-    <string name="private_dns_mode_off" msgid="8236575187318721684">"O‘chiq"</string>
+    <string name="private_dns_mode_off" msgid="8236575187318721684">"Yoqilmagan"</string>
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Avtomatik"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Shaxsiy DNS provayderining host nomi"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS provayderining host nomini kiriting"</string>
@@ -367,7 +367,7 @@
     <string name="button_convert_fbe" msgid="5152671181309826405">"O‘chirib tashlash va o‘girish…"</string>
     <string name="picture_color_mode" msgid="4560755008730283695">"Rang rejimi"</string>
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"sRGB ranglaridan foydalanish"</string>
-    <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"O‘chiq"</string>
+    <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"Yoqilmagan"</string>
     <string name="daltonizer_mode_monochromacy" msgid="8485709880666106721">"Monoxrom"</string>
     <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"Deyteranomaliya (qizil/yashil)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"Protanomaliya (qizil/yashil)"</string>
@@ -408,7 +408,7 @@
     <string name="battery_info_status_not_charging" msgid="8523453668342598579">"Ulangan, lekin quvvat olmayapti"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"To‘la"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Administrator tomonidan boshqariladi"</string>
-    <string name="disabled" msgid="9206776641295849915">"O‘chiq"</string>
+    <string name="disabled" msgid="9206776641295849915">"Yoqilmagan"</string>
     <string name="external_source_trusted" msgid="2707996266575928037">"Ruxsat berilgan"</string>
     <string name="external_source_untrusted" msgid="2677442511837596726">"Ruxsat berilmagan"</string>
     <string name="install_other_apps" msgid="6986686991775883017">"Notanish ilovalarni o‘rnatish"</string>
@@ -459,7 +459,7 @@
     <string name="alarm_template_far" msgid="3779172822607461675">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"Davomiyligi"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Har safar so‘ralsin"</string>
-    <string name="zen_mode_forever" msgid="2704305038191592967">"Bekor qilinmaguncha"</string>
+    <string name="zen_mode_forever" msgid="2704305038191592967">"Rejimdan chiqilgunicha"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"Hozir"</string>
     <string name="media_transfer_this_device_name" msgid="1636276898262571213">"Shu qurilma"</string>
 </resources>

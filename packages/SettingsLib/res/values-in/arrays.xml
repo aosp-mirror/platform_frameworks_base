@@ -165,11 +165,11 @@
   </string-array>
   <string-array name="select_logd_size_summaries">
     <item msgid="6921048829791179331">"Nonaktif"</item>
-    <item msgid="2969458029344750262">"64 K/penyangga log"</item>
-    <item msgid="1342285115665698168">"256 K/penyangga log"</item>
-    <item msgid="1314234299552254621">"1 M/penyangga log"</item>
-    <item msgid="3606047780792894151">"4 M/penyangga log"</item>
-    <item msgid="5431354956856655120">"16 M/penyangga log"</item>
+    <item msgid="2969458029344750262">"64 K/buffer log"</item>
+    <item msgid="1342285115665698168">"256 K/buffer log"</item>
+    <item msgid="1314234299552254621">"1 M/buffer log"</item>
+    <item msgid="3606047780792894151">"4 M/buffer log"</item>
+    <item msgid="5431354956856655120">"16 M/buffer log"</item>
   </string-array>
   <string-array name="select_logpersist_titles">
     <item msgid="1744840221860799971">"Nonaktif"</item>
@@ -181,7 +181,7 @@
     <item msgid="2216470072500521830">"Nonaktif"</item>
     <item msgid="172978079776521897">"Semua penyangga log"</item>
     <item msgid="3873873912383879240">"Semua kecuali penyangga log radio"</item>
-    <item msgid="8489661142527693381">"khusus penyangga log kernel"</item>
+    <item msgid="8489661142527693381">"khusus buffer log kernel"</item>
   </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"Animasi mati"</item>

@@ -27,6 +27,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.UserHandle;
+import android.util.Slog;
 
 /**
  * An implementation of IAppTask, that allows an app to manage its own tasks via
@@ -34,6 +35,7 @@ import android.os.UserHandle;
  * only the process that calls getAppTasks() can call the AppTask methods.
  */
 class AppTaskImpl extends IAppTask.Stub {
+    private static final String TAG = "AppTaskImpl";
     private ActivityTaskManagerService mService;
 
     private int mTaskId;
@@ -90,16 +92,40 @@ class AppTaskImpl extends IAppTask.Stub {
     }
 
     @Override
-    public void moveToFront() {
+    public void moveToFront(IApplicationThread appThread, String callingPackage) {
         checkCaller();
         // Will bring task to front if it already has a root activity.
         final int callingPid = Binder.getCallingPid();
         final int callingUid = Binder.getCallingUid();
+        if (!mService.isSameApp(callingUid, callingPackage)) {
+            String msg = "Permission Denial: moveToFront() from pid="
+                    + Binder.getCallingPid() + " as package " + callingPackage;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mService.mGlobalLock) {
-                mService.mStackSupervisor.startActivityFromRecents(callingPid, callingUid, mTaskId,
-                        null);
+                if (!mService.checkAppSwitchAllowedLocked(callingPid, callingUid, -1, -1,
+                        "Move to front")) {
+                    return;
+                }
+                WindowProcessController callerApp = null;
+                if (appThread != null) {
+                    callerApp = mService.getProcessController(appThread);
+                }
+                final ActivityStarter starter = mService.getActivityStartController().obtainStarter(
+                        null /* intent */, "moveToFront");
+                if (starter.shouldAbortBackgroundActivityStart(callingUid, callingPid,
+                        callingPackage, -1, -1, callerApp, null, false, null)) {
+                    boolean abort = !mService.isBackgroundActivityStartsEnabled();
+                    starter.showBackgroundActivityBlockedToast(abort, callingPackage);
+                    if (abort) {
+                        return;
+                    }
+                }
+                mService.mStackSupervisor.startActivityFromRecents(callingPid,
+                        callingUid, mTaskId, null);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);

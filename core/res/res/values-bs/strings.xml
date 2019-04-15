@@ -283,7 +283,7 @@
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; pristup vašim kontaktima?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Lokacija"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"pristupa lokaciji ovog uređaja"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; pristup lokaciji ovog uređaja?"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; da pristupi lokaciji ovog uređaja?"</string>
     <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"Aplikacija će imati pristup lokaciji isključivo dok je koristite"</string>
     <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; pristup lokaciji uređaja &lt;b&gt;sve vrijeme&lt;/b&gt;?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="4597006851453417387">"Aplikacija trenutno može pristupati lokaciji isključivo dok je koristite"</string>
@@ -1462,7 +1462,7 @@
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Želite li dozvoliti taj zahtjev?"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"Zahtjev za pristup"</string>
     <string name="allow" msgid="7225948811296386551">"Dozvoli"</string>
-    <string name="deny" msgid="2081879885755434506">"Odbijte"</string>
+    <string name="deny" msgid="2081879885755434506">"Odbij"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Upućen zahtjev za odobrenje"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Upućen zahtjev za dozvolu\nza račun <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="1207197447013960896">"Aplikaciju koristite van poslovnog profila"</string>

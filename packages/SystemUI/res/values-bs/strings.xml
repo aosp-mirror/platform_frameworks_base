@@ -172,6 +172,7 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <string name="data_connection_5ge" msgid="4699478963278829331">"5Ge"</string>
     <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
     <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
@@ -817,7 +818,7 @@
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Stranica <xliff:g id="ID_1">%1$d</xliff:g> od <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="5755818559638850294">"Zaključavanje ekrana"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"Proširi"</string>
-    <string name="pip_phone_minimize" msgid="1079119422589131792">"Umanji"</string>
+    <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimiziraj"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Zatvori"</string>
     <string name="pip_phone_settings" msgid="8080777499521528521">"Postavke"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Povucite prema dolje da odbacite"</string>

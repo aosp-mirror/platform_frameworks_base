@@ -174,7 +174,6 @@ extern int register_android_database_CursorWindow(JNIEnv* env);
 extern int register_android_database_SQLiteConnection(JNIEnv* env);
 extern int register_android_database_SQLiteGlobal(JNIEnv* env);
 extern int register_android_database_SQLiteDebug(JNIEnv* env);
-extern int register_android_nio_utils(JNIEnv* env);
 extern int register_android_os_Debug(JNIEnv* env);
 extern int register_android_os_GraphicsEnvironment(JNIEnv* env);
 extern int register_android_os_HidlSupport(JNIEnv* env);
@@ -679,6 +678,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
     char lockProfThresholdBuf[sizeof("-Xlockprofthreshold:")-1 + PROPERTY_VALUE_MAX];
     char nativeBridgeLibrary[sizeof("-XX:NativeBridge=") + PROPERTY_VALUE_MAX];
     char cpuAbiListBuf[sizeof("--cpu-abilist=") + PROPERTY_VALUE_MAX];
+    char corePlatformApiPolicyBuf[sizeof("-Xcore-platform-api-policy:") + PROPERTY_VALUE_MAX];
     char methodTraceFileBuf[sizeof("-Xmethod-trace-file:") + PROPERTY_VALUE_MAX];
     char methodTraceFileSizeBuf[sizeof("-Xmethod-trace-file-size:") + PROPERTY_VALUE_MAX];
     std::string fingerprintBuf;
@@ -1023,6 +1023,16 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
     if (property_get_bool("dalvik.vm.minidebuginfo", 0)) {
         addOption("-Xcompiler-option");
         addOption("--generate-mini-debug-info");
+    }
+
+    // If set, the property below can be used to enable core platform API violation reporting.
+    property_get("persist.debug.dalvik.vm.core_platform_api_policy", propBuf, "");
+    if (propBuf[0] != '\0') {
+      snprintf(corePlatformApiPolicyBuf,
+               sizeof(corePlatformApiPolicyBuf),
+               "-Xcore-platform-api-policy:%s",
+               propBuf);
+      addOption(corePlatformApiPolicyBuf);
     }
 
     /*
@@ -1422,7 +1432,6 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_os_NativeHandle),
     REG_JNI(register_android_os_VintfObject),
     REG_JNI(register_android_os_VintfRuntimeInfo),
-    REG_JNI(register_android_nio_utils),
     REG_JNI(register_android_graphics_Canvas),
     // This needs to be before register_android_graphics_Graphics, or the latter
     // will not be able to find the jmethodID for ColorSpace.get().

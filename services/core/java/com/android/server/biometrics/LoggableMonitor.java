@@ -16,6 +16,7 @@
 
 package com.android.server.biometrics;
 
+import android.content.Context;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.face.FaceManager;
@@ -61,7 +62,8 @@ public abstract class LoggableMonitor {
         return BiometricsProtoEnums.CLIENT_UNKNOWN;
     }
 
-    protected final void logOnAcquired(int acquiredInfo, int vendorCode, int targetUserId) {
+    protected final void logOnAcquired(Context context, int acquiredInfo, int vendorCode,
+            int targetUserId) {
         if (statsModality() == BiometricsProtoEnums.MODALITY_FACE) {
             if (acquiredInfo == FaceManager.FACE_ACQUIRED_START) {
                 mFirstAcquireTimeMs = System.currentTimeMillis();
@@ -87,10 +89,11 @@ public abstract class LoggableMonitor {
                 statsAction(),
                 statsClient(),
                 acquiredInfo,
-                0 /* vendorCode */); // Don't log vendorCode for now
+                0 /* vendorCode */, // Don't log vendorCode for now
+                Utils.isDebugEnabled(context, targetUserId));
     }
 
-    protected final void logOnError(int error, int vendorCode, int targetUserId) {
+    protected final void logOnError(Context context, int error, int vendorCode, int targetUserId) {
         if (DEBUG) {
             Slog.v(TAG, "Error! Modality: " + statsModality()
                     + ", User: " + targetUserId
@@ -107,11 +110,12 @@ public abstract class LoggableMonitor {
                 statsAction(),
                 statsClient(),
                 error,
-                vendorCode);
+                vendorCode,
+                Utils.isDebugEnabled(context, targetUserId));
     }
 
-    protected final void logOnAuthenticated(boolean authenticated, boolean requireConfirmation,
-            int targetUserId, boolean isBiometricPrompt) {
+    protected final void logOnAuthenticated(Context context, boolean authenticated,
+            boolean requireConfirmation, int targetUserId, boolean isBiometricPrompt) {
         int authState = StatsLog.BIOMETRIC_AUTHENTICATED__STATE__UNKNOWN;
         if (!authenticated) {
             authState = StatsLog.BIOMETRIC_AUTHENTICATED__STATE__REJECTED;
@@ -148,7 +152,8 @@ public abstract class LoggableMonitor {
                 statsClient(),
                 requireConfirmation,
                 authState,
-                latency);
+                latency,
+                Utils.isDebugEnabled(context, targetUserId));
     }
 
     protected final void logOnEnrolled(int targetUserId, long latency, boolean enrollSuccessful) {

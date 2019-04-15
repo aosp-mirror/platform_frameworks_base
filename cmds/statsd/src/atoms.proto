@@ -208,7 +208,7 @@ message Atom {
             119 [(log_from_module) = "docsui"];
         DocsUISearchTypeReported docs_ui_search_type_reported =
             120 [(log_from_module) = "docsui"];
-        DataStallEvent data_stall_event = 121;
+        DataStallEvent data_stall_event = 121 [(log_from_module) = "network_stack"];
         RescuePartyResetReported rescue_party_reset_reported = 122;
         SignedConfigReported signed_config_reported = 123;
         GnssNiEventReported gnss_ni_event_reported = 124;
@@ -257,7 +257,8 @@ message Atom {
         BluetoothSmpPairingEventReported bluetooth_smp_pairing_event_reported = 167;
         ScreenTimeoutExtensionReported screen_timeout_extension_reported = 168;
         ProcessStartTime process_start_time = 169;
-        PermissionGrantRequestResultReported permission_grant_request_result_reported = 170;
+        PermissionGrantRequestResultReported permission_grant_request_result_reported =
+            170 [(log_from_module) = "permissioncontroller"];
         BluetoothSocketConnectionStateChanged bluetooth_socket_connection_state_changed = 171;
         DeviceIdentifierAccessDenied device_identifier_access_denied = 172;
         BubbleDeveloperErrorReported bubble_developer_error_reported = 173;
@@ -269,7 +270,7 @@ message Atom {
         StyleUIChanged style_ui_changed = 179;
         PrivacyIndicatorsInteracted privacy_indicators_interacted = 180;
         AppInstallOnExternalStorageReported app_install_on_external_storage_reported = 181;
-        NetworkStackReported network_stack_reported = 182;
+        NetworkStackReported network_stack_reported = 182 [(log_from_module) = "network_stack"];
         AppMovedStorageReported app_moved_storage_reported = 183;
         BiometricEnrolled biometric_enrolled = 184;
         SystemServerWatchdogOccurred system_server_watchdog_occurred = 185;
@@ -278,7 +279,7 @@ message Atom {
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10058
+    // Next: 10059
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000;
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001;
@@ -338,6 +339,7 @@ message Atom {
         GpuStatsAppInfo gpu_stats_app_info = 10055;
         SystemIonHeapSize system_ion_heap_size = 10056;
         AppsOnExternalStorageInfo apps_on_external_storage_info = 10057;
+        FaceSettings face_settings = 10058;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -3122,6 +3124,8 @@ message BiometricAcquired {
     optional int32 acquire_info = 6;
     // Vendor-specific acquire info. Valid only if acquire_info == ACQUIRED_VENDOR.
     optional int32 acquire_info_vendor = 7;
+    // Dictates if this message should trigger additional debugging.
+    optional bool debug = 8;
 }
 
 /**
@@ -3158,6 +3162,8 @@ message BiometricAuthenticated {
     // AUTHENTICATED. for setRequireConfirmation(true), this is from PENDING_CONFIRMATION to
     // CONFIRMED.
     optional int64 latency_millis = 7;
+    // Dictates if this message should trigger additional debugging.
+    optional bool debug = 8;
 }
 
 /**
@@ -3183,6 +3189,8 @@ message BiometricErrorOccurred {
     // Vendor-specific error info. Valid only if acquire_info == ACQUIRED_VENDOR. These are defined
     // by the vendor and not specified by the HIDL interface.
     optional int32 error_info_vendor = 7;
+    // Dictates if this message should trigger additional debugging.
+    optional bool debug = 8;
 }
 
 /**
@@ -3195,6 +3203,8 @@ message BiometricSystemHealthIssueDetected {
     optional android.hardware.biometrics.ModalityEnum modality = 1;
     // Type of issue detected.
     optional android.hardware.biometrics.IssueEnum issue = 2;
+    // Dictates if this message should trigger additional debugging.
+    optional bool debug = 3;
 }
 
 /**
@@ -5575,6 +5585,7 @@ message BubbleUIChanged {
         SWIPE_LEFT = 13;
         SWIPE_RIGHT = 14;
         STACK_EXPANDED = 15;
+        FLYOUT = 16;
     }
     optional Action action = 6;
 
@@ -5584,6 +5595,12 @@ message BubbleUIChanged {
 
     // Whether the bubble is unread. If it is unread, a dot is shown in the bubble stack icon.
     optional bool is_unread = 9;
+
+    // Whether the bubble is an on-going one.
+    optional bool is_ongoing = 10;
+
+    // Whether the bubble is produced by an app running in foreground.
+    optional bool is_foreground = 11;
 }
 
 /**
@@ -5909,4 +5926,24 @@ message AppsOnExternalStorageInfo {
     optional android.stats.storage.ExternalStorageType external_storage_type = 1;
     // The name of the package that is installed on the external storage.
     optional string package_name = 2;
+}
+
+/**
+ * Logs the settings related to Face.
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/stats
+ */
+message FaceSettings {
+    // Whether or not face unlock is allowed on Keyguard.
+    optional bool unlock_keyguard_enabled = 1;
+    // Whether or not face unlock dismisses the Keyguard.
+    optional bool unlock_dismisses_keyguard = 2;
+    // Whether or not face unlock requires attention.
+    optional bool unlock_attention_required = 3;
+    // Whether or not face unlock is allowed for apps (through BiometricPrompt).
+    optional bool unlock_app_enabled = 4;
+    // Whether or not face unlock always requires user confirmation.
+    optional bool unlock_always_require_confirmation = 5;
+    // Whether or not a diverse set of poses are required during enrollment.
+    optional bool unlock_diversity_required = 6;
 }

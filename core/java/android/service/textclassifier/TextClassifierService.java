@@ -358,6 +358,7 @@ public abstract class TextClassifierService extends Service {
     /**
      * Returns the platform's default TextClassifier implementation.
      */
+    @NonNull
     public static TextClassifier getDefaultTextClassifierImplementation(@NonNull Context context) {
         final TextClassificationManager tcm =
                 context.getSystemService(TextClassificationManager.class);

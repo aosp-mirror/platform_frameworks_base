@@ -195,7 +195,7 @@ public final class TextSelection implements Parcelable {
         public TextSelection build() {
             return new TextSelection(
                     mStartIndex, mEndIndex, mEntityConfidence, mId,
-                    mExtras == null ? Bundle.EMPTY : mExtras.deepCopy());
+                    mExtras == null ? Bundle.EMPTY : mExtras);
         }
     }
 
@@ -378,7 +378,7 @@ public final class TextSelection implements Parcelable {
             public Request build() {
                 return new Request(new SpannedString(mText), mStartIndex, mEndIndex,
                         mDefaultLocales, mDarkLaunchAllowed,
-                        mExtras == null ? Bundle.EMPTY : mExtras.deepCopy());
+                        mExtras == null ? Bundle.EMPTY : mExtras);
             }
         }
 

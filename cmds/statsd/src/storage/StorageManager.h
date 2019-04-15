@@ -31,6 +31,19 @@ using android::util::ProtoOutputStream;
 
 class StorageManager : public virtual RefBase {
 public:
+    struct FileInfo {
+        FileInfo(std::string name, bool isHistory, int fileSize, long fileAge)
+            : mFileName(name),
+              mIsHistory(isHistory),
+              mFileSizeBytes(fileSize),
+              mFileAgeSec(fileAge) {
+        }
+        std::string mFileName;
+        bool mIsHistory;
+        int mFileSizeBytes;
+        long mFileAgeSec;
+    };
+
     /**
      * Writes a given byte array as a file to the specified file path.
      */
@@ -81,10 +94,19 @@ public:
     /**
      * Appends the ConfigMetricsReport found on disk to the specifid proto
      * and, if erase_data, deletes it from disk.
+     *
+     * [isAdb]: if the caller is adb dump. This includes local adb dump or dumpsys by
+     * bugreport or incidentd. When true, we will append any local history data too.
+     *
+     * When
+     * erase_data=true, isAdb=true:   append history data to output, remove all data after read
+     * erase_data=false, isAdb=true:  append history data to output, keep data after read
+     * erase_data=true, isAdb=false:  do not append history data, and remove data after read
+     * erase_data=false, isAdb=false: do not append history data and *rename* all data files to
+     *                                history files.
      */
-    static void appendConfigMetricsReport(const ConfigKey& key,
-                                          ProtoOutputStream* proto,
-                                          bool erase_data);
+    static void appendConfigMetricsReport(const ConfigKey& key, ProtoOutputStream* proto,
+                                          bool erase_data, bool isAdb);
 
     /**
      * Call to load the saved configs from disk.
@@ -114,6 +136,12 @@ public:
      * Prints disk usage statistics related to statsd.
      */
     static void printStats(int out);
+
+    static string getDataFileName(long wallClockSec, int uid, int64_t id);
+
+    static string getDataHistoryFileName(long wallClockSec, int uid, int64_t id);
+
+    static void sortFiles(vector<FileInfo>* fileNames);
 
 private:
     /**

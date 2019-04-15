@@ -1990,31 +1990,31 @@ public class PackageManagerService extends IPackageManager.Stub
 
             // Work that needs to happen on first install within each user
             if (firstUserIds != null && firstUserIds.length > 0) {
-                synchronized (mPackages) {
-                    for (int userId : firstUserIds) {
-                        // If this app is a browser and it's newly-installed for some
-                        // users, clear any default-browser state in those users. The
-                        // app's nature doesn't depend on the user, so we can just check
-                        // its browser nature in any user and generalize.
-                        if (packageIsBrowser(packageName, userId)) {
-                            // If this browser is restored from user's backup, do not clear
-                            // default-browser state for this user
+                for (int userId : firstUserIds) {
+                    // If this app is a browser and it's newly-installed for some
+                    // users, clear any default-browser state in those users. The
+                    // app's nature doesn't depend on the user, so we can just check
+                    // its browser nature in any user and generalize.
+                    if (packageIsBrowser(packageName, userId)) {
+                        // If this browser is restored from user's backup, do not clear
+                        // default-browser state for this user
+                        synchronized (mPackages) {
                             final PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
                             if (pkgSetting.getInstallReason(userId)
                                     != PackageManager.INSTALL_REASON_DEVICE_RESTORE) {
                                 setDefaultBrowserAsyncLPw(null, userId);
                             }
                         }
-
-                        // We may also need to apply pending (restored) runtime permission grants
-                        // within these users.
-                        mPermissionManager.restoreDelayedRuntimePermissions(packageName,
-                                UserHandle.of(userId));
-
-                        // Persistent preferred activity might have came into effect due to this
-                        // install.
-                        updateDefaultHomeLPw(userId);
                     }
+
+                    // We may also need to apply pending (restored) runtime permission grants
+                    // within these users.
+                    mPermissionManager.restoreDelayedRuntimePermissions(packageName,
+                            UserHandle.of(userId));
+
+                    // Persistent preferred activity might have came into effect due to this
+                    // install.
+                    updateDefaultHomeNotLocked(userId);
                 }
             }
 
@@ -2967,7 +2967,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
                 // Uncompress and install any stubbed system applications.
                 // This must be done last to ensure all stubs are replaced or disabled.
-                decompressSystemApplications(stubSystemApps, scanFlags);
+                installSystemStubPackages(stubSystemApps, scanFlags);
 
                 final int cachedNonSystemApps = PackageParser.sCachedPackageReadCount.get()
                                 - cachedSystemApps;
@@ -3278,49 +3278,37 @@ public class PackageManagerService extends IPackageManager.Stub
      * <p>In order to forcefully attempt an installation of a full application, go to app
      * settings and enable the application.
      */
-    private void decompressSystemApplications(@NonNull List<String> stubSystemApps, int scanFlags) {
-        for (int i = stubSystemApps.size() - 1; i >= 0; --i) {
-            final String pkgName = stubSystemApps.get(i);
+    private void installSystemStubPackages(@NonNull List<String> systemStubPackageNames,
+            @ScanFlags int scanFlags) {
+        for (int i = systemStubPackageNames.size() - 1; i >= 0; --i) {
+            final String packageName = systemStubPackageNames.get(i);
             // skip if the system package is already disabled
-            if (mSettings.isDisabledSystemPackageLPr(pkgName)) {
-                stubSystemApps.remove(i);
+            if (mSettings.isDisabledSystemPackageLPr(packageName)) {
+                systemStubPackageNames.remove(i);
                 continue;
             }
             // skip if the package isn't installed (?!); this should never happen
-            final PackageParser.Package pkg = mPackages.get(pkgName);
+            final PackageParser.Package pkg = mPackages.get(packageName);
             if (pkg == null) {
-                stubSystemApps.remove(i);
+                systemStubPackageNames.remove(i);
                 continue;
             }
             // skip if the package has been disabled by the user
-            final PackageSetting ps = mSettings.mPackages.get(pkgName);
+            final PackageSetting ps = mSettings.mPackages.get(packageName);
             if (ps != null) {
                 final int enabledState = ps.getEnabled(UserHandle.USER_SYSTEM);
                 if (enabledState == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER) {
-                    stubSystemApps.remove(i);
+                    systemStubPackageNames.remove(i);
                     continue;
                 }
             }
 
-            if (DEBUG_COMPRESSION) {
-                Slog.i(TAG, "Uncompressing system stub; pkg: " + pkgName);
-            }
-
-            // uncompress the binary to its eventual destination on /data
-            final File scanFile = decompressPackage(pkg);
-            if (scanFile == null) {
-                continue;
-            }
-
             // install the package to replace the stub on /system
             try {
-                mSettings.disableSystemPackageLPw(pkgName, true /*replaced*/);
-                removePackageLI(pkg, true /*chatty*/);
-                scanPackageTracedLI(scanFile, 0 /*reparseFlags*/, scanFlags, 0, null);
+                installStubPackageLI(pkg, 0, scanFlags);
                 ps.setEnabled(PackageManager.COMPONENT_ENABLED_STATE_DEFAULT,
                         UserHandle.USER_SYSTEM, "android");
-                stubSystemApps.remove(i);
-                continue;
+                systemStubPackageNames.remove(i);
             } catch (PackageManagerException e) {
                 Slog.e(TAG, "Failed to parse uncompressed system package: " + e.getMessage());
             }
@@ -3329,8 +3317,8 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         // disable any stub still left; these failed to install the full application
-        for (int i = stubSystemApps.size() - 1; i >= 0; --i) {
-            final String pkgName = stubSystemApps.get(i);
+        for (int i = systemStubPackageNames.size() - 1; i >= 0; --i) {
+            final String pkgName = systemStubPackageNames.get(i);
             final PackageSetting ps = mSettings.mPackages.get(pkgName);
             ps.setEnabled(PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
                     UserHandle.USER_SYSTEM, "android");
@@ -3339,20 +3327,107 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     /**
+     * Extract, install and enable a stub package.
+     * <p>If the compressed file can not be extracted / installed for any reason, the stub
+     * APK will be installed and the package will be disabled. To recover from this situation,
+     * the user will need to go into system settings and re-enable the package.
+     */
+    private boolean enableCompressedPackage(PackageParser.Package stubPkg) {
+        final int parseFlags = mDefParseFlags | PackageParser.PARSE_CHATTY
+                | PackageParser.PARSE_ENFORCE_CODE;
+        synchronized (mInstallLock) {
+            final PackageParser.Package pkg;
+            try (PackageFreezer freezer =
+                    freezePackage(stubPkg.packageName, "setEnabledSetting")) {
+                pkg = installStubPackageLI(stubPkg, parseFlags, 0 /*scanFlags*/);
+                synchronized (mPackages) {
+                    prepareAppDataAfterInstallLIF(pkg);
+                    try {
+                        updateSharedLibrariesLocked(pkg, null, mPackages);
+                    } catch (PackageManagerException e) {
+                        Slog.e(TAG, "updateAllSharedLibrariesLPw failed: ", e);
+                    }
+                    mPermissionManager.updatePermissions(
+                            pkg.packageName, pkg, true, mPackages.values(),
+                            mPermissionCallback);
+                    mSettings.writeLPr();
+                }
+            } catch (PackageManagerException e) {
+                // Whoops! Something went very wrong; roll back to the stub and disable the package
+                try (PackageFreezer freezer =
+                        freezePackage(stubPkg.packageName, "setEnabledSetting")) {
+                    synchronized (mPackages) {
+                        // NOTE: Ensure the system package is enabled; even for a compressed stub.
+                        // If we don't, installing the system package fails during scan
+                        enableSystemPackageLPw(stubPkg);
+                    }
+                    installPackageFromSystemLIF(stubPkg.codePath,
+                            null /*allUserHandles*/, null /*origUserHandles*/,
+                            null /*origPermissionsState*/, true /*writeSettings*/);
+                } catch (PackageManagerException pme) {
+                    // Serious WTF; we have to be able to install the stub
+                    Slog.wtf(TAG, "Failed to restore system package:" + stubPkg.packageName, pme);
+                } finally {
+                    // Disable the package; the stub by itself is not runnable
+                    synchronized (mPackages) {
+                        final PackageSetting stubPs = mSettings.mPackages.get(stubPkg.packageName);
+                        if (stubPs != null) {
+                            stubPs.setEnabled(COMPONENT_ENABLED_STATE_DISABLED,
+                                    UserHandle.USER_SYSTEM, "android");
+                        }
+                        mSettings.writeLPr();
+                    }
+                }
+                return false;
+            }
+            clearAppDataLIF(pkg, UserHandle.USER_ALL, FLAG_STORAGE_DE
+                    | FLAG_STORAGE_CE | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
+            mDexManager.notifyPackageUpdated(pkg.packageName,
+                    pkg.baseCodePath, pkg.splitCodePaths);
+        }
+        return true;
+    }
+
+    private PackageParser.Package installStubPackageLI(PackageParser.Package stubPkg,
+            @ParseFlags int parseFlags, @ScanFlags int scanFlags)
+                    throws PackageManagerException {
+        if (DEBUG_COMPRESSION) {
+            Slog.i(TAG, "Uncompressing system stub; pkg: " + stubPkg.packageName);
+        }
+        // uncompress the binary to its eventual destination on /data
+        final File scanFile = decompressPackage(stubPkg.packageName, stubPkg.codePath);
+        if (scanFile == null) {
+            throw new PackageManagerException("Unable to decompress stub at " + stubPkg.codePath);
+        }
+        synchronized (mPackages) {
+            mSettings.disableSystemPackageLPw(stubPkg.packageName, true /*replaced*/);
+        }
+        removePackageLI(stubPkg, true /*chatty*/);
+        try {
+            return scanPackageTracedLI(scanFile, parseFlags, scanFlags, 0, null);
+        } catch (PackageManagerException e) {
+            Slog.w(TAG, "Failed to install compressed system package:" + stubPkg.packageName, e);
+            // Remove the failed install
+            removeCodePathLI(scanFile);
+            throw e;
+        }
+    }
+
+    /**
      * Decompresses the given package on the system image onto
      * the /data partition.
      * @return The directory the package was decompressed into. Otherwise, {@code null}.
      */
-    private File decompressPackage(PackageParser.Package pkg) {
-        final File[] compressedFiles = getCompressedFiles(pkg.codePath);
+    private File decompressPackage(String packageName, String codePath) {
+        final File[] compressedFiles = getCompressedFiles(codePath);
         if (compressedFiles == null || compressedFiles.length == 0) {
             if (DEBUG_COMPRESSION) {
-                Slog.i(TAG, "No files to decompress: " + pkg.baseCodePath);
+                Slog.i(TAG, "No files to decompress: " + codePath);
             }
             return null;
         }
         final File dstCodePath =
-                getNextCodePath(Environment.getDataAppDirectory(null), pkg.packageName);
+                getNextCodePath(Environment.getDataAppDirectory(null), packageName);
         int ret = PackageManager.INSTALL_SUCCEEDED;
         try {
             Os.mkdir(dstCodePath.getAbsolutePath(), 0755);
@@ -3365,14 +3440,14 @@ public class PackageManagerService extends IPackageManager.Stub
                 ret = decompressFile(srcFile, dstFile);
                 if (ret != PackageManager.INSTALL_SUCCEEDED) {
                     logCriticalInfo(Log.ERROR, "Failed to decompress"
-                            + "; pkg: " + pkg.packageName
+                            + "; pkg: " + packageName
                             + ", file: " + dstFileName);
                     break;
                 }
             }
         } catch (ErrnoException e) {
             logCriticalInfo(Log.ERROR, "Failed to decompress"
-                    + "; pkg: " + pkg.packageName
+                    + "; pkg: " + packageName
                     + ", err: " + e.errno);
         }
         if (ret == PackageManager.INSTALL_SUCCEEDED) {
@@ -3384,7 +3459,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         null /*abiOverride*/);
             } catch (IOException e) {
                 logCriticalInfo(Log.ERROR, "Failed to extract native libraries"
-                        + "; pkg: " + pkg.packageName);
+                        + "; pkg: " + packageName);
                 ret = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
             } finally {
                 IoUtils.closeQuietly(handle);
@@ -5083,7 +5158,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             getPackagesUsingSharedLibraryLPr(libInfo, flags, userId),
                             (libInfo.getDependencies() == null
                                     ? null
-                                    : new ArrayList(libInfo.getDependencies())));
+                                    : new ArrayList<>(libInfo.getDependencies())));
 
                     if (result == null) {
                         result = new ArrayList<>();
@@ -6400,8 +6475,8 @@ public class PackageManagerService extends IPackageManager.Stub
         final List<ResolveInfo> query = queryIntentActivitiesInternal(intent, resolvedType, flags,
                 userId);
         // Find any earlier preferred or last chosen entries and nuke them
-        findPreferredActivity(intent, resolvedType,
-                flags, query, 0, false, true, false, userId);
+        findPreferredActivityNotLocked(
+                intent, resolvedType, flags, query, 0, false, true, false, userId);
         // Add the new activity as the last chosen for this filter
         addPreferredActivityInternal(filter, match, null, activity, false, userId,
                 "Setting last chosen");
@@ -6416,8 +6491,8 @@ public class PackageManagerService extends IPackageManager.Stub
         if (DEBUG_PREFERRED) Log.v(TAG, "Querying last chosen activity for " + intent);
         final List<ResolveInfo> query = queryIntentActivitiesInternal(intent, resolvedType, flags,
                 userId);
-        return findPreferredActivity(intent, resolvedType, flags, query, 0,
-                false, false, false, userId);
+        return findPreferredActivityNotLocked(
+                intent, resolvedType, flags, query, 0, false, false, false, userId);
     }
 
     /**
@@ -6530,7 +6605,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 // If we have saved a preference for a preferred activity for
                 // this Intent, use that.
-                ResolveInfo ri = findPreferredActivity(intent, resolvedType,
+                ResolveInfo ri = findPreferredActivityNotLocked(intent, resolvedType,
                         flags, query, r0.priority, true, false, debug, userId);
                 if (ri != null) {
                     return ri;
@@ -6669,9 +6744,14 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     // TODO: handle preferred activities missing while user has amnesia
-    ResolveInfo findPreferredActivity(Intent intent, String resolvedType, int flags,
+    /** <b>must not hold {@link #mPackages}</b> */
+    ResolveInfo findPreferredActivityNotLocked(Intent intent, String resolvedType, int flags,
             List<ResolveInfo> query, int priority, boolean always,
             boolean removeMatches, boolean debug, int userId) {
+        if (Thread.holdsLock(mPackages)) {
+            Slog.wtf(TAG, "Calling thread " + Thread.currentThread().getName()
+                    + " is holding mPackages", new Throwable());
+        }
         if (!sUserManager.exists(userId)) return null;
         final int callingUid = Binder.getCallingUid();
         // Do NOT hold the packages lock; this calls up into the settings provider which
@@ -10138,7 +10218,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private void destroyAppProfilesLIF(PackageParser.Package pkg, int userId) {
+    private void destroyAppProfilesLIF(PackageParser.Package pkg) {
         if (pkg == null) {
             Slog.wtf(TAG, "Package was null!", new Throwable());
             return;
@@ -18216,12 +18296,15 @@ public class PackageManagerService extends IPackageManager.Stub
             return PackageManager.DELETE_FAILED_DEVICE_POLICY_MANAGER;
         }
 
-        PackageSetting uninstalledPs;
-        PackageParser.Package pkg;
+        final PackageSetting uninstalledPs;
+        final PackageSetting disabledSystemPs;
+        final PackageParser.Package pkg;
 
         // for the uninstall-updates case and restricted profiles, remember the per-
         // user handle installed state
         int[] allUsers;
+        /** enabled state of the uninstalled application */
+        final int origEnabledState;
         synchronized (mPackages) {
             uninstalledPs = mSettings.mPackages.get(packageName);
             if (uninstalledPs == null) {
@@ -18236,6 +18319,11 @@ public class PackageManagerService extends IPackageManager.Stub
                 return PackageManager.DELETE_FAILED_INTERNAL_ERROR;
             }
 
+            disabledSystemPs = mSettings.getDisabledSystemPkgLPr(packageName);
+            // Save the enabled state before we delete the package. When deleting a stub
+            // application we always set the enabled state to 'disabled'.
+            origEnabledState = uninstalledPs == null
+                    ? COMPONENT_ENABLED_STATE_DEFAULT : uninstalledPs.getEnabled(userId);
             // Static shared libs can be declared by any package, so let us not
             // allow removing a package if it provides a lib others depend on.
             pkg = mPackages.get(packageName);
@@ -18304,9 +18392,29 @@ public class PackageManagerService extends IPackageManager.Stub
         Runtime.getRuntime().gc();
         // Delete the resources here after sending the broadcast to let
         // other processes clean up before deleting resources.
-        if (info.args != null) {
-            synchronized (mInstallLock) {
+        synchronized (mInstallLock) {
+            if (info.args != null) {
                 info.args.doPostDeleteLI(true);
+            }
+            final PackageParser.Package stubPkg =
+                    (disabledSystemPs == null) ? null : disabledSystemPs.pkg;
+            if (stubPkg != null && stubPkg.isStub) {
+                synchronized (mPackages) {
+                    // restore the enabled state of the stub; the state is overwritten when
+                    // the stub is uninstalled
+                    final PackageSetting stubPs = mSettings.mPackages.get(stubPkg.packageName);
+                    if (stubPs != null) {
+                        stubPs.setEnabled(origEnabledState, userId, "android");
+                    }
+                }
+                if (origEnabledState == COMPONENT_ENABLED_STATE_DEFAULT
+                        || origEnabledState == COMPONENT_ENABLED_STATE_ENABLED) {
+                    if (DEBUG_COMPRESSION) {
+                        Slog.i(TAG, "Enabling system stub after removal; pkg: "
+                                + stubPkg.packageName);
+                    }
+                    enableCompressedPackage(stubPkg);
+                }
             }
         }
 
@@ -18487,7 +18595,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             destroyAppDataLIF(resolvedPkg, UserHandle.USER_ALL,
                     StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
-            destroyAppProfilesLIF(resolvedPkg, UserHandle.USER_ALL);
+            destroyAppProfilesLIF(resolvedPkg);
             if (outInfo != null) {
                 outInfo.dataRemoved = true;
             }
@@ -18496,10 +18604,10 @@ public class PackageManagerService extends IPackageManager.Stub
         int removedAppId = -1;
 
         // writer
-        synchronized (mPackages) {
-            boolean installedStateChanged = false;
-            if (deletedPs != null) {
-                if ((flags&PackageManager.DELETE_KEEP_DATA) == 0) {
+        boolean installedStateChanged = false;
+        if (deletedPs != null) {
+            if ((flags & PackageManager.DELETE_KEEP_DATA) == 0) {
+                synchronized (mPackages) {
                     clearIntentFilterVerificationsLPw(deletedPs.name, UserHandle.USER_ALL);
                     clearDefaultBrowserIfNeeded(packageName);
                     mSettings.mKeySetManagerService.removeAppKeySetDataLPw(packageName);
@@ -18530,26 +18638,34 @@ public class PackageManagerService extends IPackageManager.Stub
                             }
                         }
                     }
-                    clearPackagePreferredActivitiesLPw(deletedPs.name, UserHandle.USER_ALL);
                 }
-                // make sure to preserve per-user disabled state if this removal was just
-                // a downgrade of a system app to the factory package
-                if (allUserHandles != null && outInfo != null && outInfo.origUsers != null) {
-                    if (DEBUG_REMOVE) {
-                        Slog.d(TAG, "Propagating install state across downgrade");
-                    }
-                    for (int userId : allUserHandles) {
-                        final boolean installed = ArrayUtils.contains(outInfo.origUsers, userId);
-                        if (DEBUG_REMOVE) {
-                            Slog.d(TAG, "    user " + userId + " => " + installed);
-                        }
-                        if (installed != deletedPs.getInstalled(userId)) {
-                            installedStateChanged = true;
-                        }
-                        deletedPs.setInstalled(installed, userId);
-                    }
+                final SparseBooleanArray changedUsers = new SparseBooleanArray();
+                clearPackagePreferredActivitiesLPw(
+                        deletedPs.name, changedUsers, UserHandle.USER_ALL);
+                if (changedUsers.size() > 0) {
+                    updateDefaultHomeNotLocked(changedUsers);
+                    postPreferredActivityChangedBroadcast(UserHandle.USER_ALL);
                 }
             }
+            // make sure to preserve per-user disabled state if this removal was just
+            // a downgrade of a system app to the factory package
+            if (allUserHandles != null && outInfo != null && outInfo.origUsers != null) {
+                if (DEBUG_REMOVE) {
+                    Slog.d(TAG, "Propagating install state across downgrade");
+                }
+                for (int userId : allUserHandles) {
+                    final boolean installed = ArrayUtils.contains(outInfo.origUsers, userId);
+                    if (DEBUG_REMOVE) {
+                        Slog.d(TAG, "    user " + userId + " => " + installed);
+                    }
+                    if (installed != deletedPs.getInstalled(userId)) {
+                        installedStateChanged = true;
+                    }
+                    deletedPs.setInstalled(installed, userId);
+                }
+            }
+        }
+        synchronized (mPackages) {
             // can downgrade to reader
             if (writeSettings) {
                 // Save settings now
@@ -18713,7 +18829,14 @@ public class PackageManagerService extends IPackageManager.Stub
             throw new SystemDeleteException(e);
         } finally {
             if (disabledPs.pkg.isStub) {
-                mSettings.disableSystemPackageLPw(disabledPs.name, true /*replaced*/);
+                // We've re-installed the stub; make sure it's disabled here. If package was
+                // originally enabled, we'll install the compressed version of the application
+                // and re-enable it afterward.
+                final PackageSetting stubPs = mSettings.mPackages.get(deletedPkg.packageName);
+                if (stubPs != null) {
+                    stubPs.setEnabled(
+                            COMPONENT_ENABLED_STATE_DISABLED, UserHandle.USER_SYSTEM, "android");
+                }
             }
         }
     }
@@ -19028,22 +19151,22 @@ public class PackageManagerService extends IPackageManager.Stub
         final UserHandle user = action.user;
         final int flags = action.flags;
         final boolean systemApp = isSystemApp(ps);
-        synchronized (mPackages) {
 
-            if (ps.parentPackageName != null
-                    && (!systemApp || (flags & PackageManager.DELETE_SYSTEM_APP) != 0)) {
-                if (DEBUG_REMOVE) {
-                    Slog.d(TAG, "Uninstalled child package:" + packageName + " for user:"
-                            + ((user == null) ? UserHandle.USER_ALL : user));
-                }
-                final int removedUserId = (user != null) ? user.getIdentifier()
-                        : UserHandle.USER_ALL;
+        if (ps.parentPackageName != null
+                && (!systemApp || (flags & PackageManager.DELETE_SYSTEM_APP) != 0)) {
+            if (DEBUG_REMOVE) {
+                Slog.d(TAG, "Uninstalled child package:" + packageName + " for user:"
+                        + ((user == null) ? UserHandle.USER_ALL : user));
+            }
+            final int removedUserId = (user != null) ? user.getIdentifier()
+                    : UserHandle.USER_ALL;
 
-                clearPackageStateForUserLIF(ps, removedUserId, outInfo, flags);
+            clearPackageStateForUserLIF(ps, removedUserId, outInfo, flags);
+            synchronized (mPackages) {
                 markPackageUninstalledForUserLPw(ps, user);
                 scheduleWritePackageRestrictionsLocked(user);
-                return;
             }
+            return;
         }
 
         final int userId = user == null ? UserHandle.USER_ALL : user.getIdentifier();
@@ -19057,6 +19180,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // its data. If this is a system app, we only allow this to happen if
             // they have set the special DELETE_SYSTEM_APP which requests different
             // semantics than normal for uninstalling system apps.
+            final boolean clearPackageStateAndReturn;
             synchronized (mPackages) {
                 markPackageUninstalledForUserLPw(ps, user);
                 if (!systemApp) {
@@ -19067,15 +19191,14 @@ public class PackageManagerService extends IPackageManager.Stub
                         // we need to do is clear this user's data and save that
                         // it is uninstalled.
                         if (DEBUG_REMOVE) Slog.d(TAG, "Still installed by other users");
-                        clearPackageStateForUserLIF(ps, userId, outInfo, flags);
-                        scheduleWritePackageRestrictionsLocked(user);
-                        return;
+                        clearPackageStateAndReturn = true;
                     } else {
                         // We need to set it back to 'installed' so the uninstall
                         // broadcasts will be sent correctly.
                         if (DEBUG_REMOVE) Slog.d(TAG, "Not installed by other users, full delete");
                         ps.setInstalled(true, userId);
                         mSettings.writeKernelMappingLPr(ps);
+                        clearPackageStateAndReturn = false;
                     }
                 } else {
                     // This is a system app, so we assume that the
@@ -19083,10 +19206,15 @@ public class PackageManagerService extends IPackageManager.Stub
                     // we need to do is clear this user's data and save that
                     // it is uninstalled.
                     if (DEBUG_REMOVE) Slog.d(TAG, "Deleting system app");
-                    clearPackageStateForUserLIF(ps, userId, outInfo, flags);
-                    scheduleWritePackageRestrictionsLocked(user);
-                    return;
+                    clearPackageStateAndReturn = true;
                 }
+            }
+            if (clearPackageStateAndReturn) {
+                clearPackageStateForUserLIF(ps, userId, outInfo, flags);
+                synchronized (mPackages) {
+                    scheduleWritePackageRestrictionsLocked(user);
+                }
+                return;
             }
         }
 
@@ -19207,6 +19335,8 @@ public class PackageManagerService extends IPackageManager.Stub
             pkg = mPackages.get(ps.name);
         }
 
+        destroyAppProfilesLIF(pkg);
+
         final int[] userIds = (userId == UserHandle.USER_ALL) ? sUserManager.getUserIds()
                 : new int[] {userId};
         for (int nextUserId : userIds) {
@@ -19215,15 +19345,20 @@ public class PackageManagerService extends IPackageManager.Stub
                         + nextUserId);
             }
 
-            destroyAppDataLIF(pkg, userId,
+            destroyAppDataLIF(pkg, nextUserId,
                     StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
-            destroyAppProfilesLIF(pkg, userId);
-            clearDefaultBrowserIfNeededForUser(ps.name, userId);
+            clearDefaultBrowserIfNeededForUser(ps.name, nextUserId);
             removeKeystoreDataIfNeeded(nextUserId, ps.appId);
-            synchronized (mPackages) {
-                if (clearPackagePreferredActivitiesLPw(ps.name, nextUserId)) {
+            final SparseBooleanArray changedUsers = new SparseBooleanArray();
+            clearPackagePreferredActivitiesLPw(ps.name, changedUsers, nextUserId);
+            if (changedUsers.size() > 0) {
+                updateDefaultHomeNotLocked(changedUsers);
+                postPreferredActivityChangedBroadcast(nextUserId);
+                synchronized (mPackages) {
                     scheduleWritePackageRestrictionsLocked(nextUserId);
                 }
+            }
+            synchronized (mPackages) {
                 resetUserChangesToRuntimePermissionsAndFlagsLPw(ps, nextUserId);
             }
             // Also delete contributed media, when requested
@@ -19686,33 +19821,34 @@ public class PackageManagerService extends IPackageManager.Stub
         int callingUid = Binder.getCallingUid();
         mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                 true /* requireFullPermission */, false /* checkShell */, "add preferred activity");
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.SET_PREFERRED_APPLICATIONS)
+                != PackageManager.PERMISSION_GRANTED) {
+            if (getUidTargetSdkVersionLockedLPr(callingUid)
+                    < Build.VERSION_CODES.FROYO) {
+                Slog.w(TAG, "Ignoring addPreferredActivity() from uid "
+                        + callingUid);
+                return;
+            }
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
+        }
         if (filter.countActions() == 0) {
             Slog.w(TAG, "Cannot set a preferred activity with no filter actions");
             return;
         }
-        synchronized (mPackages) {
-            if (mContext.checkCallingOrSelfPermission(
-                    android.Manifest.permission.SET_PREFERRED_APPLICATIONS)
-                    != PackageManager.PERMISSION_GRANTED) {
-                if (getUidTargetSdkVersionLockedLPr(callingUid)
-                        < Build.VERSION_CODES.FROYO) {
-                    Slog.w(TAG, "Ignoring addPreferredActivity() from uid "
-                            + callingUid);
-                    return;
-                }
-                mContext.enforceCallingOrSelfPermission(
-                        android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
-            }
-
-            PreferredIntentResolver pir = mSettings.editPreferredActivitiesLPw(userId);
+        if (DEBUG_PREFERRED) {
             Slog.i(TAG, opname + " activity " + activity.flattenToShortString() + " for user "
                     + userId + ":");
             filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
+        }
+        if (!updateDefaultHomeNotLocked(userId)) {
+            postPreferredActivityChangedBroadcast(userId);
+        }
+        synchronized (mPackages) {
+            final PreferredIntentResolver pir = mSettings.editPreferredActivitiesLPw(userId);
             pir.addFilter(new PreferredActivity(filter, match, set, activity, always));
             scheduleWritePackageRestrictionsLocked(userId);
-            if (!updateDefaultHomeLPw(userId)) {
-                postPreferredActivityChangedBroadcast(userId);
-            }
         }
     }
 
@@ -19853,25 +19989,24 @@ public class PackageManagerService extends IPackageManager.Stub
                     && filterAppAccessLPr(ps, callingUid, UserHandle.getUserId(callingUid))) {
                 return;
             }
-            int user = UserHandle.getCallingUserId();
-            if (clearPackagePreferredActivitiesLPw(packageName, user)) {
-                scheduleWritePackageRestrictionsLocked(user);
+        }
+        int callingUserId = UserHandle.getCallingUserId();
+        final SparseBooleanArray changedUsers = new SparseBooleanArray();
+        clearPackagePreferredActivitiesLPw(packageName, changedUsers, callingUserId);
+        if (changedUsers.size() > 0) {
+            updateDefaultHomeNotLocked(changedUsers);
+            postPreferredActivityChangedBroadcast(callingUserId);
+            synchronized (mPackages) {
+                scheduleWritePackageRestrictionsLocked(callingUserId);
             }
         }
     }
 
     /** This method takes a specific user id as well as UserHandle.USER_ALL. */
     @GuardedBy("mPackages")
-    boolean clearPackagePreferredActivitiesLPw(String packageName, int userId) {
-        return clearPackagePreferredActivitiesLPw(packageName, false, userId);
-    }
-
-    /** This method takes a specific user id as well as UserHandle.USER_ALL. */
-    @GuardedBy("mPackages")
-    private boolean clearPackagePreferredActivitiesLPw(String packageName,
-            boolean skipUpdateDefaultHome, int userId) {
+    private void clearPackagePreferredActivitiesLPw(String packageName,
+            @NonNull SparseBooleanArray outUserChanged, int userId) {
         ArrayList<PreferredActivity> removed = null;
-        boolean changed = false;
         for (int i=0; i<mSettings.mPreferredActivities.size(); i++) {
             final int thisUserId = mSettings.mPreferredActivities.keyAt(i);
             PreferredIntentResolver pir = mSettings.mPreferredActivities.valueAt(i);
@@ -19897,16 +20032,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     PreferredActivity pa = removed.get(j);
                     pir.removeFilter(pa);
                 }
-                changed = true;
-                if (!skipUpdateDefaultHome) {
-                    updateDefaultHomeLPw(thisUserId);
-                }
+                outUserChanged.setValueAt(thisUserId, true);
             }
         }
-        if (changed) {
-            postPreferredActivityChangedBroadcast(userId);
-        }
-        return changed;
     }
 
     /** This method takes a specific user id as well as UserHandle.USER_ALL. */
@@ -19959,21 +20087,27 @@ public class PackageManagerService extends IPackageManager.Stub
         final long identity = Binder.clearCallingIdentity();
         // writer
         try {
+            final SparseBooleanArray changedUsers = new SparseBooleanArray();
+            clearPackagePreferredActivitiesLPw(null, changedUsers, userId);
+            if (changedUsers.size() > 0) {
+                postPreferredActivityChangedBroadcast(userId);
+            }
             synchronized (mPackages) {
-                clearPackagePreferredActivitiesLPw(null, true, userId);
                 mSettings.applyDefaultPreferredAppsLPw(userId);
-                updateDefaultHomeLPw(userId);
-                // TODO: We have to reset the default SMS and Phone. This requires
-                // significant refactoring to keep all default apps in the package
-                // manager (cleaner but more work) or have the services provide
-                // callbacks to the package manager to request a default app reset.
-                setDefaultBrowserPackageName(null, userId);
                 clearIntentFilterVerificationsLPw(userId);
                 primeDomainVerificationsLPw(userId);
                 resetUserChangesToRuntimePermissionsAndFlagsLPw(userId);
+            }
+            updateDefaultHomeNotLocked(userId);
+            // TODO: We have to reset the default SMS and Phone. This requires
+            // significant refactoring to keep all default apps in the package
+            // manager (cleaner but more work) or have the services provide
+            // callbacks to the package manager to request a default app reset.
+            setDefaultBrowserPackageName(null, userId);
+            resetNetworkPolicies(userId);
+            synchronized (mPackages) {
                 scheduleWritePackageRestrictionsLocked(userId);
             }
-            resetNetworkPolicies(userId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -20023,15 +20157,17 @@ public class PackageManagerService extends IPackageManager.Stub
             Slog.w(TAG, "Cannot set a preferred activity with no filter actions");
             return;
         }
-        synchronized (mPackages) {
-            Slog.i(TAG, "Adding persistent preferred activity " + activity + " for user " + userId +
-                    ":");
+        if (DEBUG_PREFERRED) {
+            Slog.i(TAG, "Adding persistent preferred activity " + activity
+                    + " for user " + userId + ":");
             filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
+        }
+        updateDefaultHomeNotLocked(userId);
+        postPreferredActivityChangedBroadcast(userId);
+        synchronized (mPackages) {
             mSettings.editPersistentPreferredActivitiesLPw(userId).addFilter(
                     new PersistentPreferredActivity(filter, activity));
             scheduleWritePackageRestrictionsLocked(userId);
-            postPreferredActivityChangedBroadcast(userId);
-            updateDefaultHomeLPw(userId);
         }
     }
 
@@ -20071,11 +20207,12 @@ public class PackageManagerService extends IPackageManager.Stub
                     changed = true;
                 }
             }
-
-            if (changed) {
+        }
+        if (changed) {
+            updateDefaultHomeNotLocked(userId);
+            postPreferredActivityChangedBroadcast(userId);
+            synchronized (mPackages) {
                 scheduleWritePackageRestrictionsLocked(userId);
-                postPreferredActivityChangedBroadcast(userId);
-                updateDefaultHomeLPw(userId);
             }
         }
     }
@@ -20163,8 +20300,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     (readParser, readUserId) -> {
                         synchronized (mPackages) {
                             mSettings.readPreferredActivitiesLPw(readParser, readUserId);
-                            updateDefaultHomeLPw(readUserId);
                         }
+                        updateDefaultHomeNotLocked(readUserId);
                     });
         } catch (Exception e) {
             if (DEBUG_BACKUP) {
@@ -20491,29 +20628,55 @@ public class PackageManagerService extends IPackageManager.Stub
         return null;
     }
 
+    /** <b>must not hold {@link #mPackages}</b> */
+    private void updateDefaultHomeNotLocked(SparseBooleanArray userIds) {
+        if (Thread.holdsLock(mPackages)) {
+            Slog.wtf(TAG, "Calling thread " + Thread.currentThread().getName()
+                    + " is holding mPackages", new Throwable());
+        }
+        for (int i = userIds.size() - 1; i >= 0; --i) {
+            final int userId = userIds.keyAt(i);
+            updateDefaultHomeNotLocked(userId);
+        }
+    }
+
     /**
+     * <b>must not hold {@link #mPackages}</b>
+     *
      * @return Whether the ACTION_PREFERRED_ACTIVITY_CHANGED broadcast has been scheduled.
      */
-    private boolean updateDefaultHomeLPw(int userId) {
-        Intent intent = getHomeIntent();
-        List<ResolveInfo> resolveInfos = queryIntentActivitiesInternal(intent, null,
+    private boolean updateDefaultHomeNotLocked(int userId) {
+        if (Thread.holdsLock(mPackages)) {
+            Slog.wtf(TAG, "Calling thread " + Thread.currentThread().getName()
+                    + " is holding mPackages", new Throwable());
+        }
+        final Intent intent = getHomeIntent();
+        final List<ResolveInfo> resolveInfos = queryIntentActivitiesInternal(intent, null,
                 PackageManager.GET_META_DATA, userId);
-        ResolveInfo preferredResolveInfo = findPreferredActivity(intent, null, 0, resolveInfos,
-                0, true, false, false, userId);
-        String packageName = preferredResolveInfo != null
+        final ResolveInfo preferredResolveInfo = findPreferredActivityNotLocked(
+                intent, null, 0, resolveInfos, 0, true, false, false, userId);
+        final String packageName = preferredResolveInfo != null
                 && preferredResolveInfo.activityInfo != null
                 ? preferredResolveInfo.activityInfo.packageName : null;
-        String currentPackageName = mDefaultHomeProvider.getDefaultHome(userId);
+        final PackageManagerInternal.DefaultHomeProvider provider;
+        synchronized (mPackages) {
+            provider = mDefaultHomeProvider;
+        }
+        if (provider == null) {
+            Slog.e(TAG, "Default home provider has not been set");
+            return false;
+        }
+        final String currentPackageName = provider.getDefaultHome(userId);
         if (TextUtils.equals(currentPackageName, packageName)) {
             return false;
         }
-        String[] callingPackages = getPackagesForUid(Binder.getCallingUid());
+        final String[] callingPackages = getPackagesForUid(Binder.getCallingUid());
         if (callingPackages != null && ArrayUtils.contains(callingPackages,
                 mRequiredPermissionControllerPackage)) {
             // PermissionController manages default home directly.
             return false;
         }
-        mDefaultHomeProvider.setDefaultHomeAsync(packageName, userId, (successful) -> {
+        provider.setDefaultHomeAsync(packageName, userId, (successful) -> {
             if (successful) {
                 postPreferredActivityChangedBroadcast(userId);
             }
@@ -20798,101 +20961,8 @@ public class PackageManagerService extends IPackageManager.Stub
             if (isSystemStub
                     && (newState == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
                             || newState == PackageManager.COMPONENT_ENABLED_STATE_ENABLED)) {
-                final File codePath = decompressPackage(deletedPkg);
-                if (codePath == null) {
-                    Slog.e(TAG, "couldn't decompress pkg: " + pkgSetting.name);
+                if (!enableCompressedPackage(deletedPkg)) {
                     return;
-                }
-                // TODO remove direct parsing of the package object during internal cleanup
-                // of scan package
-                // We need to call parse directly here for no other reason than we need
-                // the new package in order to disable the old one [we use the information
-                // for some internal optimization to optionally create a new package setting
-                // object on replace]. However, we can't get the package from the scan
-                // because the scan modifies live structures and we need to remove the
-                // old [system] package from the system before a scan can be attempted.
-                // Once scan is indempotent we can remove this parse and use the package
-                // object we scanned, prior to adding it to package settings.
-                final PackageParser pp = new PackageParser();
-                pp.setSeparateProcesses(mSeparateProcesses);
-                pp.setDisplayMetrics(mMetrics);
-                pp.setCallback(mPackageParserCallback);
-                final PackageParser.Package tmpPkg;
-                try {
-                    final @ParseFlags int parseFlags = mDefParseFlags
-                            | PackageParser.PARSE_MUST_BE_APK
-                            | PackageParser.PARSE_IS_SYSTEM_DIR;
-                    tmpPkg = pp.parsePackage(codePath, parseFlags);
-                } catch (PackageParserException e) {
-                    Slog.w(TAG, "Failed to parse compressed system package:" + pkgSetting.name, e);
-                    return;
-                }
-                synchronized (mInstallLock) {
-                    // Disable the stub and remove any package entries
-                    removePackageLI(deletedPkg, true);
-                    synchronized (mPackages) {
-                        disableSystemPackageLPw(deletedPkg, tmpPkg);
-                    }
-                    final PackageParser.Package pkg;
-                    try (PackageFreezer freezer =
-                            freezePackage(deletedPkg.packageName, "setEnabledSetting")) {
-                        final int parseFlags = mDefParseFlags | PackageParser.PARSE_CHATTY
-                                | PackageParser.PARSE_ENFORCE_CODE;
-                        pkg = scanPackageTracedLI(codePath, parseFlags, 0 /*scanFlags*/,
-                                0 /*currentTime*/, null /*user*/);
-                        prepareAppDataAfterInstallLIF(pkg);
-                        synchronized (mPackages) {
-                            try {
-                                updateSharedLibrariesLocked(pkg, null, mPackages);
-                            } catch (PackageManagerException e) {
-                                Slog.e(TAG, "updateAllSharedLibrariesLPw failed: ", e);
-                            }
-                            mPermissionManager.updatePermissions(
-                                    pkg.packageName, pkg, true, mPackages.values(),
-                                    mPermissionCallback);
-                            mSettings.writeLPr();
-                        }
-                    } catch (PackageManagerException e) {
-                        // Whoops! Something went wrong; try to roll back to the stub
-                        Slog.w(TAG, "Failed to install compressed system package:"
-                                + pkgSetting.name, e);
-                        // Remove the failed install
-                        removeCodePathLI(codePath);
-
-                        // Install the system package
-                        try (PackageFreezer freezer =
-                                freezePackage(deletedPkg.packageName, "setEnabledSetting")) {
-                            synchronized (mPackages) {
-                                // NOTE: The system package always needs to be enabled; even
-                                // if it's for a compressed stub. If we don't, installing the
-                                // system package fails during scan [scanning checks the disabled
-                                // packages]. We will reverse this later, after we've "installed"
-                                // the stub.
-                                // This leaves us in a fragile state; the stub should never be
-                                // enabled, so, cross your fingers and hope nothing goes wrong
-                                // until we can disable the package later.
-                                enableSystemPackageLPw(deletedPkg);
-                            }
-                            installPackageFromSystemLIF(deletedPkg.codePath,
-                                    /*isPrivileged*/ null /*allUserHandles*/,
-                                    null /*origUserHandles*/, null /*origPermissionsState*/,
-                                    true /*writeSettings*/);
-                        } catch (PackageManagerException pme) {
-                            Slog.w(TAG, "Failed to restore system package:"
-                                    + deletedPkg.packageName, pme);
-                        } finally {
-                            synchronized (mPackages) {
-                                mSettings.disableSystemPackageLPw(
-                                        deletedPkg.packageName, true /*replaced*/);
-                                mSettings.writeLPr();
-                            }
-                        }
-                        return;
-                    }
-                    clearAppDataLIF(pkg, UserHandle.USER_ALL, FLAG_STORAGE_DE
-                            | FLAG_STORAGE_CE | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
-                    mDexManager.notifyPackageUpdated(pkg.packageName,
-                            pkg.baseCodePath, pkg.splitCodePaths);
                 }
             }
             if (newState == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
@@ -23703,9 +23773,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             return ((appInfo.isSystemApp() ? IPackageManagerNative.LOCATION_SYSTEM : 0)
                     | (appInfo.isVendor() ? IPackageManagerNative.LOCATION_VENDOR : 0)
-                    | (appInfo.isProduct() ? IPackageManagerNative.LOCATION_PRODUCT : 0)
-                    | (appInfo.isProductServices()
-                            ? IPackageManagerNative.LOCATION_PRODUCT_SERVICES : 0));
+                    | (appInfo.isProduct() ? IPackageManagerNative.LOCATION_PRODUCT : 0));
         }
     }
 

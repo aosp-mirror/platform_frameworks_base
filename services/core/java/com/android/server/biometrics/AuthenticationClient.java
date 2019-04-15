@@ -120,8 +120,8 @@ public abstract class AuthenticationClient extends ClientMonitor {
     @Override
     public boolean onAuthenticated(BiometricAuthenticator.Identifier identifier,
             boolean authenticated, ArrayList<Byte> token) {
-        super.logOnAuthenticated(authenticated, mRequireConfirmation, getTargetUserId(),
-                isBiometricPrompt());
+        super.logOnAuthenticated(getContext(), authenticated, mRequireConfirmation,
+                getTargetUserId(), isBiometricPrompt());
 
         final BiometricServiceBase.ServiceListener listener = getListener();
 
@@ -134,7 +134,8 @@ public abstract class AuthenticationClient extends ClientMonitor {
                     + ", Owner: " + getOwnerString()
                     + ", isBP: " + isBiometricPrompt()
                     + ", listener: " + listener
-                    + ", requireConfirmation: " + mRequireConfirmation);
+                    + ", requireConfirmation: " + mRequireConfirmation
+                    + ", user: " + getTargetUserId());
 
             if (authenticated) {
                 mAlreadyDone = true;

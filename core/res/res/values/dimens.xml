@@ -728,6 +728,6 @@
     <dimen name="chooser_preview_width">-1px</dimen>
     <dimen name="resolver_icon_size">42dp</dimen>
     <dimen name="resolver_badge_size">18dp</dimen>
-    <dimen name="chooser_target_width">76dp</dimen>
+    <dimen name="chooser_target_width">90dp</dimen>
     <dimen name="chooser_max_collapsed_height">288dp</dimen>
 </resources>

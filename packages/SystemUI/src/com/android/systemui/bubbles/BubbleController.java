@@ -356,8 +356,10 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
             ensureStackViewCreated();
             mStackView.addBubble(notif);
         }
+        Bubble bubble = mBubbleData.getBubble(notif.key);
         if (shouldAutoExpand(notif)) {
-            mStackView.setExpandedBubble(notif);
+            mStackView.setSelectedBubble(bubble);
+            mStackView.setExpanded(true);
         }
         updateVisibility();
     }
@@ -397,11 +399,8 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
                 return;
             }
             if (shouldAutoBubbleForFlags(mContext, entry) || shouldBubble(entry)) {
-                // TODO: handle group summaries
-                boolean suppressNotification = entry.getBubbleMetadata() != null
-                        && entry.getBubbleMetadata().getSuppressInitialNotification()
-                        && isForegroundApp(entry.notification.getPackageName());
-                entry.setShowInShadeWhenBubble(!suppressNotification);
+                // TODO: handle group summaries?
+                updateShowInShadeForSuppressNotification(entry);
             }
         }
 
@@ -422,7 +421,7 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
             }
             if (mNotificationInterruptionStateProvider.shouldBubbleUp(entry)
                     && alertAgain(entry, entry.notification.getNotification())) {
-                entry.setShowInShadeWhenBubble(true);
+                updateShowInShadeForSuppressNotification(entry);
                 entry.setBubbleDismissed(false); // updates come back as bubbles even if dismissed
                 updateBubble(entry);
                 mStackView.updateDotVisibility(entry.key);
@@ -586,16 +585,24 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
     private boolean shouldAutoExpand(NotificationEntry entry) {
         Notification.BubbleMetadata metadata = entry.getBubbleMetadata();
         return metadata != null && metadata.getAutoExpandBubble()
-                && isForegroundApp(entry.notification.getPackageName());
+                && isForegroundApp(mContext, entry.notification.getPackageName());
+    }
+
+    private void updateShowInShadeForSuppressNotification(NotificationEntry entry) {
+        boolean suppressNotification = entry.getBubbleMetadata() != null
+                && entry.getBubbleMetadata().getSuppressNotification()
+                && isForegroundApp(mContext, entry.notification.getPackageName());
+        entry.setShowInShadeWhenBubble(!suppressNotification);
     }
 
     /**
      * Return true if the applications with the package name is running in foreground.
      *
+     * @param context application context.
      * @param pkgName application package name.
      */
-    private boolean isForegroundApp(String pkgName) {
-        ActivityManager am = mContext.getSystemService(ActivityManager.class);
+    public static boolean isForegroundApp(Context context, String pkgName) {
+        ActivityManager am = context.getSystemService(ActivityManager.class);
         List<RunningTaskInfo> tasks = am.getRunningTasks(1 /* maxNum */);
         return !tasks.isEmpty() && pkgName.equals(tasks.get(0).topActivity.getPackageName());
     }

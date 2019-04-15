@@ -59,9 +59,9 @@
     <item msgid="45075631231212732">"Utilizar sempre a comprobación HDCP"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_entries">
-    <item msgid="3966341281672645384">"Opción desactivada"</item>
+    <item msgid="3966341281672645384">"Desactivada"</item>
     <item msgid="1969681323976948639">"Está activado o filtrado"</item>
-    <item msgid="8719029132154020716">"Opción activada"</item>
+    <item msgid="8719029132154020716">"Activada"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="5347678900838034763">"AVRCP 1.4 (predeterminado)"</item>

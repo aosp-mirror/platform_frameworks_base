@@ -224,6 +224,12 @@ public final class ActivityThread extends ClientTransactionHandler {
     private static final boolean DEBUG_PROVIDER = false;
     public static final boolean DEBUG_ORDER = false;
     private static final long MIN_TIME_BETWEEN_GCS = 5*1000;
+    /**
+     * The delay to release the provider when it has no more references. It reduces the number of
+     * transactions for acquiring and releasing provider if the client accesses the provider
+     * frequently in a short time.
+     */
+    private static final long CONTENT_PROVIDER_RETAIN_TIME = 1000;
     private static final int SQLITE_MEM_RELEASED_EVENT_LOG_TAG = 75003;
 
     /** Type for IActivityManager.serviceDoneExecuting: anonymous operation */
@@ -2121,7 +2127,11 @@ public final class ActivityThread extends ClientTransactionHandler {
             }
 
             LoadedApk packageInfo = ref != null ? ref.get() : null;
-            if (ai != null && packageInfo != null && isLoadedApkUpToDate(packageInfo, ai)) {
+            if (ai != null && packageInfo != null) {
+                if (!isLoadedApkResourceDirsUpToDate(packageInfo, ai)) {
+                    packageInfo.updateApplicationInfo(ai, null);
+                }
+
                 if (packageInfo.isSecurityViolation()
                         && (flags&Context.CONTEXT_IGNORE_SECURITY) == 0) {
                     throw new SecurityException(
@@ -2205,9 +2215,11 @@ public final class ActivityThread extends ClientTransactionHandler {
 
             LoadedApk packageInfo = ref != null ? ref.get() : null;
 
-            boolean isUpToDate = packageInfo != null && isLoadedApkUpToDate(packageInfo, aInfo);
+            if (packageInfo != null) {
+                if (!isLoadedApkResourceDirsUpToDate(packageInfo, aInfo)) {
+                    packageInfo.updateApplicationInfo(aInfo, null);
+                }
 
-            if (isUpToDate) {
                 return packageInfo;
             }
 
@@ -2243,11 +2255,8 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
-    /**
-     * Compares overlay/resource directories for a LoadedApk to determine if it's up to date
-     * with the given ApplicationInfo.
-     */
-    private boolean isLoadedApkUpToDate(LoadedApk loadedApk, ApplicationInfo appInfo) {
+    private static boolean isLoadedApkResourceDirsUpToDate(LoadedApk loadedApk,
+            ApplicationInfo appInfo) {
         Resources packageResources = loadedApk.mResources;
         String[] overlayDirs = ArrayUtils.defeatNullable(loadedApk.getOverlayDirs());
         String[] resourceDirs = ArrayUtils.defeatNullable(appInfo.resourceDirs);
@@ -6495,16 +6504,13 @@ public final class ActivityThread extends ClientTransactionHandler {
                 if (!prc.removePending) {
                     // Schedule the actual remove asynchronously, since we don't know the context
                     // this will be called in.
-                    // TODO: it would be nice to post a delayed message, so
-                    // if we come back and need the same provider quickly
-                    // we will still have it available.
                     if (DEBUG_PROVIDER) {
                         Slog.v(TAG, "releaseProvider: Enqueueing pending removal - "
                                 + prc.holder.info.name);
                     }
                     prc.removePending = true;
                     Message msg = mH.obtainMessage(H.REMOVE_PROVIDER, prc);
-                    mH.sendMessage(msg);
+                    mH.sendMessageDelayed(msg, CONTENT_PROVIDER_RETAIN_TIME);
                 } else {
                     Slog.w(TAG, "Duplicate remove pending of provider " + prc.holder.info.name);
                 }

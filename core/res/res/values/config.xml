@@ -313,14 +313,15 @@
          Settings.Global.NETWORK_AVOID_BAD_WIFI. This is the default value of that setting. -->
     <integer translatable="false" name="config_networkAvoidBadWifi">1</integer>
 
-    <!-- The URL returned by ConnectivityManager#getCaptivePortalServerUrl. The actual returned
-         value is controlled by Settings.Global.CAPTIVE_PORTAL_HTTP_URL. This is the default value
-         used if that setting is unset.
+    <!-- Configuration hook for the URL returned by ConnectivityManager#getCaptivePortalServerUrl.
+         If empty, the returned value is controlled by Settings.Global.CAPTIVE_PORTAL_HTTP_URL,
+         and if that value is empty, the framework will use a hard-coded default.
          This is *NOT* a URL that will always be used by the system network validation to detect
          captive portals: NetworkMonitor may use different strategies and will not necessarily use
          this URL. NetworkMonitor behaviour should be configured with NetworkStack resource overlays
          instead. -->
-    <string translatable="false" name="config_networkDefaultCaptivePortalServerUrl">http://connectivitycheck.gstatic.com/generate_204</string>
+    <!--suppress CheckTagEmptyBody -->
+    <string translatable="false" name="config_networkCaptivePortalServerUrl"></string>
 
     <!-- If the hardware supports specially marking packets that caused a wakeup of the
          main CPU, set this value to the mark used. -->
@@ -743,6 +744,10 @@
     <bool name="config_annoy_dianne">true</bool>
 
     <!-- XXXXXX END OF RESOURCES USING WRONG NAMING CONVENTION -->
+
+    <!-- If this is true, notification effects will be played by the notification server.
+         When false, car notification effects will be handled elsewhere. -->
+    <bool name="config_enableServerNotificationEffectsForAutomotive">false</bool>
 
     <!-- If this is true, the screen will come on when you unplug usb/power/whatever. -->
     <bool name="config_unplugTurnsOnScreen">false</bool>
@@ -1970,10 +1975,6 @@
     <bool name="config_showDefaultEmergency">false</bool>
     <!-- Whether the default home settings should be shown. -->
     <bool name="config_showDefaultHome">true</bool>
-    <!-- The name of the package that will hold the music role by default. -->
-    <string name="config_defaultMusic" translatable="false">com.android.music</string>
-    <!-- The name of the package that will hold the gallery role by default. -->
-    <string name="config_defaultGallery" translatable="false">com.android.gallery3d</string>
 
     <!-- Enable/disable default bluetooth profiles:
         HSP_AG, ObexObjectPush, Audio, NAP -->
@@ -2397,8 +2398,13 @@
     <!-- Maximum velocity to initiate a fling, as measured in dips per second. -->
     <dimen name="config_viewMaxFlingVelocity">8000dp</dimen>
 
-    <!-- Amount of time in ms the user needs to press the relevant key to bring up the global actions dialog -->
+    <!-- Amount of time in ms the user needs to press the relevant key to bring up the
+         global actions dialog -->
     <integer name="config_globalActionsKeyTimeout">500</integer>
+
+    <!-- Amount of time in ms the user needs to press the relevant keys to trigger the
+         screenshot chord -->
+    <integer name="config_screenshotChordKeyTimeout">500</integer>
 
     <!-- Default width of a vertical scrollbar and height of a horizontal scrollbar.
          Takes effect only if the scrollbar drawables have no intrinsic size. -->
@@ -3255,7 +3261,7 @@
     <dimen name="config_backGestureInset">0dp</dimen>
 
     <!-- Controls whether the navbar needs a scrim with
-         {@link Window#setEnsureNavigationBarContrastWhenTransparent}. -->
+         {@link Window#setEnsuringNavigationBarContrastWhenTransparent}. -->
     <bool name="config_navBarNeedsScrim">true</bool>
 
     <!-- Default insets [LEFT/RIGHTxTOP/BOTTOM] from the screen edge for picture-in-picture windows.

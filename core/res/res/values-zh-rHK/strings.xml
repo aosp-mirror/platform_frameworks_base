@@ -1797,7 +1797,7 @@
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"已由您的管理員刪除"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"好"</string>
     <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"省電模式會關閉或限制背景活動、某些視覺效果以及其他高耗電功能，以延長電池壽命。"<annotation id="url">"瞭解詳情"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"省電模式會關閉或限制背景活動、某些視覺效果以及其他高耗電功能，以延長電池壽命。"</string>
+    <string name="battery_saver_description" msgid="6413346684861241431">"「省電模式」會關閉或限制背景活動、某些視覺效果和其他耗電量高的功能，以延長電池壽命。"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"「數據節省模式」可防止部分應用程式在背景收發資料，以節省數據用量。您正在使用的應用程式可存取資料，但次數可能會減少。例如，圖片可能需要輕按才會顯示。"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"要開啟「數據節省模式」嗎？"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"開啟"</string>

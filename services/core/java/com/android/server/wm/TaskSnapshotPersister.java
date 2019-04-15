@@ -26,7 +26,6 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.TaskSnapshot;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
-import android.hardware.HardwareBuffer;
 import android.os.Process;
 import android.os.SystemClock;
 import android.util.ArraySet;
@@ -363,8 +362,7 @@ class TaskSnapshotPersister {
             // TODO(b/116112787) TaskSnapshot needs bookkeep the ColorSpace of the
             // hardware bitmap when created.
             final Bitmap bitmap = Bitmap.wrapHardwareBuffer(
-                    HardwareBuffer.createFromGraphicBuffer(mSnapshot.getSnapshot()),
-                    mSnapshot.getColorSpace());
+                    mSnapshot.getSnapshot(), mSnapshot.getColorSpace());
             if (bitmap == null) {
                 Slog.e(TAG, "Invalid task snapshot hw bitmap");
                 return false;
