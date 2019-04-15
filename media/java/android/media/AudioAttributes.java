@@ -535,6 +535,23 @@ public final class AudioAttributes implements Parcelable {
     }
 
     /**
+     * Return the capture policy.
+     * @return the capture policy set by {@link Builder#setAllowedCapturePolicy(int)} or
+     *         the default if it was not called.
+     */
+    @CapturePolicy
+    public int getAllowedCapturePolicy() {
+        if ((mFlags & FLAG_NO_SYSTEM_CAPTURE) == FLAG_NO_SYSTEM_CAPTURE) {
+            return ALLOW_CAPTURE_BY_NONE;
+        }
+        if ((mFlags & FLAG_NO_MEDIA_PROJECTION) == FLAG_NO_MEDIA_PROJECTION) {
+            return ALLOW_CAPTURE_BY_SYSTEM;
+        }
+        return ALLOW_CAPTURE_BY_ALL;
+    }
+
+
+    /**
      * Builder class for {@link AudioAttributes} objects.
      * <p> Here is an example where <code>Builder</code> is used to define the
      * {@link AudioAttributes} to be used by a new <code>AudioTrack</code> instance:
