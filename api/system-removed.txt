@@ -60,6 +60,18 @@ package android.content {
 
 }
 
+package android.hardware.hdmi {
+
+  public final class HdmiControlManager {
+    method @Deprecated public java.util.List<android.hardware.hdmi.HdmiDeviceInfo> getConnectedDevicesList();
+    method @Deprecated public boolean isRemoteDeviceConnected(@NonNull android.hardware.hdmi.HdmiDeviceInfo);
+    method @Deprecated public void powerOffRemoteDevice(@NonNull android.hardware.hdmi.HdmiDeviceInfo);
+    method @Deprecated public void powerOnRemoteDevice(android.hardware.hdmi.HdmiDeviceInfo);
+    method @Deprecated public void requestRemoteDeviceToBecomeActiveSource(@NonNull android.hardware.hdmi.HdmiDeviceInfo);
+  }
+
+}
+
 package android.location {
 
   public class LocationManager {
