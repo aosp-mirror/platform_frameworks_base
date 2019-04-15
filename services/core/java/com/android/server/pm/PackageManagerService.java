@@ -19151,22 +19151,22 @@ public class PackageManagerService extends IPackageManager.Stub
         final UserHandle user = action.user;
         final int flags = action.flags;
         final boolean systemApp = isSystemApp(ps);
-        synchronized (mPackages) {
 
-            if (ps.parentPackageName != null
-                    && (!systemApp || (flags & PackageManager.DELETE_SYSTEM_APP) != 0)) {
-                if (DEBUG_REMOVE) {
-                    Slog.d(TAG, "Uninstalled child package:" + packageName + " for user:"
-                            + ((user == null) ? UserHandle.USER_ALL : user));
-                }
-                final int removedUserId = (user != null) ? user.getIdentifier()
-                        : UserHandle.USER_ALL;
+        if (ps.parentPackageName != null
+                && (!systemApp || (flags & PackageManager.DELETE_SYSTEM_APP) != 0)) {
+            if (DEBUG_REMOVE) {
+                Slog.d(TAG, "Uninstalled child package:" + packageName + " for user:"
+                        + ((user == null) ? UserHandle.USER_ALL : user));
+            }
+            final int removedUserId = (user != null) ? user.getIdentifier()
+                    : UserHandle.USER_ALL;
 
-                clearPackageStateForUserLIF(ps, removedUserId, outInfo, flags);
+            clearPackageStateForUserLIF(ps, removedUserId, outInfo, flags);
+            synchronized (mPackages) {
                 markPackageUninstalledForUserLPw(ps, user);
                 scheduleWritePackageRestrictionsLocked(user);
-                return;
             }
+            return;
         }
 
         final int userId = user == null ? UserHandle.USER_ALL : user.getIdentifier();
@@ -19180,6 +19180,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // its data. If this is a system app, we only allow this to happen if
             // they have set the special DELETE_SYSTEM_APP which requests different
             // semantics than normal for uninstalling system apps.
+            final boolean clearPackageStateAndReturn;
             synchronized (mPackages) {
                 markPackageUninstalledForUserLPw(ps, user);
                 if (!systemApp) {
@@ -19190,15 +19191,14 @@ public class PackageManagerService extends IPackageManager.Stub
                         // we need to do is clear this user's data and save that
                         // it is uninstalled.
                         if (DEBUG_REMOVE) Slog.d(TAG, "Still installed by other users");
-                        clearPackageStateForUserLIF(ps, userId, outInfo, flags);
-                        scheduleWritePackageRestrictionsLocked(user);
-                        return;
+                        clearPackageStateAndReturn = true;
                     } else {
                         // We need to set it back to 'installed' so the uninstall
                         // broadcasts will be sent correctly.
                         if (DEBUG_REMOVE) Slog.d(TAG, "Not installed by other users, full delete");
                         ps.setInstalled(true, userId);
                         mSettings.writeKernelMappingLPr(ps);
+                        clearPackageStateAndReturn = false;
                     }
                 } else {
                     // This is a system app, so we assume that the
@@ -19206,10 +19206,15 @@ public class PackageManagerService extends IPackageManager.Stub
                     // we need to do is clear this user's data and save that
                     // it is uninstalled.
                     if (DEBUG_REMOVE) Slog.d(TAG, "Deleting system app");
-                    clearPackageStateForUserLIF(ps, userId, outInfo, flags);
-                    scheduleWritePackageRestrictionsLocked(user);
-                    return;
+                    clearPackageStateAndReturn = true;
                 }
+            }
+            if (clearPackageStateAndReturn) {
+                clearPackageStateForUserLIF(ps, userId, outInfo, flags);
+                synchronized (mPackages) {
+                    scheduleWritePackageRestrictionsLocked(user);
+                }
+                return;
             }
         }
 
