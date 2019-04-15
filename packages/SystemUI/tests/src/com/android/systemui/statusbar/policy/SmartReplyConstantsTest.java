@@ -211,6 +211,18 @@ public class SmartReplyConstantsTest extends SysuiTestCase {
         assertEquals(10, mConstants.getMaxNumActions());
     }
 
+    @Test
+    public void testOnClickInitDelayWithNoConfig() {
+        assertEquals(200, mConstants.getOnClickInitDelay());
+    }
+
+    @Test
+    public void testOnClickInitDelaySet() {
+        overrideSetting(SystemUiDeviceConfigFlags.SSIN_ONCLICK_INIT_DELAY, "50");
+        triggerConstantsOnChange();
+        assertEquals(50, mConstants.getOnClickInitDelay());
+    }
+
     private void overrideSetting(String propertyName, String value) {
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
                 propertyName, value, false /* makeDefault */);
@@ -239,5 +251,7 @@ public class SmartReplyConstantsTest extends SysuiTestCase {
                 false /* makeDefault */);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
                 SystemUiDeviceConfigFlags.SSIN_MAX_NUM_ACTIONS, null, false /* makeDefault */);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.SSIN_ONCLICK_INIT_DELAY, null, false /* makeDefault */);
     }
 }

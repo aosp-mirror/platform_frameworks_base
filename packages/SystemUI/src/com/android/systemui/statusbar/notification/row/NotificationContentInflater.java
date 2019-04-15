@@ -44,6 +44,7 @@ import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewW
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.InflatedSmartReplies;
+import com.android.systemui.statusbar.policy.InflatedSmartReplies.SmartRepliesAndActions;
 import com.android.systemui.statusbar.policy.SmartReplyConstants;
 import com.android.systemui.util.Assert;
 
@@ -284,7 +285,8 @@ public class NotificationContentInflater {
                 mIsChildInGroup, mUsesIncreasedHeight, mUsesIncreasedHeadsUpHeight,
                 mRedactAmbient, packageContext);
         result = inflateSmartReplyViews(result, reInflateFlags, mRow.getEntry(),
-                mRow.getContext(), mRow.getHeadsUpManager());
+                mRow.getContext(), mRow.getHeadsUpManager(),
+                mRow.getExistingSmartRepliesAndActions());
         apply(
                 inflateSynchronously,
                 result,
@@ -346,20 +348,20 @@ public class NotificationContentInflater {
 
     private static InflationProgress inflateSmartReplyViews(InflationProgress result,
             @InflationFlag int reInflateFlags, NotificationEntry entry, Context context,
-            HeadsUpManager headsUpManager) {
+            HeadsUpManager headsUpManager, SmartRepliesAndActions previousSmartRepliesAndActions) {
         SmartReplyConstants smartReplyConstants = Dependency.get(SmartReplyConstants.class);
         SmartReplyController smartReplyController = Dependency.get(SmartReplyController.class);
         if ((reInflateFlags & FLAG_CONTENT_VIEW_EXPANDED) != 0 && result.newExpandedView != null) {
             result.expandedInflatedSmartReplies =
                     InflatedSmartReplies.inflate(
                             context, entry, smartReplyConstants, smartReplyController,
-                            headsUpManager);
+                            headsUpManager, previousSmartRepliesAndActions);
         }
         if ((reInflateFlags & FLAG_CONTENT_VIEW_HEADS_UP) != 0 && result.newHeadsUpView != null) {
             result.headsUpInflatedSmartReplies =
                     InflatedSmartReplies.inflate(
                             context, entry, smartReplyConstants, smartReplyController,
-                            headsUpManager);
+                            headsUpManager, previousSmartRepliesAndActions);
         }
         return result;
     }
@@ -907,7 +909,8 @@ public class NotificationContentInflater {
                         mIsChildInGroup, mUsesIncreasedHeight, mUsesIncreasedHeadsUpHeight,
                         mRedactAmbient, packageContext);
                 return inflateSmartReplyViews(inflationProgress, mReInflateFlags, mRow.getEntry(),
-                        mRow.getContext(), mRow.getHeadsUpManager());
+                        mRow.getContext(), mRow.getHeadsUpManager(),
+                        mRow.getExistingSmartRepliesAndActions());
             } catch (Exception e) {
                 mError = e;
                 return null;
