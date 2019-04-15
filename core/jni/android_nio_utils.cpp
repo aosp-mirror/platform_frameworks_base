@@ -21,7 +21,6 @@
 namespace {
 
 void* getPointer(JNIEnv *_env, jobject buffer, jarray *array, void** elements) {
-    assert(array);
     jint position;
     jint limit;
     jint elementSizeShift;
@@ -44,25 +43,18 @@ void releasePointer(JNIEnv *_env, jarray array, void *elements, jboolean commit)
 
 }  // namespace
 
-void* android::nio_getPointer(JNIEnv *_env, jobject buffer, jarray *array) {
-    void* elements;
-    return getPointer(_env, buffer, array, &elements);
-}
+namespace android {
 
-void android::nio_releasePointer(JNIEnv *_env, jarray array, void *data, jboolean commit) {
-    releasePointer(_env, array, data, commit);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-android::AutoBufferPointer::AutoBufferPointer(JNIEnv* env, jobject nioBuffer, jboolean commit) {
+AutoBufferPointer::AutoBufferPointer(JNIEnv* env, jobject nioBuffer, jboolean commit) {
     fEnv = env;
     fCommit = commit;
     fPointer = getPointer(env, nioBuffer, &fArray, &fElements);
 }
 
-android::AutoBufferPointer::~AutoBufferPointer() {
+AutoBufferPointer::~AutoBufferPointer() {
     if (nullptr != fArray) {
         releasePointer(fEnv, fArray, fElements, fCommit);
     }
 }
+
+}  // namespace android
