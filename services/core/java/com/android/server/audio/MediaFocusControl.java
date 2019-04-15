@@ -162,6 +162,12 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
         }
     }
 
+    /*package*/ boolean hasAudioFocusUsers() {
+        synchronized (mAudioFocusLock) {
+            return !mFocusStack.empty();
+        }
+    }
+
     /**
      * Discard the current audio focus owner.
      * Notify top of audio focus stack that it lost focus (regardless of possibility to reassign

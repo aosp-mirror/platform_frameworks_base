@@ -5580,6 +5580,10 @@ public class AudioService extends IAudioService.Stub
         return mMediaFocusControl.getFocusRampTimeMs(focusGain, attr);
     }
 
+    /*package*/ boolean hasAudioFocusUsers() {
+        return mMediaFocusControl.hasAudioFocusUsers();
+    }
+
     //==========================================================================================
     private boolean readCameraSoundForced() {
         return SystemProperties.getBoolean("audio.camerasound.force", false) ||
