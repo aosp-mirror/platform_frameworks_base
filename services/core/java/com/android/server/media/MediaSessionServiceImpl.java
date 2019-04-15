@@ -171,7 +171,7 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
         mAudioPlayerStateMonitor = AudioPlayerStateMonitor.getInstance(mContext);
         mAudioPlayerStateMonitor.registerListener(
                 (config, isRemoved) -> {
-                    if (isRemoved || !config.isActive() || config.getPlayerType()
+                    if (config.getPlayerType()
                             == AudioPlaybackConfiguration.PLAYER_TYPE_JAM_SOUNDPOOL) {
                         return;
                     }
