@@ -6671,6 +6671,13 @@ public class AudioService extends IAudioService.Stub
         return AudioManager.SUCCESS;
     }
 
+    /** see AudioManager.hasRegisteredDynamicPolicy */
+    public boolean hasRegisteredDynamicPolicy() {
+        synchronized (mAudioPolicies) {
+            return !mAudioPolicies.isEmpty();
+        }
+    }
+
     private final Object mExtVolumeControllerLock = new Object();
     private IAudioPolicyCallback mExtVolumeController;
     private void setExtVolumeController(IAudioPolicyCallback apc) {
