@@ -2002,15 +2002,15 @@ package android.hardware.hdmi {
   public final class HdmiControlManager {
     method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void addHotplugEventListener(android.hardware.hdmi.HdmiControlManager.HotplugEventListener);
     method @Nullable public android.hardware.hdmi.HdmiClient getClient(int);
-    method @Nullable public java.util.List<android.hardware.hdmi.HdmiDeviceInfo> getConnectedDevicesList();
+    method @NonNull public java.util.List<android.hardware.hdmi.HdmiDeviceInfo> getConnectedDevices();
     method public int getPhysicalAddress();
     method @Nullable public android.hardware.hdmi.HdmiPlaybackClient getPlaybackClient();
     method @Nullable public android.hardware.hdmi.HdmiSwitchClient getSwitchClient();
     method @Nullable public android.hardware.hdmi.HdmiTvClient getTvClient();
-    method public boolean isRemoteDeviceConnected(@NonNull android.hardware.hdmi.HdmiDeviceInfo);
-    method public void powerOffRemoteDevice(@NonNull android.hardware.hdmi.HdmiDeviceInfo);
+    method public boolean isDeviceConnected(@NonNull android.hardware.hdmi.HdmiDeviceInfo);
+    method public void powerOffDevice(@NonNull android.hardware.hdmi.HdmiDeviceInfo);
     method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void removeHotplugEventListener(android.hardware.hdmi.HdmiControlManager.HotplugEventListener);
-    method public void requestRemoteDeviceToBecomeActiveSource(@NonNull android.hardware.hdmi.HdmiDeviceInfo);
+    method public void setActiveSource(@NonNull android.hardware.hdmi.HdmiDeviceInfo);
     method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void setStandbyMode(boolean);
     field public static final String ACTION_OSD_MESSAGE = "android.hardware.hdmi.action.OSD_MESSAGE";
     field public static final int AVR_VOLUME_MUTED = 101; // 0x65
