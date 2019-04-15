@@ -20,5 +20,8 @@ java_sdk_library {
         "java/**/*.java",
         ":framework-all-sources",
     ],
+    libs: [
+        "androidx.annotation_annotation",
+    ],
     api_packages: ["com.android.location.provider"],
 }
