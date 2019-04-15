@@ -211,6 +211,8 @@ interface IAudioService {
 
     void setVolumePolicy(in VolumePolicy policy);
 
+    boolean hasRegisteredDynamicPolicy();
+
     void registerRecordingCallback(in IRecordingConfigDispatcher rcdb);
 
     oneway void unregisterRecordingCallback(in IRecordingConfigDispatcher rcdb);
