@@ -29,10 +29,10 @@
 #include <EGL/eglext.h>
 #include <GLES/gl.h>
 
+#include <gui/Surface.h>
+#include <system/window.h>
 #include <string>
 #include <vector>
-#include <system/window.h>
-#include <gui/Surface.h>
 
 #define GLES_VERSION 2
 
@@ -171,8 +171,7 @@ EGLConfig EglManager::load8BitsConfig(EGLDisplay display, EglManager::SwapBehavi
                         EGL_NONE};
     EGLConfig config = EGL_NO_CONFIG_KHR;
     EGLint numConfigs = 1;
-    if (!eglChooseConfig(display, attribs, &config, numConfigs, &numConfigs) ||
-        numConfigs != 1) {
+    if (!eglChooseConfig(display, attribs, &config, numConfigs, &numConfigs) || numConfigs != 1) {
         return EGL_NO_CONFIG_KHR;
     }
     return config;
@@ -203,8 +202,7 @@ EGLConfig EglManager::loadFP16Config(EGLDisplay display, SwapBehavior swapBehavi
                         EGL_NONE};
     EGLConfig config = EGL_NO_CONFIG_KHR;
     EGLint numConfigs = 1;
-    if (!eglChooseConfig(display, attribs, &config, numConfigs, &numConfigs) ||
-        numConfigs != 1) {
+    if (!eglChooseConfig(display, attribs, &config, numConfigs, &numConfigs) || numConfigs != 1) {
         return EGL_NO_CONFIG_KHR;
     }
     return config;
@@ -262,7 +260,7 @@ void EglManager::loadConfigs() {
         mEglConfigWideGamut = loadFP16Config(mEglDisplay, mSwapBehavior);
         if (mEglConfigWideGamut == EGL_NO_CONFIG_KHR) {
             ALOGE("Device claims wide gamut support, cannot find matching config, error = %s",
-                    eglErrorString());
+                  eglErrorString());
             EglExtensions.pixelFormatFloat = false;
         }
     } else if (wideColorType == SkColorType::kN32_SkColorType) {
@@ -350,7 +348,7 @@ Result<EGLSurface, EGLint> EglManager::createSurface(EGLNativeWindowType window,
     EGLSurface surface = eglCreateWindowSurface(
             mEglDisplay, wideColorGamut ? mEglConfigWideGamut : mEglConfig, window, attribs);
     if (surface == EGL_NO_SURFACE) {
-        return Error<EGLint> { eglGetError() };
+        return Error<EGLint>{eglGetError()};
     }
 
     if (mSwapBehavior != SwapBehavior::Preserved) {
@@ -525,12 +523,8 @@ status_t EglManager::fenceWait(sp<Fence>& fence) {
             ALOGE("EglManager::fenceWait: error dup'ing fence fd: %d", errno);
             return -errno;
         }
-        EGLint attribs[] = {
-            EGL_SYNC_NATIVE_FENCE_FD_ANDROID, fenceFd,
-            EGL_NONE
-        };
-        EGLSyncKHR sync = eglCreateSyncKHR(mEglDisplay,
-                EGL_SYNC_NATIVE_FENCE_ANDROID, attribs);
+        EGLint attribs[] = {EGL_SYNC_NATIVE_FENCE_FD_ANDROID, fenceFd, EGL_NONE};
+        EGLSyncKHR sync = eglCreateSyncKHR(mEglDisplay, EGL_SYNC_NATIVE_FENCE_ANDROID, attribs);
         if (sync == EGL_NO_SYNC_KHR) {
             close(fenceFd);
             ALOGE("EglManager::fenceWait: error creating EGL fence: %#x", eglGetError());
@@ -559,18 +553,16 @@ status_t EglManager::fenceWait(sp<Fence>& fence) {
 }
 
 status_t EglManager::createReleaseFence(bool useFenceSync, EGLSyncKHR* eglFence,
-        sp<Fence>& nativeFence) {
+                                        sp<Fence>& nativeFence) {
     if (!hasEglContext()) {
         ALOGE("EglManager::createReleaseFence: EGLDisplay not initialized");
         return INVALID_OPERATION;
     }
 
     if (SyncFeatures::getInstance().useNativeFenceSync()) {
-        EGLSyncKHR sync = eglCreateSyncKHR(mEglDisplay,
-                EGL_SYNC_NATIVE_FENCE_ANDROID, nullptr);
+        EGLSyncKHR sync = eglCreateSyncKHR(mEglDisplay, EGL_SYNC_NATIVE_FENCE_ANDROID, nullptr);
         if (sync == EGL_NO_SYNC_KHR) {
-            ALOGE("EglManager::createReleaseFence: error creating EGL fence: %#x",
-                    eglGetError());
+            ALOGE("EglManager::createReleaseFence: error creating EGL fence: %#x", eglGetError());
             return UNKNOWN_ERROR;
         }
         glFlush();
@@ -578,7 +570,8 @@ status_t EglManager::createReleaseFence(bool useFenceSync, EGLSyncKHR* eglFence,
         eglDestroySyncKHR(mEglDisplay, sync);
         if (fenceFd == EGL_NO_NATIVE_FENCE_FD_ANDROID) {
             ALOGE("EglManager::createReleaseFence: error dup'ing native fence "
-                    "fd: %#x", eglGetError());
+                  "fd: %#x",
+                  eglGetError());
             return UNKNOWN_ERROR;
         }
         nativeFence = new Fence(fenceFd);
@@ -592,7 +585,7 @@ status_t EglManager::createReleaseFence(bool useFenceSync, EGLSyncKHR* eglFence,
             EGLint result = eglClientWaitSyncKHR(mEglDisplay, *eglFence, 0, 1000000000);
             if (result == EGL_FALSE) {
                 ALOGE("EglManager::createReleaseFence: error waiting for previous fence: %#x",
-                        eglGetError());
+                      eglGetError());
                 return UNKNOWN_ERROR;
             } else if (result == EGL_TIMEOUT_EXPIRED_KHR) {
                 ALOGE("EglManager::createReleaseFence: timeout waiting for previous fence");
