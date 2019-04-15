@@ -21,7 +21,6 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.service.watchdog.ExplicitHealthCheckService;
-import android.service.watchdog.PackageInfo;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -35,8 +34,6 @@ final class NetworkChecker extends ConnectivityManager.NetworkCallback
     private final Object mLock = new Object();
     private final ExplicitHealthCheckService mService;
     private final String mPackageName;
-    // TODO: Receive from DeviceConfig flag
-    private final long mRequestDurationMillis = 0;
     @GuardedBy("mLock")
     private boolean mIsPending;
 
@@ -76,8 +73,8 @@ final class NetworkChecker extends ConnectivityManager.NetworkCallback
     }
 
     @Override
-    public PackageInfo getSupportedPackage() {
-        return new PackageInfo(mPackageName, mRequestDurationMillis);
+    public String getSupportedPackageName() {
+        return mPackageName;
     }
 
     // TODO(b/120598832): Also monitor NetworkCallback#onAvailable to see if we have any
