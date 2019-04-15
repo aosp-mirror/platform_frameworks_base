@@ -525,19 +525,19 @@ VulkanSurface::NativeBufferInfo* VulkanSurface::dequeueNativeBuffer() {
 
 bool VulkanSurface::presentCurrentBuffer(const SkRect& dirtyRect, int semaphoreFd) {
     if (!dirtyRect.isEmpty()) {
-        SkRect transformedRect;
-        mWindowInfo.preTransform.mapRect(&transformedRect, dirtyRect);
 
-        SkIRect transformedIRect;
-        transformedRect.roundOut(&transformedIRect);
-        transformedIRect.intersect(0, 0, mWindowInfo.size.fWidth, mWindowInfo.size.fHeight);
+        // native_window_set_surface_damage takes a rectangle in prerotated space
+        // with a bottom-left origin. That is, top > bottom.
+        // The dirtyRect is also in prerotated space, so we just need to switch it to
+        // a bottom-left origin space.
 
-        // map to bottom-left coordinate system
+        SkIRect irect;
+        dirtyRect.roundOut(&irect);
         android_native_rect_t aRect;
-        aRect.left = transformedIRect.x();
-        aRect.top = mWindowInfo.size.fHeight - (transformedIRect.y() + transformedIRect.height());
-        aRect.right = aRect.left + transformedIRect.width();
-        aRect.bottom = aRect.top - transformedIRect.height();
+        aRect.left = irect.left();
+        aRect.top = logicalHeight() - irect.top();
+        aRect.right = irect.right();
+        aRect.bottom = logicalHeight() - irect.bottom();
 
         int err = native_window_set_surface_damage(mNativeWindow.get(), &aRect, 1);
         ALOGE_IF(err != 0, "native_window_set_surface_damage failed: %s (%d)", strerror(-err), err);
