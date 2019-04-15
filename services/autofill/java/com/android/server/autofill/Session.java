@@ -265,7 +265,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     // main reason being the cases where user tap HOME.
     // Right now it's completely destroying the UI, but we need to decide whether / how to
     // properly recover it later (for example, if the user switches back to the activity,
-    // should it be restored? Right not it kind of is, because Autofill's Session trigger a
+    // should it be restored? Right now it kind of is, because Autofill's Session trigger a
     // new FillRequest, which in turn triggers the Augmented Autofill request again)
     @GuardedBy("mLock")
     @Nullable
@@ -2754,9 +2754,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final ViewState viewState = mViewStates.get(mCurrentViewId);
         viewState.setState(ViewState.STATE_TRIGGERED_AUGMENTED_AUTOFILL);
         final AutofillValue currentValue = viewState.getCurrentValue();
-
-        // TODO(b/111330312): we might need to add a new state in the AutofillManager to optimize
-        // further AFM -> AFMS calls.
 
         if (mAugmentedRequestsLogs == null) {
             mAugmentedRequestsLogs = new ArrayList<>();

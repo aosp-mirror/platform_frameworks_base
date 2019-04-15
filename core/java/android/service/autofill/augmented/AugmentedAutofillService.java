@@ -27,6 +27,7 @@ import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.IBinder;
@@ -67,9 +68,8 @@ public abstract class AugmentedAutofillService extends Service {
 
     private static final String TAG = AugmentedAutofillService.class.getSimpleName();
 
-    // TODO(b/123100811): STOPSHIP use dynamic value, or change to false
-    static final boolean DEBUG = true;
-    static final boolean VERBOSE = false;
+    static boolean sDebug = Build.IS_USER ? false : true;
+    static boolean sVerbose = false;
 
     /**
      * The {@link Intent} that must be declared as handled by the service.
@@ -87,9 +87,9 @@ public abstract class AugmentedAutofillService extends Service {
     private final IAugmentedAutofillService mInterface = new IAugmentedAutofillService.Stub() {
 
         @Override
-        public void onConnected() {
+        public void onConnected(boolean debug, boolean verbose) {
             mHandler.sendMessage(obtainMessage(AugmentedAutofillService::handleOnConnected,
-                    AugmentedAutofillService.this));
+                    AugmentedAutofillService.this, debug, verbose));
         }
 
         @Override
@@ -190,7 +190,12 @@ public abstract class AugmentedAutofillService extends Service {
     public void onDisconnected() {
     }
 
-    private void handleOnConnected() {
+    private void handleOnConnected(boolean debug, boolean verbose) {
+        if (sDebug || debug) {
+            Log.d(TAG, "handleOnConnected(): debug=" + debug + ", verbose=" + verbose);
+        }
+        sDebug = debug;
+        sVerbose = verbose;
         onConnected();
     }
 
@@ -215,7 +220,7 @@ public abstract class AugmentedAutofillService extends Service {
             mAutofillProxies.put(sessionId,  proxy);
         } else {
             // TODO(b/123099468): figure out if it's ok to reuse the proxy; add logging
-            if (DEBUG) Log.d(TAG, "Reusing proxy for session " + sessionId);
+            if (sDebug) Log.d(TAG, "Reusing proxy for session " + sessionId);
             proxy.update(focusedId, focusedValue, callback);
         }
 
@@ -248,11 +253,11 @@ public abstract class AugmentedAutofillService extends Service {
 
     private void handleOnUnbind() {
         if (mAutofillProxies == null) {
-            if (DEBUG) Log.d(TAG, "onUnbind(): no proxy to destroy");
+            if (sDebug) Log.d(TAG, "onUnbind(): no proxy to destroy");
             return;
         }
         final int size = mAutofillProxies.size();
-        if (DEBUG) Log.d(TAG, "onUnbind(): destroying " + size + " proxies");
+        if (sDebug) Log.d(TAG, "onUnbind(): destroying " + size + " proxies");
         for (int i = 0; i < size; i++) {
             final AutofillProxy proxy = mAutofillProxies.valueAt(i);
             try {
@@ -373,7 +378,7 @@ public abstract class AugmentedAutofillService extends Service {
                     return null;
                 }
                 if (rect == null) {
-                    if (DEBUG) Log.d(TAG, "getViewCoordinates(" + mFocusedId + ") returned null");
+                    if (sDebug) Log.d(TAG, "getViewCoordinates(" + mFocusedId + ") returned null");
                     return null;
                 }
                 mSmartSuggestion = new SystemPopupPresentationParams(this, rect);
@@ -410,7 +415,7 @@ public abstract class AugmentedAutofillService extends Service {
         public void requestShowFillUi(int width, int height, Rect anchorBounds,
                 IAutofillWindowPresenter presenter) throws RemoteException {
             if (mCancellationSignal.isCanceled()) {
-                if (VERBOSE) {
+                if (sVerbose) {
                     Log.v(TAG, "requestShowFillUi() not showing because request is cancelled");
                 }
                 return;
@@ -462,7 +467,7 @@ public abstract class AugmentedAutofillService extends Service {
                 case REPORT_EVENT_ON_SUCCESS:
                     if (mFirstOnSuccessTime == 0) {
                         mFirstOnSuccessTime = SystemClock.elapsedRealtime();
-                        if (DEBUG) {
+                        if (sDebug) {
                             Slog.d(TAG, "Service responded in " + TimeUtils.formatDuration(
                                     mFirstOnSuccessTime - mFirstRequestTime));
                         }
@@ -476,7 +481,7 @@ public abstract class AugmentedAutofillService extends Service {
                 case REPORT_EVENT_UI_SHOWN:
                     if (mUiFirstShownTime == 0) {
                         mUiFirstShownTime = SystemClock.elapsedRealtime();
-                        if (DEBUG) {
+                        if (sDebug) {
                             Slog.d(TAG, "UI shown in " + TimeUtils.formatDuration(
                                     mUiFirstShownTime - mFirstRequestTime));
                         }
@@ -485,7 +490,7 @@ public abstract class AugmentedAutofillService extends Service {
                 case REPORT_EVENT_UI_DESTROYED:
                     if (mUiFirstDestroyedTime == 0) {
                         mUiFirstDestroyedTime = SystemClock.elapsedRealtime();
-                        if (DEBUG) {
+                        if (sDebug) {
                             Slog.d(TAG, "UI destroyed in " + TimeUtils.formatDuration(
                                     mUiFirstDestroyedTime - mFirstRequestTime));
                         }
@@ -541,7 +546,7 @@ public abstract class AugmentedAutofillService extends Service {
         private void destroy() {
             synchronized (mLock) {
                 if (mFillWindow != null) {
-                    if (DEBUG) Log.d(TAG, "destroying window");
+                    if (sDebug) Log.d(TAG, "destroying window");
                     mFillWindow.destroy();
                     mFillWindow = null;
                 }

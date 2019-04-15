@@ -15,8 +15,8 @@
  */
 package android.service.autofill.augmented;
 
-import static android.service.autofill.augmented.AugmentedAutofillService.DEBUG;
-import static android.service.autofill.augmented.AugmentedAutofillService.VERBOSE;
+import static android.service.autofill.augmented.AugmentedAutofillService.sDebug;
+import static android.service.autofill.augmented.AugmentedAutofillService.sVerbose;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
@@ -100,7 +100,7 @@ public final class FillWindow implements AutoCloseable {
      * @throws IllegalArgumentException if the area is not compatible with this window
      */
     public boolean update(@NonNull Area area, @NonNull View rootView, long flags) {
-        if (DEBUG) {
+        if (sDebug) {
             Log.d(TAG, "Updating " + area + " + with " + rootView);
         }
         // TODO(b/123100712): add test case for null
@@ -141,7 +141,7 @@ public final class FillWindow implements AutoCloseable {
             mFillView.setOnTouchListener(
                     (view, motionEvent) -> {
                         if (motionEvent.getAction() == MotionEvent.ACTION_OUTSIDE) {
-                            if (VERBOSE) Log.v(TAG, "Outside touch detected, hiding the window");
+                            if (sVerbose) Log.v(TAG, "Outside touch detected, hiding the window");
                             hide();
                         }
                         return false;
@@ -149,7 +149,7 @@ public final class FillWindow implements AutoCloseable {
             );
             mShowing = false;
             mBounds = new Rect(area.getBounds());
-            if (DEBUG) {
+            if (sDebug) {
                 Log.d(TAG, "Created FillWindow: params= " + smartSuggestion + " view=" + rootView);
             }
             mUpdateCalled = true;
@@ -162,7 +162,7 @@ public final class FillWindow implements AutoCloseable {
     /** @hide */
     void show() {
         // TODO(b/123100712): check if updated first / throw exception
-        if (DEBUG) Log.d(TAG, "show()");
+        if (sDebug) Log.d(TAG, "show()");
         synchronized (mLock) {
             checkNotDestroyedLocked();
             if (mWm == null || mFillView == null) {
@@ -187,7 +187,7 @@ public final class FillWindow implements AutoCloseable {
      * <p>The window is not destroyed and can be shown again
      */
     private void hide() {
-        if (DEBUG) Log.d(TAG, "hide()");
+        if (sDebug) Log.d(TAG, "hide()");
         synchronized (mLock) {
             checkNotDestroyedLocked();
             if (mWm == null || mFillView == null) {
@@ -204,7 +204,7 @@ public final class FillWindow implements AutoCloseable {
     }
 
     private void handleShow(WindowManager.LayoutParams p) {
-        if (DEBUG) Log.d(TAG, "handleShow()");
+        if (sDebug) Log.d(TAG, "handleShow()");
         synchronized (mLock) {
             if (mWm != null && mFillView != null) {
                 p.flags |= WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
@@ -219,7 +219,7 @@ public final class FillWindow implements AutoCloseable {
     }
 
     private void handleHide() {
-        if (DEBUG) Log.d(TAG, "handleHide()");
+        if (sDebug) Log.d(TAG, "handleHide()");
         synchronized (mLock) {
             if (mWm != null && mFillView != null && mShowing) {
                 mWm.removeView(mFillView);
@@ -234,7 +234,7 @@ public final class FillWindow implements AutoCloseable {
      * <p>Once destroyed, this window cannot be used anymore
      */
     public void destroy() {
-        if (DEBUG) {
+        if (sDebug) {
             Log.d(TAG,
                     "destroy(): mDestroyed=" + mDestroyed + " mShowing=" + mShowing + " mFillView="
                             + mFillView);
@@ -296,13 +296,13 @@ public final class FillWindow implements AutoCloseable {
         @Override
         public void show(WindowManager.LayoutParams p, Rect transitionEpicenter,
                 boolean fitsSystemWindows, int layoutDirection) {
-            if (DEBUG) Log.d(TAG, "FillWindowPresenter.show()");
+            if (sDebug) Log.d(TAG, "FillWindowPresenter.show()");
             mUiThreadHandler.sendMessage(obtainMessage(FillWindow::handleShow, FillWindow.this, p));
         }
 
         @Override
         public void hide(Rect transitionEpicenter) {
-            if (DEBUG) Log.d(TAG, "FillWindowPresenter.hide()");
+            if (sDebug) Log.d(TAG, "FillWindowPresenter.hide()");
             mUiThreadHandler.sendMessage(obtainMessage(FillWindow::handleHide, FillWindow.this));
         }
     }
