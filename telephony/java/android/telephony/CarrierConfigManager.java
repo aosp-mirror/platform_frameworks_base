@@ -2804,7 +2804,7 @@ public class CarrierConfigManager {
      * @hide
      */
     public static final String KEY_SUBSCRIPTION_GROUP_UUID_STRING =
-            "key_subscription_group_uuid_string";
+            "subscription_group_uuid_string";
 
     /**
     * A boolean property indicating whether this subscription should be managed as an opportunistic
@@ -2819,7 +2819,7 @@ public class CarrierConfigManager {
     * @hide
     */
     public static final String KEY_IS_OPPORTUNISTIC_SUBSCRIPTION_BOOL =
-            "key_is_opportunistic_subscription_bool";
+            "is_opportunistic_subscription_bool";
 
     /**
      * A list of 4 GSM RSSI thresholds above which a signal level is considered POOR,
