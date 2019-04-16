@@ -152,7 +152,9 @@ void SkiaRecordingCanvas::drawWebViewFunctor(int functor) {
 
 void SkiaRecordingCanvas::drawVectorDrawable(VectorDrawableRoot* tree) {
     mRecorder.drawVectorDrawable(tree);
-    mDisplayList->mVectorDrawables.push_back(tree);
+    SkMatrix mat;
+    this->getMatrix(&mat);
+    mDisplayList->appendVD(tree, mat);
 }
 
 // ----------------------------------------------------------------------------

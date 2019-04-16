@@ -22,6 +22,7 @@
 #include "TreeInfo.h"
 #include "hwui/AnimatedImageDrawable.h"
 #include "utils/LinearAllocator.h"
+#include "utils/Pair.h"
 
 #include <deque>
 
@@ -41,12 +42,6 @@ typedef uirenderer::VectorDrawable::Tree VectorDrawableRoot;
 
 namespace skiapipeline {
 
-/**
- * This class is intended to be self contained, but still subclasses from
- * DisplayList to make it easier to support switching between the two at
- * runtime.  The downside of this inheritance is that we pay for the overhead
- * of the parent class construction/destruction without any real benefit.
- */
 class SkiaDisplayList {
 public:
     size_t getUsedSize() { return allocator.usedSize() + mDisplayList.usedSize(); }
@@ -156,7 +151,17 @@ public:
     std::deque<RenderNodeDrawable> mChildNodes;
     std::deque<FunctorDrawable*> mChildFunctors;
     std::vector<SkImage*> mMutableImages;
-    std::vector<VectorDrawableRoot*> mVectorDrawables;
+private:
+    std::vector<Pair<VectorDrawableRoot*, SkMatrix>> mVectorDrawables;
+public:
+    void appendVD(VectorDrawableRoot* r) {
+        appendVD(r, SkMatrix::I());
+    }
+
+    void appendVD(VectorDrawableRoot* r, const SkMatrix& mat) {
+        mVectorDrawables.push_back(Pair<VectorDrawableRoot*, SkMatrix>(r, mat));
+    }
+
     std::vector<AnimatedImageDrawable*> mAnimatedImages;
     DisplayListData mDisplayList;
 
