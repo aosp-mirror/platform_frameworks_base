@@ -2485,24 +2485,7 @@
             <flag name="noExcludeDescendants" value="0x8" />
         </attr>
 
-        <!-- Hints the Android System whether the view node associated with this View should be
-             use for content capture purposes. -->
-        <attr name="importantForContentCapture">
-            <!-- Let the Android System use its heuristics to determine if the view is important for content capture. -->
-            <flag name="auto" value="0" />
-            <!-- Hint the Android System that this view is important for content capture,
-                  and its children (if any) will be traversed.. -->
-            <flag name="yes" value="0x1" />
-            <!-- Hint the Android System that this view is *not* important for content capture,
-                  but its children (if any) will be traversed.. -->
-            <flag name="no" value="0x2" />
-            <!-- Hint the Android System that this view is important for content capture,
-                 but its children (if any) will not be traversed. -->
-            <flag name="yesExcludeDescendants" value="0x4" />
-            <!-- Hint the Android System that this view is *not* important for content capture,
-                 and its children (if any) will not be traversed. -->
-            <flag name="noExcludeDescendants" value="0x8" />
-        </attr>
+        <attr name="__removed6" />
 
         <!-- Boolean that controls whether a view can take focus while in touch mode.
              If this is true for a view, that view can gain focus when clicked on, and can keep

@@ -191,8 +191,8 @@ import java.util.Set;
  *
  * <p>If your view provides its own virtual hierarchy (for example, if it's a browser that draws
  * the HTML using {@link Canvas} or native libraries in a different render process), then the view
- * is also responsible to notify the session when the virtual elements appear and disappear - see
- * {@link View#onProvideContentCaptureStructure(ViewStructure, int)} for more info.
+ * is also responsible to notify the session when the virtual elements appear and disappear -
+ * see {@link ContentCaptureSession#newViewStructure(View)} for more info.
  */
 @SystemService(Context.CONTENT_CAPTURE_MANAGER_SERVICE)
 public final class ContentCaptureManager {
@@ -578,16 +578,15 @@ public final class ContentCaptureManager {
     }
 
     /**
-     * Called by the app to request the content capture service to remove user-data associated with
-     * some context.
+     * Called by the app to remove content capture data associated with some context.
      *
-     * @param request object specifying what user data should be removed.
+     * @param request object specifying what data should be removed.
      */
-    public void removeUserData(@NonNull UserDataRemovalRequest request) {
+    public void removeData(@NonNull DataRemovalRequest request) {
         Preconditions.checkNotNull(request);
 
         try {
-            mService.removeUserData(request);
+            mService.removeData(request);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
