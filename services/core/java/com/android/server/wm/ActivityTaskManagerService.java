@@ -373,8 +373,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private final SparseArray<String> mPendingTempWhitelist = new SparseArray<>();
     /** All processes currently running that might have a window organized by name. */
     final ProcessMap<WindowProcessController> mProcessNames = new ProcessMap<>();
-    /** All processes we currently have running mapped by pid */
-    final SparseArray<WindowProcessController> mPidMap = new SparseArray<>();
+    /** All processes we currently have running mapped by pid and uid */
+    final WindowProcessControllerMap mProcessMap = new WindowProcessControllerMap();
     /** This is the process holding what we currently consider to be the "home" activity. */
     WindowProcessController mHomeProcess;
     /** The currently running heavy-weight process, if any. */
@@ -913,7 +913,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             return getGlobalConfiguration();
         }
         synchronized (mGlobalLock) {
-            final WindowProcessController app = mPidMap.get(pid);
+            final WindowProcessController app = mProcessMap.getProcess(pid);
             return app != null ? app.getConfiguration() : getGlobalConfiguration();
         }
     }
@@ -4640,7 +4640,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         enforceSystemHasVrFeature();
         synchronized (mGlobalLock) {
             final int pid = Binder.getCallingPid();
-            final WindowProcessController wpc = mPidMap.get(pid);
+            final WindowProcessController wpc = mProcessMap.getProcess(pid);
             mVrController.setVrThreadLocked(tid, pid, wpc);
         }
     }
@@ -4659,7 +4659,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         enforceSystemHasVrFeature();
         synchronized (mGlobalLock) {
             final int pid = Binder.getCallingPid();
-            final WindowProcessController proc = mPidMap.get(pid);
+            final WindowProcessController proc = mProcessMap.getProcess(pid);
             mVrController.setPersistentVrThreadLocked(tid, pid, proc);
         }
     }
@@ -5204,9 +5204,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mH.sendMessage(msg);
         }
 
-        for (int i = mPidMap.size() - 1; i >= 0; i--) {
-            final int pid = mPidMap.keyAt(i);
-            final WindowProcessController app = mPidMap.get(pid);
+        SparseArray<WindowProcessController> pidMap = mProcessMap.getPidMap();
+        for (int i = pidMap.size() - 1; i >= 0; i--) {
+            final int pid = pidMap.keyAt(i);
+            final WindowProcessController app = pidMap.get(pid);
             if (DEBUG_CONFIGURATION) {
                 Slog.v(TAG_CONFIGURATION, "Update process config of "
                         + app.mName + " to new config " + configCopy);
@@ -5859,7 +5860,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     WindowProcessController getProcessController(int pid, int uid) {
-        final WindowProcessController proc = mPidMap.get(pid);
+        final WindowProcessController proc = mProcessMap.getProcess(pid);
         if (proc == null) return null;
         if (UserHandle.isApp(uid) && proc.mUid == uid) {
             return proc;
@@ -6423,14 +6424,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public void onProcessMapped(int pid, WindowProcessController proc) {
             synchronized (mGlobalLock) {
-                mPidMap.put(pid, proc);
+                mProcessMap.put(pid, proc);
             }
         }
 
         @Override
         public void onProcessUnMapped(int pid) {
             synchronized (mGlobalLock) {
-                mPidMap.remove(pid);
+                mProcessMap.remove(pid);
             }
         }
 
@@ -6503,7 +6504,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     }
                     return;
                 }
-                final WindowProcessController process = mPidMap.get(pid);
+                final WindowProcessController process = mProcessMap.getProcess(pid);
                 if (process == null) {
                     if (DEBUG_CONFIGURATION) {
                         Slog.w(TAG, "Trying to update display configuration for invalid "
@@ -6696,7 +6697,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     // Only allow this from foreground processes, so that background
                     // applications can't abuse it to prevent system UI from being shown.
                     if (uid >= FIRST_APPLICATION_UID) {
-                        final WindowProcessController proc = mPidMap.get(pid);
+                        final WindowProcessController proc = mProcessMap.getProcess(pid);
                         if (!proc.isPerceptible()) {
                             Slog.w(TAG, "Ignoring closeSystemDialogs " + reason
                                     + " from background process " + proc);

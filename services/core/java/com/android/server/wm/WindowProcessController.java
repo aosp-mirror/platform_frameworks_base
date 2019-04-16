@@ -372,16 +372,37 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mAllowBackgroundActivityStarts = allowBackgroundActivityStarts;
     }
 
-    public boolean areBackgroundActivityStartsAllowed() {
-        return mAllowBackgroundActivityStarts;
+    boolean areBackgroundActivityStartsAllowed() {
+        // allow if the whitelisting flag was explicitly set
+        if (mAllowBackgroundActivityStarts) {
+            return true;
+        }
+        // allow if the proc is instrumenting with background activity starts privs
+        if (mInstrumentingWithBackgroundActivityStartPrivileges) {
+            return true;
+        }
+        // allow if the caller has an activity in any foreground task
+        if (hasActivityInVisibleTask()) {
+            return true;
+        }
+        // allow if the caller is bound by a UID that's currently foreground
+        if (isBoundByForegroundUid()) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isBoundByForegroundUid() {
+        for (int i = mBoundClientUids.size() - 1; i >= 0; --i) {
+            if (mAtm.isUidForeground(mBoundClientUids.valueAt(i))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void setBoundClientUids(ArraySet<Integer> boundClientUids) {
         mBoundClientUids = boundClientUids;
-    }
-
-    public ArraySet<Integer> getBoundClientUids() {
-        return mBoundClientUids;
     }
 
     public void setInstrumenting(boolean instrumenting,
@@ -392,14 +413,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     boolean isInstrumenting() {
         return mInstrumenting;
-    }
-
-    /**
-     * @return true if the instrumentation was started by a holder of
-     * START_ACTIVITIES_FROM_BACKGROUND permission
-     */
-    boolean isInstrumentingWithBackgroundActivityStartPrivileges() {
-        return mInstrumentingWithBackgroundActivityStartPrivileges;
     }
 
     public void setPerceptible(boolean perceptible) {
@@ -487,7 +500,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
     }
 
-    boolean hasActivityInVisibleTask() {
+    private boolean hasActivityInVisibleTask() {
         for (int i = mActivities.size() - 1; i >= 0; --i) {
             TaskRecord task = mActivities.get(i).getTaskRecord();
             if (task == null) {
