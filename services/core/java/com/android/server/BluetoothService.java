@@ -18,11 +18,10 @@ package com.android.server;
 
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
-import android.os.SystemProperties;
+
+import com.android.internal.os.RoSystemProperties;
 
 class BluetoothService extends SystemService {
-    private static final String HEADLESS_SYSTEM_USER = "android.car.systemuser.headless";
-
     private BluetoothManagerService mBluetoothManagerService;
     private boolean mInitialized = false;
 
@@ -48,7 +47,7 @@ class BluetoothService extends SystemService {
             publishBinderService(BluetoothAdapter.BLUETOOTH_MANAGER_SERVICE,
                     mBluetoothManagerService);
         } else if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY &&
-                !SystemProperties.getBoolean(HEADLESS_SYSTEM_USER, false)) {
+                !RoSystemProperties.MULTIUSER_HEADLESS_SYSTEM_USER) {
             initialize();
         }
     }
