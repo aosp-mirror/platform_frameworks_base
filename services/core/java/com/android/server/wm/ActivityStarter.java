@@ -971,8 +971,9 @@ class ActivityStarter {
                 : (realCallingUid == Process.SYSTEM_UID)
                         || realCallingUidProcState <= ActivityManager.PROCESS_STATE_PERSISTENT_UI;
         if (realCallingUid != callingUid) {
-            // don't abort if the realCallingUid has a visible window
-            if (realCallingUidHasAnyVisibleWindow) {
+            // don't abort if the realCallingUid has a visible window, unless realCallingUid is
+            // SYSTEM_UID, in which case it start needs to be explicitly whitelisted
+            if (realCallingUidHasAnyVisibleWindow && realCallingUid != Process.SYSTEM_UID) {
                 return false;
             }
             // if the realCallingUid is a persistent system process, abort if the IntentSender
