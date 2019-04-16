@@ -283,14 +283,6 @@ public class ContentProviderOperation implements Parcelable {
         return mType == TYPE_ASSERT;
     }
 
-    private ContentProviderResult fail(String msg) throws OperationApplicationException {
-        if (mFailureAllowed) {
-            return new ContentProviderResult(msg);
-        } else {
-            throw new OperationApplicationException(msg);
-        }
-    }
-
     /**
      * Applies this operation using the given provider. The backRefs array is used to resolve any
      * back references that were requested using
@@ -307,20 +299,35 @@ public class ContentProviderOperation implements Parcelable {
      */
     public ContentProviderResult apply(ContentProvider provider, ContentProviderResult[] backRefs,
             int numBackRefs) throws OperationApplicationException {
+        if (mFailureAllowed) {
+            try {
+                return applyInternal(provider, backRefs, numBackRefs);
+            } catch (Exception e) {
+                return new ContentProviderResult(e.getMessage());
+            }
+        } else {
+            return applyInternal(provider, backRefs, numBackRefs);
+        }
+    }
+
+    private ContentProviderResult applyInternal(ContentProvider provider,
+            ContentProviderResult[] backRefs, int numBackRefs)
+            throws OperationApplicationException {
         ContentValues values = resolveValueBackReferences(backRefs, numBackRefs);
         String[] selectionArgs =
                 resolveSelectionArgsBackReferences(backRefs, numBackRefs);
 
         if (mType == TYPE_INSERT) {
-            Uri newUri = provider.insert(mUri, values);
-            if (newUri == null) {
-                Log.e(TAG, this.toString());
-                return fail("Insert into " + mUri + " returned no result");
+            final Uri newUri = provider.insert(mUri, values);
+            if (newUri != null) {
+                return new ContentProviderResult(newUri);
+            } else {
+                throw new OperationApplicationException(
+                        "Insert into " + mUri + " returned no result");
             }
-            return new ContentProviderResult(newUri);
         }
 
-        int numRows;
+        final int numRows;
         if (mType == TYPE_DELETE) {
             numRows = provider.delete(mUri, mSelection, selectionArgs);
         } else if (mType == TYPE_UPDATE) {
@@ -346,8 +353,7 @@ public class ContentProviderOperation implements Parcelable {
                             final String expectedValue = values.getAsString(projection[i]);
                             if (!TextUtils.equals(cursorValue, expectedValue)) {
                                 // Throw exception when expected values don't match
-                                Log.e(TAG, this.toString());
-                                return fail("Found value " + cursorValue
+                                throw new OperationApplicationException("Found value " + cursorValue
                                         + " when expected " + expectedValue + " for column "
                                         + projection[i]);
                             }
@@ -358,13 +364,12 @@ public class ContentProviderOperation implements Parcelable {
                 cursor.close();
             }
         } else {
-            Log.e(TAG, this.toString());
             throw new IllegalStateException("bad type, " + mType);
         }
 
         if (mExpectedCount != null && mExpectedCount != numRows) {
-            Log.e(TAG, this.toString());
-            return fail("Expected " + mExpectedCount + " rows but actual " + numRows);
+            throw new OperationApplicationException(
+                    "Expected " + mExpectedCount + " rows but actual " + numRows);
         }
 
         return new ContentProviderResult(numRows);
