@@ -5370,10 +5370,6 @@ package android.os {
     field @NonNull public static final android.os.Parcelable.Creator<android.os.IncidentReportArgs> CREATOR;
   }
 
-  public final class LocaleList implements android.os.Parcelable {
-    method public static boolean isPseudoLocale(@Nullable android.icu.util.ULocale);
-  }
-
   public final class NativeHandle implements java.io.Closeable {
     ctor public NativeHandle();
     ctor public NativeHandle(@NonNull java.io.FileDescriptor, boolean);
