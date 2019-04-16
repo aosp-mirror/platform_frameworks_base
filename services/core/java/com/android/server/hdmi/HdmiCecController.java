@@ -580,7 +580,9 @@ final class HdmiCecController {
     @ServiceThreadOnly
     private void onReceiveCommand(HdmiCecMessage message) {
         assertRunOnServiceThread();
-        if (isAcceptableAddress(message.getDestination()) && mService.handleCecCommand(message)) {
+        if ((isAcceptableAddress(message.getDestination())
+            || !mService.isAddressAllocated())
+            && mService.handleCecCommand(message)) {
             return;
         }
         // Not handled message, so we will reply it with <Feature Abort>.
