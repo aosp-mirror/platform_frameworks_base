@@ -91,14 +91,6 @@ public abstract class AppOpsManagerInternal {
     public abstract void setUidMode(int code, int uid, int mode);
 
     /**
-     * Set all {@link #setMode (package) modes} for this uid to the default value.
-     *
-     * @param code The app-op
-     * @param uid The uid
-     */
-    public abstract void setAllPkgModesToDefault(int code, int uid);
-
-    /**
      * Get the (raw) mode of an app-op.
      *
      * <p>Does <u>not</u> verify that package belongs to uid. The caller needs to do that.

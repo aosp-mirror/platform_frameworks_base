@@ -1335,48 +1335,6 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
-    /**
-     * Set all {@link #setMode (package) modes} for this uid to the default value.
-     *
-     * @param code The app-op
-     * @param uid The uid
-     */
-    private void setAllPkgModesToDefault(int code, int uid) {
-        synchronized (this) {
-            UidState uidState = getUidStateLocked(uid, false);
-            if (uidState == null) {
-                return;
-            }
-
-            ArrayMap<String, Ops> pkgOps = uidState.pkgOps;
-            if (pkgOps == null) {
-                return;
-            }
-
-            boolean scheduleWrite = false;
-
-            int numPkgs = pkgOps.size();
-            for (int pkgNum = 0; pkgNum < numPkgs; pkgNum++) {
-                Ops ops = pkgOps.valueAt(pkgNum);
-
-                Op op = ops.get(code);
-                if (op == null) {
-                    continue;
-                }
-
-                int defaultMode = AppOpsManager.opToDefaultMode(code);
-                if (op.mode != defaultMode) {
-                    op.mode = defaultMode;
-                    scheduleWrite = true;
-                }
-            }
-
-            if (scheduleWrite) {
-                scheduleWriteLocked();
-            }
-        }
-    }
-
     @Override
     public void setMode(int code, int uid, String packageName, int mode) {
         setMode(code, uid, packageName, mode, true, false);
@@ -4573,11 +4531,6 @@ public class AppOpsService extends IAppOpsService.Stub {
         @Override
         public void setUidMode(int code, int uid, int mode) {
             AppOpsService.this.setUidMode(code, uid, mode);
-        }
-
-        @Override
-        public void setAllPkgModesToDefault(int code, int uid) {
-            AppOpsService.this.setAllPkgModesToDefault(code, uid);
         }
 
         @Override
