@@ -2423,6 +2423,16 @@ class PackageManagerShellCommand extends ShellCommand {
                     sessionParams.setStaged();
                     break;
                 case "--enable-rollback":
+                    if (params.installerPackageName == null) {
+                        // com.android.shell has the TEST_MANAGE_ROLLBACKS
+                        // permission needed to enable rollback for non-module
+                        // packages, which is likely what the user wants when
+                        // enabling rollback through the shell command. Set
+                        // the installer to com.android.shell if no installer
+                        // has been provided so that the user doesn't have to
+                        // remember to set it themselves.
+                        params.installerPackageName = "com.android.shell";
+                    }
                     sessionParams.installFlags |= PackageManager.INSTALL_ENABLE_ROLLBACK;
                     break;
                 default:
