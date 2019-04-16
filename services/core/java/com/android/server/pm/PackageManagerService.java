@@ -20752,8 +20752,16 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
-    public String getAttentionServicePackageName() {
-        return mContext.getString(R.string.config_defaultAttentionService);
+    public @Nullable String getAttentionServicePackageName() {
+        final String flattenedComponentName =
+                mContext.getString(R.string.config_defaultAttentionService);
+        if (flattenedComponentName != null) {
+            ComponentName componentName = ComponentName.unflattenFromString(flattenedComponentName);
+            if (componentName != null && componentName.getPackageName() != null) {
+                return componentName.getPackageName();
+            }
+        }
+        return null;
     }
 
     private @Nullable String getDocumenterPackageName() {
