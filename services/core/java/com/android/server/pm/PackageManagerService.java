@@ -9334,6 +9334,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 | SCAN_UPDATE_SIGNATURE, currentTime, user);
         if (scanResult.success) {
             synchronized (mPackages) {
+                boolean appIdCreated = false;
                 try {
                     final String pkgName = scanResult.pkgSetting.name;
                     final Map<String, ReconciledPackage> reconcileResult = reconcilePackagesLocked(
@@ -9346,11 +9347,12 @@ public class PackageManagerService extends IPackageManager.Stub
                                     Collections.singletonMap(pkgName,
                                             getSharedLibLatestVersionSetting(scanResult))),
                             mSettings.mKeySetManagerService);
-                    prepareScanResultLocked(scanResult);
-                    commitReconciledScanResultLocked(
-                            reconcileResult.get(pkgName));
+                    appIdCreated = optimisticallyRegisterAppId(scanResult);
+                    commitReconciledScanResultLocked(reconcileResult.get(pkgName));
                 } catch (PackageManagerException e) {
-                    unprepareScanResultLocked(scanResult);
+                    if (appIdCreated) {
+                        cleanUpAppIdCreation(scanResult);
+                    }
                     throw e;
                 }
             }
@@ -10837,27 +10839,32 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
 
-    /** Prepares the system to commit a {@link ScanResult} in a way that will not fail. */
-    private void prepareScanResultLocked(@NonNull ScanResult result)
+    /**
+     * Prepares the system to commit a {@link ScanResult} in a way that will not fail by registering
+     * the app ID required for reconcile.
+     * @return {@code true} if a new app ID was registered and will need to be cleaned up on
+     *         failure.
+     */
+    private boolean optimisticallyRegisterAppId(@NonNull ScanResult result)
             throws PackageManagerException {
         if (!result.existingSettingCopied) {
             // THROWS: when we can't allocate a user id. add call to check if there's
             // enough space to ensure we won't throw; otherwise, don't modify state
-            mSettings.registerAppIdLPw(result.pkgSetting);
+            return mSettings.registerAppIdLPw(result.pkgSetting);
         }
+        return false;
     }
 
     /**
-     * Reverts any changes to the system that were made by
-     * {@link #prepareScanResultLocked(ScanResult)}
+     * Reverts any app ID creation that were made by
+     * {@link #optimisticallyRegisterAppId(ScanResult)}. Note: this is only necessary if the
+     * referenced method returned true.
      */
-    private void unprepareScanResultLocked(@NonNull ScanResult result) {
-        if (!result.existingSettingCopied) {
-            // iff we've acquired an app ID for a new package setting, remove it so that it can be
-            // acquired by another request.
-            if (result.pkgSetting.appId > 0) {
-                mSettings.removeAppIdLPw(result.pkgSetting.appId);
-            }
+    private void cleanUpAppIdCreation(@NonNull ScanResult result) {
+        // iff we've acquired an app ID for a new package setting, remove it so that it can be
+        // acquired by another request.
+        if (result.pkgSetting.appId > 0) {
+            mSettings.removeAppIdLPw(result.pkgSetting.appId);
         }
     }
 
@@ -16701,6 +16708,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final Map<String, VersionInfo> versionInfos = new ArrayMap<>(requests.size());
         final Map<String, PackageSetting> lastStaticSharedLibSettings =
                 new ArrayMap<>(requests.size());
+        final Map<String, Boolean> createdAppId = new ArrayMap<>(requests.size());
         boolean success = false;
         try {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "installPackagesLI");
@@ -16740,7 +16748,7 @@ public class PackageManagerService extends IPackageManager.Stub
                                             + " in multi-package install request.");
                             return;
                         }
-                        prepareScanResultLocked(result);
+                        createdAppId.put(packageName, optimisticallyRegisterAppId(result));
                         versionInfos.put(result.pkgSetting.pkg.packageName,
                                 getSettingsVersionForPackage(result.pkgSetting.pkg));
                         if (result.staticSharedLibraryInfo != null) {
@@ -16797,7 +16805,9 @@ public class PackageManagerService extends IPackageManager.Stub
         } finally {
             if (!success) {
                 for (ScanResult result : preparedScans.values()) {
-                    unprepareScanResultLocked(result);
+                    if (createdAppId.getOrDefault(result.request.pkg.packageName, false)) {
+                        cleanUpAppIdCreation(result);
+                    }
                 }
             }
             for (PrepareResult result : prepareResults.values()) {
