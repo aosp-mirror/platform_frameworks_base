@@ -2188,32 +2188,34 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (op == null) {
                 return;
             }
-            if (!client.mStartedOps.remove(op)) {
-                // We finish ops when packages get removed to guarantee no dangling
-                // started ops. However, some part of the system may asynchronously
-                // finish ops for an already gone package. Hence, finishing an op
-                // for a non existing package is fine and we don't log as a wtf.
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    if (LocalServices.getService(PackageManagerInternal.class).getPackageUid(
-                            resolvedPackageName, 0, UserHandle.getUserId(uid)) < 0) {
-                        Slog.i(TAG, "Finishing op=" + AppOpsManager.opToName(code)
-                                + " for non-existing package=" + resolvedPackageName
-                                + " in uid=" + uid);
-                        return;
-                    }
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
+            if (client.mStartedOps.remove(op)) {
+                finishOperationLocked(op, /*finishNested*/ false);
+                if (op.startNesting <= 0) {
+                    scheduleOpActiveChangedIfNeededLocked(code, uid, packageName, false);
                 }
-                Slog.wtf(TAG, "Operation not started: uid=" + op.uidState.uid + " pkg="
-                        + op.packageName + " op=" + AppOpsManager.opToName(op.op));
+
                 return;
             }
-            finishOperationLocked(op, /*finishNested*/ false);
-            if (op.startNesting <= 0) {
-                scheduleOpActiveChangedIfNeededLocked(code, uid, packageName, false);
-            }
         }
+
+        // We finish ops when packages get removed to guarantee no dangling
+        // started ops. However, some part of the system may asynchronously
+        // finish ops for an already gone package. Hence, finishing an op
+        // for a non existing package is fine and we don't log as a wtf.
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            if (LocalServices.getService(PackageManagerInternal.class).getPackageUid(
+                    resolvedPackageName, 0, UserHandle.getUserId(uid)) < 0) {
+                Slog.i(TAG, "Finishing op=" + AppOpsManager.opToName(code)
+                        + " for non-existing package=" + resolvedPackageName
+                        + " in uid=" + uid);
+                return;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+        Slog.wtf(TAG, "Operation not started: uid=" + uid + " pkg="
+                + packageName + " op=" + AppOpsManager.opToName(code));
     }
 
     private void scheduleOpActiveChangedIfNeededLocked(int code, int uid, String packageName,
