@@ -35,7 +35,7 @@ import java.util.TimeZone;
 /**
  * Controller for Stretch clock that can appear on lock screen and AOD.
  */
-public class StretchAnalogClockController implements ClockPlugin {
+public class AnalogClockController implements ClockPlugin {
 
     /**
      * Resources used to get title and thumbnail.
@@ -60,9 +60,9 @@ public class StretchAnalogClockController implements ClockPlugin {
     /**
      * Custom clock shown on AOD screen and behind stack scroller on lock.
      */
-    private View mBigClockView;
+    private ClockLayout mBigClockView;
     private TextClock mDigitalClock;
-    private StretchAnalogClock mAnalogClock;
+    private ImageClock mAnalogClock;
 
     /**
      * Small clock shown on lock screen above stack scroller.
@@ -82,7 +82,7 @@ public class StretchAnalogClockController implements ClockPlugin {
      * @param inflater Inflater used to inflate custom clock views.
      * @param colorExtractor Extracts accent color from wallpaper.
      */
-    public StretchAnalogClockController(Resources res, LayoutInflater inflater,
+    public AnalogClockController(Resources res, LayoutInflater inflater,
             SysuiColorExtractor colorExtractor) {
         mResources = res;
         mLayoutInflater = inflater;
@@ -90,7 +90,7 @@ public class StretchAnalogClockController implements ClockPlugin {
     }
 
     private void createViews() {
-        mBigClockView = mLayoutInflater.inflate(R.layout.stretchanalog_clock, null);
+        mBigClockView = (ClockLayout) mLayoutInflater.inflate(R.layout.analog_clock, null);
         mAnalogClock = mBigClockView.findViewById(R.id.analog_clock);
         mDigitalClock = mBigClockView.findViewById(R.id.digital_clock);
 
@@ -114,17 +114,17 @@ public class StretchAnalogClockController implements ClockPlugin {
 
     @Override
     public String getName() {
-        return "stretch";
+        return "analog";
     }
 
     @Override
     public String getTitle() {
-        return mResources.getString(R.string.clock_title_stretch);
+        return mResources.getString(R.string.clock_title_analog);
     }
 
     @Override
     public Bitmap getThumbnail() {
-        return BitmapFactory.decodeResource(mResources, R.drawable.stretch_thumbnail);
+        return BitmapFactory.decodeResource(mResources, R.drawable.analog_thumbnail);
     }
 
     @Override
@@ -175,13 +175,14 @@ public class StretchAnalogClockController implements ClockPlugin {
         }
         final int length = colorPalette.length;
         mDigitalClock.setTextColor(colorPalette[Math.max(0, length - 5)]);
-        mAnalogClock.setClockColor(colorPalette[Math.max(0, length - 5)],
+        mAnalogClock.setClockColors(colorPalette[Math.max(0, length - 5)],
                 colorPalette[Math.max(0, length - 2)]);
     }
 
     @Override
     public void onTimeTick() {
         mAnalogClock.onTimeChanged();
+        mBigClockView.onTimeChanged();
         mDigitalClock.refresh();
         mLockClock.refresh();
     }
