@@ -374,4 +374,15 @@ public final class MultiClientInputMethodServiceDelegate {
     public boolean isUidAllowedOnDisplay(int displayId, int uid) {
         return mImpl.isUidAllowedOnDisplay(displayId, uid);
     }
+
+    /**
+     * Can be called by MSIME to activate/deactivate a client when it is gaining/losing focus
+     * respectively.
+     *
+     * @param clientId client ID to activate/deactivate.
+     * @param active {@code true} to activate a client.
+     */
+    public void setActive(int clientId, boolean active) {
+        mImpl.setActive(clientId, active);
+    }
 }
