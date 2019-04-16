@@ -1863,7 +1863,7 @@ public class ActivityManager {
             mTopActivityComponent = ComponentName.readFromParcel(source);
             mSnapshot = source.readParcelable(null /* classLoader */);
             int colorSpaceId = source.readInt();
-            mColorSpace = colorSpaceId >= 0
+            mColorSpace = colorSpaceId >= 0 && colorSpaceId < ColorSpace.Named.values().length
                     ? ColorSpace.get(ColorSpace.Named.values()[colorSpaceId])
                     : ColorSpace.get(ColorSpace.Named.SRGB);
             mOrientation = source.readInt();
