@@ -177,6 +177,7 @@ public final class BugreportManager {
             // Need to delete the file if it was created but failed while trying to get fd
             deleteFile(tmpScreenshotFile);
             Log.e(TAG, "Not able to create/open temporary screenshot file ", e);
+            callback.onError(BugreportCallback.BUGREPORT_ERROR_RUNTIME);
         } finally {
             // We can close the file descriptors here because binder would have duped them.
             IoUtils.closeQuietly(bugreportFd);
