@@ -16,11 +16,9 @@
 
 #include <string>
 
-#include "android-base/file.h"
-
-#include "gtest/gtest.h"
-
 #include "TestHelpers.h"
+#include "android-base/file.h"
+#include "gtest/gtest.h"
 
 namespace android::idmap2 {
 

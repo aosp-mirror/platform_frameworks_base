@@ -18,17 +18,14 @@
 #include <sstream>
 #include <string>
 
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
-
+#include "TestHelpers.h"
 #include "androidfw/ApkAssets.h"
 #include "androidfw/Idmap.h"
-
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 #include "idmap2/Idmap.h"
 #include "idmap2/Policies.h"
 #include "idmap2/PrettyPrintVisitor.h"
-
-#include "TestHelpers.h"
 
 using ::testing::NotNull;
 

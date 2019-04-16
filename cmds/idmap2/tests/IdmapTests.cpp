@@ -15,7 +15,6 @@
  */
 
 #include <cstdio>  // fclose
-
 #include <fstream>
 #include <memory>
 #include <sstream>
@@ -23,17 +22,14 @@
 #include <utility>
 #include <vector>
 
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
-
+#include "TestHelpers.h"
 #include "android-base/macros.h"
 #include "androidfw/ApkAssets.h"
-
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 #include "idmap2/BinaryStreamVisitor.h"
 #include "idmap2/CommandLineOptions.h"
 #include "idmap2/Idmap.h"
-
-#include "TestHelpers.h"
 
 using ::testing::IsNull;
 using ::testing::NotNull;

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+#include "idmap2/PrettyPrintVisitor.h"
+
 #include <string>
 
 #include "android-base/macros.h"
 #include "android-base/stringprintf.h"
 #include "androidfw/ApkAssets.h"
-
-#include "idmap2/PrettyPrintVisitor.h"
 #include "idmap2/ResourceUtils.h"
 #include "idmap2/Result.h"
 
