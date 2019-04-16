@@ -83,6 +83,8 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
     // Dual tone implies that battery level is a clipped overlay over top of the whole shape
     private var dualTone = false
 
+    private var batteryLevel = 0
+
     private val invalidateRunnable: () -> Unit = {
         invalidateSelf()
     }
@@ -177,9 +179,9 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
         unifiedPath.reset()
         levelPath.reset()
         levelRect.set(fillRect)
-        val fillFraction = level / 100f
+        val fillFraction = batteryLevel / 100f
         val fillTop =
-                if (level >= 95)
+                if (batteryLevel >= 95)
                     fillRect.top
                 else
                     fillRect.top + (fillRect.height() * (1 - fillFraction))
@@ -223,7 +225,7 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
             fillPaint.color = levelColor
 
             // Show colorError below this level
-            if (level <= Companion.CRITICAL_LEVEL && !charging) {
+            if (batteryLevel <= Companion.CRITICAL_LEVEL && !charging) {
                 c.save()
                 c.clipPath(scaledFill)
                 c.drawPath(levelPath, fillPaint)
@@ -310,13 +312,13 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
      */
     public open fun setBatteryLevel(l: Int) {
         invertFillIcon = if (l >= 67) true else if (l <= 33) false else invertFillIcon
-        level = l
-        levelColor = batteryColorForLevel(level)
+        batteryLevel = l
+        levelColor = batteryColorForLevel(batteryLevel)
         invalidateSelf()
     }
 
     public fun getBatteryLevel(): Int {
-        return level
+        return batteryLevel
     }
 
     override fun onBoundsChange(bounds: Rect?) {
@@ -343,7 +345,7 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
         dualToneBackgroundFill.color = bgColor
 
         // Also update the level color, since fillColor may have changed
-        levelColor = batteryColorForLevel(level)
+        levelColor = batteryColorForLevel(batteryLevel)
 
         invalidateSelf()
     }
