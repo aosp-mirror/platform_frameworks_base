@@ -16,9 +16,8 @@
 
 #include <string>
 
-#include "gtest/gtest.h"
-
 #include "TestHelpers.h"
+#include "gtest/gtest.h"
 #include "idmap2/Policies.h"
 
 using android::idmap2::PolicyBitmask;

@@ -23,11 +23,10 @@
 #include <string>
 #include <vector>
 
+#include "Commands.h"
 #include "idmap2/CommandLineOptions.h"
 #include "idmap2/Result.h"
 #include "idmap2/SysTrace.h"
-
-#include "Commands.h"
 
 using android::idmap2::CommandLineOptions;
 using android::idmap2::Result;

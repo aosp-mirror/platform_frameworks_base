@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include "idmap2d/Idmap2Service.h"
+
 #include <sys/stat.h>   // umask
 #include <sys/types.h>  // umask
 #include <unistd.h>
@@ -28,15 +30,12 @@
 #include "android-base/macros.h"
 #include "android-base/stringprintf.h"
 #include "binder/IPCThreadState.h"
-#include "utils/String8.h"
-
 #include "idmap2/BinaryStreamVisitor.h"
 #include "idmap2/FileUtils.h"
 #include "idmap2/Idmap.h"
 #include "idmap2/Policies.h"
 #include "idmap2/SysTrace.h"
-
-#include "idmap2d/Idmap2Service.h"
+#include "utils/String8.h"
 
 using android::IPCThreadState;
 using android::binder::Status;

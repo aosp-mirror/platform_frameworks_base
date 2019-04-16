@@ -19,5 +19,7 @@
     <application android:hasCode="false"/>
     <overlay
         android:targetPackage="test.target"
-        android:targetName="TestResources"/>
+        android:targetName="TestResources"
+        android:isStatic="true"
+        android:priority="10"/>
 </manifest>
