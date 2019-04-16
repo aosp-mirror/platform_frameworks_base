@@ -20,10 +20,6 @@ java_library {
         ],
     },
 
-    static_libs: [
-        "mediaplayer2-protos",
-    ],
-
     permitted_packages: [
         "android.media",
     ],
@@ -43,7 +39,6 @@ filegroup {
     name: "updatable-media-srcs",
     srcs: [
         ":mediasession2-srcs",
-        ":mediaplayer2-srcs",
     ],
 }
 
@@ -51,7 +46,6 @@ filegroup {
     name: "updatable-media-srcs-without-aidls",
     srcs : [
         ":mediasession2-srcs-without-aidls",
-        ":mediaplayer2-srcs",
     ],
 }
 
@@ -109,8 +103,7 @@ metalava_updatable_media_args = " --error UnhiddenSystemApi " +
     "--hide MissingPermission --hide BroadcastBehavior " +
     "--hide HiddenSuperclass --hide DeprecationMismatch --hide UnavailableSymbol " +
     "--hide SdkConstant --hide HiddenTypeParameter --hide Todo --hide Typo " +
-    "--hide HiddenTypedefConstant --show-annotation android.annotation.SystemApi " +
-    " --show-annotation android.annotation.TestApi "
+    "--hide HiddenTypedefConstant --show-annotation android.annotation.SystemApi "
 
 droidstubs {
     name: "updatable-media-stubs",
