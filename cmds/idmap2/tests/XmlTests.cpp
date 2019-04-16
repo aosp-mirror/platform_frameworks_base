@@ -16,13 +16,11 @@
 
 #include <cstdio>  // fclose
 
-#include "idmap2/Xml.h"
-#include "idmap2/ZipFile.h"
-
+#include "TestHelpers.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-
-#include "TestHelpers.h"
+#include "idmap2/Xml.h"
+#include "idmap2/ZipFile.h"
 
 using ::testing::IsNull;
 using ::testing::NotNull;

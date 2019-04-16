@@ -19,13 +19,11 @@
 #include <sstream>
 #include <string>
 
+#include "TestHelpers.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-
 #include "idmap2/Idmap.h"
 #include "idmap2/RawPrintVisitor.h"
-
-#include "TestHelpers.h"
 
 using ::testing::NotNull;
 

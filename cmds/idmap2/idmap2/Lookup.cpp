@@ -31,15 +31,14 @@
 #include "androidfw/ResourceUtils.h"
 #include "androidfw/StringPiece.h"
 #include "androidfw/Util.h"
-#include "utils/String16.h"
-#include "utils/String8.h"
-
 #include "idmap2/CommandLineOptions.h"
 #include "idmap2/Idmap.h"
 #include "idmap2/Result.h"
 #include "idmap2/SysTrace.h"
 #include "idmap2/Xml.h"
 #include "idmap2/ZipFile.h"
+#include "utils/String16.h"
+#include "utils/String8.h"
 
 using android::ApkAssets;
 using android::ApkAssetsCookie;

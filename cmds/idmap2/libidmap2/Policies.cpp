@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
+#include "idmap2/Policies.h"
+
 #include <iterator>
 #include <map>
 #include <string>
 #include <vector>
 
 #include "androidfw/ResourceTypes.h"
-
 #include "idmap2/Idmap.h"
-#include "idmap2/Policies.h"
 #include "idmap2/Result.h"
 
 namespace android::idmap2 {
