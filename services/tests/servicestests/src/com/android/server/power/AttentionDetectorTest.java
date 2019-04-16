@@ -29,6 +29,7 @@ import static org.mockito.Mockito.when;
 
 import android.attention.AttentionManagerInternal;
 import android.attention.AttentionManagerInternal.AttentionCallbackInternal;
+import android.content.pm.PackageManager;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.SystemClock;
@@ -49,6 +50,8 @@ import org.mockito.MockitoAnnotations;
 public class AttentionDetectorTest extends AndroidTestCase {
 
     @Mock
+    private PackageManager mPackageManager;
+    @Mock
     private AttentionManagerInternal mAttentionManagerInternal;
     @Mock
     private Runnable mOnUserAttention;
@@ -60,6 +63,9 @@ public class AttentionDetectorTest extends AndroidTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        when(mPackageManager.getAttentionServicePackageName()).thenReturn("com.google.android.as");
+        when(mPackageManager.checkPermission(any(), any())).thenReturn(
+                PackageManager.PERMISSION_GRANTED);
         when(mAttentionManagerInternal.checkAttention(anyLong(), any()))
                 .thenReturn(true);
         mAttentionDetector = new TestableAttentionDetector();
@@ -105,6 +111,27 @@ public class AttentionDetectorTest extends AndroidTestCase {
         long when = registerAttention();
         verify(mAttentionManagerInternal, never()).checkAttention(anyLong(), any());
         assertThat(mNextDimming).isEqualTo(when);
+    }
+
+    @Test
+    public void testOnUserActivity_doesntCheckIfNotSufficientPermissions() {
+        when(mPackageManager.checkPermission(any(), any())).thenReturn(
+                PackageManager.PERMISSION_DENIED);
+
+        long when = registerAttention();
+        verify(mAttentionManagerInternal, never()).checkAttention(anyLong(), any());
+        assertThat(mNextDimming).isEqualTo(when);
+    }
+
+    @Test
+    public void testOnUserActivity_disablesSettingIfNotSufficientPermissions() {
+        when(mPackageManager.checkPermission(any(), any())).thenReturn(
+                PackageManager.PERMISSION_DENIED);
+
+        registerAttention();
+        boolean enabled = Settings.System.getIntForUser(getContext().getContentResolver(),
+                Settings.System.ADAPTIVE_SLEEP, 0, UserHandle.USER_CURRENT) == 1;
+        assertFalse(enabled);
     }
 
     @Test
@@ -211,6 +238,8 @@ public class AttentionDetectorTest extends AndroidTestCase {
         TestableAttentionDetector() {
             super(AttentionDetectorTest.this.mOnUserAttention, new Object());
             mAttentionManager = mAttentionManagerInternal;
+            mPackageManager = AttentionDetectorTest.this.mPackageManager;
+            mContentResolver = getContext().getContentResolver();
             mMaximumExtensionMillis = 10000L;
         }
 

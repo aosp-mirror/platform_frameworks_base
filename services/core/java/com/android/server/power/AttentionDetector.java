@@ -16,9 +16,14 @@
 
 package com.android.server.power;
 
+import static android.provider.Settings.System.ADAPTIVE_SLEEP;
+
+import android.Manifest;
 import android.attention.AttentionManagerInternal;
 import android.attention.AttentionManagerInternal.AttentionCallbackInternal;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -83,6 +88,12 @@ public class AttentionDetector {
     @VisibleForTesting
     protected AttentionManagerInternal mAttentionManager;
 
+    @VisibleForTesting
+    protected PackageManager mPackageManager;
+
+    @VisibleForTesting
+    protected ContentResolver mContentResolver;
+
     /**
      * Current wakefulness of the device. {@see PowerManagerInternal}
      */
@@ -137,6 +148,8 @@ public class AttentionDetector {
 
     public void systemReady(Context context) {
         updateEnabledFromSettings(context);
+        mPackageManager = context.getPackageManager();
+        mContentResolver = context.getContentResolver();
         mAttentionManager = LocalServices.getService(AttentionManagerInternal.class);
         mMaximumExtensionMillis = context.getResources().getInteger(
                 com.android.internal.R.integer.config_attentionMaximumExtension);
@@ -159,6 +172,11 @@ public class AttentionDetector {
         }
 
         if (!isAttentionServiceSupported()) {
+            return nextScreenDimming;
+        }
+
+        if (!serviceHasSufficientPermissions()) {
+            Settings.System.putInt(mContentResolver, ADAPTIVE_SLEEP, 0);
             return nextScreenDimming;
         }
 
@@ -261,6 +279,18 @@ public class AttentionDetector {
     @VisibleForTesting
     boolean isAttentionServiceSupported() {
         return mAttentionManager != null && mAttentionManager.isAttentionServiceSupported();
+    }
+
+    /**
+     * Returns {@code true} if the attention service has sufficient permissions, disables the
+     * depending features otherwise.
+     */
+    @VisibleForTesting
+    boolean serviceHasSufficientPermissions() {
+        final String attentionPackage = mPackageManager.getAttentionServicePackageName();
+        return attentionPackage != null && mPackageManager.checkPermission(
+                Manifest.permission.CAMERA, attentionPackage)
+                == PackageManager.PERMISSION_GRANTED;
     }
 
     public void dump(PrintWriter pw) {

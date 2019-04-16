@@ -6267,7 +6267,6 @@ package android.service.attention {
 
   public abstract class AttentionService extends android.app.Service {
     ctor public AttentionService();
-    method public final void disableSelf();
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method public abstract void onCancelAttentionCheck(@NonNull android.service.attention.AttentionService.AttentionCallback);
     method public abstract void onCheckAttention(@NonNull android.service.attention.AttentionService.AttentionCallback);
