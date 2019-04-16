@@ -1305,7 +1305,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void onDisplayChanged(DisplayContent dc) {
         super.onDisplayChanged(dc);
         // Window was not laid out for this display yet, so make sure mLayoutSeq does not match.
-        if (dc != null) {
+        if (dc != null && mInputWindowHandle.displayId != dc.getDisplayId()) {
             mLayoutSeq = dc.mLayoutSeq - 1;
             mInputWindowHandle.displayId = dc.getDisplayId();
         }
