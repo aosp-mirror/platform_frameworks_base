@@ -25,6 +25,9 @@ import com.android.tradefed.testtype.IDeviceTest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
 @RunWith(DeviceJUnit4ClassRunner.class)
 public class PreloadCheck implements IDeviceTest {
     private ITestDevice mTestDevice;
@@ -65,6 +68,35 @@ public class PreloadCheck implements IDeviceTest {
         run("com.android.preload.check.Initialized", "android.animation.Animator");
     }
 
+    /**
+     * Test the classes mentioned in the embedded preloaded-classes blacklist.
+     */
+    @Test
+    public void testBlackList() throws Exception {
+        StringBuilder sb = new StringBuilder();
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(getClass()
+                .getResourceAsStream("/preloaded-classes-blacklist")))) {
+            String s;
+            while ((s = br.readLine()) != null) {
+                s = s.trim();
+                if (s.startsWith("#") || s.isEmpty()) {
+                    continue;
+                }
+                try {
+                    run("com.android.preload.check.NotInitialized", s);
+                } catch (Throwable t) {
+                    if (sb.length() > 0) {
+                        sb.append('\n');
+                    }
+                    sb.append(t.getMessage());
+                }
+            }
+        }
+        if (sb.length() > 0) {
+            throw new RuntimeException(sb.toString());
+        }
+    }
+
     private void run(String cmd, String... args) throws Exception {
         StringBuilder sb = new StringBuilder();
         sb.append("app_process ")
@@ -72,9 +104,16 @@ public class PreloadCheck implements IDeviceTest {
                 .append(" /system/bin ")
                 .append(cmd);
         for (String arg : args) {
-            sb.append(' ').append(arg);
+            sb.append(' ').append(escape(arg));
         }
         String res = mTestDevice.executeShellCommand(sb.toString());
         assertEquals(sb.toString(), "OK", res.trim());
+    }
+
+    private static String escape(String input) {
+        if (input.indexOf('$') == -1) {
+            return input;
+        }
+        return input.replace("$", "\\$");
     }
 }
