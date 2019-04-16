@@ -397,7 +397,9 @@ public class WindowStateTests extends WindowTestsBase {
         app.mLayoutSeq = 1;
         mDisplayContent.mLayoutSeq = 1;
 
-        app.onDisplayChanged(mDisplayContent);
+        DisplayContent newDisplay = createNewDisplay();
+
+        app.onDisplayChanged(newDisplay);
 
         assertThat(app.mLayoutSeq, not(is(mDisplayContent.mLayoutSeq)));
     }
