@@ -45,4 +45,12 @@ public abstract class AutofillManagerInternal {
     @Nullable
     public abstract AutofillOptions getAutofillOptions(@NonNull String packageName,
             long versionCode, @UserIdInt int userId);
+
+    /**
+     * Checks whether the given {@code uid} owns the
+     * {@link android.service.autofill.augmented.AugmentedAutofillService} implementation associated
+     * with the given {@code userId}.
+     */
+    public abstract boolean isAugmentedAutofillServiceForUser(@NonNull int callingUid,
+            @UserIdInt int userId);
 }

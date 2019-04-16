@@ -32,7 +32,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
 import android.content.res.Configuration;
 import android.content.res.Resources.Theme;
 import android.database.sqlite.SQLiteCompatibilityWalFlags;
@@ -1248,11 +1247,6 @@ public final class SystemServer {
             mSystemServiceManager.startService(CONTENT_SUGGESTIONS_SERVICE_CLASS);
             traceEnd();
 
-            // NOTE: ClipboardService indirectly depends on IntelligenceService
-            traceBeginAndSlog("StartClipboardService");
-            mSystemServiceManager.startService(ClipboardService.class);
-            traceEnd();
-
             traceBeginAndSlog("InitNetworkStackClient");
             try {
                 NetworkStackClient.getInstance().init();
@@ -1886,6 +1880,11 @@ public final class SystemServer {
             mSystemServiceManager.startService(AUTO_FILL_MANAGER_SERVICE_CLASS);
             traceEnd();
         }
+
+        // NOTE: ClipboardService depends on ContentCapture and Autofill
+        traceBeginAndSlog("StartClipboardService");
+        mSystemServiceManager.startService(ClipboardService.class);
+        traceEnd();
 
         traceBeginAndSlog("AppServiceManager");
         mSystemServiceManager.startService(AppBindingService.Lifecycle.class);
