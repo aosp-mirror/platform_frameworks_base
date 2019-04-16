@@ -271,7 +271,9 @@ public final class AppPredictor {
             if (mCloseGuard != null) {
                 mCloseGuard.warnIfOpen();
             }
-            destroy();
+            if (!mIsClosed.get()) {
+                destroy();
+            }
         } finally {
             super.finalize();
         }
