@@ -665,9 +665,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         boolean wasRunning = mFingerprintRunningState == BIOMETRIC_STATE_RUNNING;
         boolean isRunning = fingerprintRunningState == BIOMETRIC_STATE_RUNNING;
         mFingerprintRunningState = fingerprintRunningState;
-        if (DEBUG) Log.v(TAG, "Fingerprint State: " + mFingerprintRunningState);
+        Log.d(TAG, "fingerprintRunningState: " + mFingerprintRunningState);
         // Clients of KeyguardUpdateMonitor don't care about the internal state about the
-        // asynchronousness of the cancel cycle. So only notify them if the actualy running state
+        // asynchronousness of the cancel cycle. So only notify them if the actually running state
         // has changed.
         if (wasRunning != isRunning) {
             notifyFingerprintRunningStateChanged();
@@ -818,9 +818,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         boolean wasRunning = mFaceRunningState == BIOMETRIC_STATE_RUNNING;
         boolean isRunning = faceRunningState == BIOMETRIC_STATE_RUNNING;
         mFaceRunningState = faceRunningState;
-        if (DEBUG) Log.v(TAG, "Face State: " + mFaceRunningState);
+        Log.d(TAG, "faceRunningState: " + mFaceRunningState);
         // Clients of KeyguardUpdateMonitor don't care about the internal state or about the
-        // asynchronousness of the cancel cycle. So only notify them if the actualy running state
+        // asynchronousness of the cancel cycle. So only notify them if the actually running state
         // has changed.
         if (wasRunning != isRunning) {
             notifyFaceRunningStateChanged();
@@ -2045,7 +2045,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      */
     public void onKeyguardVisibilityChanged(boolean showing) {
         checkIsHandlerThread();
-        if (DEBUG) Log.d(TAG, "onKeyguardVisibilityChanged(" + showing + ")");
+        Log.d(TAG, "onKeyguardVisibilityChanged(" + showing + ")");
         mKeyguardIsVisible = showing;
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();

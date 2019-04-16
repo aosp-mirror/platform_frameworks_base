@@ -18,43 +18,42 @@
 
 #include "core_jni_helpers.h"
 
-namespace {
+void* android::nio_getPointer(JNIEnv *_env, jobject buffer, jarray *array) {
+    assert(array);
 
-void* getPointer(JNIEnv *_env, jobject buffer, jarray *array, void** elements) {
     jint position;
     jint limit;
     jint elementSizeShift;
     jlong pointer = jniGetNioBufferFields(_env, buffer, &position, &limit, &elementSizeShift);
     if (pointer != 0L) {
-        *array = nullptr;
-        *elements = nullptr;
         pointer += position << elementSizeShift;
         return reinterpret_cast<void*>(pointer);
     }
+
     jint offset = jniGetNioBufferBaseArrayOffset(_env, buffer);
     *array = jniGetNioBufferBaseArray(_env, buffer);
-    *elements = _env->GetPrimitiveArrayCritical(*array, (jboolean *) 0);
-    return reinterpret_cast<void*>(reinterpret_cast<char*>(*elements) + offset);
+    void * data = _env->GetPrimitiveArrayCritical(*array, (jboolean *) 0);
+    return reinterpret_cast<void*>(reinterpret_cast<char*>(data) + offset);
 }
 
-void releasePointer(JNIEnv *_env, jarray array, void *elements, jboolean commit) {
-    _env->ReleasePrimitiveArrayCritical(array, elements, commit ? 0 : JNI_ABORT);
+
+void android::nio_releasePointer(JNIEnv *_env, jarray array, void *data,
+                                jboolean commit) {
+    _env->ReleasePrimitiveArrayCritical(array, data,
+                                        commit ? 0 : JNI_ABORT);
 }
 
-}  // namespace
+///////////////////////////////////////////////////////////////////////////////
 
-namespace android {
-
-AutoBufferPointer::AutoBufferPointer(JNIEnv* env, jobject nioBuffer, jboolean commit) {
+android::AutoBufferPointer::AutoBufferPointer(JNIEnv* env, jobject nioBuffer,
+                                              jboolean commit) {
     fEnv = env;
     fCommit = commit;
-    fPointer = getPointer(env, nioBuffer, &fArray, &fElements);
+    fPointer = android::nio_getPointer(env, nioBuffer, &fArray);
 }
 
-AutoBufferPointer::~AutoBufferPointer() {
-    if (nullptr != fArray) {
-        releasePointer(fEnv, fArray, fElements, fCommit);
+android::AutoBufferPointer::~AutoBufferPointer() {
+    if (NULL != fArray) {
+        android::nio_releasePointer(fEnv, fArray, fPointer, fCommit);
     }
 }
-
-}  // namespace android

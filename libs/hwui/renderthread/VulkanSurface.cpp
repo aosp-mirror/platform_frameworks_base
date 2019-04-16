@@ -16,12 +16,12 @@
 
 #include "VulkanSurface.h"
 
-#include <algorithm>
 #include <SkSurface.h>
+#include <algorithm>
 
 #include "VulkanManager.h"
-#include "utils/TraceUtils.h"
 #include "utils/Color.h"
+#include "utils/TraceUtils.h"
 
 namespace android {
 namespace uirenderer {
@@ -31,10 +31,9 @@ static bool IsTransformSupported(int transform) {
     // For now, only support pure rotations, not flip or flip-and-rotate, until we have
     // more time to test them and build sample code. As far as I know we never actually
     // use anything besides pure rotations anyway.
-    return transform == 0
-        || transform == NATIVE_WINDOW_TRANSFORM_ROT_90
-        || transform == NATIVE_WINDOW_TRANSFORM_ROT_180
-        || transform == NATIVE_WINDOW_TRANSFORM_ROT_270;
+    return transform == 0 || transform == NATIVE_WINDOW_TRANSFORM_ROT_90 ||
+           transform == NATIVE_WINDOW_TRANSFORM_ROT_180 ||
+           transform == NATIVE_WINDOW_TRANSFORM_ROT_270;
 }
 
 static int InvertTransform(int transform) {
@@ -85,16 +84,16 @@ static SkMatrix GetPreTransformMatrix(SkISize windowSize, int transform) {
 }
 
 void VulkanSurface::ComputeWindowSizeAndTransform(WindowInfo* windowInfo, const SkISize& minSize,
-                                                   const SkISize& maxSize) {
+                                                  const SkISize& maxSize) {
     SkISize& windowSize = windowInfo->size;
 
     // clamp width & height to handle currentExtent of -1 and  protect us from broken hints
-    if (windowSize.width() < minSize.width() || windowSize.width() > maxSize.width()
-        || windowSize.height() < minSize.height() || windowSize.height() > maxSize.height()) {
+    if (windowSize.width() < minSize.width() || windowSize.width() > maxSize.width() ||
+        windowSize.height() < minSize.height() || windowSize.height() > maxSize.height()) {
         int width = std::min(maxSize.width(), std::max(minSize.width(), windowSize.width()));
         int height = std::min(maxSize.height(), std::max(minSize.height(), windowSize.height()));
-        ALOGE("Invalid Window Dimensions [%d, %d]; clamping to [%d, %d]",
-              windowSize.width(), windowSize.height(), width, height);
+        ALOGE("Invalid Window Dimensions [%d, %d]; clamping to [%d, %d]", windowSize.width(),
+              windowSize.height(), width, height);
         windowSize.set(width, height);
     }
 
@@ -145,12 +144,8 @@ class VkSurfaceAutoDeleter {
 public:
     VkSurfaceAutoDeleter(VkInstance instance, VkSurfaceKHR surface,
                          PFN_vkDestroySurfaceKHR destroySurfaceKHR)
-            : mInstance(instance)
-            , mSurface(surface)
-            , mDestroySurfaceKHR(destroySurfaceKHR) {}
-    ~VkSurfaceAutoDeleter() {
-        destroy();
-    }
+            : mInstance(instance), mSurface(surface), mDestroySurfaceKHR(destroySurfaceKHR) {}
+    ~VkSurfaceAutoDeleter() { destroy(); }
 
     void destroy() {
         if (mSurface != VK_NULL_HANDLE) {
@@ -166,9 +161,9 @@ private:
 };
 
 VulkanSurface* VulkanSurface::Create(ANativeWindow* window, ColorMode colorMode,
-                                       SkColorType colorType, sk_sp<SkColorSpace> colorSpace,
-                                       GrContext* grContext, const VulkanManager& vkManager) {
-
+                                     SkColorType colorType, sk_sp<SkColorSpace> colorSpace,
+                                     GrContext* grContext, const VulkanManager& vkManager,
+                                     uint32_t extraBuffers) {
     VkAndroidSurfaceCreateInfoKHR surfaceCreateInfo;
     memset(&surfaceCreateInfo, 0, sizeof(VkAndroidSurfaceCreateInfoKHR));
     surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR;
@@ -188,10 +183,11 @@ VulkanSurface* VulkanSurface::Create(ANativeWindow* window, ColorMode colorMode,
                                           vkManager.mDestroySurfaceKHR);
 
     SkDEBUGCODE(VkBool32 supported; res = vkManager.mGetPhysicalDeviceSurfaceSupportKHR(
-            vkManager.mPhysicalDevice, vkManager.mPresentQueueIndex, vkSurface, &supported);
-    // All physical devices and queue families on Android must be capable of
-    // presentation with any native window.
-    SkASSERT(VK_SUCCESS == res && supported););
+                                            vkManager.mPhysicalDevice, vkManager.mPresentQueueIndex,
+                                            vkSurface, &supported);
+                // All physical devices and queue families on Android must be capable of
+                // presentation with any native window.
+                SkASSERT(VK_SUCCESS == res && supported););
 
     // check for capabilities
     VkSurfaceCapabilitiesKHR caps;
@@ -225,14 +221,13 @@ VulkanSurface* VulkanSurface::Create(ANativeWindow* window, ColorMode colorMode,
     int query_value;
     int err = window->query(window, NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS, &query_value);
     if (err != 0 || query_value < 0) {
-        ALOGE("window->query failed: %s (%d) value=%d", strerror(-err), err,
-              query_value);
+        ALOGE("window->query failed: %s (%d) value=%d", strerror(-err), err, query_value);
         return nullptr;
     }
     auto min_undequeued_buffers = static_cast<uint32_t>(query_value);
 
-    windowInfo.bufferCount = min_undequeued_buffers
-            + std::max(VulkanSurface::sTargetBufferCount, caps.minImageCount);
+    windowInfo.bufferCount = min_undequeued_buffers +
+                             std::max(sTargetBufferCount + extraBuffers, caps.minImageCount);
     if (caps.maxImageCount > 0 && windowInfo.bufferCount > caps.maxImageCount) {
         // Application must settle for fewer images than desired:
         windowInfo.bufferCount = caps.maxImageCount;
@@ -241,8 +236,7 @@ VulkanSurface* VulkanSurface::Create(ANativeWindow* window, ColorMode colorMode,
     // Currently Skia requires the images to be color attachments and support all transfer
     // operations.
     VkImageUsageFlags usageFlags = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
-                                   VK_IMAGE_USAGE_SAMPLED_BIT |
-                                   VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
+                                   VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
                                    VK_IMAGE_USAGE_TRANSFER_DST_BIT;
     LOG_ALWAYS_FATAL_IF((caps.supportedUsageFlags & usageFlags) != usageFlags);
 
@@ -336,7 +330,8 @@ bool VulkanSurface::UpdateWindow(ANativeWindow* window, const WindowInfo& window
     err = native_window_set_buffers_data_space(window, windowInfo.dataspace);
     if (err != 0) {
         ALOGE("VulkanSurface::UpdateWindow() native_window_set_buffers_data_space(%d) "
-              "failed: %s (%d)", windowInfo.dataspace, strerror(-err), err);
+              "failed: %s (%d)",
+              windowInfo.dataspace, strerror(-err), err);
         return false;
     }
 
@@ -344,7 +339,8 @@ bool VulkanSurface::UpdateWindow(ANativeWindow* window, const WindowInfo& window
     err = native_window_set_buffers_dimensions(window, size.width(), size.height());
     if (err != 0) {
         ALOGE("VulkanSurface::UpdateWindow() native_window_set_buffers_dimensions(%d,%d) "
-              "failed: %s (%d)", size.width(), size.height(), strerror(-err), err);
+              "failed: %s (%d)",
+              size.width(), size.height(), strerror(-err), err);
         return false;
     }
 
@@ -357,7 +353,8 @@ bool VulkanSurface::UpdateWindow(ANativeWindow* window, const WindowInfo& window
     err = native_window_set_buffers_transform(window, InvertTransform(windowInfo.transform));
     if (err != 0) {
         ALOGE("VulkanSurface::UpdateWindow() native_window_set_buffers_transform(%d) "
-              "failed: %s (%d)", windowInfo.transform, strerror(-err), err);
+              "failed: %s (%d)",
+              windowInfo.transform, strerror(-err), err);
         return false;
     }
 
@@ -366,7 +363,8 @@ bool VulkanSurface::UpdateWindow(ANativeWindow* window, const WindowInfo& window
     err = native_window_set_scaling_mode(window, NATIVE_WINDOW_SCALING_MODE_FREEZE);
     if (err != 0) {
         ALOGE("VulkanSurface::UpdateWindow() native_window_set_scaling_mode(SCALE_TO_WINDOW) "
-              "failed: %s (%d)", strerror(-err), err);
+              "failed: %s (%d)",
+              strerror(-err), err);
         return false;
     }
 
@@ -388,12 +386,12 @@ bool VulkanSurface::UpdateWindow(ANativeWindow* window, const WindowInfo& window
 }
 
 VulkanSurface::VulkanSurface(ANativeWindow* window, const WindowInfo& windowInfo,
-                               SkISize minWindowSize, SkISize maxWindowSize, GrContext* grContext)
+                             SkISize minWindowSize, SkISize maxWindowSize, GrContext* grContext)
         : mNativeWindow(window)
         , mWindowInfo(windowInfo)
         , mGrContext(grContext)
         , mMinWindowSize(minWindowSize)
-        , mMaxWindowSize(maxWindowSize) { }
+        , mMaxWindowSize(maxWindowSize) {}
 
 VulkanSurface::~VulkanSurface() {
     releaseBuffers();
@@ -436,8 +434,7 @@ VulkanSurface::NativeBufferInfo* VulkanSurface::dequeueNativeBuffer() {
     // value at the end of the function if everything dequeued correctly.
     mCurrentBufferInfo = nullptr;
 
-
-    //check if the native window has been resized or rotated and update accordingly
+    // check if the native window has been resized or rotated and update accordingly
     SkISize newSize = SkISize::MakeEmpty();
     int transformHint = 0;
     mNativeWindow->query(mNativeWindow.get(), NATIVE_WINDOW_WIDTH, &newSize.fWidth);
@@ -457,8 +454,8 @@ VulkanSurface::NativeBufferInfo* VulkanSurface::dequeueNativeBuffer() {
                                                        newWindowInfo.actualSize.height());
             if (err != 0) {
                 ALOGE("native_window_set_buffers_dimensions(%d,%d) failed: %s (%d)",
-                      newWindowInfo.actualSize.width(),
-                      newWindowInfo.actualSize.height(), strerror(-err), err);
+                      newWindowInfo.actualSize.width(), newWindowInfo.actualSize.height(),
+                      strerror(-err), err);
                 return nullptr;
             }
             // reset the NativeBufferInfo (including SkSurface) associated with the old buffers. The
@@ -469,7 +466,7 @@ VulkanSurface::NativeBufferInfo* VulkanSurface::dequeueNativeBuffer() {
 
         if (newWindowInfo.transform != mWindowInfo.transform) {
             err = native_window_set_buffers_transform(mNativeWindow.get(),
-                    InvertTransform(newWindowInfo.transform));
+                                                      InvertTransform(newWindowInfo.transform));
             if (err != 0) {
                 ALOGE("native_window_set_buffers_transform(%d) failed: %s (%d)",
                       newWindowInfo.transform, strerror(-err), err);
@@ -512,11 +509,9 @@ VulkanSurface::NativeBufferInfo* VulkanSurface::dequeueNativeBuffer() {
     VulkanSurface::NativeBufferInfo* bufferInfo = &mNativeBuffers[idx];
 
     if (bufferInfo->skSurface.get() == nullptr) {
-        bufferInfo->skSurface =
-                SkSurface::MakeFromAHardwareBuffer(mGrContext,
-                        ANativeWindowBuffer_getHardwareBuffer(bufferInfo->buffer.get()),
-                        kTopLeft_GrSurfaceOrigin, DataSpaceToColorSpace(mWindowInfo.dataspace),
-                        nullptr);
+        bufferInfo->skSurface = SkSurface::MakeFromAHardwareBuffer(
+                mGrContext, ANativeWindowBuffer_getHardwareBuffer(bufferInfo->buffer.get()),
+                kTopLeft_GrSurfaceOrigin, DataSpaceToColorSpace(mWindowInfo.dataspace), nullptr);
         if (bufferInfo->skSurface.get() == nullptr) {
             ALOGE("SkSurface::MakeFromAHardwareBuffer failed");
             mNativeWindow->cancelBuffer(mNativeWindow.get(), buffer, fence_fd);
@@ -530,19 +525,19 @@ VulkanSurface::NativeBufferInfo* VulkanSurface::dequeueNativeBuffer() {
 
 bool VulkanSurface::presentCurrentBuffer(const SkRect& dirtyRect, int semaphoreFd) {
     if (!dirtyRect.isEmpty()) {
-        SkRect transformedRect;
-        mWindowInfo.preTransform.mapRect(&transformedRect, dirtyRect);
 
-        SkIRect transformedIRect;
-        transformedRect.roundOut(&transformedIRect);
-        transformedIRect.intersect(0, 0, mWindowInfo.size.fWidth, mWindowInfo.size.fHeight);
+        // native_window_set_surface_damage takes a rectangle in prerotated space
+        // with a bottom-left origin. That is, top > bottom.
+        // The dirtyRect is also in prerotated space, so we just need to switch it to
+        // a bottom-left origin space.
 
-        // map to bottom-left coordinate system
+        SkIRect irect;
+        dirtyRect.roundOut(&irect);
         android_native_rect_t aRect;
-        aRect.left = transformedIRect.x();
-        aRect.top = mWindowInfo.size.fHeight - (transformedIRect.y() + transformedIRect.height());
-        aRect.right = aRect.left + transformedIRect.width();
-        aRect.bottom = aRect.top - transformedIRect.height();
+        aRect.left = irect.left();
+        aRect.top = logicalHeight() - irect.top();
+        aRect.right = irect.right();
+        aRect.bottom = logicalHeight() - irect.bottom();
 
         int err = native_window_set_surface_damage(mNativeWindow.get(), &aRect, 1);
         ALOGE_IF(err != 0, "native_window_set_surface_damage failed: %s (%d)", strerror(-err), err);

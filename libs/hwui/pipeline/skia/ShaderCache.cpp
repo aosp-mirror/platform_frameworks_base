@@ -15,6 +15,7 @@
  */
 
 #include "ShaderCache.h"
+#include <GrContext.h>
 #include <log/log.h>
 #include <openssl/sha.h>
 #include <algorithm>
@@ -23,7 +24,6 @@
 #include "FileBlobCache.h"
 #include "Properties.h"
 #include "utils/TraceUtils.h"
-#include <GrContext.h>
 
 namespace android {
 namespace uirenderer {

@@ -534,17 +534,18 @@ Maybe<int> ParseSdkVersion(const StringPiece& str) {
   }
 
   // Try parsing the code name.
-  std::pair<StringPiece, int> entry = GetDevelopmentSdkCodeNameAndVersion();
-  if (entry.first == trimmed_str) {
-    return entry.second;
+  Maybe<int> entry = GetDevelopmentSdkCodeNameVersion(trimmed_str);
+  if (entry) {
+    return entry.value();
   }
 
   // Try parsing codename from "[codename].[preview_sdk_fingerprint]" value.
   const StringPiece::const_iterator begin = std::begin(trimmed_str);
   const StringPiece::const_iterator end = std::end(trimmed_str);
   const StringPiece::const_iterator codename_end = std::find(begin, end, '.');
-  if (codename_end != end && entry.first == trimmed_str.substr(begin, codename_end)) {
-    return entry.second;
+  entry = GetDevelopmentSdkCodeNameVersion(trimmed_str.substr(begin, codename_end));
+  if (entry) {
+    return entry.value();
   }
   return {};
 }

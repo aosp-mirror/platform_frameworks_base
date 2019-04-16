@@ -4710,10 +4710,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @ShellCommandResult
     private int handleShellCommandEnableDisableInputMethod(
             @NonNull ShellCommand shellCommand, boolean enabled) {
+        final int userIdToBeResolved = handleOptionsForCommandsThatOnlyHaveUserOption(shellCommand);
         final String imeId = shellCommand.getNextArgRequired();
         final PrintWriter out = shellCommand.getOutPrintWriter();
         final PrintWriter error = shellCommand.getErrPrintWriter();
-        final int userIdToBeResolved = handleOptionsForCommandsThatOnlyHaveUserOption(shellCommand);
         synchronized (mMethodMap) {
             final int[] userIds = InputMethodUtils.resolveUserId(userIdToBeResolved,
                     mSettings.getCurrentUserId(), shellCommand.getErrPrintWriter());
@@ -4732,6 +4732,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      * A special helper method for commands that only have {@code -u} and {@code --user} options.
      *
      * <p>You cannot use this helper method if the command has other options.</p>
+     *
+     * <p>CAVEAT: This method must be called only once before any other
+     * {@link ShellCommand#getNextArg()} and {@link ShellCommand#getNextArgRequired()} for the
+     * main arguments.</p>
      *
      * @param shellCommand {@link ShellCommand} from which options should be obtained.
      * @return User ID to be resolved. {@link UserHandle#CURRENT} if not specified.
@@ -4819,10 +4823,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @BinderThread
     @ShellCommandResult
     private int handleShellCommandSetInputMethod(@NonNull ShellCommand shellCommand) {
+        final int userIdToBeResolved = handleOptionsForCommandsThatOnlyHaveUserOption(shellCommand);
         final String imeId = shellCommand.getNextArgRequired();
         final PrintWriter out = shellCommand.getOutPrintWriter();
         final PrintWriter error = shellCommand.getErrPrintWriter();
-        final int userIdToBeResolved = handleOptionsForCommandsThatOnlyHaveUserOption(shellCommand);
         synchronized (mMethodMap) {
             final int[] userIds = InputMethodUtils.resolveUserId(userIdToBeResolved,
                     mSettings.getCurrentUserId(), shellCommand.getErrPrintWriter());
@@ -4864,7 +4868,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     out.print("Input method ");
                     out.print(imeId);
                     out.print(" selected for user #");
-                    error.println(userId);
+                    out.println(userId);
                 }
             }
         }

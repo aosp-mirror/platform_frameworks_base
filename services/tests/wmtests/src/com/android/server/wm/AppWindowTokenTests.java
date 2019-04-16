@@ -52,6 +52,7 @@ import android.view.Display;
 import android.view.Surface;
 import android.view.WindowManager;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
@@ -383,6 +384,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 130392471)
     public void testAddRemoveRace() {
         // There was once a race condition between adding and removing starting windows
         for (int i = 0; i < 1000; i++) {

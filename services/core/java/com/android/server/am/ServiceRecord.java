@@ -73,6 +73,10 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     final ComponentName name; // service component.
     final ComponentName instanceName; // service component's per-instance name.
     final String shortInstanceName; // instanceName.flattenToShortString().
+    final String definingPackageName;
+                            // Can be different from appInfo.packageName for external services
+    final int definingUid;
+                            // Can be different from appInfo.uid for external services
     final Intent.FilterComparison intent;
                             // original intent used to find service.
     final ServiceInfo serviceInfo;
@@ -474,7 +478,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
 
     ServiceRecord(ActivityManagerService ams,
             BatteryStatsImpl.Uid.Pkg.Serv servStats, ComponentName name,
-            ComponentName instanceName,
+            ComponentName instanceName, String definingPackageName, int definingUid,
             Intent.FilterComparison intent, ServiceInfo sInfo, boolean callerIsFg,
             Runnable restarter) {
         this.ams = ams;
@@ -482,6 +486,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         this.name = name;
         this.instanceName = instanceName;
         shortInstanceName = instanceName.flattenToShortString();
+        this.definingPackageName = definingPackageName;
+        this.definingUid = definingUid;
         this.intent = intent;
         serviceInfo = sInfo;
         appInfo = sInfo.applicationInfo;

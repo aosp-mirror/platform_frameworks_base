@@ -769,14 +769,12 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                                 + " old=" + r.app + " new=" + proc);
             }
 
-            proc.clearWaitingToKill();
             r.launchCount++;
             r.lastLaunchTime = SystemClock.uptimeMillis();
 
             if (DEBUG_ALL) Slog.v(TAG, "Launching: " + r);
 
             proc.addActivityIfNeeded(r);
-            proc.updateProcessInfo(false, true, true, true);
 
             final LockTaskController lockTaskController = mService.getLockTaskController();
             if (task.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE
@@ -814,7 +812,6 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 r.forceNewConfig = false;
                 mService.getAppWarningsLocked().onStartActivity(r);
                 r.compat = mService.compatibilityInfoForPackageLocked(r.info.applicationInfo);
-                ProfilerInfo profilerInfo = proc.onStartActivity(mService.mTopProcessState);
 
                 // Because we could be starting an Activity in the system process this may not go
                 // across a Binder interface which would create a new Configuration. Consequently
@@ -840,7 +837,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                         mergedConfiguration.getOverrideConfiguration(), r.compat,
                         r.launchedFromPackage, task.voiceInteractor, proc.getReportedProcState(),
                         r.icicle, r.persistentState, results, newIntents,
-                        dc.isNextTransitionForward(), profilerInfo));
+                        dc.isNextTransitionForward(), proc.createProfilerInfoIfNeeded()));
 
                 // Set desired final state.
                 final ActivityLifecycleItem lifecycleItem;
@@ -910,6 +907,9 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                     "Moving to PAUSED: " + r + " (starting in paused state)");
             r.setState(PAUSED, "realStartActivityLocked");
         }
+        // Perform OOM scoring after the activity state is set, so the process can be updated with
+        // the latest state.
+        proc.onStartActivity(mService.mTopProcessState, r.info);
 
         // Launch the new version setup screen if needed.  We do this -after-
         // launching the initial activity (that is, home), so that it can have
@@ -960,13 +960,6 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         boolean knownToBeDead = false;
         if (wpc != null && wpc.hasThread()) {
             try {
-                if ((r.info.flags & ActivityInfo.FLAG_MULTIPROCESS) == 0
-                        || !"android".equals(r.info.packageName)) {
-                    // Don't add this if it is a platform component that is marked to run in
-                    // multiple processes, because this is actually part of the framework so doesn't
-                    // make sense to track as a separate apk in the process.
-                    wpc.addPackage(r.info.packageName, r.info.applicationInfo.longVersionCode);
-                }
                 realStartActivityLocked(r, wpc, andResume, checkConfig);
                 return;
             } catch (RemoteException e) {

@@ -1523,9 +1523,11 @@ public class AudioService extends IAudioService.Stub
                 + ", flags=" + flags + ", caller=" + caller
                 + ", volControlStream=" + mVolumeControlStream
                 + ", userSelect=" + mUserSelectedVolumeControlStream);
-        sVolumeLogger.log(new VolumeEvent(VolumeEvent.VOL_ADJUST_SUGG_VOL, suggestedStreamType,
-                direction/*val1*/, flags/*val2*/, new StringBuilder(callingPackage)
-                        .append("/").append(caller).append(" uid:").append(uid).toString()));
+        if (direction != AudioManager.ADJUST_SAME) {
+            sVolumeLogger.log(new VolumeEvent(VolumeEvent.VOL_ADJUST_SUGG_VOL, suggestedStreamType,
+                    direction/*val1*/, flags/*val2*/, new StringBuilder(callingPackage)
+                    .append("/").append(caller).append(" uid:").append(uid).toString()));
+        }
         final int streamType;
         synchronized (mForceControlStreamLock) {
             // Request lock in case mVolumeControlStream is changed by other thread.
@@ -5578,6 +5580,10 @@ public class AudioService extends IAudioService.Stub
         return mMediaFocusControl.getFocusRampTimeMs(focusGain, attr);
     }
 
+    /*package*/ boolean hasAudioFocusUsers() {
+        return mMediaFocusControl.hasAudioFocusUsers();
+    }
+
     //==========================================================================================
     private boolean readCameraSoundForced() {
         return SystemProperties.getBoolean("audio.camerasound.force", false) ||
@@ -6320,6 +6326,11 @@ public class AudioService extends IAudioService.Stub
         @Override
         public void adjustStreamVolumeForUid(int streamType, int direction, int flags,
                 String callingPackage, int uid) {
+            if (direction != AudioManager.ADJUST_SAME) {
+                sVolumeLogger.log(new VolumeEvent(VolumeEvent.VOL_ADJUST_VOL_UID, streamType,
+                        direction/*val1*/, flags/*val2*/, new StringBuilder(callingPackage)
+                        .append(" uid:").append(uid).toString()));
+            }
             adjustStreamVolume(streamType, direction, flags, callingPackage,
                     callingPackage, uid);
         }
@@ -6658,6 +6669,13 @@ public class AudioService extends IAudioService.Stub
                     duckingBehavior == AudioPolicy.FOCUS_POLICY_DUCKING_IN_POLICY);
         }
         return AudioManager.SUCCESS;
+    }
+
+    /** see AudioManager.hasRegisteredDynamicPolicy */
+    public boolean hasRegisteredDynamicPolicy() {
+        synchronized (mAudioPolicies) {
+            return !mAudioPolicies.isEmpty();
+        }
     }
 
     private final Object mExtVolumeControllerLock = new Object();

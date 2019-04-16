@@ -20,26 +20,35 @@ import android.annotation.NonNull;
 import android.media.AudioAttributes.AttributeUsage;
 import android.media.audiopolicy.AudioMix;
 import android.media.audiopolicy.AudioMixingRule;
+import android.media.audiopolicy.AudioMixingRule.AudioMixMatchCriterion;
 import android.media.projection.MediaProjection;
 import android.os.RemoteException;
 
 import com.android.internal.util.Preconditions;
 
+import java.util.function.ToIntFunction;
+
 /**
  * Configuration for capturing audio played by other apps.
  *
- * Only the following audio can be captured:
- *  - usage MUST be {@link AudioAttributes#USAGE_UNKNOWN} or {@link AudioAttributes#USAGE_GAME}
+ *  When capturing audio signals played by other apps (and yours),
+ *  you will only capture a mix of the audio signals played by players
+ *  (such as AudioTrack or MediaPlayer) which present the following characteristics:
+ *  - the usage value MUST be {@link AudioAttributes#USAGE_UNKNOWN} or
+ *    {@link AudioAttributes#USAGE_GAME}
  *    or {@link AudioAttributes#USAGE_MEDIA}. All other usages CAN NOT be captured.
- *  - audio attributes MUST have its ${@link AudioAttributes.Builder#setAllowedCapturePolicy}
- *    to {@link AudioAttributes#ALLOW_CAPTURE_BY_ALL}.
- *  - played by apps that MUST be in the same user profile as the capturing app
- *    (eg work profile can not capture user profile apps and vice-versa).
- *  - played by apps for which the attribute allowAudioPlaybackCapture in their manifest
+ *  - AND the capture policy set by their app (with ${@link AudioManager#setAllowedCapturePolicy})
+ *    or on each player (with ${@link AudioAttributes.Builder#setAllowedCapturePolicy}) is
+ *    {@link AudioAttributes#ALLOW_CAPTURE_BY_ALL}, whichever is the most strict.
+ *  - AND their app attribute allowAudioPlaybackCapture in their manifest
  *    MUST either be:
  *      * set to "true"
- *      * not set, and their targetSdkVersion MUST be equal or higher to
+ *      * not set, and their {@code targetSdkVersion} MUST be equal or higher to
  *        {@link android.os.Build.VERSION_CODES#Q}.
+ *        Ie. Apps that do not target at least Android Q must explicitly opt-in to be captured by a
+ *            MediaProjection.
+ *  - AND their apps MUST be in the same user profile as your app
+ *    (eg work profile can not capture user profile apps and vice-versa).
  *
  * <p>An example for creating a capture configuration for capturing all media playback:
  *
@@ -77,6 +86,39 @@ public final class AudioPlaybackCaptureConfiguration {
         return mProjection;
     }
 
+    /** @return the usages passed to {@link Builder#addMatchingUsage(int)}. */
+    @AttributeUsage
+    public @NonNull int[] getMatchingUsages() {
+        return getIntPredicates(AudioMixingRule.RULE_MATCH_ATTRIBUTE_USAGE,
+                                criterion -> criterion.getAudioAttributes().getUsage());
+    }
+
+    /** @return the UIDs passed to {@link Builder#addMatchingUid(int)}. */
+    public @NonNull int[] getMatchingUids() {
+        return getIntPredicates(AudioMixingRule.RULE_MATCH_UID,
+                                criterion -> criterion.getIntProp());
+    }
+
+    /** @return the usages passed to {@link Builder#excludeUsage(int)}. */
+    @AttributeUsage
+    public @NonNull int[] getExcludeUsages() {
+        return getIntPredicates(AudioMixingRule.RULE_EXCLUDE_ATTRIBUTE_USAGE,
+                                criterion -> criterion.getAudioAttributes().getUsage());
+    }
+
+    /** @return the UIDs passed to {@link Builder#excludeUid(int)}.  */
+    public @NonNull int[] getExcludeUids() {
+        return getIntPredicates(AudioMixingRule.RULE_EXCLUDE_UID,
+                                criterion -> criterion.getIntProp());
+    }
+
+    private int[] getIntPredicates(int rule,
+                                   ToIntFunction<AudioMixMatchCriterion> getPredicate) {
+        return mAudioMixingRule.getCriteria().stream()
+            .filter(criterion -> criterion.getRule() == rule)
+            .mapToInt(getPredicate)
+            .toArray();
+    }
 
     /**
      * Returns a mix that routes audio back into the app while still playing it from the speakers.

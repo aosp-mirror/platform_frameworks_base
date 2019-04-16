@@ -2753,7 +2753,7 @@ class ActivityStack extends ConfigurationContainer {
             // happens to be sitting towards the end.
             if (next.attachedToProcess()) {
                 next.app.updateProcessInfo(false /* updateServiceConnectionActivities */,
-                        true /* updateLru */, true /* activityChange */, false /* updateOomAdj */);
+                        true /* activityChange */, false /* updateOomAdj */);
             }
             if (lastResumed != null) {
                 lastResumed.setWillCloseOrEnterPip(true);
@@ -2903,7 +2903,7 @@ class ActivityStack extends ConfigurationContainer {
             next.setState(RESUMED, "resumeTopActivityInnerLocked");
 
             next.app.updateProcessInfo(false /* updateServiceConnectionActivities */,
-                    true /* updateLru */, true /* activityChange */, true /* updateOomAdj */);
+                    true /* activityChange */, true /* updateOomAdj */);
             updateLRUListLocked(next);
 
             // Have the window manager re-evaluate the orientation of
@@ -4600,7 +4600,8 @@ class ActivityStack extends ConfigurationContainer {
                     // Update any services we are bound to that might care about whether
                     // their client may have activities.
                     // No longer have activities, so update LRU list and oom adj.
-                    r.app.updateProcessInfo(true, true, false, true);
+                    r.app.updateProcessInfo(true /* updateServiceConnectionActivities */,
+                            false /* activityChange */, true /* updateOomAdj */);
                 }
             }
 

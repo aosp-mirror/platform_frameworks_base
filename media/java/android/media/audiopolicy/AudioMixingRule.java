@@ -18,6 +18,7 @@ package android.media.audiopolicy;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.media.AudioAttributes;
 import android.os.Parcel;
@@ -41,6 +42,7 @@ import java.util.Objects;
  *         .build();
  * </pre>
  */
+@TestApi
 @SystemApi
 public class AudioMixingRule {
 
@@ -92,7 +94,8 @@ public class AudioMixingRule {
     public static final int RULE_EXCLUDE_UID =
             RULE_EXCLUSION_MASK | RULE_MATCH_UID;
 
-    static final class AudioMixMatchCriterion {
+    /** @hide */
+    public static final class AudioMixMatchCriterion {
         @UnsupportedAppUsage
         final AudioAttributes mAttr;
         @UnsupportedAppUsage
@@ -137,6 +140,10 @@ public class AudioMixingRule {
                 dest.writeInt(-1);
             }
         }
+
+        public AudioAttributes getAudioAttributes() { return mAttr; }
+        public int getIntProp() { return mIntProp; }
+        public int getRule() { return mRule; }
     }
 
     boolean isAffectingUsage(int usage) {
@@ -163,7 +170,8 @@ public class AudioMixingRule {
     int getTargetMixType() { return mTargetMixType; }
     @UnsupportedAppUsage
     private final ArrayList<AudioMixMatchCriterion> mCriteria;
-    ArrayList<AudioMixMatchCriterion> getCriteria() { return mCriteria; }
+    /** @hide */
+    public ArrayList<AudioMixMatchCriterion> getCriteria() { return mCriteria; }
     @UnsupportedAppUsage
     private boolean mAllowPrivilegedPlaybackCapture = false;
 

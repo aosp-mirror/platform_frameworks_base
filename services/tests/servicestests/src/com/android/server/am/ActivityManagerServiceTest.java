@@ -322,7 +322,8 @@ public class ActivityManagerServiceTest {
         ApplicationInfo appInfo = new ApplicationInfo();
         appInfo.processName = "com.android.test.app";
         appInfo.uid = 10000;
-        final IsolatedUidRange range = allocator.getOrCreateIsolatedUidRangeLocked(appInfo);
+        final IsolatedUidRange range = allocator.getOrCreateIsolatedUidRangeLocked(
+                appInfo.processName, appInfo.uid);
         validateAppZygoteIsolatedUidRange(range);
         verifyIsolatedUidAllocator(range);
 
@@ -330,7 +331,8 @@ public class ActivityManagerServiceTest {
         ApplicationInfo appInfo2 = new ApplicationInfo();
         appInfo2.processName = "com.android.test.app2";
         appInfo2.uid = 10001;
-        IsolatedUidRange range2 = allocator.getOrCreateIsolatedUidRangeLocked(appInfo2);
+        IsolatedUidRange range2 = allocator.getOrCreateIsolatedUidRangeLocked(
+                appInfo2.processName, appInfo2.uid);
         validateAppZygoteIsolatedUidRange(range2);
         verifyIsolatedUidAllocator(range2);
 
@@ -339,7 +341,7 @@ public class ActivityManagerServiceTest {
 
         // Free range, reallocate and verify
         allocator.freeUidRangeLocked(appInfo2);
-        range2 = allocator.getOrCreateIsolatedUidRangeLocked(appInfo2);
+        range2 = allocator.getOrCreateIsolatedUidRangeLocked(appInfo2.processName, appInfo2.uid);
         validateAppZygoteIsolatedUidRange(range2);
         verifyUidRangesNoOverlap(range, range2);
         verifyIsolatedUidAllocator(range2);
@@ -354,7 +356,8 @@ public class ActivityManagerServiceTest {
             appInfo = new ApplicationInfo();
             appInfo.uid = 10000 + i;
             appInfo.processName = "com.android.test.app" + Integer.toString(i);
-            IsolatedUidRange uidRange = allocator.getOrCreateIsolatedUidRangeLocked(appInfo);
+            IsolatedUidRange uidRange = allocator.getOrCreateIsolatedUidRangeLocked(
+                    appInfo.processName, appInfo.uid);
             validateAppZygoteIsolatedUidRange(uidRange);
             verifyIsolatedUidAllocator(uidRange);
         }
@@ -363,7 +366,8 @@ public class ActivityManagerServiceTest {
         appInfo = new ApplicationInfo();
         appInfo.uid = 9000;
         appInfo.processName = "com.android.test.app.failed";
-        IsolatedUidRange failedRange = allocator.getOrCreateIsolatedUidRangeLocked(appInfo);
+        IsolatedUidRange failedRange = allocator.getOrCreateIsolatedUidRangeLocked(
+                appInfo.processName, appInfo.uid);
 
         assertNull(failedRange);
     }

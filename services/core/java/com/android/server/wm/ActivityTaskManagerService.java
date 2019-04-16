@@ -5872,8 +5872,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     boolean isUidForeground(int uid) {
-        return (getUidState(uid) == ActivityManager.PROCESS_STATE_TOP)
-                || mWindowManager.mRoot.isAnyNonToastWindowVisibleForUid(uid);
+        // A uid is considered to be foreground if it has a visible non-toast window.
+        return mWindowManager.mRoot.isAnyNonToastWindowVisibleForUid(uid);
     }
 
     boolean isDeviceOwner(int uid) {
@@ -6480,9 +6480,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
          */
         @Override
         public void onImeWindowSetOnDisplay(final int pid, final int displayId) {
-            // Update display configuration for IME process only when Single-client IME window
-            // moving to another display.
-            if (!InputMethodSystemProperty.MULTI_CLIENT_IME_ENABLED) return;
+            // Don't update process-level configuration for Multi-Client IME process since other
+            // IMEs on other displays will also receive this configuration change due to IME
+            // services use the same application config/context.
+            if (InputMethodSystemProperty.MULTI_CLIENT_IME_ENABLED) return;
 
             if (pid == MY_PID || pid < 0) {
                 if (DEBUG_CONFIGURATION) {
