@@ -208,9 +208,9 @@ public class NotificationPanelView extends PanelView implements
     private int mUnlockMoveDistance;
     private float mEmptyDragAmount;
 
-    private KeyguardClockPositionAlgorithm mClockPositionAlgorithm =
+    private final KeyguardClockPositionAlgorithm mClockPositionAlgorithm =
             new KeyguardClockPositionAlgorithm();
-    private KeyguardClockPositionAlgorithm.Result mClockPositionResult =
+    private final KeyguardClockPositionAlgorithm.Result mClockPositionResult =
             new KeyguardClockPositionAlgorithm.Result();
     private boolean mIsExpanding;
 
@@ -627,6 +627,7 @@ public class NotificationPanelView extends PanelView implements
         } else {
             int totalHeight = getHeight();
             int bottomPadding = Math.max(mIndicationBottomPadding, mAmbientIndicationBottomPadding);
+            int clockPreferredY = mKeyguardStatusView.getClockPreferredY(totalHeight);
             mClockPositionAlgorithm.setup(
                     mStatusBarMinHeight,
                     totalHeight - bottomPadding,
@@ -634,6 +635,7 @@ public class NotificationPanelView extends PanelView implements
                     getExpandedFraction(),
                     totalHeight,
                     mKeyguardStatusView.getHeight(),
+                    clockPreferredY,
                     mInterpolatedDarkAmount,
                     mStatusBar.isKeyguardCurrentlySecure(),
                     mEmptyDragAmount);
@@ -2830,7 +2832,7 @@ public class NotificationPanelView extends PanelView implements
         mDozing = dozing;
         mNotificationStackScroller.setDark(mDozing, animate, wakeUpTouchLocation);
         if (mDozing) {
-            mNotificationStackScroller.setShowDarkShelf(!hasCustomClock());
+            mNotificationStackScroller.showDarkShelf();
         }
         mKeyguardBottomArea.setDozing(mDozing, animate);
 

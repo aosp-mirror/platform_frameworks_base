@@ -4842,8 +4842,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
      * If the shelf should be visible when the device is in ambient mode (dozing.)
      */
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void setShowDarkShelf(boolean showDarkShelf) {
-        mShowDarkShelf = showDarkShelf;
+    public void showDarkShelf() {
+        mShowDarkShelf = true;
     }
 
     private void updateDarkShelfVisibility() {
