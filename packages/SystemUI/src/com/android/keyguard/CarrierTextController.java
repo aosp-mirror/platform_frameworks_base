@@ -311,20 +311,23 @@ public class CarrierTextController {
 
         displayText = updateCarrierTextWithSimIoError(displayText, carrierNames, subOrderBySlot,
                 allSimsMissing);
+        boolean airplaneMode = false;
         // APM (airplane mode) != no carrier state. There are carrier services
         // (e.g. WFC = Wi-Fi calling) which may operate in APM.
         if (!anySimReadyAndInService && WirelessUtils.isAirplaneModeOn(mContext)) {
             displayText = getAirplaneModeMessage();
+            airplaneMode = true;
         }
 
-        if (TextUtils.isEmpty(displayText)) {
+        if (TextUtils.isEmpty(displayText) && !airplaneMode) {
             displayText = TextUtils.join(mSeparator, carrierNames);
         }
         final CarrierTextCallbackInfo info = new CarrierTextCallbackInfo(
                 displayText,
                 carrierNames,
                 !allSimsMissing,
-                subsIds);
+                subsIds,
+                airplaneMode);
         postToCallback(info);
     }
 
@@ -525,14 +528,22 @@ public class CarrierTextController {
         public final CharSequence[] listOfCarriers;
         public final boolean anySimReady;
         public final int[] subscriptionIds;
+        public boolean airplaneMode;
 
         @VisibleForTesting
         public CarrierTextCallbackInfo(CharSequence carrierText, CharSequence[] listOfCarriers,
                 boolean anySimReady, int[] subscriptionIds) {
+            this(carrierText, listOfCarriers, anySimReady, subscriptionIds, false);
+        }
+
+        @VisibleForTesting
+        public CarrierTextCallbackInfo(CharSequence carrierText, CharSequence[] listOfCarriers,
+                boolean anySimReady, int[] subscriptionIds, boolean airplaneMode) {
             this.carrierText = carrierText;
             this.listOfCarriers = listOfCarriers;
             this.anySimReady = anySimReady;
             this.subscriptionIds = subscriptionIds;
+            this.airplaneMode = airplaneMode;
         }
     }
 
