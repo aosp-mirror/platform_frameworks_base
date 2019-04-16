@@ -16,6 +16,8 @@
 
 package android.app;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -58,23 +60,27 @@ public class TaskInfo {
      * The base intent of the task (generally the intent that launched the task). This intent can
      * be used to relaunch the task (if it is no longer running) or brought to the front if it is.
      */
+    @NonNull
     public Intent baseIntent;
 
     /**
      * The component of the first activity in the task, can be considered the "application" of this
      * task.
      */
+    @Nullable
     public ComponentName baseActivity;
 
     /**
      * The component of the top activity in the task, currently showing to the user.
      */
+    @Nullable
     public ComponentName topActivity;
 
     /**
      * The component of the target activity if this task was started from an activity alias.
      * Otherwise, this is null.
      */
+    @Nullable
     public ComponentName origActivity;
 
     /**
@@ -82,6 +88,7 @@ public class TaskInfo {
      * alias).
      * @hide
      */
+    @Nullable
     public ComponentName realActivity;
 
     /**
@@ -106,6 +113,7 @@ public class TaskInfo {
      * The recent activity values for the highest activity in the stack to have set the values.
      * {@link Activity#setTaskDescription(android.app.ActivityManager.TaskDescription)}.
      */
+    @Nullable
     public ActivityManager.TaskDescription taskDescription;
 
     /**
@@ -126,6 +134,7 @@ public class TaskInfo {
      * The current configuration of the task.
      * @hide
      */
+    @NonNull
     @UnsupportedAppUsage
     public final Configuration configuration = new Configuration();
 
