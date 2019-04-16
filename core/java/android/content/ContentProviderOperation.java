@@ -17,7 +17,6 @@
 package android.content;
 
 import android.annotation.UnsupportedAppUsage;
-import android.content.ContentProvider;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Parcel;
@@ -59,6 +58,7 @@ public class ContentProviderOperation implements Parcelable {
     private final ContentValues mValuesBackReferences;
     private final Map<Integer, Integer> mSelectionArgsBackReferences;
     private final boolean mYieldAllowed;
+    private final boolean mFailureAllowed;
 
     private final static String TAG = "ContentProviderOperation";
 
@@ -76,6 +76,7 @@ public class ContentProviderOperation implements Parcelable {
         mSelectionArgsBackReferences = builder.mSelectionArgsBackReferences;
         mValuesBackReferences = builder.mValuesBackReferences;
         mYieldAllowed = builder.mYieldAllowed;
+        mFailureAllowed = builder.mFailureAllowed;
     }
 
     private ContentProviderOperation(Parcel source) {
@@ -98,6 +99,7 @@ public class ContentProviderOperation implements Parcelable {
             }
         }
         mYieldAllowed = source.readInt() != 0;
+        mFailureAllowed = source.readInt() != 0;
     }
 
     /** @hide */
@@ -111,6 +113,7 @@ public class ContentProviderOperation implements Parcelable {
         mSelectionArgsBackReferences = cpo.mSelectionArgsBackReferences;
         mValuesBackReferences = cpo.mValuesBackReferences;
         mYieldAllowed = cpo.mYieldAllowed;
+        mFailureAllowed = cpo.mFailureAllowed;
     }
 
     public void writeToParcel(Parcel dest, int flags) {
@@ -157,6 +160,7 @@ public class ContentProviderOperation implements Parcelable {
             dest.writeInt(0);
         }
         dest.writeInt(mYieldAllowed ? 1 : 0);
+        dest.writeInt(mFailureAllowed ? 1 : 0);
     }
 
     /**
@@ -210,6 +214,11 @@ public class ContentProviderOperation implements Parcelable {
      */
     public boolean isYieldAllowed() {
         return mYieldAllowed;
+    }
+
+    /** {@hide} */
+    public boolean isFailureAllowed() {
+        return mFailureAllowed;
     }
 
     /** @hide exposed for unit tests */
@@ -274,6 +283,14 @@ public class ContentProviderOperation implements Parcelable {
         return mType == TYPE_ASSERT;
     }
 
+    private ContentProviderResult fail(String msg) throws OperationApplicationException {
+        if (mFailureAllowed) {
+            return new ContentProviderResult(msg);
+        } else {
+            throw new OperationApplicationException(msg);
+        }
+    }
+
     /**
      * Applies this operation using the given provider. The backRefs array is used to resolve any
      * back references that were requested using
@@ -297,7 +314,8 @@ public class ContentProviderOperation implements Parcelable {
         if (mType == TYPE_INSERT) {
             Uri newUri = provider.insert(mUri, values);
             if (newUri == null) {
-                throw new OperationApplicationException("insert failed");
+                Log.e(TAG, this.toString());
+                return fail("Insert into " + mUri + " returned no result");
             }
             return new ContentProviderResult(newUri);
         }
@@ -329,7 +347,7 @@ public class ContentProviderOperation implements Parcelable {
                             if (!TextUtils.equals(cursorValue, expectedValue)) {
                                 // Throw exception when expected values don't match
                                 Log.e(TAG, this.toString());
-                                throw new OperationApplicationException("Found value " + cursorValue
+                                return fail("Found value " + cursorValue
                                         + " when expected " + expectedValue + " for column "
                                         + projection[i]);
                             }
@@ -346,7 +364,7 @@ public class ContentProviderOperation implements Parcelable {
 
         if (mExpectedCount != null && mExpectedCount != numRows) {
             Log.e(TAG, this.toString());
-            throw new OperationApplicationException("wrong number of rows: " + numRows);
+            return fail("Expected " + mExpectedCount + " rows but actual " + numRows);
         }
 
         return new ContentProviderResult(numRows);
@@ -491,6 +509,7 @@ public class ContentProviderOperation implements Parcelable {
         private ContentValues mValuesBackReferences;
         private Map<Integer, Integer> mSelectionArgsBackReferences;
         private boolean mYieldAllowed;
+        private boolean mFailureAllowed;
 
         /** Create a {@link Builder} of a given type. The uri must not be null. */
         private Builder(int type, Uri uri) {
@@ -681,6 +700,12 @@ public class ContentProviderOperation implements Parcelable {
          */
         public Builder withYieldAllowed(boolean yieldAllowed) {
             mYieldAllowed = yieldAllowed;
+            return this;
+        }
+
+        /** {@hide} */
+        public Builder withFailureAllowed(boolean failureAllowed) {
+            mFailureAllowed = failureAllowed;
             return this;
         }
     }
