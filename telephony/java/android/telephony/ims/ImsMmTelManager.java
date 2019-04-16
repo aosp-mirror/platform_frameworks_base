@@ -781,8 +781,13 @@ public class ImsMmTelManager {
     }
 
     /**
-     * Change the user's setting for RTT capability of this device.
-     * @param isEnabled if true RTT will be enabled during calls.
+     * Sets the capability of RTT for IMS calls placed on this subscription.
+     *
+     * Note: This does not affect the value of
+     * {@link android.provider.Settings.Secure#RTT_CALLING_MODE}, which is the global user setting
+     * for RTT. That value is enabled/disabled separately by the user through the Accessibility
+     * settings.
+     * @param isEnabled if true RTT should be enabled during calls made on this subscription.
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setRttCapabilitySetting(boolean isEnabled) {
