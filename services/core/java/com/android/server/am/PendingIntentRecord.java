@@ -29,6 +29,7 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.TransactionTooLargeException;
@@ -380,8 +381,9 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
                 userId = controller.mUserController.getCurrentOrTargetUserId();
             }
             // temporarily allow receivers and services to open activities from background if the
-            // PendingIntent.send() caller was foreground at the time of sendInner() call
-            final boolean allowTrampoline = uid != callingUid
+            // PendingIntent.send() caller was foreground at the time of sendInner() call, unless
+            // caller is SYSTEM_UID
+            final boolean allowTrampoline = uid != callingUid && callingUid != Process.SYSTEM_UID
                     && controller.mAtmInternal.isUidForeground(callingUid);
 
             // note: we on purpose don't pass in the information about the PendingIntent's creator,
