@@ -41,6 +41,7 @@
 #include <sys/stat.h>
 #include <algorithm>
 
+#include <cstdint>
 #include <cstdlib>
 #include <functional>
 
@@ -508,6 +509,17 @@ void CanvasContext::draw() {
 void CanvasContext::doFrame() {
     if (!mRenderPipeline->isSurfaceReady()) return;
     prepareAndDraw(nullptr);
+}
+
+SkISize CanvasContext::getNextFrameSize() const {
+    ReliableSurface* surface = mNativeSurface.get();
+    if (surface) {
+        SkISize size;
+        surface->query(NATIVE_WINDOW_WIDTH, &size.fWidth);
+        surface->query(NATIVE_WINDOW_HEIGHT, &size.fHeight);
+        return size;
+    }
+    return {INT32_MAX, INT32_MAX};
 }
 
 void CanvasContext::prepareAndDraw(RenderNode* node) {
