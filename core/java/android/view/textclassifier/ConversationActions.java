@@ -316,16 +316,20 @@ public final class ConversationActions implements Parcelable {
         private final List<String> mHints;
         @Nullable
         private String mCallingPackageName;
+        @NonNull
+        private Bundle mExtras;
 
         private Request(
                 @NonNull List<Message> conversation,
                 @NonNull TextClassifier.EntityConfig typeConfig,
                 int maxSuggestions,
-                @Nullable @Hint List<String> hints) {
+                @Nullable @Hint List<String> hints,
+                @NonNull Bundle extras) {
             mConversation = Preconditions.checkNotNull(conversation);
             mTypeConfig = Preconditions.checkNotNull(typeConfig);
             mMaxSuggestions = maxSuggestions;
             mHints = hints;
+            mExtras = extras;
         }
 
         private static Request readFromParcel(Parcel in) {
@@ -336,12 +340,13 @@ public final class ConversationActions implements Parcelable {
             List<String> hints = new ArrayList<>();
             in.readStringList(hints);
             String callingPackageName = in.readString();
-
+            Bundle extras = in.readBundle();
             Request request = new Request(
                     conversation,
                     typeConfig,
                     maxSuggestions,
-                    hints);
+                    hints,
+                    extras);
             request.setCallingPackageName(callingPackageName);
             return request;
         }
@@ -353,6 +358,7 @@ public final class ConversationActions implements Parcelable {
             parcel.writeInt(mMaxSuggestions);
             parcel.writeStringList(mHints);
             parcel.writeString(mCallingPackageName);
+            parcel.writeBundle(mExtras);
         }
 
         @Override
@@ -421,6 +427,16 @@ public final class ConversationActions implements Parcelable {
             return mCallingPackageName;
         }
 
+        /**
+         * Returns the extended data related to this request.
+         *
+         * <p><b>NOTE: </b>Do not modify this bundle.
+         */
+        @NonNull
+        public Bundle getExtras() {
+            return mExtras;
+        }
+
         /** Builder object to construct the {@link Request} object. */
         public static final class Builder {
             @NonNull
@@ -431,6 +447,8 @@ public final class ConversationActions implements Parcelable {
             @Nullable
             @Hint
             private List<String> mHints;
+            @Nullable
+            private Bundle mExtras;
 
             /**
              * Constructs a builder.
@@ -469,6 +487,13 @@ public final class ConversationActions implements Parcelable {
                 return this;
             }
 
+            /** Sets a set of extended data to the request. */
+            @NonNull
+            public Builder setExtras(@Nullable Bundle bundle) {
+                mExtras = bundle;
+                return this;
+            }
+
             /** Builds the {@link Request} object. */
             @NonNull
             public Request build() {
@@ -480,7 +505,8 @@ public final class ConversationActions implements Parcelable {
                         mMaxSuggestions,
                         mHints == null
                                 ? Collections.emptyList()
-                                : Collections.unmodifiableList(mHints));
+                                : Collections.unmodifiableList(mHints),
+                        mExtras == null ? Bundle.EMPTY : mExtras);
             }
         }
     }
