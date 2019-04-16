@@ -25,9 +25,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Rect;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.icu.text.DateFormat;
 import android.icu.text.DisplayContext;
@@ -37,13 +35,8 @@ import android.os.Handler;
 import android.os.Trace;
 import android.provider.Settings;
 import android.service.notification.ZenModeConfig;
-import android.text.SpannableStringBuilder;
-import android.text.Spanned;
 import android.text.TextUtils;
-import android.text.style.DynamicDrawableSpan;
-import android.text.style.ImageSpan;
 import android.text.style.StyleSpan;
-import android.util.MathUtils;
 
 import androidx.core.graphics.drawable.IconCompat;
 import androidx.slice.Slice;
@@ -205,9 +198,9 @@ public class KeyguardSliceProvider extends SliceProvider implements
                 addMediaLocked(builder);
             } else {
                 builder.addRow(new RowBuilder(mDateUri).setTitle(mLastText));
-                addNextAlarmLocked(builder);
-                addZenModeLocked(builder);
             }
+            addNextAlarmLocked(builder);
+            addZenModeLocked(builder);
             addPrimaryActionLocked(builder);
             slice = builder.build();
         }
@@ -221,32 +214,25 @@ public class KeyguardSliceProvider extends SliceProvider implements
 
     protected void addMediaLocked(ListBuilder listBuilder) {
         if (mMediaMetaData != null) {
-            SpannableStringBuilder builder = new SpannableStringBuilder();
-
-            Icon notificationIcon = mMediaManager == null ? null : mMediaManager.getMediaIcon();
-            if (notificationIcon != null) {
-                Drawable drawable = notificationIcon.loadDrawable(getContext());
-                Rect mediaBounds = new Rect(0 /* left */, 0 /* top */,
-                        drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-                int iconHeaderSize = getContext().getResources()
-                        .getDimensionPixelSize(R.dimen.header_icon_size);
-                MathUtils.fitRect(mediaBounds, iconHeaderSize);
-                drawable.setBounds(mediaBounds);
-                builder.append("# ");
-                builder.setSpan(new ImageSpan(drawable, DynamicDrawableSpan.ALIGN_CENTER),
-                        0 /* start */, 1 /* end */, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
-            }
-
             CharSequence title = mMediaMetaData.getText(MediaMetadata.METADATA_KEY_TITLE);
             if (TextUtils.isEmpty(title)) {
                 title = getContext().getResources().getString(R.string.music_controls_no_title);
             }
-            builder.append(title);
-            listBuilder.setHeader(new ListBuilder.HeaderBuilder(mHeaderUri).setTitle(builder));
+            listBuilder.setHeader(new ListBuilder.HeaderBuilder(mHeaderUri).setTitle(title));
 
             CharSequence album = mMediaMetaData.getText(MediaMetadata.METADATA_KEY_ARTIST);
             if (!TextUtils.isEmpty(album)) {
-                listBuilder.addRow(new RowBuilder(mMediaUri).setTitle(album));
+                RowBuilder albumBuilder = new RowBuilder(mMediaUri);
+                albumBuilder.setTitle(album);
+
+                Icon mediaIcon = mMediaManager == null ? null : mMediaManager.getMediaIcon();
+                IconCompat mediaIconCompat = mediaIcon == null ? null
+                        : IconCompat.createFromIcon(getContext(), mediaIcon);
+                if (mediaIconCompat != null) {
+                    albumBuilder.addEndItem(mediaIconCompat, ListBuilder.ICON_IMAGE);
+                }
+
+                listBuilder.addRow(albumBuilder);
             }
         }
     }
