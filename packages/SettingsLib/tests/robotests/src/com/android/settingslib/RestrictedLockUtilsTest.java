@@ -16,6 +16,7 @@
 
 package com.android.settingslib;
 
+import static android.app.admin.DevicePolicyManager.EXTRA_RESTRICTION;
 import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_NONE;
 import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT;
 import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_REMOTE_INPUT;
@@ -28,11 +29,13 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.os.UserHandle;
@@ -42,6 +45,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
@@ -281,6 +285,26 @@ public class RestrictedLockUtilsTest {
         EnforcedAdmin profile = RestrictedLockUtilsInternal.checkIfKeyguardFeaturesDisabled(
                 mContext, KEYGUARD_DISABLE_FINGERPRINT, mProfileId);
         assertThat(profile).isNull();
+    }
+
+    @Test
+    public void sendShowAdminSupportDetailsIntent_extraRestrictionProvided() {
+        EnforcedAdmin enforcedAdmin = new EnforcedAdmin();
+        enforcedAdmin.enforcedRestriction = "Dummy";
+        RestrictedLockUtils.sendShowAdminSupportDetailsIntent(mContext, enforcedAdmin);
+
+        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
+        verify(mContext).startActivityAsUser(intentCaptor.capture(), any());
+        assertThat(intentCaptor.getValue().getExtra(EXTRA_RESTRICTION)).isEqualTo("Dummy");
+    }
+
+    @Test
+    public void sendShowAdminSupportDetailsIntent_noExtraRestriction() {
+        RestrictedLockUtils.sendShowAdminSupportDetailsIntent(mContext, null);
+
+        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
+        verify(mContext).startActivityAsUser(intentCaptor.capture(), any());
+        assertThat(intentCaptor.getValue().getExtra(EXTRA_RESTRICTION)).isNull();
     }
 
     private UserInfo setUpUser(int userId, ComponentName[] admins) {
