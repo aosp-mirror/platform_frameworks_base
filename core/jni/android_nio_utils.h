@@ -20,7 +20,7 @@
 #include <android_runtime/AndroidRuntime.h>
 
 namespace android {
-    
+
 /**
  * Given an nio.Buffer, return a pointer to it, beginning at its current
  * position. The returned pointer is only valid for the current JNI stack-frame.
@@ -63,9 +63,10 @@ public:
 
 private:
     JNIEnv* fEnv;
-    void*   fPointer;
-    jarray  fArray;
-    jboolean fCommit;
+    void*   fPointer;   // pointer to current buffer position.
+    void*   fElements;  // pointer to array element 0 (may be directly in fArray or a copy).
+    jarray  fArray;     // pointer to array on managed heap.
+    jboolean fCommit;   // commit data to source if required (when fElements is a copy of fArray).
 };
 
 }   /* namespace android */
