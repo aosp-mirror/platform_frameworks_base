@@ -3483,6 +3483,12 @@
         <item>com.android.messaging</item>
     </string-array>
 
+    <!-- An array of packages that can make sound on the ringer stream in priority-only DND
+     mode -->
+    <string-array translatable="false" name="config_priorityOnlyDndExemptPackages">
+        <item>com.android.dialer</item>
+    </string-array>
+
     <!-- An array of packages which can listen for notifications on low ram devices. -->
     <string-array translatable="false" name="config_allowedManagedServicesOnLowRamDevices" />
 

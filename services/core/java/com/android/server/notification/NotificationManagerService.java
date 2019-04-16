@@ -1689,6 +1689,9 @@ public class NotificationManagerService extends SystemService {
 
         mPreferencesHelper.lockChannelsForOEM(getContext().getResources().getStringArray(
                 com.android.internal.R.array.config_nonBlockableNotificationPackages));
+
+        mZenModeHelper.setPriorityOnlyDndExemptPackages(getContext().getResources().getStringArray(
+                com.android.internal.R.array.config_priorityOnlyDndExemptPackages));
     }
 
     @Override
