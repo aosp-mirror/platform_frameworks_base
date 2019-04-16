@@ -38,6 +38,7 @@ import android.content.res.Configuration;
 import android.os.IBinder;
 import android.util.MergedConfiguration;
 import android.view.Display;
+import android.view.View;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.MediumTest;
@@ -150,6 +151,34 @@ public class ActivityThreadTest {
             applyConfigurationChange(activity, BASE_SEQ);
             assertEquals(numOfConfig + 1, activity.mNumOfConfigChanges);
         });
+    }
+
+    @Test
+    public void testHandleActivity_assetsChanged() {
+        final TestActivity activity = mActivityTestRule.launchActivity(new Intent());
+
+        final IBinder[] token = new IBinder[1];
+        final View[] decorView = new View[1];
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            final ActivityThread activityThread = activity.getActivityThread();
+
+            token[0] = activity.getActivityToken();
+            decorView[0] = activity.getWindow().getDecorView();
+
+            // Relaunches all activities
+            activityThread.handleApplicationInfoChanged(activity.getApplicationInfo());
+        });
+
+        final View[] newDecorView = new View[1];
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            final ActivityThread activityThread = activity.getActivityThread();
+
+            final Activity newActivity = activityThread.getActivity(token[0]);
+            newDecorView[0] = activity.getWindow().getDecorView();
+        });
+
+        assertEquals("Window must be preserved", decorView[0], newDecorView[0]);
     }
 
     @Test
