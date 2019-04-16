@@ -64,7 +64,6 @@ filegroup {
         "apex/java/android/media/IMediaSession2Service.aidl",
         "apex/java/android/media/MediaConstants.java",
         "apex/java/android/media/MediaController2.java",
-        "apex/java/android/media/MediaItem2.java",
         "apex/java/android/media/MediaSession2.java",
         "apex/java/android/media/MediaSession2Service.java",
         "apex/java/android/media/Session2Command.java",
