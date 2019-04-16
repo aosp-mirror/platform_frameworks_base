@@ -17,14 +17,12 @@
 #include <memory>
 #include <string>
 
+#include "TestHelpers.h"
+#include "androidfw/ApkAssets.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-
-#include "androidfw/ApkAssets.h"
 #include "idmap2/ResourceUtils.h"
 #include "idmap2/Result.h"
-
-#include "TestHelpers.h"
 
 using ::testing::NotNull;
 

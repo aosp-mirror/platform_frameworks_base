@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+#include "idmap2/Result.h"
+
 #include <cstdarg>
 
 #include "android-base/stringprintf.h"
-
-#include "idmap2/Result.h"
 
 namespace android::idmap2 {
 

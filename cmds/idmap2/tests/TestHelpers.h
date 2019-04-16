@@ -19,6 +19,9 @@
 
 #include <string>
 
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
+
 namespace android::idmap2 {
 
 const unsigned char idmap_raw_data[] = {

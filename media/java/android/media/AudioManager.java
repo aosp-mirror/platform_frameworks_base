@@ -26,6 +26,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -3050,6 +3051,7 @@ public class AudioManager {
      * @param requestResult the result to the focus request to be passed to the requester
      * @param ap a valid registered {@link AudioPolicy} configured as a focus policy.
      */
+    @TestApi
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public void setFocusRequestResult(@NonNull AudioFocusInfo afi,
@@ -3089,6 +3091,7 @@ public class AudioManager {
      *     if there was an error sending the request.
      * @throws NullPointerException if the {@link AudioFocusInfo} or {@link AudioPolicy} are null.
      */
+    @TestApi
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public int dispatchAudioFocusChange(@NonNull AudioFocusInfo afi, int focusChange,
@@ -3351,6 +3354,7 @@ public class AudioManager {
      *    {@link android.Manifest.permission#MODIFY_AUDIO_ROUTING} permission,
      *    {@link #SUCCESS} otherwise.
      */
+    @TestApi
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public int registerAudioPolicy(@NonNull AudioPolicy policy) {
@@ -3385,6 +3389,7 @@ public class AudioManager {
      * Unregisters an {@link AudioPolicy} asynchronously.
      * @param policy the non-null {@link AudioPolicy} to unregister.
      */
+    @TestApi
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public void unregisterAudioPolicyAsync(@NonNull AudioPolicy policy) {
@@ -3411,6 +3416,7 @@ public class AudioManager {
      * associated with mixes of this policy.
      * @param policy the non-null {@link AudioPolicy} to unregister.
      */
+    @TestApi
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public void unregisterAudioPolicy(@NonNull AudioPolicy policy) {
@@ -3420,6 +3426,20 @@ public class AudioManager {
             policy.invalidateCaptorsAndInjectors();
             service.unregisterAudioPolicy(policy.cb());
             policy.setRegistration(null);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * @return true if an AudioPolicy was previously registered
+     */
+    @TestApi
+    public boolean hasRegisteredDynamicPolicy() {
+        final IAudioService service = getService();
+        try {
+            return service.hasRegisteredDynamicPolicy();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

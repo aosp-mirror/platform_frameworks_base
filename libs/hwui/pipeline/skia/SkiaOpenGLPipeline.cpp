@@ -101,7 +101,7 @@ bool SkiaOpenGLPipeline::draw(const Frame& frame, const SkRect& screenDirty, con
 
     SkiaPipeline::updateLighting(lightGeometry, lightInfo);
     renderFrame(*layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface,
-            SkMatrix::I());
+                SkMatrix::I());
     layerUpdateQueue->clear();
 
     // Draw visual debugging features
@@ -156,8 +156,23 @@ void SkiaOpenGLPipeline::onStop() {
     }
 }
 
+static void setBufferCount(ANativeWindow* window, uint32_t extraBuffers) {
+    int query_value;
+    int err = window->query(window, NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS, &query_value);
+    if (err != 0 || query_value < 0) {
+        ALOGE("window->query failed: %s (%d) value=%d", strerror(-err), err, query_value);
+        return;
+    }
+    auto min_undequeued_buffers = static_cast<uint32_t>(query_value);
+
+    int bufferCount = min_undequeued_buffers + 2 + extraBuffers;
+    ALOGD("Setting buffer count to %d, min_undequeued %u, extraBuffers %u",
+            bufferCount, min_undequeued_buffers, extraBuffers);
+    native_window_set_buffer_count(window, bufferCount);
+}
+
 bool SkiaOpenGLPipeline::setSurface(ANativeWindow* surface, SwapBehavior swapBehavior,
-                                    ColorMode colorMode) {
+                                    ColorMode colorMode, uint32_t extraBuffers) {
     if (mEglSurface != EGL_NO_SURFACE) {
         mEglManager.destroySurface(mEglSurface);
         mEglSurface = EGL_NO_SURFACE;
@@ -177,6 +192,7 @@ bool SkiaOpenGLPipeline::setSurface(ANativeWindow* surface, SwapBehavior swapBeh
     if (mEglSurface != EGL_NO_SURFACE) {
         const bool preserveBuffer = (swapBehavior != SwapBehavior::kSwap_discardBuffer);
         mBufferPreserved = mEglManager.setPreserveBuffer(mEglSurface, preserveBuffer);
+        setBufferCount(surface, extraBuffers);
         return true;
     }
 

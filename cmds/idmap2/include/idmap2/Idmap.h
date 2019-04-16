@@ -52,11 +52,9 @@
 #include <vector>
 
 #include "android-base/macros.h"
-
 #include "androidfw/ApkAssets.h"
 #include "androidfw/ResourceTypes.h"
 #include "androidfw/StringPiece.h"
-
 #include "idmap2/Policies.h"
 
 namespace android::idmap2 {

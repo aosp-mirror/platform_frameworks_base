@@ -25,18 +25,15 @@
 #include <string>
 #include <vector>
 
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
-
+#include "TestHelpers.h"
 #include "android-base/file.h"
 #include "androidfw/ApkAssets.h"
 #include "androidfw/Idmap.h"
 #include "androidfw/LoadedArsc.h"
-
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 #include "idmap2/CommandLineOptions.h"
 #include "idmap2/Idmap.h"
-
-#include "TestHelpers.h"
 
 namespace android::idmap2 {
 

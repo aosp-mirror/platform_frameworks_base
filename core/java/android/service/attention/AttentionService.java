@@ -21,13 +21,11 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.Service;
-import android.attention.AttentionManagerInternal;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteException;
 
 import com.android.internal.util.Preconditions;
-import com.android.server.LocalServices;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -129,19 +127,6 @@ public abstract class AttentionService extends Service {
             return mBinder;
         }
         return null;
-    }
-
-    /**
-     * Disables the dependants.
-     *
-     * Example: called if the service does not have sufficient permissions to perform the task.
-     */
-    public final void disableSelf() {
-        AttentionManagerInternal attentionManager = LocalServices.getService(
-                AttentionManagerInternal.class);
-        if (attentionManager != null) {
-            attentionManager.disableSelf();
-        }
     }
 
     /**

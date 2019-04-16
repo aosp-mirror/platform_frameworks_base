@@ -24,6 +24,7 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.prediction.AppPredictionContext;
@@ -131,6 +132,7 @@ import java.util.List;
 public class ChooserActivity extends ResolverActivity {
     private static final String TAG = "ChooserActivity";
 
+
     /**
      * Boolean extra to change the following behavior: Normally, ChooserActivity finishes itself
      * in onStop when launched in a new task. If this extra is set to true, we do not finish
@@ -140,7 +142,6 @@ public class ChooserActivity extends ResolverActivity {
             = "com.android.internal.app.ChooserActivity.EXTRA_PRIVATE_RETAIN_IN_ON_STOP";
 
     private static final boolean DEBUG = false;
-
 
     /**
      * If {@link #USE_SHORTCUT_MANAGER_FOR_DIRECT_TARGETS} and this is set to true,
@@ -433,18 +434,8 @@ public class ChooserActivity extends ResolverActivity {
                 .addTaggedData(MetricsEvent.FIELD_SHARESHEET_MIMETYPE, target.getType())
                 .addTaggedData(MetricsEvent.FIELD_TIME_TO_APP_TARGETS, systemCost));
 
-        if (USE_PREDICTION_MANAGER_FOR_DIRECT_TARGETS) {
-            final IntentFilter filter = getTargetIntentFilter();
-            Bundle extras = new Bundle();
-            extras.putParcelable(APP_PREDICTION_INTENT_FILTER_KEY, filter);
-            AppPredictionManager appPredictionManager =
-                    getSystemService(AppPredictionManager.class);
-            mAppPredictor = appPredictionManager.createAppPredictionSession(
-                new AppPredictionContext.Builder(this)
-                    .setPredictedTargetCount(APP_PREDICTION_SHARE_TARGET_QUERY_PACKAGE_LIMIT)
-                    .setUiSurface(APP_PREDICTION_SHARE_UI_SURFACE)
-                    .setExtras(extras)
-                    .build());
+        AppPredictor appPredictor = getAppPredictorForDirectShareIfEnabled();
+        if (appPredictor != null) {
             mAppPredictorCallback = resultList -> {
                 if (isFinishing() || isDestroyed()) {
                     return;
@@ -467,8 +458,10 @@ public class ChooserActivity extends ResolverActivity {
                                 appTarget.getPackageName(), appTarget.getClassName())));
                 }
                 sendShareShortcutInfoList(shareShortcutInfos, driList);
+                sendShortcutManagerShareTargetResultCompleted();
             };
-            mAppPredictor.registerPredictionUpdates(this.getMainExecutor(), mAppPredictorCallback);
+            appPredictor
+                .registerPredictionUpdates(this.getMainExecutor(), mAppPredictorCallback);
         }
 
         mChooserRowLayer = getResources().getDrawable(R.drawable.chooser_row_layer_list, null);
@@ -872,7 +865,7 @@ public class ChooserActivity extends ResolverActivity {
         mChooserHandler.removeMessages(LIST_VIEW_UPDATE_MESSAGE);
         mChooserHandler.removeMessages(CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT);
         mChooserHandler.removeMessages(CHOOSER_TARGET_SERVICE_RESULT);
-        if (USE_PREDICTION_MANAGER_FOR_DIRECT_TARGETS) {
+        if (mAppPredictor != null) {
             mAppPredictor.unregisterPredictionUpdates(mAppPredictorCallback);
             mAppPredictor.destroy();
         }
@@ -1205,10 +1198,12 @@ public class ChooserActivity extends ResolverActivity {
     }
 
     private void queryDirectShareTargets(ChooserListAdapter adapter) {
-        if (USE_PREDICTION_MANAGER_FOR_DIRECT_TARGETS) {
-            mAppPredictor.requestPredictionUpdate();
+        AppPredictor appPredictor = getAppPredictorForDirectShareIfEnabled();
+        if (appPredictor != null) {
+            appPredictor.requestPredictionUpdate();
             return;
         }
+        // Default to just querying ShortcutManager if AppPredictor not present.
         final IntentFilter filter = getTargetIntentFilter();
         if (filter == null) {
             return;
@@ -1248,10 +1243,14 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         if (resultMessageSent) {
-            final Message msg = Message.obtain();
-            msg.what = SHORTCUT_MANAGER_SHARE_TARGET_RESULT_COMPLETED;
-            mChooserHandler.sendMessage(msg);
+            sendShortcutManagerShareTargetResultCompleted();
         }
+    }
+
+    private void sendShortcutManagerShareTargetResultCompleted() {
+        final Message msg = Message.obtain();
+        msg.what = SHORTCUT_MANAGER_SHARE_TARGET_RESULT_COMPLETED;
+        mChooserHandler.sendMessage(msg);
     }
 
     private ChooserTarget convertToChooserTarget(ShortcutManager.ShareShortcutInfo shareShortcut) {
@@ -1309,9 +1308,7 @@ public class ChooserActivity extends ResolverActivity {
 
     void updateModelAndChooserCounts(TargetInfo info) {
         if (info != null) {
-            if (USE_PREDICTION_MANAGER_FOR_DIRECT_TARGETS) {
-                sendClickToAppPredictor(info);
-            }
+            sendClickToAppPredictor(info);
             final ResolveInfo ri = info.getResolveInfo();
             Intent targetIntent = getTargetIntent();
             if (ri != null && ri.activityInfo != null && targetIntent != null) {
@@ -1332,6 +1329,10 @@ public class ChooserActivity extends ResolverActivity {
     }
 
     private void sendClickToAppPredictor(TargetInfo targetInfo) {
+        AppPredictor appPredictor = getAppPredictorForDirectShareIfEnabled();
+        if (appPredictor == null) {
+            return;
+        }
         if (!(targetInfo instanceof ChooserTargetInfo)) {
             return;
         }
@@ -1345,15 +1346,44 @@ public class ChooserActivity extends ResolverActivity {
         if (shortcutId == null) {
             return;
         }
-        mAppPredictor.notifyAppTargetEvent(
+        appPredictor.notifyAppTargetEvent(
                 new AppTargetEvent.Builder(
-                    new AppTarget.Builder(new AppTargetId(shortcutId))
-                        .setTarget(componentName.getPackageName(), getUser())
+                    // TODO(b/124404997) Send full shortcut info, not just Id with AppTargetId.
+                    new AppTarget.Builder(new AppTargetId(shortcutId),
+                            componentName.getPackageName(), getUser())
                         .setClassName(componentName.getClassName())
                         .build(),
-                    AppTargetEvent.ACTION_LAUNCH
-                ).setLaunchLocation(LAUNCH_LOCATON_DIRECT_SHARE)
-                .build());
+                    AppTargetEvent.ACTION_LAUNCH)
+                    .setLaunchLocation(LAUNCH_LOCATON_DIRECT_SHARE)
+                    .build());
+    }
+
+    @Nullable
+    private AppPredictor getAppPredictor() {
+        if (mAppPredictor == null
+                    && getPackageManager().getAppPredictionServicePackageName() != null) {
+            final IntentFilter filter = getTargetIntentFilter();
+            Bundle extras = new Bundle();
+            extras.putParcelable(APP_PREDICTION_INTENT_FILTER_KEY, filter);
+            AppPredictionContext appPredictionContext = new AppPredictionContext.Builder(this)
+                .setUiSurface(APP_PREDICTION_SHARE_UI_SURFACE)
+                .setPredictedTargetCount(APP_PREDICTION_SHARE_TARGET_QUERY_PACKAGE_LIMIT)
+                .setExtras(extras)
+                .build();
+            AppPredictionManager appPredictionManager
+                    = getSystemService(AppPredictionManager.class);
+            mAppPredictor = appPredictionManager.createAppPredictionSession(appPredictionContext);
+        }
+        return mAppPredictor;
+    }
+
+    /**
+     * This will return an app predictor if it is enabled for direct share sorting
+     * and if one exists. Otherwise, it returns null.
+     */
+    @Nullable
+    private AppPredictor getAppPredictorForDirectShareIfEnabled() {
+        return USE_PREDICTION_MANAGER_FOR_DIRECT_TARGETS ? getAppPredictor() : null;
     }
 
     void onRefinementResult(TargetInfo selectedTarget, Intent matchingIntent) {
@@ -2014,7 +2044,8 @@ public class ChooserActivity extends ResolverActivity {
                 }
             }
 
-            if (USE_SHORTCUT_MANAGER_FOR_DIRECT_TARGETS) {
+            if (USE_SHORTCUT_MANAGER_FOR_DIRECT_TARGETS
+                        || USE_PREDICTION_MANAGER_FOR_DIRECT_TARGETS) {
                 if (DEBUG) {
                     Log.d(TAG, "querying direct share targets from ShortcutManager");
                 }
@@ -2242,7 +2273,7 @@ public class ChooserActivity extends ResolverActivity {
                 return CALLER_TARGET_SCORE_BOOST;
             }
 
-            if (USE_PREDICTION_MANAGER_FOR_DIRECT_TARGETS) {
+            if (getAppPredictorForDirectShareIfEnabled() != null) {
                 return SHORTCUT_TARGET_SCORE_BOOST;
             }
 

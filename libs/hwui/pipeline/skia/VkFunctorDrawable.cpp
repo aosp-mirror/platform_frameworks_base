@@ -17,16 +17,16 @@
 #include "VkFunctorDrawable.h"
 #include <private/hwui/DrawVkInfo.h>
 
-#include "renderthread/VulkanManager.h"
-#include "renderthread/RenderThread.h"
-#include <SkAndroidFrameworkUtils.h>
 #include <GrBackendDrawableInfo.h>
+#include <SkAndroidFrameworkUtils.h>
 #include <SkImage.h>
 #include <utils/Color.h>
 #include <utils/Trace.h>
 #include <utils/TraceUtils.h>
 #include <vk/GrVkTypes.h>
 #include <thread>
+#include "renderthread/RenderThread.h"
+#include "renderthread/VulkanManager.h"
 #include "thread/ThreadBase.h"
 #include "utils/TimeUtils.h"
 
@@ -64,13 +64,13 @@ void VkFunctorDrawHandler::draw(const GrBackendDrawableInfo& info) {
 
     SkMatrix44 mat4(mMatrix);
     VkFunctorDrawParams params{
-      .width = mImageInfo.width(),
-      .height = mImageInfo.height(),
-      .color_space_ptr = mImageInfo.colorSpace(),
-      .clip_left = mClip.fLeft,
-      .clip_top = mClip.fTop,
-      .clip_right = mClip.fRight,
-      .clip_bottom = mClip.fBottom,
+            .width = mImageInfo.width(),
+            .height = mImageInfo.height(),
+            .color_space_ptr = mImageInfo.colorSpace(),
+            .clip_left = mClip.fLeft,
+            .clip_top = mClip.fTop,
+            .clip_right = mClip.fRight,
+            .clip_bottom = mClip.fBottom,
     };
     mat4.asColMajorf(&params.transform[0]);
     params.secondary_command_buffer = vulkan_info.fSecondaryCommandBuffer;
@@ -87,8 +87,7 @@ void VkFunctorDrawHandler::draw(const GrBackendDrawableInfo& info) {
     vulkan_info.fDrawBounds->extent.height = mClip.fBottom - mClip.fTop;
 }
 
-VkFunctorDrawable::~VkFunctorDrawable() {
-}
+VkFunctorDrawable::~VkFunctorDrawable() {}
 
 void VkFunctorDrawable::onDraw(SkCanvas* canvas) {
     // "canvas" is either SkNWayCanvas created by SkiaPipeline::tryCapture (SKP capture use case) or
@@ -106,9 +105,8 @@ void VkFunctorDrawable::onDraw(SkCanvas* canvas) {
         SkCanvas* gpuCanvas = SkAndroidFrameworkUtils::getBaseWrappedCanvas(canvas);
         // Enforce "canvas" must be an AlphaFilterCanvas. For GPU canvas, the call should come from
         // onSnapGpuDrawHandler.
-        LOG_ALWAYS_FATAL_IF(
-                gpuCanvas == canvas,
-                "VkFunctorDrawable::onDraw() should not be called with a GPU canvas!");
+        LOG_ALWAYS_FATAL_IF(gpuCanvas == canvas,
+                            "VkFunctorDrawable::onDraw() should not be called with a GPU canvas!");
 
         // This will invoke onSnapGpuDrawHandler and regular draw flow.
         gpuCanvas->drawDrawable(this);

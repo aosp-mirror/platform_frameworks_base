@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+#include "idmap2/Xml.h"
+
 #include <map>
 #include <memory>
 #include <string>
 #include <utility>
-
-#include "idmap2/Xml.h"
 
 namespace android::idmap2 {
 

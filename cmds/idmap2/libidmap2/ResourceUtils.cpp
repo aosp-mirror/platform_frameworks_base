@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+#include "idmap2/ResourceUtils.h"
+
 #include <memory>
 #include <string>
 
 #include "androidfw/StringPiece.h"
 #include "androidfw/Util.h"
-
-#include "idmap2/ResourceUtils.h"
 #include "idmap2/Result.h"
 #include "idmap2/Xml.h"
 #include "idmap2/ZipFile.h"

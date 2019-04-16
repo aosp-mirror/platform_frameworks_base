@@ -418,12 +418,15 @@ public abstract class EuiccService extends Service {
      *     bit map, and original the card Id. The result code may be one of the predefined
      *     {@code RESULT_} constants or any implementation-specific code starting with
      *     {@link #RESULT_FIRST_USER}. The resolvable error bit map can be either 0 or values
-     *     defined in {@code RESOLVABLE_ERROR_}.
+     *     defined in {@code RESOLVABLE_ERROR_}. A subclass should override this method. Otherwise,
+     *     this method does nothing and returns null by default.
      * @see android.telephony.euicc.EuiccManager#downloadSubscription
      */
-    public abstract DownloadSubscriptionResult onDownloadSubscription(int slotId,
+    public DownloadSubscriptionResult onDownloadSubscription(int slotId,
             @NonNull DownloadableSubscription subscription, boolean switchAfterDownload,
-            boolean forceDeactivateSim, @Nullable Bundle resolvedBundle);
+            boolean forceDeactivateSim, @Nullable Bundle resolvedBundle) {
+        return null;
+    }
 
     /**
      * Download the given subscription.
@@ -439,14 +442,14 @@ public abstract class EuiccService extends Service {
      *     constants or any implementation-specific code starting with {@link #RESULT_FIRST_USER}.
      * @see android.telephony.euicc.EuiccManager#downloadSubscription
      *
-     * @deprecated From Q, please use the above
-     * {@link #onDownloadSubscription(int, DownloadableSubscription, boolean, boolean, Bundle)}.
+     * @deprecated From Q, a subclass should use and override the above
+     * {@link #onDownloadSubscription(int, DownloadableSubscription, boolean, boolean, Bundle)}. The
+     * default return value for this one is Integer.MIN_VALUE.
      */
     @Deprecated public @Result int onDownloadSubscription(int slotId,
             @NonNull DownloadableSubscription subscription, boolean switchAfterDownload,
             boolean forceDeactivateSim) {
-        throw new UnsupportedOperationException("onDownloadSubscription(int, "
-            + "DownloadableSubscription, boolean, boolean) is deprecated.");
+        return Integer.MIN_VALUE;
     }
 
     /**
