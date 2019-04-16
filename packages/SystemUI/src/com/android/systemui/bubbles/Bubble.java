@@ -16,45 +16,63 @@
 package com.android.systemui.bubbles;
 
 
+import android.os.UserHandle;
 import android.view.LayoutInflater;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+
+import java.util.Objects;
 
 /**
  * Encapsulates the data and UI elements of a bubble.
  */
 class Bubble {
 
+    private static final boolean DEBUG = false;
+    private static final String TAG = "Bubble";
+
     private final String mKey;
+    private final String mGroupId;
     private final BubbleExpandedView.OnBubbleBlockedListener mListener;
 
     private boolean mInflated;
-
-    public BubbleView iconView;
-    public BubbleExpandedView expandedView;
     public NotificationEntry entry;
+    BubbleView iconView;
+    BubbleExpandedView expandedView;
+
+    private static String groupId(NotificationEntry entry) {
+        UserHandle user = entry.notification.getUser();
+        return user.getIdentifier() + '|' + entry.notification.getPackageName();
+    }
 
     Bubble(NotificationEntry e, BubbleExpandedView.OnBubbleBlockedListener listener) {
         entry = e;
         mKey = e.key;
+        mGroupId = groupId(e);
         mListener = listener;
-    }
-
-    /** @deprecated use the other constructor to defer View creation. */
-    @Deprecated
-    Bubble(NotificationEntry e, LayoutInflater inflater, BubbleStackView stackView,
-            BubbleExpandedView.OnBubbleBlockedListener listener) {
-        this(e, listener);
-        inflate(inflater, stackView);
     }
 
     public String getKey() {
         return mKey;
     }
 
+    public String getGroupId() {
+        return mGroupId;
+    }
+
+    public String getPackageName() {
+        return entry.notification.getPackageName();
+    }
+
     boolean isInflated() {
         return mInflated;
+    }
+
+    public void updateDotVisibility() {
+        if (iconView != null) {
+            iconView.updateDotVisibility();
+        }
     }
 
     void inflate(LayoutInflater inflater, BubbleStackView stackView) {
@@ -73,10 +91,32 @@ class Bubble {
         mInflated = true;
     }
 
+    void setDismissed() {
+        entry.setBubbleDismissed(true);
+        // TODO: move this somewhere where it can be guaranteed not to run until safe from flicker
+        if (expandedView != null) {
+            expandedView.cleanUpExpandedState();
+        }
+    }
+
     void setEntry(NotificationEntry entry) {
+        this.entry = entry;
         if (mInflated) {
             iconView.update(entry);
             expandedView.update(entry);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Bubble)) return false;
+        Bubble bubble = (Bubble) o;
+        return Objects.equals(mKey, bubble.mKey);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mKey);
     }
 }
