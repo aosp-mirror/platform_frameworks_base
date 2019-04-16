@@ -54,6 +54,8 @@ private:
 
 int register_android_os_HwBinder(JNIEnv *env);
 
+bool validateCanUseHwBinder(const sp<hardware::IBinder>& binder);
+
 }  // namespace android
 
 #endif  // _ANDROID_OS_HW_BINDER_H

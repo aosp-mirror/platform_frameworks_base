@@ -224,6 +224,21 @@ status_t JHwBinder::onTransact(
     return err;
 }
 
+bool validateCanUseHwBinder(const sp<hardware::IBinder>& binder) {
+    if (binder != nullptr && binder->localBinder() != nullptr) {
+        // untested/unsupported/inefficient
+        // see b/129150021, doesn't work with scatter-gather
+        //
+        // explicitly disabling until it is supported
+        // (note, even if this is fixed to work with scatter gather, we would also need
+        // to convert this to the Java object rather than re-wrapping with a proxy)
+        LOG(ERROR) << "Local Java Binder not supported.";
+        return false;
+    }
+
+    return true;
+}
+
 }  // namespace android
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -324,9 +339,9 @@ static jobject JHwBinder_native_getService(
     sp<IBase> ret = getRawServiceInternal(ifaceName, serviceName, retry /* retry */, false /* getStub */);
     sp<hardware::IBinder> service = hardware::toBinder<hidl::base::V1_0::IBase>(ret);
 
-    if (service == NULL) {
+    if (service == nullptr || !validateCanUseHwBinder(service)) {
         signalExceptionForError(env, NAME_NOT_FOUND);
-        return NULL;
+        return nullptr;
     }
 
     LOG(INFO) << "HwBinder: Starting thread pool for getting: " << ifaceName << "/" << serviceName;
