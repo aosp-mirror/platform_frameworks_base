@@ -90,8 +90,6 @@ public class ImmersiveModeConfirmation {
         mShowDelayMs = getNavBarExitDuration() * 3;
         mPanicThresholdMs = context.getResources()
                 .getInteger(R.integer.config_immersive_mode_confirmation_panic);
-        mWindowManager = (WindowManager)
-                mContext.getSystemService(Context.WINDOW_SERVICE);
         mVrModeEnabled = vrModeEnabled;
     }
 
@@ -177,7 +175,7 @@ public class ImmersiveModeConfirmation {
     private void handleHide() {
         if (mClingWindow != null) {
             if (DEBUG) Slog.d(TAG, "Hiding immersive mode confirmation");
-            mWindowManager.removeView(mClingWindow);
+            getWindowManager().removeView(mClingWindow);
             mClingWindow = null;
         }
     }
@@ -275,7 +273,7 @@ public class ImmersiveModeConfirmation {
             super.onAttachedToWindow();
 
             DisplayMetrics metrics = new DisplayMetrics();
-            mWindowManager.getDefaultDisplay().getMetrics(metrics);
+            getWindowManager().getDefaultDisplay().getMetrics(metrics);
             float density = metrics.density;
 
             getViewTreeObserver().addOnComputeInternalInsetsListener(mInsetsListener);
@@ -341,6 +339,19 @@ public class ImmersiveModeConfirmation {
         }
     }
 
+    /**
+     * DO HOLD THE WINDOW MANAGER LOCK WHEN CALLING THIS METHOD
+     * The reason why we add this method is to avoid the deadlock of WMG->WMS and WMS->WMG
+     * when ImmersiveModeConfirmation object is created.
+     */
+    private WindowManager getWindowManager() {
+        if (mWindowManager == null) {
+            mWindowManager = (WindowManager)
+                      mContext.getSystemService(Context.WINDOW_SERVICE);
+        }
+        return mWindowManager;
+    }
+
     private void handleShow() {
         if (DEBUG) Slog.d(TAG, "Showing immersive mode confirmation");
 
@@ -352,7 +363,7 @@ public class ImmersiveModeConfirmation {
 
         // show the confirmation
         WindowManager.LayoutParams lp = getClingWindowLayoutParams();
-        mWindowManager.addView(mClingWindow, lp);
+        getWindowManager().addView(mClingWindow, lp);
     }
 
     private final Runnable mConfirm = new Runnable() {
