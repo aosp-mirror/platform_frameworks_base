@@ -237,13 +237,17 @@ public class Tethering extends BaseNetworkObserver {
             mLog.log("OBSERVED UiEnitlementFailed");
             stopTethering(downstream);
         });
+        mEntitlementMgr.setTetheringConfigurationFetcher(() -> {
+            maybeDefaultDataSubChanged();
+            return mConfig;
+        });
 
         mCarrierConfigChange = new VersionedBroadcastListener(
                 "CarrierConfigChangeListener", mContext, mHandler, filter,
                 (Intent ignored) -> {
                     mLog.log("OBSERVED carrier config change");
                     updateConfiguration();
-                    mEntitlementMgr.reevaluateSimCardProvisioning();
+                    mEntitlementMgr.reevaluateSimCardProvisioning(mConfig);
                 });
 
         filter = new IntentFilter();
@@ -252,12 +256,12 @@ public class Tethering extends BaseNetworkObserver {
                 "DefaultSubscriptionChangeListener", mContext, mHandler, filter,
                 (Intent ignored) -> {
                     mLog.log("OBSERVED default data subscription change");
-                    updateConfiguration();
+                    maybeDefaultDataSubChanged();
                     // To avoid launch unexpected provisioning checks, ignore re-provisioning when
                     // no CarrierConfig loaded yet. Assume reevaluateSimCardProvisioning() will be
                     // triggered again when CarrierConfig is loaded.
-                    if (mEntitlementMgr.getCarrierConfig() != null) {
-                        mEntitlementMgr.reevaluateSimCardProvisioning();
+                    if (mEntitlementMgr.getCarrierConfig(mConfig) != null) {
+                        mEntitlementMgr.reevaluateSimCardProvisioning(mConfig);
                     } else {
                         mLog.log("IGNORED reevaluate provisioning due to no carrier config loaded");
                     }
@@ -301,15 +305,24 @@ public class Tethering extends BaseNetworkObserver {
     // NOTE: This is always invoked on the mLooper thread.
     private void updateConfiguration() {
         final int subId = mDeps.getDefaultDataSubscriptionId();
-        mConfig = new TetheringConfiguration(mContext, mLog, subId);
-        mUpstreamNetworkMonitor.updateMobileRequiresDun(mConfig.isDunRequired);
-        mEntitlementMgr.updateConfiguration(mConfig);
+        updateConfiguration(subId);
     }
 
-    private void maybeUpdateConfiguration() {
+    private void updateConfiguration(final int subId) {
+        mConfig = new TetheringConfiguration(mContext, mLog, subId);
+        mUpstreamNetworkMonitor.updateMobileRequiresDun(mConfig.isDunRequired);
+    }
+
+    private void maybeDunSettingChanged() {
         final boolean isDunRequired = TetheringConfiguration.checkDunRequired(mContext);
         if (isDunRequired == mConfig.isDunRequired) return;
         updateConfiguration();
+    }
+
+    private void maybeDefaultDataSubChanged() {
+        final int subId = mDeps.getDefaultDataSubscriptionId();
+        if (subId == mConfig.subId) return;
+        updateConfiguration(subId);
     }
 
     @Override
@@ -1183,7 +1196,7 @@ public class Tethering extends BaseNetworkObserver {
         protected void chooseUpstreamType(boolean tryCell) {
             // We rebuild configuration on ACTION_CONFIGURATION_CHANGED, but we
             // do not currently know how to watch for changes in DUN settings.
-            maybeUpdateConfiguration();
+            maybeDunSettingChanged();
 
             final TetheringConfiguration config = mConfig;
             final NetworkState ns = (config.chooseUpstreamAutomatically)
