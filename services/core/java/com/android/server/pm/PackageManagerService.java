@@ -2801,6 +2801,11 @@ public class PackageManagerService extends IPackageManager.Stub
                         if (disabledPs.codePath == null || !disabledPs.codePath.exists()
                                 || disabledPs.pkg == null) {
                             possiblyDeletedUpdatedSystemApps.add(ps.name);
+                        } else {
+                            // We're expecting that the system app should remain disabled, but add
+                            // it to expecting better to recover in case the data version cannot
+                            // be scanned.
+                            mExpectingBetter.put(disabledPs.name, disabledPs.codePath);
                         }
                     }
                 }
