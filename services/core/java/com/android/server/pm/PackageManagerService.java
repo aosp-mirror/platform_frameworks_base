@@ -20032,7 +20032,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     PreferredActivity pa = removed.get(j);
                     pir.removeFilter(pa);
                 }
-                outUserChanged.setValueAt(thisUserId, true);
+                outUserChanged.put(thisUserId, true);
             }
         }
     }
