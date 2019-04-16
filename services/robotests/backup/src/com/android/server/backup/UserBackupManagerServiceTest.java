@@ -30,6 +30,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
@@ -38,6 +39,7 @@ import static org.testng.Assert.expectThrows;
 import android.app.backup.BackupManager;
 import android.app.backup.IBackupObserver;
 import android.app.backup.ISelectBackupTransportCallback;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -48,6 +50,7 @@ import android.os.Binder;
 import android.os.HandlerThread;
 import android.os.PowerManager;
 import android.os.PowerSaveState;
+import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
 
@@ -66,6 +69,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
@@ -1128,6 +1132,31 @@ public class UserBackupManagerServiceTest {
                                 mBaseStateDir,
                                 mDataDir,
                                 /* transportManager */ null));
+    }
+
+    /**
+     * Test verifying that creating a new instance registers the broadcast receiver for package
+     * tracking
+     */
+    @Test
+    public void testCreateAndInitializeService_registersPackageTrackingReceiver() throws Exception {
+        Context contextSpy = Mockito.spy(mContext);
+
+        UserBackupManagerService service = UserBackupManagerService.createAndInitializeService(
+                USER_ID,
+                contextSpy,
+                new Trampoline(mContext),
+                mBackupThread,
+                mBaseStateDir,
+                mDataDir,
+                mTransportManager);
+
+        BroadcastReceiver packageTrackingReceiver = service.getPackageTrackingReceiver();
+        assertThat(packageTrackingReceiver).isNotNull();
+
+        // One call for package changes and one call for sd card events.
+        verify(contextSpy, times(2)).registerReceiverAsUser(
+                eq(packageTrackingReceiver), eq(UserHandle.of(USER_ID)), any(), any(), any());
     }
 
     private UserBackupManagerService createUserBackupManagerServiceAndRunTasks() {

@@ -566,10 +566,6 @@ public class UserBackupManagerService {
         // require frequent starting and stopping.
         mConstants.start();
 
-        // Set up the various sorts of package tracking we do
-        mFullBackupScheduleFile = new File(mBaseStateDir, "fb-schedule");
-        initPackageTracking();
-
         // Build our mapping of uid to backup client services.  This implicitly
         // schedules a backup pass on the Package Manager metadata the first
         // time anything needs to be backed up.
@@ -589,6 +585,10 @@ public class UserBackupManagerService {
 
         // Power management
         mWakelock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*backup*-" + userId);
+
+        // Set up the various sorts of package tracking we do
+        mFullBackupScheduleFile = new File(mBaseStateDir, "fb-schedule");
+        initPackageTracking();
     }
 
     void initializeBackupEnableState() {
@@ -742,6 +742,11 @@ public class UserBackupManagerService {
 
     public File getDataDir() {
         return mDataDir;
+    }
+
+    @VisibleForTesting
+    BroadcastReceiver getPackageTrackingReceiver() {
+        return mBroadcastReceiver;
     }
 
     @Nullable
