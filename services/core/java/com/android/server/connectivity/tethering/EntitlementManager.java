@@ -29,7 +29,6 @@ import static android.net.ConnectivityManager.TETHER_ERROR_PROVISION_FAILED;
 
 import static com.android.internal.R.string.config_wifi_tether_enable;
 
-import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -76,6 +75,7 @@ public class EntitlementManager {
     protected static final String DISABLE_PROVISIONING_SYSPROP_KEY = "net.tethering.noprovisioning";
     private static final String ACTION_PROVISIONING_ALARM =
             "com.android.server.connectivity.tethering.PROVISIONING_RECHECK_ALARM";
+    private static final String EXTRA_SUBID = "subId";
 
     // {@link ComponentName} of the Service used to run tether provisioning.
     private static final ComponentName TETHER_SERVICE = ComponentName.unflattenFromString(
@@ -99,7 +99,6 @@ public class EntitlementManager {
     private final SharedLog mLog;
     private final SparseIntArray mEntitlementCacheValue;
     private final EntitlementHandler mHandler;
-    private @Nullable TetheringConfiguration mConfig;
     private final StateMachine mTetherMasterSM;
     // Key: ConnectivityManager.TETHERING_*(downstream).
     // Value: ConnectivityManager.TETHER_ERROR_{NO_ERROR or PROVISION_FAILED}(provisioning result).
@@ -109,6 +108,7 @@ public class EntitlementManager {
     private boolean mUsingCellularAsUpstream = false;
     private boolean mNeedReRunProvisioningUi = false;
     private OnUiEntitlementFailedListener mListener;
+    private TetheringConfigurationFetcher mFetcher;
 
     public EntitlementManager(Context ctx, StateMachine tetherMasterSM, SharedLog log,
             int permissionChangeMessageCode, MockableSystemProperties systemProperties) {
@@ -143,12 +143,18 @@ public class EntitlementManager {
         void onUiEntitlementFailed(int downstream);
     }
 
-    /**
-     * Pass a new TetheringConfiguration instance each time when
-     * Tethering#updateConfiguration() is called.
-     */
-    public void updateConfiguration(TetheringConfiguration conf) {
-        mConfig = conf;
+    public void setTetheringConfigurationFetcher(final TetheringConfigurationFetcher fetcher) {
+        mFetcher = fetcher;
+    }
+
+    /** Interface to fetch TetheringConfiguration. */
+    public interface TetheringConfigurationFetcher {
+        /**
+         * Fetch current tethering configuration. This will be called to ensure whether entitlement
+         * check is needed.
+         * @return TetheringConfiguration instance.
+         */
+        TetheringConfiguration fetchTetheringConfiguration();
     }
 
     /**
@@ -176,7 +182,8 @@ public class EntitlementManager {
 
         if (!mCurrentTethers.contains(type)) mCurrentTethers.add(type);
 
-        if (isTetherProvisioningRequired()) {
+        final TetheringConfiguration config = mFetcher.fetchTetheringConfiguration();
+        if (isTetherProvisioningRequired(config)) {
             // If provisioning is required and the result is not available yet,
             // cellular upstream should not be allowed.
             if (mCellularPermitted.size() == 0) {
@@ -186,9 +193,9 @@ public class EntitlementManager {
             // till upstream change to cellular.
             if (mUsingCellularAsUpstream) {
                 if (showProvisioningUi) {
-                    runUiTetherProvisioning(type);
+                    runUiTetherProvisioning(type, config.subId);
                 } else {
-                    runSilentTetherProvisioning(type);
+                    runSilentTetherProvisioning(type, config.subId);
                 }
                 mNeedReRunProvisioningUi = false;
             } else {
@@ -237,7 +244,8 @@ public class EntitlementManager {
         mUsingCellularAsUpstream = isCellular;
 
         if (mUsingCellularAsUpstream) {
-            handleMaybeRunProvisioning();
+            final TetheringConfiguration config = mFetcher.fetchTetheringConfiguration();
+            handleMaybeRunProvisioning(config);
         }
     }
 
@@ -246,8 +254,8 @@ public class EntitlementManager {
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_MAYBE_RUN_PROVISIONING));
     }
 
-    private void handleMaybeRunProvisioning() {
-        if (mCurrentTethers.size() == 0 || !isTetherProvisioningRequired()) {
+    private void handleMaybeRunProvisioning(final TetheringConfiguration config) {
+        if (mCurrentTethers.size() == 0 || !isTetherProvisioningRequired(config)) {
             return;
         }
 
@@ -259,9 +267,9 @@ public class EntitlementManager {
             if (mCellularPermitted.indexOfKey(downstream) < 0) {
                 if (mNeedReRunProvisioningUi) {
                     mNeedReRunProvisioningUi = false;
-                    runUiTetherProvisioning(downstream);
+                    runUiTetherProvisioning(downstream, config.subId);
                 } else {
-                    runSilentTetherProvisioning(downstream);
+                    runSilentTetherProvisioning(downstream, config.subId);
                 }
             }
         }
@@ -270,29 +278,31 @@ public class EntitlementManager {
     /**
      * Check if the device requires a provisioning check in order to enable tethering.
      *
+     * @param config an object that encapsulates the various tethering configuration elements.
      * @return a boolean - {@code true} indicating tether provisioning is required by the carrier.
      */
     @VisibleForTesting
-    public boolean isTetherProvisioningRequired() {
+    protected boolean isTetherProvisioningRequired(final TetheringConfiguration config) {
         if (mSystemProperties.getBoolean(DISABLE_PROVISIONING_SYSPROP_KEY, false)
-                || mConfig.provisioningApp.length == 0) {
+                || config.provisioningApp.length == 0) {
             return false;
         }
-        if (carrierConfigAffirmsEntitlementCheckNotRequired()) {
+        if (carrierConfigAffirmsEntitlementCheckNotRequired(config)) {
             return false;
         }
-        return (mConfig.provisioningApp.length == 2);
+        return (config.provisioningApp.length == 2);
     }
 
     /**
      * Re-check tethering provisioning for all enabled tether types.
      * Reference ConnectivityManager.TETHERING_{@code *} for each tether type.
      *
+     * @param config an object that encapsulates the various tethering configuration elements.
      * Note: this method is only called from TetherMaster on the handler thread.
      * If there are new callers from different threads, the logic should move to
      * masterHandler to avoid race conditions.
      */
-    public void reevaluateSimCardProvisioning() {
+    public void reevaluateSimCardProvisioning(final TetheringConfiguration config) {
         if (DBG) mLog.i("reevaluateSimCardProvisioning");
 
         if (!mHandler.getLooper().isCurrentThread()) {
@@ -303,24 +313,27 @@ public class EntitlementManager {
         mCellularPermitted.clear();
 
         // TODO: refine provisioning check to isTetherProvisioningRequired() ??
-        if (!mConfig.hasMobileHotspotProvisionApp()
-                || carrierConfigAffirmsEntitlementCheckNotRequired()) {
-            evaluateCellularPermission();
+        if (!config.hasMobileHotspotProvisionApp()
+                || carrierConfigAffirmsEntitlementCheckNotRequired(config)) {
+            evaluateCellularPermission(config);
             return;
         }
 
         if (mUsingCellularAsUpstream) {
-            handleMaybeRunProvisioning();
+            handleMaybeRunProvisioning(config);
         }
     }
 
-    /** Get carrier configuration bundle. */
-    public PersistableBundle getCarrierConfig() {
+    /**
+     * Get carrier configuration bundle.
+     * @param config an object that encapsulates the various tethering configuration elements.
+     * */
+    public PersistableBundle getCarrierConfig(final TetheringConfiguration config) {
         final CarrierConfigManager configManager = (CarrierConfigManager) mContext
                 .getSystemService(Context.CARRIER_CONFIG_SERVICE);
         if (configManager == null) return null;
 
-        final PersistableBundle carrierConfig = configManager.getConfig();
+        final PersistableBundle carrierConfig = configManager.getConfigForSubId(config.subId);
 
         if (CarrierConfigManager.isConfigForIdentifiedCarrier(carrierConfig)) {
             return carrierConfig;
@@ -334,9 +347,10 @@ public class EntitlementManager {
     //
     // TODO: find a better way to express this, or alter the checking process
     // entirely so that this is more intuitive.
-    private boolean carrierConfigAffirmsEntitlementCheckNotRequired() {
+    private boolean carrierConfigAffirmsEntitlementCheckNotRequired(
+            final TetheringConfiguration config) {
         // Check carrier config for entitlement checks
-        final PersistableBundle carrierConfig = getCarrierConfig();
+        final PersistableBundle carrierConfig = getCarrierConfig(config);
         if (carrierConfig == null) return false;
 
         // A CarrierConfigManager was found and it has a config.
@@ -348,17 +362,19 @@ public class EntitlementManager {
     /**
      * Run no UI tethering provisioning check.
      * @param type tethering type from ConnectivityManager.TETHERING_{@code *}
+     * @param subId default data subscription ID.
      */
-    protected void runSilentTetherProvisioning(int type) {
+    @VisibleForTesting
+    protected void runSilentTetherProvisioning(int type, int subId) {
         if (DBG) mLog.i("runSilentTetherProvisioning: " + type);
         // For silent provisioning, settings would stop tethering when entitlement fail.
-        ResultReceiver receiver = buildProxyReceiver(type,
-                false/* notifyFail */, null);
+        ResultReceiver receiver = buildProxyReceiver(type, false/* notifyFail */, null);
 
         Intent intent = new Intent();
         intent.putExtra(EXTRA_ADD_TETHER_TYPE, type);
         intent.putExtra(EXTRA_RUN_PROVISION, true);
         intent.putExtra(EXTRA_PROVISION_CALLBACK, receiver);
+        intent.putExtra(EXTRA_SUBID, subId);
         intent.setComponent(TETHER_SERVICE);
         final long ident = Binder.clearCallingIdentity();
         try {
@@ -368,24 +384,25 @@ public class EntitlementManager {
         }
     }
 
+    private void runUiTetherProvisioning(int type, int subId) {
+        ResultReceiver receiver = buildProxyReceiver(type, true/* notifyFail */, null);
+        runUiTetherProvisioning(type, subId, receiver);
+    }
+
     /**
      * Run the UI-enabled tethering provisioning check.
      * @param type tethering type from ConnectivityManager.TETHERING_{@code *}
+     * @param subId default data subscription ID.
+     * @param receiver to receive entitlement check result.
      */
     @VisibleForTesting
-    protected void runUiTetherProvisioning(int type) {
-        ResultReceiver receiver = buildProxyReceiver(type,
-                true/* notifyFail */, null);
-        runUiTetherProvisioning(type, receiver);
-    }
-
-    @VisibleForTesting
-    protected void runUiTetherProvisioning(int type, ResultReceiver receiver) {
+    protected void runUiTetherProvisioning(int type, int subId, ResultReceiver receiver) {
         if (DBG) mLog.i("runUiTetherProvisioning: " + type);
 
         Intent intent = new Intent(Settings.ACTION_TETHER_PROVISIONING);
         intent.putExtra(EXTRA_ADD_TETHER_TYPE, type);
         intent.putExtra(EXTRA_PROVISION_CALLBACK, receiver);
+        intent.putExtra(EXTRA_SUBID, subId);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         final long ident = Binder.clearCallingIdentity();
         try {
@@ -396,9 +413,9 @@ public class EntitlementManager {
     }
 
     // Not needed to check if this don't run on the handler thread because it's private.
-    private void scheduleProvisioningRechecks() {
+    private void scheduleProvisioningRechecks(final TetheringConfiguration config) {
         if (mProvisioningRecheckAlarm == null) {
-            final int period = mConfig.provisioningCheckPeriod;
+            final int period = config.provisioningCheckPeriod;
             if (period <= 0) return;
 
             Intent intent = new Intent(ACTION_PROVISIONING_ALARM);
@@ -421,9 +438,9 @@ public class EntitlementManager {
         }
     }
 
-    private void evaluateCellularPermission() {
+    private void evaluateCellularPermission(final TetheringConfiguration config) {
         final boolean oldPermitted = mCellularUpstreamPermitted;
-        mCellularUpstreamPermitted = (!isTetherProvisioningRequired()
+        mCellularUpstreamPermitted = (!isTetherProvisioningRequired(config)
                 || mCellularPermitted.indexOfValue(TETHER_ERROR_NO_ERROR) > -1);
 
         if (DBG) {
@@ -438,7 +455,7 @@ public class EntitlementManager {
         // Only schedule periodic re-check when tether is provisioned
         // and the result is ok.
         if (mCellularUpstreamPermitted && mCellularPermitted.size() > 0) {
-            scheduleProvisioningRechecks();
+            scheduleProvisioningRechecks(config);
         } else {
             cancelTetherProvisioningRechecks();
         }
@@ -457,7 +474,8 @@ public class EntitlementManager {
         if (!mCurrentTethers.contains(type)) return;
 
         mCellularPermitted.put(type, resultCode);
-        evaluateCellularPermission();
+        final TetheringConfiguration config = mFetcher.fetchTetheringConfiguration();
+        evaluateCellularPermission(config);
     }
 
     /**
@@ -467,7 +485,8 @@ public class EntitlementManager {
     protected void removeDownstreamMapping(int type) {
         mLog.i("removeDownstreamMapping: " + type);
         mCellularPermitted.delete(type);
-        evaluateCellularPermission();
+        final TetheringConfiguration config = mFetcher.fetchTetheringConfiguration();
+        evaluateCellularPermission(config);
     }
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -475,7 +494,8 @@ public class EntitlementManager {
         public void onReceive(Context context, Intent intent) {
             if (ACTION_PROVISIONING_ALARM.equals(intent.getAction())) {
                 mLog.log("Received provisioning alarm");
-                reevaluateSimCardProvisioning();
+                final TetheringConfiguration config = mFetcher.fetchTetheringConfiguration();
+                reevaluateSimCardProvisioning(config);
             }
         }
     };
@@ -498,7 +518,8 @@ public class EntitlementManager {
                     handleNotifyUpstream(toBool(msg.arg1));
                     break;
                 case EVENT_MAYBE_RUN_PROVISIONING:
-                    handleMaybeRunProvisioning();
+                    final TetheringConfiguration config = mFetcher.fetchTetheringConfiguration();
+                    handleMaybeRunProvisioning(config);
                     break;
                 case EVENT_GET_ENTITLEMENT_VALUE:
                     handleGetLatestTetheringEntitlementValue(msg.arg1, (ResultReceiver) msg.obj,
@@ -636,7 +657,8 @@ public class EntitlementManager {
     private void handleGetLatestTetheringEntitlementValue(int downstream, ResultReceiver receiver,
             boolean showEntitlementUi) {
 
-        if (!isTetherProvisioningRequired()) {
+        final TetheringConfiguration config = mFetcher.fetchTetheringConfiguration();
+        if (!isTetherProvisioningRequired(config)) {
             receiver.send(TETHER_ERROR_NO_ERROR, null);
             return;
         }
@@ -647,7 +669,7 @@ public class EntitlementManager {
             receiver.send(cacheValue, null);
         } else {
             ResultReceiver proxy = buildProxyReceiver(downstream, false/* notifyFail */, receiver);
-            runUiTetherProvisioning(downstream, proxy);
+            runUiTetherProvisioning(downstream, config.subId, proxy);
         }
     }
 }
