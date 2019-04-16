@@ -3804,7 +3804,7 @@ message ProcessMemoryState {
 
     // SWAP
     // Value is read from memory.stat, field total_swap if per-app memory
-    // cgroups are enabled. Otherwise, 0.
+    // cgroups are enabled. Otherwise, VmSwap from /proc/PID/status.
     optional int64 swap_in_bytes = 8;
 
     // Deprecated: use ProcessMemoryHighWaterMark atom instead. Always 0.
@@ -3844,6 +3844,10 @@ message NativeProcessMemoryState {
     // Elapsed real time when the process started.
     // Value is read from /proc/PID/stat, field 22.
     optional int64 start_time_nanos = 7;
+
+    // SWAP
+    // Value read from /proc/PID/status, field VmSwap.
+    optional int64 swap_in_bytes = 8;
 }
 
 /*
