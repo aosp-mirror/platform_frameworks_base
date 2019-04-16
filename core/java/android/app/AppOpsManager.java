@@ -823,9 +823,11 @@ public class AppOpsManager {
     public static final int OP_LEGACY_STORAGE = 87;
     /** @hide Accessing accessibility features */
     public static final int OP_ACCESS_ACCESSIBILITY = 88;
+    /** @hide Read the device identifiers (IMEI / MEID, IMSI, SIM / Build serial) */
+    public static final int OP_READ_DEVICE_IDENTIFIERS = 89;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int _NUM_OP = 89;
+    public static final int _NUM_OP = 90;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1099,6 +1101,8 @@ public class AppOpsManager {
     /** @hide Interact with accessibility. */
     @SystemApi
     public static final String OPSTR_ACCESS_ACCESSIBILITY = "android:access_accessibility";
+    /** @hide Read device identifiers */
+    public static final String OPSTR_READ_DEVICE_IDENTIFIERS = "android:read_device_identifiers";
 
     // Warning: If an permission is added here it also has to be added to
     // com.android.packageinstaller.permission.utils.EventLogger
@@ -1259,6 +1263,7 @@ public class AppOpsManager {
             OP_WRITE_MEDIA_IMAGES,              // WRITE_MEDIA_IMAGES
             OP_LEGACY_STORAGE,                  // LEGACY_STORAGE
             OP_ACCESS_ACCESSIBILITY,            // ACCESS_ACCESSIBILITY
+            OP_READ_DEVICE_IDENTIFIERS,         // READ_DEVICE_IDENTIFIERS
     };
 
     /**
@@ -1354,6 +1359,7 @@ public class AppOpsManager {
             OPSTR_WRITE_MEDIA_IMAGES,
             OPSTR_LEGACY_STORAGE,
             OPSTR_ACCESS_ACCESSIBILITY,
+            OPSTR_READ_DEVICE_IDENTIFIERS,
     };
 
     /**
@@ -1450,6 +1456,7 @@ public class AppOpsManager {
             "WRITE_MEDIA_IMAGES",
             "LEGACY_STORAGE",
             "ACCESS_ACCESSIBILITY",
+            "READ_DEVICE_IDENTIFIERS",
     };
 
     /**
@@ -1547,6 +1554,7 @@ public class AppOpsManager {
             null, // no permission for OP_WRITE_MEDIA_IMAGES
             null, // no permission for OP_LEGACY_STORAGE
             null, // no permission for OP_ACCESS_ACCESSIBILITY
+            null, // no direct permission for OP_READ_DEVICE_IDENTIFIERS
     };
 
     /**
@@ -1644,6 +1652,7 @@ public class AppOpsManager {
             null, // WRITE_MEDIA_IMAGES
             null, // LEGACY_STORAGE
             null, // ACCESS_ACCESSIBILITY
+            null, // READ_DEVICE_IDENTIFIERS
     };
 
     /**
@@ -1740,6 +1749,7 @@ public class AppOpsManager {
             false, // WRITE_MEDIA_IMAGES
             false, // LEGACY_STORAGE
             false, // ACCESS_ACCESSIBILITY
+            false, // READ_DEVICE_IDENTIFIERS
     };
 
     /**
@@ -1835,6 +1845,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ERRORED, // WRITE_MEDIA_IMAGES
             AppOpsManager.MODE_DEFAULT, // LEGACY_STORAGE
             AppOpsManager.MODE_ALLOWED, // ACCESS_ACCESSIBILITY
+            AppOpsManager.MODE_ERRORED, // READ_DEVICE_IDENTIFIERS
     };
 
     /**
@@ -1934,6 +1945,7 @@ public class AppOpsManager {
             false, // WRITE_MEDIA_IMAGES
             false, // LEGACY_STORAGE
             false, // ACCESS_ACCESSIBILITY
+            false, // READ_DEVICE_IDENTIFIERS
     };
 
     /**
