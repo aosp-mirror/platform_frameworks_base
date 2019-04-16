@@ -1095,6 +1095,14 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                     Slog.d(TAG, "Clear notification");
                     mUsbNotificationId = 0;
                 }
+                // Not relevant for automotive.
+                if (mContext.getPackageManager().hasSystemFeature(
+                        PackageManager.FEATURE_AUTOMOTIVE)
+                        && id == SystemMessage.NOTE_USB_CHARGING) {
+                    mUsbNotificationId = 0;
+                    return;
+                }
+
                 if (id != 0) {
                     CharSequence title = r.getText(titleRes);
                     PendingIntent pi;
