@@ -65,6 +65,7 @@ import com.android.internal.util.HexDump;
 import com.android.internal.util.MessageUtils;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
+import com.android.internal.util.TrafficStatsConstants;
 import com.android.internal.util.WakeupMessage;
 
 import java.io.FileDescriptor;
@@ -329,7 +330,8 @@ public class DhcpClient extends StateMachine {
     }
 
     private boolean initUdpSocket() {
-        final int oldTag = TrafficStats.getAndSetThreadStatsTag(TrafficStats.TAG_SYSTEM_DHCP);
+        final int oldTag = TrafficStats.getAndSetThreadStatsTag(
+                TrafficStatsConstants.TAG_SYSTEM_DHCP);
         try {
             mUdpSock = Os.socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
             SocketUtils.bindSocketToInterface(mUdpSock, mIfaceName);
