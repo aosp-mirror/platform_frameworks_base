@@ -3510,6 +3510,7 @@ struct ResTable::Package
     ResStringPool                   keyStrings;
 
     size_t                          typeIdOffset;
+    bool                            definesOverlayable = false;
 };
 
 // A group of objects describing a particular resource package.
@@ -6861,6 +6862,10 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
                 ALOGW("Found multiple library tables, ignoring...");
             }
         } else {
+            if (ctype == RES_TABLE_OVERLAYABLE_TYPE) {
+                package->definesOverlayable = true;
+            }
+
             status_t err = validate_chunk(chunk, sizeof(ResChunk_header),
                                           endPos, "ResTable_package:unknown");
             if (err != NO_ERROR) {
@@ -7135,6 +7140,11 @@ status_t ResTable::createIdmap(const ResTable& targetResTable,
     if (targetResTable.mPackageGroups.size() == 0 ||
             targetResTable.mPackageGroups[0]->packages.size() == 0) {
         ALOGE("idmap: invalid target package");
+        return UNKNOWN_ERROR;
+    }
+
+    // Idmap is not aware of overlayable, exit since policy checks can't be done
+    if (targetResTable.mPackageGroups[0]->packages[0]->definesOverlayable) {
         return UNKNOWN_ERROR;
     }
 
