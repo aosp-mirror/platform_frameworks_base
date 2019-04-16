@@ -19,15 +19,16 @@
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
     android:shareInterpolator="false">
-    <translate
-        android:fromYDelta="-2%"
-        android:toYDelta="0"
-        android:interpolator="@interpolator/fast_out_slow_in"
-        android:duration="425"/>
-    <alpha
-        android:fromAlpha="0.9"
-        android:toAlpha="1.0"
-        android:interpolator="@interpolator/activity_close_dim"
-        android:startOffset="0"
-        android:duration="425"/>
+    <scale
+        android:fromXScale="1.1"
+        android:toXScale="1"
+        android:fromYScale="1.1"
+        android:toYScale="1"
+        android:pivotX="50%"
+        android:pivotY="50%"
+        android:fillEnabled="true"
+        android:fillBefore="true"
+        android:fillAfter="true"
+        android:interpolator="@interpolator/fast_out_extra_slow_in"
+        android:duration="400"/>
 </set>
