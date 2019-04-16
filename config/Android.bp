@@ -12,11 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-java_test_host {
-    name: "PreloadCheck",
-    srcs: ["src/**/*.java"],
-    java_resources: [":preloaded-classes-blacklist"],
-    libs: ["tradefed"],
-    test_suites: ["general-tests"],
-    required: ["preload-check-device"],
+filegroup {
+    name: "preloaded-classes-blacklist",
+    srcs: ["preloaded-classes-blacklist"],
 }
