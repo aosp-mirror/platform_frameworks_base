@@ -40,7 +40,6 @@ import java.util.regex.Pattern;
  */
 public final class MemoryStatUtil {
     static final int BYTES_IN_KILOBYTE = 1024;
-    static final int PAGE_SIZE = 4096;
     static final long JIFFY_NANOS = 1_000_000_000 / Os.sysconf(OsConstants._SC_CLK_TCK);
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "MemoryStatUtil" : TAG_AM;
@@ -65,15 +64,20 @@ public final class MemoryStatUtil {
     private static final Pattern RSS_IN_BYTES = Pattern.compile("total_rss (\\d+)");
     private static final Pattern CACHE_IN_BYTES = Pattern.compile("total_cache (\\d+)");
     private static final Pattern SWAP_IN_BYTES = Pattern.compile("total_swap (\\d+)");
-    private static final Pattern RSS_HIGH_WATERMARK_IN_BYTES =
+
+    private static final Pattern RSS_HIGH_WATERMARK_IN_KILOBYTES =
             Pattern.compile("VmHWM:\\s*(\\d+)\\s*kB");
+    private static final Pattern PROCFS_RSS_IN_KILOBYTES =
+            Pattern.compile("VmRSS:\\s*(\\d+)\\s*kB");
+    private static final Pattern PROCFS_SWAP_IN_KILOBYTES =
+            Pattern.compile("VmSwap:\\s*(\\d+)\\s*kB");
+
     private static final Pattern ION_HEAP_SIZE_IN_BYTES =
             Pattern.compile("\n\\s*total\\s*(\\d+)\\s*\n");
 
     private static final int PGFAULT_INDEX = 9;
     private static final int PGMAJFAULT_INDEX = 11;
     private static final int START_TIME_INDEX = 21;
-    private static final int RSS_IN_PAGES_INDEX = 23;
 
     private MemoryStatUtil() {}
 
@@ -107,7 +111,8 @@ public final class MemoryStatUtil {
     @Nullable
     public static MemoryStat readMemoryStatFromProcfs(int pid) {
         final String statPath = String.format(Locale.US, PROC_STAT_FILE_FMT, pid);
-        return parseMemoryStatFromProcfs(readFileContents(statPath));
+        final String statusPath = String.format(Locale.US, PROC_STATUS_FILE_FMT, pid);
+        return parseMemoryStatFromProcfs(readFileContents(statPath), readFileContents(statusPath));
     }
 
     /**
@@ -179,8 +184,12 @@ public final class MemoryStatUtil {
      */
     @VisibleForTesting
     @Nullable
-    static MemoryStat parseMemoryStatFromProcfs(String procStatContents) {
+    static MemoryStat parseMemoryStatFromProcfs(
+            String procStatContents, String procStatusContents) {
         if (procStatContents == null || procStatContents.isEmpty()) {
+            return null;
+        }
+        if (procStatusContents == null || procStatusContents.isEmpty()) {
             return null;
         }
 
@@ -193,7 +202,10 @@ public final class MemoryStatUtil {
             final MemoryStat memoryStat = new MemoryStat();
             memoryStat.pgfault = Long.parseLong(splits[PGFAULT_INDEX]);
             memoryStat.pgmajfault = Long.parseLong(splits[PGMAJFAULT_INDEX]);
-            memoryStat.rssInBytes = Long.parseLong(splits[RSS_IN_PAGES_INDEX]) * PAGE_SIZE;
+            memoryStat.rssInBytes =
+                tryParseLong(PROCFS_RSS_IN_KILOBYTES, procStatusContents) * BYTES_IN_KILOBYTE;
+            memoryStat.swapInBytes =
+                tryParseLong(PROCFS_SWAP_IN_KILOBYTES, procStatusContents) * BYTES_IN_KILOBYTE;
             memoryStat.startTimeNanos = Long.parseLong(splits[START_TIME_INDEX]) * JIFFY_NANOS;
             return memoryStat;
         } catch (NumberFormatException e) {
@@ -212,7 +224,8 @@ public final class MemoryStatUtil {
             return 0;
         }
         // Convert value read from /proc/pid/status from kilobytes to bytes.
-        return tryParseLong(RSS_HIGH_WATERMARK_IN_BYTES, procStatusContents) * BYTES_IN_KILOBYTE;
+        return tryParseLong(RSS_HIGH_WATERMARK_IN_KILOBYTES, procStatusContents)
+                * BYTES_IN_KILOBYTE;
     }
 
 

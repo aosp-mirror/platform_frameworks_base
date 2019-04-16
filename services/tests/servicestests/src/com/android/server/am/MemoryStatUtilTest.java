@@ -19,7 +19,6 @@ package com.android.server.am;
 import static com.android.server.am.MemoryStatUtil.BYTES_IN_KILOBYTE;
 import static com.android.server.am.MemoryStatUtil.JIFFY_NANOS;
 import static com.android.server.am.MemoryStatUtil.MemoryStat;
-import static com.android.server.am.MemoryStatUtil.PAGE_SIZE;
 import static com.android.server.am.MemoryStatUtil.parseCmdlineFromProcfs;
 import static com.android.server.am.MemoryStatUtil.parseIonHeapSizeFromDebugfs;
 import static com.android.server.am.MemoryStatUtil.parseMemoryStatFromMemcg;
@@ -102,7 +101,7 @@ public class MemoryStatUtilTest {
             "0",
             "2222", // this in start time (in ticks per second)
             "1257177088",
-            "3", // this is RSS (number of pages)
+            "3",
             "4294967295",
             "2936971264",
             "2936991289",
@@ -147,8 +146,8 @@ public class MemoryStatUtilTest {
             + "VmSize:\t 4542636 kB\n"
             + "VmLck:\t       0 kB\n"
             + "VmPin:\t       0 kB\n"
-            + "VmHWM:\t  137668 kB\n" // RSS high watermark
-            + "VmRSS:\t  126776 kB\n"
+            + "VmHWM:\t  137668 kB\n" // RSS high-water mark
+            + "VmRSS:\t  126776 kB\n" // RSS
             + "RssAnon:\t   37860 kB\n"
             + "RssFile:\t   88764 kB\n"
             + "RssShmem:\t     152 kB\n"
@@ -158,7 +157,7 @@ public class MemoryStatUtilTest {
             + "VmLib:\t  102432 kB\n"
             + "VmPTE:\t    1300 kB\n"
             + "VmPMD:\t      36 kB\n"
-            + "VmSwap:\t       0 kB\n"
+            + "VmSwap:\t      22 kB\n" // Swap
             + "Threads:\t95\n"
             + "SigQ:\t0/13641\n"
             + "SigPnd:\t0000000000000000\n"
@@ -227,28 +226,34 @@ public class MemoryStatUtilTest {
 
     @Test
     public void testParseMemoryStatFromProcfs_parsesCorrectValues() {
-        MemoryStat stat = parseMemoryStatFromProcfs(PROC_STAT_CONTENTS);
+        MemoryStat stat = parseMemoryStatFromProcfs(PROC_STAT_CONTENTS, PROC_STATUS_CONTENTS);
         assertEquals(1, stat.pgfault);
         assertEquals(2, stat.pgmajfault);
-        assertEquals(3 * PAGE_SIZE, stat.rssInBytes);
+        assertEquals(126776 * BYTES_IN_KILOBYTE, stat.rssInBytes);
         assertEquals(0, stat.cacheInBytes);
-        assertEquals(0, stat.swapInBytes);
+        assertEquals(22 * BYTES_IN_KILOBYTE, stat.swapInBytes);
         assertEquals(2222 * JIFFY_NANOS, stat.startTimeNanos);
     }
 
     @Test
     public void testParseMemoryStatFromProcfs_emptyContents() {
-        MemoryStat stat = parseMemoryStatFromProcfs("");
+        MemoryStat stat = parseMemoryStatFromProcfs("", PROC_STATUS_CONTENTS);
         assertNull(stat);
 
-        stat = parseMemoryStatFromProcfs(null);
+        stat = parseMemoryStatFromProcfs(null, PROC_STATUS_CONTENTS);
+        assertNull(stat);
+
+        stat = parseMemoryStatFromProcfs(PROC_STAT_CONTENTS, "");
+        assertNull(stat);
+
+        stat = parseMemoryStatFromProcfs(PROC_STAT_CONTENTS, null);
         assertNull(stat);
     }
 
     @Test
     public void testParseMemoryStatFromProcfs_invalidValue() {
         String contents = String.join(" ", Collections.nCopies(24, "memory"));
-        assertNull(parseMemoryStatFromProcfs(contents));
+        assertNull(parseMemoryStatFromProcfs(contents, PROC_STATUS_CONTENTS));
     }
 
     @Test
