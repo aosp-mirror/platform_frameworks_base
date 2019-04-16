@@ -31,16 +31,14 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserManager;
+import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
+import com.android.server.SystemConfig;
 
 import java.io.FileDescriptor;
-
-// TODO(b/111441001):
-// Intercept onFinished() & implement death recipient here and shutdown
-// bugreportd service.
 
 /**
  * Implementation of the service that provides a privileged API to capture and consume bugreports.
@@ -55,10 +53,13 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
     private final Object mLock = new Object();
     private final Context mContext;
     private final AppOpsManager mAppOps;
+    private final ArraySet<String> mBugreportWhitelistedPackages;
 
     BugreportManagerServiceImpl(Context context) {
         mContext = context;
         mAppOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
+        mBugreportWhitelistedPackages =
+                SystemConfig.getInstance().getBugreportWhitelistedPackages();
     }
 
     @Override
@@ -78,11 +79,20 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         Preconditions.checkNotNull(bugreportFd);
         Preconditions.checkNotNull(listener);
         validateBugreportMode(bugreportMode);
-        ensureIsPrimaryUser();
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            ensureIsPrimaryUser();
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
 
         int callingUid = Binder.getCallingUid();
         mAppOps.checkPackage(callingUid, callingPackage);
 
+        if (!mBugreportWhitelistedPackages.contains(callingPackage)) {
+            throw new SecurityException(
+                    callingPackage + " is not whitelisted to use Bugreport API");
+        }
         synchronized (mLock) {
             startBugreportLocked(callingUid, callingPackage, bugreportFd, screenshotFd,
                     bugreportMode, listener);
@@ -146,8 +156,8 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         if (isDumpstateBinderServiceRunningLocked()) {
             Slog.w(TAG, "'dumpstate' is already running. Cannot start a new bugreport"
                     + " while another one is currently in progress.");
-            // TODO(b/111441001): Use a new error code; add this to the documentation of the API.
-            reportError(listener, IDumpstateListener.BUGREPORT_ERROR_RUNTIME_ERROR);
+            reportError(listener,
+                    IDumpstateListener.BUGREPORT_ERROR_ANOTHER_REPORT_IN_PROGRESS);
             return;
         }
 
@@ -157,11 +167,18 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
             reportError(listener, IDumpstateListener.BUGREPORT_ERROR_RUNTIME_ERROR);
             return;
         }
+
+        // Wrap the listener so we can intercept binder events directly.
+        IDumpstateListener myListener = new DumpstateListener(listener, ds);
         try {
             ds.startBugreport(callingUid, callingPackage,
-                    bugreportFd, screenshotFd, bugreportMode, listener);
+                    bugreportFd, screenshotFd, bugreportMode, myListener);
         } catch (RemoteException e) {
-            reportError(listener, IDumpstateListener.BUGREPORT_ERROR_RUNTIME_ERROR);
+            // bugreportd service is already started now. We need to kill it to manage the
+            // lifecycle correctly. If we don't subsequent callers will get
+            // BUGREPORT_ERROR_ANOTHER_REPORT_IN_PROGRESS error.
+            // Note that listener will be notified by the death recipient below.
+            cancelBugreport();
         }
     }
 
@@ -225,5 +242,74 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
     private void logAndThrow(String message) {
         Slog.w(TAG, message);
         throw new IllegalArgumentException(message);
+    }
+
+
+    private final class DumpstateListener extends IDumpstateListener.Stub
+            implements DeathRecipient {
+        private final IDumpstateListener mListener;
+        private final IDumpstate mDs;
+        private boolean mDone = false;
+
+        DumpstateListener(IDumpstateListener listener, IDumpstate ds) {
+            mListener = listener;
+            mDs = ds;
+            try {
+                mDs.asBinder().linkToDeath(this, 0);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Unable to register Death Recipient for IDumpstate", e);
+            }
+        }
+
+        @Override
+        public void onProgress(int progress) throws RemoteException {
+            mListener.onProgress(progress);
+        }
+
+        @Override
+        public void onError(int errorCode) throws RemoteException {
+            synchronized (mLock) {
+                mDone = true;
+            }
+            mListener.onError(errorCode);
+        }
+
+        @Override
+        public void onFinished() throws RemoteException {
+            synchronized (mLock) {
+                mDone = true;
+            }
+            mListener.onFinished();
+        }
+
+        @Override
+        public void binderDied() {
+            synchronized (mLock) {
+                if (!mDone) {
+                    // If we have not gotten a "done" callback this must be a crash.
+                    Slog.e(TAG, "IDumpstate likely crashed. Notifying listener");
+                    try {
+                        mListener.onError(IDumpstateListener.BUGREPORT_ERROR_RUNTIME_ERROR);
+                    } catch (RemoteException ignored) {
+                        // If listener is not around, there isn't anything to do here.
+                    }
+                }
+            }
+            mDs.asBinder().unlinkToDeath(this, 0);
+        }
+
+        // Old methods; unused in the API flow.
+        @Override
+        public void onProgressUpdated(int progress) throws RemoteException {
+        }
+
+        @Override
+        public void onMaxProgressUpdated(int maxProgress) throws RemoteException {
+        }
+
+        @Override
+        public void onSectionComplete(String title, int status, int size, int durationMs)
+                throws RemoteException {
+        }
     }
 }

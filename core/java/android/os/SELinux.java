@@ -31,23 +31,28 @@ import java.io.IOException;
 public class SELinux {
     private static final String TAG = "SELinux";
 
-    /** Keep in sync with ./external/libselinux/include/selinux/android.h */
+    /** Keep in sync with ./external/selinux/libselinux/include/selinux/android.h */
     private static final int SELINUX_ANDROID_RESTORECON_NOCHANGE = 1;
     private static final int SELINUX_ANDROID_RESTORECON_VERBOSE = 2;
     private static final int SELINUX_ANDROID_RESTORECON_RECURSE = 4;
     private static final int SELINUX_ANDROID_RESTORECON_FORCE = 8;
     private static final int SELINUX_ANDROID_RESTORECON_DATADATA = 16;
+    private static final int SELINUX_ANDROID_RESTORECON_SKIPCE = 32;
+    private static final int SELINUX_ANDROID_RESTORECON_CROSS_FILESYSTEMS = 64;
+    private static final int SELINUX_ANDROID_RESTORECON_SKIP_SEHASH = 128;
 
     /**
      * Determine whether SELinux is disabled or enabled.
      * @return a boolean indicating whether SELinux is enabled.
      */
+    @UnsupportedAppUsage
     public static final native boolean isSELinuxEnabled();
 
     /**
      * Determine whether SELinux is permissive or enforcing.
      * @return a boolean indicating whether SELinux is enforcing.
      */
+    @UnsupportedAppUsage
     public static final native boolean isSELinuxEnforced();
 
     /**
@@ -91,6 +96,7 @@ public class SELinux {
      * Gets the security context of the current process.
      * @return a String representing the security context of the current process.
      */
+    @UnsupportedAppUsage
     public static final native String getContext();
 
     /**
@@ -98,6 +104,7 @@ public class SELinux {
      * @param pid an int representing the process id to check.
      * @return a String representing the security context of the given pid.
      */
+    @UnsupportedAppUsage
     public static final native String getPidContext(int pid);
 
     /**
@@ -108,6 +115,7 @@ public class SELinux {
      * @param perm The permission name.
      * @return a boolean indicating whether permission was granted.
      */
+    @UnsupportedAppUsage
     public static final native boolean checkSELinuxAccess(String scon, String tcon, String tclass, String perm);
 
     /**
@@ -167,9 +175,11 @@ public class SELinux {
      *
      * @return a boolean indicating whether the relabeling succeeded.
      */
+    @UnsupportedAppUsage
     public static boolean restoreconRecursive(File file) {
         try {
-            return native_restorecon(file.getCanonicalPath(), SELINUX_ANDROID_RESTORECON_RECURSE);
+            return native_restorecon(file.getCanonicalPath(),
+                SELINUX_ANDROID_RESTORECON_RECURSE | SELINUX_ANDROID_RESTORECON_SKIP_SEHASH);
         } catch (IOException e) {
             Slog.e(TAG, "Error getting canonical path. Restorecon failed for " +
                     file.getPath(), e);

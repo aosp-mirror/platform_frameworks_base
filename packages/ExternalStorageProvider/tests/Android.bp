@@ -1,0 +1,25 @@
+android_test {
+    name: "ExternalStorageProviderTests",
+
+    manifest: "AndroidManifest.xml",
+
+    srcs: [
+        "src/**/*.java",
+    ],
+
+    libs: [
+        "android.test.base",
+        "android.test.mock",
+        "android.test.runner",
+    ],
+
+    static_libs: [
+        "android-support-test",
+        "mockito-target",
+        "truth-prebuilt",
+    ],
+
+    certificate: "platform",
+
+    instrumentation_for: "ExternalStorageProvider",
+}

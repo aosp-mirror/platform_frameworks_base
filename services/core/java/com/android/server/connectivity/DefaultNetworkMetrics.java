@@ -163,8 +163,8 @@ public class DefaultNetworkMetrics {
         LinkProperties lp = nai.linkProperties;
         ev.netId = nai.network().netId;
         ev.transports |= BitUtils.packBits(nai.networkCapabilities.getTransportTypes());
-        ev.ipv4 |= lp.hasIPv4Address() && lp.hasIPv4DefaultRoute();
-        ev.ipv6 |= lp.hasGlobalIPv6Address() && lp.hasIPv6DefaultRoute();
+        ev.ipv4 |= lp.hasIpv4Address() && lp.hasIpv4DefaultRoute();
+        ev.ipv6 |= lp.hasGlobalIpv6Address() && lp.hasIpv6DefaultRoute();
     }
 
     private static void printEvent(long localTimeMs, PrintWriter pw, DefaultNetworkEvent ev) {

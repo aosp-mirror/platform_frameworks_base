@@ -329,7 +329,7 @@ public class DhcpServingParams {
             if (mLinkMtu != MTU_UNSET && (mLinkMtu < IPV4_MIN_MTU || mLinkMtu > IPV4_MAX_MTU)) {
                 throw new InvalidParameterException("Invalid link MTU: " + mLinkMtu);
             }
-            if (!mServerAddr.isIPv4()) {
+            if (!mServerAddr.isIpv4()) {
                 throw new InvalidParameterException("serverAddr must be IPv4");
             }
             if (mServerAddr.getPrefixLength() < MIN_PREFIX_LENGTH

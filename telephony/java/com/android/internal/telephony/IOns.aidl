@@ -17,6 +17,9 @@
 package com.android.internal.telephony;
 
 import android.telephony.AvailableNetworkInfo;
+import com.android.internal.telephony.IUpdateAvailableNetworksCallback;
+
+import com.android.internal.telephony.ISetOpportunisticDataCallback;
 
 interface IOns {
 
@@ -62,11 +65,13 @@ interface IOns {
      * @param subId which opportunistic subscription
      * {@link SubscriptionManager#getOpportunisticSubscriptions} is preferred for cellular data.
      * Pass {@link SubscriptionManager#DEFAULT_SUBSCRIPTION_ID} to unset the preference
+     * @param needValidation whether validation is needed before switch happens.
+     * @param callback callback upon request completion.
      * @param callingPackage caller's package name
-     * @return true if request is accepted, else false.
      *
      */
-    boolean setPreferredDataSubscriptionId(int subId, String callingPackage);
+    void setPreferredDataSubscriptionId(int subId, boolean needValidation,
+            ISetOpportunisticDataCallback callbackStub, String callingPackage);
 
     /**
      * Get preferred opportunistic data subscription Id
@@ -93,9 +98,9 @@ interface IOns {
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
      *  @param availableNetworks is a list of available network information.
      *  @param callingPackage caller's package name
-     *  @return true if request is accepted
+     *  @param callback callback upon request completion.
      *
      */
-    boolean updateAvailableNetworks(in List<AvailableNetworkInfo> availableNetworks,
-            String callingPackage);
+    void updateAvailableNetworks(in List<AvailableNetworkInfo> availableNetworks,
+            IUpdateAvailableNetworksCallback callbackStub, String callingPackage);
 }

@@ -136,9 +136,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi ng <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Pagtawag Gamit ang Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi ng <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Pagtawag Gamit ang Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Pagtawag Gamit ang WiFi"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Naka-off"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Mas gusto ang Wi-Fi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Mas gusto ang mobile"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"Tumawag gamit ang Wi-Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"Tumawag gamit ang mobile network"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi-Fi lang"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Hindi naipasa"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -430,6 +434,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Pinapayagan ang app na i-access ang mga tampok ng telepono ng device. Pinapayagan ng pahintulot na ito ang app na tukuyin ang numero ng telepono at  mga ID ng device, kung aktibo man ang isang tawag, at ang malayuang numerong ikinonekta ng isang tawag."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"iruta ang mga tawag sa pamamagitan ng system"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Pinapayagan ang app na iruta ang mga tawag nito sa pamamagitan ng system upang mapahusay ang karanasan sa pagtawag."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"tingnan at kontrolin ang mga tawag sa pamamagitan ng system."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Binibigyang-daan ang app na makita at makontrol ang mga kasalukuyang tawag sa device. Kabilang dito ang impormasyon gaya ng mga numero ng tawag para sa mga tawag at ang status ng mga tawag."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"ipagpatuloy ang isang tawag mula sa ibang app"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Pinapayagan ang app na ipagpatuloy ang isang tawag na sinimulan sa ibang app."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"basahin ang mga numero ng telepono"</string>
@@ -499,7 +505,7 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Hindi buo ang natukoy na fingerprint. Pakisubukang muli."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Hindi maproseso ang fingerprint. Pakisubukang muli."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Marumi ang sensor ng fingerprint. Pakilinis at subukang muli."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Masyadong mabilis ang paggalaw ng daliri. Pakisubukang muli."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Napakabilis ng paggalaw ng daliri. Pakisubukan ulit."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Masyadong mabagal ang paggalaw ng daliri. Pakisubukang muli."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
@@ -510,7 +516,7 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Nag-time out ang fingerprint. Subukang muli."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Nakansela ang operasyong ginagamitan ng fingerprint."</string>
     <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"Kinansela ng user ang operasyon sa fingerprint."</string>
-    <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Masyadong maraming beses sumubok. Subukang muli sa ibang pagkakataon."</string>
+    <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Napakaraming pagtatangka. Subukan ulit sa ibang pagkakataon."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Masyadong maraming beses sumubok. Na-disable ang sensor para sa fingerprint."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Subukang muli."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Walang naka-enroll na fingerprint."</string>
@@ -584,7 +590,7 @@
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Subaybayan ang mga pagsubok sa pag-unlock ng screen"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Subaybayan ang bilang ng mga hindi tamang password na na-type kapag ina-unlock ang screen, at i-lock ang tablet o burahin ang lahat ng data ng tablet kung masyadong maraming hindi tamang password ang na-type."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Subaybayan ang bilang ng mga maling password kapag ina-unlock ang screen at i-lock ang TV o burahin ang lahat ng data ng TV kung masyadong maraming maling password ang nata-type."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Subaybayan ang bilang ng mga hindi tamang password na na-type. kapag ina-unlock ang screen, at i-lock ang telepono o burahin ang lahat ng data ng telepono kung masyadong maraming hindi tamang password ang na-type."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Subaybayan ang bilang ng mga maling password na na-type kapag ina-unlock ang screen, at i-lock ang telepono o burahin ang lahat ng data ng telepono kung masyadong maraming maling password ang na-type."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Subaybayan ang bilang ng mga maling password na na-type kapag ina-unlock ang screen, at i-lock ang tablet o burahin ang lahat ng data ng user na ito kung masyadong maraming maling password ang nata-type."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Subaybayan ang bilang ng mga maling password na na-type kapag ina-unlock ang screen, at i-lock ang TV o burahin ang lahat ng data ng user na ito kung masyadong maraming maling password ang nata-type."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Subaybayan ang bilang ng mga maling password na na-type kapag ina-unlock ang screen, at i-lock ang telepono o burahin ang lahat ng data ng user na ito kung masyadong maraming maling password ang nata-type."</string>
@@ -606,7 +612,7 @@
     <string name="policydesc_expirePassword" msgid="5367525762204416046">"Baguhin kung gaano kadalas dapat palitan ang password, PIN o pattern sa screen lock."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Itakda pag-encrypt ng storage"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Hilinging naka-encrypt ang nakaimbak na data ng app."</string>
-    <string name="policylab_disableCamera" msgid="6395301023152297826">"Huwag paganahin mga camera"</string>
+    <string name="policylab_disableCamera" msgid="6395301023152297826">"I-disable ang mga camera"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Pigilan ang paggamit sa lahat ng camera ng device."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"I-disable ilang screen lock feature"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Pigilan ang paggamit ng ilang feature ng screen lock."</string>
@@ -1018,13 +1024,13 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Pagkilos ng teksto"</string>
     <string name="email" msgid="4560673117055050403">"Mag-email"</string>
     <string name="email_desc" msgid="3638665569546416795">"Mag-email sa mga piniling address"</string>
-    <string name="dial" msgid="1253998302767701559">"Tawagan"</string>
+    <string name="dial" msgid="1253998302767701559">"Tumawag"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Tawagan ang piniling numero ng telepono"</string>
-    <string name="map" msgid="5441053548030107189">"Mapa"</string>
+    <string name="map" msgid="5441053548030107189">"Mag-mapa"</string>
     <string name="map_desc" msgid="1836995341943772348">"Hanapin ang piniling address"</string>
     <string name="browse" msgid="1245903488306147205">"Buksan"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Buksan ang piniling URL"</string>
-    <string name="sms" msgid="4560537514610063430">"Padalhan ng Mensahe"</string>
+    <string name="sms" msgid="4560537514610063430">"Magmensahe"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Padalhan ng mensahe ang piniling numero ng telepono"</string>
     <string name="add_contact" msgid="7867066569670597203">"Magdagdag"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Idagdag sa mga contact"</string>
@@ -1177,8 +1183,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Mag-sign in sa network"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Walang access sa internet ang Wi-Fi"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"Walang access sa internet ang <xliff:g id="NETWORK_SSID">%1$s</xliff:g>"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"I-tap para sa mga opsyon"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Nakakonekta"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"Limitado ang koneksyon ng <xliff:g id="NETWORK_SSID">%1$s</xliff:g>"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"I-tap para kumonekta pa rin"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Mga pagbabago sa mga setting ng iyong hotspot"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Nagbago ang band ng iyong hotspot."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Hindi sinusuportahan ng device na ito ang kagustuhan mong gumamit lang ng 5GHz. Sa halip, gagamitin ng device na ito ang 5GHz na band kapag available."</string>
@@ -1260,7 +1269,7 @@
     <string name="usb_power_notification_message" msgid="4647527153291917218">"China-charge ang nakakonektang device. Mag-tap para sa higit pang opsyon."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"May na-detect na analog na audio accessory"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Hindi tugma sa teleponong ito ang naka-attach na device. I-tap upang matuto pa."</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"Konektado ang debugging ng USB"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"Nakakonekta ang pag-debug ng USB"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"I-tap para i-off ang pag-debug ng USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Piliin upang i-disable ang debugging ng USB."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Kinukuha ang ulat ng bug…"</string>
@@ -1353,7 +1362,7 @@
     <string name="forward_intent_to_work" msgid="621480743856004612">"Ginagamit mo ang app na ito sa iyong profile sa trabaho"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Pamamaraan ng pag-input"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"I-sync"</string>
-    <string name="accessibility_binding_label" msgid="4148120742096474641">"Kakayahang Ma-access"</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"Pagiging Accessible"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Wallpaper"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Baguhin ang wallpaper"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Notification listener"</string>

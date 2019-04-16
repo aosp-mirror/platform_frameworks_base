@@ -16,42 +16,46 @@
 
 package com.android.server.am;
 
-import android.app.ActivityOptions;
-import android.content.pm.ActivityInfo.WindowLayout;
-import android.platform.test.annotations.Presubmit;
-import android.support.test.filters.MediumTest;
-import android.support.test.runner.AndroidJUnit4;
-
-import com.android.server.am.LaunchParamsController.LaunchParams;
-import org.junit.runner.RunWith;
-import org.junit.Before;
-import org.junit.Test;
-
-import com.android.server.am.LaunchParamsController.LaunchParamsModifier;
-
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyInt;
+
+import static com.android.server.am.LaunchParamsController.LaunchParamsModifier.RESULT_CONTINUE;
+import static com.android.server.am.LaunchParamsController.LaunchParamsModifier.RESULT_DONE;
+import static com.android.server.am.LaunchParamsController.LaunchParamsModifier.RESULT_SKIP;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import static com.android.server.am.LaunchParamsController.LaunchParamsModifier.RESULT_DONE;
-import static com.android.server.am.LaunchParamsController.LaunchParamsModifier.RESULT_CONTINUE;
-import static com.android.server.am.LaunchParamsController.LaunchParamsModifier.RESULT_SKIP;
+import android.app.ActivityOptions;
+import android.content.pm.ActivityInfo.WindowLayout;
+import android.platform.test.annotations.Presubmit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import androidx.test.filters.MediumTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import com.android.server.am.LaunchParamsController.LaunchParams;
+import com.android.server.am.LaunchParamsController.LaunchParamsModifier;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Tests for exercising {@link LaunchParamsController}.
  *
- * Build/Install/Run:
+ * <p>Build/Install/Run:
  *  atest FrameworksServicesTests:LaunchParamsControllerTests
+ *
+ * <p>This test class is a part of Window Manager Service tests and specified in
+ * {@link com.android.server.wm.test.filters.FrameworksTestsFilter}.
  */
 @MediumTest
 @Presubmit

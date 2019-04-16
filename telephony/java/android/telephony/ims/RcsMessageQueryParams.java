@@ -31,6 +31,8 @@ import java.security.InvalidParameterException;
  * The parameters to pass into
  * {@link RcsMessageStore#getRcsMessages(RcsMessageQueryParams)} in order to select a
  * subset of {@link RcsMessage}s present in the message store.
+ *
+ * @hide
  */
 public final class RcsMessageQueryParams implements Parcelable {
     /**
@@ -328,7 +330,7 @@ public final class RcsMessageQueryParams implements Parcelable {
         mThreadId = in.readInt();
     }
 
-    public static final Creator<RcsMessageQueryParams> CREATOR =
+    public static final @android.annotation.NonNull Creator<RcsMessageQueryParams> CREATOR =
             new Creator<RcsMessageQueryParams>() {
                 @Override
                 public RcsMessageQueryParams createFromParcel(Parcel in) {

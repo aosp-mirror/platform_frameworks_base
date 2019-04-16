@@ -1254,16 +1254,13 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 + " callers=" + Debug.getCallers(5));
         r.setState(RESUMED, "minimalResumeActivityLocked");
         r.completeResumeLocked();
-        mStackSupervisor.getLaunchTimeTracker().setLaunchTime(r);
         if (DEBUG_SAVED_STATE) Slog.i(TAG_SAVED_STATE,
                 "Launch completed; removing icicle of " + r.icicle);
     }
 
     private void clearLaunchTime(ActivityRecord r) {
         // Make sure that there is no activity waiting for this to launch.
-        if (mStackSupervisor.mWaitingActivityLaunched.isEmpty()) {
-            r.displayStartTime = r.fullyDrawnStartTime = 0;
-        } else {
+        if (!mStackSupervisor.mWaitingActivityLaunched.isEmpty()) {
             mStackSupervisor.removeTimeoutsForActivityLocked(r);
             mStackSupervisor.scheduleIdleTimeoutLocked(r);
         }
@@ -1449,7 +1446,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         prev.getTask().touchActiveTime();
         clearLaunchTime(prev);
 
-        mStackSupervisor.getLaunchTimeTracker().stopFullyDrawnTraceIfNeeded(getWindowingMode());
+        mStackSupervisor.getActivityMetricsLogger().stopFullyDrawnTraceIfNeeded();
 
         mService.updateCpuStats();
 

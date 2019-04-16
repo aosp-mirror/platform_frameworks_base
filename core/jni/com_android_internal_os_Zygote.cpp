@@ -25,6 +25,8 @@
 
 #define LOG_TAG "Zygote"
 
+#include <async_safe/log.h>
+
 // sys/mount.h has to come before linux/fs.h due to redefinition of MS_RDONLY, MS_BIND, etc
 #include <sys/mount.h>
 #include <linux/fs.h>
@@ -43,6 +45,7 @@
 #include <fcntl.h>
 #include <grp.h>
 #include <inttypes.h>
+#include <link.h>
 #include <malloc.h>
 #include <mntent.h>
 #include <paths.h>
@@ -51,6 +54,7 @@
 #include <sys/capability.h>
 #include <sys/cdefs.h>
 #include <sys/eventfd.h>
+#include <sys/mman.h>
 #include <sys/personality.h>
 #include <sys/prctl.h>
 #include <sys/resource.h>
@@ -66,7 +70,9 @@
 #include <android-base/properties.h>
 #include <android-base/file.h>
 #include <android-base/stringprintf.h>
+#include <android-base/strings.h>
 #include <android-base/unique_fd.h>
+#include <cutils/ashmem.h>
 #include <cutils/fs.h>
 #include <cutils/multiuser.h>
 #include <private/android_filesystem_config.h>
@@ -106,10 +112,14 @@ typedef const std::function<void(std::string)>& fail_fn_t;
 
 static pid_t gSystemServerPid = 0;
 
-static const char kZygoteClassName[] = "com/android/internal/os/Zygote";
+static constexpr const char* kZygoteClassName = "com/android/internal/os/Zygote";
 static jclass gZygoteClass;
 static jmethodID gCallPostForkSystemServerHooks;
 static jmethodID gCallPostForkChildHooks;
+
+static constexpr const char* kZygoteInitClassName = "com/android/internal/os/ZygoteInit";
+static jclass gZygoteInitClass;
+static jmethodID gCreateSystemServerClassLoader;
 
 static bool g_is_security_enforced = true;
 
@@ -296,27 +306,23 @@ static void SigChldHandler(int /*signal_number*/) {
   int saved_errno = errno;
 
   while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
-     // Log process-death status that we care about.  In general it is
-     // not safe to call LOG(...) from a signal handler because of
-     // possible reentrancy.  However, we know a priori that the
-     // current implementation of LOG() is safe to call from a SIGCHLD
-     // handler in the zygote process.  If the LOG() implementation
-     // changes its locking strategy or its use of syscalls within the
-     // lazy-init critical section, its use here may become unsafe.
+     // Log process-death status that we care about.
     if (WIFEXITED(status)) {
-      ALOGI("Process %d exited cleanly (%d)", pid, WEXITSTATUS(status));
+      async_safe_format_log(ANDROID_LOG_INFO, LOG_TAG,
+                            "Process %d exited cleanly (%d)", pid, WEXITSTATUS(status));
     } else if (WIFSIGNALED(status)) {
-      ALOGI("Process %d exited due to signal (%d)", pid, WTERMSIG(status));
-      if (WCOREDUMP(status)) {
-        ALOGI("Process %d dumped core.", pid);
-      }
+      async_safe_format_log(ANDROID_LOG_INFO, LOG_TAG,
+                            "Process %d exited due to signal %d (%s)%s", pid,
+                            WTERMSIG(status), strsignal(WTERMSIG(status)),
+                            WCOREDUMP(status) ? "; core dumped" : "");
     }
 
     // If the just-crashed process is the system_server, bring down zygote
     // so that it is restarted by init and system server will be restarted
     // from there.
     if (pid == gSystemServerPid) {
-      ALOGE("Exit zygote because system server (%d) has terminated", pid);
+      async_safe_format_log(ANDROID_LOG_ERROR, LOG_TAG,
+                            "Exit zygote because system server (pid %d) has terminated", pid);
       kill(getpid(), SIGKILL);
     }
 
@@ -329,14 +335,17 @@ static void SigChldHandler(int /*signal_number*/) {
   // Note that we shouldn't consider ECHILD an error because
   // the secondary zygote might have no children left to wait for.
   if (pid < 0 && errno != ECHILD) {
-    ALOGW("Zygote SIGCHLD error in waitpid: %s", strerror(errno));
+    async_safe_format_log(ANDROID_LOG_WARN, LOG_TAG,
+                          "Zygote SIGCHLD error in waitpid: %s", strerror(errno));
   }
 
   if (blastulas_removed > 0) {
     if (write(gBlastulaPoolEventFD, &blastulas_removed, sizeof(blastulas_removed)) == -1) {
       // If this write fails something went terribly wrong.  We will now kill
       // the zygote and let the system bring it back up.
-      ALOGE("Zygote failed to write to blastula pool event FD: %s", strerror(errno));
+      async_safe_format_log(ANDROID_LOG_ERROR, LOG_TAG,
+                            "Zygote failed to write to blastula pool event FD: %s",
+                            strerror(errno));
       kill(getpid(), SIGKILL);
     }
   }
@@ -891,6 +900,8 @@ static pid_t ForkCommon(JNIEnv* env, bool is_system_server,
 
     // Turn fdsan back on.
     android_fdsan_set_error_level(fdsan_error_level);
+  } else {
+    ALOGD("Forked child process %d", pid);
   }
 
   // We blocked SIGCHLD prior to a fork, we unblock it here.
@@ -1044,6 +1055,15 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
       fail_fn("Error calling post fork system server hooks.");
     }
 
+    // Prefetch the classloader for the system server. This is done early to
+    // allow a tie-down of the proper system server selinux domain.
+    env->CallStaticVoidMethod(gZygoteInitClass, gCreateSystemServerClassLoader);
+    if (env->ExceptionCheck()) {
+      // Be robust here. The Java code will attempt to create the classloader
+      // at a later point (but may not have rights to use AoT artifacts).
+      env->ExceptionClear();
+    }
+
     // TODO(oth): Remove hardcoded label here (b/117874058).
     static const char* kSystemServerLabel = "u:r:system_server:s0";
     if (selinux_android_setcon(kSystemServerLabel) != 0) {
@@ -1115,8 +1135,8 @@ static jlong CalculateCapabilities(JNIEnv* env, jint uid, jint gid, jintArray gi
       RuntimeAbort(env, __LINE__, "Bad gids array");
     }
 
-    for (int gid_index = gids_num; --gids_num >= 0;) {
-      if (native_gid_proxy[gid_index] == AID_WAKELOCK) {
+    for (int gids_index = 0; gids_index < gids_num; ++gids_index) {
+      if (native_gid_proxy[gids_index] == AID_WAKELOCK) {
         gid_wakelock_found = true;
         break;
       }
@@ -1470,6 +1490,11 @@ static void com_android_internal_os_Zygote_nativeGetSocketFDs(JNIEnv* env, jclas
   } else {
     ALOGE("Unable to fetch Blastula pool socket file descriptor");
   }
+
+  /*
+   * ashmem initialization to avoid dlopen overhead
+   */
+  ashmem_init();
 }
 
 /**
@@ -1524,6 +1549,26 @@ static jint com_android_internal_os_Zygote_nativeGetBlastulaPoolCount(JNIEnv* en
   return gBlastulaPoolCount;
 }
 
+static int disable_execute_only(struct dl_phdr_info *info, size_t size, void *data) {
+  // Search for any execute-only segments and mark them read+execute.
+  for (int i = 0; i < info->dlpi_phnum; i++) {
+    if ((info->dlpi_phdr[i].p_type == PT_LOAD) && (info->dlpi_phdr[i].p_flags == PF_X)) {
+      mprotect(reinterpret_cast<void*>(info->dlpi_addr + info->dlpi_phdr[i].p_vaddr),
+              info->dlpi_phdr[i].p_memsz, PROT_READ | PROT_EXEC);
+    }
+  }
+  // Return non-zero to exit dl_iterate_phdr.
+  return 0;
+}
+
+/**
+ * @param env  Managed runtime environment
+ * @return  True if disable was successful.
+ */
+static jboolean com_android_internal_os_Zygote_nativeDisableExecuteOnly(JNIEnv* env, jclass) {
+  return dl_iterate_phdr(disable_execute_only, nullptr) == 0;
+}
+
 static const JNINativeMethod gMethods[] = {
     { "nativeSecurityInit", "()V",
       (void *) com_android_internal_os_Zygote_nativeSecurityInit },
@@ -1552,7 +1597,9 @@ static const JNINativeMethod gMethods[] = {
     { "nativeGetBlastulaPoolEventFD", "()I",
       (void *) com_android_internal_os_Zygote_nativeGetBlastulaPoolEventFD },
     { "nativeGetBlastulaPoolCount", "()I",
-      (void *) com_android_internal_os_Zygote_nativeGetBlastulaPoolCount }
+      (void *) com_android_internal_os_Zygote_nativeGetBlastulaPoolCount },
+    { "nativeDisableExecuteOnly", "()Z",
+      (void *) com_android_internal_os_Zygote_nativeDisableExecuteOnly }
 };
 
 int register_com_android_internal_os_Zygote(JNIEnv* env) {
@@ -1563,6 +1610,13 @@ int register_com_android_internal_os_Zygote(JNIEnv* env) {
   gCallPostForkChildHooks = GetStaticMethodIDOrDie(env, gZygoteClass, "callPostForkChildHooks",
                                                    "(IZZLjava/lang/String;)V");
 
-  return RegisterMethodsOrDie(env, "com/android/internal/os/Zygote", gMethods, NELEM(gMethods));
+  gZygoteInitClass = MakeGlobalRefOrDie(env, FindClassOrDie(env, kZygoteInitClassName));
+  gCreateSystemServerClassLoader = GetStaticMethodIDOrDie(env, gZygoteInitClass,
+                                                          "createSystemServerClassLoader",
+                                                          "()V");
+
+  RegisterMethodsOrDie(env, "com/android/internal/os/Zygote", gMethods, NELEM(gMethods));
+
+  return JNI_OK;
 }
 }  // namespace android

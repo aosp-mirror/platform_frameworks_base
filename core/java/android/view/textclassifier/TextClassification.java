@@ -104,7 +104,7 @@ public final class TextClassification implements Parcelable {
     /**
      * @hide
      */
-    static final TextClassification EMPTY = new TextClassification.Builder().build();
+    public static final TextClassification EMPTY = new TextClassification.Builder().build();
 
     private static final String LOG_TAG = "TextClassification";
     // TODO(toki): investigate a way to derive this based on device properties.

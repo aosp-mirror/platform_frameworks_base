@@ -25,6 +25,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.app.Activity;
@@ -69,6 +70,7 @@ import java.util.List;
 public class UserManager {
 
     private static final String TAG = "UserManager";
+    @UnsupportedAppUsage
     private final IUserManager mService;
     private final Context mContext;
 
@@ -781,6 +783,7 @@ public class UserManager {
      * @see #getUserRestrictions()
      * @hide
      */
+    @UnsupportedAppUsage
     public static final String DISALLOW_RECORD_AUDIO = "no_record_audio";
 
     /**
@@ -1123,6 +1126,7 @@ public class UserManager {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public static UserManager get(Context context) {
         return (UserManager) context.getSystemService(Context.USER_SERVICE);
     }
@@ -1188,6 +1192,7 @@ public class UserManager {
      * @return the user handle of this process.
      * @hide
      */
+    @UnsupportedAppUsage
     public @UserIdInt int getUserHandle() {
         return UserHandle.myUserId();
     }
@@ -1259,6 +1264,7 @@ public class UserManager {
      * Returns whether the caller is running as an admin user. There can be more than one admin
      * user.
      */
+    @UnsupportedAppUsage
     public boolean isAdminUser() {
         return isUserAdmin(UserHandle.myUserId());
     }
@@ -1268,6 +1274,7 @@ public class UserManager {
      * Returns whether the provided user is an admin user. There can be more than one admin
      * user.
      */
+    @UnsupportedAppUsage
     public boolean isUserAdmin(@UserIdInt int userId) {
         UserInfo user = getUserInfo(userId);
         return user != null && user.isAdmin();
@@ -1277,6 +1284,7 @@ public class UserManager {
      * @hide
      * @deprecated Use {@link #isRestrictedProfile()}
      */
+    @UnsupportedAppUsage
     @Deprecated
     public boolean isLinkedUser() {
         return isRestrictedProfile();
@@ -1328,6 +1336,7 @@ public class UserManager {
      * @return whether user is a guest user.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean isGuestUser(int id) {
         UserInfo user = getUserInfo(id);
         return user != null && user.isGuest();
@@ -1534,6 +1543,7 @@ public class UserManager {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public boolean isUserUnlocked(@UserIdInt int userId) {
         try {
             return mService.isUserUnlocked(userId);
@@ -1562,6 +1572,7 @@ public class UserManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public long getUserStartRealtime() {
         try {
             return mService.getUserStartRealtime();
@@ -1576,6 +1587,7 @@ public class UserManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public long getUserUnlockRealtime() {
         try {
             return mService.getUserUnlockRealtime();
@@ -1591,6 +1603,7 @@ public class UserManager {
      * @return the UserInfo object for a specific user.
      * @hide
      */
+    @UnsupportedAppUsage
     public UserInfo getUserInfo(@UserIdInt int userHandle) {
         try {
             return mService.getUserInfo(userHandle);
@@ -1670,6 +1683,7 @@ public class UserManager {
      * @param restrictionKey the string key representing the restriction
      * @param userHandle the UserHandle of the user for whom to retrieve the restrictions.
      */
+    @UnsupportedAppUsage
     public boolean hasBaseUserRestriction(String restrictionKey, UserHandle userHandle) {
         try {
             return mService.hasBaseUserRestriction(restrictionKey, userHandle.getIdentifier());
@@ -1752,6 +1766,7 @@ public class UserManager {
      * @param restrictionKey the string key representing the restriction
      * @param userHandle the UserHandle of the user for whom to retrieve the restrictions.
      */
+    @UnsupportedAppUsage
     public boolean hasUserRestriction(String restrictionKey, UserHandle userHandle) {
         try {
             return mService.hasUserRestriction(restrictionKey,
@@ -1812,6 +1827,7 @@ public class UserManager {
      * @return the UserInfo object for the created user, or null if the user could not be created.
      * @hide
      */
+    @UnsupportedAppUsage
     public UserInfo createUser(String name, int flags) {
         UserInfo user = null;
         try {
@@ -1860,6 +1876,7 @@ public class UserManager {
      *         could not be created.
      * @hide
      */
+    @UnsupportedAppUsage
     public UserInfo createProfileForUser(String name, int flags, @UserIdInt int userHandle) {
         return createProfileForUser(name, flags, userHandle, null);
     }
@@ -2148,6 +2165,7 @@ public class UserManager {
      * @return the list of users that exist on the device.
      * @hide
      */
+    @UnsupportedAppUsage
     public List<UserInfo> getUsers() {
         try {
             return mService.getUsers(false);
@@ -2273,6 +2291,7 @@ public class UserManager {
      * @return the list of profiles.
      * @hide
      */
+    @UnsupportedAppUsage
     public List<UserInfo> getProfiles(@UserIdInt int userHandle) {
         try {
             return mService.getProfiles(userHandle, false /* enabledOnly */);
@@ -2306,6 +2325,7 @@ public class UserManager {
      * @return the list of profiles.
      * @hide
      */
+    @UnsupportedAppUsage
     public List<UserInfo> getEnabledProfiles(@UserIdInt int userHandle) {
         try {
             return mService.getProfiles(userHandle, true /* enabledOnly */);
@@ -2351,6 +2371,7 @@ public class UserManager {
      * @see #getProfileIds(int, boolean)
      * @hide
      */
+    @UnsupportedAppUsage
     public int[] getProfileIdsWithDisabled(@UserIdInt int userId) {
         return getProfileIds(userId, false /* enabledOnly */);
     }
@@ -2384,6 +2405,7 @@ public class UserManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public UserInfo getProfileParent(@UserIdInt int userHandle) {
         try {
             return mService.getProfileParent(userHandle);
@@ -2532,6 +2554,7 @@ public class UserManager {
      * @return the list of users that were created.
      * @hide
      */
+    @UnsupportedAppUsage
     public @NonNull List<UserInfo> getUsers(boolean excludeDying) {
         try {
             return mService.getUsers(excludeDying);
@@ -2546,6 +2569,7 @@ public class UserManager {
      * @param userHandle the integer handle of the user, where 0 is the primary user.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean removeUser(@UserIdInt int userHandle) {
         try {
             return mService.removeUser(userHandle);
@@ -2607,6 +2631,7 @@ public class UserManager {
      * @see com.android.internal.util.UserIcons#getDefaultUserIcon for a default.
      * @hide
      */
+    @UnsupportedAppUsage
     public Bitmap getUserIcon(@UserIdInt int userHandle) {
         try {
             ParcelFileDescriptor fd = mService.getUserIcon(userHandle);
@@ -2632,6 +2657,7 @@ public class UserManager {
      * @hide
      * @return a value greater than or equal to 1
      */
+    @UnsupportedAppUsage
     public static int getMaxSupportedUsers() {
         // Don't allow multiple users on certain builds
         if (android.os.Build.ID.startsWith("JVP")) return 1;
@@ -2681,6 +2707,7 @@ public class UserManager {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public static boolean isDeviceInDemoMode(Context context) {
         return Settings.Global.getInt(context.getContentResolver(),
                 Settings.Global.DEVICE_DEMO_MODE, 0) > 0;
@@ -2693,6 +2720,7 @@ public class UserManager {
      * @return a serial number associated with that user, or -1 if the userHandle is not valid.
      * @hide
      */
+    @UnsupportedAppUsage
     public int getUserSerialNumber(@UserIdInt int userHandle) {
         try {
             return mService.getUserSerialNumber(userHandle);
@@ -2710,6 +2738,7 @@ public class UserManager {
      * is not valid.
      * @hide
      */
+    @UnsupportedAppUsage
     public @UserIdInt int getUserHandle(int userSerialNumber) {
         try {
             return mService.getUserHandle(userSerialNumber);

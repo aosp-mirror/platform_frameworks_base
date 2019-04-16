@@ -15,9 +15,7 @@
 
 cc_test_library {
     name: "libsmartcamera_jni",
-
     sdk_version: "14",
-
     srcs: [
         "contrast.cpp",
         "brightness.cpp",
@@ -29,13 +27,11 @@ cc_test_library {
         "sobeloperator.cpp",
         "stats_scorer.cpp",
     ],
-
     cflags: [
         "-Wall",
         "-Wextra",
         "-Werror",
         "-Wno-unused-parameter",
     ],
-
     stl: "c++_static",
 }

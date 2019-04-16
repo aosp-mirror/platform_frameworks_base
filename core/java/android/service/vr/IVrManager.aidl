@@ -57,6 +57,7 @@ interface IVrManager {
      *
      * @return {@code true} if VR mode is enabled.
      */
+    @UnsupportedAppUsage
     boolean getVrModeState();
 
     /**
@@ -93,6 +94,7 @@ interface IVrManager {
      * @return {@link android.view.Display.INVALID_DISPLAY} if there is no virtual display
      * currently, else return the display id of the virtual display
      */
+    @UnsupportedAppUsage
     int getVr2dDisplayId();
 
     /**

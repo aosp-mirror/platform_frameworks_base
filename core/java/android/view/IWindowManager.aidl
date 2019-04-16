@@ -75,10 +75,13 @@ interface IWindowManager
             in IInputContext inputContext);
     boolean inputMethodClientHasFocus(IInputMethodClient client);
 
+    @UnsupportedAppUsage
     void getInitialDisplaySize(int displayId, out Point size);
+    @UnsupportedAppUsage
     void getBaseDisplaySize(int displayId, out Point size);
     void setForcedDisplaySize(int displayId, int width, int height);
     void clearForcedDisplaySize(int displayId);
+    @UnsupportedAppUsage
     int getInitialDisplayDensity(int displayId);
     int getBaseDisplayDensity(int displayId);
     void setForcedDisplayDensityForUser(int displayId, int density, int userId);
@@ -93,6 +96,7 @@ interface IWindowManager
     void removeWindowToken(IBinder token, int displayId);
     void setFocusedApp(IBinder token, boolean moveFocusNow);
     void prepareAppTransition(int transit, boolean alwaysKeepCurrent);
+    @UnsupportedAppUsage
     int getPendingAppTransition();
     void overridePendingAppTransition(String packageName, int enterAnim, int exitAnim,
             IRemoteCallback startedCallback);
@@ -122,16 +126,20 @@ interface IWindowManager
      * used for recents, where generating the thumbnails of the specs takes a non-trivial amount of
      * time, so we want to move that off the critical path for starting the new activity.
      */
+    @UnsupportedAppUsage
     void overridePendingAppTransitionMultiThumbFuture(
             IAppTransitionAnimationSpecsFuture specsFuture, IRemoteCallback startedCallback,
             boolean scaleUp);
+    @UnsupportedAppUsage
     void overridePendingAppTransitionRemote(in RemoteAnimationAdapter remoteAnimationAdapter);
+    @UnsupportedAppUsage
     void executeAppTransition();
 
     /**
       * Used by system ui to report that recents has shown itself.
       * @deprecated to be removed once prebuilts are updated
       */
+    @UnsupportedAppUsage
     void endProlongedAnimations();
 
     // Re-evaluate the current orientation from the caller's state.
@@ -150,7 +158,9 @@ interface IWindowManager
     void disableKeyguard(IBinder token, String tag);
     void reenableKeyguard(IBinder token);
     void exitKeyguardSecurely(IOnKeyguardExitResult callback);
+    @UnsupportedAppUsage
     boolean isKeyguardLocked();
+    @UnsupportedAppUsage
     boolean isKeyguardSecure();
     void dismissKeyguard(IKeyguardDismissCallback callback, CharSequence message);
 
@@ -160,9 +170,12 @@ interface IWindowManager
     void closeSystemDialogs(String reason);
 
     // These can only be called with the SET_ANIMATON_SCALE permission.
+    @UnsupportedAppUsage
     float getAnimationScale(int which);
     float[] getAnimationScales();
+    @UnsupportedAppUsage
     void setAnimationScale(int which, float scale);
+    @UnsupportedAppUsage
     void setAnimationScales(in float[] scales);
 
     float getCurrentAnimatorScale();
@@ -181,6 +194,7 @@ interface IWindowManager
     // should be enabled.  The 'enabled' value is null or blank for
     // the system default (differs per build variant) or any valid
     // boolean string as parsed by SystemProperties.getBoolean().
+    @UnsupportedAppUsage
     void setStrictModeVisualIndicatorPreference(String enabled);
 
     /**
@@ -219,6 +233,7 @@ interface IWindowManager
      * Remove a rotation watcher set using watchRotation.
      * @hide
      */
+    @UnsupportedAppUsage
     void removeRotationWatcher(IRotationWatcher watcher);
 
     /**
@@ -234,12 +249,14 @@ interface IWindowManager
      * thawRotation() is called.
      * @hide
      */
+    @UnsupportedAppUsage
     void freezeRotation(int rotation);
 
     /**
      * Release the orientation lock imposed by freezeRotation().
      * @hide
      */
+    @UnsupportedAppUsage
     void thawRotation();
 
     /**
@@ -290,16 +307,19 @@ interface IWindowManager
     /**
      * Called by System UI to notify of changes to the visibility and height of the shelf.
      */
+    @UnsupportedAppUsage
     void setShelfHeight(boolean visible, int shelfHeight);
 
     /**
      * Called by System UI to enable or disable haptic feedback on the navigation bar buttons.
      */
+    @UnsupportedAppUsage
     void setNavBarVirtualKeyHapticFeedbackEnabled(boolean enabled);
 
     /**
      * Device has a software navigation bar (separate from the status bar).
      */
+    @UnsupportedAppUsage
     boolean hasNavigationBar();
 
     /**
@@ -310,11 +330,13 @@ interface IWindowManager
     /**
      * Lock the device immediately with the specified options (can be null).
      */
+    @UnsupportedAppUsage
     void lockNow(in Bundle options);
 
     /**
      * Device is in safe mode.
      */
+    @UnsupportedAppUsage
     boolean isSafeModeEnabled();
 
     /**
@@ -342,6 +364,7 @@ interface IWindowManager
      * @return the dock side the current docked stack is at; must be one of the
      *         WindowManagerGlobal.DOCKED_* values
      */
+    @UnsupportedAppUsage
     int getDockedStackSide();
 
     /**
@@ -354,6 +377,7 @@ interface IWindowManager
      * Registers a listener that will be called when the dock divider changes its visibility or when
      * the docked stack gets added/removed.
      */
+    @UnsupportedAppUsage
     void registerDockedStackListener(IDockedStackListener listener);
 
     /**
@@ -380,6 +404,7 @@ interface IWindowManager
     /**
      * Retrieves the current stable insets from the primary display.
      */
+    @UnsupportedAppUsage
     void getStableInsets(int displayId, out Rect outInsets);
 
     /**
@@ -398,6 +423,7 @@ interface IWindowManager
      * Destroy an input consumer by name.  This method will also dispose the input channels
      * associated with that InputConsumer.
      */
+    @UnsupportedAppUsage
     boolean destroyInputConsumer(String name);
 
     /**

@@ -16,6 +16,11 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
+import static android.telephony.PhoneStateListener.LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE;
+
+import static com.android.internal.telephony.PhoneConstants.MAX_PHONE_COUNT_DUAL_SIM;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -33,6 +38,7 @@ import android.os.Looper;
 import android.os.PersistableBundle;
 import android.provider.Settings;
 import android.telephony.CarrierConfigManager;
+import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.SubscriptionInfo;
@@ -54,18 +60,18 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
+import com.android.systemui.statusbar.policy.MobileSignalController.MobileIconGroup;
 
-import com.android.systemui.statusbar.policy.MobileSignalController.MobileState;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-
-import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
+import java.util.Map;
 
 /** Platform implementation of the network controller. **/
 public class NetworkControllerImpl extends BroadcastReceiver
@@ -93,6 +99,16 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private final DataSaverController mDataSaverController;
     private final CurrentUserTracker mUserTracker;
     private Config mConfig;
+
+    private PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
+        @Override
+        public void onActiveDataSubscriptionIdChanged(int subId) {
+            mActiveMobileDataSubscription = subId;
+            doUpdateMobileControllers();
+        }
+    };
+
+    private int mActiveMobileDataSubscription = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
     // Subcontrollers.
     @VisibleForTesting
@@ -267,6 +283,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             mSubscriptionListener = new SubListener();
         }
         mSubscriptionManager.addOnSubscriptionsChangedListener(mSubscriptionListener);
+        mPhone.listen(mPhoneStateListener, LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE);
 
         // broadcasts
         IntentFilter filter = new IntentFilter();
@@ -511,6 +528,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
     @VisibleForTesting
     void handleConfigurationChanged() {
+        updateMobileControllers();
         for (int i = 0; i < mMobileSignalControllers.size(); i++) {
             MobileSignalController controller = mMobileSignalControllers.valueAt(i);
             controller.setConfiguration(mConfig);
@@ -525,13 +543,39 @@ public class NetworkControllerImpl extends BroadcastReceiver
         doUpdateMobileControllers();
     }
 
+    private void filterMobileSubscriptionInSameGroup(List<SubscriptionInfo> subscriptions) {
+        if (subscriptions.size() == MAX_PHONE_COUNT_DUAL_SIM) {
+            SubscriptionInfo info1 = subscriptions.get(0);
+            SubscriptionInfo info2 = subscriptions.get(1);
+            if (info1.getGroupUuid() != null && info1.getGroupUuid().equals(info2.getGroupUuid())) {
+                // If both subscriptions are primary, show both.
+                if (!info1.isOpportunistic() && !info2.isOpportunistic()) return;
+
+                // If carrier required, always show signal bar of primary subscription.
+                // Otherwise, show whichever subscription is currently active for Internet.
+                boolean alwaysShowPrimary = CarrierConfigManager.getDefaultConfig()
+                        .getBoolean(CarrierConfigManager
+                        .KEY_ALWAYS_SHOW_PRIMARY_SIGNAL_BAR_IN_OPPORTUNISTIC_NETWORK_BOOLEAN);
+                if (alwaysShowPrimary) {
+                    subscriptions.remove(info1.isOpportunistic() ? info1 : info2);
+                } else {
+                    subscriptions.remove(info1.getSubscriptionId() == mActiveMobileDataSubscription
+                            ? info2 : info1);
+                }
+            }
+        }
+    }
+
     @VisibleForTesting
     void doUpdateMobileControllers() {
         List<SubscriptionInfo> subscriptions = mSubscriptionManager
-                .getActiveSubscriptionInfoList(true);
+                .getActiveSubscriptionInfoList(false);
         if (subscriptions == null) {
             subscriptions = Collections.emptyList();
         }
+
+        filterMobileSubscriptionInSameGroup(subscriptions);
+
         // If there have been no relevant changes to any of the subscriptions, we can leave as is.
         if (hasCorrectMobileControllers(subscriptions)) {
             // Even if the controllers are correct, make sure we have the right no sims state.
@@ -1026,6 +1070,13 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
     @VisibleForTesting
     static class Config {
+        static final int NR_CONNECTED_MMWAVE = 1;
+        static final int NR_CONNECTED = 2;
+        static final int NR_NOT_RESTRICTED = 3;
+        static final int NR_RESTRICTED = 4;
+
+        Map<Integer, MobileIconGroup> nr5GIconMap = new HashMap<>();
+
         boolean showAtLeast3G = false;
         boolean alwaysShowCdmaRssi = false;
         boolean show4gForLte = false;
@@ -1033,6 +1084,19 @@ public class NetworkControllerImpl extends BroadcastReceiver
         boolean hspaDataDistinguishable;
         boolean inflateSignalStrengths = false;
         boolean alwaysShowDataRatIcon = false;
+
+        /**
+         * Mapping from NR 5G status string to an integer. The NR 5G status string should match
+         * those in carrier config.
+         */
+        private static final Map<String, Integer> NR_STATUS_STRING_TO_INDEX;
+        static {
+            NR_STATUS_STRING_TO_INDEX = new HashMap<>(4);
+            NR_STATUS_STRING_TO_INDEX.put("connected_mmwave", NR_CONNECTED_MMWAVE);
+            NR_STATUS_STRING_TO_INDEX.put("connected", NR_CONNECTED);
+            NR_STATUS_STRING_TO_INDEX.put("not_restricted", NR_NOT_RESTRICTED);
+            NR_STATUS_STRING_TO_INDEX.put("restricted", NR_RESTRICTED);
+        }
 
         static Config readConfig(Context context) {
             Config config = new Config();
@@ -1058,8 +1122,46 @@ public class NetworkControllerImpl extends BroadcastReceiver
                         CarrierConfigManager.KEY_SHOW_4G_FOR_LTE_DATA_ICON_BOOL);
                 config.hideLtePlus = b.getBoolean(
                         CarrierConfigManager.KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL);
+                String nr5GIconConfiguration =
+                        b.getString(CarrierConfigManager.KEY_5G_ICON_CONFIGURATION_STRING);
+                if (!TextUtils.isEmpty(nr5GIconConfiguration)) {
+                    String[] nr5GIconConfigPairs = nr5GIconConfiguration.trim().split(",");
+                    for (String pair : nr5GIconConfigPairs) {
+                        add5GIconMapping(pair, config);
+                    }
+                }
             }
+
             return config;
+        }
+
+        /**
+         * Add a mapping from NR 5G status to the 5G icon. All the icon resources come from
+         * {@link TelephonyIcons}.
+         *
+         * @param keyValuePair the NR 5G status and icon name separated by a colon.
+         * @param config container that used to store the parsed configs.
+         */
+        @VisibleForTesting
+        static void add5GIconMapping(String keyValuePair, Config config) {
+            String[] kv = (keyValuePair.trim().toLowerCase()).split(":");
+
+            if (kv.length != 2) {
+                if (DEBUG) Log.e(TAG, "Invalid 5G icon configuration, config = " + keyValuePair);
+                return;
+            }
+
+            String key = kv[0], value = kv[1];
+
+            // There is no icon config for the specific 5G status.
+            if (value.equals("none")) return;
+
+            if (NR_STATUS_STRING_TO_INDEX.containsKey(key)
+                    && TelephonyIcons.ICON_NAME_TO_ICON.containsKey(value)) {
+                config.nr5GIconMap.put(
+                        NR_STATUS_STRING_TO_INDEX.get(key),
+                        TelephonyIcons.ICON_NAME_TO_ICON.get(value));
+            }
         }
     }
 }

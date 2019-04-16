@@ -26,9 +26,11 @@ import android.location.GeocoderParams;
  */
 interface IGeocodeProvider {
 
+    @UnsupportedAppUsage
     String getFromLocation(double latitude, double longitude, int maxResults,
         in GeocoderParams params, out List<Address> addrs);
 
+    @UnsupportedAppUsage
     String getFromLocationName(String locationName,
         double lowerLeftLatitude, double lowerLeftLongitude,
         double upperRightLatitude, double upperRightLongitude, int maxResults,

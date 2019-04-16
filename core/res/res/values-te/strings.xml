@@ -136,9 +136,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"WiFi కాలింగ్ | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Wi-Fi కాలింగ్"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Wi-Fi కాలింగ్"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ఆఫ్‌లో ఉంది"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fiకి ప్రాధాన్యత"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"మొబైల్‌కి ప్రాధాన్యత ఇవ్వబడింది"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"Wi-Fi ద్వారా కాల్"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"మొబైల్ నెట్‌వర్క్ ద్వారా కాల్"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi-Fi మాత్రమే"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ఫార్వార్డ్ చేయబడలేదు"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -430,6 +434,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"పరికరం యొక్క ఫోన్ ఫీచర్‌లను యాక్సెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది. ఈ అనుమతి ఫోన్ నంబర్ మరియు పరికరం IDలను, కాల్ సక్రియంగా ఉందా లేదా అనే విషయాన్ని మరియు కాల్ ద్వారా కనెక్ట్ చేయబడిన రిమోట్ నంబర్‌ను కనుగొనడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"కాల్‌లను సిస్టమ్ ద్వారా వెళ్లేలా చేయి"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"కాలింగ్ అనుభవాన్ని మెరుగుపరచడం కోసం తన కాల్‌లను సిస్టమ్ ద్వారా వెళ్లేలా చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"సిస్టమ్ ద్వారా కాల్‌లను చూసి, నియంత్రించండి."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"పరికరంలో కొనసాగుతున్న కాల్‌లను చూడడానికి మరియు నియంత్రించడానికి యాప్‌ను అనుమతిస్తుంది. ఇందులో కాల్ కోసం కాల్‌ల నంబర్‌లు మరియు రాష్ట్ర కాల్ వంటి సమాచారం ఉంటుంది."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"మరో యాప్ నుండి కాల్‌ని కొనసాగించండి"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"మరో యాప్‌లో ప్రారంభించిన కాల్‌ని కొనసాగించడానికి యాప్‌ని అనుమతిస్తుంది."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"ఫోన్ నంబర్‌లను చదువు"</string>
@@ -841,7 +847,7 @@
     <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nమీరు ఖచ్చితంగా ఈ పేజీ నుండి వెలుపలకు నావిగేట్ చేయాలనుకుంటున్నారా?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"నిర్ధారించండి"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"చిట్కా: దగ్గరకు మరియు దూరానికి జూమ్ చేయడానికి రెండు సార్లు నొక్కండి."</string>
-    <string name="autofill_this_form" msgid="4616758841157816676">"స్వీయ పూరింపు"</string>
+    <string name="autofill_this_form" msgid="4616758841157816676">"ఆటోఫిల్"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"స్వీయ పూరణను సెటప్ చేయండి"</string>
     <string name="autofill_window_title" msgid="4107745526909284887">"<xliff:g id="SERVICENAME">%1$s</xliff:g> ద్వారా స్వీయ పూరింపు చేయండి"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
@@ -1010,29 +1016,29 @@
     <string name="selectTextMode" msgid="1018691815143165326">"వచనాన్ని ఎంచుకోండి"</string>
     <string name="undo" msgid="7905788502491742328">"చర్య రద్దు చేయి"</string>
     <string name="redo" msgid="7759464876566803888">"చర్యను పునరావృతం చేయి"</string>
-    <string name="autofill" msgid="3035779615680565188">"స్వీయ పూరింపు"</string>
+    <string name="autofill" msgid="3035779615680565188">"ఆటోఫిల్"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"వచన ఎంపిక"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"నిఘంటువుకు జోడించు"</string>
     <string name="deleteText" msgid="6979668428458199034">"తొలగించు"</string>
     <string name="inputMethod" msgid="1653630062304567879">"ఇన్‌పుట్ పద్ధతి"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"వచనానికి సంబంధించిన చర్యలు"</string>
-    <string name="email" msgid="4560673117055050403">"ఇమెయిల్"</string>
+    <string name="email" msgid="4560673117055050403">"ఇమెయిల్ చేయి"</string>
     <string name="email_desc" msgid="3638665569546416795">"ఎంచుకున్న చిరునామాకు ఇమెయిల్‌ను పంపుతుంది"</string>
-    <string name="dial" msgid="1253998302767701559">"కాల్ చేయండి"</string>
+    <string name="dial" msgid="1253998302767701559">"కాల్ చేయి"</string>
     <string name="dial_desc" msgid="6573723404985517250">"ఎంచుకున్న ఫోన్ నంబర్‌కు కాల్ చేస్తుంది"</string>
-    <string name="map" msgid="5441053548030107189">"మ్యాప్"</string>
+    <string name="map" msgid="5441053548030107189">"మ్యాప్ తెరువు"</string>
     <string name="map_desc" msgid="1836995341943772348">"ఎంచుకున్న చిరునామాను గుర్తించు"</string>
-    <string name="browse" msgid="1245903488306147205">"తెరవండి"</string>
+    <string name="browse" msgid="1245903488306147205">"తెరువు"</string>
     <string name="browse_desc" msgid="8220976549618935044">"ఎంచుకున్న URLని తెరుస్తుంది"</string>
-    <string name="sms" msgid="4560537514610063430">"సందేశం"</string>
+    <string name="sms" msgid="4560537514610063430">"సందేశం పంపు"</string>
     <string name="sms_desc" msgid="7526588350969638809">"ఎంచుకున్న ఫోన్ నంబర్‌కి సందేశం పంపుతుంది"</string>
-    <string name="add_contact" msgid="7867066569670597203">"జోడించండి"</string>
+    <string name="add_contact" msgid="7867066569670597203">"జోడించు"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"పరిచయాలకు జోడిస్తుంది"</string>
-    <string name="view_calendar" msgid="979609872939597838">"చూడండి"</string>
+    <string name="view_calendar" msgid="979609872939597838">"చూడు"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"ఎంచుకున్న సమయాన్ని క్యాలెండర్‌లో వీక్షించండి"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"షెడ్యూల్"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"షెడ్యూల్ చేయి"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"ఎంచుకున్న సమయానికి ఈవెంట్‌ను షెడ్యూల్ చేస్తుంది"</string>
-    <string name="view_flight" msgid="7691640491425680214">"ట్రాక్ చేయండి"</string>
+    <string name="view_flight" msgid="7691640491425680214">"ట్రాక్ చేయి"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"ఎంచుకున్న విమానాన్ని ట్రాక్ చేస్తుంది"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"నిల్వ ఖాళీ అయిపోతోంది"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"కొన్ని సిస్టమ్ కార్యాచరణలు పని చేయకపోవచ్చు"</string>
@@ -1046,7 +1052,7 @@
     <string name="dialog_alert_title" msgid="2049658708609043103">"గమనిక"</string>
     <string name="loading" msgid="7933681260296021180">"లోడ్ చేస్తోంది…"</string>
     <string name="capital_on" msgid="1544682755514494298">"ఆన్‌లో ఉంది"</string>
-    <string name="capital_off" msgid="6815870386972805832">"ఆఫ్‌లో ఉంది"</string>
+    <string name="capital_off" msgid="6815870386972805832">"ఆఫ్‌"</string>
     <string name="whichApplication" msgid="4533185947064773386">"దీన్ని ఉపయోగించి చర్యను పూర్తి చేయండి"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"%1$sను ఉపయోగించి చర్యను పూర్తి చేయి"</string>
     <string name="whichApplicationLabel" msgid="7425855495383818784">"చర్యను పూర్తి చేయి"</string>
@@ -1177,8 +1183,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"నెట్‌వర్క్‌కి సైన్ ఇన్ చేయండి"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fiకి ఇంటర్నెట్ యాక్సెస్ లేదు"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g>కి ఇంటర్నెట్ యాక్సెస్ లేదు"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"ఎంపికల కోసం నొక్కండి"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"కనెక్ట్ చేయబడింది"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> పరిమిత కనెక్టివిటీని కలిగి ఉంది"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"ఏదేమైనా కనెక్ట్ చేయడానికి నొక్కండి"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"మీ హాట్‌స్పాట్ సెట్టింగ్‌లకు మార్పులు"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"మీ హాట్‌స్పాట్ బ్యాండ్ మార్చబడింది."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"ఈ పరికరం 5GHz కోసం మాత్రమే మీ ప్రాధాన్యతకు మద్దతు ఇవ్వదు. బదులుగా, ఈ పరికరం అందుబాటులో ఉన్నప్పుడు 5GHz బ్యాండ్‌ను ఉపయోగిస్తుంది."</string>
@@ -1446,7 +1455,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"మరిన్ని ఎంపికలు"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="3570990907910199483">"అంతర్గత భాగస్వామ్య నిల్వ"</string>
+    <string name="storage_internal" msgid="3570990907910199483">"షేర్ చేయబడిన అంతర్గత నిల్వ"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD కార్డు"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD కార్డ్"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"USB డ్రైవ్"</string>

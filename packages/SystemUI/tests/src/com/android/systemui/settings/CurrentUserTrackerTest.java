@@ -17,7 +17,8 @@
 package com.android.systemui.settings;
 
 import android.content.Intent;
-import android.support.test.filters.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 

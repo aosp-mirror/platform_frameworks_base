@@ -1,0 +1,17 @@
+// This test exists only because the jni_libs list for these tests is difficult to
+// maintain: the test itself only depends on libnetworkstatsfactorytestjni, but the test
+// fails to load that library unless *all* the dependencies of that library are explicitly
+// listed in jni_libs. This means that whenever any of the dependencies changes the test
+// starts failing and breaking presubmits in frameworks/base. We cannot easily put
+// FrameworksNetTests into global presubmit because they are at times flaky, but this
+// test is effectively empty beyond validating that the libraries load correctly, and
+// thus should be stable enough to put in global presubmit.
+//
+// TODO: remove this hack when there is a better solution for jni_libs that includes
+// dependent libraries.
+android_test {
+    name: "FrameworksNetSmokeTests",
+    defaults: ["FrameworksNetTests-jni-defaults"],
+    srcs: ["java/SmokeTest.java"],
+    test_suites: ["device-tests"],
+}

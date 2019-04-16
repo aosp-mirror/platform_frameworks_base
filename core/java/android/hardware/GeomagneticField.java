@@ -31,7 +31,7 @@ import java.util.GregorianCalendar;
  * Android may use a newer version of the model.
  */
 public class GeomagneticField {
-    // The magnetic field at a given point, in nonoteslas in geodetic
+    // The magnetic field at a given point, in nanoteslas in geodetic
     // coordinates.
     private float mX;
     private float mY;
@@ -278,7 +278,7 @@ public class GeomagneticField {
     }
 
     /**
-     * @return  Horizontal component of the field strength in nonoteslas.
+     * @return  Horizontal component of the field strength in nanoteslas.
      */
     public float getHorizontalStrength() {
         return (float) Math.hypot(mX, mY);

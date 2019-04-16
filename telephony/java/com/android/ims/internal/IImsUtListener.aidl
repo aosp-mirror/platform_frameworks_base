@@ -31,30 +31,37 @@ oneway interface IImsUtListener {
     /**
      * Notifies the result of the supplementary service configuration udpate.
      */
+    @UnsupportedAppUsage
     void utConfigurationUpdated(in IImsUt ut, int id);
+    @UnsupportedAppUsage
     void utConfigurationUpdateFailed(in IImsUt ut, int id, in ImsReasonInfo error);
 
     /**
      * Notifies the result of the supplementary service configuration query.
      */
+    @UnsupportedAppUsage
     void utConfigurationQueried(in IImsUt ut, int id, in Bundle ssInfo);
+    @UnsupportedAppUsage
     void utConfigurationQueryFailed(in IImsUt ut, int id, in ImsReasonInfo error);
 
     /**
      * Notifies the status of the call barring supplementary service.
      */
+    @UnsupportedAppUsage
     void utConfigurationCallBarringQueried(in IImsUt ut,
             int id, in ImsSsInfo[] cbInfo);
 
     /**
      * Notifies the status of the call forwarding supplementary service.
      */
+    @UnsupportedAppUsage
     void utConfigurationCallForwardQueried(in IImsUt ut,
             int id, in ImsCallForwardInfo[] cfInfo);
 
     /**
      * Notifies the status of the call waiting supplementary service.
      */
+    @UnsupportedAppUsage
     void utConfigurationCallWaitingQueried(in IImsUt ut,
             int id, in ImsSsInfo[] cwInfo);
 

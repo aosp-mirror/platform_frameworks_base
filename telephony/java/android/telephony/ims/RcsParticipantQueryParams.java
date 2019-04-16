@@ -30,6 +30,8 @@ import java.security.InvalidParameterException;
  * The parameters to pass into
  * {@link RcsMessageStore#getRcsParticipants(RcsParticipantQueryParams)} in order to select a
  * subset of {@link RcsThread}s present in the message store.
+ *
+ * @hide
  */
 public final class RcsParticipantQueryParams implements Parcelable {
     /**
@@ -277,7 +279,7 @@ public final class RcsParticipantQueryParams implements Parcelable {
         mThreadId = in.readInt();
     }
 
-    public static final Creator<RcsParticipantQueryParams> CREATOR =
+    public static final @android.annotation.NonNull Creator<RcsParticipantQueryParams> CREATOR =
             new Creator<RcsParticipantQueryParams>() {
                 @Override
                 public RcsParticipantQueryParams createFromParcel(Parcel in) {

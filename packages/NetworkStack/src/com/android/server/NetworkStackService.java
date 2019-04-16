@@ -19,7 +19,6 @@ package com.android.server;
 import static android.net.dhcp.IDhcpServer.STATUS_INVALID_ARGUMENT;
 import static android.net.dhcp.IDhcpServer.STATUS_SUCCESS;
 import static android.net.dhcp.IDhcpServer.STATUS_UNKNOWN_ERROR;
-import static android.net.shared.NetworkParcelableUtil.fromStableParcelable;
 
 import static com.android.server.util.PermissionUtil.checkDumpPermission;
 import static com.android.server.util.PermissionUtil.checkNetworkStackCallingPermission;
@@ -30,12 +29,15 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
+import android.net.IIpMemoryStore;
+import android.net.IIpMemoryStoreCallbacks;
 import android.net.INetd;
 import android.net.INetworkMonitor;
 import android.net.INetworkMonitorCallbacks;
 import android.net.INetworkStackConnector;
+import android.net.LinkProperties;
 import android.net.Network;
-import android.net.NetworkParcelable;
+import android.net.NetworkCapabilities;
 import android.net.PrivateDnsConfigParcel;
 import android.net.dhcp.DhcpServer;
 import android.net.dhcp.DhcpServingParams;
@@ -51,6 +53,7 @@ import android.os.RemoteException;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.connectivity.NetworkMonitor;
+import com.android.server.connectivity.ipmemorystore.IpMemoryStoreService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -88,7 +91,19 @@ public class NetworkStackService extends Service {
         return makeConnector(this);
     }
 
-    private static class NetworkStackConnector extends INetworkStackConnector.Stub {
+    /**
+     * An interface for internal clients of the network stack service that can return
+     * or create inline instances of the service it manages.
+     */
+    public interface NetworkStackServiceManager {
+        /**
+         * Get an instance of the IpMemoryStoreService.
+         */
+        IIpMemoryStore getIpMemoryStoreService();
+    }
+
+    private static class NetworkStackConnector extends INetworkStackConnector.Stub
+            implements NetworkStackServiceManager {
         private static final int NUM_VALIDATION_LOG_LINES = 20;
         private final Context mContext;
         private final INetd mNetd;
@@ -96,6 +111,7 @@ public class NetworkStackService extends Service {
         private final ConnectivityManager mCm;
         @GuardedBy("mIpClients")
         private final ArrayList<WeakReference<IpClient>> mIpClients = new ArrayList<>();
+        private final IpMemoryStoreService mIpMemoryStoreService;
 
         private static final int MAX_VALIDATION_LOGS = 10;
         @GuardedBy("mValidationLogs")
@@ -114,9 +130,11 @@ public class NetworkStackService extends Service {
 
         NetworkStackConnector(Context context) {
             mContext = context;
-            mNetd = (INetd) context.getSystemService(Context.NETD_SERVICE);
+            mNetd = INetd.Stub.asInterface(
+                    (IBinder) context.getSystemService(Context.NETD_SERVICE));
             mObserverRegistry = new NetworkObserverRegistry();
             mCm = context.getSystemService(ConnectivityManager.class);
+            mIpMemoryStoreService = new IpMemoryStoreService(context);
 
             try {
                 mObserverRegistry.register(mNetd);
@@ -151,18 +169,16 @@ public class NetworkStackService extends Service {
         }
 
         @Override
-        public void makeNetworkMonitor(
-                NetworkParcelable network, String name, INetworkMonitorCallbacks cb)
+        public void makeNetworkMonitor(Network network, String name, INetworkMonitorCallbacks cb)
                 throws RemoteException {
-            final Network parsedNetwork = fromStableParcelable(network);
-            final SharedLog log = addValidationLogs(parsedNetwork, name);
-            final NetworkMonitor nm = new NetworkMonitor(mContext, cb, parsedNetwork, log);
+            final SharedLog log = addValidationLogs(network, name);
+            final NetworkMonitor nm = new NetworkMonitor(mContext, cb, network, log);
             cb.onNetworkMonitorCreated(new NetworkMonitorImpl(nm));
         }
 
         @Override
         public void makeIpClient(String ifName, IIpClientCallbacks cb) throws RemoteException {
-            final IpClient ipClient = new IpClient(mContext, ifName, cb, mObserverRegistry);
+            final IpClient ipClient = new IpClient(mContext, ifName, cb, mObserverRegistry, this);
 
             synchronized (mIpClients) {
                 final Iterator<WeakReference<IpClient>> it = mIpClients.iterator();
@@ -176,6 +192,17 @@ public class NetworkStackService extends Service {
             }
 
             cb.onIpClientCreated(ipClient.makeConnector());
+        }
+
+        @Override
+        public IIpMemoryStore getIpMemoryStoreService() {
+            return mIpMemoryStoreService;
+        }
+
+        @Override
+        public void fetchIpMemoryStore(@NonNull final IIpMemoryStoreCallbacks cb)
+                throws RemoteException {
+            cb.onIpMemoryStoreFetched(mIpMemoryStoreService);
         }
 
         @Override
@@ -246,6 +273,18 @@ public class NetworkStackService extends Service {
         }
 
         @Override
+        public void notifyCaptivePortalAppFinished(int response) {
+            checkNetworkStackCallingPermission();
+            mNm.notifyCaptivePortalAppFinished(response);
+        }
+
+        @Override
+        public void setAcceptPartialConnectivity() {
+            checkNetworkStackCallingPermission();
+            mNm.setAcceptPartialConnectivity();
+        }
+
+        @Override
         public void forceReevaluation(int uid) {
             checkNetworkStackCallingPermission();
             mNm.forceReevaluation(uid);
@@ -264,15 +303,9 @@ public class NetworkStackService extends Service {
         }
 
         @Override
-        public void notifySystemReady() {
+        public void notifyNetworkConnected(LinkProperties lp, NetworkCapabilities nc) {
             checkNetworkStackCallingPermission();
-            mNm.notifySystemReady();
-        }
-
-        @Override
-        public void notifyNetworkConnected() {
-            checkNetworkStackCallingPermission();
-            mNm.notifyNetworkConnected();
+            mNm.notifyNetworkConnected(lp, nc);
         }
 
         @Override
@@ -282,15 +315,15 @@ public class NetworkStackService extends Service {
         }
 
         @Override
-        public void notifyLinkPropertiesChanged() {
+        public void notifyLinkPropertiesChanged(LinkProperties lp) {
             checkNetworkStackCallingPermission();
-            mNm.notifyLinkPropertiesChanged();
+            mNm.notifyLinkPropertiesChanged(lp);
         }
 
         @Override
-        public void notifyNetworkCapabilitiesChanged() {
+        public void notifyNetworkCapabilitiesChanged(NetworkCapabilities nc) {
             checkNetworkStackCallingPermission();
-            mNm.notifyNetworkCapabilitiesChanged();
+            mNm.notifyNetworkCapabilitiesChanged(nc);
         }
     }
 }

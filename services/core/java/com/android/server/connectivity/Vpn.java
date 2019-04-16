@@ -54,6 +54,7 @@ import android.net.LocalSocketAddress;
 import android.net.Network;
 import android.net.NetworkAgent;
 import android.net.NetworkCapabilities;
+import android.net.NetworkFactory;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkMisc;
@@ -240,7 +241,7 @@ public class Vpn {
         mNetworkCapabilities = new NetworkCapabilities();
         mNetworkCapabilities.addTransportType(NetworkCapabilities.TRANSPORT_VPN);
         mNetworkCapabilities.removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN);
-        updateCapabilities();
+        updateCapabilities(null /* defaultNetwork */);
 
         loadAlwaysOnPackage();
     }
@@ -267,22 +268,44 @@ public class Vpn {
         updateAlwaysOnNotification(detailedState);
     }
 
-    public void updateCapabilities() {
-        final Network[] underlyingNetworks = (mConfig != null) ? mConfig.underlyingNetworks : null;
-        // Only apps targeting Q and above can explicitly declare themselves as metered.
-        final boolean isAlwaysMetered =
-                mIsPackageTargetingAtLeastQ && (mConfig == null || mConfig.isMetered);
-        updateCapabilities(mContext.getSystemService(ConnectivityManager.class), underlyingNetworks,
-                mNetworkCapabilities, isAlwaysMetered);
-
-        if (mNetworkAgent != null) {
-            mNetworkAgent.sendNetworkCapabilities(mNetworkCapabilities);
+    /**
+     * Updates {@link #mNetworkCapabilities} based on current underlying networks and returns a
+     * defensive copy.
+     *
+     * <p>Does not propagate updated capabilities to apps.
+     *
+     * @param defaultNetwork underlying network for VPNs following platform's default
+     */
+    public synchronized NetworkCapabilities updateCapabilities(
+            @Nullable Network defaultNetwork) {
+        if (mConfig == null) {
+            // VPN is not running.
+            return null;
         }
+
+        Network[] underlyingNetworks = mConfig.underlyingNetworks;
+        if (underlyingNetworks == null && defaultNetwork != null) {
+            // null underlying networks means to track the default.
+            underlyingNetworks = new Network[] { defaultNetwork };
+        }
+        // Only apps targeting Q and above can explicitly declare themselves as metered.
+        final boolean isAlwaysMetered = mIsPackageTargetingAtLeastQ && mConfig.isMetered;
+
+        applyUnderlyingCapabilities(
+                mContext.getSystemService(ConnectivityManager.class),
+                underlyingNetworks,
+                mNetworkCapabilities,
+                isAlwaysMetered);
+
+        return new NetworkCapabilities(mNetworkCapabilities);
     }
 
     @VisibleForTesting
-    public static void updateCapabilities(ConnectivityManager cm, Network[] underlyingNetworks,
-            NetworkCapabilities caps, boolean isAlwaysMetered) {
+    public static void applyUnderlyingCapabilities(
+            ConnectivityManager cm,
+            Network[] underlyingNetworks,
+            NetworkCapabilities caps,
+            boolean isAlwaysMetered) {
         int[] transportTypes = new int[] { NetworkCapabilities.TRANSPORT_VPN };
         int downKbps = NetworkCapabilities.LINK_BANDWIDTH_UNSPECIFIED;
         int upKbps = NetworkCapabilities.LINK_BANDWIDTH_UNSPECIFIED;
@@ -295,6 +318,7 @@ public class Vpn {
         boolean hadUnderlyingNetworks = false;
         if (null != underlyingNetworks) {
             for (Network underlying : underlyingNetworks) {
+                // TODO(b/124469351): Get capabilities directly from ConnectivityService instead.
                 final NetworkCapabilities underlyingCaps = cm.getNetworkCapabilities(underlying);
                 if (underlyingCaps == null) continue;
                 hadUnderlyingNetworks = true;
@@ -894,6 +918,7 @@ public class Vpn {
         TreeSet<IpPrefix> ipv4Prefixes = new TreeSet<>(prefixLengthComparator);
         TreeSet<IpPrefix> ipv6Prefixes = new TreeSet<>(prefixLengthComparator);
         for (final RouteInfo route : routes) {
+            if (route.getType() == RouteInfo.RTN_UNREACHABLE) continue;
             IpPrefix destination = route.getDestination();
             if (destination.isIPv4()) {
                 ipv4Prefixes.add(destination);
@@ -965,7 +990,8 @@ public class Vpn {
         try {
             mNetworkAgent = new NetworkAgent(mLooper, mContext, NETWORKTYPE /* logtag */,
                     mNetworkInfo, mNetworkCapabilities, lp,
-                    ConnectivityConstants.VPN_DEFAULT_SCORE, networkMisc) {
+                    ConnectivityConstants.VPN_DEFAULT_SCORE, networkMisc,
+                    NetworkFactory.SerialNumber.VPN) {
                             @Override
                             public void unwanted() {
                                 // We are user controlled, not driven by NetworkRequest.
@@ -1005,9 +1031,8 @@ public class Vpn {
     }
 
     /**
-     * Establish a VPN network and return the file descriptor of the VPN
-     * interface. This methods returns {@code null} if the application is
-     * revoked or not prepared.
+     * Establish a VPN network and return the file descriptor of the VPN interface. This methods
+     * returns {@code null} if the application is revoked or not prepared.
      *
      * @param config The parameters to configure the network.
      * @return The file descriptor of the VPN interface.
@@ -1099,8 +1124,6 @@ public class Vpn {
                 // as rules are deleted. This prevents data leakage as the rules are moved over.
                 agentDisconnect(oldNetworkAgent);
             }
-            // Set up VPN's capabilities such as meteredness.
-            updateCapabilities();
 
             if (oldConnection != null) {
                 mContext.unbindService(oldConnection);
@@ -1256,6 +1279,11 @@ public class Vpn {
         return ranges;
     }
 
+    /**
+     * Updates UID ranges for this VPN and also updates its internal capabilities.
+     *
+     * <p>Should be called on primary ConnectivityService thread.
+     */
     public void onUserAdded(int userHandle) {
         // If the user is restricted tie them to the parent user's VPN
         UserInfo user = UserManager.get(mContext).getUserInfo(userHandle);
@@ -1266,8 +1294,9 @@ public class Vpn {
                     try {
                         addUserToRanges(existingRanges, userHandle, mConfig.allowedApplications,
                                 mConfig.disallowedApplications);
+                        // ConnectivityService will call {@link #updateCapabilities} and apply
+                        // those for VPN network.
                         mNetworkCapabilities.setUids(existingRanges);
-                        updateCapabilities();
                     } catch (Exception e) {
                         Log.wtf(TAG, "Failed to add restricted user to owner", e);
                     }
@@ -1277,6 +1306,11 @@ public class Vpn {
         }
     }
 
+    /**
+     * Updates UID ranges for this VPN and also updates its capabilities.
+     *
+     * <p>Should be called on primary ConnectivityService thread.
+     */
     public void onUserRemoved(int userHandle) {
         // clean up if restricted
         UserInfo user = UserManager.get(mContext).getUserInfo(userHandle);
@@ -1288,8 +1322,9 @@ public class Vpn {
                         final List<UidRange> removedRanges =
                             uidRangesForUser(userHandle, existingRanges);
                         existingRanges.removeAll(removedRanges);
+                        // ConnectivityService will call {@link #updateCapabilities} and
+                        // apply those for VPN network.
                         mNetworkCapabilities.setUids(existingRanges);
-                        updateCapabilities();
                     } catch (Exception e) {
                         Log.wtf(TAG, "Failed to remove restricted user to owner", e);
                     }
@@ -1502,6 +1537,12 @@ public class Vpn {
         return success;
     }
 
+    /**
+     * Updates underlying network set.
+     *
+     * <p>Note: Does not updates capabilities. Call {@link #updateCapabilities} from
+     * ConnectivityService thread to get updated capabilities.
+     */
     public synchronized boolean setUnderlyingNetworks(Network[] networks) {
         if (!isCallerEstablishedOwnerLocked()) {
             return false;
@@ -1518,7 +1559,6 @@ public class Vpn {
                 }
             }
         }
-        updateCapabilities();
         return true;
     }
 
@@ -1564,12 +1604,7 @@ public class Vpn {
         if (mNetworkInfo.isConnected()) {
             return !appliesToUid(uid);
         } else {
-            for (UidRange uidRange : mBlockedUsers) {
-                if (uidRange.contains(uid)) {
-                    return true;
-                }
-            }
-            return false;
+            return UidRange.containsUid(mBlockedUsers, uid);
         }
     }
 
@@ -1802,6 +1837,7 @@ public class Vpn {
         config.interfaze = iface;
         config.session = profile.name;
         config.isMetered = false;
+        config.proxyInfo = profile.proxy;
 
         config.addLegacyRoutes(profile.routes);
         if (!profile.dnsServers.isEmpty()) {

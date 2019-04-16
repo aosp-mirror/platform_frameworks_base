@@ -45,6 +45,7 @@ import android.annotation.Nullable;
 import android.net.INetworkStackStatusCallback;
 import android.net.MacAddress;
 import android.net.TrafficStats;
+import android.net.util.NetworkStackUtils;
 import android.net.util.SharedLog;
 import android.net.util.SocketUtils;
 import android.os.Handler;
@@ -207,7 +208,7 @@ public class DhcpServer extends IDhcpServer.Stub {
         @Override
         public void addArpEntry(@NonNull Inet4Address ipv4Addr, @NonNull MacAddress ethAddr,
                 @NonNull String ifname, @NonNull FileDescriptor fd) throws IOException {
-            SocketUtils.addArpEntry(ipv4Addr, ethAddr, ifname, fd);
+            NetworkStackUtils.addArpEntry(ipv4Addr, ethAddr, ifname, fd);
         }
 
         @Override

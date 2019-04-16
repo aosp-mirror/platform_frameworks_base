@@ -29,8 +29,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.settingslib.SliceBroadcastRelay;
 

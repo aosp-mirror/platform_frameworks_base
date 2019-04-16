@@ -3572,7 +3572,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * Read the Text Appearance attributes from a given TypedArray and set its values to the given
      * set. If the TypedArray contains a value that was already set in the given attributes, that
-     * will be overriden.
+     * will be overridden.
      *
      * @param context The Context to be used
      * @param appearance The TypedArray to read properties from
@@ -9420,7 +9420,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Return true iff there is a selection inside this text view.
+     * Return true iff there is a selection of nonzero length inside this text view.
      */
     public boolean hasSelection() {
         final int selectionStart = getSelectionStart();

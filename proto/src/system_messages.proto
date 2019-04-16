@@ -233,6 +233,8 @@ message SystemMessage {
     NOTE_NETWORK_SWITCH = 743;
     // Device logged-in captive portal network successfully
     NOTE_NETWORK_LOGGED_IN = 744;
+    // A partial connectivity network was detected during network validation
+    NOTE_NETWORK_PARTIAL_CONNECTIVITY = 745;
 
     // Notify the user that their work profile has been deleted
     // Package: android

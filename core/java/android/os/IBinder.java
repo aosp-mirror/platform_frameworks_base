@@ -18,6 +18,7 @@ package android.os;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 
 import java.io.FileDescriptor;
 
@@ -149,6 +150,7 @@ public interface IBinder {
     int LIKE_TRANSACTION   = ('_'<<24)|('L'<<16)|('I'<<8)|'K';
 
     /** @hide */
+    @UnsupportedAppUsage
     int SYSPROPS_TRANSACTION = ('_'<<24)|('S'<<16)|('P'<<8)|'R';
 
     /**

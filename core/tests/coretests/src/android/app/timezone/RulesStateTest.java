@@ -16,8 +16,6 @@
 
 package android.app.timezone;
 
-import static junit.framework.Assert.fail;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -47,11 +45,11 @@ public class RulesStateTest {
                 RulesState.DISTRO_STATUS_INSTALLED, rulesVersion("2016b", 2));
         assertEqualsContract(one, two);
 
-        RulesState differentSystemRules = new RulesState(
+        RulesState differentBaseRules = new RulesState(
                 "2016b", formatVersion(1, 2), false /* operationInProgress */,
                 RulesState.STAGED_OPERATION_INSTALL, rulesVersion("2016a", 3),
                 RulesState.DISTRO_STATUS_INSTALLED, rulesVersion("2016b", 2));
-        assertFalse(one.equals(differentSystemRules));
+        assertFalse(one.equals(differentBaseRules));
 
         RulesState differentFormatVersion = new RulesState(
                 "2016a", formatVersion(1, 1), false /* operationInProgress */,
@@ -122,14 +120,14 @@ public class RulesStateTest {
     }
 
     @Test
-    public void isSystemVersionNewerThan() {
+    public void isBaseVersionNewerThan() {
         RulesState rulesState = new RulesState(
                 "2016b", formatVersion(1, 1), false /* operationInProgress */,
                 RulesState.STAGED_OPERATION_NONE, null /* stagedDistroRulesVersion */,
                 RulesState.DISTRO_STATUS_INSTALLED, rulesVersion("2016b", 3));
-        assertTrue(rulesState.isSystemVersionNewerThan(rulesVersion("2016a", 1)));
-        assertFalse(rulesState.isSystemVersionNewerThan(rulesVersion("2016b", 1)));
-        assertFalse(rulesState.isSystemVersionNewerThan(rulesVersion("2016c", 1)));
+        assertTrue(rulesState.isBaseVersionNewerThan(rulesVersion("2016a", 1)));
+        assertFalse(rulesState.isBaseVersionNewerThan(rulesVersion("2016b", 1)));
+        assertFalse(rulesState.isBaseVersionNewerThan(rulesVersion("2016c", 1)));
     }
 
     private static void assertEqualsContract(RulesState one, RulesState two) {

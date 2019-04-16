@@ -1,4 +1,6 @@
 Ldalvik/system/VMRuntime;->setHiddenApiExemptions([Ljava/lang/String;)V
+Ldalvik/system/VMRuntime;->setTargetSdkVersion(I)V
+Ldalvik/system/VMRuntime;->setTargetSdkVersionNative(I)V
 Ljava/lang/invoke/MethodHandles$Lookup;->IMPL_LOOKUP:Ljava/lang/invoke/MethodHandles$Lookup;
 Ljava/lang/invoke/VarHandle;->acquireFence()V
 Ljava/lang/invoke/VarHandle;->compareAndExchange([Ljava/lang/Object;)Ljava/lang/Object;

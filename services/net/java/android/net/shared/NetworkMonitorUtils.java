@@ -21,9 +21,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VPN;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_TRUSTED;
 
-import android.content.Context;
 import android.net.NetworkCapabilities;
-import android.provider.Settings;
 
 /** @hide */
 public class NetworkMonitorUtils {
@@ -43,20 +41,6 @@ public class NetworkMonitorUtils {
     public static final String EXTRA_RESPONSE_TIMESTAMP_MS = "extra_response_timestamp_ms";
     public static final String PERMISSION_ACCESS_NETWORK_CONDITIONS =
             "android.permission.ACCESS_NETWORK_CONDITIONS";
-
-    // TODO: once the URL is a resource overlay, remove and have the resource define the default
-    private static final String DEFAULT_HTTP_URL =
-            "http://connectivitycheck.gstatic.com/generate_204";
-
-    /**
-     * Get the captive portal server HTTP URL that is configured on the device.
-     */
-    public static String getCaptivePortalServerHttpUrl(Context context) {
-        final String settingUrl = Settings.Global.getString(
-                context.getContentResolver(),
-                Settings.Global.CAPTIVE_PORTAL_HTTP_URL);
-        return settingUrl != null ? settingUrl : DEFAULT_HTTP_URL;
-    }
 
     /**
      * Return whether validation is required for a network.

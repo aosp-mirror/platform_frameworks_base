@@ -136,9 +136,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Wi-Fi-anrop | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Wi-Fi-anrop"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Wi-Fi-anrop"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Av"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi er foretrukket"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Først-på-mobil"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"Ring via Wi-Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"Ring over mobilnettverk"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Bare Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Ikke viderekoblet"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -430,6 +434,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Lar appen bruke enhetens telefonfunksjoner. Med denne tillatelsen kan appen finne telefonnummer og enhets-ID-er, registrere om en samtale pågår, og se det eksterne nummeret det opprettes en forbindelse med via oppringing."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"send anrop gjennom systemet"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Lar appen sende anrop gjennom systemet for å forbedre anropsopplevelsen."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"se og kontrollere anrop i systemet."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Lar appen se og kontrollere anrop som pågår på enheten. Dette inkluderer informasjon som anropsnumre og tilstanden til anropene."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"fortsette et anrop fra en annen app"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Lar appen fortsette et anrop som ble startet i en annen app."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"les telefonnumre"</string>
@@ -499,7 +505,7 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Deler av fingeravtrykket er registrert. Prøv på nytt."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Kunne ikke registrere fingeravtrykket. Prøv på nytt."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Fingeravtrykksensoren er skitten. Rengjør den og prøv på nytt."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Du flyttet fingeren for kjapt. Prøv på nytt."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Du flyttet fingeren for raskt. Prøv på nytt."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Du flyttet fingeren for sakte. Prøv på nytt."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
@@ -510,7 +516,7 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Tidsavbrudd for fingeravtrykk er nådd. Prøv på nytt."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Fingeravtrykk-operasjonen ble avbrutt."</string>
     <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"Fingeravtrykk-operasjonen ble avbrutt av brukeren."</string>
-    <string name="fingerprint_error_lockout" msgid="5536934748136933450">"For mange forsøk. Prøve på nytt senere."</string>
+    <string name="fingerprint_error_lockout" msgid="5536934748136933450">"For mange forsøk. Prøv på nytt senere."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"For mange forsøk. Fingeravtrykkssensoren er slått av."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Prøv igjen."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Ingen fingeravtrykk er registrert."</string>
@@ -1016,21 +1022,21 @@
     <string name="deleteText" msgid="6979668428458199034">"Slett"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Inndatametode"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Teksthandlinger"</string>
-    <string name="email" msgid="4560673117055050403">"E-post"</string>
+    <string name="email" msgid="4560673117055050403">"Send e-post"</string>
     <string name="email_desc" msgid="3638665569546416795">"Send e-post til den valgte adressen"</string>
     <string name="dial" msgid="1253998302767701559">"Ring"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Ring det valgte telefonnummeret"</string>
-    <string name="map" msgid="5441053548030107189">"Kart"</string>
+    <string name="map" msgid="5441053548030107189">"Se Kart"</string>
     <string name="map_desc" msgid="1836995341943772348">"Finn den valgte adressen"</string>
     <string name="browse" msgid="1245903488306147205">"Åpne"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Åpne den valgte nettadressen"</string>
-    <string name="sms" msgid="4560537514610063430">"Melding"</string>
+    <string name="sms" msgid="4560537514610063430">"Send melding"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Send melding til det valgte telefonnummeret"</string>
     <string name="add_contact" msgid="7867066569670597203">"Legg til"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Legg til i kontakter"</string>
     <string name="view_calendar" msgid="979609872939597838">"Se"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"Se det valgte klokkeslettet i kalenderen"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Oversikt"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Planlegg"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Planlegg aktivitet for valgt klokkeslett"</string>
     <string name="view_flight" msgid="7691640491425680214">"Spor"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Spor den valgte flyvningen"</string>
@@ -1177,8 +1183,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Logg på nettverk"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi har ikke Internett-tilgang"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> har ingen internettilkobling"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Trykk for å få alternativer"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Tilkoblet"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> har begrenset tilkobling"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Trykk for å koble til likevel"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Endres til innstillingene dine for Wi-Fi-soner"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Båndet ditt for Wi-Fi-sone er endret."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Denne enheten støtter ikke innstillingen din for bare 5 GHz. I stedet bruker enheten 5 GHz-båndet når det er tilgjengelig."</string>
@@ -1194,7 +1203,7 @@
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"en ukjent nettverkstype"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Kan ikke koble til Wi-Fi"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" har en dårlig Internett-tilkobling."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" har en dårlig internettilkobling."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Vil du tillat tilkoblingen?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Appen %1$s vil koble til Wi-Fi-nettverket %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"En app"</string>
@@ -1744,7 +1753,7 @@
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Skjul"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"«Ikke forstyrr»"</string>
-    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Nedetid"</string>
+    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Pause"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Hverdagskveld"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Helg"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Aktivitet"</string>

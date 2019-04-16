@@ -16,6 +16,8 @@
 
 package android.telephony;
 
+import android.annotation.IntRange;
+import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
@@ -25,21 +27,22 @@ import java.util.Objects;
 /**
  * Tdscdma signal strength related information.
  *
- * @hide
+ * This class provides signal strength and signal quality information for the TD-SCDMA air
+ * interface. For more information see 3gpp 25.225.
  */
 public final class CellSignalStrengthTdscdma extends CellSignalStrength implements Parcelable {
 
     private static final String LOG_TAG = "CellSignalStrengthTdscdma";
     private static final boolean DBG = false;
 
-    private static final int TDSCDMA_RSSI_MAX = -51;
-    private static final int TDSCDMA_RSSI_GREAT = -77;
-    private static final int TDSCDMA_RSSI_GOOD = -87;
-    private static final int TDSCDMA_RSSI_MODERATE = -97;
-    private static final int TDSCDMA_RSSI_POOR = -107;
-
-    private static final int TDSCDMA_RSCP_MIN = -120;
+    // These levels are arbitrary but carried over from SignalStrength.java for consistency.
     private static final int TDSCDMA_RSCP_MAX = -24;
+    private static final int TDSCDMA_RSCP_GREAT = -49;
+    private static final int TDSCDMA_RSCP_GOOD = -73;
+    private static final int TDSCDMA_RSCP_MODERATE = -97;
+    private static final int TDSCDMA_RSCP_POOR = -110;
+    private static final int TDSCDMA_RSCP_MIN = -120;
+
 
     private int mRssi; // in dBm [-113, -51], CellInfo.UNAVAILABLE
 
@@ -59,7 +62,9 @@ public final class CellSignalStrengthTdscdma extends CellSignalStrength implemen
      * @param rssi in dBm [-113, -51] or UNAVAILABLE
      * @param ber [0-7], 99 or UNAVAILABLE
      * @param rscp in dBm [-120, -24] or UNAVAILABLE
-     * @hide */
+     *
+     * @hide
+     */
     public CellSignalStrengthTdscdma(int rssi, int ber, int rscp) {
         mRssi = inRangeOrUnavailable(rssi, -113, -51);
         mBitErrorRate = inRangeOrUnavailable(ber, 0, 7, 99);
@@ -117,13 +122,10 @@ public final class CellSignalStrengthTdscdma extends CellSignalStrength implemen
         mLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
     }
 
-    /**
-     * Retrieve an abstract level value for the overall signal strength.
-     *
-     * @return a single integer from 0 to 4 representing the general signal quality.
-     *     0 represents very poor signal strength while 4 represents a very strong signal strength.
-     */
+
+    /** {@inheritDoc} */
     @Override
+    @IntRange(from = 0, to = 4)
     public int getLevel() {
         return mLevel;
     }
@@ -131,16 +133,16 @@ public final class CellSignalStrengthTdscdma extends CellSignalStrength implemen
     /** @hide */
     @Override
     public void updateLevel(PersistableBundle cc, ServiceState ss) {
-        if (mRssi > TDSCDMA_RSSI_MAX) mLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
-        else if (mRssi >= TDSCDMA_RSSI_GREAT) mLevel = SIGNAL_STRENGTH_GREAT;
-        else if (mRssi >= TDSCDMA_RSSI_GOOD)  mLevel = SIGNAL_STRENGTH_GOOD;
-        else if (mRssi >= TDSCDMA_RSSI_MODERATE)  mLevel = SIGNAL_STRENGTH_MODERATE;
-        else if (mRssi >= TDSCDMA_RSSI_POOR) mLevel = SIGNAL_STRENGTH_POOR;
+        if (mRscp > TDSCDMA_RSCP_MAX) mLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
+        else if (mRscp >= TDSCDMA_RSCP_GREAT) mLevel = SIGNAL_STRENGTH_GREAT;
+        else if (mRscp >= TDSCDMA_RSCP_GOOD)  mLevel = SIGNAL_STRENGTH_GOOD;
+        else if (mRscp >= TDSCDMA_RSCP_MODERATE)  mLevel = SIGNAL_STRENGTH_MODERATE;
+        else if (mRscp >= TDSCDMA_RSCP_POOR) mLevel = SIGNAL_STRENGTH_POOR;
         else mLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
     }
 
     /**
-     * Get the signal strength as dBm
+     * Get the RSCP as dBm value -120..-24dBm or {@link CellInfo#UNAVAILABLE UNAVAILABLE}.
      */
     @Override
     public int getDbm() {
@@ -148,11 +150,27 @@ public final class CellSignalStrengthTdscdma extends CellSignalStrength implemen
     }
 
     /**
-     * Get the RSCP as dBm
-     * @hide
+     * Get the RSCP as dBm value -120..-24dBm or {@link CellInfo#UNAVAILABLE UNAVAILABLE}.
      */
     public int getRscp() {
         return mRscp;
+    }
+
+    /**
+     * Get the RSSI as dBm value -113..-51dBm or {@link CellInfo#UNAVAILABLE UNAVAILABLE}.
+     *
+     * @hide
+     */
+    public int getRssi() {
+        return mRssi;
+    }
+
+    /**
+     * Get the BER as an ASU value 0..7, 99, or {@link CellInfo#UNAVAILABLE UNAVAILABLE}.
+     * @hide
+     */
+    public int getBitErrorRate() {
+        return mBitErrorRate;
     }
 
     /**
@@ -160,7 +178,7 @@ public final class CellSignalStrengthTdscdma extends CellSignalStrength implemen
      *
      * Asu is calculated based on 3GPP RSRP. Refer to 3GPP 27.007 (Ver 10.3.0) Sec 8.69
      *
-     * @return RSCP in ASU 0..96, 255, or UNAVAILABLE
+     * @return RSCP in ASU 0..96, 255, or {@link CellInfo#UNAVAILABLE UNAVAILABLE}.
      */
     @Override
     public int getAsuLevel() {
@@ -237,15 +255,16 @@ public final class CellSignalStrengthTdscdma extends CellSignalStrength implemen
 
     /** Implement the Parcelable interface */
     @SuppressWarnings("hiding")
+    @NonNull
     public static final Parcelable.Creator<CellSignalStrengthTdscdma> CREATOR =
             new Parcelable.Creator<CellSignalStrengthTdscdma>() {
         @Override
-        public CellSignalStrengthTdscdma createFromParcel(Parcel in) {
+        public @NonNull CellSignalStrengthTdscdma createFromParcel(Parcel in) {
             return new CellSignalStrengthTdscdma(in);
         }
 
         @Override
-        public CellSignalStrengthTdscdma[] newArray(int size) {
+        public @NonNull CellSignalStrengthTdscdma[] newArray(int size) {
             return new CellSignalStrengthTdscdma[size];
         }
     };

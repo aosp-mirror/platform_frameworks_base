@@ -136,9 +136,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> વાઇ-ફાઇ"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"વાઇ-ફાઇ કૉલિંગ | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"વાઇ-ફાઇ કૉલિંગ"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"વાઇ-ફાઇ"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"વાઇ-ફાઇ કૉલિંગ"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"બંધ"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"વાઇ-ફાઇ પસંદ કર્યું"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"મોબાઇલને પસંદગી"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"વાઇ-ફાઇ પરથી કૉલ કરો"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"મોબાઇલ નેટવર્ક પરથી કૉલ કરો"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"ફક્ત વાઇ-ફાઇ"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ફોરવર્ડ કર્યો નથી"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -309,7 +313,7 @@
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"સ્પર્શ કરીને શોધખોળ કરવું ચાલુ કરો"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"ટૅપ કરેલ આઇટમ મોટેથી બોલવામાં આવશે અને હાવભાવની મદદથી સ્ક્રીનને શોધી શકાય છે."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"તમે લખો તે ટેક્સ્ટનું અવલોકન કરો"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"ક્રેડિટ કાર્ડ નંબર્સ અને પાસવર્ડ્સ જેવો વ્યક્તિગત ડેટા શામેલ છે."</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"ક્રેડિટ કાર્ડ નંબર અને પાસવર્ડ જેવો વ્યક્તિગત ડેટા શામેલ છે."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"પ્રદર્શન વિસ્તૃતિકરણ નિયંત્રિત કરો"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"પ્રદર્શનનું ઝૂમ સ્તર અને સ્થિતિનિર્ધારણ નિયંત્રિત કરો."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"હાવભાવ કરો"</string>
@@ -430,6 +434,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"એપ્લિકેશનને ફોન સુવિધાઓને ઍક્સેસ કરવાની મંજૂરી આપે છે. આ પરવાનગી એપ્લિકેશનને ફોન નંબર અને ઉપકરણ ID, કૉલ સક્રિય છે અને કોઈ કૉલ દ્વારા કનેક્ટ થયેલ રિમોટ નંબર નિર્ધારિત કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"સિસ્ટમ મારફતે કૉલ બીજે વાળો"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"કૉલિંગ અનુભવ સુધારવા માટે ઍપ્લિકેશનને સિસ્ટમ મારફતે કૉલ બીજે વાળવાની મંજૂરી આપે છે."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"સિસ્ટમ મારફતે કૉલ જુઓ અને નિયંત્રિત કરો."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"ઍપને ડિવાઇસ પરના ચાલી રહેલા કૉલને જોવાની અને નિયંત્રિત કરવાની મંજૂરી આપે છે. આમાં કૉલ માટેના કૉલ નંબર અને તેની સ્થિતિ જેવી માહિતી શામેલ હોય છે."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"તૃતીય પક્ષ ઍપમાંનો કૉલ ચાલુ રાખો"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"એક અન્ય તૃતીય પક્ષ ઍપમાં ચાલુ થયેલા કૉલને આ ઍપમાં ચાલુ રાખવાની મંજૂરી આપે છે."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"ફોન નંબર વાંચો"</string>
@@ -1016,11 +1022,11 @@
     <string name="deleteText" msgid="6979668428458199034">"ડિલીટ કરો"</string>
     <string name="inputMethod" msgid="1653630062304567879">"ઇનપુટ પદ્ધતિ"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"ટેક્સ્ટ ક્રિયાઓ"</string>
-    <string name="email" msgid="4560673117055050403">"ઇમેઇલ"</string>
+    <string name="email" msgid="4560673117055050403">"ઇમેઇલ કરો"</string>
     <string name="email_desc" msgid="3638665569546416795">"પસંદ કરેલ ઍડ્રેસ પર ઇમેઇલ મોકલો"</string>
     <string name="dial" msgid="1253998302767701559">"કૉલ કરો"</string>
     <string name="dial_desc" msgid="6573723404985517250">"પસંદ કરેલ ફોન નંબર પર કૉલ કરો"</string>
-    <string name="map" msgid="5441053548030107189">"નકશો"</string>
+    <string name="map" msgid="5441053548030107189">"નકશો ખોલો"</string>
     <string name="map_desc" msgid="1836995341943772348">"પસંદ કરેલ સરનામું શોધો"</string>
     <string name="browse" msgid="1245903488306147205">"ખોલો"</string>
     <string name="browse_desc" msgid="8220976549618935044">"પસંદ કરેલ URL ખોલો"</string>
@@ -1029,7 +1035,7 @@
     <string name="add_contact" msgid="7867066569670597203">"ઉમેરો"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"સંપર્કોમાં ઉમેરો"</string>
     <string name="view_calendar" msgid="979609872939597838">"જુઓ"</string>
-    <string name="view_calendar_desc" msgid="5828320291870344584">"કૅલેન્ડરમાં પસંદ કરેલ સમય જુઓ"</string>
+    <string name="view_calendar_desc" msgid="5828320291870344584">"કૅલેન્ડરમાં પસંદ કરેલો સમય જુઓ"</string>
     <string name="add_calendar_event" msgid="1953664627192056206">"શેડ્યૂલ કરો"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"પસંદ કરેલ સમય માટે ઇવેન્ટ શેડ્યૂલ કરો"</string>
     <string name="view_flight" msgid="7691640491425680214">"ટ્રૅક કરો"</string>
@@ -1177,8 +1183,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"નેટવર્ક પર સાઇન ઇન કરો"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"વાઇ-ફાઇને કોઈ ઇન્ટરનેટ ઍક્સેસ નથી"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> ઇન્ટરનેટ ઍક્સેસ ધરાવતું નથી"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"વિકલ્પો માટે ટૅપ કરો"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"કનેક્ટેડ"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> મર્યાદિત કનેક્ટિવિટી ધરાવે છે"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"છતાં કનેક્ટ કરવા માટે ટૅપ કરો"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"તમારી હૉટસ્પૉટ સેટિંગને બદલે છે"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"તમારું હૉટસ્પૉટ બેન્ડ બદલાયેલ છે."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"આ ઉપકરણ તમારી ફક્ત 5GHz માટેની પસંદગીને સમર્થન આપતું નથી. તેના બદલે, જ્યારે આ ઉપકરણ જ્યારે 5GHz બેન્ડ ઉપલબ્ધ હશે ત્યારે તેનો ઉપયોગ કરશે."</string>

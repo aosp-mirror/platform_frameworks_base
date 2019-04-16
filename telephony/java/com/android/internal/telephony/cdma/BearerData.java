@@ -596,6 +596,45 @@ public final class BearerData {
         System.arraycopy(payload, 0, uData.payload, udhBytes, payload.length);
     }
 
+    private static void encode7bitAsciiEms(UserData uData, byte[] udhData, boolean force)
+            throws CodingException
+    {
+        try {
+            Rlog.d(LOG_TAG, "encode7bitAsciiEms");
+            int udhBytes = udhData.length + 1;  // Add length octet.
+            int udhSeptets = ((udhBytes * 8) + 6) / 7;
+            int paddingBits = (udhSeptets * 7) - (udhBytes * 8);
+            String msg = uData.payloadStr;
+            byte[] payload ;
+            int msgLen = msg.length();
+            BitwiseOutputStream outStream = new BitwiseOutputStream(msgLen +
+                    (paddingBits > 0 ? 1 : 0));
+            outStream.write(paddingBits, 0);
+            for (int i = 0; i < msgLen; i++) {
+                int charCode = UserData.charToAscii.get(msg.charAt(i), -1);
+                if (charCode == -1) {
+                    if (force) {
+                        outStream.write(7, UserData.UNENCODABLE_7_BIT_CHAR);
+                    } else {
+                        throw new CodingException("cannot ASCII encode (" + msg.charAt(i) + ")");
+                    }
+                } else {
+                    outStream.write(7, charCode);
+                }
+            }
+            payload = outStream.toByteArray();
+            uData.msgEncoding = UserData.ENCODING_7BIT_ASCII;
+            uData.msgEncodingSet = true;
+            uData.numFields = udhSeptets + uData.payloadStr.length();
+            uData.payload = new byte[udhBytes + payload.length];
+            uData.payload[0] = (byte)udhData.length;
+            System.arraycopy(udhData, 0, uData.payload, 1, udhData.length);
+            System.arraycopy(payload, 0, uData.payload, udhBytes, payload.length);
+        } catch (BitwiseOutputStream.AccessException ex) {
+            throw new CodingException("7bit ASCII encode failed: " + ex);
+        }
+    }
+
     private static void encodeEmsUserDataPayload(UserData uData)
         throws CodingException
     {
@@ -605,6 +644,8 @@ public final class BearerData {
                 encode7bitEms(uData, headerData, true);
             } else if (uData.msgEncoding == UserData.ENCODING_UNICODE_16) {
                 encode16bitEms(uData, headerData);
+            } else if (uData.msgEncoding == UserData.ENCODING_7BIT_ASCII) {
+                encode7bitAsciiEms(uData, headerData, true);
             } else {
                 throw new CodingException("unsupported EMS user data encoding (" +
                                           uData.msgEncoding + ")");
@@ -1056,15 +1097,18 @@ public final class BearerData {
         throws CodingException
     {
         try {
-            offset *= 8;
+            int offsetBits = offset * 8;
+            int offsetSeptets = (offsetBits + 6) / 7;
+            numFields -= offsetSeptets;
+
             StringBuffer strBuf = new StringBuffer(numFields);
             BitwiseInputStream inStream = new BitwiseInputStream(data);
-            int wantedBits = (offset * 8) + (numFields * 7);
+            int wantedBits = (offsetSeptets * 7) + (numFields * 7);
             if (inStream.available() < wantedBits) {
                 throw new CodingException("insufficient data (wanted " + wantedBits +
                                           " bits, but only have " + inStream.available() + ")");
             }
-            inStream.skip(offset);
+            inStream.skip(offsetSeptets * 7);
             for (int i = 0; i < numFields; i++) {
                 int charCode = inStream.read(7);
                 if ((charCode >= UserData.ASCII_MAP_BASE_INDEX) &&

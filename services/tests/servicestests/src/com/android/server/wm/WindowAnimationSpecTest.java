@@ -28,11 +28,12 @@ import static org.mockito.Mockito.verify;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.view.SurfaceControl;
 import android.view.animation.Animation;
 import android.view.animation.ClipRectAnimation;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

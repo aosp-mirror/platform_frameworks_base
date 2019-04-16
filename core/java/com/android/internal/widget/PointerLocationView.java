@@ -16,6 +16,7 @@
 
 package com.android.internal.widget;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -53,6 +54,7 @@ public class PointerLocationView extends View implements InputDeviceListener,
         private int mTraceCount;
         
         // True if the pointer is down.
+        @UnsupportedAppUsage
         private boolean mCurDown;
         
         // Most recent coordinates.
@@ -120,10 +122,14 @@ public class PointerLocationView extends View implements InputDeviceListener,
     private final Paint mPathPaint;
     private final FontMetricsInt mTextMetrics = new FontMetricsInt();
     private int mHeaderBottom;
+    @UnsupportedAppUsage
     private boolean mCurDown;
+    @UnsupportedAppUsage
     private int mCurNumPointers;
+    @UnsupportedAppUsage
     private int mMaxNumPointers;
     private int mActivePointerId;
+    @UnsupportedAppUsage
     private final ArrayList<PointerState> mPointers = new ArrayList<PointerState>();
     private final PointerCoords mTempCoords = new PointerCoords();
     
@@ -132,6 +138,7 @@ public class PointerLocationView extends View implements InputDeviceListener,
 
     private final FasterStringBuilder mText = new FasterStringBuilder();
     
+    @UnsupportedAppUsage
     private boolean mPrintCoords = true;
     
     public PointerLocationView(Context c) {

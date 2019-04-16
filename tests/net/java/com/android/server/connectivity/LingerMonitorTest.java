@@ -32,16 +32,18 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
+import android.net.IDnsResolver;
 import android.net.INetd;
 import android.net.Network;
 import android.net.NetworkCapabilities;
+import android.net.NetworkFactory;
 import android.net.NetworkInfo;
 import android.net.NetworkMisc;
-import android.net.NetworkStack;
 import android.os.INetworkManagementService;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.text.format.DateUtils;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.R;
 import com.android.server.ConnectivityService;
@@ -68,22 +70,19 @@ public class LingerMonitorTest {
     LingerMonitor mMonitor;
 
     @Mock ConnectivityService mConnService;
+    @Mock IDnsResolver mDnsResolver;
     @Mock INetd mNetd;
     @Mock INetworkManagementService mNMS;
     @Mock Context mCtx;
     @Mock NetworkMisc mMisc;
     @Mock NetworkNotificationManager mNotifier;
     @Mock Resources mResources;
-    @Mock NetworkStack mNetworkStack;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         when(mCtx.getResources()).thenReturn(mResources);
         when(mCtx.getPackageName()).thenReturn("com.android.server.connectivity");
-        when(mCtx.getSystemServiceName(NetworkStack.class))
-                .thenReturn(Context.NETWORK_STACK_SERVICE);
-        when(mCtx.getSystemService(Context.NETWORK_STACK_SERVICE)).thenReturn(mNetworkStack);
 
         mMonitor = new TestableLingerMonitor(mCtx, mNotifier, HIGH_DAILY_LIMIT, HIGH_RATE_LIMIT);
     }
@@ -356,7 +355,8 @@ public class LingerMonitorTest {
         caps.addCapability(0);
         caps.addTransportType(transport);
         NetworkAgentInfo nai = new NetworkAgentInfo(null, null, new Network(netId), info, null,
-                caps, 50, mCtx, null, mMisc, mConnService, mNetd, mNMS);
+                caps, 50, mCtx, null, mMisc, mConnService, mNetd, mDnsResolver, mNMS,
+                NetworkFactory.SerialNumber.NONE);
         nai.everValidated = true;
         return nai;
     }

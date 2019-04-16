@@ -27,6 +27,7 @@ import android.security.keystore.ParcelableKeyGenParameterSpec;
  */
 interface IKeyChainService {
     // APIs used by KeyChain
+    @UnsupportedAppUsage
     String requestPrivateKey(String alias);
     byte[] getCertificate(String alias);
     byte[] getCaCertificates(String alias);

@@ -806,7 +806,7 @@ public abstract class DocumentsProvider extends ContentProvider {
     }
 
     /**
-     * Implementation is provided by the parent class. Cannot be overriden.
+     * Implementation is provided by the parent class. Cannot be overridden.
      *
      * @see #queryRoots(String[])
      * @see #queryRecentDocuments(String, String[], Bundle, CancellationSignal)
@@ -864,7 +864,7 @@ public abstract class DocumentsProvider extends ContentProvider {
     }
 
     /**
-     * Implementation is provided by the parent class. Cannot be overriden.
+     * Implementation is provided by the parent class. Cannot be overridden.
      *
      * @see #getDocumentType(String)
      */
@@ -939,7 +939,7 @@ public abstract class DocumentsProvider extends ContentProvider {
 
     /**
      * Implementation is provided by the parent class. Throws by default, and
-     * cannot be overriden.
+     * cannot be overridden.
      *
      * @see #createDocument(String, String, String)
      */
@@ -950,7 +950,7 @@ public abstract class DocumentsProvider extends ContentProvider {
 
     /**
      * Implementation is provided by the parent class. Throws by default, and
-     * cannot be overriden.
+     * cannot be overridden.
      *
      * @see #deleteDocument(String)
      */
@@ -961,7 +961,7 @@ public abstract class DocumentsProvider extends ContentProvider {
 
     /**
      * Implementation is provided by the parent class. Throws by default, and
-     * cannot be overriden.
+     * cannot be overridden.
      */
     @Override
     public final int update(
@@ -1201,7 +1201,7 @@ public abstract class DocumentsProvider extends ContentProvider {
     }
 
     /**
-     * Implementation is provided by the parent class. Cannot be overriden.
+     * Implementation is provided by the parent class. Cannot be overridden.
      *
      * @see #openDocument(String, String, CancellationSignal)
      */
@@ -1212,7 +1212,7 @@ public abstract class DocumentsProvider extends ContentProvider {
     }
 
     /**
-     * Implementation is provided by the parent class. Cannot be overriden.
+     * Implementation is provided by the parent class. Cannot be overridden.
      *
      * @see #openDocument(String, String, CancellationSignal)
      */
@@ -1224,7 +1224,7 @@ public abstract class DocumentsProvider extends ContentProvider {
     }
 
     /**
-     * Implementation is provided by the parent class. Cannot be overriden.
+     * Implementation is provided by the parent class. Cannot be overridden.
      *
      * @see #openDocument(String, String, CancellationSignal)
      */
@@ -1238,7 +1238,7 @@ public abstract class DocumentsProvider extends ContentProvider {
     }
 
     /**
-     * Implementation is provided by the parent class. Cannot be overriden.
+     * Implementation is provided by the parent class. Cannot be overridden.
      *
      * @see #openDocument(String, String, CancellationSignal)
      */
@@ -1252,7 +1252,7 @@ public abstract class DocumentsProvider extends ContentProvider {
     }
 
     /**
-     * Implementation is provided by the parent class. Cannot be overriden.
+     * Implementation is provided by the parent class. Cannot be overridden.
      *
      * @see #openDocumentThumbnail(String, Point, CancellationSignal)
      * @see #openTypedDocument(String, String, Bundle, CancellationSignal)
@@ -1265,7 +1265,7 @@ public abstract class DocumentsProvider extends ContentProvider {
     }
 
     /**
-     * Implementation is provided by the parent class. Cannot be overriden.
+     * Implementation is provided by the parent class. Cannot be overridden.
      *
      * @see #openDocumentThumbnail(String, Point, CancellationSignal)
      * @see #openTypedDocument(String, String, Bundle, CancellationSignal)

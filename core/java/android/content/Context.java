@@ -49,7 +49,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.net.NetworkStack;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -188,7 +187,7 @@ public abstract class Context {
      *
      * <p>This was the legacy (but undocumented) behavior in and
      * before Gingerbread (Android 2.3) and this flag is implied when
-     * targetting such releases.  For applications targetting SDK
+     * targeting such releases.  For applications targeting SDK
      * versions <em>greater than</em> Android 2.3, this flag must be
      * explicitly set if desired.
      *
@@ -1712,7 +1711,8 @@ public abstract class Context {
      */
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
     @SystemApi
-    public void startActivityAsUser(@RequiresPermission Intent intent, UserHandle user) {
+    public void startActivityAsUser(@RequiresPermission @NonNull Intent intent,
+            @NonNull UserHandle user) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
@@ -2841,7 +2841,7 @@ public abstract class Context {
      *
      * @param service Description of the service to be stopped.  The Intent must be either
      *      fully explicit (supplying a component name) or specify a specific package
-     *      name it is targetted to.
+     *      name it is targeted to.
      *
      * @return If there is a service matching the given Intent that is already
      * running, then it is stopped and {@code true} is returned; else {@code false} is returned.
@@ -3017,6 +3017,7 @@ public abstract class Context {
             CONNECTIVITY_SERVICE,
             //@hide: IP_MEMORY_STORE_SERVICE,
             IPSEC_SERVICE,
+            TEST_NETWORK_SERVICE,
             //@hide: UPDATE_LOCK_SERVICE,
             //@hide: NETWORKMANAGEMENT_SERVICE,
             NETWORK_STATS_SERVICE,
@@ -3396,7 +3397,7 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
-     * {@link android.app.NotificationManager} for controlling keyguard.
+     * {@link android.app.KeyguardManager} for controlling keyguard.
      *
      * @see #getSystemService(String)
      * @see android.app.KeyguardManager
@@ -3514,21 +3515,12 @@ public abstract class Context {
     public static final String NETD_SERVICE = "netd";
 
     /**
-     * Use with {@link #getSystemService(String)} to retrieve a
-     * {@link NetworkStack} for communicating with the network stack
+     * Use with {@link android.os.ServiceManager.getService()} to retrieve a
+     * {@link NetworkStackClient} IBinder for communicating with the network stack
      * @hide
-     * @see #getSystemService(String)
-     * @see NetworkStack
+     * @see NetworkStackClient
      */
     public static final String NETWORK_STACK_SERVICE = "network_stack";
-
-    /**
-     * Use with {@link #getSystemService(String)} to retrieve a
-     * {@link android.net.IpMemoryStore} to store and read information about
-     * known networks.
-     * @hide
-     */
-    public static final String IP_MEMORY_STORE_SERVICE = "ipmemorystore";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
@@ -3538,6 +3530,15 @@ public abstract class Context {
      * @see #getSystemService(String)
      */
     public static final String IPSEC_SERVICE = "ipsec";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
+     * android.net.TestNetworkManager} for building TUNs and limited-use Networks
+     *
+     * @see #getSystemService(String)
+     * @hide
+     */
+    @TestApi public static final String TEST_NETWORK_SERVICE = "test_network";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a {@link

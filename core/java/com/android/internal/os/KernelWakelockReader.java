@@ -66,7 +66,7 @@ public class KernelWakelockReader {
      */
     public final KernelWakelockStats readKernelWakelockStats(KernelWakelockStats staleStats) {
         byte[] buffer = new byte[32*1024];
-        int len;
+        int len = 0;
         boolean wakeup_sources;
         final long startTime = SystemClock.uptimeMillis();
 
@@ -87,7 +87,11 @@ public class KernelWakelockReader {
                 }
             }
 
-            len = is.read(buffer);
+            int cnt;
+            while ((cnt = is.read(buffer, len, buffer.length - len)) > 0) {
+                len += cnt;
+            }
+
             is.close();
         } catch (java.io.IOException e) {
             Slog.wtf(TAG, "failed to read kernel wakelocks", e);

@@ -119,6 +119,7 @@ public class GraphEnvironment extends MffEnvironment {
      *
      * @param references An alternating argument list of keys (Strings) and values.
      */
+    @UnsupportedAppUsage
     public void addReferences(Object... references) {
         getGraphReader().addReferencesByKeysAndValues(references);
     }

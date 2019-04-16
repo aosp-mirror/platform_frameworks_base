@@ -31,6 +31,8 @@ import java.lang.annotation.RetentionPolicy;
  * @see RcsMessageQueryResult#getContinuationToken()
  * @see RcsParticipantQueryResult#getContinuationToken()
  * @see RcsThreadQueryResult#getContinuationToken()
+ *
+ * @hide
  */
 public final class RcsQueryContinuationToken implements Parcelable {
     /**
@@ -127,7 +129,7 @@ public final class RcsQueryContinuationToken implements Parcelable {
         mOffset = in.readInt();
     }
 
-    public static final Creator<RcsQueryContinuationToken> CREATOR =
+    public static final @android.annotation.NonNull Creator<RcsQueryContinuationToken> CREATOR =
             new Creator<RcsQueryContinuationToken>() {
                 @Override
                 public RcsQueryContinuationToken createFromParcel(Parcel in) {

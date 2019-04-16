@@ -1423,7 +1423,7 @@
              at {@link android.view.inputmethod.InputConnection#performEditorAction(int)
              InputConnection.performEditorAction(int)}.
              <p>Corresponds to
-             {@link android.view.inputmethod.EditorInfo#IME_FLAG_NO_FULLSCREEN}. -->
+             {@link android.view.inputmethod.EditorInfo#IME_FLAG_NAVIGATE_PREVIOUS}. -->
         <flag name="flagNavigatePrevious" value="0x4000000" />
         <!-- Used to specify that there is something
              interesting that a forward navigation can focus on. This is like using
@@ -4168,9 +4168,9 @@
         row is full. The rowCount attribute may be used similarly in the vertical case.
         The default is horizontal. -->
         <attr name="orientation" />
-        <!-- The maxmimum number of rows to create when automatically positioning children. -->
+        <!-- The maximum number of rows to create when automatically positioning children. -->
         <attr name="rowCount" format="integer" />
-        <!-- The maxmimum number of columns to create when automatically positioning children. -->
+        <!-- The maximum number of columns to create when automatically positioning children. -->
         <attr name="columnCount" format="integer" />
         <!-- When set to true, tells GridLayout to use default margins when none are specified
         in a view's layout parameters.

@@ -42,6 +42,7 @@ interface IAccessibilityManager {
 
     List<AccessibilityServiceInfo> getInstalledAccessibilityServiceList(int userId);
 
+    @UnsupportedAppUsage
     List<AccessibilityServiceInfo> getEnabledAccessibilityServiceList(int feedbackType, int userId);
 
     int addAccessibilityInteractionConnection(IWindow windowToken,

@@ -158,6 +158,11 @@ public class NotificationInfoTest extends SysuiTestCase {
         PollingCheck.waitFor(1000,
                 () -> VISIBLE == mNotificationInfo.findViewById(R.id.confirmation).getVisibility());
     }
+    private void ensureNoUndoButton() {
+        PollingCheck.waitFor(1000,
+                () -> GONE == mNotificationInfo.findViewById(R.id.confirmation).getVisibility()
+                        && !mNotificationInfo.isAnimating());
+    }
     private void waitForStopButton() {
         PollingCheck.waitFor(1000,
                 () -> VISIBLE == mNotificationInfo.findViewById(R.id.prompt).getVisibility());
@@ -567,9 +572,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true /* isUserSentimentNegative */);
 
         mNotificationInfo.findViewById(R.id.block).performClick();
-        waitForUndoButton();
-        mNotificationInfo.handleCloseControls(true /* save */, false /* force */);
-
         mTestableLooper.processAllMessages();
         verify(listener).checkSave(any(Runnable.class), eq(mSbn));
     }
@@ -787,7 +789,7 @@ public class NotificationInfoTest extends SysuiTestCase {
     }
 
     @Test
-    public void testCloseControlsDoesNotUpdateIfCheckSaveListenerIsNoOp() throws Exception {
+    public void testBlockDoesNothingIfCheckSaveListenerIsNoOp() throws Exception {
         mNotificationChannel.setImportance(IMPORTANCE_LOW);
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
                 TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn,
@@ -795,10 +797,10 @@ public class NotificationInfoTest extends SysuiTestCase {
                 }, null, null, true);
 
         mNotificationInfo.findViewById(R.id.block).performClick();
-        waitForUndoButton();
+        mTestableLooper.processAllMessages();
+        ensureNoUndoButton();
         mNotificationInfo.handleCloseControls(true, false);
 
-        mTestableLooper.processAllMessages();
         verify(mMockINotificationManager, never()).updateNotificationChannelForPackage(
                 eq(TEST_PACKAGE_NAME), eq(TEST_UID), eq(mNotificationChannel));
     }
@@ -813,6 +815,10 @@ public class NotificationInfoTest extends SysuiTestCase {
                 }, null, null, false);
 
         mNotificationInfo.findViewById(R.id.block).performClick();
+        mTestableLooper.processAllMessages();
+        verify(mMockINotificationManager, never()).updateNotificationChannelForPackage(
+                eq(TEST_PACKAGE_NAME), eq(TEST_UID), eq(mNotificationChannel));
+
         waitForUndoButton();
         mNotificationInfo.handleCloseControls(true, false);
 

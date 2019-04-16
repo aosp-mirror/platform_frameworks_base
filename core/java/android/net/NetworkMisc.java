@@ -46,10 +46,16 @@ public class NetworkMisc implements Parcelable {
 
     /**
      * Set if the user desires to use this network even if it is unvalidated. This field has meaning
-     * only if {#link explicitlySelected} is true. If it is, this field must also be set to the
+     * only if {@link explicitlySelected} is true. If it is, this field must also be set to the
      * appropriate value based on previous user choice.
      */
     public boolean acceptUnvalidated;
+
+    /**
+     * Whether the user explicitly set that this network should be validated even if presence of
+     * only partial internet connectivity.
+     */
+    public boolean acceptPartialConnectivity;
 
     /**
      * Set to avoid surfacing the "Sign in to network" notification.

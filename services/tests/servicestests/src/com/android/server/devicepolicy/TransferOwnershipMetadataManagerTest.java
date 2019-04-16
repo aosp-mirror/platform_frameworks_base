@@ -30,8 +30,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.os.Environment;
-import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
+
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.devicepolicy.TransferOwnershipMetadataManager.Injector;
 import com.android.server.devicepolicy.TransferOwnershipMetadataManager.Metadata;

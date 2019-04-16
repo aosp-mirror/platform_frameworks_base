@@ -138,9 +138,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g>, Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Połączenia przez Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g>, VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Połączenia przez Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Połączenia przez Wi-Fi"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Wył."</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Preferuj Wi-Fi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Preferowane komórkowe"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"Rozmowa przez Wi-Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"Połączenia przez sieć komórkową"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Tylko Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: nieprzekierowane"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -436,6 +440,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Pozwala aplikacji na dostęp do funkcji telefonicznych urządzenia. Aplikacja z tym uprawnieniem może odczytać numer telefonu i identyfikator urządzenia, sprawdzić, czy połączenie jest aktywne, oraz poznać numer, z którym jest nawiązane połączenie."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"przekazywanie połączeń przez system"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Zezwala aplikacji na przekazywanie połączeń przez system, by poprawić ich jakość."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"przeglądanie i kontrolowanie połączeń w systemie."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Zezwala aplikacji na przeglądanie i kontrolowanie trwających połączeń na urządzeniu. Dotyczy to informacji takich jak numery, z którymi nawiązane jest połączenie, oraz stan połączeń."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"kontynuuj połączenie w innej aplikacji"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Zezwala na kontynuowanie przez aplikację połączenia rozpoczętego w innej aplikacji."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"odczytywanie numerów telefonów"</string>
@@ -587,7 +593,7 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Pozwala aplikacji na odczyt i zmianę konfiguracji trybu Nie przeszkadzać."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Określ reguły hasła"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Kontrolowanie długości haseł blokady ekranu i kodów PIN oraz dozwolonych w nich znaków."</string>
-    <string name="policylab_watchLogin" msgid="5091404125971980158">"Monitoruj próby odblokowania ekranu"</string>
+    <string name="policylab_watchLogin" msgid="5091404125971980158">"Monitorowanie prób odblokowania ekranu"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Przy odblokowywaniu ekranu monitoruj, ile razy wpisano nieprawidłowe hasło i blokuj tablet lub usuń z niego wszystkie dane, jeśli nieprawidłowe hasło podano zbyt wiele razy."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Monitorowanie, ile razy wpisano niepoprawne hasło podczas odblokowywania ekranu, oraz blokowanie telewizora albo kasowanie na nim wszystkich danych, gdy zbyt wiele razy wpisano niepoprawne hasło."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Przy odblokowywaniu ekranu monitoruje, ile razy wpisano nieprawidłowe hasło, i blokuje telefon lub usuwa z niego wszystkie dane, jeśli nieprawidłowe hasło podano zbyt wiele razy"</string>
@@ -608,11 +614,11 @@
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Kasowanie danych tego użytkownika na tym telefonie bez ostrzeżenia."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Ustaw globalny serwer proxy urządzenia"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Ustawianie globalnego serwera proxy urządzenia do użycia przy włączonych zasadach. Tylko właściciel urządzenia może ustawić globalny serwer proxy."</string>
-    <string name="policylab_expirePassword" msgid="5610055012328825874">"Ustaw czas ważności hasła blokady ekranu"</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"Ustawianie czasu ważności hasła blokady ekranu"</string>
     <string name="policydesc_expirePassword" msgid="5367525762204416046">"Zmiana częstotliwości, z jaką należy zmieniać hasło blokady ekranu, kod PIN lub wzór."</string>
-    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Ustaw szyfrowanie pamięci"</string>
+    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Ustawianie szyfrowania pamięci"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Wymaganie szyfrowania przechowywanych danych aplikacji"</string>
-    <string name="policylab_disableCamera" msgid="6395301023152297826">"Wyłącz aparaty"</string>
+    <string name="policylab_disableCamera" msgid="6395301023152297826">"Wyłączanie aparatów"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Zapobieganie używaniu wszystkich aparatów w urządzeniu"</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Wył. funkcji blokady ekranu"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Zapobieganie użyciu niektórych funkcji blokady ekranu."</string>
@@ -1056,11 +1062,11 @@
     <string name="deleteText" msgid="6979668428458199034">"Usuń"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Sposób wprowadzania tekstu"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Działania na tekście"</string>
-    <string name="email" msgid="4560673117055050403">"E-mail"</string>
+    <string name="email" msgid="4560673117055050403">"Wyślij e-maila"</string>
     <string name="email_desc" msgid="3638665569546416795">"Wyślij e-maila na wybrany adres"</string>
     <string name="dial" msgid="1253998302767701559">"Zadzwoń"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Zadzwoń pod wybrany numer telefonu"</string>
-    <string name="map" msgid="5441053548030107189">"Mapa"</string>
+    <string name="map" msgid="5441053548030107189">"Otwórz mapę"</string>
     <string name="map_desc" msgid="1836995341943772348">"Pokaż wybrany adres na mapie"</string>
     <string name="browse" msgid="1245903488306147205">"Otwórz"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Otwórz wybrany adres URL"</string>
@@ -1072,7 +1078,7 @@
     <string name="view_calendar_desc" msgid="5828320291870344584">"Wyświetl wybraną datę w kalendarzu"</string>
     <string name="add_calendar_event" msgid="1953664627192056206">"Zaplanuj"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Zaplanuj wydarzenie na wybraną godzinę"</string>
-    <string name="view_flight" msgid="7691640491425680214">"Utwór"</string>
+    <string name="view_flight" msgid="7691640491425680214">"Śledź"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Śledź wybrany lot"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Kończy się miejsce"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Niektóre funkcje systemu mogą nie działać"</string>
@@ -1221,8 +1227,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Zaloguj się do sieci"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Sieć Wi-Fi nie ma dostępu do internetu"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> nie ma dostępu do internetu"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Kliknij, by wyświetlić opcje"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Połączono"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> ma ograniczoną łączność"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Kliknij, by mimo to nawiązać połączenie"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Zmieniono ustawienia hotspotu"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Zmieniono pasmo hotspotu."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"To urządzenie nie może korzystać tylko z częstotliwości 5 GHz. Będzie korzystać z tego pasma, jeśli będzie ono dostępne."</string>
@@ -1457,7 +1466,7 @@
     <string name="add_account_button_label" msgid="3611982894853435874">"Dodaj konto"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"Zwiększ"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"Zmniejsz"</string>
-    <string name="number_picker_increment_scroll_mode" msgid="5259126567490114216">"<xliff:g id="VALUE">%s</xliff:g> naciśnij i przytrzymaj."</string>
+    <string name="number_picker_increment_scroll_mode" msgid="5259126567490114216">"<xliff:g id="VALUE">%s</xliff:g> dotknij i przytrzymaj."</string>
     <string name="number_picker_increment_scroll_action" msgid="9101473045891835490">"Przesuń w górę, by zwiększyć, i w dół, by zmniejszyć."</string>
     <string name="time_picker_increment_minute_button" msgid="8865885114028614321">"Zmień minutę na późniejszą"</string>
     <string name="time_picker_decrement_minute_button" msgid="6246834937080684791">"Zmień minutę na wcześniejszą"</string>

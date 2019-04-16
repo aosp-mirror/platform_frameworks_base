@@ -18,6 +18,7 @@ package android.telecom;
 
 import android.annotation.UnsupportedAppUsage;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -218,7 +219,7 @@ public class VideoCallImpl extends VideoCall {
         mTargetSdkVersion = sdkVersion;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 127403196)
     public void destroy() {
         unregisterCallback(mCallback);
     }

@@ -233,6 +233,7 @@ import android.app.ActivityThread;
 import android.app.AlertDialog;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.app.AppOpsManagerInternal.CheckOpsDelegate;
 import android.app.ApplicationErrorReport;
 import android.app.ApplicationThreadConstants;
 import android.app.BroadcastOptions;
@@ -296,6 +297,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.PackageManagerInternal.CheckPermissionDelegate;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PathPermission;
 import android.content.pm.PermissionInfo;
@@ -432,6 +434,8 @@ import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.function.QuadFunction;
+import com.android.internal.util.function.TriFunction;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.AppOpsService;
 import com.android.server.AttributeCache;
@@ -516,6 +520,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.BiFunction;
 
 public class ActivityManagerService extends IActivityManager.Stub
         implements Watchdog.Monitor, BatteryStatsImpl.BatteryCallback {
@@ -583,6 +588,12 @@ public class ActivityManagerService extends IActivityManager.Stub
     // How long we wait for an attached process to publish its content providers
     // before we decide it must be hung.
     static final int CONTENT_PROVIDER_PUBLISH_TIMEOUT = 10*1000;
+
+    /**
+     * How long we wait for an provider to be published. Should be longer than
+     * {@link #CONTENT_PROVIDER_PUBLISH_TIMEOUT}.
+     */
+    static final int CONTENT_PROVIDER_WAIT_TIMEOUT = 20 * 1000;
 
     // How long we wait for a launched process to attach to the activity manager
     // before we decide it's never going to come up for real, when the process was
@@ -2653,7 +2664,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     ProcessRecord proc;
                     int procState;
                     int statType;
-                    int pid;
+                    int pid = -1;
                     long lastPssTime;
                     synchronized (ActivityManagerService.this) {
                         if (mPendingPssProcesses.size() <= 0) {
@@ -5867,7 +5878,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     private final void handleAppDiedLocked(ProcessRecord app,
             boolean restarting, boolean allowRestart) {
         int pid = app.pid;
-        final boolean clearLaunchStartTime = !restarting && app.removed && app.foregroundActivities;
         boolean kept = cleanUpApplicationRecordLocked(app, restarting, allowRestart, -1,
                 false /*replacingPid*/);
         if (!kept && !restarting) {
@@ -5909,18 +5919,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             mWindowManager.continueSurfaceLayout();
         }
 
-        // TODO (b/67683350)
-        // When an app process is removed, activities from the process may be relaunched. In the
-        // case of forceStopPackageLocked the activities are finished before any window is drawn,
-        // and the launch time is not cleared. This will be incorrectly used to calculate launch
-        // time for the next launched activity launched in the same windowing mode.
-        if (clearLaunchStartTime) {
-            final LaunchTimeTracker.Entry entry = mStackSupervisor
-                    .getLaunchTimeTracker().getEntry(mStackSupervisor.getWindowingMode());
-            if (entry != null) {
-                entry.mLaunchStartTime = 0;
-            }
-        }
     }
 
     private final int getLRURecordIndexForAppLocked(IApplicationThread thread) {
@@ -7436,6 +7434,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // next app record if we are emulating process with anonymous threads.
         ProcessRecord app;
         long startTime = SystemClock.uptimeMillis();
+        long bindApplicationTimeMillis;
         if (pid != MY_PID && pid >= 0) {
             synchronized (mPidsSelfLocked) {
                 app = mPidsSelfLocked.get(pid);
@@ -7666,6 +7665,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             checkTime(startTime, "attachApplicationLocked: immediately before bindApplication");
+            bindApplicationTimeMillis = SystemClock.elapsedRealtime();
             mStackSupervisor.getActivityMetricsLogger().notifyBindApplication(app);
             if (app.isolatedEntryPoint != null) {
                 // This is an isolated process which should just call an entry point instead of
@@ -7783,6 +7783,18 @@ public class ActivityManagerService extends IActivityManager.Stub
             updateOomAdjLocked();
             checkTime(startTime, "attachApplicationLocked: after updateOomAdjLocked");
         }
+
+        StatsLog.write(
+                StatsLog.PROCESS_START_TIME,
+                app.info.uid,
+                app.pid,
+                app.info.packageName,
+                StatsLog.PROCESS_START_TIME__TYPE__COLD,
+                app.startTime,
+                (int) (bindApplicationTimeMillis - app.startTime),
+                (int) (SystemClock.elapsedRealtime() - app.startTime),
+                app.hostingType,
+                (app.hostingNameStr != null ? app.hostingNameStr : ""));
 
         return true;
     }
@@ -7950,7 +7962,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             // And trigger dev.bootcomplete if we are not showing encryption progress
             if (!"trigger_restart_min_framework".equals(VoldProperties.decrypt().orElse(""))
-                    || "".equals(VoldProperties.encrypt_progress().orElse(""))){
+                    || "".equals(VoldProperties.encrypt_progress().orElse(""))) {
                 SystemProperties.set("dev.bootcomplete", "1");
             }
             mUserController.sendBootCompleted(
@@ -8622,6 +8634,14 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public boolean isAppForeground(int uid) {
+        int callerUid = Binder.getCallingUid();
+        if (UserHandle.isCore(callerUid) || callerUid == uid) {
+            return isAppForegroundInternal(uid);
+        }
+        return false;
+    }
+
+    private boolean isAppForegroundInternal(int uid) {
         synchronized (this) {
             UidRecord uidRec = mActiveUids.get(uid);
             if (uidRec == null || uidRec.idle) {
@@ -12021,6 +12041,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         ContentProviderRecord cpr;
         ContentProviderConnection conn = null;
         ProviderInfo cpi = null;
+        boolean providerRunning = false;
 
         synchronized(this) {
             long startTime = SystemClock.uptimeMillis();
@@ -12060,7 +12081,26 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
 
-            boolean providerRunning = cpr != null && cpr.proc != null && !cpr.proc.killed;
+            if (cpr != null && cpr.proc != null) {
+                providerRunning = !cpr.proc.killed;
+
+                // Note if killedByAm is also set, this means the provider process has just been
+                // killed by AM (in ProcessRecord.kill()), but appDiedLocked() hasn't been called
+                // yet. So we need to call appDiedLocked() here and let it clean up.
+                // (See the commit message on I2c4ba1e87c2d47f2013befff10c49b3dc337a9a7 to see
+                // how to test this case.)
+                if (cpr.proc.killed && cpr.proc.killedByAm) {
+                    checkTime(startTime, "getContentProviderImpl: before appDied (killedByAm)");
+                    final long iden = Binder.clearCallingIdentity();
+                    try {
+                        appDiedLocked(cpr.proc);
+                    } finally {
+                        Binder.restoreCallingIdentity(iden);
+                    }
+                    checkTime(startTime, "getContentProviderImpl: after appDied (killedByAm)");
+                }
+            }
+
             if (providerRunning) {
                 cpi = cpr.info;
                 String msg;
@@ -12353,6 +12393,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         // Wait for the provider to be published...
+        final long timeout = SystemClock.uptimeMillis() + CONTENT_PROVIDER_WAIT_TIMEOUT;
         synchronized (cpr) {
             while (cpr.provider == null) {
                 if (cpr.launchingApp == null) {
@@ -12367,13 +12408,22 @@ public class ActivityManagerService extends IActivityManager.Stub
                     return null;
                 }
                 try {
+                    final long wait = Math.max(0L, timeout - SystemClock.uptimeMillis());
                     if (DEBUG_MU) Slog.v(TAG_MU,
                             "Waiting to start provider " + cpr
-                            + " launchingApp=" + cpr.launchingApp);
+                            + " launchingApp=" + cpr.launchingApp + " for " + wait + " ms");
                     if (conn != null) {
                         conn.waiting = true;
                     }
-                    cpr.wait();
+                    cpr.wait(wait);
+                    if (cpr.provider == null) {
+                        Slog.wtf(TAG, "Timeout waiting for provider "
+                                + cpi.applicationInfo.packageName + "/"
+                                + cpi.applicationInfo.uid + " for provider "
+                                + name
+                                + " providerRunning=" + providerRunning);
+                        return null;
+                    }
                 } catch (InterruptedException ex) {
                 } finally {
                     if (conn != null) {
@@ -22132,6 +22182,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             // Can't call out of the system process with a lock held, so post a message.
             if (app.instr.mUiAutomationConnection != null) {
+                mAppOpsService.setAppOpsServiceDelegate(null);
+                getPackageManagerInternalLocked().setCheckPermissionDelegate(null);
                 mHandler.obtainMessage(SHUTDOWN_UI_AUTOMATION_CONNECTION_MSG,
                         app.instr.mUiAutomationConnection).sendToTarget();
             }
@@ -27142,6 +27194,145 @@ public class ActivityManagerService extends IActivityManager.Stub
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }
+        }
+    }
+
+    @Override
+    public void startDelegateShellPermissionIdentity(int delegateUid) {
+        if (UserHandle.getCallingAppId() != Process.SHELL_UID
+                && UserHandle.getCallingAppId() != Process.ROOT_UID) {
+            throw new SecurityException("Only the shell can delegate its permissions");
+        }
+
+        // We allow delegation only to one instrumentation started from the shell
+        synchronized (ActivityManagerService.this) {
+            // If there is a delegate it should be the same instance for app ops and permissions.
+            if (mAppOpsService.getAppOpsServiceDelegate()
+                    != getPackageManagerInternalLocked().getCheckPermissionDelegate()) {
+                throw new IllegalStateException("Bad shell delegate state");
+            }
+
+            // If the delegate is already set up for the target UID, nothing to do.
+            if (mAppOpsService.getAppOpsServiceDelegate() != null) {
+                if (!(mAppOpsService.getAppOpsServiceDelegate() instanceof ShellDelegate)) {
+                    throw new IllegalStateException("Bad shell delegate state");
+                }
+                if (((ShellDelegate) mAppOpsService.getAppOpsServiceDelegate())
+                        .getDelegateUid() != delegateUid) {
+                    throw new SecurityException("Shell can delegate permissions only "
+                            + "to one instrumentation at a time");
+                }
+                return;
+            }
+
+            final int instrCount = mActiveInstrumentation.size();
+            for (int i = 0; i < instrCount; i++) {
+                final ActiveInstrumentation instr = mActiveInstrumentation.get(i);
+                if (instr.mTargetInfo.uid != delegateUid) {
+                    continue;
+                }
+                // If instrumentation started from the shell the connection is not null
+                if (instr.mUiAutomationConnection == null) {
+                    throw new SecurityException("Shell can delegate its permissions" +
+                            " only to an instrumentation started from the shell");
+                }
+
+                // Hook them up...
+                final ShellDelegate shellDelegate = new ShellDelegate(
+                        instr.mTargetInfo.packageName, delegateUid);
+                mAppOpsService.setAppOpsServiceDelegate(shellDelegate);
+                getPackageManagerInternalLocked().setCheckPermissionDelegate(shellDelegate);
+                return;
+            }
+        }
+    }
+
+    @Override
+    public void stopDelegateShellPermissionIdentity() {
+        if (UserHandle.getCallingAppId() != Process.SHELL_UID
+                && UserHandle.getCallingAppId() != Process.ROOT_UID) {
+            throw new SecurityException("Only the shell can delegate its permissions");
+        }
+        synchronized (ActivityManagerService.this) {
+            mAppOpsService.setAppOpsServiceDelegate(null);
+            getPackageManagerInternalLocked().setCheckPermissionDelegate(null);
+        }
+    }
+
+    private class ShellDelegate implements CheckOpsDelegate, CheckPermissionDelegate {
+        private final String mTargetPackageName;
+        private final int mTargetUid;
+
+        ShellDelegate(String targetPacakgeName, int targetUid) {
+            mTargetPackageName = targetPacakgeName;
+            mTargetUid = targetUid;
+        }
+
+        int getDelegateUid() {
+            return mTargetUid;
+        }
+
+        @Override
+        public int checkOperation(int code, int uid, String packageName,
+                TriFunction<Integer, Integer, String, Integer> superImpl) {
+            if (uid == mTargetUid) {
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    return superImpl.apply(code, Process.SHELL_UID,
+                            "com.android.shell");
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }
+            return superImpl.apply(code, uid, packageName);
+        }
+
+        @Override
+        public int checkAudioOperation(int code, int usage, int uid, String packageName,
+                QuadFunction<Integer, Integer, Integer, String, Integer> superImpl) {
+            if (uid == mTargetUid) {
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    return superImpl.apply(code, usage, Process.SHELL_UID,
+                            "com.android.shell");
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }
+            return superImpl.apply(code, usage, uid, packageName);
+        }
+
+        @Override
+        public int noteOperation(int code, int uid, String packageName,
+                TriFunction<Integer, Integer, String, Integer> superImpl) {
+            if (uid == mTargetUid) {
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    return mAppOpsService.noteProxyOperation(code, Process.SHELL_UID,
+                            "com.android.shell", uid, packageName);
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }
+            return superImpl.apply(code, uid, packageName);
+        }
+
+        @Override
+        public int checkPermission(String permName, String pkgName, int userId,
+                TriFunction<String, String, Integer, Integer> superImpl) {
+            if (mTargetPackageName.equals(pkgName)) {
+                return superImpl.apply(permName, "com.android.shell", userId);
+            }
+            return superImpl.apply(permName, pkgName, userId);
+        }
+
+        @Override
+        public int checkUidPermission(String permName, int uid,
+                BiFunction<String, Integer, Integer> superImpl) {
+            if (uid == mTargetUid) {
+                return superImpl.apply(permName, Process.SHELL_UID);
+            }
+            return superImpl.apply(permName, uid);
         }
     }
 }

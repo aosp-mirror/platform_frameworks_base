@@ -88,20 +88,22 @@ class UtilTests(unittest.TestCase):
 
 
 faulty_current_txt = """
+// Signature format: 2.0
 package android.app {
   public final class Activity {
   }
 
   public final class WallpaperColors implements android.os.Parcelable {
-    ctor public WallpaperColors(android.os.Parcel);
+    ctor public WallpaperColors(@NonNull android.os.Parcel);
     method public int describeContents();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.app.WallpaperColors> CREATOR;
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.WallpaperColors> CREATOR;
   }
 }
-""".split('\n')
+""".strip().split('\n')
 
 ok_current_txt = """
+// Signature format: 2.0
 package android.app {
   public final class Activity {
   }
@@ -109,19 +111,20 @@ package android.app {
   public final class WallpaperColors implements android.os.Parcelable {
     ctor public WallpaperColors();
     method public int describeContents();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.app.WallpaperColors> CREATOR;
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.WallpaperColors> CREATOR;
   }
 }
-""".split('\n')
+""".strip().split('\n')
 
 system_current_txt = """
+// Signature format: 2.0
 package android.app {
   public final class WallpaperColors implements android.os.Parcelable {
     method public int getSomething();
   }
 }
-""".split('\n')
+""".strip().split('\n')
 
 
 
@@ -238,6 +241,10 @@ class V2ParserTests(unittest.TestCase):
     def _field(self, raw):
         cls = self._cls("class Class {")
         return apilint.Field(cls, 1, raw, '', sig_format=2)
+
+    def test_parse_package(self):
+        pkg = apilint.Package(999, "package wifi.p2p {", None)
+        self.assertEquals("wifi.p2p", pkg.name)
 
     def test_class(self):
         cls = self._cls("@Deprecated @IntRange(from=1, to=2) public static abstract class Some.Name extends Super<Class> implements Interface<Class> {")
@@ -368,6 +375,22 @@ class V2ParserTests(unittest.TestCase):
 
         m = self._method('method @NonNull public @NonNull String @NonNull [] split(@NonNull String, int);')
         self.assertEquals('java.lang.String[]', m.typ)
+
+class PackageTests(unittest.TestCase):
+    def _package(self, raw):
+        return apilint.Package(123, raw, "blame")
+
+    def test_regular_package(self):
+        p = self._package("package an.pref.int {")
+        self.assertEquals('an.pref.int', p.name)
+
+    def test_annotation_package(self):
+        p = self._package("package @RestrictTo(a.b.C) an.pref.int {")
+        self.assertEquals('an.pref.int', p.name)
+
+    def test_multi_annotation_package(self):
+        p = self._package("package @Rt(a.b.L_G_P) @RestrictTo(a.b.C) an.pref.int {")
+        self.assertEquals('an.pref.int', p.name)
 
 if __name__ == "__main__":
     unittest.main()

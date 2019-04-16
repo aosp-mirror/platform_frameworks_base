@@ -141,7 +141,7 @@ public class MbmsGroupCallSession implements AutoCloseable {
      * Create a new {@link MbmsGroupCallSession} using the system default data subscription ID.
      * See {@link #create(Context, int, Executor, MbmsGroupCallSessionCallback)}.
      */
-    public static MbmsGroupCallSession create(@NonNull Context context,
+    public static @Nullable MbmsGroupCallSession create(@NonNull Context context,
             @NonNull Executor executor, @NonNull MbmsGroupCallSessionCallback callback) {
         return create(context, SubscriptionManager.getDefaultSubscriptionId(), executor, callback);
     }

@@ -17,6 +17,7 @@
 package android.provider;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -34,6 +35,7 @@ import android.database.Cursor;
 import android.database.sqlite.SqliteWrapper;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Parcel;
 import android.telephony.Rlog;
 import android.telephony.ServiceState;
 import android.telephony.SmsMessage;
@@ -1126,8 +1128,8 @@ public final class Telephony {
              * Broadcast Action: A debug code has been entered in the dialer. This intent is
              * broadcast by the system and OEM telephony apps may need to receive these broadcasts.
              * These "secret codes" are used to activate developer menus by dialing certain codes.
-             * And they are of the form {@code *#*#&lt;code&gt;#*#*}. The intent will have the data
-             * URI: {@code android_secret_code://&lt;code&gt;}. It is possible that a manifest
+             * And they are of the form {@code *#*#<code>#*#*}. The intent will have the data
+             * URI: {@code android_secret_code://<code>}. It is possible that a manifest
              * receiver would be woken up even if it is not currently running.
              *
              * <p>Requires {@code android.Manifest.permission#CONTROL_INCALL_EXPERIENCE} to
@@ -2059,6 +2061,11 @@ public final class Telephony {
      * @hide - not meant for public use
      */
     public interface RcsColumns {
+        // TODO(sahinc): Turn this to true once the schema finalizes, so that people can update
+        //  their messaging databases. NOTE: move the switch/case update in MmsSmsDatabaseHelper to
+        //  the latest version of the database before turning this flag to true.
+        boolean IS_RCS_TABLE_SCHEMA_CODE_COMPLETE = false;
+
         /**
          * The authority for the content provider
          */
@@ -2117,7 +2124,10 @@ public final class Telephony {
 
             /**
              * The URI to query or modify {@link android.telephony.ims.Rcs1To1Thread}s via the
-             * content provider
+             * content provider. Can also insert to this URI to create a new 1-to-1 thread. When
+             * performing an insert, ensure that the provided content values contain the other
+             * participant's ID under the key
+             * {@link RcsParticipantColumns.RCS_PARTICIPANT_ID_COLUMN}
              */
             Uri RCS_1_TO_1_THREAD_URI = Uri.withAppendedPath(CONTENT_AND_AUTHORITY,
                     RCS_1_TO_1_THREAD_URI_PART);
@@ -3320,6 +3330,7 @@ public final class Telephony {
          * {@link SubscriptionManager#getDefaultSubscriptionId()}. To specify subId for MSIM,
          * use {@link Uri#withAppendedPath(Uri, String)} to append with subscription id.
          */
+        @NonNull
         public static final Uri CONTENT_URI = Uri.parse("content://telephony/carriers");
 
         /**
@@ -3332,6 +3343,7 @@ public final class Telephony {
          * {@link SubscriptionManager#getDefaultSubscriptionId()}. To specify subId for MSIM,
          * use {@link Uri#withAppendedPath(Uri, String)} to append with subscription id.
          */
+        @NonNull
         public static final Uri SIM_APN_URI = Uri.parse(
                 "content://telephony/carriers/sim_apn_list");
 
@@ -3756,6 +3768,42 @@ public final class Telephony {
          */
         public static final String CARRIER_ID = "carrier_id";
 
+        /**
+         * The skip 464xlat flag. Flag works as follows.
+         * {@link #SKIP_464XLAT_DEFAULT}: the APN will skip only APN is IMS and no internet.
+         * {@link #SKIP_464XLAT_DISABLE}: the APN will NOT skip 464xlat
+         * {@link #SKIP_464XLAT_ENABLE}: the APN will skip 464xlat
+         * <p>Type: INTEGER</p>
+         *
+         * @hide
+         */
+        public static final String SKIP_464XLAT = "skip_464xlat";
+
+        /**
+         * Possible value for the {@link #SKIP_464XLAT} field.
+         * <p>Type: INTEGER</p>
+         *
+         * @hide
+         */
+        public static final int SKIP_464XLAT_DEFAULT = -1;
+
+        /**
+         * Possible value for the {@link #SKIP_464XLAT} field.
+         * <p>Type: INTEGER</p>
+         *
+         * @hide
+         */
+        public static final int SKIP_464XLAT_DISABLE = 0;
+
+        /**
+         * Possible value for the {@link #SKIP_464XLAT} field.
+         * <p>Type: INTEGER</p>
+         *
+         * @hide
+         */
+        public static final int SKIP_464XLAT_ENABLE = 1;
+
+
         /** @hide */
         @IntDef({
                 UNEDITED,
@@ -3766,6 +3814,16 @@ public final class Telephony {
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface EditStatus {}
+
+        /** @hide */
+        @IntDef({
+                SKIP_464XLAT_DEFAULT,
+                SKIP_464XLAT_DISABLE,
+                SKIP_464XLAT_ENABLE,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface Skip464XlatStatus {}
+
     }
 
     /**
@@ -4011,30 +4069,22 @@ public final class Telephony {
          */
         public static ContentValues getContentValuesForServiceState(ServiceState state) {
             ContentValues values = new ContentValues();
-            values.put(VOICE_REG_STATE, state.getVoiceRegState());
-            values.put(DATA_REG_STATE, state.getDataRegState());
-            values.put(VOICE_ROAMING_TYPE, state.getVoiceRoamingType());
-            values.put(DATA_ROAMING_TYPE, state.getDataRoamingType());
-            values.put(VOICE_OPERATOR_ALPHA_LONG, state.getVoiceOperatorAlphaLong());
-            values.put(VOICE_OPERATOR_ALPHA_SHORT, state.getVoiceOperatorAlphaShort());
-            values.put(VOICE_OPERATOR_NUMERIC, state.getVoiceOperatorNumeric());
-            values.put(DATA_OPERATOR_ALPHA_LONG, state.getDataOperatorAlphaLong());
-            values.put(DATA_OPERATOR_ALPHA_SHORT, state.getDataOperatorAlphaShort());
-            values.put(DATA_OPERATOR_NUMERIC, state.getDataOperatorNumeric());
-            values.put(IS_MANUAL_NETWORK_SELECTION, state.getIsManualSelection());
-            values.put(RIL_VOICE_RADIO_TECHNOLOGY, state.getRilVoiceRadioTechnology());
-            values.put(RIL_DATA_RADIO_TECHNOLOGY, state.getRilDataRadioTechnology());
-            values.put(CSS_INDICATOR, state.getCssIndicator());
-            values.put(NETWORK_ID, state.getCdmaNetworkId());
-            values.put(SYSTEM_ID, state.getCdmaSystemId());
-            values.put(CDMA_ROAMING_INDICATOR, state.getCdmaRoamingIndicator());
-            values.put(CDMA_DEFAULT_ROAMING_INDICATOR, state.getCdmaDefaultRoamingIndicator());
-            values.put(CDMA_ERI_ICON_INDEX, state.getCdmaEriIconIndex());
-            values.put(CDMA_ERI_ICON_MODE, state.getCdmaEriIconMode());
-            values.put(IS_EMERGENCY_ONLY, state.isEmergencyOnly());
-            values.put(IS_USING_CARRIER_AGGREGATION, state.isUsingCarrierAggregation());
+            final Parcel p = Parcel.obtain();
+            state.writeToParcel(p, 0);
+            // Turn the parcel to byte array. Safe to do this because the content values were never
+            // written into a persistent storage. ServiceStateProvider keeps values in the memory.
+            values.put(SERVICE_STATE, p.marshall());
             return values;
         }
+
+        /**
+         * The current service state.
+         *
+         * This is the entire {@link ServiceState} object in byte array.
+         *
+         * @hide
+         */
+        public static final String SERVICE_STATE = "service_state";
 
         /**
          * An integer value indicating the current voice service state.
@@ -4254,23 +4304,24 @@ public final class Telephony {
         }
 
         /**
-         * Generates a content {@link Uri} used to receive updates on precise carrier identity
+         * Generates a content {@link Uri} used to receive updates on specific carrier identity
          * change on the given subscriptionId returned by
-         * {@link TelephonyManager#getSimPreciseCarrierId()}.
-         * @see TelephonyManager#ACTION_SUBSCRIPTION_PRECISE_CARRIER_IDENTITY_CHANGED
+         * {@link TelephonyManager#getSimSpecificCarrierId()}.
+         * @see TelephonyManager#ACTION_SUBSCRIPTION_SPECIFIC_CARRIER_IDENTITY_CHANGED
          * <p>
          * Use this {@link Uri} with a {@link ContentObserver} to be notified of changes to the
-         * precise carrier identity {@link TelephonyManager#getSimPreciseCarrierId()}
+         * specific carrier identity {@link TelephonyManager#getSimSpecificCarrierId()}
          * while your app is running. You can also use a {@link JobService} to ensure your app
          * is notified of changes to the {@link Uri} even when it is not running.
          * Note, however, that using a {@link JobService} does not guarantee timely delivery of
          * updates to the {@link Uri}.
          *
          * @param subscriptionId the subscriptionId to receive updates on
-         * @return the Uri used to observe precise carrier identity changes
+         * @return the Uri used to observe specific carrier identity changes
          */
-        public static Uri getPreciseCarrierIdUriForSubscriptionId(int subscriptionId) {
-            return Uri.withAppendedPath(Uri.withAppendedPath(CONTENT_URI, "precise"),
+        @NonNull
+        public static Uri getSpecificCarrierIdUriForSubscriptionId(int subscriptionId) {
+            return Uri.withAppendedPath(Uri.withAppendedPath(CONTENT_URI, "specific"),
                     String.valueOf(subscriptionId));
         }
 
@@ -4290,26 +4341,30 @@ public final class Telephony {
 
         /**
          * A fine-grained carrier id.
-         * @see TelephonyManager#getSimPreciseCarrierId()
+         * The specific carrier ID would be used for configuration purposes, but apps wishing to
+         * know about the carrier itself should use the regular carrier ID returned by
+         * {@link TelephonyManager#getSimCarrierId()}.
+         *
+         * @see TelephonyManager#getSimSpecificCarrierId()
          * This is not a database column, only used to notify content observers for
-         * {@link #getPreciseCarrierIdUriForSubscriptionId(int)}
+         * {@link #getSpecificCarrierIdUriForSubscriptionId(int)}
          */
-        public static final String PRECISE_CARRIER_ID = "precise_carrier_id";
+        public static final String SPECIFIC_CARRIER_ID = "specific_carrier_id";
 
         /**
-         * A user facing carrier name for precise carrier id {@link #PRECISE_CARRIER_ID}.
-         * @see TelephonyManager#getSimPreciseCarrierIdName()
+         * A user facing carrier name for specific carrier id {@link #SPECIFIC_CARRIER_ID}.
+         * @see TelephonyManager#getSimSpecificCarrierIdName()
          * This is not a database column, only used to notify content observers for
-         * {@link #getPreciseCarrierIdUriForSubscriptionId(int)}
+         * {@link #getSpecificCarrierIdUriForSubscriptionId(int)}
          */
-        public static final String PRECISE_CARRIER_ID_NAME = "precise_carrier_id_name";
+        public static final String SPECIFIC_CARRIER_ID_NAME = "specific_carrier_id_name";
 
         /**
          * A unique parent carrier id. The parent-child
          * relationship can be used to further differentiate a single carrier by different networks,
-         * by prepaid v.s. postpaid or even by 4G v.s. 3G plan. It's an optional field.
-         * A carrier id with a valid parent_carrier_id is considered fine-grained carrier id, will
-         * not be returned as {@link #CARRIER_ID} but {@link #PRECISE_CARRIER_ID}.
+         * by prepaid v.s. postpaid. It's an optional field.
+         * A carrier id with a valid parent_carrier_id is considered fine-grained specific carrier
+         * ID, will not be returned as {@link #CARRIER_ID} but {@link #SPECIFIC_CARRIER_ID}.
          * <P>Type: INTEGER </P>
          * @hide
          */

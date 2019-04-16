@@ -23,6 +23,7 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * CellIdentity represents the identity of a unique cell. This is the base class for
@@ -83,6 +84,13 @@ public abstract class CellIdentity implements Parcelable {
             mMncStr = null;
             log("invalid MNC format: " + mnc);
         }
+
+        if ((mMccStr != null && mMncStr == null) || (mMccStr == null && mMncStr != null)) {
+            AnomalyReporter.reportAnomaly(
+                    UUID.fromString("a3ab0b9d-f2aa-4baf-911d-7096c0d4645a"),
+                    "CellIdentity Missing Half of PLMN ID");
+        }
+
         mAlphaLong = alphal;
         mAlphaShort = alphas;
     }
@@ -99,6 +107,22 @@ public abstract class CellIdentity implements Parcelable {
      */
     public @CellInfo.Type int getType() {
         return mType;
+    }
+
+    /**
+     * @return MCC or null for CDMA
+     * @hide
+     */
+    public String getMccString() {
+        return mMccStr;
+    }
+
+    /**
+     * @return MNC or null for CDMA
+     * @hide
+     */
+    public String getMncString() {
+        return mMncStr;
     }
 
     /**
@@ -204,5 +228,24 @@ public abstract class CellIdentity implements Parcelable {
     /** @hide */
     protected void log(String s) {
         Rlog.w(mTag, s);
+    }
+
+    /** @hide */
+    protected static final int inRangeOrUnavailable(int value, int rangeMin, int rangeMax) {
+        if (value < rangeMin || value > rangeMax) return CellInfo.UNAVAILABLE;
+        return value;
+    }
+
+    /** @hide */
+    protected static final long inRangeOrUnavailable(long value, long rangeMin, long rangeMax) {
+        if (value < rangeMin || value > rangeMax) return CellInfo.UNAVAILABLE_LONG;
+        return value;
+    }
+
+    /** @hide */
+    protected static final int inRangeOrUnavailable(
+            int value, int rangeMin, int rangeMax, int special) {
+        if ((value < rangeMin || value > rangeMax) && value != special) return CellInfo.UNAVAILABLE;
+        return value;
     }
 }

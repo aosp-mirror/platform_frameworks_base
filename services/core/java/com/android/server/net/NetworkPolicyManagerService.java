@@ -38,6 +38,11 @@ import static android.net.ConnectivityManager.RESTRICT_BACKGROUND_STATUS_DISABLE
 import static android.net.ConnectivityManager.RESTRICT_BACKGROUND_STATUS_ENABLED;
 import static android.net.ConnectivityManager.RESTRICT_BACKGROUND_STATUS_WHITELISTED;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
+import static android.net.INetd.FIREWALL_CHAIN_DOZABLE;
+import static android.net.INetd.FIREWALL_CHAIN_POWERSAVE;
+import static android.net.INetd.FIREWALL_CHAIN_STANDBY;
+import static android.net.INetd.FIREWALL_RULE_ALLOW;
+import static android.net.INetd.FIREWALL_RULE_DENY;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
@@ -45,12 +50,7 @@ import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.SNOOZE_NEVER;
 import static android.net.NetworkPolicy.WARNING_DISABLED;
 import static android.net.NetworkPolicyManager.EXTRA_NETWORK_TEMPLATE;
-import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_DOZABLE;
-import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_POWERSAVE;
-import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_STANDBY;
-import static android.net.NetworkPolicyManager.FIREWALL_RULE_ALLOW;
 import static android.net.NetworkPolicyManager.FIREWALL_RULE_DEFAULT;
-import static android.net.NetworkPolicyManager.FIREWALL_RULE_DENY;
 import static android.net.NetworkPolicyManager.MASK_ALL_NETWORKS;
 import static android.net.NetworkPolicyManager.MASK_METERED_NETWORKS;
 import static android.net.NetworkPolicyManager.POLICY_ALLOW_METERED_BACKGROUND;
@@ -3462,9 +3462,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     /**
      * Process state of UID changed; if needed, will trigger
      * {@link #updateRulesForDataUsageRestrictionsUL(int)} and
-     * {@link #updateRulesForPowerRestrictionsUL(int)}
+     * {@link #updateRulesForPowerRestrictionsUL(int)}. Returns true if the state was updated.
      */
-    private void updateUidStateUL(int uid, int uidState) {
+    private boolean updateUidStateUL(int uid, int uidState) {
         Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "updateUidStateUL");
         try {
             final int oldUidState = mUidState.get(uid, ActivityManager.PROCESS_STATE_CACHED_EMPTY);
@@ -3483,14 +3483,15 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     }
                     updateRulesForPowerRestrictionsUL(uid);
                 }
-                updateNetworkStats(uid, isUidStateForeground(uidState));
+                return true;
             }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
         }
+        return false;
     }
 
-    private void removeUidStateUL(int uid) {
+    private boolean removeUidStateUL(int uid) {
         final int index = mUidState.indexOfKey(uid);
         if (index >= 0) {
             final int oldUidState = mUidState.valueAt(index);
@@ -3505,9 +3506,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     updateRuleForRestrictPowerUL(uid);
                 }
                 updateRulesForPowerRestrictionsUL(uid);
-                updateNetworkStats(uid, false);
+                return true;
             }
         }
+        return false;
     }
 
     // adjust stats accounting based on foreground status
@@ -4419,20 +4421,25 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 }
             }
         }
-
     };
 
     void handleUidChanged(int uid, int procState, long procStateSeq) {
         Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "onUidStateChanged");
         try {
+            boolean updated;
             synchronized (mUidRulesFirstLock) {
                 // We received a uid state change callback, add it to the history so that it
                 // will be useful for debugging.
                 mLogger.uidStateChanged(uid, procState, procStateSeq);
                 // Now update the network policy rules as per the updated uid state.
-                updateUidStateUL(uid, procState);
+                updated = updateUidStateUL(uid, procState);
                 // Updating the network rules is done, so notify AMS about this.
                 mActivityManagerInternal.notifyNetworkPolicyRulesUpdated(uid, procStateSeq);
+            }
+            // Do this without the lock held. handleUidChanged() and handleUidGone() are
+            // called from the handler, so there's no multi-threading issue.
+            if (updated) {
+                updateNetworkStats(uid, isUidStateForeground(procState));
             }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
@@ -4442,8 +4449,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     void handleUidGone(int uid) {
         Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "onUidGone");
         try {
+            boolean updated;
             synchronized (mUidRulesFirstLock) {
-                removeUidStateUL(uid);
+                updated = removeUidStateUL(uid);
+            }
+            // Do this without the lock held. handleUidChanged() and handleUidGone() are
+            // called from the handler, so there's no multi-threading issue.
+            if (updated) {
+                updateNetworkStats(uid, false);
             }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_NETWORK);

@@ -136,9 +136,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Wi-Fi-puhelut | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Wi-Fi-puhelut"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Wi-Fi-puhelut"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Ei käytössä"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi ensisijainen"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Mobiiliverkko ensisijainen"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"Soita Wi-Fin kautta"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"Soita mobiiliverkon kautta"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Vain Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ei siirretty"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -430,6 +434,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Antaa sovelluksen käyttää laitteen puhelinominaisuuksia. Sovellus voi määrittää puhelinnumeron ja laitteen tunnuksen, puhelun tilan sekä soitetun numeron."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"ohjata puhelut järjestelmän kautta"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Tämä sallii sovelluksen ohjata puhelut järjestelmän kautta, mikä auttaa parantamaan puhelujen laatua."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"nähdä puhelut ja päättää niistä järjestelmässä"</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Sovellus voi nähdä laitteella käynnissä olevat puhelut ja päättää niistä. Se näkee esimerkiksi puheluihin liittyvät numerot ja niiden tilat."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"jatkaa toisen sovelluksen puhelua"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Antaa sovelluksen jatkaa puhelua, joka aloitettiin toisessa sovelluksessa."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"lukea puhelinnumeroita"</string>
@@ -579,9 +585,9 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Antaa sovelluksen luoda sidoksen operaattorin palveluun. Ei tavallisten sovelluksien käyttöön."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"Älä häiritse -tilan käyttöoikeus"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Sallii sovelluksen lukea ja muokata Älä häiritse -tilan asetuksia."</string>
-    <string name="policylab_limitPassword" msgid="4497420728857585791">"Aseta salasanasäännöt"</string>
-    <string name="policydesc_limitPassword" msgid="2502021457917874968">"Hallinnoi ruudun ruudun lukituksen salasanoissa ja PIN-koodeissa sallittuja merkkejä ja niiden pituutta."</string>
-    <string name="policylab_watchLogin" msgid="5091404125971980158">"Tarkkaile näytön avaamisyrityksiä"</string>
+    <string name="policylab_limitPassword" msgid="4497420728857585791">"Asentaa salasanasäännöt"</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"Hallinnoida ruudun lukituksen salasanoissa ja PIN-koodeissa sallittuja merkkejä ja niiden pituutta."</string>
+    <string name="policylab_watchLogin" msgid="5091404125971980158">"Tarkkailla näytön avaamisyrityksiä"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Valvoo väärien salasanojen lukumäärää näytön lukituksen poistossa sekä lukitsee tablet-laitteen tai poistaa sen tiedot, jos salasana syötetään väärin liian monta kertaa."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Valvo väärien salasanojen määrää poistettaessa näytön lukitusta ja lukitse televisio tai poista television kaikki tiedot, jos salasana kirjoitetaan väärin liian monta kertaa."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Valvoo väärien salasanojen lukumäärää näytön lukituksen poistossa ja lukitsee puhelimen tai poistaa sen kaikki tiedot, jos väärä salasana syötetään liian monta kertaa."</string>
@@ -602,14 +608,14 @@
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Pyyhi tämän käyttäjän tiedot puhelimesta ilman varoitusta."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Aseta laitteen yleinen välityspalvelin"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Aseta laitteen yleinen välityspalvelin käyttöön, kun käytäntö on käytössä. Vain laitteen omistaja voi asettaa yleisen välityspalvelimen."</string>
-    <string name="policylab_expirePassword" msgid="5610055012328825874">"Määritä ruudun lukituksen salasanan viimeinen voimassaolopäivä"</string>
-    <string name="policydesc_expirePassword" msgid="5367525762204416046">"Muuta sitä, miten usein ruudun lukituksen salasana, PIN-koodi tai kuvio tulee vaihtaa."</string>
-    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Aseta tallennustilan salaus"</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"Määrittää ruudun lukituksen salasanan viimeinen voimassaolopäivä"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"Muuttaa sitä, miten usein ruudun lukituksen salasana, PIN-koodi tai kuvio tulee vaihtaa."</string>
+    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Asettaa tallennustilan salaus"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Pakota tallennettujen sovellustietojen salaus."</string>
-    <string name="policylab_disableCamera" msgid="6395301023152297826">"Poista kamerat käytöstä"</string>
-    <string name="policydesc_disableCamera" msgid="2306349042834754597">"Estä laitteen kaikkien kameroiden käyttö."</string>
+    <string name="policylab_disableCamera" msgid="6395301023152297826">"Poistaa kamerat käytöstä"</string>
+    <string name="policydesc_disableCamera" msgid="2306349042834754597">"Estää laitteen kaikkien kameroiden käytön."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Estää lukitun näytön toimintoja"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Estä joidenkin lukitun näytön toimintojen käyttö."</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Estää joidenkin lukitun näytön toimintojen käytön."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Koti"</item>
     <item msgid="869923650527136615">"Mobiili"</item>
@@ -1030,7 +1036,7 @@
     <string name="add_contact_desc" msgid="4830217847004590345">"Lisää yhteystietoihin"</string>
     <string name="view_calendar" msgid="979609872939597838">"Näytä"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"Näytä valittu aika kalenterissa"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Aikataulu"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Aikatauluta"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Ajoita tapahtuma valitulle ajalle"</string>
     <string name="view_flight" msgid="7691640491425680214">"Seuraa"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Seuraa valittua lentoa"</string>
@@ -1177,8 +1183,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Kirjaudu verkkoon"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi ei ole yhteydessä internetiin"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> ei ole yhteydessä internetiin"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Näytä vaihtoehdot napauttamalla."</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Yhdistetty"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> toimii rajoitetulla yhteydellä"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Yhdistä napauttamalla"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Hotspot-asetustesi muutokset"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Hotspot-taajuutesi on muuttunut."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Tämä laite ei tue asetustasi (vain 5 GHz). Sen sijaan laite käyttää 5 GHz:n taajuutta sen ollessa käytettävissä."</string>

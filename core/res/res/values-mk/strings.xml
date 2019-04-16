@@ -136,9 +136,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi на <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Повици преку Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"Глас преку Wi-Fi на <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Повикување преку Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Повикување преку Wi-Fi"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"Глас преку Wi-Fi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Исклучено"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Се претпочита Wi-Fi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Претпочитам мобилен интернет"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"Повикувај преку Wi-Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"Повикувај преку мобилна мрежа"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Само Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: не е препратено"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -430,6 +434,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Овозможува апликацијата да пристапи кон карактеристиките на телефонот на уредот. Оваа дозвола овозможува апликацијата да ги утврди телефонскиот број и ID на уредот, дали повикот е активен и далечинскиот број поврзан со повикот."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"пренасочи повици преку системот"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Дозволете ѝ на апликацијата да ги пренасочи повиците преку системот за да го подобри искуството при јавувањето."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"гледање и контролирање повици преку системот."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Дозволува апликацијата да гледа и контролира тековни повици на уредот. Ова вклучува информации како телефонски броеви за повици и состојбата на повиците."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"продолжување повик од друга апликација"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Овозможува апликацијата да продолжи повик започнат на друга апликација."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"да чита телефонски броеви"</string>
@@ -499,7 +505,7 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Откриен е делумен отпечаток. Обидете се повторно."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Отпечатокот не можеше да се обработи. Обидете се повторно."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Сензорот за отпечатоци е валкан. Исчистете го и обидете се повторно."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Прстот се дрижеше пребрзо. Обидете се повторно."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Прстот се движеше пребрзо. Обидете се повторно."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Прстот се движеше премногу бавно. Обидете се повторно."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
@@ -1016,23 +1022,23 @@
     <string name="deleteText" msgid="6979668428458199034">"Избриши"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Метод на внес"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Дејства со текст"</string>
-    <string name="email" msgid="4560673117055050403">"E-пошта"</string>
+    <string name="email" msgid="4560673117055050403">"Испрати е-пошта"</string>
     <string name="email_desc" msgid="3638665569546416795">"Испраќа е-порака на избраната адреса"</string>
     <string name="dial" msgid="1253998302767701559">"Повикај"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Го повикува избраниот телефонски број"</string>
-    <string name="map" msgid="5441053548030107189">"Карта"</string>
+    <string name="map" msgid="5441053548030107189">"Отвори карта"</string>
     <string name="map_desc" msgid="1836995341943772348">"Лоцирај ја избраната адреса"</string>
     <string name="browse" msgid="1245903488306147205">"Отвори"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Ја отвора избраната URL"</string>
-    <string name="sms" msgid="4560537514610063430">"Порака"</string>
+    <string name="sms" msgid="4560537514610063430">"Испрати порака"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Испраќа порака на избраниот телефонски број"</string>
     <string name="add_contact" msgid="7867066569670597203">"Додај"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Додава во контакти"</string>
     <string name="view_calendar" msgid="979609872939597838">"Прикажи"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"Го гледа избраното време во календарот"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Распоред"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Закажи"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Закажува настан за избраното време"</string>
-    <string name="view_flight" msgid="7691640491425680214">"Песна"</string>
+    <string name="view_flight" msgid="7691640491425680214">"Следи го"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Следи избран лет"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Капацитетот е речиси полн"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Некои системски функции може да не работат"</string>
@@ -1177,8 +1183,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Најавете се на мрежа"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi нема пристап до интернет"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> нема интернет-пристап"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Допрете за опции"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Поврзано"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> има ограничена поврзливост"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Допрете за да се поврзете и покрај тоа"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Промени на поставките за точка на пристап"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Појасот за точка на пристап е променет."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Уредов не ги поддржува вашите поставки за само 5 GHz. Наместо тоа, ќе го користи појасот од 5 GHz кога е достапен."</string>
@@ -1271,7 +1280,7 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"СПОДЕЛИ"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ОДБИЈ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Измени тастатура"</string>
-    <string name="show_ime" msgid="2506087537466597099">"Прикажувај го на екранот додека е активна физичката тастатура"</string>
+    <string name="show_ime" msgid="2506087537466597099">"Прикажувај ја на екранот додека е активна физичката тастатура"</string>
     <string name="hardware" msgid="194658061510127999">"Прикажи виртуелна тастатура"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Конфигурирајте физичка тастатура"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Допрете за избирање јазик и распоред"</string>

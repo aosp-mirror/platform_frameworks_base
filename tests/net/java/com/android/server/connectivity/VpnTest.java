@@ -28,6 +28,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_VPN;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
+import static android.net.RouteInfo.RTN_UNREACHABLE;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -72,10 +73,11 @@ import android.os.Looper;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.R;
 import com.android.internal.net.VpnConfig;
@@ -89,6 +91,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -566,7 +569,7 @@ public class VpnTest {
 
         final NetworkCapabilities caps = new NetworkCapabilities();
 
-        Vpn.updateCapabilities(
+        Vpn.applyUnderlyingCapabilities(
                 mConnectivityManager, new Network[] {}, caps, false /* isAlwaysMetered */);
         assertTrue(caps.hasTransport(TRANSPORT_VPN));
         assertFalse(caps.hasTransport(TRANSPORT_CELLULAR));
@@ -577,7 +580,7 @@ public class VpnTest {
         assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
         assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
 
-        Vpn.updateCapabilities(
+        Vpn.applyUnderlyingCapabilities(
                 mConnectivityManager,
                 new Network[] {mobile},
                 caps,
@@ -591,7 +594,7 @@ public class VpnTest {
         assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
         assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
 
-        Vpn.updateCapabilities(
+        Vpn.applyUnderlyingCapabilities(
                 mConnectivityManager, new Network[] {wifi}, caps, false /* isAlwaysMetered */);
         assertTrue(caps.hasTransport(TRANSPORT_VPN));
         assertFalse(caps.hasTransport(TRANSPORT_CELLULAR));
@@ -602,7 +605,7 @@ public class VpnTest {
         assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
         assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
 
-        Vpn.updateCapabilities(
+        Vpn.applyUnderlyingCapabilities(
                 mConnectivityManager, new Network[] {wifi}, caps, true /* isAlwaysMetered */);
         assertTrue(caps.hasTransport(TRANSPORT_VPN));
         assertFalse(caps.hasTransport(TRANSPORT_CELLULAR));
@@ -613,7 +616,7 @@ public class VpnTest {
         assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
         assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
 
-        Vpn.updateCapabilities(
+        Vpn.applyUnderlyingCapabilities(
                 mConnectivityManager,
                 new Network[] {mobile, wifi},
                 caps,
@@ -775,6 +778,16 @@ public class VpnTest {
         // V4 does not, but V6 has sufficient coverage again
         lp.addRoute(new RouteInfo(new IpPrefix("::/1")));
         assertTrue(Vpn.providesRoutesToMostDestinations(lp));
+
+        lp.clear();
+        // V4-unreachable route should not be treated as sufficient coverage
+        lp.addRoute(new RouteInfo(new IpPrefix(Inet4Address.ANY, 0), RTN_UNREACHABLE));
+        assertFalse(Vpn.providesRoutesToMostDestinations(lp));
+
+        lp.clear();
+        // V6-unreachable route should not be treated as sufficient coverage
+        lp.addRoute(new RouteInfo(new IpPrefix(Inet6Address.ANY, 0), RTN_UNREACHABLE));
+        assertFalse(Vpn.providesRoutesToMostDestinations(lp));
     }
 
     @Test

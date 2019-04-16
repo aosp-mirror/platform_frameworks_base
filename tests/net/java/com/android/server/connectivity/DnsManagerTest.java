@@ -29,17 +29,18 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.net.IDnsResolver;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.RouteInfo;
 import android.net.shared.PrivateDnsConfig;
-import android.os.INetworkManagementService;
 import android.provider.Settings;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.test.mock.MockContentResolver;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.test.FakeSettingsProvider;
 
@@ -72,7 +73,7 @@ public class DnsManagerTest {
     MockContentResolver mContentResolver;
 
     @Mock Context mCtx;
-    @Mock INetworkManagementService mNMService;
+    @Mock IDnsResolver mMockDnsResolver;
     @Mock MockableSystemProperties mSystemProperties;
 
     @Before
@@ -82,7 +83,7 @@ public class DnsManagerTest {
         mContentResolver.addProvider(Settings.AUTHORITY,
                 new FakeSettingsProvider());
         when(mCtx.getContentResolver()).thenReturn(mContentResolver);
-        mDnsManager = new DnsManager(mCtx, mNMService, mSystemProperties);
+        mDnsManager = new DnsManager(mCtx, mMockDnsResolver, mSystemProperties);
 
         // Clear the private DNS settings
         Settings.Global.putString(mContentResolver, PRIVATE_DNS_DEFAULT_MODE, "");

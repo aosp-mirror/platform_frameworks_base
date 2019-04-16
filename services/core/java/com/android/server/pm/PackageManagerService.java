@@ -168,6 +168,7 @@ import android.content.pm.InstantAppRequest;
 import android.content.pm.InstantAppResolveInfo;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.IntentFilterVerificationInfo;
+import android.content.pm.PackageBackwardCompatibility;
 import android.content.pm.KeySet;
 import android.content.pm.PackageCleanItem;
 import android.content.pm.PackageInfo;
@@ -177,6 +178,7 @@ import android.content.pm.PackageList;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.LegacyPackageDeleteObserver;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.PackageManagerInternal.CheckPermissionDelegate;
 import android.content.pm.PackageManagerInternal.PackageListObserver;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.ActivityIntentInfo;
@@ -297,6 +299,8 @@ import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
+import com.android.internal.util.function.QuadFunction;
+import com.android.internal.util.function.TriFunction;
 import com.android.server.AttributeCache;
 import com.android.server.DeviceIdleController;
 import com.android.server.EventLogTags;
@@ -376,6 +380,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
 /**
@@ -1042,6 +1047,9 @@ public class PackageManagerService extends IPackageManager.Stub
         void startVerifications(int userId);
         void receiveVerificationResponse(int verificationId);
     }
+
+    @GuardedBy("mPackages")
+    private CheckPermissionDelegate mCheckPermissionDelegate;
 
     private class IntentVerifierProxy implements IntentFilterVerifier<ActivityIntentInfo> {
         private Context mContext;
@@ -2149,7 +2157,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             if (allNewUsers && !update) {
-                notifyPackageAdded(packageName);
+                notifyPackageAdded(packageName, res.uid);
             }
 
             // Log current value of "unknown sources" setting
@@ -5352,11 +5360,35 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public int checkPermission(String permName, String pkgName, int userId) {
+        final CheckPermissionDelegate checkPermissionDelegate;
+        synchronized (mPackages) {
+            if (mCheckPermissionDelegate == null)  {
+                return checkPermissionImpl(permName, pkgName, userId);
+            }
+            checkPermissionDelegate = mCheckPermissionDelegate;
+        }
+        return checkPermissionDelegate.checkPermission(permName, pkgName, userId,
+                PackageManagerService.this::checkPermissionImpl);
+    }
+
+    private int checkPermissionImpl(String permName, String pkgName, int userId) {
         return mPermissionManager.checkPermission(permName, pkgName, getCallingUid(), userId);
     }
 
     @Override
     public int checkUidPermission(String permName, int uid) {
+        final CheckPermissionDelegate checkPermissionDelegate;
+        synchronized (mPackages) {
+            if (mCheckPermissionDelegate == null)  {
+                return checkUidPermissionImpl(permName, uid);
+            }
+            checkPermissionDelegate = mCheckPermissionDelegate;
+        }
+        return checkPermissionDelegate.checkUidPermission(permName, uid,
+                PackageManagerService.this::checkUidPermissionImpl);
+    }
+
+    private int checkUidPermissionImpl(String permName, int uid) {
         synchronized (mPackages) {
             final String[] packageNames = getPackagesForUid(uid);
             final PackageParser.Package pkg = (packageNames != null && packageNames.length > 0)
@@ -9237,6 +9269,16 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @GuardedBy("mPackages")
+    public CheckPermissionDelegate getCheckPermissionDelegateLocked() {
+        return mCheckPermissionDelegate;
+    }
+
+    @GuardedBy("mPackages")
+    public void setCheckPermissionDelegateLocked(CheckPermissionDelegate delegate) {
+        mCheckPermissionDelegate = delegate;
+    }
+
+    @GuardedBy("mPackages")
     private void notifyPackageUseLocked(String packageName, int reason) {
         final PackageParser.Package p = mPackages.get(packageName);
         if (p == null) {
@@ -9402,21 +9444,30 @@ public class PackageManagerService extends IPackageManager.Stub
         // at boot, or background job), the passed 'targetCompilerFilter' stays the same,
         // and the first package that uses the library will dexopt it. The
         // others will see that the compiled code for the library is up to date.
-        Collection<PackageParser.Package> deps = findSharedNonSystemLibraries(p);
+        Collection<SharedLibraryInfo> deps = findSharedLibraries(p);
         final String[] instructionSets = getAppDexInstructionSets(p.applicationInfo);
         if (!deps.isEmpty()) {
             DexoptOptions libraryOptions = new DexoptOptions(options.getPackageName(),
                     options.getCompilationReason(), options.getCompilerFilter(),
                     options.getSplitName(),
                     options.getFlags() | DexoptOptions.DEXOPT_AS_SHARED_LIBRARY);
-            for (PackageParser.Package depPackage : deps) {
-                // TODO: Analyze and investigate if we (should) profile libraries.
-                pdo.performDexOpt(depPackage, null /* sharedLibraries */, instructionSets,
-                        getOrCreateCompilerPackageStats(depPackage),
-                    mDexManager.getPackageUseInfoOrDefault(depPackage.packageName), libraryOptions);
+            for (SharedLibraryInfo info : deps) {
+                PackageParser.Package depPackage = null;
+                synchronized (mPackages) {
+                    depPackage = mPackages.get(info.getPackageName());
+                }
+                if (depPackage != null) {
+                    // TODO: Analyze and investigate if we (should) profile libraries.
+                    pdo.performDexOpt(depPackage, instructionSets,
+                            getOrCreateCompilerPackageStats(depPackage),
+                            mDexManager.getPackageUseInfoOrDefault(depPackage.packageName),
+                            libraryOptions);
+                } else {
+                    // TODO(ngeoffray): Support dexopting system shared libraries.
+                }
             }
         }
-        return pdo.performDexOpt(p, p.usesLibraryInfos, instructionSets,
+        return pdo.performDexOpt(p, instructionSets,
                 getOrCreateCompilerPackageStats(p),
                 mDexManager.getPackageUseInfoOrDefault(p.packageName), options);
     }
@@ -9453,63 +9504,48 @@ public class PackageManagerService extends IPackageManager.Stub
         return BackgroundDexOptService.runIdleOptimizationsNow(this, mContext, packageNames);
     }
 
-    List<PackageParser.Package> findSharedNonSystemLibraries(PackageParser.Package p) {
-        if (p.usesLibraries != null || p.usesOptionalLibraries != null
-                || p.usesStaticLibraries != null) {
-            ArrayList<PackageParser.Package> retValue = new ArrayList<>();
+    private static List<SharedLibraryInfo> findSharedLibraries(PackageParser.Package p) {
+        if (p.usesLibraryInfos != null) {
+            ArrayList<SharedLibraryInfo> retValue = new ArrayList<>();
             Set<String> collectedNames = new HashSet<>();
-            findSharedNonSystemLibrariesRecursive(p, retValue, collectedNames);
-
-            retValue.remove(p);
-
+            for (SharedLibraryInfo info : p.usesLibraryInfos) {
+                findSharedLibrariesRecursive(info, retValue, collectedNames);
+            }
             return retValue;
         } else {
             return Collections.emptyList();
         }
     }
 
-    private void findSharedNonSystemLibrariesRecursive(PackageParser.Package p,
-            ArrayList<PackageParser.Package> collected, Set<String> collectedNames) {
-        if (!collectedNames.contains(p.packageName)) {
-            collectedNames.add(p.packageName);
-            collected.add(p);
+    private static void findSharedLibrariesRecursive(SharedLibraryInfo info,
+            ArrayList<SharedLibraryInfo> collected, Set<String> collectedNames) {
+        if (!collectedNames.contains(info.getName())) {
+            collectedNames.add(info.getName());
+            collected.add(info);
 
-            if (p.usesLibraries != null) {
-                findSharedNonSystemLibrariesRecursive(p.usesLibraries,
-                        null, collected, collectedNames);
-            }
-            if (p.usesOptionalLibraries != null) {
-                findSharedNonSystemLibrariesRecursive(p.usesOptionalLibraries,
-                        null, collected, collectedNames);
-            }
-            if (p.usesStaticLibraries != null) {
-                findSharedNonSystemLibrariesRecursive(p.usesStaticLibraries,
-                        p.usesStaticLibrariesVersions, collected, collectedNames);
+            if (info.getDependencies() != null) {
+                for (SharedLibraryInfo dep : info.getDependencies()) {
+                    findSharedLibrariesRecursive(dep, collected, collectedNames);
+                }
             }
         }
     }
 
-    private void findSharedNonSystemLibrariesRecursive(ArrayList<String> libs, long[] versions,
-            ArrayList<PackageParser.Package> collected, Set<String> collectedNames) {
-        final int libNameCount = libs.size();
-        for (int i = 0; i < libNameCount; i++) {
-            String libName = libs.get(i);
-            long version = (versions != null && versions.length == libNameCount)
-                    ? versions[i] : PackageManager.VERSION_CODE_HIGHEST;
-            PackageParser.Package libPkg = findSharedNonSystemLibrary(libName, version);
-            if (libPkg != null) {
-                findSharedNonSystemLibrariesRecursive(libPkg, collected, collectedNames);
+    List<PackageParser.Package> findSharedNonSystemLibraries(PackageParser.Package pkg) {
+        List<SharedLibraryInfo> deps = findSharedLibraries(pkg);
+        if (!deps.isEmpty()) {
+            ArrayList<PackageParser.Package> retValue = new ArrayList<>();
+            synchronized (mPackages) {
+                for (SharedLibraryInfo info : deps) {
+                    PackageParser.Package depPackage = mPackages.get(info.getPackageName());
+                    if (depPackage != null) {
+                        retValue.add(depPackage);
+                    }
+                }
             }
-        }
-    }
-
-    private PackageParser.Package findSharedNonSystemLibrary(String name, long version) {
-        synchronized (mPackages) {
-            SharedLibraryInfo libraryInfo = getSharedLibraryInfoLPr(name, version);
-            if (libraryInfo != null) {
-                return mPackages.get(libraryInfo.getPackageName());
-            }
-            return null;
+            return retValue;
+        } else {
+            return Collections.emptyList();
         }
     }
 
@@ -11008,6 +11044,8 @@ public class PackageManagerService extends IPackageManager.Stub
             pkg.mRealPackage = null;
             pkg.mAdoptPermissions = null;
         }
+
+        PackageBackwardCompatibility.modifySharedLibraries(pkg);
     }
 
     private static @NonNull <T> T assertNotNull(@Nullable T object, String message)
@@ -13690,30 +13728,34 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
-    public void notifyPackageAdded(String packageName) {
+    public void notifyPackageAdded(String packageName, int uid) {
         final PackageListObserver[] observers;
         synchronized (mPackages) {
             if (mPackageListObservers.size() == 0) {
                 return;
             }
-            observers = (PackageListObserver[]) mPackageListObservers.toArray();
+            final PackageListObserver[] observerArray =
+                    new PackageListObserver[mPackageListObservers.size()];
+            observers = mPackageListObservers.toArray(observerArray);
         }
         for (int i = observers.length - 1; i >= 0; --i) {
-            observers[i].onPackageAdded(packageName);
+            observers[i].onPackageAdded(packageName, uid);
         }
     }
 
     @Override
-    public void notifyPackageRemoved(String packageName) {
+    public void notifyPackageRemoved(String packageName, int uid) {
         final PackageListObserver[] observers;
         synchronized (mPackages) {
             if (mPackageListObservers.size() == 0) {
                 return;
             }
-            observers = (PackageListObserver[]) mPackageListObservers.toArray();
+            final PackageListObserver[] observerArray =
+                    new PackageListObserver[mPackageListObservers.size()];
+            observers = mPackageListObservers.toArray(observerArray);
         }
         for (int i = observers.length - 1; i >= 0; --i) {
-            observers[i].onPackageRemoved(packageName);
+            observers[i].onPackageRemoved(packageName, uid);
         }
     }
 
@@ -17761,7 +17803,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     REASON_INSTALL,
                     DexoptOptions.DEXOPT_BOOT_COMPLETE |
                     DexoptOptions.DEXOPT_INSTALL_WITH_DEX_METADATA_FILE);
-            mPackageDexOptimizer.performDexOpt(pkg, pkg.usesLibraryInfos,
+            mPackageDexOptimizer.performDexOpt(pkg,
                     null /* instructionSets */,
                     getOrCreateCompilerPackageStats(pkg),
                     mDexManager.getPackageUseInfoOrDefault(pkg.packageName),
@@ -18520,7 +18562,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 return;
             }
             Bundle extras = new Bundle(2);
-            extras.putInt(Intent.EXTRA_UID, removedAppId >= 0  ? removedAppId : uid);
+            final int removedUid = removedAppId >= 0  ? removedAppId : uid;
+            extras.putInt(Intent.EXTRA_UID, removedUid);
             extras.putBoolean(Intent.EXTRA_DATA_REMOVED, dataRemoved);
             extras.putBoolean(Intent.EXTRA_DONT_KILL_APP, !killApp);
             if (isUpdate || isRemovedPackageSystemUpdate) {
@@ -18541,7 +18584,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         removedPackage, extras,
                         Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND,
                         null, null, broadcastUsers, instantUserIds);
-                    packageSender.notifyPackageRemoved(removedPackage);
+                    packageSender.notifyPackageRemoved(removedPackage, removedUid);
                 }
             }
             if (removedAppId >= 0) {
@@ -23891,6 +23934,21 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             }
             return 0;
         }
+
+        @Override
+        public int getLocationFlags(String packageName) throws RemoteException {
+            int callingUser = UserHandle.getUserId(Binder.getCallingUid());
+            ApplicationInfo appInfo = getApplicationInfo(packageName,
+                    /*flags*/ 0,
+                    /*userId*/ callingUser);
+            if (appInfo == null) {
+                throw new RemoteException(
+                        "Couldn't get ApplicationInfo for package " + packageName);
+            }
+            return ((appInfo.isSystemApp() ? IPackageManagerNative.LOCATION_SYSTEM : 0)
+                    | (appInfo.isVendor() ? IPackageManagerNative.LOCATION_VENDOR : 0)
+                    | (appInfo.isProduct() ? IPackageManagerNative.LOCATION_PRODUCT : 0));
+        }
     }
 
     private class PackageManagerInternalImpl extends PackageManagerInternal {
@@ -24511,6 +24569,20 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             }
             return mArtManagerService.compileLayouts(pkg);
         }
+
+        @Override
+        public CheckPermissionDelegate getCheckPermissionDelegate() {
+            synchronized (mPackages) {
+                return PackageManagerService.this.getCheckPermissionDelegateLocked();
+            }
+        }
+
+        @Override
+        public void setCheckPermissionDelegate(CheckPermissionDelegate delegate) {
+            synchronized (mPackages) {
+                PackageManagerService.this.setCheckPermissionDelegateLocked(delegate);
+            }
+        }
     }
 
     @Override
@@ -24890,6 +24962,6 @@ interface PackageSender {
         final IIntentReceiver finishedReceiver, final int[] userIds, int[] instantUserIds);
     void sendPackageAddedForNewUsers(String packageName, boolean sendBootCompleted,
         boolean includeStopped, int appId, int[] userIds, int[] instantUserIds);
-    void notifyPackageAdded(String packageName);
-    void notifyPackageRemoved(String packageName);
+    void notifyPackageAdded(String packageName, int uid);
+    void notifyPackageRemoved(String packageName, int uid);
 }

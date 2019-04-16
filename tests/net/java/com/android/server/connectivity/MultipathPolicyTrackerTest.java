@@ -28,7 +28,6 @@ import static android.provider.Settings.Global.NETWORK_DEFAULT_DAILY_MULTIPATH_Q
 import static com.android.server.net.NetworkPolicyManagerInternal.QUOTA_TYPE_MULTIPATH;
 import static com.android.server.net.NetworkPolicyManagerService.OPPORTUNISTIC_QUOTA_UNKNOWN;
 
-import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -54,12 +53,13 @@ import android.net.NetworkTemplate;
 import android.net.StringNetworkSpecifier;
 import android.os.Handler;
 import android.provider.Settings;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.telephony.TelephonyManager;
 import android.test.mock.MockContentResolver;
 import android.util.DataUnit;
 import android.util.RecurrenceRule;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.R;
 import com.android.internal.util.test.FakeSettingsProvider;

@@ -213,6 +213,11 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
             NetworkCapabilities.TRANSPORT_CELLULAR, true, true);
     }
 
+    public void setupDefaultNr5GIconConfiguration() {
+        NetworkControllerImpl.Config.add5GIconMapping("connected_mmwave:5g_plus", mConfig);
+        NetworkControllerImpl.Config.add5GIconMapping("connected:5g", mConfig);
+    }
+
     public void setConnectivityViaBroadcast(
         int networkType, boolean validated, boolean isConnected) {
         setConnectivityCommon(networkType, validated, isConnected);

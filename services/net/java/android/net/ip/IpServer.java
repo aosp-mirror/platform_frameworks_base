@@ -22,7 +22,6 @@ import static android.net.util.NetworkConstants.FF;
 import static android.net.util.NetworkConstants.RFC7421_PREFIX_LENGTH;
 import static android.net.util.NetworkConstants.asByte;
 
-import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.INetd;
 import android.net.INetworkStackStatusCallback;
@@ -31,7 +30,7 @@ import android.net.InterfaceConfiguration;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
-import android.net.NetworkStack;
+import android.net.NetworkStackClient;
 import android.net.RouteInfo;
 import android.net.dhcp.DhcpServerCallbacks;
 import android.net.dhcp.DhcpServingParamsParcel;
@@ -88,7 +87,6 @@ public class IpServer extends StateMachine {
         return "UNKNOWN: " + state;
     }
 
-    private static final IpPrefix LINK_LOCAL_PREFIX = new IpPrefix("fe80::/64");
     private static final byte DOUG_ADAMS = (byte) 42;
 
     private static final String USB_NEAR_IFACE_ADDR = "192.168.42.129";
@@ -132,10 +130,6 @@ public class IpServer extends StateMachine {
     }
 
     public static class Dependencies {
-        private final Context mContext;
-        public Dependencies(Context context) {
-            mContext = context;
-        }
         public RouterAdvertisementDaemon getRouterAdvertisementDaemon(InterfaceParams ifParams) {
             return new RouterAdvertisementDaemon(ifParams);
         }
@@ -153,7 +147,7 @@ public class IpServer extends StateMachine {
          */
         public void makeDhcpServer(String ifName, DhcpServingParamsParcel params,
                 DhcpServerCallbacks cb) {
-            mContext.getSystemService(NetworkStack.class).makeDhcpServer(ifName, params, cb);
+            NetworkStackClient.getInstance().makeDhcpServer(ifName, params, cb);
         }
     }
 
@@ -512,7 +506,7 @@ public class IpServer extends StateMachine {
         if (v6only != null) {
             params = new RaParams();
             params.mtu = v6only.getMtu();
-            params.hasDefaultRoute = v6only.hasIPv6DefaultRoute();
+            params.hasDefaultRoute = v6only.hasIpv6DefaultRoute();
 
             if (params.hasDefaultRoute) params.hopLimit = getHopLimit(v6only.getInterfaceName());
 
@@ -560,16 +554,6 @@ public class IpServer extends StateMachine {
             HashSet<IpPrefix> addedPrefixes = (HashSet) newPrefixes.clone();
             if (mLastRaParams != null) {
                 addedPrefixes.removeAll(mLastRaParams.prefixes);
-            }
-
-            if (mLastRaParams == null || mLastRaParams.prefixes.isEmpty()) {
-                // We need to be able to send unicast RAs, and clients might
-                // like to ping the default router's link-local address.  Note
-                // that we never remove the link-local route from the network
-                // until Tethering disables tethering on the interface. We
-                // only need to add the link-local prefix once, but in the
-                // event we add it more than once netd silently ignores EEXIST.
-                addedPrefixes.add(LINK_LOCAL_PREFIX);
             }
 
             if (!addedPrefixes.isEmpty()) {

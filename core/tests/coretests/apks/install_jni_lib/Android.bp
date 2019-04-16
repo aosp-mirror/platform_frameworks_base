@@ -14,6 +14,7 @@
 
 cc_test_library {
     name: "libframeworks_coretests_jni",
+    defaults: ["FrameworksCoreTests_apks_defaults"],
 
     srcs: ["com_android_frameworks_coretests_JNITest.cpp"],
 

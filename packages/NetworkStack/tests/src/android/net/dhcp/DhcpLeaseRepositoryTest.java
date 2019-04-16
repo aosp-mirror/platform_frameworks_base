@@ -31,22 +31,23 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
-import static java.lang.String.format;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.net.IpPrefix;
 import android.net.MacAddress;
 import android.net.dhcp.DhcpServer.Clock;
 import android.net.util.SharedLog;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import static java.lang.String.format;
 
 import java.net.Inet4Address;
 import java.util.Arrays;

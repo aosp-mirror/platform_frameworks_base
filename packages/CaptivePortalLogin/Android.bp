@@ -18,10 +18,12 @@ android_app {
     name: "CaptivePortalLogin",
     srcs: ["src/**/*.java"],
     sdk_version: "system_current",
-    certificate: "platform",
+    min_sdk_version: "28",
+    certificate: "networkstack",
     static_libs: [
         "android-support-v4",
         "metrics-constants-protos",
+        "captiveportal-lib",
     ],
     manifest: "AndroidManifest.xml",
 }

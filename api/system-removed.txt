@@ -154,3 +154,11 @@ package android.telephony {
 
 }
 
+package android.telephony.data {
+
+  public final class DataCallResponse implements android.os.Parcelable {
+    ctor public DataCallResponse(int, int, int, int, int, @Nullable String, @Nullable java.util.List<android.net.LinkAddress>, @Nullable java.util.List<java.net.InetAddress>, @Nullable java.util.List<java.net.InetAddress>, @Nullable java.util.List<java.net.InetAddress>, int);
+  }
+
+}
+

@@ -40,6 +40,7 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"‏تم الاتصال عبر %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"‏متوفرة عبر %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"متصلة ولكن بلا إنترنت"</string>
+    <string name="wifi_limited_connection" msgid="7717855024753201527">"اتصال محدود"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"لا يتوفر اتصال إنترنت."</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"يلزم تسجيل الدخول"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"نقطة الدخول ممتلئة مؤقتًا"</string>
@@ -80,8 +81,8 @@
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"‏الوصول إلى شريحة SIM"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"صوت عالي الدقة: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"صوت عالي الدقة"</string>
-    <string name="bluetooth_profile_hearing_aid" msgid="7999237886427812595">"سماعة الأذن الطبية"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="7188282786730266159">"تم توصيل سماعة الأذن الطبية"</string>
+    <string name="bluetooth_profile_hearing_aid" msgid="6680721080542444257">"سماعات الأذن الطبية"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="3051944447369418317">"تمّ التوصيل بسماعات الأذن الطبية"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"متصل بالإعدادات الصوتية للوسائط"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"متصل بالإعدادات الصوتية للهاتف"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"متصل بخادم نقل الملف"</string>
@@ -98,7 +99,7 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"الاستخدام لإعدادات الهاتف الصوتية"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"استخدامه لنقل الملفات"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"استخدام للإدخال"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="908775281788309484">"استخدام سماعة الأذن الطبية"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="8843499209204010224">"استخدام سماعات الأذن الطبية"</string>
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"إقران"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"إقران"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"إلغاء"</string>
@@ -215,7 +216,7 @@
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"إيقاف مستوى الصوت المطلق"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"‏إصدار Bluetooth AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"‏اختيار إصدار Bluetooth AVRCP"</string>
-    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ترميز صوت بلوتوث"</string>
+    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"برنامج ترميز صوت بلوتوث"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"اختيار برنامج ترميز الصوت لمشغّل\nالبلوتوث"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"معدّل عيّنة صوت بلوتوث"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"اختيار برنامج ترميز الصوت لمشغّل\nالبلوتوث: معدّل العيّنة"</string>
@@ -227,11 +228,11 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="6893955536658137179">"‏اختيار برنامج ترميز LDAC\nلصوت مشغّل البلوتوث: جودة التشغيل"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"البث: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"نظام أسماء النطاقات الخاص"</string>
-    <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"اختر وضع نظام أسماء النطاقات الخاص"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"تحديد وضع \"نظام أسماء النطاقات الخاص\""</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"غير مفعّل"</string>
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"تلقائي"</string>
-    <string name="private_dns_mode_provider" msgid="8354935160639360804">"اسم مضيف مزوّد نظام أسماء النطاقات الخاص"</string>
-    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"أدخل اسم مضيف مزوّد نظام أسماء النطاقات"</string>
+    <string name="private_dns_mode_provider" msgid="8354935160639360804">"اسم مضيف مزوّد \"نظام أسماء النطاقات الخاص\""</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"يُرجى إدخال اسم مضيف \"مزوّد نظام أسماء النطاقات\""</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"تعذّر الاتصال"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"عرض خيارات شهادة عرض شاشة لاسلكي"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"‏زيادة مستوى تسجيل Wi-Fi، وعرض لكل SSID RSSI في منتقي Wi-Fi"</string>
@@ -240,7 +241,7 @@
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"بدون قياس"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"أحجام ذاكرة التخزين المؤقت للتسجيل"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"حدد أحجامًا أكبر لكل ذاكرة تخزين مؤقت للتسجيل"</string>
-    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"هل تريد محو سعة التخزين الدائمة للمسجِّل؟"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"هل تريد محو مساحة التخزين الدائمة للمسجِّل؟"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"عندما نتوقف عن رصد أي أخطاء باستخدام المسجِّل الدائم مرة أخرى، يتعين علينا محو بيانات المسجِّل الموجودة على جهازك."</string>
     <string name="select_logpersist_title" msgid="7530031344550073166">"تخزين بيانات المسجِّل باستمرار على الجهاز"</string>
     <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"تحديد مخازن السجلات المؤقتة المراد تخزينها باستمرار على الجهاز"</string>
@@ -297,7 +298,7 @@
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"‏إيقاف توجيه الصوت عبر USB"</string>
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"‏إيقاف التوجيه التلقائي إلى أجهزة الصوت الطرفية عبر USB"</string>
     <string name="debug_layout" msgid="5981361776594526155">"عرض حدود المخطط"</string>
-    <string name="debug_layout_summary" msgid="2001775315258637682">"عرض حدود وهوامش المقطع وما إلى ذلك."</string>
+    <string name="debug_layout_summary" msgid="2001775315258637682">"عرض حدود وهوامش المقطع وما إلى ذلك"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"فرض اتجاه التنسيق ليكون من اليمين إلى اليسار"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"فرض اتجاه تنسيق الشاشة ليكون من اليمين إلى اليسار لجميع اللغات"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"‏فرض عرض رسومات GPU"</string>
@@ -319,7 +320,7 @@
     <string name="show_all_anrs" msgid="4924885492787069007">"‏عرض أخطاء ANR في الخلفية"</string>
     <string name="show_all_anrs_summary" msgid="6636514318275139826">"عرض مربع الحوار \"التطبيق لا يستجيب\" مع تطبيقات الخلفية"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"عرض تحذيرات قناة الإشعار"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"عرض تحذير على الشاشة عند ينشر تطبيق ما إشعارًا بدون قناة صالحة"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"عرض تحذير على الشاشة عندما ينشر تطبيق إشعارًا بدون قناة صالحة"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"السماح بإدراج التطبيقات في وحدة تخزين خارجية"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"تأهيل أي تطبيق بحيث تتم كتابته على وحدة تخزين خارجية، بغض النظر عن قيم البيان"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"فرض إمكانية تغيير حجم الأنشطة"</string>
@@ -373,10 +374,10 @@
     <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"يتبقى <xliff:g id="TIME_REMAINING">%1$s</xliff:g> تقريبًا، بناءً على استخدامك"</string>
     <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"يتبقى <xliff:g id="TIME_REMAINING">%1$s</xliff:g> تقريبًا، بناءً على استخدامك (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"الوقت المتبقي: <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"من المفترض أن يستمر شحن البطارية حتى حوالي الساعة <xliff:g id="TIME">%1$s</xliff:g> حسب استخدامك (<xliff:g id="LEVEL">%2$s</xliff:g>)."</string>
-    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"من المفترض أن يستمر شحن البطارية حتى حوالي الساعة <xliff:g id="TIME">%1$s</xliff:g> حسب استخدامك."</string>
-    <string name="power_discharge_by" msgid="6453537733650125582">"من المفترض أن يستمر شحن البطارية حتى حوالي الساعة <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)."</string>
-    <string name="power_discharge_by_only" msgid="107616694963545745">"من المفترض أن يستمر شحن البطارية حتى حوالي الساعة <xliff:g id="TIME">%1$s</xliff:g>."</string>
+    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"قد تكفي طاقة البطارية حتى حوالي الساعة <xliff:g id="TIME">%1$s</xliff:g> حسب استخدامك (<xliff:g id="LEVEL">%2$s</xliff:g>)."</string>
+    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"قد تكفي طاقة البطارية حتى حوالي الساعة <xliff:g id="TIME">%1$s</xliff:g> حسب استخدامك."</string>
+    <string name="power_discharge_by" msgid="6453537733650125582">"قد تكفي طاقة البطارية حتى حوالي الساعة <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)."</string>
+    <string name="power_discharge_by_only" msgid="107616694963545745">"قد تكفي طاقة البطارية حتى حوالي الساعة <xliff:g id="TIME">%1$s</xliff:g>."</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"يتبقى أقل من <xliff:g id="THRESHOLD">%1$s</xliff:g>."</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"يتبقى أقل من <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)."</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"يتبقى أكثر من <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)."</string>

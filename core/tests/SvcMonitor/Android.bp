@@ -1,0 +1,7 @@
+android_app {
+    name: "svcmonitor",
+    srcs: ["src/**/*.java"],
+    resource_dirs: ["res"],
+    sdk_version: "current",
+    certificate: "platform",
+}

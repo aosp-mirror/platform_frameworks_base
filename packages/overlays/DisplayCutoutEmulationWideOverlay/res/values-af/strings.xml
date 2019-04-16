@@ -17,5 +17,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="display_cutout_emulation_overlay" msgid="3249818092477753587">"Uitsnede vir wye vertoonskerm"</string>
+    <string name="display_cutout_emulation_overlay" msgid="4043478945358357737">"Wye uitsnede"</string>
 </resources>

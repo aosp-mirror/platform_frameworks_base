@@ -1211,6 +1211,8 @@
   <java-symbol type="string" name="mediasize_japanese_kahu" />
   <java-symbol type="string" name="mediasize_japanese_kaku2" />
   <java-symbol type="string" name="mediasize_japanese_you4" />
+  <java-symbol type="string" name="network_partial_connectivity" />
+  <java-symbol type="string" name="network_partial_connectivity_detailed" />
   <java-symbol type="string" name="reason_service_unavailable" />
   <java-symbol type="string" name="reason_unknown" />
   <java-symbol type="string" name="restr_pin_enter_admin_pin" />
@@ -1943,6 +1945,7 @@
   <java-symbol type="integer" name="config_networkNotifySwitchType" />
   <java-symbol type="array" name="config_networkNotifySwitches" />
   <java-symbol type="integer" name="config_networkAvoidBadWifi" />
+  <java-symbol type="string" name="config_networkCaptivePortalServerUrl" />
   <java-symbol type="integer" name="config_networkWakeupPacketMark" />
   <java-symbol type="integer" name="config_networkWakeupPacketMask" />
   <java-symbol type="bool" name="config_apfDrop802_3Frames" />
@@ -2482,7 +2485,6 @@
   <java-symbol type="attr" name="lightRadius" />
   <java-symbol type="attr" name="ambientShadowAlpha" />
   <java-symbol type="attr" name="spotShadowAlpha" />
-  <java-symbol type="array" name="config_cdma_home_system" />
   <java-symbol type="bool" name="config_sms_decode_gsm_8bit_data" />
   <java-symbol type="dimen" name="text_size_small_material" />
   <java-symbol type="attr" name="checkMarkGravity" />
@@ -2844,6 +2846,8 @@
   <java-symbol type="array" name="resolver_target_actions_pin" />
   <java-symbol type="array" name="resolver_target_actions_unpin" />
 
+  <java-symbol type="array" name="non_removable_euicc_slots" />
+
   <java-symbol type="string" name="install_carrier_app_notification_title" />
   <java-symbol type="string" name="install_carrier_app_notification_text" />
   <java-symbol type="string" name="install_carrier_app_notification_text_app_name" />
@@ -2904,6 +2908,7 @@
   <java-symbol type="array" name="config_defaultPinnerServiceFiles" />
   <java-symbol type="bool" name="config_pinnerCameraApp" />
   <java-symbol type="bool" name="config_pinnerHomeApp" />
+  <java-symbol type="array" name="config_apexBootImagePinnerServiceFiles" />
 
   <java-symbol type="string" name="config_doubleTouchGestureEnableFile" />
 
@@ -3417,6 +3422,8 @@
 
   <java-symbol type="string" name="config_misprovisionedDeviceModel" />
   <java-symbol type="string" name="config_misprovisionedBrandValue" />
+
+  <java-symbol type="integer" name="db_wal_truncate_size" />
 
   <!-- For Bluetooth AbsoluteVolume -->
   <java-symbol type="fraction" name="config_prescaleAbsoluteVolume_index1" />

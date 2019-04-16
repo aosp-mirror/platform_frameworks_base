@@ -19,5 +19,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="display_cutout_emulation_overlay" msgid="6129374114103110395">"ഇടുങ്ങിയ ഡി‌സ്‌പ്ലേ കട്ടൗട്ട്"</string>
+    <string name="display_cutout_emulation_overlay" msgid="3947428012427075896">"ഇടുങ്ങിയ കട്ട്ഔട്ട്"</string>
 </resources>

@@ -234,6 +234,7 @@ package android.content {
     method public android.os.UserHandle getUser();
     method public int getUserId();
     method public void setAutofillCompatibilityEnabled(boolean);
+    field public static final String TEST_NETWORK_SERVICE = "test_network";
   }
 
 }
@@ -263,7 +264,9 @@ package android.content.pm {
     method public abstract String getPermissionControllerPackageName();
     method @NonNull public abstract String getServicesSystemSharedLibraryPackageName();
     method @NonNull public abstract String getSharedSystemSharedLibraryPackageName();
+    method @RequiresPermission("android.permission.GRANT_RUNTIME_PERMISSIONS") public abstract void grantRuntimePermission(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
     method public abstract boolean isPermissionReviewModeEnabled();
+    method @RequiresPermission("android.permission.REVOKE_RUNTIME_PERMISSIONS") public abstract void revokeRuntimePermission(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
     field public static final String FEATURE_ADOPTABLE_STORAGE = "android.software.adoptable_storage";
     field public static final String FEATURE_FILE_BASED_ENCRYPTION = "android.software.file_based_encryption";
     field public static final int MATCH_FACTORY_ONLY = 2097152; // 0x200000
@@ -599,8 +602,7 @@ package android.media.audiofx {
 package android.net {
 
   public class CaptivePortal implements android.os.Parcelable {
-    ctor public CaptivePortal(android.os.IBinder);
-    method public void logEvent(int, String);
+    method public void logEvent(int, @NonNull String);
     method public void useNetwork();
     field public static final int APP_RETURN_DISMISSED = 0; // 0x0
     field public static final int APP_RETURN_UNWANTED = 1; // 0x1
@@ -608,14 +610,14 @@ package android.net {
   }
 
   public class ConnectivityManager {
-    method @RequiresPermission(android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK) public void startCaptivePortalApp(android.os.Bundle);
+    method @RequiresPermission(android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK) public void startCaptivePortalApp(@NonNull android.net.Network, @NonNull android.os.Bundle);
     field public static final String EXTRA_CAPTIVE_PORTAL_PROBE_SPEC = "android.net.extra.CAPTIVE_PORTAL_PROBE_SPEC";
     field public static final String EXTRA_CAPTIVE_PORTAL_USER_AGENT = "android.net.extra.CAPTIVE_PORTAL_USER_AGENT";
   }
 
   public final class IpPrefix implements android.os.Parcelable {
-    ctor public IpPrefix(java.net.InetAddress, int);
-    ctor public IpPrefix(String);
+    ctor public IpPrefix(@NonNull java.net.InetAddress, @IntRange(from=0, to=128) int);
+    ctor public IpPrefix(@NonNull String);
   }
 
   public final class IpSecManager {
@@ -623,51 +625,52 @@ package android.net {
   }
 
   public class LinkAddress implements android.os.Parcelable {
-    ctor public LinkAddress(java.net.InetAddress, int, int, int);
-    ctor public LinkAddress(java.net.InetAddress, int);
-    ctor public LinkAddress(String);
-    ctor public LinkAddress(String, int, int);
+    ctor public LinkAddress(@NonNull java.net.InetAddress, @IntRange(from=0, to=128) int, int, int);
+    ctor public LinkAddress(@NonNull java.net.InetAddress, @IntRange(from=0, to=128) int);
+    ctor public LinkAddress(@NonNull String);
+    ctor public LinkAddress(@NonNull String, int, int);
     method public boolean isGlobalPreferred();
-    method public boolean isIPv4();
-    method public boolean isIPv6();
-    method public boolean isSameAddressAs(android.net.LinkAddress);
+    method public boolean isIpv4();
+    method public boolean isIpv6();
+    method public boolean isSameAddressAs(@Nullable android.net.LinkAddress);
   }
 
   public final class LinkProperties implements android.os.Parcelable {
-    ctor public LinkProperties(android.net.LinkProperties);
-    method public boolean addDnsServer(java.net.InetAddress);
-    method public boolean addLinkAddress(android.net.LinkAddress);
+    ctor public LinkProperties(@Nullable android.net.LinkProperties);
+    method public boolean addDnsServer(@NonNull java.net.InetAddress);
+    method public boolean addLinkAddress(@NonNull android.net.LinkAddress);
     method @Nullable public android.net.IpPrefix getNat64Prefix();
-    method public java.util.List<java.net.InetAddress> getPcscfServers();
-    method public String getTcpBufferSizes();
-    method public java.util.List<java.net.InetAddress> getValidatedPrivateDnsServers();
-    method public boolean hasGlobalIPv6Address();
-    method public boolean hasIPv4Address();
-    method public boolean hasIPv6DefaultRoute();
-    method public boolean isIPv4Provisioned();
-    method public boolean isIPv6Provisioned();
+    method @NonNull public java.util.List<java.net.InetAddress> getPcscfServers();
+    method @Nullable public String getTcpBufferSizes();
+    method @NonNull public java.util.List<java.net.InetAddress> getValidatedPrivateDnsServers();
+    method public boolean hasGlobalIpv6Address();
+    method public boolean hasIpv4Address();
+    method public boolean hasIpv6DefaultRoute();
+    method public boolean isIpv4Provisioned();
+    method public boolean isIpv6Provisioned();
     method public boolean isProvisioned();
-    method public boolean isReachable(java.net.InetAddress);
-    method public boolean removeDnsServer(java.net.InetAddress);
-    method public boolean removeLinkAddress(android.net.LinkAddress);
-    method public boolean removeRoute(android.net.RouteInfo);
-    method public void setNat64Prefix(android.net.IpPrefix);
-    method public void setPcscfServers(java.util.Collection<java.net.InetAddress>);
+    method public boolean isReachable(@NonNull java.net.InetAddress);
+    method public boolean removeDnsServer(@NonNull java.net.InetAddress);
+    method public boolean removeLinkAddress(@NonNull android.net.LinkAddress);
+    method public boolean removeRoute(@NonNull android.net.RouteInfo);
+    method public void setNat64Prefix(@Nullable android.net.IpPrefix);
+    method public void setPcscfServers(@NonNull java.util.Collection<java.net.InetAddress>);
     method public void setPrivateDnsServerName(@Nullable String);
-    method public void setTcpBufferSizes(String);
+    method public void setTcpBufferSizes(@Nullable String);
     method public void setUsePrivateDns(boolean);
-    method public void setValidatedPrivateDnsServers(java.util.Collection<java.net.InetAddress>);
+    method public void setValidatedPrivateDnsServers(@NonNull java.util.Collection<java.net.InetAddress>);
   }
 
   public class Network implements android.os.Parcelable {
-    ctor public Network(android.net.Network);
-    method public android.net.Network getPrivateDnsBypassingCopy();
+    ctor public Network(@NonNull android.net.Network);
+    method @NonNull public android.net.Network getPrivateDnsBypassingCopy();
   }
 
   public final class NetworkCapabilities implements android.os.Parcelable {
     method public int[] getCapabilities();
-    method public int[] getTransportTypes();
-    method public boolean satisfiedByNetworkCapabilities(android.net.NetworkCapabilities);
+    method @NonNull public int[] getTransportTypes();
+    method public boolean satisfiedByNetworkCapabilities(@Nullable android.net.NetworkCapabilities);
+    field public static final int TRANSPORT_TEST = 7; // 0x7
   }
 
   public class NetworkStack {
@@ -675,7 +678,7 @@ package android.net {
   }
 
   public final class RouteInfo implements android.os.Parcelable {
-    ctor public RouteInfo(android.net.IpPrefix, java.net.InetAddress, String, int);
+    ctor public RouteInfo(@Nullable android.net.IpPrefix, @Nullable java.net.InetAddress, @Nullable String, int);
     method public int getType();
     field public static final int RTN_THROW = 9; // 0x9
     field public static final int RTN_UNICAST = 1; // 0x1
@@ -684,20 +687,42 @@ package android.net {
 
   public final class StaticIpConfiguration implements android.os.Parcelable {
     ctor public StaticIpConfiguration();
-    ctor public StaticIpConfiguration(android.net.StaticIpConfiguration);
-    method public void addDnsServer(java.net.InetAddress);
+    ctor public StaticIpConfiguration(@Nullable android.net.StaticIpConfiguration);
+    method public void addDnsServer(@NonNull java.net.InetAddress);
     method public void clear();
     method public int describeContents();
-    method public java.util.List<java.net.InetAddress> getDnsServers();
-    method public String getDomains();
-    method public java.net.InetAddress getGateway();
-    method public android.net.LinkAddress getIpAddress();
-    method public java.util.List<android.net.RouteInfo> getRoutes(String);
-    method public void setDomains(String);
-    method public void setGateway(java.net.InetAddress);
-    method public void setIpAddress(android.net.LinkAddress);
+    method @NonNull public java.util.List<java.net.InetAddress> getDnsServers();
+    method @Nullable public String getDomains();
+    method @Nullable public java.net.InetAddress getGateway();
+    method @Nullable public android.net.LinkAddress getIpAddress();
+    method @NonNull public java.util.List<android.net.RouteInfo> getRoutes(@Nullable String);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.net.StaticIpConfiguration> CREATOR;
+  }
+
+  public static final class StaticIpConfiguration.Builder {
+    ctor public StaticIpConfiguration.Builder();
+    method @NonNull public android.net.StaticIpConfiguration build();
+    method @NonNull public android.net.StaticIpConfiguration.Builder setDnsServers(@NonNull Iterable<java.net.InetAddress>);
+    method @NonNull public android.net.StaticIpConfiguration.Builder setDomains(@Nullable String);
+    method @NonNull public android.net.StaticIpConfiguration.Builder setGateway(@Nullable java.net.InetAddress);
+    method @NonNull public android.net.StaticIpConfiguration.Builder setIpAddress(@Nullable android.net.LinkAddress);
+  }
+
+  public final class TestNetworkInterface implements android.os.Parcelable {
+    ctor public TestNetworkInterface(android.os.ParcelFileDescriptor, String);
+    method public int describeContents();
+    method public android.os.ParcelFileDescriptor getFileDescriptor();
+    method public String getInterfaceName();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.net.TestNetworkInterface> CREATOR;
+  }
+
+  public class TestNetworkManager {
+    method public android.net.TestNetworkInterface createTapInterface();
+    method public android.net.TestNetworkInterface createTunInterface(@NonNull android.net.LinkAddress[]);
+    method public void setupTestNetwork(@NonNull String, @NonNull android.os.IBinder);
+    method public void teardownTestNetwork(@NonNull android.net.Network);
   }
 
   public class TrafficStats {
@@ -714,43 +739,17 @@ package android.net {
 
 package android.net.apf {
 
-  public class ApfCapabilities {
+  public final class ApfCapabilities implements android.os.Parcelable {
     ctor public ApfCapabilities(int, int, int);
-    method public static boolean getApfDrop8023Frames(android.content.Context);
-    method public static int[] getApfEthTypeBlackList(android.content.Context);
+    method public int describeContents();
+    method public static boolean getApfDrop8023Frames();
+    method @NonNull public static int[] getApfEtherTypeBlackList();
     method public boolean hasDataAccess();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.net.apf.ApfCapabilities> CREATOR;
     field public final int apfPacketFormat;
     field public final int apfVersionSupported;
     field public final int maximumApfProgramSize;
-  }
-
-}
-
-package android.net.captiveportal {
-
-  public final class CaptivePortalProbeResult {
-    ctor public CaptivePortalProbeResult(int);
-    ctor public CaptivePortalProbeResult(int, String, String);
-    ctor public CaptivePortalProbeResult(int, String, String, android.net.captiveportal.CaptivePortalProbeSpec);
-    method public boolean isFailed();
-    method public boolean isPortal();
-    method public boolean isSuccessful();
-    field public static final android.net.captiveportal.CaptivePortalProbeResult FAILED;
-    field public static final int FAILED_CODE = 599; // 0x257
-    field public static final int PORTAL_CODE = 302; // 0x12e
-    field public static final android.net.captiveportal.CaptivePortalProbeResult SUCCESS;
-    field public static final int SUCCESS_CODE = 204; // 0xcc
-    field public final String detectUrl;
-    field @Nullable public final android.net.captiveportal.CaptivePortalProbeSpec probeSpec;
-    field public final String redirectUrl;
-  }
-
-  public abstract class CaptivePortalProbeSpec {
-    method public String getEncodedSpec();
-    method public abstract android.net.captiveportal.CaptivePortalProbeResult getResult(int, @Nullable String);
-    method public java.net.URL getUrl();
-    method public static java.util.Collection<android.net.captiveportal.CaptivePortalProbeSpec> parseCaptivePortalProbeSpecs(String);
-    method @Nullable public static android.net.captiveportal.CaptivePortalProbeSpec parseSpecOrNull(@Nullable String);
   }
 
 }
@@ -760,78 +759,78 @@ package android.net.metrics {
   public final class ApfProgramEvent implements android.net.metrics.IpConnectivityLog.Event {
   }
 
-  public static class ApfProgramEvent.Builder {
+  public static final class ApfProgramEvent.Builder {
     ctor public ApfProgramEvent.Builder();
-    method public android.net.metrics.ApfProgramEvent build();
-    method public android.net.metrics.ApfProgramEvent.Builder setActualLifetime(long);
-    method public android.net.metrics.ApfProgramEvent.Builder setCurrentRas(int);
-    method public android.net.metrics.ApfProgramEvent.Builder setFilteredRas(int);
-    method public android.net.metrics.ApfProgramEvent.Builder setFlags(boolean, boolean);
-    method public android.net.metrics.ApfProgramEvent.Builder setLifetime(long);
-    method public android.net.metrics.ApfProgramEvent.Builder setProgramLength(int);
+    method @NonNull public android.net.metrics.ApfProgramEvent build();
+    method @NonNull public android.net.metrics.ApfProgramEvent.Builder setActualLifetime(long);
+    method @NonNull public android.net.metrics.ApfProgramEvent.Builder setCurrentRas(int);
+    method @NonNull public android.net.metrics.ApfProgramEvent.Builder setFilteredRas(int);
+    method @NonNull public android.net.metrics.ApfProgramEvent.Builder setFlags(boolean, boolean);
+    method @NonNull public android.net.metrics.ApfProgramEvent.Builder setLifetime(long);
+    method @NonNull public android.net.metrics.ApfProgramEvent.Builder setProgramLength(int);
   }
 
   public final class ApfStats implements android.net.metrics.IpConnectivityLog.Event {
   }
 
-  public static class ApfStats.Builder {
+  public static final class ApfStats.Builder {
     ctor public ApfStats.Builder();
-    method public android.net.metrics.ApfStats build();
-    method public android.net.metrics.ApfStats.Builder setDroppedRas(int);
-    method public android.net.metrics.ApfStats.Builder setDurationMs(long);
-    method public android.net.metrics.ApfStats.Builder setMatchingRas(int);
-    method public android.net.metrics.ApfStats.Builder setMaxProgramSize(int);
-    method public android.net.metrics.ApfStats.Builder setParseErrors(int);
-    method public android.net.metrics.ApfStats.Builder setProgramUpdates(int);
-    method public android.net.metrics.ApfStats.Builder setProgramUpdatesAll(int);
-    method public android.net.metrics.ApfStats.Builder setProgramUpdatesAllowingMulticast(int);
-    method public android.net.metrics.ApfStats.Builder setReceivedRas(int);
-    method public android.net.metrics.ApfStats.Builder setZeroLifetimeRas(int);
+    method @NonNull public android.net.metrics.ApfStats build();
+    method @NonNull public android.net.metrics.ApfStats.Builder setDroppedRas(int);
+    method @NonNull public android.net.metrics.ApfStats.Builder setDurationMs(long);
+    method @NonNull public android.net.metrics.ApfStats.Builder setMatchingRas(int);
+    method @NonNull public android.net.metrics.ApfStats.Builder setMaxProgramSize(int);
+    method @NonNull public android.net.metrics.ApfStats.Builder setParseErrors(int);
+    method @NonNull public android.net.metrics.ApfStats.Builder setProgramUpdates(int);
+    method @NonNull public android.net.metrics.ApfStats.Builder setProgramUpdatesAll(int);
+    method @NonNull public android.net.metrics.ApfStats.Builder setProgramUpdatesAllowingMulticast(int);
+    method @NonNull public android.net.metrics.ApfStats.Builder setReceivedRas(int);
+    method @NonNull public android.net.metrics.ApfStats.Builder setZeroLifetimeRas(int);
   }
 
   public final class DhcpClientEvent implements android.net.metrics.IpConnectivityLog.Event {
   }
 
-  public static class DhcpClientEvent.Builder {
+  public static final class DhcpClientEvent.Builder {
     ctor public DhcpClientEvent.Builder();
-    method public android.net.metrics.DhcpClientEvent build();
-    method public android.net.metrics.DhcpClientEvent.Builder setDurationMs(int);
-    method public android.net.metrics.DhcpClientEvent.Builder setMsg(String);
+    method @NonNull public android.net.metrics.DhcpClientEvent build();
+    method @NonNull public android.net.metrics.DhcpClientEvent.Builder setDurationMs(int);
+    method @NonNull public android.net.metrics.DhcpClientEvent.Builder setMsg(String);
   }
 
   public final class DhcpErrorEvent implements android.net.metrics.IpConnectivityLog.Event {
     ctor public DhcpErrorEvent(int);
     method public static int errorCodeWithOption(int, int);
-    field public static final int BOOTP_TOO_SHORT;
-    field public static final int BUFFER_UNDERFLOW;
-    field public static final int DHCP_BAD_MAGIC_COOKIE;
+    field public static final int BOOTP_TOO_SHORT = 67174400; // 0x4010000
+    field public static final int BUFFER_UNDERFLOW = 83951616; // 0x5010000
+    field public static final int DHCP_BAD_MAGIC_COOKIE = 67239936; // 0x4020000
     field public static final int DHCP_ERROR = 4; // 0x4
-    field public static final int DHCP_INVALID_OPTION_LENGTH;
-    field public static final int DHCP_NO_COOKIE;
-    field public static final int DHCP_NO_MSG_TYPE;
-    field public static final int DHCP_UNKNOWN_MSG_TYPE;
+    field public static final int DHCP_INVALID_OPTION_LENGTH = 67305472; // 0x4030000
+    field public static final int DHCP_NO_COOKIE = 67502080; // 0x4060000
+    field public static final int DHCP_NO_MSG_TYPE = 67371008; // 0x4040000
+    field public static final int DHCP_UNKNOWN_MSG_TYPE = 67436544; // 0x4050000
     field public static final int L2_ERROR = 1; // 0x1
-    field public static final int L2_TOO_SHORT;
-    field public static final int L2_WRONG_ETH_TYPE;
+    field public static final int L2_TOO_SHORT = 16842752; // 0x1010000
+    field public static final int L2_WRONG_ETH_TYPE = 16908288; // 0x1020000
     field public static final int L3_ERROR = 2; // 0x2
-    field public static final int L3_INVALID_IP;
-    field public static final int L3_NOT_IPV4;
-    field public static final int L3_TOO_SHORT;
+    field public static final int L3_INVALID_IP = 33751040; // 0x2030000
+    field public static final int L3_NOT_IPV4 = 33685504; // 0x2020000
+    field public static final int L3_TOO_SHORT = 33619968; // 0x2010000
     field public static final int L4_ERROR = 3; // 0x3
-    field public static final int L4_NOT_UDP;
-    field public static final int L4_WRONG_PORT;
+    field public static final int L4_NOT_UDP = 50397184; // 0x3010000
+    field public static final int L4_WRONG_PORT = 50462720; // 0x3020000
     field public static final int MISC_ERROR = 5; // 0x5
-    field public static final int PARSING_ERROR;
-    field public static final int RECEIVE_ERROR;
+    field public static final int PARSING_ERROR = 84082688; // 0x5030000
+    field public static final int RECEIVE_ERROR = 84017152; // 0x5020000
   }
 
   public class IpConnectivityLog {
     ctor public IpConnectivityLog();
-    method public boolean log(long, android.net.metrics.IpConnectivityLog.Event);
-    method public boolean log(String, android.net.metrics.IpConnectivityLog.Event);
-    method public boolean log(android.net.Network, int[], android.net.metrics.IpConnectivityLog.Event);
-    method public boolean log(int, int[], android.net.metrics.IpConnectivityLog.Event);
-    method public boolean log(android.net.metrics.IpConnectivityLog.Event);
+    method public boolean log(long, @NonNull android.net.metrics.IpConnectivityLog.Event);
+    method public boolean log(@NonNull String, @NonNull android.net.metrics.IpConnectivityLog.Event);
+    method public boolean log(@NonNull android.net.Network, @NonNull int[], @NonNull android.net.metrics.IpConnectivityLog.Event);
+    method public boolean log(int, @NonNull int[], @NonNull android.net.metrics.IpConnectivityLog.Event);
+    method public boolean log(@NonNull android.net.metrics.IpConnectivityLog.Event);
   }
 
   public static interface IpConnectivityLog.Event extends android.os.Parcelable {
@@ -868,6 +867,7 @@ package android.net.metrics {
     field public static final int NETWORK_FIRST_VALIDATION_PORTAL_FOUND = 10; // 0xa
     field public static final int NETWORK_FIRST_VALIDATION_SUCCESS = 8; // 0x8
     field public static final int NETWORK_LINGER = 5; // 0x5
+    field public static final int NETWORK_PARTIAL_CONNECTIVITY = 13; // 0xd
     field public static final int NETWORK_REVALIDATION_PORTAL_FOUND = 11; // 0xb
     field public static final int NETWORK_REVALIDATION_SUCCESS = 9; // 0x9
     field public static final int NETWORK_UNLINGER = 6; // 0x6
@@ -878,19 +878,19 @@ package android.net.metrics {
   public final class RaEvent implements android.net.metrics.IpConnectivityLog.Event {
   }
 
-  public static class RaEvent.Builder {
+  public static final class RaEvent.Builder {
     ctor public RaEvent.Builder();
-    method public android.net.metrics.RaEvent build();
-    method public android.net.metrics.RaEvent.Builder updateDnsslLifetime(long);
-    method public android.net.metrics.RaEvent.Builder updatePrefixPreferredLifetime(long);
-    method public android.net.metrics.RaEvent.Builder updatePrefixValidLifetime(long);
-    method public android.net.metrics.RaEvent.Builder updateRdnssLifetime(long);
-    method public android.net.metrics.RaEvent.Builder updateRouteInfoLifetime(long);
-    method public android.net.metrics.RaEvent.Builder updateRouterLifetime(long);
+    method @NonNull public android.net.metrics.RaEvent build();
+    method @NonNull public android.net.metrics.RaEvent.Builder updateDnsslLifetime(long);
+    method @NonNull public android.net.metrics.RaEvent.Builder updatePrefixPreferredLifetime(long);
+    method @NonNull public android.net.metrics.RaEvent.Builder updatePrefixValidLifetime(long);
+    method @NonNull public android.net.metrics.RaEvent.Builder updateRdnssLifetime(long);
+    method @NonNull public android.net.metrics.RaEvent.Builder updateRouteInfoLifetime(long);
+    method @NonNull public android.net.metrics.RaEvent.Builder updateRouterLifetime(long);
   }
 
   public final class ValidationProbeEvent implements android.net.metrics.IpConnectivityLog.Event {
-    method public static String getProbeName(int);
+    method @NonNull public static String getProbeName(int);
     field public static final int DNS_FAILURE = 0; // 0x0
     field public static final int DNS_SUCCESS = 1; // 0x1
     field public static final int PROBE_DNS = 0; // 0x0
@@ -901,32 +901,24 @@ package android.net.metrics {
     field public static final int PROBE_PRIVDNS = 5; // 0x5
   }
 
-  public static class ValidationProbeEvent.Builder {
+  public static final class ValidationProbeEvent.Builder {
     ctor public ValidationProbeEvent.Builder();
-    method public android.net.metrics.ValidationProbeEvent build();
-    method public android.net.metrics.ValidationProbeEvent.Builder setDurationMs(long);
-    method public android.net.metrics.ValidationProbeEvent.Builder setProbeType(int, boolean);
-    method public android.net.metrics.ValidationProbeEvent.Builder setReturnCode(int);
+    method @NonNull public android.net.metrics.ValidationProbeEvent build();
+    method @NonNull public android.net.metrics.ValidationProbeEvent.Builder setDurationMs(long);
+    method @NonNull public android.net.metrics.ValidationProbeEvent.Builder setProbeType(int, boolean);
+    method @NonNull public android.net.metrics.ValidationProbeEvent.Builder setReturnCode(int);
   }
 
 }
 
 package android.net.util {
 
-  public class SocketUtils {
-    method public static void addArpEntry(java.net.Inet4Address, android.net.MacAddress, String, java.io.FileDescriptor) throws java.io.IOException;
-    method public static void attachControlPacketFilter(java.io.FileDescriptor, int) throws java.net.SocketException;
-    method public static void attachDhcpFilter(java.io.FileDescriptor) throws java.net.SocketException;
-    method public static void attachRaFilter(java.io.FileDescriptor, int) throws java.net.SocketException;
-    method public static void bindSocket(java.io.FileDescriptor, java.net.SocketAddress) throws android.system.ErrnoException, java.net.SocketException;
-    method public static void bindSocketToInterface(java.io.FileDescriptor, String) throws android.system.ErrnoException;
-    method public static void closeSocket(java.io.FileDescriptor) throws java.io.IOException;
-    method public static void connectSocket(java.io.FileDescriptor, java.net.SocketAddress) throws android.system.ErrnoException, java.net.SocketException;
-    method public static java.net.SocketAddress makeNetlinkSocketAddress(int, int);
-    method public static java.net.SocketAddress makePacketSocketAddress(short, int);
-    method public static java.net.SocketAddress makePacketSocketAddress(int, byte[]);
-    method public static void sendTo(java.io.FileDescriptor, byte[], int, int, int, java.net.SocketAddress) throws android.system.ErrnoException, java.net.SocketException;
-    method public static void setSocketTimeValueOption(java.io.FileDescriptor, int, int, long) throws android.system.ErrnoException;
+  public final class SocketUtils {
+    method public static void bindSocketToInterface(@NonNull java.io.FileDescriptor, @NonNull String) throws android.system.ErrnoException;
+    method public static void closeSocket(@Nullable java.io.FileDescriptor) throws java.io.IOException;
+    method @NonNull public static java.net.SocketAddress makeNetlinkSocketAddress(int, int);
+    method @NonNull public static java.net.SocketAddress makePacketSocketAddress(int, int);
+    method @NonNull public static java.net.SocketAddress makePacketSocketAddress(int, @NonNull byte[]);
   }
 
 }
@@ -992,7 +984,7 @@ package android.os {
     method public final void putInt64Array(long, long[]);
     method public final void putInt8(long, byte);
     method public final void putInt8Array(long, byte[]);
-    method public final void putNativeHandle(long, android.os.NativeHandle);
+    method public final void putNativeHandle(long, @Nullable android.os.NativeHandle);
     method public final void putString(long, String);
     method public static Boolean[] wrapArray(@NonNull boolean[]);
     method public static Long[] wrapArray(@NonNull long[]);
@@ -1012,7 +1004,7 @@ package android.os {
     method public final double readDouble();
     method public final java.util.ArrayList<java.lang.Double> readDoubleVector();
     method public final android.os.HwBlob readEmbeddedBuffer(long, long, long, boolean);
-    method public final android.os.NativeHandle readEmbeddedNativeHandle(long, long);
+    method @Nullable public final android.os.NativeHandle readEmbeddedNativeHandle(long, long);
     method public final float readFloat();
     method public final java.util.ArrayList<java.lang.Float> readFloatVector();
     method public final short readInt16();
@@ -1023,8 +1015,8 @@ package android.os {
     method public final java.util.ArrayList<java.lang.Long> readInt64Vector();
     method public final byte readInt8();
     method public final java.util.ArrayList<java.lang.Byte> readInt8Vector();
-    method public final android.os.NativeHandle readNativeHandle();
-    method public final java.util.ArrayList<android.os.NativeHandle> readNativeHandleVector();
+    method @Nullable public final android.os.NativeHandle readNativeHandle();
+    method @NonNull public final java.util.ArrayList<android.os.NativeHandle> readNativeHandleVector();
     method public final String readString();
     method public final java.util.ArrayList<java.lang.String> readStringVector();
     method public final android.os.IHwBinder readStrongBinder();
@@ -1048,8 +1040,8 @@ package android.os {
     method public final void writeInt8(byte);
     method public final void writeInt8Vector(java.util.ArrayList<java.lang.Byte>);
     method public final void writeInterfaceToken(String);
-    method public final void writeNativeHandle(android.os.NativeHandle);
-    method public final void writeNativeHandleVector(java.util.ArrayList<android.os.NativeHandle>);
+    method public final void writeNativeHandle(@Nullable android.os.NativeHandle);
+    method public final void writeNativeHandleVector(@NonNull java.util.ArrayList<android.os.NativeHandle>);
     method public final void writeStatus(int);
     method public final void writeString(String);
     method public final void writeStringVector(java.util.ArrayList<java.lang.String>);
@@ -1099,10 +1091,10 @@ package android.os {
     ctor public NativeHandle(@NonNull java.io.FileDescriptor, boolean);
     ctor public NativeHandle(@NonNull java.io.FileDescriptor[], @NonNull int[], boolean);
     method public void close() throws java.io.IOException;
-    method public android.os.NativeHandle dup() throws java.io.IOException;
-    method public java.io.FileDescriptor getFileDescriptor();
-    method public java.io.FileDescriptor[] getFileDescriptors();
-    method public int[] getInts();
+    method @NonNull public android.os.NativeHandle dup() throws java.io.IOException;
+    method @NonNull public java.io.FileDescriptor getFileDescriptor();
+    method @NonNull public java.io.FileDescriptor[] getFileDescriptors();
+    method @NonNull public int[] getInts();
     method public boolean hasSingleFileDescriptor();
   }
 
@@ -1222,10 +1214,6 @@ package android.provider {
     field public static final String CAPTIVE_PORTAL_OTHER_FALLBACK_URLS = "captive_portal_other_fallback_urls";
     field public static final String CAPTIVE_PORTAL_USER_AGENT = "captive_portal_user_agent";
     field public static final String CAPTIVE_PORTAL_USE_HTTPS = "captive_portal_use_https";
-    field public static final String DATA_STALL_CONSECUTIVE_DNS_TIMEOUT_THRESHOLD = "data_stall_consecutive_dns_timeout_threshold";
-    field public static final String DATA_STALL_EVALUATION_TYPE = "data_stall_evaluation_type";
-    field public static final String DATA_STALL_MIN_EVALUATE_INTERVAL = "data_stall_min_evaluate_interval";
-    field public static final String DATA_STALL_VALID_DNS_TIME_THRESHOLD = "data_stall_valid_dns_time_threshold";
     field public static final String HIDDEN_API_BLACKLIST_EXEMPTIONS = "hidden_api_blacklist_exemptions";
     field public static final String LOCATION_GLOBAL_KILL_SWITCH = "location_global_kill_switch";
     field public static final String LOW_POWER_MODE = "low_power";
@@ -1436,8 +1424,8 @@ package android.telecom {
     ctor public CallAudioState(boolean, int, int, @Nullable android.bluetooth.BluetoothDevice, @NonNull java.util.Collection<android.bluetooth.BluetoothDevice>);
   }
 
-  public final class PhoneAccountSuggestion implements android.os.Parcelable {
-    ctor public PhoneAccountSuggestion(android.telecom.PhoneAccountHandle, int, boolean);
+  public abstract class Conference extends android.telecom.Conferenceable {
+    method public android.telecom.Connection getPrimaryConnection();
   }
 
   public class PhoneAccountSuggestionService extends android.app.Service {
@@ -1448,12 +1436,46 @@ package android.telecom {
     field public static final String SERVICE_INTERFACE = "android.telecom.PhoneAccountSuggestionService";
   }
 
+  public class TelecomManager {
+    method @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public int getCurrentTtyMode();
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean isInEmergencyCall();
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setUserSelectedOutgoingPhoneAccount(@Nullable android.telecom.PhoneAccountHandle);
+    field public static final int TTY_MODE_FULL = 1; // 0x1
+    field public static final int TTY_MODE_HCO = 2; // 0x2
+    field public static final int TTY_MODE_OFF = 0; // 0x0
+    field public static final int TTY_MODE_VCO = 3; // 0x3
+  }
+
 }
 
 package android.telephony {
 
+  public final class AccessNetworkConstants {
+    field public static final int TRANSPORT_TYPE_WLAN = 2; // 0x2
+    field public static final int TRANSPORT_TYPE_WWAN = 1; // 0x1
+  }
+
   public class CarrierConfigManager {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void overrideConfig(int, @Nullable android.os.PersistableBundle);
+  }
+
+  public final class DataSpecificRegistrationInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.telephony.LteVopsSupportInfo getLteVopsSupportInfo();
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.DataSpecificRegistrationInfo> CREATOR;
+  }
+
+  public final class LteVopsSupportInfo implements android.os.Parcelable {
+    ctor public LteVopsSupportInfo(int, int);
+    method public int describeContents();
+    method public int getEmcBearerSupport();
+    method public int getVopsSupport();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.telephony.LteVopsSupportInfo> CREATOR;
+    field public static final int LTE_STATUS_NOT_AVAILABLE = 1; // 0x1
+    field public static final int LTE_STATUS_NOT_SUPPORTED = 3; // 0x3
+    field public static final int LTE_STATUS_SUPPORTED = 2; // 0x2
   }
 
   public class MbmsDownloadSession implements java.lang.AutoCloseable {
@@ -1468,16 +1490,65 @@ package android.telephony {
     field public static final String MBMS_STREAMING_SERVICE_OVERRIDE_METADATA = "mbms-streaming-service-override";
   }
 
+  public final class NetworkRegistrationInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getAccessNetworkTechnology();
+    method @NonNull public java.util.List<java.lang.Integer> getAvailableServices();
+    method @Nullable public android.telephony.CellIdentity getCellIdentity();
+    method @Nullable public android.telephony.DataSpecificRegistrationInfo getDataSpecificInfo();
+    method public int getDomain();
+    method public int getRegistrationState();
+    method public int getRejectCause();
+    method public int getRoamingType();
+    method public int getTransportType();
+    method public boolean isEmergencyEnabled();
+    method public boolean isRoaming();
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.NetworkRegistrationInfo> CREATOR;
+    field public static final int DOMAIN_CS = 1; // 0x1
+    field public static final int DOMAIN_PS = 2; // 0x2
+    field public static final int REGISTRATION_STATE_DENIED = 3; // 0x3
+    field public static final int REGISTRATION_STATE_HOME = 1; // 0x1
+    field public static final int REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING = 0; // 0x0
+    field public static final int REGISTRATION_STATE_NOT_REGISTERED_SEARCHING = 2; // 0x2
+    field public static final int REGISTRATION_STATE_ROAMING = 5; // 0x5
+    field public static final int REGISTRATION_STATE_UNKNOWN = 4; // 0x4
+    field public static final int SERVICE_TYPE_DATA = 2; // 0x2
+    field public static final int SERVICE_TYPE_EMERGENCY = 5; // 0x5
+    field public static final int SERVICE_TYPE_SMS = 3; // 0x3
+    field public static final int SERVICE_TYPE_UNKNOWN = 0; // 0x0
+    field public static final int SERVICE_TYPE_VIDEO = 4; // 0x4
+    field public static final int SERVICE_TYPE_VOICE = 1; // 0x1
+  }
+
+  public static final class NetworkRegistrationInfo.Builder {
+    ctor public NetworkRegistrationInfo.Builder();
+    method @NonNull public android.telephony.NetworkRegistrationInfo build();
+    method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setAccessNetworkTechnology(int);
+    method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setAvailableServices(@NonNull java.util.List<java.lang.Integer>);
+    method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setCellIdentity(@Nullable android.telephony.CellIdentity);
+    method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setDomain(int);
+    method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setEmergencyOnly(boolean);
+    method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setRegistrationState(int);
+    method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setRejectCause(int);
+    method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setTransportType(int);
+  }
+
   public class ServiceState implements android.os.Parcelable {
+    method public void addNetworkRegistrationInfo(android.telephony.NetworkRegistrationInfo);
     method public void setCdmaSystemAndNetworkId(int, int);
     method public void setCellBandwidths(int[]);
     method public void setChannelNumber(int);
+    method public void setDataRoamingType(int);
     method public void setRilDataRadioTechnology(int);
     method public void setRilVoiceRadioTechnology(int);
+    method public void setVoiceRoamingType(int);
   }
 
   public class TelephonyManager {
     method public int getCarrierIdListVersion();
+    method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public String getLine1AlphaTag();
+    method public android.util.Pair<java.lang.Integer,java.lang.Integer> getRadioHalVersion();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void refreshUiccProfile();
     method public void setCarrierTestOverride(String, String, String, String, String, String, String);
     field public static final int UNKNOWN_CARRIER_ID_LIST_VERSION = -1; // 0xffffffff
@@ -1515,7 +1586,7 @@ package android.telephony.mbms {
 
 package android.telephony.mbms.vendor {
 
-  public class MbmsDownloadServiceBase extends android.os.Binder {
+  public class MbmsDownloadServiceBase extends android.os.Binder implements android.os.IInterface {
     ctor public MbmsDownloadServiceBase();
     method public int addProgressListener(android.telephony.mbms.DownloadRequest, android.telephony.mbms.DownloadProgressListener) throws android.os.RemoteException;
     method public int addStatusListener(android.telephony.mbms.DownloadRequest, android.telephony.mbms.DownloadStatusListener) throws android.os.RemoteException;
@@ -1540,15 +1611,15 @@ package android.telephony.mbms.vendor {
   public class MbmsGroupCallServiceBase extends android.app.Service {
     ctor public MbmsGroupCallServiceBase();
     method public void dispose(int) throws android.os.RemoteException;
-    method public int initialize(android.telephony.mbms.MbmsGroupCallSessionCallback, int) throws android.os.RemoteException;
+    method public int initialize(@NonNull android.telephony.mbms.MbmsGroupCallSessionCallback, int) throws android.os.RemoteException;
     method public void onAppCallbackDied(int, int);
     method public android.os.IBinder onBind(android.content.Intent);
-    method public int startGroupCall(int, long, java.util.List<java.lang.Integer>, java.util.List<java.lang.Integer>, android.telephony.mbms.GroupCallCallback);
+    method public int startGroupCall(int, long, @NonNull java.util.List<java.lang.Integer>, @NonNull java.util.List<java.lang.Integer>, @NonNull android.telephony.mbms.GroupCallCallback);
     method public void stopGroupCall(int, long);
-    method public void updateGroupCall(int, long, java.util.List<java.lang.Integer>, java.util.List<java.lang.Integer>);
+    method public void updateGroupCall(int, long, @NonNull java.util.List<java.lang.Integer>, @NonNull java.util.List<java.lang.Integer>);
   }
 
-  public class MbmsStreamingServiceBase extends android.os.Binder {
+  public class MbmsStreamingServiceBase extends android.os.Binder implements android.os.IInterface {
     ctor public MbmsStreamingServiceBase();
     method public android.os.IBinder asBinder();
     method public void dispose(int) throws android.os.RemoteException;

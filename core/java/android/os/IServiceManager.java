@@ -16,6 +16,8 @@
 
 package android.os;
 
+import android.annotation.UnsupportedAppUsage;
+
 /**
  * Basic interface for finding and publishing system services.
  *
@@ -33,12 +35,14 @@ public interface IServiceManager extends IInterface
      * service manager.  Blocks for a few seconds waiting for it to be
      * published if it does not already exist.
      */
+    @UnsupportedAppUsage
     IBinder getService(String name) throws RemoteException;
 
     /**
      * Retrieve an existing service called @a name from the
      * service manager.  Non-blocking.
      */
+    @UnsupportedAppUsage
     IBinder checkService(String name) throws RemoteException;
 
     /**

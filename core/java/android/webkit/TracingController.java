@@ -36,7 +36,7 @@ import java.util.concurrent.Executor;
  * <pre class="prettyprint">
  * TracingController tracingController = TracingController.getInstance();
  * tracingController.start(new TracingConfig.Builder()
- *                  .addCategories(CATEGORIES_WEB_DEVELOPER).build());
+ *                  .addCategories(TracingConfig.CATEGORIES_WEB_DEVELOPER).build());
  * ...
  * tracingController.stop(new FileOutputStream("trace.json"),
  *                        Executors.newSingleThreadExecutor());

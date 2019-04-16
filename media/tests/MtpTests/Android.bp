@@ -1,0 +1,6 @@
+android_test {
+    name: "MtpTests",
+    srcs: ["**/*.java"],
+    static_libs: ["android-support-test"],
+    platform_apis: true,
+}

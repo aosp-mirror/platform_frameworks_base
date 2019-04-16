@@ -23,6 +23,7 @@ package android.content.pm;
  * {@hide}
  */
 oneway interface IPackageDeleteObserver {
+    @UnsupportedAppUsage
     void packageDeleted(in String packageName, in int returnCode);
 }
 

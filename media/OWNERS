@@ -3,7 +3,9 @@ dwkang@google.com
 elaurent@google.com
 etalvala@google.com
 gkasten@google.com
+hdmoon@google.com
 hunga@google.com
+insun@google.com
 jaewan@google.com
 jmtrivi@google.com
 jsharkey@android.com
@@ -11,3 +13,6 @@ lajos@google.com
 marcone@google.com
 sungsoo@google.com
 wjia@google.com
+
+# For maintaining sync with AndroidX code
+per-file ExifInterface.java = jinpark@google.com, sungsoo@google.com

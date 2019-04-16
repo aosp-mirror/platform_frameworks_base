@@ -19,6 +19,7 @@ package android.net;
 import static android.net.NetworkStats.DEFAULT_NETWORK_ALL;
 import static android.net.NetworkStats.DEFAULT_NETWORK_NO;
 import static android.net.NetworkStats.DEFAULT_NETWORK_YES;
+import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.INTERFACES_ALL;
 import static android.net.NetworkStats.METERED_ALL;
 import static android.net.NetworkStats.METERED_NO;
@@ -26,31 +27,30 @@ import static android.net.NetworkStats.METERED_YES;
 import static android.net.NetworkStats.ROAMING_ALL;
 import static android.net.NetworkStats.ROAMING_NO;
 import static android.net.NetworkStats.ROAMING_YES;
-import static android.net.NetworkStats.SET_DEFAULT;
-import static android.net.NetworkStats.SET_FOREGROUND;
+import static android.net.NetworkStats.SET_ALL;
 import static android.net.NetworkStats.SET_DBG_VPN_IN;
 import static android.net.NetworkStats.SET_DBG_VPN_OUT;
-import static android.net.NetworkStats.SET_ALL;
-import static android.net.NetworkStats.IFACE_ALL;
+import static android.net.NetworkStats.SET_DEFAULT;
+import static android.net.NetworkStats.SET_FOREGROUND;
 import static android.net.NetworkStats.TAG_ALL;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
-import android.net.NetworkStats.Entry;
 import android.os.Process;
-import android.support.test.runner.AndroidJUnit4;
-import android.support.test.filters.SmallTest;
 import android.util.ArrayMap;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.google.android.collect.Sets;
 
-import java.util.HashSet;
-
-import org.junit.runner.RunWith;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import java.util.HashSet;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -569,7 +569,7 @@ public class NetworkStatsTest {
             .addValues(underlyingIface, tunUid, SET_FOREGROUND, TAG_NONE, METERED_NO, ROAMING_NO,
                     DEFAULT_NETWORK_NO, 0L, 0L, 0L, 0L, 0L);
 
-        assertTrue(delta.toString(), delta.migrateTun(tunUid, tunIface, underlyingIface));
+        delta.migrateTun(tunUid, tunIface, new String[] {underlyingIface});
         assertEquals(20, delta.size());
 
         // tunIface and TEST_IFACE entries are not changed.
@@ -650,7 +650,7 @@ public class NetworkStatsTest {
             .addValues(underlyingIface, tunUid, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
                     DEFAULT_NETWORK_NO,  75500L, 37L, 130000L, 70L, 0L);
 
-        assertTrue(delta.migrateTun(tunUid, tunIface, underlyingIface));
+        delta.migrateTun(tunUid, tunIface, new String[]{underlyingIface});
         assertEquals(9, delta.size());
 
         // tunIface entries should not be changed.
@@ -810,6 +810,37 @@ public class NetworkStatsTest {
         assertEquals(2, stats.size());
         assertEquals(entry1, stats.getValues(0, null));
         assertEquals(entry2, stats.getValues(1, null));
+    }
+
+    @Test
+    public void testFilterDebugEntries() {
+        NetworkStats.Entry entry1 = new NetworkStats.Entry(
+                "test1", 10100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_NO, 50000L, 25L, 100000L, 50L, 0L);
+
+        NetworkStats.Entry entry2 = new NetworkStats.Entry(
+                "test2", 10101, SET_DBG_VPN_IN, TAG_NONE, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_NO, 50000L, 25L, 100000L, 50L, 0L);
+
+        NetworkStats.Entry entry3 = new NetworkStats.Entry(
+                "test2", 10101, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_NO, 50000L, 25L, 100000L, 50L, 0L);
+
+        NetworkStats.Entry entry4 = new NetworkStats.Entry(
+                "test2", 10101, SET_DBG_VPN_OUT, TAG_NONE, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_NO, 50000L, 25L, 100000L, 50L, 0L);
+
+        NetworkStats stats = new NetworkStats(TEST_START, 4)
+                .addValues(entry1)
+                .addValues(entry2)
+                .addValues(entry3)
+                .addValues(entry4);
+
+        stats.filterDebugEntries();
+
+        assertEquals(2, stats.size());
+        assertEquals(entry1, stats.getValues(0, null));
+        assertEquals(entry3, stats.getValues(1, null));
     }
 
     @Test

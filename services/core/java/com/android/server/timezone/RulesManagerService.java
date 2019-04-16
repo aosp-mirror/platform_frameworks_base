@@ -16,14 +16,13 @@
 
 package com.android.server.timezone;
 
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.EventLogTags;
-import com.android.server.SystemService;
-import com.android.timezone.distro.DistroException;
-import com.android.timezone.distro.DistroVersion;
-import com.android.timezone.distro.StagedDistroOperation;
-import com.android.timezone.distro.TimeZoneDistro;
-import com.android.timezone.distro.installer.TimeZoneDistroInstaller;
+import static android.app.timezone.RulesState.DISTRO_STATUS_INSTALLED;
+import static android.app.timezone.RulesState.DISTRO_STATUS_NONE;
+import static android.app.timezone.RulesState.DISTRO_STATUS_UNKNOWN;
+import static android.app.timezone.RulesState.STAGED_OPERATION_INSTALL;
+import static android.app.timezone.RulesState.STAGED_OPERATION_NONE;
+import static android.app.timezone.RulesState.STAGED_OPERATION_UNINSTALL;
+import static android.app.timezone.RulesState.STAGED_OPERATION_UNKNOWN;
 
 import android.app.timezone.Callback;
 import android.app.timezone.DistroFormatVersion;
@@ -37,6 +36,21 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.EventLogTags;
+import com.android.server.SystemService;
+import com.android.timezone.distro.DistroException;
+import com.android.timezone.distro.DistroVersion;
+import com.android.timezone.distro.StagedDistroOperation;
+import com.android.timezone.distro.TimeZoneDistro;
+import com.android.timezone.distro.installer.TimeZoneDistroInstaller;
+
+import libcore.icu.ICU;
+import libcore.timezone.TimeZoneDataFiles;
+import libcore.timezone.TimeZoneFinder;
+import libcore.timezone.TzDataSetVersion;
+import libcore.timezone.ZoneInfoDB;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -46,18 +60,6 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
-import libcore.icu.ICU;
-import libcore.timezone.TzDataSetVersion;
-import libcore.timezone.TimeZoneFinder;
-import libcore.timezone.ZoneInfoDB;
-
-import static android.app.timezone.RulesState.DISTRO_STATUS_INSTALLED;
-import static android.app.timezone.RulesState.DISTRO_STATUS_NONE;
-import static android.app.timezone.RulesState.DISTRO_STATUS_UNKNOWN;
-import static android.app.timezone.RulesState.STAGED_OPERATION_INSTALL;
-import static android.app.timezone.RulesState.STAGED_OPERATION_NONE;
-import static android.app.timezone.RulesState.STAGED_OPERATION_UNINSTALL;
-import static android.app.timezone.RulesState.STAGED_OPERATION_UNKNOWN;
 
 public final class RulesManagerService extends IRulesManager.Stub {
 
@@ -96,8 +98,6 @@ public final class RulesManagerService extends IRulesManager.Stub {
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     static final String REQUIRED_QUERY_PERMISSION =
             android.Manifest.permission.QUERY_TIME_ZONE_RULES;
-    private static final File SYSTEM_TZ_DATA_FILE = new File("/system/usr/share/zoneinfo/tzdata");
-    private static final File TZ_DATA_DIR = new File("/data/misc/zoneinfo");
 
     private final AtomicBoolean mOperationInProgress = new AtomicBoolean(false);
     private final PermissionHelper mPermissionHelper;
@@ -108,12 +108,14 @@ public final class RulesManagerService extends IRulesManager.Stub {
 
     private static RulesManagerService create(Context context) {
         RulesManagerServiceHelperImpl helper = new RulesManagerServiceHelperImpl(context);
+        File baseVersionFile = new File(TimeZoneDataFiles.getRuntimeModuleTzVersionFile());
+        File tzDataDir = new File(TimeZoneDataFiles.getDataTimeZoneRootDir());
         return new RulesManagerService(
                 helper /* permissionHelper */,
                 helper /* executor */,
                 helper /* intentHelper */,
                 PackageTracker.create(context),
-                new TimeZoneDistroInstaller(TAG, SYSTEM_TZ_DATA_FILE, TZ_DATA_DIR));
+                new TimeZoneDistroInstaller(TAG, baseVersionFile, tzDataDir));
     }
 
     // A constructor that can be used by tests to supply mocked / faked dependencies.
@@ -143,11 +145,11 @@ public final class RulesManagerService extends IRulesManager.Stub {
     /** Like {@link #getRulesState()} without the permission check. */
     private RulesState getRulesStateInternal() {
         synchronized(this) {
-            String systemRulesVersion;
+            TzDataSetVersion baseVersion;
             try {
-                systemRulesVersion = mInstaller.getSystemRulesVersion();
+                baseVersion = mInstaller.readBaseVersion();
             } catch (IOException e) {
-                Slog.w(TAG, "Failed to read system rules", e);
+                Slog.w(TAG, "Failed to read base rules version", e);
                 return null;
             }
 
@@ -196,7 +198,7 @@ public final class RulesManagerService extends IRulesManager.Stub {
                     Slog.w(TAG, "Failed to read staged distro.", e);
                 }
             }
-            return new RulesState(systemRulesVersion, DISTRO_FORMAT_VERSION_SUPPORTED,
+            return new RulesState(baseVersion.rulesVersion, DISTRO_FORMAT_VERSION_SUPPORTED,
                     operationInProgress, stagedOperationStatus, stagedDistroRulesVersion,
                     distroStatus, installedDistroRulesVersion);
         }
@@ -454,13 +456,13 @@ public final class RulesManagerService extends IRulesManager.Stub {
                             pw.println("Operation in progress: " + value);
                             break;
                         }
-                        case 's': {
-                            // Report system image rules version
+                        case 'b': {
+                            // Report base rules version
                             String value = "Unknown";
                             if (rulesState != null) {
-                                value = rulesState.getSystemRulesVersion();
+                                value = rulesState.getBaseRulesVersion();
                             }
-                            pw.println("System rules version: " + value);
+                            pw.println("Base rules version: " + value);
                             break;
                         }
                         case 'c': {

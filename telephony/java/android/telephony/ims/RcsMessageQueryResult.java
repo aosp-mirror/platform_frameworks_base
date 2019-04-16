@@ -32,6 +32,8 @@ import java.util.List;
  * The result of a {@link RcsMessageStore#getRcsMessages(RcsMessageQueryParams)}
  * call. This class allows getting the token for querying the next batch of messages in order to
  * prevent handling large amounts of data at once.
+ *
+ * @hide
  */
 public final class RcsMessageQueryResult implements Parcelable {
     // The token to continue the query to get the next batch of results
@@ -87,7 +89,7 @@ public final class RcsMessageQueryResult implements Parcelable {
         in.readTypedList(mMessageTypeIdPairs, RcsTypeIdPair.CREATOR);
     }
 
-    public static final Creator<RcsMessageQueryResult> CREATOR =
+    public static final @android.annotation.NonNull Creator<RcsMessageQueryResult> CREATOR =
             new Creator<RcsMessageQueryResult>() {
                 @Override
                 public RcsMessageQueryResult createFromParcel(Parcel in) {

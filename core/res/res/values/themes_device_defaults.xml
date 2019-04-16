@@ -1447,7 +1447,7 @@ easier.
         <item name="colorEdgeEffect">@android:color/black</item>
 
         <!-- Add white nav bar with divider that matches material -->
-        <item name="navigationBarDividerColor">#1f000000</item>
+        <item name="navigationBarDividerColor">@color/navigation_bar_divider_device_default_settings</item>
         <item name="navigationBarColor">@android:color/white</item>
         <item name="windowLightNavigationBar">true</item>
 

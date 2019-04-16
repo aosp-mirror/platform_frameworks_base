@@ -99,7 +99,7 @@ public final class ImsStreamMediaProfile implements Parcelable {
     public int mRttMode;
     // RTT Audio Speech Indicator
     /** @hide */
-    public boolean mHasRttAudioSpeech = false;
+    public boolean mIsReceivingRttAudio = false;
 
     /** @hide */
     public ImsStreamMediaProfile(Parcel in) {
@@ -201,7 +201,7 @@ public final class ImsStreamMediaProfile implements Parcelable {
                 ", videoQuality=" + mVideoQuality +
                 ", videoDirection=" + mVideoDirection +
                 ", rttMode=" + mRttMode +
-                ", hasRttAudioSpeech=" + mHasRttAudioSpeech + " }";
+                ", hasRttAudioSpeech=" + mIsReceivingRttAudio + " }";
     }
 
     @Override
@@ -216,7 +216,7 @@ public final class ImsStreamMediaProfile implements Parcelable {
         out.writeInt(mVideoQuality);
         out.writeInt(mVideoDirection);
         out.writeInt(mRttMode);
-        out.writeBoolean(mHasRttAudioSpeech);
+        out.writeBoolean(mIsReceivingRttAudio);
     }
 
     private void readFromParcel(Parcel in) {
@@ -225,7 +225,7 @@ public final class ImsStreamMediaProfile implements Parcelable {
         mVideoQuality = in.readInt();
         mVideoDirection = in.readInt();
         mRttMode = in.readInt();
-        mHasRttAudioSpeech = in.readBoolean();
+        mIsReceivingRttAudio = in.readBoolean();
     }
 
     public static final Creator<ImsStreamMediaProfile> CREATOR =
@@ -256,8 +256,12 @@ public final class ImsStreamMediaProfile implements Parcelable {
         mRttMode = rttMode;
     }
 
-    public void setRttAudioSpeech(boolean audioOn) {
-        mHasRttAudioSpeech = audioOn;
+    /**
+     * Sets whether the remote party is transmitting audio over the RTT call.
+     * @param audioOn true if audio is being received, false otherwise.
+     */
+    public void setReceivingRttAudio(boolean audioOn) {
+        mIsReceivingRttAudio = audioOn;
     }
 
     public int getAudioQuality() {
@@ -280,7 +284,10 @@ public final class ImsStreamMediaProfile implements Parcelable {
         return mRttMode;
     }
 
-    public boolean getRttAudioSpeech() {
-        return mHasRttAudioSpeech;
+    /**
+     * @return true if remote party is transmitting audio, false otherwise.
+     */
+    public boolean isReceivingRttAudio() {
+        return mIsReceivingRttAudio;
     }
 }

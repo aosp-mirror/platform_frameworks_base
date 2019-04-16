@@ -30,10 +30,11 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.platform.test.annotations.Presubmit;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.MediumTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.util.SparseArray;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.MediumTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -42,7 +43,13 @@ import org.junit.runner.RunWith;
 import java.util.ArrayList;
 
 /**
- * runtest --path frameworks/base/services/tests/servicestests/src/com/android/server/am/RunningTasksTest.java
+ * Tests for {@link RunningTasks}.
+ *
+ * <p>Build/Install/Run:
+ *  atest FrameworksServicesTests:RunningTasksTest
+ *
+ * <p>This test class is a part of Window Manager Service tests and specified in
+ * {@link com.android.server.wm.test.filters.FrameworksTestsFilter}.
  */
 @MediumTest
 @Presubmit

@@ -28,10 +28,10 @@ import java.io.PrintWriter;
  * @hide
  */
 public class WaitResult implements Parcelable {
+    public static final int INVALID_DELAY = -1;
     public int result;
     public boolean timeout;
     public ComponentName who;
-    public long thisTime;
     public long totalTime;
 
     public WaitResult() {
@@ -47,7 +47,6 @@ public class WaitResult implements Parcelable {
         dest.writeInt(result);
         dest.writeInt(timeout ? 1 : 0);
         ComponentName.writeToParcel(who, dest);
-        dest.writeLong(thisTime);
         dest.writeLong(totalTime);
     }
 
@@ -68,7 +67,6 @@ public class WaitResult implements Parcelable {
         result = source.readInt();
         timeout = source.readInt() != 0;
         who = ComponentName.readFromParcel(source);
-        thisTime = source.readLong();
         totalTime = source.readLong();
     }
 
@@ -77,7 +75,6 @@ public class WaitResult implements Parcelable {
         pw.println(prefix + "  result=" + result);
         pw.println(prefix + "  timeout=" + timeout);
         pw.println(prefix + "  who=" + who);
-        pw.println(prefix + "  thisTime=" + thisTime);
         pw.println(prefix + "  totalTime=" + totalTime);
     }
 }

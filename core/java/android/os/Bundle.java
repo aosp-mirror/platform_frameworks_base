@@ -17,6 +17,7 @@
 package android.os;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.util.ArrayMap;
 import android.util.Size;
 import android.util.SizeF;
@@ -173,6 +174,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static Bundle forPair(String key, String value) {
         Bundle b = new Bundle(1);
         b.putString(key, value);
@@ -229,6 +231,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public static Bundle setDefusable(Bundle bundle, boolean defusable) {
         if (bundle != null) {
             bundle.setDefusable(defusable);
@@ -303,6 +306,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public int getSize() {
         if (mParcelledData != null) {
             return mParcelledData.dataSize();
@@ -385,6 +389,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * Filter values in Bundle to only basic types.
      * @hide
      */
+    @UnsupportedAppUsage
     public Bundle filterValues() {
         unparcel();
         Bundle bundle = this;
@@ -557,6 +562,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public void putParcelableList(String key, List<? extends Parcelable> value) {
         unparcel();
         mMap.put(key, value);
@@ -728,6 +734,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @deprecated
      * @hide This is the old name of the function.
      */
+    @UnsupportedAppUsage
     @Deprecated
     public void putIBinder(@Nullable String key, @Nullable IBinder value) {
         unparcel();
@@ -1180,6 +1187,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @deprecated
      * @hide This is the old name of the function.
      */
+    @UnsupportedAppUsage
     @Deprecated
     @Nullable
     public IBinder getIBinder(@Nullable String key) {

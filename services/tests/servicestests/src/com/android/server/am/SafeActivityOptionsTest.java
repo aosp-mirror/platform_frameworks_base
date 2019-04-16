@@ -20,13 +20,23 @@ import static org.junit.Assert.assertEquals;
 
 import android.app.ActivityOptions;
 import android.platform.test.annotations.Presubmit;
-import android.support.test.filters.FlakyTest;
-import android.support.test.filters.MediumTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.filters.FlakyTest;
+import androidx.test.filters.MediumTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+/**
+ * Tests for {@link SafeActivityOptions}.
+ *
+ * <p>Build/Install/Run:
+ *  atest FrameworksServicesTests:SafeActivityOptionsTest
+ *
+ * <p>This test class is a part of Window Manager Service tests and specified in
+ * {@link com.android.server.wm.test.filters.FrameworksTestsFilter}.
+ */
 @MediumTest
 @Presubmit
 @FlakyTest

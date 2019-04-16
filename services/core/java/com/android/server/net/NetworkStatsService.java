@@ -25,6 +25,7 @@ import static android.content.Intent.ACTION_USER_REMOVED;
 import static android.content.Intent.EXTRA_UID;
 import static android.net.ConnectivityManager.ACTION_TETHER_STATE_CHANGED;
 import static android.net.ConnectivityManager.isNetworkTypeMobile;
+import static android.net.NetworkStack.checkNetworkStackPermission;
 import static android.net.NetworkStats.DEFAULT_NETWORK_ALL;
 import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.INTERFACES_ALL;
@@ -82,7 +83,6 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.net.DataUsageRequest;
-import android.net.IConnectivityManager;
 import android.net.INetworkManagementEventObserver;
 import android.net.INetworkStatsService;
 import android.net.INetworkStatsSession;
@@ -130,7 +130,6 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.net.NetworkStatsFactory;
 import com.android.internal.net.VpnInfo;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
@@ -195,8 +194,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     private final boolean mUseBpfTrafficStats;
 
-    private IConnectivityManager mConnManager;
-
     @VisibleForTesting
     public static final String ACTION_NETWORK_STATS_POLL =
             "com.android.server.action.NETWORK_STATS_POLL";
@@ -258,6 +255,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private final ArrayMap<String, NetworkIdentitySet> mActiveUidIfaces = new ArrayMap<>();
 
     /** Current default active iface. */
+    @GuardedBy("mStatsLock")
     private String mActiveIface;
 
     /** Set of any ifaces associated with mobile networks since boot. */
@@ -267,6 +265,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     /** Set of all ifaces currently used by traffic that does not explicitly specify a Network. */
     @GuardedBy("mStatsLock")
     private Network[] mDefaultNetworks = new Network[0];
+
+    /** Set containing info about active VPNs and their underlying networks. */
+    @GuardedBy("mStatsLock")
+    private VpnInfo[] mVpnInfos = new VpnInfo[0];
 
     private final DropBoxNonMonotonicObserver mNonMonotonicObserver =
             new DropBoxNonMonotonicObserver();
@@ -289,6 +291,22 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     /** Data layer operation counters for splicing into other structures. */
     private NetworkStats mUidOperations = new NetworkStats(0L, 10);
+
+    /**
+     * Snapshot containing most recent network stats for all UIDs across all interfaces and tags
+     * since boot.
+     *
+     * <p>Maintains migrated VPN stats which are result of performing TUN migration on {@link
+     * #mLastUidDetailSnapshot}.
+     */
+    @GuardedBy("mStatsLock")
+    private NetworkStats mTunAdjustedStats;
+    /**
+     * Used by {@link #mTunAdjustedStats} to migrate VPN traffic over delta between this snapshot
+     * and latest snapshot.
+     */
+    @GuardedBy("mStatsLock")
+    private NetworkStats mLastUidDetailSnapshot;
 
     /** Must be set in factory by calling #setHandler. */
     private Handler mHandler;
@@ -373,10 +391,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     void setHandler(Handler handler, Handler.Callback callback) {
         mHandler = handler;
         mHandlerCallback = callback;
-    }
-
-    public void bindConnectivityManager(IConnectivityManager connManager) {
-        mConnManager = checkNotNull(connManager, "missing IConnectivityManager");
     }
 
     public void systemReady() {
@@ -807,12 +821,36 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     @Override
     public NetworkStats getDetailedUidStats(String[] requiredIfaces) {
         try {
+            // Get the latest snapshot from NetworkStatsFactory.
+            // TODO: Querying for INTERFACES_ALL may incur performance penalty. Consider restricting
+            // this to limited set of ifaces.
+            NetworkStats uidDetailStats = getNetworkStatsUidDetail(INTERFACES_ALL);
+
+            // Migrate traffic from VPN UID over delta and update mTunAdjustedStats.
+            NetworkStats result;
+            synchronized (mStatsLock) {
+                migrateTunTraffic(uidDetailStats, mVpnInfos);
+                result = mTunAdjustedStats.clone();
+            }
+
+            // Apply filter based on ifacesToQuery.
             final String[] ifacesToQuery =
                     NetworkStatsFactory.augmentWithStackedInterfaces(requiredIfaces);
-            return getNetworkStatsUidDetail(ifacesToQuery);
+            result.filter(UID_ALL, ifacesToQuery, TAG_ALL);
+            return result;
         } catch (RemoteException e) {
             Log.wtf(TAG, "Error compiling UID stats", e);
             return new NetworkStats(0L, 0);
+        }
+    }
+
+    @VisibleForTesting
+    NetworkStats getTunAdjustedStats() {
+        synchronized (mStatsLock) {
+            if (mTunAdjustedStats == null) {
+                return null;
+            }
+            return mTunAdjustedStats.clone();
         }
     }
 
@@ -857,13 +895,17 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     @Override
-    public void forceUpdateIfaces(Network[] defaultNetworks) {
-        mContext.enforceCallingOrSelfPermission(READ_NETWORK_USAGE_HISTORY, TAG);
+    public void forceUpdateIfaces(
+            Network[] defaultNetworks,
+            VpnInfo[] vpnArray,
+            NetworkState[] networkStates,
+            String activeIface) {
+        checkNetworkStackPermission(mContext);
         assertBandwidthControlEnabled();
 
         final long token = Binder.clearCallingIdentity();
         try {
-            updateIfaces(defaultNetworks);
+            updateIfaces(defaultNetworks, vpnArray, networkStates, activeIface);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -1127,11 +1169,17 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
     };
 
-    private void updateIfaces(Network[] defaultNetworks) {
+    private void updateIfaces(
+            Network[] defaultNetworks,
+            VpnInfo[] vpnArray,
+            NetworkState[] networkStates,
+            String activeIface) {
         synchronized (mStatsLock) {
             mWakeLock.acquire();
             try {
-                updateIfacesLocked(defaultNetworks);
+                mVpnInfos = vpnArray;
+                mActiveIface = activeIface;
+                updateIfacesLocked(defaultNetworks, networkStates);
             } finally {
                 mWakeLock.release();
             }
@@ -1145,7 +1193,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      * {@link NetworkIdentitySet}.
      */
     @GuardedBy("mStatsLock")
-    private void updateIfacesLocked(Network[] defaultNetworks) {
+    private void updateIfacesLocked(Network[] defaultNetworks, NetworkState[] states) {
         if (!mSystemReady) return;
         if (LOGV) Slog.v(TAG, "updateIfacesLocked()");
 
@@ -1156,18 +1204,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // poll, but only persist network stats to keep codepath fast. UID stats
         // will be persisted during next alarm poll event.
         performPollLocked(FLAG_PERSIST_NETWORK);
-
-        final NetworkState[] states;
-        final LinkProperties activeLink;
-        try {
-            states = mConnManager.getAllNetworkState();
-            activeLink = mConnManager.getActiveLinkProperties();
-        } catch (RemoteException e) {
-            // ignored; service lives in system_server
-            return;
-        }
-
-        mActiveIface = activeLink != null ? activeLink.getInterfaceName() : null;
 
         // Rebuild active interfaces based on connected networks
         mActiveIfaces.clear();
@@ -1280,7 +1316,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         Trace.traceEnd(TRACE_TAG_NETWORK);
 
         // For per-UID stats, pass the VPN info so VPN traffic is reattributed to responsible apps.
-        VpnInfo[] vpnArray = mConnManager.getAllVpnInfo();
+        VpnInfo[] vpnArray = mVpnInfos;
         Trace.traceBegin(TRACE_TAG_NETWORK, "recordUid");
         mUidRecorder.recordSnapshotLocked(uidSnapshot, mActiveUidIfaces, vpnArray, currentTime);
         Trace.traceEnd(TRACE_TAG_NETWORK);
@@ -1292,6 +1328,34 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // a race condition between the service handler thread and the observer's
         mStatsObservers.updateStats(xtSnapshot, uidSnapshot, new ArrayMap<>(mActiveIfaces),
                 new ArrayMap<>(mActiveUidIfaces), vpnArray, currentTime);
+
+        migrateTunTraffic(uidSnapshot, vpnArray);
+    }
+
+    /**
+     * Updates {@link #mTunAdjustedStats} with the delta containing traffic migrated off of VPNs.
+     */
+    @GuardedBy("mStatsLock")
+    private void migrateTunTraffic(NetworkStats uidDetailStats, VpnInfo[] vpnInfoArray) {
+        if (mTunAdjustedStats == null) {
+            // Either device booted or system server restarted, hence traffic cannot be migrated
+            // correctly without knowing the past state of VPN's underlying networks.
+            mTunAdjustedStats = uidDetailStats;
+            mLastUidDetailSnapshot = uidDetailStats;
+            return;
+        }
+        // Migrate delta traffic from VPN to other apps.
+        NetworkStats delta = uidDetailStats.subtract(mLastUidDetailSnapshot);
+        for (VpnInfo info : vpnInfoArray) {
+            delta.migrateTun(info.ownerUid, info.vpnIface, info.underlyingIfaces);
+        }
+        // Filter out debug entries as that may lead to over counting.
+        delta.filterDebugEntries();
+        // Update #mTunAdjustedStats with migrated delta.
+        mTunAdjustedStats.combineAllValues(delta);
+        mTunAdjustedStats.setElapsedRealtime(uidDetailStats.getElapsedRealtime());
+        // Update last snapshot.
+        mLastUidDetailSnapshot = uidDetailStats;
     }
 
     /**

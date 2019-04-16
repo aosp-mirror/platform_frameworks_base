@@ -48,7 +48,7 @@
     <string name="invalidPin" msgid="3850018445187475377">"Մուտքագրեք PIN, որը 4-ից 8 թիվ է:"</string>
     <string name="invalidPuk" msgid="8761456210898036513">"Մուտքագրեք PUK, որն 8 կամ ավել թիվ ունի:"</string>
     <string name="needPuk" msgid="919668385956251611">"Ձեր SIM քարտը PUK-ով կողպված է: Մուտքագրեք PUK կոդը այն ապակողպելու համար:"</string>
-    <string name="needPuk2" msgid="4526033371987193070">"Մուտքագրեք PUK2-ը` SIM քարտն արգելաբացելու համար:"</string>
+    <string name="needPuk2" msgid="4526033371987193070">"Մուտքագրեք PUK2-ը` SIM քարտն արգելահանելու համար:"</string>
     <string name="enablePin" msgid="209412020907207950">"Ձախողվեց: Միացրեք SIM/RUIM կողպումը:"</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
       <item quantity="one">Մնաց <xliff:g id="NUMBER_1">%d</xliff:g> փորձ, որից հետո SIM քարտն արգելափակվելու է:</item>
@@ -136,9 +136,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Զանգեր Wi-Fi-ի միջոցով | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Զանգեր Wi-Fi-ի միջոցով"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Զանգեր Wi-Fi-ի միջոցով"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Անջատված է"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi, նախընտրելի"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Նախընտրելի է բջջային ցանցը"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"Զանգ Wi-Fi-ի միջոցով"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"Զանգ բջջային ցանցի միջոցով"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Միայն Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>. Չի վերահասցեավորվել"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>. <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -237,9 +241,9 @@
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Անձայն ռեժիմ"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Ձայնը անջատված է"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Ձայնը միացված է"</string>
-    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Ինքնաթիռի ռեժիմ"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Ինքնաթիռի ռեժիմը միացված է"</string>
-    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Ինքնաթիռի ռեժիմը անջատված է"</string>
+    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Ավիառեժիմ"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Ավիառեժիմը միացված է"</string>
+    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Ավիառեժիմը անջատված է"</string>
     <string name="global_action_toggle_battery_saver" msgid="708515500418994208">"Մարտկոցի տնտեսում"</string>
     <string name="global_action_battery_saver_on_status" msgid="484059130698197787">"Անջատել"</string>
     <string name="global_action_battery_saver_off_status" msgid="75550964969478405">"Միացնել"</string>
@@ -430,6 +434,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Թույլ է տալիս հավելվածին օգտագործել սարքի հեռախոսային գործիքները: Այս թույլտվությունը հավելվածին հնարավորություն է տալիս որոշել հեռախոսահամարը և սարքի ID-ները, արդյոք զանգը ակտիվ է և միացված զանգի հեռակա հեռախոսահամարը:"</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"զանգերն ուղարկել համակարգի միջոցով"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Հավելվածին թույլ է տալիս իր զանգերն ուղարկել համակարգի միջոցով՝ կապի որակը բարձրացնելու նպատակով։"</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"Զանգերի դիտում և վերահսկում համակարգի միջոցով"</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Թույլ է տալիս հավելվածին տեսնել և վերահսկել ընթացիկ զանգերը սարքում: Սա ներառում է այնպիսի տեղեկություններ, ինչպիսիք են, օրինակ, հեռախոսահամարները և զանգերի վիճակը:"</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"շարունակել զանգը այլ հավելվածի միջոցով"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Թույլ է տալիս հավելվածին շարունակել մեկ այլ հավելվածի միջոցով սկսած զանգը:"</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"օգտագործել հեռախոսահամարները"</string>
@@ -1076,8 +1082,8 @@
     <string name="noApplications" msgid="2991814273936504689">"Ոչ մի հավելված չի կարող կատարել այս գործողությունը:"</string>
     <string name="aerr_application" msgid="250320989337856518">"<xliff:g id="APPLICATION">%1$s</xliff:g> – աշխատանքն ընդհատվեց"</string>
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> գործընթացն ընդհատվել է"</string>
-    <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> հավելվածի աշխատանքը շարունակաբար ընդհատվում է"</string>
-    <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> գործընթացը շարունակաբար ընդհատվում է"</string>
+    <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g>-ն էլի ընդհատվեց"</string>
+    <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g>՝ նորից ընդհատվեց"</string>
     <string name="aerr_restart" msgid="7581308074153624475">"Կրկին բացել հավելվածը"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Հաղորդել"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Փակել"</string>
@@ -1177,8 +1183,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Մուտք գործեք ցանց"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi ցանցում ինտերնետ կապ չկա"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> ցանցը չունի մուտք ինտերնետին"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Հպեք՝ ընտրանքները տեսնելու համար"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Միացված է"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> ցանցի կապը սահմանափակ է"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Հպեք՝ միանալու համար"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Փոփոխություններ թեժ կետի կարգավորումներում"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Ձեր թեժ կետի հաճախականությունը փոխվել է։"</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Սարքը չի կարող աշխատել միայն 5 ԳՀց հաճախականությամբ։ Այդ հաճախականությունը կօգտագործվի հնարավորության դեպքում։"</string>
@@ -1784,7 +1793,7 @@
     <string name="language_selection_title" msgid="2680677278159281088">"Ավելացնել լեզու"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Նախընտրելի տարածաշրջան"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Մուտքագրեք լեզուն"</string>
-    <string name="language_picker_section_suggested" msgid="8414489646861640885">"Առաջարկներ"</string>
+    <string name="language_picker_section_suggested" msgid="8414489646861640885">"Առաջարկվող"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Բոլոր լեզուները"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Բոլոր տարածաշրջանները"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Որոնում"</string>

@@ -16,6 +16,7 @@
 
 package com.android.internal.view.menu;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.IBinder;
@@ -39,6 +40,7 @@ import android.view.View;
  */
 public class ContextMenuBuilder extends MenuBuilder implements ContextMenu {
     
+    @UnsupportedAppUsage
     public ContextMenuBuilder(Context context) {
         super(context);
     }

@@ -16,34 +16,9 @@
 
 package com.android.server.timezone;
 
-import com.android.timezone.distro.DistroVersion;
-import com.android.timezone.distro.StagedDistroOperation;
-import com.android.timezone.distro.TimeZoneDistro;
-import com.android.timezone.distro.installer.TimeZoneDistroInstaller;
-
-import org.junit.Before;
-import org.junit.Test;
-
-import android.app.timezone.Callback;
-import android.app.timezone.DistroRulesVersion;
-import android.app.timezone.ICallback;
-import android.app.timezone.RulesManager;
-import android.app.timezone.RulesState;
-import android.os.ParcelFileDescriptor;
-
-import java.io.File;
-import java.io.FileDescriptor;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.concurrent.Executor;
-import javax.annotation.Nullable;
-
-import libcore.io.IoUtils;
-import libcore.timezone.TzDataSetVersion;
-
 import static com.android.server.timezone.RulesManagerService.REQUIRED_QUERY_PERMISSION;
 import static com.android.server.timezone.RulesManagerService.REQUIRED_UPDATER_PERMISSION;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -61,10 +36,42 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import android.app.timezone.Callback;
+import android.app.timezone.DistroRulesVersion;
+import android.app.timezone.ICallback;
+import android.app.timezone.RulesManager;
+import android.app.timezone.RulesState;
+import android.os.ParcelFileDescriptor;
+
+import com.android.timezone.distro.DistroVersion;
+import com.android.timezone.distro.StagedDistroOperation;
+import com.android.timezone.distro.TimeZoneDistro;
+import com.android.timezone.distro.installer.TimeZoneDistroInstaller;
+
+import libcore.io.IoUtils;
+import libcore.timezone.TzDataSetVersion;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.concurrent.Executor;
+
+import javax.annotation.Nullable;
+
 /**
  * White box interaction / unit testing of the {@link RulesManagerService}.
  */
 public class RulesManagerServiceTest {
+
+    private static final int CURRENT_FORMAT_MAJOR_VERSION =
+            TzDataSetVersion.currentFormatMajorVersion();
+    private static final int CURRENT_FORMAT_MINOR_VERSION =
+            TzDataSetVersion.currentFormatMinorVersion();
 
     private RulesManagerService mRulesManagerService;
 
@@ -116,8 +123,8 @@ public class RulesManagerServiceTest {
     }
 
     @Test
-    public void getRulesState_systemRulesError() throws Exception {
-        configureDeviceCannotReadSystemRulesVersion();
+    public void getRulesState_baseVersionError() throws Exception {
+        configureDeviceCannotReadBaseVersion();
 
         assertNull(mRulesManagerService.getRulesState());
     }
@@ -126,18 +133,18 @@ public class RulesManagerServiceTest {
     public void getRulesState_stagedInstall() throws Exception {
         configureCallerHasPermission();
 
-        configureDeviceSystemRulesVersion("2016a");
+        configureDeviceBaseVersion("2016a");
 
         DistroVersion stagedDistroVersion = new DistroVersion(
-                TzDataSetVersion.currentFormatMajorVersion(),
-                TzDataSetVersion.currentFormatMinorVersion() - 1,
+                CURRENT_FORMAT_MAJOR_VERSION,
+                CURRENT_FORMAT_MINOR_VERSION - 1,
                 "2016c",
-                3);
+                3 /* revision */);
         configureStagedInstall(stagedDistroVersion);
 
         DistroVersion installedDistroVersion = new DistroVersion(
-                TzDataSetVersion.currentFormatMajorVersion(),
-                TzDataSetVersion.currentFormatMinorVersion() - 1,
+                CURRENT_FORMAT_MAJOR_VERSION,
+                CURRENT_FORMAT_MINOR_VERSION - 1,
                 "2016b",
                 4);
         configureInstalledDistroVersion(installedDistroVersion);
@@ -158,13 +165,13 @@ public class RulesManagerServiceTest {
     public void getRulesState_nothingStaged() throws Exception {
         configureCallerHasPermission();
 
-        configureDeviceSystemRulesVersion("2016a");
+        configureDeviceBaseVersion("2016a");
 
         configureNoStagedOperation();
 
         DistroVersion installedDistroVersion = new DistroVersion(
-                TzDataSetVersion.currentFormatMajorVersion(),
-                TzDataSetVersion.currentFormatMinorVersion() - 1,
+                CURRENT_FORMAT_MAJOR_VERSION,
+                CURRENT_FORMAT_MINOR_VERSION - 1,
                 "2016b",
                 4);
         configureInstalledDistroVersion(installedDistroVersion);
@@ -183,13 +190,13 @@ public class RulesManagerServiceTest {
     public void getRulesState_uninstallStaged() throws Exception {
         configureCallerHasPermission();
 
-        configureDeviceSystemRulesVersion("2016a");
+        configureDeviceBaseVersion("2016a");
 
         configureStagedUninstall();
 
         DistroVersion installedDistroVersion = new DistroVersion(
-                TzDataSetVersion.currentFormatMajorVersion(),
-                TzDataSetVersion.currentFormatMinorVersion() - 1,
+                CURRENT_FORMAT_MAJOR_VERSION,
+                CURRENT_FORMAT_MINOR_VERSION - 1,
                 "2016b",
                 4);
         configureInstalledDistroVersion(installedDistroVersion);
@@ -208,8 +215,8 @@ public class RulesManagerServiceTest {
     public void getRulesState_installedRulesError() throws Exception {
         configureCallerHasPermission();
 
-        String systemRulesVersion = "2016a";
-        configureDeviceSystemRulesVersion(systemRulesVersion);
+        String baseRulesVersion = "2016a";
+        configureDeviceBaseVersion(baseRulesVersion);
 
         configureStagedUninstall();
         configureDeviceCannotReadInstalledDistroVersion();
@@ -226,14 +233,14 @@ public class RulesManagerServiceTest {
     public void getRulesState_stagedRulesError() throws Exception {
         configureCallerHasPermission();
 
-        String systemRulesVersion = "2016a";
-        configureDeviceSystemRulesVersion(systemRulesVersion);
+        String baseRulesVersion = "2016a";
+        configureDeviceBaseVersion(baseRulesVersion);
 
         configureDeviceCannotReadStagedDistroOperation();
 
         DistroVersion installedDistroVersion = new DistroVersion(
-                TzDataSetVersion.currentFormatMajorVersion(),
-                TzDataSetVersion.currentFormatMinorVersion() - 1,
+                CURRENT_FORMAT_MAJOR_VERSION,
+                CURRENT_FORMAT_MINOR_VERSION - 1,
                 "2016b",
                 4);
         configureInstalledDistroVersion(installedDistroVersion);
@@ -252,13 +259,13 @@ public class RulesManagerServiceTest {
     public void getRulesState_noInstalledRules() throws Exception {
         configureCallerHasPermission();
 
-        String systemRulesVersion = "2016a";
-        configureDeviceSystemRulesVersion(systemRulesVersion);
+        String baseRulesVersion = "2016a";
+        configureDeviceBaseVersion(baseRulesVersion);
         configureNoStagedOperation();
         configureInstalledDistroVersion(null);
 
         RulesState expectedRuleState = new RulesState(
-                systemRulesVersion, RulesManagerService.DISTRO_FORMAT_VERSION_SUPPORTED,
+                baseRulesVersion, RulesManagerService.DISTRO_FORMAT_VERSION_SUPPORTED,
                 false /* operationInProgress */,
                 RulesState.STAGED_OPERATION_NONE, null /* stagedDistroRulesVersion */,
                 RulesState.DISTRO_STATUS_NONE, null /* installedDistroRulesVersion */);
@@ -269,15 +276,15 @@ public class RulesManagerServiceTest {
     public void getRulesState_operationInProgress() throws Exception {
         configureCallerHasPermission();
 
-        String systemRulesVersion = "2016a";
+        String baseRulesVersion = "2016a";
         String installedRulesVersion = "2016b";
         int revision = 3;
 
-        configureDeviceSystemRulesVersion(systemRulesVersion);
+        configureDeviceBaseVersion(baseRulesVersion);
 
         DistroVersion installedDistroVersion = new DistroVersion(
-                TzDataSetVersion.currentFormatMajorVersion(),
-                TzDataSetVersion.currentFormatMinorVersion() - 1,
+                CURRENT_FORMAT_MAJOR_VERSION,
+                CURRENT_FORMAT_MINOR_VERSION - 1,
                 installedRulesVersion,
                 revision);
         configureInstalledDistroVersion(installedDistroVersion);
@@ -297,7 +304,7 @@ public class RulesManagerServiceTest {
         DistroRulesVersion expectedInstalledDistroRulesVersion =
                 new DistroRulesVersion(installedRulesVersion, revision);
         RulesState expectedRuleState = new RulesState(
-                systemRulesVersion, RulesManagerService.DISTRO_FORMAT_VERSION_SUPPORTED,
+                baseRulesVersion, RulesManagerService.DISTRO_FORMAT_VERSION_SUPPORTED,
                 true /* operationInProgress */,
                 RulesState.STAGED_OPERATION_UNKNOWN, null /* stagedDistroRulesVersion */,
                 RulesState.DISTRO_STATUS_INSTALLED, expectedInstalledDistroRulesVersion);
@@ -858,11 +865,20 @@ public class RulesManagerServiceTest {
                 .thenReturn(true);
 
         // Set up the mocks to return (arbitrary) information about the current device state.
-        when(mMockTimeZoneDistroInstaller.getSystemRulesVersion()).thenReturn("2017a");
-        when(mMockTimeZoneDistroInstaller.getInstalledDistroVersion()).thenReturn(
-                new DistroVersion(2, 3, "2017b", 4));
+        TzDataSetVersion baseVersion = new TzDataSetVersion(
+                CURRENT_FORMAT_MAJOR_VERSION, CURRENT_FORMAT_MINOR_VERSION, "2017a",
+                1 /* revision */);
+        when(mMockTimeZoneDistroInstaller.readBaseVersion()).thenReturn(baseVersion);
+        DistroVersion installedDistroVersion = new DistroVersion(
+                CURRENT_FORMAT_MAJOR_VERSION, CURRENT_FORMAT_MINOR_VERSION, "2017b",
+                4 /* revision */);
+        when(mMockTimeZoneDistroInstaller.getInstalledDistroVersion())
+                .thenReturn(installedDistroVersion);
+        DistroVersion stagedDistroVersion = new DistroVersion(
+                CURRENT_FORMAT_MAJOR_VERSION, CURRENT_FORMAT_MINOR_VERSION, "2017c",
+                7 /* revision */);
         when(mMockTimeZoneDistroInstaller.getStagedDistroOperation()).thenReturn(
-                StagedDistroOperation.install(new DistroVersion(5, 6, "2017c", 7)));
+                StagedDistroOperation.install(stagedDistroVersion));
 
         // Do the dump call.
         String dumpedOutput = doDumpCallAndCapture(rulesManagerService, args);
@@ -973,8 +989,11 @@ public class RulesManagerServiceTest {
         return new CheckToken(1, new PackageVersions(1, 1));
     }
 
-    private void configureDeviceSystemRulesVersion(String systemRulesVersion) throws Exception {
-        when(mMockTimeZoneDistroInstaller.getSystemRulesVersion()).thenReturn(systemRulesVersion);
+    private void configureDeviceBaseVersion(String baseRulesVersion) throws Exception {
+        TzDataSetVersion tzDataSetVersion = new TzDataSetVersion(
+                CURRENT_FORMAT_MAJOR_VERSION, CURRENT_FORMAT_MINOR_VERSION, baseRulesVersion,
+                1 /* revision */);
+        when(mMockTimeZoneDistroInstaller.readBaseVersion()).thenReturn(tzDataSetVersion);
     }
 
     private void configureInstalledDistroVersion(@Nullable DistroVersion installedDistroVersion)
@@ -1002,8 +1021,8 @@ public class RulesManagerServiceTest {
                 .thenThrow(new IOException("Simulated failure"));
     }
 
-    private void configureDeviceCannotReadSystemRulesVersion() throws Exception {
-        when(mMockTimeZoneDistroInstaller.getSystemRulesVersion())
+    private void configureDeviceCannotReadBaseVersion() throws Exception {
+        when(mMockTimeZoneDistroInstaller.readBaseVersion())
                 .thenThrow(new IOException("Simulated failure"));
     }
 

@@ -22,8 +22,9 @@ import static junit.framework.Assert.assertEquals;
 
 import android.app.NotificationChannel;
 import android.os.Parcel;
-import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.FastXmlSerializer;
 import com.android.server.UiServiceTestCase;

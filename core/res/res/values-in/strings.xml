@@ -136,9 +136,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Panggilan WiFi | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Panggilan Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Panggilan WiFi"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Nonaktif"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi dipilih"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Seluler dipilih"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"Panggilan telepon melalui Wi-Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"Panggilan telepon melalui jaringan seluler"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Khusus Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Tidak diteruskan"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -430,6 +434,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Memungkinkan aplikasi mengakses fitur telepon perangkat. Izin ini memungkinkan aplikasi menentukan nomor telepon dan ID perangkat, apakah suatu panggilan aktif atau tidak, dan nomor jarak jauh yang tersambung oleh sebuah panggilan."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"sambungkan panggilan telepon melalui sistem"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Mengizinkan aplikasi menyambungkan panggilan telepon melalui sistem untuk menyempurnakan pengalaman menelepon."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"melihat dan mengontrol panggilan melalui sistem."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Memungkinkan aplikasi melihat dan mengontrol panggilan telepon yang sedang berlangsung di perangkat. Ini mencakup informasi seperti nomor yang menelepon dan status panggilan telepon."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"lanjutkan panggilan dari aplikasi lain"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Mengizinkan aplikasi melanjutkan panggilan yang dimulai di aplikasi lain."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"membaca nomor telepon"</string>
@@ -581,19 +587,19 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Mengizinkan aplikasi membaca dan menulis konfigurasi status Jangan Ganggu."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Setel aturan sandi"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Mengontrol panjang dan karakter yang diizinkan dalam sandi dan PIN kunci layar."</string>
-    <string name="policylab_watchLogin" msgid="5091404125971980158">"Memantau upaya pembukaan kunci layar"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Memantau jumlah sandi yang salah ketik saat membuka kunci layar, dan mengunci tablet atau menghapus semua data tablet jika sandi yang salah ketik terlalu banyak."</string>
-    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Memantau banyaknya sandi salah yang diketikkan saat membuka kunci layar, dan mengunci TV atau menghapus semua data TV jika terlalu banyak sandi salah diketikkan."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Memantau jumlah sandi salah ketik saat membuka kunci layar, dan mengunci ponsel atau menghapus semua data ponsel jika sandi yang salah ketik terlalu banyak."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Memantau banyaknya sandi salah yang diketikkan saat membuka kunci layar, dan mengunci tablet atau menghapus semua data pengguna ini jika terlalu banyak sandi salah diketikkan."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Memantau banyaknya sandi salah yang diketikkan saat membuka kunci layar, dan mengunci TV atau menghapus semua data pengguna ini jika terlalu banyak sandi salah diketikkan."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Memantau banyaknya sandi salah yang diketikkan saat membuka kunci layar, dan mengunci ponsel atau menghapus semua data pengguna ini jika terlalu banyak sandi salah diketikkan."</string>
+    <string name="policylab_watchLogin" msgid="5091404125971980158">"Pantau upaya pembukaan kunci layar"</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Memantau berapa kali sandi yang dimasukkan salah saat ingin membuka kunci layar, dan mengunci tablet atau menghapus semua data tablet jika terjadi terlalu banyak kesalahan memasukkan sandi."</string>
+    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Memantau berapa kali sandi yang dimasukkan salah saat ingin membuka kunci layar, dan mengunci TV atau menghapus semua data TV jika terjadi terlalu banyak kesalahan memasukkan sandi."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Memantau berapa kali sandi yang dimasukkan salah saat ingin membuka kunci layar, dan mengunci ponsel atau menghapus semua data ponsel jika terjadi terlalu banyak kesalahan memasukkan sandi."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Memantau berapa kali sandi yang dimasukkan salah saat ingin membuka kunci layar, dan mengunci tablet atau menghapus semua data pengguna ini jika terjadi terlalu banyak kesalahan memasukkan sandi."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Memantau berapa kali sandi yang dimasukkan salah saat ingin membuka kunci layar, dan mengunci TV atau menghapus semua data pengguna ini jika terjadi terlalu banyak kesalahan memasukkan sandi."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Memantau berapa kali sandi yang dimasukkan salah saat ingin membuka kunci layar, dan mengunci ponsel atau menghapus semua data pengguna ini jika terjadi terlalu banyak kesalahan memasukkan sandi."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Mengubah kunci layar"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Mengubah kunci layar."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Mengunci layar"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Mengontrol cara dan kapan layar mengunci."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Menghapus semua data"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Hapus data tablet tanpa peringatan dengan menyetel ulang data pabrik."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Menghapus data tablet tanpa peringatan dengan mereset ke setelan pabrik."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Menghapus data TV tanpa peringatan dengan mengembalikan ke setelan pabrik."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Menghapus data ponsel tanpa peringatan dengan melakukan reset ke setelan pabrik."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Menghapus data pengguna"</string>
@@ -602,13 +608,13 @@
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Menghapus data pengguna ini di ponsel ini tanpa peringatan."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Setel proxy global perangkat"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Menyetel proxy global perangkat yang akan digunakan jika kebijakan diaktifkan. Hanya pemilik perangkat yang dapat menyetel proxy global."</string>
-    <string name="policylab_expirePassword" msgid="5610055012328825874">"Menyetel berakhirnya sandi kunci layar"</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"Setel akhir masa berlaku sandi kunci layar"</string>
     <string name="policydesc_expirePassword" msgid="5367525762204416046">"Mengubah seberapa sering sandi, PIN, atau pola kunci layar harus diubah."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Setel enkripsi penyimpanan"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Mengharuskan data apl yang disimpan untuk dienkripsi."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Nonaktifkan kamera"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Mencegah penggunaan semua kamera perangkat."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Menonaktifkan beberapa fitur kunci layar"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Nonaktifkan beberapa fitur kunci layar"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Mencegah penggunaan beberapa fitur kunci layar."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Rumah"</item>
@@ -761,7 +767,7 @@
     <string name="lockscreen_transport_stop_description" msgid="5907083260651210034">"Berhenti"</string>
     <string name="lockscreen_transport_rew_description" msgid="6944412838651990410">"Putar Ulang"</string>
     <string name="lockscreen_transport_ffw_description" msgid="42987149870928985">"Maju cepat"</string>
-    <string name="emergency_calls_only" msgid="6733978304386365407">"Telepon urgen saja"</string>
+    <string name="emergency_calls_only" msgid="6733978304386365407">"Panggilan darurat saja"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Jaringan terkunci"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"Kartu SIM terkunci PUK."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Lihatlah Panduan Pengguna atau hubungi Layanan Pelanggan."</string>
@@ -1021,19 +1027,19 @@
     <string name="dial" msgid="1253998302767701559">"Panggil"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Panggil nomor telepon yang dipilih"</string>
     <string name="map" msgid="5441053548030107189">"Peta"</string>
-    <string name="map_desc" msgid="1836995341943772348">"Mencari alamat yang dipilih"</string>
+    <string name="map_desc" msgid="1836995341943772348">"Cari alamat yang dipilih"</string>
     <string name="browse" msgid="1245903488306147205">"Buka"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Buka URL yang dipilih"</string>
-    <string name="sms" msgid="4560537514610063430">"Pesan"</string>
-    <string name="sms_desc" msgid="7526588350969638809">"Mengirimkan SMS ke nomor telepon yang dipilih"</string>
+    <string name="sms" msgid="4560537514610063430">"SMS"</string>
+    <string name="sms_desc" msgid="7526588350969638809">"Kirim SMS ke nomor telepon yang dipilih"</string>
     <string name="add_contact" msgid="7867066569670597203">"Tambahkan"</string>
-    <string name="add_contact_desc" msgid="4830217847004590345">"Menambahkan ke kontak"</string>
+    <string name="add_contact_desc" msgid="4830217847004590345">"Tambahkan ke kontak"</string>
     <string name="view_calendar" msgid="979609872939597838">"Lihat"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"Melihat waktu yang dipilih di kalender"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Jadwal"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Jadwalkan"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Menjadwalkan acara untuk waktu yang dipilih"</string>
-    <string name="view_flight" msgid="7691640491425680214">"Lacak"</string>
-    <string name="view_flight_desc" msgid="3876322502674253506">"Memantau penerbangan yang dipilih"</string>
+    <string name="view_flight" msgid="7691640491425680214">"Pantau"</string>
+    <string name="view_flight_desc" msgid="3876322502674253506">"Pantau penerbangan yang dipilih"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Ruang penyimpanan hampir habis"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Beberapa fungsi sistem mungkin tidak dapat bekerja"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Penyimpanan tidak cukup untuk sistem. Pastikan Anda memiliki 250 MB ruang kosong, lalu mulai ulang."</string>
@@ -1177,8 +1183,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Login ke jaringan"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi tidak memiliki akses internet"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> tidak memiliki akses internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Tap untuk melihat opsi"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Tersambung"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> memiliki konektivitas terbatas"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Tap untuk tetap menyambungkan"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Perubahan pada setelan hotspot Anda"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Pita hotspot Anda telah berubah."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Perangkat ini tidak mendukung preferensi Anda, yaitu hanya 5GHz. Sebagai gantinya, perangkat ini akan menggunakan pita frekuensi 5GHz jika tersedia."</string>
@@ -1260,8 +1269,8 @@
     <string name="usb_power_notification_message" msgid="4647527153291917218">"Mengisi daya perangkat yang terhubung. Tap untuk opsi lainnya."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Aksesori audio analog terdeteksi"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Perangkat yang terpasang tidak kompatibel dengan ponsel ini. Tap untuk mempelajari lebih lanjut."</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"Debugging USB terhubung"</string>
-    <string name="adb_active_notification_message" msgid="7463062450474107752">"Tap untuk menonaktifkan debug USB"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"Proses debug USB terhubung"</string>
+    <string name="adb_active_notification_message" msgid="7463062450474107752">"Tap untuk menonaktifkan proses debug USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Pilih untuk menonaktifkan debugging USB."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Mengambil laporan bug…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Bagikan laporan bug?"</string>
@@ -1455,7 +1464,7 @@
     <string name="data_usage_warning_title" msgid="6499834033204801605">"Peringatan kuota"</string>
     <string name="data_usage_warning_body" msgid="7340198905103751676">"Anda menggunakan <xliff:g id="APP">%s</xliff:g> dari kuota"</string>
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"Batas seluler data tercapai"</string>
-    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Batas data Wi-Fi terlampaui"</string>
+    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Batas kuota Wi-Fi terlampaui"</string>
     <string name="data_usage_limit_body" msgid="2908179506560812973">"Kuota dijeda selama sisa siklus Anda"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"Melebihi batas kuota Anda"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"Melebihi batas kuota Wi-Fi Anda"</string>
@@ -1702,7 +1711,7 @@
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Dihapus oleh admin Anda"</string>
     <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"Untuk memperpanjang masa pakai baterai Anda, fitur Penghemat Baterai menonaktifkan beberapa fitur perangkat dan membatasi aplikasi. "<annotation id="url">"Pelajari Lebih Lanjut"</annotation></string>
     <string name="battery_saver_description" msgid="769989536172631582">"Untuk memperpanjang masa pakai baterai Anda, fitur Penghemat Baterai mematikan sebagian fitur perangkat dan membatasi aplikasi."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Untuk membantu mengurangi penggunaan data, Penghemat Kuota Internet mencegah beberapa aplikasi mengirim atau menerima data di latar belakang. Aplikasi yang sedang digunakan dapat mengakses data, tetapi frekuensinya agak lebih jarang. Misalnya saja, gambar hanya akan ditampilkan setelah di-tap."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Untuk membantu mengurangi penggunaan kuota, Penghemat Kuota Internet mencegah beberapa aplikasi mengirim atau menerima data di latar belakang. Aplikasi yang sedang digunakan dapat mengakses data, tetapi frekuensinya agak lebih jarang. Misalnya saja, gambar hanya akan ditampilkan setelah di-tap."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Aktifkan Penghemat Kuota?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktifkan"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

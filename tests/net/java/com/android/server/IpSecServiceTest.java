@@ -20,6 +20,7 @@ import static android.system.OsConstants.AF_INET;
 import static android.system.OsConstants.EADDRINUSE;
 import static android.system.OsConstants.IPPROTO_UDP;
 import static android.system.OsConstants.SOCK_DGRAM;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -39,18 +40,23 @@ import android.net.IpSecAlgorithm;
 import android.net.IpSecConfig;
 import android.net.IpSecManager;
 import android.net.IpSecSpiResponse;
-import android.net.IpSecTransform;
 import android.net.IpSecUdpEncapResponse;
 import android.os.Binder;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.StructStat;
 
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
 import dalvik.system.SocketTagger;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatcher;
 
 import java.io.FileDescriptor;
 import java.net.InetAddress;
@@ -59,11 +65,6 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatcher;
 
 /** Unit tests for {@link IpSecService}. */
 @SmallTest
@@ -155,10 +156,21 @@ public class IpSecServiceTest {
 
     @Test
     public void testOpenAndCloseUdpEncapsulationSocket() throws Exception {
-        int localport = findUnusedPort();
+        int localport = -1;
+        IpSecUdpEncapResponse udpEncapResp = null;
 
-        IpSecUdpEncapResponse udpEncapResp =
-                mIpSecService.openUdpEncapsulationSocket(localport, new Binder());
+        for (int i = 0; i < IpSecService.MAX_PORT_BIND_ATTEMPTS; i++) {
+            localport = findUnusedPort();
+
+            udpEncapResp = mIpSecService.openUdpEncapsulationSocket(localport, new Binder());
+            assertNotNull(udpEncapResp);
+            if (udpEncapResp.status == IpSecManager.Status.OK) {
+                break;
+            }
+
+            // Else retry to reduce possibility for port-bind failures.
+        }
+
         assertNotNull(udpEncapResp);
         assertEquals(IpSecManager.Status.OK, udpEncapResp.status);
         assertEquals(localport, udpEncapResp.port);
@@ -203,12 +215,11 @@ public class IpSecServiceTest {
 
     @Test
     public void testOpenUdpEncapsulationSocketAfterClose() throws Exception {
-        int localport = findUnusedPort();
         IpSecUdpEncapResponse udpEncapResp =
-                mIpSecService.openUdpEncapsulationSocket(localport, new Binder());
+                mIpSecService.openUdpEncapsulationSocket(0, new Binder());
         assertNotNull(udpEncapResp);
         assertEquals(IpSecManager.Status.OK, udpEncapResp.status);
-        assertEquals(localport, udpEncapResp.port);
+        int localport = udpEncapResp.port;
 
         mIpSecService.closeUdpEncapsulationSocket(udpEncapResp.resourceId);
         udpEncapResp.fileDescriptor.close();
@@ -225,12 +236,11 @@ public class IpSecServiceTest {
      */
     @Test
     public void testUdpEncapPortNotReleased() throws Exception {
-        int localport = findUnusedPort();
         IpSecUdpEncapResponse udpEncapResp =
-                mIpSecService.openUdpEncapsulationSocket(localport, new Binder());
+                mIpSecService.openUdpEncapsulationSocket(0, new Binder());
         assertNotNull(udpEncapResp);
         assertEquals(IpSecManager.Status.OK, udpEncapResp.status);
-        assertEquals(localport, udpEncapResp.port);
+        int localport = udpEncapResp.port;
 
         udpEncapResp.fileDescriptor.close();
 
@@ -272,14 +282,11 @@ public class IpSecServiceTest {
 
     @Test
     public void testOpenUdpEncapsulationSocketTwice() throws Exception {
-        int localport = findUnusedPort();
-
         IpSecUdpEncapResponse udpEncapResp =
-                mIpSecService.openUdpEncapsulationSocket(localport, new Binder());
+                mIpSecService.openUdpEncapsulationSocket(0, new Binder());
         assertNotNull(udpEncapResp);
         assertEquals(IpSecManager.Status.OK, udpEncapResp.status);
-        assertEquals(localport, udpEncapResp.port);
-        mIpSecService.openUdpEncapsulationSocket(localport, new Binder());
+        int localport = udpEncapResp.port;
 
         IpSecUdpEncapResponse testUdpEncapResp =
                 mIpSecService.openUdpEncapsulationSocket(localport, new Binder());

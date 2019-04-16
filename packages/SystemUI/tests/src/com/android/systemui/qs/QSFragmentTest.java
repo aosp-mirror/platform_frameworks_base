@@ -18,36 +18,30 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
-import android.app.FragmentController;
-import android.app.FragmentManagerNonConfig;
+import android.content.Context;
 import android.os.Looper;
-import android.support.test.filters.FlakyTest;
+import android.testing.AndroidTestingRunner;
+import android.testing.LayoutInflaterBuilder;
+import android.testing.TestableLooper;
+import android.testing.TestableLooper.RunWithLooper;
+import android.view.View;
+import android.widget.FrameLayout;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.keyguard.CarrierText;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-
-import android.os.Parcelable;
-import android.support.test.filters.SmallTest;
-import android.testing.AndroidTestingRunner;
-
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
-import android.testing.LayoutInflaterBuilder;
-import android.testing.TestableLooper;
-import android.testing.TestableLooper.RunWithLooper;
 
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import android.content.Context;
-import android.view.View;
-import android.widget.FrameLayout;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper(setAsMainLooper = true)

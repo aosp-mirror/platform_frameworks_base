@@ -35,7 +35,7 @@ import android.util.SparseArray;
    adb install \
      -r out/target/product/hammerhead/data/app/FrameworksServicesTests/FrameworksServicesTests.apk &&
    adb shell am instrument -e class com.android.server.pm.UserRestrictionsUtilsTest \
-     -w com.android.frameworks.servicestests/android.support.test.runner.AndroidJUnitRunner
+     -w com.android.frameworks.servicestests/androidx.test.runner.AndroidJUnitRunner
  * </pre>
  */
 @SmallTest

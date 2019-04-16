@@ -15,11 +15,16 @@
  */
 package com.android.systemui.statusbar.policy;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
+
+import static org.mockito.Mockito.mock;
+
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
 import android.os.Looper;
-import android.support.test.runner.AndroidJUnit4;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.SubscriptionInfo;
@@ -41,11 +46,6 @@ import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.assertFalse;
-import static org.mockito.Mockito.mock;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)

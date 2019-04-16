@@ -1,0 +1,18 @@
+genrule {
+    name: "uiautomator-last-released-api",
+    srcs: ["api/*.txt"],
+    cmd: "cp -f $$(echo $(in) | tr \" \" \"\\n\" | sort -n | tail -1) $(genDir)/last-released-api.txt",
+    out: [
+        "last-released-api.txt",
+    ],
+}
+
+filegroup {
+    name: "uiautomator-current-api",
+    srcs: ["api/current.txt"],
+}
+
+filegroup {
+    name: "uiautomator-removed-api",
+    srcs: ["api/removed.txt"],
+}

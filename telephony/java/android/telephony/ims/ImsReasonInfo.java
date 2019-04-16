@@ -142,6 +142,11 @@ public final class ImsReasonInfo implements Parcelable {
      * Call was disconnected because a handover is not feasible due to network conditions.
      */
     public static final int CODE_LOCAL_HO_NOT_FEASIBLE = 149;
+    /**
+     * This device does not support IMS.
+     * @hide
+     */
+    public static final int CODE_LOCAL_IMS_NOT_SUPPORTED_ON_DEVICE = 150;
 
     /*
      * TIMEOUT (IMS -> Telephony)

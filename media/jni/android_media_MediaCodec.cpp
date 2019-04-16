@@ -23,7 +23,7 @@
 #include "android_media_MediaCrypto.h"
 #include "android_media_MediaDescrambler.h"
 #include "android_media_MediaMetricsJNI.h"
-#include "android_media_Utils.h"
+#include "android_media_Streams.h"
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/android_view_Surface.h"
 #include "android_util_Binder.h"

@@ -32,6 +32,7 @@ interface IAlarmManager {
     void set(String callingPackage, int type, long triggerAtTime, long windowLength,
             long interval, int flags, in PendingIntent operation, in IAlarmListener listener,
             String listenerTag, in WorkSource workSource, in AlarmManager.AlarmClockInfo alarmClock);
+    @UnsupportedAppUsage
     boolean setTime(long millis);
     void setTimeZone(String zone);
     void remove(in PendingIntent operation, in IAlarmListener listener);

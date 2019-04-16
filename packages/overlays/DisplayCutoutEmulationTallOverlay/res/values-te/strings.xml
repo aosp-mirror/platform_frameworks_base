@@ -17,5 +17,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="display_cutout_emulation_overlay" msgid="4955013674374634273">"పొడవైన డిస్‌ప్లే కట్అవుట్‌"</string>
+    <string name="display_cutout_emulation_overlay" msgid="6424539415439220018">"పొడవైన కట్అవుట్‌"</string>
 </resources>

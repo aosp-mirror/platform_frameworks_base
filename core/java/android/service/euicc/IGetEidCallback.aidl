@@ -18,5 +18,6 @@ package android.service.euicc;
 
 /** @hide */
 oneway interface IGetEidCallback {
+    @UnsupportedAppUsage
     void onSuccess(String eid);
 }

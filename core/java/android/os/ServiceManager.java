@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.UnsupportedAppUsage;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
@@ -30,11 +31,13 @@ public final class ServiceManager {
     private static final String TAG = "ServiceManager";
     private static final Object sLock = new Object();
 
+    @UnsupportedAppUsage
     private static IServiceManager sServiceManager;
 
     /**
      * Cache for the "well known" services, such as WM and AM.
      */
+    @UnsupportedAppUsage
     private static HashMap<String, IBinder> sCache = new HashMap<String, IBinder>();
 
     /**
@@ -98,6 +101,7 @@ public final class ServiceManager {
             "getService()",
     });
 
+    @UnsupportedAppUsage
     private static IServiceManager getIServiceManager() {
         if (sServiceManager != null) {
             return sServiceManager;
@@ -115,6 +119,7 @@ public final class ServiceManager {
      * @param name the name of the service to get
      * @return a reference to the service, or <code>null</code> if the service doesn't exist
      */
+    @UnsupportedAppUsage
     public static IBinder getService(String name) {
         try {
             IBinder service = sCache.get(name);
@@ -151,6 +156,7 @@ public final class ServiceManager {
      * @param name the name of the new service
      * @param service the service object
      */
+    @UnsupportedAppUsage
     public static void addService(String name, IBinder service) {
         addService(name, service, false, IServiceManager.DUMP_FLAG_PRIORITY_DEFAULT);
     }
@@ -164,6 +170,7 @@ public final class ServiceManager {
      * @param allowIsolated set to true to allow isolated sandboxed processes
      * to access this service
      */
+    @UnsupportedAppUsage
     public static void addService(String name, IBinder service, boolean allowIsolated) {
         addService(name, service, allowIsolated, IServiceManager.DUMP_FLAG_PRIORITY_DEFAULT);
     }
@@ -178,6 +185,7 @@ public final class ServiceManager {
      * @param dumpPriority supported dump priority levels as a bitmask
      * to access this service
      */
+    @UnsupportedAppUsage
     public static void addService(String name, IBinder service, boolean allowIsolated,
             int dumpPriority) {
         try {
@@ -191,6 +199,7 @@ public final class ServiceManager {
      * Retrieve an existing service called @a name from the
      * service manager.  Non-blocking.
      */
+    @UnsupportedAppUsage
     public static IBinder checkService(String name) {
         try {
             IBinder service = sCache.get(name);
@@ -210,6 +219,7 @@ public final class ServiceManager {
      * @return an array of all currently running services, or <code>null</code> in
      * case of an exception
      */
+    @UnsupportedAppUsage
     public static String[] listServices() {
         try {
             return getIServiceManager().listServices(IServiceManager.DUMP_FLAG_PRIORITY_ALL);

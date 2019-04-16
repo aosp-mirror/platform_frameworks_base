@@ -17,6 +17,7 @@
 package com.android.server.connectivity;
 
 import android.content.Context;
+import android.net.IDnsResolver;
 import android.net.INetd;
 import android.net.INetworkMonitor;
 import android.net.LinkProperties;
@@ -29,6 +30,7 @@ import android.net.NetworkState;
 import android.os.Handler;
 import android.os.INetworkManagementService;
 import android.os.Messenger;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.SparseArray;
@@ -120,7 +122,8 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     // This Network object is always valid.
     public final Network network;
     public LinkProperties linkProperties;
-    // This should only be modified via ConnectivityService.updateCapabilities().
+    // This should only be modified by ConnectivityService, via setNetworkCapabilities().
+    // TODO: make this private with a getter.
     public NetworkCapabilities networkCapabilities;
     public final NetworkMisc networkMisc;
     // Indicates if netd has been told to create this Network. From this point on the appropriate
@@ -155,6 +158,9 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     // Indicates the user was notified of a successful captive portal login since a portal was
     // last detected.
     public boolean captivePortalLoginNotified;
+
+    // Set to true when partial connectivity was detected.
+    public boolean partialConnectivity;
 
     // Networks are lingered when they become unneeded as a result of their NetworkRequests being
     // satisfied by a higher-scoring network. so as to allow communication to wrap up before the
@@ -235,8 +241,10 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     public final Messenger messenger;
     public final AsyncChannel asyncChannel;
 
+    public final int factorySerialNumber;
+
     // Used by ConnectivityService to keep track of 464xlat.
-    public Nat464Xlat clatd;
+    public final Nat464Xlat clatd;
 
     // Set after asynchronous creation of the NetworkMonitor.
     private volatile INetworkMonitor mNetworkMonitor;
@@ -244,15 +252,13 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     private static final String TAG = ConnectivityService.class.getSimpleName();
     private static final boolean VDBG = false;
     private final ConnectivityService mConnService;
-    private final INetd mNetd;
-    private final INetworkManagementService mNMS;
     private final Context mContext;
     private final Handler mHandler;
 
     public NetworkAgentInfo(Messenger messenger, AsyncChannel ac, Network net, NetworkInfo info,
             LinkProperties lp, NetworkCapabilities nc, int score, Context context, Handler handler,
             NetworkMisc misc, ConnectivityService connService, INetd netd,
-            INetworkManagementService nms) {
+            IDnsResolver dnsResolver, INetworkManagementService nms, int factorySerialNumber) {
         this.messenger = messenger;
         asyncChannel = ac;
         network = net;
@@ -260,12 +266,12 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         linkProperties = lp;
         networkCapabilities = nc;
         currentScore = score;
+        clatd = new Nat464Xlat(this, netd, dnsResolver, nms);
         mConnService = connService;
-        mNetd = netd;
-        mNMS = nms;
         mContext = context;
         mHandler = handler;
         networkMisc = misc;
+        this.factorySerialNumber = factorySerialNumber;
     }
 
     /**
@@ -273,6 +279,25 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
      */
     public void onNetworkMonitorCreated(INetworkMonitor networkMonitor) {
         mNetworkMonitor = networkMonitor;
+    }
+
+    /**
+     * Set the NetworkCapabilities on this NetworkAgentInfo. Also attempts to notify NetworkMonitor
+     * of the new capabilities, if NetworkMonitor has been created.
+     *
+     * <p>If {@link NetworkMonitor#notifyNetworkCapabilitiesChanged(NetworkCapabilities)} fails,
+     * the exception is logged but not reported to callers.
+     */
+    public void setNetworkCapabilities(NetworkCapabilities nc) {
+        networkCapabilities = nc;
+        final INetworkMonitor nm = mNetworkMonitor;
+        if (nm != null) {
+            try {
+                nm.notifyNetworkCapabilitiesChanged(nc);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error notifying NetworkMonitor of updated NetworkCapabilities", e);
+            }
+        }
     }
 
     public ConnectivityService connService() {
@@ -595,32 +620,8 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         for (LingerTimer timer : mLingerTimers) { pw.println(timer); }
     }
 
-    public void updateClat(INetworkManagementService netd) {
-        if (Nat464Xlat.requiresClat(this)) {
-            maybeStartClat();
-        } else {
-            maybeStopClat();
-        }
-    }
-
-    /** Ensure clat has started for this network. */
-    public void maybeStartClat() {
-        if (clatd != null && clatd.isStarted()) {
-            return;
-        }
-        clatd = new Nat464Xlat(this, mNetd, mNMS);
-        clatd.start();
-    }
-
-    /** Ensure clat has stopped for this network. */
-    public void maybeStopClat() {
-        if (clatd == null) {
-            return;
-        }
-        clatd.stop();
-        clatd = null;
-    }
-
+    // TODO: Print shorter members first and only print the boolean variable which value is true
+    // to improve readability.
     public String toString() {
         return "NetworkAgentInfo{ ni{" + networkInfo + "}  "
                 + "network{" + network + "}  nethandle{" + network.getNetworkHandle() + "}  "
@@ -633,6 +634,8 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
                 + "everCaptivePortalDetected{" + everCaptivePortalDetected + "} "
                 + "lastCaptivePortalDetected{" + lastCaptivePortalDetected + "} "
                 + "captivePortalLoginNotified{" + captivePortalLoginNotified + "} "
+                + "partialConnectivity{" + partialConnectivity + "} "
+                + "acceptPartialConnectivity{" + networkMisc.acceptPartialConnectivity + "} "
                 + "clat{" + clatd + "} "
                 + "}";
     }

@@ -21,6 +21,8 @@ import android.os.Bundle;
 
 /** @hide */
 oneway interface IAssistDataReceiver {
+    @UnsupportedAppUsage
     void onHandleAssistData(in Bundle resultData);
+    @UnsupportedAppUsage
     void onHandleAssistScreenshot(in Bitmap screenshot);
 }

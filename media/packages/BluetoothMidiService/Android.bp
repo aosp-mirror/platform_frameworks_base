@@ -1,0 +1,6 @@
+android_app {
+    name: "BluetoothMidiService",
+    srcs: ["src/**/*.java"],
+    platform_apis: true,
+    certificate: "platform",
+}

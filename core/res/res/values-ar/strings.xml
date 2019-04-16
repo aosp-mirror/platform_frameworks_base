@@ -140,9 +140,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"‏شبكة Wi-Fi التابعة لـ <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"‏الاتصال عبر شبكة WiFi | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"‏شبكة VoWifi التابعة لـ <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"‏الاتصال عبر Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"‏الاتصال عبر WiFi"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"إيقاف"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"‏شبكة Wi-Fi مفضّلة"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"شبكة بيانات الجوال مفضَّلة"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"‏الاتصال عبر Wi-Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"الاتصال عبر شبكة الجوّال"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"‏Wi-Fi فقط"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: لم تتم إعادة التوجيه"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -171,10 +175,10 @@
     <string name="contentServiceSync" msgid="8353523060269335667">"مزامنة"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="7036196943673524858">"تتعذّر المزامنة."</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"تمت محاولة حذف مقدار كبير من محتوى <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
-    <string name="low_memory" product="tablet" msgid="6494019234102154896">"سعة تخزين الجهاز اللوحي ممتلئة! احذف بعض الملفات لإخلاء مساحة."</string>
-    <string name="low_memory" product="watch" msgid="4415914910770005166">"سعة تخزين المشاهدة ممتلئة! احذف بعض الملفات لتحرير مساحة."</string>
-    <string name="low_memory" product="tv" msgid="516619861191025923">"سعة تخزين التلفزيون ممتلئة. يمكنك حذف بعض الملفات لتوفير مساحة فارغة."</string>
-    <string name="low_memory" product="default" msgid="3475999286680000541">"سعة تخزين الهاتف ممتلئة. احذف بعض الملفات لإخلاء مساحة."</string>
+    <string name="low_memory" product="tablet" msgid="6494019234102154896">"مساحة تخزين الجهاز اللوحي ممتلئة! احذف بعض الملفات لإخلاء مساحة."</string>
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"مساحة تخزين المشاهدة ممتلئة! احذف بعض الملفات لتحرير مساحة."</string>
+    <string name="low_memory" product="tv" msgid="516619861191025923">"مساحة تخزين التلفزيون ممتلئة. يمكنك حذف بعض الملفات لتوفير مساحة فارغة."</string>
+    <string name="low_memory" product="default" msgid="3475999286680000541">"مساحة تخزين الهاتف ممتلئة. احذف بعض الملفات لإخلاء مساحة."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
       <item quantity="zero">تم تثبيت شهادة المرجع المصدق</item>
       <item quantity="two">تم تثبيت شهادتي المرجع المصدق</item>
@@ -300,13 +304,13 @@
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بتوجيه رسائل SMS وعرضها؟"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"التخزين"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"الوصول إلى الصور والوسائط والملفات على جهازك"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالدخول إلى الصور والوسائط والملفات على جهازك؟"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالوصول إلى الصور والوسائط والملفات على جهازك؟"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"الميكروفون"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"تسجيل الصوت"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بتسجيل الصوت؟"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"الكاميرا"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"التقاط صور وتسجيل فيديو"</string>
-    <string name="permgrouprequest_camera" msgid="1299833592069671756">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالتقاط الصور وتسجيل الفيديو؟"</string>
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالتقاط صور وتسجيل فيديو؟"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"سجلّ المكالمات"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"قراءة سجلّ المكالمات الهاتفية والكتابة إليه"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالدخول إلى سجلات مكالماتك الهاتفية؟"</string>
@@ -442,6 +446,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"للسماح للتطبيق بالدخول إلى ميزات الهاتف في الجهاز. ويتيح هذا الإذن للتطبيق تحديد رقم الهاتف ومعرّفات الجهاز، وما إذا كانت هناك مكالمة نشطة والرقم البعيد الذي تم الاتصال به في المكالمة."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"توجيه المكالمات من خلال النظام"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"يسمح للتطبيق بتوجيه المكالمات من خلال النظام لتحسين تجربة الاتصال."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"رؤية المكالمات والتحكّم فيها من خلال النظام"</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"يستطيع التطبيق رؤية المكالمات الجارية على الجهاز والتحكّم فيها. ويشمل ذلك معلومات مثل الأرقام وحالة المكالمات."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"مواصلة مكالمة من تطبيق آخر"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"السماح للتطبيق بمواصلة مكالمة بدأت في تطبيق آخر."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"قراءة أرقام الهواتف"</string>
@@ -619,7 +625,7 @@
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"تعيين تشفير التخزين"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"يمكنك طلب تشفير بيانات التطبيق المخزنة."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"إيقاف الكاميرات"</string>
-    <string name="policydesc_disableCamera" msgid="2306349042834754597">"يمكنك منح استخدام جميع كاميرات الجهاز."</string>
+    <string name="policydesc_disableCamera" msgid="2306349042834754597">"يمكنك منع استخدام جميع كاميرات الجهاز."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"إيقاف بعض ميزات قفل الشاشة"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"منع استخدام بعض ميزات قفل الشاشة."</string>
   <string-array name="phoneTypes">
@@ -1096,15 +1102,15 @@
     <string name="deleteText" msgid="6979668428458199034">"حذف"</string>
     <string name="inputMethod" msgid="1653630062304567879">"طريقة الإرسال"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"إجراءات النص"</string>
-    <string name="email" msgid="4560673117055050403">"بريد إلكتروني"</string>
+    <string name="email" msgid="4560673117055050403">"إرسال بريد إلكتروني"</string>
     <string name="email_desc" msgid="3638665569546416795">"مراسلة العنوان المختار عبر البريد الإلكتروني"</string>
     <string name="dial" msgid="1253998302767701559">"اتصال"</string>
     <string name="dial_desc" msgid="6573723404985517250">"الاتصال برقم الهاتف المختار"</string>
-    <string name="map" msgid="5441053548030107189">"خريطة"</string>
+    <string name="map" msgid="5441053548030107189">"فتح تطبيق خرائط"</string>
     <string name="map_desc" msgid="1836995341943772348">"تحديد موقع العنوان المختار"</string>
     <string name="browse" msgid="1245903488306147205">"فتح"</string>
     <string name="browse_desc" msgid="8220976549618935044">"‏فتح عنوان URL المختار"</string>
-    <string name="sms" msgid="4560537514610063430">"رسالة"</string>
+    <string name="sms" msgid="4560537514610063430">"إرسال رسائل قصيرة"</string>
     <string name="sms_desc" msgid="7526588350969638809">"مراسلة رقم الهاتف المختار"</string>
     <string name="add_contact" msgid="7867066569670597203">"إضافة"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"إضافة إلى جهات الاتصال"</string>
@@ -1116,7 +1122,7 @@
     <string name="view_flight_desc" msgid="3876322502674253506">"تتبُّع الرحلة الجوية المختارة"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"مساحة التخزين منخفضة"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"قد لا تعمل بعض وظائف النظام"</string>
-    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"ليست هناك سعة تخزينية كافية للنظام. تأكد من أنه لديك مساحة خالية تبلغ ٢٥٠ ميغابايت وأعد التشغيل."</string>
+    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"ليست هناك مساحة تخزين كافية للنظام. تأكد من أنه لديك مساحة خالية تبلغ ٢٥٠ ميغابايت وأعد التشغيل."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> قيد التشغيل"</string>
     <string name="app_running_notification_text" msgid="1197581823314971177">"انقر للحصول على مزيد من المعلومات أو لإيقاف التطبيق."</string>
     <string name="ok" msgid="5970060430562524910">"حسنًا"</string>
@@ -1192,7 +1198,7 @@
     <string name="android_start_title" product="default" msgid="4536778526365907780">"جارٍ بدء تشغيل الهاتف…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"جارٍ بدء تشغيل الجهاز اللوحي…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"جارٍ بدء تشغيل الجهاز…"</string>
-    <string name="android_upgrading_fstrim" msgid="8036718871534640010">"جارٍ تحسين سعة التخزين."</string>
+    <string name="android_upgrading_fstrim" msgid="8036718871534640010">"جارٍ تحسين مساحة التخزين."</string>
     <string name="android_upgrading_notification_title" product="default" msgid="1511552415039349062">"جارٍ إنهاء تحديث النظام…"</string>
     <string name="app_upgrading_toast" msgid="3008139776215597053">"جارٍ ترقية <xliff:g id="APPLICATION">%1$s</xliff:g>…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"جارٍ تحسين التطبيق <xliff:g id="NUMBER_0">%1$d</xliff:g> من <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
@@ -1265,8 +1271,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"تسجيل الدخول إلى الشبكة"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"‏شبكة Wi-Fi غير متصلة بالإنترنت"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"لا يتوفّر في <xliff:g id="NETWORK_SSID">%1$s</xliff:g> إمكانية الاتصال بالإنترنت."</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"انقر للحصول على الخيارات."</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"تمّ الاتصال."</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"إمكانية اتصال <xliff:g id="NETWORK_SSID">%1$s</xliff:g> محدودة."</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"يمكنك النقر للاتصال على أي حال."</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"التغييرات التي طرأت على إعدادات نقطة الاتصال"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"تمّ تغيير نطاق نقطة الاتصال الخاصة بك."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"لا يتوافق هذا الجهاز مع إعدادك المفضّل الخاص باستخدام النطاق 5 غيغاهرتز فقط. وسيستخدم الجهاز بدلاً من ذلك النطاق 5 غيغاهرتز عندما يكون متاحًا."</string>
@@ -1441,7 +1450,7 @@
     <string name="forward_intent_to_work" msgid="621480743856004612">"أنت تستخدم هذا التطبيق في ملفك الشخصي للعمل"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"طريقة الإرسال"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"مزامنة"</string>
-    <string name="accessibility_binding_label" msgid="4148120742096474641">"إمكانية الدخول"</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"إمكانية الوصول"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"الخلفية"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"تغيير الخلفية"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"برنامج تلقّي الإشعارات الصوتية"</string>
@@ -1459,7 +1468,7 @@
     <string name="vpn_lockdown_config" msgid="8151951501116759194">"‏تغيير إعدادات الشبكة أو الشبكة الافتراضية الخاصة (VPN)"</string>
     <string name="upload_file" msgid="2897957172366730416">"اختيار ملف"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"لم يتم اختيار أي ملف"</string>
-    <string name="reset" msgid="2448168080964209908">"إعادة تعيين"</string>
+    <string name="reset" msgid="2448168080964209908">"إعادة الضبط"</string>
     <string name="submit" msgid="1602335572089911941">"إرسال"</string>
     <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"تطبيق القيادة قيد التشغيل"</string>
     <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"انقر للخروج من تطبيق القيادة."</string>
@@ -1537,7 +1546,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"المزيد من الخيارات"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s، %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s، %2$s، %3$s"</string>
-    <string name="storage_internal" msgid="3570990907910199483">"سعة التخزين المشتركة الداخلية"</string>
+    <string name="storage_internal" msgid="3570990907910199483">"مساحة التخزين المشتركة الداخلية"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"‏بطاقة SD"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"‏بطاقة SD من <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"‏محرك أقراص USB"</string>
@@ -1920,7 +1929,7 @@
     <string name="language_selection_title" msgid="2680677278159281088">"إضافة لغة"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"تفضيل المنطقة"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"اكتب اسم اللغة"</string>
-    <string name="language_picker_section_suggested" msgid="8414489646861640885">"المقترحة"</string>
+    <string name="language_picker_section_suggested" msgid="8414489646861640885">"اللغات المقترحة"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"جميع اللغات"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"كل المناطق"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"البحث"</string>
@@ -1958,7 +1967,7 @@
     <string name="app_category_news" msgid="7496506240743986873">"الأخبار والمجلات"</string>
     <string name="app_category_maps" msgid="5878491404538024367">"الخرائط والتنقل"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"الإنتاجية"</string>
-    <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"سعة التخزين للجهاز"</string>
+    <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"مساحة التخزين للجهاز"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"‏تصحيح أخطاء USB"</string>
     <string name="time_picker_hour_label" msgid="2979075098868106450">"ساعة"</string>
     <string name="time_picker_minute_label" msgid="5168864173796598399">"دقيقة"</string>

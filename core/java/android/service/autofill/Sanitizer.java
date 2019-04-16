@@ -21,6 +21,9 @@ package android.service.autofill;
  * <p>Typically used to avoid displaying the save UI for values that are autofilled but reformatted
  * by the app&mdash;for example, if the autofill service sends a credit card number
  * value as "004815162342108" and the app automatically changes it to "0048 1516 2342 108".
+ *
+ * <p><b>Note:</b> This interface is not meant to be implemented by app developers; only
+ * implementations provided by the Android System can be used in other Autofill APIs.
  */
 public interface Sanitizer {
 }

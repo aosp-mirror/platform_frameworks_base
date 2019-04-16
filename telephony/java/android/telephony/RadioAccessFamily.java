@@ -17,11 +17,15 @@
 package android.telephony;
 
 import android.annotation.UnsupportedAppUsage;
+import android.hardware.radio.V1_0.RadioTechnology;
+import android.hardware.radio.V1_4.CellInfo.Info;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telephony.TelephonyManager.PrefNetworkMode;
 
 import com.android.internal.telephony.RILConstants;
+
 
 /**
  * Object to indicate the phone radio type and access technology.
@@ -33,32 +37,34 @@ public class RadioAccessFamily implements Parcelable {
     /**
      * TODO: get rid of RAF definition in RadioAccessFamily and
      * use {@link TelephonyManager.NetworkTypeBitMask}
+     * TODO: public definition {@link TelephonyManager.NetworkTypeBitMask} is long.
+     * TODO: Convert from int to long everywhere including HAL definitions.
      */
     // 2G
-    public static final int RAF_UNKNOWN = TelephonyManager.NETWORK_TYPE_BITMASK_UNKNOWN;
-    public static final int RAF_GSM = TelephonyManager.NETWORK_TYPE_BITMASK_GSM;
-    public static final int RAF_GPRS = TelephonyManager.NETWORK_TYPE_BITMASK_GPRS;
-    public static final int RAF_EDGE = TelephonyManager.NETWORK_TYPE_BITMASK_EDGE;
-    public static final int RAF_IS95A = TelephonyManager.NETWORK_TYPE_BITMASK_CDMA;
-    public static final int RAF_IS95B = TelephonyManager.NETWORK_TYPE_BITMASK_CDMA;
-    public static final int RAF_1xRTT = TelephonyManager.NETWORK_TYPE_BITMASK_1xRTT;
+    public static final int RAF_UNKNOWN = (int) TelephonyManager.NETWORK_TYPE_BITMASK_UNKNOWN;
+    public static final int RAF_GSM = (int) TelephonyManager.NETWORK_TYPE_BITMASK_GSM;
+    public static final int RAF_GPRS = (int) TelephonyManager.NETWORK_TYPE_BITMASK_GPRS;
+    public static final int RAF_EDGE = (int) TelephonyManager.NETWORK_TYPE_BITMASK_EDGE;
+    public static final int RAF_IS95A = (int) TelephonyManager.NETWORK_TYPE_BITMASK_CDMA;
+    public static final int RAF_IS95B = (int) TelephonyManager.NETWORK_TYPE_BITMASK_CDMA;
+    public static final int RAF_1xRTT = (int) TelephonyManager.NETWORK_TYPE_BITMASK_1xRTT;
     // 3G
-    public static final int RAF_EVDO_0 = TelephonyManager.NETWORK_TYPE_BITMASK_EVDO_0;
-    public static final int RAF_EVDO_A = TelephonyManager.NETWORK_TYPE_BITMASK_EVDO_A;
-    public static final int RAF_EVDO_B = TelephonyManager.NETWORK_TYPE_BITMASK_EVDO_B;
-    public static final int RAF_EHRPD = TelephonyManager.NETWORK_TYPE_BITMASK_EHRPD;
-    public static final int RAF_HSUPA = TelephonyManager.NETWORK_TYPE_BITMASK_HSUPA;
-    public static final int RAF_HSDPA = TelephonyManager.NETWORK_TYPE_BITMASK_HSDPA;
-    public static final int RAF_HSPA = TelephonyManager.NETWORK_TYPE_BITMASK_HSPA;
-    public static final int RAF_HSPAP = TelephonyManager.NETWORK_TYPE_BITMASK_HSPAP;
-    public static final int RAF_UMTS = TelephonyManager.NETWORK_TYPE_BITMASK_UMTS;
-    public static final int RAF_TD_SCDMA = TelephonyManager.NETWORK_TYPE_BITMASK_TD_SCDMA;
+    public static final int RAF_EVDO_0 = (int) TelephonyManager.NETWORK_TYPE_BITMASK_EVDO_0;
+    public static final int RAF_EVDO_A = (int) TelephonyManager.NETWORK_TYPE_BITMASK_EVDO_A;
+    public static final int RAF_EVDO_B = (int) TelephonyManager.NETWORK_TYPE_BITMASK_EVDO_B;
+    public static final int RAF_EHRPD = (int) TelephonyManager.NETWORK_TYPE_BITMASK_EHRPD;
+    public static final int RAF_HSUPA = (int) TelephonyManager.NETWORK_TYPE_BITMASK_HSUPA;
+    public static final int RAF_HSDPA = (int) TelephonyManager.NETWORK_TYPE_BITMASK_HSDPA;
+    public static final int RAF_HSPA = (int) TelephonyManager.NETWORK_TYPE_BITMASK_HSPA;
+    public static final int RAF_HSPAP = (int) TelephonyManager.NETWORK_TYPE_BITMASK_HSPAP;
+    public static final int RAF_UMTS = (int) TelephonyManager.NETWORK_TYPE_BITMASK_UMTS;
+    public static final int RAF_TD_SCDMA = (int) TelephonyManager.NETWORK_TYPE_BITMASK_TD_SCDMA;
     // 4G
-    public static final int RAF_LTE = TelephonyManager.NETWORK_TYPE_BITMASK_LTE;
-    public static final int RAF_LTE_CA = TelephonyManager.NETWORK_TYPE_BITMASK_LTE_CA;
+    public static final int RAF_LTE = (int) TelephonyManager.NETWORK_TYPE_BITMASK_LTE;
+    public static final int RAF_LTE_CA = (int) TelephonyManager.NETWORK_TYPE_BITMASK_LTE_CA;
 
     // 5G
-    public static final int RAF_NR = TelephonyManager.NETWORK_TYPE_BITMASK_NR;
+    public static final int RAF_NR = (int) TelephonyManager.NETWORK_TYPE_BITMASK_NR;
 
     // Grouping of RAFs
     // 2G
@@ -147,25 +153,26 @@ public class RadioAccessFamily implements Parcelable {
     /**
      * Implement the Parcelable interface.
      */
-    public static final Creator<RadioAccessFamily> CREATOR =
-            new Creator<RadioAccessFamily>() {
+    public static final Creator<android.telephony.RadioAccessFamily> CREATOR =
+            new Creator<android.telephony.RadioAccessFamily>() {
 
         @Override
-        public RadioAccessFamily createFromParcel(Parcel in) {
+        public android.telephony.RadioAccessFamily createFromParcel(Parcel in) {
             int phoneId = in.readInt();
             int radioAccessFamily = in.readInt();
 
-            return new RadioAccessFamily(phoneId, radioAccessFamily);
+            return new android.telephony.RadioAccessFamily(phoneId, radioAccessFamily);
         }
 
         @Override
-        public RadioAccessFamily[] newArray(int size) {
-            return new RadioAccessFamily[size];
+        public android.telephony.RadioAccessFamily[] newArray(int size) {
+            return new android.telephony.RadioAccessFamily[size];
         }
     };
 
     @UnsupportedAppUsage
-    public static int getRafFromNetworkType(int type) {
+    @TelephonyManager.NetworkTypeBitMask
+    public static int getRafFromNetworkType(@PrefNetworkMode int type) {
         switch (type) {
             case RILConstants.NETWORK_MODE_WCDMA_PREF:
                 return GSM | WCDMA;
@@ -274,6 +281,7 @@ public class RadioAccessFamily implements Parcelable {
     }
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
+    @PrefNetworkMode
     public static int getNetworkTypeFromRaf(int raf) {
         raf = getAdjustedRaf(raf);
 
@@ -388,80 +396,5 @@ public class RadioAccessFamily implements Parcelable {
             result |= rafType;
         }
         return result;
-    }
-
-    /**
-     * convert RAF from {@link ServiceState.RilRadioTechnology} bitmask to
-     * {@link TelephonyManager.NetworkTypeBitMask}, the bitmask represented by
-     * {@link TelephonyManager.NetworkType}. Reasons are {@link TelephonyManager.NetworkType} are
-     * public while {@link ServiceState.RilRadioTechnology} are hidden. We
-     * don't want to expose two sets of definition to public.
-     *
-     * @param raf bitmask represented by {@link ServiceState.RilRadioTechnology}
-     * @return {@link TelephonyManager.NetworkTypeBitMask}
-     */
-    public static int convertToNetworkTypeBitMask(int raf) {
-        int networkTypeRaf = 0;
-
-        if ((raf & (1 << ServiceState.RIL_RADIO_TECHNOLOGY_GSM)) != 0) {
-            networkTypeRaf |= TelephonyManager.NETWORK_TYPE_BITMASK_GSM;
-        }
-        if ((raf & (1 << ServiceState.RIL_RADIO_TECHNOLOGY_GPRS)) != 0) {
-            networkTypeRaf |= TelephonyManager.NETWORK_TYPE_BITMASK_GPRS;
-        }
-        if ((raf & (1 << ServiceState.RIL_RADIO_TECHNOLOGY_EDGE)) != 0) {
-            networkTypeRaf |= TelephonyManager.NETWORK_TYPE_BITMASK_EDGE;
-        }
-        // convert both IS95A/IS95B to CDMA as network mode doesn't support CDMA
-        if ((raf & (1 << ServiceState.RIL_RADIO_TECHNOLOGY_IS95A)) != 0) {
-            networkTypeRaf |= TelephonyManager.NETWORK_TYPE_BITMASK_CDMA;
-        }
-        if ((raf & (1 << ServiceState.RIL_RADIO_TECHNOLOGY_IS95B)) != 0) {
-            networkTypeRaf |= TelephonyManager.NETWORK_TYPE_BITMASK_CDMA;
-        }
-        if ((raf & (1 << ServiceState.RIL_RADIO_TECHNOLOGY_1xRTT)) != 0) {
-            networkTypeRaf |= TelephonyManager.NETWORK_TYPE_BITMASK_1xRTT;
-        }
-        if ((raf & (1 << ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_0)) != 0) {
-            networkTypeRaf |= TelephonyManager.NETWORK_TYPE_BITMASK_EVDO_0;
-        }
-        if ((raf & (1 << ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_A)) != 0) {
-            networkTypeRaf |= TelephonyManager.NETWORK_TYPE_BITMASK_EVDO_A;
-        }
-        if ((raf & (1 << ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_B)) != 0) {
-            networkTypeRaf |= TelephonyManager.NETWORK_TYPE_BITMASK_EVDO_B;
-        }
-        if ((raf & (1 << ServiceState.RIL_RADIO_TECHNOLOGY_EHRPD)) != 0) {
-            networkTypeRaf |= TelephonyManager.NETWORK_TYPE_BITMASK_EHRPD;
-        }
-        if ((raf & (1 << ServiceState.RIL_RADIO_TECHNOLOGY_HSUPA)) != 0) {
-            networkTypeRaf |= TelephonyManager.NETWORK_TYPE_BITMASK_HSUPA;
-        }
-        if ((raf & (1 << ServiceState.RIL_RADIO_TECHNOLOGY_HSDPA)) != 0) {
-            networkTypeRaf |= TelephonyManager.NETWORK_TYPE_BITMASK_HSDPA;
-        }
-        if ((raf & (1 << ServiceState.RIL_RADIO_TECHNOLOGY_HSPA)) != 0) {
-            networkTypeRaf |= TelephonyManager.NETWORK_TYPE_BITMASK_HSPA;
-        }
-        if ((raf & (1 << ServiceState.RIL_RADIO_TECHNOLOGY_HSPAP)) != 0) {
-            networkTypeRaf |= TelephonyManager.NETWORK_TYPE_BITMASK_HSPAP;
-        }
-        if ((raf & (1 << ServiceState.RIL_RADIO_TECHNOLOGY_UMTS)) != 0) {
-            networkTypeRaf |= TelephonyManager.NETWORK_TYPE_BITMASK_UMTS;
-        }
-        if ((raf & (1 << ServiceState.RIL_RADIO_TECHNOLOGY_TD_SCDMA)) != 0) {
-            networkTypeRaf |= TelephonyManager.NETWORK_TYPE_BITMASK_TD_SCDMA;
-        }
-        if ((raf & (1 << ServiceState.RIL_RADIO_TECHNOLOGY_LTE)) != 0) {
-            networkTypeRaf |= TelephonyManager.NETWORK_TYPE_BITMASK_LTE;
-        }
-        if ((raf & (1 << ServiceState.RIL_RADIO_TECHNOLOGY_LTE_CA)) != 0) {
-            networkTypeRaf |= TelephonyManager.NETWORK_TYPE_BITMASK_LTE_CA;
-        }
-        if ((raf & (1 << ServiceState.RIL_RADIO_TECHNOLOGY_NR)) != 0) {
-            networkTypeRaf |= TelephonyManager.NETWORK_TYPE_BITMASK_NR;
-        }
-
-        return (networkTypeRaf == 0) ? TelephonyManager.NETWORK_TYPE_UNKNOWN : networkTypeRaf;
     }
 }

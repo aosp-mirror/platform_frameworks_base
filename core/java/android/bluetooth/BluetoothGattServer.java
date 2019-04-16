@@ -522,7 +522,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
      * {@link BluetoothGattServerCallback#onConnectionStateChange} callback will be
      * invoked when the connection state changes as a result of this function.
      *
-     * <p>The autoConnect paramter determines whether to actively connect to
+     * <p>The autoConnect parameter determines whether to actively connect to
      * the remote device, or rather passively scan and finalize the connection
      * when the remote device is in range/available. Generally, the first ever
      * connection to a device should be direct (autoConnect set to false) and
@@ -695,7 +695,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
     /**
      * Add a service to the list of services to be hosted.
      *
-     * <p>Once a service has been addded to the the list, the service and its
+     * <p>Once a service has been addded to the list, the service and its
      * included characteristics will be provided by the local device.
      *
      * <p>If the local device has already exposed services when this function

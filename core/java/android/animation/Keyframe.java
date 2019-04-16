@@ -76,7 +76,7 @@ public abstract class Keyframe implements Cloneable {
      * @param fraction The time, expressed as a value between 0 and 1, representing the fraction
      * of time elapsed of the overall animation duration.
      * @param value The value that the object will animate to as the animation time approaches
-     * the time in this keyframe, and the the value animated from as the time passes the time in
+     * the time in this keyframe, and the value animated from as the time passes the time in
      * this keyframe.
      */
     public static Keyframe ofInt(float fraction, int value) {
@@ -108,7 +108,7 @@ public abstract class Keyframe implements Cloneable {
      * @param fraction The time, expressed as a value between 0 and 1, representing the fraction
      * of time elapsed of the overall animation duration.
      * @param value The value that the object will animate to as the animation time approaches
-     * the time in this keyframe, and the the value animated from as the time passes the time in
+     * the time in this keyframe, and the value animated from as the time passes the time in
      * this keyframe.
      */
     public static Keyframe ofFloat(float fraction, float value) {
@@ -140,7 +140,7 @@ public abstract class Keyframe implements Cloneable {
      * @param fraction The time, expressed as a value between 0 and 1, representing the fraction
      * of time elapsed of the overall animation duration.
      * @param value The value that the object will animate to as the animation time approaches
-     * the time in this keyframe, and the the value animated from as the time passes the time in
+     * the time in this keyframe, and the value animated from as the time passes the time in
      * this keyframe.
      */
     public static Keyframe ofObject(float fraction, Object value) {

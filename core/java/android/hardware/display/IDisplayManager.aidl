@@ -30,6 +30,7 @@ import android.view.Surface;
 
 /** @hide */
 interface IDisplayManager {
+    @UnsupportedAppUsage
     DisplayInfo getDisplayInfo(int displayId);
     int[] getDisplayIds();
 

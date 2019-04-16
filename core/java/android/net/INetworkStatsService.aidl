@@ -19,16 +19,19 @@ package android.net;
 import android.net.DataUsageRequest;
 import android.net.INetworkStatsSession;
 import android.net.Network;
+import android.net.NetworkState;
 import android.net.NetworkStats;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
 import android.os.IBinder;
 import android.os.Messenger;
+import com.android.internal.net.VpnInfo;
 
 /** {@hide} */
 interface INetworkStatsService {
 
     /** Start a statistics query session. */
+    @UnsupportedAppUsage
     INetworkStatsSession openSession();
 
     /** Start a statistics query session. If calling package is profile or device owner then it is
@@ -37,9 +40,11 @@ interface INetworkStatsService {
      *  PACKAGE_USAGE_STATS permission is always checked. If PACKAGE_USAGE_STATS is not granted
      *  READ_NETWORK_USAGE_STATS is checked for.
      */
+    @UnsupportedAppUsage
     INetworkStatsSession openSessionForUsageStats(int flags, String callingPackage);
 
     /** Return data layer snapshot of UID network usage. */
+    @UnsupportedAppUsage
     NetworkStats getDataLayerSnapshotForUid(int uid);
 
     /** Get a detailed snapshot of stats since boot for all UIDs.
@@ -52,14 +57,20 @@ interface INetworkStatsService {
     NetworkStats getDetailedUidStats(in String[] requiredIfaces);
 
     /** Return set of any ifaces associated with mobile networks since boot. */
+    @UnsupportedAppUsage
     String[] getMobileIfaces();
 
     /** Increment data layer count of operations performed for UID and tag. */
     void incrementOperationCount(int uid, int tag, int operationCount);
 
     /** Force update of ifaces. */
-    void forceUpdateIfaces(in Network[] defaultNetworks);
+    void forceUpdateIfaces(
+         in Network[] defaultNetworks,
+         in VpnInfo[] vpnArray,
+         in NetworkState[] networkStates,
+         in String activeIface);
     /** Force update of statistics. */
+    @UnsupportedAppUsage
     void forceUpdate();
 
     /** Registers a callback on data usage. */

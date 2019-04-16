@@ -41,6 +41,7 @@ import java.util.List;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -207,8 +208,11 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     private final BackgroundFallback mBackgroundFallback = new BackgroundFallback();
 
     private int mLastTopInset = 0;
+    @UnsupportedAppUsage
     private int mLastBottomInset = 0;
+    @UnsupportedAppUsage
     private int mLastRightInset = 0;
+    @UnsupportedAppUsage
     private int mLastLeftInset = 0;
     private boolean mLastHasTopStableInset = false;
     private boolean mLastHasBottomStableInset = false;
@@ -219,6 +223,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
     private int mRootScrollY = 0;
 
+    @UnsupportedAppUsage
     private PhoneWindow mWindow;
 
     ViewGroup mContentRoot;

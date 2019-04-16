@@ -35,6 +35,8 @@ import java.util.Set;
 /**
  * The parameters to pass into {@link RcsMessageStore#getRcsThreads(RcsThreadQueryParams)} in
  * order to select a subset of {@link RcsThread}s present in the message store.
+ *
+ * @hide
  */
 public final class RcsThreadQueryParams implements Parcelable {
     /**
@@ -274,7 +276,7 @@ public final class RcsThreadQueryParams implements Parcelable {
         mIsAscending = in.readByte() == 1;
     }
 
-    public static final Creator<RcsThreadQueryParams> CREATOR =
+    public static final @android.annotation.NonNull Creator<RcsThreadQueryParams> CREATOR =
             new Creator<RcsThreadQueryParams>() {
                 @Override
                 public RcsThreadQueryParams createFromParcel(Parcel in) {

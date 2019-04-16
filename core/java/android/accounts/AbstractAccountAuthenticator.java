@@ -17,7 +17,6 @@
 package android.accounts;
 
 import android.Manifest;
-import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -32,8 +31,8 @@ import java.util.Arrays;
 
 /**
  * Abstract base class for creating AccountAuthenticators.
- * In order to be an authenticator one must extend this class, provider implementations for the
- * abstract methods and write a service that returns the result of {@link #getIBinder()}
+ * In order to be an authenticator one must extend this class, provide implementations for the
+ * abstract methods, and write a service that returns the result of {@link #getIBinder()}
  * in the service's {@link android.app.Service#onBind(android.content.Intent)} when invoked
  * with an intent with action {@link AccountManager#ACTION_AUTHENTICATOR_INTENT}. This service
  * must specify the following intent filter and metadata tags in its AndroidManifest.xml file

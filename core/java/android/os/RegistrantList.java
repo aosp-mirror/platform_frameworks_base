@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Handler;         
 
 import java.util.ArrayList;
@@ -25,12 +26,14 @@ public class RegistrantList
 {
     ArrayList   registrants = new ArrayList();      // of Registrant
 
+    @UnsupportedAppUsage
     public synchronized void
     add(Handler h, int what, Object obj)
     {
         add(new Registrant(h, what, obj));
     }
 
+    @UnsupportedAppUsage
     public synchronized void
     addUnique(Handler h, int what, Object obj)
     {
@@ -39,6 +42,7 @@ public class RegistrantList
         add(new Registrant(h, what, obj));        
     }
     
+    @UnsupportedAppUsage
     public synchronized void
     add(Registrant r)
     {
@@ -46,6 +50,7 @@ public class RegistrantList
         registrants.add(r);
     }
 
+    @UnsupportedAppUsage
     public synchronized void
     removeCleared()
     {
@@ -58,6 +63,7 @@ public class RegistrantList
         }
     }
 
+    @UnsupportedAppUsage
     public synchronized int
     size()
     {
@@ -79,6 +85,7 @@ public class RegistrantList
        }
     }
     
+    @UnsupportedAppUsage
     public /*synchronized*/ void
     notifyRegistrants()
     {
@@ -91,6 +98,7 @@ public class RegistrantList
         internalNotifyRegistrants (null, exception);
     }
 
+    @UnsupportedAppUsage
     public /*synchronized*/ void
     notifyResult(Object result)
     {
@@ -98,12 +106,14 @@ public class RegistrantList
     }
 
     
+    @UnsupportedAppUsage
     public /*synchronized*/ void
     notifyRegistrants(AsyncResult ar)
     {
         internalNotifyRegistrants(ar.result, ar.exception);
     }
     
+    @UnsupportedAppUsage
     public synchronized void
     remove(Handler h)
     {

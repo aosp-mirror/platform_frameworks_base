@@ -20,13 +20,13 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.withSettings;
 
-import android.support.test.filters.SmallTest;
 import android.testing.LeakCheck.Tracker;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.WindowManager;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 

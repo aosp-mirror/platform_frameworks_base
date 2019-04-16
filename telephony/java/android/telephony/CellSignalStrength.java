@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.IntRange;
 import android.os.PersistableBundle;
 
 /**
@@ -57,23 +58,24 @@ public abstract class CellSignalStrength {
     public abstract void setDefaultValues();
 
     /**
-     * Get signal level as an int from 0..4
-     * <p>
-     * @see SIGNAL_STRENGTH_NONE_OR_UNKNOWN
-     * @see SIGNAL_STRENGTH_POOR
-     * @see SIGNAL_STRENGTH_MODERATE
-     * @see SIGNAL_STRENGTH_GOOD
-     * @see SIGNAL_STRENGTH_GREAT
+     * Retrieve an abstract level value for the overall signal quality.
+     *
+     * @return a single integer from 0 to 4 representing the general signal quality.
+     *     0 represents very poor or unknown signal quality while 4 represents excellent
+     *     signal quality.
      */
+    @IntRange(from = SIGNAL_STRENGTH_NONE_OR_UNKNOWN, to = SIGNAL_STRENGTH_GREAT)
     public abstract int getLevel();
 
     /**
-     * Get the signal level as an asu value between 0..31, 99 is unknown
+     * Get the technology-specific signal strength in Arbitrary Strength Units, calculated from the
+     * strength of the pilot signal or equivalent.
      */
     public abstract int getAsuLevel();
 
     /**
-     * Get the signal strength as dBm
+     * Get the technology-specific signal strength in dBm, which is the signal strength of the
+     * pilot signal or equivalent.
      */
     public abstract int getDbm();
 
@@ -119,7 +121,7 @@ public abstract class CellSignalStrength {
     /** @hide */
     protected static final int getAsuFromRssiDbm(int dbm) {
         if (dbm == CellInfo.UNAVAILABLE) return 99;
-        return (dbm / 2) + 113;
+        return (dbm + 113) / 2;
     }
 
     // Range for RSCP in ASU (0-96, 255) as defined in TS 27.007 8.69

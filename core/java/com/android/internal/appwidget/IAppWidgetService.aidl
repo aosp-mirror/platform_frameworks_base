@@ -42,6 +42,7 @@ interface IAppWidgetService {
     void deleteAppWidgetId(String callingPackage, int appWidgetId);
     void deleteHost(String packageName, int hostId);
     void deleteAllHosts();
+    @UnsupportedAppUsage
     RemoteViews getAppWidgetViews(String callingPackage, int appWidgetId);
     int[] getAppWidgetIdsForHost(String callingPackage, int hostId);
     IntentSender createAppWidgetConfigIntentSender(String callingPackage, int appWidgetId,
@@ -63,11 +64,14 @@ interface IAppWidgetService {
     AppWidgetProviderInfo getAppWidgetInfo(String callingPackage, int appWidgetId);
     boolean hasBindAppWidgetPermission(in String packageName, int userId);
     void setBindAppWidgetPermission(in String packageName, int userId, in boolean permission);
+    @UnsupportedAppUsage
     boolean bindAppWidgetId(in String callingPackage, int appWidgetId,
             int providerProfileId, in ComponentName providerComponent, in Bundle options);
+    @UnsupportedAppUsage
     boolean bindRemoteViewsService(String callingPackage, int appWidgetId, in Intent intent,
             IApplicationThread caller, IBinder token, IServiceConnection connection, int flags);
 
+    @UnsupportedAppUsage
     int[] getAppWidgetIds(in ComponentName providerComponent);
     boolean isBoundWidgetPackage(String packageName, int userId);
     boolean requestPinAppWidget(String packageName, in ComponentName providerComponent,

@@ -102,6 +102,7 @@ oneway interface IApplicationThread {
     void updateHttpProxy();
     void setCoreSettings(in Bundle coreSettings);
     void updatePackageCompatibilityInfo(in String pkg, in CompatibilityInfo info);
+    @UnsupportedAppUsage
     void scheduleTrimMemory(int level);
     void dumpMemInfo(in ParcelFileDescriptor fd, in Debug.MemoryInfo mem, boolean checkin,
             boolean dumpInfo, boolean dumpDalvik, boolean dumpSummaryOnly, boolean dumpUnreachable,

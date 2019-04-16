@@ -17,26 +17,22 @@
 package android.net;
 
 import android.annotation.NonNull;
-import android.os.Binder;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Log;
 
 import java.io.FileDescriptor;
-import java.net.Socket;
 import java.util.concurrent.Executor;
 
 /** @hide */
 final class TcpSocketKeepalive extends SocketKeepalive {
 
-    private final Socket mSocket;
-
     TcpSocketKeepalive(@NonNull IConnectivityManager service,
             @NonNull Network network,
-            @NonNull Socket socket,
+            @NonNull ParcelFileDescriptor pfd,
             @NonNull Executor executor,
             @NonNull Callback callback) {
-        super(service, network, executor, callback);
-        mSocket = socket;
+        super(service, network, pfd, executor, callback);
     }
 
     /**
@@ -45,34 +41,39 @@ final class TcpSocketKeepalive extends SocketKeepalive {
      * - The application must not write to or read from the socket after calling this method, until
      *   onDataReceived, onStopped, or onError are called. If it does, the keepalive will fail
      *   with {@link #ERROR_SOCKET_NOT_IDLE}, or {@code #ERROR_INVALID_SOCKET} if the socket
-     *   experienced an error (as in poll(2) returned POLLERR); if this happens, the data received
-     *   from the socket may be invalid, and the socket can't be recovered.
+     *   experienced an error (as in poll(2) returned POLLERR or POLLHUP); if this happens, the data
+     *   received from the socket may be invalid, and the socket can't be recovered.
      * - If the socket has data in the send or receive buffer, then this call will fail with
      *   {@link #ERROR_SOCKET_NOT_IDLE} and can be retried after the data has been processed.
-     *   An app could ensure this by using an application-layer protocol where it can receive
-     *   acknowledgement that it will go into keepalive mode. It could then go into keepalive
-     *   mode after having read the acknowledgement, draining the socket.
+     *   An app could ensure this by using an application-layer protocol to receive acknowledgement
+     *   that indicates all data has been delivered to server, e.g. HTTP 200 OK.
+     *   Then the app could go into keepalive mode after reading all remaining data within the
+     *   acknowledgement.
      */
     @Override
     void startImpl(int intervalSec) {
-        try {
-            final FileDescriptor fd = mSocket.getFileDescriptor$();
-            mService.startTcpKeepalive(mNetwork, fd, intervalSec, mMessenger, new Binder());
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error starting packet keepalive: ", e);
-            stopLooper();
-        }
+        mExecutor.execute(() -> {
+            try {
+                final FileDescriptor fd = mPfd.getFileDescriptor();
+                mService.startTcpKeepalive(mNetwork, fd, intervalSec, mCallback);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error starting packet keepalive: ", e);
+                throw e.rethrowFromSystemServer();
+            }
+        });
     }
 
     @Override
     void stopImpl() {
-        try {
-            if (mSlot != null) {
-                mService.stopKeepalive(mNetwork, mSlot);
+        mExecutor.execute(() -> {
+            try {
+                if (mSlot != null) {
+                    mService.stopKeepalive(mNetwork, mSlot);
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error stopping packet keepalive: ", e);
+                throw e.rethrowFromSystemServer();
             }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error stopping packet keepalive: ", e);
-            stopLooper();
-        }
+        });
     }
 }

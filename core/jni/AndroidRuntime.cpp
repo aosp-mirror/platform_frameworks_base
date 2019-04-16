@@ -31,6 +31,7 @@
 #include <binder/Parcel.h>
 #include <utils/threads.h>
 #include <cutils/properties.h>
+#include <server_configurable_flags/get_flags.h>
 
 #include <SkGraphics.h>
 
@@ -212,12 +213,28 @@ extern int register_android_content_res_Configuration(JNIEnv* env);
 extern int register_android_animation_PropertyValuesHolder(JNIEnv *env);
 extern int register_android_security_Scrypt(JNIEnv *env);
 extern int register_com_android_internal_content_NativeLibraryHelper(JNIEnv *env);
-extern int register_com_android_internal_net_NetworkStatsFactory(JNIEnv *env);
 extern int register_com_android_internal_os_ClassLoaderFactory(JNIEnv* env);
 extern int register_com_android_internal_os_FuseAppLoop(JNIEnv* env);
 extern int register_com_android_internal_os_Zygote(JNIEnv *env);
 extern int register_com_android_internal_os_ZygoteInit(JNIEnv *env);
 extern int register_com_android_internal_util_VirtualRefBasePtr(JNIEnv *env);
+
+// Namespace for Android Runtime flags applied during boot time.
+static const char* RUNTIME_NATIVE_BOOT_NAMESPACE = "runtime_native_boot";
+// Feature flag name to enable/disable generational garbage collection in ART's
+// Concurrent Copying (CC) garbage collector.
+static const char* ENABLE_GENERATIONAL_CC = "enable_generational_cc";
+// Runtime option enabling generational garbage collection in ART's Concurrent
+// Copying (CC) garbage collector.
+static const char* kGenerationalCCRuntimeOption = "-Xgc:generational_cc";
+// Runtime option disabling generational garbage collection in ART's Concurrent
+// Copying (CC) garbage collector.
+static const char* kNoGenerationalCCRuntimeOption = "-Xgc:nogenerational_cc";
+
+// Feature flag name for running the JIT in Zygote experiment, b/119800099.
+static const char* ENABLE_APEX_IMAGE = "enable_apex_image";
+// Flag to pass to the runtime when using the apex image.
+static const char* kApexImageOption = "-Ximage:/system/framework/apex.art";
 
 static AndroidRuntime* gCurRuntime = NULL;
 
@@ -647,10 +664,25 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
     char lockProfThresholdBuf[sizeof("-Xlockprofthreshold:")-1 + PROPERTY_VALUE_MAX];
     char nativeBridgeLibrary[sizeof("-XX:NativeBridge=") + PROPERTY_VALUE_MAX];
     char cpuAbiListBuf[sizeof("--cpu-abilist=") + PROPERTY_VALUE_MAX];
+    char corePlatformApiPolicyBuf[sizeof("-Xcore-platform-api-policy:") + PROPERTY_VALUE_MAX];
     char methodTraceFileBuf[sizeof("-Xmethod-trace-file:") + PROPERTY_VALUE_MAX];
     char methodTraceFileSizeBuf[sizeof("-Xmethod-trace-file-size:") + PROPERTY_VALUE_MAX];
     std::string fingerprintBuf;
     char jdwpProviderBuf[sizeof("-XjdwpProvider:") - 1 + PROPERTY_VALUE_MAX];
+    char bootImageBuf[sizeof("-Ximage:") - 1 + PROPERTY_VALUE_MAX];
+
+    std::string use_apex_image =
+        server_configurable_flags::GetServerConfigurableFlag(RUNTIME_NATIVE_BOOT_NAMESPACE,
+                                                             ENABLE_APEX_IMAGE,
+                                                             /*default_value=*/ "");
+    if (use_apex_image == "true") {
+        addOption(kApexImageOption);
+        ALOGI("Using Apex boot image: '%s'\n", kApexImageOption);
+    } else if (parseRuntimeOption("dalvik.vm.boot-image", bootImageBuf, "-Ximage:")) {
+        ALOGI("Using dalvik.vm.boot-image: '%s'\n", bootImageBuf);
+    } else {
+        ALOGI("Using default boot image");
+    }
 
     bool checkJni = false;
     property_get("dalvik.vm.checkjni", propBuf, "");
@@ -764,7 +796,23 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
       addOption("-XX:LowMemoryMode");
     }
 
+    /*
+     * Garbage-collection related options.
+     */
     parseRuntimeOption("dalvik.vm.gctype", gctypeOptsBuf, "-Xgc:");
+
+    // If it set, honor the "enable_generational_cc" device configuration;
+    // otherwise, let the runtime use its default behavior.
+    std::string enable_generational_cc =
+        server_configurable_flags::GetServerConfigurableFlag(RUNTIME_NATIVE_BOOT_NAMESPACE,
+                                                             ENABLE_GENERATIONAL_CC,
+                                                             /*default_value=*/ "");
+    if (enable_generational_cc == "true") {
+        addOption(kGenerationalCCRuntimeOption);
+    } else if (enable_generational_cc == "false") {
+        addOption(kNoGenerationalCCRuntimeOption);
+    }
+
     parseRuntimeOption("dalvik.vm.backgroundgctype", backgroundgcOptsBuf, "-XX:BackgroundGC=");
 
     /*
@@ -963,6 +1011,16 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
         addOption("--generate-mini-debug-info");
     }
 
+    // If set, the property below can be used to enable core platform API violation reporting.
+    property_get("persist.debug.dalvik.vm.core_platform_api_policy", propBuf, "");
+    if (propBuf[0] != '\0') {
+      snprintf(corePlatformApiPolicyBuf,
+               sizeof(corePlatformApiPolicyBuf),
+               "-Xcore-platform-api-policy:%s",
+               propBuf);
+      addOption(corePlatformApiPolicyBuf);
+    }
+
     /*
      * Retrieve the build fingerprint and provide it to the runtime. That way, ANR dumps will
      * contain the fingerprint and can be parsed.
@@ -1061,6 +1119,12 @@ void AndroidRuntime::start(const char* className, const Vector<String8>& options
     const char* runtimeRootDir = getenv("ANDROID_RUNTIME_ROOT");
     if (runtimeRootDir == NULL) {
         LOG_FATAL("No runtime directory specified with ANDROID_RUNTIME_ROOT environment variable.");
+        return;
+    }
+
+    const char* tzdataRootDir = getenv("ANDROID_TZDATA_ROOT");
+    if (tzdataRootDir == NULL) {
+        LOG_FATAL("No tz data directory specified with ANDROID_TZDATA_ROOT environment variable.");
         return;
     }
 
@@ -1484,7 +1548,6 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_animation_PropertyValuesHolder),
     REG_JNI(register_android_security_Scrypt),
     REG_JNI(register_com_android_internal_content_NativeLibraryHelper),
-    REG_JNI(register_com_android_internal_net_NetworkStatsFactory),
     REG_JNI(register_com_android_internal_os_FuseAppLoop),
 };
 

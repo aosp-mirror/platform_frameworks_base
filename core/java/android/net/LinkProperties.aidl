@@ -17,4 +17,4 @@
 
 package android.net;
 
-parcelable LinkProperties;
+@JavaOnlyStableParcelable parcelable LinkProperties;

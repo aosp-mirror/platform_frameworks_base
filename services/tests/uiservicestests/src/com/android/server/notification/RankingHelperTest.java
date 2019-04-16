@@ -33,7 +33,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -61,12 +60,13 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.service.notification.StatusBarNotification;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.TestableContentResolver;
 import android.util.ArrayMap;
 import android.util.Xml;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.FastXmlSerializer;
 import com.android.server.UiServiceTestCase;
@@ -399,7 +399,7 @@ public class RankingHelperTest extends UiServiceTestCase {
                 mHelper.getNotificationChannel(PKG, UID, channel2.getId(), false));
 
         List<NotificationChannelGroup> actualGroups =
-                mHelper.getNotificationChannelGroups(PKG, UID, false, true).getList();
+                mHelper.getNotificationChannelGroups(PKG, UID, false, true, false).getList();
         boolean foundNcg = false;
         for (NotificationChannelGroup actual : actualGroups) {
             if (ncg.getId().equals(actual.getId())) {
@@ -469,7 +469,7 @@ public class RankingHelperTest extends UiServiceTestCase {
                 mHelper.getNotificationChannel(PKG, UID, channel3.getId(), false));
 
         List<NotificationChannelGroup> actualGroups =
-                mHelper.getNotificationChannelGroups(PKG, UID, false, true).getList();
+                mHelper.getNotificationChannelGroups(PKG, UID, false, true, false).getList();
         boolean foundNcg = false;
         for (NotificationChannelGroup actual : actualGroups) {
             if (ncg.getId().equals(actual.getId())) {
@@ -784,6 +784,31 @@ public class RankingHelperTest extends UiServiceTestCase {
                 new NotificationChannel("bananas", "bananas", IMPORTANCE_MAX), true, false);
     }
 
+    @Test
+    public void testGetChannelGroups_includeEmptyGroups() {
+        NotificationChannelGroup ncg = new NotificationChannelGroup("group1", "name1");
+        mHelper.createNotificationChannelGroup(PKG, UID, ncg, true);
+        NotificationChannelGroup ncgEmpty = new NotificationChannelGroup("group2", "name2");
+        mHelper.createNotificationChannelGroup(PKG, UID, ncgEmpty, true);
+
+        NotificationChannel channel1 =
+                new NotificationChannel("id1", "name1", NotificationManager.IMPORTANCE_HIGH);
+        channel1.setGroup(ncg.getId());
+        mHelper.createNotificationChannel(PKG, UID, channel1, true, false);
+
+        List<NotificationChannelGroup> actual = mHelper.getNotificationChannelGroups(
+                PKG, UID, false, false, true).getList();
+
+        assertEquals(2, actual.size());
+        for (NotificationChannelGroup group : actual) {
+            if (Objects.equals(group.getId(), ncg.getId())) {
+                assertEquals(1, group.getChannels().size());
+            }
+            if (Objects.equals(group.getId(), ncgEmpty.getId())) {
+                assertEquals(0, group.getChannels().size());
+            }
+        }
+    }
 
     @Test
     public void testUpdate() throws Exception {
@@ -1421,7 +1446,7 @@ public class RankingHelperTest extends UiServiceTestCase {
         mHelper.onPackagesChanged(true, UserHandle.USER_SYSTEM, new String[]{PKG}, new int[]{UID});
 
         assertEquals(0,
-                mHelper.getNotificationChannelGroups(PKG, UID, true, true).getList().size());
+                mHelper.getNotificationChannelGroups(PKG, UID, true, true, false).getList().size());
     }
 
     @Test
@@ -1510,7 +1535,7 @@ public class RankingHelperTest extends UiServiceTestCase {
         mHelper.createNotificationChannel(PKG, UID, channel3, true, false);
 
         List<NotificationChannelGroup> actual =
-                mHelper.getNotificationChannelGroups(PKG, UID, true, true).getList();
+                mHelper.getNotificationChannelGroups(PKG, UID, true, true, false).getList();
         assertEquals(3, actual.size());
         for (NotificationChannelGroup group : actual) {
             if (group.getId() == null) {
@@ -1542,13 +1567,13 @@ public class RankingHelperTest extends UiServiceTestCase {
                 new NotificationChannel("id1", "name1", NotificationManager.IMPORTANCE_HIGH);
         channel1.setGroup(ncg.getId());
         mHelper.createNotificationChannel(PKG, UID, channel1, true, false);
-        mHelper.getNotificationChannelGroups(PKG, UID, true, true).getList();
+        mHelper.getNotificationChannelGroups(PKG, UID, true, true, false).getList();
 
         channel1.setImportance(IMPORTANCE_LOW);
         mHelper.updateNotificationChannel(PKG, UID, channel1, true);
 
         List<NotificationChannelGroup> actual =
-                mHelper.getNotificationChannelGroups(PKG, UID, true, true).getList();
+                mHelper.getNotificationChannelGroups(PKG, UID, true, true, false).getList();
 
         assertEquals(2, actual.size());
         for (NotificationChannelGroup group : actual) {

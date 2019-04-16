@@ -32,6 +32,7 @@ import android.content.IntentSender;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
+import android.net.INetworkStatsService;
 import android.net.NetworkStats;
 import android.net.wifi.IWifiManager;
 import android.net.wifi.WifiActivityEnergyInfo;
@@ -43,6 +44,8 @@ import android.os.FileUtils;
 import android.os.IBinder;
 import android.os.IStatsCompanionService;
 import android.os.IStatsManager;
+import android.os.IThermalEventListener;
+import android.os.IThermalService;
 import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
@@ -52,6 +55,7 @@ import android.os.StatsDimensionsValue;
 import android.os.StatsLogEventWrapper;
 import android.os.SynchronousResultReceiver;
 import android.os.SystemClock;
+import android.os.Temperature;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.telephony.ModemActivityInfo;
@@ -60,7 +64,6 @@ import android.util.Slog;
 import android.util.StatsLog;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.net.NetworkStatsFactory;
 import com.android.internal.os.KernelCpuSpeedReader;
 import com.android.internal.os.KernelUidCpuTimeReader;
 import com.android.internal.os.KernelUidCpuClusterTimeReader;
@@ -120,6 +123,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     private final Context mContext;
     private final AlarmManager mAlarmManager;
+    private final INetworkStatsService mNetworkStatsService;
     @GuardedBy("sStatsdLock")
     private static IStatsManager sStatsd;
     private static final Object sStatsdLock = new Object();
@@ -153,10 +157,14 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private KernelUidCpuClusterTimeReader mKernelUidCpuClusterTimeReader =
             new KernelUidCpuClusterTimeReader();
 
+    private static IThermalService sThermalService;
+
     public StatsCompanionService(Context context) {
         super();
         mContext = context;
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+        mNetworkStatsService = INetworkStatsService.Stub.asInterface(
+              ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
 
         mAnomalyAlarmIntent = PendingIntent.getBroadcast(mContext, 0,
                 new Intent(mContext, AnomalyAlarmReceiver.class), 0);
@@ -203,6 +211,24 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         long[] freqs = mKernelUidCpuFreqTimeReader.readFreqs(powerProfile);
         mKernelUidCpuClusterTimeReader.setThrottleInterval(0);
         mKernelUidCpuActiveTimeReader.setThrottleInterval(0);
+
+        // Enable push notifications of throttling from vendor thermal
+        // management subsystem via thermalservice.
+        IBinder b = ServiceManager.getService("thermalservice");
+
+        if (b != null) {
+            sThermalService = IThermalService.Stub.asInterface(b);
+            try {
+                sThermalService.registerThermalEventListener(
+                        new ThermalEventListener());
+                Slog.i(TAG, "register thermal listener successfully");
+            } catch (RemoteException e) {
+                // Should never happen.
+                Slog.e(TAG, "register thermal listener error");
+            }
+        } else {
+            Slog.e(TAG, "cannot find thermalservice, no throttling push notifications");
+        }
     }
 
     @Override
@@ -628,13 +654,14 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             if (ifaces.length == 0) {
                 return;
             }
-            NetworkStatsFactory nsf = new NetworkStatsFactory();
+            if (mNetworkStatsService == null) {
+                Slog.e(TAG, "NetworkStats Service is not available!");
+                return;
+            }
             // Combine all the metrics per Uid into one record.
-            NetworkStats stats =
-                    nsf.readNetworkStatsDetail(NetworkStats.UID_ALL, ifaces, NetworkStats.TAG_NONE, null)
-                            .groupedByUid();
+            NetworkStats stats = mNetworkStatsService.getDetailedUidStats(ifaces).groupedByUid();
             addNetworkStats(tagId, pulledData, stats, false);
-        } catch (java.io.IOException e) {
+        } catch (RemoteException e) {
             Slog.e(TAG, "Pulling netstats for wifi bytes has error", e);
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -649,11 +676,14 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             if (ifaces.length == 0) {
                 return;
             }
-            NetworkStatsFactory nsf = new NetworkStatsFactory();
+            if (mNetworkStatsService == null) {
+                Slog.e(TAG, "NetworkStats Service is not available!");
+                return;
+            }
             NetworkStats stats = rollupNetworkStatsByFGBG(
-                    nsf.readNetworkStatsDetail(NetworkStats.UID_ALL, ifaces, NetworkStats.TAG_NONE, null));
+                    mNetworkStatsService.getDetailedUidStats(ifaces));
             addNetworkStats(tagId, pulledData, stats, true);
-        } catch (java.io.IOException e) {
+        } catch (RemoteException e) {
             Slog.e(TAG, "Pulling netstats for wifi bytes w/ fg/bg has error", e);
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -668,13 +698,14 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             if (ifaces.length == 0) {
                 return;
             }
-            NetworkStatsFactory nsf = new NetworkStatsFactory();
+            if (mNetworkStatsService == null) {
+                Slog.e(TAG, "NetworkStats Service is not available!");
+                return;
+            }
             // Combine all the metrics per Uid into one record.
-            NetworkStats stats =
-                    nsf.readNetworkStatsDetail(NetworkStats.UID_ALL, ifaces, NetworkStats.TAG_NONE, null)
-                            .groupedByUid();
+            NetworkStats stats = mNetworkStatsService.getDetailedUidStats(ifaces).groupedByUid();
             addNetworkStats(tagId, pulledData, stats, false);
-        } catch (java.io.IOException e) {
+        } catch (RemoteException e) {
             Slog.e(TAG, "Pulling netstats for mobile bytes has error", e);
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -703,11 +734,14 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             if (ifaces.length == 0) {
                 return;
             }
-            NetworkStatsFactory nsf = new NetworkStatsFactory();
+            if (mNetworkStatsService == null) {
+                Slog.e(TAG, "NetworkStats Service is not available!");
+                return;
+            }
             NetworkStats stats = rollupNetworkStatsByFGBG(
-                    nsf.readNetworkStatsDetail(NetworkStats.UID_ALL, ifaces, NetworkStats.TAG_NONE, null));
+                    mNetworkStatsService.getDetailedUidStats(ifaces));
             addNetworkStats(tagId, pulledData, stats, true);
-        } catch (java.io.IOException e) {
+        } catch (RemoteException e) {
             Slog.e(TAG, "Pulling netstats for mobile bytes w/ fg/bg has error", e);
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -1181,4 +1215,14 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
+    // Thermal event received from vendor thermal management subsystem
+    private static final class ThermalEventListener extends IThermalEventListener.Stub {
+        @Override public void notifyThrottling(boolean isThrottling, Temperature temp) {
+            StatsLog.write(StatsLog.THERMAL_THROTTLING, temp.getType(),
+                    isThrottling ?
+                            StatsLog.THERMAL_THROTTLING_STATE_CHANGED__STATE__START :
+                            StatsLog.THERMAL_THROTTLING_STATE_CHANGED__STATE__STOP,
+                    temp.getValue());
+        }
+    }
 }

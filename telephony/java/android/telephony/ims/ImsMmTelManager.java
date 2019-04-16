@@ -21,9 +21,12 @@ import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
+import android.content.pm.IPackageManager;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.RemoteException;
@@ -106,9 +109,9 @@ public class ImsMmTelManager {
                         // case, since it is defined.
                         put(ImsRegistrationImplBase.REGISTRATION_TECH_NONE, -1);
                         put(ImsRegistrationImplBase.REGISTRATION_TECH_LTE,
-                                AccessNetworkConstants.TransportType.WWAN);
+                                AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
                         put(ImsRegistrationImplBase.REGISTRATION_TECH_IWLAN,
-                                AccessNetworkConstants.TransportType.WLAN);
+                                AccessNetworkConstants.TRANSPORT_TYPE_WLAN);
                     }};
 
             private final RegistrationCallback mLocalCallback;
@@ -139,7 +142,7 @@ public class ImsMmTelManager {
                 if (mLocalCallback == null) return;
 
                 Binder.withCleanCallingIdentity(() ->
-                        mExecutor.execute(() -> mLocalCallback.onDeregistered(info)));
+                        mExecutor.execute(() -> mLocalCallback.onUnregistered(info)));
             }
 
             @Override
@@ -199,7 +202,7 @@ public class ImsMmTelManager {
          *
          * @param info the {@link ImsReasonInfo} associated with why registration was disconnected.
          */
-        public void onDeregistered(ImsReasonInfo info) {
+        public void onUnregistered(@Nullable ImsReasonInfo info) {
         }
 
         /**
@@ -211,7 +214,7 @@ public class ImsMmTelManager {
          *         transport type that has failed to handover registration to.
          * @param info A {@link ImsReasonInfo} that identifies the reason for failure.
          */
-        public void onTechnologyChangeFailed(int imsTransportType, ImsReasonInfo info) {
+        public void onTechnologyChangeFailed(int imsTransportType, @Nullable ImsReasonInfo info) {
         }
 
         /**
@@ -223,7 +226,7 @@ public class ImsMmTelManager {
          *         subscription.
          * @hide
          */
-        public void onSubscriberAssociatedUriChanged(Uri[] uris) {
+        public void onSubscriberAssociatedUriChanged(@Nullable Uri[] uris) {
         }
 
         /**@hide*/
@@ -294,7 +297,7 @@ public class ImsMmTelManager {
          * @param capabilities The new availability of the capabilities.
          */
         public void onCapabilitiesStatusChanged(
-                MmTelFeature.MmTelCapabilities capabilities) {
+                @NonNull MmTelFeature.MmTelCapabilities capabilities) {
         }
 
         /**@hide*/
@@ -313,13 +316,13 @@ public class ImsMmTelManager {
     private int mSubId;
 
     /**
-     * Create an instance of ImsManager for the subscription id specified.
+     * Create an instance of {@link ImsMmTelManager} for the subscription id specified.
      *
      * @param subId The ID of the subscription that this ImsMmTelManager will use.
      * @see android.telephony.SubscriptionManager#getActiveSubscriptionInfoList()
      * @throws IllegalArgumentException if the subscription is invalid.
      */
-    public static ImsMmTelManager createForSubscriptionId(int subId) {
+    public static @NonNull ImsMmTelManager createForSubscriptionId(int subId) {
         if (!SubscriptionManager.isValidSubscriptionId(subId)) {
             throw new IllegalArgumentException("Invalid subscription ID");
         }
@@ -357,7 +360,7 @@ public class ImsMmTelManager {
      * reason.
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public void registerImsRegistrationCallback(@CallbackExecutor Executor executor,
+    public void registerImsRegistrationCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull RegistrationCallback c) throws ImsException {
         if (c == null) {
             throw new IllegalArgumentException("Must include a non-null RegistrationCallback.");
@@ -365,12 +368,14 @@ public class ImsMmTelManager {
         if (executor == null) {
             throw new IllegalArgumentException("Must include a non-null Executor.");
         }
+        if (!isImsAvailableOnDevice()) {
+            throw new ImsException("IMS not available on device.",
+                    ImsException.CODE_ERROR_UNSUPPORTED_OPERATION);
+        }
         c.setExecutor(executor);
         try {
             getITelephony().registerImsRegistrationCallback(mSubId, c.getBinder());
-        } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
-        } catch (IllegalStateException e) {
+        } catch (RemoteException | IllegalStateException e) {
             throw new ImsException(e.getMessage(), ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
         }
     }
@@ -433,6 +438,10 @@ public class ImsMmTelManager {
         if (executor == null) {
             throw new IllegalArgumentException("Must include a non-null Executor.");
         }
+        if (!isImsAvailableOnDevice()) {
+            throw new ImsException("IMS not available on device.",
+                    ImsException.CODE_ERROR_UNSUPPORTED_OPERATION);
+        }
         c.setExecutor(executor);
         try {
             getITelephony().registerMmTelCapabilityCallback(mSubId, c.getBinder());
@@ -485,7 +494,7 @@ public class ImsMmTelManager {
      * @see android.telephony.CarrierConfigManager#KEY_HIDE_ENHANCED_4G_LTE_BOOL
      * @see android.telephony.CarrierConfigManager#KEY_ENHANCED_4G_LTE_ON_BY_DEFAULT_BOOL
      * @see android.telephony.CarrierConfigManager#KEY_CARRIER_VOLTE_AVAILABLE_BOOL
-     * @see #setAdvancedCallingSetting(boolean)
+     * @see #setAdvancedCallingSettingEnabled(boolean)
      * @return true if the user's setting for advanced calling is enabled, false otherwise.
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
@@ -519,9 +528,9 @@ public class ImsMmTelManager {
      * @see #isAdvancedCallingSettingEnabled()
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
-    public void setAdvancedCallingSetting(boolean isEnabled) {
+    public void setAdvancedCallingSettingEnabled(boolean isEnabled) {
         try {
-            getITelephony().setAdvancedCallingSetting(mSubId, isEnabled);
+            getITelephony().setAdvancedCallingSettingEnabled(mSubId, isEnabled);
             return;
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
@@ -589,7 +598,7 @@ public class ImsMmTelManager {
     /**
      * The user's setting for whether or not they have enabled the "Video Calling" setting.
      * @return true if the user’s “Video Calling” setting is currently enabled.
-     * @see #setVtSetting(boolean)
+     * @see #setVtSettingEnabled(boolean)
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean isVtSettingEnabled() {
@@ -605,9 +614,9 @@ public class ImsMmTelManager {
      * @see #isVtSettingEnabled()
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
-    public void setVtSetting(boolean isEnabled) {
+    public void setVtSettingEnabled(boolean isEnabled) {
         try {
-            getITelephony().setVtSetting(mSubId, isEnabled);
+            getITelephony().setVtSettingEnabled(mSubId, isEnabled);
             return;
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
@@ -616,7 +625,7 @@ public class ImsMmTelManager {
 
     /**
      * @return true if the user's setting for Voice over WiFi is enabled and false if it is not.
-     * @see #setVoWiFiSetting(boolean)
+     * @see #setVoWiFiSettingEnabled(boolean)
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean isVoWiFiSettingEnabled() {
@@ -633,9 +642,9 @@ public class ImsMmTelManager {
      * @see #isVoWiFiSettingEnabled()
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
-    public void setVoWiFiSetting(boolean isEnabled) {
+    public void setVoWiFiSettingEnabled(boolean isEnabled) {
         try {
-            getITelephony().setVoWiFiSetting(mSubId, isEnabled);
+            getITelephony().setVoWiFiSettingEnabled(mSubId, isEnabled);
             return;
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
@@ -645,7 +654,7 @@ public class ImsMmTelManager {
     /**
      * @return true if the user's setting for Voice over WiFi while roaming is enabled, false
      * if disabled.
-     * @see #setVoWiFiRoamingSetting(boolean)
+     * @see #setVoWiFiRoamingSettingEnabled(boolean)
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean isVoWiFiRoamingSettingEnabled() {
@@ -663,9 +672,9 @@ public class ImsMmTelManager {
      * @see #isVoWiFiRoamingSettingEnabled()
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
-    public void setVoWiFiRoamingSetting(boolean isEnabled) {
+    public void setVoWiFiRoamingSettingEnabled(boolean isEnabled) {
         try {
-            getITelephony().setVoWiFiRoamingSetting(mSubId, isEnabled);
+            getITelephony().setVoWiFiRoamingSettingEnabled(mSubId, isEnabled);
             return;
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
@@ -682,7 +691,7 @@ public class ImsMmTelManager {
      * - {@link #WIFI_MODE_WIFI_ONLY}
      * - {@link #WIFI_MODE_CELLULAR_PREFERRED}
      * - {@link #WIFI_MODE_WIFI_PREFERRED}
-     * @see #setVoWiFiSetting(boolean)
+     * @see #setVoWiFiSettingEnabled(boolean)
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setVoWiFiNonPersistent(boolean isCapable, int mode) {
@@ -700,7 +709,7 @@ public class ImsMmTelManager {
      * - {@link #WIFI_MODE_WIFI_ONLY}
      * - {@link #WIFI_MODE_CELLULAR_PREFERRED}
      * - {@link #WIFI_MODE_WIFI_PREFERRED}
-     * @see #setVoWiFiSetting(boolean)
+     * @see #setVoWiFiSettingEnabled(boolean)
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public @WiFiCallingMode int getVoWiFiModeSetting() {
@@ -739,7 +748,7 @@ public class ImsMmTelManager {
      *     - {@link #WIFI_MODE_WIFI_ONLY}
      *     - {@link #WIFI_MODE_CELLULAR_PREFERRED}
      *     - {@link #WIFI_MODE_WIFI_PREFERRED}
-     * @see #setVoWiFiRoamingSetting(boolean)
+     * @see #setVoWiFiRoamingSettingEnabled(boolean)
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public @WiFiCallingMode int getVoWiFiRoamingModeSetting() {
@@ -772,8 +781,13 @@ public class ImsMmTelManager {
     }
 
     /**
-     * Change the user's setting for RTT capability of this device.
-     * @param isEnabled if true RTT will be enabled during calls.
+     * Sets the capability of RTT for IMS calls placed on this subscription.
+     *
+     * Note: This does not affect the value of
+     * {@link android.provider.Settings.Secure#RTT_CALLING_MODE}, which is the global user setting
+     * for RTT. That value is enabled/disabled separately by the user through the Accessibility
+     * settings.
+     * @param isEnabled if true RTT should be enabled during calls made on this subscription.
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setRttCapabilitySetting(boolean isEnabled) {
@@ -797,6 +811,22 @@ public class ImsMmTelManager {
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
+    }
+
+    private static boolean isImsAvailableOnDevice() {
+        IPackageManager pm = IPackageManager.Stub.asInterface(ServiceManager.getService("package"));
+        if (pm == null) {
+            // For some reason package manger is not available.. This will fail internally anyways,
+            // so do not throw error and allow.
+            return true;
+        }
+        try {
+            return pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY_IMS, 0);
+        } catch (RemoteException e) {
+            // For some reason package manger is not available.. This will fail internally anyways,
+            // so do not throw error and allow.
+        }
+        return true;
     }
 
     private static ITelephony getITelephony() {

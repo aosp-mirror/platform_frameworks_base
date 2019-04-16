@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.IntRange;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -37,6 +38,10 @@ public final class CellSignalStrengthGsm extends CellSignalStrength implements P
     private static final int GSM_RSSI_GOOD = -97;
     private static final int GSM_RSSI_MODERATE = -103;
     private static final int GSM_RSSI_POOR = -107;
+    private static final int GSM_RSSI_MIN = -113;
+
+    private static final int[] sRssiThresholds = new int[] {
+            GSM_RSSI_POOR, GSM_RSSI_MODERATE, GSM_RSSI_GOOD, GSM_RSSI_GREAT};
 
     private int mRssi; // in dBm [-113, -51] or UNAVAILABLE
     @UnsupportedAppUsage
@@ -53,7 +58,7 @@ public final class CellSignalStrengthGsm extends CellSignalStrength implements P
 
     /** @hide */
     public CellSignalStrengthGsm(int rssi, int ber, int ta) {
-        mRssi = inRangeOrUnavailable(rssi, -113, -51);
+        mRssi = inRangeOrUnavailable(rssi, GSM_RSSI_MIN, GSM_RSSI_MAX);
         mBitErrorRate = inRangeOrUnavailable(ber, 0, 7, 99);
         mTimingAdvance = inRangeOrUnavailable(ta, 0, 219);
         updateLevel(null, null);
@@ -97,13 +102,9 @@ public final class CellSignalStrengthGsm extends CellSignalStrength implements P
         mLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
     }
 
-    /**
-     * Retrieve an abstract level value for the overall signal strength.
-     *
-     * @return a single integer from 0 to 4 representing the general signal quality.
-     *     0 represents very poor signal strength while 4 represents a very strong signal strength.
-     */
+    /** {@inheritDoc} */
     @Override
+    @IntRange(from = SIGNAL_STRENGTH_NONE_OR_UNKNOWN, to = SIGNAL_STRENGTH_GREAT)
     public int getLevel() {
         return mLevel;
     }
@@ -111,12 +112,22 @@ public final class CellSignalStrengthGsm extends CellSignalStrength implements P
     /** @hide */
     @Override
     public void updateLevel(PersistableBundle cc, ServiceState ss) {
-        if (mRssi > GSM_RSSI_MAX) mLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
-        else if (mRssi >= GSM_RSSI_GREAT) mLevel = SIGNAL_STRENGTH_GREAT;
-        else if (mRssi >= GSM_RSSI_GOOD)  mLevel = SIGNAL_STRENGTH_GOOD;
-        else if (mRssi >= GSM_RSSI_MODERATE)  mLevel = SIGNAL_STRENGTH_MODERATE;
-        else if (mRssi >= GSM_RSSI_POOR) mLevel = SIGNAL_STRENGTH_POOR;
-        else mLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
+        int[] rssiThresholds;
+        if (cc == null) {
+            rssiThresholds = sRssiThresholds;
+        } else {
+            rssiThresholds = cc.getIntArray(CarrierConfigManager.KEY_GSM_RSSI_THRESHOLDS_INT_ARRAY);
+            if (rssiThresholds == null || rssiThresholds.length != NUM_SIGNAL_STRENGTH_THRESHOLDS) {
+                rssiThresholds = sRssiThresholds;
+            }
+        }
+        int level = NUM_SIGNAL_STRENGTH_THRESHOLDS;
+        if (mRssi < GSM_RSSI_MIN || mRssi > GSM_RSSI_MAX) {
+            mLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
+            return;
+        }
+        while (level > 0 && mRssi < rssiThresholds[level - 1]) level--;
+        mLevel = level;
     }
 
     /**
@@ -141,13 +152,24 @@ public final class CellSignalStrengthGsm extends CellSignalStrength implements P
     /**
      * Get the RSSI in ASU.
      *
-     * Asu is calculated based on 3GPP RSRP. Refer to 3GPP 27.007 (Ver 10.3.0) Sec 8.69
+     * Asu is calculated based on 3GPP RSSI. Refer to 3GPP 27.007 (Ver 10.3.0) Sec 8.69
      *
      * @return RSSI in ASU 0..31, 99, or UNAVAILABLE
      */
     @Override
     public int getAsuLevel() {
         return getAsuFromRssiDbm(mRssi);
+    }
+
+    /**
+     * Return the Received Signal Strength Indicator
+     *
+     * @return the RSSI in dBm (-113, -51) or
+     *         {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE}.
+     * @hide
+     */
+    public int getRssi() {
+        return mRssi;
     }
 
     /**

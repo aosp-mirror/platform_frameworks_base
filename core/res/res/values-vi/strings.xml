@@ -136,9 +136,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Gọi qua Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Gọi qua Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Gọi qua Wi-Fi"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Tắt"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Ưu tiên Wi-Fi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Ưu tiên dữ liệu di động"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"Gọi qua Wi-Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"Gọi qua mạng di động"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Chỉ Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Không được chuyển tiếp"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -430,6 +434,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Cho phép ứng dụng truy cập vào các tính năng điện thoại của thiết bị. Quyền này cho phép ứng dụng xác định số điện thoại và ID thiết bị, cho dù cuộc gọi có hiện hoạt hay không và số từ xa có được kết nối bằng một cuộc gọi hay không."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"định tuyến cuộc gọi thông qua hệ thống"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Cho phép ứng dụng định tuyến cuộc gọi thông qua hệ thống nhằm cải thiện trải nghiệm gọi điện."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"xem và kiểm soát cuộc gọi thông qua hệ thống."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Cho phép ứng dụng xem và kiểm soát cuộc gọi đến trên thiết bị. Ứng dụng sẽ xem và kiểm soát các thông tin như số điện thoại của các cuộc gọi và trạng thái cuộc gọi."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"tiếp tục cuộc gọi từ một ứng dụng khác"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Cho phép ứng dụng tiếp tục cuộc gọi được bắt đầu trong một ứng dụng khác."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"đọc số điện thoại"</string>
@@ -1016,22 +1022,22 @@
     <string name="deleteText" msgid="6979668428458199034">"Xóa"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Phương thức nhập"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Tác vụ văn bản"</string>
-    <string name="email" msgid="4560673117055050403">"Email"</string>
+    <string name="email" msgid="4560673117055050403">"Gửi email"</string>
     <string name="email_desc" msgid="3638665569546416795">"Gửi email đến địa chỉ đã chọn"</string>
-    <string name="dial" msgid="1253998302767701559">"Gọi"</string>
+    <string name="dial" msgid="1253998302767701559">"Gọi điện"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Gọi đến số điện thoại đã chọn"</string>
-    <string name="map" msgid="5441053548030107189">"Bản đồ"</string>
+    <string name="map" msgid="5441053548030107189">"Xem bản đồ"</string>
     <string name="map_desc" msgid="1836995341943772348">"Tìm địa chỉ đã chọn"</string>
     <string name="browse" msgid="1245903488306147205">"Mở"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Mở URL đã chọn"</string>
-    <string name="sms" msgid="4560537514610063430">"Gửi tin nhắn"</string>
+    <string name="sms" msgid="4560537514610063430">"Nhắn tin"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Nhắn tin đến số điện thoại đã chọn"</string>
     <string name="add_contact" msgid="7867066569670597203">"Thêm"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Thêm vào danh bạ"</string>
     <string name="view_calendar" msgid="979609872939597838">"Xem"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"Xem thời gian đã chọn trong lịch"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Lịch biểu"</string>
-    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Lên lịch biểu sự kiện cho thời gian đã chọn"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Lên lịch"</string>
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Lên lịch sự kiện cho thời gian đã chọn"</string>
     <string name="view_flight" msgid="7691640491425680214">"Theo dõi"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Theo dõi chuyến bay đã chọn"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Sắp hết dung lượng lưu trữ"</string>
@@ -1177,8 +1183,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Đăng nhập vào mạng"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi không có quyền truy cập Internet"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> không có quyền truy cập Internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Nhấn để biết tùy chọn"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Đã kết nối"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> có khả năng kết nối giới hạn"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Nhấn để tiếp tục kết nối"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Những thay đổi trong mục cài đặt điểm phát sóng của bạn"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Bằng tần của điểm phát sóng đã thay đổi."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Thiết bị này không hỗ trợ tùy chọn chỉ sử dụng băng tần 5 GHz. Thay vào đó, thiết bị này sẽ sử dụng băng tần 5 GHz khi có thể."</string>

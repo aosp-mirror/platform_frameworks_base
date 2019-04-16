@@ -36,6 +36,7 @@ interface IPresenceListener
      * Gets the version of the presence listener implementation.
      * @param version, version information.
      */
+    @UnsupportedAppUsage
     void getVersionCb(in String version );
 
     /**
@@ -43,6 +44,7 @@ interface IPresenceListener
      * availability.
      * @param statusCode, UCE_SUCCESS as service availability.
      */
+    @UnsupportedAppUsage
     void serviceAvailable(in StatusCode statusCode);
 
     /**
@@ -50,6 +52,7 @@ interface IPresenceListener
      * unavailability.
      * @param statusCode, UCE_SUCCESS as service unAvailability.
      */
+    @UnsupportedAppUsage
     void serviceUnAvailable(in StatusCode statusCode);
 
     /**
@@ -57,12 +60,14 @@ interface IPresenceListener
      * publish request.
      * @param publishTrigger, Publish trigger for the network being supported.
      */
+    @UnsupportedAppUsage
     void publishTriggering(in PresPublishTriggerType publishTrigger);
 
     /**
      * Callback function to be invoked to inform the client of the status of an asynchronous call.
      * @param cmdStatus, command status of the request placed.
      */
+    @UnsupportedAppUsage
     void cmdStatus( in PresCmdStatus cmdStatus);
 
     /**
@@ -70,6 +75,7 @@ interface IPresenceListener
      * such as PUBLISH or SUBSCRIBE, has been received.
      * @param sipResponse, network response received for the request placed.
      */
+    @UnsupportedAppUsage
     void sipResponseReceived(in PresSipResponse sipResponse);
 
     /**
@@ -78,6 +84,7 @@ interface IPresenceListener
      * @param presentityURI, URI of the remote entity the request was placed.
      * @param tupleInfo, array of capability information remote entity supports.
      */
+    @UnsupportedAppUsage
     void capInfoReceived(in String presentityURI,
                          in PresTupleInfo [] tupleInfo);
 
@@ -87,6 +94,7 @@ interface IPresenceListener
      * @param rlmiInfo, resource infomation received from network.
      * @param resInfo, array of capabilities received from network for the list of  remore URI.
      */
+    @UnsupportedAppUsage
     void listCapInfoReceived(in PresRlmiInfo rlmiInfo,
                              in PresResInfo [] resInfo);
 
@@ -94,6 +102,7 @@ interface IPresenceListener
      * Callback function to be invoked to inform the client when Unpublish message
      * is sent to network.
      */
+    @UnsupportedAppUsage
     void unpublishMessageSent();
 
 }

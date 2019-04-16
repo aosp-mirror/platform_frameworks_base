@@ -29,12 +29,13 @@ import android.content.Context;
 import android.content.pm.PackageManagerInternal;
 import android.os.Build;
 import android.os.UserHandle;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.LocalServices;
 import com.android.server.job.controllers.JobStatus;

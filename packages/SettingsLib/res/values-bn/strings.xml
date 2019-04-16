@@ -40,6 +40,7 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s মাধ্যমে কানেক্ট হয়েছে"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s এর মাধ্যমে উপলব্ধ"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"কানেক্ট, ইন্টারনেট নেই"</string>
+    <string name="wifi_limited_connection" msgid="7717855024753201527">"সীমিত কানেকশন"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"ইন্টারনেট কানেকশন নেই"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"সাইন-ইন করা দরকার"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"এই মুহূর্তে অ্যাক্সেস পয়েন্টের কোনও কানেকশন ফাঁকা নেই"</string>
@@ -80,8 +81,8 @@
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"সিম -এর অ্যাক্সেস"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"HD অডিও: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"HD অডিও"</string>
-    <string name="bluetooth_profile_hearing_aid" msgid="7999237886427812595">"হিয়ারিং এড"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="7188282786730266159">"শ্রবণ যন্ত্রের সাথে কানেক্ট রয়েছে"</string>
+    <string name="bluetooth_profile_hearing_aid" msgid="6680721080542444257">"হিয়ারিং এড"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="3051944447369418317">"হিয়ারিং এডের সাথে কানেক্ট করা হয়েছে"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"মিডিয়া অডিওতে কানেক্ট রয়েছে"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"ফোন অডিওতে কানেক্ট"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"ফাইল স্থানান্তর সার্ভারের সঙ্গে কানেক্ট"</string>
@@ -98,7 +99,7 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"ফোন অডিওয়ের জন্য ব্যবহার করুন"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"ফাইল স্থানান্তরের জন্য ব্যবহার করুন"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"ইনপুটের জন্য ব্যবহার করুন"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="908775281788309484">"শ্রবণ যন্ত্রের জন্য ব্যবহার করুন"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="8843499209204010224">"হিয়ারিং এডের জন্য ব্যবহার করুন"</string>
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"যুক্ত করুন"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"যুক্ত করুন"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"বাতিল করুন"</string>
@@ -141,7 +142,7 @@
     <string name="launch_defaults_some" msgid="313159469856372621">"কিছু ডিফল্ট সেট করা রয়েছে"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"কোনো ডিফল্ট সেট করা নেই"</string>
     <string name="tts_settings" msgid="8186971894801348327">"পাঠ্য থেকে ভাষ্য আউটপুট সেটিংস"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"টেক্সট-থেকে-স্পীচ"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"টেক্সট-টু-স্পিচ"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"কথা বলার হার"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"যে গতিতে পাঠ্য উচ্চারিত হয়"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"পিচ"</string>
@@ -193,10 +194,10 @@
     <string name="enable_adb_summary" msgid="4881186971746056635">"USB কানেক্ট থাকাকালীন ডিবাগ মোড"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"USB ডিবাগিং অনুমতিগুলি প্রত্যাহার করুন"</string>
     <string name="bugreport_in_power" msgid="7923901846375587241">"ত্রুটি প্রতিবেদনের শর্টকাট"</string>
-    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"একটি ত্রুটি প্রতিবেদন গ্রহণের জন্য পাওয়ার মেনুতে একটি বোতাম দেখান"</string>
+    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"সমস্যার তথ্য ক্যাপচার করতে পাওয়ার মেনুতে একটি বোতাম দেখান"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"জাগিয়ে রাখুন"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"চার্জ হওয়ার স্ক্রিন কখনই নিদ্রা মোডে যাবে না"</string>
-    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"ব্লুটুথ HCI স্নুপ লগ সক্ষম করুন"</string>
+    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"ব্লুটুথ HCI স্নুপ লগ চালু করুন"</string>
     <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"সমস্ত ব্লুটুথ HCI প্যাকেট একটি ফাইলে ক্যাপচার করে রাখুন (এই সেটিং পরিবর্তন করার পরে ব্লুটুথ চালু অথবা বন্ধ করুন)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM আনলক করা হচ্ছে"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"বুট-লোডার আনলক করার অনুমতি দিন"</string>
@@ -248,7 +249,7 @@
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"USB কনফিগারেশন বেছে নিন"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"নকল অবস্থানের অনুমতি দিন"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"মক অবস্থানগুলি মঞ্জুর করুন"</string>
-    <string name="debug_view_attributes" msgid="6485448367803310384">"অ্যাট্রিবিউট পরিদর্শন দেখা সক্ষম করুন"</string>
+    <string name="debug_view_attributes" msgid="6485448367803310384">"অ্যাট্রিবিউট ইন্সপেকশন দেখা চালু করুন"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"ওয়াই-ফাই সক্রিয় থাকার সময়েও (দ্রুত নেটওয়ার্কে পাল্টানোর জন্য) সর্বদা মোবাইল ডেটা সক্রিয় রাখুন।"</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"টিথারিং হার্ডওয়্যার অ্যাক্সিলারেশন উপলব্ধ থাকলে ব্যবহার করুন"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB ডিবাগিং মঞ্জুর করবেন?"</string>
@@ -306,7 +307,7 @@
     <string name="force_msaa_summary" msgid="9123553203895817537">"OpenGL ES 2.0 অ্যাপ্লিকেশানগুলির মধ্যে 4x MSAA সক্রিয় করুন"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"অ-আয়তক্ষেত্রাকার ক্লিপ অ্যাক্টিভিটি ডিবাগ করুন"</string>
     <string name="track_frame_time" msgid="6146354853663863443">"প্রোফাইল GPU রেন্ডারিং"</string>
-    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"GPU ডিবাগ স্তর সক্ষম করুন"</string>
+    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"GPU ডিবাগ স্তর চালু করুন"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"ডিবাগ অ্যাপের জন্য GPU ডিবাগ স্তর লোড হতে দিন"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"উইন্ডো অ্যানিমেশন স্কেল"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"ট্র্যানজিশন অ্যানিমেশন স্কেল"</string>
@@ -410,7 +411,7 @@
     <item msgid="1286113608943010849">"১০০%"</item>
   </string-array>
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> আগে"</string>
-    <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> বাকী আছে"</string>
+    <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> বাকি আছে"</string>
     <string name="screen_zoom_summary_small" msgid="5867245310241621570">"ক্ষুদ্র"</string>
     <string name="screen_zoom_summary_default" msgid="2247006805614056507">"ডিফল্ট"</string>
     <string name="screen_zoom_summary_large" msgid="4835294730065424084">"বড়"</string>

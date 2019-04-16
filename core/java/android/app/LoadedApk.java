@@ -46,6 +46,7 @@ import android.os.StrictMode;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.sysprop.ProductProperties;
 import android.text.TextUtils;
 import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
@@ -232,7 +233,8 @@ public final class LoadedApk {
         mResources = Resources.getSystem();
         mDefaultClassLoader = ClassLoader.getSystemClassLoader();
         mAppComponentFactory = createAppFactory(mApplicationInfo, mDefaultClassLoader);
-        mClassLoader = mAppComponentFactory.instantiateClassLoader(mDefaultClassLoader);
+        mClassLoader = mAppComponentFactory.instantiateClassLoader(mDefaultClassLoader,
+                new ApplicationInfo(mApplicationInfo));
     }
 
     /**
@@ -243,19 +245,15 @@ public final class LoadedApk {
         mApplicationInfo = info;
         mDefaultClassLoader = classLoader;
         mAppComponentFactory = createAppFactory(info, mDefaultClassLoader);
-        mClassLoader = mAppComponentFactory.instantiateClassLoader(mDefaultClassLoader);
+        mClassLoader = mAppComponentFactory.instantiateClassLoader(mDefaultClassLoader,
+                new ApplicationInfo(mApplicationInfo));
     }
 
     private AppComponentFactory createAppFactory(ApplicationInfo appInfo, ClassLoader cl) {
         if (appInfo.appComponentFactory != null && cl != null) {
             try {
-                AppComponentFactory factory = (AppComponentFactory) cl.loadClass(
-                        appInfo.appComponentFactory).newInstance();
-                // Pass a copy of ApplicationInfo to the factory. Copying protects the framework
-                // from apps which would override the factory and change ApplicationInfo contents.
-                // ApplicationInfo is used to set up the default class loader.
-                factory.setApplicationInfo(new ApplicationInfo(appInfo));
-                return factory;
+                return (AppComponentFactory)
+                        cl.loadClass(appInfo.appComponentFactory).newInstance();
             } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
                 Slog.e(TAG, "Unable to instantiate appComponentFactory", e);
             }
@@ -678,7 +676,7 @@ public final class LoadedApk {
 
         // Shared libraries get a null parent: this has the side effect of having canonicalized
         // shared libraries using ApplicationLoaders cache, which is the behavior we want.
-        return ApplicationLoaders.getDefault().getClassLoaderWithSharedLibraries(jars,
+        return ApplicationLoaders.getDefault().getSharedLibraryClassLoaderWithSharedLibraries(jars,
                     mApplicationInfo.targetSdkVersion, isBundledApp, librarySearchPath,
                     libraryPermittedPath, /* parent */ null,
                     /* classLoaderName */ null, sharedLibraries);
@@ -712,8 +710,8 @@ public final class LoadedApk {
                 mDefaultClassLoader = ClassLoader.getSystemClassLoader();
             }
             mAppComponentFactory = createAppFactory(mApplicationInfo, mDefaultClassLoader);
-            mClassLoader = mAppComponentFactory.instantiateClassLoader(mDefaultClassLoader);
-
+            mClassLoader = mAppComponentFactory.instantiateClassLoader(mDefaultClassLoader,
+                    new ApplicationInfo(mApplicationInfo));
             return;
         }
 
@@ -763,6 +761,19 @@ public final class LoadedApk {
             isBundledApp = false;
         }
 
+        // Similar to vendor apks, we should add /product/lib for apks from product partition
+        // when product apps are marked as unbundled. We cannot use the same way from vendor
+        // to check if lib path exists because there is possibility that /product/lib would not
+        // exist from legacy device while product apks are bundled. To make this clear, new
+        // property ("ro.product.apps.unbundled") is defined which should be true only when
+        // product apks are unbundled.
+        if (mApplicationInfo.getCodePath() != null
+                && mApplicationInfo.isProduct() && ProductProperties.unbundled_apps().orElse(false)
+                // TODO(b/128557860): Change target SDK version when version code R is available.
+                && getTargetSdkVersion() == Build.VERSION_CODES.CUR_DEVELOPMENT) {
+            isBundledApp = false;
+        }
+
         makePaths(mActivityThread, isBundledApp, mApplicationInfo, zipPaths, libPaths);
 
         String libraryPermittedPath = mDataDir;
@@ -801,7 +812,8 @@ public final class LoadedApk {
             }
 
             if (mClassLoader == null) {
-                mClassLoader = mAppComponentFactory.instantiateClassLoader(mDefaultClassLoader);
+                mClassLoader = mAppComponentFactory.instantiateClassLoader(mDefaultClassLoader,
+                        new ApplicationInfo(mApplicationInfo));
             }
 
             return;
@@ -850,8 +862,9 @@ public final class LoadedApk {
             }
         }
 
-        // /vendor/lib, /odm/lib and /product/lib are added to the native lib search
-        // paths of the classloader. Note that this is done AFTER the classloader is
+        // /aepx/com.android.runtime/lib, /vendor/lib, /odm/lib and /product/lib
+        // are added to the native lib search paths of the classloader.
+        // Note that this is done AFTER the classloader is
         // created by ApplicationLoaders.getDefault().getClassLoader(...). The
         // reason is because if we have added the paths when creating the classloader
         // above, the paths are also added to the search path of the linker namespace
@@ -868,8 +881,11 @@ public final class LoadedApk {
         // System.loadLibrary(). In order to prevent the problem, we explicitly
         // add the paths only to the classloader, and not to the native loader
         // (linker namespace).
-        List<String> extraLibPaths = new ArrayList<>(3);
+        List<String> extraLibPaths = new ArrayList<>(4);
         String abiSuffix = VMRuntime.getRuntime().is64Bit() ? "64" : "";
+        if (!defaultSearchPaths.contains("/apex/com.android.runtime/lib")) {
+            extraLibPaths.add("/apex/com.android.runtime/lib" + abiSuffix);
+        }
         if (!defaultSearchPaths.contains("/vendor/lib")) {
             extraLibPaths.add("/vendor/lib" + abiSuffix);
         }
@@ -911,8 +927,10 @@ public final class LoadedApk {
         // Call AppComponentFactory to select/create the main class loader of this app.
         // Since this may call code in the app, mDefaultClassLoader must be fully set up
         // before invoking the factory.
+        // Invoke with a copy of ApplicationInfo to protect against the app changing it.
         if (mClassLoader == null) {
-            mClassLoader = mAppComponentFactory.instantiateClassLoader(mDefaultClassLoader);
+            mClassLoader = mAppComponentFactory.instantiateClassLoader(mDefaultClassLoader,
+                    new ApplicationInfo(mApplicationInfo));
         }
     }
 

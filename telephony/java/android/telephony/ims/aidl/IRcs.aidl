@@ -18,7 +18,7 @@ package android.telephony.ims.aidl;
 
 import android.net.Uri;
 import android.telephony.ims.RcsEventQueryParams;
-import android.telephony.ims.RcsEventQueryResult;
+import android.telephony.ims.RcsEventQueryResultDescriptor;
 import android.telephony.ims.RcsFileTransferCreationParams;
 import android.telephony.ims.RcsIncomingMessageCreationParams;
 import android.telephony.ims.RcsMessageSnippet;
@@ -26,10 +26,10 @@ import android.telephony.ims.RcsMessageQueryParams;
 import android.telephony.ims.RcsMessageQueryResult;
 import android.telephony.ims.RcsOutgoingMessageCreationParams;
 import android.telephony.ims.RcsParticipantQueryParams;
-import android.telephony.ims.RcsParticipantQueryResult;
+import android.telephony.ims.RcsParticipantQueryResultParcelable;
 import android.telephony.ims.RcsQueryContinuationToken;
 import android.telephony.ims.RcsThreadQueryParams;
-import android.telephony.ims.RcsThreadQueryResult;
+import android.telephony.ims.RcsThreadQueryResultParcelable;
 
 /**
  * RPC definition between RCS storage APIs and phone process.
@@ -39,14 +39,14 @@ interface IRcs {
     /////////////////////////
     // RcsMessageStore APIs
     /////////////////////////
-    RcsThreadQueryResult getRcsThreads(in RcsThreadQueryParams queryParams);
+    RcsThreadQueryResultParcelable getRcsThreads(in RcsThreadQueryParams queryParams);
 
-    RcsThreadQueryResult getRcsThreadsWithToken(
+    RcsThreadQueryResultParcelable getRcsThreadsWithToken(
         in RcsQueryContinuationToken continuationToken);
 
-    RcsParticipantQueryResult getParticipants(in RcsParticipantQueryParams queryParams);
+    RcsParticipantQueryResultParcelable getParticipants(in RcsParticipantQueryParams queryParams);
 
-    RcsParticipantQueryResult getParticipantsWithToken(
+    RcsParticipantQueryResultParcelable getParticipantsWithToken(
         in RcsQueryContinuationToken continuationToken);
 
     RcsMessageQueryResult getMessages(in RcsMessageQueryParams queryParams);
@@ -54,9 +54,9 @@ interface IRcs {
     RcsMessageQueryResult getMessagesWithToken(
         in RcsQueryContinuationToken continuationToken);
 
-    RcsEventQueryResult getEvents(in RcsEventQueryParams queryParams);
+    RcsEventQueryResultDescriptor getEvents(in RcsEventQueryParams queryParams);
 
-    RcsEventQueryResult getEventsWithToken(
+    RcsEventQueryResultDescriptor getEventsWithToken(
         in RcsQueryContinuationToken continuationToken);
 
     // returns true if the thread was successfully deleted

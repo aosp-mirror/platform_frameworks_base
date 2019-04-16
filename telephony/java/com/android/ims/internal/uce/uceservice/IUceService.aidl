@@ -38,6 +38,7 @@ interface IUceService
      * Service status is returned in setStatus callback in IUceListener.
      * @hide
      */
+    @UnsupportedAppUsage
     boolean startService(IUceListener uceListener);
 
     /**
@@ -45,6 +46,7 @@ interface IUceService
      * @return boolean true if the service stop request is processed successfully, FALSE otherwise.
      * @hide
      */
+    @UnsupportedAppUsage
     boolean stopService();
 
 
@@ -54,6 +56,7 @@ interface IUceService
      * @return boolean true if service started else false.
      * @hide
      */
+    @UnsupportedAppUsage
     boolean isServiceStarted();
 
     /**
@@ -71,6 +74,7 @@ interface IUceService
      *
      * @deprecated This is replaced with new API createOptionsServiceForSubscription()
      */
+    @UnsupportedAppUsage
     int createOptionsService(IOptionsListener optionsListener,
                              inout UceLong optionsServiceListenerHdl);
     /**
@@ -97,6 +101,7 @@ interface IUceService
      *        in IOptionsListener
      * @hide
      */
+    @UnsupportedAppUsage
     void destroyOptionsService(int optionsServiceHandle);
 
     /**
@@ -114,6 +119,7 @@ interface IUceService
      *
      * @deprecated This is replaced with new API createPresenceServiceForSubscription()
      */
+    @UnsupportedAppUsage
     int createPresenceService(IPresenceListener presenceServiceListener,
                               inout UceLong presenceServiceListenerHdl);
     /**
@@ -141,6 +147,7 @@ interface IUceService
      *
      * @hide
      */
+    @UnsupportedAppUsage
     void destroyPresenceService(int presenceServiceHdl);
 
 
@@ -152,6 +159,7 @@ interface IUceService
      *
      * @hide
      */
+    @UnsupportedAppUsage
     boolean getServiceStatus();
 
     /**
@@ -163,6 +171,7 @@ interface IUceService
      *
      * @deprecated use API getPresenceServiceForSubscription()
      */
+    @UnsupportedAppUsage
     IPresenceService getPresenceService();
 
     /**
@@ -185,6 +194,7 @@ interface IUceService
      *
      * @hide
      */
+    @UnsupportedAppUsage
     IOptionsService getOptionsService();
 
     /**

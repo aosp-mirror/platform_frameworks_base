@@ -16,6 +16,7 @@
 
 package android.net.metrics;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
@@ -125,7 +126,7 @@ public final class ApfStats implements IpConnectivityLog.Event {
      */
     @SystemApi
     @TestApi
-    public static class Builder {
+    public static final class Builder {
         private long mDurationMs;
         private int mReceivedRas;
         private int mMatchingRas;
@@ -140,6 +141,7 @@ public final class ApfStats implements IpConnectivityLog.Event {
         /**
          * Set the time interval in milliseconds these statistics covers.
          */
+        @NonNull
         public Builder setDurationMs(long durationMs) {
             mDurationMs = durationMs;
             return this;
@@ -148,6 +150,7 @@ public final class ApfStats implements IpConnectivityLog.Event {
         /**
          * Set the number of received RAs.
          */
+        @NonNull
         public Builder setReceivedRas(int receivedRas) {
             mReceivedRas = receivedRas;
             return this;
@@ -156,6 +159,7 @@ public final class ApfStats implements IpConnectivityLog.Event {
         /**
          * Set the number of received RAs matching a known RA.
          */
+        @NonNull
         public Builder setMatchingRas(int matchingRas) {
             mMatchingRas = matchingRas;
             return this;
@@ -164,6 +168,7 @@ public final class ApfStats implements IpConnectivityLog.Event {
         /**
          * Set the number of received RAs ignored due to the MAX_RAS limit.
          */
+        @NonNull
         public Builder setDroppedRas(int droppedRas) {
             mDroppedRas = droppedRas;
             return this;
@@ -172,6 +177,7 @@ public final class ApfStats implements IpConnectivityLog.Event {
         /**
          * Set the number of received RAs with a minimum lifetime of 0.
          */
+        @NonNull
         public Builder setZeroLifetimeRas(int zeroLifetimeRas) {
             mZeroLifetimeRas = zeroLifetimeRas;
             return this;
@@ -180,6 +186,7 @@ public final class ApfStats implements IpConnectivityLog.Event {
         /**
          * Set the number of received RAs that could not be parsed.
          */
+        @NonNull
         public Builder setParseErrors(int parseErrors) {
             mParseErrors = parseErrors;
             return this;
@@ -188,6 +195,7 @@ public final class ApfStats implements IpConnectivityLog.Event {
         /**
          * Set the number of APF program updates from receiving RAs.
          */
+        @NonNull
         public Builder setProgramUpdates(int programUpdates) {
             mProgramUpdates = programUpdates;
             return this;
@@ -196,6 +204,7 @@ public final class ApfStats implements IpConnectivityLog.Event {
         /**
          * Set the total number of APF program updates.
          */
+        @NonNull
         public Builder setProgramUpdatesAll(int programUpdatesAll) {
             mProgramUpdatesAll = programUpdatesAll;
             return this;
@@ -204,6 +213,7 @@ public final class ApfStats implements IpConnectivityLog.Event {
         /**
          * Set the number of APF program updates from allowing multicast traffic.
          */
+        @NonNull
         public Builder setProgramUpdatesAllowingMulticast(int programUpdatesAllowingMulticast) {
             mProgramUpdatesAllowingMulticast = programUpdatesAllowingMulticast;
             return this;
@@ -212,6 +222,7 @@ public final class ApfStats implements IpConnectivityLog.Event {
         /**
          * Set the maximum APF program size advertised by hardware.
          */
+        @NonNull
         public Builder setMaxProgramSize(int maxProgramSize) {
             mMaxProgramSize = maxProgramSize;
             return this;
@@ -220,6 +231,7 @@ public final class ApfStats implements IpConnectivityLog.Event {
         /**
          * Create a new {@link ApfStats}.
          */
+        @NonNull
         public ApfStats build() {
             return new ApfStats(mDurationMs, mReceivedRas, mMatchingRas, mDroppedRas,
                     mZeroLifetimeRas, mParseErrors, mProgramUpdates, mProgramUpdatesAll,

@@ -40,6 +40,15 @@ import org.junit.runner.RunWith;
 
 import java.util.Arrays;
 
+/**
+ * Tests for {@link DisplayCutout}.
+ *
+ * <p>Build/Install/Run:
+ *  atest FrameworksCoreTests:DisplayCutoutTest
+ *
+ * <p>This test class is a part of Window Manager Service tests and specified in
+ * {@link com.android.server.wm.test.filters.FrameworksTestsFilter}.
+ */
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 @Presubmit

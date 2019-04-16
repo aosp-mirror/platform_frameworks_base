@@ -19,9 +19,8 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.os.Parcel;
 import android.support.test.runner.AndroidJUnit4;
-import android.telephony.ims.RcsGroupThread;
 import android.telephony.ims.RcsGroupThreadParticipantJoinedEvent;
-import android.telephony.ims.RcsParticipant;
+import android.telephony.ims.RcsGroupThreadParticipantJoinedEventDescriptor;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,20 +30,24 @@ public class RcsGroupThreadParticipantJoinedEventTest {
 
     @Test
     public void testCanUnparcel() {
-        RcsGroupThread rcsGroupThread = new RcsGroupThread(1);
-        RcsParticipant rcsParticipant = new RcsParticipant(2);
+        int rcsGroupThreadId = 1;
+        int rcsParticipantId = 2;
 
-        RcsGroupThreadParticipantJoinedEvent participantJoinedEvent =
-                new RcsGroupThreadParticipantJoinedEvent(1234567890, rcsGroupThread, rcsParticipant,
-                        rcsParticipant);
+        RcsGroupThreadParticipantJoinedEventDescriptor participantJoinedEventDescriptor =
+                new RcsGroupThreadParticipantJoinedEventDescriptor(
+                        1234567890, rcsGroupThreadId, rcsParticipantId, rcsParticipantId);
 
         Parcel parcel = Parcel.obtain();
-        participantJoinedEvent.writeToParcel(parcel, participantJoinedEvent.describeContents());
+        participantJoinedEventDescriptor.writeToParcel(
+                parcel, participantJoinedEventDescriptor.describeContents());
 
         parcel.setDataPosition(0);
 
-        participantJoinedEvent = RcsGroupThreadParticipantJoinedEvent.CREATOR.createFromParcel(
-                parcel);
+        participantJoinedEventDescriptor = RcsGroupThreadParticipantJoinedEventDescriptor.CREATOR
+                .createFromParcel(parcel);
+
+        RcsGroupThreadParticipantJoinedEvent participantJoinedEvent =
+                participantJoinedEventDescriptor.createRcsEvent();
 
         assertThat(participantJoinedEvent.getJoinedParticipant().getId()).isEqualTo(2);
         assertThat(participantJoinedEvent.getRcsGroupThread().getThreadId()).isEqualTo(1);

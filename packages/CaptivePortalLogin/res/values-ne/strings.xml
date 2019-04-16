@@ -9,4 +9,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"तपाईँले सामेल हुन प्रयास गरिरहनु भएको नेटवर्कमा सुरक्षा मुद्दाहरू छन्।"</string>
     <string name="ssl_error_example" msgid="647898534624078900">"उदाहरणका लागि, लग इन पृष्ठ देखाइएको संस्थाको नहुन सक्छ।"</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"जे भए पनि ब्राउजर मार्फत जारी राख्नुहोस्"</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"यो विश्वसनीय प्राधिकरणबाट उपलब्ध गराइएको प्रमाणपत्र होइन।"</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"प्रमाणपत्रमा भएको नाम साइटमा भएको नामसँग मेल खाँदैन।"</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"यो प्रमाणपत्रको म्याद समाप्त भयो।"</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"यो प्रमाणपत्र अझै मान्य छैन।"</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"यो प्रमाणपत्रमा कुनै अमान्य मिति छ।"</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"यो प्रमाणपत्र अमान्य छ।"</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"प्रमाणपत्रसम्बन्धी अज्ञात त्रुटि।"</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"सुरक्षासम्बन्धी चेतावनी"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"प्रमाणपत्र हेर्नुहोस्‌"</string>
+    <string name="ok" msgid="2817931639040794018">"ठिक छ"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"ठेगाना:"</string>
+    <string name="page_info" msgid="4416941086705172545">"पृष्ठको जानकारी"</string>
 </resources>

@@ -18,6 +18,7 @@ package android.os;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.os.LooperProto;
 import android.util.Log;
 import android.util.Printer;
@@ -68,12 +69,16 @@ public final class Looper {
     private static final String TAG = "Looper";
 
     // sThreadLocal.get() will return null unless you've called prepare().
+    @UnsupportedAppUsage
     static final ThreadLocal<Looper> sThreadLocal = new ThreadLocal<Looper>();
+    @UnsupportedAppUsage
     private static Looper sMainLooper;  // guarded by Looper.class
 
+    @UnsupportedAppUsage
     final MessageQueue mQueue;
     final Thread mThread;
 
+    @UnsupportedAppUsage
     private Printer mLogging;
     private long mTraceTag;
 
@@ -290,6 +295,7 @@ public final class Looper {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public void setTraceTag(long traceTag) {
         mTraceTag = traceTag;
     }

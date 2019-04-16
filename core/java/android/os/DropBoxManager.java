@@ -19,6 +19,7 @@ package android.os;
 import android.annotation.SdkConstant;
 import android.annotation.SystemService;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.util.Log;
 
@@ -45,6 +46,7 @@ public class DropBoxManager {
     private static final String TAG = "DropBoxManager";
 
     private final Context mContext;
+    @UnsupportedAppUsage
     private final IDropBoxManagerService mService;
 
     /** Flag value: Entry's content was deleted to save space. */

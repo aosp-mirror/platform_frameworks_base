@@ -47,6 +47,7 @@ oneway interface ImsConfigListener {
      *
      * @return void.
      */
+    @UnsupportedAppUsage
     void onSetFeatureResponse(int feature, int network, int value, int status);
 
     /**

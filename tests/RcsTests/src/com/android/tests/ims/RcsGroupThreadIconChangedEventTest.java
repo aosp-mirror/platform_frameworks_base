@@ -20,9 +20,8 @@ import static com.google.common.truth.Truth.assertThat;
 import android.net.Uri;
 import android.os.Parcel;
 import android.support.test.runner.AndroidJUnit4;
-import android.telephony.ims.RcsGroupThread;
 import android.telephony.ims.RcsGroupThreadIconChangedEvent;
-import android.telephony.ims.RcsParticipant;
+import android.telephony.ims.RcsGroupThreadIconChangedEventDescriptor;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,20 +31,27 @@ public class RcsGroupThreadIconChangedEventTest {
 
     @Test
     public void testCanUnparcel() {
-        RcsGroupThread rcsGroupThread = new RcsGroupThread(1);
-        RcsParticipant rcsParticipant = new RcsParticipant(2);
+        int rcsGroupThreadId = 1;
+        int rcsParticipantId = 2;
         Uri newIconUri = Uri.parse("content://new_icon");
 
-        RcsGroupThreadIconChangedEvent iconChangedEvent =
-                new RcsGroupThreadIconChangedEvent(1234567890, rcsGroupThread, rcsParticipant,
-                        newIconUri);
+        RcsGroupThreadIconChangedEventDescriptor iconChangedEventDescriptor =
+                new RcsGroupThreadIconChangedEventDescriptor(1234567890, rcsGroupThreadId,
+                        rcsParticipantId, newIconUri);
 
         Parcel parcel = Parcel.obtain();
-        iconChangedEvent.writeToParcel(parcel, iconChangedEvent.describeContents());
+        iconChangedEventDescriptor.writeToParcel(
+                parcel, iconChangedEventDescriptor.describeContents());
 
         parcel.setDataPosition(0);
 
-        iconChangedEvent = RcsGroupThreadIconChangedEvent.CREATOR.createFromParcel(parcel);
+        iconChangedEventDescriptor =
+                RcsGroupThreadIconChangedEventDescriptor.CREATOR.createFromParcel(parcel);
+
+        RcsGroupThreadIconChangedEvent iconChangedEvent =
+                iconChangedEventDescriptor.createRcsEvent();
+
+
 
         assertThat(iconChangedEvent.getNewIcon()).isEqualTo(newIconUri);
         assertThat(iconChangedEvent.getRcsGroupThread().getThreadId()).isEqualTo(1);

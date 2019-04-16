@@ -892,6 +892,16 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         for (ScrimState state : ScrimState.values()) {
             state.setHasBackdrop(hasBackdrop);
         }
+
+        // Backdrop event may arrive after state was already applied,
+        // in this case, back-scrim needs to be re-evaluated
+        if (mState == ScrimState.AOD || mState == ScrimState.PULSING) {
+            float newBehindAlpha = mState.getBehindAlpha(mNotificationDensity);
+            if (mCurrentBehindAlpha != newBehindAlpha) {
+                mCurrentBehindAlpha = newBehindAlpha;
+                updateScrims();
+            }
+        }
     }
 
     public void setLaunchingAffordanceWithPreview(boolean launchingAffordanceWithPreview) {

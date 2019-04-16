@@ -65,6 +65,7 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"Να επιτρέπεται ο εντοπισμός σφαλμάτων USB;"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Το μοναδικό χαρακτηριστικό του κλειδιού RSA είναι:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Να επιτρέπεται πάντα από αυτόν τον υπολογιστή"</string>
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"Να επιτρέπεται"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Δεν επιτρέπεται ο εντοπισμός σφαλμάτων USB"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Ο χρήστης που είναι συνδεδεμένος αυτήν τη στιγμή σε αυτήν τη συσκευή δεν μπορεί να ενεργοποιήσει τον εντοπισμό σφαλμάτων USB. Για να χρησιμοποιήσετε αυτήν τη λειτουργία, κάντε εναλλαγή στον κύριο χρήστη."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Ζουμ σε πλήρη οθόνη"</string>
@@ -137,7 +138,7 @@
     <string name="accessibility_ethernet_disconnected" msgid="5896059303377589469">"Το Ethernet αποσυνδέθηκε."</string>
     <string name="accessibility_ethernet_connected" msgid="2692130313069182636">"Το Ethernet συνδέθηκε."</string>
     <string name="accessibility_no_signal" msgid="7064645320782585167">"Δεν υπάρχει σήμα."</string>
-    <string name="accessibility_not_connected" msgid="6395326276213402883">"Δεν έχει συνδεθεί."</string>
+    <string name="accessibility_not_connected" msgid="6395326276213402883">"Μη συνδεδεμένο"</string>
     <string name="accessibility_zero_bars" msgid="3806060224467027887">"Μηδέν γραμμές."</string>
     <string name="accessibility_one_bar" msgid="1685730113192081895">"Μία γραμμή."</string>
     <string name="accessibility_two_bars" msgid="6437363648385206679">"Δύο γραμμές."</string>
@@ -156,6 +157,8 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
+    <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"Περιαγωγή"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
@@ -286,6 +289,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"Ήχος"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"Ακουστικά"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"Είσοδος"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="4930931771490695395">"Βοηθήματα ακρόασης"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"Ενεργοποίηση…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Φωτεινότητα"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Αυτόματη περιστροφή"</string>
@@ -848,7 +852,7 @@
     <string name="auto_saver_title" msgid="1217959994732964228">"Πατήστε για προγραμματισμό της Εξοικονόμησης μπαταρίας"</string>
     <string name="auto_saver_text" msgid="6324376061044218113">"Αυτόματη ενεργοποίηση όταν η στάθμη της μπαταρίας είναι στο <xliff:g id="PERCENTAGE">%d</xliff:g>%%"</string>
     <string name="no_auto_saver_action" msgid="8086002101711328500">"Όχι, ευχαριστώ"</string>
-    <string name="auto_saver_enabled_title" msgid="6726474226058316862">"Το χρονοδιάγραμμα της Εξοικονόμησης μπαταρίας ενεργοποιήθηκε"</string>
+    <string name="auto_saver_enabled_title" msgid="6726474226058316862">"Το πρόγραμμα της Εξοικονόμησης μπαταρίας ενεργοποιήθηκε"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"Η Εξοικονόμηση μπαταρίας θα ενεργοποιηθεί αυτόματα μόλις η στάθμη της μπαταρίας φτάσει κάτω από <xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Ρυθμίσεις"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"Το κατάλαβα"</string>

@@ -45,12 +45,14 @@ import static com.android.server.util.NetworkStackConstants.IPV4_ADDR_ANY;
 
 import android.content.Context;
 import android.net.DhcpResults;
+import android.net.InetAddresses;
 import android.net.TrafficStats;
 import android.net.ip.IpClient;
 import android.net.metrics.DhcpClientEvent;
 import android.net.metrics.DhcpErrorEvent;
 import android.net.metrics.IpConnectivityLog;
 import android.net.util.InterfaceParams;
+import android.net.util.NetworkStackUtils;
 import android.net.util.SocketUtils;
 import android.os.Message;
 import android.os.SystemClock;
@@ -65,6 +67,7 @@ import com.android.internal.util.MessageUtils;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 import com.android.internal.util.WakeupMessage;
+import com.android.networkstack.R;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -102,9 +105,9 @@ public class DhcpClient extends StateMachine {
 
     private static final String TAG = "DhcpClient";
     private static final boolean DBG = true;
-    private static final boolean STATE_DBG = false;
-    private static final boolean MSG_DBG = false;
-    private static final boolean PACKET_DBG = false;
+    private static final boolean STATE_DBG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean MSG_DBG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean PACKET_DBG = Log.isLoggable(TAG, Log.DEBUG);
 
     // Metrics events: must be kept in sync with server-side aggregation code.
     /** Represents transitions from DhcpInitState to DhcpBoundState */
@@ -126,6 +129,7 @@ public class DhcpClient extends StateMachine {
     // DhcpClient uses IpClient's handler.
     private static final int PUBLIC_BASE = IpClient.DHCPCLIENT_CMD_BASE;
 
+    // Below constants are picked up by MessageUtils and exempt from ProGuard optimization.
     /* Commands from controller to start/stop DHCP */
     public static final int CMD_START_DHCP                  = PUBLIC_BASE + 1;
     public static final int CMD_STOP_DHCP                   = PUBLIC_BASE + 2;
@@ -317,8 +321,8 @@ public class DhcpClient extends StateMachine {
         try {
             mPacketSock = Os.socket(AF_PACKET, SOCK_RAW, ETH_P_IP);
             SocketAddress addr = makePacketSocketAddress((short) ETH_P_IP, mIface.index);
-            SocketUtils.bindSocket(mPacketSock, addr);
-            SocketUtils.attachDhcpFilter(mPacketSock);
+            Os.bind(mPacketSock, addr);
+            NetworkStackUtils.attachDhcpFilter(mPacketSock);
         } catch(SocketException|ErrnoException e) {
             Log.e(TAG, "Error creating packet socket", e);
             return false;
@@ -412,8 +416,7 @@ public class DhcpClient extends StateMachine {
         try {
             if (encap == DhcpPacket.ENCAP_L2) {
                 if (DBG) Log.d(TAG, "Broadcasting " + description);
-                SocketUtils.sendTo(
-                        mPacketSock, buf.array(), 0, buf.limit(), 0, mInterfaceBroadcastAddr);
+                Os.sendto(mPacketSock, buf.array(), 0, buf.limit(), 0, mInterfaceBroadcastAddr);
             } else if (encap == DhcpPacket.ENCAP_BOOTP && to.equals(INADDR_BROADCAST)) {
                 if (DBG) Log.d(TAG, "Broadcasting " + description);
                 // We only send L3-encapped broadcasts in DhcpRebindingState,
@@ -497,6 +500,18 @@ public class DhcpClient extends StateMachine {
 
     private void acceptDhcpResults(DhcpResults results, String msg) {
         mDhcpLease = results;
+        if (mDhcpLease.dnsServers.isEmpty()) {
+            // supplement customized dns servers
+            String[] dnsServersList =
+                    mContext.getResources().getStringArray(R.array.config_default_dns_servers);
+            for (final String dnsServer : dnsServersList) {
+                try {
+                    mDhcpLease.dnsServers.add(InetAddresses.parseNumericAddress(dnsServer));
+                } catch (IllegalArgumentException e) {
+                    Log.e(TAG, "Invalid default DNS server: " + dnsServer, e);
+                }
+            }
+        }
         mOffer = null;
         Log.d(TAG, msg + " lease: " + mDhcpLease);
         notifySuccess();

@@ -108,9 +108,8 @@ public class AppLaunch extends InstrumentationTestCase {
     private static final String DROP_CACHE_SCRIPT = "/data/local/tmp/dropCache.sh";
     private static final String APP_LAUNCH_CMD = "am start -W -n";
     private static final String SUCCESS_MESSAGE = "Status: ok";
-    private static final String WARNING_MESSAGE = "Warning:";
+    private static final String TOTAL_TIME_MESSAGE = "TotalTime:";
     private static final String COMPILE_SUCCESS = "Success";
-    private static final String THIS_TIME = "ThisTime:";
     private static final String LAUNCH_ITERATION = "LAUNCH_ITERATION - %d";
     private static final String TRACE_ITERATION = "TRACE_ITERATION-%d";
     private static final String LAUNCH_ITERATION_PREFIX = "LAUNCH_ITERATION";
@@ -831,15 +830,13 @@ public class AppLaunch extends InstrumentationTestCase {
             String launchTime = "-1";
             String cpuCycles = "-1";
             String majorFaults = "-1";
-            boolean coldLaunchSuccess = false;
-            boolean hotLaunchSuccess = false;
+            boolean launchSuccess = false;
             try {
                 InputStream inputStream = new FileInputStream(parcelDesc.getFileDescriptor());
                 /* SAMPLE OUTPUT : Cold launch
                 Starting: Intent { cmp=com.google.android.calculator/com.android.calculator2.Calculator }
                 Status: ok
                 Activity: com.google.android.calculator/com.android.calculator2.Calculator
-                ThisTime: 357
                 TotalTime: 357
                 WaitTime: 377
                 Complete*/
@@ -848,7 +845,6 @@ public class AppLaunch extends InstrumentationTestCase {
                 Warning: Activity not started, its current task has been brought to the front
                 Status: ok
                 Activity: com.google.android.calculator/com.android.calculator2.CalculatorGoogle
-                ThisTime: 60
                 TotalTime: 60
                 WaitTime: 67
                 Complete*/
@@ -859,54 +855,37 @@ public class AppLaunch extends InstrumentationTestCase {
                 Total test time,1.462129,seconds,*/
                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
                         inputStream));
-                String line = null;
-                int lineCount = 1;
+                String line;
                 mBufferedWriter.newLine();
                 mBufferedWriter.write(headerInfo);
                 mBufferedWriter.newLine();
                 while ((line = bufferedReader.readLine()) != null) {
-                    if (lineCount == 2 && line.startsWith(SUCCESS_MESSAGE)) {
-                        coldLaunchSuccess = true;
+                    mBufferedWriter.write(line);
+                    mBufferedWriter.newLine();
+                    if (line.startsWith(SUCCESS_MESSAGE)) {
+                        launchSuccess = true;
                     }
-                    if (lineCount == 2 && line.startsWith(WARNING_MESSAGE)) {
-                        hotLaunchSuccess = true;
+                    if (!launchSuccess) {
+                        continue;
                     }
                     // Parse TotalTime which is the launch time
-                    if (coldLaunchSuccess && lineCount == 5) {
-                        String launchSplit[] = line.split(":");
-                        launchTime = launchSplit[1].trim();
-                    }
-                    if (hotLaunchSuccess && lineCount == 6) {
+                    if (line.startsWith(TOTAL_TIME_MESSAGE)) {
                         String launchSplit[] = line.split(":");
                         launchTime = launchSplit[1].trim();
                     }
 
                     if (mSimplePerfAppOnly) {
-                        // Parse simpleperf output.
-                        if ((lineCount == 9 && coldLaunchSuccess)
-                                || (lineCount == 10 && hotLaunchSuccess)) {
-                            if (!line.contains("cpu-cycles")) {
-                                Log.e(TAG, "Error in simpleperf output");
-                            } else {
-                                cpuCycles = line.split(",")[0].trim();
-                            }
-                        } else if ((lineCount == 10 && coldLaunchSuccess)
-                                || (lineCount == 11 && hotLaunchSuccess)) {
-                            if (!line.contains("major-faults")) {
-                                Log.e(TAG, "Error in simpleperf output");
-                            } else {
-                                majorFaults = line.split(",")[0].trim();
-                            }
+                        if (line.contains(",cpu-cycles,")) {
+                            cpuCycles = line.split(",")[0].trim();
+                        } else if (line.contains(",major-faults,")) {
+                            majorFaults = line.split(",")[0].trim();
                         }
                     }
-                    mBufferedWriter.write(line);
-                    mBufferedWriter.newLine();
-                    lineCount++;
                 }
                 mBufferedWriter.flush();
                 inputStream.close();
             } catch (IOException e) {
-                Log.w(TAG, "Error writing the launch file", e);
+                Log.w(TAG, "Error parsing launch time and writing to file", e);
             }
             return new AppLaunchResult(launchTime, cpuCycles, majorFaults);
         }

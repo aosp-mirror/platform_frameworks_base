@@ -22,11 +22,12 @@ import android.content.ContentResolver;
 import android.net.Uri;
 import android.net.Uri.Builder;
 import android.os.FileUtils;
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.Xml.Encoding;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.server.UiServiceTestCase;
 

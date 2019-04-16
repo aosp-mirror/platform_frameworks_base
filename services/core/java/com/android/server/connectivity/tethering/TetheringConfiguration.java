@@ -26,10 +26,11 @@ import static android.provider.Settings.Global.TETHER_ENABLE_LEGACY_DHCP_SERVER;
 import static com.android.internal.R.array.config_mobile_hotspot_provision_app;
 import static com.android.internal.R.array.config_tether_bluetooth_regexs;
 import static com.android.internal.R.array.config_tether_dhcp_range;
-import static com.android.internal.R.array.config_tether_usb_regexs;
 import static com.android.internal.R.array.config_tether_upstream_types;
+import static com.android.internal.R.array.config_tether_usb_regexs;
 import static com.android.internal.R.array.config_tether_wifi_regexs;
 import static com.android.internal.R.bool.config_tether_upstream_automatic;
+import static com.android.internal.R.integer.config_mobile_hotspot_provision_check_period;
 import static com.android.internal.R.string.config_mobile_hotspot_provision_app_no_ui;
 
 import android.content.ContentResolver;
@@ -38,6 +39,7 @@ import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.util.SharedLog;
 import android.provider.Settings;
+import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
@@ -66,11 +68,6 @@ public class TetheringConfiguration {
 
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
-    @VisibleForTesting
-    public static final int DUN_NOT_REQUIRED = 0;
-    public static final int DUN_REQUIRED = 1;
-    public static final int DUN_UNSPECIFIED = 2;
-
     // Default ranges used for the legacy DHCP server.
     // USB is  192.168.42.1 and 255.255.255.0
     // Wifi is 192.168.43.1 and 255.255.255.0
@@ -89,7 +86,6 @@ public class TetheringConfiguration {
     public final String[] tetherableUsbRegexs;
     public final String[] tetherableWifiRegexs;
     public final String[] tetherableBluetoothRegexs;
-    public final int dunCheck;
     public final boolean isDunRequired;
     public final boolean chooseUpstreamAutomatically;
     public final Collection<Integer> preferredUpstreamIfaceTypes;
@@ -99,30 +95,37 @@ public class TetheringConfiguration {
 
     public final String[] provisioningApp;
     public final String provisioningAppNoUi;
+    public final int provisioningCheckPeriod;
 
-    public TetheringConfiguration(Context ctx, SharedLog log) {
+    public final int subId;
+
+    public TetheringConfiguration(Context ctx, SharedLog log, int id) {
         final SharedLog configLog = log.forSubComponent("config");
 
-        tetherableUsbRegexs = getResourceStringArray(ctx, config_tether_usb_regexs);
+        subId = id;
+        Resources res = getResources(ctx, subId);
+
+        tetherableUsbRegexs = getResourceStringArray(res, config_tether_usb_regexs);
         // TODO: Evaluate deleting this altogether now that Wi-Fi always passes
         // us an interface name. Careful consideration needs to be given to
         // implications for Settings and for provisioning checks.
-        tetherableWifiRegexs = getResourceStringArray(ctx, config_tether_wifi_regexs);
-        tetherableBluetoothRegexs = getResourceStringArray(ctx, config_tether_bluetooth_regexs);
+        tetherableWifiRegexs = getResourceStringArray(res, config_tether_wifi_regexs);
+        tetherableBluetoothRegexs = getResourceStringArray(res, config_tether_bluetooth_regexs);
 
-        dunCheck = checkDunRequired(ctx);
-        configLog.log("DUN check returned: " + dunCheckString(dunCheck));
+        isDunRequired = checkDunRequired(ctx);
 
-        chooseUpstreamAutomatically = getResourceBoolean(ctx, config_tether_upstream_automatic);
-        preferredUpstreamIfaceTypes = getUpstreamIfaceTypes(ctx, dunCheck);
-        isDunRequired = preferredUpstreamIfaceTypes.contains(TYPE_MOBILE_DUN);
+        chooseUpstreamAutomatically = getResourceBoolean(res, config_tether_upstream_automatic);
+        preferredUpstreamIfaceTypes = getUpstreamIfaceTypes(res, isDunRequired);
 
-        legacyDhcpRanges = getLegacyDhcpRanges(ctx);
+        legacyDhcpRanges = getLegacyDhcpRanges(res);
         defaultIPv4DNS = copy(DEFAULT_IPV4_DNS);
         enableLegacyDhcpServer = getEnableLegacyDhcpServer(ctx);
 
-        provisioningApp = getResourceStringArray(ctx, config_mobile_hotspot_provision_app);
-        provisioningAppNoUi = getProvisioningAppNoUi(ctx);
+        provisioningApp = getResourceStringArray(res, config_mobile_hotspot_provision_app);
+        provisioningAppNoUi = getProvisioningAppNoUi(res);
+        provisioningCheckPeriod = getResourceInteger(res,
+                config_mobile_hotspot_provision_check_period,
+                0 /* No periodic re-check */);
 
         configLog.log(toString());
     }
@@ -144,6 +147,9 @@ public class TetheringConfiguration {
     }
 
     public void dump(PrintWriter pw) {
+        pw.print("subId: ");
+        pw.println(subId);
+
         dumpStringArray(pw, "tetherableUsbRegexs", tetherableUsbRegexs);
         dumpStringArray(pw, "tetherableWifiRegexs", tetherableWifiRegexs);
         dumpStringArray(pw, "tetherableBluetoothRegexs", tetherableBluetoothRegexs);
@@ -169,6 +175,7 @@ public class TetheringConfiguration {
 
     public String toString() {
         final StringJoiner sj = new StringJoiner(" ");
+        sj.add(String.format("subId:%d", subId));
         sj.add(String.format("tetherableUsbRegexs:%s", makeString(tetherableUsbRegexs)));
         sj.add(String.format("tetherableWifiRegexs:%s", makeString(tetherableWifiRegexs)));
         sj.add(String.format("tetherableBluetoothRegexs:%s",
@@ -220,53 +227,43 @@ public class TetheringConfiguration {
         return upstreamNames;
     }
 
-    public static int checkDunRequired(Context ctx) {
+    /** Check whether dun is required. */
+    public static boolean checkDunRequired(Context ctx) {
         final TelephonyManager tm = (TelephonyManager) ctx.getSystemService(TELEPHONY_SERVICE);
-        return (tm != null) ? tm.getTetherApnRequired() : DUN_UNSPECIFIED;
+        return (tm != null) ? tm.getTetherApnRequired() : false;
     }
 
-    private static String dunCheckString(int dunCheck) {
-        switch (dunCheck) {
-            case DUN_NOT_REQUIRED: return "DUN_NOT_REQUIRED";
-            case DUN_REQUIRED:     return "DUN_REQUIRED";
-            case DUN_UNSPECIFIED:  return "DUN_UNSPECIFIED";
-            default:
-                return String.format("UNKNOWN (%s)", dunCheck);
-        }
-    }
-
-    private static Collection<Integer> getUpstreamIfaceTypes(Context ctx, int dunCheck) {
-        final int ifaceTypes[] = ctx.getResources().getIntArray(config_tether_upstream_types);
+    private static Collection<Integer> getUpstreamIfaceTypes(Resources res, boolean dunRequired) {
+        final int[] ifaceTypes = res.getIntArray(config_tether_upstream_types);
         final ArrayList<Integer> upstreamIfaceTypes = new ArrayList<>(ifaceTypes.length);
         for (int i : ifaceTypes) {
             switch (i) {
                 case TYPE_MOBILE:
                 case TYPE_MOBILE_HIPRI:
-                    if (dunCheck == DUN_REQUIRED) continue;
+                    if (dunRequired) continue;
                     break;
                 case TYPE_MOBILE_DUN:
-                    if (dunCheck == DUN_NOT_REQUIRED) continue;
+                    if (!dunRequired) continue;
                     break;
             }
             upstreamIfaceTypes.add(i);
         }
 
         // Fix up upstream interface types for DUN or mobile. NOTE: independent
-        // of the value of |dunCheck|, cell data of one form or another is
+        // of the value of |dunRequired|, cell data of one form or another is
         // *always* an upstream, regardless of the upstream interface types
         // specified by configuration resources.
-        if (dunCheck == DUN_REQUIRED) {
+        if (dunRequired) {
             appendIfNotPresent(upstreamIfaceTypes, TYPE_MOBILE_DUN);
-        } else if (dunCheck == DUN_NOT_REQUIRED) {
-            appendIfNotPresent(upstreamIfaceTypes, TYPE_MOBILE);
-            appendIfNotPresent(upstreamIfaceTypes, TYPE_MOBILE_HIPRI);
         } else {
-            // Fix upstream interface types for case DUN_UNSPECIFIED.
             // Do not modify if a cellular interface type is already present in the
             // upstream interface types. Add TYPE_MOBILE and TYPE_MOBILE_HIPRI if no
             // cellular interface types are found in the upstream interface types.
-            if (!(containsOneOf(upstreamIfaceTypes,
-                    TYPE_MOBILE_DUN, TYPE_MOBILE, TYPE_MOBILE_HIPRI))) {
+            // This preserves backwards compatibility and prevents the DUN and default
+            // mobile types incorrectly appearing together, which could happen on
+            // previous releases in the common case where checkDunRequired returned
+            // DUN_UNSPECIFIED.
+            if (!containsOneOf(upstreamIfaceTypes, TYPE_MOBILE, TYPE_MOBILE_HIPRI)) {
                 upstreamIfaceTypes.add(TYPE_MOBILE);
                 upstreamIfaceTypes.add(TYPE_MOBILE_HIPRI);
             }
@@ -286,36 +283,44 @@ public class TetheringConfiguration {
         return false;
     }
 
-    private static String[] getLegacyDhcpRanges(Context ctx) {
-        final String[] fromResource = getResourceStringArray(ctx, config_tether_dhcp_range);
+    private static String[] getLegacyDhcpRanges(Resources res) {
+        final String[] fromResource = getResourceStringArray(res, config_tether_dhcp_range);
         if ((fromResource.length > 0) && (fromResource.length % 2 == 0)) {
             return fromResource;
         }
         return copy(LEGACY_DHCP_DEFAULT_RANGE);
     }
 
-    private static String getProvisioningAppNoUi(Context ctx) {
+    private static String getProvisioningAppNoUi(Resources res) {
         try {
-            return ctx.getResources().getString(config_mobile_hotspot_provision_app_no_ui);
+            return res.getString(config_mobile_hotspot_provision_app_no_ui);
         } catch (Resources.NotFoundException e) {
             return "";
         }
     }
 
-    private static boolean getResourceBoolean(Context ctx, int resId) {
+    private static boolean getResourceBoolean(Resources res, int resId) {
         try {
-            return ctx.getResources().getBoolean(resId);
+            return res.getBoolean(resId);
         } catch (Resources.NotFoundException e404) {
             return false;
         }
     }
 
-    private static String[] getResourceStringArray(Context ctx, int resId) {
+    private static String[] getResourceStringArray(Resources res, int resId) {
         try {
-            final String[] strArray = ctx.getResources().getStringArray(resId);
+            final String[] strArray = res.getStringArray(resId);
             return (strArray != null) ? strArray : EMPTY_STRING_ARRAY;
         } catch (Resources.NotFoundException e404) {
             return EMPTY_STRING_ARRAY;
+        }
+    }
+
+    private static int getResourceInteger(Resources res, int resId, int defaultValue) {
+        try {
+            return res.getInteger(resId);
+        } catch (Resources.NotFoundException e404) {
+            return defaultValue;
         }
     }
 
@@ -323,6 +328,19 @@ public class TetheringConfiguration {
         final ContentResolver cr = ctx.getContentResolver();
         final int intVal = Settings.Global.getInt(cr, TETHER_ENABLE_LEGACY_DHCP_SERVER, 0);
         return intVal != 0;
+    }
+
+    private Resources getResources(Context ctx, int subId) {
+        if (subId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
+            return getResourcesForSubIdWrapper(ctx, subId);
+        } else {
+            return ctx.getResources();
+        }
+    }
+
+    @VisibleForTesting
+    protected Resources getResourcesForSubIdWrapper(Context ctx, int subId) {
+        return SubscriptionManager.getResourcesForSubId(ctx, subId);
     }
 
     private static String[] copy(String[] strarray) {

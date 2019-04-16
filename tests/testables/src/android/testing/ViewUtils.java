@@ -16,7 +16,6 @@ package android.testing;
 
 import android.content.pm.ApplicationInfo;
 import android.graphics.PixelFormat;
-import android.support.test.InstrumentationRegistry;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;

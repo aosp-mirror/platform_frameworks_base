@@ -32,6 +32,7 @@ import android.util.Printer;
 import dalvik.system.BlockGuard;
 import dalvik.system.CloseGuard;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -303,12 +304,47 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                 } else {
                     setSyncMode(SQLiteGlobal.getWALSyncMode());
                 }
+                maybeTruncateWalFile();
             } else {
                 setJournalMode(mConfiguration.journalMode == null
                         ? SQLiteGlobal.getDefaultJournalMode() : mConfiguration.journalMode);
                 setSyncMode(mConfiguration.syncMode == null
                         ? SQLiteGlobal.getDefaultSyncMode() : mConfiguration.syncMode);
             }
+        }
+    }
+
+    /**
+     * If the WAL file exists and larger than a threshold, truncate it by executing
+     * PRAGMA wal_checkpoint.
+     */
+    private void maybeTruncateWalFile() {
+        final long threshold = SQLiteGlobal.getWALTruncateSize();
+        if (DEBUG) {
+            Log.d(TAG, "Truncate threshold=" + threshold);
+        }
+        if (threshold == 0) {
+            return;
+        }
+
+        final File walFile = new File(mConfiguration.path + "-wal");
+        if (!walFile.isFile()) {
+            return;
+        }
+        final long size = walFile.length();
+        if (size < threshold) {
+            if (DEBUG) {
+                Log.d(TAG, walFile.getAbsolutePath() + " " + size + " bytes: No need to truncate");
+            }
+            return;
+        }
+
+        Log.i(TAG, walFile.getAbsolutePath() + " " + size + " bytes: Bigger than "
+                + threshold + "; truncating");
+        try {
+            executeForString("PRAGMA wal_checkpoint(TRUNCATE)", null, null);
+        } catch (SQLiteException e) {
+            Log.w(TAG, "Failed to truncate the -wal file", e);
         }
     }
 

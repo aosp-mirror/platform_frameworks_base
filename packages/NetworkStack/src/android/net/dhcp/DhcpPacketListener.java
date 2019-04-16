@@ -18,7 +18,7 @@ package android.net.dhcp;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.net.shared.FdEventsReader;
+import android.net.util.FdEventsReader;
 import android.os.Handler;
 import android.system.Os;
 

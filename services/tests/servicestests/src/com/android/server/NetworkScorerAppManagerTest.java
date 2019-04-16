@@ -34,7 +34,6 @@ import android.Manifest.permission;
 import android.app.AppOpsManager;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -45,14 +44,14 @@ import android.net.NetworkScoreManager;
 import android.net.NetworkScorerAppData;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.R;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;

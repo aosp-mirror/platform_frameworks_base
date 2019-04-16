@@ -17,5 +17,5 @@
 
 package android.net;
 
-parcelable ProxyInfo;
+@JavaOnlyStableParcelable parcelable ProxyInfo;
 

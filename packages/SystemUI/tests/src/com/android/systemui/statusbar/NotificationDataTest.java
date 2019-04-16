@@ -44,11 +44,12 @@ import android.media.session.MediaSession;
 import android.os.Bundle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
-import android.support.test.annotation.UiThreadTest;
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.ArraySet;
+
+import androidx.test.annotation.UiThreadTest;
+import androidx.test.filters.SmallTest;
 
 import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.SysuiTestCase;

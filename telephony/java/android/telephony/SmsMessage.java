@@ -606,7 +606,7 @@ public class SmsMessage {
 
     /**
      * Returns the message body as a String, if it exists and is text based.
-     * @return message body is there is one, otherwise null
+     * @return message body if there is one, otherwise null
      */
     public String getMessageBody() {
         return mWrappedSmsMessage.getMessageBody();
@@ -980,5 +980,14 @@ public class SmsMessage {
         }
 
         return false;
+    }
+
+    /**
+     * {@hide}
+     * Returns the recipient address(receiver) of this SMS message in String form or null if
+     * unavailable.
+     */
+    public String getRecipientAddress() {
+        return mWrappedSmsMessage.getRecipientAddress();
     }
 }

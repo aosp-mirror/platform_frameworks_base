@@ -46,6 +46,11 @@ bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer
     sk_sp<SkImage> layerImage;
     const int layerWidth = layer->getWidth();
     const int layerHeight = layer->getHeight();
+    const int bufferWidth = layer->getBufferWidth();
+    const int bufferHeight = layer->getBufferHeight();
+    if (bufferWidth <= 0 || bufferHeight <=0) {
+        return false;
+    }
     if (layer->getApi() == Layer::Api::OpenGL) {
         GlLayer* glLayer = static_cast<GlLayer*>(layer);
         GrGLTextureInfo externalTexture;
@@ -57,7 +62,7 @@ bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer
         // this is anticipated to have is that for some format types if we are not bound as an OES
         // texture we may get invalid results for SKP capture if we read back the texture.
         externalTexture.fFormat = GL_RGBA8;
-        GrBackendTexture backendTexture(layerWidth, layerHeight, GrMipMapped::kNo, externalTexture);
+        GrBackendTexture backendTexture(bufferWidth, bufferHeight, GrMipMapped::kNo, externalTexture);
         layerImage = SkImage::MakeFromTexture(context, backendTexture, kTopLeft_GrSurfaceOrigin,
                                               kPremul_SkAlphaType, nullptr);
     } else {
@@ -76,7 +81,7 @@ bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer
         flipV.setAll(1, 0, 0, 0, -1, 1, 0, 0, 1);
         textureMatrixInv.preConcat(flipV);
         textureMatrixInv.preScale(1.0f / layerWidth, 1.0f / layerHeight);
-        textureMatrixInv.postScale(layerWidth, layerHeight);
+        textureMatrixInv.postScale(bufferWidth, bufferHeight);
         SkMatrix textureMatrix;
         if (!textureMatrixInv.invert(&textureMatrix)) {
             textureMatrix = textureMatrixInv;
@@ -101,6 +106,7 @@ bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer
             canvas->save();
             canvas->concat(matrix);
         }
+        const SkMatrix& totalMatrix = canvas->getTotalMatrix();
         if (dstRect) {
             SkMatrix matrixInv;
             if (!matrix.invert(&matrixInv)) {
@@ -110,9 +116,28 @@ bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer
             matrixInv.mapRect(&srcRect);
             SkRect skiaDestRect = *dstRect;
             matrixInv.mapRect(&skiaDestRect);
+            // If (matrix is identity or an integer translation) and (src/dst buffers size match),
+            // then use nearest neighbor, otherwise use bilerp sampling.
+            // Integer translation is defined as when src rect and dst rect align fractionally.
+            // Skia TextureOp has the above logic build-in, but not NonAAFillRectOp. TextureOp works
+            // only for SrcOver blending and without color filter (readback uses Src blending).
+            bool isIntegerTranslate = totalMatrix.isTranslate()
+                    && SkScalarFraction(skiaDestRect.fLeft + totalMatrix[SkMatrix::kMTransX])
+                    == SkScalarFraction(srcRect.fLeft)
+                    && SkScalarFraction(skiaDestRect.fTop + totalMatrix[SkMatrix::kMTransY])
+                    == SkScalarFraction(srcRect.fTop);
+            if (layer->getForceFilter() || !isIntegerTranslate) {
+                paint.setFilterQuality(kLow_SkFilterQuality);
+            }
             canvas->drawImageRect(layerImage.get(), srcRect, skiaDestRect, &paint,
                                   SkCanvas::kFast_SrcRectConstraint);
         } else {
+            bool isIntegerTranslate = totalMatrix.isTranslate()
+                    && SkScalarIsInt(totalMatrix[SkMatrix::kMTransX])
+                    && SkScalarIsInt(totalMatrix[SkMatrix::kMTransY]);
+            if (layer->getForceFilter() || !isIntegerTranslate) {
+                paint.setFilterQuality(kLow_SkFilterQuality);
+            }
             canvas->drawImage(layerImage.get(), 0, 0, &paint);
         }
         // restore the original matrix

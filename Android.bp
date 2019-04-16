@@ -186,6 +186,7 @@ java_defaults {
         "core/java/android/hardware/radio/ITunerCallback.aidl",
         "core/java/android/hardware/soundtrigger/IRecognitionStatusCallback.aidl",
         "core/java/android/hardware/usb/IUsbManager.aidl",
+        "core/java/android/net/ICaptivePortal.aidl",
         "core/java/android/net/IConnectivityManager.aidl",
         "core/java/android/net/IIpConnectivityMetrics.aidl",
         "core/java/android/net/IEthernetManager.aidl",
@@ -200,6 +201,9 @@ java_defaults {
         "core/java/android/net/INetworkScoreService.aidl",
         "core/java/android/net/INetworkStatsService.aidl",
         "core/java/android/net/INetworkStatsSession.aidl",
+        "core/java/android/net/ISocketKeepaliveCallback.aidl",
+        "core/java/android/net/ITestNetworkManager.aidl",
+        "core/java/android/net/ITetheringEventCallback.aidl",
         "core/java/android/net/ITetheringStatsProvider.aidl",
         "core/java/android/net/nsd/INsdManager.aidl",
         "core/java/android/nfc/IAppCallback.aidl",
@@ -550,11 +554,13 @@ java_defaults {
         "telephony/java/com/android/internal/telephony/IOnSubscriptionsChangedListener.aidl",
         "telephony/java/com/android/internal/telephony/IPhoneStateListener.aidl",
         "telephony/java/com/android/internal/telephony/IPhoneSubInfo.aidl",
+        "telephony/java/com/android/internal/telephony/ISetOpportunisticDataCallback.aidl",
         "telephony/java/com/android/internal/telephony/ISms.aidl",
         "telephony/java/com/android/internal/telephony/ISub.aidl",
         "telephony/java/com/android/internal/telephony/IOns.aidl",
         "telephony/java/com/android/internal/telephony/ITelephony.aidl",
         "telephony/java/com/android/internal/telephony/ITelephonyRegistry.aidl",
+        "telephony/java/com/android/internal/telephony/IUpdateAvailableNetworksCallback.aidl",
         "telephony/java/com/android/internal/telephony/IWapPushManager.aidl",
         "telephony/java/com/android/internal/telephony/euicc/IAuthenticateServerCallback.aidl",
         "telephony/java/com/android/internal/telephony/euicc/ICancelSessionCallback.aidl",
@@ -676,7 +682,7 @@ java_defaults {
         "ext",
     ],
 
-    jarjar_rules: "jarjar_rules_hidl.txt",
+    jarjar_rules: ":framework-jarjar-rules",
 
     static_libs: [
         "apex_aidl_interface-java",
@@ -690,10 +696,6 @@ java_defaults {
         "android.hardware.radio-V1.2-java",
         "android.hardware.radio-V1.3-java",
         "android.hardware.radio-V1.4-java",
-        "android.hardware.radio.config-V1.0-java",
-        "android.hardware.radio.config-V1.1-java",
-        "android.hardware.radio.config-V1.2-java",
-        "android.hardware.radio.deprecated-V1.0-java",
         "android.hardware.thermal-V1.0-java-constants",
         "android.hardware.tv.input-V1.0-java-constants",
         "android.hardware.usb-V1.0-java-constants",
@@ -703,8 +705,6 @@ java_defaults {
         "android.hardware.vibrator-V1.1-java",
         "android.hardware.vibrator-V1.2-java",
         "android.hardware.wifi-V1.0-java-constants",
-        "networkstack-aidl-interfaces-java",
-        "netd_aidl_interface-java",
     ],
 
     required: [
@@ -719,6 +719,11 @@ java_defaults {
         "--multi-dex",
     ],
 
+}
+
+filegroup {
+    name: "framework-jarjar-rules",
+    srcs: ["jarjar_rules_hidl.txt"],
 }
 
 filegroup {
@@ -767,6 +772,7 @@ java_library_host {
 // specified on the build command line.
 java_library {
     name: "framework-atb-backward-compatibility",
+    installable: true,
     srcs: [
         "core/java/android/content/pm/AndroidTestBaseUpdater.java",
     ],
@@ -808,53 +814,26 @@ gensrcs {
     output_extension: "srcjar",
 }
 
-// AIDL interfaces between the core system and the networking mainline module.
-aidl_interface {
-    name: "networkstack-aidl-interfaces",
-    local_include_dir: "core/java",
+filegroup {
+    name: "framework-annotations",
     srcs: [
-        "core/java/android/net/ApfCapabilitiesParcelable.aidl",
-        "core/java/android/net/DhcpResultsParcelable.aidl",
-        "core/java/android/net/ICaptivePortal.aidl",
-        "core/java/android/net/INetworkMonitor.aidl",
-        "core/java/android/net/INetworkMonitorCallbacks.aidl",
-        "core/java/android/net/IIpMemoryStore.aidl",
-        "core/java/android/net/INetworkStackConnector.aidl",
-        "core/java/android/net/INetworkStackStatusCallback.aidl",
-        "core/java/android/net/InitialConfigurationParcelable.aidl",
-        "core/java/android/net/IpPrefixParcelable.aidl",
-        "core/java/android/net/LinkAddressParcelable.aidl",
-        "core/java/android/net/LinkPropertiesParcelable.aidl",
-        "core/java/android/net/NetworkParcelable.aidl",
-        "core/java/android/net/PrivateDnsConfigParcel.aidl",
-        "core/java/android/net/ProvisioningConfigurationParcelable.aidl",
-        "core/java/android/net/ProxyInfoParcelable.aidl",
-        "core/java/android/net/RouteInfoParcelable.aidl",
-        "core/java/android/net/StaticIpConfigurationParcelable.aidl",
-        "core/java/android/net/TcpKeepalivePacketDataParcelable.aidl",
-        "core/java/android/net/dhcp/DhcpServingParamsParcel.aidl",
-        "core/java/android/net/dhcp/IDhcpServer.aidl",
-        "core/java/android/net/dhcp/IDhcpServerCallbacks.aidl",
-        "core/java/android/net/ip/IIpClient.aidl",
-        "core/java/android/net/ip/IIpClientCallbacks.aidl",
-        "core/java/android/net/ipmemorystore/**/*.aidl",
-    ],
-    api_dir: "aidl/networkstack",
+        "core/java/android/annotation/NonNull.java",
+        "core/java/android/annotation/Nullable.java",
+        "core/java/android/annotation/IntDef.java",
+        "core/java/android/annotation/IntRange.java",
+        "core/java/android/annotation/UnsupportedAppUsage.java",
+        "core/java/com/android/internal/annotations/GuardedBy.java",
+        "core/java/com/android/internal/annotations/VisibleForTesting.java",
+    ]
 }
 
 filegroup {
     name: "framework-networkstack-shared-srcs",
     srcs: [
         // TODO: remove these annotations as soon as we can use andoid.support.annotations.*
-        "core/java/android/annotation/NonNull.java",
-        "core/java/android/annotation/Nullable.java",
-        "core/java/android/annotation/IntDef.java",
-        "core/java/android/annotation/IntRange.java",
-        "core/java/android/annotation/UnsupportedAppUsage.java",
+        ":framework-annotations",
         "core/java/android/net/DhcpResults.java",
         "core/java/android/util/LocalLog.java",
-        "core/java/com/android/internal/annotations/GuardedBy.java",
-        "core/java/com/android/internal/annotations/VisibleForTesting.java",
         "core/java/com/android/internal/util/HexDump.java",
         "core/java/com/android/internal/util/IndentingPrintWriter.java",
         "core/java/com/android/internal/util/IState.java",
@@ -1038,8 +1017,10 @@ java_library {
         "core/java/android/os/HidlSupport.java",
         "core/java/android/annotation/IntDef.java",
         "core/java/android/annotation/NonNull.java",
+        "core/java/android/annotation/Nullable.java",
         "core/java/android/annotation/SystemApi.java",
         "core/java/android/annotation/TestApi.java",
+        "core/java/android/annotation/UnsupportedAppUsage.java",
         "core/java/android/os/HwBinder.java",
         "core/java/android/os/HwBlob.java",
         "core/java/android/os/HwParcel.java",
@@ -1109,12 +1090,21 @@ packages_to_document = [
     "org/apache/http/params",
 ]
 
+// Make the api/current.txt file available for use by modules in other
+// directories.
+filegroup {
+    name: "frameworks-base-api-current.txt",
+    srcs: [
+        "api/current.txt",
+    ],
+}
+
 framework_docs_only_args = " -android -manifest $(location core/res/AndroidManifest.xml) " +
      "-werror -lerror -hide 111 -hide 113 -hide 125 -hide 126 -hide 127 -hide 128 " +
      "-overview $(location core/java/overview.html) " +
      // Federate Support Library references against local API file.
      "-federate SupportLib https://developer.android.com " +
-     "-federationapi SupportLib $(location current/support-api.txt) "
+     "-federationapi SupportLib $(location :current-support-api) "
 
 framework_docs_only_libs = [
     "voip-common",
@@ -1170,10 +1160,7 @@ stubs_defaults {
         "test-base/src/**/*.java",
         ":opt-telephony-srcs",
         ":opt-net-voip-srcs",
-        ":openjdk_javadoc_files",
-        ":non_openjdk_javadoc_files",
-        ":android_icu4j_src_files_for_docs",
-        ":conscrypt_public_api_files",
+        ":core_public_api_files",
         "test-mock/src/**/*.java",
         "test-runner/src/**/*.java",
     ],
@@ -1231,10 +1218,7 @@ stubs_defaults {
     srcs: [
         ":opt-telephony-srcs",
         ":opt-net-voip-srcs",
-        ":openjdk_javadoc_files",
-        ":non_openjdk_javadoc_files",
-        ":android_icu4j_src_files_for_docs",
-        ":conscrypt_public_api_files",
+        ":core_public_api_files",
     ],
     srcs_lib: "framework",
     srcs_lib_whitelist_dirs: frameworks_base_subdirs,
@@ -1567,6 +1551,8 @@ droidstubs {
     srcs: [
         ":openjdk_java_files",
         ":non_openjdk_java_files",
+        ":opt-telephony-common-srcs",
+        "core/java/**/*.java",
     ],
     arg_files: [
         "core/res/AndroidManifest.xml",
@@ -1667,4 +1653,12 @@ droidstubs {
             removed_api_file: "api/test-removed.txt",
         },
     },
+}
+
+// Creates an index of AIDL methods; used for adding UnsupportedAppUsage
+// annotations to private apis
+aidl_mapping {
+    name: "framework-aidl-mappings",
+    srcs: [":framework-defaults"],
+    output: "framework-aidl-mappings.txt"
 }

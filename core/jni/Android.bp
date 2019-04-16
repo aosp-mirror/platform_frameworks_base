@@ -41,7 +41,7 @@ cc_library_shared {
         "com_google_android_gles_jni_EGLImpl.cpp",
         "com_google_android_gles_jni_GLImpl.cpp", // TODO: .arm
         "android_app_Activity.cpp",
-	"android_app_ActivityThread.cpp",
+        "android_app_ActivityThread.cpp",
         "android_app_NativeActivity.cpp",
         "android_app_admin_SecurityLog.cpp",
         "android_opengl_EGL14.cpp",
@@ -134,7 +134,6 @@ cc_library_shared {
         "android/graphics/GIFMovie.cpp",
         "android/graphics/GraphicBuffer.cpp",
         "android/graphics/Graphics.cpp",
-        "android/graphics/HarfBuzzNGFaceSkia.cpp",
         "android/graphics/ImageDecoder.cpp",
         "android/graphics/Interpolator.cpp",
         "android/graphics/MaskFilter.cpp",
@@ -197,7 +196,6 @@ cc_library_shared {
         "android_content_res_Configuration.cpp",
         "android_animation_PropertyValuesHolder.cpp",
         "android_security_Scrypt.cpp",
-        "com_android_internal_net_NetworkStatsFactory.cpp",
         "com_android_internal_os_ClassLoaderFactory.cpp",
         "com_android_internal_os_FuseAppLoop.cpp",
         "com_android_internal_os_Zygote.cpp",
@@ -225,6 +223,7 @@ cc_library_shared {
     ],
 
     static_libs: [
+        "libasync_safe",
         "libgif",
         "libseccomp_policy",
         "libgrallocusage",
@@ -278,8 +277,8 @@ cc_library_shared {
         "libsoundtrigger",
         "libminikin",
         "libprocessgroup",
-        "libnativebridge",
-        "libnativeloader",
+        "libnativebridge_lazy",
+        "libnativeloader_lazy",
         "libmemunreachable",
         "libhidlbase",
         "libhidltransport",
@@ -288,7 +287,9 @@ cc_library_shared {
         "libnativewindow",
         "libhwui",
         "libdl",
+        "libdl_android",
         "libstatslog",
+        "server_configurable_flags",
     ],
 
     generated_sources: ["android_util_StatsLog.cpp"],

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.android.externalstorage.tests">
+
+    <application android:label="ExternalStorageProvider Tests">
+        <uses-library android:name="android.test.runner" />
+    </application>
+
+    <instrumentation android:name="android.support.test.runner.AndroidJUnitRunner"
+                     android:targetPackage="com.android.externalstorage"
+                     android:label="ExternalStorageProvider Tests" />
+</manifest>
+

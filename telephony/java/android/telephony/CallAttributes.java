@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -29,15 +30,15 @@ import java.util.Objects;
  * @hide
  */
 @SystemApi
-public class CallAttributes implements Parcelable {
+public final class CallAttributes implements Parcelable {
     private PreciseCallState mPreciseCallState;
     @NetworkType
     private int mNetworkType; // TelephonyManager.NETWORK_TYPE_* ints
     private CallQuality mCallQuality;
 
 
-    public CallAttributes(PreciseCallState state, @NetworkType int networkType,
-            CallQuality callQuality) {
+    public CallAttributes(@NonNull PreciseCallState state, @NetworkType int networkType,
+            @NonNull CallQuality callQuality) {
         this.mPreciseCallState = state;
         this.mNetworkType = networkType;
         this.mCallQuality = callQuality;
@@ -59,6 +60,7 @@ public class CallAttributes implements Parcelable {
     /**
      * Returns the {@link PreciseCallState} of the call.
      */
+    @NonNull
     public PreciseCallState getPreciseCallState() {
         return mPreciseCallState;
     }
@@ -96,6 +98,7 @@ public class CallAttributes implements Parcelable {
     /**
      * Returns the {#link CallQuality} of the call.
      */
+    @NonNull
     public CallQuality getCallQuality() {
         return mCallQuality;
     }
