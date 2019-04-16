@@ -20,6 +20,7 @@
 #include "utils/Macros.h"
 
 #include <utils/Timers.h>
+#include "SkSize.h"
 
 #include <string>
 
@@ -95,6 +96,8 @@ public:
     bool updateWindowPositions = false;
 
     int disableForceDark;
+
+    const SkISize screenSize;
 
     struct Out {
         bool hasFunctors = false;
