@@ -8139,7 +8139,14 @@ public final class Settings {
         public static final String FACE_UNLOCK_ATTENTION_REQUIRED =
                 "face_unlock_attention_required";
 
-        private static final Validator FACE_UNLOCK_ATTENTION_REQUIRED_VALIDATOR = BOOLEAN_VALIDATOR;
+        /**
+         * Whether or not face unlock requires a diverse set of poses during enrollment. This is a
+         * cached value, the source of truth is obtained through the HAL.
+         * @hide
+         */
+        public static final String FACE_UNLOCK_DIVERSITY_REQUIRED =
+                "face_unlock_diversity_required";
+
 
         /**
          * Whether or not face unlock is allowed for apps (through BiometricPrompt).
@@ -8797,7 +8804,6 @@ public final class Settings {
             AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN,
             FACE_UNLOCK_KEYGUARD_ENABLED,
             FACE_UNLOCK_DISMISSES_KEYGUARD,
-            FACE_UNLOCK_ATTENTION_REQUIRED,
             FACE_UNLOCK_APP_ENABLED,
             FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION,
             ASSIST_GESTURE_ENABLED,
@@ -8964,8 +8970,6 @@ public final class Settings {
             VALIDATORS.put(FACE_UNLOCK_KEYGUARD_ENABLED, FACE_UNLOCK_KEYGUARD_ENABLED_VALIDATOR);
             VALIDATORS.put(FACE_UNLOCK_DISMISSES_KEYGUARD,
                     FACE_UNLOCK_DISMISSES_KEYGUARD_VALIDATOR);
-            VALIDATORS.put(FACE_UNLOCK_ATTENTION_REQUIRED,
-                    FACE_UNLOCK_ATTENTION_REQUIRED_VALIDATOR);
             VALIDATORS.put(FACE_UNLOCK_APP_ENABLED, FACE_UNLOCK_APP_ENABLED_VALIDATOR);
             VALIDATORS.put(FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION,
                     FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION_VALIDATOR);
