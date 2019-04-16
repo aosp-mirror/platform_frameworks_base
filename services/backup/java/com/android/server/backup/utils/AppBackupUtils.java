@@ -23,22 +23,20 @@ import static com.android.server.backup.UserBackupManagerService.SHARED_BACKUP_A
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import android.annotation.Nullable;
-import android.app.AppGlobals;
 import android.app.backup.BackupTransport;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.Signature;
 import android.content.pm.SigningInfo;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.backup.IBackupTransport;
 import com.android.internal.util.ArrayUtils;
+import com.android.server.LocalServices;
 import com.android.server.backup.transport.TransportClient;
 
 import com.google.android.collect.Sets;
@@ -67,12 +65,13 @@ public class AppBackupUtils {
      * </ol>
      */
     public static boolean appIsEligibleForBackup(ApplicationInfo app, int userId) {
-        return appIsEligibleForBackup(app, AppGlobals.getPackageManager(), userId);
+        return appIsEligibleForBackup(
+                app, LocalServices.getService(PackageManagerInternal.class), userId);
     }
 
     @VisibleForTesting
-    static boolean appIsEligibleForBackup(ApplicationInfo app,
-        IPackageManager packageManager, int userId) {
+    static boolean appIsEligibleForBackup(
+            ApplicationInfo app, PackageManagerInternal packageManager, int userId) {
         // 1. their manifest states android:allowBackup="false"
         if ((app.flags & ApplicationInfo.FLAG_ALLOW_BACKUP) == 0) {
             return false;
@@ -108,9 +107,9 @@ public class AppBackupUtils {
     /**
      * Returns whether an app is eligible for backup at runtime. That is, the app has to:
      * <ol>
-     *     <li>Return true for {@link #appIsEligibleForBackup(ApplicationInfo, PackageManager)}
+     *     <li>Return true for {@link #appIsEligibleForBackup(ApplicationInfo, int)}
      *     <li>Return false for {@link #appIsStopped(ApplicationInfo)}
-     *     <li>Return false for {@link #appIsDisabled(ApplicationInfo, PackageManager)}
+     *     <li>Return false for {@link #appIsDisabled(ApplicationInfo, int)}
      *     <li>Be eligible for the transport via
      *         {@link BackupTransport#isAppEligibleForBackup(PackageInfo, boolean)}
      * </ol>
@@ -149,19 +148,13 @@ public class AppBackupUtils {
 
     /** Avoid backups of 'disabled' apps. */
     static boolean appIsDisabled(ApplicationInfo app, int userId) {
-        return appIsDisabled(app, AppGlobals.getPackageManager(), userId);
+        return appIsDisabled(app, LocalServices.getService(PackageManagerInternal.class), userId);
     }
 
     @VisibleForTesting
-    static boolean appIsDisabled(ApplicationInfo app,
-        IPackageManager packageManager, int userId) {
-        int enabledSetting;
-        try {
-            enabledSetting = packageManager.getApplicationEnabledSetting(app.packageName, userId);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Failed to get application enabled setting: " + e);
-            return false;
-        }
+    static boolean appIsDisabled(
+            ApplicationInfo app, PackageManagerInternal packageManager, int userId) {
+        int enabledSetting = packageManager.getApplicationEnabledState(app.packageName, userId);
 
         switch (enabledSetting) {
             case PackageManager.COMPONENT_ENABLED_STATE_DISABLED:
