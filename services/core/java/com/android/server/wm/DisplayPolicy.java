@@ -1726,14 +1726,16 @@ public class DisplayPolicy {
 
             // In case we forced the window to draw behind the navigation bar, restrict df/of to
             // DF.RestrictedOverscan to simulate old compat behavior.
-            final Rect parentDisplayFrame = attached.getDisplayFrameLw();
-            final Rect parentOverscan = attached.getOverscanFrameLw();
+            Rect parentDisplayFrame = attached.getDisplayFrameLw();
+            Rect parentOverscan = attached.getOverscanFrameLw();
             final WindowManager.LayoutParams attachedAttrs = attached.mAttrs;
             if ((attachedAttrs.privateFlags & PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS) != 0
                     && (attachedAttrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0
                     && (attachedAttrs.systemUiVisibility
                             & SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) == 0) {
+                parentOverscan = new Rect(parentOverscan);
                 parentOverscan.intersect(displayFrames.mRestrictedOverscan);
+                parentDisplayFrame = new Rect(parentDisplayFrame);
                 parentDisplayFrame.intersect(displayFrames.mRestrictedOverscan);
             }
 
