@@ -140,6 +140,7 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
     private AudioPlayerStateMonitor mAudioPlayerStateMonitor;
 
     // Used to notify System UI and Settings when remote volume was changed.
+    @GuardedBy("mLock")
     final RemoteCallbackList<IRemoteVolumeController> mRemoteVolumeControllers =
             new RemoteCallbackList<>();
 
@@ -287,17 +288,19 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
         if (!session.isActive()) {
             return;
         }
-        int size = mRemoteVolumeControllers.beginBroadcast();
-        MediaSession.Token token = session.getSessionToken();
-        for (int i = size - 1; i >= 0; i--) {
-            try {
-                IRemoteVolumeController cb = mRemoteVolumeControllers.getBroadcastItem(i);
-                cb.remoteVolumeChanged(token, flags);
-            } catch (Exception e) {
-                Log.w(TAG, "Error sending volume change.", e);
+        synchronized (mLock) {
+            int size = mRemoteVolumeControllers.beginBroadcast();
+            MediaSession.Token token = session.getSessionToken();
+            for (int i = size - 1; i >= 0; i--) {
+                try {
+                    IRemoteVolumeController cb = mRemoteVolumeControllers.getBroadcastItem(i);
+                    cb.remoteVolumeChanged(token, flags);
+                } catch (Exception e) {
+                    Log.w(TAG, "Error sending volume change.", e);
+                }
             }
+            mRemoteVolumeControllers.finishBroadcast();
         }
-        mRemoteVolumeControllers.finishBroadcast();
     }
 
     @Override
@@ -647,19 +650,21 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
             return;
         }
 
-        int size = mRemoteVolumeControllers.beginBroadcast();
-        MediaSessionRecord record = user.mPriorityStack.getDefaultRemoteSession(userId);
-        MediaSession.Token token = record == null ? null : record.getSessionToken();
+        synchronized (mLock) {
+            int size = mRemoteVolumeControllers.beginBroadcast();
+            MediaSessionRecord record = user.mPriorityStack.getDefaultRemoteSession(userId);
+            MediaSession.Token token = record == null ? null : record.getSessionToken();
 
-        for (int i = size - 1; i >= 0; i--) {
-            try {
-                IRemoteVolumeController cb = mRemoteVolumeControllers.getBroadcastItem(i);
-                cb.updateRemoteController(token);
-            } catch (Exception e) {
-                Log.w(TAG, "Error sending default remote volume.", e);
+            for (int i = size - 1; i >= 0; i--) {
+                try {
+                    IRemoteVolumeController cb = mRemoteVolumeControllers.getBroadcastItem(i);
+                    cb.updateRemoteController(token);
+                } catch (Exception e) {
+                    Log.w(TAG, "Error sending default remote volume.", e);
+                }
             }
+            mRemoteVolumeControllers.finishBroadcast();
         }
-        mRemoteVolumeControllers.finishBroadcast();
     }
 
     void pushSession2TokensChangedLocked(int userId) {
@@ -1676,11 +1681,13 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
-            try {
-                enforceStatusBarServicePermission("listen for volume changes", pid, uid);
-                mRemoteVolumeControllers.register(rvc);
-            } finally {
-                Binder.restoreCallingIdentity(token);
+            synchronized (mLock) {
+                try {
+                    enforceStatusBarServicePermission("listen for volume changes", pid, uid);
+                    mRemoteVolumeControllers.register(rvc);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
             }
         }
 
@@ -1689,11 +1696,13 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
-            try {
-                enforceStatusBarServicePermission("listen for volume changes", pid, uid);
-                mRemoteVolumeControllers.unregister(rvc);
-            } finally {
-                Binder.restoreCallingIdentity(token);
+            synchronized (mLock) {
+                try {
+                    enforceStatusBarServicePermission("listen for volume changes", pid, uid);
+                    mRemoteVolumeControllers.unregister(rvc);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
             }
         }
 
