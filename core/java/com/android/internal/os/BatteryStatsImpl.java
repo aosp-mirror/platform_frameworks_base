@@ -30,6 +30,7 @@ import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.hardware.usb.UsbManager;
 import android.net.ConnectivityManager;
+import android.net.INetworkStatsService;
 import android.net.NetworkStats;
 import android.net.Uri;
 import android.net.wifi.WifiActivityEnergyInfo;
@@ -87,7 +88,6 @@ import android.view.Display;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.location.gnssmetrics.GnssMetrics;
-import com.android.internal.net.NetworkStatsFactory;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FastXmlSerializer;
@@ -228,6 +228,15 @@ public class BatteryStatsImpl extends BatteryStats {
 
     @GuardedBy("this")
     public boolean mPerProcStateCpuTimesAvailable = true;
+
+    /**
+     * When per process state cpu times tracking is off, cpu times in KernelSingleUidTimeReader are
+     * not updated. So, when the setting is turned on later, we would end up with huge cpu time
+     * deltas. This flag tracks the case where tracking is turned on from off so that we won't
+     * end up attributing the huge deltas to wrong buckets.
+     */
+    @GuardedBy("this")
+    private boolean mIsPerProcessStateCpuDataStale;
 
     /**
      * Uids for which per-procstate cpu times need to be updated.
@@ -402,7 +411,7 @@ public class BatteryStatsImpl extends BatteryStats {
             }
             // If the KernelSingleUidTimeReader has stale cpu times, then we shouldn't try to
             // compute deltas since it might result in mis-attributing cpu times to wrong states.
-            if (mKernelSingleUidTimeReader.hasStaleData()) {
+            if (mIsPerProcessStateCpuDataStale) {
                 mPendingUids.clear();
                 return;
             }
@@ -485,9 +494,9 @@ public class BatteryStatsImpl extends BatteryStats {
                     mKernelUidCpuFreqTimeReader.getAllUidCpuFreqTimeMs();
             // If the KernelSingleUidTimeReader has stale cpu times, then we shouldn't try to
             // compute deltas since it might result in mis-attributing cpu times to wrong states.
-            if (mKernelSingleUidTimeReader.hasStaleData()) {
+            if (mIsPerProcessStateCpuDataStale) {
                 mKernelSingleUidTimeReader.setAllUidsCpuTimesMs(allUidCpuFreqTimesMs);
-                mKernelSingleUidTimeReader.markDataAsStale(false);
+                mIsPerProcessStateCpuDataStale = false;
                 mPendingUids.clear();
                 return;
             }
@@ -11083,7 +11092,6 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    private final NetworkStatsFactory mNetworkStatsFactory = new NetworkStatsFactory();
     private final Pools.Pool<NetworkStats> mNetworkStatsPool = new Pools.SynchronizedPool<>(6);
 
     private final Object mWifiNetworkLock = new Object();
@@ -11105,11 +11113,16 @@ public class BatteryStatsImpl extends BatteryStats {
     private NetworkStats readNetworkStatsLocked(String[] ifaces) {
         try {
             if (!ArrayUtils.isEmpty(ifaces)) {
-                return mNetworkStatsFactory.readNetworkStatsDetail(NetworkStats.UID_ALL, ifaces,
-                        NetworkStats.TAG_NONE, mNetworkStatsPool.acquire());
+                INetworkStatsService statsService = INetworkStatsService.Stub.asInterface(
+                        ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
+                if (statsService != null) {
+                    return statsService.getDetailedUidStats(ifaces);
+                } else {
+                    Slog.e(TAG, "Failed to get networkStatsService ");
+                }
             }
-        } catch (IOException e) {
-            Slog.e(TAG, "failed to read network stats for ifaces: " + Arrays.toString(ifaces));
+        } catch (RemoteException e) {
+            Slog.e(TAG, "failed to read network stats for ifaces: " + Arrays.toString(ifaces) + e);
         }
         return null;
     }
@@ -13430,7 +13443,7 @@ public class BatteryStatsImpl extends BatteryStats {
         private void updateTrackCpuTimesByProcStateLocked(boolean wasEnabled, boolean isEnabled) {
             TRACK_CPU_TIMES_BY_PROC_STATE = isEnabled;
             if (isEnabled && !wasEnabled) {
-                mKernelSingleUidTimeReader.markDataAsStale(true);
+                mIsPerProcessStateCpuDataStale = true;
                 mExternalSync.scheduleCpuSyncDueToSettingChange();
 
                 mNumSingleUidCpuTimeReads = 0;

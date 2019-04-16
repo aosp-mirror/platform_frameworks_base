@@ -17,11 +17,10 @@
 package android.net;
 
 import android.annotation.NonNull;
-import android.os.Binder;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Log;
 
-import java.io.FileDescriptor;
 import java.net.InetAddress;
 import java.util.concurrent.Executor;
 
@@ -32,44 +31,47 @@ public final class NattSocketKeepalive extends SocketKeepalive {
 
     @NonNull private final InetAddress mSource;
     @NonNull private final InetAddress mDestination;
-    @NonNull private final FileDescriptor mFd;
     private final int mResourceId;
 
     NattSocketKeepalive(@NonNull IConnectivityManager service,
             @NonNull Network network,
-            @NonNull FileDescriptor fd,
+            @NonNull ParcelFileDescriptor pfd,
             int resourceId,
             @NonNull InetAddress source,
             @NonNull InetAddress destination,
             @NonNull Executor executor,
             @NonNull Callback callback) {
-        super(service, network, executor, callback);
+        super(service, network, pfd, executor, callback);
         mSource = source;
         mDestination = destination;
-        mFd = fd;
         mResourceId = resourceId;
     }
 
     @Override
     void startImpl(int intervalSec) {
-        try {
-            mService.startNattKeepaliveWithFd(mNetwork, mFd, mResourceId, intervalSec, mMessenger,
-                    new Binder(), mSource.getHostAddress(), mDestination.getHostAddress());
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error starting packet keepalive: ", e);
-            stopLooper();
-        }
+        mExecutor.execute(() -> {
+            try {
+                mService.startNattKeepaliveWithFd(mNetwork, mPfd.getFileDescriptor(), mResourceId,
+                        intervalSec, mCallback,
+                        mSource.getHostAddress(), mDestination.getHostAddress());
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error starting socket keepalive: ", e);
+                throw e.rethrowFromSystemServer();
+            }
+        });
     }
 
     @Override
     void stopImpl() {
-        try {
-            if (mSlot != null) {
-                mService.stopKeepalive(mNetwork, mSlot);
+        mExecutor.execute(() -> {
+            try {
+                if (mSlot != null) {
+                    mService.stopKeepalive(mNetwork, mSlot);
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error stopping socket keepalive: ", e);
+                throw e.rethrowFromSystemServer();
             }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error stopping packet keepalive: ", e);
-            stopLooper();
-        }
+        });
     }
 }

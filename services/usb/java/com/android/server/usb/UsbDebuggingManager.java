@@ -34,10 +34,10 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.service.usb.UsbDebuggingManagerProto;
-import android.sysprop.VoldProperties;
 import android.util.Base64;
 import android.util.Slog;
 
@@ -263,7 +263,7 @@ public class UsbDebuggingManager {
 
                 case MESSAGE_ADB_CONFIRM: {
                     if ("trigger_restart_min_framework".equals(
-                            VoldProperties.decrypt().orElse(""))) {
+                            SystemProperties.get("vold.decrypt"))) {
                         Slog.d(TAG, "Deferring adb confirmation until after vold decrypt");
                         if (mThread != null) {
                             mThread.sendResponse("NO");

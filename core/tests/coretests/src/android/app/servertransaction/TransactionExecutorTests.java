@@ -26,9 +26,8 @@ import static android.app.servertransaction.ActivityLifecycleItem.ON_STOP;
 import static android.app.servertransaction.ActivityLifecycleItem.PRE_ON_CREATE;
 import static android.app.servertransaction.ActivityLifecycleItem.UNDEFINED;
 
-import static junit.framework.Assert.assertEquals;
-
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
@@ -58,7 +57,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/** Test {@link TransactionExecutor} logic. */
+/**
+ * Test {@link TransactionExecutor} logic.
+ *
+ * <p>Build/Install/Run:
+ *  atest FrameworksCoreTests:TransactionExecutorTests
+ *
+ * <p>This test class is a part of Window Manager Service tests and specified in
+ * {@link com.android.server.wm.test.filters.FrameworksTestsFilter}.
+ */
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 @Presubmit

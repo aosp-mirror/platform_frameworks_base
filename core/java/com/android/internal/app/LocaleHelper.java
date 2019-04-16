@@ -17,6 +17,7 @@
 package com.android.internal.app;
 
 import android.annotation.IntRange;
+import android.annotation.UnsupportedAppUsage;
 import android.icu.text.ListFormatter;
 import android.icu.util.ULocale;
 import android.os.LocaleList;
@@ -84,6 +85,7 @@ public class LocaleHelper {
      * @param locale the locale that might be used for certain operations (i.e. case conversion)
      * @return the string normalized for search
      */
+    @UnsupportedAppUsage
     public static String normalizeForSearch(String str, Locale locale) {
         // TODO: tbd if it needs to be smarter (real normalization, remove accents, etc.)
         // If needed we might use case folding and ICU/CLDR's collation-based loose searching.
@@ -109,6 +111,7 @@ public class LocaleHelper {
      * @param sentenceCase true if the result should be sentence-cased
      * @return the localized name of the locale.
      */
+    @UnsupportedAppUsage
     public static String getDisplayName(Locale locale, Locale displayLocale, boolean sentenceCase) {
         final ULocale displayULocale = ULocale.forLocale(displayLocale);
         String result = shouldUseDialectName(locale)
@@ -135,6 +138,7 @@ public class LocaleHelper {
      * @param displayLocale the locale in which to display the name.
      * @return the localized country name.
      */
+    @UnsupportedAppUsage
     public static String getDisplayCountry(Locale locale, Locale displayLocale) {
         final String languageTag = locale.toLanguageTag();
         final ULocale uDisplayLocale = ULocale.forLocale(displayLocale);
@@ -226,6 +230,7 @@ public class LocaleHelper {
          *
          * @param sortLocale the locale to be used for sorting.
          */
+        @UnsupportedAppUsage
         public LocaleInfoComparator(Locale sortLocale, boolean countryMode) {
             mCollator = Collator.getInstance(sortLocale);
             mCountryMode = countryMode;
@@ -253,6 +258,7 @@ public class LocaleHelper {
          * @return  a negative integer, zero, or a positive integer as the first
          *          argument is less than, equal to, or greater than the second.
          */
+        @UnsupportedAppUsage
         @Override
         public int compare(LocaleStore.LocaleInfo lhs, LocaleStore.LocaleInfo rhs) {
             // We don't care about the various suggestion types, just "suggested" (!= 0)

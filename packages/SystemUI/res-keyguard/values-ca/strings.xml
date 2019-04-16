@@ -111,7 +111,7 @@
       <item quantity="other">El codi PUK de la SIM no és correcte. Et queden <xliff:g id="NUMBER_1">%d</xliff:g> intents; si els esgotes tots, la SIM no es podrà tornar a fer servir.</item>
       <item quantity="one">El codi PUK de la SIM no és correcte. Et queda <xliff:g id="NUMBER_0">%d</xliff:g> intent; si no l\'encertes, la SIM no es podrà tornar a fer servir.</item>
     </plurals>
-    <string name="kg_password_pin_failed" msgid="8769990811451236223">"No s\'ha pogut desbloquejar la SIM amb el codi PIN."</string>
+    <string name="kg_password_pin_failed" msgid="8769990811451236223">"Ha fallat l\'operació del PIN de la SIM"</string>
     <string name="kg_password_puk_failed" msgid="1331621440873439974">"No s\'ha pogut desbloquejar la SIM amb el codi PUK."</string>
     <string name="kg_pin_accepted" msgid="7637293533973802143">"S\'ha acceptat el codi."</string>
     <string name="keyguard_carrier_default" msgid="4274828292998453695">"Sense servei"</string>

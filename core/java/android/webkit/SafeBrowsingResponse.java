@@ -36,14 +36,14 @@ public abstract class SafeBrowsingResponse {
     public abstract void showInterstitial(boolean allowReporting);
 
     /**
-     * Act as if the user clicked "visit this unsafe site."
+     * Act as if the user clicked the "visit this unsafe site" button.
      *
      * @param report {@code true} to enable Safe Browsing reporting.
      */
     public abstract void proceed(boolean report);
 
     /**
-     * Act as if the user clicked "back to safety."
+     * Act as if the user clicked the "back to safety" button.
      *
      * @param report {@code true} to enable Safe Browsing reporting.
      */

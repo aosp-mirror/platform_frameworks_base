@@ -136,9 +136,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"WiFi ඇමතුම් | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Wi-Fi ඇමතීම"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Wi-Fi ඇමතීම"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ක්‍රියාවිරහිතයි"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi වඩා කැමතියි"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"ජංගම කැමතියි"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"Wi-Fi ඔස්සේ ඇමතුම"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"ජංගම ජාලය ඔස්සේ ඇමතුම"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi-Fi පමණයි"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ඉදිරියට නොයවන ලදි"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -430,6 +434,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"උපාංගයේ දුරකථන විශේෂාංග වෙත ප්‍රවේශයට යෙදුමට ඉඩ දෙයි.  ඇමතුම සක්‍රිය වුවත්, සහ ඇමතුමකින් දුරස්ථ අංකය සම්බන්ධ වුවත් දුරකථන අංකය සහ උපාංග ID හඳුනා ගැනීමට මෙම අවසරය යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"පද්ධතිය හරහා ඇමතුම් මාර්ගගත කරන්න"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"ඇමතුම් අත්දැකීම වැඩිදියුණු කිරීම සඳහා යෙදුමට පද්ධතිය හරහා එහි ඇමතුම් මාර්ගගත කිරීමට ඉඩ දෙයි."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"පද්ධතිය හරහා ඇමතුම් බලන්න සහ පාලනය කරන්න."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"යෙදුමට උපාංගයෙහි පවතින ඇමතුම් බැලීමට සහ පාලනය කිරීමට ඉඩ දෙයි මෙහි ඇමතුම් සඳහා ඇමතුම් අංක සහ ඇමතුම්වල තත්ත්වය වැනි තොරතුරු ඇතුළත් වේ."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"වෙනත් යෙදුමක් වෙතින් වන ඇමතුමක් දිගටම කරගෙන යන්න"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"වෙනත් යෙදුමක ආරම්භ කරන ලද ඇමතුමක් දිගටම කරගෙන යාමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"දුරකථන අංක කියවන්න"</string>
@@ -1048,7 +1054,7 @@
     <string name="dialog_alert_title" msgid="2049658708609043103">"අවධානය"</string>
     <string name="loading" msgid="7933681260296021180">"පූරණය වෙමින්..."</string>
     <string name="capital_on" msgid="1544682755514494298">"සක්‍රීයයි"</string>
-    <string name="capital_off" msgid="6815870386972805832">"අක්‍රිය කරන්න"</string>
+    <string name="capital_off" msgid="6815870386972805832">"ක්‍රියාවිරහිතයි"</string>
     <string name="whichApplication" msgid="4533185947064773386">"පහත භාවිතයෙන් ක්‍රියාව සම්පූර්ණ කරන්න"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"%1$s භාවිතා කරමින් ක්‍රියාව සම්පුර්ණ කරන්න"</string>
     <string name="whichApplicationLabel" msgid="7425855495383818784">"ක්‍රියාව සම්පූර්ණ කරන්න"</string>
@@ -1179,8 +1185,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"ජාලයට පුරනය වන්න"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi සඳහා අන්තර්ජාල ප්‍රවේශය නැත"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> හට අන්තර්ජාල ප්‍රවේශය නැත"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"විකල්ප සඳහා තට්ටු කරන්න"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"සම්බන්ධයි"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> හට සීමිත සබැඳුම් හැකියාවක් ඇත"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"කෙසේ වෙතත් ඉදිරියට යාමට තට්ටු කරන්න"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"ඔබගේ හොට්ස්පොට් සැකසීම්වලට වෙනස් කිරීම්"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"ඔබගේ හොට්ස්පොට් කලාපය වෙනස් වී ඇත."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"මෙම උපාංගය 5GHz සඳහා ඔබේ මනාපවලට සහාය නොදක්වයි. ඒ වෙනුවට, මෙම උපාංගය ලබා ගත හැකි විට 5GHz කලාපය භාවිතා කරනු ඇත."</string>

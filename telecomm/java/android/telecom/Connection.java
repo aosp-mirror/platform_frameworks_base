@@ -555,6 +555,15 @@ public abstract class Connection extends Conferenceable {
     public static final String EVENT_CALL_MERGE_FAILED = "android.telecom.event.CALL_MERGE_FAILED";
 
     /**
+     * Connection event used to inform Telecom when a hold operation on a call has failed.
+     * Not intended for use by the UI at this time.
+     * Sent via {@link #sendConnectionEvent(String, Bundle)}.  The {@link Bundle} parameter is
+     * expected to be null when this connection event is used.
+     * @hide
+     */
+    public static final String EVENT_CALL_HOLD_FAILED = "android.telecom.event.CALL_HOLD_FAILED";
+
+    /**
      * Connection event used to inform {@link InCallService}s when the process of merging a
      * Connection into a conference has begun.
      * <p>

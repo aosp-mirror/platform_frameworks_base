@@ -136,9 +136,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Wi-Fi қоңыраулары | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Wi-Fi қоңыраулары"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"WiFi қоңыраулары"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Өшірулі"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Қалаулы Wi-Fi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Таңдаулы мобильдік байланыс"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"Wi-Fi арқылы қоңырау шалу"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"Мобильдік желі арқылы қоңырау шалу"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Тек Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Басқа нөмірге бағытталмады"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -430,6 +434,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Қолданбаға құрылғыдағы телефон функцияларына кіру мүмкіндігін береді. Бұл рұқсат қолданбаға телефон нөмірі, құрылғы жеке анықтағышы, қоңырау белсенділігі және сол қоңырауға байланысты қашықтағы нөмірді анықтау мүмкіндігін береді."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"қоңырауларды жүйе арқылы бағыттау"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Қоңырау шалу тәжірибесін жақсарту үшін қолданба қоңырауларды жүйе арқылы бағыттай алады."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"жүйе арқылы қоңырауларды көру және басқару."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Қолданбаға құрылғыдағы қазіргі қоңырауларды көруге және басқаруға мүмкіндік береді. Бұл – қоңырау шалу нөмірлері және қоңыраулардың күйі сияқты ақпаратқа қатысты."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"басқа қолданбадағы қоңырауды жалғастыру"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Қолданбаға басқа қолданбадағы қоңырауды жалғастыруға рұқсат береді."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"телефон нөмірлерін оқу"</string>
@@ -1016,23 +1022,23 @@
     <string name="deleteText" msgid="6979668428458199034">"Жою"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Енгізу әдісі"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Мәтін әрекеттері"</string>
-    <string name="email" msgid="4560673117055050403">"Электрондық пошта"</string>
-    <string name="email_desc" msgid="3638665569546416795">"Таңдалған электрондық пошта мекенжайына хабар жіберу"</string>
+    <string name="email" msgid="4560673117055050403">"Эл. поштаны ашу"</string>
+    <string name="email_desc" msgid="3638665569546416795">"Таңдалған мекенжайға хабар жіберу"</string>
     <string name="dial" msgid="1253998302767701559">"Қоңырау шалу"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Таңдалған телефон нөміріне қоңырау шалу"</string>
-    <string name="map" msgid="5441053548030107189">"Map"</string>
-    <string name="map_desc" msgid="1836995341943772348">"Таңдалған мекенжайдың орналасқан жерін анықтау"</string>
+    <string name="map" msgid="5441053548030107189">"Картаны ашу"</string>
+    <string name="map_desc" msgid="1836995341943772348">"Таңдалған мекенжайды табу"</string>
     <string name="browse" msgid="1245903488306147205">"Ашу"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Таңдалған URL мекенжайын ашу"</string>
-    <string name="sms" msgid="4560537514610063430">"Хабар"</string>
+    <string name="sms" msgid="4560537514610063430">"Хабар жазу"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Таңдалған телефон нөміріне хабар жіберу"</string>
     <string name="add_contact" msgid="7867066569670597203">"Енгізу"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Контактілер тізіміне енгізу"</string>
     <string name="view_calendar" msgid="979609872939597838">"Көру"</string>
-    <string name="view_calendar_desc" msgid="5828320291870344584">"Күнтізбеде таңдалған уақытты көру"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Кесте"</string>
-    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Таңдалған уақытқа іс-шараны жоспарлау"</string>
-    <string name="view_flight" msgid="7691640491425680214">"Бақылау"</string>
+    <string name="view_calendar_desc" msgid="5828320291870344584">"Таңдалған уақытты күнтізбеден көру"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Жоспарлау"</string>
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Таңдалған уақытқа іс-шара жоспарлау"</string>
+    <string name="view_flight" msgid="7691640491425680214">"Қадағалау"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Таңдалған ұшу рейсін қадағалау"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Жадта орын азайып барады"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Жүйенің кейбір функциялары жұмыс істемеуі мүмкін"</string>
@@ -1132,7 +1138,7 @@
     <string name="dump_heap_text" msgid="4809417337240334941">"<xliff:g id="PROC">%1$s</xliff:g> процесі <xliff:g id="SIZE">%2$s</xliff:g> процесс жады шегінен асып кетті. Үйінді дамп оның әзірлеушісімен ​​бөлісуге қолжетімді. Абай болыңыз: бұл үйінді дампта бағдарлама кіре алатын кейбір жеке ақпараттарыңыз болуы мүмкін."</string>
     <string name="sendText" msgid="5209874571959469142">"Мәтін үшін әрекет таңдау"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Қоңырау шырылының қаттылығы"</string>
-    <string name="volume_music" msgid="5421651157138628171">"Meдиа дыбысының қаттылығы"</string>
+    <string name="volume_music" msgid="5421651157138628171">"Mультимeдиа дыбыс деңгейі"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Bluetooth арқылы ойнату"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Үнсіз қоңырау әуенін орнату"</string>
     <string name="volume_call" msgid="3941680041282788711">"Келетін қоңырау дыбысының қаттылығы"</string>
@@ -1142,8 +1148,8 @@
     <string name="volume_unknown" msgid="1400219669770445902">"Дыбыс қаттылығы"</string>
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Bluetooth дыбысының қаттылығы"</string>
     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Қоңырау әуенінің дыбыс қаттылығы"</string>
-    <string name="volume_icon_description_incall" msgid="8890073218154543397">"Қоңырау дыбысының қаттылығы"</string>
-    <string name="volume_icon_description_media" msgid="4217311719665194215">"Meдиа дыбысының қаттылығы"</string>
+    <string name="volume_icon_description_incall" msgid="8890073218154543397">"Сөйлескендегі дыбыс деңгейі"</string>
+    <string name="volume_icon_description_media" msgid="4217311719665194215">"Mультимeдиа дыбыс деңгейі"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Хабар дыбысының қаттылығы"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Әдепкі рингтон"</string>
     <string name="ringtone_default_with_actual" msgid="1767304850491060581">"Әдепкі (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -1177,8 +1183,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Желіге кіру"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi желісінде интернет байланысы жоқ"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> желісінің интернетті пайдалану мүмкіндігі шектеулі."</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Опциялар үшін түртіңіз"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Жалғанды"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> желісінің қосылу мүмкіндігі шектеулі."</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Бәрібір жалғау үшін түртіңіз."</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Хотспот параметрлеріне өзгерістер енгізілді"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Хотспот жолағы өзгертілді."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Бұл құрылғы тек 5 ГГц жиілікте жұмыс істей алмайды. Бұл жиілік мүмкін болған жағдайда ғана қолданылады."</string>
@@ -1271,7 +1280,7 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"БӨЛІСУ"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ҚАБЫЛДАМАУ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Пернетақтаны өзгерту"</string>
-    <string name="show_ime" msgid="2506087537466597099">"Физикалық пернетақта белсенді кезде оны экранда ұстау"</string>
+    <string name="show_ime" msgid="2506087537466597099">"Физикалық пернетақта қосулы кезде оны экранға шығару"</string>
     <string name="hardware" msgid="194658061510127999">"Виртуалды пернетақтаны көрсету"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Физикалық пернетақтаны конфигурациялау"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Тіл мен пернетақта схемасын таңдау үшін түртіңіз"</string>

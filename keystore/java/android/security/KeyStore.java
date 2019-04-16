@@ -97,6 +97,9 @@ public class KeyStore {
      */
     public static final int OP_AUTH_NEEDED = 15;
 
+    // Used when a user changes their pin, invalidating old auth bound keys.
+    public static final int KEY_PERMANENTLY_INVALIDATED = 17;
+
     // Used for UID field to indicate the calling UID.
     public static final int UID_SELF = -1;
 
@@ -219,6 +222,15 @@ public class KeyStore {
     }
 
     public byte[] get(String key, int uid) {
+        return get(key, uid, false);
+    }
+
+    @UnsupportedAppUsage
+    public byte[] get(String key) {
+        return get(key, UID_SELF);
+    }
+
+    public byte[] get(String key, int uid, boolean suppressKeyNotFoundWarning) {
         try {
             key = key != null ? key : "";
             return mBinder.get(key, uid);
@@ -226,15 +238,17 @@ public class KeyStore {
             Log.w(TAG, "Cannot connect to keystore", e);
             return null;
         } catch (android.os.ServiceSpecificException e) {
-            Log.w(TAG, "KeyStore exception", e);
+            if (!suppressKeyNotFoundWarning || e.errorCode != KEY_NOT_FOUND) {
+                Log.w(TAG, "KeyStore exception", e);
+            }
             return null;
         }
     }
 
-    @UnsupportedAppUsage
-    public byte[] get(String key) {
-        return get(key, UID_SELF);
+    public byte[] get(String key, boolean suppressKeyNotFoundWarning) {
+        return get(key, UID_SELF, suppressKeyNotFoundWarning);
     }
+
 
     public boolean put(String key, byte[] value, int uid, int flags) {
         return insert(key, value, uid, flags) == NO_ERROR;
@@ -1188,6 +1202,8 @@ public class KeyStore {
                     return new KeyStoreException(errorCode, "Key blob corrupted");
                 case OP_AUTH_NEEDED:
                     return new KeyStoreException(errorCode, "Operation requires authorization");
+                case KEY_PERMANENTLY_INVALIDATED:
+                    return new KeyStoreException(errorCode, "Key permanently invalidated");
                 default:
                     return new KeyStoreException(errorCode, String.valueOf(errorCode));
             }

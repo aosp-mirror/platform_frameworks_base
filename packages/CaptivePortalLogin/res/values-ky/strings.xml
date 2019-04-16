@@ -9,4 +9,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"Кошулайын деген тармагыңызда коопсуздук көйгөйлөрү бар."</string>
     <string name="ssl_error_example" msgid="647898534624078900">"Мисалы, каттоо эсебине кирүү баракчасы көрсөтүлгөн уюмга таандык эмес болушу мүмкүн."</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"Баары бир серепчи аркылуу улантуу"</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"Бул тастыктама ишеничтүү мекеме аркылуу берилген эмес."</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"Сайттын аталышы тастыктаманын аталышына дал келбейт."</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"Бул тастыктаманын мөөнөтү өтүп кеткен."</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"Бул тастыктама азырынча жараксыз."</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"Бул тастыктаманын күнү жараксыз."</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"Бул тастыктама жараксыз."</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"Тастыктамага байланыштуу белгисиз ката."</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"Коопсуздук эскертүүсү"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"Тастыктаманы көрүү"</string>
+    <string name="ok" msgid="2817931639040794018">"ЖАРАЙТ"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"Дарек:"</string>
+    <string name="page_info" msgid="4416941086705172545">"Барак жөнүндө маалымат"</string>
 </resources>

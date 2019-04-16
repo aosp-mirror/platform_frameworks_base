@@ -23,6 +23,8 @@ import android.telephony.ims.RcsMessage.RcsMessageStatus;
 
 /**
  * An immutable summary of the latest {@link RcsMessage} on an {@link RcsThread}
+ *
+ * @hide
  */
 public final class RcsMessageSnippet implements Parcelable {
     private final String mText;
@@ -69,7 +71,7 @@ public final class RcsMessageSnippet implements Parcelable {
         mTimestamp = in.readLong();
     }
 
-    public static final Creator<RcsMessageSnippet> CREATOR =
+    public static final @android.annotation.NonNull Creator<RcsMessageSnippet> CREATOR =
             new Creator<RcsMessageSnippet>() {
                 @Override
                 public RcsMessageSnippet createFromParcel(Parcel in) {

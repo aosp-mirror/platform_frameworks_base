@@ -62,45 +62,60 @@ import android.content.IntentSender;
  */
 interface IPackageManager {
     void checkPackageStartable(String packageName, int userId);
+    @UnsupportedAppUsage
     boolean isPackageAvailable(String packageName, int userId);
+    @UnsupportedAppUsage
     PackageInfo getPackageInfo(String packageName, int flags, int userId);
     PackageInfo getPackageInfoVersioned(in VersionedPackage versionedPackage,
             int flags, int userId);
+    @UnsupportedAppUsage
     int getPackageUid(String packageName, int flags, int userId);
     int[] getPackageGids(String packageName, int flags, int userId);
 
+    @UnsupportedAppUsage
     String[] currentToCanonicalPackageNames(in String[] names);
+    @UnsupportedAppUsage
     String[] canonicalToCurrentPackageNames(in String[] names);
 
     PermissionInfo getPermissionInfo(String name, String packageName, int flags);
 
     ParceledListSlice queryPermissionsByGroup(String group, int flags);
 
+    @UnsupportedAppUsage
     PermissionGroupInfo getPermissionGroupInfo(String name, int flags);
 
     ParceledListSlice getAllPermissionGroups(int flags);
 
+    @UnsupportedAppUsage
     ApplicationInfo getApplicationInfo(String packageName, int flags ,int userId);
 
+    @UnsupportedAppUsage
     ActivityInfo getActivityInfo(in ComponentName className, int flags, int userId);
 
     boolean activitySupportsIntent(in ComponentName className, in Intent intent,
             String resolvedType);
 
+    @UnsupportedAppUsage
     ActivityInfo getReceiverInfo(in ComponentName className, int flags, int userId);
 
+    @UnsupportedAppUsage
     ServiceInfo getServiceInfo(in ComponentName className, int flags, int userId);
 
+    @UnsupportedAppUsage
     ProviderInfo getProviderInfo(in ComponentName className, int flags, int userId);
 
+    @UnsupportedAppUsage
     int checkPermission(String permName, String pkgName, int userId);
 
     int checkUidPermission(String permName, int uid);
 
+    @UnsupportedAppUsage
     boolean addPermission(in PermissionInfo info);
 
+    @UnsupportedAppUsage
     void removePermission(String name);
 
+    @UnsupportedAppUsage
     void grantRuntimePermission(String packageName, String permissionName, int userId);
 
     void revokeRuntimePermission(String packageName, String permissionName, int userId);
@@ -119,33 +134,43 @@ interface IPackageManager {
 
     boolean isProtectedBroadcast(String actionName);
 
+    @UnsupportedAppUsage
     int checkSignatures(String pkg1, String pkg2);
 
+    @UnsupportedAppUsage
     int checkUidSignatures(int uid1, int uid2);
 
     List<String> getAllPackages();
 
+    @UnsupportedAppUsage
     String[] getPackagesForUid(int uid);
 
+    @UnsupportedAppUsage
     String getNameForUid(int uid);
     String[] getNamesForUids(in int[] uids);
 
+    @UnsupportedAppUsage
     int getUidForSharedUser(String sharedUserName);
 
+    @UnsupportedAppUsage
     int getFlagsForUid(int uid);
 
     int getPrivateFlagsForUid(int uid);
 
+    @UnsupportedAppUsage
     boolean isUidPrivileged(int uid);
 
+    @UnsupportedAppUsage
     String[] getAppOpPermissionPackages(String permissionName);
 
+    @UnsupportedAppUsage
     ResolveInfo resolveIntent(in Intent intent, String resolvedType, int flags, int userId);
 
     ResolveInfo findPersistentPreferredActivity(in Intent intent, int userId);
 
     boolean canForwardTo(in Intent intent, String resolvedType, int sourceUserId, int targetUserId);
 
+    @UnsupportedAppUsage
     ParceledListSlice queryIntentActivities(in Intent intent,
             String resolvedType, int flags, int userId);
 
@@ -172,6 +197,7 @@ interface IPackageManager {
      * limit that kicks in when flags are included that bloat up the data
      * returned.
      */
+    @UnsupportedAppUsage
     ParceledListSlice getInstalledPackages(int flags, in int userId);
 
     /**
@@ -189,6 +215,7 @@ interface IPackageManager {
      * limit that kicks in when flags are included that bloat up the data
      * returned.
      */
+    @UnsupportedAppUsage
     ParceledListSlice getInstalledApplications(int flags, int userId);
 
     /**
@@ -209,20 +236,24 @@ interface IPackageManager {
      * @param outInfo Filled in with a list of the ProviderInfo for each
      *                name in 'outNames'.
      */
+    @UnsupportedAppUsage
     void querySyncProviders(inout List<String> outNames,
             inout List<ProviderInfo> outInfo);
 
     ParceledListSlice queryContentProviders(
             String processName, int uid, int flags, String metaDataKey);
 
+    @UnsupportedAppUsage
     InstrumentationInfo getInstrumentationInfo(
             in ComponentName className, int flags);
 
+    @UnsupportedAppUsage
     ParceledListSlice queryInstrumentation(
             String targetPackage, int flags);
 
     void finishPackageInstall(int token, boolean didLaunch);
 
+    @UnsupportedAppUsage
     void setInstallerPackageName(in String targetPackage, in String installerPackageName);
 
     void setApplicationCategoryHint(String packageName, int categoryHint, String callerPackageName);
@@ -242,24 +273,30 @@ interface IPackageManager {
     void deletePackageVersioned(in VersionedPackage versionedPackage,
             IPackageDeleteObserver2 observer, int userId, int flags);
 
+    @UnsupportedAppUsage
     String getInstallerPackageName(in String packageName);
 
     void resetApplicationPreferences(int userId);
 
+    @UnsupportedAppUsage
     ResolveInfo getLastChosenActivity(in Intent intent,
             String resolvedType, int flags);
 
+    @UnsupportedAppUsage
     void setLastChosenActivity(in Intent intent, String resolvedType, int flags,
             in IntentFilter filter, int match, in ComponentName activity);
 
     void addPreferredActivity(in IntentFilter filter, int match,
             in ComponentName[] set, in ComponentName activity, int userId);
 
+    @UnsupportedAppUsage
     void replacePreferredActivity(in IntentFilter filter, int match,
             in ComponentName[] set, in ComponentName activity, int userId);
 
+    @UnsupportedAppUsage
     void clearPackagePreferredActivities(String packageName);
 
+    @UnsupportedAppUsage
     int getPreferredActivities(out List<IntentFilter> outFilters,
             out List<ComponentName> outActivities, String packageName);
 
@@ -296,6 +333,7 @@ interface IPackageManager {
      * Report the set of 'Home' activity candidates, plus (if any) which of them
      * is the current "always use this one" setting.
      */
+     @UnsupportedAppUsage
      ComponentName getHomeActivities(out List<ResolveInfo> outHomeCandidates);
 
     void setHomeActivity(in ComponentName className, int userId);
@@ -303,23 +341,27 @@ interface IPackageManager {
     /**
      * As per {@link android.content.pm.PackageManager#setComponentEnabledSetting}.
      */
+    @UnsupportedAppUsage
     void setComponentEnabledSetting(in ComponentName componentName,
             in int newState, in int flags, int userId);
 
     /**
      * As per {@link android.content.pm.PackageManager#getComponentEnabledSetting}.
      */
+    @UnsupportedAppUsage
     int getComponentEnabledSetting(in ComponentName componentName, int userId);
 
     /**
      * As per {@link android.content.pm.PackageManager#setApplicationEnabledSetting}.
      */
+    @UnsupportedAppUsage
     void setApplicationEnabledSetting(in String packageName, in int newState, int flags,
             int userId, String callingPackage);
 
     /**
      * As per {@link android.content.pm.PackageManager#getApplicationEnabledSetting}.
      */
+    @UnsupportedAppUsage
     int getApplicationEnabledSetting(in String packageName, int userId);
 
     /**
@@ -337,6 +379,7 @@ interface IPackageManager {
      * Set whether the given package should be considered stopped, making
      * it not visible to implicit intents that filter out stopped packages.
      */
+    @UnsupportedAppUsage
     void setPackageStoppedState(String packageName, boolean stopped, int userId);
 
     /**
@@ -392,6 +435,7 @@ interface IPackageManager {
      * files need to be deleted
      * @param observer a callback used to notify when the deletion is finished.
      */
+    @UnsupportedAppUsage
     void deleteApplicationCacheFiles(in String packageName, IPackageDataObserver observer);
 
     /**
@@ -432,6 +476,7 @@ interface IPackageManager {
      * Get a list of shared libraries that are available on the
      * system.
      */
+    @UnsupportedAppUsage
     String[] getSystemSharedLibraryNames();
 
     /**
@@ -443,8 +488,10 @@ interface IPackageManager {
     boolean hasSystemFeature(String name, int version);
 
     void enterSafeMode();
+    @UnsupportedAppUsage
     boolean isSafeMode();
     void systemReady();
+    @UnsupportedAppUsage
     boolean hasSystemUidErrors();
 
     /**
@@ -563,9 +610,11 @@ interface IPackageManager {
     int movePackage(in String packageName, in String volumeUuid);
     int movePrimaryStorage(in String volumeUuid);
 
+    @UnsupportedAppUsage
     boolean addPermissionAsync(in PermissionInfo info);
 
     boolean setInstallLocation(int loc);
+    @UnsupportedAppUsage
     int getInstallLocation();
 
     int installExistingPackageAsUser(String packageName, int userId, int installFlags,
@@ -593,17 +642,21 @@ interface IPackageManager {
     boolean isPermissionEnforced(String permission);
 
     /** Reflects current DeviceStorageMonitorService state */
+    @UnsupportedAppUsage
     boolean isStorageLow();
 
+    @UnsupportedAppUsage
     boolean setApplicationHiddenSettingAsUser(String packageName, boolean hidden, int userId);
     boolean getApplicationHiddenSettingAsUser(String packageName, int userId);
 
     void setSystemAppHiddenUntilInstalled(String packageName, boolean hidden);
     boolean setSystemAppInstallState(String packageName, boolean installed, int userId);
 
+    @UnsupportedAppUsage
     IPackageInstaller getPackageInstaller();
 
     boolean setBlockUninstallForUser(String packageName, boolean blockUninstall, int userId);
+    @UnsupportedAppUsage
     boolean getBlockUninstallForUser(String packageName, int userId);
 
     KeySet getKeySetByAlias(String packageName, String alias);
@@ -624,6 +677,7 @@ interface IPackageManager {
 
     boolean isPermissionRevokedByPolicy(String permission, String packageName, int userId);
 
+    @UnsupportedAppUsage
     String getPermissionControllerPackageName();
 
     ParceledListSlice getInstantApps(int userId);
@@ -640,7 +694,9 @@ interface IPackageManager {
      */
     void setUpdateAvailable(String packageName, boolean updateAvaialble);
 
+    @UnsupportedAppUsage
     String getServicesSystemSharedLibraryPackageName();
+    @UnsupportedAppUsage
     String getSharedSystemSharedLibraryPackageName();
 
     ChangedPackages getChangedPackages(int sequenceNumber, int userId);

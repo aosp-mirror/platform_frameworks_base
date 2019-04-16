@@ -1421,7 +1421,8 @@ public class NotificationStackScrollLayout extends ViewGroup
      */
     private int targetScrollForView(ExpandableView v, int positionInLinearLayout) {
         return positionInLinearLayout + v.getIntrinsicHeight() +
-                getImeInset() - getHeight() + getTopPadding();
+                getImeInset() - getHeight()
+                + ((!isExpanded() && isPinnedHeadsUp(v)) ? mHeadsUpInset : getTopPadding());
     }
 
     @Override
@@ -2052,9 +2053,15 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private int getScrollRange() {
-        int scrollRange = Math.max(0, mContentHeight - mMaxLayoutHeight);
+        // In current design, it only use the top HUN to treat all of HUNs
+        // although there are more than one HUNs
+        int contentHeight = mContentHeight;
+        if (!isExpanded() && mHeadsUpManager.hasPinnedHeadsUp()) {
+            contentHeight = mHeadsUpInset + getTopHeadsUpPinnedHeight();
+        }
+        int scrollRange = Math.max(0, contentHeight - mMaxLayoutHeight);
         int imeInset = getImeInset();
-        scrollRange += Math.min(imeInset, Math.max(0, mContentHeight - (getHeight() - imeInset)));
+        scrollRange += Math.min(imeInset, Math.max(0, contentHeight - (getHeight() - imeInset)));
         return scrollRange;
     }
 

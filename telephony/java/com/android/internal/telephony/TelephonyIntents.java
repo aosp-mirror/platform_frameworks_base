@@ -56,6 +56,7 @@ public class TelephonyIntents {
      * by the system.
      * @deprecated use {@link Intent#ACTION_SERVICE_STATE}
      */
+    @Deprecated
     public static final String ACTION_SERVICE_STATE_CHANGED = Intent.ACTION_SERVICE_STATE;
 
     /**

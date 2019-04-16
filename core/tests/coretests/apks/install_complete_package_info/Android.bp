@@ -1,0 +1,7 @@
+android_test_helper_app {
+    name: "FrameworksCoreTests_install_complete_package_info",
+    defaults: ["FrameworksCoreTests_apks_defaults"],
+
+    srcs: ["**/*.java"],
+}
+

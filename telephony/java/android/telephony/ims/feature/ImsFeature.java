@@ -20,7 +20,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.content.Context;
-import android.content.Intent;
 import android.os.IInterface;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -210,6 +209,7 @@ public abstract class ImsFeature {
     /**
      * Contains the capabilities defined and supported by an ImsFeature in the form of a bit mask.
      * @hide
+     * @deprecated Use {@link MmTelFeature.MmTelCapabilities} instead.
      */
     @SystemApi  // SystemApi only because it was leaked through type usage in a previous release.
     public static class Capabilities {
@@ -394,30 +394,6 @@ public abstract class ImsFeature {
                 }
             }
         }
-        sendImsServiceIntent(state);
-    }
-
-    /**
-     * Provide backwards compatibility using deprecated service UP/DOWN intents.
-     */
-    private void sendImsServiceIntent(@ImsState int state) {
-        if (mContext == null || mSlotId == SubscriptionManager.INVALID_SIM_SLOT_INDEX) {
-            return;
-        }
-        Intent intent;
-        switch (state) {
-            case ImsFeature.STATE_UNAVAILABLE:
-            case ImsFeature.STATE_INITIALIZING:
-                intent = new Intent(ACTION_IMS_SERVICE_DOWN);
-                break;
-            case ImsFeature.STATE_READY:
-                intent = new Intent(ACTION_IMS_SERVICE_UP);
-                break;
-            default:
-                intent = new Intent(ACTION_IMS_SERVICE_DOWN);
-        }
-        intent.putExtra(EXTRA_PHONE_ID, mSlotId);
-        mContext.sendBroadcast(intent);
     }
 
     /**

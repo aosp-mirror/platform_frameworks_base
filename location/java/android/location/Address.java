@@ -363,7 +363,7 @@ public class Address implements Parcelable {
      * or null if it is unknown.
      *
      * @throws IllegalStateException if this Address has not been assigned
-     * a latitude.
+     * a phone number.
      */
     public String getPhone() {
         return mPhone;

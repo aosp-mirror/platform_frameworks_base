@@ -27,8 +27,9 @@ import android.net.LinkAddress;
 import android.net.NetworkUtils;
 import android.net.ProxyInfo;
 import android.net.StaticIpConfiguration;
-import android.support.test.runner.AndroidJUnit4;
 import android.util.ArrayMap;
+
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

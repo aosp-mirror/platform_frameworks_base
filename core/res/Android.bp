@@ -39,3 +39,12 @@ android_app {
     // PRODUCT-agnostic resource data like IDs and type definitions.
     export_package_resources: true,
 }
+
+// This logic can be removed once robolectric's transition to binary resources is complete
+filegroup {
+    name: "robolectric_framework_raw_res_files",
+    srcs: [
+        "assets/**/*",
+        "res/**/*",
+    ],
+}

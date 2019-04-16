@@ -19,23 +19,21 @@ package android.net.util;
 import static android.system.OsConstants.SOL_SOCKET;
 import static android.system.OsConstants.SO_BINDTODEVICE;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.net.MacAddress;
 import android.net.NetworkUtils;
 import android.system.ErrnoException;
 import android.system.NetlinkSocketAddress;
 import android.system.Os;
 import android.system.PacketSocketAddress;
-import android.system.StructTimeval;
 
 import libcore.io.IoBridge;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
-import java.net.Inet4Address;
 import java.net.SocketAddress;
-import java.net.SocketException;
 
 /**
  * Collection of utilities to interact with raw sockets.
@@ -43,13 +41,13 @@ import java.net.SocketException;
  */
 @SystemApi
 @TestApi
-public class SocketUtils {
+public final class SocketUtils {
     /**
      * Create a raw datagram socket that is bound to an interface.
      *
      * <p>Data sent through the socket will go directly to the underlying network, ignoring VPNs.
      */
-    public static void bindSocketToInterface(FileDescriptor socket, String iface)
+    public static void bindSocketToInterface(@NonNull FileDescriptor socket, @NonNull String iface)
             throws ErrnoException {
         // SO_BINDTODEVICE actually takes a string. This works because the first member
         // of struct ifreq is a NULL-terminated interface name.
@@ -61,6 +59,7 @@ public class SocketUtils {
     /**
      * Make a socket address to communicate with netlink.
      */
+    @NonNull
     public static SocketAddress makeNetlinkSocketAddress(int portId, int groupsMask) {
         return new NetlinkSocketAddress(portId, groupsMask);
     }
@@ -68,91 +67,24 @@ public class SocketUtils {
     /**
      * Make socket address that packet sockets can bind to.
      */
-    public static SocketAddress makePacketSocketAddress(short protocol, int ifIndex) {
-        return new PacketSocketAddress(protocol, ifIndex);
+    @NonNull
+    public static SocketAddress makePacketSocketAddress(int protocol, int ifIndex) {
+        return new PacketSocketAddress((short) protocol, ifIndex);
     }
 
     /**
      * Make a socket address that packet socket can send packets to.
      */
-    public static SocketAddress makePacketSocketAddress(int ifIndex, byte[] hwAddr) {
+    @NonNull
+    public static SocketAddress makePacketSocketAddress(int ifIndex, @NonNull byte[] hwAddr) {
         return new PacketSocketAddress(ifIndex, hwAddr);
-    }
-
-    /**
-     * Set an option on a socket that takes a time value argument.
-     */
-    public static void setSocketTimeValueOption(
-            FileDescriptor fd, int level, int option, long millis) throws ErrnoException {
-        Os.setsockoptTimeval(fd, level, option, StructTimeval.fromMillis(millis));
-    }
-
-    /**
-     * Bind a socket to the specified address.
-     */
-    public static void bindSocket(FileDescriptor fd, SocketAddress addr)
-            throws ErrnoException, SocketException {
-        Os.bind(fd, addr);
-    }
-
-    /**
-     * Connect a socket to the specified address.
-     */
-    public static void connectSocket(FileDescriptor fd, SocketAddress addr)
-            throws ErrnoException, SocketException {
-        Os.connect(fd, addr);
-    }
-
-    /**
-     * Send a message on a socket, using the specified SocketAddress.
-     */
-    public static void sendTo(FileDescriptor fd, byte[] bytes, int byteOffset, int byteCount,
-            int flags, SocketAddress addr) throws ErrnoException, SocketException {
-        Os.sendto(fd, bytes, byteOffset, byteCount, flags, addr);
     }
 
     /**
      * @see IoBridge#closeAndSignalBlockedThreads(FileDescriptor)
      */
-    public static void closeSocket(FileDescriptor fd) throws IOException {
+    public static void closeSocket(@Nullable FileDescriptor fd) throws IOException {
         IoBridge.closeAndSignalBlockedThreads(fd);
-    }
-
-    /**
-     * Attaches a socket filter that accepts DHCP packets to the given socket.
-     */
-    public static void attachDhcpFilter(FileDescriptor fd) throws SocketException {
-        NetworkUtils.attachDhcpFilter(fd);
-    }
-
-    /**
-     * Attaches a socket filter that accepts ICMPv6 router advertisements to the given socket.
-     * @param fd the socket's {@link FileDescriptor}.
-     * @param packetType the hardware address type, one of ARPHRD_*.
-     */
-    public static void attachRaFilter(FileDescriptor fd, int packetType) throws SocketException {
-        NetworkUtils.attachRaFilter(fd, packetType);
-    }
-
-    /**
-     * Attaches a socket filter that accepts L2-L4 signaling traffic required for IP connectivity.
-     *
-     * This includes: all ARP, ICMPv6 RS/RA/NS/NA messages, and DHCPv4 exchanges.
-     *
-     * @param fd the socket's {@link FileDescriptor}.
-     * @param packetType the hardware address type, one of ARPHRD_*.
-     */
-    public static void attachControlPacketFilter(FileDescriptor fd, int packetType)
-            throws SocketException {
-        NetworkUtils.attachControlPacketFilter(fd, packetType);
-    }
-
-    /**
-     * Add an entry into the ARP cache.
-     */
-    public static void addArpEntry(Inet4Address ipv4Addr, MacAddress ethAddr, String ifname,
-            FileDescriptor fd) throws IOException {
-        NetworkUtils.addArpEntry(ipv4Addr, ethAddr, ifname, fd);
     }
 
     private SocketUtils() {}

@@ -32,6 +32,7 @@ import "frameworks/base/core/proto/android/net/networkcapabilities.proto";
 import "frameworks/base/core/proto/android/os/enums.proto";
 import "frameworks/base/core/proto/android/server/connectivity/data_stall_event.proto";
 import "frameworks/base/core/proto/android/server/enums.proto";
+import "frameworks/base/core/proto/android/stats/connectivity/network_stack.proto";
 import "frameworks/base/core/proto/android/stats/launcher/launcher.proto";
 import "frameworks/base/core/proto/android/telecomm/enums.proto";
 import "frameworks/base/core/proto/android/telephony/enums.proto";
@@ -131,6 +132,7 @@ message Atom {
         PhoneServiceStateChanged phone_service_state_changed = 94;
         PhoneStateChanged phone_state_changed = 95;
         LowMemReported low_mem_reported = 81;
+        ThermalThrottlingStateChanged thermal_throttling = 86;
         NetworkDnsEventReported network_dns_event_reported = 116;
         DataStallEvent data_stall_event = 121;
         BluetoothLinkLayerConnectionEvent bluetooth_link_layer_connection_event = 125;
@@ -161,7 +163,9 @@ message Atom {
         BluetoothBondStateChanged bluetooth_bond_state_changed = 165;
         BluetoothClassicPairingEventReported bluetooth_classic_pairing_event_reported = 166;
         BluetoothSmpPairingEventReported bluetooth_smp_pairing_event_reported = 167;
+        ProcessStartTime process_start_time = 169;
         BluetoothSocketConnectionStateChanged bluetooth_socket_connection_state_changed = 171;
+        NetworkStackReported network_stack_reported = 182;
     }
 
     // Pulled events will start at field 10000.
@@ -236,6 +240,26 @@ message AttributionNode {
  *   - If there is a UID, it goes first. Think in an object-oriented fashion.
  * *****************************************************************************
  */
+
+/**
+ * Logs when the Thermal service HAL notifies the throttling start/stop events.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/stats/StatsCompanionService.java
+ */
+message ThermalThrottlingStateChanged {
+    optional android.os.TemperatureTypeEnum sensor_type = 1;
+
+    enum State {
+        UNKNOWN = 0;
+        START = 1;
+        STOP = 2;
+    }
+
+    optional State state = 2;
+
+    optional float temperature = 3;
+}
 
 /**
  * Logs when the screen state changes.
@@ -1692,6 +1716,9 @@ message BluetoothClassicPairingEventReported {
     // HCI reason code associated with this event
     // Default: STATUS_UNKNOWN
     optional android.bluetooth.hci.StatusEnum reason_code = 6;
+    // A status value related to this specific event
+    // Default: 0
+    optional int64 event_value = 7;
 }
 
 /**
@@ -2388,6 +2415,9 @@ message LmkKillOccurred {
 
     // The elapsed real time of start of the process.
     optional int64 process_start_time_nanos = 9;
+
+    // Min oom adj score considered by lmkd.
+    optional int32 min_oom_score = 10;
 }
 
 /*
@@ -2968,3 +2998,72 @@ message SeOmapiReported {
 
     optional string package_name = 3;
 }
+
+/*
+* Logs number of milliseconds it takes to start a process.
+* The definition of app process start time is from the app launch time to
+* the time that Zygote finished forking the app process and loaded the
+* application package's java classes.
+
+* This metric is different from AppStartOccurred which is for foreground
+* activity only.
+
+* ProcessStartTime can report all processes (both foreground and background)
+* start time.
+*
+* Logged from:
+*   frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+*/
+message ProcessStartTime {
+    // The uid of the ProcessRecord.
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // The process pid.
+    optional int32 pid = 2;
+
+    // The process name.
+    // Usually package name, "system" for system server.
+    // Provided by ActivityManagerService.
+    optional string process_name = 3;
+
+    enum StartType {
+        UNKNOWN = 0;
+        WARM = 1;
+        HOT = 2;
+        COLD = 3;
+    }
+
+    // The start type.
+    optional StartType type = 4;
+
+    // The elapsed realtime at the start of the process.
+    optional int64 process_start_time_millis = 5;
+
+    // Number of milliseconds it takes to reach bind application.
+    optional int32 bind_application_delay_millis = 6;
+
+    // Number of milliseconds it takes to finish start of the process.
+    optional int32 process_start_delay_millis = 7;
+
+    // hostingType field in ProcessRecord, the component type such as "activity",
+    // "service", "content provider", "broadcast" or other strings.
+    optional string hosting_type = 8;
+
+    // hostingNameStr field in ProcessRecord. The component class name that runs
+    // in this process.
+    optional string hosting_name = 9;
+}
+
+/**
+ * Push network stack events.
+ *
+ * Log from:
+ *     frameworks/base/packages/NetworkStack/
+ */
+message NetworkStackReported {
+    // The id that indicates the event reported from NetworkStack.
+    optional int32 event_id = 1;
+    // The data for the reported events.
+    optional android.stats.connectivity.NetworkStackEventData network_stack_event = 2 [(log_mode) = MODE_BYTES];
+}
+

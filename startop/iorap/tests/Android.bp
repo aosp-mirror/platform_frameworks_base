@@ -16,7 +16,6 @@
 java_library {
     name: "libiorap-java-test-lib",
     srcs: ["src/**/*.kt"],
-
     static_libs: [
       // non-test dependencies
       "libiorap-java",
@@ -28,13 +27,33 @@ java_library {
       // "mockito-target-minus-junit4",
         // Mockito also requires JNI (see Android.mk)
         // and android:debuggable=true (see AndroidManifest.xml)
-      "truth-prebuilt",
+        "truth-prebuilt",
     ],
-
     // sdk_version: "current",
     // certificate: "platform",
-
-    libs: ["android.test.base", "android.test.runner"],
-
+    libs: [
+        "android.test.base",
+        "android.test.runner",
+    ],
     // test_suites: ["device-tests"],
+}
+
+android_test {
+    name: "libiorap-java-tests",
+    dxflags: ["--multi-dex"],
+    test_suites: ["device-tests"],
+    static_libs: ["libiorap-java-test-lib"],
+    compile_multilib: "both",
+    jni_libs: [
+        "libdexmakerjvmtiagent",
+        "libstaticjvmtiagent",
+        "libmultiplejvmtiagentsinterferenceagent",
+    ],
+    libs: [
+        "android.test.base",
+        "android.test.runner",
+    ],
+    // Use private APIs
+    certificate: "platform",
+    platform_apis: true,
 }

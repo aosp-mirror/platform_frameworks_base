@@ -33,6 +33,7 @@ oneway interface IRecentsAnimationRunner {
      * wallpaper not drawing in time, or the handler not finishing the animation within a predefined
      * amount of time.
      */
+    @UnsupportedAppUsage
     void onAnimationCanceled() = 1;
 
     /**
@@ -42,6 +43,7 @@ oneway interface IRecentsAnimationRunner {
      * @param minimizedHomeBounds Specifies the bounds of the minimized home app, will be
      *                            {@code null} if the device is not currently in split screen
      */
+    @UnsupportedAppUsage
     void onAnimationStart(in IRecentsAnimationController controller,
             in RemoteAnimationTarget[] apps, in Rect homeContentInsets,
             in Rect minimizedHomeBounds) = 2;

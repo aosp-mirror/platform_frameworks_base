@@ -17,6 +17,7 @@
 package android.net.metrics;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
@@ -95,7 +96,7 @@ public final class ApfProgramEvent implements IpConnectivityLog.Event {
     /**
      * Utility to create an instance of {@link ApfProgramEvent}.
      */
-    public static class Builder {
+    public static final class Builder {
         private long mLifetime;
         private long mActualLifetime;
         private int mFilteredRas;
@@ -106,6 +107,7 @@ public final class ApfProgramEvent implements IpConnectivityLog.Event {
         /**
          * Set the maximum computed lifetime of the program in seconds.
          */
+        @NonNull
         public Builder setLifetime(long lifetime) {
             mLifetime = lifetime;
             return this;
@@ -114,6 +116,7 @@ public final class ApfProgramEvent implements IpConnectivityLog.Event {
         /**
          * Set the effective program lifetime in seconds.
          */
+        @NonNull
         public Builder setActualLifetime(long lifetime) {
             mActualLifetime = lifetime;
             return this;
@@ -122,6 +125,7 @@ public final class ApfProgramEvent implements IpConnectivityLog.Event {
         /**
          * Set the number of RAs filtered by the APF program.
          */
+        @NonNull
         public Builder setFilteredRas(int filteredRas) {
             mFilteredRas = filteredRas;
             return this;
@@ -130,6 +134,7 @@ public final class ApfProgramEvent implements IpConnectivityLog.Event {
         /**
          * Set the total number of current RAs at generation time.
          */
+        @NonNull
         public Builder setCurrentRas(int currentRas) {
             mCurrentRas = currentRas;
             return this;
@@ -138,6 +143,7 @@ public final class ApfProgramEvent implements IpConnectivityLog.Event {
         /**
          * Set the length of the APF program in bytes.
          */
+        @NonNull
         public Builder setProgramLength(int programLength) {
             mProgramLength = programLength;
             return this;
@@ -146,6 +152,7 @@ public final class ApfProgramEvent implements IpConnectivityLog.Event {
         /**
          * Set the flags describing what an Apf program filters.
          */
+        @NonNull
         public Builder setFlags(boolean hasIPv4, boolean multicastFilterOn) {
             mFlags = flagsFor(hasIPv4, multicastFilterOn);
             return this;
@@ -154,6 +161,7 @@ public final class ApfProgramEvent implements IpConnectivityLog.Event {
         /**
          * Build a new {@link ApfProgramEvent}.
          */
+        @NonNull
         public ApfProgramEvent build() {
             return new ApfProgramEvent(mLifetime, mActualLifetime, mFilteredRas, mCurrentRas,
                     mProgramLength, mFlags);

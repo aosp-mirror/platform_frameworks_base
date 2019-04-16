@@ -65,6 +65,7 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"Izinkan debugging USB?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Sidik jari kunci RSA komputer adalah:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Selalu izinkan dari komputer ini"</string>
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"Izinkan"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Debug USB tidak diizinkan"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Pengguna yang sedang login ke perangkat ini tidak dapat mengaktifkan proses debug USB. Beralihlah ke pengguna utama untuk menggunakan fitur ini."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Perbesar utk mengisi layar"</string>
@@ -156,6 +157,8 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
+    <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"Roaming"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
@@ -250,7 +253,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Data 4G dijeda"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"Data seluler dijeda"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Data dijeda"</string>
-    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Batas data yang Anda tetapkan telah tercapai. Anda tidak menggunakan data seluler lagi.\n\nJika Anda melanjutkan, tarif penggunaan data mungkin berlaku."</string>
+    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Batas kuota yang Anda tetapkan telah tercapai. Anda tidak menggunakan data seluler lagi.\n\nJika Anda melanjutkan, tarif penggunaan data mungkin berlaku."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Lanjutkan"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Menelusuri GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Lokasi yang disetel oleh GPS"</string>
@@ -286,6 +289,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"Headset"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"Masukan"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="4930931771490695395">"Alat Bantu Dengar"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"Mengaktifkan…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Kecerahan"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Rotasi otomatis"</string>
@@ -299,7 +303,7 @@
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Lokasi Nonaktif"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Perangkat media"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
-    <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Telepon urgen saja"</string>
+    <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Panggilan Darurat Saja"</string>
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"Setelan"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"Waktu"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"Saya"</string>
@@ -337,7 +341,7 @@
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Notifikasi"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Lampu senter"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Data seluler"</string>
-    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Penggunaan data"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Penggunaan kuota"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Data tersisa"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Melebihi batas"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> digunakan"</string>

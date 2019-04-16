@@ -23,10 +23,11 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.content.pm.ApplicationInfo;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.content.pm.SharedLibraryInfo;
 import android.util.SparseArray;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import dalvik.system.DelegateLastClassLoader;
 import dalvik.system.DexClassLoader;
@@ -36,8 +37,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -329,6 +330,20 @@ public class DexoptUtilsTest {
         assertEquals("PCL[];PCL[base.dex]{PCL[a.dex:b.dex]}", contexts[5]);
         assertEquals("PCL[];PCL[base-5.dex];PCL[base.dex]{PCL[a.dex:b.dex]}", contexts[6]);
         assertEquals(null, contexts[7]);
+    }
+
+    @Test
+    public void testSharedLibraryContext() {
+        SharedLibraryInfo sharedLibrary =
+                createMockSharedLibrary(new String[] {"a.dex", "b.dex"}).get(0);
+        String context = DexoptUtils.getClassLoaderContext(sharedLibrary);
+        assertEquals("PCL[]", context);
+
+        SharedLibraryInfo otherSharedLibrary =
+                createMockSharedLibrary(new String[] {"c.dex"}).get(0);
+        otherSharedLibrary.addDependency(sharedLibrary);
+        context = DexoptUtils.getClassLoaderContext(otherSharedLibrary);
+        assertEquals("PCL[]{PCL[a.dex:b.dex]}", context);
     }
 
     @Test

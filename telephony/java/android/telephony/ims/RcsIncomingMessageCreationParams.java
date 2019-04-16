@@ -17,6 +17,7 @@
 package android.telephony.ims;
 
 import android.annotation.CheckResult;
+import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -24,6 +25,8 @@ import android.os.Parcelable;
  * {@link RcsIncomingMessageCreationParams} is a collection of parameters that should be passed
  * into {@link RcsThread#addIncomingMessage(RcsIncomingMessageCreationParams)} to generate an
  * {@link RcsIncomingMessage} on that {@link RcsThread}
+ *
+ * @hide
  */
 public final class RcsIncomingMessageCreationParams extends RcsMessageCreationParams implements
         Parcelable {
@@ -150,7 +153,7 @@ public final class RcsIncomingMessageCreationParams extends RcsMessageCreationPa
         return mSenderParticipantId;
     }
 
-    public static final Creator<RcsIncomingMessageCreationParams> CREATOR =
+    public static final @NonNull Creator<RcsIncomingMessageCreationParams> CREATOR =
             new Creator<RcsIncomingMessageCreationParams>() {
                 @Override
                 public RcsIncomingMessageCreationParams createFromParcel(Parcel in) {

@@ -22,7 +22,7 @@
     <string name="app_label" msgid="7164937344850004466">"सिस्टम UI"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"साफ करा"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"सूचीमधून काढा"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"अॅप माहिती"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"अ‍ॅप माहिती"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"आपल्या अलीकडील स्क्रीन येथे दिसतात"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"अलीकडील अॅप्स डिसमिस करा"</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
@@ -65,6 +65,7 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB डीबग करण्यास अनुमती द्यायची?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"संगणकाची RSA की फिंगरप्रिंट ही आहे:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"या संगणकावरून नेहमी अनुमती द्या"</string>
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"अनुमती द्या"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB डीबग करण्‍यास अनुमती नाही"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"सध्‍या या डीव्हाइसमध्‍ये साइन इन केलेला वापरकर्ता USB डीबग करणे चालू करू शकत नाही. हे वैशिष्‍ट्य वापरण्‍यासाठी, प्राथमिक वापरकर्त्‍यावर स्विच करा."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"स्क्रीन भरण्यासाठी झूम करा"</string>
@@ -81,7 +82,7 @@
     <string name="usb_preference_title" msgid="6551050377388882787">"USB फाईल स्थानांतरण पर्याय"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"मीडिया प्लेअर म्हणून माउंट करा (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"कॅमेरा म्हणून माउंट करा (PTP)"</string>
-    <string name="installer_cd_button_title" msgid="2312667578562201583">"Mac साठी Android फाईल स्थानांतर अॅप इंस्टॉल करा"</string>
+    <string name="installer_cd_button_title" msgid="2312667578562201583">"Mac साठी Android फाईल स्थानांतर अ‍ॅप इंस्टॉल करा"</string>
     <string name="accessibility_back" msgid="567011538994429120">"मागे"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"होम"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"मेनू"</string>
@@ -156,6 +157,8 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"४G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
+    <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"१X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"रोमिंग"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
@@ -286,6 +289,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"ऑडिओ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"हेडसेट"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"इनपुट"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="4930931771490695395">"श्रवण यंत्रे"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"सुरू करत आहे…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"चमक"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"ऑटो-रोटेट"</string>
@@ -599,7 +603,7 @@
     <string name="tuner_full_importance_settings" msgid="3207312268609236827">"पॉवर सूचना नियंत्रणे"</string>
     <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"चालू"</string>
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"बंद"</string>
-    <string name="power_notification_controls_description" msgid="4372459941671353358">"पॉवर सूचना नियंत्रणांच्या साहाय्याने तुम्ही अॅप सूचनांसाठी 0 ते 5 असे महत्त्व स्तर सेट करू शकता. \n\n"<b>"स्तर 5"</b>" \n- सूचना सूचीच्या शीर्षस्थानी दाखवा \n- फुल स्क्रीन व्यत्ययास अनुमती द्या \n- नेहमी डोकावून पहा \n\n"<b>"स्तर 4"</b>\n" - फुल स्क्रीन व्यत्ययास प्रतिबंधित करा \n- नेहमी डोकावून पहा \n\n"<b>"स्तर 3"</b>" \n- फुल स्क्रीन व्यत्ययास प्रतिबंधित करा \n- कधीही डोकावून पाहू नका \n\n"<b>"स्तर 2"</b>" \n- फुल स्क्रीन व्यत्ययास प्रतिबंधित करा \n- कधीही डोकावून पाहू नका \n- कधीही ध्वनी किंवा व्हायब्रेट करू नका \n\n"<b>"स्तर 1"</b>\n"- फुल स्क्रीन व्यत्ययास प्रतिबंधित करा \n- कधीही डोकावून पाहू नका \n- कधीही ध्वनी किंवा व्हायब्रेट करू नका \n- लॉक स्क्रीन आणि स्टेटस बार मधून लपवा \n- सूचना सूचीच्या तळाशी दर्शवा \n\n"<b>"स्तर 0"</b>" \n- अॅपमधील सर्व सूचना ब्लॉक करा"</string>
+    <string name="power_notification_controls_description" msgid="4372459941671353358">"पॉवर सूचना नियंत्रणांच्या साहाय्याने तुम्ही अ‍ॅप सूचनांसाठी 0 ते 5 असे महत्त्व स्तर सेट करू शकता. \n\n"<b>"स्तर 5"</b>" \n- सूचना सूचीच्या शीर्षस्थानी दाखवा \n- फुल स्क्रीन व्यत्ययास अनुमती द्या \n- नेहमी डोकावून पहा \n\n"<b>"स्तर 4"</b>\n" - फुल स्क्रीन व्यत्ययास प्रतिबंधित करा \n- नेहमी डोकावून पहा \n\n"<b>"स्तर 3"</b>" \n- फुल स्क्रीन व्यत्ययास प्रतिबंधित करा \n- कधीही डोकावून पाहू नका \n\n"<b>"स्तर 2"</b>" \n- फुल स्क्रीन व्यत्ययास प्रतिबंधित करा \n- कधीही डोकावून पाहू नका \n- कधीही ध्वनी किंवा व्हायब्रेट करू नका \n\n"<b>"स्तर 1"</b>\n"- फुल स्क्रीन व्यत्ययास प्रतिबंधित करा \n- कधीही डोकावून पाहू नका \n- कधीही ध्वनी किंवा व्हायब्रेट करू नका \n- लॉक स्क्रीन आणि स्टेटस बार मधून लपवा \n- सूचना सूचीच्या तळाशी दर्शवा \n\n"<b>"स्तर 0"</b>" \n- अ‍ॅपमधील सर्व सूचना ब्लॉक करा"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"सूचना"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"आता तुम्हाला या सूचना दिसणार नाहीत"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"या सूचना लहान केल्या जातील"</string>
@@ -610,13 +614,13 @@
     <string name="inline_minimize_button" msgid="966233327974702195">"लहान करा"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"या अ‍ॅपकडील सूचना दाखवणे सुरू ठेवायचे?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"या सूचना बंद करता येत नाहीत"</string>
-    <string name="appops_camera" msgid="8100147441602585776">"हे अॅप कॅमेरा वापरत आहे."</string>
-    <string name="appops_microphone" msgid="741508267659494555">"हे अॅप मायक्रोफोन वापरत आहे."</string>
-    <string name="appops_overlay" msgid="6165912637560323464">"हे अॅप स्क्रीनवरील इतर अॅप्स वर प्रदर्शित होत आहे."</string>
-    <string name="appops_camera_mic" msgid="1576901651150187433">"हे अॅप मायक्रोफोन आणि कॅमेरा वापरत आहे."</string>
-    <string name="appops_camera_overlay" msgid="8869400080809298814">"हे अॅप तुमच्या स्क्रीनवरील इतर अॅप्स वर प्रदर्शित होत आहे आणि कॅमेरा वापरत आहे."</string>
-    <string name="appops_mic_overlay" msgid="4835157962857919804">"हे अॅप तुमच्या स्क्रीनवरील इतर अॅप्स वर प्रदर्शित होत आहे आणि मायक्रोफोन वापरत आहे."</string>
-    <string name="appops_camera_mic_overlay" msgid="6718768197048030993">"हे अॅप तुमच्या स्क्रीनवरील इतर अॅप्स वर प्रदर्शित होत आहे आणि मायक्रोफोन आणि कॅमेरा वापरत आहे."</string>
+    <string name="appops_camera" msgid="8100147441602585776">"हे अ‍ॅप कॅमेरा वापरत आहे."</string>
+    <string name="appops_microphone" msgid="741508267659494555">"हे अ‍ॅप मायक्रोफोन वापरत आहे."</string>
+    <string name="appops_overlay" msgid="6165912637560323464">"हे अ‍ॅप स्क्रीनवरील इतर अ‍ॅप्स वर प्रदर्शित होत आहे."</string>
+    <string name="appops_camera_mic" msgid="1576901651150187433">"हे अ‍ॅप मायक्रोफोन आणि कॅमेरा वापरत आहे."</string>
+    <string name="appops_camera_overlay" msgid="8869400080809298814">"हे अ‍ॅप तुमच्या स्क्रीनवरील इतर अ‍ॅप्स वर प्रदर्शित होत आहे आणि कॅमेरा वापरत आहे."</string>
+    <string name="appops_mic_overlay" msgid="4835157962857919804">"हे अ‍ॅप तुमच्या स्क्रीनवरील इतर अ‍ॅप्स वर प्रदर्शित होत आहे आणि मायक्रोफोन वापरत आहे."</string>
+    <string name="appops_camera_mic_overlay" msgid="6718768197048030993">"हे अ‍ॅप तुमच्या स्क्रीनवरील इतर अ‍ॅप्स वर प्रदर्शित होत आहे आणि मायक्रोफोन आणि कॅमेरा वापरत आहे."</string>
     <string name="notification_appops_settings" msgid="1028328314935908050">"सेटिंग्ज"</string>
     <string name="notification_appops_ok" msgid="1156966426011011434">"ओके"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> साठी सूचना नियंत्रणे खुली आहेत"</string>
@@ -765,8 +769,8 @@
     <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ला <xliff:g id="POSITION">%2$d</xliff:g> स्थितीवर हलविले"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"द्रुत सेटिंग्ज संपादक."</string>
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> सूचना: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
-    <string name="dock_forced_resizable" msgid="5914261505436217520">"अॅप कदाचित विभाजित-स्क्रीनसह कार्य करू शकत नाही."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"अॅप स्क्रीन-विभाजनास समर्थन देत नाही."</string>
+    <string name="dock_forced_resizable" msgid="5914261505436217520">"अ‍ॅप कदाचित विभाजित-स्क्रीनसह कार्य करू शकत नाही."</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"अ‍ॅप स्क्रीन-विभाजनास समर्थन देत नाही."</string>
     <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"दुसऱ्या डिस्प्लेवर अ‍ॅप कदाचित चालणार नाही."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"दुसऱ्या डिस्प्लेवर अ‍ॅप लाँच होणार नाही."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"सेटिंग्ज उघडा."</string>
@@ -794,7 +798,7 @@
     <string name="pip_skip_to_prev" msgid="1955311326688637914">"डावलून मागे जा"</string>
     <string name="thermal_shutdown_title" msgid="4458304833443861111">"तापल्‍यामुळे फोन बंद झाला"</string>
     <string name="thermal_shutdown_message" msgid="9006456746902370523">"तुमचा फोन आता व्‍यवस्थित चालू आहे"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="566347880005304139">"तुमचा फोन खूप तापलाय, म्हणून तो थंड होण्यासाठी बंद झाला आहे. तुमचा फोन आता व्‍यवस्थित चालू आहे.\n\nतुम्ही असे केल्यास तुमचा फोन खूप तापेल:\n	•संसाधन केंद्रित अॅप वापरणे (गेमिंग, व्हिडिओ किंवा नेव्हिगेशन अॅप यासारखे)\n	•मोठ्या फायली डाउनलोड किंवा अपलोड करणे\n	•उच्च तापमानामध्ये तुमचा फोन वापरणे"</string>
+    <string name="thermal_shutdown_dialog_message" msgid="566347880005304139">"तुमचा फोन खूप तापलाय, म्हणून तो थंड होण्यासाठी बंद झाला आहे. तुमचा फोन आता व्‍यवस्थित चालू आहे.\n\nतुम्ही असे केल्यास तुमचा फोन खूप तापेल:\n	•संसाधन केंद्रित अ‍ॅप वापरणे (गेमिंग, व्हिडिओ किंवा नेव्हिगेशन अ‍ॅप यासारखे)\n	•मोठ्या फायली डाउनलोड किंवा अपलोड करणे\n	•उच्च तापमानामध्ये तुमचा फोन वापरणे"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"फोन ऊष्ण होत आहे"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"फोन थंड होत असताना काही वैशिष्‍ट्ये मर्यादित असतात"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"तुमचा फोन स्वयंचलितपणे थंड होईल. तुम्ही अद्यापही तुमचा फोन वापरू शकता परंतु तो कदाचित धीमेपणे कार्य करेल.\n\nतुमचा फोन एकदा थंड झाला की, तो सामान्यपणे कार्य करेल."</string>
@@ -820,7 +824,7 @@
     <string name="notification_channel_hints" msgid="7323870212489152689">"सूचना"</string>
     <string name="instant_apps" msgid="6647570248119804907">"इन्सटंट अ‍ॅप्स"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"इन्सटंट अॅप्सना स्थापनेची आवश्यकता नसते."</string>
-    <string name="app_info" msgid="6856026610594615344">"अॅप माहिती"</string>
+    <string name="app_info" msgid="6856026610594615344">"अ‍ॅप माहिती"</string>
     <string name="go_to_web" msgid="2650669128861626071">"ब्राउझरवर जा"</string>
     <string name="mobile_data" msgid="7094582042819250762">"मोबाइल डेटा"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%s</xliff:g> — <xliff:g id="ID_2">%s</xliff:g>"</string>

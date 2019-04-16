@@ -33,17 +33,17 @@ import static org.mockito.Mockito.when;
 import android.app.AppOpsManager;
 import android.app.slice.SliceSpec;
 import android.app.usage.UsageStatsManagerInternal;
-import android.content.pm.PackageManagerInternal;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.server.LocalServices;
 import com.android.server.UiServiceTestCase;

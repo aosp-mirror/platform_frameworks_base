@@ -16,20 +16,28 @@
 
 package android.telephony;
 
+import android.annotation.IntRange;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.telephony.gsm.GsmCellLocation;
 
 import java.util.Objects;
 
 /**
- * Information to represent a unique 5G NR cell.
+ * Information to represent a unique NR(New Radio 5G) cell.
  */
 public final class CellIdentityNr extends CellIdentity {
     private static final String TAG = "CellIdentityNr";
 
+    private static final int MAX_PCI = 1007;
+    private static final int MAX_TAC = 65535;
+    private static final int MAX_NRARFCN = 3279165;
+    private static final long MAX_NCI = 68719476735L;
+
     private final int mNrArfcn;
     private final int mPci;
     private final int mTac;
+    private final long mNci;
 
     /**
      *
@@ -38,17 +46,25 @@ public final class CellIdentityNr extends CellIdentity {
      * @param nrArfcn NR Absolute Radio Frequency Channel Number, in range [0, 3279165].
      * @param mccStr 3-digit Mobile Country Code in string format.
      * @param mncStr 2 or 3-digit Mobile Network Code in string format.
+     * @param nci The 36-bit NR Cell Identity in range [0, 68719476735].
      * @param alphal long alpha Operator Name String or Enhanced Operator Name String.
      * @param alphas short alpha Operator Name String or Enhanced Operator Name String.
      *
      * @hide
      */
-    public CellIdentityNr(int pci, int tac, int nrArfcn,  String mccStr, String mncStr,
-            String alphal, String alphas) {
+    public CellIdentityNr(int pci, int tac, int nrArfcn, String mccStr, String mncStr,
+            long nci, String alphal, String alphas) {
         super(TAG, CellInfo.TYPE_NR, mccStr, mncStr, alphal, alphas);
-        mPci = pci;
-        mTac = tac;
-        mNrArfcn = nrArfcn;
+        mPci = inRangeOrUnavailable(pci, 0, MAX_PCI);
+        mTac = inRangeOrUnavailable(tac, 0, MAX_TAC);
+        mNrArfcn = inRangeOrUnavailable(nrArfcn, 0, MAX_NRARFCN);
+        mNci = inRangeOrUnavailable(nci, 0, MAX_NCI);
+    }
+
+    /** @hide */
+    public CellIdentityNr sanitizeLocationInfo() {
+        return new CellIdentityNr(CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE,
+                mMccStr, mMncStr, CellInfo.UNAVAILABLE, mAlphaLong, mAlphaShort);
     }
 
     /**
@@ -62,7 +78,7 @@ public final class CellIdentityNr extends CellIdentity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), mPci, mTac, mNrArfcn);
+        return Objects.hash(super.hashCode(), mPci, mTac, mNrArfcn, mNci);
     }
 
     @Override
@@ -72,15 +88,30 @@ public final class CellIdentityNr extends CellIdentity {
         }
 
         CellIdentityNr o = (CellIdentityNr) other;
-        return super.equals(o) && mPci == o.mPci && mTac == o.mTac && mNrArfcn == o.mNrArfcn;
+        return super.equals(o) && mPci == o.mPci && mTac == o.mTac && mNrArfcn == o.mNrArfcn
+                && mNci == o.mNci;
     }
 
     /**
-     * Get the Absolute Radio Frequency Channel Number.
+     * Get the NR(New Radio 5G) Cell Identity.
+     *
+     * @return The 36-bit NR Cell Identity in range [0, 68719476735] or
+     *         {@link CellInfo#UNAVAILABLE_LONG} if unknown.
+     */
+    public long getNci() {
+        return mNci;
+    }
+
+    /**
+     * Get the New Radio Absolute Radio Frequency Channel Number.
+     *
+     * Reference: 3GPP TS 38.101-1 section 5.4.2.1 NR-ARFCN and channel raster.
+     * Reference: 3GPP TS 38.101-2 section 5.4.2.1 NR-ARFCN and channel raster.
+     *
      * @return Integer value in range [0, 3279165] or {@link CellInfo#UNAVAILABLE} if unknown.
      */
-    @Override
-    public int getChannelNumber() {
+    @IntRange(from = 0, to = 3279165)
+    public int getNrarfcn() {
         return mNrArfcn;
     }
 
@@ -88,6 +119,7 @@ public final class CellIdentityNr extends CellIdentity {
      * Get the physical cell id.
      * @return Integer value in range [0, 1007] or {@link CellInfo#UNAVAILABLE} if unknown.
      */
+    @IntRange(from = 0, to = 1007)
     public int getPci() {
         return mPci;
     }
@@ -96,6 +128,7 @@ public final class CellIdentityNr extends CellIdentity {
      * Get the tracking area code.
      * @return a 16 bit integer or {@link CellInfo#UNAVAILABLE} if unknown.
      */
+    @IntRange(from = 0, to = 65535)
     public int getTac() {
         return mTac;
     }
@@ -103,6 +136,7 @@ public final class CellIdentityNr extends CellIdentity {
     /**
      * @return Mobile Country Code in string format, or {@code null} if unknown.
      */
+    @Nullable
     public String getMccString() {
         return mMccStr;
     }
@@ -110,6 +144,7 @@ public final class CellIdentityNr extends CellIdentity {
     /**
      * @return Mobile Network Code in string fomrat, or {@code null} if unknown.
      */
+    @Nullable
     public String getMncString() {
         return mMncStr;
     }
@@ -122,6 +157,7 @@ public final class CellIdentityNr extends CellIdentity {
                 .append(" mNrArfcn = ").append(mNrArfcn)
                 .append(" mMcc = ").append(mMccStr)
                 .append(" mMnc = ").append(mMncStr)
+                .append(" mNci = ").append(mNci)
                 .append(" mAlphaLong = ").append(mAlphaLong)
                 .append(" mAlphaShort = ").append(mAlphaShort)
                 .append(" }")
@@ -134,6 +170,7 @@ public final class CellIdentityNr extends CellIdentity {
         dest.writeInt(mPci);
         dest.writeInt(mTac);
         dest.writeInt(mNrArfcn);
+        dest.writeLong(mNci);
     }
 
     /** Construct from Parcel, type has already been processed */
@@ -142,6 +179,7 @@ public final class CellIdentityNr extends CellIdentity {
         mPci = in.readInt();
         mTac = in.readInt();
         mNrArfcn = in.readInt();
+        mNci = in.readLong();
     }
 
     /** Implement the Parcelable interface */

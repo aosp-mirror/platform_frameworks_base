@@ -17,5 +17,5 @@
 
 package android.net;
 
-parcelable NetworkCapabilities;
+@JavaOnlyStableParcelable parcelable NetworkCapabilities;
 

@@ -31,18 +31,25 @@ import android.telecom.VideoProfile;
  * {@hide}
  */
 oneway interface IImsVideoCallCallback {
+    @UnsupportedAppUsage
     void receiveSessionModifyRequest(in VideoProfile videoProfile);
 
+    @UnsupportedAppUsage
     void receiveSessionModifyResponse(int status, in VideoProfile requestedProfile,
         in VideoProfile responseProfile);
 
+    @UnsupportedAppUsage
     void handleCallSessionEvent(int event);
 
+    @UnsupportedAppUsage
     void changePeerDimensions(int width, int height);
 
+    @UnsupportedAppUsage
     void changeCallDataUsage(long dataUsage);
 
+    @UnsupportedAppUsage
     void changeCameraCapabilities(in VideoProfile.CameraCapabilities cameraCapabilities);
 
+    @UnsupportedAppUsage
     void changeVideoQuality(int videoQuality);
 }

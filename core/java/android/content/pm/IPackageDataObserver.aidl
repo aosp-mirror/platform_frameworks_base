@@ -24,5 +24,6 @@ package android.content.pm;
  * {@hide}
  */
 oneway interface IPackageDataObserver {
+    @UnsupportedAppUsage
     void onRemoveCompleted(in String packageName, boolean succeeded);
 }

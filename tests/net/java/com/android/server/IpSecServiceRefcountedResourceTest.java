@@ -18,6 +18,7 @@ package com.android.server;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
@@ -31,21 +32,22 @@ import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.IpSecService.IResource;
 import com.android.server.IpSecService.RefcountedResource;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 /** Unit tests for {@link IpSecService.RefcountedResource}. */
 @SmallTest
@@ -133,11 +135,11 @@ public class IpSecServiceRefcountedResourceTest {
         IBinder binderMock = mock(IBinder.class);
         doThrow(new RemoteException()).when(binderMock).linkToDeath(anyObject(), anyInt());
 
-        RefcountedResource<IResource> refcountedResource = getTestRefcountedResource(binderMock);
-
-        // Verify that cleanup is performed (Spy limitations prevent verification of method calls
-        // for binder death scenario; check refcount to determine if cleanup was performed.)
-        assertEquals(-1, refcountedResource.mRefCount);
+        try {
+            getTestRefcountedResource(binderMock);
+            fail("Expected exception to propogate when binder fails to link to death");
+        } catch (RuntimeException expected) {
+        }
     }
 
     @Test

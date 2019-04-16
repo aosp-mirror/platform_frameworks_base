@@ -241,9 +241,6 @@ public class AccountManagerService
         private final HashMap<Account, AtomicReference<String>> previousNameCache =
                 new HashMap<Account, AtomicReference<String>>();
 
-        private int debugDbInsertionPoint = -1;
-        private SQLiteStatement statementForLogging; // TODO Move to AccountsDb
-
         UserAccounts(Context context, int userId, File preNDbFile, File deDbFile) {
             this.userId = userId;
             synchronized (dbLock) {
@@ -1299,7 +1296,6 @@ public class AccountManagerService
                 File preNDbFile = new File(mInjector.getPreNDatabaseName(userId));
                 File deDbFile = new File(mInjector.getDeDatabaseName(userId));
                 accounts = new UserAccounts(mContext, userId, preNDbFile, deDbFile);
-                initializeDebugDbSizeAndCompileSqlStatementForLogging(accounts);
                 mUsers.append(userId, accounts);
                 purgeOldGrants(accounts);
                 validateAccounts = true;
@@ -1399,7 +1395,7 @@ public class AccountManagerService
         if (accounts != null) {
             synchronized (accounts.dbLock) {
                 synchronized (accounts.cacheLock) {
-                    accounts.statementForLogging.close();
+                    accounts.accountsDb.closeDebugStatement();
                     accounts.accountsDb.close();
                 }
             }
@@ -5121,41 +5117,36 @@ public class AccountManagerService
 
             @Override
             public void run() {
-                SQLiteStatement logStatement = userAccount.statementForLogging;
-                logStatement.bindLong(1, accountId);
-                logStatement.bindString(2, action);
-                logStatement.bindString(3, mDateFormat.format(new Date()));
-                logStatement.bindLong(4, callingUid);
-                logStatement.bindString(5, tableName);
-                logStatement.bindLong(6, userDebugDbInsertionPoint);
-                try {
-                    logStatement.execute();
-                } catch (IllegalStateException e) {
-                    // Guard against crash, DB can already be closed
-                    // since this statement is executed on a handler thread
-                    Slog.w(TAG, "Failed to insert a log record. accountId=" + accountId
-                            + " action=" + action + " tableName=" + tableName + " Error: " + e);
-                } finally {
-                    logStatement.clearBindings();
+                synchronized (userAccount.accountsDb.mDebugStatementLock) {
+                    SQLiteStatement logStatement = userAccount.accountsDb.getStatementForLogging();
+                    if (logStatement == null) {
+                        return; // Can't log.
+                    }
+                    logStatement.bindLong(1, accountId);
+                    logStatement.bindString(2, action);
+                    logStatement.bindString(3, mDateFormat.format(new Date()));
+                    logStatement.bindLong(4, callingUid);
+                    logStatement.bindString(5, tableName);
+                    logStatement.bindLong(6, userDebugDbInsertionPoint);
+                    try {
+                        logStatement.execute();
+                    } catch (IllegalStateException e) {
+                        // Guard against crash, DB can already be closed
+                        // since this statement is executed on a handler thread
+                        Slog.w(TAG, "Failed to insert a log record. accountId=" + accountId
+                                + " action=" + action + " tableName=" + tableName + " Error: " + e);
+                    } finally {
+                        logStatement.clearBindings();
+                    }
                 }
             }
         }
-
-        LogRecordTask logTask = new LogRecordTask(action, tableName, accountId, userAccount,
-                callingUid, userAccount.debugDbInsertionPoint);
-        userAccount.debugDbInsertionPoint = (userAccount.debugDbInsertionPoint + 1)
-                % AccountsDb.MAX_DEBUG_DB_SIZE;
-        mHandler.post(logTask);
-    }
-
-    /*
-     * This should only be called once to compile the sql statement for logging
-     * and to find the insertion point.
-     */
-    private void initializeDebugDbSizeAndCompileSqlStatementForLogging(UserAccounts userAccount) {
-        userAccount.debugDbInsertionPoint = userAccount.accountsDb
-                .calculateDebugTableInsertionPoint();
-        userAccount.statementForLogging = userAccount.accountsDb.compileSqlStatementForLogging();
+        long insertionPoint = userAccount.accountsDb.reserveDebugDbInsertionPoint();
+        if (insertionPoint != -1) {
+            LogRecordTask logTask = new LogRecordTask(action, tableName, accountId, userAccount,
+                    callingUid, insertionPoint);
+            mHandler.post(logTask);
+        }
     }
 
     public IBinder onBind(@SuppressWarnings("unused") Intent intent) {

@@ -23,8 +23,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.RoSystemProperties;
-import com.android.org.conscrypt.Conscrypt;
-import com.android.org.conscrypt.OpenSSLContextImpl;
+import com.android.org.conscrypt.ClientSessionContext;
 import com.android.org.conscrypt.OpenSSLSocketImpl;
 import com.android.org.conscrypt.SSLClientSessionCache;
 
@@ -33,6 +32,8 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
 import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 
@@ -40,6 +41,7 @@ import javax.net.SocketFactory;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.KeyManager;
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSession;
@@ -60,7 +62,7 @@ import javax.net.ssl.X509TrustManager;
  *
  * The handshake timeout does not apply to actual TCP socket connection.
  * If you want a connection timeout as well, use {@link #createSocket()}
- * and {@link Socket#connect(SocketAddress, int)}, after which you
+ * and {@link Socket#connect(java.net.SocketAddress, int)}, after which you
  * must verify the identity of the server you are connected to.
  *
  * <p class="caution"><b>Most {@link SSLSocketFactory} implementations do not
@@ -209,14 +211,14 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
     }
 
     /**
-     * Verify the hostname of the certificate used by the other end of a
-     * connected socket.  You MUST call this if you did not supply a hostname
-     * to {@link #createSocket()}.  It is harmless to call this method
-     * redundantly if the hostname has already been verified.
+     * Verify the hostname of the certificate used by the other end of a connected socket using the
+     * {@link HostnameVerifier} obtained from {@code
+     * HttpsURLConnection.getDefaultHostnameVerifier()}. You MUST call this if you did not supply a
+     * hostname to {@link #createSocket()}.  It is harmless to call this method redundantly if the
+     * hostname has already been verified.
      *
-     * <p>Wildcard certificates are allowed to verify any matching hostname,
-     * so "foo.bar.example.com" is verified if the peer has a certificate
-     * for "*.example.com".
+     * <p>Wildcard certificates are allowed to verify any matching hostname, so
+     * "foo.bar.example.com" is verified if the peer has a certificate for "*.example.com".
      *
      * @param socket An SSL socket which has been connected to a server
      * @param hostname The expected hostname of the remote server
@@ -251,11 +253,12 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
     private SSLSocketFactory makeSocketFactory(
             KeyManager[] keyManagers, TrustManager[] trustManagers) {
         try {
-            OpenSSLContextImpl sslContext =  (OpenSSLContextImpl) Conscrypt.newPreferredSSLContextSpi();
-            sslContext.engineInit(keyManagers, trustManagers, null);
-            sslContext.engineGetClientSessionContext().setPersistentCache(mSessionCache);
-            return sslContext.engineGetSocketFactory();
-        } catch (KeyManagementException e) {
+            SSLContext sslContext = SSLContext.getInstance("TLS", "AndroidOpenSSL");
+            sslContext.init(keyManagers, trustManagers, null);
+            ((ClientSessionContext) sslContext.getClientSessionContext())
+                .setPersistentCache(mSessionCache);
+            return sslContext.getSocketFactory();
+        } catch (KeyManagementException | NoSuchAlgorithmException | NoSuchProviderException e) {
             Log.wtf(TAG, e);
             return (SSLSocketFactory) SSLSocketFactory.getDefault();  // Fallback
         }
@@ -480,7 +483,8 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
      * {@inheritDoc}
      *
      * <p>By default, this method returns a <i>connected</i> socket and verifies the peer's
-     * certificate hostname after connecting; if this instance was created with
+     * certificate hostname after connecting using the {@link HostnameVerifier} obtained from
+     * {@code HttpsURLConnection.getDefaultHostnameVerifier()}; if this instance was created with
      * {@link #getInsecure(int, SSLSessionCache)}, it returns a socket that is <i>not connected</i>
      * instead.
      */
@@ -559,7 +563,8 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
      * {@inheritDoc}
      *
      * <p>By default, this method returns a <i>connected</i> socket and verifies the peer's
-     * certificate hostname after connecting; if this instance was created with
+     * certificate hostname after connecting using the {@link HostnameVerifier} obtained from
+     * {@code HttpsURLConnection.getDefaultHostnameVerifier()}; if this instance was created with
      * {@link #getInsecure(int, SSLSessionCache)}, it returns a socket that is <i>not connected</i>
      * instead.
      */
@@ -582,7 +587,8 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
      * {@inheritDoc}
      *
      * <p>By default, this method returns a <i>connected</i> socket and verifies the peer's
-     * certificate hostname after connecting; if this instance was created with
+     * certificate hostname after connecting using the {@link HostnameVerifier} obtained from
+     * {@code HttpsURLConnection.getDefaultHostnameVerifier()}; if this instance was created with
      * {@link #getInsecure(int, SSLSessionCache)}, it returns a socket that is <i>not connected</i>
      * instead.
      */

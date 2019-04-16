@@ -16,28 +16,28 @@
 
 package android.media;
 
+import static android.media.MediaPlayer.MEDIA_ERROR_UNSUPPORTED;
+
 import android.annotation.UnsupportedAppUsage;
 import android.net.NetworkUtils;
 import android.os.IBinder;
 import android.os.StrictMode;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
 import java.io.BufferedInputStream;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.CookieHandler;
-import java.net.CookieManager;
-import java.net.Proxy;
-import java.net.URL;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.NoRouteToHostException;
 import java.net.ProtocolException;
+import java.net.Proxy;
+import java.net.URL;
 import java.net.UnknownServiceException;
 import java.util.HashMap;
 import java.util.Map;
-
-import static android.media.MediaPlayer.MEDIA_ERROR_UNSUPPORTED;
 
 /** @hide */
 public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
@@ -47,20 +47,35 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
     // connection timeout - 30 sec
     private static final int CONNECT_TIMEOUT_MS = 30 * 1000;
 
+    @GuardedBy("this")
     @UnsupportedAppUsage
     private long mCurrentOffset = -1;
+
+    @GuardedBy("this")
     @UnsupportedAppUsage
     private URL mURL = null;
+
+    @GuardedBy("this")
     @UnsupportedAppUsage
     private Map<String, String> mHeaders = null;
+
+    // volatile so that disconnect() can be called without acquiring a lock.
+    // All other access is @GuardedBy("this").
     @UnsupportedAppUsage
-    private HttpURLConnection mConnection = null;
+    private volatile HttpURLConnection mConnection = null;
+
+    @GuardedBy("this")
     @UnsupportedAppUsage
     private long mTotalSize = -1;
+
+    @GuardedBy("this")
     private InputStream mInputStream = null;
 
+    @GuardedBy("this")
     @UnsupportedAppUsage
     private boolean mAllowCrossDomainRedirect = true;
+
+    @GuardedBy("this")
     @UnsupportedAppUsage
     private boolean mAllowCrossProtocolRedirect = true;
 
@@ -80,7 +95,7 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
 
     @Override
     @UnsupportedAppUsage
-    public IBinder connect(String uri, String headers) {
+    public synchronized IBinder connect(String uri, String headers) {
         if (VERBOSE) {
             Log.d(TAG, "connect: uri=" + uri + ", headers=" + headers);
         }
@@ -97,7 +112,7 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
         return native_getIMemory();
     }
 
-    private boolean parseBoolean(String val) {
+    private static boolean parseBoolean(String val) {
         try {
             return Long.parseLong(val) != 0;
         } catch (NumberFormatException e) {
@@ -107,7 +122,7 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
     }
 
     /* returns true iff header is internal */
-    private boolean filterOutInternalHeaders(String key, String val) {
+    private synchronized boolean filterOutInternalHeaders(String key, String val) {
         if ("android-allow-cross-domain-redirect".equalsIgnoreCase(key)) {
             mAllowCrossDomainRedirect = parseBoolean(val);
             // cross-protocol redirects are also controlled by this flag
@@ -118,7 +133,7 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
         return true;
     }
 
-    private Map<String, String> convertHeaderStringToMap(String headers) {
+    private synchronized Map<String, String> convertHeaderStringToMap(String headers) {
         HashMap<String, String> map = new HashMap<String, String>();
 
         String[] pairs = headers.split("\r\n");
@@ -140,12 +155,23 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
     @Override
     @UnsupportedAppUsage
     public void disconnect() {
-        teardownConnection();
-        mHeaders = null;
-        mURL = null;
+        HttpURLConnection connectionToDisconnect = mConnection;
+        // Call disconnect() before blocking for the lock in order to ensure that any
+        // other thread that is blocked in readAt() will return quickly.
+        if (connectionToDisconnect != null) {
+            connectionToDisconnect.disconnect();
+        }
+        synchronized (this) {
+            // It's unlikely but possible that while we were waiting to acquire the lock, another
+            // thread concurrently started a new connection; if so, we're disconnecting that one
+            // here, too.
+            teardownConnection();
+            mHeaders = null;
+            mURL = null;
+        }
     }
 
-    private void teardownConnection() {
+    private synchronized void teardownConnection() {
         if (mConnection != null) {
             if (mInputStream != null) {
                 try {
@@ -185,7 +211,7 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
         return false;
     }
 
-    private void seekTo(long offset) throws IOException {
+    private synchronized void seekTo(long offset) throws IOException {
         teardownConnection();
 
         try {
@@ -324,21 +350,19 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
 
     @Override
     @UnsupportedAppUsage
-    public int readAt(long offset, int size) {
+    public synchronized int readAt(long offset, int size) {
         return native_readAt(offset, size);
     }
 
-    private int readAt(long offset, byte[] data, int size) {
+    private synchronized int readAt(long offset, byte[] data, int size) {
         StrictMode.ThreadPolicy policy =
             new StrictMode.ThreadPolicy.Builder().permitAll().build();
 
         StrictMode.setThreadPolicy(policy);
 
         try {
-            synchronized(this) {
-                if (offset != mCurrentOffset) {
-                    seekTo(offset);
-                }
+            if (offset != mCurrentOffset) {
+                seekTo(offset);
             }
 
             int n = mInputStream.read(data, 0, size);
@@ -408,7 +432,7 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
 
     @Override
     @UnsupportedAppUsage
-    public String getUri() {
+    public synchronized String getUri() {
         return mURL.toString();
     }
 

@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.NonNull;
 import android.os.Parcel;
 
 import java.util.Objects;
@@ -35,14 +36,35 @@ public final class CellInfoNr extends CellInfo {
         mCellSignalStrength = CellSignalStrengthNr.CREATOR.createFromParcel(in);
     }
 
+    private CellInfoNr(CellInfoNr other, boolean sanitizeLocationInfo) {
+        super(other);
+        mCellIdentity = sanitizeLocationInfo ? other.mCellIdentity.sanitizeLocationInfo()
+                : other.mCellIdentity;
+        mCellSignalStrength = other.mCellSignalStrength;
+    }
+
+    /**
+     * @return a {@link CellIdentityNr} instance.
+     */
     @Override
+    @NonNull
     public CellIdentity getCellIdentity() {
         return mCellIdentity;
     }
 
+    /**
+     * @return a {@link CellSignalStrengthNr} instance.
+     */
     @Override
+    @NonNull
     public CellSignalStrength getCellSignalStrength() {
         return mCellSignalStrength;
+    }
+
+    /** @hide */
+    @Override
+    public CellInfo sanitizeLocationInfo() {
+        return new CellInfoNr(this, true);
     }
 
     @Override

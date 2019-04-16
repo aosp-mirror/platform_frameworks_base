@@ -66,6 +66,8 @@ public:
      */
     void onGlContextLost();
 
+    SkBlendMode getMode() const override;
+
 private:
     Caches& caches;
 

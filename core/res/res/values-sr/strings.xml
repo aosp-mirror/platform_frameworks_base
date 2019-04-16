@@ -137,9 +137,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Позивање преко Wi-Fi-ја | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Позивање преко Wi-Fi-ја"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Позивање преко Wi-Fi-ја"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Искључено"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Предност има Wi-Fi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Желим мобилне податке"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"Позивање преко Wi-Fi-ја"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"Позив преко мобилне мреже"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Само Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Није прослеђено"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -213,7 +217,7 @@
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Сат ће се угасити."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Телефон ће се искључити."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Да ли желите да искључите телефон?"</string>
-    <string name="reboot_safemode_title" msgid="7054509914500140361">"Поново покрени систем у безбедном режиму"</string>
+    <string name="reboot_safemode_title" msgid="7054509914500140361">"Рестартуј систем у безбедном режиму"</string>
     <string name="reboot_safemode_confirm" msgid="55293944502784668">"Да ли желите да поново покренете систем у безбедном режиму? Ово ће онемогућити све инсталиране апликације независних произвођача. Оне ће бити враћене када поново покренете систем."</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Недавно"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Нема недавних апликација."</string>
@@ -433,6 +437,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Дозвољава апликацији да приступа функцијама телефона на уређају. Ова дозвола омогућава апликацији да утврди број телефона и ИД-ове уређаја, затим да ли је позив активан, као и број даљинског уређаја са којим је успостављен позив."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"преусмеравање позива преко система"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Дозвољава апликацији да преусмерава позиве преко система да би побољшала доживљај позивања."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"преглед и контрола позива преко система."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Дозвољава апликацији да прегледа и контролише тренутне позиве на уређају. То обухвата информације попут бројева телефона и статуса позива."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"настави позив у другој апликацији"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Дозвољава апликацији да настави позив који је започет у другој апликацији."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"читање бројева телефона"</string>
@@ -494,11 +500,11 @@
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"онемогућавање закључавања екрана"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Дозвољава апликацији да онемогући закључавање тастатуре и све повезане безбедносне мере са лозинкама. На пример, телефон онемогућава закључавање тастатуре при пријему долазног телефонског позива, а затим га поново омогућава по завршетку позива."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"користи биометријски хардвер"</string>
-    <string name="permdesc_useBiometric" msgid="8389855232721612926">"Дозвољава апликацији да користи биометријски хардвер за потврду аутентичности"</string>
+    <string name="permdesc_useBiometric" msgid="8389855232721612926">"Дозвољава апликацији да користи биометријски хардвер за потврду идентитета"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"управљај хардвером за отиске прстију"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Дозвољава апликацији да активира методе за додавање и брисање шаблона отисака прстију који ће се користити."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"користи хардвер за отиске прстију"</string>
-    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Дозвољава апликацији да користи хардвер за отиске прстију ради потврде аутентичности"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Дозвољава апликацији да користи хардвер за отиске прстију ради потврде идентитета"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Откривен је делимични отисак прста. Пробајте поново."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Није успела обрада отиска прста. Пробајте поново."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Сензор за отиске прстију је прљав. Очистите га и покушајте поново."</string>
@@ -611,7 +617,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Захтева да сачувани подаци апликације буду шифровани."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Онемогућавање камера"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Спречите коришћење свих камера уређаја."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Онемогућава неке функ. закључавања екрана"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Онемогућава функције закључавања екрана"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Спречава коришћење неких функција закључавања екрана."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Кућа"</item>
@@ -835,7 +841,7 @@
     <string name="factorytest_failed" msgid="5410270329114212041">"Фабричко тестирање није успело"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"Радња FACTORY_TEST је подржана само за пакете инсталиране у директоријуму /system/app."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"Није пронађен ниједан пакет који обезбеђује радњу FACTORY_TEST."</string>
-    <string name="factorytest_reboot" msgid="6320168203050791643">"Поново покрени"</string>
+    <string name="factorytest_reboot" msgid="6320168203050791643">"Рестартуј"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"На страници на адреси „<xliff:g id="TITLE">%s</xliff:g>“ пише:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Потврда навигације"</string>
@@ -1040,7 +1046,7 @@
     <string name="email_desc" msgid="3638665569546416795">"Пошаљите имејл на изабрану адресу"</string>
     <string name="dial" msgid="1253998302767701559">"Позови"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Позовите изабрани број телефона"</string>
-    <string name="map" msgid="5441053548030107189">"Мапа"</string>
+    <string name="map" msgid="5441053548030107189">"Прикажи на мапи"</string>
     <string name="map_desc" msgid="1836995341943772348">"Пронађите изабрану адресу"</string>
     <string name="browse" msgid="1245903488306147205">"Отвори"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Отворите изабрани URL"</string>
@@ -1199,8 +1205,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Пријавите се на мрежу"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi нема приступ интернету"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> нема приступ интернету"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Додирните за опције"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Повезано је"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> има ограничену везу"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Додирните да бисте се ипак повезали"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Промене подешавања за хотспот"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Опсег хотспота је промењен."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Овај уређај не подржава подешавање само за 5 GHz. Уређај ће користити опсег од 5 GHz када буде доступан."</string>
@@ -1255,7 +1264,7 @@
     <string name="sim_done_button" msgid="827949989369963775">"Готово"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM картица је додата"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"Рестартујте уређај да бисте могли да приступите мобилној мрежи."</string>
-    <string name="sim_restart_button" msgid="4722407842815232347">"Поново покрени"</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"Рестартуј"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"Активирајте мобилну услугу"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Преузмите апликацију мобилног оператера да бисте активирали нови SIM"</string>
     <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"Преузмите апликацију <xliff:g id="APP_NAME">%1$s</xliff:g> да бисте активирали нову SIM картицу"</string>

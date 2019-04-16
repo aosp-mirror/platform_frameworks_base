@@ -9,16 +9,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"شبکه‌ای که می‌خواهید به آن بپیوندید مشکلات امنیتی دارد."</string>
     <string name="ssl_error_example" msgid="647898534624078900">"به عنوان مثال، صفحه ورود به سیستم ممکن است متعلق به سازمان نشان داده شده نباشد."</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"در هر صورت از طریق مرورگر ادامه یابد"</string>
-    <string name="ok" msgid="1509280796718850364">"تأیید"</string>
-    <string name="page_info" msgid="4048529256302257195">"اطلاعات صفحه"</string>
-    <string name="page_info_address" msgid="2222306609532903254">"آدرس:"</string>
-    <string name="ssl_security_warning_title" msgid="6607795404322797541">"اخطار امنیتی"</string>
-    <string name="ssl_error_view_certificate" msgid="1472768887529093862">"مشاهده گواهی"</string>
-    <string name="ssl_error_untrusted" msgid="7754507359360636447">"این گواهی از یک منبع مورد اطمینان صادر نشده است."</string>
-    <string name="ssl_error_mismatch" msgid="3809794439740523641">"نام سایت با نام موجود در گواهی مطابقت ندارد."</string>
-    <string name="ssl_error_expired" msgid="5739349389499575559">"این گواهی منقضی شده است."</string>
-    <string name="ssl_error_not_yet_valid" msgid="8193083327719048247">"این گواهی هنوز معتبر نیست."</string>
-    <string name="ssl_error_date_invalid" msgid="3705563379257285534">"تاریخ این گواهی نامعتبر است."</string>
-    <string name="ssl_error_invalid" msgid="9041704741505449967">"این گواهی نامعتبر است."</string>
-    <string name="ssl_error_unknown" msgid="5679243486524754571">"خطای ناشناخته در گواهی."</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"این گواهی از یک منبع مورد‌اطمینان صادر نشده است."</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"نام سایت با نام موجود در گواهی مطابقت ندارد."</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"این گواهی منقضی شده است."</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"این گواهی هنوز معتبر نیست."</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"تاریخ این گواهی نامعتبر است."</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"این گواهی نامعتبر است."</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"خطای ناشناخته در گواهی."</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"اخطار امنیتی"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"مشاهده گواهی"</string>
+    <string name="ok" msgid="2817931639040794018">"تأیید"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"نشانی:"</string>
+    <string name="page_info" msgid="4416941086705172545">"اطلاعات صفحه"</string>
 </resources>

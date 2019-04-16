@@ -18,8 +18,6 @@ package android.net.ip;
 
 import static android.net.RouteInfo.RTN_UNICAST;
 import static android.net.shared.IpConfigurationParcelableUtil.toStableParcelable;
-import static android.net.shared.LinkPropertiesParcelableUtil.fromStableParcelable;
-import static android.net.shared.LinkPropertiesParcelableUtil.toStableParcelable;
 
 import static com.android.server.util.PermissionUtil.checkNetworkStackCallingPermission;
 
@@ -31,9 +29,9 @@ import android.net.INetd;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
+import android.net.NetworkStackIpMemoryStore;
 import android.net.ProvisioningConfigurationParcelable;
 import android.net.ProxyInfo;
-import android.net.ProxyInfoParcelable;
 import android.net.RouteInfo;
 import android.net.TcpKeepalivePacketDataParcelable;
 import android.net.apf.ApfCapabilities;
@@ -46,12 +44,14 @@ import android.net.shared.ProvisioningConfiguration;
 import android.net.util.InterfaceParams;
 import android.net.util.SharedLog;
 import android.os.ConditionVariable;
+import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.LocalLog;
 import android.util.Log;
+import android.util.Pair;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -63,6 +63,7 @@ import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 import com.android.internal.util.WakeupMessage;
 import com.android.server.NetworkObserverRegistry;
+import com.android.server.NetworkStackService.NetworkStackServiceManager;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -102,6 +103,7 @@ public class IpClient extends StateMachine {
     // One holds StateMachine logs and the other connectivity packet logs.
     private static final ConcurrentHashMap<String, SharedLog> sSmLogs = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<String, LocalLog> sPktLogs = new ConcurrentHashMap<>();
+    private final NetworkStackIpMemoryStore mIpMemoryStore;
 
     /**
      * Dump all state machine and connectivity packet logs to the specified writer.
@@ -200,7 +202,7 @@ public class IpClient extends StateMachine {
         public void onProvisioningSuccess(LinkProperties newLp) {
             log("onProvisioningSuccess({" + newLp + "})");
             try {
-                mCallback.onProvisioningSuccess(toStableParcelable(newLp));
+                mCallback.onProvisioningSuccess(newLp);
             } catch (RemoteException e) {
                 log("Failed to call onProvisioningSuccess", e);
             }
@@ -209,7 +211,7 @@ public class IpClient extends StateMachine {
         public void onProvisioningFailure(LinkProperties newLp) {
             log("onProvisioningFailure({" + newLp + "})");
             try {
-                mCallback.onProvisioningFailure(toStableParcelable(newLp));
+                mCallback.onProvisioningFailure(newLp);
             } catch (RemoteException e) {
                 log("Failed to call onProvisioningFailure", e);
             }
@@ -218,7 +220,7 @@ public class IpClient extends StateMachine {
         public void onLinkPropertiesChange(LinkProperties newLp) {
             log("onLinkPropertiesChange({" + newLp + "})");
             try {
-                mCallback.onLinkPropertiesChange(toStableParcelable(newLp));
+                mCallback.onLinkPropertiesChange(newLp);
             } catch (RemoteException e) {
                 log("Failed to call onLinkPropertiesChange", e);
             }
@@ -281,6 +283,7 @@ public class IpClient extends StateMachine {
 
     public static final String DUMP_ARG_CONFIRM = "confirm";
 
+    // Below constants are picked up by MessageUtils and exempt from ProGuard optimization.
     private static final int CMD_TERMINATE_AFTER_STOP             = 1;
     private static final int CMD_STOP                             = 2;
     private static final int CMD_START                            = 3;
@@ -296,6 +299,7 @@ public class IpClient extends StateMachine {
     private static final int EVENT_READ_PACKET_FILTER_COMPLETE    = 12;
     private static final int CMD_ADD_KEEPALIVE_PACKET_FILTER_TO_APF = 13;
     private static final int CMD_REMOVE_KEEPALIVE_PACKET_FILTER_FROM_APF = 14;
+    private static final int CMD_UPDATE_L2KEY_GROUPHINT = 15;
 
     // Internal commands to use instead of trying to call transitionTo() inside
     // a given State's enter() method. Calling transitionTo() from enter/exit
@@ -362,6 +366,8 @@ public class IpClient extends StateMachine {
     private String mTcpBufferSizes;
     private ProxyInfo mHttpProxy;
     private ApfFilter mApfFilter;
+    private String mL2Key; // The L2 key for this network, for writing into the memory store
+    private String mGroupHint; // The group hint for this network, for writing into the memory store
     private boolean mMulticastFiltering;
     private long mStartTimeMillis;
 
@@ -380,16 +386,24 @@ public class IpClient extends StateMachine {
         public InterfaceParams getInterfaceParams(String ifname) {
             return InterfaceParams.getByName(ifname);
         }
+
+        /**
+         * Get a INetd connector.
+         */
+        public INetd getNetd(Context context) {
+            return INetd.Stub.asInterface((IBinder) context.getSystemService(Context.NETD_SERVICE));
+        }
     }
 
     public IpClient(Context context, String ifName, IIpClientCallbacks callback,
-            NetworkObserverRegistry observerRegistry) {
-        this(context, ifName, callback, observerRegistry, new Dependencies());
+            NetworkObserverRegistry observerRegistry, NetworkStackServiceManager nssManager) {
+        this(context, ifName, callback, observerRegistry, nssManager, new Dependencies());
     }
 
     @VisibleForTesting
     IpClient(Context context, String ifName, IIpClientCallbacks callback,
-            NetworkObserverRegistry observerRegistry, Dependencies deps) {
+            NetworkObserverRegistry observerRegistry, NetworkStackServiceManager nssManager,
+            Dependencies deps) {
         super(IpClient.class.getSimpleName() + "." + ifName);
         Preconditions.checkNotNull(ifName);
         Preconditions.checkNotNull(callback);
@@ -403,6 +417,8 @@ public class IpClient extends StateMachine {
         mShutdownLatch = new CountDownLatch(1);
         mCm = mContext.getSystemService(ConnectivityManager.class);
         mObserverRegistry = observerRegistry;
+        mIpMemoryStore =
+                new NetworkStackIpMemoryStore(context, nssManager.getIpMemoryStoreService());
 
         sSmLogs.putIfAbsent(mInterfaceName, new SharedLog(MAX_LOG_RECORDS, mTag));
         mLog = sSmLogs.get(mInterfaceName);
@@ -413,7 +429,7 @@ public class IpClient extends StateMachine {
 
         // TODO: Consider creating, constructing, and passing in some kind of
         // InterfaceController.Dependencies class.
-        mNetd = mContext.getSystemService(INetd.class);
+        mNetd = deps.getNetd(mContext);
         mInterfaceCtrl = new InterfaceController(mInterfaceName, mNetd, mLog);
 
         mLinkObserver = new IpClientLinkObserver(
@@ -512,14 +528,19 @@ public class IpClient extends StateMachine {
             IpClient.this.stop();
         }
         @Override
+        public void setL2KeyAndGroupHint(String l2Key, String groupHint) {
+            checkNetworkStackCallingPermission();
+            IpClient.this.setL2KeyAndGroupHint(l2Key, groupHint);
+        }
+        @Override
         public void setTcpBufferSizes(String tcpBufferSizes) {
             checkNetworkStackCallingPermission();
             IpClient.this.setTcpBufferSizes(tcpBufferSizes);
         }
         @Override
-        public void setHttpProxy(ProxyInfoParcelable proxyInfo) {
+        public void setHttpProxy(ProxyInfo proxyInfo) {
             checkNetworkStackCallingPermission();
-            IpClient.this.setHttpProxy(fromStableParcelable(proxyInfo));
+            IpClient.this.setHttpProxy(proxyInfo);
         }
         @Override
         public void setMulticastFilter(boolean enabled) {
@@ -637,6 +658,13 @@ public class IpClient extends StateMachine {
      */
     public void setTcpBufferSizes(String tcpBufferSizes) {
         sendMessage(CMD_UPDATE_TCP_BUFFER_SIZES, tcpBufferSizes);
+    }
+
+    /**
+     * Set the L2 key and group hint for storing info into the memory store.
+     */
+    public void setL2KeyAndGroupHint(String l2Key, String groupHint) {
+        sendMessage(CMD_UPDATE_L2KEY_GROUPHINT, new Pair<>(l2Key, groupHint));
     }
 
     /**
@@ -823,7 +851,7 @@ public class IpClient extends StateMachine {
     static boolean isProvisioned(LinkProperties lp, InitialConfiguration config) {
         // For historical reasons, we should connect even if all we have is
         // an IPv4 address and nothing else.
-        if (lp.hasIPv4Address() || lp.isProvisioned()) {
+        if (lp.hasIpv4Address() || lp.isProvisioned()) {
             return true;
         }
         if (config == null) {
@@ -867,9 +895,9 @@ public class IpClient extends StateMachine {
             delta = PROV_CHANGE_LOST_PROVISIONING;
         }
 
-        final boolean lostIPv6 = oldLp.isIPv6Provisioned() && !newLp.isIPv6Provisioned();
-        final boolean lostIPv4Address = oldLp.hasIPv4Address() && !newLp.hasIPv4Address();
-        final boolean lostIPv6Router = oldLp.hasIPv6DefaultRoute() && !newLp.hasIPv6DefaultRoute();
+        final boolean lostIPv6 = oldLp.isIpv6Provisioned() && !newLp.isIpv6Provisioned();
+        final boolean lostIPv4Address = oldLp.hasIpv4Address() && !newLp.hasIpv4Address();
+        final boolean lostIPv6Router = oldLp.hasIpv6DefaultRoute() && !newLp.hasIpv6DefaultRoute();
 
         // If bad wifi avoidance is disabled, then ignore IPv6 loss of
         // provisioning. Otherwise, when a hotspot that loses Internet
@@ -886,7 +914,7 @@ public class IpClient extends StateMachine {
         // accompanying code in IpReachabilityMonitor) is unreachable.
         final boolean ignoreIPv6ProvisioningLoss =
                 mConfiguration != null && mConfiguration.mUsingMultinetworkPolicyTracker
-                && mCm.getAvoidBadWifi();
+                && mCm.shouldAvoidBadWifi();
 
         // Additionally:
         //
@@ -909,7 +937,7 @@ public class IpClient extends StateMachine {
         // If the previous link properties had a global IPv6 address and an
         // IPv6 default route then also consider the loss of that default route
         // to be a loss of provisioning. See b/27962810.
-        if (oldLp.hasGlobalIPv6Address() && (lostIPv6Router && !ignoreIPv6ProvisioningLoss)) {
+        if (oldLp.hasGlobalIpv6Address() && (lostIPv6Router && !ignoreIPv6ProvisioningLoss)) {
             delta = PROV_CHANGE_LOST_PROVISIONING;
         }
 
@@ -1056,6 +1084,10 @@ public class IpClient extends StateMachine {
             return true;
         }
         final int delta = setLinkProperties(newLp);
+        // Most of the attributes stored in the memory store are deduced from
+        // the link properties, therefore when the properties update the memory
+        // store record should be updated too.
+        maybeSaveNetworkToIpMemoryStore();
         if (sendCallbacks) {
             dispatchCallback(delta, newLp);
         }
@@ -1071,6 +1103,7 @@ public class IpClient extends StateMachine {
             Log.d(mTag, "onNewDhcpResults(" + Objects.toString(dhcpResults) + ")");
         }
         mCallback.onNewDhcpResults(dhcpResults);
+        maybeSaveNetworkToIpMemoryStore();
         dispatchCallback(delta, newLp);
     }
 
@@ -1145,7 +1178,7 @@ public class IpClient extends StateMachine {
 
     private boolean applyInitialConfig(InitialConfiguration config) {
         // TODO: also support specifying a static IPv4 configuration in InitialConfiguration.
-        for (LinkAddress addr : findAll(config.ipAddresses, LinkAddress::isIPv6)) {
+        for (LinkAddress addr : findAll(config.ipAddresses, LinkAddress::isIpv6)) {
             if (!mInterfaceCtrl.addAddress(addr)) return false;
         }
 
@@ -1201,6 +1234,10 @@ public class IpClient extends StateMachine {
         mInterfaceCtrl.clearAllAddresses();
     }
 
+    private void maybeSaveNetworkToIpMemoryStore() {
+        // TODO : implement this
+    }
+
     class StoppedState extends State {
         @Override
         public void enter() {
@@ -1245,6 +1282,13 @@ public class IpClient extends StateMachine {
                     mHttpProxy = (ProxyInfo) msg.obj;
                     handleLinkPropertiesUpdate(NO_CALLBACKS);
                     break;
+
+                case CMD_UPDATE_L2KEY_GROUPHINT: {
+                    final Pair<String, String> args = (Pair<String, String>) msg.obj;
+                    mL2Key = args.first;
+                    mGroupHint = args.second;
+                    break;
+                }
 
                 case CMD_SET_MULTICAST_FILTER:
                     mMulticastFiltering = (boolean) msg.obj;
@@ -1345,6 +1389,20 @@ public class IpClient extends StateMachine {
                     }
                     break;
 
+                case CMD_UPDATE_L2KEY_GROUPHINT: {
+                    final Pair<String, String> args = (Pair<String, String>) msg.obj;
+                    mL2Key = args.first;
+                    mGroupHint = args.second;
+                    // TODO : attributes should be saved to the memory store with
+                    // these new values if they differ from the previous ones.
+                    // If the state machine is in pure StartedState, then the values to input
+                    // are not known yet and should be updated when the LinkProperties are updated.
+                    // If the state machine is in RunningState (which is a child of StartedState)
+                    // then the next NUD check should be used to store the new values to avoid
+                    // inputting current values for what may be a different L3 network.
+                    break;
+                }
+
                 case EVENT_PROVISIONING_TIMEOUT:
                     handleProvisioningFailure();
                     break;
@@ -1363,7 +1421,7 @@ public class IpClient extends StateMachine {
         }
 
         private boolean readyToProceed() {
-            return (!mLinkProperties.hasIPv4Address() && !mLinkProperties.hasGlobalIPv6Address());
+            return (!mLinkProperties.hasIpv4Address() && !mLinkProperties.hasGlobalIpv6Address());
         }
     }
 
@@ -1377,8 +1435,8 @@ public class IpClient extends StateMachine {
             apfConfig.apfCapabilities = mConfiguration.mApfCapabilities;
             apfConfig.multicastFilter = mMulticastFiltering;
             // Get the Configuration for ApfFilter from Context
-            apfConfig.ieee802_3Filter = ApfCapabilities.getApfDrop8023Frames(mContext);
-            apfConfig.ethTypeBlackList = ApfCapabilities.getApfEthTypeBlackList(mContext);
+            apfConfig.ieee802_3Filter = ApfCapabilities.getApfDrop8023Frames();
+            apfConfig.ethTypeBlackList = ApfCapabilities.getApfEtherTypeBlackList();
             mApfFilter = ApfFilter.maybeCreate(mContext, apfConfig, mInterfaceParams, mCallback);
             // TODO: investigate the effects of any multicast filtering racing/interfering with the
             // rest of this IP configuration startup.

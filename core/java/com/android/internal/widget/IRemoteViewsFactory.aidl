@@ -21,15 +21,23 @@ import android.widget.RemoteViews;
 
 /** {@hide} */
 interface IRemoteViewsFactory {
+    @UnsupportedAppUsage
     void onDataSetChanged();
     oneway void onDataSetChangedAsync();
     oneway void onDestroy(in Intent intent);
+    @UnsupportedAppUsage
     int getCount();
+    @UnsupportedAppUsage
     RemoteViews getViewAt(int position);
+    @UnsupportedAppUsage
     RemoteViews getLoadingView();
+    @UnsupportedAppUsage
     int getViewTypeCount();
+    @UnsupportedAppUsage
     long getItemId(int position);
+    @UnsupportedAppUsage
     boolean hasStableIds();
+    @UnsupportedAppUsage
     boolean isCreated();
 }
 

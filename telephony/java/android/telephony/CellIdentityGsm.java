@@ -31,6 +31,11 @@ public final class CellIdentityGsm extends CellIdentity {
     private static final String TAG = CellIdentityGsm.class.getSimpleName();
     private static final boolean DBG = false;
 
+    private static final int MAX_LAC = 65535;
+    private static final int MAX_CID = 65535;
+    private static final int MAX_ARFCN = 65535;
+    private static final int MAX_BSIC = 63;
+
     // 16-bit Location Area Code, 0..65535
     private final int mLac;
     // 16-bit GSM Cell Identity described in TS 27.007, 0..65535
@@ -68,10 +73,10 @@ public final class CellIdentityGsm extends CellIdentity {
     public CellIdentityGsm(int lac, int cid, int arfcn, int bsic, String mccStr,
                             String mncStr, String alphal, String alphas) {
         super(TAG, CellInfo.TYPE_GSM, mccStr, mncStr, alphal, alphas);
-        mLac = lac;
-        mCid = cid;
-        mArfcn = arfcn;
-        mBsic = bsic;
+        mLac = inRangeOrUnavailable(lac, 0, MAX_LAC);
+        mCid = inRangeOrUnavailable(cid, 0, MAX_CID);
+        mArfcn = inRangeOrUnavailable(arfcn, 0, MAX_ARFCN);
+        mBsic = inRangeOrUnavailable(bsic, 0, MAX_BSIC);
     }
 
     /** @hide */
@@ -95,6 +100,12 @@ public final class CellIdentityGsm extends CellIdentity {
 
     CellIdentityGsm copy() {
         return new CellIdentityGsm(this);
+    }
+
+    /** @hide */
+    public CellIdentityGsm sanitizeLocationInfo() {
+        return new CellIdentityGsm(CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE,
+                CellInfo.UNAVAILABLE, mMccStr, mMncStr, mAlphaLong, mAlphaShort);
     }
 
     /**
@@ -160,6 +171,7 @@ public final class CellIdentityGsm extends CellIdentity {
     /**
      * @return Mobile Country Code in string format, null if unavailable.
      */
+    @Nullable
     public String getMccString() {
         return mMccStr;
     }
@@ -167,6 +179,7 @@ public final class CellIdentityGsm extends CellIdentity {
     /**
      * @return Mobile Network Code in string format, null if unavailable.
      */
+    @Nullable
     public String getMncString() {
         return mMncStr;
     }

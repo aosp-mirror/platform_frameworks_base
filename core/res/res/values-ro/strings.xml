@@ -137,9 +137,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Apelare prin Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Apelare prin Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Apelare prin Wi-Fi"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Dezactivată"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Se preferă conexiunea Wi-Fi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Se preferă datele mobile"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"Apelați prin Wi-Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"Apelați prin rețeaua mobilă"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Numai Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: neredirecționată"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -433,6 +437,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Permite aplicației să acceseze funcțiile de telefon ale dispozitivului. Cu această permisiune aplicația stabilește numărul de telefon și ID-urile de dispozitiv, dacă un apel este activ, precum și numărul de la distanță conectat printr-un apel."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"să direcționeze apelurile prin intermediul sistemului"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Permiteți aplicației să direcționeze apelurile prin intermediul sistemului pentru a îmbunătăți calitatea apelurilor."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"Vedeți și controlați apelurile prin intermediul sistemului."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Permite aplicației să vadă și să controleze apelurile în desfășurare pe dispozitiv. Aceasta include informații ca numerele pentru apeluri și starea apelurilor."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"să continue un apel dintr-o altă aplicație"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Permite aplicației să continue un apel care a fost inițiat dintr-o altă aplicație."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"să citească numerele de telefon"</string>
@@ -582,9 +588,9 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Permite aplicației să se conecteze la serviciile operatorului. Nu ar trebui să fie niciodată necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"accesează Nu deranja"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Permite aplicației să citească și să scrie configurația Nu deranja."</string>
-    <string name="policylab_limitPassword" msgid="4497420728857585791">"Setați reguli pentru parolă"</string>
+    <string name="policylab_limitPassword" msgid="4497420728857585791">"Să seteze reguli pentru parolă"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Stabiliți lungimea și tipul de caractere permise pentru parolele și codurile PIN de blocare a ecranului."</string>
-    <string name="policylab_watchLogin" msgid="5091404125971980158">"Monitorizați încercările de deblocare a ecranului"</string>
+    <string name="policylab_watchLogin" msgid="5091404125971980158">"Să monitorizeze încercările de deblocare a ecranului"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Monitorizați numărul de parole incorecte introduse la deblocarea ecranului și blocați tableta sau ștergeți datele acesteia dacă sunt introduse prea multe parole incorecte."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Monitorizați numărul de parole incorecte introduse la deblocarea ecranului și blocați televizorul sau ștergeți toate datele acestuia dacă sunt introduse prea multe parole incorecte."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Monitorizați numărul de parole incorecte introduse la deblocarea ecranului și blocați telefonul sau ștergeți toate datele acestuia dacă sunt introduse prea multe parole incorecte."</string>
@@ -607,9 +613,9 @@
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Setați serverul proxy global pentru dispozitiv, care să fie utilizat cât timp politica este activă. Numai proprietarul dispozitivului poate seta serverul proxy global."</string>
     <string name="policylab_expirePassword" msgid="5610055012328825874">"Setați expirarea parolei pentru blocarea ecranului"</string>
     <string name="policydesc_expirePassword" msgid="5367525762204416046">"Modificați frecvența cu care trebuie să se schimbe parola, codul PIN sau modelul pentru blocarea ecranului."</string>
-    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Setați criptarea stocării"</string>
+    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Să seteze criptarea stocării"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Necesită ca datele aplicației stocate să fie criptate."</string>
-    <string name="policylab_disableCamera" msgid="6395301023152297826">"Dezactivați camerele foto"</string>
+    <string name="policylab_disableCamera" msgid="6395301023152297826">"Să dezactiveze camerele foto"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Împiedicați utilizarea camerelor foto de pe dispozitiv."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Să oprească funcții de blocare ecran"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Împiedicați folosirea unor funcții de blocare a ecranului."</string>
@@ -1037,21 +1043,21 @@
     <string name="inputMethod" msgid="1653630062304567879">"Metodă de intrare"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Acțiuni pentru text"</string>
     <string name="email" msgid="4560673117055050403">"E-mail"</string>
-    <string name="email_desc" msgid="3638665569546416795">"Trimiteți e-mail la adresa selectată"</string>
-    <string name="dial" msgid="1253998302767701559">"Apelați"</string>
-    <string name="dial_desc" msgid="6573723404985517250">"Apelați numărul de telefon selectat"</string>
+    <string name="email_desc" msgid="3638665569546416795">"Trimiteți un e-mail la adresa selectată"</string>
+    <string name="dial" msgid="1253998302767701559">"Sunați"</string>
+    <string name="dial_desc" msgid="6573723404985517250">"Sunați la numărul de telefon selectat"</string>
     <string name="map" msgid="5441053548030107189">"Hartă"</string>
     <string name="map_desc" msgid="1836995341943772348">"Localizați adresa selectată"</string>
     <string name="browse" msgid="1245903488306147205">"Deschideți"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Deschideți adresa URL selectată"</string>
-    <string name="sms" msgid="4560537514610063430">"Mesaj"</string>
+    <string name="sms" msgid="4560537514610063430">"Trimiteți mesaj"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Trimiteți un mesaj la numărul de telefon selectat"</string>
     <string name="add_contact" msgid="7867066569670597203">"Adăugați"</string>
-    <string name="add_contact_desc" msgid="4830217847004590345">"Adăugați la persoanele din Agendă"</string>
+    <string name="add_contact_desc" msgid="4830217847004590345">"Adăugați în agendă"</string>
     <string name="view_calendar" msgid="979609872939597838">"Afișați"</string>
-    <string name="view_calendar_desc" msgid="5828320291870344584">"Afișați ora selectată în calendar"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Program"</string>
-    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Programați evenimentul pentru momentul selectat"</string>
+    <string name="view_calendar_desc" msgid="5828320291870344584">"Afișați data selectată în calendar"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Programați"</string>
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Programați evenimentul pentru data selectată"</string>
     <string name="view_flight" msgid="7691640491425680214">"Urmăriți"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Urmăriți zborul selectat"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Spațiul de stocare aproape ocupat"</string>
@@ -1199,8 +1205,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Conectați-vă la rețea"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Rețeaua Wi-Fi nu are acces la internet"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> nu are acces la internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Atingeți pentru opțiuni"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Conectat"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> are conectivitate limitată"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Atingeți pentru a vă conecta oricum"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Modificări aduse setărilor pentru hotspot"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"S-a schimbat banda de frecvență a hotspotului."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Dispozitivul nu acceptă doar preferința pentru 5 GHz. Dispozitivul va folosi banda de 5 GHz când este disponibilă."</string>

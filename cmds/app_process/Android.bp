@@ -1,0 +1,63 @@
+cc_binary {
+    name: "app_process",
+
+    srcs: ["app_main.cpp"],
+
+    multilib: {
+        lib32: {
+            version_script: ":art_sigchain_version_script32.txt",
+            stem: "app_process32",
+        },
+        lib64: {
+            version_script: ":art_sigchain_version_script64.txt",
+            stem: "app_process64",
+        },
+    },
+
+    ldflags: ["-Wl,--export-dynamic"],
+
+    shared_libs: [
+        "libandroid_runtime",
+        "libbinder",
+        "libcutils",
+        "libdl",
+        "libhwbinder",
+        "liblog",
+        "libnativeloader",
+        "libutils",
+
+        // This is a list of libraries that need to be included in order to avoid
+        // bad apps. This prevents a library from having a mismatch when resolving
+        // new/delete from an app shared library.
+        // See b/21032018 for more details.
+        "libwilhelm",
+    ],
+
+    whole_static_libs: ["libsigchain"],
+
+    compile_multilib: "both",
+
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wunused",
+        "-Wunreachable-code",
+    ],
+
+    // If SANITIZE_LITE is revived this will need:
+    //product_variables: {
+    //    sanitize_lite: {
+    //        // In SANITIZE_LITE mode, we create the sanitized binary in a separate location (but reuse
+    //        // the same module). Using the same module also works around an issue with make: binaries
+    //        // that depend on sanitized libraries will be relinked, even if they set LOCAL_SANITIZE := never.
+    //        //
+    //        // Also pull in the asanwrapper helper.
+    //        relative_install_path: "asan",
+    //        required: ["asanwrapper"],
+    //    },
+    //},
+
+    // Create a symlink from app_process to app_process32 or 64
+    // depending on the target configuration.
+    symlink_preferred_arch: true,
+}

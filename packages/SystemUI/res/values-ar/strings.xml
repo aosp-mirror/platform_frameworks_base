@@ -69,6 +69,7 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"‏هل تريد السماح بتصحيح أخطاء USB؟"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"‏الملف المرجعي الرئيسي لـ RSA في هذا الكمبيوتر هو:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"السماح دائمًا من هذا الكمبيوتر"</string>
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"سماح"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"‏لا يُسمح بتصحيح أخطاء USB"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"‏لا يمكن للمستخدم الذي يسجّل دخوله حاليًا إلى هذا الجهاز تشغيل تصحيح أخطاء USB. لاستخدام هذه الميزة، يمكنك التبديل إلى المستخدم الأساسي."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"تكبير/تصغير لملء الشاشة"</string>
@@ -160,6 +161,8 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"شبكة الجيل الرابع أو أحدث"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+‎"</string>
+    <string name="data_connection_5g" msgid="6357743323196864504">"‏شبكة 5G"</string>
+    <string name="data_connection_5g_plus" msgid="3284146603743732965">"‏شبكة 5G‎ والأحدث"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"التجوال"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"‏شبكة EDGE"</string>
@@ -294,6 +297,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"صوت"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"سماعة الرأس"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"الإدخال"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="4930931771490695395">"سماعات الأذن الطبية"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"جارٍ التفعيل…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"السطوع"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"دوران تلقائي"</string>
@@ -320,7 +324,7 @@
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"‏تم تشغيل Wi-Fi"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"‏لا تتوفر أي شبكة Wi-Fi"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"جارٍ التفعيل…"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"إرسال"</string>
+    <string name="quick_settings_cast_title" msgid="7709016546426454729">"الإرسال"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"جارٍ الإرسال"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"جهاز لا يحمل اسمًا"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"جاهز للإرسال"</string>
@@ -361,7 +365,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"حتى شروق الشمس"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"تفعيل الإعداد في <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"حتى <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="quick_settings_nfc_label" msgid="9012153754816969325">"‏الاتصال القريب المدى (NFC)"</string>
+    <string name="quick_settings_nfc_label" msgid="9012153754816969325">"‏الاتصالات قصيرة المدى (NFC)"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"تم إيقاف الاتصال القريب المدى"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"تم تفعيل الاتصال القريب المدى"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"ليست هناك عناصر تم استخدامها مؤخرًا"</string>
@@ -740,7 +744,7 @@
   </string-array>
     <string name="menu_ime" msgid="4998010205321292416">"مفتاح تبديل لوحة المفاتيح"</string>
     <string name="save" msgid="2311877285724540644">"حفظ"</string>
-    <string name="reset" msgid="2448168080964209908">"إعادة تعيين"</string>
+    <string name="reset" msgid="2448168080964209908">"إعادة الضبط"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"ضبط عرض الزر"</string>
     <string name="clipboard" msgid="1313879395099896312">"الحافظة"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"زر التنقل المخصص"</string>

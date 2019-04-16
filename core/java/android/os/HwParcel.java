@@ -17,8 +17,11 @@
 package android.os;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 
 import libcore.util.NativeAllocationRegistry;
 
@@ -47,6 +50,7 @@ public class HwParcel {
 
     private static final NativeAllocationRegistry sNativeRegistry;
 
+    @UnsupportedAppUsage
     private HwParcel(boolean allocate) {
         native_setup(allocate);
 
@@ -123,7 +127,7 @@ public class HwParcel {
      *
      * @param val to write
      */
-    public native final void writeNativeHandle(NativeHandle val);
+    public native final void writeNativeHandle(@Nullable NativeHandle val);
 
     /**
      * Writes an array of boolean values to the end of the parcel.
@@ -170,6 +174,9 @@ public class HwParcel {
     private native final void writeStringVector(String[] val);
     /**
      * Writes an array of native handles to the end of the parcel.
+     *
+     * Individual elements may be null but not the whole array.
+     *
      * @param val array of {@link NativeHandle} objects to write
      */
     private native final void writeNativeHandleVector(NativeHandle[] val);
@@ -284,7 +291,7 @@ public class HwParcel {
      * Helper method to write a list of native handles to the end of the parcel.
      * @param val list of {@link NativeHandle} objects to write
      */
-    public final void writeNativeHandleVector(ArrayList<NativeHandle> val) {
+    public final void writeNativeHandleVector(@NonNull ArrayList<NativeHandle> val) {
         writeNativeHandleVector(val.toArray(new NativeHandle[val.size()]));
     }
 
@@ -359,7 +366,7 @@ public class HwParcel {
      * @return a {@link NativeHandle} instance parsed from the parcel
      * @throws IllegalArgumentException if the parcel has no more data
      */
-    public native final NativeHandle readNativeHandle();
+    public native final @Nullable NativeHandle readNativeHandle();
     /**
      * Reads an embedded native handle (without duplicating the underlying
      * file descriptors) from the parcel. These file descriptors will only
@@ -372,7 +379,7 @@ public class HwParcel {
      * @return a {@link NativeHandle} instance parsed from the parcel
      * @throws IllegalArgumentException if the parcel has no more data
      */
-    public native final NativeHandle readEmbeddedNativeHandle(
+    public native final @Nullable NativeHandle readEmbeddedNativeHandle(
             long parentHandle, long offset);
 
     /**
@@ -521,7 +528,7 @@ public class HwParcel {
      * @return array of {@link NativeHandle} objects.
      * @throws IllegalArgumentException if the parcel has no more data
      */
-    public final ArrayList<NativeHandle> readNativeHandleVector() {
+    public final @NonNull ArrayList<NativeHandle> readNativeHandleVector() {
         return new ArrayList<NativeHandle>(Arrays.asList(readNativeHandleAsArray()));
     }
 

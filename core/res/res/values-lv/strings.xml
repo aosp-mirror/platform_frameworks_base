@@ -137,9 +137,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Wi-Fi zvani | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Wi-Fi zvani"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Wi-Fi zvani"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Izslēgts"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Vēlams Wi-Fi tīkls"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Vēlams mobilo datu savienojums"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"Zvani Wi-Fi tīklā"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"Zvani mobilajā tīklā"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Tikai Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: nav pāradresēts"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -222,7 +226,7 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Tālruņa opcijas"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Ekrāna bloķētājs"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Strāvas padeve ir izslēgta."</string>
-    <string name="global_action_emergency" msgid="7112311161137421166">"Ārkārtas"</string>
+    <string name="global_action_emergency" msgid="7112311161137421166">"Ārkārtas situācija"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Kļūdu ziņojums"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Beigt sesiju"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Ekrānuzņēmums"</string>
@@ -433,6 +437,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Ļauj lietotnei piekļūt ierīces tālruņa funkcijām. Ar šo atļauju lietotne var noteikt tālruņa numuru un ierīču ID, zvana statusu un attālo numuru, ar ko ir izveidots savienojums, veicot zvanu."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"maršrutēt zvanus sistēmā"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Ļauj lietotnei maršrutēt tās zvanus sistēmā, lai uzlabotu zvanīšanas pieredzi."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"skatīt un kontrolēt zvanus sistēmā."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Ļauj lietotnei ierīcē skatīt un kontrolēt aktīvos zvanus. Šeit ir ietverta tāda informācija kā zvanu tālruņa numuri un zvanu statuss."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"turpināt zvanu no citas lietotnes"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Ļauj lietotnei turpināt zvanu, kas tika sākts citā lietotnē."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"lasīt tālruņa numurus"</string>
@@ -742,7 +748,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Nospiediet Izvēlne, lai atbloķētu, vai veiciet ārkārtas zvanu."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Lai atbloķētu, nospiediet vienumu Izvēlne."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Zīmējiet kombināciju, lai atbloķētu."</string>
-    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Ārkārtas"</string>
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Ārkārtas situācija"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Atpakaļ pie zvana"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Pareizi!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Mēģināt vēlreiz"</string>
@@ -1038,9 +1044,9 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Teksta darbības"</string>
     <string name="email" msgid="4560673117055050403">"E-pasts"</string>
     <string name="email_desc" msgid="3638665569546416795">"Nosūtīt e-pasta ziņojumu uz atlasīto adresi"</string>
-    <string name="dial" msgid="1253998302767701559">"Zvanīt"</string>
+    <string name="dial" msgid="1253998302767701559">"Zvans"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Zvanīt uz atlasīto tālruņa numuru"</string>
-    <string name="map" msgid="5441053548030107189">"Maps"</string>
+    <string name="map" msgid="5441053548030107189">"Karte"</string>
     <string name="map_desc" msgid="1836995341943772348">"Atrast atlasīto adresi"</string>
     <string name="browse" msgid="1245903488306147205">"Atvērt"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Atvērt atlasīto URL"</string>
@@ -1199,8 +1205,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Pierakstīšanās tīklā"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi tīklā nav piekļuves internetam."</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"Tīklā <xliff:g id="NETWORK_SSID">%1$s</xliff:g> nav piekļuves internetam"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Pieskarieties, lai skatītu iespējas."</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Izveidots savienojums"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"Tīklā <xliff:g id="NETWORK_SSID">%1$s</xliff:g> ir ierobežota savienojamība"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Lai tik un tā izveidotu savienojumu, pieskarieties"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Izmaiņas tīklāja iestatījumos"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Ir mainīts tīklāja joslas platums."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Šajā ierīcē netiek atbalstīta jūsu preference par tikai 5 GHz joslu. 5 GHz josla ierīcē tiks izmantota, kad tā būs pieejama."</string>

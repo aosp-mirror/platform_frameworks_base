@@ -84,6 +84,7 @@ public class WindowDecorActionBar extends ActionBar implements
     private ActionBarContextView mContextView;
     private ActionBarContainer mSplitView;
     private View mContentView;
+    @UnsupportedAppUsage
     private ScrollingTabContainerView mTabScrollView;
 
     private ArrayList<TabImpl> mTabs = new ArrayList<TabImpl>();
@@ -331,6 +332,7 @@ public class WindowDecorActionBar extends ActionBar implements
      *
      * @param enabled true to animate, false to not animate.
      */
+    @UnsupportedAppUsage
     public void setShowHideAnimationEnabled(boolean enabled) {
         mShowHideAnimationEnabled = enabled;
         if (!enabled && mCurrentShowAnim != null) {
@@ -1147,6 +1149,7 @@ public class WindowDecorActionBar extends ActionBar implements
      * @hide
      */
     public class TabImpl extends ActionBar.Tab {
+        @UnsupportedAppUsage
         private ActionBar.TabListener mCallback;
         private Object mTag;
         private Drawable mIcon;

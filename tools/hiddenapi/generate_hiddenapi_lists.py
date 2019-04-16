@@ -21,6 +21,7 @@ from collections import defaultdict
 import os
 import sys
 import re
+import functools
 
 # Names of flags recognized by the `hiddenapi` tool.
 FLAG_WHITELIST = "whitelist"
@@ -29,6 +30,9 @@ FLAG_BLACKLIST = "blacklist"
 FLAG_GREYLIST_MAX_O = "greylist-max-o"
 FLAG_GREYLIST_MAX_P = "greylist-max-p"
 FLAG_CORE_PLATFORM_API = "core-platform-api"
+FLAG_PUBLIC_API = "public-api"
+FLAG_SYSTEM_API = "system-api"
+FLAG_TEST_API = "test-api"
 
 # List of all known flags.
 FLAGS_API_LIST = [
@@ -38,7 +42,12 @@ FLAGS_API_LIST = [
     FLAG_GREYLIST_MAX_O,
     FLAG_GREYLIST_MAX_P,
 ]
-ALL_FLAGS = FLAGS_API_LIST + [ FLAG_CORE_PLATFORM_API ]
+ALL_FLAGS = FLAGS_API_LIST + [
+    FLAG_CORE_PLATFORM_API,
+    FLAG_PUBLIC_API,
+    FLAG_SYSTEM_API,
+    FLAG_TEST_API,
+    ]
 
 FLAGS_API_LIST_SET = set(FLAGS_API_LIST)
 ALL_FLAGS_SET = set(ALL_FLAGS)
@@ -49,6 +58,10 @@ ALL_FLAGS_SET = set(ALL_FLAGS)
 # but signatures have changes since then. The flag instructs this
 # script to skip any entries which do not exist any more.
 FLAG_IGNORE_CONFLICTS_SUFFIX = "-ignore-conflicts"
+
+# Suffix used in command line args to express that all apis within a given set
+# of packages should be assign the given flag.
+FLAG_PACKAGES_SUFFIX = "-packages"
 
 # Regex patterns of fields/methods used in serialization. These are
 # considered public API despite being hidden.
@@ -83,12 +96,16 @@ def get_args():
 
     for flag in ALL_FLAGS:
         ignore_conflicts_flag = flag + FLAG_IGNORE_CONFLICTS_SUFFIX
+        packages_flag = flag + FLAG_PACKAGES_SUFFIX
         parser.add_argument('--' + flag, dest=flag, nargs='*', default=[], metavar='TXT_FILE',
             help='lists of entries with flag "' + flag + '"')
         parser.add_argument('--' + ignore_conflicts_flag, dest=ignore_conflicts_flag, nargs='*',
             default=[], metavar='TXT_FILE',
             help='lists of entries with flag "' + flag +
                  '". skip entry if missing or flag conflict.')
+        parser.add_argument('--' + packages_flag, dest=packages_flag, nargs='*',
+            default=[], metavar='TXT_FILE',
+            help='lists of packages to be added to ' + flag + ' list')
 
     return parser.parse_args()
 
@@ -119,6 +136,19 @@ def write_lines(filename, lines):
     lines = map(lambda line: line + '\n', lines)
     with open(filename, 'w') as f:
         f.writelines(lines)
+
+def extract_package(signature):
+    """Extracts the package from a signature.
+
+    Args:
+        signature (string): JNI signature of a method or field.
+
+    Returns:
+        The package name of the class containing the field/method.
+    """
+    full_class_name = signature.split(";->")[0]
+    package_name = full_class_name[1:full_class_name.rindex("/")]
+    return package_name.replace('/', '.')
 
 class FlagsDict:
     def __init__(self):
@@ -198,19 +228,27 @@ class FlagsDict:
         self._dict_keyset.update([ csv[0] for csv in csv_values ])
 
         # Check that all flags are known.
-        csv_flags = set(reduce(lambda x, y: set(x).union(y), [ csv[1:] for csv in csv_values ], []))
+        csv_flags = set(functools.reduce(
+            lambda x, y: set(x).union(y),
+            [ csv[1:] for csv in csv_values ],
+            []))
         self._check_flags_set(csv_flags, source)
 
         # Iterate over all CSV lines, find entry in dict and append flags to it.
         for csv in csv_values:
-            self._dict[csv[0]].update(csv[1:])
+            flags = csv[1:]
+            if (FLAG_PUBLIC_API in flags) or (FLAG_SYSTEM_API in flags):
+                flags.append(FLAG_WHITELIST)
+            elif FLAG_TEST_API in flags:
+                flags.append(FLAG_GREYLIST)
+            self._dict[csv[0]].update(flags)
 
     def assign_flag(self, flag, apis, source="<unknown>"):
         """Assigns a flag to given subset of entries.
 
         Args:
             flag (string): One of ALL_FLAGS.
-            apis (set): Subset of APIs to recieve the flag.
+            apis (set): Subset of APIs to receive the flag.
             source (string): Origin of `entries_subset`. Will be printed in error messages.
 
         Throws:
@@ -259,6 +297,15 @@ def main(argv):
         for filename in args[flag + FLAG_IGNORE_CONFLICTS_SUFFIX]:
             valid_entries = flags.get_valid_subset_of_unassigned_apis(read_lines(filename))
             flags.assign_flag(flag, valid_entries, filename)
+
+    # All members in the specified packages will be assigned the appropriate flag.
+    for flag in ALL_FLAGS:
+        for filename in args[flag + FLAG_PACKAGES_SUFFIX]:
+            packages_needing_list = set(read_lines(filename))
+            should_add_signature_to_list = lambda sig,lists: extract_package(
+                sig) in packages_needing_list and not lists
+            valid_entries = flags.filter_apis(should_add_signature_to_list)
+            flags.assign_flag(flag, valid_entries)
 
     # Assign all remaining entries to the blacklist.
     flags.assign_flag(FLAG_BLACKLIST, flags.filter_apis(HAS_NO_API_LIST_ASSIGNED))

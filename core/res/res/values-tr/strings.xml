@@ -136,9 +136,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Kablosuz"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Kablosuz Çağrı | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Kablosuz Çağrı"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Kablosuz"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Kablosuz Çağrı"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Kapalı"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Kablosuz bağlantı tercihli"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Mobil tercihli"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"Kablosuz ağ üzerinden arama"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"Mobil ağ üzerinden arama"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Yalnızca kablosuz"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Yönlendirilmedi"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -294,7 +298,7 @@
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uygulamasının ses kaydetmesine izin verilsin mi?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"fotoğraf çekme ve video kaydetme"</string>
-    <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uygulamasının resim çekmesine ve video kaydı yapmasına izin verilsin mi?"</string>
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uygulamasının fotoğraf çekmesine ve video kaydı yapmasına izin verilsin mi?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"Arama kayıtları"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"telefon arama kaydını okuma ve yazma"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Telefon arama kayıtlarınıza erişmek için &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uygulamasına izin verilsin mi?"</string>
@@ -430,6 +434,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Uygulamaya cihazdaki telefon özelliklerine erişme izni verir. Bu izin, uygulamanın telefon numarasını ve cihaz kimliğini, etkin bir çağrı olup olmadığını ve çağrıda bağlanılan karşı tarafın numarasını öğrenmesine olanak sağlar."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"çağrıları sistem üzerinden yönlendir"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Uygulamanın, çağrı deneyimini iyileştirmek için çağrılarını sistem üzerinden yönlendirmesine olanak tanır."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"aramaları sistemde görüp denetleme."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Uygulamanın cihazda devam eden aramaları görmesini ve denetlemesini sağlar. Bu bilgiler arasında aramaların yapıldığı numaralar ve aramaların durumu gibi bilgiler yer alır."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"başka bir uygulamadaki çağrıya devam etme"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Uygulamanın, başka bir uygulamada başlatılan çağrıya devam etmesine izin verir."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"telefon numaralarını oku"</string>
@@ -1131,7 +1137,7 @@
     <string name="dump_heap_title" msgid="5864292264307651673">"Yığın dökümü paylaşılsın mı?"</string>
     <string name="dump_heap_text" msgid="4809417337240334941">"<xliff:g id="PROC">%1$s</xliff:g>, <xliff:g id="SIZE">%2$s</xliff:g> olan işlem bellek sınırını aştı. İşlemin geliştiricisiyle paylaşabileceğiniz bir bellek yığını dökümü hazır. Dikkat: Bu bellek yığını dökümü, uygulamanın erişebildiği tüm kişisel bilgilerinizi içerebilir."</string>
     <string name="sendText" msgid="5209874571959469142">"Kısa mesaj için bir işlem seçin"</string>
-    <string name="volume_ringtone" msgid="6885421406845734650">"Zil sesi düzeyi"</string>
+    <string name="volume_ringtone" msgid="6885421406845734650">"Zil ses düzeyi"</string>
     <string name="volume_music" msgid="5421651157138628171">"Medya ses düzeyi"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Bluetooth üzerinden çalıyor"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Sessiz zil sesi ayarlandı"</string>
@@ -1141,7 +1147,7 @@
     <string name="volume_notification" msgid="2422265656744276715">"Bildirim ses düzeyi"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Ses"</string>
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Bluetooth ses düzeyi"</string>
-    <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Zil sesi düzeyi"</string>
+    <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Zil ses düzeyi"</string>
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Çağrı ses düzeyi"</string>
     <string name="volume_icon_description_media" msgid="4217311719665194215">"Medya ses düzeyi"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Bildirim ses düzeyi"</string>
@@ -1177,8 +1183,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Ağda oturum açın"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Kablosuz bağlantının internet erişimi yok"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> ağının internet bağlantısı yok"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Seçenekler için dokunun"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Bağlandı"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> sınırlı bağlantıya sahip"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Yine de bağlanmak için dokunun"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Hotspot ayarlarınız değişti"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Hotspot bandı değişti."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Bu cihaz yalnızca 5 GHz bandının kullanılmasına yönelik tercihinizi desteklemiyor. Bunun yerine, bu cihaz 5 GHz bandını mevcut olduğunda kullanacak."</string>

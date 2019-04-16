@@ -19,9 +19,13 @@ package com.android.server.net.watchlist;
 import static org.junit.Assert.assertEquals;
 
 import android.content.Context;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import com.android.service.nano.NetworkWatchlistAppResultProto;
+import com.android.service.nano.NetworkWatchlistReportProto;
 
 import org.junit.After;
 import org.junit.Before;
@@ -34,9 +38,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
-
-import com.android.service.nano.NetworkWatchlistReportProto;
-import com.android.service.nano.NetworkWatchlistAppResultProto;
 
 /**
  * runtest frameworks-services -c com.android.server.net.watchlist.ReportEncoderTests

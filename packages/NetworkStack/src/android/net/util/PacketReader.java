@@ -18,7 +18,6 @@ package android.net.util;
 
 import static java.lang.Math.max;
 
-import android.net.shared.FdEventsReader;
 import android.os.Handler;
 import android.system.Os;
 

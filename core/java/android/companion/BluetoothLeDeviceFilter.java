@@ -39,6 +39,8 @@ import com.android.internal.util.BitUtils;
 import com.android.internal.util.ObjectUtils;
 import com.android.internal.util.Preconditions;
 
+import libcore.util.HexEncoding;
+
 import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.Objects;
@@ -152,7 +154,7 @@ public final class BluetoothLeDeviceFilter implements DeviceFilter<ScanResult> {
             int initial = mRenameBytesReverseOrder ? endInclusive : startInclusive;
             int step = mRenameBytesReverseOrder ? -1 : 1;
             for (int i = initial; startInclusive <= i && i <= endInclusive; i += step) {
-                sb.append(Byte.toHexString(bytes[i], true));
+                sb.append(HexEncoding.encodeToString(bytes[i], true));
             }
         } else {
             sb.append(

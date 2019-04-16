@@ -1,0 +1,15 @@
+android_test {
+    name: "NotificationStressTests",
+    // Include all test java files.
+    srcs: ["src/**/*.java"],
+    libs: [
+        "android.test.runner",
+        "android.test.base",
+    ],
+    // Could build against SDK if it wasn't for the @RepetitiveTest annotation.
+    platform_apis: true,
+    static_libs: [
+        "junit",
+        "ub-uiautomator",
+    ],
+}

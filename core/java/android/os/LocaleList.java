@@ -20,6 +20,7 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
+import android.annotation.UnsupportedAppUsage;
 import android.content.LocaleProto;
 import android.icu.util.ULocale;
 import android.util.proto.ProtoOutputStream;
@@ -558,6 +559,7 @@ public final class LocaleList implements Parcelable {
      *
      * {@hide}
      */
+    @UnsupportedAppUsage
     public static void setDefault(@NonNull @Size(min=1) LocaleList locales, int localeIndex) {
         if (locales == null) {
             throw new NullPointerException("locales is null");

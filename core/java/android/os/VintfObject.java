@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.UnsupportedAppUsage;
 import java.util.Map;
 
 
@@ -33,6 +34,7 @@ public class VintfObject {
      * If any error in getting one of the manifests, it is not included in
      * the list.
      */
+    @UnsupportedAppUsage
     public static native String[] report();
 
     /**
@@ -66,11 +68,13 @@ public class VintfObject {
      * ["android.hidl.manager@1.0", "android.hardware.camera.device@1.0",
      *  "android.hardware.camera.device@3.2"]. There are no duplicates.
      */
+    @UnsupportedAppUsage
     public static native String[] getHalNamesAndVersions();
 
     /**
      * @return the BOARD_SEPOLICY_VERS build flag available in device manifest.
      */
+    @UnsupportedAppUsage
     public static native String getSepolicyVersion();
 
     /**
@@ -79,6 +83,7 @@ public class VintfObject {
      * [("27", ["libjpeg.so", "libbase.so"]),
      *  ("28", ["libjpeg.so", "libbase.so"])]
      */
+    @UnsupportedAppUsage
     public static native Map<String, String[]> getVndkSnapshots();
 
     /**
@@ -86,5 +91,6 @@ public class VintfObject {
      * indicating the FCM version that the device manifest implements. Null if
      * device manifest doesn't specify this number (for legacy devices).
      */
+    @UnsupportedAppUsage
     public static native Long getTargetFrameworkCompatibilityMatrixVersion();
 }

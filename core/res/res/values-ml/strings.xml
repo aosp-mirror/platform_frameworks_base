@@ -136,9 +136,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> വൈഫൈ"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"വൈഫൈ കോളിംഗ് | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> Voവൈഫൈ"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"വൈഫൈ കോളിംഗ്"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"വൈഫൈ"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"വൈഫൈ കോളിംഗ്"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"Voവൈഫൈ"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ഓഫ്"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"വൈഫൈ തിരഞ്ഞെടുത്തിരിക്കുന്നു"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"മൊബൈൽ ഡാറ്റ ഉപയോഗിക്കാൻ താൽപ്പര്യപ്പെടുന്നു"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"വൈഫൈ മുഖേനയുള്ള കോൾ"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"മൊബൈൽ നെറ്റ്‌വർക്ക് മുഖേനയുള്ള കോൾ"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"വൈഫൈ മാത്രം"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: കൈമാറിയില്ല"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -430,6 +434,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"ഉപകരണത്തിന്റെ ഫോൺ സവിശേഷതകൾ ആക്‌സസ്സുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഈ അനുമതി ഫോൺ നമ്പർ, ഉപകരണ ഐഡികൾ, ഒരു കോൾ സജീവമാണോയെന്നത്, ഒരു കോൾ കണക്റ്റുചെയ്‌ത വിദൂര നമ്പർ എന്നിവ നിർണ്ണയിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"കോളുകൾ സിസ്റ്റത്തിലൂടെ വിടുക"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"കോളിംഗ് അനുഭവം ‌മെച്ചപ്പെടുത്തുന്നതിനായി തങ്ങളുടെ ‌കോളുകൾ സിസ്റ്റത്തിലേയ്ക്ക് വഴിതിരിച്ചുവിടാൻ ആപ്പുകളെ അനുവദിക്കുന്നു."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"സിസ്‌റ്റത്തിലൂടെ കോളുകൾ കാണുകയും നിയന്ത്രിക്കുകയും ചെയ്യുക."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"ഉപകരണത്തിൽ നിലവിലുള്ള കോളുകൾ കാണാനും നിയന്തിക്കാനും ആപ്പിനെ അനുവദിക്കുന്നു. കോളുകൾക്കുള്ള നമ്പറുകളും അവയുടെ നിലയും പോലെയുള്ള വിവരങ്ങൾ ഇതിൽ ഉൾപ്പെടുന്നു."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"മറ്റൊരു ആപ്പിൽ നിന്നുള്ള കോൾ തുടരുക"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"മറ്റൊരു ആപ്പിൽ ആരംഭിച്ച കോൾ തുടരാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"ഫോൺ നമ്പറുകൾ റീഡുചെയ്യൽ"</string>
@@ -498,7 +504,7 @@
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"പ്രാമാണീകരണത്തിനായി വിരലടയാളം ഉപയോഗിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"വിരലടയാളം ഭാഗികമായി തിരിച്ചറിഞ്ഞു. വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"വിരലടയാളം പ്രോസസ്സ് ചെയ്യാനായില്ല. വീണ്ടും ശ്രമിക്കുക."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"വിരലടയാള സെൻസറിന് വൃത്തിയില്ല. അത് ശുചിയാക്കി വീണ്ടും ശ്രമിക്കുക."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"വിരലടയാള സെൻസറിൽ ചെളിയുണ്ട്. അത് വൃത്തിയാക്കി വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"വിരൽ വളരെ വേഗത്തിൽ നീക്കി. വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"വിരൽ വളരെ പതുക്കെ നീക്കി. വീണ്ടും ശ്രമിക്കുക."</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -1016,23 +1022,23 @@
     <string name="deleteText" msgid="6979668428458199034">"ഇല്ലാതാക്കുക"</string>
     <string name="inputMethod" msgid="1653630062304567879">"ടൈപ്പുചെയ്യൽ രീതി"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"ടെക്‌സ്‌റ്റ് പ്രവർത്തനങ്ങൾ"</string>
-    <string name="email" msgid="4560673117055050403">"ഇമെയിൽ"</string>
+    <string name="email" msgid="4560673117055050403">"ഇമെയിൽ അയയ്ക്കൂക"</string>
     <string name="email_desc" msgid="3638665569546416795">"തിരഞ്ഞെടുത്ത വിലാസത്തിലേക്ക് ഇമെയിൽ അയയ്ക്കുക"</string>
     <string name="dial" msgid="1253998302767701559">"വിളിക്കുക"</string>
-    <string name="dial_desc" msgid="6573723404985517250">"തിരഞ്ഞെടുത്ത നമ്പറിലേക്ക് കോൾ ചെയ്യുക"</string>
-    <string name="map" msgid="5441053548030107189">"മാപ്പ്"</string>
+    <string name="dial_desc" msgid="6573723404985517250">"തിരഞ്ഞെടുത്ത നമ്പറിലേക്ക് വിളിക്കുക"</string>
+    <string name="map" msgid="5441053548030107189">"മാപ്പ് തുറക്കുക"</string>
     <string name="map_desc" msgid="1836995341943772348">"തിരഞ്ഞെടുത്ത വിലാസം കണ്ടെത്തുക"</string>
     <string name="browse" msgid="1245903488306147205">"തുറക്കുക"</string>
-    <string name="browse_desc" msgid="8220976549618935044">"തിരഞ്ഞെടുത്ത URL ഓപ്പൺ ചെയ്യുക"</string>
-    <string name="sms" msgid="4560537514610063430">"സന്ദേശം"</string>
+    <string name="browse_desc" msgid="8220976549618935044">"തിരഞ്ഞെടുത്ത URL തുറക്കുക"</string>
+    <string name="sms" msgid="4560537514610063430">"സന്ദേശം അയയ്ക്കുക"</string>
     <string name="sms_desc" msgid="7526588350969638809">"തിരഞ്ഞെടുത്ത നമ്പറിലേക്ക് സന്ദേശം അയയ്ക്കുക"</string>
     <string name="add_contact" msgid="7867066569670597203">"ചേർക്കുക"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"കോൺടാക്‌റ്റുകളിലേക്ക് ചേർക്കുക"</string>
     <string name="view_calendar" msgid="979609872939597838">"കാണുക"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"കലണ്ടറിൽ തിരഞ്ഞെടുത്ത സമയം കാണുക"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"ഷെഡ്യൂള്‍‌"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"ഷെഡ്യൂള്‍‌ ചെയ്യുക"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"തിരഞ്ഞെടുത്ത സമയത്തേക്ക് ഇവന്റ് ഷെഡ്യൂൾ ചെയ്യുക"</string>
-    <string name="view_flight" msgid="7691640491425680214">"ട്രാക്ക്"</string>
+    <string name="view_flight" msgid="7691640491425680214">"ട്രാക്ക് ചെയ്യുക"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"തിരഞ്ഞെടുത്ത ഫ്ലൈറ്റ് ട്രാക്ക് ചെയ്യുക"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"സംഭരണയിടം കഴിഞ്ഞു"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"ചില സിസ്റ്റം പ്രവർത്തനങ്ങൾ പ്രവർത്തിക്കണമെന്നില്ല."</string>
@@ -1177,8 +1183,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"നെറ്റ്‌വർക്കിലേക്ക് സൈൻ ഇൻ ചെയ്യുക"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"വൈഫൈയ്ക്ക് ഇന്റർനെറ്റ് ആക്‌സസ് ഇല്ല"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> എന്നതിന് ഇന്റർനെറ്റ് ആക്‌സസ് ഇല്ല"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"ഓപ്ഷനുകൾക്ക് ടാപ്പുചെയ്യുക"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"കണക്‌റ്റ് ചെയ്‌തു"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> എന്നതിന് പരിമിതമായ കണക്റ്റിവിറ്റി ഉണ്ട്"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"ഏതുവിധേനയും കണക്‌റ്റ് ചെയ്യാൻ ടാപ്പ് ചെയ്യുക"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"നിങ്ങളുടെ ഹോട്ട്‌സ്‌പോട്ട് ക്രമീകരണത്തിൽ വരുത്തിയ മാറ്റങ്ങൾ"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"നിങ്ങളുടെ ഹോട്ട്‌സ്‌പോട്ട് ബാൻഡ് മാറി."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"നിങ്ങളുടെ മുൻഗണനയനുസരിച്ചുള്ള, 5GHz മാത്രം എന്നത് ഈ ഉപകരണം പിന്തുണയ്ക്കുന്നില്ല. പകരം, 5GHz ബാൻഡ് ലഭ്യമാകുമ്പോൾ അത് ഉപയോഗിക്കും."</string>
@@ -1703,7 +1712,7 @@
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"നിങ്ങളുടെ അഡ്‌മിൻ ഇല്ലാതാക്കുന്നത്"</string>
     <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"നിങ്ങളുടെ ബാറ്ററി ലൈഫ് ദീർഘിപ്പിക്കാൻ, ബാറ്ററി ലാഭിക്കൽ, ചില ഉപകരണ ഫീച്ചറുകളെ ഓഫാക്കുകയും ആപ്പുകളെ പരിമിതപ്പെടുത്തുകയും ചെയ്യുന്നു. "<annotation id="url">"കൂടുതലറിയുക"</annotation></string>
     <string name="battery_saver_description" msgid="769989536172631582">"നിങ്ങളുടെ ബാറ്ററി ലൈഫ് ദീർഘിപ്പിക്കാൻ, ബാറ്ററി ലാഭിക്കൽ, ചില ഉപകരണ ഫീച്ചറുകളെ ഓഫാക്കുകയും ആപ്പുകളെ നിയന്ത്രിക്കുകയും ചെയ്യുന്നു.‌"</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"ഡാറ്റാ ഉപയോഗം കുറയ്ക്കാൻ സഹായിക്കുന്നതിന്, പശ്ചാത്തലത്തിൽ ഡാറ്റ അയയ്ക്കുകയോ സ്വീകരിക്കുകയോ ചെയ്യുന്നതിൽ നിന്ന് ചില ആപ്‌സിനെ ഡാറ്റ സേവർ തടയുന്നു. നിങ്ങൾ നിലവിൽ ഉപയോഗിക്കുന്ന ഒരു ആപ്പിന് ഡാറ്റ ആക്സസ്സ് ചെയ്യാൻ കഴിയും, എന്നാൽ കുറഞ്ഞ ആവൃത്തിയിലാണിത് നടക്കുക. ഇതിനർത്ഥം, ഉദാഹരണമായി നിങ്ങൾ ടാപ്പ് ചെയ്യുന്നത് വരെ ചിത്രങ്ങൾ പ്രദ‍‍‍ർശിപ്പിക്കുകയില്ല എന്നാണ്."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"ഡാറ്റാ ഉപയോഗം കുറയ്ക്കാൻ സഹായിക്കുന്നതിനായി പശ്ചാത്തലത്തിൽ ഡാറ്റ അയയ്ക്കുകയോ സ്വീകരിക്കുകയോ ചെയ്യുന്നതിൽ നിന്ന് ചില ആപ്പുകളെ ഡാറ്റാ സേവർ തടയുന്നു. നിങ്ങൾ നിലവിൽ ഉപയോഗിക്കുന്ന ഒരു ആപ്പിന് ഡാറ്റ ആക്‌സസ് ചെയ്യാനാകും, എന്നാൽ വല്ലപ്പോഴും മാത്രമെ സംഭവിക്കുന്നുള്ളു. ഇതിനർത്ഥം, ഉദാഹരണമായി നിങ്ങൾ ടാപ്പ് ചെയ്യുന്നത് വരെ ചിത്രങ്ങൾ പ്രദ‍‍‍ർശിപ്പിക്കുകയില്ല എന്നാണ്."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ഡാറ്റ സേവർ ഓണാക്കണോ?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ഓണാക്കുക"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1829,7 +1838,7 @@
     <string name="time_picker_minute_label" msgid="5168864173796598399">"മിനിറ്റ്"</string>
     <string name="time_picker_header_text" msgid="143536825321922567">"സമയം സജ്ജീകരിക്കുക"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"ശരിയായ സമയം ‌നൽകുക"</string>
-    <string name="time_picker_prompt_label" msgid="7588093983899966783">"സമയപ്രകാരം ടൈപ്പ് ചെയ്യുക"</string>
+    <string name="time_picker_prompt_label" msgid="7588093983899966783">"സമയം നൽകുക"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"സമയം നൽകുന്നതിന് ടെക്സ്റ്റ് ഇൻപുട്ട് ‌മോ‌ഡിലേക്ക് ‌മാറുക."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"‌സമയം നൽകുന്നതിന് ക്ലോക്ക് മോഡിലേക്ക് ‌മാറുക."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"സ്വയമേവ പൂരിപ്പിക്കൽ ഓപ്ഷനുകൾ"</string>

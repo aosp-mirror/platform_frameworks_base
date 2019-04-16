@@ -16,6 +16,7 @@
 
 package com.android.internal.os;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Trace;
 
 import dalvik.system.DelegateLastClassLoader;
@@ -115,20 +116,13 @@ public class ClassLoaderFactory {
         final ClassLoader classLoader = createClassLoader(dexPath, librarySearchPath, parent,
                 classLoaderName, sharedLibraries);
 
-        boolean isForVendor = false;
-        for (String path : dexPath.split(":")) {
-            if (path.startsWith("/vendor/")) {
-                isForVendor = true;
-                break;
-            }
-        }
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "createClassloaderNamespace");
         String errorMessage = createClassloaderNamespace(classLoader,
                                                          targetSdkVersion,
                                                          librarySearchPath,
                                                          libraryPermittedPath,
                                                          isNamespaceShared,
-                                                         isForVendor);
+                                                         dexPath);
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
         if (errorMessage != null) {
@@ -139,10 +133,11 @@ public class ClassLoaderFactory {
         return classLoader;
     }
 
+    @UnsupportedAppUsage
     private static native String createClassloaderNamespace(ClassLoader classLoader,
                                                             int targetSdkVersion,
                                                             String librarySearchPath,
                                                             String libraryPermittedPath,
                                                             boolean isNamespaceShared,
-                                                            boolean isForVendor);
+                                                            String dexPath);
 }

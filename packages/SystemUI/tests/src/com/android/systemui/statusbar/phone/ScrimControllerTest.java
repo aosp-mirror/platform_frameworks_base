@@ -37,10 +37,11 @@ import android.app.AlarmManager;
 import android.graphics.Color;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.internal.util.function.TriConsumer;
@@ -143,6 +144,20 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.setHasBackdrop(true);
         mScrimController.setWallpaperSupportsAmbientMode(true);
         mScrimController.transitionTo(ScrimState.AOD);
+        mScrimController.finishAnimationsImmediately();
+        // Front scrim should be transparent
+        // Back scrim should be visible with tint
+        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_OPAQUE);
+        assertScrimTint(mScrimBehind, true /* tinted */);
+        assertScrimTint(mScrimInFront, true /* tinted */);
+    }
+
+    @Test
+    public void setHasBackdrop_withAodWallpaperAndAlbumArt() {
+        mScrimController.setWallpaperSupportsAmbientMode(true);
+        mScrimController.transitionTo(ScrimState.AOD);
+        mScrimController.finishAnimationsImmediately();
+        mScrimController.setHasBackdrop(true);
         mScrimController.finishAnimationsImmediately();
         // Front scrim should be transparent
         // Back scrim should be visible with tint

@@ -65,6 +65,7 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"Consentire debug USB?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Fingerprint della chiave RSA del computer: \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Consenti sempre da questo computer"</string>
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"Consenti"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Debug USB non consentito"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"L\'utente che ha eseguito l\'accesso a questo dispositivo non può attivare il debug USB. Per utilizzare questa funzione, passa all\'utente principale."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom per riempire schermo"</string>
@@ -156,6 +157,8 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
+    <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"Roaming"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
@@ -271,7 +274,7 @@
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"Ora lo schermo è bloccato nell\'orientamento orizzontale."</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"Ora lo schermo è bloccato nell\'orientamento verticale."</string>
     <string name="dessert_case" msgid="1295161776223959221">"Vetrina di dolci"</string>
-    <string name="start_dreams" msgid="5640361424498338327">"Screensaver"</string>
+    <string name="start_dreams" msgid="5640361424498338327">"Salvaschermo"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_header_onboarding_text" msgid="8030309023792936283">"Tocca e tieni premuta ciascuna icona per visualizzare altre opzioni"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Non disturbare"</string>
@@ -286,6 +289,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"Auricolare"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"Ingresso"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="4930931771490695395">"Apparecchi acustici"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"Attivazione…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Luminosità"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Rotazione automatica"</string>

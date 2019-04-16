@@ -9,16 +9,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"Jaringan yang ingin Anda masuki mengalami masalah keamanan."</string>
     <string name="ssl_error_example" msgid="647898534624078900">"Misalnya, halaman masuk mungkin bukan milik organisasi yang ditampilkan."</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"Tetap lanjutkan melalui browser"</string>
-    <string name="ok" msgid="1509280796718850364">"Oke"</string>
-    <string name="page_info" msgid="4048529256302257195">"Info laman"</string>
-    <string name="page_info_address" msgid="2222306609532903254">"Alamat:"</string>
-    <string name="ssl_security_warning_title" msgid="6607795404322797541">"Peringatan sertifikat"</string>
-    <string name="ssl_error_view_certificate" msgid="1472768887529093862">"Lihat sertifikat"</string>
-    <string name="ssl_error_untrusted" msgid="7754507359360636447">"Sertifikat ini tidak berasal dari otoritas tepercaya."</string>
-    <string name="ssl_error_mismatch" msgid="3809794439740523641">"Nama situs tidak cocok dengan nama pada sertifikat."</string>
-    <string name="ssl_error_expired" msgid="5739349389499575559">"Sertifikat ini telah kedaluwarsa."</string>
-    <string name="ssl_error_not_yet_valid" msgid="8193083327719048247">"Sertifikat ini belum valid."</string>
-    <string name="ssl_error_date_invalid" msgid="3705563379257285534">"Tanggal sertifikat ini tidak valid."</string>
-    <string name="ssl_error_invalid" msgid="9041704741505449967">"Sertifikat ini tidak valid."</string>
-    <string name="ssl_error_unknown" msgid="5679243486524754571">"Kesalahan sertifikat tak dikenal."</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"Sertifikat ini tidak berasal dari otoritas tepercaya."</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"Nama situs tidak cocok dengan nama pada sertifikat."</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"Masa berlaku sertifikat ini telah berakhir."</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"Sertifikat ini belum valid."</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"Tanggal sertifikat ini tidak valid."</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"Sertifikat ini tidak valid."</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"Error sertifikat tak dikenal."</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"Peringatan keamanan"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"Lihat sertifikat"</string>
+    <string name="ok" msgid="2817931639040794018">"Oke"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"Alamat:"</string>
+    <string name="page_info" msgid="4416941086705172545">"Info halaman"</string>
 </resources>

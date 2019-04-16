@@ -16,17 +16,16 @@
 
 package android.telephony.ims;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 import java.util.List;
 
 /**
  * The result of a {@link RcsMessageStore#getRcsEvents(RcsEventQueryParams)}
  * call. This class allows getting the token for querying the next batch of events in order to
  * prevent handling large amounts of data at once.
+ *
+ * @hide
  */
-public final class RcsEventQueryResult implements Parcelable {
+public class RcsEventQueryResult {
     private RcsQueryContinuationToken mContinuationToken;
     private List<RcsEvent> mEvents;
 
@@ -59,31 +58,5 @@ public final class RcsEventQueryResult implements Parcelable {
      */
     public List<RcsEvent> getEvents() {
         return mEvents;
-    }
-
-    private RcsEventQueryResult(Parcel in) {
-        mContinuationToken = in.readParcelable(RcsQueryContinuationToken.class.getClassLoader());
-    }
-
-    public static final Creator<RcsEventQueryResult> CREATOR = new Creator<RcsEventQueryResult>() {
-        @Override
-        public RcsEventQueryResult createFromParcel(Parcel in) {
-            return new RcsEventQueryResult(in);
-        }
-
-        @Override
-        public RcsEventQueryResult[] newArray(int size) {
-            return new RcsEventQueryResult[size];
-        }
-    };
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeParcelable(mContinuationToken, flags);
     }
 }

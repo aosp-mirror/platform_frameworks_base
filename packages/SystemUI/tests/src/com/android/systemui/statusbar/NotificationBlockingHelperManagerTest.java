@@ -16,27 +16,10 @@
 
 package com.android.systemui.statusbar;
 
-import com.android.systemui.SysuiTestCase;
-import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
-
-import android.content.Context;
-import android.support.test.filters.FlakyTest;
-import android.support.test.filters.SmallTest;
-import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
-import android.view.View;
-
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
-
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_POSITIVE;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -45,6 +28,22 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import android.content.Context;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
+import android.view.View;
+
+import androidx.test.filters.FlakyTest;
+import androidx.test.filters.SmallTest;
+
+import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 /**
  * Tests for {@link NotificationBlockingHelperManager}.

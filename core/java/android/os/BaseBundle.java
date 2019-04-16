@@ -18,6 +18,7 @@ package android.os;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.MathUtils;
@@ -82,6 +83,7 @@ public class BaseBundle {
     // Invariant - exactly one of mMap / mParcelledData will be null
     // (except inside a call to unparcel)
 
+    @UnsupportedAppUsage
     ArrayMap<String, Object> mMap = null;
 
     /*
@@ -89,6 +91,7 @@ public class BaseBundle {
      * data are stored as a Parcel containing a Bundle.  When the data
      * are unparcelled, mParcelledData willbe set to null.
      */
+    @UnsupportedAppUsage
     Parcel mParcelledData = null;
 
     /**
@@ -225,6 +228,7 @@ public class BaseBundle {
      * If the underlying data are stored as a Parcel, unparcel them
      * using the currently assigned class loader.
      */
+    @UnsupportedAppUsage
     /* package */ void unparcel() {
         synchronized (this) {
             final Parcel source = mParcelledData;
@@ -311,6 +315,7 @@ public class BaseBundle {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean isParcelled() {
         return mParcelledData != null;
     }

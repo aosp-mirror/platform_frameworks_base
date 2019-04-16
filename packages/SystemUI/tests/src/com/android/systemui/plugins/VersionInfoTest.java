@@ -17,13 +17,13 @@ package com.android.systemui.plugins;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import android.support.test.filters.SmallTest;
+import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.VersionInfo.InvalidVersionException;
 import com.android.systemui.plugins.annotations.Requires;
-import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.qs.DetailAdapter;
+import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.qs.QS.HeightListener;
 
 import org.junit.Rule;

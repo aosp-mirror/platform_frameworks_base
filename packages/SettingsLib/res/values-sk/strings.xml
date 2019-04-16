@@ -40,6 +40,7 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Pripojené prostredníctvom %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"K dispozícii prostredníctvom %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Pripojené, žiadny internet"</string>
+    <string name="wifi_limited_connection" msgid="7717855024753201527">"Obmedzené pripojenie"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"Žiadny internet"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"Vyžaduje sa prihlásenie"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Prístupový bod je dočasne plný"</string>
@@ -80,8 +81,8 @@
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Prístup k SIM karte"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"HD zvuk: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"HD zvuk"</string>
-    <string name="bluetooth_profile_hearing_aid" msgid="7999237886427812595">"Načúvacia pomôcka"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="7188282786730266159">"Pripojené k načúvacej pomôcke"</string>
+    <string name="bluetooth_profile_hearing_aid" msgid="6680721080542444257">"Načúvacie pomôcky"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="3051944447369418317">"Pripojené k načúvacím pomôckam"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Pripojené ku zvukovému médiu"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Pripojené ku zvuku telefónu"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Pripojené na server pre prenos údajov"</string>
@@ -98,7 +99,7 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Použiť pre zvuk telefónu"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Použiť na prenos súborov"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"Použiť pre vstup"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="908775281788309484">"Použitie načúvacej pomôcky"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="8843499209204010224">"Použiť pre načúvacie pomôcky"</string>
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Párovať"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"PÁROVAŤ"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Zrušiť"</string>
@@ -443,7 +444,7 @@
     <string name="cancel" msgid="6859253417269739139">"Zrušiť"</string>
     <string name="okay" msgid="1997666393121016642">"OK"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"Zapnúť"</string>
-    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"Zapnite režim Nerušiť"</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"Zapnite režim bez vyrušení"</string>
     <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"Nikdy"</string>
     <string name="zen_interruption_level_priority" msgid="2078370238113347720">"Iba prioritné"</string>
     <string name="zen_mode_and_condition" msgid="4927230238450354412">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>

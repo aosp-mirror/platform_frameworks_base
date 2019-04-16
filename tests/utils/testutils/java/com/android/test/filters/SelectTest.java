@@ -26,10 +26,12 @@ import com.android.internal.annotations.VisibleForTesting;
 import org.junit.runner.Description;
 import org.junit.runner.manipulation.Filter;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringJoiner;
@@ -131,7 +133,8 @@ public class SelectTest extends Filter {
      *
      * @param testArgs instrumentation test arguments.
      * @param selectTests array of class name to be selected to run.
-     * @return modified instrumentation test arguments.
+     * @return modified instrumentation test arguments. if {@link #OPTION_SELECT_TEST} argument
+     *      already exists in {@code testArgs}, those are prepended before {@code selectTests}.
      */
     @NonNull
     protected static Bundle addSelectTest(
@@ -139,7 +142,13 @@ public class SelectTest extends Filter {
         if (selectTests.length == 0) {
             return testArgs;
         }
-        testArgs.putString(OPTION_SELECT_TEST, join(Arrays.asList(selectTests)));
+        final List<String> selectedTestList = new ArrayList<>();
+        final String selectTestArgs = testArgs.getString(OPTION_SELECT_TEST);
+        if (selectTestArgs != null) {
+            selectedTestList.addAll(Arrays.asList(selectTestArgs.split(ARGUMENT_ITEM_SEPARATOR)));
+        }
+        selectedTestList.addAll(Arrays.asList(selectTests));
+        testArgs.putString(OPTION_SELECT_TEST, join(selectedTestList));
         return testArgs;
     }
 

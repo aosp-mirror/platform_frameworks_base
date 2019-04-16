@@ -28,12 +28,25 @@ public final class CellIdentityCdma extends CellIdentity {
     private static final String TAG = CellIdentityCdma.class.getSimpleName();
     private static final boolean DBG = false;
 
+    private static final int NETWORK_ID_MAX = 65535;
+    private static final int SYSTEM_ID_MAX = 32767;
+    private static final int BASESTATION_ID_MAX = 65535;
+
+    private static final int LONGITUDE_MIN = -2592000;
+    private static final int LONGITUDE_MAX = 2592000;
+
+    private static final int LATITUDE_MIN = -1296000;
+    private static final int LATITUDE_MAX = 1296000;
+
     // Network Id 0..65535
     private final int mNetworkId;
+
     // CDMA System Id 0..32767
     private final int mSystemId;
+
     // Base Station Id 0..65535
     private final int mBasestationId;
+
     /**
      * Longitude is a decimal number as specified in 3GPP2 C.S0005-A v6.0.
      * It is represented in units of 0.25 seconds and ranges from -2592000
@@ -41,6 +54,7 @@ public final class CellIdentityCdma extends CellIdentity {
      * to +180 degrees).
      */
     private final int mLongitude;
+
     /**
      * Latitude is a decimal number as specified in 3GPP2 C.S0005-A v6.0.
      * It is represented in units of 0.25 seconds and ranges from -1296000
@@ -78,9 +92,12 @@ public final class CellIdentityCdma extends CellIdentity {
     public CellIdentityCdma(
             int nid, int sid, int bid, int lon, int lat, String alphal, String alphas) {
         super(TAG, CellInfo.TYPE_CDMA, null, null, alphal, alphas);
-        mNetworkId = nid;
-        mSystemId = sid;
-        mBasestationId = bid;
+        mNetworkId = inRangeOrUnavailable(nid, 0, NETWORK_ID_MAX);
+        mSystemId = inRangeOrUnavailable(sid, 0, SYSTEM_ID_MAX);
+        mBasestationId = inRangeOrUnavailable(bid, 0, BASESTATION_ID_MAX);
+        lat = inRangeOrUnavailable(lat, LATITUDE_MIN, LATITUDE_MAX);
+        lon = inRangeOrUnavailable(lon, LONGITUDE_MIN, LONGITUDE_MAX);
+
         if (!isNullIsland(lat, lon)) {
             mLongitude = lon;
             mLatitude = lat;
@@ -107,6 +124,13 @@ public final class CellIdentityCdma extends CellIdentity {
 
     CellIdentityCdma copy() {
         return new CellIdentityCdma(this);
+    }
+
+    /** @hide */
+    public CellIdentityCdma sanitizeLocationInfo() {
+        return new CellIdentityCdma(CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE,
+                CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE,
+                mAlphaLong, mAlphaShort);
     }
 
     /**

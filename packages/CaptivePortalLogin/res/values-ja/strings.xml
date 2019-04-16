@@ -9,16 +9,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"接続しようとしているネットワークにセキュリティの問題があります。"</string>
     <string name="ssl_error_example" msgid="647898534624078900">"たとえば、ログインページが表示されている組織に属していない可能性があります。"</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"ブラウザから続行"</string>
-    <string name="ok" msgid="1509280796718850364">"OK"</string>
-    <string name="page_info" msgid="4048529256302257195">"ページ情報"</string>
-    <string name="page_info_address" msgid="2222306609532903254">"アドレス:"</string>
-    <string name="ssl_security_warning_title" msgid="6607795404322797541">"セキュリティ警告"</string>
-    <string name="ssl_error_view_certificate" msgid="1472768887529093862">"証明書を表示"</string>
-    <string name="ssl_error_untrusted" msgid="7754507359360636447">"この証明書は信頼できる認証機関のものではありません。"</string>
-    <string name="ssl_error_mismatch" msgid="3809794439740523641">"サイト名と証明書上の名前が一致しません。"</string>
-    <string name="ssl_error_expired" msgid="5739349389499575559">"この証明書は有効期限切れです。"</string>
-    <string name="ssl_error_not_yet_valid" msgid="8193083327719048247">"この証明書はまだ有効ではありません。"</string>
-    <string name="ssl_error_date_invalid" msgid="3705563379257285534">"この証明書の日付は無効です。"</string>
-    <string name="ssl_error_invalid" msgid="9041704741505449967">"この証明書は無効です。"</string>
-    <string name="ssl_error_unknown" msgid="5679243486524754571">"不明な証明書エラーです。"</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"この証明書は信頼できる認証機関のものではありません。"</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"サイト名と証明書上の名前が一致しません。"</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"この証明書は有効期限切れです。"</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"この証明書はまだ有効ではありません。"</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"この証明書の日付は無効です。"</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"この証明書は無効です。"</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"不明な証明書エラーです。"</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"セキュリティに関する警告"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"証明書を表示"</string>
+    <string name="ok" msgid="2817931639040794018">"OK"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"メールアドレス:"</string>
+    <string name="page_info" msgid="4416941086705172545">"ページ情報"</string>
 </resources>

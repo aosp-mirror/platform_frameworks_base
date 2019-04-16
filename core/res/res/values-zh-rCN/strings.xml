@@ -136,9 +136,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> WLAN"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"WLAN 通话 | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"WLAN 通话"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"WLAN"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"WLAN 通话"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"关闭"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"首选 WLAN"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"首选移动数据网络"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"通过 WLAN 进行通话"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"通过移动网络进行通话"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"仅限 WLAN"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：无法转接"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：<xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -244,7 +248,7 @@
     <string name="global_action_battery_saver_on_status" msgid="484059130698197787">"省电模式已关闭"</string>
     <string name="global_action_battery_saver_off_status" msgid="75550964969478405">"省电模式已开启"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"设置"</string>
-    <string name="global_action_assist" msgid="3892832961594295030">"助手应用"</string>
+    <string name="global_action_assist" msgid="3892832961594295030">"助理"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"语音助理"</string>
     <string name="global_action_lockdown" msgid="1099326950891078929">"锁定"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
@@ -279,7 +283,7 @@
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"允许&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;访问您的通讯录吗？"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"位置信息"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"获取此设备的位置信息"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"要允许“<xliff:g id="APP_NAME">%1$s</xliff:g>”获取此设备的位置信息吗？"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"要允许<xliff:g id="APP_NAME">%1$s</xliff:g>获取此设备的位置信息吗？"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"日历"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"访问您的日历"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"允许&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;访问您的日历吗？"</string>
@@ -288,7 +292,7 @@
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"允许&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;发送和查看短信吗？"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"存储空间"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"访问您设备上的照片、媒体内容和文件"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"允许&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;访问您设备上的照片、媒体内容和文件吗？"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"允许“<xliff:g id="APP_NAME">%1$s</xliff:g>”&lt;b&gt;&lt;/b&gt;访问您设备上的照片、媒体内容和文件吗？"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"麦克风"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"录制音频"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"允许&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;录音吗？"</string>
@@ -430,6 +434,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"允许该应用访问设备的电话功能。此权限可让该应用确定本机号码和设备 ID、是否正处于通话状态以及拨打的号码。"</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"通过系统转接来电"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"允许该应用通过系统转接来电，以改善通话体验。"</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"查看并控制通过系统拨打的电话。"</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"允许应用查看并控制设备上正在进行的通话，其中包括通话号码和通话状态等信息。"</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"继续进行来自其他应用的通话"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"允许该应用继续进行在其他应用中发起的通话。"</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"读取电话号码"</string>
@@ -1016,11 +1022,11 @@
     <string name="deleteText" msgid="6979668428458199034">"删除"</string>
     <string name="inputMethod" msgid="1653630062304567879">"输入法"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"文字操作"</string>
-    <string name="email" msgid="4560673117055050403">"电子邮件"</string>
+    <string name="email" msgid="4560673117055050403">"发送电子邮件"</string>
     <string name="email_desc" msgid="3638665569546416795">"将电子邮件发送至所选地址"</string>
     <string name="dial" msgid="1253998302767701559">"拨打电话"</string>
     <string name="dial_desc" msgid="6573723404985517250">"拨打所选电话号码"</string>
-    <string name="map" msgid="5441053548030107189">"地图"</string>
+    <string name="map" msgid="5441053548030107189">"查看地图"</string>
     <string name="map_desc" msgid="1836995341943772348">"找到所选地址"</string>
     <string name="browse" msgid="1245903488306147205">"打开"</string>
     <string name="browse_desc" msgid="8220976549618935044">"打开所选网址"</string>
@@ -1177,8 +1183,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"登录到网络"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"此 WLAN 网络无法访问互联网"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> 无法访问互联网"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"点按即可查看相关选项"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"已连接"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> 的连接受限"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"点按即可继续连接"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"您的热点设置已变更"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"您的热点频段已变更。"</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"此设备不支持您的偏好设置（仅限 5GHz），而且会在 5GHz 频段可用时使用该频段。"</string>

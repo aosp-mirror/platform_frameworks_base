@@ -558,9 +558,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 if (result.who != null) {
                     pw.println("Activity: " + result.who.flattenToShortString());
                 }
-                if (result.thisTime >= 0) {
-                    pw.println("ThisTime: " + result.thisTime);
-                }
                 if (result.totalTime >= 0) {
                     pw.println("TotalTime: " + result.totalTime);
                 }
@@ -790,7 +787,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return -1;
                 }
             }
-            process = getNextArg();
+            process = getNextArgRequired();
         } else {
             // Compatibility with old syntax: process is specified first.
             process = cmd;
@@ -2922,15 +2919,22 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      start: start tracing IPC transactions.");
             pw.println("      stop: stop tracing IPC transactions and dump the results to file.");
             pw.println("      --dump-file <FILE>: Specify the file the trace should be dumped to.");
-            pw.println("  profile [start|stop] [--user <USER_ID> current] [--sampling INTERVAL]");
-            pw.println("          [--streaming] <PROCESS> <FILE>");
-            pw.println("      Start and stop profiler on a process.  The given <PROCESS> argument");
+            pw.println("  profile start [--user <USER_ID> current]");
+            pw.println("          [--sampling INTERVAL | --streaming] <PROCESS> <FILE>");
+            pw.println("      Start profiler on a process.  The given <PROCESS> argument");
             pw.println("        may be either a process name or pid.  Options are:");
             pw.println("      --user <USER_ID> | current: When supplying a process name,");
-            pw.println("          specify user of process to profile; uses current user if not specified.");
+            pw.println("          specify user of process to profile; uses current user if not");
+            pw.println("          specified.");
             pw.println("      --sampling INTERVAL: use sample profiling with INTERVAL microseconds");
-            pw.println("          between samples");
-            pw.println("      --streaming: stream the profiling output to the specified file");
+            pw.println("          between samples.");
+            pw.println("      --streaming: stream the profiling output to the specified file.");
+            pw.println("  profile stop [--user <USER_ID> current] <PROCESS>");
+            pw.println("      Stop profiler on a process.  The given <PROCESS> argument");
+            pw.println("        may be either a process name or pid.  Options are:");
+            pw.println("      --user <USER_ID> | current: When supplying a process name,");
+            pw.println("          specify user of process to profile; uses current user if not");
+            pw.println("          specified.");
             pw.println("  dumpheap [--user <USER_ID> current] [-n] [-g] <PROCESS> <FILE>");
             pw.println("      Dump the heap of a process.  The given <PROCESS> argument may");
             pw.println("        be either a process name or pid.  Options are:");

@@ -9,16 +9,16 @@
     <string name="ssl_error_warning" msgid="6653188881418638872">"Kilo tinklo, prie kurio bandote prisijungti, problemų."</string>
     <string name="ssl_error_example" msgid="647898534624078900">"Pavyzdžiui, prisijungimo puslapis gali nepriklausyti rodomai organizacijai."</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"Vis tiek tęsti naudojant naršyklę"</string>
-    <string name="ok" msgid="1509280796718850364">"Gerai"</string>
-    <string name="page_info" msgid="4048529256302257195">"Puslapio informacija"</string>
-    <string name="page_info_address" msgid="2222306609532903254">"Adresas:"</string>
-    <string name="ssl_security_warning_title" msgid="6607795404322797541">"Saugos įspėjimas"</string>
-    <string name="ssl_error_view_certificate" msgid="1472768887529093862">"Žiūrėti sertifikatą"</string>
-    <string name="ssl_error_untrusted" msgid="7754507359360636447">"Šį sertifikatą išdavė nepatikima įstaiga."</string>
-    <string name="ssl_error_mismatch" msgid="3809794439740523641">"Svetainės pavadinimas neatitinka sertifikate nurodyto pavadinimo."</string>
-    <string name="ssl_error_expired" msgid="5739349389499575559">"Šio sertifikato galiojimo laikas baigėsi."</string>
-    <string name="ssl_error_not_yet_valid" msgid="8193083327719048247">"Šis sertifikatas dar negalioja."</string>
-    <string name="ssl_error_date_invalid" msgid="3705563379257285534">"Šio sertifikato data netinkama."</string>
-    <string name="ssl_error_invalid" msgid="9041704741505449967">"Šis sertifikatas netinkamas."</string>
-    <string name="ssl_error_unknown" msgid="5679243486524754571">"Nežinoma sertifikato klaida."</string>
+    <string name="ssl_error_untrusted" msgid="1496280318271264520">"Šį sertifikatą išdavė nepatikima įstaiga."</string>
+    <string name="ssl_error_mismatch" msgid="3060364165934822383">"Svetainės pavadinimas neatitinka sertifikate nurodyto pavadinimo."</string>
+    <string name="ssl_error_expired" msgid="1501588340716182495">"Šio sertifikato galiojimo laikas baigėsi."</string>
+    <string name="ssl_error_not_yet_valid" msgid="8648649030525886924">"Šis sertifikatas dar negalioja."</string>
+    <string name="ssl_error_date_invalid" msgid="88425990680059223">"Šio sertifikato data netinkama."</string>
+    <string name="ssl_error_invalid" msgid="2540546515565633432">"Šis sertifikatas netinkamas."</string>
+    <string name="ssl_error_unknown" msgid="4405203446079465859">"Nežinoma sertifikato klaida."</string>
+    <string name="ssl_security_warning_title" msgid="8768539813847504404">"Saugos įspėjimas"</string>
+    <string name="ssl_error_view_certificate" msgid="5722652540168339333">"Žiūrėti sertifikatą"</string>
+    <string name="ok" msgid="2817931639040794018">"Gerai"</string>
+    <string name="page_info_address" msgid="1261481517455692363">"Adresas"</string>
+    <string name="page_info" msgid="4416941086705172545">"Puslapio informacija"</string>
 </resources>

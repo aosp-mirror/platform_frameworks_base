@@ -182,6 +182,7 @@ interface ITelecomService {
     /**
      * @see TelecomServiceImpl#getCallState
      */
+    @UnsupportedAppUsage
     int getCallState();
 
     /**
@@ -284,8 +285,6 @@ interface ITelecomService {
      * @see TelecomServiceImpl#isInEmergencyCall
      */
     boolean isInEmergencyCall();
-
-    oneway void reportNuisanceCallStatus(in Uri address, boolean isNuisance, String callingPackage);
 
     /**
      * @see TelecomServiceImpl#handleCallIntent

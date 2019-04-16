@@ -27,7 +27,7 @@
     <string name="label_duplex" msgid="5370037254347072243">"Obojstranné"</string>
     <string name="label_orientation" msgid="2853142581990496477">"Orientácia"</string>
     <string name="label_pages" msgid="7768589729282182230">"Strany"</string>
-    <string name="destination_default_text" msgid="5422708056807065710">"Výber tlačiarne"</string>
+    <string name="destination_default_text" msgid="5422708056807065710">"Vyberte tlačiareň"</string>
     <string name="template_all_pages" msgid="3322235982020148762">"Všetky: <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
     <string name="template_page_range" msgid="428638530038286328">"Rozsah: <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"napr. 1–5, 8, 11–13"</string>

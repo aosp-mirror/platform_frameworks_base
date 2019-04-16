@@ -18,9 +18,14 @@ package android.content.pm;
 
 /** {@hide} */
 oneway interface IPackageInstallerCallback {
+    @UnsupportedAppUsage
     void onSessionCreated(int sessionId);
+    @UnsupportedAppUsage
     void onSessionBadgingChanged(int sessionId);
+    @UnsupportedAppUsage
     void onSessionActiveChanged(int sessionId, boolean active);
+    @UnsupportedAppUsage
     void onSessionProgressChanged(int sessionId, float progress);
+    @UnsupportedAppUsage
     void onSessionFinished(int sessionId, boolean success);
 }

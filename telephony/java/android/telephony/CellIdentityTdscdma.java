@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.telephony.gsm.GsmCellLocation;
@@ -29,12 +30,18 @@ public final class CellIdentityTdscdma extends CellIdentity {
     private static final String TAG = CellIdentityTdscdma.class.getSimpleName();
     private static final boolean DBG = false;
 
+    private static final int MAX_LAC = 65535;
+    private static final int MAX_CID = 268435455;
+    private static final int MAX_CPID = 127;
+    private static final int MAX_UARFCN = 65535;
+
     // 16-bit Location Area Code, 0..65535, CellInfo.UNAVAILABLE if unknown.
     private final int mLac;
     // 28-bit UMTS Cell Identity described in TS 25.331, 0..268435455, CellInfo.UNAVAILABLE
     // if unknown.
     private final int mCid;
-    // 8-bit Cell Parameters ID described in TS 25.331, 0..127, CellInfo.UNAVAILABLE if unknown.
+    // 8-bit Cell Parameters ID described in TS 25.331 sec 10.3.6.9,
+    // 0..127, CellInfo.UNAVAILABLE if unknown.
     private final int mCpid;
     // 16-bit UMTS Absolute RF Channel Number described in TS 25.101 sec. 5.4.3
     private final int mUarfcn;
@@ -67,10 +74,10 @@ public final class CellIdentityTdscdma extends CellIdentity {
     public CellIdentityTdscdma(String mcc, String mnc, int lac, int cid, int cpid, int uarfcn,
             String alphal, String alphas) {
         super(TAG, CellInfo.TYPE_TDSCDMA, mcc, mnc, alphal, alphas);
-        mLac = lac;
-        mCid = cid;
-        mCpid = cpid;
-        mUarfcn = uarfcn;
+        mLac = inRangeOrUnavailable(lac, 0, MAX_LAC);
+        mCid = inRangeOrUnavailable(cid, 0, MAX_CID);
+        mCpid = inRangeOrUnavailable(cpid, 0, MAX_CPID);
+        mUarfcn = inRangeOrUnavailable(uarfcn, 0, MAX_UARFCN);
     }
 
     private CellIdentityTdscdma(CellIdentityTdscdma cid) {
@@ -89,6 +96,12 @@ public final class CellIdentityTdscdma extends CellIdentity {
                 cid.uarfcn, cid.operatorNames.alphaLong, cid.operatorNames.alphaShort);
     }
 
+    /** @hide */
+    public CellIdentityTdscdma sanitizeLocationInfo() {
+        return new CellIdentityTdscdma(mMccStr, mMncStr, CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE,
+                CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE, mAlphaLong, mAlphaShort);
+    }
+
     CellIdentityTdscdma copy() {
         return new CellIdentityTdscdma(this);
     }
@@ -97,6 +110,7 @@ public final class CellIdentityTdscdma extends CellIdentity {
      * Get Mobile Country Code in string format
      * @return Mobile Country Code in string format, null if unknown
      */
+    @Nullable
     public String getMccString() {
         return mMccStr;
     }
@@ -105,6 +119,7 @@ public final class CellIdentityTdscdma extends CellIdentity {
      * Get Mobile Network Code in string format
      * @return Mobile Network Code in string format, null if unknown
      */
+    @Nullable
     public String getMncString() {
         return mMncStr;
     }
@@ -139,6 +154,14 @@ public final class CellIdentityTdscdma extends CellIdentity {
      */
     public int getCpid() {
         return mCpid;
+    }
+
+    /**
+     * @return 16-bit UMTS Absolute RF Channel Number,
+     *         {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE} if unavailable.
+     */
+    public int getUarfcn() {
+        return mUarfcn;
     }
 
     /** @hide */
@@ -197,6 +220,12 @@ public final class CellIdentityTdscdma extends CellIdentity {
 
     /** Implement the Parcelable interface */
     @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    /** Implement the Parcelable interface */
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
         if (DBG) log("writeToParcel(Parcel, int): " + toString());
         super.writeToParcel(dest, CellInfo.TYPE_TDSCDMA);
@@ -218,16 +247,17 @@ public final class CellIdentityTdscdma extends CellIdentity {
 
     /** Implement the Parcelable interface */
     @SuppressWarnings("hiding")
+    @NonNull
     public static final Creator<CellIdentityTdscdma> CREATOR =
             new Creator<CellIdentityTdscdma>() {
                 @Override
-                public CellIdentityTdscdma createFromParcel(Parcel in) {
+                public @NonNull CellIdentityTdscdma createFromParcel(Parcel in) {
                     in.readInt();   // skip
                     return createFromParcelBody(in);
                 }
 
                 @Override
-                public CellIdentityTdscdma[] newArray(int size) {
+                public @NonNull CellIdentityTdscdma[] newArray(int size) {
                     return new CellIdentityTdscdma[size];
                 }
             };

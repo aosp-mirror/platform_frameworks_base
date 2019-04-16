@@ -75,7 +75,7 @@ import java.util.List;
  * follows the established service life cycle. Starting an accessibility service is triggered
  * exclusively by the user explicitly turning the service on in device settings. After the system
  * binds to a service, it calls {@link AccessibilityService#onServiceConnected()}. This method can
- * be overriden by clients that want to perform post binding setup.
+ * be overridden by clients that want to perform post binding setup.
  * </p>
  * <p>
  * An accessibility service stops either when the user turns it off in device settings or when

@@ -17,6 +17,7 @@
 package android.telephony.ims;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
@@ -350,6 +351,9 @@ public final class ImsCallProfile implements Parcelable {
     /** Indicates if the call is for testing purpose */
     private boolean mEmergencyCallTesting = false;
 
+    /** Indicates if we have known the intent of the user for the call is emergency */
+    private boolean mHasKnownUserIntentEmergency = false;
+
     /**
      * Extras associated with this {@link ImsCallProfile}.
      * <p>
@@ -540,7 +544,8 @@ public final class ImsCallProfile implements Parcelable {
                 + ", emergencyServiceCategories=" + mEmergencyServiceCategories
                 + ", emergencyUrns=" + mEmergencyUrns
                 + ", emergencyCallRouting=" + mEmergencyCallRouting
-                + ", emergencyCallTesting=" + mEmergencyCallTesting + " }";
+                + ", emergencyCallTesting=" + mEmergencyCallTesting
+                + ", hasKnownUserIntentEmergency=" + mHasKnownUserIntentEmergency + " }";
     }
 
     @Override
@@ -559,6 +564,7 @@ public final class ImsCallProfile implements Parcelable {
         out.writeStringList(mEmergencyUrns);
         out.writeInt(mEmergencyCallRouting);
         out.writeBoolean(mEmergencyCallTesting);
+        out.writeBoolean(mHasKnownUserIntentEmergency);
     }
 
     private void readFromParcel(Parcel in) {
@@ -570,6 +576,7 @@ public final class ImsCallProfile implements Parcelable {
         mEmergencyUrns = in.createStringArrayList();
         mEmergencyCallRouting = in.readInt();
         mEmergencyCallTesting = in.readBoolean();
+        mHasKnownUserIntentEmergency = in.readBoolean();
     }
 
     public static final Creator<ImsCallProfile> CREATOR = new Creator<ImsCallProfile>() {
@@ -789,12 +796,13 @@ public final class ImsCallProfile implements Parcelable {
      *
      * @hide
      */
-    public void setEmergencyCallInfo(EmergencyNumber num) {
+    public void setEmergencyCallInfo(EmergencyNumber num, boolean hasKnownUserIntentEmergency) {
         setEmergencyServiceCategories(num.getEmergencyServiceCategoryBitmaskInternalDial());
         setEmergencyUrns(num.getEmergencyUrns());
         setEmergencyCallRouting(num.getEmergencyCallRouting());
         setEmergencyCallTesting(num.getEmergencyNumberSourceBitmask()
                 == EmergencyNumber.EMERGENCY_NUMBER_SOURCE_TEST);
+        setHasKnownUserIntentEmergency(hasKnownUserIntentEmergency);
     }
 
     /**
@@ -830,7 +838,7 @@ public final class ImsCallProfile implements Parcelable {
      *            3gpp 22.101, Section 10 - Emergency Calls.
      */
     @VisibleForTesting
-    public void setEmergencyUrns(List<String> emergencyUrns) {
+    public void setEmergencyUrns(@NonNull List<String> emergencyUrns) {
         mEmergencyUrns = emergencyUrns;
     }
 
@@ -857,6 +865,19 @@ public final class ImsCallProfile implements Parcelable {
     @VisibleForTesting
     public void setEmergencyCallTesting(boolean isTesting) {
         mEmergencyCallTesting = isTesting;
+    }
+
+    /**
+     * Set if we have known the user intent of the call is emergency.
+     *
+     * This is only used to specify when the dialed number is ambiguous when it can be identified
+     * as both emergency number and any other non-emergency number; e.g. in some situation, 611
+     * could be both an emergency number in a country and a non-emergency number of a carrier's
+     * customer service hotline.
+     */
+    @VisibleForTesting
+    public void setHasKnownUserIntentEmergency(boolean hasKnownUserIntentEmergency) {
+        mHasKnownUserIntentEmergency = hasKnownUserIntentEmergency;
     }
 
     /**
@@ -891,7 +912,7 @@ public final class ImsCallProfile implements Parcelable {
      * Reference: 3gpp 24.503, Section 5.1.6.8.1 - General;
      *            3gpp 22.101, Section 10 - Emergency Calls.
      */
-    public List<String> getEmergencyUrns() {
+    public @NonNull List<String> getEmergencyUrns() {
         return mEmergencyUrns;
     }
 
@@ -915,5 +936,17 @@ public final class ImsCallProfile implements Parcelable {
      */
     public boolean isEmergencyCallTesting() {
         return mEmergencyCallTesting;
+    }
+
+    /**
+     * Checks if we have known the user intent of the call is emergency.
+     *
+     * This is only used to specify when the dialed number is ambiguous when it can be identified
+     * as both emergency number and any other non-emergency number; e.g. in some situation, 611
+     * could be both an emergency number in a country and a non-emergency number of a carrier's
+     * customer service hotline.
+     */
+    public boolean hasKnownUserIntentEmergency() {
+        return mHasKnownUserIntentEmergency;
     }
 }

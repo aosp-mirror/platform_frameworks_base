@@ -19,6 +19,7 @@ package com.android.internal.view;
 import android.annotation.AnyThread;
 import android.annotation.BinderThread;
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.inputmethodservice.AbstractInputMethodService;
 import android.os.Bundle;
 import android.os.Handler;
@@ -78,6 +79,7 @@ public class InputConnectionWrapper implements InputConnection {
          * sequence number is set to a new integer.  We use a sequence number so that replies that
          * occur after a timeout has expired are not interpreted as replies to a later request.
          */
+        @UnsupportedAppUsage
         @AnyThread
         private static InputContextCallback getInstance() {
             synchronized (InputContextCallback.class) {
@@ -102,6 +104,7 @@ public class InputConnectionWrapper implements InputConnection {
         /**
          * Makes the given InputContextCallback available for use in the future.
          */
+        @UnsupportedAppUsage
         @AnyThread
         private void dispose() {
             synchronized (InputContextCallback.class) {

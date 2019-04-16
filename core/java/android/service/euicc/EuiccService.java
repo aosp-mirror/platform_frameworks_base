@@ -76,6 +76,11 @@ import java.util.concurrent.atomic.AtomicInteger;
  * filter with the appropriate action, the {@link #CATEGORY_EUICC_UI} category, and a non-zero
  * priority.
  *
+ * <p>Old implementations of EuiccService may support passing in slot IDs equal to
+ * {@link android.telephony.SubscriptionManager#INVALID_SIM_SLOT_INDEX}, which allows the LPA to
+ * decide which eUICC to target when there are multiple eUICCs. This behavior is not supported in
+ * Android Q or later.
+ *
  * @hide
  */
 @SystemApi
@@ -96,9 +101,34 @@ public abstract class EuiccService extends Service {
      */
     public static final String ACTION_MANAGE_EMBEDDED_SUBSCRIPTIONS =
             "android.service.euicc.action.MANAGE_EMBEDDED_SUBSCRIPTIONS";
+
     /** @see android.telephony.euicc.EuiccManager#ACTION_PROVISION_EMBEDDED_SUBSCRIPTION */
     public static final String ACTION_PROVISION_EMBEDDED_SUBSCRIPTION =
             "android.service.euicc.action.PROVISION_EMBEDDED_SUBSCRIPTION";
+
+    /**
+     * @see android.telephony.euicc.EuiccManager#ACTION_TOGGLE_SUBSCRIPTION_PRIVILEGED. This is
+     * a protected intent that can only be sent by the system, and requires the
+     * {@link android.Manifest.permission#BIND_EUICC_SERVICE} permission.
+     */
+    public static final String ACTION_TOGGLE_SUBSCRIPTION_PRIVILEGED =
+            "android.service.euicc.action.TOGGLE_SUBSCRIPTION_PRIVILEGED";
+
+    /**
+     * @see android.telephony.euicc.EuiccManager#ACTION_DELETE_SUBSCRIPTION_PRIVILEGED. This is
+     * a protected intent that can only be sent by the system, and requires the
+     * {@link android.Manifest.permission#BIND_EUICC_SERVICE} permission.
+     */
+    public static final String ACTION_DELETE_SUBSCRIPTION_PRIVILEGED =
+            "android.service.euicc.action.DELETE_SUBSCRIPTION_PRIVILEGED";
+
+    /**
+     * @see android.telephony.euicc.EuiccManager#ACTION_RENAME_SUBSCRIPTION_PRIVILEGED. This is
+     * a protected intent that can only be sent by the system, and requires the
+     * {@link android.Manifest.permission#BIND_EUICC_SERVICE} permission.
+     */
+    public static final String ACTION_RENAME_SUBSCRIPTION_PRIVILEGED =
+            "android.service.euicc.action.RENAME_SUBSCRIPTION_PRIVILEGED";
 
     // LUI resolution actions. These are called by the platform to resolve errors in situations that
     // require user interaction.
@@ -520,7 +550,7 @@ public abstract class EuiccService extends Service {
                         int resultCode = EuiccService.this.onDownloadSubscription(
                                 slotId, subscription, switchAfterDownload, forceDeactivateSim);
                         result = new DownloadSubscriptionResult(resultCode,
-                            0 /* resolvableErrors */, TelephonyManager.INVALID_CARD_ID);
+                            0 /* resolvableErrors */, TelephonyManager.UNSUPPORTED_CARD_ID);
                     }
                     try {
                         callback.onComplete(result);

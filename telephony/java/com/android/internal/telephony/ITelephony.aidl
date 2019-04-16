@@ -76,6 +76,7 @@ interface ITelephony {
      * @param number the number to be dialed. If null, this
      * would display the Dialer screen with no number pre-filled.
      */
+    @UnsupportedAppUsage
     void dial(String number);
 
     /**
@@ -83,6 +84,7 @@ interface ITelephony {
      * @param callingPackage The package making the call.
      * @param number the number to be called.
      */
+    @UnsupportedAppUsage
     void call(String callingPackage, String number);
 
     /**
@@ -98,6 +100,7 @@ interface ITelephony {
      * @param callingPackage the name of the package making the call.
      * @return returns true if the radio is on.
      */
+    @UnsupportedAppUsage
     boolean isRadioOnForSubscriber(int subId, String callingPackage);
 
     /**
@@ -105,6 +108,7 @@ interface ITelephony {
      * @param pin The pin to check.
      * @return whether the operation was a success.
      */
+    @UnsupportedAppUsage
     boolean supplyPin(String pin);
 
     /**
@@ -182,6 +186,7 @@ interface ITelephony {
      * @param dialString the MMI command to be executed.
      * @return true if MMI command is executed.
      */
+    @UnsupportedAppUsage
     boolean handlePinMmi(String dialString);
 
 
@@ -202,11 +207,13 @@ interface ITelephony {
      * @param subId user preferred subId.
      * @return true if MMI command is executed.
      */
+    @UnsupportedAppUsage
     boolean handlePinMmiForSubscriber(int subId, String dialString);
 
     /**
      * Toggles the radio on or off.
      */
+    @UnsupportedAppUsage
     void toggleRadioOnOff();
 
     /**
@@ -218,6 +225,7 @@ interface ITelephony {
     /**
      * Set the radio to on or off
      */
+    @UnsupportedAppUsage
     boolean setRadio(boolean turnOn);
 
     /**
@@ -234,6 +242,7 @@ interface ITelephony {
     /**
      * Request to update location information in service state
      */
+    @UnsupportedAppUsage
     void updateServiceLocation();
 
     /**
@@ -245,6 +254,7 @@ interface ITelephony {
     /**
      * Enable location update notifications.
      */
+    @UnsupportedAppUsage
     void enableLocationUpdates();
 
     /**
@@ -256,6 +266,7 @@ interface ITelephony {
     /**
      * Disable location update notifications.
      */
+    @UnsupportedAppUsage
     void disableLocationUpdates();
 
     /**
@@ -267,11 +278,13 @@ interface ITelephony {
     /**
      * Allow mobile data connections.
      */
+    @UnsupportedAppUsage
     boolean enableDataConnectivity();
 
     /**
      * Disallow mobile data connections.
      */
+    @UnsupportedAppUsage
     boolean disableDataConnectivity();
 
     /**
@@ -293,6 +306,7 @@ interface ITelephony {
      */
     List<NeighboringCellInfo> getNeighboringCellInfo(String callingPkg);
 
+     @UnsupportedAppUsage
      int getCallState();
 
     /**
@@ -300,7 +314,9 @@ interface ITelephony {
      */
      int getCallStateForSlot(int slotIndex);
 
+     @UnsupportedAppUsage
      int getDataActivity();
+     @UnsupportedAppUsage
      int getDataState();
 
     /**
@@ -308,6 +324,7 @@ interface ITelephony {
      * Returns TelephonyManager.PHONE_TYPE_CDMA if RILConstants.CDMA_PHONE
      * and TelephonyManager.PHONE_TYPE_GSM if RILConstants.GSM_PHONE
      */
+    @UnsupportedAppUsage
     int getActivePhoneType();
 
     /**
@@ -444,6 +461,7 @@ interface ITelephony {
      * Returns the network type for data transmission
      * Legacy call, permission-free
      */
+    @UnsupportedAppUsage
     int getNetworkType();
 
     /**
@@ -477,6 +495,7 @@ interface ITelephony {
     /**
      * Return true if an ICC card is present
      */
+    @UnsupportedAppUsage
     boolean hasIccCard();
 
     /**
@@ -534,6 +553,20 @@ interface ITelephony {
     void setCellInfoListRate(int rateInMillis);
 
     /**
+     * Opens a logical channel to the ICC card using the physical slot index.
+     *
+     * Input parameters equivalent to TS 27.007 AT+CCHO command.
+     *
+     * @param slotIndex The physical slot index of the target ICC card
+     * @param callingPackage the name of the package making the call.
+     * @param AID Application id. See ETSI 102.221 and 101.220.
+     * @param p2 P2 parameter (described in ISO 7816-4).
+     * @return an IccOpenLogicalChannelResponse object.
+     */
+    IccOpenLogicalChannelResponse iccOpenLogicalChannelBySlot(
+            int slotIndex, String callingPackage, String AID, int p2);
+
+    /**
      * Opens a logical channel to the ICC card.
      *
      * Input parameters equivalent to TS 27.007 AT+CCHO command.
@@ -548,24 +581,37 @@ interface ITelephony {
             int subId, String callingPackage, String AID, int p2);
 
     /**
+     * Closes a previously opened logical channel to the ICC card using the physical slot index.
+     *
+     * Input parameters equivalent to TS 27.007 AT+CCHC command.
+     *
+     * @param slotIndex The physical slot index of the target ICC card
+     * @param channel is the channel id to be closed as returned by a
+     *            successful iccOpenLogicalChannel.
+     * @return true if the channel was closed successfully.
+     */
+    boolean iccCloseLogicalChannelBySlot(int slotIndex, int channel);
+
+    /**
      * Closes a previously opened logical channel to the ICC card.
      *
      * Input parameters equivalent to TS 27.007 AT+CCHC command.
      *
      * @param subId The subscription to use.
-     * @param channel is the channel id to be closed as retruned by a
+     * @param channel is the channel id to be closed as returned by a
      *            successful iccOpenLogicalChannel.
      * @return true if the channel was closed successfully.
      */
+    @UnsupportedAppUsage
     boolean iccCloseLogicalChannel(int subId, int channel);
 
     /**
-     * Transmit an APDU to the ICC card over a logical channel.
+     * Transmit an APDU to the ICC card over a logical channel using the physical slot index.
      *
      * Input parameters equivalent to TS 27.007 AT+CGLA command.
      *
-     * @param subId The subscription to use.
-     * @param channel is the channel id to be closed as retruned by a
+     * @param slotIndex The physical slot index of the target ICC card
+     * @param channel is the channel id to be closed as returned by a
      *            successful iccOpenLogicalChannel.
      * @param cla Class of the APDU command.
      * @param instruction Instruction of the APDU command.
@@ -577,8 +623,50 @@ interface ITelephony {
      * @return The APDU response from the ICC card with the status appended at
      *            the end.
      */
+    String iccTransmitApduLogicalChannelBySlot(int slotIndex, int channel, int cla, int instruction,
+            int p1, int p2, int p3, String data);
+
+    /**
+     * Transmit an APDU to the ICC card over a logical channel.
+     *
+     * Input parameters equivalent to TS 27.007 AT+CGLA command.
+     *
+     * @param subId The subscription to use.
+     * @param channel is the channel id to be closed as returned by a
+     *            successful iccOpenLogicalChannel.
+     * @param cla Class of the APDU command.
+     * @param instruction Instruction of the APDU command.
+     * @param p1 P1 value of the APDU command.
+     * @param p2 P2 value of the APDU command.
+     * @param p3 P3 value of the APDU command. If p3 is negative a 4 byte APDU
+     *            is sent to the SIM.
+     * @param data Data to be sent with the APDU.
+     * @return The APDU response from the ICC card with the status appended at
+     *            the end.
+     */
+    @UnsupportedAppUsage
     String iccTransmitApduLogicalChannel(int subId, int channel, int cla, int instruction,
             int p1, int p2, int p3, String data);
+
+    /**
+     * Transmit an APDU to the ICC card over the basic channel using the physical slot index.
+     *
+     * Input parameters equivalent to TS 27.007 AT+CSIM command.
+     *
+     * @param slotIndex The physical slot index of the target ICC card
+     * @param callingPackage the name of the package making the call.
+     * @param cla Class of the APDU command.
+     * @param instruction Instruction of the APDU command.
+     * @param p1 P1 value of the APDU command.
+     * @param p2 P2 value of the APDU command.
+     * @param p3 P3 value of the APDU command. If p3 is negative a 4 byte APDU
+     *            is sent to the SIM.
+     * @param data Data to be sent with the APDU.
+     * @return The APDU response from the ICC card with the status appended at
+     *            the end.
+     */
+    String iccTransmitApduBasicChannelBySlot(int slotIndex, String callingPackage, int cla,
+            int instruction, int p1, int p2, int p3, String data);
 
     /**
      * Transmit an APDU to the ICC card over the basic channel.
@@ -700,13 +788,13 @@ interface ITelephony {
     int getPreferredNetworkType(int subId);
 
     /**
-     * Check TETHER_DUN_REQUIRED and TETHER_DUN_APN settings, net.tethering.noprovisioning
-     * SystemProperty to decide whether DUN APN is required for
-     * tethering.
+     * Check whether DUN APN is required for tethering with subId.
      *
-     * @return 0: Not required. 1: required. 2: Not set.
+     * @param subId the id of the subscription to require tethering.
+     * @return {@code true} if DUN APN is required for tethering.
+     * @hide
      */
-    int getTetherApnRequired();
+    boolean getTetherApnRequiredForSubscriber(int subId);
 
     /**
     * Enables framework IMS and triggers IMS Registration.
@@ -765,7 +853,7 @@ interface ITelephony {
      * @param subId the id of the subscription.
      * @return CellNetworkScanResult containing status of scan and networks.
      */
-    CellNetworkScanResult getCellNetworkScanResults(int subId);
+    CellNetworkScanResult getCellNetworkScanResults(int subId, String callingPackage);
 
     /**
      * Perform a radio network scan and return the id of this scan.
@@ -774,10 +862,11 @@ interface ITelephony {
      * @param request Defines all the configs for network scan.
      * @param messenger Callback messages will be sent using this messenger.
      * @param binder the binder object instantiated in TelephonyManager.
+     * @param callingPackage the calling package
      * @return An id for this scan.
      */
     int requestNetworkScan(int subId, in NetworkScanRequest request, in Messenger messenger,
-            in IBinder binder);
+            in IBinder binder, in String callingPackage);
 
     /**
      * Stop an existing radio network scan.
@@ -828,6 +917,7 @@ interface ITelephony {
      *
      * @return true on enabled
      */
+    @UnsupportedAppUsage
     boolean getDataEnabled(int subId);
 
     /**
@@ -1175,6 +1265,11 @@ interface ITelephony {
      */
     int getSubIdForPhoneAccount(in PhoneAccount phoneAccount);
 
+    /**
+     * Returns the PhoneAccountHandle associated with a subscription ID.
+     */
+    PhoneAccountHandle getPhoneAccountHandleForSubscriptionId(int subscriptionId);
+
     void factoryReset(int subId);
 
     /**
@@ -1347,7 +1442,7 @@ interface ITelephony {
     /**
      * Returns fine-grained carrier id of the current subscription.
      *
-     * <p>The precise carrier id can be used to further differentiate a carrier by different
+     * <p>The specific carrier id can be used to further differentiate a carrier by different
      * networks, by prepaid v.s.postpaid or even by 4G v.s.3G plan. Each carrier has a unique
      * carrier id {@link #getSimCarrierId()} but can have multiple precise carrier id. e.g,
      * {@link #getSimCarrierId()} will always return Tracfone (id 2022) for a Tracfone SIM, while
@@ -1361,19 +1456,19 @@ interface ITelephony {
      * be identified.
      * @hide
      */
-    int getSubscriptionPreciseCarrierId(int subId);
+    int getSubscriptionSpecificCarrierId(int subId);
 
     /**
      * Similar like {@link #getSimCarrierIdName()}, returns user-facing name of the
-     * precise carrier id {@link #getSimPreciseCarrierId()}
+     * specific carrier id {@link #getSimSpecificCarrierId()}
      *
      * <p>The returned name is unlocalized.
      *
-     * @return user-facing name of the subscription precise carrier id. Return {@code null} if the
+     * @return user-facing name of the subscription specific carrier id. Return {@code null} if the
      * subscription is unavailable or the carrier cannot be identified.
      * @hide
      */
-    String getSubscriptionPreciseCarrierName(int subId);
+    String getSubscriptionSpecificCarrierName(int subId);
 
     /**
      * Returns carrier id based on MCCMNC only. This will return a MNO carrier id used for fallback
@@ -1610,6 +1705,11 @@ interface ITelephony {
      */
      int getNetworkSelectionMode(int subId);
 
+     /**
+     * Return true if the device is in emergency sms mode, false otherwise.
+     */
+     boolean isInEmergencySmsMode();
+
     /**
      * Get a list of SMS apps on a user.
      */
@@ -1670,7 +1770,7 @@ interface ITelephony {
     /**
      * Modify the user's setting for whether or not 4G LTE is enabled.
      */
-    void setAdvancedCallingSetting(int subId, boolean isEnabled);
+    void setAdvancedCallingSettingEnabled(int subId, boolean isEnabled);
 
     /**
      * return true if the user's setting for VT is enabled for the subscription.
@@ -1680,7 +1780,7 @@ interface ITelephony {
     /**
      * Modify the user's setting for whether or not VT is available for the subscrption specified.
      */
-    void setVtSetting(int subId, boolean isEnabled);
+    void setVtSettingEnabled(int subId, boolean isEnabled);
 
     /**
      * return true if the user's setting for whether or not Voice over WiFi is currently enabled.
@@ -1690,7 +1790,7 @@ interface ITelephony {
     /**
      * sets the user's setting for Voice over WiFi enabled state.
      */
-    void setVoWiFiSetting(int subId, boolean isEnabled);
+    void setVoWiFiSettingEnabled(int subId, boolean isEnabled);
 
     /**
      * return true if the user's setting for Voice over WiFi while roaming is enabled.
@@ -1701,7 +1801,7 @@ interface ITelephony {
      * Sets the user's preference for whether or not Voice over WiFi is enabled for the current
      * subscription while roaming.
      */
-    void setVoWiFiRoamingSetting(int subId, boolean isEnabled);
+    void setVoWiFiRoamingSettingEnabled(int subId, boolean isEnabled);
 
     /**
      * Set the Voice over WiFi enabled state, but do not persist the setting.
@@ -1743,12 +1843,12 @@ interface ITelephony {
     /**
      * Return the emergency number list from all the active subscriptions.
      */
-    Map getCurrentEmergencyNumberList(String callingPackage);
+    Map getEmergencyNumberList(String callingPackage);
 
     /**
      * Identify if the number is emergency number, based on all the active subscriptions.
      */
-    boolean isCurrentEmergencyNumber(String number, boolean exactMatch);
+    boolean isEmergencyNumber(String number, boolean exactMatch);
 
     /**
      * Return a list of certs in hex string from loaded carrier privileges access rules.
@@ -1822,27 +1922,40 @@ interface ITelephony {
      * Indicate if the enablement of multi SIM functionality is restricted.
      * @hide
      */
-    void setMultisimCarrierRestriction(boolean isMultisimCarrierRestricted);
+    void setMultiSimCarrierRestriction(boolean isMultiSimCarrierRestricted);
 
     /**
-     * Returns if the usage of multiple SIM cards at the same time is restricted.
-     * @hide
+     * Returns if the usage of multiple SIM cards at the same time is supported.
+     *
+     * @param callingPackage The package making the call.
+     * @return {@link #MULTISIM_ALLOWED} if the device supports multiple SIMs.
+     * {@link #MULTISIM_NOT_SUPPORTED_BY_HARDWARE} if the device does not support multiple SIMs.
+     * {@link #MULTISIM_NOT_SUPPORTED_BY_CARRIER} in the device supports multiple SIMs, but the
+     * functionality is restricted by the carrier.
      */
-    boolean isMultisimCarrierRestricted();
+    int isMultiSimSupported(String callingPackage);
 
     /**
      * Switch configs to enable multi-sim or switch back to single-sim
      * @hide
      */
     void switchMultiSimConfig(int numOfSims);
-    /**
-     * Get how many modems have been activated on the phone
-     * @hide
-     */
-    int getNumOfActiveSims();
+
     /**
      * Get if reboot is required upon altering modems configurations
      * @hide
      */
     boolean isRebootRequiredForModemConfigChange();
+
+    /**
+     * Get the mapping from logical slots to physical slots.
+     */
+    int[] getSlotsMapping();
+
+    /**
+     * Get the IRadio HAL Version encoded as 100 * MAJOR_VERSION + MINOR_VERSION or -1 if unknown
+     */
+    int getRadioHalVersion();
+
+    boolean isModemEnabledForSlot(int slotIndex, String callingPackage);
 }

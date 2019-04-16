@@ -67,6 +67,7 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"Povoliť ladenie USB?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Digitálny odtlačok RSA počítača je:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Vždy povoliť z tohto počítača"</string>
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"Povoliť"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Ladenie cez USB nie je povolené"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Používateľ, ktorý je práve prihlásený v tomto zariadení, nemôže zapnúť ladenie USB. Ak chcete použiť túto funkciu, prepnite na hlavného používateľa."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Priblížiť na celú obrazovku"</string>
@@ -158,6 +159,8 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
+    <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"Roaming"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
@@ -212,9 +215,9 @@
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Režim v lietadle je zapnutý."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"úplné ticho"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"iba budíky"</string>
-    <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Nerušiť"</string>
-    <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Stav Nerušiť je vypnutý."</string>
-    <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Stav Nerušiť je zapnutý."</string>
+    <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Režim bez vyrušení"</string>
+    <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Režim bez vyrušení je vypnutý."</string>
+    <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Režim bez vyrušení je zapnutý."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth"</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"Rozhranie Bluetooth je vypnuté."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"Rozhranie Bluetooth je zapnuté."</string>
@@ -230,11 +233,11 @@
     <string name="accessibility_quick_settings_close" msgid="3115847794692516306">"Zavrieť panel"</string>
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"Dlhší čas"</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"Kratší čas"</string>
-    <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"Svietidlo je vypnuté."</string>
-    <string name="accessibility_quick_settings_flashlight_unavailable" msgid="8012811023312280810">"Svietidlo nie je k dispozícii."</string>
-    <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"Svietidlo je zapnuté."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"Svietidlo je vypnuté."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"Svietidlo je zapnuté."</string>
+    <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"Baterka je vypnutá."</string>
+    <string name="accessibility_quick_settings_flashlight_unavailable" msgid="8012811023312280810">"Baterka nie je k dispozícii."</string>
+    <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"Baterka je zapnutá."</string>
+    <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"Baterka je vypnutá."</string>
+    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"Baterka je zapnutá."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="4406577213290173911">"Prevrátenie farieb je vypnuté."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="6897462320184911126">"Prevrátenie farieb je zapnuté."</string>
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"Mobilný hotspot je vypnutý."</string>
@@ -278,7 +281,7 @@
     <string name="start_dreams" msgid="5640361424498338327">"Šetrič obrazovky"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_header_onboarding_text" msgid="8030309023792936283">"Pridržaním ikon zobrazíte ďalšie možnosti"</string>
-    <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Nerušiť"</string>
+    <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Režim bez vyrušení"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Iba prioritné"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Iba budíky"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Úplné ticho"</string>
@@ -290,6 +293,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"Zvuk"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"Náhlavná súprava"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"Vstup"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="4930931771490695395">"Načúvacie pomôcky"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"Zapína sa…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Jas"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Automatické otáčanie"</string>
@@ -442,7 +446,7 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Nabudúce nezobrazovať"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Vymazať všetko"</string>
     <string name="manage_notifications_text" msgid="8035284146227267681">"Spravovať upozornenia"</string>
-    <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Upozornenia sú pozastavené režimom Nerušiť"</string>
+    <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Upozornenia sú pozastavené režimom bez vyrušení"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Spustiť"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Žiadne upozornenia"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"Profil môže byť monitorovaný"</string>
@@ -650,7 +654,7 @@
       <item quantity="other">%d minút</item>
       <item quantity="one">%d minúta</item>
     </plurals>
-    <string name="battery_panel_title" msgid="7944156115535366613">"Využitie batérie"</string>
+    <string name="battery_panel_title" msgid="7944156115535366613">"Spotreba batérie"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Počas nabíjania nie je Šetrič batérie k dispozícii"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Šetrič batérie"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Obmedzí výkonnosť a údaje na pozadí"</string>
@@ -697,9 +701,9 @@
     <string name="keyboard_shortcut_group_applications_youtube" msgid="6555453761294723317">"YouTube"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="9043614299194991263">"Kalendár"</string>
     <string name="tuner_full_zen_title" msgid="4540823317772234308">"Zobrazovať s ovládacími prvkami hlasitosti"</string>
-    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"Nerušiť"</string>
+    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"Režim bez vyrušení"</string>
     <string name="volume_dnd_silent" msgid="4363882330723050727">"Skratka tlačidiel hlasitosti"</string>
-    <string name="volume_up_silent" msgid="7141255269783588286">"Pri zvýšení hlasitosti ukončiť režim Nerušiť"</string>
+    <string name="volume_up_silent" msgid="7141255269783588286">"Pri zvýšení hlasitosti ukončiť režim bez vyrušení"</string>
     <string name="battery" msgid="7498329822413202973">"Batéria"</string>
     <string name="clock" msgid="7416090374234785905">"Hodiny"</string>
     <string name="headset" msgid="4534219457597457353">"Náhlavná súprava"</string>
@@ -836,10 +840,10 @@
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%s</xliff:g> – <xliff:g id="ID_2">%s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Pripojenie Wi‑Fi je vypnuté"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Rozhranie Bluetooth je vypnuté"</string>
-    <string name="dnd_is_off" msgid="6167780215212497572">"Nastavenie Nerušiť je vypnuté"</string>
-    <string name="qs_dnd_prompt_auto_rule" msgid="862559028345233052">"Režim Nerušiť bol zapnutý automatickým pravidlom (<xliff:g id="ID_1">%s</xliff:g>)."</string>
-    <string name="qs_dnd_prompt_app" msgid="7978037419334156034">"Režim Nerušiť bol zapnutý aplikáciou (<xliff:g id="ID_1">%s</xliff:g>)."</string>
-    <string name="qs_dnd_prompt_auto_rule_app" msgid="2599343675391111951">"Režim Nerušiť bol zapnutý automatickým pravidlom alebo aplikáciou."</string>
+    <string name="dnd_is_off" msgid="6167780215212497572">"Režim bez vyrušení je vypnutý"</string>
+    <string name="qs_dnd_prompt_auto_rule" msgid="862559028345233052">"Režim bez vyrušení bol zapnutý automatickým pravidlom (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_app" msgid="7978037419334156034">"Režim bez vyrušení bol zapnutý aplikáciou (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="2599343675391111951">"Režim bez vyrušení bol zapnutý automatickým pravidlom alebo aplikáciou."</string>
     <string name="qs_dnd_until" msgid="3469471136280079874">"Do <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Ponechať"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Nahradiť"</string>

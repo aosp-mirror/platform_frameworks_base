@@ -16,9 +16,9 @@
 
 package android.telecom;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.telecom.Logging.EventManager;
 import android.telecom.Logging.Session;
@@ -29,8 +29,6 @@ import android.text.TextUtils;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.IllegalFormatException;
 import java.util.Locale;
 
@@ -100,6 +98,7 @@ public class Log {
         }
     }
 
+    @UnsupportedAppUsage
     public static void i(String prefix, String format, Object... args) {
         if (INFO) {
             android.util.Slog.i(TAG, buildMessage(prefix, format, args));
@@ -130,6 +129,7 @@ public class Log {
         }
     }
 
+    @UnsupportedAppUsage
     public static void w(String prefix, String format, Object... args) {
         if (WARN) {
             android.util.Slog.w(TAG, buildMessage(prefix, format, args));
@@ -373,6 +373,12 @@ public class Log {
         return FORCE_LOGGING || android.util.Log.isLoggable(TAG, level);
     }
 
+    /**
+     * Generates an obfuscated string for a calling handle in {@link Uri} format, or a raw phone
+     * phone number in {@link String} format.
+     * @param pii The information to obfuscate.
+     * @return The obfuscated string.
+     */
     public static String piiHandle(Object pii) {
         if (pii == null || VERBOSE) {
             return String.valueOf(pii);
@@ -389,16 +395,7 @@ public class Log {
 
             String textToObfuscate = uri.getSchemeSpecificPart();
             if (PhoneAccount.SCHEME_TEL.equals(scheme)) {
-                int numDigitsToObfuscate = getDialableCount(textToObfuscate)
-                        - NUM_DIALABLE_DIGITS_TO_LOG;
-                for (int i = 0; i < textToObfuscate.length(); i++) {
-                    char c = textToObfuscate.charAt(i);
-                    boolean isDialable = PhoneNumberUtils.isDialable(c);
-                    if (isDialable) {
-                        numDigitsToObfuscate--;
-                    }
-                    sb.append(isDialable && numDigitsToObfuscate >= 0 ? "*" : c);
-                }
+                obfuscatePhoneNumber(sb, textToObfuscate);
             } else if (PhoneAccount.SCHEME_SIP.equals(scheme)) {
                 for (int i = 0; i < textToObfuscate.length(); i++) {
                     char c = textToObfuscate.charAt(i);
@@ -410,9 +407,31 @@ public class Log {
             } else {
                 sb.append(pii(pii));
             }
+        } else if (pii instanceof String) {
+            String number = (String) pii;
+            obfuscatePhoneNumber(sb, number);
         }
 
         return sb.toString();
+    }
+
+    /**
+     * Obfuscates a phone number, allowing NUM_DIALABLE_DIGITS_TO_LOG digits to be exposed for the
+     * phone number.
+     * @param sb String buffer to write obfuscated number to.
+     * @param phoneNumber The number to obfuscate.
+     */
+    private static void obfuscatePhoneNumber(StringBuilder sb, String phoneNumber) {
+        int numDigitsToObfuscate = getDialableCount(phoneNumber)
+                - NUM_DIALABLE_DIGITS_TO_LOG;
+        for (int i = 0; i < phoneNumber.length(); i++) {
+            char c = phoneNumber.charAt(i);
+            boolean isDialable = PhoneNumberUtils.isDialable(c);
+            if (isDialable) {
+                numDigitsToObfuscate--;
+            }
+            sb.append(isDialable && numDigitsToObfuscate >= 0 ? "*" : c);
+        }
     }
 
     /**

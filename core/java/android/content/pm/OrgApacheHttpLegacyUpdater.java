@@ -18,6 +18,7 @@ package android.content.pm;
 import static android.content.pm.SharedLibraryNames.ORG_APACHE_HTTP_LEGACY;
 
 import android.content.pm.PackageParser.Package;
+import android.os.Build;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -29,6 +30,11 @@ import com.android.internal.annotations.VisibleForTesting;
  */
 @VisibleForTesting
 public class OrgApacheHttpLegacyUpdater extends PackageSharedLibraryUpdater {
+
+    private static boolean apkTargetsApiLevelLessThanOrEqualToOMR1(Package pkg) {
+        int targetSdkVersion = pkg.applicationInfo.targetSdkVersion;
+        return targetSdkVersion < Build.VERSION_CODES.P;
+    }
 
     @Override
     public void updatePackage(Package pkg) {

@@ -143,9 +143,6 @@ public class HardwareUiLayout extends LinearLayout implements Tunable {
                 mSeparatedView.setBackground(mSeparatedViewBackground);
                 updateEdgeMargin(mEdgeBleed ? 0 : getEdgePadding());
                 mOldHeight = mList.getMeasuredHeight();
-                mList.addOnLayoutChangeListener(
-                        (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) ->
-                                updatePosition());
                 updateRotation();
             } else {
                 return;
@@ -155,6 +152,8 @@ public class HardwareUiLayout extends LinearLayout implements Tunable {
         if (newHeight != mOldHeight) {
             animateChild(mOldHeight, newHeight);
         }
+
+        post(() -> updatePaddingAndGravityIfTooTall());
         post(() -> updatePosition());
     }
 
@@ -241,7 +240,7 @@ public class HardwareUiLayout extends LinearLayout implements Tunable {
         separatedViewLayoutParams.gravity = rotateGravityRight(separatedViewLayoutParams.gravity);
         mSeparatedView.setLayoutParams(separatedViewLayoutParams);
 
-        setGravity(p.gravity);
+        setGravity(rotateGravityRight(getGravity()));
     }
 
     private void swapDimens(View v) {
@@ -299,7 +298,7 @@ public class HardwareUiLayout extends LinearLayout implements Tunable {
         separatedViewLayoutParams.gravity = rotateGravityLeft(separatedViewLayoutParams.gravity);
         mSeparatedView.setLayoutParams(separatedViewLayoutParams);
 
-        setGravity(p.gravity);
+        setGravity(rotateGravityLeft(getGravity()));
     }
 
     private int rotateGravityLeft(int gravity) {
@@ -445,6 +444,46 @@ public class HardwareUiLayout extends LinearLayout implements Tunable {
             mCollapse = false;
         }
         mAnimator.start();
+    }
+
+    // If current power menu height larger then screen height, remove padding to break power menu
+    // alignment and set menu center vertical within the screen.
+    private void updatePaddingAndGravityIfTooTall() {
+        int defaultTopPadding;
+        int viewsTotalHeight;
+        int separatedViewTopMargin;
+        int screenHeight;
+        int totalHeight;
+        int targetGravity;
+        MarginLayoutParams params = (MarginLayoutParams) mSeparatedView.getLayoutParams();
+        switch (RotationUtils.getRotation(getContext())) {
+            case RotationUtils.ROTATION_LANDSCAPE:
+                defaultTopPadding = getPaddingLeft();
+                viewsTotalHeight = mList.getMeasuredWidth() + mSeparatedView.getMeasuredWidth();
+                separatedViewTopMargin = mHasSeparatedButton ? params.leftMargin : 0;
+                screenHeight = getMeasuredWidth();
+                targetGravity = Gravity.CENTER_HORIZONTAL|Gravity.TOP;
+                break;
+            case RotationUtils.ROTATION_SEASCAPE:
+                defaultTopPadding = getPaddingRight();
+                viewsTotalHeight = mList.getMeasuredWidth() + mSeparatedView.getMeasuredWidth();
+                separatedViewTopMargin = mHasSeparatedButton ? params.leftMargin : 0;
+                screenHeight = getMeasuredWidth();
+                targetGravity = Gravity.CENTER_HORIZONTAL|Gravity.BOTTOM;
+                break;
+            default: // Portrait
+                defaultTopPadding = getPaddingTop();
+                viewsTotalHeight = mList.getMeasuredHeight() + mSeparatedView.getMeasuredHeight();
+                separatedViewTopMargin = mHasSeparatedButton ? params.topMargin : 0;
+                screenHeight = getMeasuredHeight();
+                targetGravity = Gravity.CENTER_VERTICAL|Gravity.RIGHT;
+                break;
+        }
+        totalHeight = defaultTopPadding + viewsTotalHeight + separatedViewTopMargin;
+        if (totalHeight >= screenHeight) {
+            setPadding(0, 0, 0, 0);
+            setGravity(targetGravity);
+        }
     }
 
     @Override

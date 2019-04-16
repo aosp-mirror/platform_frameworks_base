@@ -16,4 +16,4 @@
 
 package android.net;
 
-parcelable RouteInfo;
+@JavaOnlyStableParcelable parcelable RouteInfo;

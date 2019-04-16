@@ -16,20 +16,27 @@
 
 package android.net.apf;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.content.Context;
+import android.content.res.Resources;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import com.android.internal.R;
 
 /**
- * APF program support capabilities.
+ * APF program support capabilities. APF stands for Android Packet Filtering and it is a flexible
+ * way to drop unwanted network packets to save power.
  *
+ * See documentation at hardware/google/apf/apf.h
+ *
+ * This class is immutable.
  * @hide
  */
 @SystemApi
 @TestApi
-public class ApfCapabilities {
+public final class ApfCapabilities implements Parcelable {
     /**
      * Version of APF instruction set supported for packet filtering. 0 indicates no support for
      * packet filtering using APF programs.
@@ -53,6 +60,37 @@ public class ApfCapabilities {
         this.apfPacketFormat = apfPacketFormat;
     }
 
+    private ApfCapabilities(Parcel in) {
+        apfVersionSupported = in.readInt();
+        maximumApfProgramSize = in.readInt();
+        apfPacketFormat = in.readInt();
+    }
+
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(apfVersionSupported);
+        dest.writeInt(maximumApfProgramSize);
+        dest.writeInt(apfPacketFormat);
+    }
+
+    public static final Creator<ApfCapabilities> CREATOR = new Creator<ApfCapabilities>() {
+        @Override
+        public ApfCapabilities createFromParcel(Parcel in) {
+            return new ApfCapabilities(in);
+        }
+
+        @Override
+        public ApfCapabilities[] newArray(int size) {
+            return new ApfCapabilities[size];
+        }
+    };
+
     @Override
     public String toString() {
         return String.format("%s{version: %d, maxSize: %d, format: %d}", getClass().getSimpleName(),
@@ -69,10 +107,11 @@ public class ApfCapabilities {
     }
 
     /**
-     * Returns true if the APF interpreter advertises support for the data buffer access opcodes
-     * LDDW and STDW.
+     * Determines whether the APF interpreter advertises support for the data buffer access opcodes
+     * LDDW (LoaD Data Word) and STDW (STore Data Word). Full LDDW (LoaD Data Word) and
+     * STDW (STore Data Word) support is present from APFv4 on.
      *
-     * Full LDDW and STDW support is present from APFv4 on.
+     * @return {@code true} if the IWifiStaIface#readApfPacketFilterData is supported.
      */
     public boolean hasDataAccess() {
         return apfVersionSupported >= 4;
@@ -81,14 +120,14 @@ public class ApfCapabilities {
     /**
      * @return Whether the APF Filter in the device should filter out IEEE 802.3 Frames.
      */
-    public static boolean getApfDrop8023Frames(Context context) {
-        return context.getResources().getBoolean(R.bool.config_apfDrop802_3Frames);
+    public static boolean getApfDrop8023Frames() {
+        return Resources.getSystem().getBoolean(R.bool.config_apfDrop802_3Frames);
     }
 
     /**
      * @return An array of blacklisted EtherType, packets with EtherTypes within it will be dropped.
      */
-    public static int[] getApfEthTypeBlackList(Context context) {
-        return context.getResources().getIntArray(R.array.config_apfEthTypeBlackList);
+    public static @NonNull int[] getApfEtherTypeBlackList() {
+        return Resources.getSystem().getIntArray(R.array.config_apfEthTypeBlackList);
     }
 }

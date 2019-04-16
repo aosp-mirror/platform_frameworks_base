@@ -40,6 +40,7 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Yhdistetty seuraavan kautta: %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Käytettävissä seuraavan kautta: %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Yhdistetty, ei internetyhteyttä"</string>
+    <string name="wifi_limited_connection" msgid="7717855024753201527">"Rajallinen yhteys"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"Ei internetyhteyttä"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"Sisäänkirjautuminen vaaditaan"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Yhteyspiste tilapäisesti täynnä"</string>
@@ -80,8 +81,8 @@
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM-kortin käyttö"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"HD-ääni: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"HD-ääni"</string>
-    <string name="bluetooth_profile_hearing_aid" msgid="7999237886427812595">"Kuulolaite"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="7188282786730266159">"Kuulolaite yhdistetty"</string>
+    <string name="bluetooth_profile_hearing_aid" msgid="6680721080542444257">"Kuulolaitteet"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="3051944447369418317">"Yhdistetty kuulolaitteisiin"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Yhdistetty median ääneen"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Yhdistetty puhelimen ääneen"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Yhdistetty tiedostonsiirtopalvelimeen"</string>
@@ -98,7 +99,7 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Käytä puhelimen äänille"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Käytä tiedostojen siirtoon"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"Käytä syöttöön"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="908775281788309484">"Käytä kuulolaitteen kanssa"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="8843499209204010224">"Käytä kuulolaitteilla"</string>
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Muodosta laitepari"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"MUODOSTA LAITEPARI"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Peruuta"</string>
@@ -284,7 +285,7 @@
     <string name="show_touches" msgid="2642976305235070316">"Näytä kosketus"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"Anna visuaalista palautetta kosketuksesta."</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Näytä pintapäivitykset"</string>
-    <string name="show_screen_updates_summary" msgid="2569622766672785529">"Väläytä koko ikkunoiden pinnat päivitettäessä"</string>
+    <string name="show_screen_updates_summary" msgid="2569622766672785529">"Väläytä koko ikkunoiden pinnat päivitettäessä."</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"Näytä GPU:n näytön päivitykset"</string>
     <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"Väläytä ikkunoiden sisältö GPU:lla piirrettäessä."</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Näytä laitteistotason päivitykset"</string>

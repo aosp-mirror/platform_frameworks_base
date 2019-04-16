@@ -136,9 +136,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Chiamate Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi <xliff:g id="SPN">%s</xliff:g>"</string>
-    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Non attiva"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Rete preferita: Wi-Fi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Rete preferita: dati mobili"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Chiamate Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Chiamate Wi-Fi"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Off"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"Chiamata tramite Wi-Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"Chiamata su rete mobile"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Solo Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: inoltro non effettuato"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -430,6 +434,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Consente all\'applicazione di accedere alle funzioni telefoniche del dispositivo. Questa autorizzazione consente all\'applicazione di determinare il numero di telefono e gli ID dei dispositivi, se una chiamata è attiva e il numero remoto connesso da una chiamata."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"indirizzamento delle chiamate tramite il sistema"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Consente all\'app di indirizzare le proprie chiamate tramite il sistema al fine di migliorare l\'esperienza di chiamata."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"visualizzazione e controllo delle chiamate tramite il sistema."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Consente all\'app di visualizzare e controllare le chiamate in corso sul dispositivo. Sono incluse informazioni quali i numeri e lo stato relativi alle chiamate."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"Continuazione di una chiamata da un\'altra app"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Consente all\'app di continuare una chiamata che è stata iniziata in un\'altra app."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"lettura dei numeri di telefono"</string>
@@ -595,7 +601,7 @@
     <string name="policylab_wipeData" msgid="3910545446758639713">"Cancellare tutti i dati"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Cancella i dati del tablet senza preavviso eseguendo un ripristino dati di fabbrica."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Consente di cancellare i dati della TV senza preavviso eseguendo un ripristino dei dati di fabbrica."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Cancella i dati del telefono senza preavviso eseguendo un ripristino dati di fabbrica."</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Cancella i dati del telefono senza preavviso eseguendo un ripristino dei dati di fabbrica."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Resettare i dati dell\'utente"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Resetta i dati dell\'utente sul tablet senza preavviso."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Resetta i dati dell\'utente sulla TV senza preavviso."</string>
@@ -1016,7 +1022,7 @@
     <string name="deleteText" msgid="6979668428458199034">"Elimina"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Metodo inserimento"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Azioni testo"</string>
-    <string name="email" msgid="4560673117055050403">"Invia una email"</string>
+    <string name="email" msgid="4560673117055050403">"Invia email"</string>
     <string name="email_desc" msgid="3638665569546416795">"Invia un\'email all\'indirizzo selezionato"</string>
     <string name="dial" msgid="1253998302767701559">"Chiama"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Chiama il numero di telefono selezionato"</string>
@@ -1117,7 +1123,7 @@
     <string name="app_upgrading_toast" msgid="3008139776215597053">"Upgrade dell\'app <xliff:g id="APPLICATION">%1$s</xliff:g>…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Ottimizzazione applicazione <xliff:g id="NUMBER_0">%1$d</xliff:g> di <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> in preparazione."</string>
-    <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Avvio applicazioni."</string>
+    <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Avvio app."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Conclusione dell\'avvio."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> in esecuzione"</string>
     <string name="heavy_weight_notification_detail" msgid="2304833848484424985">"Tocca per tornare al gioco"</string>
@@ -1177,8 +1183,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Accedi alla rete"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"La rete Wi-Fi non ha accesso a Internet"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> non ha accesso a Internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Tocca per le opzioni"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Connesso"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> ha una connettività limitata"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Tocca per connettere comunque"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Modifiche alle tue impostazioni dell\'hotspot"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"La tua banda di hotspot è cambiata."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Questo dispositivo non supporta la tua preferenza esclusiva per 5 GHz. Utilizzerà invece la banda a 5 GHz solo quando è disponibile."</string>
@@ -1744,7 +1753,7 @@
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Comprimi"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Non disturbare"</string>
-    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Tempo di inattività"</string>
+    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Tempo di riposo"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Notte di un giorno feriale"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Fine settimana"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Evento"</string>

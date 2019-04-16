@@ -1,0 +1,36 @@
+// Signature format: 2.0
+package com.android.server.pm.permission.configfile {
+
+  public class Exception {
+    ctor public Exception();
+    method public String getBrand();
+    method public java.util.List<com.android.server.pm.permission.configfile.Permission> getPermission();
+    method public String getSha256CertDigest();
+    method public String get_package();
+    method public void setBrand(String);
+    method public void setSha256CertDigest(String);
+    method public void set_package(String);
+  }
+
+  public class Exceptions {
+    ctor public Exceptions();
+    method public java.util.List<com.android.server.pm.permission.configfile.Exception> getException();
+  }
+
+  public class Permission {
+    ctor public Permission();
+    method public boolean getFixed();
+    method public String getName();
+    method public void setFixed(boolean);
+    method public void setName(String);
+  }
+
+  public class XmlParser {
+    ctor public XmlParser();
+    method public static com.android.server.pm.permission.configfile.Exceptions read(java.io.InputStream) throws javax.xml.datatype.DatatypeConfigurationException, java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method public static String readText(org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method public static void skip(org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+  }
+
+}
+

@@ -67,7 +67,6 @@ public class SettingsBackupTest {
                     Settings.System.LOCKSCREEN_DISABLED, // ?
                     Settings.System.MEDIA_BUTTON_RECEIVER, // candidate for backup?
                     Settings.System.MUTE_STREAMS_AFFECTED, //  candidate for backup?
-                    Settings.System.NOTIFICATION_LIGHT_PULSE, // candidate for backup?
                     Settings.System.NOTIFICATION_SOUND_CACHE, // internal cache
                     Settings.System.POINTER_LOCATION, // backup candidate?
                     Settings.System.DEBUG_ENABLE_ENHANCED_CALL_BLOCKING, // used for testing only
@@ -186,11 +185,7 @@ public class SettingsBackupTest {
                     Settings.Global.DATA_ROAMING,
                     Settings.Global.DATA_STALL_ALARM_AGGRESSIVE_DELAY_IN_MS,
                     Settings.Global.DATA_STALL_ALARM_NON_AGGRESSIVE_DELAY_IN_MS,
-                    Settings.Global.DATA_STALL_CONSECUTIVE_DNS_TIMEOUT_THRESHOLD,
-                    Settings.Global.DATA_STALL_EVALUATION_TYPE,
-                    Settings.Global.DATA_STALL_MIN_EVALUATE_INTERVAL,
                     Settings.Global.DATA_STALL_RECOVERY_ON_BAD_NETWORK,
-                    Settings.Global.DATA_STALL_VALID_DNS_TIME_THRESHOLD,
                     Settings.Global.DEBUG_APP,
                     Settings.Global.DEBUG_VIEW_ATTRIBUTES,
                     Settings.Global.DEFAULT_DNS_SERVER,
@@ -538,7 +533,6 @@ public class SettingsBackupTest {
                  Settings.Secure.BACKUP_ENABLED,
                  Settings.Secure.BACKUP_PROVISIONED,
                  Settings.Secure.BACKUP_TRANSPORT,
-                 Settings.Secure.CALL_REDIRECTION_DEFAULT_APPLICATION,
                  Settings.Secure.CALL_SCREENING_DEFAULT_COMPONENT,
                  Settings.Secure.CAMERA_LIFT_TRIGGER_ENABLED, // Candidate for backup?
                  Settings.Secure.CARRIER_APPS_HANDLED,
@@ -567,10 +561,8 @@ public class SettingsBackupTest {
                  Settings.Secure.LAST_SETUP_SHOWN,
                  Settings.Secure.LOCATION_CHANGER,
                  Settings.Secure.LOCATION_MODE,
-                 Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, // Candidate?
                  Settings.Secure.LOCK_SCREEN_ALLOW_REMOTE_INPUT, // Candidate?
                  Settings.Secure.LOCK_SCREEN_LOCK_AFTER_TIMEOUT,
-                 Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, // Candidate?
                  Settings.Secure.LOCK_TO_APP_EXIT_LOCKED,
                  Settings.Secure.MANAGED_PROFILE_CONTACT_REMOTE_SEARCH,
                  Settings.Secure.MULTI_PRESS_TIMEOUT,

@@ -18,8 +18,9 @@ import static org.mockito.Mockito.when;
 
 import android.content.pm.PackageManagerInternal;
 import android.os.Build;
-import android.support.test.InstrumentationRegistry;
 import android.testing.TestableContext;
+
+import androidx.test.InstrumentationRegistry;
 
 import org.junit.Before;
 import org.junit.Rule;

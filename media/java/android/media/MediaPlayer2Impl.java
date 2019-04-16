@@ -4781,7 +4781,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
         private void sendCompleteNotification(int status) {
             // In {@link #notifyWhenCommandLabelReached} case, a separate callback
-            // {#link #onCommandLabelReached} is already called in {@code process()}.
+            // {@link #onCommandLabelReached} is already called in {@code process()}.
             if (mMediaCallType == CALL_COMPLETED_NOTIFY_WHEN_COMMAND_LABEL_REACHED) {
                 return;
             }

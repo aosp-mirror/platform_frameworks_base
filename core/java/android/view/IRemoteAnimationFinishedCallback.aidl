@@ -23,5 +23,6 @@ package android.view;
  * {@hide}
  */
 interface IRemoteAnimationFinishedCallback {
+    @UnsupportedAppUsage
     void onAnimationFinished();
 }

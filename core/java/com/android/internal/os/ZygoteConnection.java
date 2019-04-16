@@ -26,6 +26,7 @@ import static android.system.OsConstants.STDOUT_FILENO;
 import static com.android.internal.os.ZygoteConnectionConstants.CONNECTION_TIMEOUT_MILLIS;
 import static com.android.internal.os.ZygoteConnectionConstants.WRAPPED_PID_TIMEOUT_MILLIS;
 
+import android.annotation.UnsupportedAppUsage;
 import android.metrics.LogMaker;
 import android.net.Credentials;
 import android.net.LocalSocket;
@@ -65,9 +66,12 @@ class ZygoteConnection {
      * that it closes when the child process terminates. In other cases,
      * it is closed in the peer.
      */
+    @UnsupportedAppUsage
     private final LocalSocket mSocket;
+    @UnsupportedAppUsage
     private final DataOutputStream mSocketOutStream;
     private final BufferedReader mSocketReader;
+    @UnsupportedAppUsage
     private final Credentials peer;
     private final String abiList;
     private boolean isEof;
@@ -239,7 +243,7 @@ class ZygoteConnection {
         pid = Zygote.forkAndSpecialize(parsedArgs.mUid, parsedArgs.mGid, parsedArgs.mGids,
                 parsedArgs.mRuntimeFlags, rlimits, parsedArgs.mMountExternal, parsedArgs.mSeInfo,
                 parsedArgs.mNiceName, fdsToClose, fdsToIgnore, parsedArgs.mStartChildZygote,
-                parsedArgs.mInstructionSet, parsedArgs.mAppDataDir);
+                parsedArgs.mInstructionSet, parsedArgs.mAppDataDir, parsedArgs.mTargetSdkVersion);
 
         try {
             if (pid == 0) {
@@ -319,13 +323,25 @@ class ZygoteConnection {
 
         private final MetricsLogger mMetricsLogger = new MetricsLogger();
         private static HiddenApiUsageLogger sInstance = new HiddenApiUsageLogger();
+        private int mHiddenApiAccessLogSampleRate = 0;
+
+        public static void setHiddenApiAccessLogSampleRate(int sampleRate) {
+            sInstance.mHiddenApiAccessLogSampleRate = sampleRate;
+        }
 
         public static HiddenApiUsageLogger getInstance() {
             return HiddenApiUsageLogger.sInstance;
         }
 
-        public void hiddenApiUsed(String packageName, String signature,
+        public void hiddenApiUsed(int sampledValue, String packageName, String signature,
                 int accessMethod, boolean accessDenied) {
+            if (sampledValue < mHiddenApiAccessLogSampleRate) {
+                logUsage(packageName, signature, accessMethod, accessDenied);
+            }
+        }
+
+        private void logUsage(String packageName, String signature, int accessMethod,
+                                  boolean accessDenied) {
             int accessMethodMetric = HiddenApiUsageLogger.ACCESS_METHOD_NONE;
             switch(accessMethod) {
                 case HiddenApiUsageLogger.ACCESS_METHOD_NONE:
@@ -356,6 +372,7 @@ class ZygoteConnection {
     private void handleHiddenApiAccessLogSampleRate(int samplingRate) {
         try {
             ZygoteInit.setHiddenApiAccessLogSampleRate(samplingRate);
+            HiddenApiUsageLogger.setHiddenApiAccessLogSampleRate(samplingRate);
             ZygoteInit.setHiddenApiUsageLogger(HiddenApiUsageLogger.getInstance());
             mSocketOutStream.writeInt(0);
         } catch (IOException ioe) {
@@ -383,6 +400,7 @@ class ZygoteConnection {
     /**
      * Closes socket associated with this connection.
      */
+    @UnsupportedAppUsage
     void closeSocket() {
         try {
             mSocket.close();

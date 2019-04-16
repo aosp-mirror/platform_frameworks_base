@@ -18,7 +18,8 @@ package com.android.server.pm;
 
 import android.content.IIntentReceiver;
 import android.os.Bundle;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -55,11 +56,11 @@ public class PackageManagerServiceTest {
             }
 
             @Override
-            public void notifyPackageAdded(String packageName) {
+            public void notifyPackageAdded(String packageName, int uid) {
             }
 
             @Override
-            public void notifyPackageRemoved(String packageName) {
+            public void notifyPackageRemoved(String packageName, int uid) {
             }
         }
 

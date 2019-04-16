@@ -136,9 +136,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"WiFi 通話 | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Wi-Fi 通話"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Wi-Fi 通話"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"關閉"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"首選 Wi-Fi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"流動數據優先"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"使用 Wi-Fi 通話"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"使用流動網絡通話"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"只限 Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：尚未轉接"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>:<xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -407,11 +411,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"接收額外的位置提供者指令"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"允許應用程式存取額外的位置提供者指令。這項設定可能會使應用程式干擾 GPS 或其他位置來源的運作。"</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"存取精確位置 (根據 GPS 和網絡)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"此應用程式可以根據 GPS 或網絡位置來源 (例如手機訊號塔和 Wi-Fi 網絡) 取得您的位置。您的手機必須支援並啟用這些位置資訊服務，應用程式方可使用這項功能。這可能會增加耗電量。"</string>
+    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"此應用程式可以根據 GPS 或網絡位置來源 (例如手機訊號塔和 Wi-Fi 網絡) 取得您的位置。您的手機必須支援並啟用這些定位服務，應用程式方可使用這項功能。這可能會增加耗電量。"</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"存取約略位置 (根據網絡)"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"此應用程式可以根據您的網絡來源 (例如手機訊號塔和 Wi-Fi 網絡) 取得您的位置。您的平板電腦必須支援並啟用這些位置資訊服務，應用程式方可使用這項功能。"</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"此應用程式可以根據您的網絡來源 (例如手機訊號塔和 Wi-Fi 網絡) 取得您的位置。您的電視必須支援並啟用這些位置資訊服務，應用程式方可使用這項功能。"</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"此應用程式可以根據您的網絡來源 (例如手機訊號塔和 Wi-Fi 網絡) 取得您的位置。您的手機必須支援並啟用這些位置資訊服務，應用程式方可使用這項功能。"</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"此應用程式可以根據您的網絡來源 (例如手機訊號塔和 Wi-Fi 網絡) 取得您的位置。您的平板電腦必須支援並啟用這些定位服務，應用程式方可使用這項功能。"</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"此應用程式可以根據您的網絡來源 (例如手機訊號塔和 Wi-Fi 網絡) 取得您的位置。您的電視必須支援並啟用這些定位服務，應用程式方可使用這項功能。"</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"此應用程式可以根據您的網絡來源 (例如手機訊號塔和 Wi-Fi 網絡) 取得您的位置。您的手機必須支援並啟用這些定位服務，應用程式方可使用這項功能。"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"更改音效設定"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"允許應用程式修改全域音頻設定，例如音量和用於輸出的喇叭。"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"錄製音效"</string>
@@ -430,6 +434,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"允許應用程式使用裝置的電話功能。這項權限允許應用程式確定手機號碼和裝置編號、是否正在通話中，以及所撥打的對方號碼。"</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"透過系統轉接來電"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"允許應用程式透過系統轉接來電，以改善通話體驗。"</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"透過系統查看和控制通話。"</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"允許應用程式查看和控制裝置上正在進行的通話，當中包括通話號碼和通話狀態等資訊。"</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"繼續進行來自其他應用程式的通話"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"允許應用程式繼續進行在其他應用程式中開始的通話。"</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"讀取電話號碼"</string>
@@ -1024,7 +1030,7 @@
     <string name="map_desc" msgid="1836995341943772348">"搵出指定地址"</string>
     <string name="browse" msgid="1245903488306147205">"開啟"</string>
     <string name="browse_desc" msgid="8220976549618935044">"打開指定網址"</string>
-    <string name="sms" msgid="4560537514610063430">"短訊"</string>
+    <string name="sms" msgid="4560537514610063430">"發短訊"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Send 短訊去指定電話號碼"</string>
     <string name="add_contact" msgid="7867066569670597203">"新增"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"加入通訊錄"</string>
@@ -1177,8 +1183,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"登入網絡"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi 並未連接互聯網"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g>未有連接至互聯網"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"輕按即可查看選項"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"已連接"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g>連線受限"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"仍要輕按以連結至此網絡"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"您的熱點設定變更"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"您的熱點頻段已變更。"</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"此裝置不支援只限 5 GHz 的偏好設定，但會在 5 GHz 頻段可用時採用。"</string>

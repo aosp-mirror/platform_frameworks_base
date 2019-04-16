@@ -17,6 +17,7 @@
 package android.os;
 
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.app.IAlarmManager;
 import android.content.Context;
 import android.util.Slog;
@@ -104,6 +105,7 @@ public final class SystemClock {
     /**
      * This class is uninstantiable.
      */
+    @UnsupportedAppUsage
     private SystemClock() {
         // This space intentionally left blank.
     }
@@ -241,6 +243,7 @@ public final class SystemClock {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     @CriticalNative
     public static native long currentThreadTimeMicro();
 
@@ -251,6 +254,7 @@ public final class SystemClock {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     @CriticalNative
     public static native long currentTimeMicro();
 

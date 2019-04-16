@@ -16,9 +16,13 @@
 
 package android.net;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+
 import android.content.Context;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -32,13 +36,25 @@ public class IpMemoryStoreTest {
     @Mock
     Context mMockContext;
     @Mock
+    NetworkStackClient mNetworkStackClient;
+    @Mock
     IIpMemoryStore mMockService;
     IpMemoryStore mStore;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mStore = new IpMemoryStore(mMockContext, mMockService);
+        doAnswer(invocation -> {
+            ((IIpMemoryStoreCallbacks) invocation.getArgument(0))
+                    .onIpMemoryStoreFetched(mMockService);
+            return null;
+        }).when(mNetworkStackClient).fetchIpMemoryStore(any());
+        mStore = new IpMemoryStore(mMockContext) {
+            @Override
+            protected NetworkStackClient getNetworkStackClient() {
+                return mNetworkStackClient;
+            }
+        };
     }
 
     @Test

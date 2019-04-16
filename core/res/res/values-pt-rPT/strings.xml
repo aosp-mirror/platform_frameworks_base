@@ -136,9 +136,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Chamadas Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Chamadas Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Chamadas Wi-Fi"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Desativado"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Rede Wi-Fi preferida"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Preferência pela rede móvel"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"Chamada por Wi-Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"Chamada por rede móvel"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Apenas Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Não reencaminhado"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -430,6 +434,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Permite que a aplicação aceda às funcionalidades de telefone do dispositivo. Esta autorização permite que a aplicação determine o número de telefone e IDs do dispositivo, se alguma chamada está ativa e qual o número remoto ligado por uma chamada."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"encaminhar chamadas através do sistema"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Permite que a aplicação encaminhe as respetivas chamadas através do sistema de modo a melhorar a experiência da chamada."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"ver e controlar chamadas através do sistema."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Permite à aplicação ver e controlar as chamadas em curso no dispositivo. Isto inclui informações como números de telefone das chamadas e o estado das mesmas."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"continuar uma chamada a partir de outra aplicação"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Permite à aplicação continuar uma chamada iniciada noutra aplicação."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"ler os números de telefone"</string>
@@ -1177,8 +1183,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Início de sessão na rede"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"O Wi-Fi não tem acesso à Internet."</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> não tem acesso à Internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Toque para obter mais opções"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Ligado"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> tem conetividade limitada."</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Toque para ligar mesmo assim."</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Alterações às definições de zona Wi-Fi"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"A banda da sua zona Wi-Fi foi alterada."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Este dispositivo não suporta a sua preferência apenas para 5 GHz. Em alternativa, este dispositivo vai utilizar a banda de 5 GHz quando estiver disponível."</string>
@@ -1278,7 +1287,7 @@
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Sobrepor a outras aplicações"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"A aplicação <xliff:g id="NAME">%s</xliff:g> sobrepõe-se a outras aplicações"</string>
-    <string name="alert_windows_notification_title" msgid="3697657294867638947">"O <xliff:g id="NAME">%s</xliff:g> sobrepõe-se a outras aplic."</string>
+    <string name="alert_windows_notification_title" msgid="3697657294867638947">"O <xliff:g id="NAME">%s</xliff:g> sobrepõe-se a outras app"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Se não pretende que a aplicação <xliff:g id="NAME">%s</xliff:g> utilize esta funcionalidade, toque para abrir as definições e desative-a."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"Desligar"</string>
     <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"A verificar o <xliff:g id="NAME">%s</xliff:g>…"</string>

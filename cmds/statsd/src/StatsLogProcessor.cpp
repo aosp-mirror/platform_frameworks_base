@@ -71,6 +71,9 @@ const int FIELD_ID_STRINGS = 9;
 
 #define STATS_DATA_DIR "/data/misc/stats-data"
 
+// Cool down period for writing data to disk to avoid overwriting files.
+#define WRITE_DATA_COOL_DOWN_SEC 5
+
 StatsLogProcessor::StatsLogProcessor(const sp<UidMap>& uidMap,
                                      const sp<AlarmMonitor>& anomalyAlarmMonitor,
                                      const sp<AlarmMonitor>& periodicAlarmMonitor,
@@ -526,6 +529,16 @@ void StatsLogProcessor::WriteDataToDiskLocked(const ConfigKey& key,
 
 void StatsLogProcessor::WriteDataToDiskLocked(const DumpReportReason dumpReportReason) {
     const int64_t timeNs = getElapsedRealtimeNs();
+    // Do not write to disk if we already have in the last few seconds.
+    // This is to avoid overwriting files that would have the same name if we
+    //   write twice in the same second.
+    if (static_cast<unsigned long long> (timeNs) <
+            mLastWriteTimeNs + WRITE_DATA_COOL_DOWN_SEC * NS_PER_SEC) {
+        ALOGI("Statsd skipping writing data to disk. Already wrote data in last %d seconds",
+                WRITE_DATA_COOL_DOWN_SEC);
+        return;
+    }
+    mLastWriteTimeNs = timeNs;
     for (auto& pair : mMetricsManagers) {
         WriteDataToDiskLocked(pair.first, timeNs, dumpReportReason);
     }

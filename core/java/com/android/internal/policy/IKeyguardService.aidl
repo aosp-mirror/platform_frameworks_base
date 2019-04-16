@@ -88,8 +88,10 @@ oneway interface IKeyguardService {
      */
     void onScreenTurnedOff();
 
+    @UnsupportedAppUsage
     void setKeyguardEnabled(boolean enabled);
     void onSystemReady();
+    @UnsupportedAppUsage
     void doKeyguardTimeout(in Bundle options);
     void setSwitchingUser(boolean switching);
     void setCurrentUser(int userId);

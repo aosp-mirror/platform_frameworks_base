@@ -118,6 +118,8 @@
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
     <uses-permission android:name="android.permission.MOUNT_FORMAT_FILESYSTEMS" />
     <uses-permission android:name="android.permission.MODIFY_PHONE_STATE" />
+    <!-- Shell only holds android.permission.NETWORK_SCAN in order to to enable CTS testing -->
+    <uses-permission android:name="android.permission.NETWORK_SCAN" />
     <uses-permission android:name="android.permission.REGISTER_CALL_PROVIDER" />
     <uses-permission android:name="android.permission.REGISTER_CONNECTION_MANAGER" />
     <uses-permission android:name="android.permission.REGISTER_SIM_SUBSCRIPTION" />
@@ -136,6 +138,7 @@
     <uses-permission android:name="android.permission.SET_TIME_ZONE" />
     <uses-permission android:name="android.permission.DISABLE_HIDDEN_API_CHECKS" />
     <uses-permission android:name="android.permission.MANAGE_ROLE_HOLDERS" />
+    <uses-permission android:name="android.permission.OBSERVE_ROLE_HOLDERS" />
     <!-- Permission needed to rename bugreport notifications (so they're not shown as Shell) -->
     <uses-permission android:name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME" />
     <!-- Permission needed to hold a wakelock in dumpstate.cpp (drop_root_user()) -->
@@ -157,6 +160,14 @@
     <uses-permission android:name="android.permission.WATCH_APPOPS" />
 
     <uses-permission android:name="android.permission.CONTROL_KEYGUARD" />
+
+    <!-- Permission needed to run network tests in CTS -->
+    <uses-permission android:name="android.permission.MANAGE_TEST_NETWORKS" />
+    <!-- Permission needed to test tcp keepalive offload. -->
+    <uses-permission android:name="android.permission.PACKET_KEEPALIVE_OFFLOAD" />
+
+    <!-- Permission required to test ContentResolver caching. -->
+    <uses-permission android:name="android.permission.CACHE_CONTENT" />
 
     <application android:label="@string/app_label"
                  android:defaultToDeviceProtectedStorage="true"

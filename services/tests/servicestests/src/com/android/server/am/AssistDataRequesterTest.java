@@ -41,12 +41,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.FlakyTest;
-import android.support.test.filters.MediumTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
 import android.view.IWindowManager;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.FlakyTest;
+import androidx.test.filters.MediumTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.am.AssistDataRequester.AssistDataRequesterCallbacks;
 
@@ -63,7 +64,11 @@ import java.util.concurrent.TimeUnit;
  * Note: Currently, we only support fetching the screenshot for the current application, so the
  * screenshot checks are hardcoded accordingly.
  *
- * runtest --path frameworks/base/services/tests/servicestests/src/com/android/server/am/AssistDataRequesterTest.java
+ * <p>Build/Install/Run:
+ *  atest FrameworksServicesTests:AssistDataRequesterTest
+ *
+ * <p>This test class is a part of Window Manager Service tests and specified in
+ * {@link com.android.server.wm.test.filters.FrameworksTestsFilter}.
  */
 @MediumTest
 @FlakyTest(bugId = 113616538)

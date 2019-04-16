@@ -22,8 +22,11 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
+import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.util.ArrayMap;
 import android.util.Log;
+
+import libcore.util.HexEncoding;
 
 import java.security.Key;
 import java.security.SecureRandom;
@@ -70,11 +73,7 @@ public class RecoverySession implements AutoCloseable {
         SecureRandom secureRandom = new SecureRandom();
         byte[] sessionId = new byte[SESSION_ID_LENGTH_BYTES];
         secureRandom.nextBytes(sessionId);
-        StringBuilder sb = new StringBuilder();
-        for (byte b : sessionId) {
-            sb.append(Byte.toHexString(b, /*upperCase=*/ false));
-        }
-        return sb.toString();
+        return HexEncoding.encodeToString(sessionId, /*upperCase=*/ false);
     }
 
     /**
@@ -218,7 +217,7 @@ public class RecoverySession implements AutoCloseable {
             Key key;
             try {
                 key = mRecoveryController.getKeyFromGrant(grantAlias);
-            } catch (UnrecoverableKeyException e) {
+            } catch (KeyPermanentlyInvalidatedException | UnrecoverableKeyException e) {
                 throw new InternalRecoveryServiceException(
                         String.format(
                                 Locale.US,

@@ -17,6 +17,7 @@
 package android.os;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -24,10 +25,14 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
+import android.util.Log;
 
 import com.android.internal.util.Preconditions;
 
-import java.io.FileDescriptor;
+import libcore.io.IoUtils;
+
+import java.io.File;
+import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.Executor;
@@ -39,7 +44,10 @@ import java.util.concurrent.Executor;
  */
 @SystemApi
 @SystemService(Context.BUGREPORT_SERVICE)
-public class BugreportManager {
+public final class BugreportManager {
+
+    private static final String TAG = "BugreportManager";
+
     private final Context mContext;
     private final IDumpstate mBinder;
 
@@ -59,7 +67,8 @@ public class BugreportManager {
                 BUGREPORT_ERROR_INVALID_INPUT,
                 BUGREPORT_ERROR_RUNTIME,
                 BUGREPORT_ERROR_USER_DENIED_CONSENT,
-                BUGREPORT_ERROR_USER_CONSENT_TIMED_OUT
+                BUGREPORT_ERROR_USER_CONSENT_TIMED_OUT,
+                BUGREPORT_ERROR_ANOTHER_REPORT_IN_PROGRESS
         })
 
         /** Possible error codes taking a bugreport can encounter */
@@ -81,11 +90,15 @@ public class BugreportManager {
         public static final int BUGREPORT_ERROR_USER_CONSENT_TIMED_OUT =
                 IDumpstateListener.BUGREPORT_ERROR_USER_CONSENT_TIMED_OUT;
 
+        /** There is currently a bugreport running. The caller should try again later. */
+        public static final int BUGREPORT_ERROR_ANOTHER_REPORT_IN_PROGRESS =
+                IDumpstateListener.BUGREPORT_ERROR_ANOTHER_REPORT_IN_PROGRESS;
+
         /**
          * Called when there is a progress update.
          * @param progress the progress in [0.0, 100.0]
          */
-        public void onProgress(float progress) {}
+        public void onProgress(@FloatRange(from = 0f, to = 100f) float progress) {}
 
         /**
          * Called when taking bugreport resulted in an error.
@@ -96,6 +109,9 @@ public class BugreportManager {
          * <p>If {@code BUGREPORT_ERROR_USER_CONSENT_TIMED_OUT} is passed, then the consent timed
          * out, but the bugreport could be available in the internal directory of dumpstate for
          * manual retrieval.
+         *
+         * <p> If {@code BUGREPORT_ERROR_ANOTHER_REPORT_IN_PROGRESS} is passed, then the
+         * caller should try later, as only one bugreport can be in progress at a time.
          */
         public void onError(@BugreportErrorCode int errorCode) {}
 
@@ -115,6 +131,8 @@ public class BugreportManager {
      * <p>The bugreport artifacts will be copied over to the given file descriptors only if the
      * user consents to sharing with the calling app.
      *
+     * <p>{@link BugreportManager} takes ownership of {@code bugreportFd} and {@code screenshotFd}.
+     *
      * @param bugreportFd file to write the bugreport. This should be opened in write-only,
      *     append mode.
      * @param screenshotFd file to write the screenshot, if necessary. This should be opened
@@ -128,21 +146,42 @@ public class BugreportManager {
             @NonNull BugreportParams params,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull BugreportCallback callback) {
-        Preconditions.checkNotNull(bugreportFd);
-        Preconditions.checkNotNull(params);
-        Preconditions.checkNotNull(executor);
-        Preconditions.checkNotNull(callback);
-        DumpstateListener dsListener = new DumpstateListener(executor, callback);
+        File tmpScreenshotFile = null;
         try {
+            Preconditions.checkNotNull(bugreportFd);
+            Preconditions.checkNotNull(params);
+            Preconditions.checkNotNull(executor);
+            Preconditions.checkNotNull(callback);
+
+            if (screenshotFd == null) {
+                // Binder needs a valid File Descriptor to be passed
+                tmpScreenshotFile = File.createTempFile("tmp", ".png");
+                screenshotFd = ParcelFileDescriptor.open(tmpScreenshotFile,
+                        ParcelFileDescriptor.MODE_READ_ONLY);
+            }
+            DumpstateListener dsListener = new DumpstateListener(executor,
+                    callback, tmpScreenshotFile);
+
             // Note: mBinder can get callingUid from the binder transaction.
             mBinder.startBugreport(-1 /* callingUid */,
                     mContext.getOpPackageName(),
                     bugreportFd.getFileDescriptor(),
-                    (screenshotFd != null
-                            ? screenshotFd.getFileDescriptor() : new FileDescriptor()),
+                    screenshotFd.getFileDescriptor(),
                     params.getMode(), dsListener);
         } catch (RemoteException e) {
+            deleteFile(tmpScreenshotFile);
             throw e.rethrowFromSystemServer();
+        } catch (IOException e) {
+            // Need to delete the file if it was created but failed while trying to get fd
+            deleteFile(tmpScreenshotFile);
+            Log.e(TAG, "Not able to create/open temporary screenshot file ", e);
+            callback.onError(BugreportCallback.BUGREPORT_ERROR_RUNTIME);
+        } finally {
+            // We can close the file descriptors here because binder would have duped them.
+            IoUtils.closeQuietly(bugreportFd);
+            if (screenshotFd != null) {
+                IoUtils.closeQuietly(screenshotFd);
+            }
         }
     }
 
@@ -158,13 +197,26 @@ public class BugreportManager {
         }
     }
 
+    private void deleteFile(@Nullable File tmpScreenshotFile) {
+        try {
+            if (tmpScreenshotFile != null && tmpScreenshotFile.exists()) {
+                tmpScreenshotFile.delete();
+            }
+        } catch (SecurityException e) {
+            Log.e(TAG, "Not able to delete temporary screenshot file ", e);
+        }
+    }
+
     private final class DumpstateListener extends IDumpstateListener.Stub {
         private final Executor mExecutor;
         private final BugreportCallback mCallback;
+        private final File mTmpScreenshotFile;
 
-        DumpstateListener(Executor executor, @Nullable BugreportCallback callback) {
+        DumpstateListener(Executor executor, BugreportCallback callback,
+                @Nullable File tmpScreenshotFile) {
             mExecutor = executor;
             mCallback = callback;
+            mTmpScreenshotFile = tmpScreenshotFile;
         }
 
         @Override
@@ -188,6 +240,7 @@ public class BugreportManager {
                 });
             } finally {
                 Binder.restoreCallingIdentity(identity);
+                deleteFile(mTmpScreenshotFile);
             }
         }
 
@@ -200,8 +253,7 @@ public class BugreportManager {
                 });
             } finally {
                 Binder.restoreCallingIdentity(identity);
-                // The bugreport has finished. Let's shutdown the service to minimize its footprint.
-                cancelBugreport();
+                deleteFile(mTmpScreenshotFile);
             }
         }
 

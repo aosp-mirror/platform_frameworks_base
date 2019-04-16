@@ -100,7 +100,7 @@
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Teng huquqli ishtirokchi teletayp rejimini VCO (gapiradi, eshitolmaydi) qilib o‘zgartirdi"</string>
     <string name="peerTtyModeOff" msgid="3280819717850602205">"Teng huquqli ishtirokchi teletayp rejimini OFF (o‘chirilgan) qilib o‘zgartirdi"</string>
     <string name="serviceClassVoice" msgid="1258393812335258019">"Ovozli aloqa"</string>
-    <string name="serviceClassData" msgid="872456782077937893">"Ma’lumot"</string>
+    <string name="serviceClassData" msgid="872456782077937893">"Internet"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"FAKS"</string>
     <string name="serviceClassSMS" msgid="2015460373701527489">"SMS"</string>
     <string name="serviceClassDataAsync" msgid="4523454783498551468">"Asinx"</string>
@@ -136,9 +136,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Wi-Fi chaqiruv | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWi-Fi"</string>
-    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"O‘chiq"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi afzalligi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Mobil internet afzalligi"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Wi-Fi chaqiruv"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Wi-Fi chaqiruv"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWi-Fi"</string>
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Yoqilmagan"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"Wi-Fi orqali chaqiruv"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"Mobil tarmoq orqali chaqiruv"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Faqat Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Yo‘naltirilmadi"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -279,7 +283,7 @@
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun kontaktlaringizga ruxsat berilsinmi?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Joylashuv"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"shu qurilmaning joylashuvi haqidagi axborotga kirish"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun bu qurilmaning joylashuvi haqidagi axborotdan foydalanishiga ruxsat berilsinmi?"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun bu qurilmaning joylashuvi haqidagi axborotdan foydalanishga ruxsat berilsinmi?"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Taqvim"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"taqvimingizga kirish"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun taqvimingizga ruxsat berilsinmi?"</string>
@@ -430,6 +434,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Ilovaga qurilmangizdagi telefon xususiyatlariga kirishga ruxsat beradi. Bu ruxsat ilovaga telefon raqami va qurilma nomlari, qo‘ng‘iroq faol yoki faolsizligi va masofadagi raqam qo‘ng‘rioq orqali bog‘langanligini aniqlashga imkon beradi."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"chaqiruvlarni tizim orqali yo‘naltirish"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Ilova aloqa sifatini yaxshilash maqsadida chaqiruvlarni tizim orqali yo‘naltirishi mumkin."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"tizim orqali chaqiruvlarni tekshirish va boshqarish."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Ilovaga qurilmadagi amaldagi chaqiruvlarni tekshirish va boshqarish imkonini beradi. Shuningdek, chaqiruvlar holati va kiruvchi-chiquvchi chaqiruv raqamlari axborotiga ham ruxsat beradi."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"chaqiruvni boshqa ilovada davom ettirish"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Ilovaga boshqa ilovada boshlangan chaqiruvni davom ettirish imkon beradi"</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"telefon raqamlarini o‘qish"</string>
@@ -914,8 +920,8 @@
     <string name="days" msgid="4774547661021344602">"kun"</string>
     <string name="hour" msgid="2126771916426189481">"soat"</string>
     <string name="hours" msgid="894424005266852993">"soat"</string>
-    <string name="minute" msgid="9148878657703769868">"daq"</string>
-    <string name="minutes" msgid="5646001005827034509">"daq."</string>
+    <string name="minute" msgid="9148878657703769868">"daqiqa"</string>
+    <string name="minutes" msgid="5646001005827034509">"daqiqa"</string>
     <string name="second" msgid="3184235808021478">"sek"</string>
     <string name="seconds" msgid="3161515347216589235">"sek"</string>
     <string name="week" msgid="5617961537173061583">"hafta"</string>
@@ -1017,22 +1023,22 @@
     <string name="inputMethod" msgid="1653630062304567879">"Kiritish uslubi"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Matn yozish"</string>
     <string name="email" msgid="4560673117055050403">"E-pochta"</string>
-    <string name="email_desc" msgid="3638665569546416795">"Belgilangan manzilga xat yuborish"</string>
+    <string name="email_desc" msgid="3638665569546416795">"Belgilangan e-pochta manziliga xat yuborish"</string>
     <string name="dial" msgid="1253998302767701559">"Chaqiruv"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Belgilangan raqamga telefon qilish"</string>
     <string name="map" msgid="5441053548030107189">"Xarita"</string>
     <string name="map_desc" msgid="1836995341943772348">"Belgilangan manzilni xaritadan topish"</string>
     <string name="browse" msgid="1245903488306147205">"Ochish"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Belgilangan URL manzilini ochish"</string>
-    <string name="sms" msgid="4560537514610063430">"Xabar"</string>
+    <string name="sms" msgid="4560537514610063430">"SMS yozish"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Belgilangan telefon raqamiga SMS yuborish"</string>
-    <string name="add_contact" msgid="7867066569670597203">"Qo‘shish"</string>
+    <string name="add_contact" msgid="7867066569670597203">"Saqlab olish"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Kontaktlarga saqlash"</string>
     <string name="view_calendar" msgid="979609872939597838">"Ochish"</string>
-    <string name="view_calendar_desc" msgid="5828320291870344584">"Taqvimda belgilangan vaqtni ko‘rish"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Jadval"</string>
-    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Belgilangan vaqt uchun tadbirni rejalashtirish"</string>
-    <string name="view_flight" msgid="7691640491425680214">"Trek"</string>
+    <string name="view_calendar_desc" msgid="5828320291870344584">"Belgilangan vaqtni taqvimda ochish"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Rejalashtirish"</string>
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Belgilangan vaqt uchun tadbir rejalashtirish"</string>
+    <string name="view_flight" msgid="7691640491425680214">"Kuzatish"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Belgilangan parvozni kuzatish"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Xotirada bo‘sh joy tugamoqda"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Ba‘zi tizim funksiyalari ishlamasligi mumkin"</string>
@@ -1177,8 +1183,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Tarmoqqa kirish"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi tarmoqda internet aloqasi yo‘q"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> nomli tarmoqda internetga ruxsati yoʻq"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Variantlarni ko‘rsatish uchun bosing"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Ulandi"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> nomli tarmoqda aloqa cheklangan"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Baribir ulash uchun bosing"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Hotspot sozlamalari o‘zgartirildi"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Hotspot chastotasi o‘zgartirildi."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Qurilma faqat 5 GGs chastotada ishlay olmaydi. Bu chastotadan imkoniyatga qarab foydalaniladi."</string>
@@ -1740,8 +1749,8 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> gacha"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> gacha (keyingi signal)"</string>
-    <string name="zen_mode_forever" msgid="931849471004038757">"O‘chirmaguningizcha"</string>
-    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"“Bezovta qilinmasin” rejimi o‘chirilmaguncha"</string>
+    <string name="zen_mode_forever" msgid="931849471004038757">"Rejimdan chiqilgunicha"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Bezovta qilinmasin rejimidan chiqilgunicha"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Yig‘ish"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Bezovta qilinmasin"</string>

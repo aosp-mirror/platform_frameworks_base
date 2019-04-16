@@ -29,13 +29,13 @@ import android.os.Messenger;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.util.Log;
 import android.util.SparseArray;
+
+import com.android.internal.telephony.ITelephony;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executor;
-
-import com.android.internal.telephony.ITelephony;
 
 /**
  * Manages the radio access network scan requests and callbacks.
@@ -53,6 +53,11 @@ public final class TelephonyScanManager {
     public static final int CALLBACK_SCAN_ERROR = 2;
     /** @hide */
     public static final int CALLBACK_SCAN_COMPLETE = 3;
+    /** @hide */
+    public static final int CALLBACK_RESTRICTED_SCAN_RESULTS = 4;
+
+    /** @hide */
+    public static final int INVALID_SCAN_ID = -1;
 
     /**
      * The caller of
@@ -129,6 +134,7 @@ public final class TelephonyScanManager {
                 }
 
                 switch (message.what) {
+                    case CALLBACK_RESTRICTED_SCAN_RESULTS:
                     case CALLBACK_SCAN_RESULTS:
                         try {
                             final Bundle b = message.getData();
@@ -137,9 +143,9 @@ public final class TelephonyScanManager {
                             for (int i = 0; i < parcelables.length; i++) {
                                 ci[i] = (CellInfo) parcelables[i];
                             }
-                            executor.execute(() ->{
+                            executor.execute(() -> {
                                 Rlog.d(TAG, "onResults: " + ci.toString());
-                                callback.onResults((List<CellInfo>) Arrays.asList(ci));
+                                callback.onResults(Arrays.asList(ci));
                             });
                         } catch (Exception e) {
                             Rlog.e(TAG, "Exception in networkscan callback onResults", e);
@@ -183,6 +189,7 @@ public final class TelephonyScanManager {
      *
      * <p>
      * Requires Permission:
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION} and
      *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
      * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
      *
@@ -192,11 +199,17 @@ public final class TelephonyScanManager {
      * @hide
      */
     public NetworkScan requestNetworkScan(int subId,
-            NetworkScanRequest request, Executor executor, NetworkScanCallback callback) {
+            NetworkScanRequest request, Executor executor, NetworkScanCallback callback,
+            String callingPackage) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                int scanId = telephony.requestNetworkScan(subId, request, mMessenger, new Binder());
+                int scanId = telephony.requestNetworkScan(
+                        subId, request, mMessenger, new Binder(), callingPackage);
+                if (scanId == INVALID_SCAN_ID) {
+                    Rlog.e(TAG, "Failed to initiate network scan");
+                    return null;
+                }
                 saveScanInfo(scanId, request, executor, callback);
                 return new NetworkScan(scanId, subId);
             }

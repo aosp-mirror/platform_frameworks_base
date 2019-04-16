@@ -137,6 +137,7 @@ public class DividerSnapAlgorithm {
         mDismissStartTarget = mTargets.get(0);
         mDismissEndTarget = mTargets.get(mTargets.size() - 1);
         mMiddleTarget = mTargets.get(mTargets.size() / 2);
+        mMiddleTarget.isMiddleTarget = true;
     }
 
     /**
@@ -437,6 +438,8 @@ public class DividerSnapAlgorithm {
         public final int taskPosition;
 
         public final int flag;
+
+        public boolean isMiddleTarget;
 
         /**
          * Multiplier used to calculate distance to snap position. The lower this value, the harder

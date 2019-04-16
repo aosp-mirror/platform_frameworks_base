@@ -31,6 +31,7 @@ import android.text.Layout;
 import android.text.Selection;
 import android.text.Spannable;
 import android.text.TextUtils;
+import android.text.util.Linkify;
 import android.util.Log;
 import android.view.ActionMode;
 import android.view.textclassifier.SelectionEvent;
@@ -1045,7 +1046,12 @@ public final class SelectionActionModeHelper {
 
                 trimText();
                 final TextClassification classification;
-                if (mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.P) {
+                if (Linkify.containsUnsupportedCharacters(mText)) {
+                    // Do not show smart actions for text containing unsupported characters.
+                    android.util.EventLog.writeEvent(0x534e4554, "116321860", -1, "");
+                    classification = TextClassification.EMPTY;
+                } else if (mContext.getApplicationInfo().targetSdkVersion
+                        >= Build.VERSION_CODES.P) {
                     final TextClassification.Request request =
                             new TextClassification.Request.Builder(
                                     mTrimmedText, mRelativeStart, mRelativeEnd)

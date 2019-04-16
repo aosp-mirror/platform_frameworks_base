@@ -108,6 +108,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private static final int COLORED_DIVIDER_ALPHA = 0x7B;
     private static final int MENU_VIEW_INDEX = 0;
     private static final String TAG = "ExpandableNotifRow";
+    public static final float DEFAULT_HEADER_VISIBLE_AMOUNT = 1.0f;
 
     /**
      * Listener for when {@link ExpandableNotificationRow} is laid out.
@@ -157,7 +158,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private boolean mSensitiveHiddenInGeneral;
     private boolean mShowingPublicInitialized;
     private boolean mHideSensitiveForIntrinsicHeight;
-    private float mHeaderVisibleAmount = 1.0f;
+    private float mHeaderVisibleAmount = DEFAULT_HEADER_VISIBLE_AMOUNT;
 
     /**
      * Is this notification expanded by the system. The expansion state can be overridden by the

@@ -17,6 +17,8 @@
 package android.telephony.ims;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.net.Uri;
 import android.os.Parcel;
@@ -124,9 +126,9 @@ public final class ImsExternalCallState implements Parcelable {
      * @param callType The type of external call.
      * @param isCallheld A flag determining if the external connection is currently held.
      */
-    public ImsExternalCallState(String callId, Uri address, Uri localAddress,
-            boolean isPullable, @ExternalCallState int callState, @ExternalCallType int callType,
-            boolean isCallheld) {
+    public ImsExternalCallState(@NonNull String callId, @NonNull Uri address,
+            @Nullable Uri localAddress, boolean isPullable, @ExternalCallState int callState,
+            @ExternalCallType int callType, boolean isCallheld) {
         mCallId = getIdForString(callId);
         mAddress = address;
         mLocalAddress = localAddress;
@@ -184,14 +186,14 @@ public final class ImsExternalCallState implements Parcelable {
         return mCallId;
     }
 
-    public Uri getAddress() {
+    public @NonNull Uri getAddress() {
         return mAddress;
     }
 
     /**
      * @return A {@link Uri} containing the local address from the Multiendpoint Dialog Information.
      */
-    public Uri getLocalAddress() {
+    public @Nullable Uri getLocalAddress() {
         return mLocalAddress;
     }
 

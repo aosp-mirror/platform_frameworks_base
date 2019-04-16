@@ -181,7 +181,7 @@ public abstract class SearchIndexablesProvider extends ContentProvider {
     }
 
     /**
-     * Implementation is provided by the parent class. Throws by default, and cannot be overriden.
+     * Implementation is provided by the parent class. Throws by default, and cannot be overridden.
      */
     @Override
     public final Uri insert(Uri uri, ContentValues values) {
@@ -189,7 +189,7 @@ public abstract class SearchIndexablesProvider extends ContentProvider {
     }
 
     /**
-     * Implementation is provided by the parent class. Throws by default, and cannot be overriden.
+     * Implementation is provided by the parent class. Throws by default, and cannot be overridden.
      */
     @Override
     public final int delete(Uri uri, String selection, String[] selectionArgs) {
@@ -197,7 +197,7 @@ public abstract class SearchIndexablesProvider extends ContentProvider {
     }
 
     /**
-     * Implementation is provided by the parent class. Throws by default, and cannot be overriden.
+     * Implementation is provided by the parent class. Throws by default, and cannot be overridden.
      */
     @Override
     public final int update(

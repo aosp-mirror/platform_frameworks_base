@@ -35,7 +35,7 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src)
 LOCAL_STATIC_JAVA_LIBRARIES := \
 	SystemUISharedLib \
     metrics-helper-lib \
-    android-support-test \
+    androidx.test.rules \
     mockito-target-inline-minus-junit4 \
     SystemUI-proto \
     SystemUI-tags \

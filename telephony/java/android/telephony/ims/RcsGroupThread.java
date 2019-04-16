@@ -29,6 +29,8 @@ import java.util.Set;
  * RcsGroupThread represents a single RCS conversation thread where {@link RcsParticipant}s can join
  * or leave. Please see Section 6 (Group Chat) - GSMA RCC.71 (RCS Universal Profile Service
  * Definition Document)
+ *
+ * @hide
  */
 public class RcsGroupThread extends RcsThread {
     /**
@@ -167,8 +169,9 @@ public class RcsGroupThread extends RcsThread {
         RcsParticipantQueryParams queryParameters =
                 new RcsParticipantQueryParams.Builder().setThread(this).build();
 
-        RcsParticipantQueryResult queryResult = RcsControllerCall.call(
-                iRcs -> iRcs.getParticipants(queryParameters));
+        RcsParticipantQueryResult queryResult = new RcsParticipantQueryResult(
+                RcsControllerCall.call(
+                        iRcs -> iRcs.getParticipants(queryParameters)));
 
         List<RcsParticipant> participantList = queryResult.getParticipants();
         Set<RcsParticipant> participantSet = new LinkedHashSet<>(participantList);

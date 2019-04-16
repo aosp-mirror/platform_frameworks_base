@@ -20,8 +20,9 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.MessageQueue;
 import android.os.TestLooperManager;
-import android.support.test.InstrumentationRegistry;
 import android.util.ArrayMap;
+
+import androidx.test.InstrumentationRegistry;
 
 import org.junit.runners.model.FrameworkMethod;
 

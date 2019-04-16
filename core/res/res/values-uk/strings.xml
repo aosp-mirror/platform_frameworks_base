@@ -138,9 +138,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> через Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Виклики через Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> через VoWi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Дзвінки через Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Дзвінки через Wi-Fi"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"Передавання голосу через Wi-Fi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Вимкнено"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi за умовчанням"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Мобільна мережа за умовчанням"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"Телефонувати через Wi-Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"Телефонувати через мобільну мережу"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Лише Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: не переслано"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -436,6 +440,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Дозволяє програмі отримувати доступ до телефонних функцій пристрою. Такий дозвіл дає програмі змогу визначати номер телефону й ідентифікатори пристрою, активність виклику, а також віддалений номер, на який здійснюється виклик."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"маршрутизувати виклики через систему"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Дозволяє додатку маршрутизувати виклики через систему, щоб було зручніше телефонувати."</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"Переглядати виклики через систему й керувати ними."</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Додаток може переглядати поточні виклики на пристрої та керувати ними. Це стосується такої інформації, як номери та стан викликів."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"продовжувати виклик з іншого додатка"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Додаток може продовжувати виклик, початий в іншому додатку."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"переглядати номери телефону"</string>
@@ -1040,13 +1046,13 @@
     <string name="elapsed_time_short_format_h_mm_ss" msgid="1846071997616654124">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll" msgid="6876518925844129331">"Вибрати все"</string>
     <string name="cut" msgid="3092569408438626261">"Виріз."</string>
-    <string name="copy" msgid="2681946229533511987">"Копіюв."</string>
+    <string name="copy" msgid="2681946229533511987">"Копіювати"</string>
     <string name="failed_to_copy_to_clipboard" msgid="1833662432489814471">"Не вдалося скопіювати в буфер обміну"</string>
     <string name="paste" msgid="5629880836805036433">"Вставити"</string>
     <string name="paste_as_plain_text" msgid="5427792741908010675">"Вставити як простий текст"</string>
     <string name="replace" msgid="5781686059063148930">"Замінити..."</string>
     <string name="delete" msgid="6098684844021697789">"Видалити"</string>
-    <string name="copyUrl" msgid="2538211579596067402">"Копіюв. URL"</string>
+    <string name="copyUrl" msgid="2538211579596067402">"Копіювати URL"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"Вибрати текст"</string>
     <string name="undo" msgid="7905788502491742328">"Відмінити"</string>
     <string name="redo" msgid="7759464876566803888">"Повторити"</string>
@@ -1056,15 +1062,15 @@
     <string name="deleteText" msgid="6979668428458199034">"Видалити"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Метод введення"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Дії з текстом"</string>
-    <string name="email" msgid="4560673117055050403">"Електронна пошта"</string>
+    <string name="email" msgid="4560673117055050403">"Написати лист"</string>
     <string name="email_desc" msgid="3638665569546416795">"Надіслати електронний лист на вибрану адресу"</string>
-    <string name="dial" msgid="1253998302767701559">"Зателефонувати"</string>
-    <string name="dial_desc" msgid="6573723404985517250">"Набрати вибраний номер телефону"</string>
-    <string name="map" msgid="5441053548030107189">"Карта"</string>
+    <string name="dial" msgid="1253998302767701559">"Телефонувати"</string>
+    <string name="dial_desc" msgid="6573723404985517250">"Телефонувати за вибраним номером"</string>
+    <string name="map" msgid="5441053548030107189">"Відкрити карту"</string>
     <string name="map_desc" msgid="1836995341943772348">"Знайти вибрану адресу"</string>
     <string name="browse" msgid="1245903488306147205">"Відкрити"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Відкрити вибрану URL-адресу"</string>
-    <string name="sms" msgid="4560537514610063430">"Повідомлення"</string>
+    <string name="sms" msgid="4560537514610063430">"Написати SMS"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Надіслати повідомлення за вибраним номером телефону"</string>
     <string name="add_contact" msgid="7867066569670597203">"Додати"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Додати в контакти"</string>
@@ -1221,8 +1227,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Вхід у мережу"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Мережа Wi-Fi не має доступу до Інтернету"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"Мережа <xliff:g id="NETWORK_SSID">%1$s</xliff:g> не має доступу до Інтернету"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Торкніться, щоб відкрити опції"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Підключено"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"Підключення до мережі <xliff:g id="NETWORK_SSID">%1$s</xliff:g> обмежено"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Натисніть, щоб усе одно підключитися"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Зміни в налаштуваннях точки доступу"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Діапазон точки доступу змінено."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"На цьому пристрої не підтримується налаштування лише 5 ГГц. Замість цього буде використовуватися діапазон 5 ГГц, якщо доступно."</string>
@@ -1277,7 +1286,7 @@
     <string name="sim_done_button" msgid="827949989369963775">"Готово"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM-карту додано"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"Перезапустіть пристрій, щоб отримати доступ до мобільної мережі."</string>
-    <string name="sim_restart_button" msgid="4722407842815232347">"Перезапуск"</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"Перезапустити"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"Активувати мобільну службу"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Завантажити додаток оператора, щоб активувати нову SIM-карту"</string>
     <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"Щоб активувати нову SIM-карту, завантажте додаток <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>

@@ -4198,7 +4198,8 @@ public final class Settings {
             SHOW_BATTERY_PERCENT,
             NOTIFICATION_VIBRATION_INTENSITY,
             HAPTIC_FEEDBACK_INTENSITY,
-            DISPLAY_COLOR_MODE
+            DISPLAY_COLOR_MODE,
+            NOTIFICATION_LIGHT_PULSE,
         };
 
         /**
@@ -4404,6 +4405,7 @@ public final class Settings {
             VALIDATORS.put(WIFI_STATIC_DNS1, WIFI_STATIC_DNS1_VALIDATOR);
             VALIDATORS.put(WIFI_STATIC_DNS2, WIFI_STATIC_DNS2_VALIDATOR);
             VALIDATORS.put(SHOW_BATTERY_PERCENT, SHOW_BATTERY_PERCENT_VALIDATOR);
+            VALIDATORS.put(NOTIFICATION_LIGHT_PULSE, BOOLEAN_VALIDATOR);
         }
 
         /**
@@ -7317,15 +7319,6 @@ public final class Settings {
                 "call_screening_default_component";
 
         /**
-         * Specifies the component name currently configured to be the default application to
-         * perform the user-defined call redirection service with Telecom.
-         * @hide
-         */
-        @UnsupportedAppUsage
-        public static final String CALL_REDIRECTION_DEFAULT_APPLICATION =
-                "call_redirection_default_application";
-
-        /**
          * Specifies the package name currently configured to be the emergency assistance application
          *
          * @see android.telephony.TelephonyManager#ACTION_EMERGENCY_ASSISTANCE
@@ -8144,6 +8137,8 @@ public final class Settings {
             VOLUME_HUSH_GESTURE,
             MANUAL_RINGER_TOGGLE_COUNT,
             HUSH_GESTURE_USED,
+            LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS,
+            LOCK_SCREEN_SHOW_NOTIFICATIONS,
         };
 
         /**
@@ -8290,6 +8285,8 @@ public final class Settings {
                     ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES_VALIDATOR); //legacy restore setting
             VALIDATORS.put(HUSH_GESTURE_USED, HUSH_GESTURE_USED_VALIDATOR);
             VALIDATORS.put(MANUAL_RINGER_TOGGLE_COUNT, MANUAL_RINGER_TOGGLE_COUNT_VALIDATOR);
+            VALIDATORS.put(LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, BOOLEAN_VALIDATOR);
+            VALIDATORS.put(LOCK_SCREEN_SHOW_NOTIFICATIONS, BOOLEAN_VALIDATOR);
         }
 
         /**
@@ -10466,49 +10463,6 @@ public final class Settings {
         @SystemApi
         @TestApi
         public static final String CAPTIVE_PORTAL_USER_AGENT = "captive_portal_user_agent";
-
-        /**
-         * The threshold value for the number of consecutive dns timeout events received to be a
-         * signal of data stall. Set the value to 0 or less than 0 to disable. Note that the value
-         * should be larger than 0 if the DNS data stall detection is enabled.
-         *
-         * @hide
-         */
-        @SystemApi
-        @TestApi
-        public static final String DATA_STALL_CONSECUTIVE_DNS_TIMEOUT_THRESHOLD =
-                "data_stall_consecutive_dns_timeout_threshold";
-
-        /**
-         * The minimal time interval in milliseconds for data stall reevaluation.
-         *
-         * @hide
-         */
-        @SystemApi
-        @TestApi
-        public static final String DATA_STALL_MIN_EVALUATE_INTERVAL =
-                "data_stall_min_evaluate_interval";
-
-        /**
-         * DNS timeouts older than this timeout (in milliseconds) are not considered for detecting
-         * a data stall.
-         *
-         * @hide
-         */
-        @SystemApi
-        @TestApi
-        public static final String DATA_STALL_VALID_DNS_TIME_THRESHOLD =
-                "data_stall_valid_dns_time_threshold";
-
-        /**
-         * Which data stall detection signal to use. Possible values are a union of the powers of 2
-         * of DATA_STALL_EVALUATION_TYPE_*.
-         *
-         * @hide
-         */
-        @SystemApi
-        @TestApi
-        public static final String DATA_STALL_EVALUATION_TYPE = "data_stall_evaluation_type";
 
         /**
          * Whether to try cellular data recovery when a bad network is reported.
@@ -13028,6 +12982,7 @@ public final class Settings {
          * Supported keys:
          * compatibility_wal_supported      (boolean)
          * wal_syncmode       (String)
+         * truncate_size      (int)
          *
          * @hide
          */

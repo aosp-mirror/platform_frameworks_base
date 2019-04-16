@@ -1,0 +1,244 @@
+// Signature format: 2.0
+package com.android.xml.permission.configfile {
+
+  public class AllowAssociation {
+    ctor public AllowAssociation();
+    method public String getAllowed();
+    method public String getTarget();
+    method public void setAllowed(String);
+    method public void setTarget(String);
+  }
+
+  public class AllowIgnoreLocationSettings {
+    ctor public AllowIgnoreLocationSettings();
+    method public String get_package();
+    method public void set_package(String);
+  }
+
+  public class AllowImplicitBroadcast {
+    ctor public AllowImplicitBroadcast();
+    method public String getAction();
+    method public void setAction(String);
+  }
+
+  public class AllowInDataUsageSave {
+    ctor public AllowInDataUsageSave();
+    method public String get_package();
+    method public void set_package(String);
+  }
+
+  public class AllowInPowerSave {
+    ctor public AllowInPowerSave();
+    method public String get_package();
+    method public void set_package(String);
+  }
+
+  public class AllowInPowerSaveExceptIdle {
+    ctor public AllowInPowerSaveExceptIdle();
+    method public String get_package();
+    method public void set_package(String);
+  }
+
+  public class AllowUnthrottledLocation {
+    ctor public AllowUnthrottledLocation();
+    method public String get_package();
+    method public void set_package(String);
+  }
+
+  public class AppLink {
+    ctor public AppLink();
+    method public String get_package();
+    method public void set_package(String);
+  }
+
+  public class AssignPermission {
+    ctor public AssignPermission();
+    method public String getName();
+    method public int getUid();
+    method public void setName(String);
+    method public void setUid(int);
+  }
+
+  public class BackupTransportWhitelistedService {
+    ctor public BackupTransportWhitelistedService();
+    method public String getService();
+    method public void setService(String);
+  }
+
+  public class BugreportWhitelisted {
+    ctor public BugreportWhitelisted();
+    method public String get_package();
+    method public void set_package(String);
+  }
+
+  public class DefaultEnabledVrApp {
+    ctor public DefaultEnabledVrApp();
+    method public String get_class();
+    method public String get_package();
+    method public void set_class(String);
+    method public void set_package(String);
+  }
+
+  public class DisabledUntilUsedPreinstalledCarrierApp {
+    ctor public DisabledUntilUsedPreinstalledCarrierApp();
+    method public String get_package();
+    method public void set_package(String);
+  }
+
+  public class DisabledUntilUsedPreinstalledCarrierAssociatedApp {
+    ctor public DisabledUntilUsedPreinstalledCarrierAssociatedApp();
+    method public String getCarrierAppPackage();
+    method public String get_package();
+    method public void setCarrierAppPackage(String);
+    method public void set_package(String);
+  }
+
+  public class Feature {
+    ctor public Feature();
+    method public String getName();
+    method public String getNotLowRam();
+    method public int getVersion();
+    method public void setName(String);
+    method public void setNotLowRam(String);
+    method public void setVersion(int);
+  }
+
+  public class Group {
+    ctor public Group();
+    method public int getGid();
+    method public void setGid(int);
+  }
+
+  public class HiddenApiWhitelistedApp {
+    ctor public HiddenApiWhitelistedApp();
+    method public String get_package();
+    method public void set_package(String);
+  }
+
+  public class Library {
+    ctor public Library();
+    method public String getDependency();
+    method public String getFile();
+    method public String getName();
+    method public void setDependency(String);
+    method public void setFile(String);
+    method public void setName(String);
+  }
+
+  public class OemPermissions {
+    ctor public OemPermissions();
+    method public java.util.List<com.android.xml.permission.configfile.OemPermissions.DenyPermission> getDenyPermission();
+    method public java.util.List<com.android.xml.permission.configfile.OemPermissions.Permission> getPermission();
+    method public String get_package();
+    method public void set_package(String);
+  }
+
+  public static class OemPermissions.DenyPermission {
+    ctor public OemPermissions.DenyPermission();
+    method public String getName();
+    method public void setName(String);
+  }
+
+  public static class OemPermissions.Permission {
+    ctor public OemPermissions.Permission();
+    method public String getName();
+    method public void setName(String);
+  }
+
+  public class Permission {
+    ctor public Permission();
+    method public String getName();
+    method public void setName(String);
+  }
+
+  public class Permissions {
+    ctor public Permissions();
+    method public java.util.List<com.android.xml.permission.configfile.AllowAssociation> getAllowAssociation_optional();
+    method public java.util.List<com.android.xml.permission.configfile.AllowIgnoreLocationSettings> getAllowIgnoreLocationSettings_optional();
+    method public java.util.List<com.android.xml.permission.configfile.AllowImplicitBroadcast> getAllowImplicitBroadcast_optional();
+    method public java.util.List<com.android.xml.permission.configfile.AllowInDataUsageSave> getAllowInDataUsageSave_optional();
+    method public java.util.List<com.android.xml.permission.configfile.AllowInPowerSaveExceptIdle> getAllowInPowerSaveExceptIdle_optional();
+    method public java.util.List<com.android.xml.permission.configfile.AllowInPowerSave> getAllowInPowerSave_optional();
+    method public java.util.List<com.android.xml.permission.configfile.AllowUnthrottledLocation> getAllowUnthrottledLocation_optional();
+    method public java.util.List<com.android.xml.permission.configfile.AppLink> getAppLink_optional();
+    method public java.util.List<com.android.xml.permission.configfile.AssignPermission> getAssignPermission_optional();
+    method public java.util.List<com.android.xml.permission.configfile.BackupTransportWhitelistedService> getBackupTransportWhitelistedService_optional();
+    method public java.util.List<com.android.xml.permission.configfile.BugreportWhitelisted> getBugreportWhitelisted_optional();
+    method public java.util.List<com.android.xml.permission.configfile.DefaultEnabledVrApp> getDefaultEnabledVrApp_optional();
+    method public java.util.List<com.android.xml.permission.configfile.DisabledUntilUsedPreinstalledCarrierApp> getDisabledUntilUsedPreinstalledCarrierApp_optional();
+    method public java.util.List<com.android.xml.permission.configfile.DisabledUntilUsedPreinstalledCarrierAssociatedApp> getDisabledUntilUsedPreinstalledCarrierAssociatedApp_optional();
+    method public java.util.List<com.android.xml.permission.configfile.Feature> getFeature_optional();
+    method public java.util.List<com.android.xml.permission.configfile.Group> getGroup_optional();
+    method public java.util.List<com.android.xml.permission.configfile.HiddenApiWhitelistedApp> getHiddenApiWhitelistedApp_optional();
+    method public java.util.List<com.android.xml.permission.configfile.Library> getLibrary_optional();
+    method public java.util.List<com.android.xml.permission.configfile.OemPermissions> getOemPermissions_optional();
+    method public java.util.List<com.android.xml.permission.configfile.Permission> getPermission_optional();
+    method public java.util.List<com.android.xml.permission.configfile.PrivappPermissions> getPrivappPermissions_optional();
+    method public java.util.List<com.android.xml.permission.configfile.SplitPermission> getSplitPermission_optional();
+    method public java.util.List<com.android.xml.permission.configfile.SystemUserBlacklistedApp> getSystemUserBlacklistedApp_optional();
+    method public java.util.List<com.android.xml.permission.configfile.SystemUserWhitelistedApp> getSystemUserWhitelistedApp_optional();
+    method public java.util.List<com.android.xml.permission.configfile.UnavailableFeature> getUnavailableFeature_optional();
+  }
+
+  public class PrivappPermissions {
+    ctor public PrivappPermissions();
+    method public java.util.List<com.android.xml.permission.configfile.PrivappPermissions.DenyPermission> getDenyPermission();
+    method public java.util.List<com.android.xml.permission.configfile.PrivappPermissions.Permission> getPermission();
+    method public String get_package();
+    method public void set_package(String);
+  }
+
+  public static class PrivappPermissions.DenyPermission {
+    ctor public PrivappPermissions.DenyPermission();
+    method public String getName();
+    method public void setName(String);
+  }
+
+  public static class PrivappPermissions.Permission {
+    ctor public PrivappPermissions.Permission();
+    method public String getName();
+    method public void setName(String);
+  }
+
+  public class SplitPermission {
+    ctor public SplitPermission();
+    method public java.util.List<com.android.xml.permission.configfile.SplitPermission.Library> getLibrary();
+    method public String getName();
+    method public int getTargetSdk();
+    method public void setName(String);
+    method public void setTargetSdk(int);
+  }
+
+  public static class SplitPermission.Library {
+    ctor public SplitPermission.Library();
+    method public String getName();
+    method public void setName(String);
+  }
+
+  public class SystemUserBlacklistedApp {
+    ctor public SystemUserBlacklistedApp();
+    method public String get_package();
+    method public void set_package(String);
+  }
+
+  public class SystemUserWhitelistedApp {
+    ctor public SystemUserWhitelistedApp();
+    method public String get_package();
+    method public void set_package(String);
+  }
+
+  public class UnavailableFeature {
+    ctor public UnavailableFeature();
+    method public String getName();
+    method public void setName(String);
+  }
+
+  public class XmlParser {
+    ctor public XmlParser();
+    method public static com.android.xml.permission.configfile.Permissions read(java.io.InputStream) throws javax.xml.datatype.DatatypeConfigurationException, java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method public static String readText(org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method public static void skip(org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+  }
+
+}
+

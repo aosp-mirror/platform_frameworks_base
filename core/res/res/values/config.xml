@@ -302,6 +302,16 @@
          Settings.Global.NETWORK_AVOID_BAD_WIFI. This is the default value of that setting. -->
     <integer translatable="false" name="config_networkAvoidBadWifi">1</integer>
 
+    <!-- Configuration hook for the URL returned by ConnectivityManager#getCaptivePortalServerUrl.
+         If empty, the returned value is controlled by Settings.Global.CAPTIVE_PORTAL_HTTP_URL,
+         and if that value is empty, the framework will use a hard-coded default.
+         This is *NOT* a URL that will always be used by the system network validation to detect
+         captive portals: NetworkMonitor may use different strategies and will not necessarily use
+         this URL. NetworkMonitor behaviour should be configured with NetworkStack resource overlays
+         instead. -->
+    <!--suppress CheckTagEmptyBody -->
+    <string translatable="false" name="config_networkCaptivePortalServerUrl"></string>
+
     <!-- If the hardware supports specially marking packets that caused a wakeup of the
          main CPU, set this value to the mark used. -->
     <integer name="config_networkWakeupPacketMark">0</integer>
@@ -477,22 +487,16 @@
              - the return value of TelephonyManager.getTetherApnRequired()
                determines how the array is further modified:
 
-                   * DUN_REQUIRED
-                     TYPE_MOBILE is removed (if present)
-                     TYPE_MOBILE_HIPRI is removed (if present)
-                     TYPE_MOBILE_DUN is appended (if not already present)
+                   * TRUE (DUN REQUIRED).
+                     TYPE_MOBILE is removed (if present).
+                     TYPE_MOBILE_HIPRI is removed (if present).
+                     TYPE_MOBILE_DUN is appended (if not already present).
 
-                   * DUN_NOT_REQUIRED
-                     TYPE_MOBILE_DUN is removed (if present)
-                     TYPE_MOBILE is appended (if not already present)
-                     TYPE_MOBILE_HIPRI is appended (if not already present)
-
-                   * DUN_UNSPECIFIED
-                     if any of TYPE_MOBILE{,_DUN,_HIPRI} are present:
-                         change nothing
-                     else:
-                         TYPE_MOBILE is appended
-                         TYPE_MOBILE_HIPRI is appended
+                   * FALSE (DUN NOT REQUIRED).
+                     TYPE_MOBILE_DUN is removed (if present).
+                     If both of TYPE_MOBILE{,_HIPRI} are not present:
+                        TYPE_MOBILE is appended.
+                        TYPE_MOBILE_HIPRI is appended.
 
          For other changes applied to this list, now and in the future, see
          com.android.server.connectivity.tethering.TetheringConfiguration.
@@ -659,7 +663,7 @@
     <bool translatable="false" name="config_wifi_framework_enable_associated_network_selection">true</bool>
 
     <!-- Boolean indicating whether single radio chain scan results are to be used for network selection -->
-    <bool translatable="false" name="config_wifi_framework_use_single_radio_chain_scan_results_network_selection">false</bool>
+    <bool translatable="false" name="config_wifi_framework_use_single_radio_chain_scan_results_network_selection">true</bool>
 
     <!-- Boolean indicating that wifi only link configuratios that have exact same credentials (i.e PSK) -->
     <bool translatable="false" name="config_wifi_only_link_same_credential_configurations">true</bool>
@@ -1870,6 +1874,10 @@
          truncate it after committing the transaction. -->
     <integer name="db_journal_size_limit">524288</integer>
 
+    <!-- When opening a database with WAL enabled and if the wal file already exists and larger
+         than this size in bytes, we'll truncate it. -->
+    <integer name="db_wal_truncate_size">1048576</integer>
+
     <!-- The database synchronization mode when using the default journal mode.
          FULL is safest and preserves durability at the cost of extra fsyncs.
          NORMAL also preserves durability in non-WAL modes and uses checksums to ensure
@@ -2750,14 +2758,6 @@
 
     <bool name="config_networkSamplingWakesDevice">true</bool>
 
-    <!-- Home (non-roaming) values for CDMA roaming indicator.
-         Carriers can override this table by resource overlay. If not,
-         the default values come from 3GPP2 C.R1001 table
-         8.1-1. Enhanced Roaming Indicator Number Assignments -->
-    <string-array translatable="false" name="config_cdma_home_system">
-        <item>1</item>
-    </string-array>
-
     <!--From SmsMessage-->
     <!--Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
         string that's stored in 8-bit unpacked format) characters.-->
@@ -3190,6 +3190,10 @@
 
     <!-- True if home app should be pinned via Pinner Service -->
     <bool name="config_pinnerHomeApp">false</bool>
+
+    <!-- List of files pinned by the Pinner Service with the apex boot image b/119800099 -->
+    <string-array translatable="false" name="config_apexBootImagePinnerServiceFiles">
+    </string-array>
 
     <!-- Number of days preloaded file cache should be preserved on a device before it can be
          deleted -->

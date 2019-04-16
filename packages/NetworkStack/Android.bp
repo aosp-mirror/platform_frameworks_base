@@ -14,32 +14,93 @@
 // limitations under the License.
 //
 
-// Library including the network stack, used to compile the network stack app, or linked into the
-// system server on devices that run the stack there
 java_library {
-    name: "NetworkStackLib",
+    name: "captiveportal-lib",
+    srcs: ["common/**/*.java"],
+    libs: [
+        "androidx.annotation_annotation",
+    ],
     sdk_version: "system_current",
-    installable: true,
+}
+
+java_defaults {
+    name: "NetworkStackCommon",
+    sdk_version: "system_current",
+    min_sdk_version: "28",
+}
+
+// Library including the network stack, used to compile both variants of the network stack
+android_library {
+    name: "NetworkStackBase",
+    defaults: ["NetworkStackCommon"],
     srcs: [
         "src/**/*.java",
         ":framework-networkstack-shared-srcs",
         ":services-networkstack-shared-srcs",
     ],
     static_libs: [
+        "androidx.annotation_annotation",
+        "ipmemorystore-client",
         "netd_aidl_interface-java",
         "networkstack-aidl-interfaces-java",
-    ]
+        "datastallprotosnano",
+        "networkstackprotosnano",
+        "captiveportal-lib",
+    ],
+    manifest: "AndroidManifestBase.xml",
+}
+
+cc_library_shared {
+    name: "libnetworkstackutilsjni",
+    srcs: [
+        "jni/network_stack_utils_jni.cpp"
+    ],
+
+    shared_libs: [
+        "liblog",
+        "libcutils",
+        "libnativehelper",
+    ],
+    static_libs: [
+        "libpcap",
+    ],
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wno-unused-parameter",
+    ],
+}
+
+java_defaults {
+    name: "NetworkStackAppCommon",
+    defaults: ["NetworkStackCommon"],
+    privileged: true,
+    static_libs: [
+        "NetworkStackBase",
+    ],
+    jni_libs: ["libnetworkstackutilsjni"],
+    // Resources already included in NetworkStackBase
+    resource_dirs: [],
+    jarjar_rules: "jarjar-rules-shared.txt",
+    optimize: {
+        proguard_flags_files: ["proguard.flags"],
+    },
+    // The permission configuration *must* be included to ensure security of the device
+    required: ["NetworkPermissionConfig"],
+}
+
+// Non-updatable network stack running in the system server process for devices not using the module
+android_app {
+    name: "InProcessNetworkStack",
+    defaults: ["NetworkStackAppCommon"],
+    certificate: "platform",
+    manifest: "AndroidManifest_InProcess.xml",
 }
 
 // Updatable network stack packaged as an application
 android_app {
     name: "NetworkStack",
-    sdk_version: "system_current",
-    certificate: "platform",
-    privileged: true,
-    static_libs: [
-        "NetworkStackLib"
-    ],
+    defaults: ["NetworkStackAppCommon"],
+    certificate: "networkstack",
     manifest: "AndroidManifest.xml",
-    required: ["NetworkStackPermissionStub"],
 }

@@ -1,0 +1,6 @@
+java_library {
+    name: "apct-perftests-utils",
+    static_libs: ["android-support-test"],
+    // Build all java files in the java subdirectory
+    srcs: ["**/*.java"],
+}

@@ -69,7 +69,6 @@ class AppWindowThumbnail implements Animatable {
                 .setFormat(PixelFormat.TRANSLUCENT)
                 .setMetadata(appToken.windowType,
                         window != null ? window.mOwnerUid : Binder.getCallingUid())
-                .setBufferLayer()
                 .build();
 
         if (SHOW_TRANSACTIONS) {

@@ -32,6 +32,12 @@ public final class CellIdentityLte extends CellIdentity {
     private static final String TAG = CellIdentityLte.class.getSimpleName();
     private static final boolean DBG = false;
 
+    private static final int MAX_CI = 268435455;
+    private static final int MAX_PCI = 503;
+    private static final int MAX_TAC = 65535;
+    private static final int MAX_EARFCN = 262143;
+    private static final int MAX_BANDWIDTH = 20000;
+
     // 28-bit cell identity
     private final int mCi;
     // physical cell id 0..503
@@ -89,11 +95,11 @@ public final class CellIdentityLte extends CellIdentity {
     public CellIdentityLte(int ci, int pci, int tac, int earfcn, int bandwidth, String mccStr,
             String mncStr, String alphal, String alphas) {
         super(TAG, CellInfo.TYPE_LTE, mccStr, mncStr, alphal, alphas);
-        mCi = ci;
-        mPci = pci;
-        mTac = tac;
-        mEarfcn = earfcn;
-        mBandwidth = bandwidth;
+        mCi = inRangeOrUnavailable(ci, 0, MAX_CI);
+        mPci = inRangeOrUnavailable(pci, 0, MAX_PCI);
+        mTac = inRangeOrUnavailable(tac, 0, MAX_TAC);
+        mEarfcn = inRangeOrUnavailable(earfcn, 0, MAX_EARFCN);
+        mBandwidth = inRangeOrUnavailable(bandwidth, 0, MAX_BANDWIDTH);
     }
 
     /** @hide */
@@ -111,6 +117,13 @@ public final class CellIdentityLte extends CellIdentity {
     private CellIdentityLte(CellIdentityLte cid) {
         this(cid.mCi, cid.mPci, cid.mTac, cid.mEarfcn, cid.mBandwidth, cid.mMccStr,
                 cid.mMncStr, cid.mAlphaLong, cid.mAlphaShort);
+    }
+
+    /** @hide */
+    public CellIdentityLte sanitizeLocationInfo() {
+        return new CellIdentityLte(CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE,
+                CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE,
+                mMccStr, mMncStr, mAlphaLong, mAlphaShort);
     }
 
     CellIdentityLte copy() {
@@ -180,6 +193,7 @@ public final class CellIdentityLte extends CellIdentity {
     /**
      * @return Mobile Country Code in string format, null if unavailable.
      */
+    @Nullable
     public String getMccString() {
         return mMccStr;
     }
@@ -187,6 +201,7 @@ public final class CellIdentityLte extends CellIdentity {
     /**
      * @return Mobile Network Code in string format, null if unavailable.
      */
+    @Nullable
     public String getMncString() {
         return mMncStr;
     }

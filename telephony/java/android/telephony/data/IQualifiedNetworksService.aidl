@@ -23,6 +23,6 @@ import android.telephony.data.IQualifiedNetworksServiceCallback;
  */
 interface IQualifiedNetworksService
 {
-    oneway void createNetworkAvailabilityUpdater(int slotId, IQualifiedNetworksServiceCallback callback);
-    oneway void removeNetworkAvailabilityUpdater(int slotId);
+    oneway void createNetworkAvailabilityProvider(int slotId, IQualifiedNetworksServiceCallback callback);
+    oneway void removeNetworkAvailabilityProvider(int slotId);
 }

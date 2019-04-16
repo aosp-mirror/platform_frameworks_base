@@ -383,14 +383,14 @@ class UserController implements Handler.Callback {
      * Step from {@link UserState#STATE_RUNNING_LOCKED} to
      * {@link UserState#STATE_RUNNING_UNLOCKING}.
      */
-    private void finishUserUnlocking(final UserState uss) {
+    private boolean finishUserUnlocking(final UserState uss) {
         final int userId = uss.mHandle.getIdentifier();
         // Only keep marching forward if user is actually unlocked
-        if (!StorageManager.isUserKeyUnlocked(userId)) return;
+        if (!StorageManager.isUserKeyUnlocked(userId)) return false;
         synchronized (mLock) {
             // Do not proceed if unexpected state or a stale user
             if (mStartedUsers.get(userId) != uss || uss.state != STATE_RUNNING_LOCKED) {
-                return;
+                return false;
             }
         }
         uss.mUnlockProgress.start();
@@ -421,6 +421,7 @@ class UserController implements Handler.Callback {
             mHandler.obtainMessage(SYSTEM_USER_UNLOCK_MSG, userId, 0, uss)
                     .sendToTarget();
         });
+        return true;
     }
 
     /**
@@ -845,10 +846,16 @@ class UserController implements Handler.Callback {
     }
 
     void scheduleStartProfiles() {
-        if (!mHandler.hasMessages(START_PROFILES_MSG)) {
-            mHandler.sendMessageDelayed(mHandler.obtainMessage(START_PROFILES_MSG),
-                    DateUtils.SECOND_IN_MILLIS);
-        }
+        // Parent user transition to RUNNING_UNLOCKING happens on FgThread, so it is busy, there is
+        // a chance the profile will reach RUNNING_LOCKED while parent is still locked, so no
+        // attempt will be made to unlock the profile. If we go via FgThread, this will be executed
+        // after the parent had chance to unlock fully.
+        FgThread.getHandler().post(() -> {
+            if (!mHandler.hasMessages(START_PROFILES_MSG)) {
+                mHandler.sendMessageDelayed(mHandler.obtainMessage(START_PROFILES_MSG),
+                        DateUtils.SECOND_IN_MILLIS);
+            }
+        });
     }
 
     void startProfiles() {
@@ -1174,7 +1181,10 @@ class UserController implements Handler.Callback {
             return false;
         }
 
-        finishUserUnlocking(uss);
+        if (!finishUserUnlocking(uss)) {
+            notifyFinished(userId, listener);
+            return false;
+        }
 
         // We just unlocked a user, so let's now attempt to unlock any
         // managed profiles under that user.

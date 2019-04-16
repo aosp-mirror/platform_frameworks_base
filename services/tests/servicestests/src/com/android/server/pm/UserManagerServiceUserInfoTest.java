@@ -16,15 +16,20 @@
 
 package com.android.server.pm;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import android.content.pm.UserInfo;
 import android.os.Looper;
 import android.os.Parcel;
-import android.os.UserManagerInternal;
 import android.os.UserHandle;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
-import android.support.test.filters.MediumTest;
+import android.os.UserManagerInternal;
 import android.text.TextUtils;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.MediumTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerService.UserData;
@@ -37,10 +42,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * <p>Run with:<pre>

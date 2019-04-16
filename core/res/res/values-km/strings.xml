@@ -136,9 +136,13 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"ការហៅតាម WiFi | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"ការហៅតាម Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"ការហៅតាម Wi-Fi"</string>
+    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"បិទ"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi ជាអាទិភាព"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"ទិន្នន័យទូរសព្ទចល័តជាអាទិភាព"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"ហៅទូរសព្ទ​តាមរយៈ Wi-Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"ហៅទូរសព្ទ​តាមរយៈបណ្តាញ​ទូរសព្ទ​ចល័ត"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi-Fi តែប៉ុណ្ណោះ"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g> ៖ មិន​បាន​បញ្ជូន​បន្ត"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -430,6 +434,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"ឲ្យ​កម្មវិធី​ចូល​ដំណើរការ​លក្ខណៈ​ទូរស័ព្ទ​នៃ​ឧបករណ៍។ សិទ្ធិ​នេះ​​ឲ្យ​កម្មវិធី​កំណត់​លេខ​ទូរស័ព្ទ និង​លេខ​សម្គាល់​ឧបករណ៍ ថា​តើ​ការ​ហៅ​សកម្ម និង​លេខ​ពី​ចម្ងាយ​បាន​ភ្ជាប់​ដោយ​ការ​ហៅ។"</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"បញ្ជូន​ការ​ហៅ​ទូរសព្ទ​តាមរយៈ​ប្រព័ន្ធ"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"អនុញ្ញាត​ឲ្យ​កម្មវិធី​នេះ​បញ្ជូន​ការ​ហៅ​ទូរសព្ទ​របស់វា​តាមរយៈ​ប្រព័ន្ធ ​ដើម្បី​ធ្វើ​ឲ្យ​ការ​ហៅ​ទូរសព្ទ​ប្រសើរ​ជាង​មុន។"</string>
+    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"មើល និង​គ្រប់គ្រង​ការហៅទូរសព្ទ​តាមរយៈប្រព័ន្ធ។"</string>
+    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"អនុញ្ញាត​ឱ្យកម្មវិធី​មើល និងគ្រប់គ្រង​ការហៅទូរសព្ទ​ដែល​កំពុង​ដំណើរការ​នៅលើ​ឧបករណ៍។ សកម្មភាព​នេះរួមមាន​ព័ត៌មាន​ដូចជា លេខទូរសព្ទ​សម្រាប់ការ​ហៅទូរសព្ទ និង​ស្ថានភាព​នៃការហៅទូរសព្ទជាដើម។"</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"បន្ត​ការ​ហៅ​ទូរសព្ទ​ពី​កម្មវិធី​ផ្សេង​"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"អនុញ្ញាត​ឱ្យ​កម្មវិធី​បន្ត​ការ​ហៅ​ទូរសព្ទ​ ដែល​បាន​ចាប់ផ្តើម​នៅក្នុង​កម្មវិធី​ផ្សេង​។"</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"អាន​លេខ​ទូរសព្ទ"</string>
@@ -1030,7 +1036,7 @@
     <string name="add_contact_desc" msgid="4830217847004590345">"បញ្ចូល​ទៅ​ក្នុង​ទំនាក់ទំនង"</string>
     <string name="view_calendar" msgid="979609872939597838">"មើល"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"មើល​ពេលវេលា​ដែល​បាន​ជ្រើសរើស​នៅក្នុង​ប្រតិទិន"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"កាលវិភាគ"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"កំណត់​កាលវិភាគ"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"កំណត់​កាលវិភាគ​ព្រឹត្តិការណ៍​សម្រាប់ពេល​វេលាដែល​បាន​ជ្រើសរើស"</string>
     <string name="view_flight" msgid="7691640491425680214">"តាម​ដាន"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"តាមដាន​ជើង​ហោះហើរ​ដែល​បាន​ជ្រើសរើស"</string>
@@ -1179,8 +1185,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"ចូលទៅបណ្តាញ"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi មិនមាន​ការតភ្ជាប់​អ៊ីនធឺណិតទេ"</string>
+    <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> មិនមាន​ការតភ្ជាប់អ៊ីនធឺណិត​ទេ"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"ប៉ះសម្រាប់ជម្រើស"</string>
+    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"បានភ្ជាប់"</string>
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> មានការតភ្ជាប់​មានកម្រិត"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"មិន​អី​ទេ ចុច​​ភ្ជាប់​ចុះ"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"ប្ដូរ​ទៅ​ការ​កំណត់​ហតស្ប៉ត​របស់អ្នក"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"រលកសញ្ញាហតស្ប៉តរបស់​អ្នកបាន​ផ្លាស់ប្ដូរ។"</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"ឧបករណ៍​នេះ​មិន​អាច​ប្រើចំណូល​ចិត្ត​របស់អ្នកសម្រាប់តែ 5GHz ទេ។ ផ្ទុយ​មកវិញ ឧបករណ៍​នេះ​នឹង​ប្រើរលកសញ្ញា​ 5GHz នៅពេល​ដែលអាច​ប្រើបាន។"</string>

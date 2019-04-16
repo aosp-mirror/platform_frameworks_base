@@ -19,25 +19,28 @@ package com.android.systemui.keyguard;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import android.app.AlarmManager;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.net.Uri;
 import android.provider.Settings;
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
-import android.util.Log;
+
+import androidx.slice.Slice;
+import androidx.slice.SliceItem;
+import androidx.slice.SliceProvider;
+import androidx.slice.SliceSpecs;
+import androidx.slice.builders.ListBuilder;
+import androidx.slice.core.SliceQuery;
+import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.policy.ZenModeController;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -49,13 +52,6 @@ import org.mockito.MockitoAnnotations;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.concurrent.TimeUnit;
-
-import androidx.slice.Slice;
-import androidx.slice.SliceItem;
-import androidx.slice.SliceProvider;
-import androidx.slice.SliceSpecs;
-import androidx.slice.builders.ListBuilder;
-import androidx.slice.core.SliceQuery;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
