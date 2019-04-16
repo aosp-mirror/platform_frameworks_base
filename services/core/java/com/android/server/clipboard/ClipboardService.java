@@ -52,6 +52,7 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.autofill.AutofillManagerInternal;
 
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -159,6 +160,7 @@ public class ClipboardService extends SystemService {
     private final PackageManager mPm;
     private final AppOpsManager mAppOps;
     private final ContentCaptureManagerInternal mContentCaptureInternal;
+    private final AutofillManagerInternal mAutofillInternal;
     private final IBinder mPermissionOwner;
     private HostClipboardMonitor mHostClipboardMonitor = null;
     private Thread mHostMonitorThread = null;
@@ -179,6 +181,7 @@ public class ClipboardService extends SystemService {
         mUm = (IUserManager) ServiceManager.getService(Context.USER_SERVICE);
         mAppOps = (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE);
         mContentCaptureInternal = LocalServices.getService(ContentCaptureManagerInternal.class);
+        mAutofillInternal = LocalServices.getService(AutofillManagerInternal.class);
         final IBinder permOwner = mUgmInternal.newUriPermissionOwner("clipboard");
         mPermissionOwner = permOwner;
         if (IS_EMULATOR) {
@@ -653,13 +656,18 @@ public class ClipboardService extends SystemService {
                 // Clipboard can only be read by applications with focus..
                 boolean allowed = mWm.isUidFocused(callingUid);
                 if (!allowed && mContentCaptureInternal != null) {
-                    // ...or the Intelligence Service
+                    // ...or the Content Capture Service
                     allowed = mContentCaptureInternal.isContentCaptureServiceForUser(callingUid,
+                            userId);
+                }
+                if (!allowed && mAutofillInternal != null) {
+                    // ...or the Augmented Autofill Service
+                    allowed = mAutofillInternal.isAugmentedAutofillServiceForUser(callingUid,
                             userId);
                 }
                 if (!allowed) {
                     Slog.e(TAG, "Denying clipboard access to " + callingPackage
-                            + ", application is not in focus neither is the IntelligeService for "
+                            + ", application is not in focus neither is a system service for "
                             + "user " + userId);
                 }
                 return allowed;

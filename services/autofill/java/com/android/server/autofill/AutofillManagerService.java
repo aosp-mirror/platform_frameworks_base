@@ -806,6 +806,17 @@ public final class AutofillManagerService
             mAugmentedAutofillState.injectAugmentedAutofillInfo(options, userId, packageName);
             return options;
         }
+
+        @Override
+        public boolean isAugmentedAutofillServiceForUser(int callingUid, int userId) {
+            synchronized (mLock) {
+                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                if (service != null) {
+                    return service.isAugmentedAutofillServiceForUserLocked(callingUid);
+                }
+            }
+            return false;
+        }
     }
 
     /**
