@@ -4523,6 +4523,7 @@ public class AudioManager {
      */
 
     /** @hide */
+    @TestApi
     @SystemApi
     public static final int SUCCESS = AudioSystem.SUCCESS;
     /**
