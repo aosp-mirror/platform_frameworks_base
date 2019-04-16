@@ -1533,6 +1533,9 @@ public final class Settings {
     /**
      * Activity Action: Show More default apps settings.
      * <p>
+     * If a Settings activity handles this intent action, a "More defaults" entry will be shown in
+     * the Default apps settings, and clicking it will launch that activity.
+     * <p>
      * In some cases, a matching Activity may not exist, so ensure you safeguard against this.
      * <p>
      * Input: Nothing.
