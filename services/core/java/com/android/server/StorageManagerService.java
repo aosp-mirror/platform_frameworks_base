@@ -3766,7 +3766,7 @@ class StorageManagerService extends IStorageManager.Stub
                 return Zygote.MOUNT_EXTERNAL_NONE;
             }
             if (mPmInternal.isInstantApp(packageName, UserHandle.getUserId(uid))) {
-                return Zygote.MOUNT_EXTERNAL_NONE;
+                return Zygote.MOUNT_EXTERNAL_DEFAULT;
             }
 
             // Determine if caller is holding runtime permission
