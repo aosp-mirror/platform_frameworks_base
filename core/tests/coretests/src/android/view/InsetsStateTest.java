@@ -40,7 +40,6 @@ import android.util.SparseIntArray;
 import android.view.WindowInsets.Type;
 import android.view.test.InsetsModeSession;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
@@ -56,7 +55,6 @@ import org.junit.runner.RunWith;
  * {@link com.android.server.wm.test.filters.FrameworksTestsFilter}.
  */
 @Presubmit
-@FlakyTest(detail = "Promote once confirmed non-flaky")
 @RunWith(AndroidJUnit4.class)
 public class InsetsStateTest {
 
