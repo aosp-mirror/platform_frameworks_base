@@ -17,7 +17,6 @@
 package android.service.voice;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.UnsupportedAppUsage;
 import android.app.Service;
@@ -41,6 +40,7 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -211,11 +211,11 @@ public class VoiceInteractionService extends Service {
      *
      * @param voiceActions A set of checked voice actions.
      * @return Returns a subset of checked voice actions. Additional voice actions in the
-     * returned set will be ignored. Returns null or empty set if no actions are supported.
+     * returned set will be ignored. Returns empty set if no actions are supported.
      */
-    @Nullable
+    @NonNull
     public Set<String> onGetSupportedVoiceActions(@NonNull Set<String> voiceActions) {
-        return null;
+        return Collections.emptySet();
     }
 
     @Override
@@ -272,7 +272,7 @@ public class VoiceInteractionService extends Service {
             try {
                 Set<String> voiceActionsSet = new ArraySet<>(voiceActions);
                 Set<String> resultSet = onGetSupportedVoiceActions(voiceActionsSet);
-                callback.onComplete(resultSet == null ? null : new ArrayList<>(resultSet));
+                callback.onComplete(new ArrayList<>(resultSet));
             } catch (RemoteException e) {
             }
         }
