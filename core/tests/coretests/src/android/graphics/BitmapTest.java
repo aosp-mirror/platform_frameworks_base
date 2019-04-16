@@ -22,6 +22,8 @@ import androidx.test.filters.SmallTest;
 
 import junit.framework.TestCase;
 
+import java.nio.ByteBuffer;
+
 public class BitmapTest extends TestCase {
 
     @SmallTest
@@ -261,5 +263,75 @@ public class BitmapTest extends TestCase {
         assertTrue(hardwareBitmap.isPremultiplied());
         assertFalse(hardwareBitmap.isMutable());
         assertEquals(ColorSpace.get(ColorSpace.Named.DISPLAY_P3), hardwareBitmap.getColorSpace());
+    }
+
+    @SmallTest
+    public void testCopyWithDirectBuffer() {
+        // Initialize Bitmap
+        final int width = 2;
+        final int height = 2;
+        Bitmap bm1 = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+        bm1.setPixels(new int[] { 0xff, 0xeeee, 0xdddddd, 0xcccccccc }, 0, 2, 0, 0, 2, 2);
+
+        // Copy bytes to direct buffer, buffer is padded by fixed amount (pad bytes) either side
+        // of bitmap.
+        final int pad = 1;
+        final byte padValue = 0x5a;
+        final int bufferSize = pad + width * height * 2 + pad;
+        ByteBuffer directBuffer = ByteBuffer.allocateDirect(bufferSize);
+
+        // Write padding
+        directBuffer.put(0, padValue);
+        directBuffer.put(directBuffer.limit() - 1, padValue);
+
+        // Copy bitmap
+        directBuffer.position(pad);
+        bm1.copyPixelsToBuffer(directBuffer);
+        assertEquals(directBuffer.position(), pad + width * height * 2);
+
+        // Check padding
+        assertEquals(directBuffer.get(0), padValue);
+        assertEquals(directBuffer.get(directBuffer.limit() - 1), padValue);
+
+        // Create bitmap from direct buffer and check match.
+        directBuffer.position(pad);
+        Bitmap bm2 = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+        bm2.copyPixelsFromBuffer(directBuffer);
+        assertTrue(bm2.sameAs(bm1));
+    }
+
+    @SmallTest
+    public void testCopyWithHeapBuffer() {
+        // Initialize Bitmap
+        final int width = 2;
+        final int height = 2;
+        Bitmap bm1 = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+        bm1.setPixels(new int[] { 0xff, 0xeeee, 0xdddddd, 0xcccccccc }, 0, 2, 0, 0, 2, 2);
+
+        // Copy bytes to heap buffer, buffer is padded by fixed amount (pad bytes) either side
+        // of bitmap.
+        final int pad = 1;
+        final byte padValue = 0x5a;
+        final int bufferSize = pad + width * height * 2 + pad;
+        ByteBuffer heapBuffer = ByteBuffer.allocate(bufferSize);
+
+        // Write padding
+        heapBuffer.put(0, padValue);
+        heapBuffer.put(heapBuffer.limit() - 1, padValue);
+
+        // Copy bitmap
+        heapBuffer.position(pad);
+        bm1.copyPixelsToBuffer(heapBuffer);
+        assertEquals(heapBuffer.position(), pad + width * height * 2);
+
+        // Check padding
+        assertEquals(heapBuffer.get(0), padValue);
+        assertEquals(heapBuffer.get(heapBuffer.limit() - 1), padValue);
+
+        // Create bitmap from heap buffer and check match.
+        heapBuffer.position(pad);
+        Bitmap bm2 = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+        bm2.copyPixelsFromBuffer(heapBuffer);
+        assertTrue(bm2.sameAs(bm1));
     }
 }

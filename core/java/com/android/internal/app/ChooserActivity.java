@@ -1349,13 +1349,13 @@ public class ChooserActivity extends ResolverActivity {
         appPredictor.notifyAppTargetEvent(
                 new AppTargetEvent.Builder(
                     // TODO(b/124404997) Send full shortcut info, not just Id with AppTargetId.
-                    new AppTarget.Builder(new AppTargetId(shortcutId),
-                            componentName.getPackageName(), getUser())
+                    new AppTarget.Builder(new AppTargetId(shortcutId))
+                        .setTarget(componentName.getPackageName(), getUser())
                         .setClassName(componentName.getClassName())
                         .build(),
-                    AppTargetEvent.ACTION_LAUNCH)
-                    .setLaunchLocation(LAUNCH_LOCATON_DIRECT_SHARE)
-                    .build());
+                    AppTargetEvent.ACTION_LAUNCH
+                ).setLaunchLocation(LAUNCH_LOCATON_DIRECT_SHARE)
+                .build());
     }
 
     @Nullable
