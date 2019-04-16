@@ -31,4 +31,5 @@ interface IMultiClientInputMethodPrivilegedOperations {
             in IMultiClientInputMethodSession multiClientSession, in InputChannel writeChannel);
     void reportImeWindowTarget(int clientId, int targetWindowHandle, in IBinder imeWindowToken);
     boolean isUidAllowedOnDisplay(int displayId, int uid);
+    void setActive(int clientId, boolean active);
 }
