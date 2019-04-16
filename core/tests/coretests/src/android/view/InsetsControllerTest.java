@@ -43,7 +43,6 @@ import android.view.WindowManager.LayoutParams;
 import android.widget.TextView;
 
 import androidx.test.InstrumentationRegistry;
-import androidx.test.filters.FlakyTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
@@ -63,7 +62,6 @@ import java.util.concurrent.CountDownLatch;
  * {@link com.android.server.wm.test.filters.FrameworksTestsFilter}.
  */
 @Presubmit
-@FlakyTest(detail = "Promote once confirmed non-flaky")
 @RunWith(AndroidJUnit4.class)
 public class InsetsControllerTest {
 
