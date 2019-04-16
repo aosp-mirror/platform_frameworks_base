@@ -2186,11 +2186,6 @@ public class NotificationManagerService extends SystemService {
         @Override
         public boolean areNotificationsEnabledForPackage(String pkg, int uid) {
             checkCallerIsSystemOrSameApp(pkg);
-            if (UserHandle.getCallingUserId() != UserHandle.getUserId(uid)) {
-                getContext().enforceCallingPermission(
-                        android.Manifest.permission.INTERACT_ACROSS_USERS,
-                        "canNotifyAsPackage for uid " + uid);
-            }
 
             return mRankingHelper.getImportance(pkg, uid) != IMPORTANCE_NONE;
         }
