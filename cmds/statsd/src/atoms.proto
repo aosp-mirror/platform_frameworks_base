@@ -340,6 +340,7 @@ message Atom {
         SystemIonHeapSize system_ion_heap_size = 10056;
         AppsOnExternalStorageInfo apps_on_external_storage_info = 10057;
         FaceSettings face_settings = 10058;
+        CoolingDevice cooling_device = 10059;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -410,17 +411,25 @@ message KeyValuePairsAtom {
  *   frameworks/base/services/core/java/com/android/server/stats/StatsCompanionService.java
  */
 message ThermalThrottlingStateChanged {
+    // The type of temperature being reported (CPU, GPU, SKIN, etc)
     optional android.os.TemperatureTypeEnum sensor_type = 1;
 
+    // Throttling state, this field is DEPRECATED
     enum State {
         UNKNOWN = 0;
-        START = 1;
-        STOP = 2;
+        START = 1; // START indicated that throttling was triggered.
+        STOP = 2; // STOP indicates that throttling was cleared.
     }
-
     optional State state = 2;
 
+    // Temperature in deci degrees celsius
     optional float temperature = 3;
+
+    // Severity of throttling
+    optional android.os.ThrottlingSeverityEnum severity = 4;
+
+    // Thermistor name
+    optional string sensor_name = 5;
 }
 
 /**
@@ -3957,8 +3966,7 @@ message BatteryLevel {
  * Pulls the temperature of various parts of the device.
  * The units are tenths of a degree Celsius. Eg: 30.3C is reported as 303.
  *
- * Pulled from:
- *   frameworks/base/cmds/statsd/src/external/ResourceThermalManagerPuller.cpp
+ * Pulled from StatsCompanionService.java
  */
 message Temperature {
     // The type of temperature being reported. Eg. CPU, GPU, SKIN, BATTERY, BCL_.
@@ -3970,6 +3978,9 @@ message Temperature {
     // Temperature in tenths of a degree C.
     // For BCL, it is decimillivolt, decimilliamps, and percentage * 10.
     optional int32 temperature_deci_celsius = 3;
+
+    // Relative severity of the throttling, see enum definition.
+    optional android.os.ThrottlingSeverityEnum severity = 4;
 }
 
 /**
@@ -5946,4 +5957,20 @@ message FaceSettings {
     optional bool unlock_always_require_confirmation = 5;
     // Whether or not a diverse set of poses are required during enrollment.
     optional bool unlock_diversity_required = 6;
+}
+
+/**
+ * Logs cooling devices maintained by the kernel.
+ *
+ * Pulled from StatsCompanionService.java
+ */
+message CoolingDevice {
+    // The type of cooling device being reported. Eg. CPU, GPU...
+    optional android.os.CoolingTypeEnum device_location = 1;
+    // The name of the cooling device source. Eg. CPU0
+    optional string device_name = 2;
+    // Current throttle state of the cooling device. The value can any unsigned
+    // integer between 0 and max_state defined in its driver. 0 means device is
+    // not in throttling, higher value means deeper throttling.
+    optional int32 state = 3;
 }
