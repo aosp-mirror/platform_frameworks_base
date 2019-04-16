@@ -17,7 +17,6 @@
 package android.media;
 
 import android.annotation.IntDef;
-import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -64,7 +63,6 @@ import java.lang.annotation.RetentionPolicy;
  * <p>Users should use {@link Builder} to change {@link BufferingParams}.
  * @hide
  */
-@TestApi
 public final class BufferingParams implements Parcelable {
     private static final int BUFFERING_NO_MARK = -1;
 
