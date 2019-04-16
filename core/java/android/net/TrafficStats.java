@@ -25,6 +25,7 @@ import android.app.backup.BackupManager;
 import android.app.usage.NetworkStatsManager;
 import android.content.Context;
 import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.DataUnit;
@@ -150,7 +151,7 @@ public class TrafficStats {
 
     private static INetworkStatsService sStatsService;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 130143562)
     private synchronized static INetworkStatsService getStatsService() {
         if (sStatsService == null) {
             sStatsService = INetworkStatsService.Stub.asInterface(
@@ -960,7 +961,7 @@ public class TrafficStats {
      * Interfaces are never removed from this list, so counters should always be
      * monotonic.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 130143562)
     private static String[] getMobileIfaces() {
         try {
             return getStatsService().getMobileIfaces();
