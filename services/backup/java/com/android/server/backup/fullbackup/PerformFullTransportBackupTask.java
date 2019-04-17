@@ -516,7 +516,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                     }
 
                     if (backupPackageStatus != BackupTransport.TRANSPORT_OK) {
-                        Slog.e(TAG, "Error " + backupPackageStatus + " backing up "
+                        Slog.w(TAG, "Error " + backupPackageStatus + " backing up "
                                 + packageName);
                     }
 
@@ -857,7 +857,8 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                     }
                 }
             } catch (Exception e) {
-                Slog.e(TAG, "Exception during full package backup of " + mTarget.packageName);
+                Slog.w(TAG, "Exception during full package backup of " + mTarget.packageName,
+                        e);
             } finally {
                 unregisterTask();
                 mBackupLatch.countDown();
