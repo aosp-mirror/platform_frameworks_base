@@ -20,7 +20,7 @@ java_test {
     srcs: ["src/**/*.java"],
     static_libs: [
         "androidx.test.janktesthelper",
-        "cts-amwm-util",
+        "cts-wm-util",
         "platformprotosnano",
         "layersprotosnano",
         "truth-prebuilt",
