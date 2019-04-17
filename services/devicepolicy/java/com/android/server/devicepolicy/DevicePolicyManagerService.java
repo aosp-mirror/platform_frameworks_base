@@ -1379,7 +1379,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
         }
 
-        void readFromXml(XmlPullParser parser)
+        void readFromXml(XmlPullParser parser, boolean shouldOverridePolicies)
                 throws XmlPullParserException, IOException {
             int outerDepth = parser.getDepth();
             int type;
@@ -1390,7 +1390,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 }
                 String tag = parser.getName();
                 if (TAG_POLICIES.equals(tag)) {
-                    info.readPoliciesFromXml(parser);
+                    if (shouldOverridePolicies) {
+                        Log.d(LOG_TAG, "Overriding device admin policies from XML.");
+                        info.readPoliciesFromXml(parser);
+                    }
                 } else if (TAG_PASSWORD_QUALITY.equals(tag)) {
                     minimumPasswordMetrics.quality = Integer.parseInt(
                             parser.getAttributeValue(null, ATTR_VALUE));
@@ -1518,9 +1521,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     }
                 } else if (TAG_PARENT_ADMIN.equals(tag)) {
                     Preconditions.checkState(!isParent);
-
                     parentAdmin = new ActiveAdmin(info, /* parent */ true);
-                    parentAdmin.readFromXml(parser);
+                    parentAdmin.readFromXml(parser, shouldOverridePolicies);
                 } else if (TAG_ORGANIZATION_COLOR.equals(tag)) {
                     organizationColor = Integer.parseInt(
                             parser.getAttributeValue(null, ATTR_VALUE));
@@ -3326,8 +3328,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                                     + userHandle);
                         }
                         if (dai != null) {
+                            boolean shouldOverwritePolicies =
+                                    shouldOverwritePoliciesFromXml(dai.getComponent(), userHandle);
                             ActiveAdmin ap = new ActiveAdmin(dai, /* parent */ false);
-                            ap.readFromXml(parser);
+                            ap.readFromXml(parser, shouldOverwritePolicies);
                             policy.mAdminMap.put(ap.info.getComponent(), ap);
                         }
                     } catch (RuntimeException e) {
@@ -3435,6 +3439,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (policy.mStatusBarDisabled) {
             setStatusBarDisabledInternal(policy.mStatusBarDisabled, userHandle);
         }
+    }
+
+    private boolean shouldOverwritePoliciesFromXml(
+            ComponentName deviceAdminComponent, int userHandle) {
+        // http://b/123415062: If DA, overwrite with the stored policies that were agreed by the
+        // user to prevent apps from sneaking additional policies into updates.
+        return !isProfileOwner(deviceAdminComponent, userHandle)
+                && !isDeviceOwner(deviceAdminComponent, userHandle);
     }
 
     private void updateLockTaskPackagesLocked(List<String> packages, int userId) {
