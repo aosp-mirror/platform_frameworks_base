@@ -14640,6 +14640,20 @@ public class PackageManagerService extends IPackageManager.Stub
             return mUser;
         }
 
+        /**
+         * Gets the user handle for the user that the rollback agent should
+         * use to look up information about this installation when enabling
+         * rollback.
+         */
+        UserHandle getRollbackUser() {
+            // The session for packages installed for "all" users is
+            // associated with the "system" user.
+            if (mUser == UserHandle.ALL) {
+                return UserHandle.SYSTEM;
+            }
+            return mUser;
+        }
+
         HandlerParams setTraceMethod(String traceMethod) {
             this.traceMethod = traceMethod;
             return this;
@@ -15258,7 +15272,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             installedUsers);
                     enableRollbackIntent.putExtra(
                             PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_USER,
-                            getUser().getIdentifier());
+                            getRollbackUser().getIdentifier());
                     enableRollbackIntent.setDataAndType(Uri.fromFile(new File(origin.resolvedPath)),
                             PACKAGE_MIME_TYPE);
                     enableRollbackIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
