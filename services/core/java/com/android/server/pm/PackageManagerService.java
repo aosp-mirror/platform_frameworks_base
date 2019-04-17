@@ -2801,6 +2801,11 @@ public class PackageManagerService extends IPackageManager.Stub
                         if (disabledPs.codePath == null || !disabledPs.codePath.exists()
                                 || disabledPs.pkg == null) {
                             possiblyDeletedUpdatedSystemApps.add(ps.name);
+                        } else {
+                            // We're expecting that the system app should remain disabled, but add
+                            // it to expecting better to recover in case the data version cannot
+                            // be scanned.
+                            mExpectingBetter.put(disabledPs.name, disabledPs.codePath);
                         }
                     }
                 }
@@ -9334,6 +9339,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 | SCAN_UPDATE_SIGNATURE, currentTime, user);
         if (scanResult.success) {
             synchronized (mPackages) {
+                boolean appIdCreated = false;
                 try {
                     final String pkgName = scanResult.pkgSetting.name;
                     final Map<String, ReconciledPackage> reconcileResult = reconcilePackagesLocked(
@@ -9346,11 +9352,12 @@ public class PackageManagerService extends IPackageManager.Stub
                                     Collections.singletonMap(pkgName,
                                             getSharedLibLatestVersionSetting(scanResult))),
                             mSettings.mKeySetManagerService);
-                    prepareScanResultLocked(scanResult);
-                    commitReconciledScanResultLocked(
-                            reconcileResult.get(pkgName));
+                    appIdCreated = optimisticallyRegisterAppId(scanResult);
+                    commitReconciledScanResultLocked(reconcileResult.get(pkgName));
                 } catch (PackageManagerException e) {
-                    unprepareScanResultLocked(scanResult);
+                    if (appIdCreated) {
+                        cleanUpAppIdCreation(scanResult);
+                    }
                     throw e;
                 }
             }
@@ -10837,27 +10844,32 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
 
-    /** Prepares the system to commit a {@link ScanResult} in a way that will not fail. */
-    private void prepareScanResultLocked(@NonNull ScanResult result)
+    /**
+     * Prepares the system to commit a {@link ScanResult} in a way that will not fail by registering
+     * the app ID required for reconcile.
+     * @return {@code true} if a new app ID was registered and will need to be cleaned up on
+     *         failure.
+     */
+    private boolean optimisticallyRegisterAppId(@NonNull ScanResult result)
             throws PackageManagerException {
         if (!result.existingSettingCopied) {
             // THROWS: when we can't allocate a user id. add call to check if there's
             // enough space to ensure we won't throw; otherwise, don't modify state
-            mSettings.registerAppIdLPw(result.pkgSetting);
+            return mSettings.registerAppIdLPw(result.pkgSetting);
         }
+        return false;
     }
 
     /**
-     * Reverts any changes to the system that were made by
-     * {@link #prepareScanResultLocked(ScanResult)}
+     * Reverts any app ID creation that were made by
+     * {@link #optimisticallyRegisterAppId(ScanResult)}. Note: this is only necessary if the
+     * referenced method returned true.
      */
-    private void unprepareScanResultLocked(@NonNull ScanResult result) {
-        if (!result.existingSettingCopied) {
-            // iff we've acquired an app ID for a new package setting, remove it so that it can be
-            // acquired by another request.
-            if (result.pkgSetting.appId > 0) {
-                mSettings.removeAppIdLPw(result.pkgSetting.appId);
-            }
+    private void cleanUpAppIdCreation(@NonNull ScanResult result) {
+        // iff we've acquired an app ID for a new package setting, remove it so that it can be
+        // acquired by another request.
+        if (result.pkgSetting.appId > 0) {
+            mSettings.removeAppIdLPw(result.pkgSetting.appId);
         }
     }
 
@@ -16701,6 +16713,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final Map<String, VersionInfo> versionInfos = new ArrayMap<>(requests.size());
         final Map<String, PackageSetting> lastStaticSharedLibSettings =
                 new ArrayMap<>(requests.size());
+        final Map<String, Boolean> createdAppId = new ArrayMap<>(requests.size());
         boolean success = false;
         try {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "installPackagesLI");
@@ -16740,7 +16753,7 @@ public class PackageManagerService extends IPackageManager.Stub
                                             + " in multi-package install request.");
                             return;
                         }
-                        prepareScanResultLocked(result);
+                        createdAppId.put(packageName, optimisticallyRegisterAppId(result));
                         versionInfos.put(result.pkgSetting.pkg.packageName,
                                 getSettingsVersionForPackage(result.pkgSetting.pkg));
                         if (result.staticSharedLibraryInfo != null) {
@@ -16797,7 +16810,9 @@ public class PackageManagerService extends IPackageManager.Stub
         } finally {
             if (!success) {
                 for (ScanResult result : preparedScans.values()) {
-                    unprepareScanResultLocked(result);
+                    if (createdAppId.getOrDefault(result.request.pkg.packageName, false)) {
+                        cleanUpAppIdCreation(result);
+                    }
                 }
             }
             for (PrepareResult result : prepareResults.values()) {
@@ -19890,26 +19905,28 @@ public class PackageManagerService extends IPackageManager.Stub
         mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                 true /* requireFullPermission */, false /* checkShell */,
                 "replace preferred activity");
-        synchronized (mPackages) {
-            if (mContext.checkCallingOrSelfPermission(
-                    android.Manifest.permission.SET_PREFERRED_APPLICATIONS)
-                    != PackageManager.PERMISSION_GRANTED) {
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.SET_PREFERRED_APPLICATIONS)
+                != PackageManager.PERMISSION_GRANTED) {
+            synchronized (mPackages) {
                 if (getUidTargetSdkVersionLockedLPr(callingUid)
                         < Build.VERSION_CODES.FROYO) {
                     Slog.w(TAG, "Ignoring replacePreferredActivity() from uid "
                             + Binder.getCallingUid());
                     return;
                 }
-                mContext.enforceCallingOrSelfPermission(
-                        android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
             }
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
+        }
 
-            PreferredIntentResolver pir = mSettings.mPreferredActivities.get(userId);
+        synchronized (mPackages) {
+            final PreferredIntentResolver pir = mSettings.mPreferredActivities.get(userId);
             if (pir != null) {
                 // Get all of the existing entries that exactly match this filter.
-                ArrayList<PreferredActivity> existing = pir.findFilters(filter);
+                final ArrayList<PreferredActivity> existing = pir.findFilters(filter);
                 if (existing != null && existing.size() == 1) {
-                    PreferredActivity cur = existing.get(0);
+                    final PreferredActivity cur = existing.get(0);
                     if (DEBUG_PREFERRED) {
                         Slog.i(TAG, "Checking replace of preferred:");
                         filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
@@ -19939,14 +19956,13 @@ public class PackageManagerService extends IPackageManager.Stub
                         return;
                     }
                 }
-
                 if (existing != null) {
                     if (DEBUG_PREFERRED) {
                         Slog.i(TAG, existing.size() + " existing preferred matches for:");
                         filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
                     }
-                    for (int i = 0; i < existing.size(); i++) {
-                        PreferredActivity pa = existing.get(i);
+                    for (int i = existing.size() - 1; i >= 0; --i) {
+                        final PreferredActivity pa = existing.get(i);
                         if (DEBUG_PREFERRED) {
                             Slog.i(TAG, "Removing existing preferred activity "
                                     + pa.mPref.mComponent + ":");
@@ -19956,9 +19972,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                 }
             }
-            addPreferredActivityInternal(filter, match, set, activity, true, userId,
-                    "Replacing preferred");
         }
+        addPreferredActivityInternal(filter, match, set, activity, true, userId,
+                "Replacing preferred");
     }
 
     @Override
@@ -20032,7 +20048,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     PreferredActivity pa = removed.get(j);
                     pir.removeFilter(pa);
                 }
-                outUserChanged.setValueAt(thisUserId, true);
+                outUserChanged.put(thisUserId, true);
             }
         }
     }

@@ -98,7 +98,7 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
         mViewHierarchyManager = new NotificationViewHierarchyManager(mContext,
                 mLockscreenUserManager, mGroupManager, mVisualStabilityManager,
                 mock(StatusBarStateControllerImpl.class), mEntryManager,
-                () -> mShadeController, new BubbleData());
+                () -> mShadeController, new BubbleData(mContext));
         Dependency.get(InitController.class).executePostInitTasks();
         mViewHierarchyManager.setUpWithPresenter(mPresenter, mListContainer);
     }

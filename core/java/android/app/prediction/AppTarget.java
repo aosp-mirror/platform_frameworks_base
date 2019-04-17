@@ -204,24 +204,49 @@ public final class AppTarget implements Parcelable {
         private int mRank;
 
         /**
-         * @param id A unique id for this launchable target.
+         * @deprecated Use the other Builder constructors.
          * @hide
          */
-        @SystemApi
-        @TestApi
+        @Deprecated
         public Builder(@NonNull AppTargetId id) {
             mId = id;
         }
 
         /**
-         * Sets the target to be an app.
-         *
-         * @param packageName PackageName of the app
+         * @param id A unique id for this launchable target.
+         * @param packageName PackageName of the target.
          * @param user The UserHandle of the user which this target belongs to.
-         *
-         * @throws IllegalArgumentException is the target is already set
+         * @hide
+         */
+        @SystemApi
+        @TestApi
+        public Builder(@NonNull AppTargetId id, @NonNull String packageName,
+                @NonNull UserHandle user) {
+            mId = Preconditions.checkNotNull(id);
+            mPackageName = Preconditions.checkNotNull(packageName);
+            mUser = Preconditions.checkNotNull(user);
+        }
+
+        /**
+         * @param id A unique id for this launchable target.
+         * @param info The ShortcutInfo that represents this launchable target.
+         * @hide
+         */
+        @SystemApi
+        @TestApi
+        public Builder(@NonNull AppTargetId id, @NonNull ShortcutInfo info) {
+            mId = Preconditions.checkNotNull(id);
+            mShortcutInfo = Preconditions.checkNotNull(info);
+            mPackageName = info.getPackage();
+            mUser = info.getUserHandle();
+        }
+
+        /**
+         * @deprecated Use the appropriate constructor.
+         * @hide
          */
         @NonNull
+        @Deprecated
         public Builder setTarget(@NonNull String packageName, @NonNull UserHandle user) {
             if (mPackageName != null) {
                 throw new IllegalArgumentException("Target is already set");
@@ -232,11 +257,11 @@ public final class AppTarget implements Parcelable {
         }
 
         /**
-         * Sets the target to be a ShortcutInfo.
-         *
-         * @throws IllegalArgumentException is the target is already set
+         * @deprecated Use the appropriate constructor.
+         * @hide
          */
         @NonNull
+        @Deprecated
         public Builder setTarget(@NonNull ShortcutInfo info) {
             setTarget(info.getPackage(), info.getUserHandle());
             mShortcutInfo = Preconditions.checkNotNull(info);
@@ -244,7 +269,7 @@ public final class AppTarget implements Parcelable {
         }
 
         /**
-         * Sets the className for the target
+         * Sets the className for the target.
          */
         @NonNull
         public Builder setClassName(@NonNull String className) {
@@ -253,7 +278,7 @@ public final class AppTarget implements Parcelable {
         }
 
         /**
-         * Sets the rank of the for the target.
+         * Sets the rank of the target.
          */
         @NonNull
         public Builder setRank(@IntRange(from = 0) int rank) {
@@ -274,7 +299,7 @@ public final class AppTarget implements Parcelable {
         @NonNull
         public AppTarget build() {
             if (mPackageName == null) {
-                throw new IllegalStateException("No target set");
+                throw new IllegalStateException("No target is set");
             }
             return new AppTarget(mId, mPackageName, mUser, mShortcutInfo, mClassName, mRank);
         }

@@ -212,4 +212,21 @@ public class MultiClientInputMethodPrivilegedOperations {
         }
     }
 
+    /**
+     * Calls {@link IMultiClientInputMethodPrivilegedOperations#setActive(int, boolean)}.
+     * @param clientId client ID to be set active/inactive
+     * @param active {@code true} set set active.
+     */
+    @AnyThread
+    public void setActive(int clientId, boolean active) {
+        final IMultiClientInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
+        if (ops == null) {
+            return;
+        }
+        try {
+            ops.setActive(clientId, active);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }

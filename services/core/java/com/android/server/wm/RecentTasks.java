@@ -60,7 +60,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.text.TextUtils;
@@ -185,7 +184,6 @@ class RecentTasks {
     // front. Newly created tasks, or tasks that are removed from the list will continue to change
     // the list.  This does not affect affiliated tasks.
     private boolean mFreezeTaskListReordering;
-    private long mFreezeTaskListReorderingTime;
     private long mFreezeTaskListTimeoutMs = FREEZE_TASK_LIST_TIMEOUT_MS;
 
     // Mainly to avoid object recreation on multiple calls.
@@ -219,6 +217,9 @@ class RecentTasks {
             }, null).recycleOnUse());
         }
     };
+
+    private final Runnable mResetFreezeTaskListOnTimeoutRunnable =
+            this::resetFreezeTaskListReorderingOnTimeout;
 
     @VisibleForTesting
     RecentTasks(ActivityTaskManagerService service, TaskPersister taskPersister) {
@@ -255,8 +256,7 @@ class RecentTasks {
     }
 
     @VisibleForTesting
-    void setFreezeTaskListTimeoutParams(long reorderingTime, long timeoutMs) {
-        mFreezeTaskListReorderingTime = reorderingTime;
+    void setFreezeTaskListTimeout(long timeoutMs) {
         mFreezeTaskListTimeoutMs = timeoutMs;
     }
 
@@ -272,7 +272,8 @@ class RecentTasks {
         // Always update the reordering time when this is called to ensure that the timeout
         // is reset
         mFreezeTaskListReordering = true;
-        mFreezeTaskListReorderingTime = SystemClock.elapsedRealtime();
+        mService.mH.removeCallbacks(mResetFreezeTaskListOnTimeoutRunnable);
+        mService.mH.postDelayed(mResetFreezeTaskListOnTimeoutRunnable, mFreezeTaskListTimeoutMs);
     }
 
     /**
@@ -286,6 +287,7 @@ class RecentTasks {
 
         // Once we end freezing the task list, reset the existing task order to the stable state
         mFreezeTaskListReordering = false;
+        mService.mH.removeCallbacks(mResetFreezeTaskListOnTimeoutRunnable);
 
         // If the top task is provided, then restore the top task to the front of the list
         if (topTask != null) {
@@ -295,6 +297,8 @@ class RecentTasks {
 
         // Resume trimming tasks
         trimInactiveRecentTasks();
+
+        mService.getTaskChangeNotificationController().notifyTaskStackChanged();
     }
 
     /**
@@ -302,13 +306,8 @@ class RecentTasks {
      * before we need to iterate the task list in order (either for purposes of returning the list
      * to SystemUI or if we need to trim tasks in order)
      */
+    @VisibleForTesting
     void resetFreezeTaskListReorderingOnTimeout() {
-        // Unfreeze the recent task list if the time heuristic has passed
-        if (mFreezeTaskListReorderingTime
-                > (SystemClock.elapsedRealtime() - mFreezeTaskListTimeoutMs)) {
-            return;
-        }
-
         final ActivityStack focusedStack = mService.getTopDisplayFocusedStack();
         final TaskRecord topTask = focusedStack != null
                 ? focusedStack.topTask()
@@ -874,9 +873,6 @@ class RecentTasks {
 
         final Set<Integer> includedUsers = getProfileIds(userId);
         includedUsers.add(Integer.valueOf(userId));
-
-        // Check if the frozen task list has timed out
-        resetFreezeTaskListReorderingOnTimeout();
 
         final ArrayList<ActivityManager.RecentTaskInfo> res = new ArrayList<>();
         final int size = mTasks.size();
@@ -1654,8 +1650,8 @@ class RecentTasks {
         pw.println("mRecentsUid=" + mRecentsUid);
         pw.println("mRecentsComponent=" + mRecentsComponent);
         pw.println("mFreezeTaskListReordering=" + mFreezeTaskListReordering);
-        pw.println("mFreezeTaskListReorderingTime (time since)="
-                + (SystemClock.elapsedRealtime() - mFreezeTaskListReorderingTime) + "ms");
+        pw.println("mFreezeTaskListReorderingPendingTimeout="
+                + mService.mH.hasCallbacks(mResetFreezeTaskListOnTimeoutRunnable));
         if (mTasks.isEmpty()) {
             return;
         }

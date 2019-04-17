@@ -48,7 +48,7 @@ public class BubbleStackViewTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mStackView = new BubbleStackView(mContext, new BubbleData(), null);
+        mStackView = new BubbleStackView(mContext, new BubbleData(getContext()), null);
         mBubble.entry = mNotifEntry;
     }
 

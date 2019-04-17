@@ -967,6 +967,10 @@ public class WifiEnterpriseConfig implements Parcelable {
      * from the top-level domain and all the labels in domain_suffix_match shall be included in the
      * certificate. The certificate may include additional sub-level labels in addition to the
      * required labels.
+     * <p>More than one match string can be provided by using semicolons to separate the strings
+     * (e.g., example.org;example.com). When multiple strings are specified, a match with any one of
+     * the values is considered a sufficient match for the certificate, i.e., the conditions are
+     * ORed ogether.
      * <p>For example, domain_suffix_match=example.com would match test.example.com but would not
      * match test-example.com.
      * @param domain The domain value

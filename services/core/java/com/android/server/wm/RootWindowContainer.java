@@ -22,6 +22,7 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
@@ -312,11 +313,12 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
     /**
      * Returns true if the callingUid has any non-toast window currently visible to the user.
+     * Also ignores TYPE_APPLICATION_STARTING, since those windows don't belong to apps.
      */
     boolean isAnyNonToastWindowVisibleForUid(int callingUid) {
         return forAllWindows(w ->
                         w.getOwningUid() == callingUid && w.mAttrs.type != TYPE_TOAST
-                        && w.isVisibleNow(),
+                        && w.mAttrs.type != TYPE_APPLICATION_STARTING && w.isVisibleNow(),
                 true /* traverseTopToBottom */);
     }
 

@@ -712,7 +712,6 @@ public class RecentTasksTest extends ActivityTestsBase {
         mRecentTasks.add(mTasks.get(4));
 
         // Freeze the list
-        long freezeTime = SystemClock.elapsedRealtime();
         mRecentTasks.setFreezeTaskListReordering();
         assertTrue(mRecentTasks.isFreezeTaskListReorderingSet());
 
@@ -720,13 +719,11 @@ public class RecentTasksTest extends ActivityTestsBase {
         mRecentTasks.add(mTasks.get(2));
         mRecentTasks.add(mTasks.get(1));
 
-        // Override the freeze timeout params to simulate the timeout (simulate the freeze at 100ms
-        // ago with a timeout of 1ms)
-        mRecentTasks.setFreezeTaskListTimeoutParams(freezeTime - 100, 1);
-
         ActivityStack stack = mTasks.get(2).getStack();
         stack.moveToFront("", mTasks.get(2));
         doReturn(stack).when(mTestService.mRootActivityContainer).getTopDisplayFocusedStack();
+
+        // Simulate the reset from the timeout
         mRecentTasks.resetFreezeTaskListReorderingOnTimeout();
         assertFalse(mRecentTasks.isFreezeTaskListReorderingSet());
 
