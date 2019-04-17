@@ -32,13 +32,12 @@ public abstract class DisplayAddress implements Parcelable {
      * A physical display ID is stable if the display can be identified using EDID information.
      *
      * @param physicalDisplayId A physical display ID.
-     * @return The {@link Physical} address, or {@code null} if the ID is not stable.
+     * @return The {@link Physical} address.
      * @see SurfaceControl#getPhysicalDisplayIds
      */
-    @Nullable
+    @NonNull
     public static Physical fromPhysicalDisplayId(long physicalDisplayId) {
-        final Physical address = new Physical(physicalDisplayId);
-        return address.getModel() == 0 ? null : address;
+        return new Physical(physicalDisplayId);
     }
 
     /**
@@ -59,9 +58,12 @@ public abstract class DisplayAddress implements Parcelable {
      * of a display. The port, located in the least significant byte, uniquely identifies a physical
      * connector on the device for display output like eDP or HDMI. The model, located in the upper
      * bits, uniquely identifies a display model across manufacturers by encoding EDID information.
+     * While the port is always stable, the model may not be available if EDID identification is not
+     * supported by the platform, in which case the address is not unique.
      */
     public static final class Physical extends DisplayAddress {
-        private static final int PHYSICAL_DISPLAY_ID_MODEL_SHIFT = 8;
+        private static final long UNKNOWN_MODEL = 0;
+        private static final int MODEL_SHIFT = 8;
         private static final int PORT_MASK = 0xFF;
 
         private final long mPhysicalDisplayId;
@@ -75,9 +77,13 @@ public abstract class DisplayAddress implements Parcelable {
 
         /**
          * Model identifier unique across manufacturers.
+         *
+         * @return The model ID, or {@code null} if the model cannot be identified.
          */
-        public long getModel() {
-            return mPhysicalDisplayId >>> PHYSICAL_DISPLAY_ID_MODEL_SHIFT;
+        @Nullable
+        public Long getModel() {
+            final long model = mPhysicalDisplayId >>> MODEL_SHIFT;
+            return model == UNKNOWN_MODEL ? null : model;
         }
 
         @Override
@@ -88,11 +94,15 @@ public abstract class DisplayAddress implements Parcelable {
 
         @Override
         public String toString() {
-            return new StringBuilder("{")
-                    .append("port=").append(getPort() & PORT_MASK)
-                    .append(", model=0x").append(Long.toHexString(getModel()))
-                    .append("}")
-                    .toString();
+            final StringBuilder builder = new StringBuilder("{")
+                    .append("port=").append(getPort() & PORT_MASK);
+
+            final Long model = getModel();
+            if (model != null) {
+                builder.append(", model=0x").append(Long.toHexString(model));
+            }
+
+            return builder.append("}").toString();
         }
 
         @Override
@@ -109,7 +119,7 @@ public abstract class DisplayAddress implements Parcelable {
             mPhysicalDisplayId = physicalDisplayId;
         }
 
-        public static final @android.annotation.NonNull Parcelable.Creator<Physical> CREATOR =
+        public static final @NonNull Parcelable.Creator<Physical> CREATOR =
                 new Parcelable.Creator<Physical>() {
                     @Override
                     public Physical createFromParcel(Parcel in) {
@@ -153,7 +163,7 @@ public abstract class DisplayAddress implements Parcelable {
             mMacAddress = macAddress;
         }
 
-        public static final @android.annotation.NonNull Parcelable.Creator<Network> CREATOR =
+        public static final @NonNull Parcelable.Creator<Network> CREATOR =
                 new Parcelable.Creator<Network>() {
                     @Override
                     public Network createFromParcel(Parcel in) {
