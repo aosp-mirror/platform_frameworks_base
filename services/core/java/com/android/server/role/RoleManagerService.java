@@ -147,6 +147,8 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
 
         mLegacyRoleResolver = legacyRoleResolver;
 
+        RoleControllerManager.initializeRemoteServiceComponentName(context);
+
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
         mAppOpsManager = context.getSystemService(AppOpsManager.class);
 
@@ -231,7 +233,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
             // Run grants again
             Slog.i(LOG_TAG, "Granting default permissions...");
             CompletableFuture<Void> result = new CompletableFuture<>();
-            getOrCreateControllerService(userId).grantDefaultRoles(FgThread.getExecutor(),
+            getOrCreateController(userId).grantDefaultRoles(FgThread.getExecutor(),
                     successful -> {
                         if (successful) {
                             userState.setPackagesHash(packagesHash);
@@ -318,7 +320,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
     }
 
     @NonNull
-    private RoleControllerManager getOrCreateControllerService(@UserIdInt int userId) {
+    private RoleControllerManager getOrCreateController(@UserIdInt int userId) {
         synchronized (mLock) {
             RoleControllerManager controller = mControllers.get(userId);
             if (controller == null) {
@@ -330,7 +332,8 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
                 } catch (NameNotFoundException e) {
                     throw new RuntimeException(e);
                 }
-                controller = new RoleControllerManager(context, FgThread.getHandler());
+                controller = RoleControllerManager.createWithInitializedRemoteServiceComponentName(
+                        FgThread.getHandler(), context);
                 mControllers.put(userId, controller);
             }
             return controller;
@@ -474,7 +477,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
             Preconditions.checkStringNotEmpty(packageName, "packageName cannot be null or empty");
             Preconditions.checkNotNull(callback, "callback cannot be null");
 
-            getOrCreateControllerService(userId).onAddRoleHolder(roleName, packageName, flags,
+            getOrCreateController(userId).onAddRoleHolder(roleName, packageName, flags,
                     callback);
         }
 
@@ -494,7 +497,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
             Preconditions.checkStringNotEmpty(packageName, "packageName cannot be null or empty");
             Preconditions.checkNotNull(callback, "callback cannot be null");
 
-            getOrCreateControllerService(userId).onRemoveRoleHolder(roleName, packageName, flags,
+            getOrCreateController(userId).onRemoveRoleHolder(roleName, packageName, flags,
                     callback);
         }
 
@@ -513,7 +516,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
             Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
             Preconditions.checkNotNull(callback, "callback cannot be null");
 
-            getOrCreateControllerService(userId).onClearRoleHolders(roleName, flags, callback);
+            getOrCreateController(userId).onClearRoleHolders(roleName, flags, callback);
         }
 
         @Override
@@ -738,10 +741,10 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
                 }
             });
             if (packageName != null) {
-                getOrCreateControllerService(userId).onAddRoleHolder(RoleManager.ROLE_BROWSER,
+                getOrCreateController(userId).onAddRoleHolder(RoleManager.ROLE_BROWSER,
                         packageName, 0, callback);
             } else {
-                getOrCreateControllerService(userId).onClearRoleHolders(RoleManager.ROLE_BROWSER, 0,
+                getOrCreateController(userId).onClearRoleHolders(RoleManager.ROLE_BROWSER, 0,
                         callback);
             }
             try {
@@ -762,10 +765,10 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
                 }
             });
             if (packageName != null) {
-                getOrCreateControllerService(userId).onAddRoleHolder(RoleManager.ROLE_BROWSER,
+                getOrCreateController(userId).onAddRoleHolder(RoleManager.ROLE_BROWSER,
                         packageName, 0, callback);
             } else {
-                getOrCreateControllerService(userId).onClearRoleHolders(RoleManager.ROLE_BROWSER, 0,
+                getOrCreateController(userId).onClearRoleHolders(RoleManager.ROLE_BROWSER, 0,
                         callback);
             }
         }
@@ -791,10 +794,10 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
                 callback.accept(successful);
             });
             if (packageName != null) {
-                getOrCreateControllerService(userId).onAddRoleHolder(RoleManager.ROLE_HOME,
+                getOrCreateController(userId).onAddRoleHolder(RoleManager.ROLE_HOME,
                         packageName, 0, remoteCallback);
             } else {
-                getOrCreateControllerService(userId).onClearRoleHolders(RoleManager.ROLE_HOME, 0,
+                getOrCreateController(userId).onClearRoleHolders(RoleManager.ROLE_HOME, 0,
                         remoteCallback);
             }
         }
