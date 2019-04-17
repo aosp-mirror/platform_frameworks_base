@@ -43,6 +43,10 @@ import static android.net.util.DataStallUtils.DEFAULT_DATA_STALL_EVALUATION_TYPE
 import static android.net.util.DataStallUtils.DEFAULT_DATA_STALL_MIN_EVALUATE_TIME_MS;
 import static android.net.util.DataStallUtils.DEFAULT_DATA_STALL_VALID_DNS_TIME_THRESHOLD_MS;
 import static android.net.util.DataStallUtils.DEFAULT_DNS_LOG_SIZE;
+import static android.net.util.NetworkStackUtils.CAPTIVE_PORTAL_FALLBACK_PROBE_SPECS;
+import static android.net.util.NetworkStackUtils.CAPTIVE_PORTAL_OTHER_FALLBACK_URLS;
+import static android.net.util.NetworkStackUtils.CAPTIVE_PORTAL_USER_AGENT;
+import static android.net.util.NetworkStackUtils.CAPTIVE_PORTAL_USE_HTTPS;
 import static android.net.util.NetworkStackUtils.NAMESPACE_CONNECTIVITY;
 import static android.net.util.NetworkStackUtils.isEmpty;
 
@@ -1170,7 +1174,8 @@ public class NetworkMonitor extends StateMachine {
     }
 
     private boolean getUseHttpsValidation() {
-        return mDependencies.getSetting(mContext, Settings.Global.CAPTIVE_PORTAL_USE_HTTPS, 1) == 1;
+        return mDependencies.getDeviceConfigPropertyInt(NAMESPACE_CONNECTIVITY,
+                CAPTIVE_PORTAL_USE_HTTPS, 1) == 1;
     }
 
     private String getCaptivePortalServerHttpsUrl() {
@@ -1223,8 +1228,8 @@ public class NetworkMonitor extends StateMachine {
 
             final URL[] settingProviderUrls;
             if (!TextUtils.isEmpty(firstUrl)) {
-                final String otherUrls = mDependencies.getSetting(mContext,
-                        Settings.Global.CAPTIVE_PORTAL_OTHER_FALLBACK_URLS, "");
+                final String otherUrls = mDependencies.getDeviceConfigProperty(
+                        NAMESPACE_CONNECTIVITY, CAPTIVE_PORTAL_OTHER_FALLBACK_URLS, "");
                 // otherUrls may be empty, but .split() ignores trailing empty strings
                 final String separator = ",";
                 final String[] urls = (firstUrl + separator + otherUrls).split(separator);
@@ -1244,8 +1249,9 @@ public class NetworkMonitor extends StateMachine {
 
     private CaptivePortalProbeSpec[] makeCaptivePortalFallbackProbeSpecs() {
         try {
-            final String settingsValue = mDependencies.getSetting(
-                    mContext, Settings.Global.CAPTIVE_PORTAL_FALLBACK_PROBE_SPECS, null);
+            final String settingsValue = mDependencies.getDeviceConfigProperty(
+                    NAMESPACE_CONNECTIVITY, CAPTIVE_PORTAL_FALLBACK_PROBE_SPECS, null);
+
             final CaptivePortalProbeSpec[] emptySpecs = new CaptivePortalProbeSpec[0];
             final CaptivePortalProbeSpec[] providerValue = TextUtils.isEmpty(settingsValue)
                     ? emptySpecs
@@ -1339,8 +1345,8 @@ public class NetworkMonitor extends StateMachine {
     }
 
     private String getCaptivePortalUserAgent() {
-        return mDependencies.getSetting(mContext,
-                Settings.Global.CAPTIVE_PORTAL_USER_AGENT, DEFAULT_USER_AGENT);
+        return mDependencies.getDeviceConfigProperty(NAMESPACE_CONNECTIVITY,
+                CAPTIVE_PORTAL_USER_AGENT, DEFAULT_USER_AGENT);
     }
 
     private URL nextFallbackUrl() {
