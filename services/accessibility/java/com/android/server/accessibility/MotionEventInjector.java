@@ -111,6 +111,15 @@ public class MotionEventInjector extends BaseEventStreamTransformation implement
 
     @Override
     public void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
+        // MotionEventInjector would cancel any injected gesture when any MotionEvent arrives.
+        // For user using an external device to control the pointer movement, it's almost
+        // impossible to perform the gestures. Any slightly unintended movement results in the
+        // cancellation of the gesture.
+        if ((event.isFromSource(InputDevice.SOURCE_MOUSE)
+                && event.getActionMasked() == MotionEvent.ACTION_HOVER_MOVE)
+                && mOpenGesturesInProgress.get(EVENT_SOURCE, false)) {
+            return;
+        }
         cancelAnyPendingInjectedEvents();
         sendMotionEventToNext(event, rawEvent, policyFlags);
     }

@@ -22,7 +22,6 @@ import android.os.Trace;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewParent;
 
 import com.android.systemui.R;
 import com.android.systemui.bubbles.BubbleData;
@@ -120,7 +119,7 @@ public class NotificationViewHierarchyManager {
         for (int i = 0; i < N; i++) {
             NotificationEntry ent = activeNotifications.get(i);
             if (ent.isRowDismissed() || ent.isRowRemoved()
-                    || (mBubbleData.getBubble(ent.key) != null && !ent.showInShadeWhenBubble())) {
+                    || (mBubbleData.hasBubbleWithKey(ent.key) && !ent.showInShadeWhenBubble())) {
                 // we don't want to update removed notifications because they could
                 // temporarily become children if they were isolated before.
                 continue;

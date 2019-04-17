@@ -2,6 +2,7 @@ package android.app;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -71,7 +72,7 @@ public class VrManager {
             android.Manifest.permission.ACCESS_VR_STATE
     })
     public void registerVrStateCallback(@NonNull @CallbackExecutor Executor executor,
-            VrStateCallback callback) {
+            @NonNull VrStateCallback callback) {
         if (callback == null || mCallbackMap.containsKey(callback)) {
             return;
         }
@@ -99,7 +100,7 @@ public class VrManager {
             android.Manifest.permission.RESTRICTED_VR_ACCESS,
             android.Manifest.permission.ACCESS_VR_STATE
     })
-    public void unregisterVrStateCallback(VrStateCallback callback) {
+    public void unregisterVrStateCallback(@NonNull VrStateCallback callback) {
         CallbackEntry entry = mCallbackMap.remove(callback);
         if (entry != null) {
             try {
@@ -175,7 +176,7 @@ public class VrManager {
      */
     @RequiresPermission(android.Manifest.permission.RESTRICTED_VR_ACCESS)
     public void setVr2dDisplayProperties(
-            Vr2dDisplayProperties vr2dDisplayProp) {
+            @NonNull Vr2dDisplayProperties vr2dDisplayProp) {
         try {
             mService.setVr2dDisplayProperties(vr2dDisplayProp);
         } catch (RemoteException e) {
@@ -220,7 +221,7 @@ public class VrManager {
      * @param componentName not used
      */
     @RequiresPermission(android.Manifest.permission.RESTRICTED_VR_ACCESS)
-    public void setVrInputMethod(ComponentName componentName) {
+    public void setVrInputMethod(@Nullable ComponentName componentName) {
     }
 
     /**

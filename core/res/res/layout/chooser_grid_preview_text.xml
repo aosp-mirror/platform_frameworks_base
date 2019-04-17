@@ -24,9 +24,9 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:paddingBottom="@dimen/chooser_view_spacing"
-    android:background="?attr/colorBackgroundFloating">
+    android:background="?android:attr/colorBackgroundFloating">
 
-  <LinearLayout
+  <RelativeLayout
       android:layout_width="@dimen/chooser_preview_width"
       android:layout_height="wrap_content"
       android:layout_gravity="center"
@@ -35,28 +35,51 @@
       android:paddingRight="@dimen/chooser_edge_margin_normal"
       android:layout_marginBottom="@dimen/chooser_view_spacing"
       android:id="@+id/content_preview_text_layout">
+
     <TextView
         android:id="@+id/content_preview_text"
-        android:layout_width="0dp"
-        android:layout_weight="1"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
+        android:layout_alignParentStart="true"
+        android:layout_toStartOf="@id/copy_button"
+        android:layout_centerVertical="true"
         android:ellipsize="end"
-        android:gravity="start|top"
-        android:paddingRight="@dimen/chooser_view_spacing"
+        android:textColor="?android:attr/textColorPrimary"
         android:maxLines="2"/>
-    <ImageButton
+
+    <LinearLayout
         android:id="@+id/copy_button"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:padding="12dp"
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="@dimen/chooser_view_spacing"
         android:gravity="center"
-        android:layout_gravity="center_vertical"
-        android:src="@drawable/ic_content_copy_gm2"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
         android:clickable="true"
-        android:contentDescription="@string/copy"
-        android:background="?attr/selectableItemBackgroundBorderless"/>
-  </LinearLayout>
+        android:background="?android:attr/selectableItemBackgroundBorderless">
+
+      <ImageView
+          android:layout_width="24dp"
+          android:layout_height="24dp"
+          android:gravity="top|center_horizontal"
+          android:src="@drawable/ic_content_copy_gm2" />
+
+      <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="4dp"
+          android:gravity="center_horizontal"
+          android:text="@string/copy"
+          android:textColor="?android:textColorSecondary"
+          android:textSize="12sp"
+          android:maxWidth="72dp"
+          android:maxLines="2"
+          android:ellipsize="end" />
+    </LinearLayout>
+  </RelativeLayout>
 
   <!-- Required sub-layout so we can get the nice rounded corners-->
   <!-- around this section -->
@@ -89,7 +112,8 @@
         android:layout_gravity="center_vertical"
         android:ellipsize="end"
         android:maxLines="2"
-        android:textSize="20sp"/>
+        android:textSize="20sp"
+        android:textColor="?android:attr/textColorPrimary"/>
   </LinearLayout>
 </LinearLayout>
 
