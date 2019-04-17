@@ -3679,6 +3679,7 @@ public abstract class Context {
      * @hide
      */
     @SystemApi
+    @TestApi
     public static final String STATUS_BAR_SERVICE = "statusbar";
 
     /**
