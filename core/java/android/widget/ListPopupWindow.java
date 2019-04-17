@@ -52,6 +52,9 @@ import com.android.internal.view.menu.ShowableListMenu;
  * positioning, scrolling parents to fit the dropdown, interacting
  * sanely with the IME if present, and others.
  *
+ * @attr ref android.R.styleable#ListPopupWindow_dropDownVerticalOffset
+ * @attr ref android.R.styleable#ListPopupWindow_dropDownHorizontalOffset
+ *
  * @see android.widget.AutoCompleteTextView
  * @see android.widget.Spinner
  */
@@ -433,6 +436,7 @@ public class ListPopupWindow implements ShowableListMenu {
 
     /**
      * @return The horizontal offset of the popup from its anchor in pixels.
+     * @attr ref android.R.styleable#ListPopupWindow_dropDownHorizontalOffset
      */
     public int getHorizontalOffset() {
         return mDropDownHorizontalOffset;
@@ -442,6 +446,7 @@ public class ListPopupWindow implements ShowableListMenu {
      * Set the horizontal offset of this popup from its anchor view in pixels.
      *
      * @param offset The horizontal offset of the popup from its anchor.
+     * @attr ref android.R.styleable#ListPopupWindow_dropDownHorizontalOffset
      */
     public void setHorizontalOffset(int offset) {
         mDropDownHorizontalOffset = offset;
@@ -449,6 +454,7 @@ public class ListPopupWindow implements ShowableListMenu {
 
     /**
      * @return The vertical offset of the popup from its anchor in pixels.
+     * @attr ref android.R.styleable#ListPopupWindow_dropDownVerticalOffset
      */
     public int getVerticalOffset() {
         if (!mDropDownVerticalOffsetSet) {
@@ -461,6 +467,7 @@ public class ListPopupWindow implements ShowableListMenu {
      * Set the vertical offset of this popup from its anchor view in pixels.
      *
      * @param offset The vertical offset of the popup from its anchor.
+     * @attr ref android.R.styleable#ListPopupWindow_dropDownVerticalOffset
      */
     public void setVerticalOffset(int offset) {
         mDropDownVerticalOffset = offset;
