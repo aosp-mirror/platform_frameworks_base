@@ -11260,7 +11260,7 @@ public class PackageManagerService extends IPackageManager.Stub
             sharedUserSetting.isPrivileged() | pkg.isPrivileged() : pkg.isPrivileged();
 
         pkg.applicationInfo.seInfo = SELinuxMMAC.getSeInfo(pkg, isPrivileged,
-                pkg.applicationInfo.targetSandboxVersion, targetSdkVersion);
+                targetSdkVersion);
         pkg.applicationInfo.seInfoUser = SELinuxUtil.assignSeinfoUser(pkgSetting.readUserState(
                 userId == UserHandle.USER_ALL ? UserHandle.USER_SYSTEM : userId));
 
