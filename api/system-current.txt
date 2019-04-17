@@ -2741,6 +2741,7 @@ package android.hardware.radio {
     method public int describeContents();
     method @android.hardware.radio.ProgramSelector.IdentifierType public int getType();
     method public long getValue();
+    method public boolean isCategoryType();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.radio.ProgramSelector.Identifier> CREATOR;
   }
