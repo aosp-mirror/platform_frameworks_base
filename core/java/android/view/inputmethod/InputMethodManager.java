@@ -510,7 +510,7 @@ public final class InputMethodManager {
             return null;
         }
         final InputMethodManager fallbackImm =
-                viewRootImpl.mDisplayContext.getSystemService(InputMethodManager.class);
+                viewRootImpl.mContext.getSystemService(InputMethodManager.class);
         if (fallbackImm == null) {
             Log.e(TAG, "b/117267690: Failed to get non-null fallback IMM. view=" + view);
             return null;
