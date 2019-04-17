@@ -5758,12 +5758,16 @@ public class PackageManagerService extends IPackageManager.Stub
                     "getWhitelistedRestrictedPermissions for user " + userId);
         }
 
+        final PackageParser.Package pkg;
+
         synchronized (mPackages) {
             final PackageSetting packageSetting = mSettings.mPackages.get(packageName);
             if (packageSetting == null) {
                 Slog.w(TAG, "Unknown package: " + packageName);
                 return null;
             }
+
+            pkg = packageSetting.pkg;
 
             final boolean isCallerPrivileged = mContext.checkCallingOrSelfPermission(
                     Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS)
@@ -5792,14 +5796,14 @@ public class PackageManagerService extends IPackageManager.Stub
                     UserHandle.getCallingUserId())) {
                 return null;
             }
+        }
 
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                return mPermissionManager.getWhitelistedRestrictedPermissions(
-                        packageSetting.pkg, whitelistFlags, userId);
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return mPermissionManager.getWhitelistedRestrictedPermissions(
+                    pkg, whitelistFlags, userId);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
     }
 
@@ -5810,6 +5814,10 @@ public class PackageManagerService extends IPackageManager.Stub
         // Other argument checks are done in get/setWhitelistedRestrictedPermissions
         Preconditions.checkNotNull(permission);
 
+        if (!checkExistsAndEnforceCannotModifyImmutablyRestrictedPermission(permission)) {
+            return false;
+        }
+
         List<String> permissions = getWhitelistedRestrictedPermissions(packageName,
                 whitelistFlags, userId);
         if (permissions == null) {
@@ -5817,11 +5825,29 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         if (permissions.indexOf(permission) < 0) {
             permissions.add(permission);
-            setWhitelistedRestrictedPermissions(packageName, permissions,
+            return setWhitelistedRestrictedPermissions(packageName, permissions,
                     whitelistFlags, userId);
-            return true;
         }
         return false;
+    }
+
+    private boolean checkExistsAndEnforceCannotModifyImmutablyRestrictedPermission(
+            @NonNull String permission) {
+        synchronized (mPackages) {
+            final BasePermission bp = mPermissionManager.getPermissionTEMP(permission);
+            if (bp == null) {
+                Slog.w(TAG, "No such permissions: " + permission);
+                return false;
+            }
+            if (bp.isHardOrSoftRestricted() && bp.isImmutablyRestricted()
+                    && mContext.checkCallingOrSelfPermission(
+                    Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("Cannot modify whitelisting of an immutably "
+                        + "restricted permission: " + permission);
+            }
+            return true;
+        }
     }
 
     @Override
@@ -5831,17 +5857,20 @@ public class PackageManagerService extends IPackageManager.Stub
         // Other argument checks are done in get/setWhitelistedRestrictedPermissions
         Preconditions.checkNotNull(permission);
 
+        if (!checkExistsAndEnforceCannotModifyImmutablyRestrictedPermission(permission)) {
+            return false;
+        }
+
         final List<String> permissions = getWhitelistedRestrictedPermissions(packageName,
                 whitelistFlags, userId);
         if (permissions != null && permissions.remove(permission)) {
-            setWhitelistedRestrictedPermissions(packageName, permissions,
+            return setWhitelistedRestrictedPermissions(packageName, permissions,
                     whitelistFlags, userId);
-            return true;
         }
         return false;
     }
 
-    private void setWhitelistedRestrictedPermissions(@NonNull String packageName,
+    private boolean setWhitelistedRestrictedPermissions(@NonNull String packageName,
             @Nullable List<String> permissions, @PermissionWhitelistFlags int whitelistFlag,
             @UserIdInt int userId) {
         Preconditions.checkNotNull(packageName);
@@ -5858,12 +5887,16 @@ public class PackageManagerService extends IPackageManager.Stub
                     "setWhitelistedRestrictedPermissions for user " + userId);
         }
 
+        final PackageParser.Package pkg;
+
         synchronized (mPackages) {
             final PackageSetting packageSetting = mSettings.mPackages.get(packageName);
             if (packageSetting == null) {
                 Slog.w(TAG, "Unknown package: " + packageName);
-                return;
+                return false;
             }
+
+            pkg = packageSetting.pkg;
 
             final boolean isCallerPrivileged = mContext.checkCallingOrSelfPermission(
                     Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS)
@@ -5889,7 +5922,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         packageName, whitelistFlag, userId);
                 if (permissions == null || permissions.isEmpty()) {
                     if (whitelistedPermissions == null || whitelistedPermissions.isEmpty()) {
-                        return;
+                        return true;
                     }
                 } else {
                     // Only the system can add and remove while the installer can only remove.
@@ -5915,18 +5948,20 @@ public class PackageManagerService extends IPackageManager.Stub
 
             if (filterAppAccessLPr(packageSetting, Binder.getCallingUid(),
                     UserHandle.getCallingUserId())) {
-                return;
-            }
-
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                mPermissionManager.setWhitelistedRestrictedPermissions(packageSetting.pkg,
-                        new int[]{userId}, permissions, Process.myUid(), whitelistFlag,
-                        mPermissionCallback);
-            } finally {
-                Binder.restoreCallingIdentity(identity);
+                return false;
             }
         }
+
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mPermissionManager.setWhitelistedRestrictedPermissions(pkg,
+                    new int[]{userId}, permissions, Process.myUid(), whitelistFlag,
+                    mPermissionCallback);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+
+        return true;
     }
 
     @Override
