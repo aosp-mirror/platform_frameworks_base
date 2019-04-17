@@ -246,7 +246,7 @@
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Prikaz opcija za certifikaciju bežičnog prikaza"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Povećani nivo zapisnika za WiFi. Prikaz po SSID RSSI-ju u Biraču WiFi-ja"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"S naplatom"</string>
-    <string name="wifi_unmetered_label" msgid="6124098729457992931">"Mreža bez ograničenja prometa"</string>
+    <string name="wifi_unmetered_label" msgid="6124098729457992931">"Mreža bez naplate"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Veličine međumemorije zapisnika"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Odaberite veličinu međumemorije zapisnika"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Želite li obrisati trajnu pohranu zapisivača?"</string>

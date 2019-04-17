@@ -414,9 +414,9 @@
     <string name="install_other_apps" msgid="6986686991775883017">"Установка неизвестных приложений"</string>
     <string name="home" msgid="3256884684164448244">"Настройки"</string>
   <string-array name="battery_labels">
-    <item msgid="8494684293649631252">"0%"</item>
-    <item msgid="8934126114226089439">"50%"</item>
-    <item msgid="1286113608943010849">"100%"</item>
+    <item msgid="8494684293649631252">"0 %"</item>
+    <item msgid="8934126114226089439">"50 %"</item>
+    <item msgid="1286113608943010849">"100 %"</item>
   </string-array>
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> назад"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"Осталось <xliff:g id="ID_1">%1$s</xliff:g>"</string>

@@ -238,15 +238,15 @@
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Reprodución en tempo real: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"DNS privado"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Selecciona o modo de DNS privado"</string>
-    <string name="private_dns_mode_off" msgid="8236575187318721684">"Desactivar"</string>
+    <string name="private_dns_mode_off" msgid="8236575187318721684">"Desactivado"</string>
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Automático"</string>
-    <string name="private_dns_mode_provider" msgid="8354935160639360804">"Nome de host de provedor de DNS privado"</string>
+    <string name="private_dns_mode_provider" msgid="8354935160639360804">"Nome de host do provedor de DNS privado"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Introduce o host de provedor de DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Non se puido conectar"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Mostra opcións para o certificado de visualización sen fíos"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Aumenta o nivel de rexistro da wifi, móstrao por SSID RSSI no selector de wifi"</string>
-    <string name="wifi_metered_label" msgid="4514924227256839725">"De pago por consumo"</string>
-    <string name="wifi_unmetered_label" msgid="6124098729457992931">"Sen pago por consumo"</string>
+    <string name="wifi_metered_label" msgid="4514924227256839725">"Sen tarifa plana"</string>
+    <string name="wifi_unmetered_label" msgid="6124098729457992931">"Con tarifa plana"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Tamaños do búfer do rexistrador"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Seleccionar tamaño do rexistrador por búfer"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Queres borrar o almacenamento persistente do rexistrador?"</string>
@@ -287,7 +287,7 @@
     <string name="media_category" msgid="4388305075496848353">"Multimedia"</string>
     <string name="debug_monitoring_category" msgid="7640508148375798343">"Supervisión"</string>
     <string name="strict_mode" msgid="1938795874357830695">"Modo estrito activado"</string>
-    <string name="strict_mode_summary" msgid="142834318897332338">"Ilumínase se aplicacións tardan moito no proceso principal"</string>
+    <string name="strict_mode_summary" msgid="142834318897332338">"Ilumínase se as aplicacións tardan moito no proceso principal"</string>
     <string name="pointer_location" msgid="6084434787496938001">"Localización do punteiro"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Superpón os datos dos toques na pantalla"</string>
     <string name="show_touches" msgid="2642976305235070316">"Mostrar toques"</string>

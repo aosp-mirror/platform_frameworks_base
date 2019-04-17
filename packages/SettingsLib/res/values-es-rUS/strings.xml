@@ -241,7 +241,7 @@
     <string name="private_dns_mode_off" msgid="8236575187318721684">"Desactivado"</string>
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Automático"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Nombre de host del proveedor de DNS privado"</string>
-    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Ingresa el nombre de host del proveedor de DNS"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Ingresa el host del proveedor de DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"No se pudo establecer conexión"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Mostrar opciones de certificación de pantalla inalámbrica"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Aumentar nivel de registro Wi-Fi; mostrar por SSID RSSI en el selector de Wi-Fi"</string>
