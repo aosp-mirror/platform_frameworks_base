@@ -5850,6 +5850,7 @@ package android.provider {
     field public static final String NAMESPACE_INTELLIGENCE_ATTENTION = "intelligence_attention";
     field public static final String NAMESPACE_MEDIA_NATIVE = "media_native";
     field public static final String NAMESPACE_NETD_NATIVE = "netd_native";
+    field public static final String NAMESPACE_PACKAGE_MANAGER_SERVICE = "package_manager_service";
     field public static final String NAMESPACE_PRIVACY = "privacy";
     field public static final String NAMESPACE_ROLLBACK = "rollback";
     field public static final String NAMESPACE_ROLLBACK_BOOT = "rollback_boot";
