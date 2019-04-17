@@ -60,6 +60,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -211,7 +212,7 @@ public class BubbleStackView extends FrameLayout {
 
         mBubbleData = data;
         mInflater = LayoutInflater.from(context);
-        mTouchHandler = new BubbleTouchHandler(context, this);
+        mTouchHandler = new BubbleTouchHandler(this, data, context);
         setOnTouchListener(mTouchHandler);
         mInflater = LayoutInflater.from(context);
 
@@ -484,6 +485,9 @@ public class BubbleStackView extends FrameLayout {
 
     // via BubbleData.Listener
     void addBubble(Bubble bubble) {
+        if (DEBUG) {
+            Log.d(TAG, "addBubble: " + bubble);
+        }
         bubble.inflate(mInflater, this);
         mBubbleContainer.addView(bubble.iconView, 0,
                 new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
@@ -494,10 +498,17 @@ public class BubbleStackView extends FrameLayout {
 
     // via BubbleData.Listener
     void removeBubble(Bubble bubble) {
+        if (DEBUG) {
+            Log.d(TAG, "removeBubble: " + bubble);
+        }
         // Remove it from the views
         int removedIndex = mBubbleContainer.indexOfChild(bubble.iconView);
-        mBubbleContainer.removeViewAt(removedIndex);
-        logBubbleEvent(bubble, StatsLog.BUBBLE_UICHANGED__ACTION__DISMISSED);
+        if (removedIndex >= 0) {
+            mBubbleContainer.removeViewAt(removedIndex);
+            logBubbleEvent(bubble, StatsLog.BUBBLE_UICHANGED__ACTION__DISMISSED);
+        } else {
+            Log.d(TAG, "was asked to remove Bubble, but didn't find the view! " + bubble);
+        }
     }
 
     // via BubbleData.Listener
@@ -512,7 +523,10 @@ public class BubbleStackView extends FrameLayout {
      * position of any bubble.
      */
     // via BubbleData.Listener
-    public void setSelectedBubble(Bubble bubbleToSelect) {
+    public void setSelectedBubble(@Nullable Bubble bubbleToSelect) {
+        if (DEBUG) {
+            Log.d(TAG, "setSelectedBubble: " + bubbleToSelect);
+        }
         if (mExpandedBubble != null && mExpandedBubble.equals(bubbleToSelect)) {
             return;
         }
@@ -543,6 +557,9 @@ public class BubbleStackView extends FrameLayout {
      */
     // via BubbleData.Listener
     public void setExpanded(boolean shouldExpand) {
+        if (DEBUG) {
+            Log.d(TAG, "setExpanded: " + shouldExpand);
+        }
         boolean wasExpanded = mIsExpanded;
         if (shouldExpand == wasExpanded) {
             return;
@@ -567,6 +584,9 @@ public class BubbleStackView extends FrameLayout {
      */
     @Deprecated
     void stackDismissed(int reason) {
+        if (DEBUG) {
+            Log.d(TAG, "stackDismissed: reason=" + reason);
+        }
         mBubbleData.dismissAll(reason);
         logBubbleEvent(null /* no bubble associated with bubble stack dismiss */,
                 StatsLog.BUBBLE_UICHANGED__ACTION__STACK_DISMISSED);
@@ -614,6 +634,9 @@ public class BubbleStackView extends FrameLayout {
     @Deprecated
     @MainThread
     void collapseStack() {
+        if (DEBUG) {
+            Log.d(TAG, "collapseStack()");
+        }
         mBubbleData.setExpanded(false);
     }
 
@@ -623,6 +646,9 @@ public class BubbleStackView extends FrameLayout {
     @Deprecated
     @MainThread
     void collapseStack(Runnable endRunnable) {
+        if (DEBUG) {
+            Log.d(TAG, "collapseStack(endRunnable)");
+        }
         collapseStack();
         // TODO - use the runnable at end of animation
         endRunnable.run();
@@ -638,6 +664,9 @@ public class BubbleStackView extends FrameLayout {
     @Deprecated
     @MainThread
     void expandStack() {
+        if (DEBUG) {
+            Log.d(TAG, "expandStack()");
+        }
         mBubbleData.setExpanded(true);
     }
 
@@ -645,6 +674,9 @@ public class BubbleStackView extends FrameLayout {
      * Tell the stack to animate to collapsed or expanded state.
      */
     private void animateExpansion(boolean shouldExpand) {
+        if (DEBUG) {
+            Log.d(TAG, "animateExpansion: shouldExpand=" + shouldExpand);
+        }
         if (mIsExpanded != shouldExpand) {
             hideFlyoutImmediate();
 
@@ -726,6 +758,9 @@ public class BubbleStackView extends FrameLayout {
 
     /** Called when a drag operation on an individual bubble has started. */
     public void onBubbleDragStart(View bubble) {
+        if (DEBUG) {
+            Log.d(TAG, "onBubbleDragStart: bubble=" + bubble);
+        }
         mExpandedAnimationController.prepareForBubbleDrag(bubble);
     }
 
@@ -741,6 +776,9 @@ public class BubbleStackView extends FrameLayout {
     /** Called when a drag operation on an individual bubble has finished. */
     public void onBubbleDragFinish(
             View bubble, float x, float y, float velX, float velY, boolean dismissed) {
+        if (DEBUG) {
+            Log.d(TAG, "onBubbleDragFinish: bubble=" + bubble + ", dismissed=" + dismissed);
+        }
         if (!mIsExpanded || mIsExpansionAnimating) {
             return;
         }
@@ -753,6 +791,9 @@ public class BubbleStackView extends FrameLayout {
     }
 
     void onDragStart() {
+        if (DEBUG) {
+            Log.d(TAG, "onDragStart()");
+        }
         if (mIsExpanded || mIsExpansionAnimating) {
             return;
         }
@@ -773,6 +814,9 @@ public class BubbleStackView extends FrameLayout {
     }
 
     void onDragFinish(float x, float y, float velX, float velY) {
+        if (DEBUG) {
+            Log.d(TAG, "onDragFinish");
+        }
         // TODO: Add fling to bottom to dismiss.
         mIsDragging = false;
 
@@ -914,6 +958,9 @@ public class BubbleStackView extends FrameLayout {
     }
 
     private void updateExpandedBubble() {
+        if (DEBUG) {
+            Log.d(TAG, "updateExpandedBubble()");
+        }
         mExpandedViewContainer.removeAllViews();
         if (mExpandedBubble != null && mIsExpanded) {
             mExpandedViewContainer.addView(mExpandedBubble.expandedView);
@@ -924,7 +971,9 @@ public class BubbleStackView extends FrameLayout {
     }
 
     private void applyCurrentState() {
-        Log.d(TAG, "applyCurrentState: mIsExpanded=" + mIsExpanded);
+        if (DEBUG) {
+            Log.d(TAG, "applyCurrentState: mIsExpanded=" + mIsExpanded);
+        }
         mExpandedViewContainer.setVisibility(mIsExpanded ? VISIBLE : GONE);
         if (mIsExpanded) {
             // First update the view so that it calculates a new height (ensuring the y position
@@ -963,10 +1012,14 @@ public class BubbleStackView extends FrameLayout {
     }
 
     private void updatePointerPosition() {
-        if (mExpandedBubble != null) {
-            float pointerPosition = mExpandedBubble.iconView.getTranslationX()
-                    + (mExpandedBubble.iconView.getWidth() / 2f);
-            mExpandedBubble.expandedView.setPointerPosition((int) pointerPosition);
+        if (DEBUG) {
+            Log.d(TAG, "updatePointerPosition()");
+        }
+        Bubble expandedBubble = getExpandedBubble();
+        if (expandedBubble != null) {
+            BubbleView iconView = expandedBubble.iconView;
+            float pointerPosition = iconView.getTranslationX() + (iconView.getWidth() / 2f);
+            expandedBubble.expandedView.setPointerPosition((int) pointerPosition);
         }
     }
 
@@ -1061,5 +1114,19 @@ public class BubbleStackView extends FrameLayout {
             return false;
         }
         return mExpandedBubble.expandedView.performBackPressIfNeeded();
+    }
+
+    /** For debugging only */
+    List<Bubble> getBubblesOnScreen() {
+        List<Bubble> bubbles = new ArrayList<>();
+        for (int i = 0; i < mBubbleContainer.getChildCount(); i++) {
+            View child = mBubbleContainer.getChildAt(i);
+            if (child instanceof BubbleView) {
+                String key = ((BubbleView) child).getKey();
+                Bubble bubble = mBubbleData.getBubbleWithKey(key);
+                bubbles.add(bubble);
+            }
+        }
+        return bubbles;
     }
 }

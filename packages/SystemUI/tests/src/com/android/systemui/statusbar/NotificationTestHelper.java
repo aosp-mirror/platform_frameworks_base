@@ -234,7 +234,7 @@ public class NotificationTestHelper {
      * @param bubbleMetadata the bubble metadata to use for this notification if it exists.
      * @return a notification that is in the group specified or standalone if unspecified
      */
-    private Notification createNotification(boolean isGroupSummary,
+    public Notification createNotification(boolean isGroupSummary,
             @Nullable String groupKey, @Nullable BubbleMetadata bubbleMetadata) {
         Notification publicVersion = new Notification.Builder(mContext).setSmallIcon(
                 R.drawable.ic_person)
