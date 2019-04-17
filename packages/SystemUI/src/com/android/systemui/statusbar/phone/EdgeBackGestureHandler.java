@@ -126,6 +126,12 @@ public class EdgeBackGestureHandler implements DisplayListener {
     private final float mTouchSlop;
     // Minimum distance to move so that is can be considerd as a back swipe
     private final float mSwipeThreshold;
+    // The threshold where the touch needs to be at most, such that the arrow is displayed above the
+    // finger, otherwise it will be below
+    private final int mMinArrowPosition;
+    // The amount by which the arrow is shifted to avoid the finger
+    private final int mFingerOffset;
+
 
     private final int mNavBarHeight;
 
@@ -163,6 +169,9 @@ public class EdgeBackGestureHandler implements DisplayListener {
         mSwipeThreshold = res.getDimension(R.dimen.navigation_edge_action_drag_threshold);
 
         mNavBarHeight = res.getDimensionPixelSize(R.dimen.navigation_bar_frame_height);
+        mMinArrowPosition = res.getDimensionPixelSize(
+                R.dimen.navigation_edge_arrow_min_y);
+        mFingerOffset = res.getDimensionPixelSize(R.dimen.navigation_edge_finger_offset);
     }
 
     /**
@@ -291,7 +300,7 @@ public class EdgeBackGestureHandler implements DisplayListener {
             // Verify if this is in within the touch region and we aren't in immersive mode, and
             // either the bouncer is showing or the notification panel is hidden
             int stateFlags = mOverviewProxyService.getSystemUiStateFlags();
-            mIsOnLeftEdge = ev.getX() < mEdgeWidth;
+            mIsOnLeftEdge = ev.getX() <= mEdgeWidth;
             mAllowGesture = (stateFlags & SYSUI_STATE_NAV_BAR_HIDDEN) == 0
                     && ((stateFlags & SYSUI_STATE_BOUNCER_SHOWING) == SYSUI_STATE_BOUNCER_SHOWING
                             || (stateFlags & SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED) == 0)
@@ -301,9 +310,7 @@ public class EdgeBackGestureHandler implements DisplayListener {
                         ? (Gravity.LEFT | Gravity.TOP)
                         : (Gravity.RIGHT | Gravity.TOP);
                 mEdgePanel.setIsLeftPanel(mIsOnLeftEdge);
-                mEdgePanelLp.y = MathUtils.constrain(
-                        (int) (ev.getY() - mEdgePanelLp.height / 2),
-                        0, mDisplaySize.y);
+                mEdgePanelLp.y = positionEdgePanelonDown(ev.getY());
                 mWm.updateViewLayout(mEdgePanel, mEdgePanelLp);
 
                 mDownPoint.set(ev.getX(), ev.getY());
@@ -348,6 +355,13 @@ public class EdgeBackGestureHandler implements DisplayListener {
                         (int) mDownPoint.y, false /* isButton */, !mIsOnLeftEdge);
             }
         }
+    }
+
+    private int positionEdgePanelonDown(float touchY) {
+        float position = touchY - mFingerOffset;
+        position = Math.max(position, mMinArrowPosition);
+        position = (position - mEdgePanelLp.height / 2.0f);
+        return MathUtils.constrain((int) position, 0, mDisplaySize.y);
     }
 
     @Override

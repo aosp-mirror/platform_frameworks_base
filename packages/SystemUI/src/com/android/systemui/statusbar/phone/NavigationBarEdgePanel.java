@@ -24,10 +24,12 @@ import android.os.SystemClock;
 import android.os.VibrationEffect;
 import android.util.FloatProperty;
 import android.util.MathUtils;
+import android.view.ContextThemeWrapper;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.VibratorHelper;
@@ -35,9 +37,6 @@ import com.android.systemui.statusbar.VibratorHelper;
 public class NavigationBarEdgePanel extends View {
 
     // TODO: read from resources once drawing is finalized.
-    private static final boolean SHOW_PROTECTION_STROKE = true;
-    private static final int PROTECTION_COLOR = 0xffc0c0c0;
-    private static final int STROKE_COLOR = 0xffe5e5e5;
     private static final int PROTECTION_WIDTH_PX = 4;
     private static final int BASE_EXTENT = 32;
     private static final int ARROW_HEIGHT_DP = 32;
@@ -64,6 +63,15 @@ public class NavigationBarEdgePanel extends View {
     private final float mStrokeThickness;
 
     private final float mSwipeThreshold;
+
+    private boolean mIsDark = false;
+    private boolean mShowProtection = false;
+    private int mProtectionColorLight;
+    private int mArrowColorLight;
+    private int mProtectionColorDark;
+    private int mArrowColorDark;
+    private int mProtectionColor;
+    private int mArrowColor;
 
     private boolean mIsLeftPanel;
 
@@ -128,20 +136,49 @@ public class NavigationBarEdgePanel extends View {
 
         mPaint.setStrokeWidth(mStrokeThickness);
         mPaint.setStrokeCap(Paint.Cap.ROUND);
-        mPaint.setColor(STROKE_COLOR);
         mPaint.setAntiAlias(true);
 
         mProtectionPaint.setStrokeWidth(mStrokeThickness + PROTECTION_WIDTH_PX);
         mProtectionPaint.setStrokeCap(Paint.Cap.ROUND);
-        mProtectionPaint.setColor(PROTECTION_COLOR);
         mProtectionPaint.setAntiAlias(true);
 
+        loadColors(context);
         // Both panels arrow point the same way
         mArrowsPointLeft = getLayoutDirection() == LAYOUT_DIRECTION_LTR;
 
         mSwipeThreshold = context.getResources()
                 .getDimension(R.dimen.navigation_edge_action_drag_threshold);
         setVisibility(GONE);
+    }
+
+    private void loadColors(Context context) {
+        final int dualToneDarkTheme = Utils.getThemeAttr(context, R.attr.darkIconTheme);
+        final int dualToneLightTheme = Utils.getThemeAttr(context, R.attr.lightIconTheme);
+        Context lightContext = new ContextThemeWrapper(context, dualToneLightTheme);
+        Context darkContext = new ContextThemeWrapper(context, dualToneDarkTheme);
+        mArrowColorLight = Utils.getColorAttrDefaultColor(lightContext, R.attr.singleToneColor);
+        mArrowColorDark = Utils.getColorAttrDefaultColor(darkContext, R.attr.singleToneColor);
+        mProtectionColorDark = mArrowColorLight;
+        mProtectionColorLight = mArrowColorDark;
+        updateIsDark(false /* animate */);
+    }
+
+    private void updateIsDark(boolean animate) {
+        mArrowColor = mIsDark ? mArrowColorDark : mArrowColorLight;
+        mProtectionColor = mIsDark ? mProtectionColorDark : mProtectionColorLight;
+        mProtectionPaint.setColor(mProtectionColor);
+        mPaint.setColor(mArrowColor);
+        // TODO: add animation
+    }
+
+    public void setIsDark(boolean isDark, boolean animate) {
+        mIsDark = isDark;
+        updateIsDark(animate);
+    }
+
+    public void setShowProtection(boolean showProtection) {
+        mShowProtection = showProtection;
+        invalidate();
     }
 
     public void setIsLeftPanel(boolean isLeftPanel) {
@@ -160,7 +197,7 @@ public class NavigationBarEdgePanel extends View {
         float outsideX = mArrowsPointLeft ? animatedOffset : 0;
         float middleX = mArrowsPointLeft ? 0 : animatedOffset;
 
-        if (SHOW_PROTECTION_STROKE) {
+        if (mShowProtection) {
             canvas.drawLine(outsideX, 0, middleX, mHeight * 0.5f, mProtectionPaint);
             canvas.drawLine(middleX, mHeight * 0.5f, outsideX, mHeight, mProtectionPaint);
         }
