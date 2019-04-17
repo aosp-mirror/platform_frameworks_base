@@ -22,10 +22,6 @@ package android.graphics;
  * documentation of the {@link PorterDuff.Mode} enum for more
  * information on the available alpha compositing and blending modes.</p>
  *
- *  @deprecated Consider using {@link BlendMode} instead as it supports a wider
- * set of blend modes than those defined in {@link PorterDuff.Mode}
- *
- * @see Paint#setBlendMode(BlendMode)
  */
 public class PorterDuffXfermode extends Xfermode {
     /**
