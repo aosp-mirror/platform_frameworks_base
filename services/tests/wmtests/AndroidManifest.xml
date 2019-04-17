@@ -42,6 +42,7 @@
                  android:testOnly="true"
                  android:largeHeap="true">
         <uses-library android:name="android.test.mock" android:required="true" />
+        <uses-library android:name="android.test.runner" />
 
         <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityA" />
         <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityB" />
