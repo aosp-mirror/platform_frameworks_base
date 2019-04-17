@@ -54,6 +54,7 @@ import android.os.UserHandle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.WorkSource;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.util.DebugUtils;
@@ -78,6 +79,7 @@ public class VibratorService extends IVibratorService.Stub
     private static final boolean DEBUG = false;
     private static final String SYSTEM_UI_PACKAGE = "com.android.systemui";
     private static final String EXTERNAL_VIBRATOR_SERVICE = "external_vibrator_service";
+    private static final String RAMPING_RINGER_ENABLED = "ramping_ringer_enabled";
 
     private static final long[] DOUBLE_CLICK_EFFECT_FALLBACK_TIMINGS = { 0, 30, 100, 30 };
 
@@ -610,7 +612,6 @@ public class VibratorService extends IVibratorService.Stub
                 linkVibration(vib);
                 long ident = Binder.clearCallingIdentity();
                 try {
-
                     doCancelVibrateLocked();
                     startVibrationLocked(vib);
                     addToPreviousVibrationsLocked(vib);
@@ -861,6 +862,11 @@ public class VibratorService extends IVibratorService.Stub
         // "Also vibrate for calls" Setting in Sound
         if (Settings.System.getInt(
                 mContext.getContentResolver(), Settings.System.VIBRATE_WHEN_RINGING, 0) != 0) {
+            return ringerMode != AudioManager.RINGER_MODE_SILENT;
+        } else if (Settings.Global.getInt(
+                    mContext.getContentResolver(), Settings.Global.APPLY_RAMPING_RINGER, 0) != 0
+                && DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_TELEPHONY, RAMPING_RINGER_ENABLED, false)) {
             return ringerMode != AudioManager.RINGER_MODE_SILENT;
         } else {
             return ringerMode == AudioManager.RINGER_MODE_VIBRATE;
