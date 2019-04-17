@@ -444,6 +444,7 @@ public class SettingsBackupTest {
                     Settings.Global.ENABLE_GPU_DEBUG_LAYERS,
                     Settings.Global.GPU_DEBUG_APP,
                     Settings.Global.GPU_DEBUG_LAYERS,
+                    Settings.Global.UPDATED_GFX_DRIVER_DEV_OPT_IN_APP,
                     Settings.Global.ENABLE_GNSS_RAW_MEAS_FULL_TRACKING,
                     Settings.Global.INSTALL_CARRIER_APP_NOTIFICATION_PERSISTENT,
                     Settings.Global.INSTALL_CARRIER_APP_NOTIFICATION_SLEEP_MILLIS,
