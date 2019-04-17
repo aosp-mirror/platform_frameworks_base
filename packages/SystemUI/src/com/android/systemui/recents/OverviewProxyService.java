@@ -608,6 +608,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         mConnectionCallbacks.add(listener);
         listener.onConnectionChanged(mOverviewProxy != null);
         listener.onInteractionFlagsChanged(mInteractionFlags);
+        listener.onBackButtonAlphaChanged(mBackButtonAlpha, false);
     }
 
     @Override

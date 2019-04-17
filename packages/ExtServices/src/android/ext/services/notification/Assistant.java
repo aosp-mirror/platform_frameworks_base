@@ -272,6 +272,9 @@ public class Assistant extends NotificationAssistantService {
                 final int importance = entry.getImportance() < IMPORTANCE_LOW
                         ? entry.getImportance() : IMPORTANCE_LOW;
                 signals.putInt(KEY_IMPORTANCE, importance);
+            } else {
+                // Even if no change is made, send an identity adjustment for metric logging.
+                signals.putInt(KEY_IMPORTANCE, entry.getImportance());
             }
         }
 

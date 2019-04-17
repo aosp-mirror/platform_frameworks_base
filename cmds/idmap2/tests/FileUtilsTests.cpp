@@ -15,19 +15,17 @@
  */
 
 #include <dirent.h>
+
 #include <set>
 #include <string>
 
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
-
+#include "TestHelpers.h"
 #include "android-base/macros.h"
 #include "android-base/stringprintf.h"
-#include "private/android_filesystem_config.h"
-
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 #include "idmap2/FileUtils.h"
-
-#include "TestHelpers.h"
+#include "private/android_filesystem_config.h"
 
 using ::testing::NotNull;
 

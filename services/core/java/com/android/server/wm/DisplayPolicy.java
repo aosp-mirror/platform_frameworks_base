@@ -28,6 +28,7 @@ import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
 import static android.view.InsetsState.TYPE_TOP_BAR;
 import static android.view.InsetsState.TYPE_TOP_GESTURES;
 import static android.view.InsetsState.TYPE_TOP_TAPPABLE_ELEMENT;
+import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_NONE;
 import static android.view.WindowManager.INPUT_CONSUMER_NAVIGATION;
@@ -1230,7 +1231,7 @@ public class DisplayPolicy {
         final boolean screenDecor = (pfl & PRIVATE_FLAG_IS_SCREEN_DECOR) != 0;
 
         if (layoutInScreenAndInsetDecor && !screenDecor) {
-            if ((sysUiVis & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0) {
+            if ((sysUiVis & SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0) {
                 outFrame.set(displayFrames.mUnrestricted);
             } else {
                 outFrame.set(displayFrames.mRestricted);
@@ -1290,7 +1291,7 @@ public class DisplayPolicy {
                 && attrs.height == MATCH_PARENT && attrs.width == MATCH_PARENT;
         if ((attrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0
                 || forceWindowDrawsBarBackgrounds) {
-            impliedFlags |= View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+            impliedFlags |= SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
             impliedFlags |= View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
         }
         return impliedFlags;
@@ -1722,6 +1723,22 @@ public class DisplayPolicy {
             of.set(displayFrames.mDock);
             df.set(displayFrames.mDock);
         } else {
+
+            // In case we forced the window to draw behind the navigation bar, restrict df/of to
+            // DF.RestrictedOverscan to simulate old compat behavior.
+            Rect parentDisplayFrame = attached.getDisplayFrameLw();
+            Rect parentOverscan = attached.getOverscanFrameLw();
+            final WindowManager.LayoutParams attachedAttrs = attached.mAttrs;
+            if ((attachedAttrs.privateFlags & PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS) != 0
+                    && (attachedAttrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0
+                    && (attachedAttrs.systemUiVisibility
+                            & SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) == 0) {
+                parentOverscan = new Rect(parentOverscan);
+                parentOverscan.intersect(displayFrames.mRestrictedOverscan);
+                parentDisplayFrame = new Rect(parentDisplayFrame);
+                parentDisplayFrame.intersect(displayFrames.mRestrictedOverscan);
+            }
+
             // The effective display frame of the attached window depends on whether it is taking
             // care of insetting its content. If not, we need to use the parent's content frame so
             // that the entire window is positioned within that content. Otherwise we can use the
@@ -1733,7 +1750,7 @@ public class DisplayPolicy {
                 // setting {@link WindowManager.LayoutParams#FLAG_LAYOUT_ATTACHED_IN_DECOR} flag.
                 // Otherwise, use the overscan frame.
                 cf.set((fl & FLAG_LAYOUT_ATTACHED_IN_DECOR) != 0
-                        ? attached.getContentFrameLw() : attached.getOverscanFrameLw());
+                        ? attached.getContentFrameLw() : parentOverscan);
             } else {
                 // If the window is resizing, then we want to base the content frame on our attached
                 // content frame to resize...however, things can be tricky if the attached window is
@@ -1747,8 +1764,8 @@ public class DisplayPolicy {
                     cf.intersectUnchecked(displayFrames.mContent);
                 }
             }
-            df.set(insetDecors ? attached.getDisplayFrameLw() : cf);
-            of.set(insetDecors ? attached.getOverscanFrameLw() : cf);
+            df.set(insetDecors ? parentDisplayFrame : cf);
+            of.set(insetDecors ? parentOverscan : cf);
             vf.set(attached.getVisibleFrameLw());
         }
         // The LAYOUT_IN_SCREEN flag is used to determine whether the attached window should be
@@ -1956,7 +1973,7 @@ public class DisplayPolicy {
                         of.set(displayFrames.mOverscan);
                         df.set(displayFrames.mOverscan);
                         pf.set(displayFrames.mOverscan);
-                    } else if ((sysUiFl & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
+                    } else if ((sysUiFl & SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
                             && (type >= FIRST_APPLICATION_WINDOW && type <= LAST_SUB_WINDOW
                             || type == TYPE_VOLUME_OVERLAY)) {
                         // Asking for layout as if the nav bar is hidden, lets the application
@@ -2006,7 +2023,7 @@ public class DisplayPolicy {
                 }
             } else if (layoutInScreen || (sysUiFl
                     & (View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)) != 0) {
+                    | SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)) != 0) {
                 if (DEBUG_LAYOUT) Slog.v(TAG, "layoutWindowLw(" + attrs.getTitle()
                         + "): IN_SCREEN");
                 // A window that has requested to fill the entire screen just
@@ -2051,7 +2068,7 @@ public class DisplayPolicy {
                     of.set(displayFrames.mOverscan);
                     df.set(displayFrames.mOverscan);
                     pf.set(displayFrames.mOverscan);
-                } else if ((sysUiFl & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
+                } else if ((sysUiFl & SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
                         && (type == TYPE_STATUS_BAR
                         || type == TYPE_TOAST
                         || type == TYPE_DOCK_DIVIDER

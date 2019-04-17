@@ -955,18 +955,16 @@ public final class Settings {
             "android.settings.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS";
 
     /**
-     * Activity Action: Open the advanced power usage details page of an associated app.
+     * Activity Action: Open the battery details page of an associated app.
      * <p>
      * Input: Intent's data URI set with an application name, using the
      * "package" schema (like "package:com.my.app")
      * <p>
      * Output: Nothing.
-     *
-     * @hide
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_VIEW_ADVANCED_POWER_USAGE_DETAIL =
-            "android.settings.VIEW_ADVANCED_POWER_USAGE_DETAIL";
+    public static final String ACTION_APP_BATTERY_SETTINGS =
+            "android.settings.APP_BATTERY_SETTINGS";
 
     /**
      * Activity Action: Show screen for controlling background data
@@ -1532,6 +1530,9 @@ public final class Settings {
 
     /**
      * Activity Action: Show More default apps settings.
+     * <p>
+     * If a Settings activity handles this intent action, a "More defaults" entry will be shown in
+     * the Default apps settings, and clicking it will launch that activity.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you safeguard against this.
      * <p>
@@ -5801,6 +5802,14 @@ public final class Settings {
                 "autofill_field_classification";
 
         /**
+         * Boolean indicating if the dark mode dialog shown on first toggle has been seen.
+         *
+         * @hide
+         */
+        public static final String DARK_MODE_DIALOG_SEEN =
+                "dark_mode_dialog_seen";
+
+        /**
          * Defines value returned by {@link android.service.autofill.UserData#getMaxUserDataSize()}.
          *
          * @hide
@@ -8139,7 +8148,14 @@ public final class Settings {
         public static final String FACE_UNLOCK_ATTENTION_REQUIRED =
                 "face_unlock_attention_required";
 
-        private static final Validator FACE_UNLOCK_ATTENTION_REQUIRED_VALIDATOR = BOOLEAN_VALIDATOR;
+        /**
+         * Whether or not face unlock requires a diverse set of poses during enrollment. This is a
+         * cached value, the source of truth is obtained through the HAL.
+         * @hide
+         */
+        public static final String FACE_UNLOCK_DIVERSITY_REQUIRED =
+                "face_unlock_diversity_required";
+
 
         /**
          * Whether or not face unlock is allowed for apps (through BiometricPrompt).
@@ -8797,7 +8813,6 @@ public final class Settings {
             AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN,
             FACE_UNLOCK_KEYGUARD_ENABLED,
             FACE_UNLOCK_DISMISSES_KEYGUARD,
-            FACE_UNLOCK_ATTENTION_REQUIRED,
             FACE_UNLOCK_APP_ENABLED,
             FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION,
             ASSIST_GESTURE_ENABLED,
@@ -8842,6 +8857,7 @@ public final class Settings {
             SILENCE_NOTIFICATION_GESTURE_COUNT,
             SILENCE_CALL_GESTURE_COUNT,
             SILENCE_TIMER_GESTURE_COUNT,
+            DARK_MODE_DIALOG_SEEN
         };
 
         /**
@@ -8964,8 +8980,6 @@ public final class Settings {
             VALIDATORS.put(FACE_UNLOCK_KEYGUARD_ENABLED, FACE_UNLOCK_KEYGUARD_ENABLED_VALIDATOR);
             VALIDATORS.put(FACE_UNLOCK_DISMISSES_KEYGUARD,
                     FACE_UNLOCK_DISMISSES_KEYGUARD_VALIDATOR);
-            VALIDATORS.put(FACE_UNLOCK_ATTENTION_REQUIRED,
-                    FACE_UNLOCK_ATTENTION_REQUIRED_VALIDATOR);
             VALIDATORS.put(FACE_UNLOCK_APP_ENABLED, FACE_UNLOCK_APP_ENABLED_VALIDATOR);
             VALIDATORS.put(FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION,
                     FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION_VALIDATOR);
@@ -9024,6 +9038,7 @@ public final class Settings {
             VALIDATORS.put(SILENCE_CALL_GESTURE_COUNT, SILENCE_GESTURE_COUNT_VALIDATOR);
             VALIDATORS.put(SILENCE_NOTIFICATION_GESTURE_COUNT, SILENCE_GESTURE_COUNT_VALIDATOR);
             VALIDATORS.put(ODI_CAPTIONS_ENABLED, ODI_CAPTIONS_ENABLED_VALIDATOR);
+            VALIDATORS.put(DARK_MODE_DIALOG_SEEN, BOOLEAN_VALIDATOR);
         }
 
         /**

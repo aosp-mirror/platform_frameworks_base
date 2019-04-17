@@ -39,11 +39,13 @@ import android.platform.test.annotations.Presubmit;
 import android.util.SparseArray;
 import android.view.SurfaceControl.Transaction;
 import android.view.SyncRtSurfaceTransactionApplier.SurfaceParams;
+import android.view.test.InsetsModeSession;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -62,7 +64,6 @@ import java.util.List;
  * {@link com.android.server.wm.test.filters.FrameworksTestsFilter}.
  */
 @Presubmit
-@FlakyTest(detail = "Promote once confirmed non-flaky")
 @RunWith(AndroidJUnit4.class)
 public class InsetsAnimationControlImplTest {
 
@@ -72,15 +73,25 @@ public class InsetsAnimationControlImplTest {
     private SurfaceControl mTopLeash;
     private SurfaceControl mNavLeash;
     private InsetsState mInsetsState;
+    private static InsetsModeSession sInsetsModeSession;
 
     @Mock Transaction mMockTransaction;
     @Mock InsetsController mMockController;
     @Mock WindowInsetsAnimationControlListener mMockListener;
     @Mock SyncRtSurfaceTransactionApplier mMockTransactionApplier;
 
+    @BeforeClass
+    public static void setupOnce() {
+        sInsetsModeSession = new InsetsModeSession(NEW_INSETS_MODE_FULL);
+    }
+
+    @AfterClass
+    public static void tearDownOnce() throws Exception {
+        sInsetsModeSession.close();
+    }
+
     @Before
     public void setup() {
-        ViewRootImpl.sNewInsetsMode = NEW_INSETS_MODE_FULL;
         MockitoAnnotations.initMocks(this);
         mTopLeash = new SurfaceControl.Builder(mSession)
                 .setName("testSurface")

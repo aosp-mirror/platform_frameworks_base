@@ -3368,8 +3368,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     } catch (PackageManagerException e) {
                         Slog.e(TAG, "updateAllSharedLibrariesLPw failed: ", e);
                     }
-                    mPermissionManager.updatePermissions(
-                            pkg.packageName, pkg, true, mPackages.values(),
+                    mPermissionManager.updatePermissions(pkg.packageName, pkg, mPackages.values(),
                             mPermissionCallback);
                     mSettings.writeLPr();
                 }
@@ -15984,7 +15983,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (DEBUG_INSTALL) Slog.d(TAG, "New package installed in " + pkg.codePath);
         synchronized (mPackages) {
 // NOTE: This changes slightly to include UPDATE_PERMISSIONS_ALL regardless of the size of pkg.permissions
-            mPermissionManager.updatePermissions(pkg.packageName, pkg, true, mPackages.values(),
+            mPermissionManager.updatePermissions(pkg.packageName, pkg, mPackages.values(),
                     mPermissionCallback);
             // For system-bundled packages, we assume that installing an upgraded version
             // of the package implies that the user actually wants to run that new code,
@@ -18637,7 +18636,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         outInfo.removedAppId = removedAppId;
                     }
                     mPermissionManager.updatePermissions(
-                            deletedPs.name, null, false, mPackages.values(), mPermissionCallback);
+                            deletedPs.name, null, mPackages.values(), mPermissionCallback);
                     if (deletedPs.sharedUser != null) {
                         // Remove permissions associated with package. Since runtime
                         // permissions are per user we have to kill the removed package
@@ -18916,7 +18915,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if (origPermissionState != null) {
                 ps.getPermissionsState().copyFrom(origPermissionState);
             }
-            mPermissionManager.updatePermissions(pkg.packageName, pkg, true, mPackages.values(),
+            mPermissionManager.updatePermissions(pkg.packageName, pkg, mPackages.values(),
                     mPermissionCallback);
 
             final boolean applyUserRestrictions
@@ -20053,7 +20052,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     PreferredActivity pa = removed.get(j);
                     pir.removeFilter(pa);
                 }
-                outUserChanged.setValueAt(thisUserId, true);
+                outUserChanged.put(thisUserId, true);
             }
         }
     }

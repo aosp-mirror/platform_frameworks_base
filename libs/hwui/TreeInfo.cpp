@@ -25,6 +25,7 @@ TreeInfo::TreeInfo(TraversalMode mode, renderthread::CanvasContext& canvasContex
         , prepareTextures(mode == MODE_FULL)
         , canvasContext(canvasContext)
         , damageGenerationId(canvasContext.getFrameNumber())
-        , disableForceDark(canvasContext.useForceDark() ? 0 : 1) {}
+        , disableForceDark(canvasContext.useForceDark() ? 0 : 1)
+        , screenSize(canvasContext.getNextFrameSize()) {}
 
 }  // namespace android::uirenderer

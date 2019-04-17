@@ -123,6 +123,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     private static final boolean DEBUG = false;
     private static final String EXTRA_DISABLE_STATE = "disabled_state";
     private static final String EXTRA_DISABLE2_STATE = "disabled2_state";
+    private static final String EXTRA_SYSTEM_UI_VISIBILITY = "system_ui_visibility";
 
     /** Allow some time inbetween the long press for back and recents. */
     private static final int LOCK_TO_APP_GESTURE_TOLERENCE = 200;
@@ -156,7 +157,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     private Locale mLocale;
     private int mLayoutDirection;
 
-    private int mSystemUiVisibility;
+    private int mSystemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE;
     private LightBarController mLightBarController;
     private AutoHideController mAutoHideController;
 
@@ -277,6 +278,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         if (savedInstanceState != null) {
             mDisabledFlags1 = savedInstanceState.getInt(EXTRA_DISABLE_STATE, 0);
             mDisabledFlags2 = savedInstanceState.getInt(EXTRA_DISABLE2_STATE, 0);
+            mSystemUiVisibility = savedInstanceState.getInt(EXTRA_SYSTEM_UI_VISIBILITY, 0);
         }
         mAccessibilityManagerWrapper.addCallback(mAccessibilityListener);
 
@@ -363,6 +365,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         super.onSaveInstanceState(outState);
         outState.putInt(EXTRA_DISABLE_STATE, mDisabledFlags1);
         outState.putInt(EXTRA_DISABLE2_STATE, mDisabledFlags2);
+        outState.putInt(EXTRA_SYSTEM_UI_VISIBILITY, mSystemUiVisibility);
         if (mNavigationBarView != null) {
             mNavigationBarView.getLightTransitionsController().saveState(outState);
         }
@@ -492,13 +495,8 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         }
     }
 
-    /**
-     * Sets System UI flags to {@link NavigationBarFragment}.
-     *
-     * @see View#setSystemUiVisibility(int)
-     */
-    public void setSystemUiVisibility(int systemUiVisibility) {
-        mSystemUiVisibility = systemUiVisibility;
+    /** Restores the System UI flags saved state to {@link NavigationBarFragment}. */
+    public void restoreSystemUiVisibilityState() {
         final int barMode = computeBarMode(0, mSystemUiVisibility);
         if (barMode != -1) {
             mNavigationBarMode = barMode;

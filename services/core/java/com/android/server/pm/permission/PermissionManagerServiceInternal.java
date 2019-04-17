@@ -89,11 +89,39 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
             @NonNull String packageName, boolean overridePolicy, int userId,
             @Nullable PermissionCallback callback);
 
-    public abstract void updatePermissions(@Nullable String packageName,
-            @Nullable PackageParser.Package pkg, boolean replaceGrant,
-            @NonNull Collection<PackageParser.Package> allPacakges, PermissionCallback callback);
+    /**
+     * Update permissions when a package changed.
+     *
+     * <p><ol>
+     *     <li>Reconsider the ownership of permission</li>
+     *     <li>Update the state (grant, flags) of the permissions</li>
+     * </ol>
+     *
+     * @param packageName The package that is updated
+     * @param pkg The package that is updated, or {@code null} if package is deleted
+     * @param allPackages All currently known packages
+     * @param callback Callback to call after permission changes
+     */
+    public abstract void updatePermissions(@NonNull String packageName,
+            @Nullable PackageParser.Package pkg,
+            @NonNull Collection<PackageParser.Package> allPackages,
+            @NonNull PermissionCallback callback);
+
+    /**
+     * Update all permissions for all apps.
+     *
+     * <p><ol>
+     *     <li>Reconsider the ownership of permission</li>
+     *     <li>Update the state (grant, flags) of the permissions</li>
+     * </ol>
+     *
+     * @param volumeUuid The volume of the packages to be updated, {@code null} for all volumes
+     * @param allPackages All currently known packages
+     * @param callback Callback to call after permission changes
+     */
     public abstract void updateAllPermissions(@Nullable String volumeUuid, boolean sdkUpdate,
-            @NonNull Collection<PackageParser.Package> allPacakges, PermissionCallback callback);
+            @NonNull Collection<PackageParser.Package> allPackages,
+            @NonNull PermissionCallback callback);
 
     /**
      * We might auto-grant permissions if any permission of the group is already granted. Hence if

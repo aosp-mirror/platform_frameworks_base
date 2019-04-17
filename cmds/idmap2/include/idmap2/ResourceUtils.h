@@ -21,7 +21,6 @@
 #include <string>
 
 #include "androidfw/AssetManager2.h"
-
 #include "idmap2/Idmap.h"
 #include "idmap2/Result.h"
 #include "idmap2/ZipFile.h"

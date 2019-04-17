@@ -17,7 +17,6 @@
 package com.android.server.attention;
 
 import static android.provider.DeviceConfig.NAMESPACE_ATTENTION_MANAGER_SERVICE;
-import static android.provider.Settings.System.ADAPTIVE_SLEEP;
 import static android.service.attention.AttentionService.ATTENTION_FAILURE_CANCELLED;
 import static android.service.attention.AttentionService.ATTENTION_FAILURE_UNKNOWN;
 
@@ -47,7 +46,6 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
-import android.provider.Settings;
 import android.service.attention.AttentionService;
 import android.service.attention.AttentionService.AttentionFailureCodes;
 import android.service.attention.AttentionService.AttentionSuccessCodes;
@@ -275,19 +273,6 @@ public class AttentionManagerService extends SystemService {
         }
     }
 
-    /** Disables service dependants. */
-    private void disableSelf() {
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            if (DEBUG) {
-                Slog.d(LOG_TAG, "Disabling self.");
-            }
-            Settings.System.putInt(mContext.getContentResolver(), ADAPTIVE_SLEEP, 0);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-    }
-
     @GuardedBy("mLock")
     private void freeIfInactiveLocked() {
         // If we are called here, it means someone used the API again - reset the timer then.
@@ -417,11 +402,6 @@ public class AttentionManagerService extends SystemService {
         @Override
         public void cancelAttentionCheck(AttentionCallbackInternal callbackInternal) {
             AttentionManagerService.this.cancelAttentionCheck(callbackInternal);
-        }
-
-        @Override
-        public void disableSelf() {
-            AttentionManagerService.this.disableSelf();
         }
     }
 

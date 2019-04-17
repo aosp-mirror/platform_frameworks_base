@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include "idmap2/FileUtils.h"
+
 #include <dirent.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -32,8 +34,6 @@
 #include "android-base/macros.h"
 #include "android-base/stringprintf.h"
 #include "private/android_filesystem_config.h"
-
-#include "idmap2/FileUtils.h"
 
 namespace android::idmap2::utils {
 

@@ -187,17 +187,13 @@ public:
     AlphaFilterCanvas(SkCanvas* canvas, float alpha) : SkPaintFilterCanvas(canvas), mAlpha(alpha) {}
 
 protected:
-    bool onFilter(SkTCopyOnFirstWrite<SkPaint>* paint, Type t) const override {
-        std::optional<SkPaint> defaultPaint;
-        if (!*paint) {
-            paint->init(defaultPaint.emplace());
-        }
-        paint->writable()->setAlpha((uint8_t)(*paint)->getAlpha() * mAlpha);
+    bool onFilter(SkPaint& paint) const override {
+        paint.setAlpha((uint8_t)paint.getAlpha() * mAlpha);
         return true;
     }
     void onDrawDrawable(SkDrawable* drawable, const SkMatrix* matrix) override {
         // We unroll the drawable using "this" canvas, so that draw calls contained inside will
-        // get their alpha applied. THe default SkPaintFilterCanvas::onDrawDrawable does not unroll.
+        // get their alpha applied. The default SkPaintFilterCanvas::onDrawDrawable does not unroll.
         drawable->draw(this, matrix);
     }
 

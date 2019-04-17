@@ -20,7 +20,6 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-
 #include "idmap2/Result.h"
 
 namespace android::idmap2 {

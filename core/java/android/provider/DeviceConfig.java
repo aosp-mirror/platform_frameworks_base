@@ -493,6 +493,7 @@ public final class DeviceConfig {
      * @param onPropertyChangedListener The listener to add.
      * @hide
      * @see #removeOnPropertyChangedListener(OnPropertyChangedListener)
+     * @removed
      */
     @SystemApi
     @TestApi
@@ -569,6 +570,7 @@ public final class DeviceConfig {
      * @param onPropertyChangedListener The listener to remove.
      * @hide
      * @see #addOnPropertyChangedListener(String, Executor, OnPropertyChangedListener)
+     * @removed
      */
     @SystemApi
     @TestApi
@@ -737,6 +739,7 @@ public final class DeviceConfig {
      * Override {@link #onPropertyChanged(String, String, String)} to handle callbacks for changes.
      *
      * @hide
+     * @removed
      */
     @SystemApi
     @TestApi

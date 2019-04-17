@@ -16,6 +16,7 @@
 
 package android.app;
 
+import static android.app.ActivityManager.PROCESS_STATE_UNKNOWN;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_CREATE;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_DESTROY;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_PAUSE;
@@ -26,6 +27,8 @@ import static android.app.servertransaction.ActivityLifecycleItem.PRE_ON_CREATE;
 import static android.content.ContentResolver.DEPRECATE_DATA_COLUMNS;
 import static android.content.ContentResolver.DEPRECATE_DATA_PREFIX;
 import static android.view.Display.INVALID_DISPLAY;
+
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -193,6 +196,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicInteger;
 
 final class RemoteServiceException extends AndroidRuntimeException {
     public RemoteServiceException(String msg) {
@@ -225,6 +229,11 @@ public final class ActivityThread extends ClientTransactionHandler {
     public static final boolean DEBUG_ORDER = false;
     private static final long MIN_TIME_BETWEEN_GCS = 5*1000;
     /**
+     * If the activity doesn't become idle in time, the timeout will ensure to apply the pending top
+     * process state.
+     */
+    private static final long PENDING_TOP_PROCESS_STATE_TIMEOUT = 1000;
+    /**
      * The delay to release the provider when it has no more references. It reduces the number of
      * transactions for acquiring and releasing provider if the client accesses the provider
      * frequently in a short time.
@@ -241,6 +250,11 @@ public final class ActivityThread extends ClientTransactionHandler {
 
     // Whether to invoke an activity callback after delivering new configuration.
     private static final boolean REPORT_TO_ACTIVITY = true;
+
+    /** Use foreground GC policy (less pause time) and higher JIT weight. */
+    private static final int VM_PROCESS_STATE_JANK_PERCEPTIBLE = 0;
+    /** Use background GC policy and default JIT threshold. */
+    private static final int VM_PROCESS_STATE_JANK_IMPERCEPTIBLE = 1;
 
     /**
      * Denotes an invalid sequence number corresponding to a process state change.
@@ -296,6 +310,11 @@ public final class ActivityThread extends ClientTransactionHandler {
     // Number of activities that are currently visible on-screen.
     @UnsupportedAppUsage
     int mNumVisibleActivities = 0;
+    private final AtomicInteger mNumLaunchingActivities = new AtomicInteger();
+    @GuardedBy("mAppThread")
+    private int mLastProcessState = PROCESS_STATE_UNKNOWN;
+    @GuardedBy("mAppThread")
+    private int mPendingProcessState = PROCESS_STATE_UNKNOWN;
     ArrayList<WeakReference<AssistStructure>> mLastAssistStructures = new ArrayList<>();
     private int mLastSessionId;
     @UnsupportedAppUsage
@@ -872,17 +891,6 @@ public final class ActivityThread extends ClientTransactionHandler {
 
     private class ApplicationThread extends IApplicationThread.Stub {
         private static final String DB_INFO_FORMAT = "  %8s %8s %14s %14s  %s";
-
-        private int mLastProcessState = -1;
-
-        private void updatePendingConfiguration(Configuration config) {
-            synchronized (mResourcesManager) {
-                if (mPendingConfiguration == null ||
-                        mPendingConfiguration.isOtherSeqNewer(config)) {
-                    mPendingConfiguration = config;
-                }
-            }
-        }
 
         public final void scheduleSleeping(IBinder token, boolean sleeping) {
             sendMessage(H.SLEEPING, token, sleeping ? 1 : 0);
@@ -1560,27 +1568,6 @@ public final class ActivityThread extends ClientTransactionHandler {
             updateProcessState(state, true);
         }
 
-        public void updateProcessState(int processState, boolean fromIpc) {
-            synchronized (this) {
-                if (mLastProcessState != processState) {
-                    mLastProcessState = processState;
-                    // Update Dalvik state based on ActivityManager.PROCESS_STATE_* constants.
-                    final int DALVIK_PROCESS_STATE_JANK_PERCEPTIBLE = 0;
-                    final int DALVIK_PROCESS_STATE_JANK_IMPERCEPTIBLE = 1;
-                    int dalvikProcessState = DALVIK_PROCESS_STATE_JANK_IMPERCEPTIBLE;
-                    // TODO: Tune this since things like gmail sync are important background but not jank perceptible.
-                    if (processState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND) {
-                        dalvikProcessState = DALVIK_PROCESS_STATE_JANK_PERCEPTIBLE;
-                    }
-                    VMRuntime.getRuntime().updateProcessState(dalvikProcessState);
-                    if (false) {
-                        Slog.i(TAG, "******************* PROCESS STATE CHANGED TO: " + processState
-                                + (fromIpc ? " (from ipc": ""));
-                    }
-                }
-            }
-        }
-
         /**
          * Updates {@link #mNetworkBlockSeq}. This is used by ActivityManagerService to inform
          * the main thread that it needs to wait for the network rules to get updated before
@@ -1659,16 +1646,6 @@ public final class ActivityThread extends ClientTransactionHandler {
         public void scheduleTransaction(ClientTransaction transaction) throws RemoteException {
             ActivityThread.this.scheduleTransaction(transaction);
         }
-    }
-
-    @Override
-    public void updatePendingConfiguration(Configuration config) {
-        mAppThread.updatePendingConfiguration(config);
-    }
-
-    @Override
-    public void updateProcessState(int processState, boolean fromIpc) {
-        mAppThread.updateProcessState(processState, fromIpc);
     }
 
     class H extends Handler {
@@ -1995,6 +1972,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             if (stopProfiling) {
                 mProfiler.stopProfiling();
             }
+            applyPendingProcessState();
             return false;
         }
     }
@@ -2937,6 +2915,68 @@ public final class ActivityThread extends ClientTransactionHandler {
     @Override
     public ActivityClientRecord getActivityClient(IBinder token) {
         return mActivities.get(token);
+    }
+
+    @Override
+    public void updatePendingConfiguration(Configuration config) {
+        synchronized (mResourcesManager) {
+            if (mPendingConfiguration == null || mPendingConfiguration.isOtherSeqNewer(config)) {
+                mPendingConfiguration = config;
+            }
+        }
+    }
+
+    @Override
+    public void updateProcessState(int processState, boolean fromIpc) {
+        synchronized (mAppThread) {
+            if (mLastProcessState == processState) {
+                return;
+            }
+            mLastProcessState = processState;
+            // Defer the top state for VM to avoid aggressive JIT compilation affecting activity
+            // launch time.
+            if (processState == ActivityManager.PROCESS_STATE_TOP
+                    && mNumLaunchingActivities.get() > 0) {
+                mPendingProcessState = processState;
+                mH.postDelayed(this::applyPendingProcessState, PENDING_TOP_PROCESS_STATE_TIMEOUT);
+            } else {
+                mPendingProcessState = PROCESS_STATE_UNKNOWN;
+                updateVmProcessState(processState);
+            }
+            if (localLOGV) {
+                Slog.i(TAG, "******************* PROCESS STATE CHANGED TO: " + processState
+                        + (fromIpc ? " (from ipc" : ""));
+            }
+        }
+    }
+
+    /** Update VM state based on ActivityManager.PROCESS_STATE_* constants. */
+    private void updateVmProcessState(int processState) {
+        // TODO: Tune this since things like gmail sync are important background but not jank
+        // perceptible.
+        final int state = processState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
+                ? VM_PROCESS_STATE_JANK_PERCEPTIBLE
+                : VM_PROCESS_STATE_JANK_IMPERCEPTIBLE;
+        VMRuntime.getRuntime().updateProcessState(state);
+    }
+
+    private void applyPendingProcessState() {
+        synchronized (mAppThread) {
+            if (mPendingProcessState == PROCESS_STATE_UNKNOWN) {
+                return;
+            }
+            final int pendingState = mPendingProcessState;
+            mPendingProcessState = PROCESS_STATE_UNKNOWN;
+            // Only apply the pending state if the last state doesn't change.
+            if (pendingState == mLastProcessState) {
+                updateVmProcessState(pendingState);
+            }
+        }
+    }
+
+    @Override
+    public void countLaunchingActivities(int num) {
+        mNumLaunchingActivities.getAndAdd(num);
     }
 
     @UnsupportedAppUsage
@@ -4570,7 +4610,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     private void onCoreSettingsChange() {
         if (updateDebugViewAttributeState()) {
             // request all activities to relaunch for the changes to take place
-            relaunchAllActivities();
+            relaunchAllActivities(false /* preserveWindows */);
         }
     }
 
@@ -4587,10 +4627,13 @@ public final class ActivityThread extends ClientTransactionHandler {
         return previousState != View.sDebugViewAttributes;
     }
 
-    private void relaunchAllActivities() {
+    private void relaunchAllActivities(boolean preserveWindows) {
         for (Map.Entry<IBinder, ActivityClientRecord> entry : mActivities.entrySet()) {
-            final Activity activity = entry.getValue().activity;
-            if (!activity.mFinished) {
+            final ActivityClientRecord r = entry.getValue();
+            if (!r.activity.mFinished) {
+                if (preserveWindows && r.window != null) {
+                    r.mPreserveWindow = true;
+                }
                 scheduleRelaunchActivity(entry.getKey());
             }
         }
@@ -5423,7 +5466,8 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
-    void handleApplicationInfoChanged(@NonNull final ApplicationInfo ai) {
+    @VisibleForTesting(visibility = PACKAGE)
+    public void handleApplicationInfoChanged(@NonNull final ApplicationInfo ai) {
         // Updates triggered by package installation go through a package update
         // receiver. Here we try to capture ApplicationInfo changes that are
         // caused by other sources, such as overlays. That means we want to be as conservative
@@ -5469,7 +5513,8 @@ public final class ActivityThread extends ClientTransactionHandler {
         newConfig.assetsSeq = (mConfiguration != null ? mConfiguration.assetsSeq : 0) + 1;
         handleConfigurationChanged(newConfig, null);
 
-        relaunchAllActivities();
+        // Preserve windows to avoid black flickers when overlays change.
+        relaunchAllActivities(true /* preserveWindows */);
     }
 
     static void freeTextLayoutCachesIfNeeded(int configDiff) {

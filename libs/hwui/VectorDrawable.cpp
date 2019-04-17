@@ -547,6 +547,11 @@ void Tree::Cache::clear() {
 }
 
 void Tree::draw(SkCanvas* canvas, const SkRect& bounds, const SkPaint& inPaint) {
+    if (canvas->quickReject(bounds)) {
+        // The RenderNode is on screen, but the AVD is not.
+        return;
+    }
+
     // Update the paint for any animatable properties
     SkPaint paint = inPaint;
     paint.setAlpha(mProperties.getRootAlpha() * 255);

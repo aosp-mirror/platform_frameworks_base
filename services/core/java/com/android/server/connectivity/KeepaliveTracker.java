@@ -191,6 +191,7 @@ public class KeepaliveTracker {
                 case NOT_STARTED : return "NOT_STARTED";
                 case STARTING : return "STARTING";
                 case STARTED : return "STARTED";
+                case STOPPING : return "STOPPING";
             }
             throw new IllegalArgumentException("Unknown state");
         }
@@ -314,18 +315,27 @@ public class KeepaliveTracker {
                     Log.e(TAG, "Cannot stop unowned keepalive " + mSlot + " on " + mNai.network);
                 }
             }
-            if (NOT_STARTED != mStartedState) {
-                mStartedState = STOPPING;
-                Log.d(TAG, "Stopping keepalive " + mSlot + " on " + mNai.name());
-                if (mType == TYPE_NATT) {
-                    mNai.asyncChannel.sendMessage(CMD_STOP_SOCKET_KEEPALIVE, mSlot);
-                } else if (mType == TYPE_TCP) {
-                    mNai.asyncChannel.sendMessage(CMD_STOP_SOCKET_KEEPALIVE, mSlot);
-                    mNai.asyncChannel.sendMessage(CMD_REMOVE_KEEPALIVE_PACKET_FILTER, mSlot);
-                    mTcpController.stopSocketMonitor(mSlot);
-                } else {
-                    Log.wtf(TAG, "Stopping keepalive with unknown type: " + mType);
-                }
+            Log.d(TAG, "Stopping keepalive " + mSlot + " on " + mNai.name() + ": " + reason);
+            switch (mStartedState) {
+                case NOT_STARTED:
+                    // Remove the reference of the keepalive that meet error before starting,
+                    // e.g. invalid parameter.
+                    cleanupStoppedKeepalive(mNai, mSlot);
+                    break;
+                case STOPPING:
+                    // Keepalive is already in stopping state, ignore.
+                    return;
+                default:
+                    mStartedState = STOPPING;
+                    if (mType == TYPE_NATT) {
+                        mNai.asyncChannel.sendMessage(CMD_STOP_SOCKET_KEEPALIVE, mSlot);
+                    } else if (mType == TYPE_TCP) {
+                        mNai.asyncChannel.sendMessage(CMD_STOP_SOCKET_KEEPALIVE, mSlot);
+                        mNai.asyncChannel.sendMessage(CMD_REMOVE_KEEPALIVE_PACKET_FILTER, mSlot);
+                        mTcpController.stopSocketMonitor(mSlot);
+                    } else {
+                        Log.wtf(TAG, "Stopping keepalive with unknown type: " + mType);
+                    }
             }
 
             // Close the duplicated fd that maintains the lifecycle of socket whenever
@@ -405,9 +415,9 @@ public class KeepaliveTracker {
             for (KeepaliveInfo ki : networkKeepalives.values()) {
                 ki.stop(reason);
             }
-            networkKeepalives.clear();
-            mKeepalives.remove(nai);
         }
+        // Clean up keepalives will be done as a result of calling ki.stop() after the slots are
+        // freed.
     }
 
     public void handleStopKeepalive(NetworkAgentInfo nai, int slot, int reason) {
@@ -423,8 +433,24 @@ public class KeepaliveTracker {
             return;
         }
         ki.stop(reason);
+        // Clean up keepalives will be done as a result of calling ki.stop() after the slots are
+        // freed.
+    }
+
+    private void cleanupStoppedKeepalive(NetworkAgentInfo nai, int slot) {
+        String networkName = (nai == null) ? "(null)" : nai.name();
+        HashMap<Integer, KeepaliveInfo> networkKeepalives = mKeepalives.get(nai);
+        if (networkKeepalives == null) {
+            Log.e(TAG, "Attempt to remove keepalive on nonexistent network " + networkName);
+            return;
+        }
+        KeepaliveInfo ki = networkKeepalives.get(slot);
+        if (ki == null) {
+            Log.e(TAG, "Attempt to remove nonexistent keepalive " + slot + " on " + networkName);
+            return;
+        }
         networkKeepalives.remove(slot);
-        Log.d(TAG, "Stopped keepalive " + slot + " on " + networkName + ", "
+        Log.d(TAG, "Remove keepalive " + slot + " on " + networkName + ", "
                 + networkKeepalives.size() + " remains.");
         if (networkKeepalives.isEmpty()) {
             mKeepalives.remove(nai);
@@ -495,10 +521,11 @@ public class KeepaliveTracker {
                 handleStopKeepalive(nai, slot, reason);
             }
         } else if (KeepaliveInfo.STOPPING == ki.mStartedState) {
-            // The message indicated result of stopping : don't call handleStopKeepalive.
+            // The message indicated result of stopping : clean up keepalive slots.
             Log.d(TAG, "Stopped keepalive " + slot + " on " + nai.name()
                     + " stopped: " + reason);
             ki.mStartedState = KeepaliveInfo.NOT_STARTED;
+            cleanupStoppedKeepalive(nai, slot);
         } else {
             Log.wtf(TAG, "Event " + message.what + "," + slot + "," + reason
                     + " for keepalive in wrong state: " + ki.toString());

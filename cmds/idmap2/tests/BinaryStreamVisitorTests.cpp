@@ -19,16 +19,13 @@
 #include <string>
 #include <utility>
 
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
-
+#include "TestHelpers.h"
 #include "androidfw/ApkAssets.h"
 #include "androidfw/Idmap.h"
-
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 #include "idmap2/BinaryStreamVisitor.h"
 #include "idmap2/Idmap.h"
-
-#include "TestHelpers.h"
 
 using ::testing::NotNull;
 
