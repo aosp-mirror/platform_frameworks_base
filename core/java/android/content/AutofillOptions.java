@@ -24,7 +24,7 @@ import android.os.Parcelable;
 import android.util.ArraySet;
 import android.util.Log;
 import android.view.autofill.AutofillManager;
-import android.view.contentcapture.ContentCaptureManager.ContentCaptureClient;
+import android.view.autofill.AutofillManager.AutofillClient;
 
 import java.io.PrintWriter;
 
@@ -73,10 +73,10 @@ public final class AutofillOptions implements Parcelable {
     public boolean isAugmentedAutofillEnabled(@NonNull Context context) {
         if (!augmentedAutofillEnabled) return false;
 
-        final ContentCaptureClient contentCaptureClient = context.getContentCaptureClient();
-        if (contentCaptureClient == null) return false;
+        final AutofillClient autofillClient = context.getAutofillClient();
+        if (autofillClient == null) return false;
 
-        final ComponentName component = contentCaptureClient.contentCaptureClientGetComponentName();
+        final ComponentName component = autofillClient.autofillClientGetComponentName();
         return whitelistedActivitiesForAugmentedAutofill == null
                 || whitelistedActivitiesForAugmentedAutofill.contains(component);
     }

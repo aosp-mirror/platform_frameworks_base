@@ -70,7 +70,6 @@ import android.view.View;
 import android.view.ViewDebug;
 import android.view.WindowManager;
 import android.view.autofill.AutofillManager.AutofillClient;
-import android.view.contentcapture.ContentCaptureManager.ContentCaptureClient;
 import android.view.textclassifier.TextClassificationManager;
 
 import java.io.File;
@@ -5409,14 +5408,6 @@ public abstract class Context {
      * @hide
      */
     public void setAutofillClient(@SuppressWarnings("unused") AutofillClient client) {
-    }
-
-    /**
-     * @hide
-     */
-    @Nullable
-    public ContentCaptureClient getContentCaptureClient() {
-        return null;
     }
 
     /**
