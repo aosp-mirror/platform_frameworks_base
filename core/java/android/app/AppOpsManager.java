@@ -1762,21 +1762,21 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED, // VIBRATE
             AppOpsManager.MODE_ALLOWED, // READ_CONTACTS
             AppOpsManager.MODE_ALLOWED, // WRITE_CONTACTS
-            AppOpsManager.MODE_DEFAULT, // READ_CALL_LOG
-            AppOpsManager.MODE_DEFAULT, // WRITE_CALL_LOG
+            AppOpsManager.MODE_ALLOWED, // READ_CALL_LOG
+            AppOpsManager.MODE_ALLOWED, // WRITE_CALL_LOG
             AppOpsManager.MODE_ALLOWED, // READ_CALENDAR
             AppOpsManager.MODE_ALLOWED, // WRITE_CALENDAR
             AppOpsManager.MODE_ALLOWED, // WIFI_SCAN
             AppOpsManager.MODE_ALLOWED, // POST_NOTIFICATION
             AppOpsManager.MODE_ALLOWED, // NEIGHBORING_CELLS
             AppOpsManager.MODE_ALLOWED, // CALL_PHONE
-            AppOpsManager.MODE_DEFAULT, // READ_SMS
+            AppOpsManager.MODE_ALLOWED, // READ_SMS
             AppOpsManager.MODE_IGNORED, // WRITE_SMS
-            AppOpsManager.MODE_DEFAULT, // RECEIVE_SMS
+            AppOpsManager.MODE_ALLOWED, // RECEIVE_SMS
             AppOpsManager.MODE_ALLOWED, // RECEIVE_EMERGENCY_BROADCAST
-            AppOpsManager.MODE_DEFAULT, // RECEIVE_MMS
-            AppOpsManager.MODE_DEFAULT, // RECEIVE_WAP_PUSH
-            AppOpsManager.MODE_DEFAULT, // SEND_SMS
+            AppOpsManager.MODE_ALLOWED, // RECEIVE_MMS
+            AppOpsManager.MODE_ALLOWED, // RECEIVE_WAP_PUSH
+            AppOpsManager.MODE_ALLOWED, // SEND_SMS
             AppOpsManager.MODE_ALLOWED, // READ_ICC_SMS
             AppOpsManager.MODE_ALLOWED, // WRITE_ICC_SMS
             AppOpsManager.MODE_DEFAULT, // WRITE_SETTINGS
@@ -1810,10 +1810,10 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED, // READ_PHONE_STATE
             AppOpsManager.MODE_ALLOWED, // ADD_VOICEMAIL
             AppOpsManager.MODE_ALLOWED, // USE_SIP
-            AppOpsManager.MODE_DEFAULT, // PROCESS_OUTGOING_CALLS
+            AppOpsManager.MODE_ALLOWED, // PROCESS_OUTGOING_CALLS
             AppOpsManager.MODE_ALLOWED, // USE_FINGERPRINT
             AppOpsManager.MODE_ALLOWED, // BODY_SENSORS
-            AppOpsManager.MODE_DEFAULT, // READ_CELL_BROADCASTS
+            AppOpsManager.MODE_ALLOWED, // READ_CELL_BROADCASTS
             AppOpsManager.MODE_ERRORED, // MOCK_LOCATION
             AppOpsManager.MODE_ALLOWED, // READ_EXTERNAL_STORAGE
             AppOpsManager.MODE_ALLOWED, // WRITE_EXTERNAL_STORAGE

@@ -293,7 +293,6 @@ class StorageManagerService extends IStorageManager.Stub
     private static final String TAG_VOLUMES = "volumes";
     private static final String ATTR_VERSION = "version";
     private static final String ATTR_PRIMARY_STORAGE_UUID = "primaryStorageUuid";
-    private static final String ATTR_ISOLATED_STORAGE = "isolatedStorage";
     private static final String TAG_VOLUME = "volume";
     private static final String ATTR_TYPE = "type";
     private static final String ATTR_FS_UUID = "fsUuid";
@@ -348,10 +347,6 @@ class StorageManagerService extends IStorageManager.Stub
     private ArrayMap<String, VolumeRecord> mRecords = new ArrayMap<>();
     @GuardedBy("mLock")
     private String mPrimaryStorageUuid;
-
-    /** Flag indicating isolated storage state of last boot */
-    @GuardedBy("mLock")
-    private boolean mLastIsolatedStorage = false;
 
     /** Map from disk ID to latches */
     @GuardedBy("mLock")
@@ -1690,63 +1685,6 @@ class StorageManagerService extends IStorageManager.Stub
             mIAppOpsService.startWatchingMode(OP_REQUEST_INSTALL_PACKAGES, null, mAppOpsCallback);
         } catch (RemoteException e) {
         }
-
-        synchronized (mLock) {
-            final boolean thisIsolatedStorage = StorageManager.hasIsolatedStorage();
-            if (mLastIsolatedStorage != thisIsolatedStorage) {
-                if (thisIsolatedStorage) {
-                    // This boot enables isolated storage; apply legacy behavior
-                    applyLegacyStorage();
-                }
-
-                // Always remember the new state we just booted with
-                writeSettingsLocked();
-            }
-        }
-    }
-
-    /**
-     * If we're enabling isolated storage, we need to remember which existing
-     * apps have already been using shared storage, and grant them legacy access
-     * to keep them running smoothly.
-     *
-     * @see com.android.server.pm.permission.PermissionManagerService
-     *      #applyLegacyStoragePermissionModel
-     */
-    private void applyLegacyStorage() {
-        final AppOpsManager appOps = mContext.getSystemService(AppOpsManager.class);
-        final UserManagerInternal um = LocalServices.getService(UserManagerInternal.class);
-        for (int userId : um.getUserIds()) {
-            final UserHandle user = UserHandle.of(userId);
-            final PackageManager pm;
-            try {
-                pm = mContext.createPackageContextAsUser(mContext.getPackageName(), 0,
-                        user).getPackageManager();
-            } catch (PackageManager.NameNotFoundException e) {
-                throw new RuntimeException(e);
-            }
-
-            final List<PackageInfo> pkgs = pm.getPackagesHoldingPermissions(
-                    ALL_STORAGE_PERMISSIONS,
-                    MATCH_UNINSTALLED_PACKAGES | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE
-                            | GET_PERMISSIONS);
-            for (PackageInfo pkg : pkgs) {
-                final int uid = pkg.applicationInfo.uid;
-                final String packageName = pkg.applicationInfo.packageName;
-
-                final long lastAccess = getLastAccessTime(appOps, uid, packageName, new int[] {
-                        AppOpsManager.OP_READ_EXTERNAL_STORAGE,
-                        AppOpsManager.OP_WRITE_EXTERNAL_STORAGE,
-                });
-
-                Log.d(TAG, "Found " + uid + " " + packageName
-                        + " with granted storage access, last accessed " + lastAccess);
-                if (lastAccess > 0) {
-                    appOps.setUidMode(AppOpsManager.OP_LEGACY_STORAGE, uid,
-                            AppOpsManager.MODE_ALLOWED);
-                }
-            }
-        }
     }
 
     private static long getLastAccessTime(AppOpsManager manager,
@@ -1792,7 +1730,6 @@ class StorageManagerService extends IStorageManager.Stub
     private void readSettingsLocked() {
         mRecords.clear();
         mPrimaryStorageUuid = getDefaultPrimaryStorageUuid();
-        mLastIsolatedStorage = false;
 
         FileInputStream fis = null;
         try {
@@ -1814,9 +1751,6 @@ class StorageManagerService extends IStorageManager.Stub
                             mPrimaryStorageUuid = readStringAttribute(in,
                                     ATTR_PRIMARY_STORAGE_UUID);
                         }
-                        mLastIsolatedStorage = readBooleanAttribute(in,
-                                ATTR_ISOLATED_STORAGE, false);
-
                     } else if (TAG_VOLUME.equals(tag)) {
                         final VolumeRecord rec = readVolumeRecord(in);
                         mRecords.put(rec.fsUuid, rec);
@@ -1846,7 +1780,6 @@ class StorageManagerService extends IStorageManager.Stub
             out.startTag(null, TAG_VOLUMES);
             writeIntAttribute(out, ATTR_VERSION, VERSION_FIX_PRIMARY);
             writeStringAttribute(out, ATTR_PRIMARY_STORAGE_UUID, mPrimaryStorageUuid);
-            writeBooleanAttribute(out, ATTR_ISOLATED_STORAGE, StorageManager.hasIsolatedStorage());
             final int size = mRecords.size();
             for (int i = 0; i < size; i++) {
                 final VolumeRecord rec = mRecords.valueAt(i);
@@ -3825,11 +3758,7 @@ class StorageManagerService extends IStorageManager.Stub
             // they hold the runtime permission
             final boolean hasLegacy = mIAppOpsService.checkOperation(OP_LEGACY_STORAGE,
                     uid, packageName) == MODE_ALLOWED;
-            // STOPSHIP: only use app-op once permission model has fully landed
-            final boolean requestedLegacy = !mIPackageManager
-                    .getApplicationInfo(packageName, 0, UserHandle.getUserId(uid))
-                    .isExternalStorageSandboxAllowed();
-            if ((hasLegacy || requestedLegacy) && hasStorage) {
+            if (hasLegacy && hasStorage) {
                 return Zygote.MOUNT_EXTERNAL_LEGACY;
             } else {
                 return Zygote.MOUNT_EXTERNAL_WRITE;
