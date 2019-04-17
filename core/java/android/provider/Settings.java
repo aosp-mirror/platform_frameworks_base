@@ -11446,11 +11446,16 @@ public final class Settings {
         public static final String GPU_DEBUG_APP = "gpu_debug_app";
 
         /**
-         * App that is selected to use updated graphics driver.
+         * Apps that are selected to use Game Update Package.
          * @hide
          */
-        public static final String UPDATED_GFX_DRIVER_DEV_OPT_IN_APP =
-                "updated_gfx_driver_dev_opt_in_app";
+        public static final String GUP_DEV_OPT_IN_APPS = "gup_dev_opt_in_apps";
+
+        /**
+         * Apps on the black list that are forbidden to useGame Update Package.
+         * @hide
+         */
+        public static final String GUP_BLACK_LIST = "gup_black_list";
 
         /**
          * Ordered GPU debug layer list

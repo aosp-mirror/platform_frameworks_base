@@ -156,7 +156,7 @@ public class GraphicsEnvironment {
 
         String applicationPackageName = context.getPackageName();
         String devOptInApplicationName = coreSettings.getString(
-                Settings.Global.UPDATED_GFX_DRIVER_DEV_OPT_IN_APP);
+                Settings.Global.GUP_DEV_OPT_IN_APPS);
         boolean devOptIn = applicationPackageName.equals(devOptInApplicationName);
         boolean whitelisted = onWhitelist(context, driverPackageName, ai.packageName);
         if (!devOptIn && !whitelisted) {
