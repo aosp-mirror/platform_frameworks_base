@@ -2658,12 +2658,24 @@ public class ChooserActivity extends ResolverActivity {
             }
         }
 
+        /**
+         * Need to merge CALLER + ranked STANDARD into a single row. All other types
+         * are placed into their own row as determined by their target type, and dividers
+         * are added in the list to separate each type.
+         */
+        int getRowType(int rowPosition) {
+            int positionType = mChooserListAdapter.getPositionTargetType(rowPosition);
+            if (positionType == ChooserListAdapter.TARGET_CALLER) {
+                return ChooserListAdapter.TARGET_STANDARD;
+            }
+
+            return positionType;
+        }
+
         void bindViewHolder(int rowPosition, RowViewHolder holder) {
             final int start = getFirstRowPosition(rowPosition);
-            final int startType = mChooserListAdapter.getPositionTargetType(start);
-
-            final int lastStartType = mChooserListAdapter.getPositionTargetType(
-                    getFirstRowPosition(rowPosition - 1));
+            final int startType = getRowType(start);
+            final int lastStartType = getRowType(getFirstRowPosition(rowPosition - 1));
 
             final ViewGroup row = holder.getViewGroup();
 
@@ -2675,7 +2687,7 @@ public class ChooserActivity extends ResolverActivity {
 
             int columnCount = holder.getColumnCount();
             int end = start + columnCount - 1;
-            while (mChooserListAdapter.getPositionTargetType(end) != startType && end >= start) {
+            while (getRowType(end) != startType && end >= start) {
                 end--;
             }
 
@@ -2727,14 +2739,15 @@ public class ChooserActivity extends ResolverActivity {
                 return row * getMaxTargetsPerRow();
             }
 
-            final int callerCount = mChooserListAdapter.getCallerTargetCount();
-            final int callerRows = (int) Math.ceil((float) callerCount / getMaxTargetsPerRow());
-            if (row < callerRows + serviceRows) {
+            final int callerAndRankedCount = mChooserListAdapter.getCallerTargetCount()
+                                                 + mChooserListAdapter.getRankedTargetCount();
+            final int callerAndRankedRows = getCallerAndRankedTargetRowCount();
+            if (row < callerAndRankedRows + serviceRows) {
                 return serviceCount + (row - serviceRows) * getMaxTargetsPerRow();
             }
 
-            return callerCount + serviceCount
-                    + (row - callerRows - serviceRows) * getMaxTargetsPerRow();
+            return callerAndRankedCount + serviceCount
+                    + (row - callerAndRankedRows - serviceRows) * getMaxTargetsPerRow();
         }
 
         public void handleScroll(View v, int y, int oldy) {
