@@ -647,6 +647,12 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.GPU_DEBUG_LAYERS,
                 GlobalSettingsProto.Gpu.DEBUG_LAYERS);
+        dumpSetting(s, p,
+                Settings.Global.GUP_DEV_OPT_IN_APPS,
+                GlobalSettingsProto.Gpu.GUP_DEV_OPT_IN_APPS);
+        dumpSetting(s, p,
+                Settings.Global.GUP_BLACK_LIST,
+                GlobalSettingsProto.Gpu.GUP_BLACK_LIST);
         p.end(gpuToken);
 
         final long hdmiToken = p.start(GlobalSettingsProto.HDMI);

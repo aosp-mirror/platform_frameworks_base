@@ -19,6 +19,7 @@ package android.os;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.res.AssetManager;
 import android.opengl.EGL14;
 import android.os.Build;
 import android.os.SystemProperties;
@@ -27,7 +28,11 @@ import android.util.Log;
 
 import dalvik.system.VMRuntime;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 /** @hide */
 public class GraphicsEnvironment {
@@ -44,6 +49,7 @@ public class GraphicsEnvironment {
     private static final boolean DEBUG = false;
     private static final String TAG = "GraphicsEnvironment";
     private static final String PROPERTY_GFX_DRIVER = "ro.gfx.driver.0";
+    private static final String GUP_WHITELIST_FILENAME = "whitelist.txt";
 
     private ClassLoader mClassLoader;
     private String mLayerPath;
@@ -52,9 +58,9 @@ public class GraphicsEnvironment {
     /**
      * Set up GraphicsEnvironment
      */
-    public void setup(Context context) {
+    public void setup(Context context, Bundle coreSettings) {
         setupGpuLayers(context);
-        chooseDriver(context);
+        chooseDriver(context, coreSettings);
     }
 
     /**
@@ -133,11 +139,12 @@ public class GraphicsEnvironment {
     /**
      * Choose whether the current process should use the builtin or an updated driver.
      */
-    private static void chooseDriver(Context context) {
+    private static void chooseDriver(Context context, Bundle coreSettings) {
         String driverPackageName = SystemProperties.get(PROPERTY_GFX_DRIVER);
         if (driverPackageName == null || driverPackageName.isEmpty()) {
             return;
         }
+
         // To minimize risk of driver updates crippling the device beyond user repair, never use an
         // updated driver for privileged or non-updated system apps. Presumably pre-installed apps
         // were tested thoroughly with the pre-installed driver.
@@ -146,6 +153,19 @@ public class GraphicsEnvironment {
             if (DEBUG) Log.v(TAG, "ignoring driver package for privileged/non-updated system app");
             return;
         }
+
+        String applicationPackageName = context.getPackageName();
+        String devOptInApplicationName = coreSettings.getString(
+                Settings.Global.GUP_DEV_OPT_IN_APPS);
+        boolean devOptIn = applicationPackageName.equals(devOptInApplicationName);
+        boolean whitelisted = onWhitelist(context, driverPackageName, ai.packageName);
+        if (!devOptIn && !whitelisted) {
+            if (DEBUG) {
+                Log.w(TAG, applicationPackageName + " is not on the whitelist.");
+            }
+            return;
+        }
+
         ApplicationInfo driverInfo;
         try {
             driverInfo = context.getPackageManager().getApplicationInfo(driverPackageName,
@@ -154,6 +174,16 @@ public class GraphicsEnvironment {
             Log.w(TAG, "driver package '" + driverPackageName + "' not installed");
             return;
         }
+
+        // O drivers are restricted to the sphal linker namespace, so don't try to use
+        // packages unless they declare they're compatible with that restriction.
+        if (driverInfo.targetSdkVersion < Build.VERSION_CODES.O) {
+            if (DEBUG) {
+                Log.w(TAG, "updated driver package is not known to be compatible with O");
+            }
+            return;
+        }
+
         String abi = chooseAbi(driverInfo);
         if (abi == null) {
             if (DEBUG) {
@@ -162,12 +192,6 @@ public class GraphicsEnvironment {
                     Log.w(TAG, "updated driver package has no compatible native libraries");
                 }
             }
-            return;
-        }
-        if (driverInfo.targetSdkVersion < Build.VERSION_CODES.O) {
-            // O drivers are restricted to the sphal linker namespace, so don't try to use
-            // packages unless they declare they're compatible with that restriction.
-            Log.w(TAG, "updated driver package is not known to be compatible with O");
             return;
         }
 
@@ -213,6 +237,31 @@ public class GraphicsEnvironment {
             return ai.secondaryCpuAbi;
         }
         return null;
+    }
+
+    private static boolean onWhitelist(Context context, String driverPackageName,
+            String applicationPackageName) {
+        try {
+            Context driverContext = context.createPackageContext(driverPackageName,
+                                                                 Context.CONTEXT_RESTRICTED);
+            AssetManager assets = driverContext.getAssets();
+            InputStream stream = assets.open(GUP_WHITELIST_FILENAME);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+            for (String packageName; (packageName = reader.readLine()) != null; ) {
+                if (packageName.equals(applicationPackageName)) {
+                    return true;
+                }
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            if (DEBUG) {
+                Log.w(TAG, "driver package '" + driverPackageName + "' not installed");
+            }
+        } catch (IOException e) {
+            if (DEBUG) {
+                Log.w(TAG, "Failed to load whitelist driver package, abort.");
+            }
+        }
+        return false;
     }
 
     private static native void setLayerPaths(ClassLoader classLoader, String layerPaths);

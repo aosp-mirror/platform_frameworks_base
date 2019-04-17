@@ -11446,6 +11446,18 @@ public final class Settings {
         public static final String GPU_DEBUG_APP = "gpu_debug_app";
 
         /**
+         * Apps that are selected to use Game Update Package.
+         * @hide
+         */
+        public static final String GUP_DEV_OPT_IN_APPS = "gup_dev_opt_in_apps";
+
+        /**
+         * Apps on the black list that are forbidden to useGame Update Package.
+         * @hide
+         */
+        public static final String GUP_BLACK_LIST = "gup_black_list";
+
+        /**
          * Ordered GPU debug layer list
          * i.e. <layer1>:<layer2>:...:<layerN>
          * @hide
