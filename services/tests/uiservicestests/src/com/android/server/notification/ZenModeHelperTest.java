@@ -110,6 +110,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     private ZenModeHelper mZenModeHelperSpy;
     private Context mContext;
     private ContentResolver mContentResolver;
+    @Mock AppOpsManager mAppOps;
 
     @Before
     public void setUp() {
@@ -127,6 +128,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                     e.toString());
         }
 
+        when(mContext.getSystemService(AppOpsManager.class)).thenReturn(mAppOps);
         when(mContext.getSystemService(NotificationManager.class)).thenReturn(mNotificationManager);
         mConditionProviders = new ConditionProviders(mContext, new UserProfiles(),
                 AppGlobals.getPackageManager());
@@ -219,10 +221,10 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 Policy.PRIORITY_CATEGORY_MEDIA, 0, 0, 0, 0);
         mZenModeHelperSpy.applyRestrictions();
 
-        doNothing().when(mZenModeHelperSpy).applyRestrictions(anyBoolean(), anyInt());
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false,
+        doNothing().when(mZenModeHelperSpy).applyRestrictions(eq(false), anyBoolean(), anyInt());
+        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false, false,
                 AudioAttributes.USAGE_ALARM);
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false,
+        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false, false,
                 AudioAttributes.USAGE_MEDIA);
     }
 
@@ -233,9 +235,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 Policy.PRIORITY_CATEGORY_MEDIA, 0, 0, 0, 0);
 
         mZenModeHelperSpy.applyRestrictions();
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false,
+        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true, false,
                 AudioAttributes.USAGE_ALARM);
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false,
+        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true, false,
                 AudioAttributes.USAGE_MEDIA);
     }
 
@@ -244,13 +246,13 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         mZenModeHelperSpy.mConsolidatedPolicy = new Policy(0, 0, 0, 0, 0);
         mZenModeHelperSpy.applyRestrictions();
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true,
+        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true, true,
                 AudioAttributes.USAGE_ALARM);
 
         // Media is a catch-all that includes games
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true,
+        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true, true,
                 AudioAttributes.USAGE_MEDIA);
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true,
+        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true, true,
                 AudioAttributes.USAGE_GAME);
     }
 
@@ -262,17 +264,17 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelperSpy.applyRestrictions();
 
         // Total silence will silence alarms, media and system noises (but not vibrations)
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true,
+        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false, true,
                 AudioAttributes.USAGE_ALARM);
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true,
+        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false, true,
                 AudioAttributes.USAGE_MEDIA);
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true,
+        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false, true,
                 AudioAttributes.USAGE_GAME);
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true,
+        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false, true,
                 AudioAttributes.USAGE_ASSISTANCE_SONIFICATION, AppOpsManager.OP_PLAY_AUDIO);
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false,
+        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false, false,
                 AudioAttributes.USAGE_ASSISTANCE_SONIFICATION, AppOpsManager.OP_VIBRATE);
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true,
+        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false, true,
                 AudioAttributes.USAGE_UNKNOWN);
     }
 
@@ -283,19 +285,19 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelperSpy.applyRestrictions();
 
         // Alarms only mode will not silence alarms
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false,
+        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false, false,
                 AudioAttributes.USAGE_ALARM);
 
         // Alarms only mode will not silence media
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false,
+        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false, false,
                 AudioAttributes.USAGE_MEDIA);
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false,
+        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false, false,
                 AudioAttributes.USAGE_GAME);
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false,
+        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false, false,
                 AudioAttributes.USAGE_UNKNOWN);
 
         // Alarms only will silence system noises (but not vibrations)
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true,
+        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false, true,
                 AudioAttributes.USAGE_ASSISTANCE_SONIFICATION, AppOpsManager.OP_PLAY_AUDIO);
     }
 
@@ -306,9 +308,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelperSpy.applyRestrictions();
 
         // Alarms only mode will silence calls despite priority-mode config
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true,
+        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false, true,
                 AudioAttributes.USAGE_NOTIFICATION_RINGTONE);
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true,
+        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false, true,
                 AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_REQUEST);
     }
 
@@ -319,7 +321,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelperSpy.mConsolidatedPolicy = new Policy(0, 0, 0, 0, 0);
         mZenModeHelperSpy.applyRestrictions();
 
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false,
+        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false, false,
                 AudioAttributes.USAGE_ALARM);
     }
 
@@ -334,15 +336,60 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         for (int usage : AudioAttributes.SDK_USAGES) {
             if (usage == AudioAttributes.USAGE_ASSISTANCE_SONIFICATION) {
                 // only mute audio, not vibrations
-                verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true, usage,
+                verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true, true, usage,
                         AppOpsManager.OP_PLAY_AUDIO);
-                verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false, usage,
+                verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true, false, usage,
                         AppOpsManager.OP_VIBRATE);
             } else {
                 boolean shouldMute = AudioAttributes.SUPPRESSIBLE_USAGES.get(usage)
                         != AudioAttributes.SUPPRESSIBLE_NEVER;
-                verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(shouldMute, usage);
+                verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true, shouldMute, usage);
             }
+        }
+    }
+
+    @Test
+    public void testApplyRestrictions_whitelist_priorityOnlyMode() {
+        mZenModeHelperSpy.setPriorityOnlyDndExemptPackages(new String[] {PKG_O});
+        mZenModeHelperSpy.mZenMode = Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        mZenModeHelperSpy.mConsolidatedPolicy = new Policy(0, 0, 0, 0, 0);
+        mZenModeHelperSpy.applyRestrictions();
+
+        for (int usage : AudioAttributes.SDK_USAGES) {
+            verify(mAppOps).setRestriction(
+                    eq(AppOpsManager.OP_PLAY_AUDIO), eq(usage), anyInt(), eq(new String[]{PKG_O}));
+            verify(mAppOps).setRestriction(
+                    eq(AppOpsManager.OP_VIBRATE), eq(usage), anyInt(), eq(new String[]{PKG_O}));
+        }
+    }
+
+    @Test
+    public void testApplyRestrictions_whitelist_alarmsOnlyMode() {
+        mZenModeHelperSpy.setPriorityOnlyDndExemptPackages(new String[] {PKG_O});
+        mZenModeHelperSpy.mZenMode = Global.ZEN_MODE_ALARMS;
+        mZenModeHelperSpy.mConsolidatedPolicy = new Policy(0, 0, 0, 0, 0);
+        mZenModeHelperSpy.applyRestrictions();
+
+        for (int usage : AudioAttributes.SDK_USAGES) {
+            verify(mAppOps).setRestriction(
+                    eq(AppOpsManager.OP_PLAY_AUDIO), eq(usage), anyInt(), eq(null));
+            verify(mAppOps).setRestriction(
+                    eq(AppOpsManager.OP_VIBRATE), eq(usage), anyInt(), eq(null));
+        }
+    }
+
+    @Test
+    public void testApplyRestrictions_whitelist_totalSilenceMode() {
+        mZenModeHelperSpy.setPriorityOnlyDndExemptPackages(new String[] {PKG_O});
+        mZenModeHelperSpy.mZenMode = Global.ZEN_MODE_NO_INTERRUPTIONS;
+        mZenModeHelperSpy.mConsolidatedPolicy = new Policy(0, 0, 0, 0, 0);
+        mZenModeHelperSpy.applyRestrictions();
+
+        for (int usage : AudioAttributes.SDK_USAGES) {
+            verify(mAppOps).setRestriction(
+                    eq(AppOpsManager.OP_PLAY_AUDIO), eq(usage), anyInt(), eq(null));
+            verify(mAppOps).setRestriction(
+                    eq(AppOpsManager.OP_VIBRATE), eq(usage), anyInt(), eq(null));
         }
     }
 
