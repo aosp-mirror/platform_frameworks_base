@@ -2479,9 +2479,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
      */
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private void updateBackgroundBounds() {
-        getLocationInWindow(mTempInt2);
-        int left = mTempInt2[0] + mSidePaddings;
-        int right = mTempInt2[0] + getWidth() - mSidePaddings;
+        int left = mSidePaddings;
+        int right = getWidth() - mSidePaddings;
         for (NotificationSection section : mSections) {
             section.getBounds().left = left;
             section.getBounds().right = right;
