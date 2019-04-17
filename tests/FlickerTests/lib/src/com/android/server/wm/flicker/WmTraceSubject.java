@@ -24,9 +24,8 @@ import android.annotation.Nullable;
 import com.android.server.wm.flicker.Assertions.Result;
 import com.android.server.wm.flicker.TransitionRunner.TransitionResult;
 
-import com.google.common.truth.FailureStrategy;
+import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
-import com.google.common.truth.SubjectFactory;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -38,19 +37,19 @@ import java.util.stream.Collectors;
  */
 public class WmTraceSubject extends Subject<WmTraceSubject, WindowManagerTrace> {
     // Boiler-plate Subject.Factory for WmTraceSubject
-    private static final SubjectFactory<WmTraceSubject, WindowManagerTrace> FACTORY =
-            new SubjectFactory<WmTraceSubject, WindowManagerTrace>() {
+    private static final Subject.Factory<WmTraceSubject, WindowManagerTrace> FACTORY =
+            new Subject.Factory<WmTraceSubject, WindowManagerTrace>() {
                 @Override
-                public WmTraceSubject getSubject(
-                        FailureStrategy fs, @Nullable WindowManagerTrace target) {
-                    return new WmTraceSubject(fs, target);
+                public WmTraceSubject createSubject(
+                        FailureMetadata fm, @Nullable WindowManagerTrace target) {
+                    return new WmTraceSubject(fm, target);
                 }
             };
 
     private AssertionsChecker<WindowManagerTrace.Entry> mChecker = new AssertionsChecker<>();
 
-    private WmTraceSubject(FailureStrategy fs, @Nullable WindowManagerTrace subject) {
-        super(fs, subject);
+    private WmTraceSubject(FailureMetadata fm, @Nullable WindowManagerTrace subject) {
+        super(fm, subject);
     }
 
     // User-defined entry point
@@ -66,7 +65,7 @@ public class WmTraceSubject extends Subject<WmTraceSubject, WindowManagerTrace> 
     }
 
     // Static method for getting the subject factory (for use with assertAbout())
-    public static SubjectFactory<WmTraceSubject, WindowManagerTrace> entries() {
+    public static Subject.Factory<WmTraceSubject, WindowManagerTrace> entries() {
         return FACTORY;
     }
 
