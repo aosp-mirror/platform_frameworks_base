@@ -416,6 +416,7 @@ public class AudioPolicy {
      * @param devices list of devices to which the audio stream of the application may be routed.
      * @return true if the change was successful, false otherwise.
      */
+    @TestApi
     @SystemApi
     public boolean setUidDeviceAffinity(int uid, @NonNull List<AudioDeviceInfo> devices) {
         if (devices == null) {
@@ -457,6 +458,7 @@ public class AudioPolicy {
      * @param uid UID of the application affected.
      * @return true if the change was successful, false otherwise.
      */
+    @TestApi
     @SystemApi
     public boolean removeUidDeviceAffinity(int uid) {
         synchronized (mLock) {
