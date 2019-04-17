@@ -21,13 +21,11 @@
 #include <binder/ProcessState.h>
 
 #include <cstdlib>  // EXIT_{FAILURE,SUCCESS}
-
 #include <iostream>
 #include <sstream>
 
-#include "android-base/macros.h"
-
 #include "Idmap2Service.h"
+#include "android-base/macros.h"
 
 using android::BinderService;
 using android::IPCThreadState;

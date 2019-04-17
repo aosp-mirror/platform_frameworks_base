@@ -544,11 +544,17 @@ class ActivityStarter {
      */
     int startResolvedActivity(final ActivityRecord r, ActivityRecord sourceRecord,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
-            int startFlags, boolean doResume, ActivityOptions options, TaskRecord inTask,
-            ActivityRecord[] outActivity) {
+            int startFlags, boolean doResume, ActivityOptions options, TaskRecord inTask) {
         try {
-            return startActivity(r, sourceRecord, voiceSession, voiceInteractor, startFlags,
-                    doResume, options, inTask, outActivity);
+            mSupervisor.getActivityMetricsLogger().notifyActivityLaunching(r.intent);
+            mLastStartReason = "startResolvedActivity";
+            mLastStartActivityTimeMs = System.currentTimeMillis();
+            mLastStartActivityRecord[0] = r;
+            mLastStartActivityResult = startActivity(r, sourceRecord, voiceSession, voiceInteractor,
+                    startFlags, doResume, options, inTask, mLastStartActivityRecord);
+            mSupervisor.getActivityMetricsLogger().notifyActivityLaunched(mLastStartActivityResult,
+                    mLastStartActivityRecord[0]);
+            return mLastStartActivityResult;
         } finally {
             onExecutionComplete();
         }

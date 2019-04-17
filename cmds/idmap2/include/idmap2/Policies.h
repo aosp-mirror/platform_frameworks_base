@@ -17,10 +17,9 @@
 #include <string>
 #include <vector>
 
+#include "Result.h"
 #include "androidfw/ResourceTypes.h"
 #include "androidfw/StringPiece.h"
-
-#include "Result.h"
 
 #ifndef IDMAP2_INCLUDE_IDMAP2_POLICIES_H_
 #define IDMAP2_INCLUDE_IDMAP2_POLICIES_H_

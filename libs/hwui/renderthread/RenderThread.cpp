@@ -16,6 +16,7 @@
 
 #include "RenderThread.h"
 
+#include "../HardwareBitmapUploader.h"
 #include "CanvasContext.h"
 #include "DeviceInfo.h"
 #include "EglManager.h"
@@ -29,7 +30,6 @@
 #include "utils/FatVector.h"
 #include "utils/TimeUtils.h"
 #include "utils/TraceUtils.h"
-#include "../HardwareBitmapUploader.h"
 
 #ifdef HWUI_GLES_WRAP_ENABLED
 #include "debug/GlesDriver.h"
@@ -410,9 +410,7 @@ bool RenderThread::isCurrent() {
 void RenderThread::preload() {
     // EGL driver is always preloaded only if HWUI renders with GL.
     if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaGL) {
-        std::thread eglInitThread([]() {
-            eglGetDisplay(EGL_DEFAULT_DISPLAY);
-        });
+        std::thread eglInitThread([]() { eglGetDisplay(EGL_DEFAULT_DISPLAY); });
         eglInitThread.detach();
     } else {
         requireVkContext();

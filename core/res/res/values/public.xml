@@ -2922,7 +2922,7 @@
         <public name="settingsSliceUri" />
         <public name="shell" />
         <public name="interactiveUiTimeout" />
-        <public name="importantForContentCapture" />
+        <public name="__removed6" />
         <public name="supportsMultipleDisplays" />
         <public name="useAppZygote" />
         <public name="__removed1" />

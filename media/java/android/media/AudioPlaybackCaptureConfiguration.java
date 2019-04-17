@@ -20,10 +20,13 @@ import android.annotation.NonNull;
 import android.media.AudioAttributes.AttributeUsage;
 import android.media.audiopolicy.AudioMix;
 import android.media.audiopolicy.AudioMixingRule;
+import android.media.audiopolicy.AudioMixingRule.AudioMixMatchCriterion;
 import android.media.projection.MediaProjection;
 import android.os.RemoteException;
 
 import com.android.internal.util.Preconditions;
+
+import java.util.function.ToIntFunction;
 
 /**
  * Configuration for capturing audio played by other apps.
@@ -83,6 +86,39 @@ public final class AudioPlaybackCaptureConfiguration {
         return mProjection;
     }
 
+    /** @return the usages passed to {@link Builder#addMatchingUsage(int)}. */
+    @AttributeUsage
+    public @NonNull int[] getMatchingUsages() {
+        return getIntPredicates(AudioMixingRule.RULE_MATCH_ATTRIBUTE_USAGE,
+                                criterion -> criterion.getAudioAttributes().getUsage());
+    }
+
+    /** @return the UIDs passed to {@link Builder#addMatchingUid(int)}. */
+    public @NonNull int[] getMatchingUids() {
+        return getIntPredicates(AudioMixingRule.RULE_MATCH_UID,
+                                criterion -> criterion.getIntProp());
+    }
+
+    /** @return the usages passed to {@link Builder#excludeUsage(int)}. */
+    @AttributeUsage
+    public @NonNull int[] getExcludeUsages() {
+        return getIntPredicates(AudioMixingRule.RULE_EXCLUDE_ATTRIBUTE_USAGE,
+                                criterion -> criterion.getAudioAttributes().getUsage());
+    }
+
+    /** @return the UIDs passed to {@link Builder#excludeUid(int)}.  */
+    public @NonNull int[] getExcludeUids() {
+        return getIntPredicates(AudioMixingRule.RULE_EXCLUDE_UID,
+                                criterion -> criterion.getIntProp());
+    }
+
+    private int[] getIntPredicates(int rule,
+                                   ToIntFunction<AudioMixMatchCriterion> getPredicate) {
+        return mAudioMixingRule.getCriteria().stream()
+            .filter(criterion -> criterion.getRule() == rule)
+            .mapToInt(getPredicate)
+            .toArray();
+    }
 
     /**
      * Returns a mix that routes audio back into the app while still playing it from the speakers.

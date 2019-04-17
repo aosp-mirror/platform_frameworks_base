@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+#include "idmap2/ZipFile.h"
+
 #include <memory>
 #include <string>
 
 #include "idmap2/Result.h"
-#include "idmap2/ZipFile.h"
 
 namespace android::idmap2 {
 

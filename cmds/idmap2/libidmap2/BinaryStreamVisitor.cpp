@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+#include "idmap2/BinaryStreamVisitor.h"
+
 #include <algorithm>
 #include <cstring>
 #include <string>
 
 #include "android-base/macros.h"
-
-#include "idmap2/BinaryStreamVisitor.h"
 
 namespace android::idmap2 {
 

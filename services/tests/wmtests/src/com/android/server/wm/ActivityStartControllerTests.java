@@ -87,7 +87,7 @@ public class ActivityStartControllerTests extends ActivityTestsBase {
         mController.doPendingActivityLaunches(resume);
 
         verify(mStarter, times(1)).startResolvedActivity(eq(activity), eq(source), eq(null),
-                eq(null), eq(startFlags), eq(resume), eq(null), eq(null), eq(null));
+                eq(null), eq(startFlags), eq(resume), eq(null), eq(null));
     }
 
 

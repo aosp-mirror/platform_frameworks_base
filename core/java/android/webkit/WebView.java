@@ -413,9 +413,6 @@ public class WebView extends AbsoluteLayout
         if (getImportantForAutofill() == IMPORTANT_FOR_AUTOFILL_AUTO) {
             setImportantForAutofill(IMPORTANT_FOR_AUTOFILL_YES);
         }
-        if (getImportantForContentCapture() == IMPORTANT_FOR_CONTENT_CAPTURE_AUTO) {
-            setImportantForContentCapture(IMPORTANT_FOR_CONTENT_CAPTURE_YES);
-        }
 
         if (context == null) {
             throw new IllegalArgumentException("Invalid context argument");
@@ -2796,11 +2793,6 @@ public class WebView extends AbsoluteLayout
     @Override
     public void onProvideAutofillVirtualStructure(ViewStructure structure, int flags) {
         mProvider.getViewDelegate().onProvideAutofillVirtualStructure(structure, flags);
-    }
-
-    @Override
-    public void onProvideContentCaptureStructure(ViewStructure structure, int flags) {
-        mProvider.getViewDelegate().onProvideContentCaptureStructure(structure, flags);
     }
 
     @Override

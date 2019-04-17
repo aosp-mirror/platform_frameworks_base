@@ -94,6 +94,7 @@ public class AudioServiceEvents {
         static final int VOL_SET_STREAM_VOL = 2;
         static final int VOL_SET_HEARING_AID_VOL = 3;
         static final int VOL_SET_AVRCP_VOL = 4;
+        static final int VOL_ADJUST_VOL_UID = 5;
 
         final int mOp;
         final int mStream;
@@ -159,6 +160,13 @@ public class AudioServiceEvents {
                 case VOL_SET_AVRCP_VOL:
                     return new StringBuilder("setAvrcpVolume:")
                             .append(" index:").append(mVal1)
+                            .toString();
+                case VOL_ADJUST_VOL_UID:
+                    return new StringBuilder("adjustStreamVolumeForUid(stream:")
+                            .append(AudioSystem.streamToString(mStream))
+                            .append(" dir:").append(AudioManager.adjustToString(mVal1))
+                            .append(" flags:0x").append(Integer.toHexString(mVal2))
+                            .append(") from ").append(mCaller)
                             .toString();
                default: return new StringBuilder("FIXME invalid op:").append(mOp).toString();
             }

@@ -428,17 +428,33 @@ public final class HdmiControlManager {
     }
 
     /**
-     * Get a snapshot of the real-time status of the remote devices.
+     * Get a snapshot of the real-time status of the devices on the CEC bus.
      *
-     * <p>This only applies to devices with multiple HDMI inputs.
+     * <p>This only applies to devices with switch functionality, which are devices with one
+     * or more than one HDMI inputs.
      *
-     * @return a list of {@link HdmiDeviceInfo} of the connected CEC devices. An empty
-     * list will be returned if there is none.
+     * @return a list of {@link HdmiDeviceInfo} of the connected CEC devices on the CEC bus. An
+     * empty list will be returned if there is none.
      *
      * @hide
      */
+    @NonNull
     @SystemApi
-    @Nullable
+    public List<HdmiDeviceInfo> getConnectedDevices() {
+        try {
+            return mService.getDeviceList();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @removed
+     * @hide
+     * @deprecated Please use {@link #getConnectedDevices()} instead.
+     */
+    @Deprecated
+    @SystemApi
     public List<HdmiDeviceInfo> getConnectedDevicesList() {
         try {
             return mService.getDeviceList();
@@ -448,7 +464,8 @@ public final class HdmiControlManager {
     }
 
     /**
-     * Power off the target device by sending CEC commands.
+     * Power off the target device by sending CEC commands. Note that this device can't be the
+     * current device itself.
      *
      * <p>The target device info can be obtained by calling {@link #getConnectedDevicesList()}.
      *
@@ -456,6 +473,23 @@ public final class HdmiControlManager {
      *
      * @hide
      */
+    @SystemApi
+    public void powerOffDevice(@NonNull HdmiDeviceInfo deviceInfo) {
+        Preconditions.checkNotNull(deviceInfo);
+        try {
+            mService.powerOffRemoteDevice(
+                    deviceInfo.getLogicalAddress(), deviceInfo.getDevicePowerStatus());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @removed
+     * @hide
+     * @deprecated Please use {@link #powerOffDevice(deviceInfo)} instead.
+     */
+    @Deprecated
     @SystemApi
     public void powerOffRemoteDevice(@NonNull HdmiDeviceInfo deviceInfo) {
         Preconditions.checkNotNull(deviceInfo);
@@ -468,7 +502,8 @@ public final class HdmiControlManager {
     }
 
     /**
-     * Power on the target device by sending CEC commands.
+     * Power on the target device by sending CEC commands. Note that this device can't be the
+     * current device itself.
      *
      * <p>The target device info can be obtained by calling {@link #getConnectedDevicesList()}.
      *
@@ -476,6 +511,23 @@ public final class HdmiControlManager {
      *
      * @hide
      */
+    public void powerOnDevice(HdmiDeviceInfo deviceInfo) {
+        Preconditions.checkNotNull(deviceInfo);
+        try {
+            mService.powerOnRemoteDevice(
+                    deviceInfo.getLogicalAddress(), deviceInfo.getDevicePowerStatus());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @removed
+     * @hide
+     * @deprecated Please use {@link #powerOnDevice(deviceInfo)} instead.
+     */
+    @Deprecated
+    @SystemApi
     public void powerOnRemoteDevice(HdmiDeviceInfo deviceInfo) {
         Preconditions.checkNotNull(deviceInfo);
         try {
@@ -487,14 +539,34 @@ public final class HdmiControlManager {
     }
 
     /**
-     * Request the target device to be the new Active Source by sending CEC commands.
+     * Request the target device to be the new Active Source by sending CEC commands. Note that
+     * this device can't be the current device itself.
      *
      * <p>The target device info can be obtained by calling {@link #getConnectedDevicesList()}.
+     *
+     * <p>If the target device responds to the command, the users should see the target device
+     * streaming on their TVs.
      *
      * @param deviceInfo HdmiDeviceInfo of the target device
      *
      * @hide
      */
+    @SystemApi
+    public void setActiveSource(@NonNull HdmiDeviceInfo deviceInfo) {
+        Preconditions.checkNotNull(deviceInfo);
+        try {
+            mService.askRemoteDeviceToBecomeActiveSource(deviceInfo.getPhysicalAddress());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @removed
+     * @hide
+     * @deprecated Please use {@link #setActiveSource(deviceInfo)} instead.
+     */
+    @Deprecated
     @SystemApi
     public void requestRemoteDeviceToBecomeActiveSource(@NonNull HdmiDeviceInfo deviceInfo) {
         Preconditions.checkNotNull(deviceInfo);
@@ -556,7 +628,7 @@ public final class HdmiControlManager {
     }
 
     /**
-     * Check if the target remote device is connected to the current device.
+     * Check if the target device is connected to the current device.
      *
      * <p>The API also returns true if the current device is the target.
      *
@@ -566,6 +638,27 @@ public final class HdmiControlManager {
      *
      * @hide
      */
+    @SystemApi
+    public boolean isDeviceConnected(@NonNull HdmiDeviceInfo targetDevice) {
+        Preconditions.checkNotNull(targetDevice);
+        mPhysicalAddress = getPhysicalAddress();
+        if (mPhysicalAddress == INVALID_PHYSICAL_ADDRESS) {
+            return false;
+        }
+        int targetPhysicalAddress = targetDevice.getPhysicalAddress();
+        if (targetPhysicalAddress == INVALID_PHYSICAL_ADDRESS) {
+            return false;
+        }
+        return HdmiUtils.getLocalPortFromPhysicalAddress(targetPhysicalAddress, mPhysicalAddress)
+            != HdmiUtils.TARGET_NOT_UNDER_LOCAL_DEVICE;
+    }
+
+    /**
+     * @removed
+     * @hide
+     * @deprecated Please use {@link #isDeviceConnected(targetDevice)} instead.
+     */
+    @Deprecated
     @SystemApi
     public boolean isRemoteDeviceConnected(@NonNull HdmiDeviceInfo targetDevice) {
         Preconditions.checkNotNull(targetDevice);

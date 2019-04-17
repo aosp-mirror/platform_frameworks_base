@@ -406,6 +406,10 @@ import java.util.ArrayList;
         mAudioService.checkVolumeCecOnHdmiConnection(state, caller);
     }
 
+    /*package*/ boolean hasAudioFocusUsers() {
+        return mAudioService.hasAudioFocusUsers();
+    }
+
     //---------------------------------------------------------------------
     // Message handling on behalf of helper classes
     /*package*/ void postBroadcastScoConnectionState(int state) {

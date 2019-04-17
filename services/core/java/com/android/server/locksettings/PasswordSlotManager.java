@@ -52,10 +52,12 @@ public class PasswordSlotManager {
     // This maps each used password slot to the OS image that created it. Password slots are
     // integer keys/indices into secure storage. The OS image is recorded as a string. The factory
     // image is "host" and GSIs are "gsi<N>" where N >= 1.
-    private final Map<Integer, String> mSlotMap;
+    private Map<Integer, String> mSlotMap;
+
+    // Cache the active slots until loadSlotMap() is called.
+    private Set<Integer> mActiveSlots;
 
     public PasswordSlotManager() {
-        mSlotMap = loadSlotMap();
     }
 
     @VisibleForTesting
@@ -74,6 +76,11 @@ public class PasswordSlotManager {
      * @throws RuntimeException
      */
     public void refreshActiveSlots(Set<Integer> activeSlots) throws RuntimeException {
+        if (mSlotMap == null) {
+            mActiveSlots = new HashSet<Integer>(activeSlots);
+            return;
+        }
+
         // Update which slots are owned by the current image.
         final HashSet<Integer> slotsToDelete = new HashSet<Integer>();
         for (Map.Entry<Integer, String> entry : mSlotMap.entrySet()) {
@@ -100,6 +107,7 @@ public class PasswordSlotManager {
      * @throws RuntimeException
      */
     public void markSlotInUse(int slot) throws RuntimeException {
+        ensureSlotMapLoaded();
         if (mSlotMap.containsKey(slot) && !mSlotMap.get(slot).equals(getMode())) {
             throw new RuntimeException("password slot " + slot + " is not available");
         }
@@ -113,6 +121,7 @@ public class PasswordSlotManager {
      * @throws RuntimeException
      */
     public void markSlotDeleted(int slot) throws RuntimeException {
+        ensureSlotMapLoaded();
         if (mSlotMap.containsKey(slot) && mSlotMap.get(slot) != getMode()) {
             throw new RuntimeException("password slot " + slot + " cannot be deleted");
         }
@@ -126,6 +135,7 @@ public class PasswordSlotManager {
      * @return Integer set of all used slots.
      */
     public Set<Integer> getUsedSlots() {
+        ensureSlotMapLoaded();
         return Collections.unmodifiableSet(mSlotMap.keySet());
     }
 
@@ -167,8 +177,21 @@ public class PasswordSlotManager {
         return new HashMap<Integer, String>();
     }
 
+    private void ensureSlotMapLoaded() {
+        if (mSlotMap == null) {
+            mSlotMap = loadSlotMap();
+            if (mActiveSlots != null) {
+                refreshActiveSlots(mActiveSlots);
+                mActiveSlots = null;
+            }
+        }
+    }
+
     @VisibleForTesting
     protected void saveSlotMap(OutputStream stream) throws IOException {
+        if (mSlotMap == null) {
+            return;
+        }
         final Properties props = new Properties();
         for (Map.Entry<Integer, String> entry : mSlotMap.entrySet()) {
             props.setProperty(entry.getKey().toString(), entry.getValue());
@@ -177,6 +200,9 @@ public class PasswordSlotManager {
     }
 
     private void saveSlotMap() {
+        if (mSlotMap == null) {
+            return;
+        }
         if (!getSlotMapFile().getParentFile().exists()) {
             Slog.w(TAG, "Not saving slot map, " + getSlotMapDir() + " does not exist");
             return;

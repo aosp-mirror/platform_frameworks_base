@@ -151,7 +151,7 @@ public class NavigationBarController implements Callbacks {
                     ? Dependency.get(AutoHideController.class)
                     : new AutoHideController(context, mHandler);
             navBar.setAutoHideController(autoHideController);
-            navBar.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+            navBar.restoreSystemUiVisibilityState();
             mNavigationBars.append(displayId, navBar);
 
             if (result != null) {

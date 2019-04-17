@@ -142,8 +142,7 @@ void SkiaRecordingCanvas::callDrawGLFunction(Functor* functor,
 void SkiaRecordingCanvas::drawWebViewFunctor(int functor) {
     FunctorDrawable* functorDrawable;
     if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
-        functorDrawable =
-                mDisplayList->allocateDrawable<VkFunctorDrawable>(functor, asSkCanvas());
+        functorDrawable = mDisplayList->allocateDrawable<VkFunctorDrawable>(functor, asSkCanvas());
     } else {
         functorDrawable = mDisplayList->allocateDrawable<GLFunctorDrawable>(functor, asSkCanvas());
     }

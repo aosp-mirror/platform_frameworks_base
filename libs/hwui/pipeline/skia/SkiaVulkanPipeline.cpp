@@ -18,12 +18,12 @@
 
 #include "DeferredLayerUpdater.h"
 #include "Readback.h"
+#include "ShaderCache.h"
 #include "SkiaPipeline.h"
 #include "SkiaProfileRenderer.h"
 #include "VkInteropFunctorDrawable.h"
 #include "renderstate/RenderState.h"
 #include "renderthread/Frame.h"
-#include "ShaderCache.h"
 
 #include <SkSurface.h>
 #include <SkTypes.h>
@@ -70,8 +70,8 @@ bool SkiaVulkanPipeline::draw(const Frame& frame, const SkRect& screenDirty, con
         return false;
     }
     SkiaPipeline::updateLighting(lightGeometry, lightInfo);
-    renderFrame(*layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds,
-            backBuffer, mVkSurface->getCurrentPreTransform());
+    renderFrame(*layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, backBuffer,
+                mVkSurface->getCurrentPreTransform());
     ShaderCache::get().onVkFrameFlushed(mRenderThread.getGrContext());
     layerUpdateQueue->clear();
 
@@ -116,7 +116,7 @@ DeferredLayerUpdater* SkiaVulkanPipeline::createTextureLayer() {
 void SkiaVulkanPipeline::onStop() {}
 
 bool SkiaVulkanPipeline::setSurface(ANativeWindow* surface, SwapBehavior swapBehavior,
-                                    ColorMode colorMode) {
+                                    ColorMode colorMode, uint32_t extraBuffers) {
     if (mVkSurface) {
         mVkManager.destroySurface(mVkSurface);
         mVkSurface = nullptr;
@@ -125,8 +125,9 @@ bool SkiaVulkanPipeline::setSurface(ANativeWindow* surface, SwapBehavior swapBeh
     setSurfaceColorProperties(colorMode);
     if (surface) {
         mRenderThread.requireVkContext();
-        mVkSurface = mVkManager.createSurface(surface, colorMode, mSurfaceColorSpace,
-                                              mSurfaceColorType, mRenderThread.getGrContext());
+        mVkSurface =
+                mVkManager.createSurface(surface, colorMode, mSurfaceColorSpace, mSurfaceColorType,
+                                         mRenderThread.getGrContext(), extraBuffers);
     }
 
     return mVkSurface != nullptr;

@@ -21,17 +21,16 @@
 #include "RenderThread.h"
 #include "pipeline/skia/ShaderCache.h"
 #include "pipeline/skia/SkiaMemoryTracer.h"
-#include "Properties.h"
 #include "renderstate/RenderState.h"
 #include "thread/CommonPool.h"
 
 #include <GrContextOptions.h>
 #include <SkExecutor.h>
 #include <SkGraphics.h>
+#include <SkMathPriv.h>
 #include <gui/Surface.h>
 #include <math.h>
 #include <set>
-#include <SkMathPriv.h>
 
 namespace android {
 namespace uirenderer {
@@ -79,14 +78,13 @@ void CacheManager::updateContextCacheSizes() {
 
 class CommonPoolExecutor : public SkExecutor {
 public:
-    virtual void add(std::function<void(void)> func) override {
-        CommonPool::post(std::move(func));
-    }
+    virtual void add(std::function<void(void)> func) override { CommonPool::post(std::move(func)); }
 };
 
 static CommonPoolExecutor sDefaultExecutor;
 
-void CacheManager::configureContext(GrContextOptions* contextOptions, const void* identity, ssize_t size) {
+void CacheManager::configureContext(GrContextOptions* contextOptions, const void* identity,
+                                    ssize_t size) {
     contextOptions->fAllowPathMaskCaching = true;
 
     // This sets the maximum size for a single texture atlas in the GPU font cache.  If necessary,
@@ -180,7 +178,8 @@ void CacheManager::dumpMemoryUsage(String8& log, const RenderState* renderState)
         }
 
         const char* layerType = Properties::getRenderPipelineType() == RenderPipelineType::SkiaGL
-                ? "GlLayer" : "VkLayer";
+                                        ? "GlLayer"
+                                        : "VkLayer";
         size_t layerMemoryTotal = 0;
         for (std::set<Layer*>::iterator it = renderState->mActiveLayers.begin();
              it != renderState->mActiveLayers.end(); it++) {

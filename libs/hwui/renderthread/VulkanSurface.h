@@ -19,8 +19,8 @@
 #include <system/window.h>
 #include <vulkan/vulkan.h>
 
-#include <SkSize.h>
 #include <SkRefCnt.h>
+#include <SkSize.h>
 
 #include "IRenderPipeline.h"
 
@@ -34,12 +34,9 @@ class VulkanManager;
 
 class VulkanSurface {
 public:
-    static VulkanSurface* Create(ANativeWindow* window,
-                                  ColorMode colorMode,
-                                  SkColorType colorType,
-                                  sk_sp<SkColorSpace> colorSpace,
-                                  GrContext* grContext,
-                                  const VulkanManager& vkManager);
+    static VulkanSurface* Create(ANativeWindow* window, ColorMode colorMode, SkColorType colorType,
+                                 sk_sp<SkColorSpace> colorSpace, GrContext* grContext,
+                                 const VulkanManager& vkManager, uint32_t extraBuffers);
     ~VulkanSurface();
 
     sk_sp<SkSurface> getCurrentSkSurface() {
@@ -104,15 +101,10 @@ private:
         SkMatrix preTransform;
     };
 
-    VulkanSurface(ANativeWindow* window,
-                  const WindowInfo& windowInfo,
-                  SkISize minWindowSize,
-                  SkISize maxWindowSize,
-                  GrContext* grContext);
-    static bool UpdateWindow(ANativeWindow* window,
-                             const WindowInfo& windowInfo);
-    static void ComputeWindowSizeAndTransform(WindowInfo* windowInfo,
-                                              const SkISize& minSize,
+    VulkanSurface(ANativeWindow* window, const WindowInfo& windowInfo, SkISize minWindowSize,
+                  SkISize maxWindowSize, GrContext* grContext);
+    static bool UpdateWindow(ANativeWindow* window, const WindowInfo& windowInfo);
+    static void ComputeWindowSizeAndTransform(WindowInfo* windowInfo, const SkISize& minSize,
                                               const SkISize& maxSize);
     void releaseBuffers();
 

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include "idmap2/CommandLineOptions.h"
+
 #include <algorithm>
 #include <iomanip>
 #include <iostream>
@@ -24,8 +26,6 @@
 #include <vector>
 
 #include "android-base/macros.h"
-
-#include "idmap2/CommandLineOptions.h"
 #include "idmap2/Result.h"
 
 namespace android::idmap2 {
