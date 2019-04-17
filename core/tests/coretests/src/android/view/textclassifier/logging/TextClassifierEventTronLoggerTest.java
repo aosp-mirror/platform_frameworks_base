@@ -49,8 +49,6 @@ import org.mockito.MockitoAnnotations;
 public class TextClassifierEventTronLoggerTest {
     private static final String WIDGET_TYPE = "notification";
     private static final String PACKAGE_NAME = "pkg";
-    private static final long EVENT_TIME = System.currentTimeMillis();
-
 
     @Mock
     private MetricsLogger mMetricsLogger;
@@ -68,13 +66,11 @@ public class TextClassifierEventTronLoggerTest {
         TextClassificationContext textClassificationContext =
                 new TextClassificationContext.Builder(PACKAGE_NAME, WIDGET_TYPE)
                         .build();
-        TextClassifierEvent textClassifierEvent =
-                new TextClassifierEvent.Builder(
-                        TextClassifierEvent.CATEGORY_CONVERSATION_ACTIONS,
+        TextClassifierEvent.ConversationActionsEvent textClassifierEvent =
+                new TextClassifierEvent.ConversationActionsEvent.Builder(
                         TextClassifierEvent.TYPE_SMART_ACTION)
                         .setEntityTypes(ConversationAction.TYPE_CALL_PHONE)
-                        .setScore(0.5f)
-                        .setEventTime(EVENT_TIME)
+                        .setScores(0.5f)
                         .setEventContext(textClassificationContext)
                         .build();
 
@@ -83,10 +79,8 @@ public class TextClassifierEventTronLoggerTest {
         ArgumentCaptor<LogMaker> captor = ArgumentCaptor.forClass(LogMaker.class);
         Mockito.verify(mMetricsLogger).write(captor.capture());
         LogMaker logMaker = captor.getValue();
-        assertThat(logMaker.getCategory()).isEqualTo(
-                CONVERSATION_ACTIONS);
-        assertThat(logMaker.getSubtype()).isEqualTo(
-                ACTION_TEXT_SELECTION_SMART_SHARE);
+        assertThat(logMaker.getCategory()).isEqualTo(CONVERSATION_ACTIONS);
+        assertThat(logMaker.getSubtype()).isEqualTo(ACTION_TEXT_SELECTION_SMART_SHARE);
         assertThat(logMaker.getTaggedData(FIELD_TEXT_CLASSIFIER_FIRST_ENTITY_TYPE))
                 .isEqualTo(ConversationAction.TYPE_CALL_PHONE);
         assertThat((float) logMaker.getTaggedData(FIELD_TEXT_CLASSIFIER_SCORE))
@@ -101,9 +95,8 @@ public class TextClassifierEventTronLoggerTest {
 
     @Test
     public void testWriteEvent_unsupportedCategory() {
-        TextClassifierEvent textClassifierEvent =
-                new TextClassifierEvent.Builder(
-                        TextClassifierEvent.CATEGORY_SELECTION,
+        TextClassifierEvent.TextSelectionEvent textClassifierEvent =
+                new TextClassifierEvent.TextSelectionEvent.Builder(
                         TextClassifierEvent.TYPE_SMART_ACTION)
                         .build();
 
