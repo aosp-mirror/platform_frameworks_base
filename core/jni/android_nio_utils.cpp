@@ -18,51 +18,29 @@
 
 #include "core_jni_helpers.h"
 
-namespace {
+namespace android {
 
-void* getPointer(JNIEnv *_env, jobject buffer, jarray *array, void** elements) {
-    assert(array);
-    jint position;
-    jint limit;
-    jint elementSizeShift;
-    jlong pointer = jniGetNioBufferFields(_env, buffer, &position, &limit, &elementSizeShift);
+AutoBufferPointer::AutoBufferPointer(JNIEnv* env, jobject nioBuffer, jboolean commit)
+        : fEnv(env), fCommit(commit) {
+    jlong pointer = jniGetNioBufferPointer(fEnv, nioBuffer);
     if (pointer != 0L) {
-        *array = nullptr;
-        *elements = nullptr;
-        pointer += position << elementSizeShift;
-        return reinterpret_cast<void*>(pointer);
+        // Buffer is backed by a direct buffer.
+        fArray = nullptr;
+        fElements = nullptr;
+        fPointer = reinterpret_cast<void*>(pointer);
+    } else {
+        // Buffer is backed by a managed array.
+        jint byteOffset = jniGetNioBufferBaseArrayOffset(fEnv, nioBuffer);
+        fArray = jniGetNioBufferBaseArray(fEnv, nioBuffer);
+        fElements = fEnv->GetPrimitiveArrayCritical(fArray, /* isCopy= */ nullptr);
+        fPointer = reinterpret_cast<void*>(reinterpret_cast<char*>(fElements) + byteOffset);
     }
-    jint offset = jniGetNioBufferBaseArrayOffset(_env, buffer);
-    *array = jniGetNioBufferBaseArray(_env, buffer);
-    *elements = _env->GetPrimitiveArrayCritical(*array, (jboolean *) 0);
-    return reinterpret_cast<void*>(reinterpret_cast<char*>(*elements) + offset);
 }
 
-void releasePointer(JNIEnv *_env, jarray array, void *elements, jboolean commit) {
-    _env->ReleasePrimitiveArrayCritical(array, elements, commit ? 0 : JNI_ABORT);
-}
-
-}  // namespace
-
-void* android::nio_getPointer(JNIEnv *_env, jobject buffer, jarray *array) {
-    void* elements;
-    return getPointer(_env, buffer, array, &elements);
-}
-
-void android::nio_releasePointer(JNIEnv *_env, jarray array, void *data, jboolean commit) {
-    releasePointer(_env, array, data, commit);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-android::AutoBufferPointer::AutoBufferPointer(JNIEnv* env, jobject nioBuffer, jboolean commit) {
-    fEnv = env;
-    fCommit = commit;
-    fPointer = getPointer(env, nioBuffer, &fArray, &fElements);
-}
-
-android::AutoBufferPointer::~AutoBufferPointer() {
+AutoBufferPointer::~AutoBufferPointer() {
     if (nullptr != fArray) {
-        releasePointer(fEnv, fArray, fElements, fCommit);
+        fEnv->ReleasePrimitiveArrayCritical(fArray, fElements, fCommit ? 0 : JNI_ABORT);
     }
 }
+
+}  // namespace android
