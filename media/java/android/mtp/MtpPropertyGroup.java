@@ -46,9 +46,6 @@ class MtpPropertyGroup {
         }
     }
 
-    private final ContentProviderClient mProvider;
-    private final String mVolumeName;
-
     // list of all properties in this group
     private final Property[] mProperties;
 
@@ -58,10 +55,7 @@ class MtpPropertyGroup {
     private static final String PATH_WHERE = Files.FileColumns.DATA + "=?";
 
     // constructs a property group for a list of properties
-    public MtpPropertyGroup(ContentProviderClient provider, String volumeName, int[] properties) {
-        mProvider = provider;
-        mVolumeName = volumeName;
-
+    public MtpPropertyGroup(int[] properties) {
         int count = properties.length;
         ArrayList<String> columns = new ArrayList<>(count);
         columns.add(Files.FileColumns._ID);
@@ -175,7 +169,8 @@ class MtpPropertyGroup {
      * object and adds them to the given property list.
      * @return Response_OK if the operation succeeded.
      */
-    public int getPropertyList(MtpStorageManager.MtpObject object, MtpPropertyList list) {
+    public int getPropertyList(ContentProviderClient provider, String volumeName,
+            MtpStorageManager.MtpObject object, MtpPropertyList list) {
         Cursor c = null;
         int id = object.getId();
         String path = object.getPath().toString();
@@ -184,8 +179,8 @@ class MtpPropertyGroup {
                 try {
                     // Look up the entry in MediaProvider only if one of those properties is needed.
                     final Uri uri = MtpDatabase.getObjectPropertiesUri(object.getFormat(),
-                            mVolumeName);
-                    c = mProvider.query(uri, mColumns,
+                            volumeName);
+                    c = provider.query(uri, mColumns,
                             PATH_WHERE, new String[] {path}, null, null);
                     if (c != null && !c.moveToNext()) {
                         c.close();

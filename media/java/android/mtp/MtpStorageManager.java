@@ -21,6 +21,8 @@ import android.os.FileObserver;
 import android.os.storage.StorageVolume;
 import android.util.Log;
 
+import com.android.internal.util.Preconditions;
+
 import java.io.IOException;
 import java.nio.file.DirectoryIteratorException;
 import java.nio.file.DirectoryStream;
@@ -131,6 +133,7 @@ public class MtpStorageManager {
 
     /** MtpObject represents either a file or directory in an associated storage. **/
     public static class MtpObject {
+        private MtpStorage mStorage;
         // null for root objects
         private MtpObject mParent;
 
@@ -147,9 +150,10 @@ public class MtpStorageManager {
         // null if not both a directory and visited
         private FileObserver mObserver;
 
-        MtpObject(String name, int id, MtpObject parent, boolean isDir) {
+        MtpObject(String name, int id, MtpStorage storage, MtpObject parent, boolean isDir) {
             mId = id;
             mName = name;
+            mStorage = Preconditions.checkNotNull(storage);
             mParent = parent;
             mObserver = null;
             mVisited = false;
@@ -204,6 +208,10 @@ public class MtpStorageManager {
 
         public boolean isRoot() {
             return mParent == null;
+        }
+
+        public String getVolumeName() {
+            return mStorage.getVolumeName();
         }
 
         /** For MtpStorageManager only **/
@@ -278,7 +286,7 @@ public class MtpStorageManager {
         }
 
         private MtpObject copy(boolean recursive) {
-            MtpObject copy = new MtpObject(mName, mId, mParent, mIsDir);
+            MtpObject copy = new MtpObject(mName, mId, mStorage, mParent, mIsDir);
             copy.mIsDir = mIsDir;
             copy.mVisited = mVisited;
             copy.mState = mState;
@@ -408,7 +416,7 @@ public class MtpStorageManager {
     public synchronized MtpStorage addMtpStorage(StorageVolume volume) {
         int storageId = ((getNextStorageId() & 0x0000FFFF) << 16) + 1;
         MtpStorage storage = new MtpStorage(volume, storageId);
-        MtpObject root = new MtpObject(storage.getPath(), storageId, null, true);
+        MtpObject root = new MtpObject(storage.getPath(), storageId, storage, null, true);
         mRoots.put(storageId, root);
         return storage;
     }
@@ -608,7 +616,7 @@ public class MtpStorageManager {
             return null;
         }
 
-        MtpObject obj = new MtpObject(newName, getNextObjectId(), parent, isDir);
+        MtpObject obj = new MtpObject(newName, getNextObjectId(), parent.mStorage, parent, isDir);
         mObjects.put(obj.getId(), obj);
         parent.addChild(obj);
         return obj;
