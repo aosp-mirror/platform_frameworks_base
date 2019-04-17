@@ -131,13 +131,12 @@ bool SkiaDisplayList::prepareListAndChildren(
         }
     }
 
-    for (auto& vectorDrawablePair : mVectorDrawables) {
+    for (auto& [vectorDrawable, cachedMatrix] : mVectorDrawables) {
         // If any vector drawable in the display list needs update, damage the node.
-        auto& vectorDrawable = vectorDrawablePair.first;
         if (vectorDrawable->isDirty()) {
             Matrix4 totalMatrix;
             info.damageAccumulator->computeCurrentTransform(&totalMatrix);
-            Matrix4 canvasMatrix(vectorDrawablePair.second);
+            Matrix4 canvasMatrix(cachedMatrix);
             totalMatrix.multiply(canvasMatrix);
             const SkRect& bounds = vectorDrawable->properties().getBounds();
             if (intersects(info.screenSize, totalMatrix, bounds)) {
