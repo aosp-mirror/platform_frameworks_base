@@ -27,5 +27,15 @@
                 }
             ]
         }
+    ],
+    "postsubmit": [
+        {
+            "file_patterns": ["(/|^)ActivityThreadClientTest.java"],
+            "name": "FrameworksMockingCoreTests"
+        },
+        {
+            "file_patterns": ["(/|^)ActivityThreadTest.java"],
+            "name": "FrameworksCoreTests"
+        }
     ]
 }
