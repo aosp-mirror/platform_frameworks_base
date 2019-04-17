@@ -502,8 +502,7 @@ public class RingtoneManager {
     private static Uri getUriFromCursor(Context context, Cursor cursor) {
         final Uri uri = ContentUris.withAppendedId(Uri.parse(cursor.getString(URI_COLUMN_INDEX)),
                 cursor.getLong(ID_COLUMN_INDEX));
-        final Uri canonicalized = context.getContentResolver().canonicalize(uri);
-        return (canonicalized != null) ? canonicalized : uri;
+        return context.getContentResolver().canonicalizeOrElse(uri);
     }
 
     /**
