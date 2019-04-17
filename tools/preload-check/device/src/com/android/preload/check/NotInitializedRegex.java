@@ -23,7 +23,15 @@ import java.util.Enumeration;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Test boot classpath classes that satisfy a given regular expression to be not initialized.
+ * Optionally check that at least one class was matched.
+ */
 public class NotInitializedRegex {
+    /**
+     * First arg (mandatory): regular exception. Second arg (optional): boolean to denote a
+     * required match.
+     */
     public static void main(String[] args) throws Exception {
         Matcher m = Pattern.compile(args[0]).matcher("");
         boolean requiresMatch = args.length > 1 ? Boolean.parseBoolean(args[1]) : false;
