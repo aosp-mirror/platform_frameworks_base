@@ -560,8 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"Sondeza ifoni eduze."</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"Hambisa ifoni phezulu."</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"Hambisa ifoni ngaphansi."</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"Hambisa ifoni ngakwesokudla."</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"Hambisa ifoni ngakwesokunxele."</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"Hambisa ifoni ngakwesokunxele."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"Hambisa ifoni ngakwesokudla."</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Bheka isikrini ngamehlo akho avuliwe."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Ayikwazi ukubona ubuso bakho. Bheka ifoni"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Ukunyakaza okuningi kakhulu. Bamba ifoni iqine."</string>

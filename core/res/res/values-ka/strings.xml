@@ -560,8 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"მიიტანეთ ტელეფონი უფრო ახლოს."</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"გადაანაცვლეთ ტელეფონი ზემოთ."</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"გადაანაცვლეთ ტელეფონი ქვემოთ."</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"გადაანაცვლეთ ტელეფონი მარჯვნივ."</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"გადაანაცვლეთ ტელეფონი მარცხნივ."</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"გადაანაცვლეთ ტელეფონი მარცხნივ."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"გადაანაცვლეთ ტელეფონი მარჯვნივ."</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"შეხედეთ ეკრანს გახელილი თვალებით."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"თქვენი სახე არ ჩანს. შეხედეთ ტელეფონს."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"მეტისმეტად მოძრაობთ. მყარად დაიჭირეთ ტელეფონი."</string>
@@ -674,8 +674,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"საჭიროა შენახული აპის მონაცემების დაშიფრვა."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"კამერების გათიშვა"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"მოწყობილობის კამერების გამოყენების აღკვეთა."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"დაბლოკვის ელემენტების გათიშვა"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"ეკრანის დაბლოკვის ზოგიერთი ელემენტის გამოყენების თავიდან აცილება."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"დაბლოკვის ზოგი ფუნქციის გათიშვა"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"ეკრანის დაბლოკვის ზოგიერთი ფუნქციის გამოყენების თავიდან აცილება."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"სახლი"</item>
     <item msgid="869923650527136615">"მობილური"</item>

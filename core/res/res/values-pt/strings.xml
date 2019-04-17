@@ -560,8 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"Aproxime o smartphone."</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"Mova o smartphone para cima."</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"Mova o smartphone para baixo."</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"Mova o smartphone para a direita."</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"Mova o smartphone para a esquerda."</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"Mova o smartphone para a esquerda."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"Mova o smartphone para a direita."</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Olhe para a tela com os olhos abertos."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Não é possível ver o rosto. Olhe para o telefone."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Muito movimento. Não mova o smartphone."</string>
@@ -661,7 +661,7 @@
     <string name="policylab_wipeData" msgid="3910545446758639713">"Apagar todos os dados"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Apague os dados do tablet sem aviso redefinindo a configuração original."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Apaga dados da TV sem aviso, fazendo uma redefinição para configuração original."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Apaga os dados do telefone sem aviso redefinindo a configuração original."</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Apaga os dados sem aviso redefinindo o smartphone para a configuração original."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Limpar dados do usuário"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Limpa os dados do usuário neste tablet sem aviso prévio."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Limpa os dados do usuário nesta TV sem aviso prévio."</string>

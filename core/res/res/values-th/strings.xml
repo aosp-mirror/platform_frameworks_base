@@ -560,8 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"เลื่อนโทรศัพท์เข้าไปใกล้กว่านี้"</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"ยกโทรศัพท์ให้สูงขึ้น"</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"ถือโทรศัพท์ให้ต่ำลง"</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"เลื่อนโทรศัพท์ไปทางขวา"</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"เลื่อนโทรศัพท์ไปทางซ้าย"</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"เลื่อนโทรศัพท์ไปทางซ้าย"</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"เลื่อนโทรศัพท์ไปทางขวา"</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"มองที่หน้าจอและลืมตา"</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"ไม่เห็นหน้า มองที่โทรศัพท์"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"มีการเคลื่อนไหวมากเกินไป ถือโทรศัพท์นิ่งๆ"</string>
