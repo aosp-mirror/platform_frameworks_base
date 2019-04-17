@@ -40,6 +40,8 @@ public class Util {
         } catch (Throwable t) {
             throw new RuntimeException(t);
         }
+        // Reset the framework's kill handler.
+        Thread.setDefaultUncaughtExceptionHandler(null);
     }
 
     public static Collection<DexFile> getBootDexFiles() throws Exception {
