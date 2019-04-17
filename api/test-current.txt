@@ -730,9 +730,6 @@ package android.net {
     method public static long getLoopbackRxPackets();
     method public static long getLoopbackTxBytes();
     method public static long getLoopbackTxPackets();
-    field public static final int TAG_SYSTEM_DHCP = -192; // 0xffffff40
-    field public static final int TAG_SYSTEM_DHCP_SERVER = -186; // 0xffffff46
-    field public static final int TAG_SYSTEM_PROBE = -190; // 0xffffff42
   }
 
 }
