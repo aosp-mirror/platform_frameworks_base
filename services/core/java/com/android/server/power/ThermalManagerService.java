@@ -312,10 +312,8 @@ public class ThermalManagerService extends SystemService {
                     if (!mThermalEventListeners.register(listener, null)) {
                         return false;
                     }
-                    if (mHalReady.get()) {
-                        // Notify its callback after new client registered.
-                        postEventListenerCurrentTemperatures(listener, null);
-                    }
+                    // Notify its callback after new client registered.
+                    postEventListenerCurrentTemperatures(listener, null);
                     return true;
                 } finally {
                     Binder.restoreCallingIdentity(token);
@@ -334,10 +332,8 @@ public class ThermalManagerService extends SystemService {
                     if (!mThermalEventListeners.register(listener, new Integer(type))) {
                         return false;
                     }
-                    if (mHalReady.get()) {
-                        // Notify its callback after new client registered.
-                        postEventListenerCurrentTemperatures(listener, new Integer(type));
-                    }
+                    // Notify its callback after new client registered.
+                    postEventListenerCurrentTemperatures(listener, new Integer(type));
                     return true;
                 } finally {
                     Binder.restoreCallingIdentity(token);
@@ -398,10 +394,8 @@ public class ThermalManagerService extends SystemService {
                     if (!mThermalStatusListeners.register(listener)) {
                         return false;
                     }
-                    if (mHalReady.get()) {
-                        // Notify its callback after new client registered.
-                        postStatusListener(listener);
-                    }
+                    // Notify its callback after new client registered.
+                    postStatusListener(listener);
                     return true;
                 } finally {
                     Binder.restoreCallingIdentity(token);
