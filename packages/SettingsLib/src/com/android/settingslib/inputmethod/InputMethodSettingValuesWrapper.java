@@ -77,25 +77,25 @@ public class InputMethodSettingValuesWrapper {
             return true;
         }
 
-        final int enabledValidSystemNonAuxAsciiCapableImeCount =
-                getEnabledValidSystemNonAuxAsciiCapableImeCount();
+        final int enabledValidNonAuxAsciiCapableImeCount =
+                getEnabledValidNonAuxAsciiCapableImeCount();
 
-        return enabledValidSystemNonAuxAsciiCapableImeCount <= 1
-                && !(enabledValidSystemNonAuxAsciiCapableImeCount == 1 && !isEnabled)
+        return enabledValidNonAuxAsciiCapableImeCount <= 1
+                && !(enabledValidNonAuxAsciiCapableImeCount == 1 && !isEnabled)
                 && imi.isSystem()
-                && InputMethodAndSubtypeUtil.isValidSystemNonAuxAsciiCapableIme(imi);
+                && InputMethodAndSubtypeUtil.isValidNonAuxAsciiCapableIme(imi);
     }
 
-    private int getEnabledValidSystemNonAuxAsciiCapableImeCount() {
+    private int getEnabledValidNonAuxAsciiCapableImeCount() {
         int count = 0;
         final List<InputMethodInfo> enabledImis = getEnabledInputMethodList();
         for (final InputMethodInfo imi : enabledImis) {
-            if (InputMethodAndSubtypeUtil.isValidSystemNonAuxAsciiCapableIme(imi)) {
+            if (InputMethodAndSubtypeUtil.isValidNonAuxAsciiCapableIme(imi)) {
                 ++count;
             }
         }
         if (count == 0) {
-            Log.w(TAG, "No \"enabledValidSystemNonAuxAsciiCapableIme\"s found.");
+            Log.w(TAG, "No \"enabledValidNonAuxAsciiCapableIme\"s found.");
         }
         return count;
     }
