@@ -1683,6 +1683,7 @@ class StorageManagerService extends IStorageManager.Stub
                 ServiceManager.getService(Context.APP_OPS_SERVICE));
         try {
             mIAppOpsService.startWatchingMode(OP_REQUEST_INSTALL_PACKAGES, null, mAppOpsCallback);
+            mIAppOpsService.startWatchingMode(OP_LEGACY_STORAGE, null, mAppOpsCallback);
         } catch (RemoteException e) {
         }
     }
@@ -3335,7 +3336,7 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     private String translateInternal(String path, int pid, int uid, boolean toSystem) {
-        if (!ENABLE_ISOLATED_STORAGE) return path;
+        if (true) return path;
 
         if (path.contains("/../")) {
             throw new SecurityException("Shady looking path " + path);
@@ -3761,7 +3762,7 @@ class StorageManagerService extends IStorageManager.Stub
             if (hasLegacy && hasStorage) {
                 return Zygote.MOUNT_EXTERNAL_LEGACY;
             } else {
-                return Zygote.MOUNT_EXTERNAL_WRITE;
+                return Zygote.MOUNT_EXTERNAL_DEFAULT;
             }
         } catch (RemoteException e) {
             // Should not happen
