@@ -388,10 +388,12 @@ public final class AudioAttributes implements Parcelable {
      */
     public static final int FLAG_NO_SYSTEM_CAPTURE = 0x1 << 12;
 
+    // Note that even though FLAG_MUTE_HAPTIC is stored as a flag bit, it is not here since
+    // it is known as a boolean value outside of AudioAttributes.
     private static final int FLAG_ALL = FLAG_AUDIBILITY_ENFORCED | FLAG_SECURE | FLAG_SCO
             | FLAG_BEACON | FLAG_HW_AV_SYNC | FLAG_HW_HOTWORD | FLAG_BYPASS_INTERRUPTION_POLICY
             | FLAG_BYPASS_MUTE | FLAG_LOW_LATENCY | FLAG_DEEP_BUFFER | FLAG_NO_MEDIA_PROJECTION
-            | FLAG_MUTE_HAPTIC | FLAG_NO_SYSTEM_CAPTURE;
+            | FLAG_NO_SYSTEM_CAPTURE;
     private final static int FLAG_ALL_PUBLIC = FLAG_AUDIBILITY_ENFORCED |
             FLAG_HW_AV_SYNC | FLAG_LOW_LATENCY;
 
@@ -598,8 +600,9 @@ public final class AudioAttributes implements Parcelable {
         public Builder(AudioAttributes aa) {
             mUsage = aa.mUsage;
             mContentType = aa.mContentType;
-            mFlags = aa.mFlags;
+            mFlags = aa.getAllFlags();
             mTags = (HashSet<String>) aa.mTags.clone();
+            mMuteHapticChannels = aa.areHapticChannelsMuted();
         }
 
         /**
@@ -812,7 +815,7 @@ public final class AudioAttributes implements Parcelable {
                         AudioProductStrategy.getAudioAttributesForStrategyWithLegacyStreamType(
                                 streamType);
                 if (attributes != null) {
-                    return new Builder(attributes);
+                    return new Builder(attributes).setHapticChannelsMuted(mMuteHapticChannels);
                 }
             }
             switch(streamType) {
