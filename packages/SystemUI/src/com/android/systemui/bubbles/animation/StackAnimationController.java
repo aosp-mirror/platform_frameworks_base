@@ -538,6 +538,7 @@ public class StackAnimationController extends
         Log.d(TAG, String.format("Setting position to (%f, %f).", pos.x, pos.y));
         mStackPosition.set(pos.x, pos.y);
 
+        mLayout.cancelAllAnimations();
         cancelStackPositionAnimations();
 
         // Since we're not using the chained animations, apply the offsets manually.
