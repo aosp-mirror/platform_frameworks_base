@@ -1301,7 +1301,7 @@ class ProcessRecord implements WindowProcessListener {
             }
             mService.mProcessList.updateLruProcessLocked(this, activityChange, null /* client */);
             if (updateOomAdj) {
-                mService.updateOomAdjLocked();
+                mService.updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_ACTIVITY);
             }
         }
     }
