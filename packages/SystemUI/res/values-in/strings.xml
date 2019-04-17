@@ -267,7 +267,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Data 4G dijeda"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"Data seluler dijeda"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Data dijeda"</string>
-    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Batas data yang Anda tetapkan telah tercapai. Anda tidak menggunakan data seluler lagi.\n\nJika Anda melanjutkan, tarif penggunaan data mungkin berlaku."</string>
+    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Batas kuota yang Anda tetapkan telah tercapai. Anda tidak menggunakan data seluler lagi.\n\nJika Anda melanjutkan, tarif penggunaan data mungkin berlaku."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Lanjutkan"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Menelusuri GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Lokasi yang disetel oleh GPS"</string>
@@ -356,7 +356,7 @@
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Notifikasi"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Lampu senter"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Data seluler"</string>
-    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Penggunaan data"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Penggunaan kuota"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Data tersisa"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Melebihi batas"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> digunakan"</string>
@@ -368,6 +368,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Sampai pagi"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Aktif pada <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Hingga <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Tema Gelap"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC dinonaktifkan"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC diaktifkan"</string>
@@ -887,7 +888,7 @@
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"Jadwal Penghemat Baterai diaktifkan"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"Penghemat Baterai akan aktif otomatis jika baterai kurang dari <xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Setelan"</string>
-    <string name="auto_saver_okay_action" msgid="2701221740227683650">"OK"</string>
+    <string name="auto_saver_okay_action" msgid="2701221740227683650">"Oke"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"Hapus Heap SysUI"</string>
     <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"<xliff:g id="APP">%1$s</xliff:g> menggunakan <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"Aplikasi menggunakan <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>

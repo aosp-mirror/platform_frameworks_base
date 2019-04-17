@@ -172,8 +172,7 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
-    <!-- no translation found for data_connection_5ge (4699478963278829331) -->
-    <skip />
+    <string name="data_connection_5ge" msgid="4699478963278829331">"5Ge"</string>
     <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
     <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
@@ -259,7 +258,7 @@
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"Arbejdstilstand er slået fra."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"Arbejdstilstand er slået til."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Datasparefunktionen er slået fra."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Datasparefunktionen er slået til."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Datasparefunktionen er aktiveret."</string>
     <string name="accessibility_quick_settings_sensor_privacy_changed_off" msgid="5152819588955163090">"Privat sensortilstand blev deaktiveret."</string>
     <string name="accessibility_quick_settings_sensor_privacy_changed_on" msgid="529705259565826355">"Privat sensortilstand blev aktiveret."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Skærmens lysstyrke"</string>
@@ -331,7 +330,7 @@
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi er slået til"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Der er ingen tilgængelige Wi-Fi-netværk"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"Aktiverer…"</string>
-    <string name="quick_settings_cast_title" msgid="6954684227605751758">"Cast af skærm"</string>
+    <string name="quick_settings_cast_title" msgid="6954684227605751758">"Cast skærm"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Caster"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Enhed uden navn"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Klar til at caste"</string>
@@ -369,6 +368,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Indtil solopgang"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Tænd kl. <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Indtil <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Mørkt tema"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC er deaktiveret"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC er aktiveret"</string>
@@ -636,7 +636,7 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Vil du fortsætte med at se notifikationer fra denne app?"</string>
     <string name="hint_text_block" msgid="3554459167504485284">"Blokerede notifikationer vises ikke nogen steder og afspiller ikke nogen lyd. Du kan fjerne blokeringen af notifikationer i indstillingerne."</string>
     <string name="hint_text_silent" msgid="859468056340177016">"Lydløse notifikationer vises i underretningspanelet, men de vises ikke på låseskærmen eller via et banner, og de afspiller ingen lyd."</string>
-    <string name="hint_text_alert" msgid="2721169810318722524">"Når du modtager disse notifikationer, kan du høre en lyd og se dem i notifikationsskuffen, i statusbjælken og på låseskærmen"</string>
+    <string name="hint_text_alert" msgid="2721169810318722524">"Når du modtager disse notifikationer, kan du høre en lyd og se dem i notifikationsskuffen, på statusbjælken og på låseskærmen"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"Disse notifikationer kan ikke deaktiveres"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Du kan ikke konfigurere denne gruppe notifikationer her"</string>
     <string name="notification_delegate_header" msgid="9167022191405284627">"via <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -727,7 +727,7 @@
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Hovedtelefoner er tilsluttet"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Headset er forbundet"</string>
     <string name="data_saver" msgid="5037565123367048522">"Datasparefunktion"</string>
-    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Datasparefunktionen er slået til"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Datasparefunktionen er aktiveret"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Datasparefunktionen er slået fra"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"Til"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"Fra"</string>
@@ -759,7 +759,7 @@
     <string name="left_icon" msgid="3096287125959387541">"Venstre ikon"</string>
     <string name="right_icon" msgid="3952104823293824311">"Højre ikon"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Tilføj felter ved at holde dem nede og trække"</string>
-    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Omorganiser felter ved at holde dem nede og trække"</string>
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Flyt rundt på felterne ved at holde dem nede og trække"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Træk herhen for at fjerne"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Du skal bruge mindst seks felter"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Rediger"</string>
@@ -815,7 +815,7 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimer"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Luk"</string>
     <string name="pip_phone_settings" msgid="8080777499521528521">"Indstillinger"</string>
-    <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Træk nedad for at afvise"</string>
+    <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Træk ned for at afvise"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"Menu"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> vises som integreret billede"</string>
     <string name="pip_notification_message" msgid="5619512781514343311">"Hvis du ikke ønsker, at <xliff:g id="NAME">%s</xliff:g> skal benytte denne funktion, kan du åbne indstillingerne og deaktivere den."</string>

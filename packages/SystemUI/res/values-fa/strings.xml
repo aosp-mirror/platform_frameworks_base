@@ -172,12 +172,11 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+‎"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+‎"</string>
-    <!-- no translation found for data_connection_5ge (4699478963278829331) -->
-    <skip />
+    <string name="data_connection_5ge" msgid="4699478963278829331">"5Ge"</string>
     <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
     <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
-    <string name="data_connection_roaming" msgid="6037232010953697354">"رومینگ"</string>
+    <string name="data_connection_roaming" msgid="6037232010953697354">"فراگردی"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"بدون سیم کارت."</string>
@@ -186,7 +185,7 @@
     <string name="cell_data_off_content_description" msgid="4356113230238585072">"داده تلفن همراه خاموش است"</string>
     <string name="not_default_data_content_description" msgid="9194667237765917844">"برای استفاده از داده تنظیم نشده است"</string>
     <string name="cell_data_off" msgid="1051264981229902873">"خاموش"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"اتصال اینترنت با بلوتوث تلفن همراه."</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"اشتراک‌گذاری اینترنت با بلوتوث."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"حالت هواپیما."</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"‏VPN روشن است."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"سیم‌کارتی موجود نیست."</string>
@@ -268,7 +267,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"‏داده 4G موقتاً متوقف شده است"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"داده تلفن همراه موقتاً متوقف شده است"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"داده موقتاً متوقف شده است"</string>
-    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"مصرف داده شما به محدودیت داده‌ای که تنظیم کردید رسیده است. دیگر از داده تلفن همراه استفاده نمی‌کنید.\n\n درصورت ازسرگیری، ممکن است هزینه‌های مصرف داده اعمال شود."</string>
+    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"به حدمجاز داده‌ای که تنظیم کردید رسیده است. دیگر از داده تلفن همراه استفاده نمی‌کنید.\n\n درصورت ازسرگیری، ممکن است هزینه‌های مصرف داده اعمال شود."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"از سر‌گیری"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"‏جستجو برای GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"‏مکان تنظیم شده توسط GPS"</string>
@@ -346,7 +345,7 @@
     <string name="quick_settings_connected" msgid="1722253542984847487">"متصل"</string>
     <string name="quick_settings_connected_battery_level" msgid="4136051440381328892">"متصل، باتری <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"در حال اتصال..."</string>
-    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"اتصال به اینترنت با تلفن همراه"</string>
+    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"اشتراک‌گذاری اینترنت"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"نقطه اتصال"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="8010579363691405477">"روشن کردن…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="5672131949987422420">"صرفه‌جویی داده روشن است"</string>
@@ -369,6 +368,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"تا طلوع"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"ساعت <xliff:g id="TIME">%s</xliff:g> روشن می‌شود"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"تا <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"طرح زمینه تیره"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"‏NFC غیرفعال است"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"‏NFC فعال است"</string>
@@ -758,7 +758,7 @@
     <string name="right_keycode" msgid="708447961000848163">"کدکلید راست"</string>
     <string name="left_icon" msgid="3096287125959387541">"نماد چپ"</string>
     <string name="right_icon" msgid="3952104823293824311">"نماد راست"</string>
-    <string name="drag_to_add_tiles" msgid="230586591689084925">"نگه‌داشتن و کشیدن برای افزودن کاشی"</string>
+    <string name="drag_to_add_tiles" msgid="230586591689084925">"برای افزودن کاشی، نگه دارید و بکشید"</string>
     <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"برای تغییر دادن ترتیب کاشی‌ها، آن‌ها را نگه دارید و بکشید"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"برای حذف، به اینجا بکشید"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"حداقل به ۶ کاشی نیاز دارید"</string>

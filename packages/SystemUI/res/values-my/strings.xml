@@ -338,7 +338,7 @@
     <string name="quick_settings_cast_no_wifi" msgid="2696477881905521882">"Wi-Fi ချိတ်ဆက်ထားခြင်းမရှိပါ"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"အလင်းတောက်ပမှု"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"အလိုအလျောက်"</string>
-    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"အရောင်များ ပြောင်းပြန်လုပ်ရန်"</string>
+    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"အရောင်ပြောင်းပြန်"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"အရောင် မှန်ကန်စေခြင်း အခြေအနေ"</string>
     <string name="quick_settings_more_settings" msgid="326112621462813682">"နောက်ထပ် ဆက်တင်များ"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"ပြီးပါပြီ"</string>
@@ -368,6 +368,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"နေထွက်ချိန် အထိ"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g> တွင် ဖွင့်ရန်"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g> အထိ"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"မှောင်သည့် အပြင်အဆင်"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC ကို ပိတ်ထားသည်"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC ကို ဖွင့်ထားသည်"</string>

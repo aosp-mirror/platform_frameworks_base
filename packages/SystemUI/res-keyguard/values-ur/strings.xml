@@ -151,31 +151,4 @@
       <item quantity="other">‏SIM اب غیر فعال ہے۔ جاری رکھنے کیلئے PUK کوڈ درج کریں۔ SIM کے مستقل طور پر ناقابل استعمال ہونے سے پہلے آپ کے پاس <xliff:g id="_NUMBER_1">%d</xliff:g> کوششیں بچی ہیں۔ تفصیلات کیلئے کیریئر سے رابطہ کریں۔</item>
       <item quantity="one">‏SIM اب غیر فعال ہے۔ جاری رکھنے کیلئے PUK کوڈ درج کریں۔ SIM کے مستقل طور پر ناقابل استعمال ہونے سے پہلے آپ کے پاس <xliff:g id="_NUMBER_0">%d</xliff:g> کوشش بچی ہے۔ تفصیلات کیلئے کیریئر سے رابطہ کریں۔</item>
     </plurals>
-    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
-      <item quantity="other">"<annotation name="color">"ابھی"</annotation>\n"^1\n^2 ہو رہے ہیں</item>
-      <item quantity="one">"<annotation name="color">"ابھی"</annotation>\n"^1\n^2 ہو رہے ہیں</item>
-    </plurals>
-  <string-array name="type_clock_hours">
-    <item msgid="3543074812389379830">"بارہ"</item>
-    <item msgid="7389464214252023751">"ایک"</item>
-    <item msgid="8803180377002008046">"دو"</item>
-    <item msgid="8614897059944644719">"تین"</item>
-    <item msgid="2293058674782619556">"چار"</item>
-    <item msgid="4815402358455041664">"پانچ"</item>
-    <item msgid="3325754778509665687">"چھ"</item>
-    <item msgid="5805551341866280575">"سات"</item>
-    <item msgid="203334816668238610">"آٹھ"</item>
-    <item msgid="4828052671464488923">"نو"</item>
-    <item msgid="2233497913571137419">"دس"</item>
-    <item msgid="5621554266768657830">"گیارہ"</item>
-  </string-array>
-    <!-- no translation found for type_clock_minutes:1 (2091812961809760681) -->
-    <!-- no translation found for type_clock_minutes:2 (1496435384877290709) -->
-    <!-- no translation found for type_clock_minutes:3 (881846472976674129) -->
-    <!-- no translation found for type_clock_minutes:4 (2784477043911540584) -->
-    <!-- no translation found for type_clock_minutes:5 (1610928853656700614) -->
-    <!-- no translation found for type_clock_minutes:6 (2317806244043886658) -->
-    <!-- no translation found for type_clock_minutes:7 (3318687539120971327) -->
-    <!-- no translation found for type_clock_minutes:8 (5701600693712102348) -->
-    <!-- no translation found for type_clock_minutes:9 (3247381605947372495) -->
 </resources>

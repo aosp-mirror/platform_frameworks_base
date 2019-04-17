@@ -368,6 +368,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"จนพระอาทิตย์ขึ้น"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"เปิดเวลา <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"จนถึง <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"ธีมสีเข้ม"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC ถูกปิดใช้งาน"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"เปิดใช้งาน NFC แล้ว"</string>
@@ -757,8 +758,8 @@
     <string name="right_keycode" msgid="708447961000848163">"Keycode ทางขวา"</string>
     <string name="left_icon" msgid="3096287125959387541">"ไอคอนทางซ้าย"</string>
     <string name="right_icon" msgid="3952104823293824311">"ไอคอนทางขวา"</string>
-    <string name="drag_to_add_tiles" msgid="230586591689084925">"กดชิ้นส่วนค้างไว้แล้วลากไปเพื่อเพิ่ม"</string>
-    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"กดชิ้นส่วนค้างไว้แล้วลากไปเพื่อจัดลำดับใหม่"</string>
+    <string name="drag_to_add_tiles" msgid="230586591689084925">"กดค้างแล้วลากเพื่อเพิ่มไทล์"</string>
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"กดไทล์ค้างไว้แล้วลากเพื่อจัดเรียงใหม่"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"ลากมาที่นี่เพื่อนำออก"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"คุณต้องมีชิ้นส่วนอย่างน้อย 6 ชิ้น"</string>
     <string name="qs_edit" msgid="2232596095725105230">"แก้ไข"</string>

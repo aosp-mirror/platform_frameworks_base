@@ -119,7 +119,7 @@
     <string name="cancel" msgid="6442560571259935130">"Zrušiť"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"Potvrdiť"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"Skúsiť znova"</string>
-    <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Klepnite na senzor odtlačkov prstov"</string>
+    <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Dotknite sa senzora odtlačkov prstov"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Ikona odtlačku prsta"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Hľadáme vás…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="2658119009870383490">"Ikona tváre"</string>
@@ -172,8 +172,7 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
-    <!-- no translation found for data_connection_5ge (4699478963278829331) -->
-    <skip />
+    <string name="data_connection_5ge" msgid="4699478963278829331">"5Ge"</string>
     <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
     <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
@@ -373,6 +372,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Do východu slnka"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Zapne sa o <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Do <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Tmavý motív"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC je deaktivované"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC je aktivované"</string>
@@ -882,7 +882,7 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Nahradiť"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Aplikácie sú spustené na pozadí"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Klepnutím zobrazíte podrobnosti o batérii a spotrebe dát"</string>
-    <string name="mobile_data_disable_title" msgid="1068272097382942231">"Vypnúť mobilné dáta?"</string>
+    <string name="mobile_data_disable_title" msgid="1068272097382942231">"Chcete vypnúť mobilné dáta?"</string>
     <string name="mobile_data_disable_message" msgid="4756541658791493506">"Prostredníctvom operátora <xliff:g id="CARRIER">%s</xliff:g> nebudete mať prístup k dátam ani internetu. Internet bude k dispozícii iba cez Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"váš operátor"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"Nastavenia nemôžu overiť vašu odpoveď, pretože určitá aplikácia blokuje žiadosť o povolenie."</string>
@@ -914,7 +914,7 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"Otvoriť <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"Nastavenia bublín aplikácie <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"Povoliť bubliny z aplikácie <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="no_bubbles" msgid="337101288173078247">"Odmietnuť"</string>
+    <string name="no_bubbles" msgid="337101288173078247">"Zamietnuť"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Povoliť"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Spýtať sa neskôr"</string>
     <string name="bubble_content_description_single" msgid="1184462974339387516">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> z aplikácie <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>

@@ -374,6 +374,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Do wschodu słońca"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Włącz o <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Do <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Ciemny motyw"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"Komunikacja NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"Komunikacja NFC jest wyłączona"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"Komunikacja NFC jest włączona"</string>
@@ -814,7 +815,7 @@
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Otwórz szybkie ustawienia."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Zamknij szybkie ustawienia."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Alarm ustawiony."</string>
-    <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"Jesteś zalogowany jako <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"Zalogowany użytkownik: <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="data_connection_no_internet" msgid="4503302451650972989">"Brak internetu"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Otwórz szczegóły."</string>
     <string name="accessibility_quick_settings_not_available" msgid="4190068184294019846">"Niedostępne z powodu: <xliff:g id="REASON">%s</xliff:g>"</string>

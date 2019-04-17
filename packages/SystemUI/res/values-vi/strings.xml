@@ -45,7 +45,7 @@
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Thông báo"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth được dùng làm điểm truy cập Internet"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Thiết lập phương thức nhập"</string>
-    <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Bàn phím thực"</string>
+    <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Bàn phím vật lý"</string>
     <string name="usb_device_permission_prompt" msgid="1825685909587559679">"Cho phép <xliff:g id="APPLICATION">%1$s</xliff:g> truy cập <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"Cho phép <xliff:g id="APPLICATION">%1$s</xliff:g> truy cập <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt" msgid="7440562274256843905">"Mở <xliff:g id="APPLICATION">%1$s</xliff:g> để điều khiển <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
@@ -368,6 +368,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Cho đến khi trời sáng"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Bật vào lúc <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Cho đến <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Giao diện tối"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC đã được tắt"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC đã được bật"</string>
@@ -430,7 +431,7 @@
     <string name="user_logout_notification_text" msgid="3350262809611876284">"Đăng xuất người dùng hiện tại"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ĐĂNG XUẤT NGƯỜI DÙNG"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Thêm người dùng mới?"</string>
-    <string name="user_add_user_message_short" msgid="2161624834066214559">"Khi bạn thêm người dùng mới, người dùng đó cần thiết lập dung lượng lưu trữ của mình.\n\nMọi người dùng đều có thể cập nhật ứng dụng cho tất cả người dùng khác."</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"Khi bạn thêm người dùng mới, họ cần thiết lập không gian của mình.\n\nMọi người dùng đều có thể cập nhật ứng dụng cho tất cả người dùng khác."</string>
     <string name="user_limit_reached_title" msgid="7374910700117359177">"Đã đạt đến giới hạn người dùng"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
       <item quantity="other">Bạn có thể thêm tối đa <xliff:g id="COUNT">%d</xliff:g> người dùng.</item>
