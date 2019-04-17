@@ -35,11 +35,13 @@ import java.util.List;
  *
  * <p>This class is thread safe.
  */
+// TODO: add unit tests
 public class GlobalWhitelistState {
 
     // Uses full-name to avoid collision with service-provided mLock
     protected final Object mGlobalWhitelistStateLock = new Object();
 
+    // TODO: should not be exposed directly
     @Nullable
     @GuardedBy("mGlobalWhitelistStateLock")
     protected SparseArray<WhitelistHelper> mWhitelisterHelpers;
