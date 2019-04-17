@@ -8692,16 +8692,11 @@ public final class Settings {
                 "location_access_check_delay_millis";
 
         /**
-         * What should happen to the location permissions when upgraded to Android Q.
-         *
-         * <ul>
-         *     <li>0/unset == revoke permissions</li>
-         *     <li>anything else == Don't do anything</li>
-         * </ul>
-         *
+         * @deprecated This setting does not have any effect anymore
          * @hide
          */
         @SystemApi
+        @Deprecated
         public static final String LOCATION_PERMISSIONS_UPGRADE_TO_Q_MODE =
                 "location_permissions_upgrade_to_q_mode";
 
