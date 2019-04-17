@@ -526,7 +526,7 @@
     <string name="biometric_error_canceled" msgid="349665227864885880">"Удостоверяването бе анулирано"</string>
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"Няма зададен ПИН код, фигура или парола"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Открит е частичен отпечатък. Моля, опитайте отново."</string>
-    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Отпечатъкът не можа да се обработи. Моля, опитайте отново."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Отпечатъкът не бе обработен. Моля, опитайте отново."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Сензорът за отпечатъци е мръсен. Моля, почистете го и опитайте отново."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Отместихте пръста си твърде бързо. Моля, опитайте отново."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Преместихте пръста си твърде бавно. Моля, опитайте отново."</string>
@@ -560,8 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"Доближете телефона."</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"Преместете телефона по-високо."</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"Преместете телефона по-ниско."</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"Преместете телефона надясно."</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"Преместете телефона наляво."</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"Преместете телефона наляво."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"Преместете телефона надясно."</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Гледайте към екрана с отворени очи."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Лицето ви не се вижда. Погледнете към телефона."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Твърде много движение. Дръжте телефона неподвижно."</string>
@@ -674,7 +674,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Изисква съхраняваните данни за приложенията да бъдат шифровани."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Деактивиране на камерите"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Предотвратява употребата на камерите на всички устройства."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Изкл. на някои функции за закл. на екр."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Изкл. на някои функции за закл. на екрана"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Предотвратява използването на някои функции за заключване на екрана."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Домашен"</item>

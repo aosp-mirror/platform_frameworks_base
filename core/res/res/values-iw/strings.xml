@@ -337,7 +337,7 @@
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"מאפשר לאפליקציה להרחיב או לכווץ את שורת המצב."</string>
     <string name="permlab_install_shortcut" msgid="4279070216371564234">"התקן קיצורי דרך"</string>
     <string name="permdesc_install_shortcut" msgid="8341295916286736996">"מאפשר לאפליקציה להוסיף קיצורי דרך במסך דף הבית ללא התערבות המשתמש."</string>
-    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"הסר התקנה של קיצורי דרך"</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"להסרת התקנה של קיצורי דרך"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"מאפשר לאפליקציה להסיר קיצורי דרך במסך דף הבית ללא התערבות המשתמש."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"ניתוב מחדש של שיחות יוצאות"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"מאפשרת לאפליקציה לראות את המספר המחויג במהלך ביצוע שיחה יוצאת, עם האפשרות להפנות את השיחה למספר אחר או לבטל את השיחה לחלוטין."</string>
@@ -566,8 +566,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"צריך לקרב את הטלפון."</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"צריך להגביה את הטלפון."</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"צריך להוריד את הטלפון."</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"צריך להזיז את הטלפון ימינה."</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"צריך להזיז את הטלפון שמאלה."</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"צריך להזיז את הטלפון שמאלה."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"צריך להזיז את הטלפון ימינה."</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"צריך להביט במסך בעיניים פקוחות."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"אי אפשר לראות את הפנים שלך. צריך להביט אל הטלפון."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"יותר מדי תנועה. יש להחזיק את הטלפון בצורה יציבה."</string>
@@ -1371,7 +1371,7 @@
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"הקש כדי להגדיר"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"הגדרת שעה"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"הגדרת תאריך"</string>
-    <string name="date_time_set" msgid="5777075614321087758">"הגדר"</string>
+    <string name="date_time_set" msgid="5777075614321087758">"הגדרה"</string>
     <string name="date_time_done" msgid="2507683751759308828">"בוצע"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff33b5e5">"חדש: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"מטעם <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
@@ -1433,7 +1433,7 @@
     <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"ייתכן שפונקציונליות מסוימת לא תפעל כראוי. יש להכניס אמצעי אחסון חדש."</string>
     <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"הוצאה של <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmounting_notification_message" msgid="1003926904442321115">"אין להסיר"</string>
-    <string name="ext_media_init_action" msgid="7952885510091978278">"הגדר"</string>
+    <string name="ext_media_init_action" msgid="7952885510091978278">"הגדרה"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"הוצא"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"גלה"</string>
     <string name="ext_media_seamless_action" msgid="6575980560886881233">"החלפת פלט"</string>
@@ -1848,7 +1848,7 @@
     <string name="confirm_battery_saver" msgid="639106420541753635">"אישור"</string>
     <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"\'חיסכון בסוללה\' מכבה או מגביל פעילות ברקע, חלק מהאפקטים החזותיים ותכונות אחרות שצורכות הרבה חשמל, כדי להאריך את חיי הסוללה. "<annotation id="url">"מידע נוסף"</annotation></string>
     <string name="battery_saver_description" msgid="6413346684861241431">"\'חיסכון בסוללה\' מכבה או מגביל פעילות ברקע, חלק מהאפקטים החזותיים ותכונות אחרות שצורכות הרבה חשמל, כדי להאריך את חיי הסוללה."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"‏כדי לסייע בהפחתת השימוש בנתונים, חוסך הנתונים (Data Saver) מונע מאפליקציות מסוימות שליחה או קבלה של נתונים ברקע. אפליקציה שבה אתה משתמש כרגע יכולה לגשת לנתונים, אבל בתדירות נמוכה יותר. משמעות הדבר היא, למשל, שתמונות יוצגו רק לאחר שתקיש עליהן."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"‏כדי לסייע בהפחתת השימוש בנתונים, חוסך הנתונים (Data Saver) מונע מאפליקציות מסוימות שליחה או קבלה של נתונים ברקע. אפליקציה שבה נעשה שימוש כרגע יכולה לגשת לנתונים, אבל בתדירות נמוכה יותר. המשמעות היא, למשל, שתמונות יוצגו רק לאחר שמקישים עליהן."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"‏האם להפעיל את חוסך הנתונים (Data Saver)?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"הפעל"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

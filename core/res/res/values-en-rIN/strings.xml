@@ -560,8 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"Move phone closer."</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"Move phone higher."</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"Move phone lower."</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"Move phone to the right."</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"Move phone to the left."</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"Move phone to the left."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"Move phone to the right."</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Look at the screen with your eyes open."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Can’t see your face. Look at the phone."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Too much motion. Hold phone steady."</string>

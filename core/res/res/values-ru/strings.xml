@@ -302,7 +302,7 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"записывать аудио"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Разрешить приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; записывать аудио?"</string>
-    <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"Данные о физической активности"</string>
+    <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"Физическая активность"</string>
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"доступ к данным о физической активности"</string>
     <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"Открыть приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ к данным о физической активности?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Камера"</string>
@@ -566,8 +566,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"Переместите телефон ближе."</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"Переместите телефон выше."</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"Переместите телефон ниже."</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"Переместите телефон вправо."</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"Переместите телефон влево."</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"Переместите телефон влево."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"Переместите телефон вправо."</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Смотрите в экран и не закрывайте глаза."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Вашего лица не видно. Смотрите на телефон."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Не перемещайте устройство. Держите его неподвижно."</string>

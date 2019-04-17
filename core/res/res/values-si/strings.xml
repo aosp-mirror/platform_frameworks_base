@@ -560,8 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"දුරකථනය තවත් සමීපව ගෙන යන්න."</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"දුරකථනය ඉහළට ගෙන යන්න."</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"දුරකථනය පහළට ගෙන යන්න."</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"දුරකථනය දකුණට ගෙන යන්න."</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"දුරකථනය වමට ගෙන යන්න."</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"දුරකථනය වමට ගෙන යන්න."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"දුරකථනය දකුණට ගෙන යන්න."</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"ඔබේ ඇස් ඇරගෙන තිරය වෙත බලන්න."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"ඔබේ මුහුණ දැකිය නොහැක. දුරකථනය වෙත බලන්න."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"චලනය ඉතා වැඩියි. දුරකථනය ස්ථිරව අල්ලා සිටින්න."</string>
@@ -1119,7 +1119,7 @@
     <string name="dialog_alert_title" msgid="2049658708609043103">"අවධානය"</string>
     <string name="loading" msgid="7933681260296021180">"පූරණය වෙමින්..."</string>
     <string name="capital_on" msgid="1544682755514494298">"සක්‍රීයයි"</string>
-    <string name="capital_off" msgid="6815870386972805832">"අක්‍රිය කරන්න"</string>
+    <string name="capital_off" msgid="6815870386972805832">"ක්‍රියාවිරහිතයි"</string>
     <string name="whichApplication" msgid="4533185947064773386">"පහත භාවිතයෙන් ක්‍රියාව සම්පූර්ණ කරන්න"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"%1$s භාවිතා කරමින් ක්‍රියාව සම්පුර්ණ කරන්න"</string>
     <string name="whichApplicationLabel" msgid="7425855495383818784">"ක්‍රියාව සම්පූර්ණ කරන්න"</string>

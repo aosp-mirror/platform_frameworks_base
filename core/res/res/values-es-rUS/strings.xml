@@ -560,8 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"Acerca el teléfono."</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"Mueve el teléfono hacia arriba."</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"Mueve el teléfono hacia abajo."</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"Mueve el teléfono hacia la derecha."</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"Mueve el teléfono hacia la izquierda."</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"Mueve el teléfono hacia la izquierda."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"Mueve el teléfono hacia la derecha."</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Mira la pantalla con los ojos abiertos."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"No se ve tu cara. Mira el teléfono."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Te estás moviendo demasiado. No muevas el teléfono"</string>
@@ -655,13 +655,13 @@
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Permite controlar la cantidad de contraseñas incorrectas que se escriben al desbloquear la pantalla y bloquear la televisión, o borrar todos los datos del usuario, si se ingresan demasiadas contraseñas incorrectas."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Permite controlar la cantidad de contraseñas incorrectas que se escriben al desbloquear la pantalla y bloquear el teléfono, o borrar todos los datos del usuario, si se ingresan demasiadas contraseñas incorrectas."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Cambiar el bloqueo de pantalla"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Cambiar el bloqueo de pantalla"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Cambia el bloqueo de pantalla."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Bloquear la pantalla"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"Controlar cómo y cuándo se bloquea la pantalla"</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"Controla cómo y cuándo se bloquea la pantalla."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Borrar todos los datos"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Eliminar los datos de la tablet sin avisar y restablecer la configuración de fábrica"</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Permite borrar los datos de la TV sin previo aviso mediante el restablecimiento de la configuración de fábrica."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Eliminar los datos del dispositivo sin avisar y restablecer la configuración de fábrica"</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Borra los datos del dispositivo sin avisar y restablece la configuración de fábrica."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Borrar los datos del usuario"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Permite borrar los datos del usuario en esta tablet sin previo aviso."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Permite borrar los datos del usuario en esta televisión sin previo aviso."</string>
