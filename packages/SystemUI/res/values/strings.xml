@@ -1331,6 +1331,14 @@
     <!-- Content description for accessibility: Clear the odi caption tool tip. [CHAR LIMIT=NONE] -->
     <string name="accessibility_volume_close_odi_captions_tip">Close captions tip</string>
 
+    <!-- Content description for accessibility: Captions button. [CHAR LIMIT=NONE] -->
+    <string name="volume_odi_captions_content_description">Captions overlay</string>
+
+    <!-- Content description for accessibility: Hint if click will enable. [CHAR LIMIT=NONE] -->
+    <string name="volume_odi_captions_hint_enable">enable</string>
+    <!-- Content description for accessibility: Hint if click will disable. [CHAR LIMIT=NONE] -->
+    <string name="volume_odi_captions_hint_disable">disable</string>
+
     <!-- content description for audio output chooser [CHAR LIMIT=NONE]-->
     <string name="accessibility_output_chooser">Switch output device</string>
 

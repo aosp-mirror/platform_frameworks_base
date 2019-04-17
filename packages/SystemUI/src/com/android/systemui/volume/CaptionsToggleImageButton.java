@@ -22,6 +22,9 @@ import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 
+import androidx.core.view.ViewCompat;
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat;
+
 import com.android.keyguard.AlphaOptimizedImageButton;
 import com.android.systemui.R;
 
@@ -31,7 +34,7 @@ public class CaptionsToggleImageButton extends AlphaOptimizedImageButton {
     private static final int[] OPTED_OUT_STATE = new int[] { R.attr.optedOut };
 
     private ConfirmedTapListener mConfirmedTapListener;
-    private boolean mComponentEnabled = false;
+    private boolean mCaptionsEnabled = false;
     private boolean mOptedOut = false;
 
     private GestureDetector mGestureDetector;
@@ -39,16 +42,14 @@ public class CaptionsToggleImageButton extends AlphaOptimizedImageButton {
             new GestureDetector.SimpleOnGestureListener() {
         @Override
         public boolean onSingleTapConfirmed(MotionEvent e) {
-            if (mConfirmedTapListener != null) {
-                mConfirmedTapListener.onConfirmedTap();
-                return true;
-            }
-            return false;
+            return tryToSendTapConfirmedEvent();
         }
     };
 
     public CaptionsToggleImageButton(Context context, AttributeSet attrs) {
         super(context, attrs);
+        this.setContentDescription(
+                getContext().getString(R.string.volume_odi_captions_content_description));
     }
 
     @Override
@@ -66,16 +67,32 @@ public class CaptionsToggleImageButton extends AlphaOptimizedImageButton {
         return state;
     }
 
-    Runnable setComponentEnabled(boolean isComponentEnabled) {
-        this.mComponentEnabled = isComponentEnabled;
+    Runnable setCaptionsEnabled(boolean areCaptionsEnabled) {
+        this.mCaptionsEnabled = areCaptionsEnabled;
 
-        return this.setImageResourceAsync(this.mComponentEnabled
+        ViewCompat.replaceAccessibilityAction(
+                this,
+                AccessibilityActionCompat.ACTION_CLICK,
+                mCaptionsEnabled
+                        ? getContext().getString(R.string.volume_odi_captions_hint_disable)
+                        : getContext().getString(R.string.volume_odi_captions_hint_enable),
+                (view, commandArguments) -> tryToSendTapConfirmedEvent());
+
+        return this.setImageResourceAsync(mCaptionsEnabled
                 ? R.drawable.ic_volume_odi_captions
                 : R.drawable.ic_volume_odi_captions_disabled);
     }
 
-    boolean getComponentEnabled() {
-        return this.mComponentEnabled;
+    private boolean tryToSendTapConfirmedEvent() {
+        if (mConfirmedTapListener != null) {
+            mConfirmedTapListener.onConfirmedTap();
+            return true;
+        }
+        return false;
+    }
+
+    boolean getCaptionsEnabled() {
+        return this.mCaptionsEnabled;
     }
 
     /** Sets whether or not the current stream has opted out of captions */
