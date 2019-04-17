@@ -270,7 +270,7 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Biće prikazani Bluetooth uređaji bez naziva (samo sa MAC adresama)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Onemogućava glavno podešavanje jačine zvuka na Bluetooth uređaju u slučaju problema sa jačinom zvuka na daljinskim uređajima, kao što su izuzetno velika jačina zvuka ili nedostatak kontrole."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Lokalni terminal"</string>
-    <string name="enable_terminal_summary" msgid="67667852659359206">"Omogući aplik. terminala za pristup lokalnom komandnom okruženju"</string>
+    <string name="enable_terminal_summary" msgid="67667852659359206">"Omogući apl. terminala za pristup lokalnom komandnom okruženju"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP provera"</string>
     <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"Podešavanje ponašanja HDCP provere"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"Otklanjanje grešaka"</string>

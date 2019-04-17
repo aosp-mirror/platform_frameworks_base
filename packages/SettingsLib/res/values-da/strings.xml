@@ -199,7 +199,7 @@
     <string name="development_settings_not_available" msgid="4308569041701535607">"Valgmuligheder for udviklere er ikke tilgængelige for denne bruger"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"VPN-indstillingerne er ikke tilgængelige for denne bruger"</string>
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"Indstillingerne for netdeling er ikke tilgængelige for denne bruger"</string>
-    <string name="apn_settings_not_available" msgid="7873729032165324000">"Indstillingerne for Adgangspunkt (APN) er ikke tilgængelige for denne bruger"</string>
+    <string name="apn_settings_not_available" msgid="7873729032165324000">"Indstillingerne for adgangspunktet (APN) er ikke tilgængelige for denne bruger"</string>
     <string name="enable_adb" msgid="7982306934419797485">"USB-fejlretning"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"Fejlretningstilstand, når USB er tilsluttet"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"Tilbagekald tilladelser for USB-fejlretning"</string>
@@ -262,7 +262,7 @@
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Brug hardwareacceleration ved netdeling, hvis det er muligt"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Vil du tillade USB-fejlretning?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB-fejlretning er kun beregnet til udvikling og kan bruges til at kopiere data mellem din computer og enheden, installere apps på enheden uden notifikation og læse logdata."</string>
-    <string name="adb_keys_warning_message" msgid="5659849457135841625">"Vil du ophæve adgangen til USB-fejlfinding for alle computere, du tidligere har godkendt?"</string>
+    <string name="adb_keys_warning_message" msgid="5659849457135841625">"Vil du ophæve adgangen til USB-fejlretning for alle computere, du tidligere har godkendt?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"Vil du tillade udviklingsindstillinger?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Disse indstillinger er kun beregnet til brug i forbindelse med udvikling. De kan forårsage, at din enhed og dens apps går ned eller ikke fungerer korrekt."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verificer apps via USB"</string>
@@ -274,8 +274,8 @@
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP-kontrol"</string>
     <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"Angiv HDCP-kontroladfærd"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"Fejlfinding"</string>
-    <string name="debug_app" msgid="8349591734751384446">"Vælg app til fejlfinding"</string>
-    <string name="debug_app_not_set" msgid="718752499586403499">"Ingen applikation til fejlfinding er angivet"</string>
+    <string name="debug_app" msgid="8349591734751384446">"Vælg app til fejlretning"</string>
+    <string name="debug_app_not_set" msgid="718752499586403499">"Ingen applikation til fejlretning er angivet"</string>
     <string name="debug_app_set" msgid="2063077997870280017">"Applikation til fejlfinding: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="5156029161289091703">"Vælg applikation"</string>
     <string name="no_application" msgid="2813387563129153880">"Ingen"</string>
@@ -308,10 +308,10 @@
     <string name="debug_layout" msgid="5981361776594526155">"Vis layoutgrænser"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Vis grænser for klip, margener osv."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Tving læsning mod venstre"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Tving til højre mod venstre-layout for alle sprog"</string>
-    <string name="force_msaa" msgid="7920323238677284387">"Tving 4x MSAA"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Gennemtving højre mod venstre-layout for alle sprog"</string>
+    <string name="force_msaa" msgid="7920323238677284387">"Gennemtving 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Aktivér 4x MSAA i apps med OpenGL ES 2.0"</string>
-    <string name="show_non_rect_clip" msgid="505954950474595172">"Fejlfind på ikke-rektangulære klippehandlinger"</string>
+    <string name="show_non_rect_clip" msgid="505954950474595172">"Fejlret på ikke-rektangulære klippehandlinger"</string>
     <string name="track_frame_time" msgid="6094365083096851167">"HWUI-profilgengivelse"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Aktivér fejlretningslag for grafikprocessor"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Tillad, at fejlretningslag indlæses for grafikprocessor i apps til fejlretning"</string>
@@ -329,7 +329,7 @@
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Viser en advarsel, når en app sender en notifikation uden en gyldig kanal"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Gennemtving tilladelse til eksternt lager"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Gør det muligt at overføre enhver app til et eksternt lager uafhængigt af manifestværdier"</string>
-    <string name="force_resizable_activities" msgid="8615764378147824985">"Tving aktiviteter til at kunne tilpasses"</string>
+    <string name="force_resizable_activities" msgid="8615764378147824985">"Gennemtving, at aktiviteter kan tilpasses"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Tillad, at alle aktiviteter kan tilpasses flere vinduer uafhængigt af manifestværdier."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Aktivér vinduer i frit format"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"Aktivér understøttelse af eksperimentelle vinduer i frit format."</string>

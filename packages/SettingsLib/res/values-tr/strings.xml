@@ -241,7 +241,7 @@
     <string name="private_dns_mode_off" msgid="8236575187318721684">"Kapalı"</string>
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Otomatik"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Gizli DNS sağlayıcının ana makine adı"</string>
-    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS sağlayıcının ana makine adını gir"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS sağlayıcının ana makine adını girin"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Bağlanılamadı"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Kablosuz ekran sertifikası seçeneklerini göster"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Kablosuz günlük kaydı seviyesini artır. Kablosuz Seçici\'de her bir SSID RSSI için göster."</string>
@@ -297,7 +297,7 @@
     <string name="show_hw_screen_updates" msgid="4117270979975470789">"Görünüm güncellemelerini göster"</string>
     <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"Çizim yapılırken görünümleri pencerede çiz"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Donanım katmanı güncellemelerini göster"</string>
-    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Flash donanım katmanları güncellendiğinde yeşildir"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Güncellenirken donanım katmanlarını yeşil renkte yanıp söndür"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"GPU fazla çizim hatasını ayıkla"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"Donanım katmanlarını devre dışı bırak"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"Ekran oluştururken her zaman GPU\'yu kullan"</string>
@@ -356,8 +356,8 @@
     <string name="standby_bucket_summary" msgid="6567835350910684727">"Uygulamayı beklemeye alma durumu: <xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Çalışan hizmetler"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Şu anda çalışan hizmetleri görüntüle ve denetle"</string>
-    <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView kullanımı"</string>
-    <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView kullanımını ayarla"</string>
+    <string name="select_webview_provider_title" msgid="4628592979751918907">"Web Görünümü kullanımı"</string>
+    <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Web Görünümü kullanımını ayarla"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Bu seçenek artık geçerli değil. Tekrar deneyin."</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"Dosya şifrelemeye dönüştür"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Dönüştür…"</string>

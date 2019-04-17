@@ -86,11 +86,11 @@
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"फ़ाइल स्थानांतरण"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"इनपुट डिवाइस"</string>
     <string name="bluetooth_profile_pan" msgid="3391606497945147673">"इंटरनेट पहुंच"</string>
-    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"संपर्क साझाकरण"</string>
+    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"संपर्क शेयर करना"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"संपर्क साझाकरण के लिए उपयोग करें"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"इंटरनेट कनेक्शन साझाकरण"</string>
     <string name="bluetooth_profile_map" msgid="1019763341565580450">"लेख संदेश"</string>
-    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"सिम ऐक्सेस"</string>
+    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"सिम एक्सेस"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"HD ऑडियो: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"HD ऑडियो"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="6680721080542444257">"सुनने में मदद करने वाले डिवाइस"</string>
@@ -187,7 +187,7 @@
     <item msgid="4795095314303559268">"धीमा"</item>
     <item msgid="8903157781070679765">"सामान्य"</item>
     <item msgid="164347302621392996">"तेज़"</item>
-    <item msgid="5794028588101562009">"अधिक तेज़"</item>
+    <item msgid="5794028588101562009">"ज़्यादा तेज़"</item>
     <item msgid="7163942783888652942">"अत्‍यधिक तेज़"</item>
     <item msgid="7831712693748700507">"त्वरित"</item>
     <item msgid="5194774745031751806">"अत्यधिक तीव्र"</item>
@@ -427,7 +427,7 @@
     <string name="screen_zoom_summary_small" msgid="5867245310241621570">"छोटा"</string>
     <string name="screen_zoom_summary_default" msgid="2247006805614056507">"डिफ़ॉल्ट"</string>
     <string name="screen_zoom_summary_large" msgid="4835294730065424084">"बड़ा"</string>
-    <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"अधिक बड़ा"</string>
+    <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"ज़्यादा बड़ा"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"सबसे बड़ा"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"कस्टम (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"मेन्यू"</string>

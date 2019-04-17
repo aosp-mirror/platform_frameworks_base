@@ -213,7 +213,7 @@
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"bootloaderକୁ ଅନ୍‌ଲକ୍‌ ହେବାର ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM ଅନଲକ୍‌ କରିବା ଅନୁମତି ଦେବେ?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"ଚେତାବନୀ: ଏହି ସେଟିଙ୍ଗ ଚାଲୁ ଥିବାବେଳେ ଡିଭାଇସ୍‌ର ସୁରକ୍ଷା ବୈଶିଷ୍ଟ୍ୟ କାମ କରିବ ନାହିଁ"</string>
-    <string name="mock_location_app" msgid="7966220972812881854">"ନକଲି ଲୋକେଶନ୍‌ ଆପ୍‌ର ଚୟନ କରନ୍ତୁ"</string>
+    <string name="mock_location_app" msgid="7966220972812881854">"ମକ୍ ଲୋକେସନ୍‌ ଆପ୍‌ର ଚୟନ କରନ୍ତୁ"</string>
     <string name="mock_location_app_not_set" msgid="809543285495344223">"କୌଣସି ନକଲି ଲୋକେଶନ ଆପ୍ ସେଟ୍ କରାଯାଇନାହିଁ"</string>
     <string name="mock_location_app_set" msgid="8966420655295102685">"ନକଲି ଲୋକେଶନ୍‌ ଆପ୍‌: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"ନେଟ୍‌ୱର୍କିଙ୍ଗ"</string>
@@ -223,11 +223,11 @@
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"ଟିଥରିଙ୍ଗ ହାର୍ଡୱେର ବେଗ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"ବ୍ଲୁ-ଟୂଥ୍‍‌ ଡିଭାଇସ୍‌ଗୁଡ଼ିକୁ ନାମ ବିନା ଦେଖନ୍ତୁ"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ପୂର୍ଣ୍ଣ ଭଲ୍ୟୁମ୍‌ ଅକ୍ଷମ କରନ୍ତୁ"</string>
-    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"ବ୍ଲୁ-ଟୂଥ୍‌ AVRCP ଭର୍ସନ୍"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"ବ୍ଲୁଟୂଥ୍‌ AVRCP ଭର୍ସନ୍"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"ବ୍ଲୁ-ଟୂଥ୍‍‌ AVRCP ଭର୍ସନ୍‌"</string>
-    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ବ୍ଲୁ-ଟୂଥ୍‍‌ ଅଡିଓ କୋଡେକ୍‌"</string>
+    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ବ୍ଲୁଟୁଥ୍‌ ଅଡିଓ କୋଡେକ୍‌"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"ବ୍ଲୁ-ଟୂଥ୍‍ ଅଡିଓ କୋଡେକ୍\nସିଲେକ୍ସନ୍‌କୁ ଗତିଶୀଳ କରନ୍ତୁ"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"ବ୍ଲୁ-ଟୂଥ୍‍‌ ଅଡିଓ ସାମ୍ପଲ୍‌ ରେଟ୍‌"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"ବ୍ଲୁଟୂଥ୍‌ ଅଡିଓ ସାମ୍ପଲ୍‌ ରେଟ୍‌"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"ବ୍ଲୁ-ଟୂଥ୍‍ ଅଡିଓ କୋଡେକ୍\nସିଲେକ୍ସନ୍‌କୁ ଗତିଶୀଳ କରନ୍ତୁ: ସାମ୍ପଲ୍ ରେଟ୍"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"ନମୁନା ପିଛା ବ୍ଲୁ-ଟୂଥ୍‍‌ ଅଡିଓ ବିଟ୍ସ"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"ବ୍ଲୁ-ଟୂଥ୍‍ ଅଡିଓ କୋଡେକ୍\nସିଲେକ୍ସନ୍‌କୁ ଗତିଶୀଳ କରନ୍ତୁ: ନମୁନା ପିଛା ବିଟ୍ସ"</string>
