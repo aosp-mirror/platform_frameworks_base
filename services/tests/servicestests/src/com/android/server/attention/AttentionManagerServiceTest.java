@@ -132,6 +132,13 @@ public class AttentionManagerServiceTest {
         verify(callback).onSuccess(anyInt(), anyLong());
     }
 
+    @Test
+    public void testOnSwitchUser_noCrashCurrentServiceIsNull() {
+        final int userId = 10;
+        mSpyAttentionManager.getOrCreateUserStateLocked(userId);
+        mSpyAttentionManager.onSwitchUser(userId);
+    }
+
     private class MockIAttentionService implements IAttentionService {
         public void checkAttention(IAttentionCallback callback) throws RemoteException {
             callback.onSuccess(0, 0);
