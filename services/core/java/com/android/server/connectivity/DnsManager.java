@@ -34,6 +34,7 @@ import android.net.IDnsResolver;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkUtils;
+import android.net.ResolverParamsParcel;
 import android.net.Uri;
 import android.net.shared.PrivateDnsConfig;
 import android.os.Binder;
@@ -311,11 +312,9 @@ public class DnsManager {
 
     public void setDnsConfigurationForNetwork(
             int netId, LinkProperties lp, boolean isDefaultNetwork) {
-        final String[] assignedServers = NetworkUtils.makeStrings(lp.getDnsServers());
-        final String[] domainStrs = getDomainStrings(lp.getDomains());
 
         updateParametersSettings();
-        final int[] params = { mSampleValidity, mSuccessThreshold, mMinSamples, mMaxSamples };
+        final ResolverParamsParcel paramsParcel = new ResolverParamsParcel();
 
         // We only use the PrivateDnsConfig data pushed to this class instance
         // from ConnectivityService because it works in coordination with
@@ -329,34 +328,44 @@ public class DnsManager {
 
         final boolean useTls = privateDnsCfg.useTls;
         final boolean strictMode = privateDnsCfg.inStrictMode();
-        final String tlsHostname = strictMode ? privateDnsCfg.hostname : "";
-        final String[] tlsServers =
+        paramsParcel.netId = netId;
+        paramsParcel.sampleValiditySeconds = mSampleValidity;
+        paramsParcel.successThreshold = mSuccessThreshold;
+        paramsParcel.minSamples = mMinSamples;
+        paramsParcel.maxSamples = mMaxSamples;
+        paramsParcel.servers = NetworkUtils.makeStrings(lp.getDnsServers());
+        paramsParcel.domains = getDomainStrings(lp.getDomains());
+        paramsParcel.tlsName = strictMode ? privateDnsCfg.hostname : "";
+        paramsParcel.tlsServers =
                 strictMode ? NetworkUtils.makeStrings(
                         Arrays.stream(privateDnsCfg.ips)
                               .filter((ip) -> lp.isReachable(ip))
                               .collect(Collectors.toList()))
-                : useTls ? assignedServers  // Opportunistic
+                : useTls ? paramsParcel.servers  // Opportunistic
                 : new String[0];            // Off
-
+        paramsParcel.tlsFingerprints = new String[0];
         // Prepare to track the validation status of the DNS servers in the
         // resolver config when private DNS is in opportunistic or strict mode.
         if (useTls) {
             if (!mPrivateDnsValidationMap.containsKey(netId)) {
                 mPrivateDnsValidationMap.put(netId, new PrivateDnsValidationStatuses());
             }
-            mPrivateDnsValidationMap.get(netId).updateTrackedDnses(tlsServers, tlsHostname);
+            mPrivateDnsValidationMap.get(netId).updateTrackedDnses(paramsParcel.tlsServers,
+                    paramsParcel.tlsName);
         } else {
             mPrivateDnsValidationMap.remove(netId);
         }
 
-        Slog.d(TAG, String.format("setDnsConfigurationForNetwork(%d, %s, %s, %s, %s, %s)",
-                netId, Arrays.toString(assignedServers), Arrays.toString(domainStrs),
-                Arrays.toString(params), tlsHostname, Arrays.toString(tlsServers)));
-        final String[] tlsFingerprints = new String[0];
+        Slog.d(TAG, String.format("setDnsConfigurationForNetwork(%d, %s, %s, %d, %d, %d, %d, "
+                + "%d, %d, %s, %s)", paramsParcel.netId, Arrays.toString(paramsParcel.servers),
+                Arrays.toString(paramsParcel.domains), paramsParcel.sampleValiditySeconds,
+                paramsParcel.successThreshold, paramsParcel.minSamples,
+                paramsParcel.maxSamples, paramsParcel.baseTimeoutMsec,
+                paramsParcel.retryCount, paramsParcel.tlsName,
+                Arrays.toString(paramsParcel.tlsServers)));
+
         try {
-            mDnsResolver.setResolverConfiguration(
-                    netId, assignedServers, domainStrs, params,
-                    tlsHostname, tlsServers, tlsFingerprints);
+            mDnsResolver.setResolverConfiguration(paramsParcel);
         } catch (RemoteException | ServiceSpecificException e) {
             Slog.e(TAG, "Error setting DNS configuration: " + e);
             return;
