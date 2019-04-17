@@ -1806,7 +1806,7 @@ public final class ActiveServices {
                                 || (callerApp.getCurProcState() <= ActivityManager.PROCESS_STATE_TOP
                                         && (flags & Context.BIND_TREAT_LIKE_ACTIVITY) != 0),
                         b.client);
-                mAm.updateOomAdjLocked();
+                mAm.updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_BIND_SERVICE);
             }
 
             if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Bind " + s + " with " + b
@@ -1957,11 +1957,12 @@ public final class ActiveServices {
                                 r.binding.service.app.hasClientActivities()
                                 || r.binding.service.app.treatLikeActivity, null);
                     }
-                    mAm.updateOomAdjLocked(r.binding.service.app, false);
+                    mAm.updateOomAdjLocked(r.binding.service.app, false,
+                            OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
                 }
             }
 
-            mAm.updateOomAdjLocked();
+            mAm.updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
 
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -2676,7 +2677,7 @@ public final class ActiveServices {
         bumpServiceExecutingLocked(r, execInFg, "create");
         mAm.updateLruProcessLocked(app, false, null);
         updateServiceForegroundLocked(r.app, /* oomAdj= */ false);
-        mAm.updateOomAdjLocked();
+        mAm.updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_START_SERVICE);
 
         boolean created = false;
         try {
@@ -2797,7 +2798,7 @@ public final class ActiveServices {
             bumpServiceExecutingLocked(r, execInFg, "start");
             if (!oomAdjusted) {
                 oomAdjusted = true;
-                mAm.updateOomAdjLocked(r.app, true);
+                mAm.updateOomAdjLocked(r.app, true, OomAdjuster.OOM_ADJ_REASON_START_SERVICE);
             }
             if (r.fgRequired && !r.fgWaiting) {
                 if (!r.isForeground) {
@@ -2923,7 +2924,8 @@ public final class ActiveServices {
                 if (ibr.hasBound) {
                     try {
                         bumpServiceExecutingLocked(r, false, "bring down unbind");
-                        mAm.updateOomAdjLocked(r.app, true);
+                        mAm.updateOomAdjLocked(r.app, true,
+                                OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
                         ibr.hasBound = false;
                         ibr.requested = false;
                         r.app.thread.scheduleUnbindService(r,
@@ -3038,7 +3040,8 @@ public final class ActiveServices {
                     bumpServiceExecutingLocked(r, false, "destroy");
                     mDestroyingServices.add(r);
                     r.destroying = true;
-                    mAm.updateOomAdjLocked(r.app, true);
+                    mAm.updateOomAdjLocked(r.app, true,
+                            OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
                     r.app.thread.scheduleStopService(r);
                 } catch (Exception e) {
                     Slog.w(TAG, "Exception when destroying service "
@@ -3143,7 +3146,8 @@ public final class ActiveServices {
                         // it to go down there and we want it to start out near the top.
                         mAm.updateLruProcessLocked(s.app, false, null);
                     }
-                    mAm.updateOomAdjLocked(s.app, true);
+                    mAm.updateOomAdjLocked(s.app, true,
+                            OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
                     b.intent.hasBound = false;
                     // Assume the client doesn't want to know about a rebind;
                     // we will deal with that later if it asks for one.
@@ -3296,7 +3300,7 @@ public final class ActiveServices {
                     mDestroyingServices.remove(r);
                     r.bindings.clear();
                 }
-                mAm.updateOomAdjLocked(r.app, true);
+                mAm.updateOomAdjLocked(r.app, true, OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
             }
             r.executeFg = false;
             if (r.tracker != null) {
