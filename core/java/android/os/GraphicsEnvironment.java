@@ -49,7 +49,7 @@ public class GraphicsEnvironment {
     private static final boolean DEBUG = false;
     private static final String TAG = "GraphicsEnvironment";
     private static final String PROPERTY_GFX_DRIVER = "ro.gfx.driver.0";
-    private static final String PROPERTY_GFX_DRIVER_WHITELIST = "ro.gfx.driver.whitelist.0";
+    private static final String GUP_WHITELIST_FILENAME = "whitelist.txt";
 
     private ClassLoader mClassLoader;
     private String mLayerPath;
@@ -241,22 +241,11 @@ public class GraphicsEnvironment {
 
     private static boolean onWhitelist(Context context, String driverPackageName,
             String applicationPackageName) {
-        String whitelistName = SystemProperties.get(PROPERTY_GFX_DRIVER_WHITELIST);
-
-        // Empty whitelist implies no updatable graphics driver. Typically, the pre-installed
-        // updatable graphics driver is supposed to be a place holder and contains no graphics
-        // driver and whitelist.
-        if (whitelistName == null || whitelistName.isEmpty()) {
-            if (DEBUG) {
-                Log.w(TAG, "No whitelist found.");
-            }
-            return false;
-        }
         try {
             Context driverContext = context.createPackageContext(driverPackageName,
                                                                  Context.CONTEXT_RESTRICTED);
             AssetManager assets = driverContext.getAssets();
-            InputStream stream = assets.open(whitelistName);
+            InputStream stream = assets.open(GUP_WHITELIST_FILENAME);
             BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
             for (String packageName; (packageName = reader.readLine()) != null; ) {
                 if (packageName.equals(applicationPackageName)) {
