@@ -15,7 +15,7 @@
  */
 package android.service.autofill.augmented;
 
-import static android.service.autofill.augmented.AugmentedAutofillService.DEBUG;
+import static android.service.autofill.augmented.AugmentedAutofillService.sDebug;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
@@ -56,7 +56,7 @@ public final class FillController {
     public void autofill(@NonNull List<Pair<AutofillId, AutofillValue>> values) {
         Preconditions.checkNotNull(values);
 
-        if (DEBUG) {
+        if (sDebug) {
             Log.d(TAG, "autofill() with " + values.size() + " values");
         }
 
