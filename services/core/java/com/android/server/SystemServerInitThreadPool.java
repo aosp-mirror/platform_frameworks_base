@@ -120,7 +120,7 @@ public class SystemServerInitThreadPool {
     private static void dumpStackTraces() {
         final ArrayList<Integer> pids = new ArrayList<>();
         pids.add(Process.myPid());
-        ActivityManagerService.dumpStackTraces(
-                pids, null, null, null);
+        ActivityManagerService.dumpStackTraces(pids, null, null,
+                Watchdog.getInterestingNativePids());
     }
 }
