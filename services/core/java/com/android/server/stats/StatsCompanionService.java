@@ -1159,6 +1159,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             e.writeLong(memoryStat.rssInBytes);
             e.writeLong(0);  // unused
             e.writeLong(memoryStat.startTimeNanos);
+            e.writeLong(memoryStat.swapInBytes);
             pulledData.add(e);
         }
     }
