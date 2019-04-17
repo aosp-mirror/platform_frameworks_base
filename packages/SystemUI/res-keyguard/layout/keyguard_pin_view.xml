@@ -27,10 +27,6 @@
         androidprv:layout_maxHeight="@dimen/keyguard_security_max_height"
         android:orientation="vertical"
         >
-    <include layout="@layout/keyguard_message_area"
-             android:layout_width="match_parent"
-             android:layout_height="wrap_content"
-            />
     <LinearLayout
             android:id="@+id/container"
             android:layout_width="match_parent"

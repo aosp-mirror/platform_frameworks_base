@@ -81,7 +81,9 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
     @Override
     protected void resetState() {
         mPasswordEntry.setTextOperationUser(UserHandle.of(KeyguardUpdateMonitor.getCurrentUser()));
-        mSecurityMessageDisplay.setMessage("");
+        if (mSecurityMessageDisplay != null) {
+            mSecurityMessageDisplay.setMessage("");
+        }
         final boolean wasDisabled = mPasswordEntry.isEnabled();
         // Don't set enabled password entry & showSoftInput when PasswordEntry is invisible or in
         // pausing stage.

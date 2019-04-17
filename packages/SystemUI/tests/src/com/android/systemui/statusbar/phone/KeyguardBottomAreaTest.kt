@@ -42,6 +42,5 @@ class KeyguardBottomAreaTest : SysuiTestCase() {
 
         other.initFrom(mKeyguardBottomArea)
         other.launchVoiceAssist()
-        other.onLongClick(null)
     }
 }

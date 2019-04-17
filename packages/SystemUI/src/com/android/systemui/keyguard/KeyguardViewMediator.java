@@ -2074,9 +2074,9 @@ public class KeyguardViewMediator extends SystemUI {
 
     public StatusBarKeyguardViewManager registerStatusBar(StatusBar statusBar,
             ViewGroup container, NotificationPanelView panelView,
-            BiometricUnlockController biometricUnlockController) {
+            BiometricUnlockController biometricUnlockController, ViewGroup lockIconContainer) {
         mStatusBarKeyguardViewManager.registerStatusBar(statusBar, container, panelView,
-                biometricUnlockController, mDismissCallbackRegistry);
+                biometricUnlockController, mDismissCallbackRegistry, lockIconContainer);
         return mStatusBarKeyguardViewManager;
     }
 
