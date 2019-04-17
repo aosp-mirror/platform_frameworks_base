@@ -20,6 +20,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Rect;
 
+import com.android.internal.util.Preconditions;
+
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,6 +33,8 @@ import java.util.List;
  */
 class GestureExclusionTracker {
     private boolean mGestureExclusionViewsChanged = false;
+    private boolean mRootGestureExclusionRectsChanged = false;
+    private List<Rect> mRootGestureExclusionRects = Collections.emptyList();
     private List<GestureExclusionViewInfo> mGestureExclusionViewInfos = new ArrayList<>();
     private List<Rect> mGestureExclusionRects = Collections.emptyList();
 
@@ -59,9 +63,9 @@ class GestureExclusionTracker {
 
     @Nullable
     public List<Rect> computeChangedRects() {
-        boolean changed = false;
+        boolean changed = mRootGestureExclusionRectsChanged;
         final Iterator<GestureExclusionViewInfo> i = mGestureExclusionViewInfos.iterator();
-        final List<Rect> rects = new ArrayList<>();
+        final List<Rect> rects = new ArrayList<>(mRootGestureExclusionRects);
         while (i.hasNext()) {
             final GestureExclusionViewInfo info = i.next();
             switch (info.update()) {
@@ -79,12 +83,24 @@ class GestureExclusionTracker {
         }
         if (changed || mGestureExclusionViewsChanged) {
             mGestureExclusionViewsChanged = false;
+            mRootGestureExclusionRectsChanged = false;
             if (!mGestureExclusionRects.equals(rects)) {
                 mGestureExclusionRects = rects;
                 return rects;
             }
         }
         return null;
+    }
+
+    public void setRootSystemGestureExclusionRects(@NonNull List<Rect> rects) {
+        Preconditions.checkNotNull(rects, "rects must not be null");
+        mRootGestureExclusionRects = rects;
+        mRootGestureExclusionRectsChanged = true;
+    }
+
+    @NonNull
+    public List<Rect> getRootSystemGestureExclusionRects() {
+        return mRootGestureExclusionRects;
     }
 
     private static class GestureExclusionViewInfo {
