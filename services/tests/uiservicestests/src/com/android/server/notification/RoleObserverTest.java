@@ -206,6 +206,7 @@ public class RoleObserverTest extends UiServiceTestCase {
 
         LocalServices.removeServiceForTest(WindowManagerInternal.class);
         LocalServices.addService(WindowManagerInternal.class, mock(WindowManagerInternal.class));
+        mContext.addMockSystemService(AppOpsManager.class, mock(AppOpsManager.class));
 
         mUsers = new ArrayList<>();
         mUsers.add(new UserInfo(0, "system", 0));
