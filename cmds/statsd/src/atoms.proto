@@ -22,8 +22,8 @@ option java_outer_classname = "AtomsProto";
 
 import "frameworks/base/cmds/statsd/src/atom_field_options.proto";
 import "frameworks/base/core/proto/android/app/enums.proto";
-import "frameworks/base/core/proto/android/app/settings_enums.proto";
 import "frameworks/base/core/proto/android/app/job/enums.proto";
+import "frameworks/base/core/proto/android/app/settings_enums.proto";
 import "frameworks/base/core/proto/android/bluetooth/a2dp/enums.proto";
 import "frameworks/base/core/proto/android/bluetooth/enums.proto";
 import "frameworks/base/core/proto/android/bluetooth/hci/enums.proto";
@@ -42,10 +42,11 @@ import "frameworks/base/core/proto/android/service/procstats_enum.proto";
 import "frameworks/base/core/proto/android/service/usb.proto";
 import "frameworks/base/core/proto/android/stats/connectivity/network_stack.proto";
 import "frameworks/base/core/proto/android/stats/connectivity/resolv_stats.proto";
-import "frameworks/base/core/proto/android/stats/enums.proto";
-import "frameworks/base/core/proto/android/stats/docsui/docsui_enums.proto";
 import "frameworks/base/core/proto/android/stats/devicepolicy/device_policy.proto";
 import "frameworks/base/core/proto/android/stats/devicepolicy/device_policy_enums.proto";
+import "frameworks/base/core/proto/android/stats/docsui/docsui_enums.proto";
+import "frameworks/base/core/proto/android/stats/enums.proto";
+import "frameworks/base/core/proto/android/stats/intelligence/enums.proto";
 import "frameworks/base/core/proto/android/stats/launcher/launcher.proto";
 import "frameworks/base/core/proto/android/stats/storage/storage_enums.proto";
 import "frameworks/base/core/proto/android/stats/style/style_enums.proto";
@@ -277,6 +278,8 @@ message Atom {
         SystemServerWatchdogOccurred system_server_watchdog_occurred = 185;
         TombStoneOccurred tomb_stone_occurred = 186;
         BluetoothClassOfDeviceReported bluetooth_class_of_device_reported = 187;
+        IntelligenceEventReported intelligence_event_reported =
+            188 [(log_from_module) = "intelligence"];
     }
 
     // Pulled events will start at field 10000.
@@ -5980,4 +5983,16 @@ message CoolingDevice {
     // integer between 0 and max_state defined in its driver. 0 means device is
     // not in throttling, higher value means deeper throttling.
     optional int32 state = 3;
+}
+
+/**
+ * Intelligence has several counter-type events that don't warrant a
+ * full separate atom. These are primarily API call counters but also include
+ * counters for feature usage and specific failure modes.
+ *
+ * Logged from the Intelligence mainline module.
+ */
+message IntelligenceEventReported {
+  optional android.stats.intelligence.EventType event_id = 1;
+  optional android.stats.intelligence.Status status = 2;
 }
