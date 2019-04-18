@@ -17,6 +17,7 @@
 package android.nfc.cardemulation;
 
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.app.Activity;
@@ -360,6 +361,8 @@ public final class CardEmulation {
      * @param service The component name of the service
      * @return whether the registration was successful.
      */
+    @RequiresPermission(android.Manifest.permission.NFC)
+    @NonNull
     public boolean unsetOffHostForService(@NonNull ComponentName service) {
         NfcAdapter adapter = NfcAdapter.getDefaultAdapter(mContext);
         if (adapter == null) {
@@ -391,7 +394,9 @@ public final class CardEmulation {
      * through the manifest, or dynamically by using this API),
      * it will be replaced with this one. All AIDs registered by
      * this service will be re-routed to this Secure Element if
-     * successful.
+     * successful. AIDs that was statically assigned using manifest
+     * will re-route to off-host SE that stated in manifest after NFC
+     * toggle.
      *
      * <p>Note that you can only set off-host SE for a service that
      * is running under the same UID as the caller of this API. Typically
@@ -403,9 +408,19 @@ public final class CardEmulation {
      * exists on the device.
      *
      * @param service The component name of the service
-     * @param offHostSecureElement Secure Element to register the AID to
+     * @param offHostSecureElement Secure Element to register the AID to. Only accept strings with
+     *                             prefix SIM or prefix eSE.
+     *                             Ref: GSMA TS.26 - NFC Handset Requirements
+     *                             TS26_NFC_REQ_069: For UICC, Secure Element Name SHALL be
+     *                                               SIM[smartcard slot]
+     *                                               (e.g. SIM/SIM1, SIM2… SIMn).
+     *                             TS26_NFC_REQ_070: For embedded SE, Secure Element Name SHALL be
+     *                                               eSE[number]
+     *                                               (e.g. eSE/eSE1, eSE2, etc.).
      * @return whether the registration was successful.
      */
+    @RequiresPermission(android.Manifest.permission.NFC)
+    @NonNull
     public boolean setOffHostForService(@NonNull ComponentName service,
             @NonNull String offHostSecureElement) {
         boolean validSecureElement = false;
@@ -418,6 +433,10 @@ public final class CardEmulation {
         List<String> validSE = adapter.getSupportedOffHostSecureElements();
         if ((offHostSecureElement.startsWith("eSE") && !validSE.contains("eSE"))
                 || (offHostSecureElement.startsWith("SIM") && !validSE.contains("SIM"))) {
+            return false;
+        }
+
+        if (!offHostSecureElement.startsWith("eSE") && !offHostSecureElement.startsWith("SIM")) {
             return false;
         }
 
