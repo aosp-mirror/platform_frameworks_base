@@ -220,7 +220,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         if (mStatusBarStateController.isDozing()
                 && mStatusBarComponent.getPanel().hasCustomClock()) {
             state |= DISABLE_CLOCK | DISABLE_SYSTEM_INFO;
-            state &= ~DISABLE_NOTIFICATION_ICONS;
         }
 
         return state;

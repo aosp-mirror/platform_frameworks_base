@@ -54,20 +54,20 @@ public final class AnalogClockControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void setDarkAmount_fadeIn() {
+    public void setDarkAmount_AOD() {
         ViewGroup smallClockFrame = (ViewGroup) mClockController.getView();
         View smallClock = smallClockFrame.getChildAt(0);
         // WHEN dark amount is set to AOD
         mClockController.setDarkAmount(1f);
-        // THEN small clock should not be shown.
-        assertThat(smallClock.getVisibility()).isEqualTo(View.GONE);
+        // THEN small clock should be shown.
+        assertThat(smallClock.getVisibility()).isEqualTo(View.VISIBLE);
     }
 
     @Test
-    public void setTextColor_setDigitalClock() {
+    public void setColorPalette_setDigitalClock() {
         ViewGroup smallClock = (ViewGroup) mClockController.getView();
-        // WHEN text color is set
-        mClockController.setTextColor(42);
+        // WHEN color palette is set
+        mClockController.setColorPalette(true, new int[]{42});
         // THEN child of small clock should have text color set.
         TextView digitalClock = (TextView) smallClock.getChildAt(0);
         assertThat(digitalClock.getCurrentTextColor()).isEqualTo(42);
