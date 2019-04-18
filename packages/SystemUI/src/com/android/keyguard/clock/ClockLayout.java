@@ -22,7 +22,6 @@ import android.content.res.Resources;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.FrameLayout.LayoutParams;
 
 import com.android.keyguard.R;
 
@@ -36,11 +35,10 @@ public class ClockLayout extends FrameLayout {
     /**
      * Clock face views.
      */
-    private View mDigitalClock;
     private View mAnalogClock;
 
     /**
-     * Pixel shifting amplitidues used to prevent screen burn-in.
+     * Pixel shifting amplitudes used to prevent screen burn-in.
      */
     private int mBurnInPreventionOffsetX;
     private int mBurnInPreventionOffsetY;
@@ -60,7 +58,6 @@ public class ClockLayout extends FrameLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mDigitalClock = findViewById(R.id.digital_clock);
         mAnalogClock = findViewById(R.id.analog_clock);
 
         // Get pixel shifting X, Y amplitudes from resources.
@@ -86,13 +83,6 @@ public class ClockLayout extends FrameLayout {
                 - mBurnInPreventionOffsetX;
         final float offsetY = getBurnInOffset(mBurnInPreventionOffsetY * 2, false)
                 - mBurnInPreventionOffsetY;
-
-        // Put digital clock in two left corner of the screen.
-        if (mDigitalClock != null) {
-            LayoutParams params = (LayoutParams) mDigitalClock.getLayoutParams();
-            mDigitalClock.setX(offsetX + params.leftMargin);
-            mDigitalClock.setY(offsetY + params.topMargin);
-        }
 
         // Put the analog clock in the middle of the screen.
         if (mAnalogClock != null) {
