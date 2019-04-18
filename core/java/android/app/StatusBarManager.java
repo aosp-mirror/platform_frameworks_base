@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Binder;
@@ -366,6 +367,7 @@ public class StatusBarManager {
      * @hide
      */
     @SystemApi
+    @TestApi
     @RequiresPermission(android.Manifest.permission.STATUS_BAR)
     public void setDisabledForSetup(boolean disabled) {
         try {
@@ -390,6 +392,7 @@ public class StatusBarManager {
      * @hide
      */
     @SystemApi
+    @TestApi
     @RequiresPermission(android.Manifest.permission.STATUS_BAR)
     @NonNull
     public DisableInfo getDisableInfo() {
@@ -422,6 +425,7 @@ public class StatusBarManager {
      * @hide
      */
     @SystemApi
+    @TestApi
     public static final class DisableInfo {
 
         private boolean mStatusBarExpansion;
@@ -448,6 +452,7 @@ public class StatusBarManager {
          * @hide
          */
         @SystemApi
+        @TestApi
         public boolean isStatusBarExpansionDisabled() {
             return mStatusBarExpansion;
         }
@@ -463,6 +468,7 @@ public class StatusBarManager {
          * @hide
          */
         @SystemApi
+        @TestApi
         public boolean isNavigateToHomeDisabled() {
             return mNavigateHome;
         }
@@ -478,6 +484,7 @@ public class StatusBarManager {
          * @hide
          */
         @SystemApi
+        @TestApi
         public boolean isNotificationPeekingDisabled() {
             return mNotificationPeeking;
         }
@@ -493,6 +500,7 @@ public class StatusBarManager {
          * @hide
          */
         @SystemApi
+        @TestApi
         public boolean isRecentsDisabled() {
             return mRecents;
         }
@@ -508,6 +516,7 @@ public class StatusBarManager {
          * @hide
          */
         @SystemApi
+        @TestApi
         public boolean isSearchDisabled() {
             return mSearch;
         }
@@ -523,6 +532,7 @@ public class StatusBarManager {
          * @hide
          */
         @SystemApi
+        @TestApi
         public boolean areAllComponentsEnabled() {
             return !mStatusBarExpansion && !mNavigateHome && !mNotificationPeeking && !mRecents
                     && !mSearch;
