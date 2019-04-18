@@ -66,8 +66,6 @@ import android.view.WindowManagerPolicyConstants;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IKeyguardDrawnCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
@@ -362,7 +360,6 @@ public class KeyguardViewMediator extends SystemUI {
 
     private boolean mWakeAndUnlocking;
     private IKeyguardDrawnCallback mDrawnCallback;
-    private boolean mLockWhenSimRemoved;
     private CharSequence mCustomMessage;
 
     KeyguardUpdateMonitorCallback mUpdateCallback = new KeyguardUpdateMonitorCallback() {
@@ -465,7 +462,6 @@ public class KeyguardViewMediator extends SystemUI {
                         if (simState == ABSENT) {
                             // MVNO SIMs can become transiently NOT_READY when switching networks,
                             // so we should only lock when they are ABSENT.
-                            onSimAbsentLocked();
                             if (simWasLocked) {
                                 if (DEBUG_SIM_STATES) Log.d(TAG, "SIM moved to ABSENT when the "
                                         + "previous state was locked. Reset the state.");
@@ -498,7 +494,6 @@ public class KeyguardViewMediator extends SystemUI {
                                   + "show permanently disabled message in lockscreen.");
                             resetStateLocked();
                         }
-                        onSimAbsentLocked();
                     }
                     break;
                 case READY:
@@ -509,24 +504,11 @@ public class KeyguardViewMediator extends SystemUI {
                                     + "previous state was locked. Reset the state.");
                             resetStateLocked();
                         }
-                        mLockWhenSimRemoved = true;
                     }
                     break;
                 default:
                     if (DEBUG_SIM_STATES) Log.v(TAG, "Unspecific state: " + simState);
                     break;
-            }
-        }
-
-        private void onSimAbsentLocked() {
-            if (isSecure() && mLockWhenSimRemoved && !mShuttingDown) {
-                mLockWhenSimRemoved = false;
-                MetricsLogger.action(mContext,
-                        MetricsProto.MetricsEvent.ACTION_LOCK_BECAUSE_SIM_REMOVED, mShowing);
-                if (!mShowing) {
-                    Log.i(TAG, "SIM removed, showing keyguard");
-                    doKeyguardLocked(null);
-                }
             }
         }
 
