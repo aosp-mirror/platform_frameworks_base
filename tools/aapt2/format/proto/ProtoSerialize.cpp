@@ -327,6 +327,9 @@ static void SerializeOverlayableItemToPb(const OverlayableItem& overlayable_item
 void SerializeTableToPb(const ResourceTable& table, pb::ResourceTable* out_table,
                         IDiagnostics* diag) {
   StringPool source_pool;
+  pb::ToolFingerprint* pb_fingerprint = out_table->add_tool_fingerprint();
+  pb_fingerprint->set_tool(util::GetToolName());
+  pb_fingerprint->set_version(util::GetToolFingerprint());
 
   std::vector<Overlayable*> overlayables;
   for (const std::unique_ptr<ResourceTablePackage>& package : table.packages) {

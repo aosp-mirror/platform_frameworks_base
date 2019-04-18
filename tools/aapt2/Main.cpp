@@ -46,12 +46,6 @@ using ::android::base::StringPrintf;
 
 namespace aapt {
 
-// DO NOT UPDATE, this is more of a marketing version.
-static const char* sMajorVersion = "2";
-
-// Update minor version whenever a feature or flag is added.
-static const char* sMinorVersion = "19";
-
 /** Prints the version information of AAPT2. */
 class VersionCommand : public Command {
  public:
@@ -60,8 +54,7 @@ class VersionCommand : public Command {
   }
 
   int Action(const std::vector<std::string>& /* args */) override {
-    std::cerr << StringPrintf("Android Asset Packaging Tool (aapt) %s:%s", sMajorVersion,
-                              sMinorVersion)
+    std::cerr << StringPrintf("%s %s", util::GetToolName(), util::GetToolFingerprint().c_str())
               << std::endl;
     return 0;
   }
