@@ -455,8 +455,23 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testNoBeepForImportanceDefaultInAutomotive() throws Exception {
+    public void testNoBeepForAutomotiveIfEffectsDisabled() throws Exception {
         mService.setIsAutomotive(true);
+        mService.setNotificationEffectsEnabledForAutomotive(false);
+
+        NotificationRecord r = getBeepyNotification();
+        r.setSystemImportance(NotificationManager.IMPORTANCE_HIGH);
+
+        mService.buzzBeepBlinkLocked(r);
+
+        verifyNeverBeep();
+        assertFalse(r.isInterruptive());
+    }
+
+    @Test
+    public void testNoBeepForImportanceDefaultInAutomotiveIfEffectsEnabled() throws Exception {
+        mService.setIsAutomotive(true);
+        mService.setNotificationEffectsEnabledForAutomotive(true);
 
         NotificationRecord r = getBeepyNotification();
         r.setSystemImportance(NotificationManager.IMPORTANCE_DEFAULT);
@@ -468,10 +483,12 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testBeepForImportanceHighInAutomotive() throws Exception {
+    public void testBeepForImportanceHighInAutomotiveIfEffectsEnabled() throws Exception {
         mService.setIsAutomotive(true);
+        mService.setNotificationEffectsEnabledForAutomotive(true);
 
         NotificationRecord r = getBeepyNotification();
+        r.setSystemImportance(NotificationManager.IMPORTANCE_HIGH);
 
         mService.buzzBeepBlinkLocked(r);
 
