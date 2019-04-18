@@ -16,6 +16,8 @@
 
 package android.util;
 
+import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.IStatsManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -113,4 +115,14 @@ public final class StatsLog extends StatsLogInternal {
         sService = IStatsManager.Stub.asInterface(ServiceManager.getService("stats"));
         return sService;
     }
+
+    /**
+     * Write an event to stats log using the raw format.
+     *
+     * @param buffer    The encoded buffer of data to write..
+     * @param size      The number of bytes from the buffer to write.
+     * @hide
+     */
+    @SystemApi
+    public static native void writeRaw(@NonNull byte[] buffer, int size);
 }

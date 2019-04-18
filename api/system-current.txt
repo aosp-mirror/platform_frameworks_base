@@ -7777,6 +7777,10 @@ package android.util {
     method public int getUid();
   }
 
+  public final class StatsLog {
+    method public static void writeRaw(@NonNull byte[], int);
+  }
+
 }
 
 package android.view {
