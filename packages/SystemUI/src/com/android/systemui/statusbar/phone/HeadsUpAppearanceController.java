@@ -47,6 +47,7 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
     private final HeadsUpManagerPhone mHeadsUpManager;
     private final NotificationStackScrollLayout mStackScroller;
     private final HeadsUpStatusBarView mHeadsUpStatusBarView;
+    private final View mCenteredIconView;
     private final View mClockView;
     private final View mOperatorNameView;
     private final DarkIconDispatcher mDarkIconDispatcher;
@@ -79,7 +80,8 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
                 statusbarView.findViewById(R.id.notification_stack_scroller),
                 statusbarView.findViewById(R.id.notification_panel),
                 statusbarView.findViewById(R.id.clock),
-                statusbarView.findViewById(R.id.operator_name_frame));
+                statusbarView.findViewById(R.id.operator_name_frame),
+                statusbarView.findViewById(R.id.centered_icon_area));
     }
 
     @VisibleForTesting
@@ -90,11 +92,13 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
             NotificationStackScrollLayout stackScroller,
             NotificationPanelView panelView,
             View clockView,
-            View operatorNameView) {
+            View operatorNameView,
+            View centeredIconView) {
         mNotificationIconAreaController = notificationIconAreaController;
         mHeadsUpManager = headsUpManager;
         mHeadsUpManager.addListener(this);
         mHeadsUpStatusBarView = headsUpStatusBarView;
+        mCenteredIconView = centeredIconView;
         headsUpStatusBarView.setOnDrawingRectChangedListener(
                 () -> updateIsolatedIconLocation(true /* requireUpdate */));
         mStackScroller = stackScroller;
@@ -238,11 +242,17 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
                 mHeadsUpStatusBarView.setVisibility(View.VISIBLE);
                 show(mHeadsUpStatusBarView);
                 hide(mClockView, View.INVISIBLE);
+                if (mCenteredIconView.getVisibility() != View.GONE) {
+                    hide(mCenteredIconView, View.INVISIBLE);
+                }
                 if (mOperatorNameView != null) {
                     hide(mOperatorNameView, View.INVISIBLE);
                 }
             } else {
                 show(mClockView);
+                if (mCenteredIconView.getVisibility() != View.GONE) {
+                    show(mCenteredIconView);
+                }
                 if (mOperatorNameView != null) {
                     show(mOperatorNameView);
                 }
