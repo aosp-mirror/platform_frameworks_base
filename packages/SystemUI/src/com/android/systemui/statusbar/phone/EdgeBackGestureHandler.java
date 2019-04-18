@@ -48,6 +48,7 @@ import android.view.InputMonitor;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
@@ -153,6 +154,8 @@ public class EdgeBackGestureHandler implements DisplayListener {
 
     private NavigationBarEdgePanel mEdgePanel;
     private WindowManager.LayoutParams mEdgePanelLp;
+    private final Rect mSamplingRect = new Rect();
+    private RegionSamplingHelper mRegionSamplingHelper;
 
     public EdgeBackGestureHandler(Context context, OverviewProxyService overviewProxyService) {
         final Resources res = context.getResources();
@@ -217,6 +220,8 @@ public class EdgeBackGestureHandler implements DisplayListener {
         if (mEdgePanel != null) {
             mWm.removeView(mEdgePanel);
             mEdgePanel = null;
+            mRegionSamplingHelper.stop();
+            mRegionSamplingHelper = null;
         }
 
         if (!mIsEnabled) {
@@ -270,6 +275,18 @@ public class EdgeBackGestureHandler implements DisplayListener {
             mEdgePanelLp.windowAnimations = 0;
             mEdgePanel.setLayoutParams(mEdgePanelLp);
             mWm.addView(mEdgePanel, mEdgePanelLp);
+            mRegionSamplingHelper = new RegionSamplingHelper(mEdgePanel,
+                    new RegionSamplingHelper.SamplingCallback() {
+                        @Override
+                        public void onRegionDarknessChanged(boolean isRegionDark) {
+                            mEdgePanel.setIsDark(!isRegionDark, true /* animate */);
+                        }
+
+                        @Override
+                        public Rect getSampledRegion(View sampledView) {
+                            return mSamplingRect;
+                        }
+                    });
         }
     }
 
@@ -310,8 +327,9 @@ public class EdgeBackGestureHandler implements DisplayListener {
                         ? (Gravity.LEFT | Gravity.TOP)
                         : (Gravity.RIGHT | Gravity.TOP);
                 mEdgePanel.setIsLeftPanel(mIsOnLeftEdge);
-                mEdgePanelLp.y = positionEdgePanelonDown(ev.getY());
+                updateEdgePanelPosition(ev.getY());
                 mWm.updateViewLayout(mEdgePanel, mEdgePanelLp);
+                mRegionSamplingHelper.start(mSamplingRect);
 
                 mDownPoint.set(ev.getX(), ev.getY());
                 mThresholdCrossed = false;
@@ -340,7 +358,8 @@ public class EdgeBackGestureHandler implements DisplayListener {
             // forward touch
             mEdgePanel.handleTouch(ev);
 
-            if (ev.getAction() == MotionEvent.ACTION_UP) {
+            boolean isUp = ev.getAction() == MotionEvent.ACTION_UP;
+            if (isUp) {
                 float xDiff = ev.getX() - mDownPoint.x;
                 boolean exceedsThreshold = mIsOnLeftEdge
                         ? (xDiff > mSwipeThreshold) : (-xDiff > mSwipeThreshold);
@@ -354,14 +373,30 @@ public class EdgeBackGestureHandler implements DisplayListener {
                 mOverviewProxyService.notifyBackAction(performAction, (int) mDownPoint.x,
                         (int) mDownPoint.y, false /* isButton */, !mIsOnLeftEdge);
             }
+            if (isUp || ev.getAction() == MotionEvent.ACTION_CANCEL) {
+                mRegionSamplingHelper.stop();
+            } else {
+                updateSamplingRect();
+                mRegionSamplingHelper.updateSamplingRect();
+            }
         }
     }
 
-    private int positionEdgePanelonDown(float touchY) {
+    private void updateEdgePanelPosition(float touchY) {
         float position = touchY - mFingerOffset;
         position = Math.max(position, mMinArrowPosition);
         position = (position - mEdgePanelLp.height / 2.0f);
-        return MathUtils.constrain((int) position, 0, mDisplaySize.y);
+        mEdgePanelLp.y = MathUtils.constrain((int) position, 0, mDisplaySize.y);
+        updateSamplingRect();
+    }
+
+    private void updateSamplingRect() {
+        int top = mEdgePanelLp.y;
+        int left = mIsOnLeftEdge ? 0 : mDisplaySize.x - mEdgePanelLp.width;
+        int right = left + mEdgePanelLp.width;
+        int bottom = top + mEdgePanelLp.height;
+        mSamplingRect.set(left, top, right, bottom);
+        mEdgePanel.adjustRectToBoundingBox(mSamplingRect);
     }
 
     @Override

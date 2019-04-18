@@ -20,6 +20,7 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.os.SystemClock;
 import android.os.VibrationEffect;
 import android.util.FloatProperty;
@@ -315,5 +316,14 @@ public class NavigationBarEdgePanel extends View {
 
     private float dp(float dp) {
         return mDensity * dp;
+    }
+
+    /**
+     * Adjust the rect to conform the the actual visible bounding box of the arrow.
+     *
+     * @param samplingRect the existing bounding box in screen coordinates, to be modified
+     */
+    public void adjustRectToBoundingBox(Rect samplingRect) {
+        // TODO: adjust this. For now we take the complete rect
     }
 }
