@@ -78,6 +78,7 @@ import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
+import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
@@ -109,7 +110,7 @@ public class NotificationPanelView extends PanelView implements
         KeyguardAffordanceHelper.Callback, NotificationStackScrollLayout.OnEmptySpaceClickListener,
         OnHeadsUpChangedListener, QS.HeightListener, ZenModeController.Callback,
         ConfigurationController.ConfigurationListener, StateListener,
-        PulseExpansionHandler.ExpansionCallback {
+        PulseExpansionHandler.ExpansionCallback, DynamicPrivacyController.Listener {
 
     private static final boolean DEBUG = false;
 
@@ -343,7 +344,8 @@ public class NotificationPanelView extends PanelView implements
     public NotificationPanelView(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
             InjectionInflationController injectionInflationController,
             NotificationWakeUpCoordinator coordinator,
-            PulseExpansionHandler pulseExpansionHandler) {
+            PulseExpansionHandler pulseExpansionHandler,
+            DynamicPrivacyController dynamicPrivacyController) {
         super(context, attrs);
         setWillNotDraw(!DEBUG);
         mInjectionInflationController = injectionInflationController;
@@ -358,6 +360,7 @@ public class NotificationPanelView extends PanelView implements
         mDisplayId = context.getDisplayId();
         mPulseExpansionHandler = pulseExpansionHandler;
         mThemeResId = context.getThemeResId();
+        dynamicPrivacyController.addListener(this);
     }
 
     /**
@@ -3112,5 +3115,10 @@ public class NotificationPanelView extends PanelView implements
             parent = (ViewGroup) parent.getParent();
         }
         return y;
+    }
+
+    @Override
+    public void onDynamicPrivacyChanged() {
+        mAnimateNextPositionUpdate = true;
     }
 }
