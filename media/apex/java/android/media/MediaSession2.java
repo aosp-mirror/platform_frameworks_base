@@ -153,7 +153,7 @@ public class MediaSession2 implements AutoCloseable {
      * Returns the session ID
      */
     @NonNull
-    public String getSessionId() {
+    public String getId() {
         return mSessionId;
     }
 
@@ -161,7 +161,7 @@ public class MediaSession2 implements AutoCloseable {
      * Returns the {@link Session2Token} for creating {@link MediaController2}.
      */
     @NonNull
-    public Session2Token getSessionToken() {
+    public Session2Token getToken() {
         return mSessionToken;
     }
 
@@ -553,7 +553,7 @@ public class MediaSession2 implements AutoCloseable {
             try {
                 MediaSessionManager manager = (MediaSessionManager) mContext.getSystemService(
                         Context.MEDIA_SESSION_SERVICE);
-                manager.notifySession2Created(session2.getSessionToken());
+                manager.notifySession2Created(session2.getToken());
             } catch (Exception e) {
                 session2.close();
                 throw e;
