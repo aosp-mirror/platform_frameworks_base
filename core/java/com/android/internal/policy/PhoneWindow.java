@@ -2466,9 +2466,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
         if (!targetPreQ) {
             mEnsureStatusBarContrastWhenTransparent = a.getBoolean(
-                    R.styleable.Window_ensuringStatusBarContrastWhenTransparent, false);
+                    R.styleable.Window_enforceStatusBarContrast, false);
             mEnsureNavigationBarContrastWhenTransparent = a.getBoolean(
-                    R.styleable.Window_ensuringNavigationBarContrastWhenTransparent, true);
+                    R.styleable.Window_enforceNavigationBarContrast, true);
         }
 
         WindowManager.LayoutParams params = getAttributes();
@@ -3859,7 +3859,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     @Override
-    public void setEnsuringStatusBarContrastWhenTransparent(boolean ensureContrast) {
+    public void setStatusBarContrastEnforced(boolean ensureContrast) {
         mEnsureStatusBarContrastWhenTransparent = ensureContrast;
         if (mDecor != null) {
             mDecor.updateColorViews(null, false /* animate */);
@@ -3867,20 +3867,20 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     @Override
-    public boolean isEnsuringStatusBarContrastWhenTransparent() {
+    public boolean isStatusBarContrastEnforced() {
         return mEnsureStatusBarContrastWhenTransparent;
     }
 
     @Override
-    public void setEnsuringNavigationBarContrastWhenTransparent(boolean ensureContrast) {
-        mEnsureNavigationBarContrastWhenTransparent = ensureContrast;
+    public void setNavigationBarContrastEnforced(boolean enforceContrast) {
+        mEnsureNavigationBarContrastWhenTransparent = enforceContrast;
         if (mDecor != null) {
             mDecor.updateColorViews(null, false /* animate */);
         }
     }
 
     @Override
-    public boolean isEnsuringNavigationBarContrastWhenTransparent() {
+    public boolean isNavigationBarContrastEnforced() {
         return mEnsureNavigationBarContrastWhenTransparent;
     }
 
