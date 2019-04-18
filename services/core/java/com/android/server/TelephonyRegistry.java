@@ -2283,6 +2283,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         .setCallingPid(r.callerPid)
                         .setCallingUid(r.callerUid)
                         .setMethod("TelephonyRegistry push")
+                        .setLogAsInfo(true) // we don't need to log an error every time we push
                         .setMinSdkVersionForFine(minSdk)
                         .build();
 
@@ -2300,6 +2301,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         .setCallingPid(r.callerPid)
                         .setCallingUid(r.callerUid)
                         .setMethod("TelephonyRegistry push")
+                        .setLogAsInfo(true) // we don't need to log an error every time we push
                         .setMinSdkVersionForCoarse(minSdk)
                         .build();
 
