@@ -330,9 +330,9 @@
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"laienda/ahenda olekuriba"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Võimaldab rakendusel laiendada või ahendada olekuriba."</string>
     <string name="permlab_install_shortcut" msgid="4279070216371564234">"otseteede installimine"</string>
-    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Lubab rakendusel lisada avaekraani otseteid ilma kasutaja sekkumiseta."</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Lubab rakendusel lisada avakuva otseteid ilma kasutaja sekkumiseta."</string>
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"otseteede desinstallimine"</string>
-    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Lubab rakendusel eemaldada avaekraani otseteid ilma kasutaja sekkumiseta."</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Lubab rakendusel eemaldada avakuva otseteid ilma kasutaja sekkumiseta."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"marsruutige väljuvad kõned uuesti"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Lubab rakendusel näha, mis number valitakse väljahelistamisel, ning laseb suunata kõne teisele numbrile või selle üldse katkestada."</string>
     <string name="permlab_answerPhoneCalls" msgid="4077162841226223337">"vastamine telefonikõnedele"</string>
@@ -560,8 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"Liigutage telefon lähemale."</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"Liigutage telefoni kõrgemale."</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"Liigutage telefoni allapoole."</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"Liigutage telefoni paremale."</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"Liigutage telefoni vasakule."</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"Liigutage telefoni vasakule."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"Liigutage telefoni paremale."</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Vaadake ekraani avatud silmadega."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Teie nägu ei ole näha. Vaadake telefoni poole."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Liiga palju liikumist. Hoidke telefoni paigal."</string>
@@ -1136,7 +1136,7 @@
     <string name="whichSendToApplication" msgid="8272422260066642057">"Saada rakendusega"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"Saada rakendusega %1$s"</string>
     <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"Saada"</string>
-    <string name="whichHomeApplication" msgid="4307587691506919691">"Avaekraani rakenduse valimine"</string>
+    <string name="whichHomeApplication" msgid="4307587691506919691">"Avakuva rakenduse valimine"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Rakenduse %1$s kasutamine avaekraanina"</string>
     <string name="whichHomeApplicationLabel" msgid="809529747002918649">"Jäädvusta kujutis"</string>
     <string name="whichImageCaptureApplication" msgid="3680261417470652882">"Jäädvusta pilt rakendusega"</string>
@@ -1264,8 +1264,8 @@
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Ühendatud"</string>
     <string name="network_partial_connectivity" msgid="7774883385494762741">"Võrgu <xliff:g id="NETWORK_SSID">%1$s</xliff:g> ühendus on piiratud"</string>
     <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Puudutage, kui soovite siiski ühenduse luua"</string>
-    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Muudatused teie leviala seadetes"</string>
-    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Teie leviala riba on muutunud."</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Muudatused teie kuumkoha seadetes"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Teie kuumkoha sagedusriba on muutunud."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"See seade ei toeta teie eelistatud ainult 5 GHz riba. Seade kasutab 5 GHz riba ainult siis, kui see on saadaval."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Lülitati võrgule <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Seade kasutab võrku <xliff:g id="NEW_NETWORK">%1$s</xliff:g>, kui võrgul <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> puudub juurdepääs Internetile. Rakenduda võivad tasud."</string>
@@ -1798,7 +1798,7 @@
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Aku tööea pikendamiseks lülitab akusäästja taustategevused, mõningad visuaalsed efektid ja muud akut koormavad funktsioonid välja või piirab neid. "<annotation id="url">"Lisateave"</annotation></string>
     <string name="battery_saver_description" msgid="6413346684861241431">"Aku tööea pikendamiseks lülitab akusäästja taustategevused, mõningad visuaalsed efektid ja muud akut koormavad funktsioonid välja või piirab neid."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Andmekasutuse vähendamiseks keelab andmeside mahu säästja mõne rakenduse puhul andmete taustal saatmise ja vastuvõtmise. Rakendus, mida praegu kasutate, pääseb andmesidele juurde, kuid võib seda teha väiksema sagedusega. Seetõttu võidakse näiteks kujutised kuvada alles siis, kui neid puudutate."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Andmekasutuse vähendamiseks keelab andmemahu säästja mõne rakenduse puhul andmete taustal saatmise ja vastuvõtmise. Rakendus, mida praegu kasutate, pääseb andmesidele juurde, kuid võib seda teha väiksema sagedusega. Seetõttu võidakse näiteks kujutised kuvada alles siis, kui neid puudutate."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Lül. andmemahu säästja sisse?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Lülita sisse"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

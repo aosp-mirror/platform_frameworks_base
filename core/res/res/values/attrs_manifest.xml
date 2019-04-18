@@ -328,6 +328,12 @@
              would be granted. The weak grant depends on the permission.
         -->
         <flag name="softRestricted" value="0x8" />
+        <!-- This permission is restricted immutably which means that its
+             restriction state may be specified only on the first install of
+             the app and will stay in this initial whitelist state until
+             the app is uninstalled.
+        -->
+        <flag name="immutablyRestricted" value="0x10" />
     </attr>
 
     <!-- Specified the name of a group that this permission is associated
@@ -1707,17 +1713,18 @@
              See {@link android.media.AudioPlaybackCaptureConfiguration} for more detail.
              -->
         <attr name="allowAudioPlaybackCapture" format="boolean" />
-        <!-- If {@code true} this app allows shared/external storage media to be
-             a sandboxed view that only contains files owned by the app.
-             <p>
-             Sandboxed apps can continue to discover and read media belonging to other
-             apps via {@code MediaStore}.
+        <!-- If {@code true} this app would like to run under the legacy storage
+             model. Note that this may not always be respected due to policy or
+             backwards compatibility reasons.
+
+             <p>Apps not requesting legacy storage can continue to discover and
+             read media belonging to other apps via {@code MediaStore}.
              <p>
              The default value is:
-                 - {@code true} for apps with targetSdkVersion >= 29 (Q).
-                 - {@code false} for apps with targetSdkVersion < 29.
+                 - {@code false} for apps with targetSdkVersion >= 29 (Q).
+                 - {@code true} for apps with targetSdkVersion < 29.
              -->
-        <attr name="allowExternalStorageSandbox" format="boolean" />
+        <attr name="requestLegacyExternalStorage" format="boolean" />
     </declare-styleable>
     <!-- The <code>permission</code> tag declares a security permission that can be
          used to control access from other packages to specific components or

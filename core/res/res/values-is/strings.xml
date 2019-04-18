@@ -560,8 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"Færðu símann nær."</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"Færðu símann hærra."</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"Færðu símann neðar."</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"Færðu símann til hægri."</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"Færðu símann til vinstri."</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"Færðu símann til vinstri."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"Færðu símann til hægri."</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Horfðu á skjáinn með opin augu."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Sé ekki andlit þitt. Horfðu á símann."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Of mikil hreyfing. Haltu símanum stöðugum."</string>
@@ -674,8 +674,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Krefjast þess að geymd forritsgögn séu dulkóðuð."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Slökkva á myndavélum"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Koma í veg fyrir notkun allra myndavéla tækisins."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Slökkva á sumum skjáláseiginl."</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Komdu í veg fyrir notkun sumra eiginleika skjáláss."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Loka á suma eiginl. skjáláss"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Hindra notkun sumra eiginleika skjáláss."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Heima"</item>
     <item msgid="869923650527136615">"Farsími"</item>

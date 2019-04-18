@@ -15,7 +15,7 @@
  */
 package android.service.autofill.augmented;
 
-import static android.service.autofill.augmented.AugmentedAutofillService.DEBUG;
+import static android.service.autofill.augmented.AugmentedAutofillService.sDebug;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -48,7 +48,7 @@ public final class FillCallback {
      * could not provide autofill for the request.
      */
     public void onSuccess(@Nullable FillResponse response) {
-        if (DEBUG) Log.d(TAG, "onSuccess(): " + response);
+        if (sDebug) Log.d(TAG, "onSuccess(): " + response);
 
         mProxy.report(AutofillProxy.REPORT_EVENT_ON_SUCCESS);
         if (response == null) return;

@@ -11648,14 +11648,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * When screen readers (one type of accessibility tool) decide what should be read to the
-     * user, they typically look for input focusable ({@link #isFocusable()}) parents of
-     * non-focusable text items, and read those focusable parents and their non-focusable children
-     * as a unit. In some situations, this behavior is desirable for views that should not take
-     * input focus. Setting an item to be screen reader focusable requests that the view be
-     * treated as a unit by screen readers without any effect on input focusability. The default
-     * value of {@code false} lets screen readers use other signals, like focusable, to determine
-     * how to group items.
+     * Sets whether this View should be a focusable element for screen readers
+     * and include non-focusable Views from its subtree when providing feedback.
+     * <p>
+     * Note: this is similar to using <a href="#attr_android:focusable">{@code android:focusable},
+     * but does not impact input focus behavior.
      *
      * @param screenReaderFocusable Whether the view should be treated as a unit by screen reader
      *                              accessibility tools.

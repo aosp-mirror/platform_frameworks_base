@@ -155,7 +155,7 @@
     <string name="tts_settings_title" msgid="1237820681016639683">"Nutq sintezi"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Nutq tezligi"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Matnni o‘qish tezligi"</string>
-    <string name="tts_default_pitch_title" msgid="6135942113172488671">"Chimdish"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"Ohang"</string>
     <string name="tts_default_pitch_summary" msgid="1944885882882650009">"Sintezlangan nutq balandligiga ta’sir qiladi"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"Til"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"Tizim tili"</string>
@@ -222,7 +222,7 @@
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobil internet doim yoniq tursin"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Modem rejimida apparatli tezlashtirish"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Bluetooth qurilmalarini nomlarisiz ko‘rsatish"</string>
-    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Ovoz balangligining mutlaq darajasini o‘chirib qo‘yish"</string>
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Tovush balandligining mutlaq darajasini faolsizlantirish"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP versiyasi"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Bluetooth AVRCP versiyasini tanlang"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth audio kodeki"</string>

@@ -503,6 +503,8 @@ package android.app.prediction {
     method @NonNull public android.app.prediction.AppTarget build();
     method @NonNull public android.app.prediction.AppTarget.Builder setClassName(@NonNull String);
     method @NonNull public android.app.prediction.AppTarget.Builder setRank(@IntRange(from=0) int);
+    method @Deprecated @NonNull public android.app.prediction.AppTarget.Builder setTarget(@NonNull String, @NonNull android.os.UserHandle);
+    method @Deprecated @NonNull public android.app.prediction.AppTarget.Builder setTarget(@NonNull android.content.pm.ShortcutInfo);
   }
 
   public final class AppTargetEvent implements android.os.Parcelable {
@@ -1128,22 +1130,6 @@ package android.media {
     field public static final String FRAME_COUNT = "android.media.audiotrack.frameCount";
     field public static final String PORT_ID = "android.media.audiotrack.portId";
     field public static final String SAMPLE_RATE = "android.media.audiotrack.sampleRate";
-  }
-
-  public final class BufferingParams implements android.os.Parcelable {
-    method public int describeContents();
-    method public int getInitialMarkMs();
-    method public int getResumePlaybackMarkMs();
-    method public void writeToParcel(android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.media.BufferingParams> CREATOR;
-  }
-
-  public static class BufferingParams.Builder {
-    ctor public BufferingParams.Builder();
-    ctor public BufferingParams.Builder(android.media.BufferingParams);
-    method public android.media.BufferingParams build();
-    method public android.media.BufferingParams.Builder setInitialMarkMs(int);
-    method public android.media.BufferingParams.Builder setResumePlaybackMarkMs(int);
   }
 
   public static final class MediaCodecInfo.VideoCapabilities.PerformancePoint {

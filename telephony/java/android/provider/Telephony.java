@@ -3039,6 +3039,7 @@ public final class Telephony {
              * The {@code content://} style URL for this table. Can be appended with a part ID to
              * address individual parts.
              */
+            @NonNull
             public static final Uri CONTENT_URI = Uri.withAppendedPath(Mms.CONTENT_URI, "part");
 
             /**

@@ -18,8 +18,8 @@
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.captiveportallogin"
-    android:versionCode="210000300"
-    android:versionName="Year 2021 Week 00 Build 30 on api-level 0">
+    android:versionCode="210000400"
+    android:versionName="Year 2021 Week 00 Build 40 on api-level 0">
 
     <uses-sdk android:minSdkVersion="28" android:targetSdkVersion="28" />
     <uses-permission android:name="android.permission.INTERNET" />

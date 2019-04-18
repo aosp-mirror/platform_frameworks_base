@@ -292,7 +292,7 @@
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"Թույլ տա՞լ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; հավելվածին ուղարկել և դիտել SMS հաղորդագրություններ:"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Տարածք"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"օգտագործել լուսանկարները, մեդիա ֆայլերը և ձեր սարքում պահվող մյուս ֆայլերը"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Թույլ տա՞լ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; հավելվածին օգտագործել սարքում պահված լուսանկարները, մեդիան և ֆայլերը:"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Թույլ տա՞լ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; հավելվածին օգտագործել սարքում պահված լուսանկարները, մուլտիմեդիան և ֆայլերը"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Խոսափող"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ձայնագրել"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Թույլ տա՞լ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; հավելվածին կատարել ձայնագրություն:"</string>
@@ -528,8 +528,8 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Մատնահետքը հայտնաբերվել է մասամբ: Փորձեք նորից:"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Չհաջողվեց մշակել մատնահետքը: Նորից փորձեք:"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Մատնահետքերի սենսորն աղտոտված է: Մաքրեք այն և փորձեք նորից:"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Շատ արագ անցկացրեցիք մատը: Փորձեք նորից:"</string>
-    <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Շատ դանդաղ անցկացրեցիք մատը: Փորձեք նորից:"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Շատ արագ անցկացրիք մատը: Փորձեք նորից:"</string>
+    <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Շատ դանդաղ անցկացրիք մատը: Փորձեք նորից:"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Մատնահետքը նույնականացվեց"</string>
@@ -560,8 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"Մոտեցրեք հեռախոսը։"</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"Բարձրացրեք հեռախոսը։"</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"Իջեցրեք հեռախոսը։"</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"Տեղափոխեք հեռախոսը աջ"</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"Տեղափոխեք հեռախոսը ձախ"</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"Տեղափոխեք հեռախոսը ձախ:"</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"Տեղափոխեք հեռախոսը աջ:"</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Աչքերը բաց նայեք էկրանին։"</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Ձեր դեմքը չի երևում։ Նայեք հեռախոսին։"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Շատ եք շարժում։ Հեռախոսն անշարժ պահեք։"</string>
@@ -1881,7 +1881,7 @@
     <string name="language_selection_title" msgid="2680677278159281088">"Ավելացնել լեզու"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Նախընտրելի տարածաշրջան"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Մուտքագրեք լեզուն"</string>
-    <string name="language_picker_section_suggested" msgid="8414489646861640885">"Առաջարկներ"</string>
+    <string name="language_picker_section_suggested" msgid="8414489646861640885">"Առաջարկվող"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Բոլոր լեզուները"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Բոլոր տարածաշրջանները"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Որոնում"</string>

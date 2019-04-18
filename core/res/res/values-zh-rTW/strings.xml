@@ -20,7 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="byteShort" msgid="8340973892742019101">"位元組"</string>
+    <string name="byteShort" msgid="8340973892742019101">"B"</string>
     <string name="kilobyteShort" msgid="7542884022844556968">"KB"</string>
     <string name="megabyteShort" msgid="6355851576770428922">"MB"</string>
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
@@ -560,8 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"請將手機拿近一點。"</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"請將手機舉高一點。"</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"請將手機拿低一點。"</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"請將手機向右移動。"</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"請將手機向左移動。"</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"請將手機向左移動。"</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"請將手機向右移動。"</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"請直視螢幕並張開眼睛。"</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"無法偵測你的臉孔，請直視手機。"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"鏡頭過度晃動，請拿穩手機。"</string>
@@ -890,7 +890,7 @@
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"滑動區域。"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
-    <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
+    <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT 鍵"</string>
     <string name="granularity_label_character" msgid="7336470535385009523">"字元"</string>
     <string name="granularity_label_word" msgid="7075570328374918660">"字詞"</string>
     <string name="granularity_label_link" msgid="5815508880782488267">"連結"</string>
@@ -1295,7 +1295,7 @@
     <string name="wifi_p2p_from_message" msgid="570389174731951769">"寄件者："</string>
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"收件者："</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"請輸入必要的 PIN："</string>
-    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN："</string>
+    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN 碼："</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"平板電腦與 <xliff:g id="DEVICE_NAME">%1$s</xliff:g> 連線期間將暫時中斷 Wi-Fi 連線"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"電視連上 <xliff:g id="DEVICE_NAME">%1$s</xliff:g> 期間將暫時中斷 Wi-Fi 連線"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"手機與 <xliff:g id="DEVICE_NAME">%1$s</xliff:g> 連線期間將暫時中斷 Wi-Fi 連線"</string>

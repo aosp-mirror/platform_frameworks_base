@@ -3829,6 +3829,24 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     /**
+     * Set the root-level system gesture exclusion rects. These are added to those provided by
+     * the root's view hierarchy.
+     */
+    public void setRootSystemGestureExclusionRects(@NonNull List<Rect> rects) {
+        mGestureExclusionTracker.setRootSystemGestureExclusionRects(rects);
+        mHandler.sendEmptyMessage(MSG_SYSTEM_GESTURE_EXCLUSION_CHANGED);
+    }
+
+    /**
+     * Returns the root-level system gesture exclusion rects. These do not include those provided by
+     * the root's view hierarchy.
+     */
+    @NonNull
+    public List<Rect> getRootSystemGestureExclusionRects() {
+        return mGestureExclusionTracker.getRootSystemGestureExclusionRects();
+    }
+
+    /**
      * Requests that the root render node is invalidated next time we perform a draw, such that
      * {@link WindowCallbacks#onPostDraw} gets called.
      */

@@ -3484,7 +3484,9 @@ public class AudioService extends IAudioService.Stub
                 !mSystemReady) {
             return;
         }
-        mDeviceBroker.startBluetoothScoForClient_Sync(cb, scoAudioMode, eventSource);
+        synchronized (mDeviceBroker.mSetModeLock) {
+            mDeviceBroker.startBluetoothScoForClient_Sync(cb, scoAudioMode, eventSource);
+        }
     }
 
     /** @see AudioManager#stopBluetoothSco() */
@@ -3496,7 +3498,9 @@ public class AudioService extends IAudioService.Stub
         final String eventSource =  new StringBuilder("stopBluetoothSco()")
                 .append(") from u/pid:").append(Binder.getCallingUid()).append("/")
                 .append(Binder.getCallingPid()).toString();
-        mDeviceBroker.stopBluetoothScoForClient_Sync(cb, eventSource);
+        synchronized (mDeviceBroker.mSetModeLock) {
+            mDeviceBroker.stopBluetoothScoForClient_Sync(cb, eventSource);
+        }
     }
 
 

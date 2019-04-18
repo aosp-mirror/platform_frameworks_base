@@ -46,7 +46,7 @@
     <string name="badPuk" msgid="5487257647081132201">"आपके द्वारा लिखा गया PUK सही नहीं है."</string>
     <string name="mismatchPin" msgid="609379054496863419">"आपने जो पिन लिखे हैं उसका मिलान नहीं होता."</string>
     <string name="invalidPin" msgid="3850018445187475377">"कोई ऐसा पिन लिखें, जिसमें 4 से 8 अंक हों."</string>
-    <string name="invalidPuk" msgid="8761456210898036513">"ऐसा PUK लिखें जो 8 अंकों या अधिक का हो."</string>
+    <string name="invalidPuk" msgid="8761456210898036513">"ऐसा PUK लिखें जो 8 अंकों या ज़्यादा का हो."</string>
     <string name="needPuk" msgid="919668385956251611">"आपका सिम कार्ड PUK लॉक किया गया है. इसे अनलॉक करने के लिए PUK कोड लिखें."</string>
     <string name="needPuk2" msgid="4526033371987193070">"सिम कार्ड अनब्‍लॉक करने के लिए PUK2 लिखें."</string>
     <string name="enablePin" msgid="209412020907207950">"नहीं हो सका, सिम//RUIM लॉक चालू करें."</string>
@@ -234,7 +234,7 @@
     <skip />
     <string name="bugreport_message" msgid="398447048750350456">"इससे ईमेल भेजने के लिए, आपके डिवाइस की मौजूदा स्थिति से जुड़ी जानकारी इकट्ठा की जाएगी. गड़बड़ी की रिपोर्ट बनना शुरू होने से लेकर भेजने के लिए तैयार होने तक कुछ समय लगेगा; कृपया इंतज़ार करें."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"सहभागी रिपोर्ट"</string>
-    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"ज़्यादातर परिस्थितियों में इसका उपयोग करें. यह आपको रिपोर्ट की प्रगति ट्रैक करने देता है, समस्या के बारे में अधिक विवरण डालने देता है और स्क्रीनशॉट लेने देता है. यह आपको ऐसे कम उपयोग किए गए अनुभाग मिटाने दे सकता है जिनकी रिपोर्ट करने में अधिक समय लगता है."</string>
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"ज़्यादातर परिस्थितियों में इसका उपयोग करें. यह आपको रिपोर्ट की प्रगति ट्रैक करने देता है, समस्या के बारे में ज़्यादा विवरण डालने देता है और स्क्रीनशॉट लेने देता है. यह आपको ऐसे कम उपयोग किए गए अनुभाग मिटाने दे सकता है जिनकी रिपोर्ट करने में ज़्यादा समय लगता है."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"पूर्ण रिपोर्ट"</string>
     <string name="bugreport_option_full_summary" msgid="7210859858969115745">"जब आपका डिवाइस ठीक से काम नहीं कर रहा हो या बहुत धीमा हो या जब आपको रिपोर्ट के सभी भागों की ज़रूरत हो, तो सिस्टम से कम से कम रोक-टोक के लिए इस विकल्प का इस्तेमाल करें. यह आपको ज़्यादा जानकारी डालने या अतिरिक्त स्क्रीनशॉट लेने नहीं देता."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
@@ -244,7 +244,7 @@
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"साइलेंट मोड (खामोश)"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"ध्‍वनि बंद है"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"ध्‍वनि चालू है"</string>
-    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"हवाई जहाज मोड"</string>
+    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"हवाई जहाज़ मोड"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"हवाई जहाज मोड चालू है"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"हवाई जहाज मोड बंद है"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"सेटिंग"</string>
@@ -389,13 +389,13 @@
     <string name="permlab_writeSettings" msgid="2226195290955224730">"सिस्‍टम सेटिंग बदलें"</string>
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"ऐप्स  को सिस्टम सेटिंग डेटा संशोधित करने देता है. दुर्भावनापूर्ण ऐप्स  आपके सिस्टम के कॉन्फ़िगरेशन को दूषित कर सकते हैं."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"प्रारंभ होने पर चलाएं"</string>
-    <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"ऐप्स  को सिस्टम द्वारा बूटिंग पूर्ण करते ही अपने आप आरंभ करने देता है. इससे टैबलेट को आरंभ होने में अधिक समय लग सकता है और ऐप्स  को निरंतर चलाकर संपूर्ण टैबलेट को धीमा करने देता है."</string>
+    <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"ऐप्स  को सिस्टम द्वारा बूटिंग पूर्ण करते ही अपने आप आरंभ करने देता है. इससे टैबलेट को आरंभ होने में ज़्यादा समय लग सकता है और ऐप्स  को निरंतर चलाकर संपूर्ण टैबलेट को धीमा करने देता है."</string>
     <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"सिस्‍टम के चालू होते ही ऐप को अपने आप शुरू होने देती है. इससे टीवी को चालू होने में ज़्यादा समय लग सकता है और ऐप के लगातार चलते रहने से पूरा टैबलेट धीमा हो सकता है."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"सिस्‍टम के चालू होते ही ऐप को अपने आप शुरू होने देती है. इससे फ़ोन को चालू होने में ज़्यादा समय लग सकता है और ऐप के लगातार चलते रहने से पूरा फ़ोन धीमा हो सकता है."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"स्टिकी प्रसारण भेजें"</string>
-    <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"ऐप्स को स्‍टिकी प्रसारण भेजने देता है, जो प्रसारण खत्म होने के बाद भी बने रहते हैं. अत्यधिक उपयोग, टैबलेट की बहुत अधिक मेमोरी का उपयोग करके उसे धीमा या अस्‍थिर कर सकता है."</string>
+    <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"ऐप्स को स्‍टिकी प्रसारण भेजने देता है, जो प्रसारण खत्म होने के बाद भी बने रहते हैं. अत्यधिक उपयोग, टैबलेट की बहुत ज़्यादा मेमोरी का उपयोग करके उसे धीमा या अस्‍थिर कर सकता है."</string>
     <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"ऐप को स्‍िटकी प्रसारण भेजने देती है, जो प्रसारण बंद होने के बाद भी बने रहते हैं. अत्‍यधिक उपयोग से टीवी धीमा या अस्‍थिर हो सकता है जिससे वह बहुत सारी मेमोरी का उपयोग कर सकता है."</string>
-    <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"ऐप्स को स्‍टिकी प्रसारण भेजने देता है, जो प्रसारण खत्म होने के बाद भी बने रहते हैं. अत्यधिक उपयोग, फ़ोन की बहुत अधिक मेमोरी का उपयोग करके उसे धीमा या अस्‍थिर कर सकता है."</string>
+    <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"ऐप्स को स्‍टिकी प्रसारण भेजने देता है, जो प्रसारण खत्म होने के बाद भी बने रहते हैं. अत्यधिक उपयोग, फ़ोन की बहुत ज़्यादा मेमोरी का उपयोग करके उसे धीमा या अस्‍थिर कर सकता है."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"अपने संपर्क पढ़ें"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"ऐप को आपके टैबलेट पर मौजूद आपके संपर्कों का डेटा पढ़ने देती है, जिसमें ये भी शामिल है कि आपने कुछ ख़ास लोगों से कितनी बार कॉल, ईमेल, या कुछ और तरीकों से बातचीत की. यह अनुमति ऐप को आपका संपर्क डेटा सेव करने देती है और धोखा देने वाले ऐप संपर्क डेटा को आपकी जानकारी के बिना शेयर कर सकते हैं."</string>
     <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"ऐप को आपके टीवी पर मौजूद आपके संपर्कों का डेटा पढ़ने देती है, जिसमें ये भी शामिल है कि आपने कुछ ख़ास लोगों से कितनी बार कॉल, ईमेल, या कुछ और तरीकों से बातचीत की. यह अनुमति ऐप को आपका संपर्क डेटा सेव करने देती है और धोखा देने वाले ऐप संपर्क डेटा को आपकी जानकारी के बिना शेयर कर सकते हैं."</string>
@@ -491,9 +491,9 @@
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"वाई-फ़ाई  से कनेक्‍ट और डिस्‍कनेक्‍ट करें"</string>
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"ऐप्स  को वाई-फ़ाई  पहुंच बिंदुओं से कनेक्ट और डिसकनेक्ट करने और वाई-फ़ाई  नेटवर्क के लिए डिवाइस कॉन्फ़िगरेशन में परिवर्तन करने देता है."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"वाई-फ़ाई  मल्‍टीकास्‍ट प्राप्ति को अनुमति दें"</string>
-    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"ऐप्स  को वाई-फ़ाई  नेटवर्क पर मल्टीकास्ट पते के उपयोग से केवल आपके टैबलेट पर ही नहीं, बल्कि सभी डिवाइस पर भेजे गए पैकेट प्राप्‍त करने देता है. यह गैर-मल्टीकास्ट मोड से अधिक पावर का उपयोग करता है."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"ऐप को मल्‍टीकास्‍ट पतों का उपयोग करके ना केवल आपके टीवी को, बल्‍कि वाई-फ़ाई पर मौजूद सभी डिवाइसों को पैकेट भेजने और प्राप्‍त करने देती है. इसमें गैर-मल्‍टीकास्‍ट मोड की अपेक्षा अधिक पावर का उपयोग होता है."</string>
-    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"ऐप्स  को वाई-फ़ाई  नेटवर्क पर मल्टीकास्ट पते के उपयोग से केवल आपके फ़ोन पर ही नहीं, बल्कि सभी डिवाइस पर भेजे गए पैकेट प्राप्‍त करने देता है. यह गैर-मल्टीकास्ट मोड से अधिक पावर का उपयोग करता है."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"ऐप्स  को वाई-फ़ाई  नेटवर्क पर मल्टीकास्ट पते के उपयोग से केवल आपके टैबलेट पर ही नहीं, बल्कि सभी डिवाइस पर भेजे गए पैकेट प्राप्‍त करने देता है. यह गैर-मल्टीकास्ट मोड से ज़्यादा पावर का उपयोग करता है."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"ऐप को मल्‍टीकास्‍ट पतों का उपयोग करके ना केवल आपके टीवी को, बल्‍कि वाई-फ़ाई पर मौजूद सभी डिवाइसों को पैकेट भेजने और प्राप्‍त करने देती है. इसमें गैर-मल्‍टीकास्‍ट मोड की अपेक्षा ज़्यादा पावर का उपयोग होता है."</string>
+    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"ऐप्स  को वाई-फ़ाई  नेटवर्क पर मल्टीकास्ट पते के उपयोग से केवल आपके फ़ोन पर ही नहीं, बल्कि सभी डिवाइस पर भेजे गए पैकेट प्राप्‍त करने देता है. यह गैर-मल्टीकास्ट मोड से ज़्यादा पावर का उपयोग करता है."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"ब्लूटूथ सेटिंग पर पहुंचें"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"किसी ऐप्स को स्‍थानीय ब्लूटूथ टैबलेट कॉन्‍फ़िगर करने की और रिमोट डिवाइस के साथ खोजने और युग्‍मित करने देता है."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"ऐप को स्‍थानीय ब्‍लूटूथ टीवी कॉन्‍फ़िगर करने देती है और दूरस्‍थ डिवाइसों को खोजने और उनसे युग्‍मित करने देती है."</string>
@@ -537,7 +537,7 @@
     <string name="biometric_error_canceled" msgid="349665227864885880">"प्रमाणीकरण रद्द किया गया"</string>
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"पिन, पैटर्न या पासवर्ड सेट नहीं है"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"आंशिक फ़िंगरप्रिंट की पहचान की गई. कृपया पुनः प्रयास करें."</string>
-    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"फ़िंगरप्रिंट संसाधित नहीं हो सका. कृपया फिर से प्रयास करें."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"फ़िंगरप्रिंट प्रोसेस नहीं हो सका. कृपया दोबारा कोशिश करें."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"फ़िंगरप्रिंट सेंसर गंदा है. कृपया साफ़ करें और फिर कोशिश करें."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"उंगली बहुत तेज़ी से चलाई गई है. कृपया फिर से कोशिश करें."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"उंगली बहुत धीरे चलाई गई. कृपया फिर से कोशिश करें."</string>
@@ -551,8 +551,8 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"फ़िंगरप्रिंट का समय खत्म हो गया. पुनः प्रयास करें."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"फ़िंगरप्रिंट क्रियान्वयन रोक दिया गया."</string>
     <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"उपयोगकर्ता ने फिंगरप्रिंट की पुष्टि की कार्रवाई रद्द कर दी है."</string>
-    <string name="fingerprint_error_lockout" msgid="5536934748136933450">"बहुत अधिक प्रयास कर लिए गए हैं. बाद में फिर से प्रयास करें."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"बहुत अधिक कोशिशें. फ़िंगरप्रिंट सेंसर अक्षम है."</string>
+    <string name="fingerprint_error_lockout" msgid="5536934748136933450">"बहुत ज़्यादा प्रयास कर लिए गए हैं. बाद में फिर से प्रयास करें."</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"बहुत ज़्यादा कोशिशें. फ़िंगरप्रिंट सेंसर अक्षम है."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"फिर से प्रयास करें."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"कोई फ़िंगरप्रिंट रजिस्टर नहीं किया गया है."</string>
     <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"इस डिवाइस में फ़िंगरप्रिंट सेंसर नहीं है."</string>
@@ -578,9 +578,9 @@
     <skip />
     <!-- no translation found for face_acquired_too_low (488983581737550912) -->
     <skip />
-    <!-- no translation found for face_acquired_too_right (941726879175375970) -->
+    <!-- no translation found for face_acquired_too_right (3667075962661863218) -->
     <skip />
-    <!-- no translation found for face_acquired_too_left (5873592047381190672) -->
+    <!-- no translation found for face_acquired_too_left (3148242963894703424) -->
     <skip />
     <!-- no translation found for face_acquired_poor_gaze (8471716624377228327) -->
     <skip />
@@ -678,10 +678,10 @@
     <string name="policylab_limitPassword" msgid="4497420728857585791">"पासवर्ड नियम सेट करना"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"स्‍क्रीन लॉक पासवर्ड और पिन की लंबाई और उनमें स्वीकृत वर्णों को नियंत्रित करना."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"स्‍क्रीन अनलॉक करने के की कोशिशों पर नज़र रखना"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"स्‍क्रीन को अनलॉक करते समय गलत लिखे गए पासवर्ड की संख्‍या पर निगरानी करें, और बहुत अधिक बार गलत पासवर्ड लिखे जाने पर टैबलेट लॉक करें या टैबलेट का संपूर्ण डेटा मिटाएं."</string>
-    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"स्‍क्रीन को अनलॉक करते समय गलत तरीके से लिखे गए पासवर्ड पर नज़र रखें और अगर बहुत अधिक गलत पासवर्ड लिखे जाते हैं तो टीवी को लॉक करें या टीवी का सभी डेटा मिटा दें."</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"स्‍क्रीन को अनलॉक करते समय गलत लिखे गए पासवर्ड की संख्‍या पर निगरानी करें, और बहुत ज़्यादा बार गलत पासवर्ड लिखे जाने पर टैबलेट लॉक करें या टैबलेट का संपूर्ण डेटा मिटाएं."</string>
+    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"स्‍क्रीन को अनलॉक करते समय गलत तरीके से लिखे गए पासवर्ड पर नज़र रखें और अगर बहुत ज़्यादा गलत पासवर्ड लिखे जाते हैं तो टीवी को लॉक करें या टीवी का सभी डेटा मिटा दें."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"स्क्रीन को अनलॉक करते समय जितनी बार गलत पासवर्ड लिखा गया है, उसकी संख्या पर नज़र रखना और अगर बहुत बार गलत पासवर्ड डाले गए हैं, तो फ़ोन को लॉक कर देना या फ़ोन का सारा डेटा मिटा देना."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"स्‍क्रीन का लॉक खोलते समय गलत तरीके से लिखे गए पासवर्ड पर नज़र रखें, और अगर बार-बार अधिक पासवर्ड लिखे जाते हैं तो टैबलेट को लॉक करें या इस उपयोगकर्ता का सभी डेटा मिटा दें."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"स्‍क्रीन का लॉक खोलते समय गलत तरीके से लिखे गए पासवर्ड पर नज़र रखें, और अगर बार-बार ज़्यादा पासवर्ड लिखे जाते हैं तो टैबलेट को लॉक करें या इस उपयोगकर्ता का सभी डेटा मिटा दें."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"स्‍क्रीन का लॉक खोलते समय गलत तरीके से लिखे गए पासवर्ड पर नज़र रखें, और अगर बार-बार गलत पासवर्ड लिखा जाता है तो टीवी को लॉक करें या इस उपयोगकर्ता का सभी डेटा मिटा दें."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"स्‍क्रीनका लॉक खोलते समय गलत तरीके से लिखे गए पासवर्ड पर नज़र रखें, और अगर बार-बार गलत पासवर्ड लिखा जाता है तो फ़ोन को लॉक करें या इस उपयोगकर्ता का सभी डेटा मिटा दें."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"स्‍क्रीन लॉक बदलना"</string>
@@ -878,7 +878,7 @@
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"<xliff:g id="NUMBER">%d</xliff:g> सेकंड में फिर से प्रयास करें."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"आकार भूल गए?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"खाता अनलॉक"</string>
-    <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"बहुत अधिक आकार प्रयास"</string>
+    <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"बहुत ज़्यादा आकार प्रयास"</string>
     <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"अनलॉक करने के लिए, अपने Google खाते से साइन इन करें."</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"उपयोगकर्ता नाम (ईमेल)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"पासवर्ड"</string>
@@ -1139,7 +1139,7 @@
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"हो सकता है कुछ सिस्टम फ़ंक्शन कार्य न करें"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"सिस्टम के लिए ज़रूरी मेमोरी नहीं है. पक्का करें कि आपके पास 250एमबी की खाली जगह है और फिर से शुरू करें."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> चल रहा है"</string>
-    <string name="app_running_notification_text" msgid="1197581823314971177">"अधिक जानकारी के लिए या ऐप्लिकेशन को रोकने के लिए छूएं."</string>
+    <string name="app_running_notification_text" msgid="1197581823314971177">"ज़्यादा जानकारी के लिए या ऐप्लिकेशन को रोकने के लिए छूएं."</string>
     <string name="ok" msgid="5970060430562524910">"ठीक है"</string>
     <string name="cancel" msgid="6442560571259935130">"रद्द करें"</string>
     <string name="yes" msgid="5362982303337969312">"ठीक है"</string>
@@ -1381,7 +1381,7 @@
     <string name="usb_notification_message" msgid="3370903770828407960">"ज़्यादा विकल्पों के लिए टैप करें."</string>
     <string name="usb_power_notification_message" msgid="4647527153291917218">"जोड़ा गया डिवाइस चार्ज हो रहा है. ज़्यादा विकल्पों के लिए टैप करें."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"एनालॉग ऑडियो एक्सेसरी का पता चला"</string>
-    <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"अटैच किया गया डिवाइस इस फ़ोन से संगत नहीं है. अधिक जानने के लिए टैप करें."</string>
+    <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"अटैच किया गया डिवाइस इस फ़ोन से संगत नहीं है. ज़्यादा जानने के लिए टैप करें."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"डीबग करने के लिए एडीबी कनेक्ट किया गया"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"यूएसबी को डीबग करने की सुविधा बंद करने के लिए टैप करें"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB डीबग करना अक्षम करने के लिए चुनें."</string>
@@ -1473,7 +1473,7 @@
     <string name="ime_action_default" msgid="2840921885558045721">"निष्‍पादित करें"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"<xliff:g id="NUMBER">%s</xliff:g> के उपयोग द्वारा \n नंबर डायल करें"</string>
     <string name="create_contact_using" msgid="4947405226788104538">"<xliff:g id="NUMBER">%s</xliff:g> का उपयोग करके\n संपर्क बनाएं"</string>
-    <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"इनमें से एक या अधिक ऐप, अभी और आने वाले समय में आपके खाते तक पहुंचने की अनुमति चाहते हैं."</string>
+    <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"इनमें से एक या ज़्यादा ऐप, अभी और आने वाले समय में आपके खाते तक पहुंचने की अनुमति चाहते हैं."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"क्या आप इस अनुरोध की अनुमति देना चाहते हैं?"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"पहुंच पाने का अनुरोध"</string>
     <string name="allow" msgid="7225948811296386551">"अनुमति दें"</string>
@@ -1603,7 +1603,7 @@
     <string name="org_unit" msgid="7265981890422070383">"संगठनात्मक इकाई:"</string>
     <string name="issued_by" msgid="2647584988057481566">"जारीकर्ता:"</string>
     <string name="validity_period" msgid="8818886137545983110">"मान्यता:"</string>
-    <string name="issued_on" msgid="5895017404361397232">"जारी करने का दिनांक:"</string>
+    <string name="issued_on" msgid="5895017404361397232">"जारी करने का तारीख:"</string>
     <string name="expires_on" msgid="3676242949915959821">"खत्म होने की तारीख है:"</string>
     <string name="serial_number" msgid="758814067660862493">"सीरियल नंबर:"</string>
     <string name="fingerprints" msgid="4516019619850763049">"फ़िंगरप्रिंट:"</string>
@@ -1668,7 +1668,7 @@
     <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"PUK कोड 8 अंकों का होना चाहिए."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"सही PUK कोड फिर से डालें. बार-बार प्रयास करने से सिम स्थायी रूप से अक्षम हो जाएगी."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"पिन कोड का मिलान नहीं होता"</string>
-    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"बहुत अधिक आकार प्रयास"</string>
+    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"बहुत ज़्यादा आकार प्रयास"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"अनलॉक करने के लिए, अपने Google खाते से साइन इन करें."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"उपयोगकर्ता नाम (ईमेल)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"पासवर्ड"</string>
@@ -1690,7 +1690,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"आपने अपने अनलॉक आकार को <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से आरेखित किया है. <xliff:g id="NUMBER_1">%2$d</xliff:g> और असफल प्रयासों के बाद, आपसे अपने फ़ोन को किसी ईमेल खाते का उपयोग करके अनलॉक करने के लिए कहा जाएगा.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंड में फिर से प्रयास करें."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"निकालें"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"वॉल्यूम को सुझाए गए स्तर से ऊपर बढ़ाएं?\n\nअत्यधिक वॉल्यूम पर अधिक समय तक सुनने से आपकी सुनने की क्षमता को नुकसान हो सकता है."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"वॉल्यूम को सुझाए गए स्तर से ऊपर बढ़ाएं?\n\nअत्यधिक वॉल्यूम पर ज़्यादा समय तक सुनने से आपकी सुनने की क्षमता को नुकसान हो सकता है."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"सुलभता शॉर्टकट का इस्तेमाल करना चाहते हैं?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"इस शॉर्टकट के चालू होने पर, दोनों वॉल्यूम बटनों को 3 सेकंड तक दबाने से सुलभता सुविधा शुरू हो जाएगी.\n\n मौजूदा सुलभता सुविधा:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n आप इस सुविधा को सेटिंग &gt; सुलभता पर जाकर बदल सकते हैं."</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"शॉर्टकट बंद करें"</string>
@@ -1746,8 +1746,8 @@
     <string name="mediasize_iso_c10" msgid="5040764293406765584">"ISO C10"</string>
     <string name="mediasize_na_letter" msgid="2841414839888344296">"लेटर"</string>
     <string name="mediasize_na_gvrnmt_letter" msgid="5295836838862962809">"गवर्नमेंट लेटर"</string>
-    <string name="mediasize_na_legal" msgid="8621364037680465666">"वैधानिक"</string>
-    <string name="mediasize_na_junior_legal" msgid="3309324162155085904">"जूनियर वैधानिक"</string>
+    <string name="mediasize_na_legal" msgid="8621364037680465666">"कानूनी"</string>
+    <string name="mediasize_na_junior_legal" msgid="3309324162155085904">"जूनियर कानूनी"</string>
     <string name="mediasize_na_ledger" msgid="5567030340509075333">"लेजर"</string>
     <string name="mediasize_na_tabloid" msgid="4571735038501661757">"टेबलॉइड"</string>
     <string name="mediasize_na_index_3x5" msgid="5182901917818625126">"इंडेक्स कार्ड 3x5"</string>
@@ -1839,7 +1839,7 @@
     <skip />
     <!-- no translation found for battery_saver_description (6413346684861241431) -->
     <skip />
-    <string name="data_saver_description" msgid="6015391409098303235">"डेटा खर्च, कम करने के लिए डेटा सेवर कुछ ऐप्लिकेशन को बैकग्राउंड में डेटा भेजने या डेटा पाने से रोकता है. आप फ़िलहाल जिस एेप्लिकेशन का इस्तेमाल कर रहे हैं वह डेटा तक पहुंच सकता है लेकिन ऐसा कभी-कभी ही हो पाएगा. उदाहरण के लिए, इमेज तब तक दिखाई नहीं देंगी जब तक कि आप उन्हें टैप नहीं करते."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"डेटा खर्च, कम करने के लिए डेटा सेवर कुछ ऐप्लिकेशन को बैकग्राउंड में डेटा भेजने या डेटा पाने से रोकता है. आप फ़िलहाल जिस ऐप्लिकेशन का इस्तेमाल कर रहे हैं वह डेटा तक पहुंच सकता है लेकिन ऐसा कभी-कभी ही हो पाएगा. उदाहरण के लिए, इमेज तब तक दिखाई नहीं देंगी जब तक कि आप उन्हें टैप नहीं करते."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"डेटा बचाने की सेटिंग चालू करें?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"चालू करें"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

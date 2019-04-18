@@ -1966,4 +1966,6 @@ interface ITelephony {
     int getRadioHalVersion();
 
     boolean isModemEnabledForSlot(int slotIndex, String callingPackage);
+
+    boolean isMmsDataEnabled(int subId, String callingPackage);
 }

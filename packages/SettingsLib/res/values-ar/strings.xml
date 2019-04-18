@@ -140,9 +140,9 @@
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"التطبيقات المزالة"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"التطبيقات والمستخدمون الذين تمت إزالتهم"</string>
     <string name="data_usage_ota" msgid="5377889154805560860">"تحديثات النظام"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"‏ربط USB"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"‏التوصيل عبر USB"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"نقطة اتصال محمولة"</string>
-    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"ربط البلوتوث"</string>
+    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"التوصيل عبر البلوتوث"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"ربط"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"الربط ونقطة الاتصال المحمولة"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"كل تطبيقات العمل"</string>
@@ -225,7 +225,7 @@
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"إيقاف مستوى الصوت المطلق"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"‏إصدار Bluetooth AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"‏اختيار إصدار Bluetooth AVRCP"</string>
-    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ترميز صوت بلوتوث"</string>
+    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"برنامج ترميز صوت بلوتوث"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"اختيار برنامج ترميز الصوت لمشغّل\nالبلوتوث"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"معدّل عيّنة صوت بلوتوث"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"اختيار برنامج ترميز الصوت لمشغّل\nالبلوتوث: معدّل العيّنة"</string>
@@ -306,7 +306,7 @@
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"‏إيقاف توجيه الصوت عبر USB"</string>
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"‏إيقاف التوجيه التلقائي إلى أجهزة الصوت الطرفية عبر USB"</string>
     <string name="debug_layout" msgid="5981361776594526155">"عرض حدود المخطط"</string>
-    <string name="debug_layout_summary" msgid="2001775315258637682">"عرض حدود وهوامش المقطع وما إلى ذلك."</string>
+    <string name="debug_layout_summary" msgid="2001775315258637682">"عرض حدود وهوامش المقطع وما إلى ذلك"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"فرض اتجاه التنسيق ليكون من اليمين إلى اليسار"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"فرض اتجاه تنسيق الشاشة ليكون من اليمين إلى اليسار لجميع اللغات"</string>
     <string name="force_msaa" msgid="7920323238677284387">"‏فرض 4x MSAA"</string>
@@ -326,7 +326,7 @@
     <string name="show_all_anrs" msgid="4924885492787069007">"‏عرض أخطاء ANR في الخلفية"</string>
     <string name="show_all_anrs_summary" msgid="6636514318275139826">"عرض مربع الحوار \"التطبيق لا يستجيب\" مع تطبيقات الخلفية"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"عرض تحذيرات قناة الإشعار"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"عرض تحذير على الشاشة عند ينشر تطبيق ما إشعارًا بدون قناة صالحة"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"عرض تحذير على الشاشة عندما ينشر تطبيق إشعارًا بدون قناة صالحة"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"السماح بإدراج التطبيقات في وحدة تخزين خارجية"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"تأهيل أي تطبيق بحيث تتم كتابته على وحدة تخزين خارجية، بغض النظر عن قيم البيان"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"فرض إمكانية تغيير حجم الأنشطة"</string>

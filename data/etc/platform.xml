@@ -180,6 +180,9 @@
     <assign-permission name="android.permission.STATSCOMPANION" uid="statsd" />
     <assign-permission name="android.permission.UPDATE_APP_OPS_STATS" uid="statsd" />
 
+    <split-permission name="android.permission.ACCESS_FINE_LOCATION">
+        <new-permission name="android.permission.ACCESS_COARSE_LOCATION" />
+    </split-permission>
     <split-permission name="android.permission.WRITE_EXTERNAL_STORAGE">
         <new-permission name="android.permission.READ_EXTERNAL_STORAGE" />
     </split-permission>

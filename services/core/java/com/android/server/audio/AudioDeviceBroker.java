@@ -114,8 +114,10 @@ import java.util.ArrayList;
     // All post* methods are asynchronous
 
     /*package*/ void onSystemReady() {
-        synchronized (mDeviceStateLock) {
-            mBtHelper.onSystemReady();
+        synchronized (mSetModeLock) {
+            synchronized (mDeviceStateLock) {
+                mBtHelper.onSystemReady();
+            }
         }
     }
 
@@ -151,8 +153,10 @@ import java.util.ArrayList;
      * @param intent
      */
     /*package*/ void receiveBtEvent(@NonNull Intent intent) {
-        synchronized (mDeviceStateLock) {
-            mBtHelper.receiveBtEvent(intent);
+        synchronized (mSetModeLock) {
+            synchronized (mDeviceStateLock) {
+                mBtHelper.receiveBtEvent(intent);
+            }
         }
     }
 
@@ -350,13 +354,19 @@ import java.util.ArrayList;
         sendLMsgNoDelay(MSG_L_A2DP_DEVICE_CONFIG_CHANGE, SENDMSG_QUEUE, device);
     }
 
+    @GuardedBy("mSetModeLock")
     /*package*/ void startBluetoothScoForClient_Sync(IBinder cb, int scoAudioMode,
                 @NonNull String eventSource) {
-        mBtHelper.startBluetoothScoForClient(cb, scoAudioMode, eventSource);
+        synchronized (mDeviceStateLock) {
+            mBtHelper.startBluetoothScoForClient(cb, scoAudioMode, eventSource);
+        }
     }
 
+    @GuardedBy("mSetModeLock")
     /*package*/ void stopBluetoothScoForClient_Sync(IBinder cb, @NonNull String eventSource) {
-        mBtHelper.stopBluetoothScoForClient(cb, eventSource);
+        synchronized (mDeviceStateLock) {
+            mBtHelper.stopBluetoothScoForClient(cb, eventSource);
+        }
     }
 
     //---------------------------------------------------------------------
@@ -477,6 +487,10 @@ import java.util.ArrayList;
     /*package*/ void postBtHearingAidProfileConnected(BluetoothHearingAid hearingAidProfile) {
         sendLMsgNoDelay(MSG_L_BT_SERVICE_CONNECTED_PROFILE_HEARING_AID, SENDMSG_QUEUE,
                 hearingAidProfile);
+    }
+
+    /*package*/ void postScoClientDied(Object obj) {
+        sendLMsgNoDelay(MSG_L_SCOCLIENT_DIED, SENDMSG_QUEUE, obj);
     }
 
     //---------------------------------------------------------------------
@@ -708,8 +722,10 @@ import java.util.ArrayList;
                     }
                     break;
                 case MSG_BT_HEADSET_CNCT_FAILED:
-                    synchronized (mDeviceStateLock) {
-                        mBtHelper.resetBluetoothSco();
+                    synchronized (mSetModeLock) {
+                        synchronized (mDeviceStateLock) {
+                            mBtHelper.resetBluetoothSco();
+                        }
                     }
                     break;
                 case MSG_IL_BTA2DP_DOCK_TIMEOUT:
@@ -742,8 +758,17 @@ import java.util.ArrayList;
                     }
                     break;
                 case MSG_I_DISCONNECT_BT_SCO:
-                    synchronized (mDeviceStateLock) {
-                        mBtHelper.disconnectBluetoothSco(msg.arg1);
+                    synchronized (mSetModeLock) {
+                        synchronized (mDeviceStateLock) {
+                            mBtHelper.disconnectBluetoothSco(msg.arg1);
+                        }
+                    }
+                    break;
+                case MSG_L_SCOCLIENT_DIED:
+                    synchronized (mSetModeLock) {
+                        synchronized (mDeviceStateLock) {
+                            mBtHelper.scoClientDied(msg.arg1);
+                        }
                     }
                     break;
                 case MSG_TOGGLE_HDMI:
@@ -774,8 +799,10 @@ import java.util.ArrayList;
                     }
                     break;
                 case MSG_DISCONNECT_BT_HEADSET:
-                    synchronized (mDeviceStateLock) {
-                        mBtHelper.disconnectHeadset();
+                    synchronized (mSetModeLock) {
+                        synchronized (mDeviceStateLock) {
+                            mBtHelper.disconnectHeadset();
+                        }
                     }
                     break;
                 case MSG_L_BT_SERVICE_CONNECTED_PROFILE_A2DP:
@@ -794,8 +821,10 @@ import java.util.ArrayList;
                     }
                     break;
                 case MSG_L_BT_SERVICE_CONNECTED_PROFILE_HEADSET:
-                    synchronized (mDeviceStateLock) {
-                        mBtHelper.onHeadsetProfileConnected((BluetoothHeadset) msg.obj);
+                    synchronized (mSetModeLock) {
+                        synchronized (mDeviceStateLock) {
+                            mBtHelper.onHeadsetProfileConnected((BluetoothHeadset) msg.obj);
+                        }
                     }
                     break;
                 case MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT: {
@@ -892,6 +921,8 @@ import java.util.ArrayList;
     private static final int MSG_L_HEARING_AID_DEVICE_CONNECTION_CHANGE_EXT = 28;
     // process external command to (dis)connect or change active A2DP device
     private static final int MSG_L_A2DP_ACTIVE_DEVICE_CHANGE_EXT = 29;
+    // a ScoClient died in BtHelper
+    private static final int MSG_L_SCOCLIENT_DIED = 30;
 
 
     private static boolean isMessageHandledUnderWakelock(int msgId) {

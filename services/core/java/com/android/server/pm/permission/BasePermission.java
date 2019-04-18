@@ -203,10 +203,15 @@ public final class BasePermission {
                 && (perm.info.flags & PermissionInfo.FLAG_HARD_RESTRICTED) != 0;
     }
 
-    public boolean isRestricted() {
+    public boolean isHardOrSoftRestricted() {
         return perm != null && perm.info != null
                 && (perm.info.flags & (PermissionInfo.FLAG_HARD_RESTRICTED
                 | PermissionInfo.FLAG_SOFT_RESTRICTED)) != 0;
+    }
+
+    public boolean isImmutablyRestricted() {
+        return perm != null && perm.info != null
+                && (perm.info.flags & PermissionInfo.FLAG_IMMUTABLY_RESTRICTED) != 0;
     }
 
     public boolean isSignature() {
