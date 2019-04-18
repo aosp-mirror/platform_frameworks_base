@@ -6346,9 +6346,14 @@ public class NotificationManagerService extends SystemService {
 
         // tell the app
         if (sendDelete) {
-            if (r.getNotification().deleteIntent != null) {
+            final PendingIntent deleteIntent = r.getNotification().deleteIntent;
+            if (deleteIntent != null) {
                 try {
-                    r.getNotification().deleteIntent.send();
+                    // make sure deleteIntent cannot be used to start activities from background
+                    LocalServices.getService(ActivityManagerInternal.class)
+                            .clearPendingIntentAllowBgActivityStarts(deleteIntent.getTarget(),
+                            WHITELIST_TOKEN);
+                    deleteIntent.send();
                 } catch (PendingIntent.CanceledException ex) {
                     // do nothing - there's no relevant way to recover, and
                     //     no reason to let this propagate
