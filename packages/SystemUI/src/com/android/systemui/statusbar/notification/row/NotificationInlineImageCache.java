@@ -52,7 +52,7 @@ public class NotificationInlineImageCache implements NotificationInlineImageReso
     @Override
     public void preload(Uri uri) {
         PreloadImageTask newTask = new PreloadImageTask(mResolver);
-        newTask.executeOnExecutor(NotificationContentInflater.EXECUTOR, uri);
+        newTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, uri);
         mCache.put(uri, newTask);
     }
 
