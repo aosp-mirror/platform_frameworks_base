@@ -59,6 +59,16 @@ public class KeyguardClockPositionAlgorithm {
     private int mClockPreferredY;
 
     /**
+     * Whether or not there is a custom clock face on keyguard.
+     */
+    private boolean mHasCustomClock;
+
+    /**
+     * Whether or not the NSSL contains any visible notifications.
+     */
+    private boolean mHasVisibleNotifs;
+
+    /**
      * Height of notification stack: Sum of height of each notification.
      */
     private int mNotificationStackHeight;
@@ -117,7 +127,7 @@ public class KeyguardClockPositionAlgorithm {
 
     public void setup(int minTopMargin, int maxShadeBottom, int notificationStackHeight,
             float panelExpansion, int parentHeight, int keyguardStatusHeight, int clockPreferredY,
-            float dark, float emptyDragAmount) {
+            boolean hasCustomClock, boolean hasVisibleNotifs, float dark, float emptyDragAmount) {
         mMinTopMargin = minTopMargin + mContainerTopPadding;
         mMaxShadeBottom = maxShadeBottom;
         mNotificationStackHeight = notificationStackHeight;
@@ -125,6 +135,8 @@ public class KeyguardClockPositionAlgorithm {
         mHeight = parentHeight;
         mKeyguardStatusHeight = keyguardStatusHeight;
         mClockPreferredY = clockPreferredY;
+        mHasCustomClock = hasCustomClock;
+        mHasVisibleNotifs = hasVisibleNotifs;
         mDarkAmount = dark;
         mEmptyDragAmount = emptyDragAmount;
     }
@@ -179,6 +191,9 @@ public class KeyguardClockPositionAlgorithm {
         clockYDark = MathUtils.max(0, clockYDark);
 
         float clockYRegular = getExpandedClockPosition();
+        if (mHasCustomClock && !mHasVisibleNotifs) {
+            clockYRegular = clockYDark;
+        }
         float clockYBouncer = -mKeyguardStatusHeight;
 
         // Move clock up while collapsing the shade
