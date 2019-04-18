@@ -157,6 +157,8 @@ message OverlayableItem {
     VENDOR = 3;
     PRODUCT = 4;
     SIGNATURE = 5;
+    ODM = 6;
+    OEM = 7;
   }
 
   // The location of the <item> declaration in source.

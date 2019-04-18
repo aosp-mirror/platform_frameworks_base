@@ -971,6 +971,12 @@ TEST_F(ResourceParserTest, ParseOverlayablePolicy) {
         <policy type="signature">
           <item type="string" name="foz" />
         </policy>
+        <policy type="odm">
+          <item type="string" name="biz" />
+        </policy>
+        <policy type="oem">
+          <item type="string" name="buz" />
+        </policy>
       </overlayable>)";
   ASSERT_TRUE(TestParse(input));
 
@@ -1013,6 +1019,22 @@ TEST_F(ResourceParserTest, ParseOverlayablePolicy) {
   result_overlayable_item = search_result.value().entry->overlayable_item.value();
   EXPECT_THAT(result_overlayable_item.overlayable->name, Eq("Name"));
   EXPECT_THAT(result_overlayable_item.policies, Eq(OverlayableItem::Policy::kSignature));
+
+  search_result = table_.FindResource(test::ParseNameOrDie("string/biz"));
+  ASSERT_TRUE(search_result);
+  ASSERT_THAT(search_result.value().entry, NotNull());
+  ASSERT_TRUE(search_result.value().entry->overlayable_item);
+  result_overlayable_item = search_result.value().entry->overlayable_item.value();
+  EXPECT_THAT(result_overlayable_item.overlayable->name, Eq("Name"));
+  EXPECT_THAT(result_overlayable_item.policies, Eq(OverlayableItem::Policy::kOdm));
+
+  search_result = table_.FindResource(test::ParseNameOrDie("string/buz"));
+  ASSERT_TRUE(search_result);
+  ASSERT_THAT(search_result.value().entry, NotNull());
+  ASSERT_TRUE(search_result.value().entry->overlayable_item);
+  result_overlayable_item = search_result.value().entry->overlayable_item.value();
+  EXPECT_THAT(result_overlayable_item.overlayable->name, Eq("Name"));
+  EXPECT_THAT(result_overlayable_item.policies, Eq(OverlayableItem::Policy::kOem));
 }
 
 TEST_F(ResourceParserTest, ParseOverlayableNoPolicyError) {

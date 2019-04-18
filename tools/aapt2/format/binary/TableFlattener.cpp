@@ -496,6 +496,12 @@ class PackageFlattener {
         if (item.policies & OverlayableItem::Policy::kSignature) {
           policy_flags |= ResTable_overlayable_policy_header::POLICY_SIGNATURE;
         }
+        if (item.policies & OverlayableItem::Policy::kOdm) {
+          policy_flags |= ResTable_overlayable_policy_header::POLICY_ODM_PARTITION;
+        }
+        if (item.policies & OverlayableItem::Policy::kOem) {
+          policy_flags |= ResTable_overlayable_policy_header::POLICY_OEM_PARTITION;
+        }
 
         auto policy = overlayable_chunk->policy_ids.find(policy_flags);
         if (policy != overlayable_chunk->policy_ids.end()) {
