@@ -80,7 +80,7 @@
     <string name="screenrecord_channel_description" msgid="4630777331970993858">"Obavještenje za sesiju snimanja ekrana je u toku"</string>
     <string name="screenrecord_start_label" msgid="5177739269492196055">"Započni snimanje"</string>
     <string name="screenrecord_mic_label" msgid="4522870600914810019">"Govor snimka"</string>
-    <string name="screenrecord_taps_label" msgid="1776467076607964790">"Prikaži dodirivanja"</string>
+    <string name="screenrecord_taps_label" msgid="1776467076607964790">"Prikaži dodire"</string>
     <string name="screenrecord_stop_label" msgid="2544887572381260038">"Zaustavi"</string>
     <string name="screenrecord_pause_label" msgid="7162476078856786227">"Pauza"</string>
     <string name="screenrecord_resume_label" msgid="3605818317015993314">"Nastavi"</string>
@@ -370,6 +370,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Do svitanja"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Uključuje se u <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Do <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Tema po mraku"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC je onemogućen"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC je omogućen"</string>
@@ -432,7 +433,7 @@
     <string name="user_logout_notification_text" msgid="3350262809611876284">"Odjavi trenutnog korisnika"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ODJAVI KORISNIKA"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Želite dodati novog korisnika?"</string>
-    <string name="user_add_user_message_short" msgid="2161624834066214559">"Kada dodate novog korisnika, ta osoba treba uspostaviti svoj prostor.\n\nSvaki korisnik može ažurirati aplikacije za sve ostale korisnike."</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"Kada dodate novog korisnika, ta osoba treba postaviti svoj prostor.\n\nSvaki korisnik može ažurirati aplikacije za sve ostale korisnike."</string>
     <string name="user_limit_reached_title" msgid="7374910700117359177">"Dostignut limit za broj korisnika"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
       <item quantity="one">Možete dodati najviše <xliff:g id="COUNT">%d</xliff:g> korisnika.</item>
@@ -756,7 +757,7 @@
   </string-array>
     <string name="menu_ime" msgid="4998010205321292416">"Prebacivač tastatura"</string>
     <string name="save" msgid="2311877285724540644">"Sačuvaj"</string>
-    <string name="reset" msgid="2448168080964209908">"Vraćanje na zadano"</string>
+    <string name="reset" msgid="2448168080964209908">"Vrati na zadano"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Podesite širinu dugmeta"</string>
     <string name="clipboard" msgid="1313879395099896312">"Međumemorija"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Prilagođeno dugme za navigaciju"</string>
@@ -768,7 +769,7 @@
     <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Držite i prevucite da preuredite polja"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Prevucite ovdje za uklanjanje"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Trebate najmanje šest polja"</string>
-    <string name="qs_edit" msgid="2232596095725105230">"Uredi"</string>
+    <string name="qs_edit" msgid="2232596095725105230">"Uredite"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Vrijeme"</string>
   <string-array name="clock_options">
     <item msgid="5965318737560463480">"Prikaži sate, minute i sekunde"</item>
@@ -858,7 +859,7 @@
     <string name="notification_channel_general" msgid="4525309436693914482">"Opće poruke"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Pohrana"</string>
     <string name="notification_channel_hints" msgid="7323870212489152689">"Savjeti"</string>
-    <string name="instant_apps" msgid="6647570248119804907">"Instant-aplikacije"</string>
+    <string name="instant_apps" msgid="6647570248119804907">"Instant aplikacije"</string>
     <string name="instant_apps_title" msgid="8738419517367449783">"Pokrenuta je aplikacija <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="instant_apps_message" msgid="1183313016396018086">"Aplikacija je otvorena bez prethodne instalacije."</string>
     <string name="instant_apps_message_with_help" msgid="6179830437630729747">"Aplikacija je otvorena bez prethodne instalacije. Dodirnite da saznate više."</string>

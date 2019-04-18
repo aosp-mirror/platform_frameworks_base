@@ -368,6 +368,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Até ao amanhecer"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Ativada à(s) <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Até à(s) <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Tema escuro"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"O NFC está desativado"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"O NFC está ativado"</string>
@@ -888,7 +889,7 @@
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"A Poupança de bateria é ativada automaticamente quando o nível de bateria está abaixo de <xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Definições"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"Compreendi"</string>
-    <string name="heap_dump_tile_name" msgid="9141031328971226374">"Cp ár. di. da. SysUI"</string>
+    <string name="heap_dump_tile_name" msgid="9141031328971226374">"Despejar pilha SysUI"</string>
     <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"A aplicação <xliff:g id="APP">%1$s</xliff:g> está a utilizar o(a) <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"As aplicações estão a utilizar o(a) <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="6854860652480837439">", "</string>

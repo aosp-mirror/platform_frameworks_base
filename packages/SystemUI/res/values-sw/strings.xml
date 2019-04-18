@@ -67,7 +67,7 @@
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"Washa kipengele cha USB"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Kuza ili kujaza skrini"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Tanua ili kujaza skrini"</string>
-    <string name="global_action_screenshot" msgid="8329831278085426283">"Picha ya skrini"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Pichaskrini"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Inahifadhi picha ya skrini..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Inahifadhi picha ya skrini..."</string>
     <string name="screenshot_saved_title" msgid="5637073968117370753">"Imehifadhi picha ya skrini"</string>
@@ -172,8 +172,7 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
-    <!-- no translation found for data_connection_5ge (4699478963278829331) -->
-    <skip />
+    <string name="data_connection_5ge" msgid="4699478963278829331">"5Ge"</string>
     <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
     <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
@@ -369,6 +368,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Hadi macheo"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Itawashwa saa <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Hadi <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Mandhari Meusi"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC imezimwa"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC imewashwa"</string>
@@ -414,10 +414,10 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"Onyesha wasifu"</string>
     <string name="user_add_user" msgid="5110251524486079492">"Ongeza mtumiaji"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Mtumiaji mpya"</string>
-    <string name="guest_nickname" msgid="8059989128963789678">"Aliyealikwa"</string>
+    <string name="guest_nickname" msgid="8059989128963789678">"Mgeni"</string>
     <string name="guest_new_guest" msgid="600537543078847803">"Ongeza mgeni"</string>
-    <string name="guest_exit_guest" msgid="7187359342030096885">"Ondoa aliyealikwa"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"Ungependa kumwondoa aliyealikwa?"</string>
+    <string name="guest_exit_guest" msgid="7187359342030096885">"Ondoa mgeni"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"Ungependa kumwondoa mgeni?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"Data na programu zote katika kipindi hiki zitafutwa."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"Ondoa"</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"Karibu tena, mwalikwa!"</string>
@@ -425,7 +425,7 @@
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Anza tena"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Ndiyo, endelea"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"Mtumiaji mgeni"</string>
-    <string name="guest_notification_text" msgid="335747957734796689">"Ili uweze kufuta programu na data, mwondoe mtumiaji aliyealikwa"</string>
+    <string name="guest_notification_text" msgid="335747957734796689">"Ili kufuta programu na data, mwondoe mtumiaji mgeni"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"ONDOA MGENI"</string>
     <string name="user_logout_notification_title" msgid="1453960926437240727">"Ondoa mtumiaji"</string>
     <string name="user_logout_notification_text" msgid="3350262809611876284">"Mwondoe mtumiaji wa sasa"</string>

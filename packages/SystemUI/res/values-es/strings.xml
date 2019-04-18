@@ -368,6 +368,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Hasta el amanecer"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Hora: <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Hasta: <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Tema oscuro"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"La conexión NFC está inhabilitada"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"La conexión NFC está habilitada"</string>
@@ -580,8 +581,8 @@
     <string name="status_bar_alarm" msgid="8536256753575881818">"Alarma"</string>
     <string name="status_bar_work" msgid="6022553324802866373">"Perfil de trabajo"</string>
     <string name="status_bar_airplane" msgid="7057575501472249002">"Modo avión"</string>
-    <string name="add_tile" msgid="2995389510240786221">"Añadir mosaico"</string>
-    <string name="broadcast_tile" msgid="3894036511763289383">"Mosaico de emisión"</string>
+    <string name="add_tile" msgid="2995389510240786221">"Añadir icono"</string>
+    <string name="broadcast_tile" msgid="3894036511763289383">"Icono de emisión"</string>
     <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"No oirás la próxima alarma (<xliff:g id="WHEN">%1$s</xliff:g>) a menos que desactives esta opción antes"</string>
     <string name="zen_alarm_warning" msgid="444533119582244293">"No oirás la próxima alarma (<xliff:g id="WHEN">%1$s</xliff:g>)"</string>
     <string name="alarm_template" msgid="3980063409350522735">"a las <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -758,9 +759,9 @@
     <string name="left_icon" msgid="3096287125959387541">"Icono a la izquierda"</string>
     <string name="right_icon" msgid="3952104823293824311">"Icono a la derecha"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Pulsa y arrastra para añadir funciones"</string>
-    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Mantener pulsado y arrastrar para reorganizar los mosaicos"</string>
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Mantén pulsado un icono y arrástralo para reorganizarlo"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Arrastra aquí para quitar una función"</string>
-    <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Necesitas 6 mosaicos como mínimo"</string>
+    <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Necesitas al menos 6 iconos"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Editar"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Hora"</string>
   <string-array name="clock_options">
@@ -901,8 +902,8 @@
     <string name="music_controls_no_title" msgid="5236895307087002011">"Sin título"</string>
     <string name="restart_button_description" msgid="2035077840254950187">"Toca para reiniciar esta aplicación e ir a la pantalla completa."</string>
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"Abrir <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubbles_settings_button_description" msgid="2970630476657287189">"Ajustes de los cuadros de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubbles_prompt" msgid="8807968030159469710">"¿Quieres permitir los cuadros de <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="bubbles_settings_button_description" msgid="2970630476657287189">"Ajustes de las burbujas de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="bubbles_prompt" msgid="8807968030159469710">"¿Quieres permitir las burbujas de <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="no_bubbles" msgid="337101288173078247">"Denegar"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Permitir"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Preguntarme más tarde"</string>

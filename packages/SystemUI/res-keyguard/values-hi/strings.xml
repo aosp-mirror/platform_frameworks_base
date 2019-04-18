@@ -81,7 +81,7 @@
     <string name="kg_enter_confirm_pin_hint" msgid="3089485999116759671">"मनचाहे पिन कोड की पुष्टि करें"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="4471738151810900114">"SIM कार्ड अनलॉक हो रहा है…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="3057533256729513335">"कोई ऐसा पिन लिखें, जिसमें 4 से 8 अंक हों."</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="6003602401368264144">"PUK कोड 8 या अधिक संख्या वाला होना चाहिए."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="6003602401368264144">"PUK कोड 8 या ज़्यादा संख्या वाला होना चाहिए."</string>
     <string name="kg_invalid_puk" msgid="5399287873762592502">"सही PUK कोड दोबारा डालें. बार-बार कोशिश करने से SIM हमेशा के लिए अक्षम हो जाएगा."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="5672736555427444330">"पिन कोड का मिलान नहीं हो रहा है"</string>
     <string name="kg_login_too_many_attempts" msgid="6604574268387867255">"पैटर्न के लिए बहुत ज़्यादा बार कोशिश की गई है"</string>
@@ -151,31 +151,4 @@
       <item quantity="one">सिम बंद कर दिया गया है. जारी रखने के लिए PUK कोड डालें. आपके पास <xliff:g id="_NUMBER_1">%d</xliff:g> मौके बचे हैं, उसके बाद, सिम हमेशा के लिए काम करना बंद कर देगा. जानकारी के लिए, मोबाइल और इंटरनेट सेवा देने वाली कंपनी से संपर्क करें.</item>
       <item quantity="other">सिम बंद कर दिया गया है. जारी रखने के लिए PUK कोड डालें. आपके पास <xliff:g id="_NUMBER_1">%d</xliff:g> मौके बचे हैं, उसके बाद, सिम हमेशा के लिए काम करना बंद कर देगा. जानकारी के लिए, मोबाइल और इंटरनेट सेवा देने वाली कंपनी से संपर्क करें.</item>
     </plurals>
-    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
-      <item quantity="one">"<annotation name="color">"अभी"</annotation>\n"^1\n^2 बजे हैं</item>
-      <item quantity="other">"<annotation name="color">"अभी"</annotation>\n"^1\n^2 बजे हैं</item>
-    </plurals>
-  <string-array name="type_clock_hours">
-    <item msgid="3543074812389379830">"बारह"</item>
-    <item msgid="7389464214252023751">"एक"</item>
-    <item msgid="8803180377002008046">"दो"</item>
-    <item msgid="8614897059944644719">"तीन"</item>
-    <item msgid="2293058674782619556">"चार"</item>
-    <item msgid="4815402358455041664">"पाँच"</item>
-    <item msgid="3325754778509665687">"छह"</item>
-    <item msgid="5805551341866280575">"सात"</item>
-    <item msgid="203334816668238610">"आठ"</item>
-    <item msgid="4828052671464488923">"नौ"</item>
-    <item msgid="2233497913571137419">"दस"</item>
-    <item msgid="5621554266768657830">"ग्यारह"</item>
-  </string-array>
-    <!-- no translation found for type_clock_minutes:1 (2091812961809760681) -->
-    <!-- no translation found for type_clock_minutes:2 (1496435384877290709) -->
-    <!-- no translation found for type_clock_minutes:3 (881846472976674129) -->
-    <!-- no translation found for type_clock_minutes:4 (2784477043911540584) -->
-    <!-- no translation found for type_clock_minutes:5 (1610928853656700614) -->
-    <!-- no translation found for type_clock_minutes:6 (2317806244043886658) -->
-    <!-- no translation found for type_clock_minutes:7 (3318687539120971327) -->
-    <!-- no translation found for type_clock_minutes:8 (5701600693712102348) -->
-    <!-- no translation found for type_clock_minutes:9 (3247381605947372495) -->
 </resources>

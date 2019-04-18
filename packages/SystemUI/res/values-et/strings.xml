@@ -257,8 +257,8 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"Töörežiim on sees."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"Töörežiim on välja lülitatud."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"Töörežiim on sisse lülitatud."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Andmeside mahu säästja on välja lülitatud."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Andmeside mahu säästja on sisse lülitatud."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Andmemahu säästja on välja lülitatud."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Andmemahu säästja on sisse lülitatud."</string>
     <string name="accessibility_quick_settings_sensor_privacy_changed_off" msgid="5152819588955163090">"Andur Privaatsus on välja lülitatud."</string>
     <string name="accessibility_quick_settings_sensor_privacy_changed_on" msgid="529705259565826355">"Andur Privaatsus on sisse lülitatud."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Ekraani heledus"</string>
@@ -368,6 +368,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Kuni päikesetõusuni"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Sisselülitam. kell <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Kuni <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Tume teema"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC on keelatud"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC on lubatud"</string>
@@ -523,11 +524,11 @@
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"Väljundseadme vahetamine"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ekraan on kinnitatud"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"See hoitakse kuval, kuni selle vabastate. Vabastamiseks puudutage pikalt nuppe Tagasi ja Ülevaade."</string>
-    <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"See hoitakse kuval, kuni selle vabastate. Vabastamiseks puudutage pikalt nuppe Tagasi ja Avaekraan."</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"See hoitakse kuval, kuni selle vabastate. Vabastamiseks puudutage pikalt nuppe Tagasi ja Avakuva."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"See hoitakse kuval, kuni selle vabastate. Vabastamiseks puudutage pikalt nuppu Ülevaade."</string>
-    <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"See hoitakse kuval, kuni selle vabastate. Vabastamiseks puudutage pikalt nuppu Avaekraan."</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"See hoitakse kuval, kuni selle vabastate. Vabastamiseks puudutage pikalt nuppu Avakuva."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Ekraanikuva vabastamiseks puudutage pikalt nuppe Tagasi ja Ülevaade"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Ekraanikuva vabastamiseks puudutage pikalt nuppe Tagasi ja Avaekraan"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Ekraanikuva vabastamiseks puudutage pikalt nuppe Tagasi ja Avakuva"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Selge"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Tänan, ei"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"Ekraanikuva on kinnitatud"</string>
@@ -674,7 +675,7 @@
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Akusäästja"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Vähendab jõudlust ja taustaandmeid"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Nupp <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="keyboard_key_home" msgid="2243500072071305073">"Avaekraan"</string>
+    <string name="keyboard_key_home" msgid="2243500072071305073">"Avakuva"</string>
     <string name="keyboard_key_back" msgid="2337450286042721351">"Tagasi"</string>
     <string name="keyboard_key_dpad_up" msgid="5584144111755734686">"Üles"</string>
     <string name="keyboard_key_dpad_down" msgid="7331518671788337815">"Alla"</string>
@@ -694,13 +695,13 @@
     <string name="keyboard_key_page_up" msgid="5654098530106845603">"Lehe võrra üles"</string>
     <string name="keyboard_key_page_down" msgid="8720502083731906136">"Lehe võrra alla"</string>
     <string name="keyboard_key_forward_del" msgid="1391451334716490176">"Kustuta"</string>
-    <string name="keyboard_key_move_home" msgid="2765693292069487486">"Avaekraan"</string>
+    <string name="keyboard_key_move_home" msgid="2765693292069487486">"Avakuva"</string>
     <string name="keyboard_key_move_end" msgid="5901174332047975247">"Lõpp"</string>
     <string name="keyboard_key_insert" msgid="8530501581636082614">"Sisesta"</string>
     <string name="keyboard_key_num_lock" msgid="5052537581246772117">"Numbrilukk"</string>
     <string name="keyboard_key_numpad_template" msgid="8729216555174634026">"Numbriklahvistik <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"Süsteem"</string>
-    <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Avaekraan"</string>
+    <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Avakuva"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Hiljutised"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Tagasi"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"Märguanded"</string>
@@ -725,9 +726,9 @@
     <string name="accessibility_long_click_tile" msgid="6687350750091842525">"avada seaded"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Kõrvaklapid on ühendatud"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Peakomplekt on ühendatud"</string>
-    <string name="data_saver" msgid="5037565123367048522">"Andmeside mahu säästja"</string>
-    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Andmeside mahu säästja on sisse lülitatud"</string>
-    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Andmeside mahu säästja on välja lülitatud"</string>
+    <string name="data_saver" msgid="5037565123367048522">"Andmemahu säästja"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Andmemahu säästja on sisse lülitatud"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Andmemahu säästja on välja lülitatud"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"Sees"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"Väljas"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Navigeerimisriba"</string>

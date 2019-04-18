@@ -62,7 +62,7 @@
     <string name="error_disable_esim_msg" msgid="676694908770135639">"Không thể tắt eSIM do lỗi."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Nhập"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"Đã quên hình mở khóa"</string>
-    <string name="kg_wrong_pattern" msgid="2873443744087746812">"Hình mở khóa sai"</string>
+    <string name="kg_wrong_pattern" msgid="2873443744087746812">"Hình không chính xác"</string>
     <string name="kg_wrong_password" msgid="8060364776224836597">"Mật khẩu sai"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"Mã PIN sai"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
@@ -151,84 +151,4 @@
       <item quantity="other">SIM hiện đã bị tắt. Hãy nhập mã PUK để tiếp tục. Bạn còn <xliff:g id="_NUMBER_1">%d</xliff:g> lần thử trước khi SIM vĩnh viễn không sử dụng được. Hãy liên hệ với nhà cung cấp dịch vụ để biết chi tiết.</item>
       <item quantity="one">SIM hiện đã bị tắt. Hãy nhập mã PUK để tiếp tục. Bạn còn <xliff:g id="_NUMBER_0">%d</xliff:g> lần thử trước khi SIM vĩnh viễn không thể sử dụng được. Hãy liên hệ với nhà cung cấp dịch vụ để biết chi tiết.</item>
     </plurals>
-    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
-      <item quantity="other">"<annotation name="color"></annotation>\n"^1\n^2</item>
-      <item quantity="one">"<annotation name="color"></annotation>\n"^1\n^2</item>
-    </plurals>
-  <string-array name="type_clock_hours">
-    <item msgid="3543074812389379830">"Mười hai"</item>
-    <item msgid="7389464214252023751">"Một"</item>
-    <item msgid="8803180377002008046">"Hai"</item>
-    <item msgid="8614897059944644719">"Ba"</item>
-    <item msgid="2293058674782619556">"Bốn"</item>
-    <item msgid="4815402358455041664">"Năm"</item>
-    <item msgid="3325754778509665687">"Sáu"</item>
-    <item msgid="5805551341866280575">"Bảy"</item>
-    <item msgid="203334816668238610">"Tám"</item>
-    <item msgid="4828052671464488923">"Chín"</item>
-    <item msgid="2233497913571137419">"Mười"</item>
-    <item msgid="5621554266768657830">"Mười một"</item>
-  </string-array>
-  <string-array name="type_clock_minutes">
-    <item msgid="8322049385467207985">"Giờ"</item>
-    <item msgid="2091812961809760681">"Không một"</item>
-    <item msgid="1496435384877290709">"Không hai"</item>
-    <item msgid="881846472976674129">"Không ba"</item>
-    <item msgid="2784477043911540584">"Không bốn"</item>
-    <item msgid="1610928853656700614">"Không năm"</item>
-    <item msgid="2317806244043886658">"Không sáu"</item>
-    <item msgid="3318687539120971327">"Không bảy"</item>
-    <item msgid="5701600693712102348">"Tám"</item>
-    <item msgid="3247381605947372495">"Không chín"</item>
-    <item msgid="3508406095411245038">"Mười"</item>
-    <item msgid="7161996337755311711">"Mười một"</item>
-    <item msgid="4044549963329624197">"Mười hai"</item>
-    <item msgid="333373157917379088">"Mười ba"</item>
-    <item msgid="2631202907124819385">"Mười bốn"</item>
-    <item msgid="6472396076858033453">"Mười lăm"</item>
-    <item msgid="8656981856181581643">"Mười sáu"</item>
-    <item msgid="7289026608562030619">"Mười bảy"</item>
-    <item msgid="3881477602692646573">"Mười tám"</item>
-    <item msgid="3358129827772984226">"Mười chín"</item>
-    <item msgid="3308575407402865807">"Hai mươi"</item>
-    <item msgid="5346560955382229629">"Hai mươi\nmốt"</item>
-    <item msgid="226750304761473436">"Hai mươi\nhai"</item>
-    <item msgid="616811325336838734">"Hai mươi\nba"</item>
-    <item msgid="616346116869053440">"Hai mươi\nbốn"</item>
-    <item msgid="4642996410384042830">"Hai mươi\nlăm"</item>
-    <item msgid="7506092849993571465">"Hai mươi\nsáu"</item>
-    <item msgid="1915078191101042031">"Hai mươi\nbảy"</item>
-    <item msgid="4292378641900520252">"Hai mươi\ntám"</item>
-    <item msgid="5339513901773103696">"Hai mươi\nchín"</item>
-    <item msgid="3574673250891657607">"Ba mươi"</item>
-    <item msgid="5796923836589110940">"Ba mươi\nmốt"</item>
-    <item msgid="5859323597571702052">"Ba mươi\nhai"</item>
-    <item msgid="5133326723148876507">"Ba mươi\nba"</item>
-    <item msgid="2693999494655663096">"Ba mươi\ntư"</item>
-    <item msgid="3316754944962836197">"Ba mươi\nlăm"</item>
-    <item msgid="816891008836796723">"Ba mươi\nsáu"</item>
-    <item msgid="9158890488666520078">"Ba mươi\nbảy"</item>
-    <item msgid="1894769703213894011">"Ba mươi\ntám"</item>
-    <item msgid="5638820345598572399">"Ba mươi\nchín"</item>
-    <item msgid="8838304023017895439">"Bốn mươi"</item>
-    <item msgid="1834742948932559597">"Bốn mươi\nmốt"</item>
-    <item msgid="6573707308847773944">"Bốn mươi\nhai"</item>
-    <item msgid="2450149950652678001">"Bốn mươi\nba"</item>
-    <item msgid="2874667401318178036">"Bốn mươi\nbốn"</item>
-    <item msgid="3391101532763048862">"Bốn mươi\nlăm"</item>
-    <item msgid="1671489330863254362">"Bốn mươi\nsáu"</item>
-    <item msgid="5916017359554531038">"Bốn mươi\nbảy"</item>
-    <item msgid="8205413177993059967">"Bốn mươi\ntám"</item>
-    <item msgid="6607867415142171302">"Bốn mươi\nchín"</item>
-    <item msgid="8358850748472089162">"Năm mươi"</item>
-    <item msgid="3551313125255080234">"Năm mươi\nmốt"</item>
-    <item msgid="1559678130725716542">"Năm mươi\nhai"</item>
-    <item msgid="431441994725492377">"Năm mươi\nba"</item>
-    <item msgid="6345774640539623024">"Năm mươi\nbốn"</item>
-    <item msgid="8018192990793931120">"Năm mươi\nlăm"</item>
-    <item msgid="6187650843754604534">"Năm mươi\nsáu"</item>
-    <item msgid="8727240174015993259">"Năm mươi\nbảy"</item>
-    <item msgid="848339003778952950">"Năm mươi\ntám"</item>
-    <item msgid="5798985802835423618">"Năm mươi\nchín"</item>
-  </string-array>
 </resources>

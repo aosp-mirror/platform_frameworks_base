@@ -372,6 +372,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Bis Sonnenaufgang"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"An um <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Bis <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Dunkles Design"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC ist deaktiviert"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC ist aktiviert"</string>
@@ -761,8 +762,8 @@
     <string name="right_keycode" msgid="708447961000848163">"Rechter Keycode"</string>
     <string name="left_icon" msgid="3096287125959387541">"Linkes Symbol"</string>
     <string name="right_icon" msgid="3952104823293824311">"Rechtes Symbol"</string>
-    <string name="drag_to_add_tiles" msgid="230586591689084925">"Halten und ziehen, um Kacheln hinzuzufügen"</string>
-    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Halten und ziehen, um die Kacheln neu anzuordnen"</string>
+    <string name="drag_to_add_tiles" msgid="230586591689084925">"Zum Hinzufügen von Kacheln Kachel halten und ziehen"</string>
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Zum Verschieben der Kacheln Kachel halten und ziehen"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Zum Entfernen hierher ziehen"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Du brauchst mindestens sechs Kacheln"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Bearbeiten"</string>
@@ -905,8 +906,8 @@
     <string name="music_controls_no_title" msgid="5236895307087002011">"Kein Titel"</string>
     <string name="restart_button_description" msgid="2035077840254950187">"Tippe, um die App im Vollbildmodus neu zu starten."</string>
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"<xliff:g id="APP_NAME">%1$s</xliff:g> öffnen"</string>
-    <string name="bubbles_settings_button_description" msgid="2970630476657287189">"Einstellungen für <xliff:g id="APP_NAME">%1$s</xliff:g>-Infofelder"</string>
-    <string name="bubbles_prompt" msgid="8807968030159469710">"Infofelder von <xliff:g id="APP_NAME">%1$s</xliff:g> zulassen?"</string>
+    <string name="bubbles_settings_button_description" msgid="2970630476657287189">"Einstellungen für <xliff:g id="APP_NAME">%1$s</xliff:g>-Bubbles"</string>
+    <string name="bubbles_prompt" msgid="8807968030159469710">"<xliff:g id="APP_NAME">%1$s</xliff:g>-Bubbles zulassen?"</string>
     <string name="no_bubbles" msgid="337101288173078247">"Ablehnen"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Zulassen"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Später fragen"</string>

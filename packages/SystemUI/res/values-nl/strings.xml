@@ -368,6 +368,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Tot zonsopgang"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Aan om <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Tot <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Donker thema"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC is uitgeschakeld"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC is ingeschakeld"</string>
@@ -512,7 +513,7 @@
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Sneller meldingen ontvangen"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Weergeven voordat u ontgrendelt"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Nee, bedankt"</string>
-    <string name="hidden_notifications_setup" msgid="41079514801976810">"Configureren"</string>
+    <string name="hidden_notifications_setup" msgid="41079514801976810">"Instellen"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="6930243045593601084">"Nu uitschakelen"</string>
     <string name="accessibility_volume_settings" msgid="4915364006817819212">"Geluidsinstellingen"</string>

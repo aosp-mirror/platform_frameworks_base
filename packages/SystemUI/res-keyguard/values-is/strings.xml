@@ -151,23 +151,4 @@
       <item quantity="one">SIM-kortið er nú óvirkt. Sláðu inn PUK-númer til að halda áfram. Það er <xliff:g id="_NUMBER_1">%d</xliff:g> tilraun eftir þar til SIM-kortið verður ónothæft til frambúðar. Hafðu samband við símafyrirtækið til að fá upplýsingar.</item>
       <item quantity="other">SIM-kortið er nú óvirkt. Sláðu inn PUK-númer til að halda áfram. Það eru <xliff:g id="_NUMBER_1">%d</xliff:g> tilraunir eftir þar til SIM-kortið verður ónothæft til frambúðar. Hafðu samband við símafyrirtækið til að fá upplýsingar.</item>
     </plurals>
-    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
-      <item quantity="one">"<annotation name="color">"Hún er"</annotation>\n"^1\n^2</item>
-      <item quantity="other">"<annotation name="color">"Hún er"</annotation>\n"^1\n^2</item>
-    </plurals>
-  <string-array name="type_clock_hours">
-    <item msgid="3543074812389379830">"Tólf"</item>
-    <item msgid="7389464214252023751">"Eitt"</item>
-    <item msgid="8803180377002008046">"Tvö"</item>
-    <item msgid="8614897059944644719">"Þrjú"</item>
-    <item msgid="2293058674782619556">"Fjögur"</item>
-    <item msgid="4815402358455041664">"Fimm"</item>
-    <item msgid="3325754778509665687">"Sex"</item>
-    <item msgid="5805551341866280575">"Sjö"</item>
-    <item msgid="203334816668238610">"Átta"</item>
-    <item msgid="4828052671464488923">"Níu"</item>
-    <item msgid="2233497913571137419">"Tíu"</item>
-    <item msgid="5621554266768657830">"Ellefu"</item>
-  </string-array>
-    <!-- no translation found for type_clock_minutes:0 (8322049385467207985) -->
 </resources>
