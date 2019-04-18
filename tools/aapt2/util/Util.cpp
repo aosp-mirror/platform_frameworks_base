@@ -21,13 +21,15 @@
 #include <string>
 #include <vector>
 
+#include "android-base/stringprintf.h"
 #include "androidfw/StringPiece.h"
-#include "utils/Unicode.h"
+#include "build/version.h"
 
 #include "text/Unicode.h"
 #include "text/Utf8Iterator.h"
 #include "util/BigBuffer.h"
 #include "util/Maybe.h"
+#include "utils/Unicode.h"
 
 using ::aapt::text::Utf8Iterator;
 using ::android::StringPiece;
@@ -198,6 +200,24 @@ Maybe<std::string> GetFullyQualifiedClassName(const StringPiece& package,
     return {};
   }
   return result;
+}
+
+const char* GetToolName() {
+  static const char* const sToolName = "Android Asset Packaging Tool (aapt)";
+  return sToolName;
+}
+
+std::string GetToolFingerprint() {
+  // DO NOT UPDATE, this is more of a marketing version.
+  static const char* const sMajorVersion = "2";
+
+  // Update minor version whenever a feature or flag is added.
+  static const char* const sMinorVersion = "19";
+
+  // The build id of aapt2 binary.
+  static const std::string sBuildId = android::build::GetBuildNumber();
+
+  return android::base::StringPrintf("%s.%s-%s", sMajorVersion, sMinorVersion, sBuildId.c_str());
 }
 
 static size_t ConsumeDigits(const char* start, const char* end) {
