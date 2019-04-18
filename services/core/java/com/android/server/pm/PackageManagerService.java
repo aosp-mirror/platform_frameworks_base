@@ -9280,11 +9280,17 @@ public class PackageManagerService extends IPackageManager.Stub
                     + " better than this " + pkg.getLongVersionCode());
         }
 
-        // Verify certificates against what was last scanned. If there was an upgrade and this is an
-        // app in a system partition, or if this is an updated priv app, we will force re-collecting
-        // certificate.
-        final boolean forceCollect = (mIsUpgrade && scanSystemPartition)
-                || PackageManagerServiceUtils.isApkVerificationForced(disabledPkgSetting);
+        // Verify certificates against what was last scanned. Force re-collecting certificate in two
+        // special cases:
+        // 1) when scanning system, force re-collect only if system is upgrading.
+        // 2) when scannning /data, force re-collect only if the app is privileged (updated from
+        // preinstall, or treated as privileged, e.g. due to shared user ID).
+        final boolean forceCollect = scanSystemPartition ? mIsUpgrade
+                : PackageManagerServiceUtils.isApkVerificationForced(pkgSetting);
+        if (DEBUG_VERIFY && forceCollect) {
+            Slog.d(TAG, "Force collect certificate of " + pkg.packageName);
+        }
+
         // Full APK verification can be skipped during certificate collection, only if the file is
         // in verified partition, or can be verified on access (when apk verity is enabled). In both
         // cases, only data in Signing Block is verified instead of the whole file.
