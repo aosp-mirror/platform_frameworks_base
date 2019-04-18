@@ -3164,13 +3164,26 @@ public final class ProcessList {
 
     @GuardedBy("mService")
     void sendPackageBroadcastLocked(int cmd, String[] packages, int userId) {
+        boolean foundProcess = false;
         for (int i = mLruProcesses.size() - 1; i >= 0; i--) {
             ProcessRecord r = mLruProcesses.get(i);
             if (r.thread != null && (userId == UserHandle.USER_ALL || r.userId == userId)) {
                 try {
+                    for (int index = packages.length - 1; index >= 0 && !foundProcess; index--) {
+                        if (packages[index].equals(r.info.packageName)) {
+                            foundProcess = true;
+                        }
+                    }
                     r.thread.dispatchPackageBroadcast(cmd, packages);
                 } catch (RemoteException ex) {
                 }
+            }
+        }
+
+        if (!foundProcess) {
+            try {
+                AppGlobals.getPackageManager().notifyPackagesReplacedReceived(packages);
+            } catch (RemoteException ignored) {
             }
         }
     }
