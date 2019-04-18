@@ -3691,7 +3691,7 @@
              the settings for this service. -->
         <attr name="settingsActivity"/>
         <!-- Secure Element which the AIDs should be routed to -->
-        <attr name="secureElementName"/>
+        <attr name="secureElementName" format="string"/>
     </declare-styleable>
 
     <!-- Specify one or more <code>aid-group</code> elements inside a
