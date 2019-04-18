@@ -132,16 +132,20 @@ public class SettingsToPropertiesMapper {
         }
 
         for (String deviceConfigScope : mDeviceConfigScopes) {
-            DeviceConfig.addOnPropertyChangedListener(
+            DeviceConfig.addOnPropertiesChangedListener(
                     deviceConfigScope,
                     AsyncTask.THREAD_POOL_EXECUTOR,
-                    (String scope, String name, String value) -> {
-                        String propertyName = makePropertyName(scope, name);
-                        if (propertyName == null) {
-                            log("unable to construct system property for " + scope + "/" + name);
-                            return;
+                    (DeviceConfig.Properties properties) -> {
+                        String scope = properties.getNamespace();
+                        for (String key : properties.getKeyset()) {
+                            String propertyName = makePropertyName(scope, key);
+                            if (propertyName == null) {
+                                log("unable to construct system property for " + scope + "/"
+                                        + key);
+                                return;
+                            }
+                            setProperty(propertyName, properties.getString(key, null));
                         }
-                        setProperty(propertyName, value);
                     });
         }
     }
