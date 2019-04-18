@@ -370,10 +370,6 @@ public abstract class MediaSession2Service extends Service {
                             }
                             return;
                         }
-                        if (DEBUG) {
-                            Log.d(TAG, "Handling incoming connection request from the"
-                                    + " controller, controller=" + caller + ", uid=" + uid);
-                        }
 
                         String callingPkg = connectionRequest.getString(KEY_PACKAGE_NAME);
                         // The Binder.getCallingPid() can be 0 for an oneway call from the
@@ -389,13 +385,18 @@ public abstract class MediaSession2Service extends Service {
                                 caller,
                                 connectionRequest.getBundle(KEY_CONNECTION_HINTS));
 
+                        if (DEBUG) {
+                            Log.d(TAG, "Handling incoming connection request from the"
+                                    + " controller=" + controllerInfo);
+                        }
+
                         final MediaSession2 session;
                         session = service.onGetSession(controllerInfo);
 
                         if (session == null) {
                             if (DEBUG) {
                                 Log.d(TAG, "Rejecting incoming connection request from the"
-                                        + " controller, controller=" + caller + ", uid=" + uid);
+                                        + " controller=" + controllerInfo);
                             }
                             // Note: Trusted controllers also can be rejected according to the
                             // service implementation.
