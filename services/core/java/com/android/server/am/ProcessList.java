@@ -709,7 +709,10 @@ public final class ProcessList {
             ApplicationInfo applicationInfo) {
         final boolean shouldUseGameDriver =
                 GraphicsEnvironment.shouldUseGameDriver(context, coreSettings, applicationInfo);
-        return !shouldUseGameDriver;
+        final boolean shouldUseAngle =
+                GraphicsEnvironment.shouldUseAngle(context, coreSettings,
+                    applicationInfo.packageName);
+        return !shouldUseGameDriver && !shouldUseAngle;
     }
 
     public static String makeOomAdjString(int setAdj, boolean compact) {
