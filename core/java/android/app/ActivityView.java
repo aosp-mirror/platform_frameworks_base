@@ -19,6 +19,7 @@ package android.app;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
+import static android.view.Display.INVALID_DISPLAY;
 
 import android.annotation.NonNull;
 import android.annotation.TestApi;
@@ -374,6 +375,16 @@ public class ActivityView extends ViewGroup {
     protected void onVisibilityChanged(View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
         mSurfaceView.setVisibility(visibility);
+    }
+
+    /**
+     * @return the display id of the virtual display.
+     */
+    public int getVirtualDisplayId() {
+        if (mVirtualDisplay != null) {
+            return mVirtualDisplay.getDisplay().getDisplayId();
+        }
+        return INVALID_DISPLAY;
     }
 
     /**
