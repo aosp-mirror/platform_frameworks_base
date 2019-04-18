@@ -144,6 +144,7 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Insets;
 import android.graphics.Matrix;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
@@ -541,6 +542,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     private final InsetsStateController mInsetsStateController;
 
+    /** @see #getParentWindow() */
+    private WindowState mParentWindow;
+
+    private Point mLocationInParentWindow = new Point();
     private SurfaceControl mParentSurfaceControl;
     private InputWindowHandle mPortalWindowHandle;
 
@@ -4923,17 +4928,55 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     /**
      * Re-parent the DisplayContent's top surfaces, {@link #mWindowingLayer} and
-     * {@link #mOverlayLayer} to the specified surfaceControl.
+     * {@link #mOverlayLayer} to the specified SurfaceControl.
      *
+     * @param win The window which owns the SurfaceControl. This indicates the z-order of the
+     *            windows of this display against the windows on the parent display.
      * @param sc The new SurfaceControl, where the DisplayContent's surfaces will be re-parented to.
      */
-    void reparentDisplayContent(SurfaceControl sc) {
+    void reparentDisplayContent(WindowState win, SurfaceControl sc) {
+        mParentWindow = win;
         mParentSurfaceControl = sc;
         if (mPortalWindowHandle == null) {
             mPortalWindowHandle = createPortalWindowHandle(sc.toString());
         }
         mPendingTransaction.setInputWindowInfo(sc, mPortalWindowHandle)
                 .reparent(mWindowingLayer, sc).reparent(mOverlayLayer, sc);
+    }
+
+    /**
+     * Get the window which owns the surface that this DisplayContent is re-parented to.
+     *
+     * @return the parent window.
+     */
+    WindowState getParentWindow() {
+        return mParentWindow;
+    }
+
+    /**
+     * Update the location of this display in the parent window. This enables windows in this
+     * display to compute the global transformation matrix.
+     *
+     * @param win The parent window of this display.
+     * @param x The x coordinate in the parent window.
+     * @param y The y coordinate in the parent window.
+     */
+    void updateLocation(WindowState win, int x, int y) {
+        if (mParentWindow != win) {
+            throw new IllegalArgumentException(
+                    "The given window is not the parent window of this display.");
+        }
+        if (mLocationInParentWindow.x != x || mLocationInParentWindow.y != y) {
+            mLocationInParentWindow.x = x;
+            mLocationInParentWindow.y = y;
+            if (mWmService.mAccessibilityController != null) {
+                mWmService.mAccessibilityController.onSomeWindowResizedOrMovedLocked();
+            }
+        }
+    }
+
+    Point getLocationInParentWindow() {
+        return mLocationInParentWindow;
     }
 
     @VisibleForTesting

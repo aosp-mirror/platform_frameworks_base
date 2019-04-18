@@ -317,7 +317,7 @@ public class ActivityView extends ViewGroup {
      * regions and avoid focus switches by touches on this view.
      */
     public void onLocationChanged() {
-        updateTapExcludeRegion();
+        updateLocationAndTapExcludeRegion();
     }
 
     @Override
@@ -329,37 +329,50 @@ public class ActivityView extends ViewGroup {
     public boolean gatherTransparentRegion(Region region) {
         // The tap exclude region may be affected by any view on top of it, so we detect the
         // possible change by monitoring this function.
-        updateTapExcludeRegion();
+        updateLocationAndTapExcludeRegion();
         return super.gatherTransparentRegion(region);
     }
 
-    /** Compute and send current tap exclude region to WM for this view. */
-    private void updateTapExcludeRegion() {
-        if (!isAttachedToWindow()) {
+    /**
+     * Sends current location in window and tap exclude region to WM for this view.
+     */
+    private void updateLocationAndTapExcludeRegion() {
+        if (mVirtualDisplay == null || !isAttachedToWindow()) {
             return;
         }
+        try {
+            int x = mLocationInWindow[0];
+            int y = mLocationInWindow[1];
+            getLocationInWindow(mLocationInWindow);
+            if (x != mLocationInWindow[0] || y != mLocationInWindow[1]) {
+                x = mLocationInWindow[0];
+                y = mLocationInWindow[1];
+                WindowManagerGlobal.getWindowSession().updateDisplayContentLocation(
+                        getWindow(), x, y, mVirtualDisplay.getDisplay().getDisplayId());
+            }
+            updateTapExcludeRegion(x, y);
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
+    }
+
+    /** Computes and sends current tap exclude region to WM for this view. */
+    private void updateTapExcludeRegion(int x, int y) throws RemoteException {
         if (!canReceivePointerEvents()) {
             cleanTapExcludeRegion();
             return;
         }
-        try {
-            getLocationInWindow(mLocationInWindow);
-            final int x = mLocationInWindow[0];
-            final int y = mLocationInWindow[1];
-            mTapExcludeRegion.set(x, y, x + getWidth(), y + getHeight());
+        mTapExcludeRegion.set(x, y, x + getWidth(), y + getHeight());
 
-            // There might be views on top of us. We need to subtract those areas from the tap
-            // exclude region.
-            final ViewParent parent = getParent();
-            if (parent instanceof ViewGroup) {
-                ((ViewGroup) parent).subtractObscuredTouchableRegion(mTapExcludeRegion, this);
-            }
-
-            WindowManagerGlobal.getWindowSession().updateTapExcludeRegion(getWindow(), hashCode(),
-                    mTapExcludeRegion);
-        } catch (RemoteException e) {
-            e.rethrowAsRuntimeException();
+        // There might be views on top of us. We need to subtract those areas from the tap
+        // exclude region.
+        final ViewParent parent = getParent();
+        if (parent != null) {
+            parent.subtractObscuredTouchableRegion(mTapExcludeRegion, this);
         }
+
+        WindowManagerGlobal.getWindowSession().updateTapExcludeRegion(getWindow(), hashCode(),
+                mTapExcludeRegion);
     }
 
     private class SurfaceCallback implements SurfaceHolder.Callback {
@@ -379,7 +392,7 @@ public class ActivityView extends ViewGroup {
                 mVirtualDisplay.setDisplayState(true);
             }
 
-            updateTapExcludeRegion();
+            updateLocationAndTapExcludeRegion();
         }
 
         @Override
@@ -387,7 +400,7 @@ public class ActivityView extends ViewGroup {
             if (mVirtualDisplay != null) {
                 mVirtualDisplay.resize(width, height, getBaseDisplayDensity());
             }
-            updateTapExcludeRegion();
+            updateLocationAndTapExcludeRegion();
         }
 
         @Override
@@ -471,7 +484,8 @@ public class ActivityView extends ViewGroup {
 
         try {
             // TODO: Find a way to consolidate these calls to the server.
-            wm.reparentDisplayContent(displayId, mRootSurfaceControl);
+            WindowManagerGlobal.getWindowSession().reparentDisplayContent(
+                    getWindow(), mRootSurfaceControl, displayId);
             wm.dontOverrideDisplayInfo(displayId);
             if (mSingleTaskInstance) {
                 mActivityTaskManager.setDisplayToSingleTaskInstance(displayId);
