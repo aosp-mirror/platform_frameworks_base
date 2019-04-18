@@ -228,6 +228,23 @@ public class BubbleData {
         dispatchPendingChanges();
     }
 
+    /**
+     * Retrieves any bubbles that are part of the notification group represented by the provided
+     * group key.
+     */
+    ArrayList<Bubble> getBubblesInGroup(@Nullable String groupKey) {
+        ArrayList<Bubble> bubbleChildren = new ArrayList<>();
+        if (groupKey == null) {
+            return bubbleChildren;
+        }
+        for (Bubble b : mBubbles) {
+            if (groupKey.equals(b.getEntry().notification.getGroupKey())) {
+                bubbleChildren.add(b);
+            }
+        }
+        return bubbleChildren;
+    }
+
     private void doAdd(Bubble bubble) {
         if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "doAdd: " + bubble);

@@ -16,12 +16,15 @@
 
 package com.android.systemui.bubbles;
 
+import static android.app.Notification.FLAG_AUTOGROUP_SUMMARY;
 import static android.app.Notification.FLAG_BUBBLE;
 import static android.content.pm.ActivityInfo.DOCUMENT_LAUNCH_ALWAYS;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL_ALL;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL_ALL;
+import static android.service.notification.NotificationListenerService.REASON_CLICK;
+import static android.service.notification.NotificationListenerService.REASON_GROUP_SUMMARY_CANCELED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.View.INVISIBLE;
@@ -82,6 +85,7 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -90,6 +94,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -109,7 +114,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     @Retention(SOURCE)
     @IntDef({DISMISS_USER_GESTURE, DISMISS_AGED, DISMISS_TASK_FINISHED, DISMISS_BLOCKED,
             DISMISS_NOTIF_CANCEL, DISMISS_ACCESSIBILITY_ACTION, DISMISS_NO_LONGER_BUBBLE,
-            DISMISS_USER_CHANGED})
+            DISMISS_USER_CHANGED, DISMISS_GROUP_CANCELLED})
     @Target({FIELD, LOCAL_VARIABLE, PARAMETER})
     @interface DismissReason {}
 
@@ -121,6 +126,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     static final int DISMISS_ACCESSIBILITY_ACTION = 6;
     static final int DISMISS_NO_LONGER_BUBBLE = 7;
     static final int DISMISS_USER_CHANGED = 8;
+    static final int DISMISS_GROUP_CANCELLED = 9;
 
     public static final int MAX_BUBBLES = 5; // TODO: actually enforce this
 
@@ -133,6 +139,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     private BubbleStateChangeListener mStateChangeListener;
     private BubbleExpandListener mExpandListener;
     @Nullable private BubbleStackView.SurfaceSynchronizer mSurfaceSynchronizer;
+    private final NotificationGroupManager mNotificationGroupManager;
 
     private BubbleData mBubbleData;
     @Nullable private BubbleStackView mStackView;
@@ -211,10 +218,11 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             BubbleData data, ConfigurationController configurationController,
             NotificationInterruptionStateProvider interruptionStateProvider,
             ZenModeController zenModeController,
-            NotificationLockscreenUserManager notifUserManager) {
+            NotificationLockscreenUserManager notifUserManager,
+            NotificationGroupManager groupManager) {
         this(context, statusBarWindowController, data, null /* synchronizer */,
                 configurationController, interruptionStateProvider, zenModeController,
-                notifUserManager);
+                notifUserManager, groupManager);
     }
 
     public BubbleController(Context context, StatusBarWindowController statusBarWindowController,
@@ -222,7 +230,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             ConfigurationController configurationController,
             NotificationInterruptionStateProvider interruptionStateProvider,
             ZenModeController zenModeController,
-            NotificationLockscreenUserManager notifUserManager) {
+            NotificationLockscreenUserManager notifUserManager,
+            NotificationGroupManager groupManager) {
         mContext = context;
         mNotificationInterruptionStateProvider = interruptionStateProvider;
         mNotifUserManager = notifUserManager;
@@ -251,6 +260,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         mNotificationEntryManager = Dependency.get(NotificationEntryManager.class);
         mNotificationEntryManager.addNotificationEntryListener(mEntryListener);
         mNotificationEntryManager.setNotificationRemoveInterceptor(mRemoveInterceptor);
+        mNotificationGroupManager = groupManager;
 
         mStatusBarWindowController = statusBarWindowController;
         mStatusBarStateListener = new StatusBarStateListener();
@@ -500,24 +510,38 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             new NotificationRemoveInterceptor() {
             @Override
             public boolean onNotificationRemoveRequested(String key, int reason) {
-                if (!mBubbleData.hasBubbleWithKey(key)) {
+                NotificationEntry entry = mNotificationEntryManager.getNotificationData().get(key);
+                String groupKey = entry != null ? entry.notification.getGroupKey() : null;
+                ArrayList<Bubble> bubbleChildren = mBubbleData.getBubblesInGroup(groupKey);
+
+                boolean inBubbleData = mBubbleData.hasBubbleWithKey(key);
+                boolean isSummary = entry != null
+                        && entry.notification.getNotification().isGroupSummary();
+                boolean isSummaryOfBubbles = isSummary && bubbleChildren != null
+                        && !bubbleChildren.isEmpty();
+
+                if (!inBubbleData && !isSummaryOfBubbles) {
                     return false;
                 }
-                Bubble bubble = mBubbleData.getBubbleWithKey(key);
-                NotificationEntry entry = bubble.getEntry();
 
                 final boolean isClearAll = reason == REASON_CANCEL_ALL;
-                final boolean isUserDimiss = reason == REASON_CANCEL;
+                final boolean isUserDimiss = reason == REASON_CANCEL || reason == REASON_CLICK;
                 final boolean isAppCancel = reason == REASON_APP_CANCEL
                         || reason == REASON_APP_CANCEL_ALL;
+                final boolean isSummaryCancel = reason == REASON_GROUP_SUMMARY_CANCELED;
 
                 // Need to check for !appCancel here because the notification may have
                 // previously been dismissed & entry.isRowDismissed would still be true
                 boolean userRemovedNotif = (entry.isRowDismissed() && !isAppCancel)
-                        || isClearAll || isUserDimiss;
+                        || isClearAll || isUserDimiss || isSummaryCancel;
+
+                if (isSummaryOfBubbles) {
+                    return handleSummaryRemovalInterception(entry, userRemovedNotif);
+                }
 
                 // The bubble notification sticks around in the data as long as the bubble is
                 // not dismissed and the app hasn't cancelled the notification.
+                Bubble bubble = mBubbleData.getBubbleWithKey(key);
                 boolean bubbleExtended = entry.isBubble() && userRemovedNotif;
                 if (bubbleExtended) {
                     bubble.setShowInShadeWhenBubble(false);
@@ -535,6 +559,43 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 return false;
             }
         };
+
+    private boolean handleSummaryRemovalInterception(NotificationEntry summary,
+            boolean userRemovedNotif) {
+        String groupKey = summary.notification.getGroupKey();
+        ArrayList<Bubble> bubbleChildren = mBubbleData.getBubblesInGroup(groupKey);
+
+        if (userRemovedNotif) {
+            // If it's a user dismiss we mark the children to be hidden from the shade.
+            for (int i = 0; i < bubbleChildren.size(); i++) {
+                Bubble bubbleChild = bubbleChildren.get(i);
+                // As far as group manager is concerned, once a child is no longer shown
+                // in the shade, it is essentially removed.
+                mNotificationGroupManager.onEntryRemoved(bubbleChild.getEntry());
+                bubbleChild.setShowInShadeWhenBubble(false);
+                bubbleChild.setShowBubbleDot(false);
+                if (mStackView != null) {
+                    mStackView.updateDotVisibility(bubbleChild.getKey());
+                }
+            }
+            // And since all children are removed, remove the summary.
+            mNotificationGroupManager.onEntryRemoved(summary);
+
+            // If the summary was auto-generated we don't need to keep that notification around
+            // because apps can't cancel it; so we only intercept & suppress real summaries.
+            boolean isAutogroupSummary = (summary.notification.getNotification().flags
+                    & FLAG_AUTOGROUP_SUMMARY) != 0;
+            return !isAutogroupSummary;
+        } else {
+            // Remove any associated bubble children.
+            for (int i = 0; i < bubbleChildren.size(); i++) {
+                Bubble bubbleChild = bubbleChildren.get(i);
+                mBubbleData.notificationEntryRemoved(bubbleChild.getEntry(),
+                        DISMISS_GROUP_CANCELLED);
+            }
+            return false;
+        }
+    }
 
     @SuppressWarnings("FieldCanBeLocal")
     private final NotificationEntryListener mEntryListener = new NotificationEntryListener() {
@@ -597,7 +658,9 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             }
 
             // Do removals, if any.
-            for (Pair<Bubble, Integer> removed : update.removedBubbles) {
+            ArrayList<Pair<Bubble, Integer>> removedBubbles =
+                    new ArrayList<>(update.removedBubbles);
+            for (Pair<Bubble, Integer> removed : removedBubbles) {
                 final Bubble bubble = removed.first;
                 @DismissReason final int reason = removed.second;
                 mStackView.removeBubble(bubble);
@@ -620,6 +683,18 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                                     false /* isBubble */);
                         } catch (RemoteException e) {
                             // Bad things have happened
+                        }
+                    }
+
+                    // Check if summary should be removed from NoManGroup
+                    NotificationEntry summary = mNotificationGroupManager.getLogicalGroupSummary(
+                            bubble.getEntry().notification);
+                    if (summary != null) {
+                        ArrayList<NotificationEntry> summaryChildren =
+                                mNotificationGroupManager.getLogicalChildren(summary.notification);
+                        if (summaryChildren == null || summaryChildren.isEmpty()) {
+                            mNotificationEntryManager.performRemoveNotification(
+                                    summary.notification, UNDEFINED_DISMISS_REASON);
                         }
                     }
                 }
