@@ -869,8 +869,12 @@ static void MountEmulatedStorage(uid_t uid, jint mount_mode,
     storage_source = "/mnt/runtime/default";
   } else if (mount_mode == MOUNT_EXTERNAL_READ) {
     storage_source = "/mnt/runtime/read";
-  } else if (mount_mode == MOUNT_EXTERNAL_WRITE) {
+  } else if (mount_mode == MOUNT_EXTERNAL_WRITE
+      || mount_mode == MOUNT_EXTERNAL_LEGACY
+      || mount_mode == MOUNT_EXTERNAL_INSTALLER) {
     storage_source = "/mnt/runtime/write";
+  } else if (mount_mode == MOUNT_EXTERNAL_FULL) {
+    storage_source = "/mnt/runtime/full";
   } else if (mount_mode == MOUNT_EXTERNAL_NONE && !force_mount_namespace) {
     // Sane default of no storage visible
     return;
@@ -886,7 +890,8 @@ static void MountEmulatedStorage(uid_t uid, jint mount_mode,
     return;
   }
 
-  if (GetBoolProperty(kIsolatedStorageSnapshot, GetBoolProperty(kIsolatedStorage, true))) {
+  if (/* DISABLES CODE */ (false)
+      && GetBoolProperty(kIsolatedStorageSnapshot, GetBoolProperty(kIsolatedStorage, true))) {
     if (mount_mode == MOUNT_EXTERNAL_FULL || mount_mode == MOUNT_EXTERNAL_LEGACY) {
       storage_source = (mount_mode == MOUNT_EXTERNAL_FULL)
           ? "/mnt/runtime/full" : "/mnt/runtime/write";
