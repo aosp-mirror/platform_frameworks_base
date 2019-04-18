@@ -25,10 +25,6 @@ import static android.app.AppOpsManager.OP_LEGACY_STORAGE;
 import static android.app.AppOpsManager.OP_READ_EXTERNAL_STORAGE;
 import static android.app.AppOpsManager.OP_REQUEST_INSTALL_PACKAGES;
 import static android.app.AppOpsManager.OP_WRITE_EXTERNAL_STORAGE;
-import static android.content.pm.PackageManager.GET_PERMISSIONS;
-import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
-import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
-import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.ParcelFileDescriptor.MODE_READ_WRITE;
 import static android.os.storage.OnObbStateChangeListener.ERROR_ALREADY_MOUNTED;
@@ -40,11 +36,9 @@ import static android.os.storage.OnObbStateChangeListener.ERROR_PERMISSION_DENIE
 import static android.os.storage.OnObbStateChangeListener.MOUNTED;
 import static android.os.storage.OnObbStateChangeListener.UNMOUNTED;
 
-import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
 import static com.android.internal.util.XmlUtils.readLongAttribute;
 import static com.android.internal.util.XmlUtils.readStringAttribute;
-import static com.android.internal.util.XmlUtils.writeBooleanAttribute;
 import static com.android.internal.util.XmlUtils.writeIntAttribute;
 import static com.android.internal.util.XmlUtils.writeLongAttribute;
 import static com.android.internal.util.XmlUtils.writeStringAttribute;
@@ -69,7 +63,6 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.IPackageMoveObserver;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ProviderInfo;
@@ -3733,15 +3726,12 @@ class StorageManagerService extends IStorageManager.Stub
                     uid, packageName, READ_EXTERNAL_STORAGE, OP_READ_EXTERNAL_STORAGE);
             final boolean hasWrite = StorageManager.checkPermissionAndCheckOp(mContext, false, 0,
                     uid, packageName, WRITE_EXTERNAL_STORAGE, OP_WRITE_EXTERNAL_STORAGE);
-            // STOPSHIP: remove this temporary hack once we have dynamic runtime
-            // permissions fully enabled again
-            final boolean hasStorage = hasRead || hasWrite || true;
 
             // We're only willing to give out broad access if they also hold
             // runtime permission; this is a firm CDD requirement
             final boolean hasFull = mIPackageManager.checkUidPermission(WRITE_MEDIA_STORAGE,
                     uid) == PERMISSION_GRANTED;
-            if (hasFull && hasStorage) {
+            if (hasFull && hasWrite) {
                 return Zygote.MOUNT_EXTERNAL_FULL;
             }
 
@@ -3751,16 +3741,18 @@ class StorageManagerService extends IStorageManager.Stub
                     uid) == PERMISSION_GRANTED;
             final boolean hasInstallOp = mIAppOpsService.checkOperation(OP_REQUEST_INSTALL_PACKAGES,
                     uid, packageName) == MODE_ALLOWED;
-            if ((hasInstall || hasInstallOp) && hasStorage) {
-                return Zygote.MOUNT_EXTERNAL_INSTALLER;
+            if ((hasInstall || hasInstallOp) && hasWrite) {
+                return Zygote.MOUNT_EXTERNAL_WRITE;
             }
 
             // Otherwise we're willing to give out sandboxed or non-sandboxed if
             // they hold the runtime permission
             final boolean hasLegacy = mIAppOpsService.checkOperation(OP_LEGACY_STORAGE,
                     uid, packageName) == MODE_ALLOWED;
-            if (hasLegacy && hasStorage) {
-                return Zygote.MOUNT_EXTERNAL_LEGACY;
+            if (hasLegacy && hasWrite) {
+                return Zygote.MOUNT_EXTERNAL_WRITE;
+            } else if (hasLegacy && hasRead) {
+                return Zygote.MOUNT_EXTERNAL_READ;
             } else {
                 return Zygote.MOUNT_EXTERNAL_DEFAULT;
             }
