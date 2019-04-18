@@ -1150,8 +1150,11 @@ public final class MediaStore {
          * {@code IMG1024.BURST001.JPG} and {@code IMG1024.BURST002.JPG}
          * will have the same {@link #GROUP_ID} because the first portion of
          * their filenames is identical.
+         *
+         * @removed
          */
         @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
+        @Deprecated
         public static final String GROUP_ID = "group_id";
 
         /**
