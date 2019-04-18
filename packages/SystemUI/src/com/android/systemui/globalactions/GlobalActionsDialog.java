@@ -438,7 +438,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     @Override
     public void onUiModeChanged() {
         mContext.getTheme().applyStyle(mContext.getThemeResId(), true);
-        if (mDialog.isShowing()) {
+        if (mDialog != null && mDialog.isShowing()) {
             mDialog.refreshDialog();
         }
     }
