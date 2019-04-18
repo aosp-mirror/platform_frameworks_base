@@ -40,7 +40,7 @@ public class SchedulingPolicyService extends ISchedulingPolicyService.Stub {
     private static final int PRIORITY_MAX = 3;
 
     private static final String[] MEDIA_PROCESS_NAMES = new String[] {
-            "media.codec", // vendor/bin/hw/android.hardware.media.omx@1.0-service
+            "media.swcodec", // /apex/com.android.media.swcodec/bin/mediaswcodec
     };
     private final IBinder.DeathRecipient mDeathRecipient = new IBinder.DeathRecipient() {
         @Override
