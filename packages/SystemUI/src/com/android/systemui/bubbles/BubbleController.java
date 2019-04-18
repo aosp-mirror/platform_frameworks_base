@@ -595,7 +595,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
     private void updateShowInShadeForSuppressNotification(NotificationEntry entry) {
         boolean suppressNotification = entry.getBubbleMetadata() != null
-                && entry.getBubbleMetadata().getSuppressNotification()
+                && entry.getBubbleMetadata().isNotificationSuppressed()
                 && isForegroundApp(mContext, entry.notification.getPackageName());
         entry.setShowInShadeWhenBubble(!suppressNotification);
     }
