@@ -23,6 +23,7 @@ import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
+import android.graphics.BlendMode;
 import android.graphics.Canvas;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
@@ -58,7 +59,7 @@ public class CheckedTextView extends TextView implements Checkable {
     @UnsupportedAppUsage
     private Drawable mCheckMarkDrawable;
     private ColorStateList mCheckMarkTintList = null;
-    private PorterDuff.Mode mCheckMarkTintMode = null;
+    private BlendMode mCheckMarkBlendMode = null;
     private boolean mHasCheckMarkTint = false;
     private boolean mHasCheckMarkTintMode = false;
 
@@ -99,8 +100,9 @@ public class CheckedTextView extends TextView implements Checkable {
         }
 
         if (a.hasValue(R.styleable.CheckedTextView_checkMarkTintMode)) {
-            mCheckMarkTintMode = Drawable.parseTintMode(a.getInt(
-                    R.styleable.CheckedTextView_checkMarkTintMode, -1), mCheckMarkTintMode);
+            mCheckMarkBlendMode = Drawable.parseBlendMode(a.getInt(
+                    R.styleable.CheckedTextView_checkMarkTintMode, -1),
+                    mCheckMarkBlendMode);
             mHasCheckMarkTintMode = true;
         }
 
@@ -259,7 +261,23 @@ public class CheckedTextView extends TextView implements Checkable {
      * @see Drawable#setTintMode(PorterDuff.Mode)
      */
     public void setCheckMarkTintMode(@Nullable PorterDuff.Mode tintMode) {
-        mCheckMarkTintMode = tintMode;
+        setCheckMarkTintBlendMode(tintMode != null
+                ? BlendMode.fromValue(tintMode.nativeInt) : null);
+    }
+
+    /**
+     * Specifies the blending mode used to apply the tint specified by
+     * {@link #setCheckMarkTintList(ColorStateList)} to the check mark
+     * drawable. The default mode is {@link PorterDuff.Mode#SRC_IN}.
+     *
+     * @param tintMode the blending mode used to apply the tint, may be
+     *                 {@code null} to clear tint
+     * @attr ref android.R.styleable#CheckedTextView_checkMarkTintMode
+     * @see #setCheckMarkTintList(ColorStateList)
+     * @see Drawable#setTintBlendMode(BlendMode)
+     */
+    public void setCheckMarkTintBlendMode(@Nullable BlendMode tintMode) {
+        mCheckMarkBlendMode = tintMode;
         mHasCheckMarkTintMode = true;
 
         applyCheckMarkTint();
@@ -277,7 +295,23 @@ public class CheckedTextView extends TextView implements Checkable {
     @InspectableProperty
     @Nullable
     public PorterDuff.Mode getCheckMarkTintMode() {
-        return mCheckMarkTintMode;
+        return mCheckMarkBlendMode != null
+                ? BlendMode.blendModeToPorterDuffMode(mCheckMarkBlendMode) : null;
+    }
+
+    /**
+     * Returns the blending mode used to apply the tint to the check mark
+     * drawable, if specified.
+     *
+     * @return the blending mode used to apply the tint to the check mark
+     *         drawable
+     * @attr ref android.R.styleable#CheckedTextView_checkMarkTintMode
+     * @see #setCheckMarkTintMode(PorterDuff.Mode)
+     */
+    @InspectableProperty(attributeId = android.R.styleable.CheckedTextView_checkMarkTintMode)
+    @Nullable
+    public BlendMode getCheckMarkTintBlendMode() {
+        return mCheckMarkBlendMode;
     }
 
     private void applyCheckMarkTint() {
@@ -289,7 +323,7 @@ public class CheckedTextView extends TextView implements Checkable {
             }
 
             if (mHasCheckMarkTintMode) {
-                mCheckMarkDrawable.setTintMode(mCheckMarkTintMode);
+                mCheckMarkDrawable.setTintBlendMode(mCheckMarkBlendMode);
             }
 
             // The drawable (or one of its children) may not have been

@@ -270,11 +270,8 @@ public interface MenuItem {
      * @attr ref android.R.styleable#MenuItem_iconTintMode
      * @see #setIconTintList(ColorStateList)
      * @see Drawable#setTintMode(PorterDuff.Mode)
-     * @see Drawable#setTintMode(BlendMode)
-     *
-     * @deprecated use {@link #setIconTintMode(BlendMode)} instead
+     * @see Drawable#setTintBlendMode(BlendMode)
      */
-    @Deprecated
     default @NonNull MenuItem setIconTintMode(@Nullable PorterDuff.Mode tintMode) {
         return this;
     }
@@ -289,7 +286,7 @@ public interface MenuItem {
      * @attr ref android.R.styleable#MenuItem_iconTintMode
      * @see #setIconTintList(ColorStateList)
      */
-    default @NonNull MenuItem setIconTintMode(@Nullable BlendMode blendMode) {
+    default @NonNull MenuItem setIconTintBlendMode(@Nullable BlendMode blendMode) {
         PorterDuff.Mode mode = BlendMode.blendModeToPorterDuffMode(blendMode);
         if (mode != null) {
             return setIconTintMode(mode);
@@ -304,11 +301,9 @@ public interface MenuItem {
      * @return the blending mode used to apply the tint to this item's icon
      * @attr ref android.R.styleable#MenuItem_iconTintMode
      * @see #setIconTintMode(PorterDuff.Mode)
-     * @see #setIconTintMode(BlendMode)
+     * @see #setIconTintBlendMode(BlendMode)
      *
-     * @deprecated Use {@link #getIconTintBlendMode()} instead
      */
-    @Deprecated
     @Nullable
     public default PorterDuff.Mode getIconTintMode() { return null; }
 
@@ -317,7 +312,7 @@ public interface MenuItem {
      *
      * @return the blending mode used to apply the tint to this item's icon
      * @attr ref android.R.styleable#MenuItem_iconTintMode
-     * @see #setIconTintMode(BlendMode)
+     * @see #setIconTintBlendMode(BlendMode)
      *
      */
     @Nullable

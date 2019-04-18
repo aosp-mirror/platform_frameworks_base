@@ -23,6 +23,7 @@ import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
+import android.graphics.BlendMode;
 import android.graphics.Canvas;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
@@ -67,9 +68,9 @@ public abstract class CompoundButton extends Button implements Checkable {
     @UnsupportedAppUsage
     private Drawable mButtonDrawable;
     private ColorStateList mButtonTintList = null;
-    private PorterDuff.Mode mButtonTintMode = null;
+    private BlendMode mButtonBlendMode = null;
     private boolean mHasButtonTint = false;
-    private boolean mHasButtonTintMode = false;
+    private boolean mHasButtonBlendMode = false;
 
     @UnsupportedAppUsage
     private OnCheckedChangeListener mOnCheckedChangeListener;
@@ -109,9 +110,9 @@ public abstract class CompoundButton extends Button implements Checkable {
         }
 
         if (a.hasValue(R.styleable.CompoundButton_buttonTintMode)) {
-            mButtonTintMode = Drawable.parseTintMode(a.getInt(
-                    R.styleable.CompoundButton_buttonTintMode, -1), mButtonTintMode);
-            mHasButtonTintMode = true;
+            mButtonBlendMode = Drawable.parseBlendMode(a.getInt(
+                    R.styleable.CompoundButton_buttonTintMode, -1), mButtonBlendMode);
+            mHasButtonBlendMode = true;
         }
 
         if (a.hasValue(R.styleable.CompoundButton_buttonTint)) {
@@ -337,8 +338,23 @@ public abstract class CompoundButton extends Button implements Checkable {
      * @see Drawable#setTintMode(PorterDuff.Mode)
      */
     public void setButtonTintMode(@Nullable PorterDuff.Mode tintMode) {
-        mButtonTintMode = tintMode;
-        mHasButtonTintMode = true;
+        setButtonTintBlendMode(tintMode != null ? BlendMode.fromValue(tintMode.nativeInt) : null);
+    }
+
+    /**
+     * Specifies the blending mode used to apply the tint specified by
+     * {@link #setButtonTintList(ColorStateList)}} to the button drawable. The
+     * default mode is {@link PorterDuff.Mode#SRC_IN}.
+     *
+     * @param tintMode the blending mode used to apply the tint, may be
+     *                 {@code null} to clear tint
+     * @attr ref android.R.styleable#CompoundButton_buttonTintMode
+     * @see #getButtonTintMode()
+     * @see Drawable#setTintBlendMode(BlendMode)
+     */
+    public void setButtonTintBlendMode(@Nullable BlendMode tintMode) {
+        mButtonBlendMode = tintMode;
+        mHasButtonBlendMode = true;
 
         applyButtonTint();
     }
@@ -348,22 +364,35 @@ public abstract class CompoundButton extends Button implements Checkable {
      * @attr ref android.R.styleable#CompoundButton_buttonTintMode
      * @see #setButtonTintMode(PorterDuff.Mode)
      */
-    @InspectableProperty
+    @InspectableProperty(name = "buttonTintMode")
     @Nullable
     public PorterDuff.Mode getButtonTintMode() {
-        return mButtonTintMode;
+        return mButtonBlendMode != null ? BlendMode.blendModeToPorterDuffMode(mButtonBlendMode) :
+                null;
+    }
+
+    /**
+     * @return the blending mode used to apply the tint to the button drawable
+     * @attr ref android.R.styleable#CompoundButton_buttonTintMode
+     * @see #setButtonTintBlendMode(BlendMode)
+     */
+    @InspectableProperty(name = "buttonBlendMode",
+            attributeId = R.styleable.CompoundButton_buttonTintMode)
+    @Nullable
+    public BlendMode getButtonTintBlendMode() {
+        return mButtonBlendMode;
     }
 
     private void applyButtonTint() {
-        if (mButtonDrawable != null && (mHasButtonTint || mHasButtonTintMode)) {
+        if (mButtonDrawable != null && (mHasButtonTint || mHasButtonBlendMode)) {
             mButtonDrawable = mButtonDrawable.mutate();
 
             if (mHasButtonTint) {
                 mButtonDrawable.setTintList(mButtonTintList);
             }
 
-            if (mHasButtonTintMode) {
-                mButtonDrawable.setTintMode(mButtonTintMode);
+            if (mHasButtonBlendMode) {
+                mButtonDrawable.setTintBlendMode(mButtonBlendMode);
             }
 
             // The drawable (or one of its children) may not have been

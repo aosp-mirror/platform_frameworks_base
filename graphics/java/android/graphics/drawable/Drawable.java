@@ -213,17 +213,17 @@ public abstract class Drawable {
     protected int mSrcDensityOverride = 0;
 
     /**
-     * Flag used to break the recursive loop between setTintMode(PorterDuff.Mode) and
-     * setTintMode(BlendMode) as each default implementation invokes the other in order to
+     * Flag used to break the recursive loop between setTintBlendMode(PorterDuff.Mode) and
+     * setTintBlendMode(BlendMode) as each default implementation invokes the other in order to
      * support new use cases that utilize the new blending modes as well as support the legacy
-     * use cases. This flag tracks that {@link #setTintMode(BlendMode)} is only invoked once
+     * use cases. This flag tracks that {@link #setTintBlendMode(BlendMode)} is only invoked once
      * per invocation.
      */
     private boolean mSetBlendModeInvoked = false;
 
     /**
-     * Flag used to break the recursive loop between setTintMode(PorterDuff.Mode) and
-     * setTintMode(BlendMode) as each default implementation invokes the other in order to
+     * Flag used to break the recursive loop between setTintBlendMode(PorterDuff.Mode) and
+     * setTintBlendMode(BlendMode) as each default implementation invokes the other in order to
      * support new use cases that utilize the new blending modes as well as support the legacy
      * use cases. This flag tracks that {@link #setTintMode(Mode)} is only invoked once
      * per invocation;
@@ -651,7 +651,7 @@ public abstract class Drawable {
      * @param tintColor Color to use for tinting this drawable
      * @see #setTintList(ColorStateList)
      * @see #setTintMode(PorterDuff.Mode)
-     * @see #setTintMode(BlendMode)
+     * @see #setTintBlendMode(BlendMode)
      */
     public void setTint(@ColorInt int tintColor) {
         setTintList(ColorStateList.valueOf(tintColor));
@@ -673,7 +673,7 @@ public abstract class Drawable {
      *            {@code null} to clear the tint
      * @see #setTint(int)
      * @see #setTintMode(PorterDuff.Mode)
-     * @see #setTintMode(BlendMode)
+     * @see #setTintBlendMode(BlendMode)
      */
     public void setTintList(@Nullable ColorStateList tint) {}
 
@@ -693,15 +693,12 @@ public abstract class Drawable {
      *                 of {@link PorterDuff.Mode#SRC_IN}
      * @see #setTint(int)
      * @see #setTintList(ColorStateList)
-     *
-     * @deprecated use {@link #setTintMode(BlendMode)} instead
      */
-    @Deprecated
     public void setTintMode(@Nullable PorterDuff.Mode tintMode) {
         if (!mSetTintModeInvoked) {
             mSetTintModeInvoked = true;
             BlendMode mode = tintMode != null ? BlendMode.fromValue(tintMode.nativeInt) : null;
-            setTintMode(mode != null ? mode : Drawable.DEFAULT_BLEND_MODE);
+            setTintBlendMode(mode != null ? mode : Drawable.DEFAULT_BLEND_MODE);
             mSetTintModeInvoked = false;
         }
     }
@@ -721,7 +718,7 @@ public abstract class Drawable {
      * @see #setTint(int)
      * @see #setTintList(ColorStateList)
      */
-    public void setTintMode(@Nullable BlendMode blendMode) {
+    public void setTintBlendMode(@Nullable BlendMode blendMode) {
         if (!mSetBlendModeInvoked) {
             mSetBlendModeInvoked = true;
             PorterDuff.Mode mode = BlendMode.blendModeToPorterDuffMode(blendMode);

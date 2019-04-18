@@ -55,6 +55,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.BaseCanvas;
+import android.graphics.BlendMode;
 import android.graphics.Canvas;
 import android.graphics.Insets;
 import android.graphics.Paint;
@@ -489,7 +490,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final Drawable[] mShowing = new Drawable[4];
 
         ColorStateList mTintList;
-        PorterDuff.Mode mTintMode;
+        BlendMode mBlendMode;
         boolean mHasTint;
         boolean mHasTintMode;
 
@@ -1036,7 +1037,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         Drawable drawableLeft = null, drawableTop = null, drawableRight = null,
                 drawableBottom = null, drawableStart = null, drawableEnd = null;
         ColorStateList drawableTint = null;
-        PorterDuff.Mode drawableTintMode = null;
+        BlendMode drawableTintMode = null;
         int drawablePadding = 0;
         int ellipsize = ELLIPSIZE_NOT_SET;
         boolean singleLine = false;
@@ -1139,7 +1140,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     break;
 
                 case com.android.internal.R.styleable.TextView_drawableTintMode:
-                    drawableTintMode = Drawable.parseTintMode(a.getInt(attr, -1), drawableTintMode);
+                    drawableTintMode = Drawable.parseBlendMode(a.getInt(attr, -1),
+                            drawableTintMode);
                     break;
 
                 case com.android.internal.R.styleable.TextView_drawablePadding:
@@ -1543,7 +1545,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mDrawables.mHasTint = true;
             }
             if (drawableTintMode != null) {
-                mDrawables.mTintMode = drawableTintMode;
+                mDrawables.mBlendMode = drawableTintMode;
                 mDrawables.mHasTintMode = true;
             }
         }
@@ -3299,10 +3301,26 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @see Drawable#setTintMode(PorterDuff.Mode)
      */
     public void setCompoundDrawableTintMode(@Nullable PorterDuff.Mode tintMode) {
+        setCompoundDrawableTintBlendMode(tintMode != null
+                ? BlendMode.fromValue(tintMode.nativeInt) : null);
+    }
+
+    /**
+     * Specifies the blending mode used to apply the tint specified by
+     * {@link #setCompoundDrawableTintList(ColorStateList)} to the compound
+     * drawables. The default mode is {@link PorterDuff.Mode#SRC_IN}.
+     *
+     * @param blendMode the blending mode used to apply the tint, may be
+     *                 {@code null} to clear tint
+     * @attr ref android.R.styleable#TextView_drawableTintMode
+     * @see #setCompoundDrawableTintList(ColorStateList)
+     * @see Drawable#setTintBlendMode(BlendMode)
+     */
+    public void setCompoundDrawableTintBlendMode(@Nullable BlendMode blendMode) {
         if (mDrawables == null) {
             mDrawables = new Drawables(getContext());
         }
-        mDrawables.mTintMode = tintMode;
+        mDrawables.mBlendMode = blendMode;
         mDrawables.mHasTintMode = true;
 
         applyCompoundDrawableTint();
@@ -3316,10 +3334,27 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *         drawables
      * @attr ref android.R.styleable#TextView_drawableTintMode
      * @see #setCompoundDrawableTintMode(PorterDuff.Mode)
+     *
      */
     @InspectableProperty(name = "drawableTintMode")
     public PorterDuff.Mode getCompoundDrawableTintMode() {
-        return mDrawables != null ? mDrawables.mTintMode : null;
+        BlendMode mode = getCompoundDrawableTintBlendMode();
+        return mode != null ? BlendMode.blendModeToPorterDuffMode(mode) : null;
+    }
+
+    /**
+     * Returns the blending mode used to apply the tint to the compound
+     * drawables, if specified.
+     *
+     * @return the blending mode used to apply the tint to the compound
+     *         drawables
+     * @attr ref android.R.styleable#TextView_drawableTintMode
+     * @see #setCompoundDrawableTintBlendMode(BlendMode)
+     */
+    @InspectableProperty(name = "drawableBlendMode",
+            attributeId = com.android.internal.R.styleable.TextView_drawableTintMode)
+    public @Nullable BlendMode getCompoundDrawableTintBlendMode() {
+        return mDrawables != null ? mDrawables.mBlendMode : null;
     }
 
     private void applyCompoundDrawableTint() {
@@ -3329,7 +3364,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         if (mDrawables.mHasTint || mDrawables.mHasTintMode) {
             final ColorStateList tintList = mDrawables.mTintList;
-            final PorterDuff.Mode tintMode = mDrawables.mTintMode;
+            final BlendMode blendMode = mDrawables.mBlendMode;
             final boolean hasTint = mDrawables.mHasTint;
             final boolean hasTintMode = mDrawables.mHasTintMode;
             final int[] state = getDrawableState();
@@ -3353,7 +3388,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
 
                 if (hasTintMode) {
-                    dr.setTintMode(tintMode);
+                    dr.setTintBlendMode(blendMode);
                 }
 
                 // The drawable (or one of its children) may not have been
