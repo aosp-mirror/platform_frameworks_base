@@ -503,6 +503,8 @@ package android.app.prediction {
     method @NonNull public android.app.prediction.AppTarget build();
     method @NonNull public android.app.prediction.AppTarget.Builder setClassName(@NonNull String);
     method @NonNull public android.app.prediction.AppTarget.Builder setRank(@IntRange(from=0) int);
+    method @Deprecated @NonNull public android.app.prediction.AppTarget.Builder setTarget(@NonNull String, @NonNull android.os.UserHandle);
+    method @Deprecated @NonNull public android.app.prediction.AppTarget.Builder setTarget(@NonNull android.content.pm.ShortcutInfo);
   }
 
   public final class AppTargetEvent implements android.os.Parcelable {
@@ -1104,6 +1106,7 @@ package android.media {
     method @RequiresPermission("android.permission.MODIFY_AUDIO_ROUTING") public void setFocusRequestResult(@NonNull android.media.AudioFocusInfo, int, @NonNull android.media.audiopolicy.AudioPolicy);
     method @RequiresPermission("android.permission.MODIFY_AUDIO_ROUTING") public void unregisterAudioPolicy(@NonNull android.media.audiopolicy.AudioPolicy);
     method @RequiresPermission("android.permission.MODIFY_AUDIO_ROUTING") public void unregisterAudioPolicyAsync(@NonNull android.media.audiopolicy.AudioPolicy);
+    field public static final int SUCCESS = 0; // 0x0
   }
 
   public static final class AudioRecord.MetricsConstants {
@@ -1127,22 +1130,6 @@ package android.media {
     field public static final String FRAME_COUNT = "android.media.audiotrack.frameCount";
     field public static final String PORT_ID = "android.media.audiotrack.portId";
     field public static final String SAMPLE_RATE = "android.media.audiotrack.sampleRate";
-  }
-
-  public final class BufferingParams implements android.os.Parcelable {
-    method public int describeContents();
-    method public int getInitialMarkMs();
-    method public int getResumePlaybackMarkMs();
-    method public void writeToParcel(android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.media.BufferingParams> CREATOR;
-  }
-
-  public static class BufferingParams.Builder {
-    ctor public BufferingParams.Builder();
-    ctor public BufferingParams.Builder(android.media.BufferingParams);
-    method public android.media.BufferingParams build();
-    method public android.media.BufferingParams.Builder setInitialMarkMs(int);
-    method public android.media.BufferingParams.Builder setResumePlaybackMarkMs(int);
   }
 
   public static final class MediaCodecInfo.VideoCapabilities.PerformancePoint {
@@ -1241,8 +1228,10 @@ package android.media.audiopolicy {
     method public int detachMixes(@NonNull java.util.List<android.media.audiopolicy.AudioMix>);
     method public int getFocusDuckingBehavior();
     method public int getStatus();
+    method public boolean removeUidDeviceAffinity(int);
     method public int setFocusDuckingBehavior(int) throws java.lang.IllegalArgumentException, java.lang.IllegalStateException;
     method public void setRegistration(String);
+    method public boolean setUidDeviceAffinity(int, @NonNull java.util.List<android.media.AudioDeviceInfo>);
     method public String toLogFriendlyString();
     field public static final int FOCUS_POLICY_DUCKING_DEFAULT = 0; // 0x0
     field public static final int FOCUS_POLICY_DUCKING_IN_APP = 0; // 0x0
@@ -1459,9 +1448,6 @@ package android.net {
     method public static long getLoopbackRxPackets();
     method public static long getLoopbackTxBytes();
     method public static long getLoopbackTxPackets();
-    field public static final int TAG_SYSTEM_DHCP = -192; // 0xffffff40
-    field public static final int TAG_SYSTEM_DHCP_SERVER = -186; // 0xffffff46
-    field public static final int TAG_SYSTEM_PROBE = -190; // 0xffffff42
   }
 
 }

@@ -5,9 +5,7 @@
     },
     {
       "name": "CtsSystemApiSignatureTestCases"
-    }
-  ],
-  "postsubmit": [
+    },
     {
       "name": "GtsUnofficialApisUsageTestCases"
     }

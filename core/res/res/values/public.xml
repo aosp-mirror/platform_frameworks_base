@@ -2942,7 +2942,7 @@
         <public name="allowClearUserDataOnFailedRestore"/>
         <public name="allowAudioPlaybackCapture"/>
         <public name="secureElementName" />
-        <public name="allowExternalStorageSandbox"/>
+        <public name="requestLegacyExternalStorage"/>
         <public name="ensuringStatusBarContrastWhenTransparent" />
         <public name="ensuringNavigationBarContrastWhenTransparent" />
         <public name="identifier" />

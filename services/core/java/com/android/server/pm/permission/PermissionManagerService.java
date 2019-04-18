@@ -2062,7 +2062,7 @@ public class PermissionManagerService {
             return;
         }
 
-        if (RESTRICTED_PERMISSIONS_ENABLED && bp.isRestricted()
+        if (RESTRICTED_PERMISSIONS_ENABLED && bp.isHardOrSoftRestricted()
                 && (flags & PackageManager.FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT) == 0) {
             Log.e(TAG, "Cannot grant restricted non-exempt permission "
                     + permName + " for package " + packageName);
@@ -2244,7 +2244,7 @@ public class PermissionManagerService {
                 continue;
             }
 
-            if (!bp.isRestricted()) {
+            if (!bp.isHardOrSoftRestricted()) {
                 continue;
             }
 
@@ -2297,18 +2297,29 @@ public class PermissionManagerService {
 
             updatePermissions = true;
 
+            final boolean wasWhitelisted = (oldFlags
+                    & (PackageManager.FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT)) != 0;
+            final boolean isWhitelisted = (newFlags
+                    & (PackageManager.FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT)) != 0;
+
             // If the permission is policy fixed as granted but it is no longer
             // on any of the whitelists we need to clear the policy fixed flag
             // as whitelisting trumps policy i.e. policy cannot grant a non
             // grantable permission.
             if ((oldFlags & PackageManager.FLAG_PERMISSION_POLICY_FIXED) != 0) {
-                final boolean isWhitelisted = (newFlags
-                        & (PackageManager.FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT)) != 0;
                 final boolean isGranted = permissionsState.hasPermission(permissionName, userId);
                 if (!isWhitelisted && isGranted) {
                     mask |= PackageManager.FLAG_PERMISSION_POLICY_FIXED;
                     newFlags &= ~PackageManager.FLAG_PERMISSION_POLICY_FIXED;
                 }
+            }
+
+            // If we are whitelisting an app that does not support runtime permissions
+            // we need to make sure it goes through the permission review UI at launch.
+            if (pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.M
+                    && !wasWhitelisted && isWhitelisted) {
+                mask |= PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
+                newFlags |= PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
             }
 
             updatePermissionFlags(permissionName, pkg.packageName, mask, newFlags,

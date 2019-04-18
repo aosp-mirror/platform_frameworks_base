@@ -16,18 +16,30 @@
 package android.multiuser;
 
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
+import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.IStopUserCallback;
 import android.app.UserSwitchObserver;
+import android.app.WaitResult;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.IIntentReceiver;
+import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentSender;
+import android.content.pm.IPackageInstaller;
+import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
+import android.os.Bundle;
+import android.os.IBinder;
+import android.os.IProgressListener;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
+import android.view.WindowManagerGlobal;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
@@ -66,8 +78,10 @@ import java.util.concurrent.TimeUnit;
 public class UserLifecycleTests {
     private static final String TAG = UserLifecycleTests.class.getSimpleName();
 
-    private final int TIMEOUT_IN_SECOND = 30;
-    private final int CHECK_USER_REMOVED_INTERVAL_MS = 200;
+    private static final int TIMEOUT_IN_SECOND = 30;
+    private static final int CHECK_USER_REMOVED_INTERVAL_MS = 200;
+
+    private static final String DUMMY_PACKAGE_NAME = "perftests.multiuser.apps.dummyapp";
 
     private UserManager mUm;
     private ActivityManager mAm;
@@ -101,15 +115,16 @@ public class UserLifecycleTests {
     @Test
     public void createAndStartUser() throws Exception {
         while (mRunner.keepRunning()) {
-            final UserInfo userInfo = mUm.createUser("TestUser", 0);
+            final int userId = createUser();
 
             final CountDownLatch latch = new CountDownLatch(1);
-            registerBroadcastReceiver(Intent.ACTION_USER_STARTED, latch, userInfo.id);
-            mIam.startUserInBackground(userInfo.id);
+            registerBroadcastReceiver(Intent.ACTION_USER_STARTED, latch, userId);
+            // Don't use this.startUserInBackground() since only waiting until ACTION_USER_STARTED.
+            mIam.startUserInBackground(userId);
             latch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
 
             mRunner.pauseTiming();
-            removeUser(userInfo.id);
+            removeUser(userId);
             mRunner.resumeTiming();
         }
     }
@@ -119,14 +134,14 @@ public class UserLifecycleTests {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int startUser = mAm.getCurrentUser();
-            final UserInfo userInfo = mUm.createUser("TestUser", 0);
+            final int userId = createUser();
             mRunner.resumeTiming();
 
-            switchUser(userInfo.id);
+            switchUser(userId);
 
             mRunner.pauseTiming();
             switchUser(startUser);
-            removeUser(userInfo.id);
+            removeUser(userId);
             mRunner.resumeTiming();
         }
     }
@@ -176,17 +191,17 @@ public class UserLifecycleTests {
     public void stopUser() throws Exception {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
-            final UserInfo userInfo = mUm.createUser("TestUser", 0);
+            final int userId = createUser();
             final CountDownLatch latch = new CountDownLatch(1);
-            registerBroadcastReceiver(Intent.ACTION_USER_STARTED, latch, userInfo.id);
-            mIam.startUserInBackground(userInfo.id);
+            registerBroadcastReceiver(Intent.ACTION_USER_STARTED, latch, userId);
+            mIam.startUserInBackground(userId);
             latch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
             mRunner.resumeTiming();
 
-            stopUser(userInfo.id, false);
+            stopUser(userId, false);
 
             mRunner.pauseTiming();
-            removeUser(userInfo.id);
+            removeUser(userId);
             mRunner.resumeTiming();
         }
     }
@@ -196,64 +211,17 @@ public class UserLifecycleTests {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int startUser = mAm.getCurrentUser();
-            final UserInfo userInfo = mUm.createUser("TestUser", 0);
+            final int userId = createUser();
             final CountDownLatch latch = new CountDownLatch(1);
-            registerUserSwitchObserver(null, latch, userInfo.id);
+            registerUserSwitchObserver(null, latch, userId);
             mRunner.resumeTiming();
 
-            mAm.switchUser(userInfo.id);
+            mAm.switchUser(userId);
             latch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
 
             mRunner.pauseTiming();
             switchUser(startUser);
-            removeUser(userInfo.id);
-            mRunner.resumeTiming();
-        }
-    }
-
-    @Test
-    public void managedProfileUnlock() throws Exception {
-        while (mRunner.keepRunning()) {
-            mRunner.pauseTiming();
-            final UserInfo userInfo = mUm.createProfileForUser("TestUser",
-                    UserInfo.FLAG_MANAGED_PROFILE, mAm.getCurrentUser());
-            final CountDownLatch latch = new CountDownLatch(1);
-            registerBroadcastReceiver(Intent.ACTION_USER_UNLOCKED, latch, userInfo.id);
-            mRunner.resumeTiming();
-
-            mIam.startUserInBackground(userInfo.id);
-            latch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
-
-            mRunner.pauseTiming();
-            removeUser(userInfo.id);
-            mRunner.resumeTiming();
-        }
-    }
-
-    /** Tests starting an already-created, but no-longer-running, profile. */
-    @Test
-    public void managedProfileUnlock_stopped() throws Exception {
-        while (mRunner.keepRunning()) {
-            mRunner.pauseTiming();
-            final UserInfo userInfo = mUm.createProfileForUser("TestUser",
-                    UserInfo.FLAG_MANAGED_PROFILE, mAm.getCurrentUser());
-            // Start the profile initially, then stop it. Similar to setQuietModeEnabled.
-            final CountDownLatch latch1 = new CountDownLatch(1);
-            registerBroadcastReceiver(Intent.ACTION_USER_UNLOCKED, latch1, userInfo.id);
-            mIam.startUserInBackground(userInfo.id);
-            latch1.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
-            stopUser(userInfo.id, true);
-
-            // Now we restart the profile.
-            final CountDownLatch latch2 = new CountDownLatch(1);
-            registerBroadcastReceiver(Intent.ACTION_USER_UNLOCKED, latch2, userInfo.id);
-            mRunner.resumeTiming();
-
-            mIam.startUserInBackground(userInfo.id);
-            latch2.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
-
-            mRunner.pauseTiming();
-            removeUser(userInfo.id);
+            removeUser(userId);
             mRunner.resumeTiming();
         }
     }
@@ -263,15 +231,14 @@ public class UserLifecycleTests {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int startUser = mAm.getCurrentUser();
-            final UserInfo userInfo = mUm.createUser("TestUser",
-                    UserInfo.FLAG_EPHEMERAL | UserInfo.FLAG_DEMO);
-            switchUser(userInfo.id);
+            final int userId = createUser(UserInfo.FLAG_EPHEMERAL | UserInfo.FLAG_DEMO);
+            switchUser(userId);
             final CountDownLatch latch = new CountDownLatch(1);
             InstrumentationRegistry.getContext().registerReceiver(new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
                     if (Intent.ACTION_USER_STOPPED.equals(intent.getAction()) && intent.getIntExtra(
-                            Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL) == userInfo.id) {
+                            Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL) == userId) {
                         latch.countDown();
                     }
                 }
@@ -285,31 +252,173 @@ public class UserLifecycleTests {
 
             mRunner.pauseTiming();
             switchLatch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
-            removeUser(userInfo.id);
+            removeUser(userId);
             mRunner.resumeTiming();
         }
     }
 
+    /** Tests creating a new profile. */
+    @Test
+    public void managedProfileCreate() throws Exception {
+        while (mRunner.keepRunning()) {
+            final int userId = createManagedProfile();
+
+            mRunner.pauseTiming();
+            attestTrue("Failed creating profile " + userId, mUm.isManagedProfile(userId));
+            removeUser(userId);
+            mRunner.resumeTiming();
+        }
+    }
+
+    /** Tests starting (unlocking) a newly-created profile. */
+    @Test
+    public void managedProfileUnlock() throws Exception {
+        while (mRunner.keepRunning()) {
+            mRunner.pauseTiming();
+            final int userId = createManagedProfile();
+            mRunner.resumeTiming();
+
+            startUserInBackground(userId);
+
+            mRunner.pauseTiming();
+            removeUser(userId);
+            mRunner.resumeTiming();
+        }
+    }
+
+    /** Tests starting (unlocking) an already-created, but no-longer-running, profile. */
+    @Test
+    public void managedProfileUnlock_stopped() throws Exception {
+        while (mRunner.keepRunning()) {
+            mRunner.pauseTiming();
+            final int userId = createManagedProfile();
+            // Start the profile initially, then stop it. Similar to setQuietModeEnabled.
+            startUserInBackground(userId);
+            stopUser(userId, true);
+            mRunner.resumeTiming();
+
+            startUserInBackground(userId);
+
+            mRunner.pauseTiming();
+            removeUser(userId);
+            mRunner.resumeTiming();
+        }
+    }
+
+    /**
+     * Tests starting (unlocking) and launching an already-installed app in a newly-created profile.
+     */
+    @Test
+    public void managedProfileUnlockAndLaunchApp() throws Exception {
+        while (mRunner.keepRunning()) {
+            mRunner.pauseTiming();
+            final int userId = createManagedProfile();
+            WindowManagerGlobal.getWindowManagerService().dismissKeyguard(null, null);
+            installPreexistingApp(userId, DUMMY_PACKAGE_NAME);
+            mRunner.resumeTiming();
+
+            startUserInBackground(userId);
+            startApp(userId, DUMMY_PACKAGE_NAME);
+
+            mRunner.pauseTiming();
+            removeUser(userId);
+            mRunner.resumeTiming();
+        }
+    }
+
+    /** Tests installing a pre-existing app in a newly-created profile. */
+    @Test
+    public void managedProfileInstall() throws Exception {
+        while (mRunner.keepRunning()) {
+            mRunner.pauseTiming();
+            final int userId = createManagedProfile();
+            mRunner.resumeTiming();
+
+            installPreexistingApp(userId, DUMMY_PACKAGE_NAME);
+
+            mRunner.pauseTiming();
+            removeUser(userId);
+            mRunner.resumeTiming();
+        }
+    }
+
+    /**
+     * Tests creating a new profile, starting (unlocking) it, installing an app,
+     * and launching that app in it.
+     */
+    @Test
+    public void managedProfileCreateUnlockInstallAndLaunchApp() throws Exception {
+        final String packageName = "perftests.multiuser.apps.dummyapp";
+        while (mRunner.keepRunning()) {
+            mRunner.pauseTiming();
+            WindowManagerGlobal.getWindowManagerService().dismissKeyguard(null, null);
+            mRunner.resumeTiming();
+
+            final int userId = createManagedProfile();
+            startUserInBackground(userId);
+            installPreexistingApp(userId, DUMMY_PACKAGE_NAME);
+            startApp(userId, DUMMY_PACKAGE_NAME);
+
+            mRunner.pauseTiming();
+            removeUser(userId);
+            mRunner.resumeTiming();
+        }
+    }
+
+    /** Tests stopping a profile. */
     @Test
     public void managedProfileStopped() throws Exception {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
-            final UserInfo userInfo = mUm.createProfileForUser("TestUser",
-                    UserInfo.FLAG_MANAGED_PROFILE, mAm.getCurrentUser());
-            final CountDownLatch latch = new CountDownLatch(1);
-            registerBroadcastReceiver(Intent.ACTION_USER_UNLOCKED, latch, userInfo.id);
-            mIam.startUserInBackground(userInfo.id);
-            latch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
+            final int userId = createManagedProfile();
+            startUserInBackground(userId);
             mRunner.resumeTiming();
 
-            stopUser(userInfo.id, true);
+            stopUser(userId, true);
 
             mRunner.pauseTiming();
-            removeUser(userInfo.id);
+            removeUser(userId);
             mRunner.resumeTiming();
         }
     }
 
+    /** Creates a new user, returning its userId. */
+    private int createUser() {
+        return createUser(0);
+    }
+
+    /** Creates a new user with the given flags, returning its userId. */
+    private int createUser(int flags) {
+        int userId = mUm.createUser("TestUser", flags).id;
+        mUsersToRemove.add(userId);
+        return userId;
+    }
+
+    /** Creates a managed (work) profile under the current user, returning its userId. */
+    private int createManagedProfile() {
+        final UserInfo userInfo = mUm.createProfileForUser("TestProfile",
+                UserInfo.FLAG_MANAGED_PROFILE, mAm.getCurrentUser());
+        mUsersToRemove.add(userInfo.id);
+        return userInfo.id;
+    }
+
+    /**
+     * Start user in background and wait for it to unlock (equivalent to ACTION_USER_UNLOCKED).
+     * To start in foreground instead, see {@link #switchUser(int)}.
+     * This should always be used for profiles since profiles cannot be started in foreground.
+     */
+    private void startUserInBackground(int userId) {
+        final ProgressWaiter waiter = new ProgressWaiter();
+        try {
+            mIam.startUserInBackgroundWithListener(userId, waiter);
+            boolean success = waiter.waitForFinish(TIMEOUT_IN_SECOND);
+            attestTrue("Failed to start user " + userId + " in background.", success);
+        } catch (RemoteException e) {
+            Log.e(TAG, "startUserInBackground failed", e);
+        }
+    }
+
+    /** Starts the given user in the foreground. */
     private void switchUser(int userId) throws Exception {
         final CountDownLatch latch = new CountDownLatch(1);
         registerUserSwitchObserver(latch, null, userId);
@@ -342,7 +451,7 @@ public class UserLifecycleTests {
     private int initializeNewUserAndSwitchBack(boolean stopNewUser) throws Exception {
         final int origUser = mAm.getCurrentUser();
         // First, create and switch to testUser, waiting for its ACTION_USER_UNLOCKED
-        final int testUser = mUm.createUser("TestUser", 0).id;
+        final int testUser = createUser();
         final CountDownLatch latch1 = new CountDownLatch(1);
         registerBroadcastReceiver(Intent.ACTION_USER_UNLOCKED, latch1, testUser);
         mAm.switchUser(testUser);
@@ -359,6 +468,45 @@ public class UserLifecycleTests {
         }
 
         return testUser;
+    }
+
+    /**
+     * Installs the given package in the given user.
+     */
+    private void installPreexistingApp(int userId, String packageName) throws RemoteException {
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        final IntentSender sender = new IntentSender((IIntentSender) new IIntentSender.Stub() {
+            @Override
+            public void send(int code, Intent intent, String resolvedType, IBinder whitelistToken,
+                    IIntentReceiver finishedReceiver, String requiredPermission, Bundle options) {
+                latch.countDown();
+            }
+        });
+
+        final IPackageInstaller installer = AppGlobals.getPackageManager().getPackageInstaller();
+        installer.installExistingPackage(packageName, 0, PackageManager.INSTALL_REASON_UNKNOWN,
+                sender, userId);
+
+        try {
+            latch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Log.e(TAG, "Thread interrupted unexpectedly.", e);
+        }
+    }
+
+    /**
+     * Launches the given package in the given user.
+     * Make sure the keyguard has been dismissed prior to calling.
+     */
+    private void startApp(int userId, String packageName) throws RemoteException {
+        final Context context = InstrumentationRegistry.getContext();
+        final WaitResult result = ActivityTaskManager.getService().startActivityAndWait(null, null,
+                context.getPackageManager().getLaunchIntentForPackage(packageName),
+                null, null, null, 0, 0, null, null,
+                userId);
+        attestTrue("User " + userId + " failed to start " + packageName,
+                result.result == ActivityManager.START_SUCCESS);
     }
 
     private void registerUserSwitchObserver(final CountDownLatch switchLatch,
@@ -394,6 +542,30 @@ public class UserLifecycleTests {
         }, UserHandle.of(userId), new IntentFilter(action), null, null);
     }
 
+    private class ProgressWaiter extends IProgressListener.Stub {
+        private final CountDownLatch mFinishedLatch = new CountDownLatch(1);
+
+        @Override
+        public void onStarted(int id, Bundle extras) {}
+
+        @Override
+        public void onProgress(int id, int progress, Bundle extras) {}
+
+        @Override
+        public void onFinished(int id, Bundle extras) {
+            mFinishedLatch.countDown();
+        }
+
+        public boolean waitForFinish(long timeoutSecs) {
+            try {
+                return mFinishedLatch.await(timeoutSecs, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                Log.e(TAG, "Thread interrupted unexpectedly.", e);
+                return false;
+            }
+        }
+    }
+
     private void removeUser(int userId) {
         try {
             mUm.removeUser(userId);
@@ -413,13 +585,13 @@ public class UserLifecycleTests {
         }
     }
 
-    private void attestTrue(String message, boolean attestion) {
-        if (!attestion) {
+    private void attestTrue(String message, boolean assertion) {
+        if (!assertion) {
             Log.w(TAG, message);
         }
     }
 
-    private void attestFalse(String message, boolean attestion) {
-        attestTrue(message, !attestion);
+    private void attestFalse(String message, boolean assertion) {
+        attestTrue(message, !assertion);
     }
 }

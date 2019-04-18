@@ -252,6 +252,21 @@ public class StackAnimationController extends
     }
 
     /**
+     * Moves the stack in response to rotation. We keep it in the most similar position by keeping
+     * it on the same side, and positioning it the same percentage of the way down the screen
+     * (taking status bar/nav bar into account by using the allowable region's height).
+     */
+    public void moveStackToSimilarPositionAfterRotation(boolean wasOnLeft, float verticalPercent) {
+        final RectF allowablePos = getAllowableStackPositionRegion();
+        final float allowableRegionHeight = allowablePos.bottom - allowablePos.top;
+
+        final float x = wasOnLeft ? allowablePos.left : allowablePos.right;
+        final float y = (allowableRegionHeight * verticalPercent) + allowablePos.top;
+
+        setStackPosition(new PointF(x, y));
+    }
+
+    /**
      * Flings the first bubble along the given property's axis, using the provided configuration
      * values. When the animation ends - either by hitting the min/max, or by friction sufficiently
      * reducing momentum - a SpringAnimation takes over to snap the bubble to the given final

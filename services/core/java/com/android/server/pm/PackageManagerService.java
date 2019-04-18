@@ -2822,6 +2822,11 @@ public class PackageManagerService extends IPackageManager.Stub
                         if (disabledPs.codePath == null || !disabledPs.codePath.exists()
                                 || disabledPs.pkg == null) {
                             possiblyDeletedUpdatedSystemApps.add(ps.name);
+                        } else {
+                            // We're expecting that the system app should remain disabled, but add
+                            // it to expecting better to recover in case the data version cannot
+                            // be scanned.
+                            mExpectingBetter.put(disabledPs.name, disabledPs.codePath);
                         }
                     }
                 }
@@ -5753,12 +5758,16 @@ public class PackageManagerService extends IPackageManager.Stub
                     "getWhitelistedRestrictedPermissions for user " + userId);
         }
 
+        final PackageParser.Package pkg;
+
         synchronized (mPackages) {
             final PackageSetting packageSetting = mSettings.mPackages.get(packageName);
             if (packageSetting == null) {
                 Slog.w(TAG, "Unknown package: " + packageName);
                 return null;
             }
+
+            pkg = packageSetting.pkg;
 
             final boolean isCallerPrivileged = mContext.checkCallingOrSelfPermission(
                     Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS)
@@ -5787,14 +5796,14 @@ public class PackageManagerService extends IPackageManager.Stub
                     UserHandle.getCallingUserId())) {
                 return null;
             }
+        }
 
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                return mPermissionManager.getWhitelistedRestrictedPermissions(
-                        packageSetting.pkg, whitelistFlags, userId);
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return mPermissionManager.getWhitelistedRestrictedPermissions(
+                    pkg, whitelistFlags, userId);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
     }
 
@@ -5805,6 +5814,10 @@ public class PackageManagerService extends IPackageManager.Stub
         // Other argument checks are done in get/setWhitelistedRestrictedPermissions
         Preconditions.checkNotNull(permission);
 
+        if (!checkExistsAndEnforceCannotModifyImmutablyRestrictedPermission(permission)) {
+            return false;
+        }
+
         List<String> permissions = getWhitelistedRestrictedPermissions(packageName,
                 whitelistFlags, userId);
         if (permissions == null) {
@@ -5812,11 +5825,29 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         if (permissions.indexOf(permission) < 0) {
             permissions.add(permission);
-            setWhitelistedRestrictedPermissions(packageName, permissions,
+            return setWhitelistedRestrictedPermissions(packageName, permissions,
                     whitelistFlags, userId);
-            return true;
         }
         return false;
+    }
+
+    private boolean checkExistsAndEnforceCannotModifyImmutablyRestrictedPermission(
+            @NonNull String permission) {
+        synchronized (mPackages) {
+            final BasePermission bp = mPermissionManager.getPermissionTEMP(permission);
+            if (bp == null) {
+                Slog.w(TAG, "No such permissions: " + permission);
+                return false;
+            }
+            if (bp.isHardOrSoftRestricted() && bp.isImmutablyRestricted()
+                    && mContext.checkCallingOrSelfPermission(
+                    Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("Cannot modify whitelisting of an immutably "
+                        + "restricted permission: " + permission);
+            }
+            return true;
+        }
     }
 
     @Override
@@ -5826,17 +5857,20 @@ public class PackageManagerService extends IPackageManager.Stub
         // Other argument checks are done in get/setWhitelistedRestrictedPermissions
         Preconditions.checkNotNull(permission);
 
+        if (!checkExistsAndEnforceCannotModifyImmutablyRestrictedPermission(permission)) {
+            return false;
+        }
+
         final List<String> permissions = getWhitelistedRestrictedPermissions(packageName,
                 whitelistFlags, userId);
         if (permissions != null && permissions.remove(permission)) {
-            setWhitelistedRestrictedPermissions(packageName, permissions,
+            return setWhitelistedRestrictedPermissions(packageName, permissions,
                     whitelistFlags, userId);
-            return true;
         }
         return false;
     }
 
-    private void setWhitelistedRestrictedPermissions(@NonNull String packageName,
+    private boolean setWhitelistedRestrictedPermissions(@NonNull String packageName,
             @Nullable List<String> permissions, @PermissionWhitelistFlags int whitelistFlag,
             @UserIdInt int userId) {
         Preconditions.checkNotNull(packageName);
@@ -5853,12 +5887,16 @@ public class PackageManagerService extends IPackageManager.Stub
                     "setWhitelistedRestrictedPermissions for user " + userId);
         }
 
+        final PackageParser.Package pkg;
+
         synchronized (mPackages) {
             final PackageSetting packageSetting = mSettings.mPackages.get(packageName);
             if (packageSetting == null) {
                 Slog.w(TAG, "Unknown package: " + packageName);
-                return;
+                return false;
             }
+
+            pkg = packageSetting.pkg;
 
             final boolean isCallerPrivileged = mContext.checkCallingOrSelfPermission(
                     Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS)
@@ -5884,7 +5922,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         packageName, whitelistFlag, userId);
                 if (permissions == null || permissions.isEmpty()) {
                     if (whitelistedPermissions == null || whitelistedPermissions.isEmpty()) {
-                        return;
+                        return true;
                     }
                 } else {
                     // Only the system can add and remove while the installer can only remove.
@@ -5910,18 +5948,20 @@ public class PackageManagerService extends IPackageManager.Stub
 
             if (filterAppAccessLPr(packageSetting, Binder.getCallingUid(),
                     UserHandle.getCallingUserId())) {
-                return;
-            }
-
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                mPermissionManager.setWhitelistedRestrictedPermissions(packageSetting.pkg,
-                        new int[]{userId}, permissions, Process.myUid(), whitelistFlag,
-                        mPermissionCallback);
-            } finally {
-                Binder.restoreCallingIdentity(identity);
+                return false;
             }
         }
+
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mPermissionManager.setWhitelistedRestrictedPermissions(pkg,
+                    new int[]{userId}, permissions, Process.myUid(), whitelistFlag,
+                    mPermissionCallback);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+
+        return true;
     }
 
     @Override
@@ -9354,6 +9394,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 | SCAN_UPDATE_SIGNATURE, currentTime, user);
         if (scanResult.success) {
             synchronized (mPackages) {
+                boolean appIdCreated = false;
                 try {
                     final String pkgName = scanResult.pkgSetting.name;
                     final Map<String, ReconciledPackage> reconcileResult = reconcilePackagesLocked(
@@ -9366,11 +9407,12 @@ public class PackageManagerService extends IPackageManager.Stub
                                     Collections.singletonMap(pkgName,
                                             getSharedLibLatestVersionSetting(scanResult))),
                             mSettings.mKeySetManagerService);
-                    prepareScanResultLocked(scanResult);
-                    commitReconciledScanResultLocked(
-                            reconcileResult.get(pkgName));
+                    appIdCreated = optimisticallyRegisterAppId(scanResult);
+                    commitReconciledScanResultLocked(reconcileResult.get(pkgName));
                 } catch (PackageManagerException e) {
-                    unprepareScanResultLocked(scanResult);
+                    if (appIdCreated) {
+                        cleanUpAppIdCreation(scanResult);
+                    }
                     throw e;
                 }
             }
@@ -10857,27 +10899,32 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
 
-    /** Prepares the system to commit a {@link ScanResult} in a way that will not fail. */
-    private void prepareScanResultLocked(@NonNull ScanResult result)
+    /**
+     * Prepares the system to commit a {@link ScanResult} in a way that will not fail by registering
+     * the app ID required for reconcile.
+     * @return {@code true} if a new app ID was registered and will need to be cleaned up on
+     *         failure.
+     */
+    private boolean optimisticallyRegisterAppId(@NonNull ScanResult result)
             throws PackageManagerException {
         if (!result.existingSettingCopied) {
             // THROWS: when we can't allocate a user id. add call to check if there's
             // enough space to ensure we won't throw; otherwise, don't modify state
-            mSettings.registerAppIdLPw(result.pkgSetting);
+            return mSettings.registerAppIdLPw(result.pkgSetting);
         }
+        return false;
     }
 
     /**
-     * Reverts any changes to the system that were made by
-     * {@link #prepareScanResultLocked(ScanResult)}
+     * Reverts any app ID creation that were made by
+     * {@link #optimisticallyRegisterAppId(ScanResult)}. Note: this is only necessary if the
+     * referenced method returned true.
      */
-    private void unprepareScanResultLocked(@NonNull ScanResult result) {
-        if (!result.existingSettingCopied) {
-            // iff we've acquired an app ID for a new package setting, remove it so that it can be
-            // acquired by another request.
-            if (result.pkgSetting.appId > 0) {
-                mSettings.removeAppIdLPw(result.pkgSetting.appId);
-            }
+    private void cleanUpAppIdCreation(@NonNull ScanResult result) {
+        // iff we've acquired an app ID for a new package setting, remove it so that it can be
+        // acquired by another request.
+        if (result.pkgSetting.appId > 0) {
+            mSettings.removeAppIdLPw(result.pkgSetting.appId);
         }
     }
 
@@ -11213,7 +11260,7 @@ public class PackageManagerService extends IPackageManager.Stub
             sharedUserSetting.isPrivileged() | pkg.isPrivileged() : pkg.isPrivileged();
 
         pkg.applicationInfo.seInfo = SELinuxMMAC.getSeInfo(pkg, isPrivileged,
-                pkg.applicationInfo.targetSandboxVersion, targetSdkVersion);
+                targetSdkVersion);
         pkg.applicationInfo.seInfoUser = SELinuxUtil.assignSeinfoUser(pkgSetting.readUserState(
                 userId == UserHandle.USER_ALL ? UserHandle.USER_SYSTEM : userId));
 
@@ -14628,6 +14675,20 @@ public class PackageManagerService extends IPackageManager.Stub
             return mUser;
         }
 
+        /**
+         * Gets the user handle for the user that the rollback agent should
+         * use to look up information about this installation when enabling
+         * rollback.
+         */
+        UserHandle getRollbackUser() {
+            // The session for packages installed for "all" users is
+            // associated with the "system" user.
+            if (mUser == UserHandle.ALL) {
+                return UserHandle.SYSTEM;
+            }
+            return mUser;
+        }
+
         HandlerParams setTraceMethod(String traceMethod) {
             this.traceMethod = traceMethod;
             return this;
@@ -15246,7 +15307,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             installedUsers);
                     enableRollbackIntent.putExtra(
                             PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_USER,
-                            getUser().getIdentifier());
+                            getRollbackUser().getIdentifier());
                     enableRollbackIntent.setDataAndType(Uri.fromFile(new File(origin.resolvedPath)),
                             PACKAGE_MIME_TYPE);
                     enableRollbackIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -16721,6 +16782,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final Map<String, VersionInfo> versionInfos = new ArrayMap<>(requests.size());
         final Map<String, PackageSetting> lastStaticSharedLibSettings =
                 new ArrayMap<>(requests.size());
+        final Map<String, Boolean> createdAppId = new ArrayMap<>(requests.size());
         boolean success = false;
         try {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "installPackagesLI");
@@ -16760,7 +16822,7 @@ public class PackageManagerService extends IPackageManager.Stub
                                             + " in multi-package install request.");
                             return;
                         }
-                        prepareScanResultLocked(result);
+                        createdAppId.put(packageName, optimisticallyRegisterAppId(result));
                         versionInfos.put(result.pkgSetting.pkg.packageName,
                                 getSettingsVersionForPackage(result.pkgSetting.pkg));
                         if (result.staticSharedLibraryInfo != null) {
@@ -16817,7 +16879,9 @@ public class PackageManagerService extends IPackageManager.Stub
         } finally {
             if (!success) {
                 for (ScanResult result : preparedScans.values()) {
-                    unprepareScanResultLocked(result);
+                    if (createdAppId.getOrDefault(result.request.pkg.packageName, false)) {
+                        cleanUpAppIdCreation(result);
+                    }
                 }
             }
             for (PrepareResult result : prepareResults.values()) {
@@ -19910,26 +19974,28 @@ public class PackageManagerService extends IPackageManager.Stub
         mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                 true /* requireFullPermission */, false /* checkShell */,
                 "replace preferred activity");
-        synchronized (mPackages) {
-            if (mContext.checkCallingOrSelfPermission(
-                    android.Manifest.permission.SET_PREFERRED_APPLICATIONS)
-                    != PackageManager.PERMISSION_GRANTED) {
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.SET_PREFERRED_APPLICATIONS)
+                != PackageManager.PERMISSION_GRANTED) {
+            synchronized (mPackages) {
                 if (getUidTargetSdkVersionLockedLPr(callingUid)
                         < Build.VERSION_CODES.FROYO) {
                     Slog.w(TAG, "Ignoring replacePreferredActivity() from uid "
                             + Binder.getCallingUid());
                     return;
                 }
-                mContext.enforceCallingOrSelfPermission(
-                        android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
             }
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
+        }
 
-            PreferredIntentResolver pir = mSettings.mPreferredActivities.get(userId);
+        synchronized (mPackages) {
+            final PreferredIntentResolver pir = mSettings.mPreferredActivities.get(userId);
             if (pir != null) {
                 // Get all of the existing entries that exactly match this filter.
-                ArrayList<PreferredActivity> existing = pir.findFilters(filter);
+                final ArrayList<PreferredActivity> existing = pir.findFilters(filter);
                 if (existing != null && existing.size() == 1) {
-                    PreferredActivity cur = existing.get(0);
+                    final PreferredActivity cur = existing.get(0);
                     if (DEBUG_PREFERRED) {
                         Slog.i(TAG, "Checking replace of preferred:");
                         filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
@@ -19959,14 +20025,13 @@ public class PackageManagerService extends IPackageManager.Stub
                         return;
                     }
                 }
-
                 if (existing != null) {
                     if (DEBUG_PREFERRED) {
                         Slog.i(TAG, existing.size() + " existing preferred matches for:");
                         filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
                     }
-                    for (int i = 0; i < existing.size(); i++) {
-                        PreferredActivity pa = existing.get(i);
+                    for (int i = existing.size() - 1; i >= 0; --i) {
+                        final PreferredActivity pa = existing.get(i);
                         if (DEBUG_PREFERRED) {
                             Slog.i(TAG, "Removing existing preferred activity "
                                     + pa.mPref.mComponent + ":");
@@ -19976,9 +20041,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                 }
             }
-            addPreferredActivityInternal(filter, match, set, activity, true, userId,
-                    "Replacing preferred");
         }
+        addPreferredActivityInternal(filter, match, set, activity, true, userId,
+                "Replacing preferred");
     }
 
     @Override

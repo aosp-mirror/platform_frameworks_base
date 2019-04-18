@@ -3058,6 +3058,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         int nonpackageUid;
         final static Binder sBinder = new Binder();
         IBinder mToken;
+        boolean targetsUid;
 
         Shell(IAppOpsService iface, AppOpsService internal) {
             mInterface = iface;
@@ -3151,6 +3152,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             for (String argument; (argument = getNextArg()) != null;) {
                 if ("--user".equals(argument)) {
                     userId = UserHandle.parseUserArg(getNextArgRequired());
+                } else if ("--uid".equals(argument)) {
+                    targetsUid = true;
                 } else {
                     if (packageName == null) {
                         packageName = argument;
@@ -3249,7 +3252,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         pw.println("    Starts a given operation for a particular application.");
         pw.println("  stop [--user <USER_ID>] <PACKAGE | UID> <OP> ");
         pw.println("    Stops a given operation for a particular application.");
-        pw.println("  set [--user <USER_ID>] <PACKAGE | UID> <OP> <MODE>");
+        pw.println("  set [--user <USER_ID>] <--uid PACKAGE | PACKAGE | UID> <OP> <MODE>");
         pw.println("    Set the mode for a particular application and operation.");
         pw.println("  get [--user <USER_ID>] <PACKAGE | UID> [<OP>]");
         pw.println("    Return the mode for a particular application and optional operation.");
@@ -3267,6 +3270,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         pw.println("    <MODE>    one of allow, ignore, deny, or default");
         pw.println("    <USER_ID> the user id under which the package is installed. If --user is not");
         pw.println("              specified, the current user is assumed.");
+        pw.println("    --uid PACKAGE refer to the UID of the package");
     }
 
     static int onShellCommand(Shell shell, String cmd) {
@@ -3293,9 +3297,17 @@ public class AppOpsService extends IAppOpsService.Stub {
                         return -1;
                     }
 
-                    if (shell.packageName != null) {
+                    if (!shell.targetsUid && shell.packageName != null) {
                         shell.mInterface.setMode(shell.op, shell.packageUid, shell.packageName,
                                 mode);
+                    } else if (shell.targetsUid && shell.packageName != null) {
+                        try {
+                            final int uid = shell.mInternal.mContext.getPackageManager()
+                                    .getPackageUid(shell.packageName, shell.userId);
+                            shell.mInterface.setUidMode(shell.op, uid, mode);
+                        } catch (PackageManager.NameNotFoundException e) {
+                            return -1;
+                        }
                     } else {
                         shell.mInterface.setUidMode(shell.op, shell.nonpackageUid, mode);
                     }

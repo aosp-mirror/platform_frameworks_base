@@ -48,6 +48,7 @@ import android.transition.Transition;
 import android.transition.TransitionManager;
 import android.view.accessibility.AccessibilityEvent;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -2395,6 +2396,53 @@ public abstract class Window {
      */
     public boolean isEnsuringNavigationBarContrastWhenTransparent() {
         return false;
+    }
+
+    /**
+     * Sets a list of areas within this window's coordinate space where the system should not
+     * intercept touch or other pointing device gestures.
+     *
+     * <p>This method should be used by apps that make use of
+     * {@link #takeSurface(SurfaceHolder.Callback2)} and do not have a view hierarchy available.
+     * Apps that do have a view hierarchy should use
+     * {@link View#setSystemGestureExclusionRects(List)} instead. This method does not modify or
+     * replace the gesture exclusion rects populated by individual views in this window's view
+     * hierarchy using {@link View#setSystemGestureExclusionRects(List)}.</p>
+     *
+     * <p>Use this to tell the system which specific sub-areas of a view need to receive gesture
+     * input in order to function correctly in the presence of global system gestures that may
+     * conflict. For example, if the system wishes to capture swipe-in-from-screen-edge gestures
+     * to provide system-level navigation functionality, a view such as a navigation drawer
+     * container can mark the left (or starting) edge of itself as requiring gesture capture
+     * priority using this API. The system may then choose to relax its own gesture recognition
+     * to allow the app to consume the user's gesture. It is not necessary for an app to register
+     * exclusion rects for broadly spanning regions such as the entirety of a
+     * <code>ScrollView</code> or for simple press and release click targets such as
+     * <code>Button</code>. Mark an exclusion rect when interacting with a view requires
+     * a precision touch gesture in a small area in either the X or Y dimension, such as
+     * an edge swipe or dragging a <code>SeekBar</code> thumb.</p>
+     *
+     * <p>Do not modify the provided list after this method is called.</p>
+     *
+     * @param rects A list of precision gesture regions that this window needs to function correctly
+     */
+    @SuppressWarnings("unused")
+    public void setSystemGestureExclusionRects(@NonNull List<Rect> rects) {
+        throw new UnsupportedOperationException("window does not support gesture exclusion rects");
+    }
+
+    /**
+     * Retrieve the list of areas within this window's coordinate space where the system should not
+     * intercept touch or other pointing device gestures. This is the list as set by
+     * {@link #setSystemGestureExclusionRects(List)} or an empty list if
+     * {@link #setSystemGestureExclusionRects(List)} has not been called. It does not include
+     * exclusion rects set by this window's view hierarchy.
+     *
+     * @return a list of system gesture exclusion rects specific to this window
+     */
+    @NonNull
+    public List<Rect> getSystemGestureExclusionRects() {
+        return Collections.emptyList();
     }
 
     /** @hide */

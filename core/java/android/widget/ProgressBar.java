@@ -25,6 +25,7 @@ import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
+import android.graphics.BlendMode;
 import android.graphics.Canvas;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
@@ -334,7 +335,7 @@ public class ProgressBar extends View {
             if (mProgressTintInfo == null) {
                 mProgressTintInfo = new ProgressTintInfo();
             }
-            mProgressTintInfo.mProgressTintMode = Drawable.parseTintMode(a.getInt(
+            mProgressTintInfo.mProgressBlendMode = Drawable.parseBlendMode(a.getInt(
                     R.styleable.ProgressBar_progressTintMode, -1), null);
             mProgressTintInfo.mHasProgressTintMode = true;
         }
@@ -352,7 +353,7 @@ public class ProgressBar extends View {
             if (mProgressTintInfo == null) {
                 mProgressTintInfo = new ProgressTintInfo();
             }
-            mProgressTintInfo.mProgressBackgroundTintMode = Drawable.parseTintMode(a.getInt(
+            mProgressTintInfo.mProgressBackgroundBlendMode = Drawable.parseBlendMode(a.getInt(
                     R.styleable.ProgressBar_progressBackgroundTintMode, -1), null);
             mProgressTintInfo.mHasProgressBackgroundTintMode = true;
         }
@@ -370,7 +371,7 @@ public class ProgressBar extends View {
             if (mProgressTintInfo == null) {
                 mProgressTintInfo = new ProgressTintInfo();
             }
-            mProgressTintInfo.mSecondaryProgressTintMode = Drawable.parseTintMode(
+            mProgressTintInfo.mSecondaryProgressBlendMode = Drawable.parseBlendMode(
                     a.getInt(R.styleable.ProgressBar_secondaryProgressTintMode, -1), null);
             mProgressTintInfo.mHasSecondaryProgressTintMode = true;
         }
@@ -388,7 +389,7 @@ public class ProgressBar extends View {
             if (mProgressTintInfo == null) {
                 mProgressTintInfo = new ProgressTintInfo();
             }
-            mProgressTintInfo.mIndeterminateTintMode = Drawable.parseTintMode(a.getInt(
+            mProgressTintInfo.mIndeterminateBlendMode = Drawable.parseBlendMode(a.getInt(
                     R.styleable.ProgressBar_indeterminateTintMode, -1), null);
             mProgressTintInfo.mHasIndeterminateTintMode = true;
         }
@@ -796,12 +797,29 @@ public class ProgressBar extends View {
      * @attr ref android.R.styleable#ProgressBar_indeterminateTintMode
      * @see #setIndeterminateTintList(ColorStateList)
      * @see Drawable#setTintMode(PorterDuff.Mode)
+     *
      */
     public void setIndeterminateTintMode(@Nullable PorterDuff.Mode tintMode) {
+        setIndeterminateTintBlendMode(tintMode != null
+                ? BlendMode.fromValue(tintMode.nativeInt) : null);
+    }
+
+    /**
+     * Specifies the blending mode used to apply the tint specified by
+     * {@link #setIndeterminateTintList(ColorStateList)} to the indeterminate
+     * drawable. The default mode is {@link PorterDuff.Mode#SRC_IN}.
+     *
+     * @param blendMode the blending mode used to apply the tint, may be
+     *                 {@code null} to clear tint
+     * @attr ref android.R.styleable#ProgressBar_indeterminateTintMode
+     * @see #setIndeterminateTintList(ColorStateList)
+     * @see Drawable#setTintBlendMode(BlendMode)
+     */
+    public void setIndeterminateTintBlendMode(@Nullable BlendMode blendMode) {
         if (mProgressTintInfo == null) {
             mProgressTintInfo = new ProgressTintInfo();
         }
-        mProgressTintInfo.mIndeterminateTintMode = tintMode;
+        mProgressTintInfo.mIndeterminateBlendMode = blendMode;
         mProgressTintInfo.mHasIndeterminateTintMode = true;
 
         applyIndeterminateTint();
@@ -819,7 +837,23 @@ public class ProgressBar extends View {
     @InspectableProperty
     @Nullable
     public PorterDuff.Mode getIndeterminateTintMode() {
-        return mProgressTintInfo != null ? mProgressTintInfo.mIndeterminateTintMode : null;
+        BlendMode mode = getIndeterminateTintBlendMode();
+        return mode != null ? BlendMode.blendModeToPorterDuffMode(mode) : null;
+    }
+
+    /**
+     * Returns the blending mode used to apply the tint to the indeterminate
+     * drawable, if specified.
+     *
+     * @return the blending mode used to apply the tint to the indeterminate
+     *         drawable
+     * @attr ref android.R.styleable#ProgressBar_indeterminateTintMode
+     * @see #setIndeterminateTintBlendMode(BlendMode)
+     */
+    @InspectableProperty(attributeId = R.styleable.ProgressBar_indeterminateTintMode)
+    @Nullable
+    public BlendMode getIndeterminateTintBlendMode() {
+        return mProgressTintInfo != null ? mProgressTintInfo.mIndeterminateBlendMode : null;
     }
 
     private void applyIndeterminateTint() {
@@ -833,7 +867,7 @@ public class ProgressBar extends View {
                 }
 
                 if (tintInfo.mHasIndeterminateTintMode) {
-                    mIndeterminateDrawable.setTintMode(tintInfo.mIndeterminateTintMode);
+                    mIndeterminateDrawable.setTintBlendMode(tintInfo.mIndeterminateBlendMode);
                 }
 
                 // The drawable (or one of its children) may not have been
@@ -956,7 +990,7 @@ public class ProgressBar extends View {
                     target.setTintList(mProgressTintInfo.mProgressTintList);
                 }
                 if (mProgressTintInfo.mHasProgressTintMode) {
-                    target.setTintMode(mProgressTintInfo.mProgressTintMode);
+                    target.setTintBlendMode(mProgressTintInfo.mProgressBlendMode);
                 }
 
                 // The drawable (or one of its children) may not have been
@@ -981,7 +1015,7 @@ public class ProgressBar extends View {
                     target.setTintList(mProgressTintInfo.mProgressBackgroundTintList);
                 }
                 if (mProgressTintInfo.mHasProgressBackgroundTintMode) {
-                    target.setTintMode(mProgressTintInfo.mProgressBackgroundTintMode);
+                    target.setTintBlendMode(mProgressTintInfo.mProgressBackgroundBlendMode);
                 }
 
                 // The drawable (or one of its children) may not have been
@@ -1006,7 +1040,7 @@ public class ProgressBar extends View {
                     target.setTintList(mProgressTintInfo.mSecondaryProgressTintList);
                 }
                 if (mProgressTintInfo.mHasSecondaryProgressTintMode) {
-                    target.setTintMode(mProgressTintInfo.mSecondaryProgressTintMode);
+                    target.setTintBlendMode(mProgressTintInfo.mSecondaryProgressBlendMode);
                 }
 
                 // The drawable (or one of its children) may not have been
@@ -1076,10 +1110,25 @@ public class ProgressBar extends View {
      * @see Drawable#setTintMode(PorterDuff.Mode)
      */
     public void setProgressTintMode(@Nullable PorterDuff.Mode tintMode) {
+        setProgressTintBlendMode(tintMode != null ? BlendMode.fromValue(tintMode.nativeInt) : null);
+    }
+
+    /**
+     * Specifies the blending mode used to apply the tint specified by
+     * {@link #setProgressTintList(ColorStateList)}} to the progress
+     * indicator. The default mode is {@link PorterDuff.Mode#SRC_IN}.
+     *
+     * @param blendMode the blending mode used to apply the tint, may be
+     *                 {@code null} to clear tint
+     * @attr ref android.R.styleable#ProgressBar_progressTintMode
+     * @see #getProgressTintMode()
+     * @see Drawable#setTintBlendMode(BlendMode)
+     */
+    public void setProgressTintBlendMode(@Nullable BlendMode blendMode) {
         if (mProgressTintInfo == null) {
             mProgressTintInfo = new ProgressTintInfo();
         }
-        mProgressTintInfo.mProgressTintMode = tintMode;
+        mProgressTintInfo.mProgressBlendMode = blendMode;
         mProgressTintInfo.mHasProgressTintMode = true;
 
         if (mProgressDrawable != null) {
@@ -1099,7 +1148,23 @@ public class ProgressBar extends View {
     @InspectableProperty
     @Nullable
     public PorterDuff.Mode getProgressTintMode() {
-        return mProgressTintInfo != null ? mProgressTintInfo.mProgressTintMode : null;
+        BlendMode mode = getProgressTintBlendMode();
+        return mode != null ? BlendMode.blendModeToPorterDuffMode(mode) : null;
+    }
+
+    /**
+     * Returns the blending mode used to apply the tint to the progress
+     * drawable, if specified.
+     *
+     * @return the blending mode used to apply the tint to the progress
+     *         drawable
+     * @attr ref android.R.styleable#ProgressBar_progressTintMode
+     * @see #setProgressTintBlendMode(BlendMode)
+     */
+    @InspectableProperty(attributeId = android.R.styleable.ProgressBar_progressTintMode)
+    @Nullable
+    public BlendMode getProgressTintBlendMode() {
+        return mProgressTintInfo != null ? mProgressTintInfo.mProgressBlendMode : null;
     }
 
     /**
@@ -1160,10 +1225,26 @@ public class ProgressBar extends View {
      * @see Drawable#setTintMode(PorterDuff.Mode)
      */
     public void setProgressBackgroundTintMode(@Nullable PorterDuff.Mode tintMode) {
+        setProgressBackgroundTintBlendMode(tintMode != null
+                ? BlendMode.fromValue(tintMode.nativeInt) : null);
+    }
+
+    /**
+     * Specifies the blending mode used to apply the tint specified by
+     * {@link #setProgressBackgroundTintList(ColorStateList)}} to the progress
+     * background. The default mode is {@link BlendMode#SRC_IN}.
+     *
+     * @param blendMode the blending mode used to apply the tint, may be
+     *                 {@code null} to clear tint
+     * @attr ref android.R.styleable#ProgressBar_progressBackgroundTintMode
+     * @see #setProgressBackgroundTintList(ColorStateList)
+     * @see Drawable#setTintBlendMode(BlendMode)
+     */
+    public void setProgressBackgroundTintBlendMode(@Nullable BlendMode blendMode) {
         if (mProgressTintInfo == null) {
             mProgressTintInfo = new ProgressTintInfo();
         }
-        mProgressTintInfo.mProgressBackgroundTintMode = tintMode;
+        mProgressTintInfo.mProgressBackgroundBlendMode = blendMode;
         mProgressTintInfo.mHasProgressBackgroundTintMode = true;
 
         if (mProgressDrawable != null) {
@@ -1180,7 +1261,20 @@ public class ProgressBar extends View {
     @InspectableProperty
     @Nullable
     public PorterDuff.Mode getProgressBackgroundTintMode() {
-        return mProgressTintInfo != null ? mProgressTintInfo.mProgressBackgroundTintMode : null;
+        BlendMode mode = getProgressBackgroundTintBlendMode();
+        return mode != null ? BlendMode.blendModeToPorterDuffMode(mode) : null;
+    }
+
+    /**
+     * @return the blending mode used to apply the tint to the progress
+     *         background
+     * @attr ref android.R.styleable#ProgressBar_progressBackgroundTintMode
+     * @see #setProgressBackgroundTintBlendMode(BlendMode)
+     */
+    @InspectableProperty(attributeId = R.styleable.ProgressBar_progressBackgroundTintMode)
+    @Nullable
+    public BlendMode getProgressBackgroundTintBlendMode() {
+        return mProgressTintInfo != null ? mProgressTintInfo.mProgressBackgroundBlendMode : null;
     }
 
     /**
@@ -1242,10 +1336,27 @@ public class ProgressBar extends View {
      * @see Drawable#setTintMode(PorterDuff.Mode)
      */
     public void setSecondaryProgressTintMode(@Nullable PorterDuff.Mode tintMode) {
+        setSecondaryProgressTintBlendMode(tintMode != null
+                ? BlendMode.fromValue(tintMode.nativeInt) : null);
+    }
+
+    /**
+     * Specifies the blending mode used to apply the tint specified by
+     * {@link #setSecondaryProgressTintList(ColorStateList)}} to the secondary
+     * progress indicator. The default mode is
+     * {@link PorterDuff.Mode#SRC_ATOP}.
+     *
+     * @param blendMode the blending mode used to apply the tint, may be
+     *                 {@code null} to clear tint
+     * @attr ref android.R.styleable#ProgressBar_secondaryProgressTintMode
+     * @see #setSecondaryProgressTintList(ColorStateList)
+     * @see Drawable#setTintBlendMode(BlendMode)
+     */
+    public void setSecondaryProgressTintBlendMode(@Nullable BlendMode blendMode) {
         if (mProgressTintInfo == null) {
             mProgressTintInfo = new ProgressTintInfo();
         }
-        mProgressTintInfo.mSecondaryProgressTintMode = tintMode;
+        mProgressTintInfo.mSecondaryProgressBlendMode = blendMode;
         mProgressTintInfo.mHasSecondaryProgressTintMode = true;
 
         if (mProgressDrawable != null) {
@@ -1265,7 +1376,23 @@ public class ProgressBar extends View {
     @InspectableProperty
     @Nullable
     public PorterDuff.Mode getSecondaryProgressTintMode() {
-        return mProgressTintInfo != null ? mProgressTintInfo.mSecondaryProgressTintMode : null;
+        BlendMode mode = getSecondaryProgressTintBlendMode();
+        return mode != null ? BlendMode.blendModeToPorterDuffMode(mode) : null;
+    }
+
+        /**
+     * Returns the blending mode used to apply the tint to the secondary
+     * progress drawable, if specified.
+     *
+     * @return the blending mode used to apply the tint to the secondary
+     *         progress drawable
+     * @attr ref android.R.styleable#ProgressBar_secondaryProgressTintMode
+     * @see #setSecondaryProgressTintBlendMode(BlendMode)
+     */
+    @InspectableProperty(attributeId = android.R.styleable.ProgressBar_secondaryProgressTintMode)
+    @Nullable
+    public BlendMode getSecondaryProgressTintBlendMode() {
+        return mProgressTintInfo != null ? mProgressTintInfo.mSecondaryProgressBlendMode : null;
     }
 
     /**
@@ -2208,22 +2335,22 @@ public class ProgressBar extends View {
 
     private static class ProgressTintInfo {
         ColorStateList mIndeterminateTintList;
-        PorterDuff.Mode mIndeterminateTintMode;
+        BlendMode mIndeterminateBlendMode;
         boolean mHasIndeterminateTint;
         boolean mHasIndeterminateTintMode;
 
         ColorStateList mProgressTintList;
-        PorterDuff.Mode mProgressTintMode;
+        BlendMode mProgressBlendMode;
         boolean mHasProgressTint;
         boolean mHasProgressTintMode;
 
         ColorStateList mProgressBackgroundTintList;
-        PorterDuff.Mode mProgressBackgroundTintMode;
+        BlendMode mProgressBackgroundBlendMode;
         boolean mHasProgressBackgroundTint;
         boolean mHasProgressBackgroundTintMode;
 
         ColorStateList mSecondaryProgressTintList;
-        PorterDuff.Mode mSecondaryProgressTintMode;
+        BlendMode mSecondaryProgressBlendMode;
         boolean mHasSecondaryProgressTint;
         boolean mHasSecondaryProgressTintMode;
     }
