@@ -290,6 +290,18 @@ class GnssVisibilityControl {
                     return "<Unknown>";
             }
         }
+
+        private boolean isRequestAccepted() {
+            return mResponseType != NfwNotification.NFW_RESPONSE_TYPE_REJECTED;
+        }
+
+        private boolean isRequestAttributedToProxyApp() {
+            return !TextUtils.isEmpty(mProxyAppPackageName);
+        }
+
+        private boolean isEmergencyRequestNotification() {
+            return mInEmergencyMode && !isRequestAttributedToProxyApp();
+        }
     }
 
     private void handlePermissionsChanged(int uid) {
@@ -378,20 +390,37 @@ class GnssVisibilityControl {
     private void handleNfwNotification(NfwNotification nfwNotification) {
         if (DEBUG) Log.d(TAG, "Non-framework location access notification: " + nfwNotification);
 
-        final String proxyAppPackageName = nfwNotification.mProxyAppPackageName;
-        Boolean isLocationPermissionEnabled = mProxyAppToLocationPermissions.get(
-                proxyAppPackageName);
-        boolean isLocationRequestAccepted =
-                nfwNotification.mResponseType != NfwNotification.NFW_RESPONSE_TYPE_REJECTED;
-        boolean isPermissionMismatched;
-        if (isLocationPermissionEnabled == null) {
-            isPermissionMismatched = isLocationRequestAccepted;
-        } else {
-            isPermissionMismatched = (isLocationPermissionEnabled != isLocationRequestAccepted);
+        if (nfwNotification.isEmergencyRequestNotification()) {
+            handleEmergencyNfwNotification(nfwNotification);
+            return;
         }
+
+        final String proxyAppPackageName = nfwNotification.mProxyAppPackageName;
+        final Boolean isLocationPermissionEnabled = mProxyAppToLocationPermissions.get(
+                proxyAppPackageName);
+        final boolean isLocationRequestAccepted = nfwNotification.isRequestAccepted();
+        final boolean isPermissionMismatched =
+                (isLocationPermissionEnabled == null) ? isLocationRequestAccepted
+                        : (isLocationPermissionEnabled != isLocationRequestAccepted);
         logEvent(nfwNotification, isPermissionMismatched);
 
-        if (TextUtils.isEmpty(proxyAppPackageName)) {
+        if (!nfwNotification.isRequestAttributedToProxyApp()) {
+            // Handle cases where GNSS HAL implementation correctly rejected NFW location request.
+            // 1. GNSS HAL implementation doesn't provide location to any NFW location use cases.
+            //    There is no Location Attribution App configured in the framework.
+            // 2. GNSS HAL implementation doesn't provide location to some NFW location use cases.
+            //    Location Attribution Apps are configured only for the supported NFW location
+            //    use cases. All other use cases which are not supported (and always rejected) by
+            //    the GNSS HAL implementation will have proxyAppPackageName set to empty string.
+            if (!isLocationRequestAccepted) {
+                if (DEBUG) {
+                    Log.d(TAG, "Non-framework location request rejected. ProxyAppPackageName field"
+                            + " is not set in the notification: " + nfwNotification + ". Number of"
+                            + " configured proxy apps: " + mProxyAppToLocationPermissions.size());
+                }
+                return;
+            }
+
             Log.e(TAG, "ProxyAppPackageName field is not set. AppOps service not notified "
                     + "for non-framework location access notification: " + nfwNotification);
             return;
@@ -423,6 +452,16 @@ class GnssVisibilityControl {
                     + nfwNotification.getResponseTypeAsString() + " for notification: "
                     + nfwNotification);
         }
+    }
+
+    private void handleEmergencyNfwNotification(NfwNotification nfwNotification) {
+        boolean isPermissionMismatched =
+                (nfwNotification.mResponseType == NfwNotification.NFW_RESPONSE_TYPE_REJECTED);
+        if (isPermissionMismatched) {
+            Log.e(TAG, "Emergency non-framework location request incorrectly rejected."
+                    + " Notification: " + nfwNotification);
+        }
+        logEvent(nfwNotification, isPermissionMismatched);
     }
 
     private void logEvent(NfwNotification notification, boolean isPermissionMismatched) {
