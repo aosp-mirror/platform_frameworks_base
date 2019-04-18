@@ -5467,9 +5467,11 @@ message AttentionManagerServiceResultReported {
         UNKNOWN = 20;
         ATTENTION_SUCCESS_ABSENT = 0;
         ATTENTION_SUCCESS_PRESENT = 1;
-        ATTENTION_FAILURE_PREEMPTED = 2;
-        ATTENTION_FAILURE_TIMED_OUT = 3;
-        ATTENTION_FAILURE_UNKNOWN = 4;
+        ATTENTION_FAILURE_UNKNOWN = 2;
+        ATTENTION_FAILURE_CANCELLED = 3;
+        ATTENTION_FAILURE_PREEMPTED = 4;
+        ATTENTION_FAILURE_TIMED_OUT = 5;
+        ATTENTION_FAILURE_CAMERA_PERMISSION_ABSENT = 6;
     }
     optional AttentionCheckResult attention_check_result = 1 [default = UNKNOWN];
 }
