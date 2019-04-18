@@ -150,7 +150,7 @@ public class ZygoteInit {
         nativePreloadAppProcessHALs();
         Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
         Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "PreloadOpenGL");
-        preloadOpenGL();
+        maybePreloadOpenGL();
         Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
         preloadSharedLibraries();
         preloadTextResources();
@@ -192,9 +192,16 @@ public class ZygoteInit {
 
     native private static void nativePreloadAppProcessHALs();
 
-    native private static void nativePreloadOpenGL();
+    /**
+     * This call loads the graphics driver by attempting to make an OpenGL call.  If the driver is
+     * not currently in memory it will load and initialize it.  The OpenGL call itself is relatively
+     * cheap and pure.  This means that it is a low overhead on the initial call, and is safe and
+     * cheap to call later.  Calls after the initial invocation will effectively be no-ops for the
+     * system.
+     */
+    static native void nativePreloadOpenGL();
 
-    private static void preloadOpenGL() {
+    private static void maybePreloadOpenGL() {
         String driverPackageName = SystemProperties.get(PROPERTY_GFX_DRIVER);
         if (!SystemProperties.getBoolean(PROPERTY_DISABLE_OPENGL_PRELOADING, false) &&
                 (driverPackageName == null || driverPackageName.isEmpty())) {
