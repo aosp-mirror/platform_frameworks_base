@@ -275,6 +275,11 @@ public class RoleControllerManager {
                 Log.e(LOG_TAG, "Error calling grantDefaultRoles()", e);
             }
         }
+
+        @Override
+        protected void onFailed() {
+            mRemoteCallback.sendResult(null);
+        }
     }
 
     /**
