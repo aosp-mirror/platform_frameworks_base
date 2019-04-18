@@ -208,6 +208,7 @@ public final class AppTarget implements Parcelable {
          * @hide
          */
         @Deprecated
+        @SystemApi
         public Builder(@NonNull AppTargetId id) {
             mId = id;
         }
@@ -243,7 +244,6 @@ public final class AppTarget implements Parcelable {
 
         /**
          * @deprecated Use the appropriate constructor.
-         * @hide
          */
         @NonNull
         @Deprecated
@@ -258,7 +258,6 @@ public final class AppTarget implements Parcelable {
 
         /**
          * @deprecated Use the appropriate constructor.
-         * @hide
          */
         @NonNull
         @Deprecated

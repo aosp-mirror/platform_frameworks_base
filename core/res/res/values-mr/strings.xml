@@ -295,20 +295,20 @@
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला तुमच्या डिव्हाइसवरील फोटो, मीडिया आणि फायली अॅक्सेस करू द्यायचे?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"मायक्रोफोन"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ऑडिओ रेकॉर्ड"</string>
-    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला ऑडिओ रेकॉर्ड करू द्यायचे?"</string>
+    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला ऑडिओ रेकॉर्ड करू द्यायचा?"</string>
     <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"शारीरिक अ‍ॅक्टिव्हिटी"</string>
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"शारीरिक अ‍ॅक्टिव्हिटी अ‍ॅक्सेस करा"</string>
     <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला तुमची शारीरिक अ‍ॅक्टिव्हिटी अ‍ॅक्सेस करण्याची अनुमती द्यायची का?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"कॅमेरा"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"चित्रे घेण्याची आणि व्हिडिओ रेकॉर्ड"</string>
-    <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला फोटो घेऊ आणि व्हिडिओ रेकॉर्ड करू द्यायचे?"</string>
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला फोटो घेऊ आणि व्हिडिओ रेकॉर्ड करू द्यायचा?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"कॉल लॉग"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"फोन कॉल लॉग वाचा आणि लिहा"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला तुमचे फोन कॉल लॉग अॅक्सेस करण्याची अनुमती द्यायची का?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"फोन"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"फोन कॉल आणि व्यवस्थापित"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला फोन कॉल करू आणि ते व्यवस्थापित करू द्यायचे?"</string>
-    <string name="permgrouplab_sensors" msgid="4838614103153567532">"शरीर सेंसर"</string>
+    <string name="permgrouplab_sensors" msgid="4838614103153567532">"शरीर सेन्सर"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"आपल्‍या महत्त्वाच्या मापनांविषयी सेंसर डेटा अॅक्सेस करा"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला तुमच्या महत्त्वाच्या लक्षणांविषयीचा सेन्सर डेटा अॅक्सेस करू द्यायचे?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"विंडोमधील आशय पुन्हा मिळवा"</string>
@@ -560,8 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"फोन आणखी जवळ हलवा."</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"फोन आणखी वर हलवा."</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"फोन आणखी खाली हलवा."</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"फोन उजवीकडे हलवा."</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"फोन डावीकडे हलवा."</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"फोन डावीकडे हलवा."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"फोन उजवीकडे हलवा."</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"तुमचे डोळे उघडे ठेवून स्क्रीनकडे पहा."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"तुमचा चेहरा दिसत नाही. फोनकडे पहा."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"खूप हलत आहे. फोन स्थिर धरून ठेवा."</string>
@@ -1799,7 +1799,7 @@
     <string name="confirm_battery_saver" msgid="639106420541753635">"ओके"</string>
     <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"बॅटरी लाइफ वाढवण्यासाठी बॅटरी सेव्हर बॅकग्राउंड अ‍ॅक्टिव्हिटी, काही व्हिज्युअल इफेक्ट आणि इतर हाय-पॉवर वैशिष्ट्ये बंद किंवा मर्यादित करतो. "<annotation id="url">"अधिक जाणून घ्या"</annotation></string>
     <string name="battery_saver_description" msgid="6413346684861241431">"बॅटरी लाइफ वाढवण्यासाठी बॅटरी सेव्हर बॅकग्राउंड अ‍ॅक्टिव्हिटी, काही व्हिज्युअल इफेक्ट आणि इतर हाय-पॉवर वैशिष्ट्ये बंद किंवा मर्यादित करतो."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"डेटा वापर कमी करण्यात मदत करण्यासाठी, डेटा सर्व्हर काही अ‍ॅप्सना पार्श्वभूमीमध्ये डेटा पाठविण्यास किंवा प्राप्त करण्यास प्रतिबंधित करतो. तुम्ही सध्या वापरत असलेला अ‍ॅप डेटामध्ये प्रवेश करू शकतो परंतु तसे तो खूप कमी वेळा करू शकतो. याचा अर्थ, उदाहरणार्थ, तुम्ही इमेज टॅप करेपर्यंत त्या प्रदर्शित करणार नाहीत असा असू शकतो."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"डेटा वापर कमी करण्यात मदत करण्यासाठी, डेटा सर्व्हर काही अ‍ॅप्सना पार्श्वभूमीमध्ये डेटा पाठविण्यास किंवा  मिळवण्यास प्रतिबंध करतो. तुम्ही सध्या वापरत असलेला अ‍ॅप डेटामध्ये प्रवेश करू शकतो परंतु तसे तो खूप कमी वेळा करू शकतो. याचा अर्थ, उदाहरणार्थ, तुम्ही इमेज टॅप करेपर्यंत त्या प्रदर्शित करणार नाहीत असा असू शकतो."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"डेटा बचतकर्ता चालू करायचा?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"चालू करा"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

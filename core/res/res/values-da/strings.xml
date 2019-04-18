@@ -282,7 +282,7 @@
     <string name="permgroupdesc_location" msgid="1346617465127855033">"få adgang til enhedens placering"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"Vil du give &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; adgang til enhedens placering?"</string>
     <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"Appen har kun adgang til placeringen, når du bruger appen"</string>
-    <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"Skal &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; &lt;b&gt;altid&lt;/b&gt; have adgang til placeringen på denne enhed?"</string>
+    <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"Skal &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; &lt;b&gt;altid&lt;/b&gt; have adgang til denne enheds placering?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="4597006851453417387">"Appen kan i øjeblikket kun få adgang til placeringen, mens du bruger appen"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalender"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"have adgang til din kalender"</string>
@@ -303,7 +303,7 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"tage billeder og optage video"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Vil du give &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tilladelse til at tage billeder og optage video?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"Opkaldslister"</string>
-    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"læse og skrive til opkaldslisten"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"læse og redigere opkaldslisten"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Vil du give &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; adgang til dine opkaldslister?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"foretage og administrere telefonopkald"</string>
@@ -560,8 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"Flyt telefonen tættere på."</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"Løft telefonen højere op."</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"Sænk telefonen."</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"Flyt telefonen til højre."</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"Flyt telefonen til venstre."</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"Flyt telefonen til venstre."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"Flyt telefonen til højre."</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Kig på skærmen med åbne øjne."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Dit ansigt kan ikke registreres. Kig på telefonen."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Der er for meget bevægelse. Hold telefonen stille."</string>
@@ -644,7 +644,7 @@
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"knytte til tjenester fra mobilselskabet"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Tillader, at brugeren knytter sig til tjenester fra mobilselskabet. Dette bør aldrig være nødvendigt for almindelige apps."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"have adgang til Forstyr ikke"</string>
-    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Giver appen tilladelse til at læse og skrive konfigurationen af Forstyr ikke."</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Giver appen tilladelse til at læse og redigere konfigurationen af Forstyr ikke."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Angiv regler for adgangskoder"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Tjek længden samt tilladte tegn i adgangskoder og pinkoder til skærmlåsen."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Overvåg forsøg på oplåsning af skærm"</string>
@@ -655,7 +655,7 @@
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Registrer antallet af forkerte adgangskoder, der angives ved oplåsning af skærmen, og lås tv-adgangen, eller slet alle brugerens data, hvis adgangskoden tastes forkert for mange gange."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Registrer antallet af forkerte adgangskoder, der angives ved oplåsning af skærmen, og lås telefonen, eller slet alle brugerens data, hvis adgangskoden tastes forkert for mange gange."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Skifte skærmlås"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Skifter skærmlås"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Skifter skærmlås."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Låse skærmen"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Administrerer, hvordan og hvornår skærmen låses."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Slette alle data"</string>
@@ -675,7 +675,7 @@
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Deaktiver kameraer"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Bloker brug af alle kameraer på enheden."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Slå visse skærmlåsfunktioner fra"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Undgå brugen af visse skærmlåsfunktioner."</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Forhindrer brug af visse skærmlåsfunktioner."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Hjem"</item>
     <item msgid="869923650527136615">"Mobil"</item>

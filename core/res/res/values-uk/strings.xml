@@ -566,8 +566,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"Тримайте телефон ближче до обличчя."</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"Тримайте телефон вище."</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"Тримайте телефон нижче."</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"Тримайте телефон правіше."</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"Тримайте телефон лівіше."</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"Тримайте телефон лівіше."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"Тримайте телефон правіше."</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Дивіться на екран і не заплющуйте очі."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Обличчя не видно. Дивіться на телефон."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Забагато рухів. Тримайте телефон нерухомо."</string>
@@ -660,8 +660,8 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Відстежуйте кількість неправильних паролів, введених під час розблокування екрана. Блокуйте планшет або стирайте всі його дані, якщо пароль введено неправильно забагато разів."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Відстежуйте кількість неправильних паролів, введених під час розблокування екрана. Блокуйте телевізор або стирайте всі його дані, якщо пароль введено неправильно забагато разів."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Відстежуйте кількість неправильних паролів, введених під час розблокування екрана. Блокуйте телефон або стирайте всі його дані, якщо пароль введено неправильно забагато разів."</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"Змінити пароль розблокування екрана"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Змінити пароль розблокування екрана."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Змінити спосіб розблокування екрана"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Змінити спосіб розблокування екрана."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Блокувати екран"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Контролювати, як і коли блокується екран."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Видалити всі дані"</string>

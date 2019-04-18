@@ -307,7 +307,7 @@
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"നിങ്ങളുടെ ഫോൺ കോൾ ലോഗുകൾ ആക്സസ് ചെയ്യാൻ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ആപ്പിനെ അനുവദിക്കണോ?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ഫോണ്‍"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ഫോൺ വിളിക്കുകയും നിയന്ത്രിക്കുകയും ചെയ്യുക"</string>
-    <string name="permgrouprequest_phone" msgid="9166979577750581037">"ഫോൺ കോളുകൾ ചെയ്യാനും അവ നിയന്ത്രിക്കാനും &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ആപ്പിനെ അനുവദിക്കണോ?"</string>
+    <string name="permgrouprequest_phone" msgid="9166979577750581037">"ഫോൺ കോളുകൾ ചെയ്യാനും അവ മാനേജ് ചെയ്യാനും &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ആപ്പിനെ അനുവദിക്കണോ?"</string>
     <string name="permgrouplab_sensors" msgid="4838614103153567532">"ബോഡി സെൻസറുകൾ"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"നിങ്ങളുടെ ജീവാധാര ലക്ഷണങ്ങളെ കുറിച്ചുള്ള സെൻസർ വിവരങ്ങൾ ആക്സസ് ചെയ്യുക"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"നിങ്ങളുടെ ജീവധാരണ ലക്ഷണങ്ങളെ കുറിച്ചുള്ള സെൻസർ ഡാറ്റ ആക്‌സസ് ചെയ്യാൻ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ആപ്പിനെ അനുവദിക്കണോ?"</string>
@@ -560,8 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"ഫോൺ അടുത്തേക്ക് നീക്കുക."</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"ഫോൺ കൂടുതൽ ഉയരത്തിലേക്ക് നീക്കുക."</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"ഫോൺ കൂടുതൽ താഴേക്ക് നീക്കുക."</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"ഫോൺ വലത്തോട്ട് നീക്കുക."</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"ഫോൺ ഇടത്തോട്ട് നീക്കുക."</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"ഫോൺ ഇടത്തോട്ട് നീക്കുക."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"ഫോൺ വലത്തോട്ട് നീക്കുക."</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"തുറന്ന കണ്ണുകളുമായി സ്‌ക്രീനിലേക്ക് നോക്കുക."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"നിങ്ങളുടെ മുഖം കാണാനാവുന്നില്ല. ഫോണിലേക്ക് നോക്കൂ."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"വളരെയധികം ചലനം. ഫോൺ അനക്കാതെ നേരെ പിടിക്കുക."</string>
@@ -1799,7 +1799,7 @@
     <string name="confirm_battery_saver" msgid="639106420541753635">"ശരി"</string>
     <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"ബാറ്ററി ലൈഫ് വികസിപ്പിക്കാൻ പശ്ചാത്തല ആക്‌റ്റിവിറ്റി, ചില വിഷ്വൽ ഇഫക്‌റ്റുകൾ, മറ്റ് ഹൈ പവർ ഫീച്ചറുകൾ എന്നിവയെ ബാറ്ററി ലാഭിക്കൽ ഓഫാക്കുകയോ നിയന്ത്രിക്കുകയോ ചെയ്യും. "<annotation id="url">"കൂടുതലറിയുക"</annotation></string>
     <string name="battery_saver_description" msgid="6413346684861241431">"ബാറ്ററി ലൈഫ് വികസിപ്പിക്കാൻ പശ്ചാത്തല ആക്‌റ്റിവിറ്റി, ചില വിഷ്വൽ ഇഫക്‌റ്റുകൾ, മറ്റ് ഹൈ പവർ ഫീച്ചറുകൾ എന്നിവയെ ബാറ്ററി ലാഭിക്കൽ ഓഫാക്കുകയോ നിയന്ത്രിക്കുകയോ ചെയ്യും."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"ഡാറ്റാ ഉപയോഗം കുറയ്ക്കാൻ സഹായിക്കുന്നതിന്, പശ്ചാത്തലത്തിൽ ഡാറ്റ അയയ്ക്കുകയോ സ്വീകരിക്കുകയോ ചെയ്യുന്നതിൽ നിന്ന് ചില ആപ്‌സിനെ ഡാറ്റ സേവർ തടയുന്നു. നിങ്ങൾ നിലവിൽ ഉപയോഗിക്കുന്ന ഒരു ആപ്പിന് ഡാറ്റ ആക്സസ്സ് ചെയ്യാൻ കഴിയും, എന്നാൽ കുറഞ്ഞ ആവൃത്തിയിലാണിത് നടക്കുക. ഇതിനർത്ഥം, ഉദാഹരണമായി നിങ്ങൾ ടാപ്പ് ചെയ്യുന്നത് വരെ ചിത്രങ്ങൾ പ്രദ‍‍‍ർശിപ്പിക്കുകയില്ല എന്നാണ്."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"ഡാറ്റാ ഉപയോഗം കുറയ്ക്കാൻ സഹായിക്കുന്നതിനായി പശ്ചാത്തലത്തിൽ ഡാറ്റ അയയ്ക്കുകയോ സ്വീകരിക്കുകയോ ചെയ്യുന്നതിൽ നിന്ന് ചില ആപ്പുകളെ ഡാറ്റാ സേവർ തടയുന്നു. നിങ്ങൾ നിലവിൽ ഉപയോഗിക്കുന്ന ഒരു ആപ്പിന് ഡാറ്റ ആക്‌സസ് ചെയ്യാനാകും, എന്നാൽ വല്ലപ്പോഴും മാത്രമെ സംഭവിക്കുന്നുള്ളു. ഇതിനർത്ഥം, ഉദാഹരണമായി നിങ്ങൾ ടാപ്പ് ചെയ്യുന്നത് വരെ ചിത്രങ്ങൾ പ്രദ‍‍‍ർശിപ്പിക്കുകയില്ല എന്നാണ്."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ഡാറ്റ സേവർ ഓണാക്കണോ?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ഓണാക്കുക"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

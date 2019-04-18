@@ -309,7 +309,8 @@ public class AttentionManagerService extends SystemService {
     }
 
     @GuardedBy("mLock")
-    private UserState getOrCreateUserStateLocked(int userId) {
+    @VisibleForTesting
+    protected UserState getOrCreateUserStateLocked(int userId) {
         UserState result = mUserStates.get(userId);
         if (result == null) {
             result = new UserState(userId, mContext, mLock, mComponentName);

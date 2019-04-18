@@ -566,8 +566,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"Bolj približajte telefon."</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"Telefon pomaknite višje."</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"Telefon premaknite nižje."</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"Telefon premaknite v desno."</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"Telefon premaknite v levo."</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"Telefon premaknite v levo."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"Telefon premaknite v desno."</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Z odprtimi očmi glejte v zaslon."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Obraz ni viden. Poglejte v telefon."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Preveč se premikate. Držite telefon pri miru."</string>

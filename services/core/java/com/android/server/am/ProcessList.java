@@ -2227,9 +2227,10 @@ public final class ProcessList {
         for (AppZygote appZygote : zygotesToKill) {
             killAppZygoteIfNeededLocked(appZygote);
         }
-        mService.updateOomAdjLocked();
+        mService.updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_PROCESS_END);
         return N > 0;
     }
+
     @GuardedBy("mService")
     boolean removeProcessLocked(ProcessRecord app,
             boolean callerWillRestart, boolean allowRestart, String reason) {

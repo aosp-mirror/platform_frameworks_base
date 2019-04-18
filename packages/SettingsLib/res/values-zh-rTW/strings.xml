@@ -289,7 +289,7 @@
     <string name="strict_mode" msgid="1938795874357830695">"嚴格模式已啟用"</string>
     <string name="strict_mode_summary" msgid="142834318897332338">"當應用程式在主執行緒中進行長時間作業時，讓螢幕閃爍"</string>
     <string name="pointer_location" msgid="6084434787496938001">"指標位置"</string>
-    <string name="pointer_location_summary" msgid="840819275172753713">"觸控時在螢幕上方顯示相關資料"</string>
+    <string name="pointer_location_summary" msgid="840819275172753713">"在螢幕圖層上顯示目前的觸控資料"</string>
     <string name="show_touches" msgid="2642976305235070316">"顯示觸控回應"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"顯示觸控位置的視覺回應"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"顯示表層更新"</string>
@@ -306,7 +306,7 @@
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"停用 USB 音訊路由"</string>
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"停用 USB 音訊周邊設備的自動路由功能"</string>
     <string name="debug_layout" msgid="5981361776594526155">"顯示版面配置界限"</string>
-    <string name="debug_layout_summary" msgid="2001775315258637682">"顯示剪輯範圍、邊界等。"</string>
+    <string name="debug_layout_summary" msgid="2001775315258637682">"顯示剪輯範圍、邊界等"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"強制使用從右至左版面配置方向"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"強制將所有語言代碼的畫面配置方向改為從右至左"</string>
     <string name="force_msaa" msgid="7920323238677284387">"強制 4x MSAA"</string>

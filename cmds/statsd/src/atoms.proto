@@ -268,7 +268,8 @@ message Atom {
         TouchGestureClassified touch_gesture_classified = 177;
         HiddenApiUsed hidden_api_used = 178 [(allow_from_any_uid) = true];
         StyleUIChanged style_ui_changed = 179;
-        PrivacyIndicatorsInteracted privacy_indicators_interacted = 180;
+        PrivacyIndicatorsInteracted privacy_indicators_interacted =
+	    180 [(log_from_module) = "permissioncontroller"];
         AppInstallOnExternalStorageReported app_install_on_external_storage_reported = 181;
         NetworkStackReported network_stack_reported = 182 [(log_from_module) = "network_stack"];
         AppMovedStorageReported app_moved_storage_reported = 183;
@@ -5466,9 +5467,11 @@ message AttentionManagerServiceResultReported {
         UNKNOWN = 20;
         ATTENTION_SUCCESS_ABSENT = 0;
         ATTENTION_SUCCESS_PRESENT = 1;
-        ATTENTION_FAILURE_PREEMPTED = 2;
-        ATTENTION_FAILURE_TIMED_OUT = 3;
-        ATTENTION_FAILURE_UNKNOWN = 4;
+        ATTENTION_FAILURE_UNKNOWN = 2;
+        ATTENTION_FAILURE_CANCELLED = 3;
+        ATTENTION_FAILURE_PREEMPTED = 4;
+        ATTENTION_FAILURE_TIMED_OUT = 5;
+        ATTENTION_FAILURE_CAMERA_PERMISSION_ABSENT = 6;
     }
     optional AttentionCheckResult attention_check_result = 1 [default = UNKNOWN];
 }

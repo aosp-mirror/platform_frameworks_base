@@ -330,7 +330,9 @@ public class SmartActionsHelperTest {
         List<TextClassifierEvent> events = argumentCaptor.getAllValues();
         assertTextClassifierEvent(events.get(0), TextClassifierEvent.TYPE_ACTIONS_GENERATED);
         assertTextClassifierEvent(events.get(1), TextClassifierEvent.TYPE_SMART_ACTION);
-        assertThat(events.get(1).getScore()).isEqualTo(SCORE);
+        float[] scores = events.get(1).getScores();
+        assertThat(scores).hasLength(1);
+        assertThat(scores[0]).isEqualTo(SCORE);
     }
 
     @Test

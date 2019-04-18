@@ -73,6 +73,7 @@
 #include <android-base/stringprintf.h>
 #include <android-base/strings.h>
 #include <android-base/unique_fd.h>
+#include <bionic_malloc.h>
 #include <cutils/ashmem.h>
 #include <cutils/fs.h>
 #include <cutils/multiuser.h>
@@ -499,12 +500,9 @@ static void EnableDebugger() {
   }
 }
 
-// The debug malloc library needs to know whether it's the zygote or a child.
-extern "C" int gMallocLeakZygoteChild;
-
 static void PreApplicationInit() {
   // The child process sets this to indicate it's not the zygote.
-  gMallocLeakZygoteChild = 1;
+  android_mallopt(M_SET_ZYGOTE_CHILD, nullptr, 0);
 
   // Set the jemalloc decay time to 1.
   mallopt(M_DECAY_TIME, 1);
@@ -877,8 +875,12 @@ static void MountEmulatedStorage(uid_t uid, jint mount_mode,
     storage_source = "/mnt/runtime/default";
   } else if (mount_mode == MOUNT_EXTERNAL_READ) {
     storage_source = "/mnt/runtime/read";
-  } else if (mount_mode == MOUNT_EXTERNAL_WRITE) {
+  } else if (mount_mode == MOUNT_EXTERNAL_WRITE
+      || mount_mode == MOUNT_EXTERNAL_LEGACY
+      || mount_mode == MOUNT_EXTERNAL_INSTALLER) {
     storage_source = "/mnt/runtime/write";
+  } else if (mount_mode == MOUNT_EXTERNAL_FULL) {
+    storage_source = "/mnt/runtime/full";
   } else if (mount_mode == MOUNT_EXTERNAL_NONE && !force_mount_namespace) {
     // Sane default of no storage visible
     return;
@@ -894,7 +896,8 @@ static void MountEmulatedStorage(uid_t uid, jint mount_mode,
     return;
   }
 
-  if (GetBoolProperty(kIsolatedStorageSnapshot, GetBoolProperty(kIsolatedStorage, true))) {
+  if (/* DISABLES CODE */ (false)
+      && GetBoolProperty(kIsolatedStorageSnapshot, GetBoolProperty(kIsolatedStorage, true))) {
     if (mount_mode == MOUNT_EXTERNAL_FULL || mount_mode == MOUNT_EXTERNAL_LEGACY) {
       storage_source = (mount_mode == MOUNT_EXTERNAL_FULL)
           ? "/mnt/runtime/full" : "/mnt/runtime/write";

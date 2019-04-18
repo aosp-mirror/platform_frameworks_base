@@ -560,8 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"Доближете го телефонот."</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"Поткренете го телефонот."</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"Снижете го телефонот."</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"Поместете го телефонот надесно."</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"Поместете го телефонот налево."</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"Поместете го телефонот налево."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"Поместете го телефонот надесно."</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Гледајте во екранот со отворени очи."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Не ви се гледа ликот. Гледајте во телефонот."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Премногу движење. Држете го телефонот стабилно."</string>

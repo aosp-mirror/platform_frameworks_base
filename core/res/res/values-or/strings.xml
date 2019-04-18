@@ -526,8 +526,8 @@
     <string name="biometric_error_canceled" msgid="349665227864885880">"ପ୍ରାମାଣିକତାକୁ ବାତିଲ୍ କରାଯାଇଛି"</string>
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"କୌଣସି ପିନ୍, ପେଟେର୍ନ ବା ପାସ୍‍ୱର୍ଡ ସେଟ୍ ନାହିଁ"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"ଆଙ୍ଗୁଠି ଚିହ୍ନ ଆଂଶିକ ଚିହ୍ନଟ ହେଲା। ଦୟାକରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"ଆଙ୍ଗୁଠି ଚିହ୍ନ ପ୍ରୋସେସ୍‍ କରାଯାଇପାରିଲା ନାହିଁ। ଦୟାକରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"ଆଙ୍ଗୁଠି ଚିହ୍ନ ସେନ୍ସର୍‍ ମଇଳା ହୋଇଯାଇଛି। ଦୟାକରି ସଫା କରନ୍ତୁ ଓ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"ଟିପଚିହ୍ନ ପ୍ରୋସେସ୍‍ କରାଯାଇପାରିଲା ନାହିଁ। ଦୟାକରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"ଟିପଚିହ୍ନ ସେନ୍ସର୍‍ ମଇଳା ହୋଇଯାଇଛି। ଦୟାକରି ସଫା କରନ୍ତୁ ଓ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"ଆଙ୍ଗୁଠି ବହୁତ ଜୋର୍‌ରେ ଚଲାଗଲା। ଦୟାକରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"ଆଙ୍ଗୁଠି ଖୁବ୍‍ ଧୀରେ ନିଆଗଲା। ଦୟାକରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -560,8 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"ଫୋନ୍‌କୁ ପାଖକୁ ଆଣନ୍ତୁ।"</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"ଫୋନ୍‌କୁ ଉପରକୁ ଉଠାନ୍ତୁ।"</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"ଫୋନ୍‌କୁ ତଳକୁ ନିଅନ୍ତୁ।"</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"ଫୋନ୍‌କୁ ଡାହାଣ ପଟକୁ ନିଅନ୍ତୁ"</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"ଫୋନ୍‌କୁ ବାମ୍‌କୁ ନିଅନ୍ତୁ।"</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"ବାମ ପଟକୁ ଫୋନ୍ ଘୁଞ୍ଚାନ୍ତୁ।"</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"ଡାହାଣ ପଟକୁ ଫୋନ୍ ଘୁଞ୍ଚାନ୍ତୁ।"</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"ଆପଣଙ୍କ ଆଖି ଖୋଲା ଥିବା ସମୟରେ ସ୍କ୍ରିନ୍‌କୁ ଦେଖନ୍ତୁ।"</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"ଆପଣଙ୍କର ମୁହଁ ଦେଖି ପାରୁନାହିଁ। ଫୋନ୍‌କୁ ଦେଖନ୍ତୁ।"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"ଅତ୍ୟଧିକ ଅସ୍ଥିର। ଫୋନ୍‍କୁ ସ୍ଥିର ଭାବେ ଧରନ୍ତୁ।"</string>
@@ -654,10 +654,10 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"ସ୍କ୍ରୀନ୍‍ ଅନଲକ୍‍ କରିବାବେଳେ ଟାଇପ୍‍ କରାଯାଇଥିବା ଭୁଲ ପାସ୍‌ୱର୍ଡର ସଂଖ୍ୟାକୁ ନୀରିକ୍ଷଣ କରେ ଏବଂ ଟାବଲେଟ୍‍କୁ ଲକ୍‍ କରିଦିଏ କିମ୍ବା ଯଦି ଅନେକ ଭୁଲ ପାସ୍‌ୱର୍ଡ ଟାଇପ୍‍ କରାଯାଇଥାଏ, ତେବେ ସମସ୍ତ ଡାଟା ଲିଭାଇଦିଏ।"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"ସ୍କ୍ରୀନ୍‍ ଅନଲକ୍‍ କରିବାବେଳେ ଟାଇପ୍‍ କରାଯାଇଥିବା ଭୁଲ ପାସ୍‌ୱର୍ଡର ସଂଖ୍ୟାକୁ ନୀରିକ୍ଷଣ କରେ ଏବଂ ଟିଭିକୁ ଲକ୍‍ କରିଦିଏ କିମ୍ବା ଯଦି ଅନେକ ଭୁଲ ପାସ୍‌ୱର୍ଡ ଟାଇପ୍‍ କରାଯାଇଥାଏ, ତେବେ ସମସ୍ତ ଡାଟା ଲିଭାଇଦିଏ।"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"ସ୍କ୍ରୀନ୍‍ ଅନଲକ୍‍ କରିବାବେଳେ ଟାଇପ୍‍ କରାଯାଇଥିବା ଭୁଲ ପାସ୍‌ୱର୍ଡର ସଂଖ୍ୟାକୁ ନୀରିକ୍ଷଣ କରେ ଏବଂ ଫୋନ୍‍କୁ ଲକ୍‍ କରିଦିଏ କିମ୍ବା ଯଦି ଅନେକ ଭୁଲ ପାସ୍‌ୱର୍ଡ ଟାଇପ୍‍ କରାଯାଇଥାଏ, ତେବେ ସମସ୍ତ ଡାଟା ଲିଭାଇଦିଏ।"</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"ସ୍କ୍ରୀନ୍‍ ଲକ୍‍ ବଦଳାନ୍ତୁ"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"ସ୍କ୍ରୀନ୍‍ ଲକ୍‍ ବଦଳାନ୍ତୁ।"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"ସ୍କ୍ରୀନ୍‍ ଲକ୍‍ ବଦଳାଇବା"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"ସ୍କ୍ରୀନ୍‍ ଲକ୍‍ ବଦଳାଏ।"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"ସ୍କ୍ରୀନ୍‌କୁ ଲକ୍‌ କରିବା"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"ସ୍କ୍ରୀନ୍‍ କିପରି ଓ କେତେବେଳେ ଲକ୍‍ କରାଯିବ, ତାହା ନିୟନ୍ତ୍ରଣ କରନ୍ତୁ।"</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"ସ୍କ୍ରୀନ୍‍ କିପରି ଓ କେତେବେଳେ ଲକ୍‍ କରାଯିବ, ତାହା ନିୟନ୍ତ୍ରଣ କରେ।"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"ସମସ୍ତ ଡାଟା ଖାଲି କରିବା"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"ବିନା ଚେତାବନୀରେ ଫ୍ୟାକ୍ଟୋରୀ ସେଟିଙ୍ଗ କରାଇ ଟାବ୍‍ଲେଟ୍‍ର ଡାଟା ଲିଭାଇଥାଏ।"</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"ବିନା ଚେତାବନୀରେ ଫ୍ୟାକ୍ଟୋରୀ ସେଟିଙ୍ଗ କରାଇ ଟିଭିର ଡାଟା ଲିଭାଇଥାଏ।"</string>
@@ -675,7 +675,7 @@
     <string name="policylab_disableCamera" msgid="6395301023152297826">"କ୍ୟାମେରାଗୁଡ଼ିକୁ ଅକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"ସମସ୍ତ ଡିଭାଇସ୍‍ର କ୍ୟାମେରା ବ୍ୟବହାର କରିବା ପ୍ରତିରୋଧ କରନ୍ତୁ।"</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"କିଛି ସ୍କ୍ରୀନ୍‍ ଲକ୍‍ ସୁବିଧାକୁ ଅକ୍ଷମ କରିବା"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"କିଛି ସ୍କ୍ରୀନ୍‍ ଲକ୍‍ ସୁବିଧା ବ୍ୟବହାର କରିବାରେ ପ୍ରତିରୋଧ କରନ୍ତୁ।"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"କିଛି ସ୍କ୍ରୀନ୍‍ ଲକ୍‍ ସୁବିଧା ବ୍ୟବହାର କରିବାରେ ପ୍ରତିରୋଧ କରେ।"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"ହୋମ୍"</item>
     <item msgid="869923650527136615">"ମୋବାଇଲ୍‍"</item>
@@ -1799,7 +1799,7 @@
     <string name="confirm_battery_saver" msgid="639106420541753635">"ଠିକ୍ ଅଛି"</string>
     <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"ବ୍ୟାଟେରୀ ସେଭର୍ ବ୍ୟାଟେରୀ ଜୀବନ ବଢ଼ାଇବାକୁ ପୃଷ୍ଟପଟ କାର୍ଯ୍ୟକଳାପ,କିଛି ଭିଜୁଆଲ୍ ପ୍ରଭାବଗୁଡ଼ିକୁ &amp; ବ୍ୟାଟେରୀ ଅଧିକ ଖର୍ଚ୍ଚ କରୁଥିବା ଅନ୍ୟ ବୈଶିଷ୍ଟ୍ୟକୁ ବନ୍ଦ ରଖେ କିମ୍ବା ପ୍ରତିବନ୍ଧିତ କରିଥାଏ। "<annotation id="url">"ଅଧିକ ଜାଣନ୍ତୁ"</annotation></string>
     <string name="battery_saver_description" msgid="6413346684861241431">"ବ୍ୟାଟେରୀ ସେଭର୍ ବ୍ୟାଟେରୀ ଜୀବନ ବଢ଼ାଇବାକୁ ପୃଷ୍ଟପଟ କାର୍ଯ୍ୟକଳାପକୁ,କିଛି ଭିଜୁଆଲ୍ ପ୍ରଭାବଗୁଡ଼ିକୁ &amp; ବ୍ୟାଟେରୀ ଅଧିକ ଖର୍ଚ୍ଚ କରୁଥିବା ଅନ୍ୟ ବୈଶିଷ୍ଟ୍ୟକୁ ବନ୍ଦ ରଖେ କିମ୍ବା ପ୍ରତିବନ୍ଧିତ କରିଥାଏ।"</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"ଡାଟା ବ୍ୟବହାର କମ୍‍ କରିବାରେ ସାହାଯ୍ୟ କରିବାକୁ, ଡାଟା ସେଭର୍‍ ବ୍ୟାକ୍‌ଗ୍ରାଉଣ୍ଡରେ ଡାଟା ପଠାଇବା କିମ୍ବା ପ୍ରାପ୍ତ କରିବାକୁ କିଛି ଆପ୍‍କୁ ବ୍ଲକ୍‌ କରେ। ଆପଣ ବର୍ତ୍ତମାନ ବ୍ୟବହାର କରୁଥିବା ଆପ୍‍, ଡାଟା ଆକ୍ସେସ୍‍ କରିପାରେ, କିନ୍ତୁ ଏହା କମ୍‍ ସମୟରେ କରିପାରେ। ଏହାର ଅର୍ଥ ହୋଇପାରେ, ଯେପରି, ଆପଣ ଟାପ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଯେଉଁ ଇମେଜ୍‍ ଦେଖାଯାଏ ନାହିଁ।"</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"ଡାଟା ବ୍ୟବହାର କମ୍‍ କରିବାରେ ସାହାଯ୍ୟ କରିବାକୁ, ଡାଟା ସେଭର୍‍ ବ୍ୟାକ୍‌ଗ୍ରାଉଣ୍ଡରେ ଡାଟା ପଠାଇବା କିମ୍ବା ପ୍ରାପ୍ତ କରିବାକୁ କିଛି ଆପ୍‍କୁ ବାରଣ କରେ। ଆପଣ ବର୍ତ୍ତମାନ ବ୍ୟବହାର କରୁଥିବା ଆପ୍‍, ଡାଟା ଆକ୍ସେସ୍‍ କରିପାରେ, କିନ୍ତୁ ଏହା କମ୍‍ ଥର କରିପାରେ। ଏହାର ଅର୍ଥ ହୋଇପାରେ, ଯେପରି, ଆପଣ ଟାପ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଯେଉଁ ଇମେଜ୍‍ ଦେଖାଯାଏ ନାହିଁ।"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ଡାଟା ସେଭର୍‌ ଅନ୍ କରିବେ?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ଅନ୍ କରନ୍ତୁ"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

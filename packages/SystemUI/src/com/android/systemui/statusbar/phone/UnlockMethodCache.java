@@ -16,10 +16,18 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.app.admin.DevicePolicyManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.biometrics.BiometricSourceType;
+import android.media.AudioManager;
+import android.os.Build;
 import android.os.Trace;
+import android.telephony.TelephonyManager;
 
+import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
@@ -34,6 +42,8 @@ import java.util.ArrayList;
 public class UnlockMethodCache {
 
     private static UnlockMethodCache sInstance;
+    private static final boolean DEBUG_AUTH_WITH_ADB = false;
+    private static final String AUTH_BROADCAST_KEY = "debug_trigger_auth";
 
     private final LockPatternUtils mLockPatternUtils;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
@@ -44,12 +54,27 @@ public class UnlockMethodCache {
     private boolean mCanSkipBouncer;
     private boolean mTrustManaged;
     private boolean mTrusted;
+    private boolean mDebugUnlocked = false;
 
     private UnlockMethodCache(Context ctx) {
         mLockPatternUtils = new LockPatternUtils(ctx);
         mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(ctx);
         KeyguardUpdateMonitor.getInstance(ctx).registerCallback(mCallback);
         update(true /* updateAlways */);
+        if (Build.IS_DEBUGGABLE && DEBUG_AUTH_WITH_ADB) {
+            // Watch for interesting updates
+            final IntentFilter filter = new IntentFilter();
+            filter.addAction(AUTH_BROADCAST_KEY);
+            ctx.registerReceiver(new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (DEBUG_AUTH_WITH_ADB && AUTH_BROADCAST_KEY.equals(intent.getAction())) {
+                        mDebugUnlocked = !mDebugUnlocked;
+                        update(true /* updateAlways */);
+                    }
+                }
+            }, filter, null, null);
+        }
     }
 
     public static UnlockMethodCache getInstance(Context context) {
@@ -89,7 +114,8 @@ public class UnlockMethodCache {
         Trace.beginSection("UnlockMethodCache#update");
         int user = KeyguardUpdateMonitor.getCurrentUser();
         boolean secure = mLockPatternUtils.isSecure(user);
-        boolean canSkipBouncer = !secure ||  mKeyguardUpdateMonitor.getUserCanSkipBouncer(user);
+        boolean canSkipBouncer = !secure || mKeyguardUpdateMonitor.getUserCanSkipBouncer(user)
+                || (Build.IS_DEBUGGABLE && DEBUG_AUTH_WITH_ADB && mDebugUnlocked);
         boolean trustManaged = mKeyguardUpdateMonitor.getUserTrustIsManaged(user);
         boolean trusted = mKeyguardUpdateMonitor.getUserHasTrust(user);
         boolean changed = secure != mSecure || canSkipBouncer != mCanSkipBouncer ||

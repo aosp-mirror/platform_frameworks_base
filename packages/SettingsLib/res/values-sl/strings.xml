@@ -241,11 +241,11 @@
     <string name="private_dns_mode_off" msgid="8236575187318721684">"Izklopljeno"</string>
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Samodejno"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Ime gostitelja pri ponudniku zasebnega strežnika DNS"</string>
-    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Vnesite ime gostitelja pri ponudniku strežnika DNS"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Vnesite ime gostitelja pri ponudniku DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Povezave ni bilo mogoče vzpostaviti"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Pokaži možnosti za potrdilo brezžičnega zaslona"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Povečaj raven zapis. dnev. za Wi-Fi; v izbir. Wi‑Fi-ja pokaži glede na SSID RSSI"</string>
-    <string name="wifi_metered_label" msgid="4514924227256839725">"Z omejenim prenosom podatkov"</string>
+    <string name="wifi_metered_label" msgid="4514924227256839725">"Omejen prenos podatkov"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Z neomejenim prenosom podatkov"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Velikosti medpomn. zapisov. dnevnika"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Izberite velikost medpomnilnika dnevnika"</string>

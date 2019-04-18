@@ -17,6 +17,7 @@
 package com.android.server.autofill;
 
 import static com.android.server.autofill.Helper.sDebug;
+import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -99,7 +100,7 @@ final class RemoteAugmentedAutofillService
         }
         try {
             if (state) {
-                mService.onConnected();
+                mService.onConnected(sDebug, sVerbose);
             } else {
                 mService.onDisconnected();
             }

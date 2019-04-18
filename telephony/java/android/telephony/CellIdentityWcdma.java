@@ -31,6 +31,11 @@ public final class CellIdentityWcdma extends CellIdentity {
     private static final String TAG = CellIdentityWcdma.class.getSimpleName();
     private static final boolean DBG = false;
 
+    private static final int MAX_LAC = 65535;
+    private static final int MAX_CID = 268435455;
+    private static final int MAX_PSC = 511;
+    private static final int MAX_UARFCN = 16383; // a 14 bit number; TS 25.331 ex sec 10.3.8.15
+
     // 16-bit Location Area Code, 0..65535
     private final int mLac;
     // 28-bit UMTS Cell Identity described in TS 25.331, 0..268435455
@@ -68,10 +73,10 @@ public final class CellIdentityWcdma extends CellIdentity {
     public CellIdentityWcdma (int lac, int cid, int psc, int uarfcn,
                               String mccStr, String mncStr, String alphal, String alphas) {
         super(TAG, CellInfo.TYPE_WCDMA, mccStr, mncStr, alphal, alphas);
-        mLac = lac;
-        mCid = cid;
-        mPsc = psc;
-        mUarfcn = uarfcn;
+        mLac = inRangeOrUnavailable(lac, 0, MAX_LAC);
+        mCid = inRangeOrUnavailable(cid, 0, MAX_CID);
+        mPsc = inRangeOrUnavailable(psc, 0, MAX_PSC);
+        mUarfcn = inRangeOrUnavailable(uarfcn, 0, MAX_UARFCN);
     }
 
     /** @hide */
