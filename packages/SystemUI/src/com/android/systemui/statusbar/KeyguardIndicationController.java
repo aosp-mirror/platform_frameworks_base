@@ -236,8 +236,8 @@ public class KeyguardIndicationController implements StateListener {
      *
      * @return {@code null} or an empty string if a trust indication text should not be shown.
      */
-    protected String getTrustGrantedIndication() {
-        return null;
+    private String getTrustGrantedIndication() {
+        return mContext.getString(R.string.keyguard_indication_trust_unlocked);
     }
 
     /**
@@ -245,7 +245,7 @@ public class KeyguardIndicationController implements StateListener {
      *
      * @return {@code null} or an empty string if a trust managed text should not be shown.
      */
-    protected String getTrustManagedIndication() {
+    private String getTrustManagedIndication() {
         return null;
     }
 
