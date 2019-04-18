@@ -1274,10 +1274,7 @@ public class Paint {
      * Get the paint's transfer mode object.
      *
      * @return the paint's transfer mode (or null)
-     *
-     * @deprecated use {@link #getBlendMode()} instead
      */
-    @Deprecated
     public Xfermode getXfermode() {
         return mXfermode;
     }
@@ -1308,11 +1305,7 @@ public class Paint {
      *
      * @param xfermode May be null. The xfermode to be installed in the paint
      * @return         xfermode
-     *
-     * @deprecated Use {@link #setBlendMode} to apply a Xfermode directly
-     * through usage of {@link BlendMode}
      */
-    @Deprecated
     public Xfermode setXfermode(Xfermode xfermode) {
         return installXfermode(xfermode);
     }
