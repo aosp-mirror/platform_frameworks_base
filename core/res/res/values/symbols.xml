@@ -3756,4 +3756,8 @@
   <java-symbol type="drawable" name="perm_group_camera" />
   <java-symbol type="drawable" name="perm_group_location" />
   <java-symbol type="drawable" name="perm_group_microphone" />
+
+  <java-symbol type="drawable" name="chooser_direct_share_icon_placeholder" />
+  <java-symbol type="color" name="chooser_gradient_background" />
+  <java-symbol type="color" name="chooser_gradient_highlight" />
 </resources>
