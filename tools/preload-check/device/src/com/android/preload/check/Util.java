@@ -16,7 +16,18 @@
 
 package com.android.preload.check;
 
+import dalvik.system.DexFile;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 public class Util {
     private static Field statusField;
@@ -29,6 +40,49 @@ public class Util {
         } catch (Throwable t) {
             throw new RuntimeException(t);
         }
+    }
+
+    public static Collection<DexFile> getBootDexFiles() throws Exception {
+        Class<?> vmClassLoaderClass = Class.forName("java.lang.VMClassLoader");
+        Method getResources = vmClassLoaderClass.getDeclaredMethod("getResources", String.class);
+        getResources.setAccessible(true);
+        LinkedList<DexFile> res = new LinkedList<>();
+        for (int i = 1;; i++) {
+            try {
+                String name = "classes" + (i > 1 ? String.valueOf(i) : "") + ".dex";
+                @SuppressWarnings("unchecked")
+                List<URL> urls = (List<URL>) getResources.invoke(null, name);
+                if (urls.isEmpty()) {
+                    break;
+                }
+                for (URL url : urls) {
+                    // Make temp copy, so we can use public API. Would be nice to use in-memory, but
+                    // those are unstable.
+                    String tmp = "/data/local/tmp/tmp.dex";
+                    try (BufferedInputStream in = new BufferedInputStream(url.openStream());
+                            BufferedOutputStream out = new BufferedOutputStream(
+                                    new FileOutputStream(tmp))) {
+                        byte[] buf = new byte[4096];
+                        for (;;) {
+                            int r = in.read(buf);
+                            if (r == -1) {
+                                break;
+                            }
+                            out.write(buf, 0, r);
+                        }
+                    }
+                    try {
+                        res.add(new DexFile(tmp));
+                    } catch (Exception dexError) {
+                        dexError.printStackTrace(System.out);
+                    }
+                    new File(tmp).delete();
+                }
+            } catch (Exception ignored) {
+                break;
+            }
+        }
+        return res;
     }
 
     public static boolean isInitialized(Class<?> klass) throws Exception {
