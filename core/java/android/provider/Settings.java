@@ -1791,6 +1791,58 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_MANAGE_DOMAIN_URLS = "android.settings.MANAGE_DOMAIN_URLS";
 
+    /**
+     * Broadcast to trigger notification of asking user to enable MMS.
+     * Need to specify {@link #EXTRA_ENABLE_MMS_DATA_REQUEST_REASON} and {@link #EXTRA_SUB_ID}.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_ENABLE_MMS_DATA_REQUEST =
+            "android.settings.ENABLE_MMS_DATA_REQUEST";
+
+    /**
+     * Integer value that specifies the reason triggering enable MMS data notification.
+     * This must be passed as an extra field to the {@link #ACTION_ENABLE_MMS_DATA_REQUEST}.
+     * Extra with value of EnableMmsDataReason interface.
+     * @hide
+     */
+    public static final String EXTRA_ENABLE_MMS_DATA_REQUEST_REASON =
+            "android.settings.extra.ENABLE_MMS_DATA_REQUEST_REASON";
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "ENABLE_MMS_DATA_REQUEST_REASON_" }, value = {
+            ENABLE_MMS_DATA_REQUEST_REASON_INCOMING_MMS,
+            ENABLE_MMS_DATA_REQUEST_REASON_OUTGOING_MMS,
+    })
+    public @interface EnableMmsDataReason{}
+
+    /**
+     * Requesting to enable MMS data because there's an incoming MMS.
+     * @hide
+     */
+    public static final int ENABLE_MMS_DATA_REQUEST_REASON_INCOMING_MMS = 0;
+
+    /**
+     * Requesting to enable MMS data because user is sending MMS.
+     * @hide
+     */
+    public static final int ENABLE_MMS_DATA_REQUEST_REASON_OUTGOING_MMS = 1;
+
+    /**
+     * Activity Action: Show screen of a cellular subscription and highlight the
+     * "enable MMS" toggle.
+     * <p>
+     * Input: {@link #EXTRA_SUB_ID}: Sub ID of the subscription.
+     * <p>
+     * Output: Nothing
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MMS_MESSAGE_SETTING = "android.settings.MMS_MESSAGE_SETTING";
+
     // End of Intent actions for Settings
 
     /**
