@@ -20,6 +20,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.voice.VoiceInteractionSession;
@@ -54,6 +55,14 @@ public class AssistManager implements ConfigurationChangedReceiver {
 
     private static final String ASSIST_ICON_METADATA_NAME =
             "com.android.systemui.action_assist_icon";
+    private static final String INVOCATION_TIME_MS_KEY = "invocation_time_ms";
+    public static final String INVOCATION_TYPE_KEY = "invocation_type";
+
+    public static final int INVOCATION_TYPE_GESTURE = 1;
+    public static final int INVOCATION_TYPE_ACTIVE_EDGE = 2;
+    public static final int INVOCATION_TYPE_VOICE = 3;
+    public static final int INVOCATION_TYPE_QUICK_SEARCH_BAR = 4;
+    public static final int INVOCATION_HOME_BUTTON_LONG_PRESS = 5;
 
     private static final long TIMEOUT_SERVICE = 2500;
     private static final long TIMEOUT_ACTIVITY = 1000;
@@ -171,6 +180,7 @@ public class AssistManager implements ConfigurationChangedReceiver {
                     ? TIMEOUT_SERVICE
                     : TIMEOUT_ACTIVITY);
         }
+        args.putLong(INVOCATION_TIME_MS_KEY, SystemClock.uptimeMillis());
         startAssistInternal(args, assistComponent, isService);
     }
 
