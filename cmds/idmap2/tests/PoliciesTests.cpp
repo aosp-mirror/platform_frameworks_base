@@ -38,9 +38,10 @@ TEST(PoliciesTests, PoliciesToBitmasks) {
   ASSERT_TRUE(bitmask3);
   ASSERT_EQ(*bitmask3, PolicyFlags::POLICY_SYSTEM_PARTITION | PolicyFlags::POLICY_VENDOR_PARTITION);
 
-  const auto bitmask4 = PoliciesToBitmask({"public", "product", "system", "vendor"});
+  const auto bitmask4 = PoliciesToBitmask({"odm", "oem", "public", "product", "system", "vendor"});
   ASSERT_TRUE(bitmask4);
-  ASSERT_EQ(*bitmask4, PolicyFlags::POLICY_PUBLIC | PolicyFlags::POLICY_PRODUCT_PARTITION |
+  ASSERT_EQ(*bitmask4, PolicyFlags::POLICY_ODM_PARTITION | PolicyFlags::POLICY_OEM_PARTITION |
+                           PolicyFlags::POLICY_PUBLIC | PolicyFlags::POLICY_PRODUCT_PARTITION |
                            PolicyFlags::POLICY_SYSTEM_PARTITION |
                            PolicyFlags::POLICY_VENDOR_PARTITION);
 
@@ -62,6 +63,30 @@ TEST(PoliciesTests, PoliciesToBitmasks) {
 
   const auto bitmask10 = PoliciesToBitmask({"system "});
   ASSERT_FALSE(bitmask10);
+}
+
+TEST(PoliciesTests, BitmaskToPolicies) {
+  const auto policies1 = BitmaskToPolicies(PolicyFlags::POLICY_PUBLIC);
+  ASSERT_EQ(1, policies1.size());
+  ASSERT_EQ(policies1[0], "public");
+
+  const auto policies2 = BitmaskToPolicies(PolicyFlags::POLICY_SYSTEM_PARTITION |
+                                           PolicyFlags::POLICY_VENDOR_PARTITION);
+  ASSERT_EQ(2, policies2.size());
+  ASSERT_EQ(policies2[0], "system");
+  ASSERT_EQ(policies2[1], "vendor");
+
+  const auto policies3 = BitmaskToPolicies(
+      PolicyFlags::POLICY_ODM_PARTITION | PolicyFlags::POLICY_OEM_PARTITION |
+      PolicyFlags::POLICY_PUBLIC | PolicyFlags::POLICY_PRODUCT_PARTITION |
+      PolicyFlags::POLICY_SYSTEM_PARTITION | PolicyFlags::POLICY_VENDOR_PARTITION);
+  ASSERT_EQ(2, policies2.size());
+  ASSERT_EQ(policies3[0], "odm");
+  ASSERT_EQ(policies3[1], "oem");
+  ASSERT_EQ(policies3[2], "public");
+  ASSERT_EQ(policies3[3], "product");
+  ASSERT_EQ(policies3[4], "system");
+  ASSERT_EQ(policies3[5], "vendor");
 }
 
 }  // namespace android::idmap2

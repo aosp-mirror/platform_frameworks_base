@@ -17,8 +17,8 @@
 #include "idmap2/Policies.h"
 
 #include <iterator>
-#include <map>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "androidfw/ResourceTypes.h"
@@ -27,19 +27,17 @@
 
 namespace android::idmap2 {
 
-namespace {
-
-const std::map<android::StringPiece, PolicyFlags> kStringToFlag = {
-    {kPolicyPublic, PolicyFlags::POLICY_PUBLIC},
-    {kPolicyProduct, PolicyFlags::POLICY_PRODUCT_PARTITION},
-    {kPolicySystem, PolicyFlags::POLICY_SYSTEM_PARTITION},
-    {kPolicyVendor, PolicyFlags::POLICY_VENDOR_PARTITION},
-    {kPolicySignature, PolicyFlags::POLICY_SIGNATURE},
-};
-
-}  // namespace
-
 Result<PolicyBitmask> PoliciesToBitmask(const std::vector<std::string>& policies) {
+  static const std::unordered_map<android::StringPiece, PolicyFlags> kStringToFlag = {
+      {kPolicyOdm, PolicyFlags::POLICY_ODM_PARTITION},
+      {kPolicyOem, PolicyFlags::POLICY_OEM_PARTITION},
+      {kPolicyPublic, PolicyFlags::POLICY_PUBLIC},
+      {kPolicyProduct, PolicyFlags::POLICY_PRODUCT_PARTITION},
+      {kPolicySignature, PolicyFlags::POLICY_SIGNATURE},
+      {kPolicySystem, PolicyFlags::POLICY_SYSTEM_PARTITION},
+      {kPolicyVendor, PolicyFlags::POLICY_VENDOR_PARTITION},
+  };
+
   PolicyBitmask bitmask = 0;
   for (const std::string& policy : policies) {
     const auto iter = kStringToFlag.find(policy);
@@ -55,6 +53,15 @@ Result<PolicyBitmask> PoliciesToBitmask(const std::vector<std::string>& policies
 
 std::vector<std::string> BitmaskToPolicies(const PolicyBitmask& bitmask) {
   std::vector<std::string> policies;
+
+  if ((bitmask & PolicyFlags::POLICY_ODM_PARTITION) != 0) {
+    policies.emplace_back(kPolicyOdm);
+  }
+
+  if ((bitmask & PolicyFlags::POLICY_OEM_PARTITION) != 0) {
+    policies.emplace_back(kPolicyOem);
+  }
+
   if ((bitmask & PolicyFlags::POLICY_PUBLIC) != 0) {
     policies.emplace_back(kPolicyPublic);
   }
@@ -63,16 +70,16 @@ std::vector<std::string> BitmaskToPolicies(const PolicyBitmask& bitmask) {
     policies.emplace_back(kPolicyProduct);
   }
 
+  if ((bitmask & PolicyFlags::POLICY_SIGNATURE) != 0) {
+    policies.emplace_back(kPolicySignature);
+  }
+
   if ((bitmask & PolicyFlags::POLICY_SYSTEM_PARTITION) != 0) {
     policies.emplace_back(kPolicySystem);
   }
 
   if ((bitmask & PolicyFlags::POLICY_VENDOR_PARTITION) != 0) {
     policies.emplace_back(kPolicyVendor);
-  }
-
-  if ((bitmask & PolicyFlags::POLICY_SIGNATURE) != 0) {
-    policies.emplace_back(kPolicySignature);
   }
 
   return policies;

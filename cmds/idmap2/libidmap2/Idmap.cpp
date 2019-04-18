@@ -282,6 +282,7 @@ Result<Unit> CheckOverlayable(const LoadedPackage& target_package,
                               const utils::OverlayManifestInfo& overlay_info,
                               const PolicyBitmask& fulfilled_policies, const ResourceId& resid) {
   static constexpr const PolicyBitmask sDefaultPolicies =
+      PolicyFlags::POLICY_ODM_PARTITION | PolicyFlags::POLICY_OEM_PARTITION |
       PolicyFlags::POLICY_SYSTEM_PARTITION | PolicyFlags::POLICY_VENDOR_PARTITION |
       PolicyFlags::POLICY_PRODUCT_PARTITION | PolicyFlags::POLICY_SIGNATURE;
 

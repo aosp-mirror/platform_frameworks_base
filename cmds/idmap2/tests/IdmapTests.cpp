@@ -194,7 +194,7 @@ TEST(IdmapTests, CreateIdmapFromApkAssets) {
   ASSERT_THAT(idmap->GetHeader(), NotNull());
   ASSERT_EQ(idmap->GetHeader()->GetMagic(), 0x504d4449U);
   ASSERT_EQ(idmap->GetHeader()->GetVersion(), 0x01U);
-  ASSERT_EQ(idmap->GetHeader()->GetTargetCrc(), 0xd513ca1b);
+  ASSERT_EQ(idmap->GetHeader()->GetTargetCrc(), 0x76a20829);
   ASSERT_EQ(idmap->GetHeader()->GetOverlayCrc(), 0x8635c2ed);
   ASSERT_EQ(idmap->GetHeader()->GetTargetPath().to_string(), target_apk_path);
   ASSERT_EQ(idmap->GetHeader()->GetOverlayPath(), overlay_apk_path);
@@ -220,7 +220,7 @@ TEST(IdmapTests, CreateIdmapFromApkAssets) {
   ASSERT_EQ(types[1]->GetTargetTypeId(), 0x02U);
   ASSERT_EQ(types[1]->GetOverlayTypeId(), 0x02U);
   ASSERT_EQ(types[1]->GetEntryCount(), 4U);
-  ASSERT_EQ(types[1]->GetEntryOffset(), 10U);
+  ASSERT_EQ(types[1]->GetEntryOffset(), 12U);
   ASSERT_EQ(types[1]->GetEntry(0), 0x0000U);
   ASSERT_EQ(types[1]->GetEntry(1), kNoEntry);
   ASSERT_EQ(types[1]->GetEntry(2), 0x0001U);
@@ -251,7 +251,7 @@ TEST(IdmapOverlayableTests, CreateIdmapFromApkAssetsPolicySystemPublic) {
   ASSERT_EQ(types[0]->GetTargetTypeId(), 0x02U);
   ASSERT_EQ(types[0]->GetOverlayTypeId(), 0x01U);
   ASSERT_EQ(types[0]->GetEntryCount(), 4U);
-  ASSERT_EQ(types[0]->GetEntryOffset(), 6U);
+  ASSERT_EQ(types[0]->GetEntryOffset(), 8U);
   ASSERT_EQ(types[0]->GetEntry(0), 0x0000U);   // string/policy_public
   ASSERT_EQ(types[0]->GetEntry(1), kNoEntry);  // string/policy_signature
   ASSERT_EQ(types[0]->GetEntry(2), 0x0001U);   // string/policy_system
@@ -281,7 +281,7 @@ TEST(IdmapOverlayableTests, CreateIdmapFromApkAssetsPolicySignature) {
   ASSERT_EQ(types[0]->GetTargetTypeId(), 0x02U);
   ASSERT_EQ(types[0]->GetOverlayTypeId(), 0x01U);
   ASSERT_EQ(types[0]->GetEntryCount(), 1U);
-  ASSERT_EQ(types[0]->GetEntryOffset(), 7U);
+  ASSERT_EQ(types[0]->GetEntryOffset(), 9U);
   ASSERT_EQ(types[0]->GetEntry(0), 0x0000U);  // string/policy_signature
 }
 
@@ -310,11 +310,11 @@ TEST(IdmapOverlayableTests, CreateIdmapFromApkAssetsPolicySystemPublicInvalid) {
   ASSERT_EQ(types[0]->GetTargetTypeId(), 0x02U);
   ASSERT_EQ(types[0]->GetOverlayTypeId(), 0x01U);
   ASSERT_EQ(types[0]->GetEntryCount(), 4U);
-  ASSERT_EQ(types[0]->GetEntryOffset(), 6U);
-  ASSERT_EQ(types[0]->GetEntry(0), 0x0003U);   // string/policy_public
+  ASSERT_EQ(types[0]->GetEntryOffset(), 8U);
+  ASSERT_EQ(types[0]->GetEntry(0), 0x0005U);   // string/policy_public
   ASSERT_EQ(types[0]->GetEntry(1), kNoEntry);  // string/policy_signature
-  ASSERT_EQ(types[0]->GetEntry(2), 0x0005U);   // string/policy_system
-  ASSERT_EQ(types[0]->GetEntry(3), 0x0006U);   // string/policy_system_vendor
+  ASSERT_EQ(types[0]->GetEntry(2), 0x0007U);   // string/policy_system
+  ASSERT_EQ(types[0]->GetEntry(3), 0x0008U);   // string/policy_system_vendor
 }
 
 // Overlays should ignore all overlayable restrictions if enforcement of overlayable is disabled.
@@ -341,15 +341,17 @@ TEST(IdmapOverlayableTests, CreateIdmapFromApkAssetsPolicySystemPublicInvalidIgn
 
   ASSERT_EQ(types[0]->GetTargetTypeId(), 0x02U);
   ASSERT_EQ(types[0]->GetOverlayTypeId(), 0x01U);
-  ASSERT_EQ(types[0]->GetEntryCount(), 7U);
+  ASSERT_EQ(types[0]->GetEntryCount(), 9U);
   ASSERT_EQ(types[0]->GetEntryOffset(), 3U);
   ASSERT_EQ(types[0]->GetEntry(0), 0x0000U);  // string/not_overlayable
-  ASSERT_EQ(types[0]->GetEntry(1), 0x0001U);  // string/other
-  ASSERT_EQ(types[0]->GetEntry(2), 0x0002U);  // string/policy_product
-  ASSERT_EQ(types[0]->GetEntry(3), 0x0003U);  // string/policy_signature
-  ASSERT_EQ(types[0]->GetEntry(4), 0x0004U);  // string/policy_public
-  ASSERT_EQ(types[0]->GetEntry(5), 0x0005U);  // string/policy_system
-  ASSERT_EQ(types[0]->GetEntry(6), 0x0006U);  // string/policy_system_vendor
+  ASSERT_EQ(types[0]->GetEntry(1), 0x0001U);  // string/policy_odm
+  ASSERT_EQ(types[0]->GetEntry(2), 0x0002U);  // string/policy_oem
+  ASSERT_EQ(types[0]->GetEntry(3), 0x0003U);  // string/other
+  ASSERT_EQ(types[0]->GetEntry(4), 0x0004U);  // string/policy_product
+  ASSERT_EQ(types[0]->GetEntry(5), 0x0005U);  // string/policy_public
+  ASSERT_EQ(types[0]->GetEntry(6), 0x0006U);  // string/policy_signature
+  ASSERT_EQ(types[0]->GetEntry(7), 0x0007U);  // string/policy_system
+  ASSERT_EQ(types[0]->GetEntry(8), 0x0008U);  // string/policy_system_vendor
 }
 
 // Overlays that do not specify a target <overlayable> can overlay resources defined as overlayable.
@@ -381,7 +383,7 @@ TEST(IdmapOverlayableTests, CreateIdmapFromApkAssetsNoDefinedOverlayableAndNoTar
   ASSERT_EQ(types[1]->GetTargetTypeId(), 0x02U);
   ASSERT_EQ(types[1]->GetOverlayTypeId(), 0x02U);
   ASSERT_EQ(types[1]->GetEntryCount(), 4U);
-  ASSERT_EQ(types[1]->GetEntryOffset(), 10U);
+  ASSERT_EQ(types[1]->GetEntryOffset(), 12U);
   ASSERT_EQ(types[1]->GetEntry(0), 0x0000U);   // string/str1
   ASSERT_EQ(types[1]->GetEntry(1), kNoEntry);  // string/str2
   ASSERT_EQ(types[1]->GetEntry(2), 0x0001U);   // string/str3
@@ -412,7 +414,6 @@ TEST(IdmapOverlayableTests, CreateIdmapFromApkAssetsDefaultPolicies) {
     ASSERT_EQ(dataBlocks.size(), 1U);
 
     const std::unique_ptr<const IdmapData>& data = dataBlocks[0];
-
     ASSERT_EQ(data->GetHeader()->GetTargetPackageId(), 0x7fU);
     ASSERT_EQ(data->GetHeader()->GetTypeCount(), 1U);
 
@@ -421,15 +422,17 @@ TEST(IdmapOverlayableTests, CreateIdmapFromApkAssetsDefaultPolicies) {
 
     ASSERT_EQ(types[0]->GetTargetTypeId(), 0x02U);
     ASSERT_EQ(types[0]->GetOverlayTypeId(), 0x01U);
-    ASSERT_EQ(types[0]->GetEntryCount(), 7U);
+    ASSERT_EQ(types[0]->GetEntryCount(), 9U);
     ASSERT_EQ(types[0]->GetEntryOffset(), 3U);
     ASSERT_EQ(types[0]->GetEntry(0), 0x0000U);  // string/not_overlayable
-    ASSERT_EQ(types[0]->GetEntry(1), 0x0001U);  // string/other
-    ASSERT_EQ(types[0]->GetEntry(2), 0x0002U);  // string/policy_product
-    ASSERT_EQ(types[0]->GetEntry(3), 0x0003U);  // string/policy_public
-    ASSERT_EQ(types[0]->GetEntry(4), 0x0004U);  // string/string/policy_signature
-    ASSERT_EQ(types[0]->GetEntry(5), 0x0005U);  // string/policy_system
-    ASSERT_EQ(types[0]->GetEntry(6), 0x0006U);  // string/policy_system_vendor
+    ASSERT_EQ(types[0]->GetEntry(1), 0x0001U);  // string/policy_odm
+    ASSERT_EQ(types[0]->GetEntry(2), 0x0002U);  // string/policy_oem
+    ASSERT_EQ(types[0]->GetEntry(3), 0x0003U);  // string/other
+    ASSERT_EQ(types[0]->GetEntry(4), 0x0004U);  // string/policy_product
+    ASSERT_EQ(types[0]->GetEntry(5), 0x0005U);  // string/policy_public
+    ASSERT_EQ(types[0]->GetEntry(6), 0x0006U);  // string/policy_signature
+    ASSERT_EQ(types[0]->GetEntry(7), 0x0007U);  // string/policy_system
+    ASSERT_EQ(types[0]->GetEntry(8), 0x0008U);  // string/policy_system_vendor
   };
 
   CreateIdmap(target_apk_path, overlay_apk_path, PolicyFlags::POLICY_SIGNATURE,
@@ -448,6 +451,16 @@ TEST(IdmapOverlayableTests, CreateIdmapFromApkAssetsDefaultPolicies) {
   CheckEntries();
 
   CreateIdmap(target_apk_path, overlay_apk_path, PolicyFlags::POLICY_VENDOR_PARTITION,
+              /* enforce_overlayable */ true, &idmap);
+  ASSERT_THAT(idmap, NotNull());
+  CheckEntries();
+
+  CreateIdmap(target_apk_path, overlay_apk_path, PolicyFlags::POLICY_ODM_PARTITION,
+              /* enforce_overlayable */ true, &idmap);
+  ASSERT_THAT(idmap, NotNull());
+  CheckEntries();
+
+  CreateIdmap(target_apk_path, overlay_apk_path, PolicyFlags::POLICY_OEM_PARTITION,
               /* enforce_overlayable */ true, &idmap);
   ASSERT_THAT(idmap, NotNull());
   CheckEntries();
