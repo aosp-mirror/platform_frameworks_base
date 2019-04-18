@@ -313,7 +313,7 @@ final class ContentCapturePerUserService
         // Make sure service is bound, just in case the initial connection failed somehow
         mRemoteService.ensureBoundLocked();
 
-        final ContentCaptureServerSession newSession = new ContentCaptureServerSession(
+        final ContentCaptureServerSession newSession = new ContentCaptureServerSession(mLock,
                 activityToken, this, componentName, clientReceiver, taskId, displayId, sessionId,
                 uid, flags);
         if (mMaster.verbose) {
