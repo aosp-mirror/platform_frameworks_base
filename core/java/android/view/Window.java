@@ -2341,11 +2341,11 @@ public abstract class Window {
      * <p>When the status bar color has a non-zero alpha value, the value of this
      * property has no effect.
      *
-     * @see android.R.attr#ensuringStatusBarContrastWhenTransparent
-     * @see #isEnsuringStatusBarContrastWhenTransparent
+     * @see android.R.attr#enforceStatusBarContrast
+     * @see #isStatusBarContrastEnforced
      * @see #setStatusBarColor
      */
-    public void setEnsuringStatusBarContrastWhenTransparent(boolean ensureContrast) {
+    public void setStatusBarContrastEnforced(boolean ensureContrast) {
     }
 
     /**
@@ -2356,11 +2356,11 @@ public abstract class Window {
      * property has no effect.
      *
      * @return true, if the system is ensuring contrast, false otherwise.
-     * @see android.R.attr#ensuringStatusBarContrastWhenTransparent
-     * @see #setEnsuringStatusBarContrastWhenTransparent
+     * @see android.R.attr#enforceStatusBarContrast
+     * @see #setStatusBarContrastEnforced
      * @see #setStatusBarColor
      */
-    public boolean isEnsuringStatusBarContrastWhenTransparent() {
+    public boolean isStatusBarContrastEnforced() {
         return false;
     }
 
@@ -2375,11 +2375,11 @@ public abstract class Window {
      * <p>When the navigation bar color has a non-zero alpha value, the value of this
      * property has no effect.
      *
-     * @see android.R.attr#ensuringNavigationBarContrastWhenTransparent
-     * @see #isEnsuringNavigationBarContrastWhenTransparent
+     * @see android.R.attr#enforceNavigationBarContrast
+     * @see #isNavigationBarContrastEnforced
      * @see #setNavigationBarColor
      */
-    public void setEnsuringNavigationBarContrastWhenTransparent(boolean ensureContrast) {
+    public void setNavigationBarContrastEnforced(boolean enforceContrast) {
     }
 
     /**
@@ -2390,11 +2390,11 @@ public abstract class Window {
      * property has no effect.
      *
      * @return true, if the system is ensuring contrast, false otherwise.
-     * @see android.R.attr#ensuringNavigationBarContrastWhenTransparent
-     * @see #setEnsuringNavigationBarContrastWhenTransparent
+     * @see android.R.attr#enforceNavigationBarContrast
+     * @see #setNavigationBarContrastEnforced
      * @see #setNavigationBarColor
      */
-    public boolean isEnsuringNavigationBarContrastWhenTransparent() {
+    public boolean isNavigationBarContrastEnforced() {
         return false;
     }
 

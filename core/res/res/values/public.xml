@@ -2943,8 +2943,8 @@
         <public name="allowAudioPlaybackCapture"/>
         <public name="secureElementName" />
         <public name="requestLegacyExternalStorage"/>
-        <public name="ensuringStatusBarContrastWhenTransparent" />
-        <public name="ensuringNavigationBarContrastWhenTransparent" />
+        <public name="enforceStatusBarContrast" />
+        <public name="enforceNavigationBarContrast" />
         <public name="identifier" />
     </public-group>
 
