@@ -15,6 +15,8 @@
  */
 package com.android.systemui.statusbar.phone;
 
+import static android.view.Display.INVALID_DISPLAY;
+
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
@@ -46,7 +48,9 @@ import android.view.ViewConfiguration;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.shared.system.InputChannelCompat.InputEventReceiver;
 import com.android.systemui.shared.system.QuickStepContract;
@@ -363,6 +367,13 @@ public class EdgeBackGestureHandler implements DisplayListener {
                 0 /* metaState */, KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /* scancode */,
                 KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY,
                 InputDevice.SOURCE_KEYBOARD);
+
+        // Bubble controller will give us a valid display id if it should get the back event
+        BubbleController bubbleController = Dependency.get(BubbleController.class);
+        int bubbleDisplayId = bubbleController.getExpandedDisplayId(mContext);
+        if (code == KeyEvent.KEYCODE_BACK && bubbleDisplayId != INVALID_DISPLAY) {
+            ev.setDisplayId(bubbleDisplayId);
+        }
         InputManager.getInstance().injectInputEvent(ev, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
     }
 }

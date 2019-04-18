@@ -16,6 +16,8 @@
 
 package com.android.systemui.bubbles;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.Display.INVALID_DISPLAY;
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
@@ -533,6 +535,21 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         }
         mStackView.getBoundsOnScreen(mTempRect);
         return mTempRect;
+    }
+
+    /**
+     * The display id of the expanded view, if the stack is expanded and not occluded by the
+     * status bar, otherwise returns {@link Display#INVALID_DISPLAY}.
+     */
+    public int getExpandedDisplayId(Context context) {
+        boolean defaultDisplay = context.getDisplay() != null
+                && context.getDisplay().getDisplayId() == DEFAULT_DISPLAY;
+        Bubble b = mStackView.getExpandedBubble();
+        if (defaultDisplay && b != null && isStackExpanded()
+                && !mStatusBarWindowController.getPanelExpanded()) {
+            return b.expandedView.getVirtualDisplayId();
+        }
+        return INVALID_DISPLAY;
     }
 
     @VisibleForTesting
