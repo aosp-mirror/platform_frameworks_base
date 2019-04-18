@@ -16,6 +16,7 @@
 
 package android.security.keystore;
 
+import android.content.pm.PackageManager;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.security.GateKeeper;
@@ -122,12 +123,20 @@ public abstract class KeymasterUtils {
         }
 
         if (spec.getUserAuthenticationValidityDurationSeconds() == -1) {
+            PackageManager pm = KeyStore.getApplicationContext().getPackageManager();
             // Every use of this key needs to be authorized by the user. This currently means
             // fingerprint or face auth.
-            FingerprintManager fingerprintManager =
-                    KeyStore.getApplicationContext().getSystemService(FingerprintManager.class);
-            FaceManager faceManager =
-                    KeyStore.getApplicationContext().getSystemService(FaceManager.class);
+            FingerprintManager fingerprintManager = null;
+            FaceManager faceManager = null;
+
+            if (pm.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
+                fingerprintManager = KeyStore.getApplicationContext()
+                        .getSystemService(FingerprintManager.class);
+            }
+            if (pm.hasSystemFeature(PackageManager.FEATURE_FACE)) {
+                faceManager = KeyStore.getApplicationContext().getSystemService(FaceManager.class);
+            }
+
             // TODO: Restore USE_FINGERPRINT permission check in
             // FingerprintManager.getAuthenticatorId once the ID is no longer needed here.
             final long fingerprintOnlySid =
