@@ -539,6 +539,7 @@ package android.provider {
   }
 
   public static interface MediaStore.MediaColumns extends android.provider.BaseColumns {
+    field @Deprecated public static final String GROUP_ID = "group_id";
     field @Deprecated public static final String HASH = "_hash";
     field @Deprecated public static final String IS_TRASHED = "is_trashed";
     field @Deprecated public static final String PRIMARY_DIRECTORY = "primary_directory";
