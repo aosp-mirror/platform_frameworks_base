@@ -542,6 +542,9 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
      * status bar, otherwise returns {@link Display#INVALID_DISPLAY}.
      */
     public int getExpandedDisplayId(Context context) {
+        if (mStackView == null) {
+            return INVALID_DISPLAY;
+        }
         boolean defaultDisplay = context.getDisplay() != null
                 && context.getDisplay().getDisplayId() == DEFAULT_DISPLAY;
         Bubble b = mStackView.getExpandedBubble();
