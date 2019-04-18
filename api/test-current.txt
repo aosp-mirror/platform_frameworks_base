@@ -346,6 +346,20 @@ package android.app {
     method public android.graphics.Rect getSourceRectHint();
   }
 
+  public class StatusBarManager {
+    method @NonNull @RequiresPermission(android.Manifest.permission.STATUS_BAR) public android.app.StatusBarManager.DisableInfo getDisableInfo();
+    method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void setDisabledForSetup(boolean);
+  }
+
+  public static final class StatusBarManager.DisableInfo {
+    method public boolean areAllComponentsEnabled();
+    method public boolean isNavigateToHomeDisabled();
+    method public boolean isNotificationPeekingDisabled();
+    method public boolean isRecentsDisabled();
+    method public boolean isSearchDisabled();
+    method public boolean isStatusBarExpansionDisabled();
+  }
+
   public class TimePickerDialog extends android.app.AlertDialog implements android.content.DialogInterface.OnClickListener android.widget.TimePicker.OnTimeChangedListener {
     method public android.widget.TimePicker getTimePicker();
   }
@@ -632,6 +646,7 @@ package android.content {
     method public void setContentCaptureOptions(@Nullable android.content.ContentCaptureOptions);
     field public static final String BUGREPORT_SERVICE = "bugreport";
     field public static final String ROLLBACK_SERVICE = "rollback";
+    field public static final String STATUS_BAR_SERVICE = "statusbar";
     field public static final String TEST_NETWORK_SERVICE = "test_network";
   }
 
