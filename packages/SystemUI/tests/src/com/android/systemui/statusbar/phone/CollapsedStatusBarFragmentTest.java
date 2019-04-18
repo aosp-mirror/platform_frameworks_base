@@ -49,6 +49,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
     private NotificationIconAreaController mMockNotificiationAreaController;
     private View mNotificationAreaInner;
+    private View mCenteredNotificationAreaView;
     private StatusBarStateController mStatusBarStateController;
 
     public CollapsedStatusBarFragmentTest() {
@@ -66,10 +67,14 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         injectLeakCheckedDependencies(ALL_SUPPORTED_CLASSES);
         mMockNotificiationAreaController = mock(NotificationIconAreaController.class);
         mNotificationAreaInner = mock(View.class);
+        mCenteredNotificationAreaView = mock(View.class);
         when(statusBar.getPanel()).thenReturn(mock(NotificationPanelView.class));
         when(mNotificationAreaInner.animate()).thenReturn(mock(ViewPropertyAnimator.class));
         when(mMockNotificiationAreaController.getNotificationInnerAreaView()).thenReturn(
                 mNotificationAreaInner);
+        when(mCenteredNotificationAreaView.animate()).thenReturn(mock(ViewPropertyAnimator.class));
+        when(mMockNotificiationAreaController.getCenteredNotificationAreaView()).thenReturn(
+                mCenteredNotificationAreaView);
     }
 
     @Test
