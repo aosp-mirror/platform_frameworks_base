@@ -22,7 +22,6 @@ import static com.android.systemui.statusbar.notification.NotificationUtils.inte
 import android.content.res.Resources;
 import android.util.MathUtils;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -53,6 +52,11 @@ public class KeyguardClockPositionAlgorithm {
      * Height of {@link KeyguardStatusView}.
      */
     private int mKeyguardStatusHeight;
+
+    /**
+     * Preferred Y position of clock.
+     */
+    private int mClockPreferredY;
 
     /**
      * Height of notification stack: Sum of height of each notification.
@@ -117,14 +121,15 @@ public class KeyguardClockPositionAlgorithm {
     }
 
     public void setup(int minTopMargin, int maxShadeBottom, int notificationStackHeight,
-            float panelExpansion, int parentHeight, int keyguardStatusHeight, float dark,
-            boolean secure, float emptyDragAmount) {
+            float panelExpansion, int parentHeight, int keyguardStatusHeight, int clockPreferredY,
+            float dark, boolean secure, float emptyDragAmount) {
         mMinTopMargin = minTopMargin + mContainerTopPadding;
         mMaxShadeBottom = maxShadeBottom;
         mNotificationStackHeight = notificationStackHeight;
         mPanelExpansion = panelExpansion;
         mHeight = parentHeight;
         mKeyguardStatusHeight = keyguardStatusHeight;
+        mClockPreferredY = clockPreferredY;
         mDarkAmount = dark;
         mCurrentlySecure = secure;
         mEmptyDragAmount = emptyDragAmount;
@@ -144,6 +149,10 @@ public class KeyguardClockPositionAlgorithm {
 
     private int getMaxClockY() {
         return mHeight / 2 - mKeyguardStatusHeight - mClockNotificationsMargin;
+    }
+
+    private int getPreferredClockY() {
+        return mClockPreferredY - mKeyguardStatusHeight - mClockNotificationsMargin;
     }
 
     /**
@@ -172,7 +181,7 @@ public class KeyguardClockPositionAlgorithm {
 
     private int getClockY() {
         // Dark: Align the bottom edge of the clock at about half of the screen:
-        float clockYDark = getMaxClockY() + burnInPreventionOffsetY();
+        float clockYDark = getPreferredClockY() + burnInPreventionOffsetY();
         clockYDark = MathUtils.max(0, clockYDark);
 
         float clockYRegular = getExpandedClockPosition();

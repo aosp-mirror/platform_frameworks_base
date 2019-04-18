@@ -35,6 +35,7 @@ import org.junit.runner.RunWith;
 public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
 
     private static final int SCREEN_HEIGHT = 2000;
+    private static final int PREFERRED_CLOCK_Y = SCREEN_HEIGHT / 2;
     private static final int EMPTY_MARGIN = 0;
     private static final int EMPTY_HEIGHT = 0;
     private static final boolean SECURE_LOCKED = false;
@@ -305,8 +306,8 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
 
     private void positionClock() {
         mClockPositionAlgorithm.setup(EMPTY_MARGIN, SCREEN_HEIGHT, mNotificationStackHeight,
-                mPanelExpansion, SCREEN_HEIGHT, mKeyguardStatusHeight, mDark, SECURE_LOCKED,
-                ZERO_DRAG);
+                mPanelExpansion, SCREEN_HEIGHT, mKeyguardStatusHeight, PREFERRED_CLOCK_Y, mDark,
+                SECURE_LOCKED, ZERO_DRAG);
         mClockPositionAlgorithm.run(mClockPosition);
     }
 }
