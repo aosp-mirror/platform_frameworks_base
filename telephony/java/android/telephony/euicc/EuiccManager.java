@@ -334,6 +334,18 @@ public class EuiccManager {
             "android.telephony.euicc.extra.FROM_SUBSCRIPTION_ID";
 
     /**
+     * Key for an extra set on privileged actions {@link #ACTION_TOGGLE_SUBSCRIPTION_PRIVILEGED}
+     * providing the physical slot ID of the target slot.
+     *
+     * <p>Expected type of the extra data: int
+     *
+     * @hide
+     */
+    // TODO: Make this a @SystemApi.
+    public static final String EXTRA_PHYSICAL_SLOT_ID =
+            "android.telephony.euicc.extra.PHYSICAL_SLOT_ID";
+
+    /**
      * Optional meta-data attribute for a carrier app providing an icon to use to represent the
      * carrier. If not provided, the app's launcher icon will be used as a fallback.
      */
