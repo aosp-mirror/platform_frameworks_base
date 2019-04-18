@@ -17581,6 +17581,19 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
+        public void clearPendingIntentAllowBgActivityStarts(IIntentSender target,
+                IBinder whitelistToken) {
+            if (!(target instanceof PendingIntentRecord)) {
+                Slog.w(TAG, "clearPendingIntentAllowBgActivityStarts():"
+                        + " not a PendingIntentRecord: " + target);
+                return;
+            }
+            synchronized (ActivityManagerService.this) {
+                ((PendingIntentRecord) target).clearAllowBgActivityStarts(whitelistToken);
+            }
+        }
+
+        @Override
         public void setDeviceIdleWhitelist(int[] allAppids, int[] exceptIdleAppids) {
             synchronized (ActivityManagerService.this) {
                 mDeviceIdleWhitelist = allAppids;
