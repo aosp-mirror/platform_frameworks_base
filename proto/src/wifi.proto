@@ -2095,6 +2095,9 @@ message WifiUsabilityStats {
   // Firmware alert code. Only valid when the stats was triggered by a firmware
   // alert, otherwise -1.
   optional int32 firmware_alert_code = 4 [default = -1];
+
+  // Absolute milliseconds from device boot when these stats were sampled
+  optional int64 time_stamp_ms = 5;
 }
 
 message DeviceMobilityStatePnoScanStats {
