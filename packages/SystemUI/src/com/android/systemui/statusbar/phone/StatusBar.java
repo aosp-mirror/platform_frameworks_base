@@ -3926,6 +3926,10 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mScrimController.setWakeLockScreenSensorActive(true);
             }
 
+            if (reason == DozeLog.PULSE_REASON_DOCKING && mStatusBarWindow != null) {
+                mStatusBarWindow.suppressWakeUpGesture(true);
+            }
+
             boolean passiveAuthInterrupt = reason == DozeLog.PULSE_REASON_NOTIFICATION;
             // Set the state to pulsing, so ScrimController will know what to do once we ask it to
             // execute the transition. The pulse callback will then be invoked when the scrims
@@ -3945,6 +3949,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                     callback.onPulseFinished();
                     updateNotificationPanelTouchState();
                     mScrimController.setWakeLockScreenSensorActive(false);
+                    if (mStatusBarWindow != null) {
+                        mStatusBarWindow.suppressWakeUpGesture(false);
+                    }
                     setPulsing(false);
                 }
 
