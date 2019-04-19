@@ -4026,7 +4026,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             r.persistentState = null;
             r.setState(ON_RESUME);
 
-            reportTopResumedActivityChanged(r, r.isTopResumedActivity);
+            reportTopResumedActivityChanged(r, r.isTopResumedActivity, "topWhenResuming");
         } catch (Exception e) {
             if (!mInstrumentation.onException(r.activity, e)) {
                 throw new RuntimeException("Unable to resume activity "
@@ -4201,7 +4201,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         r.isTopResumedActivity = onTop;
 
         if (r.getLifecycleState() == ON_RESUME) {
-            reportTopResumedActivityChanged(r, onTop);
+            reportTopResumedActivityChanged(r, onTop, "topStateChangedWhenResumed");
         } else {
             if (DEBUG_ORDER) {
                 Slog.d(TAG, "Won't deliver top position change in state=" + r.getLifecycleState());
@@ -4213,10 +4213,11 @@ public final class ActivityThread extends ClientTransactionHandler {
      * Call {@link Activity#onTopResumedActivityChanged(boolean)} if its top resumed state changed
      * since the last report.
      */
-    private void reportTopResumedActivityChanged(ActivityClientRecord r, boolean onTop) {
+    private void reportTopResumedActivityChanged(ActivityClientRecord r, boolean onTop,
+            String reason) {
         if (r.lastReportedTopResumedState != onTop) {
             r.lastReportedTopResumedState = onTop;
-            r.activity.onTopResumedActivityChanged(onTop);
+            r.activity.performTopResumedActivityChanged(onTop, reason);
         }
     }
 
@@ -4313,7 +4314,7 @@ public final class ActivityThread extends ClientTransactionHandler {
 
         // Always reporting top resumed position loss when pausing an activity. If necessary, it
         // will be restored in performResumeActivity().
-        reportTopResumedActivityChanged(r, false /* onTop */);
+        reportTopResumedActivityChanged(r, false /* onTop */, "pausing");
 
         try {
             r.activity.mCalled = false;

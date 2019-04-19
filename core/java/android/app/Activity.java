@@ -773,6 +773,8 @@ public class Activity extends ContextThemeWrapper
     private static final int LOG_AM_ON_RESTART_CALLED = 30058;
     private static final int LOG_AM_ON_DESTROY_CALLED = 30060;
     private static final int LOG_AM_ON_ACTIVITY_RESULT_CALLED = 30062;
+    private static final int LOG_AM_ON_TOP_RESUMED_GAINED_CALLED = 30064;
+    private static final int LOG_AM_ON_TOP_RESUMED_LOST_CALLED = 30065;
 
     private static class ManagedDialog {
         Dialog mDialog;
@@ -1838,6 +1840,13 @@ public class Activity extends ContextThemeWrapper
      * @see #onWindowFocusChanged(boolean)
      */
     public void onTopResumedActivityChanged(boolean isTopResumedActivity) {
+    }
+
+    final void performTopResumedActivityChanged(boolean isTopResumedActivity, String reason) {
+        onTopResumedActivityChanged(isTopResumedActivity);
+
+        writeEventLog(isTopResumedActivity
+                ? LOG_AM_ON_TOP_RESUMED_GAINED_CALLED : LOG_AM_ON_TOP_RESUMED_LOST_CALLED, reason);
     }
 
     void setVoiceInteractor(IVoiceInteractor voiceInteractor) {
