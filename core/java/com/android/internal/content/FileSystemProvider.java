@@ -19,7 +19,6 @@ package com.android.internal.content;
 import android.annotation.CallSuper;
 import android.annotation.Nullable;
 import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
@@ -266,17 +265,7 @@ public abstract class FileSystemProvider extends DocumentsProvider {
         if (visibleFolder != null) {
             assert (visibleFolder.isDirectory());
 
-            final long token = Binder.clearCallingIdentity();
-
-            try {
-                final ContentResolver resolver = getContext().getContentResolver();
-                final Uri uri = MediaStore.Files.getDirectoryUri("external");
-                ContentValues values = new ContentValues();
-                values.put(MediaStore.Files.FileColumns.DATA, visibleFolder.getAbsolutePath());
-                resolver.insert(uri, values);
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
+            MediaStore.scanFile(getContext(), visibleFolder);
         }
     }
 
