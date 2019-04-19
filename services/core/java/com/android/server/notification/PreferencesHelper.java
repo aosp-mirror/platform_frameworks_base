@@ -1717,6 +1717,22 @@ public class PreferencesHelper implements RankingConfig {
         }
     }
 
+    public void clearData(String pkg, int uid) {
+        synchronized (mPackagePreferences) {
+            PackagePreferences p = getPackagePreferencesLocked(pkg, uid);
+            p.channels = new ArrayMap<>();
+            p.groups = new ArrayMap<>();
+            p.delegate = null;
+            p.lockedAppFields = DEFAULT_LOCKED_APP_FIELDS;
+            p.allowBubble = DEFAULT_ALLOW_BUBBLE;
+            p.importance = DEFAULT_IMPORTANCE;
+            p.priority = DEFAULT_PRIORITY;
+            p.visibility = DEFAULT_VISIBILITY;
+            p.showBadge = DEFAULT_SHOW_BADGE;
+
+        }
+    }
+
     private LogMaker getChannelLog(NotificationChannel channel, String pkg) {
         return new LogMaker(
                 com.android.internal.logging.nano.MetricsProto.MetricsEvent
