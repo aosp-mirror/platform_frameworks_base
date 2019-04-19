@@ -150,6 +150,7 @@ public class ChooserActivity extends ResolverActivity {
      */
     // TODO(b/123089490): Replace with system flag
     private static final boolean USE_PREDICTION_MANAGER_FOR_DIRECT_TARGETS = false;
+    private static final boolean USE_PREDICTION_MANAGER_FOR_SHARE_ACTIVITIES = false;
     // TODO(b/123088566) Share these in a better way.
     private static final String APP_PREDICTION_SHARE_UI_SURFACE = "share";
     public static final String LAUNCH_LOCATON_DIRECT_SHARE = "direct_share";
@@ -1387,6 +1388,15 @@ public class ChooserActivity extends ResolverActivity {
         return USE_PREDICTION_MANAGER_FOR_DIRECT_TARGETS ? getAppPredictor() : null;
     }
 
+    /**
+     * This will return an app predictor if it is enabled for share activity sorting
+     * and if one exists. Otherwise, it returns null.
+     */
+    @Nullable
+    private AppPredictor getAppPredictorForShareActivitesIfEnabled() {
+        return USE_PREDICTION_MANAGER_FOR_SHARE_ACTIVITIES ? getAppPredictor() : null;
+    }
+
     void onRefinementResult(TargetInfo selectedTarget, Intent matchingIntent) {
         if (mRefinementResultReceiver != null) {
             mRefinementResultReceiver.destroy();
@@ -1491,8 +1501,10 @@ public class ChooserActivity extends ResolverActivity {
                 PackageManager pm,
                 Intent targetIntent,
                 String referrerPackageName,
-                int launchedFromUid) {
-            super(context, pm, targetIntent, referrerPackageName, launchedFromUid);
+                int launchedFromUid,
+                AbstractResolverComparator resolverComparator) {
+            super(context, pm, targetIntent, referrerPackageName, launchedFromUid,
+                    resolverComparator);
         }
 
         @Override
@@ -1520,13 +1532,24 @@ public class ChooserActivity extends ResolverActivity {
 
     @VisibleForTesting
     protected ResolverListController createListController() {
+        AppPredictor appPredictor = getAppPredictorForShareActivitesIfEnabled();
+        AbstractResolverComparator resolverComparator;
+        if (appPredictor != null) {
+            resolverComparator = new AppPredictionServiceResolverComparator(this, getTargetIntent(),
+                    appPredictor, getUser());
+        } else {
+            resolverComparator =
+                    new ResolverRankerServiceResolverComparator(this, getTargetIntent(),
+                        getReferrerPackageName(), null);
+        }
+
         return new ChooserListController(
                 this,
                 mPm,
                 getTargetIntent(),
                 getReferrerPackageName(),
-                mLaunchedFromUid
-                );
+                mLaunchedFromUid,
+                resolverComparator);
     }
 
     @VisibleForTesting
