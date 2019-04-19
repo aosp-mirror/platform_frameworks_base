@@ -28,6 +28,7 @@ import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_INP
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SUPPORTS_WINDOW_CORNERS;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SYSUI_PROXY;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_WINDOW_CORNER_RADIUS;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NAV_BAR_HIDDEN;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SCREEN_PINNING;
@@ -489,12 +490,17 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
     }
 
+    public int getSystemUiStateFlags() {
+        return mSysUiStateFlags;
+    }
+
     private void updateSystemUiStateFlags() {
         final NavigationBarController navBar = Dependency.get(NavigationBarController.class);
         final NavigationBarFragment navBarFragment = navBar.getDefaultNavigationBarFragment();
         final StatusBar statusBar = SysUiServiceProvider.getComponent(mContext, StatusBar.class);
         final boolean panelExpanded = statusBar != null && statusBar.getPanel() != null
                 && statusBar.getPanel().isFullyExpanded();
+        final boolean bouncerShowing = statusBar != null && statusBar.isBouncerShowing();
         mSysUiStateFlags = 0;
         mSysUiStateFlags |= ActivityManagerWrapper.getInstance().isScreenPinningActive()
                 ? SYSUI_STATE_SCREEN_PINNING : 0;
@@ -502,6 +508,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 ? SYSUI_STATE_NAV_BAR_HIDDEN : 0;
         mSysUiStateFlags |= panelExpanded
                 ? SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED : 0;
+        mSysUiStateFlags |= bouncerShowing
+                ? SYSUI_STATE_BOUNCER_SHOWING : 0;
         notifySystemUiStateFlags(mSysUiStateFlags);
     }
 
