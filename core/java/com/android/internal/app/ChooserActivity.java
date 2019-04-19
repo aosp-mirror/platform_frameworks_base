@@ -225,6 +225,7 @@ public class ChooserActivity extends ResolverActivity {
     public static final int LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS = 250;
 
     private static final int MAX_EXTRA_INITIAL_INTENTS = 2;
+    private static final int MAX_EXTRA_CHOOSER_TARGETS = 2;
 
     private boolean mListViewDataChanged = false;
 
@@ -413,8 +414,9 @@ public class ChooserActivity extends ResolverActivity {
 
         pa = intent.getParcelableArrayExtra(Intent.EXTRA_CHOOSER_TARGETS);
         if (pa != null) {
-            ChooserTarget[] targets = new ChooserTarget[pa.length];
-            for (int i = 0; i < pa.length; i++) {
+            int count = Math.min(pa.length, MAX_EXTRA_CHOOSER_TARGETS);
+            ChooserTarget[] targets = new ChooserTarget[count];
+            for (int i = 0; i < count; i++) {
                 if (!(pa[i] instanceof ChooserTarget)) {
                     Log.w(TAG, "Chooser target #" + i + " not a ChooserTarget: " + pa[i]);
                     targets = null;
@@ -1026,7 +1028,6 @@ public class ChooserActivity extends ResolverActivity {
                     break;
                 case ChooserListAdapter.TARGET_SERVICE:
                     cat = MetricsEvent.ACTION_ACTIVITY_CHOOSER_PICKED_SERVICE_TARGET;
-                    value -= mChooserListAdapter.getCallerTargetCount();
                     // Log the package name + target name to answer the question if most users
                     // share to mostly the same person or to a bunch of different people.
                     ChooserTarget target =
@@ -1038,6 +1039,10 @@ public class ChooserActivity extends ResolverActivity {
                                     + target.getTitle().toString(),
                             mMaxHashSaltDays);
                     directTargetAlsoRanked = getRankedPosition((SelectableTargetInfo) targetInfo);
+
+                    if (mCallerChooserTargets != null) {
+                        value -= mCallerChooserTargets.length;
+                    }
                     break;
                 case ChooserListAdapter.TARGET_STANDARD:
                     cat = MetricsEvent.ACTION_ACTIVITY_CHOOSER_PICKED_STANDARD_TARGET;
