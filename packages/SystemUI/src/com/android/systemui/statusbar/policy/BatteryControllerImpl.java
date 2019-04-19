@@ -31,10 +31,10 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.fuelgauge.BatterySaverUtils;
+import com.android.settingslib.fuelgauge.Estimate;
 import com.android.settingslib.utils.PowerUtil;
 import com.android.systemui.Dependency;
 import com.android.systemui.power.EnhancedEstimates;
-import com.android.systemui.power.Estimate;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
