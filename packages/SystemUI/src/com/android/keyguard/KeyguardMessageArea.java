@@ -87,15 +87,14 @@ public class KeyguardMessageArea extends TextView implements SecurityMessageDisp
         monitor.registerCallback(mInfoCallback);
         mHandler = new Handler(Looper.myLooper());
         mConfigurationController = configurationController;
-
         onThemeChanged();
-        update();
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         mConfigurationController.addCallback(this);
+        onThemeChanged();
     }
 
     @Override
@@ -116,8 +115,8 @@ public class KeyguardMessageArea extends TextView implements SecurityMessageDisp
         });
         ColorStateList newTextColors = ColorStateList.valueOf(array.getColor(0, Color.RED));
         array.recycle();
-        setTextColor(newTextColors);
         mDefaultColorState = newTextColors;
+        update();
     }
 
     @Override
