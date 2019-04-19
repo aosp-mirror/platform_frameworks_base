@@ -35,21 +35,28 @@ import java.io.IOException;
  * On the client side, use a single {@link BluetoothSocket} to both initiate
  * an outgoing connection and to manage the connection.
  *
- * <p>The most common type of Bluetooth socket is RFCOMM, which is the type
- * supported by the Android APIs. RFCOMM is a connection-oriented, streaming
- * transport over Bluetooth. It is also known as the Serial Port Profile (SPP).
+ * <p>For Bluetooth BR/EDR, the most common type of socket is RFCOMM, which is the type supported by
+ * the Android APIs. RFCOMM is a connection-oriented, streaming transport over Bluetooth BR/EDR. It
+ * is also known as the Serial Port Profile (SPP). To create a listening
+ * {@link BluetoothServerSocket} that's ready for incoming Bluetooth BR/EDR connections, use {@link
+ * BluetoothAdapter#listenUsingRfcommWithServiceRecord
+ * BluetoothAdapter.listenUsingRfcommWithServiceRecord()}.
  *
- * <p>To create a listening {@link BluetoothServerSocket} that's ready for
- * incoming connections, use
- * {@link BluetoothAdapter#listenUsingRfcommWithServiceRecord
- * BluetoothAdapter.listenUsingRfcommWithServiceRecord()}. Then call
- * {@link #accept()} to listen for incoming connection requests. This call
- * will block until a connection is established, at which point, it will return
- * a {@link BluetoothSocket} to manage the connection. Once the {@link
- * BluetoothSocket} is acquired, it's a good idea to call {@link #close()} on
- * the {@link BluetoothServerSocket} when it's no longer needed for accepting
- * connections. Closing the {@link BluetoothServerSocket} will <em>not</em>
- * close the returned {@link BluetoothSocket}.
+ * <p>For Bluetooth LE, the socket uses LE Connection-oriented Channel (CoC). LE CoC is a
+ * connection-oriented, streaming transport over Bluetooth LE and has a credit-based flow control.
+ * Correspondingly, use {@link BluetoothAdapter#listenUsingL2capChannel
+ * BluetoothAdapter.listenUsingL2capChannel()} to create a listening {@link BluetoothServerSocket}
+ * that's ready for incoming Bluetooth LE CoC connections. For LE CoC, you can use {@link #getPsm()}
+ * to get the protocol/service multiplexer (PSM) value that the peer needs to use to connect to your
+ * socket.
+ *
+ * <p> After the listening {@link BluetoothServerSocket} is created, call {@link #accept()} to
+ * listen for incoming connection requests. This call will block until a connection is established,
+ * at which point, it will return a {@link BluetoothSocket} to manage the connection. Once the
+ * {@link BluetoothSocket} is acquired, it's a good idea to call {@link #close()} on the {@link
+ * BluetoothServerSocket} when it's no longer needed for accepting
+ * connections. Closing the {@link BluetoothServerSocket} will <em>not</em> close the returned
+ * {@link BluetoothSocket}.
  *
  * <p>{@link BluetoothServerSocket} is thread
  * safe. In particular, {@link #close} will always immediately abort ongoing
