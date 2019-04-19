@@ -25456,7 +25456,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
         if (mAttachInfo.mDragToken != null) {
             try {
-                mAttachInfo.mSession.cancelDragAndDrop(mAttachInfo.mDragToken);
+                mAttachInfo.mSession.cancelDragAndDrop(mAttachInfo.mDragToken, false);
             } catch (Exception e) {
                 Log.e(VIEW_LOG_TAG, "Unable to cancel drag", e);
             }
