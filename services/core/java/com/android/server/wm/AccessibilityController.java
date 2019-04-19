@@ -1132,7 +1132,7 @@ final class AccessibilityController {
                 HashSet<Integer> skipRemainingWindowsForTasks = new HashSet<>();
 
                 // Iterate until we figure out what is touchable for the entire screen.
-                for (int i = visibleWindowCount - 1; i >= 0 && !unaccountedSpace.isEmpty(); i--) {
+                for (int i = visibleWindowCount - 1; i >= 0; i--) {
                     final WindowState windowState = visibleWindows.valueAt(i);
 
                     final Rect boundsInScreen = mTempRect;
@@ -1143,6 +1143,11 @@ final class AccessibilityController {
                         addPopulatedWindowInfo(windowState, boundsInScreen, windows, addedWindows);
                         updateUnaccountedSpace(windowState, boundsInScreen, unaccountedSpace,
                                 skipRemainingWindowsForTasks);
+                        focusedWindowAdded |= windowState.isFocused();
+                    }
+
+                    if (unaccountedSpace.isEmpty() && focusedWindowAdded) {
+                        break;
                     }
                 }
 
