@@ -455,7 +455,7 @@ public class ContrastColorUtil {
      * Resolves {@param color} to an actual color if it is {@link Notification#COLOR_DEFAULT}
      */
     public static int resolveColor(Context context, int color, boolean defaultBackgroundIsDark) {
-        if (color == Notification.COLOR_DEFAULT || defaultBackgroundIsDark) {
+        if (color == Notification.COLOR_DEFAULT) {
             int res = defaultBackgroundIsDark
                     ? com.android.internal.R.color.notification_default_color_dark
                     : com.android.internal.R.color.notification_default_color_light;
