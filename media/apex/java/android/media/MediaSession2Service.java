@@ -195,15 +195,15 @@ public abstract class MediaSession2Service extends Service {
             throw new IllegalArgumentException("session is already closed");
         }
         synchronized (mLock) {
-            MediaSession2 previousSession = mSessions.get(session.getSessionId());
+            MediaSession2 previousSession = mSessions.get(session.getId());
             if (previousSession != null) {
                 if (previousSession != session) {
-                    Log.w(TAG, "Session ID should be unique, ID=" + session.getSessionId()
+                    Log.w(TAG, "Session ID should be unique, ID=" + session.getId()
                             + ", previous=" + previousSession + ", session=" + session);
                 }
                 return;
             }
-            mSessions.put(session.getSessionId(), session);
+            mSessions.put(session.getId(), session);
             session.setForegroundServiceEventCallback(mForegroundServiceEventCallback);
         }
     }
@@ -220,11 +220,11 @@ public abstract class MediaSession2Service extends Service {
         }
         MediaNotification notification;
         synchronized (mLock) {
-            if (mSessions.get(session.getSessionId()) != session) {
+            if (mSessions.get(session.getId()) != session) {
                 // Session isn't added or removed already.
                 return;
             }
-            mSessions.remove(session.getSessionId());
+            mSessions.remove(session.getId());
             notification = mNotifications.remove(session);
         }
         session.setForegroundServiceEventCallback(null);
