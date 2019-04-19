@@ -41,8 +41,10 @@
 
     <!-- Size of the nav bar edge panels, should be greater to the
          edge sensitivity + the drag threshold -->
-    <dimen name="navigation_edge_panel_width">52dp</dimen>
-    <dimen name="navigation_edge_panel_height">52dp</dimen>
+    <dimen name="navigation_edge_panel_width">76dp</dimen>
+    <!-- Padding at the end of the navigation panel to allow the arrow not to be clipped off -->
+    <dimen name="navigation_edge_panel_padding">24dp</dimen>
+    <dimen name="navigation_edge_panel_height">84dp</dimen>
     <!-- The threshold to drag to trigger the edge action -->
     <dimen name="navigation_edge_action_drag_threshold">16dp</dimen>
     <!-- The minimum display position of the arrow on the screen -->

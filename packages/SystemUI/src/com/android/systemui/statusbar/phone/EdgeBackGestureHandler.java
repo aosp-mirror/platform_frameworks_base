@@ -327,13 +327,13 @@ public class EdgeBackGestureHandler implements DisplayListener {
                         ? (Gravity.LEFT | Gravity.TOP)
                         : (Gravity.RIGHT | Gravity.TOP);
                 mEdgePanel.setIsLeftPanel(mIsOnLeftEdge);
+                mEdgePanel.handleTouch(ev);
                 updateEdgePanelPosition(ev.getY());
                 mWm.updateViewLayout(mEdgePanel, mEdgePanelLp);
                 mRegionSamplingHelper.start(mSamplingRect);
 
                 mDownPoint.set(ev.getX(), ev.getY());
                 mThresholdCrossed = false;
-                mEdgePanel.handleTouch(ev);
             }
         } else if (mAllowGesture) {
             if (!mThresholdCrossed && ev.getAction() == MotionEvent.ACTION_MOVE) {
@@ -360,11 +360,7 @@ public class EdgeBackGestureHandler implements DisplayListener {
 
             boolean isUp = ev.getAction() == MotionEvent.ACTION_UP;
             if (isUp) {
-                float xDiff = ev.getX() - mDownPoint.x;
-                boolean exceedsThreshold = mIsOnLeftEdge
-                        ? (xDiff > mSwipeThreshold) : (-xDiff > mSwipeThreshold);
-                boolean performAction = exceedsThreshold
-                        && Math.abs(xDiff) > Math.abs(ev.getY() - mDownPoint.y);
+                boolean performAction = mEdgePanel.shouldTriggerBack();
                 if (performAction) {
                     // Perform back
                     sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK);
