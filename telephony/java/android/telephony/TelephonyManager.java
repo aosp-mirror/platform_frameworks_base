@@ -64,6 +64,7 @@ import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
 import android.telephony.VisualVoicemailService.VisualVoicemailTask;
+import android.telephony.data.ApnSetting;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.emergency.EmergencyNumber.EmergencyServiceCategories;
 import android.telephony.ims.aidl.IImsConfig;
@@ -10904,5 +10905,59 @@ public class TelephonyManager {
             Log.e(TAG, "getRadioHalVersion() RemoteException", e);
         }
         return new Pair<Integer, Integer>(-1, -1);
+    }
+
+    /**
+     * Return whether data is enabled for certain APN type. This will tell if framework will accept
+     * corresponding network requests on a subId.
+     *
+     * {@link #isDataEnabled()} is directly associated with users' Mobile data toggle on / off. If
+     * {@link #isDataEnabled()} returns false, it means in general all meter-ed data are disabled.
+     *
+     * This per APN type API gives a better idea whether data is allowed on a specific APN type.
+     * It will return true if:
+     *
+     *  1) User data is turned on, or
+     *  2) APN is un-metered for this subscription, or
+     *  3) APN type is whitelisted. E.g. MMS is whitelisted if
+     *  {@link SubscriptionManager#setAlwaysAllowMmsData} is turned on.
+     *
+     * @return whether data is enabled for a apn type.
+     *
+     * @hide
+     */
+    public boolean isDataEnabledForApn(@ApnSetting.ApnType int apnType) {
+        String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.isDataEnabledForApn(apnType, getSubId(), pkgForDebug);
+            }
+        } catch (RemoteException ex) {
+            if (!isSystemProcess()) {
+                ex.rethrowAsRuntimeException();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Whether an APN type is metered or not. It will be evaluated with the subId associated
+     * with the TelephonyManager instance.
+     *
+     * @hide
+     */
+    public boolean isApnMetered(@ApnSetting.ApnType int apnType) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.isApnMetered(apnType, getSubId());
+            }
+        } catch (RemoteException ex) {
+            if (!isSystemProcess()) {
+                ex.rethrowAsRuntimeException();
+            }
+        }
+        return true;
     }
 }
