@@ -21,8 +21,6 @@
     android:id="@+id/privacy_chip"
     android:layout_height="match_parent"
     android:layout_width="wrap_content"
-    android:layout_marginLeft="@dimen/ongoing_appops_chip_margin"
-    android:layout_marginRight="@dimen/ongoing_appops_chip_margin"
     android:layout_gravity="center_vertical|end"
     android:gravity="center_vertical"
     android:orientation="horizontal"

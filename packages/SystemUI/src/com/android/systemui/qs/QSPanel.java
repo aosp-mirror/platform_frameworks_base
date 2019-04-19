@@ -300,6 +300,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         mFooter.onConfigurationChanged();
+        updateResources();
 
         updateBrightnessMirror();
     }
