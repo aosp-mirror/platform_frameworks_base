@@ -18,29 +18,47 @@ package com.android.keyguard;
 
 import static junit.framework.Assert.assertEquals;
 
-import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 public class KeyguardMessageAreaTest extends SysuiTestCase {
+    @Mock
+    private ConfigurationController mConfigurationController;
+    @Mock
+    private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private KeyguardMessageArea mMessageArea;
 
     @Before
     public void setUp() throws Exception {
-        KeyguardUpdateMonitor monitor = mock(KeyguardUpdateMonitor.class);
-        mMessageArea = new KeyguardMessageArea(mContext, null, monitor);
+        MockitoAnnotations.initMocks(this);
+        mMessageArea = new KeyguardMessageArea(mContext, null, mKeyguardUpdateMonitor,
+                mConfigurationController);
         waitForIdleSync();
+    }
+
+    @Test
+    public void onAttachedToWindow_registersConfigurationCallback() {
+        mMessageArea.onAttachedToWindow();
+        verify(mConfigurationController).addCallback(eq(mMessageArea));
+
+        mMessageArea.onDetachedFromWindow();
+        verify(mConfigurationController).removeCallback(eq(mMessageArea));
     }
 
     @Test

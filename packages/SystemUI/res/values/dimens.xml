@@ -717,9 +717,9 @@
     <!-- The width/height of the unlock icon view on keyguard. -->
     <dimen name="keyguard_lock_height">42dp</dimen>
     <dimen name="keyguard_lock_width">42dp</dimen>
-    <dimen name="keyguard_lock_padding">19dp</dimen>
+    <dimen name="keyguard_lock_padding">20dp</dimen>
 
-    <dimen name="keyguard_indication_margin_bottom">65dp</dimen>
+    <dimen name="keyguard_indication_margin_bottom">44dp</dimen>
 
     <!-- The text size for battery level -->
     <dimen name="battery_level_text_size">12sp</dimen>
