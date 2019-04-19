@@ -717,12 +717,10 @@ public class BubbleStackView extends FrameLayout {
 
     /** Moves the bubbles out of the way if they're going to be over the keyboard. */
     public void onImeVisibilityChanged(boolean visible, int height) {
+        mStackAnimationController.setImeHeight(height + mImeOffset);
+
         if (!mIsExpanded) {
-            if (visible) {
-                mStackAnimationController.updateBoundsForVisibleImeAndAnimate(height + mImeOffset);
-            } else {
-                mStackAnimationController.updateBoundsForInvisibleImeAndAnimate();
-            }
+            mStackAnimationController.animateForImeVisibility(visible);
         }
     }
 
