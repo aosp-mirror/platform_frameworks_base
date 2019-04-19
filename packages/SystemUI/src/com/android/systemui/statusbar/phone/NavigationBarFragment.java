@@ -1063,4 +1063,9 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         context.getSystemService(WindowManager.class).addView(navigationBarView, lp);
         return navigationBarView;
     }
+
+    @VisibleForTesting
+    int getNavigationIconHints() {
+        return mNavigationIconHints;
+    }
 }
