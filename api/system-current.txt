@@ -3396,7 +3396,7 @@ package android.location {
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void flushGnssBatch();
     method @Nullable public String getExtraLocationControllerPackage();
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public int getGnssBatchSize();
-    method @Nullable public android.location.GnssCapabilities getGnssCapabilities();
+    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public android.location.GnssCapabilities getGnssCapabilities();
     method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public void injectGnssMeasurementCorrections(@NonNull android.location.GnssMeasurementCorrections);
     method public boolean isExtraLocationControllerPackageEnabled();
     method public boolean isLocationEnabledForUser(@NonNull android.os.UserHandle);
