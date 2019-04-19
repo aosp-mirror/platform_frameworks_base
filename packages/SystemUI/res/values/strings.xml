@@ -277,8 +277,6 @@
     <string name="accessibility_send_smart_reply">Send</string>
     <!-- Content description of the manage notification button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_manage_notification">Manage notifications</string>
-    <!-- Click action label for accessibility for the unlock button. [CHAR LIMIT=NONE] -->
-    <string name="unlock_label">unlock</string>
     <!-- Click action label for accessibility for the phone button. [CHAR LIMIT=NONE] -->
     <string name="phone_label">open phone</string>
     <!-- Click action label for accessibility for the voice assist button. This is not shown on-screen and is an accessibility label for the icon which launches the voice assist from the lock screen.[CHAR LIMIT=NONE] -->
@@ -1290,10 +1288,7 @@
         activity.</string>
 
     <!-- Indication on the keyguard that appears when a trust agents unlocks the device. [CHAR LIMIT=40] -->
-    <string name="keyguard_indication_trust_granted">Unlocked for <xliff:g id="user_name" example="John Doe">%1$s</xliff:g></string>
-
-    <!-- Indication on the keyguard that appears when a trust agent is active and available. [CHAR LIMIT=40] -->
-    <string name="keyguard_indication_trust_managed"><xliff:g id="trust_agent" example="Smart Lock">%1$s</xliff:g> is running</string>
+    <string name="keyguard_indication_trust_unlocked">Kept unlocked by TrustAgent</string>
 
     <!-- Indication on the keyguard that appears when the user disables trust agents until the next time they unlock manually. [CHAR LIMIT=NONE] -->
     <string name="keyguard_indication_trust_disabled">Device will stay locked until you manually unlock</string>

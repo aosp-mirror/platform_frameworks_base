@@ -368,6 +368,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Till soluppgången"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"På från <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Till <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Mörkt tema"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC är inaktiverat"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC är aktiverat"</string>

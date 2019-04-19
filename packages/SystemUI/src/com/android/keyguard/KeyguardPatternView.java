@@ -34,6 +34,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.LinearLayout;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternChecker;
 import com.android.internal.widget.LockPatternUtils;
@@ -92,7 +93,8 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         }
     };
     private Rect mTempRect = new Rect();
-    private KeyguardMessageArea mSecurityMessageDisplay;
+    @VisibleForTesting
+    KeyguardMessageArea mSecurityMessageDisplay;
     private View mEcaView;
     private ViewGroup mContainer;
     private int mDisappearYTranslation;
@@ -151,8 +153,6 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         // vibrate mode will be the same for the life of this screen
         mLockPatternView.setTactileFeedbackEnabled(mLockPatternUtils.isTactileFeedbackEnabled());
 
-        mSecurityMessageDisplay =
-                (KeyguardMessageArea) KeyguardMessageArea.findSecurityMessageDisplay(this);
         mEcaView = findViewById(R.id.keyguard_selector_fade_container);
         mContainer = findViewById(R.id.container);
 
@@ -168,6 +168,12 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
                 mCallback.onCancelClicked();
             });
         }
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        mSecurityMessageDisplay = KeyguardMessageArea.findSecurityMessageDisplay(this);
     }
 
     @Override
@@ -201,6 +207,10 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         mLockPatternView.setEnabled(true);
         mLockPatternView.clearPattern();
 
+        if (mSecurityMessageDisplay == null) {
+            return;
+        }
+
         // if the user is currently locked out, enforce it.
         long deadline = mLockPatternUtils.getLockoutAttemptDeadline(
                 KeyguardUpdateMonitor.getCurrentUser());
@@ -212,7 +222,9 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
     }
 
     private void displayDefaultSecurityMessage() {
-        mSecurityMessageDisplay.setMessage("");
+        if (mSecurityMessageDisplay != null) {
+            mSecurityMessageDisplay.setMessage("");
+        }
     }
 
     @Override

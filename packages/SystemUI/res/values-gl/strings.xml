@@ -172,8 +172,7 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
-    <!-- no translation found for data_connection_5ge (4699478963278829331) -->
-    <skip />
+    <string name="data_connection_5ge" msgid="4699478963278829331">"5Ge"</string>
     <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
     <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
@@ -369,6 +368,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Ata o amencer"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Activación (<xliff:g id="TIME">%s</xliff:g>)"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Ata: <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Tema escuro"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"A opción NFC está desactivada"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"A opción NFC está activada"</string>
@@ -581,8 +581,8 @@
     <string name="status_bar_alarm" msgid="8536256753575881818">"Alarma"</string>
     <string name="status_bar_work" msgid="6022553324802866373">"Perfil de traballo"</string>
     <string name="status_bar_airplane" msgid="7057575501472249002">"Modo avión"</string>
-    <string name="add_tile" msgid="2995389510240786221">"Engade un mosaico"</string>
-    <string name="broadcast_tile" msgid="3894036511763289383">"Mosaico controlado pola emisión"</string>
+    <string name="add_tile" msgid="2995389510240786221">"Engade un atallo"</string>
+    <string name="broadcast_tile" msgid="3894036511763289383">"Atallo de emisión"</string>
     <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Non escoitarás a alarma seguinte <xliff:g id="WHEN">%1$s</xliff:g> a menos que desactives esta opción antes desa hora"</string>
     <string name="zen_alarm_warning" msgid="444533119582244293">"Non escoitarás a alarma seguinte <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="3980063409350522735">"ás <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -758,10 +758,10 @@
     <string name="right_keycode" msgid="708447961000848163">"Código de teclas á dereita"</string>
     <string name="left_icon" msgid="3096287125959387541">"Icona á esquerda"</string>
     <string name="right_icon" msgid="3952104823293824311">"Icona á dereita"</string>
-    <string name="drag_to_add_tiles" msgid="230586591689084925">"Mantén premidas as funcións e arrástraas para engadilas"</string>
-    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Para reorganizar os mosaicos, mantenos premidos e arrástraos"</string>
+    <string name="drag_to_add_tiles" msgid="230586591689084925">"Mantén premido un elemento e arrástrao para engadir atallos"</string>
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Para reorganizar os atallos, mantenos premidos e arrástraos"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Arrastra o elemento ata aquí para eliminalo"</string>
-    <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Necesitas polo menos 6 mosaicos"</string>
+    <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Como mínimo ten que haber 6 atallos"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Editar"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Hora"</string>
   <string-array name="clock_options">
@@ -889,7 +889,7 @@
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"Activarase automaticamente a función Aforro de batería en canto o nivel de carga sexa inferior ao <xliff:g id="PERCENTAGE">%d</xliff:g> %%."</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Configuración"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"De acordo"</string>
-    <string name="heap_dump_tile_name" msgid="9141031328971226374">"Baleirar mont. SysUI"</string>
+    <string name="heap_dump_tile_name" msgid="9141031328971226374">"Baleirado mem. SysUI"</string>
     <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"<xliff:g id="APP">%1$s</xliff:g> está utilizando <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"Hai aplicacións que están utilizando <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="6854860652480837439">", "</string>

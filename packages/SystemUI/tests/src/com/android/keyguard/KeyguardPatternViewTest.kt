@@ -22,11 +22,13 @@ import android.testing.TestableLooper
 import android.view.LayoutInflater
 
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.statusbar.policy.ConfigurationController
 import com.google.common.truth.Truth.assertThat
 
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.mock
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -41,8 +43,9 @@ class KeyguardPatternViewTest : SysuiTestCase() {
         val inflater = LayoutInflater.from(context)
         mKeyguardPatternView = inflater.inflate(R.layout.keyguard_pattern_view, null)
                 as KeyguardPatternView
-        mSecurityMessage = KeyguardMessageArea.findSecurityMessageDisplay(mKeyguardPatternView)
-                as KeyguardMessageArea
+        mSecurityMessage = KeyguardMessageArea(mContext, null,
+                mock(KeyguardUpdateMonitor::class.java), mock(ConfigurationController::class.java))
+        mKeyguardPatternView.mSecurityMessageDisplay = mSecurityMessage
     }
 
     @Test

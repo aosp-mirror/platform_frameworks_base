@@ -487,7 +487,7 @@ public class VectorDrawable extends Drawable {
     }
 
     @Override
-    public void setTintMode(@NonNull BlendMode blendMode) {
+    public void setTintBlendMode(@NonNull BlendMode blendMode) {
         final VectorDrawableState state = mVectorState;
         if (state.mBlendMode != blendMode) {
             state.mBlendMode = blendMode;

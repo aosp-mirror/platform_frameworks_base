@@ -8645,19 +8645,29 @@ public class Notification implements Parcelable
          * @return whether this bubble should suppress the initial notification when it is posted.
          *
          * @see BubbleMetadata.Builder#setSuppressInitialNotification(boolean)
-         * @deprecated TO BE REMOVED, use {@link #getSuppressNotification()} instead.
+         * @deprecated TO BE REMOVED, use {@link #isNotificationSuppressed()} instead.
          */
         @Deprecated
         public boolean getSuppressInitialNotification() {
-            return (mFlags & FLAG_SUPPRESS_NOTIFICATION) != 0;
+            return isNotificationSuppressed();
         }
 
         /**
          * @return whether this bubble should suppress the notification when it is posted.
          *
-         * @see BubbleMetadata.Builder#setSuppressInitialNotification(boolean)
+         * @see BubbleMetadata.Builder#setSuppressNotification(boolean)
+         * @deprecated TO BE REMOVED, use {@link #isNotificationSuppressed()} instead.
          */
         public boolean getSuppressNotification() {
+            return isNotificationSuppressed();
+        }
+
+        /**
+         * @return whether this bubble should suppress the notification when it is posted.
+         *
+         * @see BubbleMetadata.Builder#setSuppressNotification(boolean)
+         */
+        public boolean isNotificationSuppressed() {
             return (mFlags & FLAG_SUPPRESS_NOTIFICATION) != 0;
         }
 

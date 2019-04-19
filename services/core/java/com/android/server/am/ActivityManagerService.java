@@ -1635,9 +1635,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             } break;
             case UPDATE_HTTP_PROXY_MSG: {
-                synchronized (ActivityManagerService.this) {
-                    mProcessList.setAllHttpProxyLocked();
-                }
+                mProcessList.setAllHttpProxy();
             } break;
             case PROC_START_TIMEOUT_MSG: {
                 ProcessRecord app = (ProcessRecord)msg.obj;
@@ -1826,7 +1824,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             } break;
             }
         }
-    };
+    }
 
     static final int COLLECT_PSS_BG_MSG = 1;
 
@@ -17577,6 +17575,19 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             synchronized (ActivityManagerService.this) {
                 ((PendingIntentRecord) target).setAllowBgActivityStarts(whitelistToken, flags);
+            }
+        }
+
+        @Override
+        public void clearPendingIntentAllowBgActivityStarts(IIntentSender target,
+                IBinder whitelistToken) {
+            if (!(target instanceof PendingIntentRecord)) {
+                Slog.w(TAG, "clearPendingIntentAllowBgActivityStarts():"
+                        + " not a PendingIntentRecord: " + target);
+                return;
+            }
+            synchronized (ActivityManagerService.this) {
+                ((PendingIntentRecord) target).clearAllowBgActivityStarts(whitelistToken);
             }
         }
 

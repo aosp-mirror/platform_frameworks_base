@@ -125,7 +125,7 @@ public class InputMethodPreference extends RestrictedSwitchPreference implements
         }
         mInputMethodSettingValues = InputMethodSettingValuesWrapper.getInstance(context);
         mHasPriorityInSorting = imi.isSystem()
-                && InputMethodAndSubtypeUtil.isValidSystemNonAuxAsciiCapableIme(imi);
+                && InputMethodAndSubtypeUtil.isValidNonAuxAsciiCapableIme(imi);
         setOnPreferenceClickListener(this);
         setOnPreferenceChangeListener(this);
     }

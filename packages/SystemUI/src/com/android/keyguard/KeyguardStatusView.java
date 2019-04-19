@@ -241,6 +241,16 @@ public class KeyguardStatusView extends GridLayout implements
         return mClockView.getTextSize();
     }
 
+    /**
+     * Returns the preferred Y position of the clock.
+     *
+     * @param totalHeight The height available to position the clock.
+     * @return Y position of clock.
+     */
+    public int getClockPreferredY(int totalHeight) {
+        return mClockView.getPreferredY(totalHeight);
+    }
+
     private void updateLogoutView() {
         if (mLogoutView == null) {
             return;

@@ -77,9 +77,9 @@ public class SystemUIService extends Service {
                 ((PluginManagerImpl) Dependency.get(PluginManager.class)).dump(fd, pw, args);
             }
         } else {
-            String svc = args[0];
+            String svc = args[0].toLowerCase();
             for (SystemUI ui: services) {
-                String name = ui.getClass().getName();
+                String name = ui.getClass().getName().toLowerCase();
                 if (name.endsWith(svc)) {
                     ui.dump(fd, pw, args);
                 }

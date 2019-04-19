@@ -20,6 +20,7 @@ import static android.content.pm.ActivityInfo.DOCUMENT_LAUNCH_ALWAYS;
 import static android.util.StatsLogInternal.BUBBLE_DEVELOPER_ERROR_REPORTED__ERROR__ACTIVITY_INFO_MISSING;
 import static android.util.StatsLogInternal.BUBBLE_DEVELOPER_ERROR_REPORTED__ERROR__ACTIVITY_INFO_NOT_RESIZABLE;
 import static android.util.StatsLogInternal.BUBBLE_DEVELOPER_ERROR_REPORTED__ERROR__DOCUMENT_LAUNCH_NOT_ALWAYS;
+import static android.view.Display.INVALID_DISPLAY;
 
 import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
@@ -596,6 +597,16 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
 
     private boolean usingActivityView() {
         return mBubbleIntent != null && mActivityView != null;
+    }
+
+    /**
+     * @return the display id of the virtual display.
+     */
+    public int getVirtualDisplayId() {
+        if (usingActivityView()) {
+            return mActivityView.getVirtualDisplayId();
+        }
+        return INVALID_DISPLAY;
     }
 
     private void applyRowState(ExpandableNotificationRow view) {

@@ -26,11 +26,13 @@
 
 namespace android::idmap2 {
 
-constexpr const char* kPolicyPublic = "public";
+constexpr const char* kPolicyOdm = "odm";
+constexpr const char* kPolicyOem = "oem";
 constexpr const char* kPolicyProduct = "product";
+constexpr const char* kPolicyPublic = "public";
+constexpr const char* kPolicySignature = "signature";
 constexpr const char* kPolicySystem = "system";
 constexpr const char* kPolicyVendor = "vendor";
-constexpr const char* kPolicySignature = "signature";
 
 using PolicyFlags = ResTable_overlayable_policy_header::PolicyFlags;
 using PolicyBitmask = uint32_t;

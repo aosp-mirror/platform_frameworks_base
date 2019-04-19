@@ -50,7 +50,7 @@
     <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"<xliff:g id="APPLICATION">%1$s</xliff:g> को <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> के एक्सेस की अनुमति दें?"</string>
     <string name="usb_device_confirm_prompt" msgid="7440562274256843905">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> के लिए <xliff:g id="APPLICATION">%1$s</xliff:g> खोलें?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="4333670517539993561">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> के लिए <xliff:g id="APPLICATION">%1$s</xliff:g> खोलें?"</string>
-    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"इस USB सहायक डिवाइस के साथ कोई भी इंस्टॉल ऐप्स  काम नहीं करता. इस सहायक डिवाइस के बारे में यहां अधिक जानें: <xliff:g id="URL">%1$s</xliff:g>"</string>
+    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"इस USB सहायक डिवाइस के साथ कोई भी इंस्टॉल ऐप्स  काम नहीं करता. इस सहायक डिवाइस के बारे में यहां ज़्यादा जानें: <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"USB सहायक साधन"</string>
     <string name="label_view" msgid="6304565553218192990">"देखें"</string>
     <string name="always_use_device" msgid="4015357883336738417">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> के कनेक्ट होने पर हमेशा <xliff:g id="APPLICATION">%1$s</xliff:g> खोलें"</string>
@@ -175,8 +175,7 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"एलटीई"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
-    <!-- no translation found for data_connection_5ge (4699478963278829331) -->
-    <skip />
+    <string name="data_connection_5ge" msgid="4699478963278829331">"5Ge"</string>
     <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
     <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
@@ -191,7 +190,7 @@
     <skip />
     <string name="cell_data_off" msgid="1051264981229902873">"बंद है"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ब्लूटूथ से टेदरिंग."</string>
-    <string name="accessibility_airplane_mode" msgid="834748999790763092">"हवाई जहाज मोड."</string>
+    <string name="accessibility_airplane_mode" msgid="834748999790763092">"हवाई जहाज़ मोड."</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN चालू."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"कोई सिम कार्ड नहीं है."</string>
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"मोबाइल और इंटरनेट सेवा देने वाली कंपनी का नेटवर्क बदल रहा है"</string>
@@ -249,7 +248,7 @@
     <string name="accessibility_quick_settings_location_changed_on" msgid="339403053079338468">"जगह की रिपोर्ट को चालू किया गया."</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"<xliff:g id="TIME">%s</xliff:g> के लिए अलार्म सेट किया गया."</string>
     <string name="accessibility_quick_settings_close" msgid="3115847794692516306">"पैनल बंद करें."</string>
-    <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"अधिक समय."</string>
+    <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"ज़्यादा समय."</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"कम समय."</string>
     <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"फ़्लैशलाइट बंद है."</string>
     <string name="accessibility_quick_settings_flashlight_unavailable" msgid="8012811023312280810">"फ़्लैशलाइट उपलब्ध नहीं है."</string>
@@ -315,7 +314,7 @@
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="4930931771490695395">"सुनने में मददगार डिवाइस"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"ब्लूटूथ चालू हो रहा है…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"स्क्रीन की रोशनी"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"स्वत: घुमाएं"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"अपने आप घूमना"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"स्‍क्रीन अपने आप घूमने की सुविधा चालू करें"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="8187398200140760213">"<xliff:g id="ID_1">%s</xliff:g> मोड"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"घुमाना लॉक किया गया"</string>
@@ -367,7 +366,7 @@
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"मोबाइल डेटा"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"डेटा खर्च"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"शेष डेटा"</string>
-    <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"सीमा से अधिक"</string>
+    <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"सीमा से ज़्यादा"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> उपयोग किया गया"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> सीमा"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> चेतावनी"</string>
@@ -377,6 +376,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"सुबह तक चालू रहेगी"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g> पर चालू की जाएगी"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g> तक"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"गहरे रंग वाली थीम"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"एनएफ़सी"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC बंद है"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC चालू है"</string>
@@ -392,7 +392,7 @@
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> के लिए ऊपर स्‍लाइड करें."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> के लिए बाएं स्‍लाइड करें."</string>
     <string name="zen_priority_introduction" msgid="1149025108714420281">"आपको अलार्म, रिमाइंडर, इवेंट और चुनिंदा कॉल करने वालों के अलावा किसी और तरह से (आवाज़ करके और थरथरा कर ) परेशान नहीं किया जाएगा. आप फिर भी संगीत, वीडियो और गेम सहित अपना चुना हुआ सब कुछ सुन सकते हैं."</string>
-    <string name="zen_alarms_introduction" msgid="4934328096749380201">"आपको अलार्म छोड़कर दूसरी आवाज़ों और कंपनों से परेशान नहीं किया जाएगा. आपको अभी भी संगीत, वीडियो और गेम सहित वह सब कुछ सुनाई देगा जो आपने चलाने के लिए चुना है."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"आपको अलार्म छोड़कर दूसरी आवाज़ों और कंपनों से परेशान नहीं किया जाएगा. आपको अब भी संगीत, वीडियो और गेम सहित वह सब कुछ सुनाई देगा जो आपने चलाने के लिए चुना है."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"अपनी पसंद के मुताबिक बनाएं"</string>
     <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"इससे अलार्म, संगीत, वीडियो और गेम सहित सभी आवाज़ और कंपन (वाइब्रेशन) रोक दिए जाते हैं. आप तब भी फ़ोन काॅल कर सकेंगे."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"इससे अलार्म, संगीत, वीडियो और गेम सहित सभी आवाज़ और कंपन (वाइब्रेशन) रोक दिए जाते हैं."</string>
@@ -508,7 +508,7 @@
     <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"VPN सेटिंग खोलें"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"भरोसेमंद क्रेडेंशियल खोलें"</string>
-    <string name="monitoring_description_network_logging" msgid="7223505523384076027">"आपके एडमिन ने नेटवर्क लॉग करना चालू कर दिया है, जो आपके डिवाइस पर ट्रैफ़िक की निगरानी करता है.\n\nअधिक जानकारी के लिए अपने एडमिन से संपर्क करें."</string>
+    <string name="monitoring_description_network_logging" msgid="7223505523384076027">"आपके एडमिन ने नेटवर्क लॉग करना चालू कर दिया है, जो आपके डिवाइस पर ट्रैफ़िक की निगरानी करता है.\n\nज़्यादा जानकारी के लिए अपने एडमिन से संपर्क करें."</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"आपने किसी ऐप को VPN कनेक्‍शन सेट करने की अनुमति दी है.\n\nयह ऐप ईमेल, ऐप्‍स और सुरक्षित वेबसाइटों सहित आपके डिवाइस और नेटवर्क की गतिविधि की निगरानी कर सकता है."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> आपकी वर्क प्रोफ़ाइल को प्रबंधित करता है.\n\n आपका एडमिन ईमेल, ऐप्लिकेशन और वेबसाइटों सहित आपकी नेटवर्क गतिविधि की निगरानी कर सकता है.\n\nऔर जानकारी के लिए अपने एडमिन से संपर्क करें.\n\nआप ऐसे VPN से भी कनेक्‍ट हैं, जो आपकी नेटवर्क गतिविधि की निगरानी कर सकता है."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
@@ -841,10 +841,10 @@
     <string name="pip_skip_to_prev" msgid="1955311326688637914">"पिछले पर जाएं"</string>
     <string name="thermal_shutdown_title" msgid="4458304833443861111">"गर्म होने के कारण फ़ोन बंद हुआ"</string>
     <string name="thermal_shutdown_message" msgid="9006456746902370523">"आपका फ़ोन अब सामान्य रूप से चल रहा है"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="566347880005304139">"फ़ोन बहुत गर्म हो गया था, इसलिए वह ठंडा होने के लिए बंद हो गया. फ़ोन अब सामान्य रूप से चल रहा है.\n\nफ़ोन तब बहुत गर्म हो सकता है जब आप:\n	• अधिक संसाधनों का उपयोग करने वाले ऐप चलाते हैं (जैसे गेमिंग, वीडियो या मार्गदर्शक ऐप)\n	• बड़ी फ़ाइलें डाउनलोड या अपलोड करते हैं\n	• उच्च तापमान में फ़ोन का उपयोग करते हैं"</string>
+    <string name="thermal_shutdown_dialog_message" msgid="566347880005304139">"फ़ोन बहुत गर्म हो गया था, इसलिए वह ठंडा होने के लिए बंद हो गया. फ़ोन अब सामान्य रूप से चल रहा है.\n\nफ़ोन तब बहुत गर्म हो सकता है जब आप:\n	• ज़्यादा संसाधनों का उपयोग करने वाले ऐप चलाते हैं (जैसे गेमिंग, वीडियो या मार्गदर्शक ऐप)\n	• बड़ी फ़ाइलें डाउनलोड या अपलोड करते हैं\n	• उच्च तापमान में फ़ोन का उपयोग करते हैं"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"फ़ोन गर्म हो रहा है"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"फ़ोन के ठंडा होने के दौरान कुछ सुविधाएं सीमित होती हैं"</string>
-    <string name="high_temp_dialog_message" msgid="6840700639374113553">"आपका फ़ोन अपने आप ठंडा होने की कोशिश करेगा. आप अभी भी अपने फ़ोन का उपयोग कर सकते हैं, लेकिन हो सकता है कि यह धीमी गति से चले.\n\nठंडा हो जाने पर आपका फ़ोन सामान्य रूप से चलेगा."</string>
+    <string name="high_temp_dialog_message" msgid="6840700639374113553">"आपका फ़ोन अपने आप ठंडा होने की कोशिश करेगा. आप अब भी अपने फ़ोन का उपयोग कर सकते हैं, लेकिन हो सकता है कि यह धीमी गति से चले.\n\nठंडा हो जाने पर आपका फ़ोन सामान्य रूप से चलेगा."</string>
     <string name="high_temp_alarm_title" msgid="442812040762745210">"चार्जर निकालें"</string>
     <string name="high_temp_alarm_notify_message" msgid="1802871059489414932">"इस डिवाइस को चार्ज करने में समस्या हुई. पावर अडैप्टर का प्लग निकालें. ऐसा करते समय सावधानी बरतें क्योंकि तार गर्म हो सकता है."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"प्रबंधन से जुड़े चरण देखें"</string>

@@ -192,53 +192,47 @@ public class InputMethodAndSubtypeUtilTest {
     }
 
     @Test
-    public void isValidSystemNonAuxAsciiCapableIme() {
-        // System IME w/ no subtype
-        assertThat(InputMethodAndSubtypeUtil.isValidSystemNonAuxAsciiCapableIme(
-                createDummyIme(true, false)))
+    public void isValidNonAuxAsciiCapableIme() {
+        // IME w/ no subtype
+        assertThat(InputMethodAndSubtypeUtil.isValidNonAuxAsciiCapableIme(
+                createDummyIme(false)))
                 .isFalse();
 
-        // System IME w/ non-Aux and non-ASCII-capable "keyboard" subtype
-        assertThat(InputMethodAndSubtypeUtil.isValidSystemNonAuxAsciiCapableIme(
-                createDummyIme(true, false, createDummySubtype("keyboard", false, false))))
+        // IME w/ non-Aux and non-ASCII-capable "keyboard" subtype
+        assertThat(InputMethodAndSubtypeUtil.isValidNonAuxAsciiCapableIme(
+                createDummyIme(false, createDummySubtype("keyboard", false, false))))
                 .isFalse();
 
-        // System IME w/ non-Aux and ASCII-capable "keyboard" subtype
-        assertThat(InputMethodAndSubtypeUtil.isValidSystemNonAuxAsciiCapableIme(
-                createDummyIme(true, false, createDummySubtype("keyboard", false, true))))
+        // IME w/ non-Aux and ASCII-capable "keyboard" subtype
+        assertThat(InputMethodAndSubtypeUtil.isValidNonAuxAsciiCapableIme(
+                createDummyIme(false, createDummySubtype("keyboard", false, true))))
                 .isTrue();
 
-        // System IME w/ Aux and ASCII-capable "keyboard" subtype
-        assertThat(InputMethodAndSubtypeUtil.isValidSystemNonAuxAsciiCapableIme(
-                createDummyIme(true, true, createDummySubtype("keyboard", true, true))))
+        // IME w/ Aux and ASCII-capable "keyboard" subtype
+        assertThat(InputMethodAndSubtypeUtil.isValidNonAuxAsciiCapableIme(
+                createDummyIme(true, createDummySubtype("keyboard", true, true))))
                 .isFalse();
 
-        // System IME w/ non-Aux and ASCII-capable "voice" subtype
-        assertThat(InputMethodAndSubtypeUtil.isValidSystemNonAuxAsciiCapableIme(
-                createDummyIme(true, false, createDummySubtype("voice", false, true))))
+        // IME w/ non-Aux and ASCII-capable "voice" subtype
+        assertThat(InputMethodAndSubtypeUtil.isValidNonAuxAsciiCapableIme(
+                createDummyIme(false, createDummySubtype("voice", false, true))))
                 .isFalse();
 
-        // System IME w/ non-Aux and non-ASCII-capable subtype + Non-Aux and ASCII-capable subtype
-        assertThat(InputMethodAndSubtypeUtil.isValidSystemNonAuxAsciiCapableIme(
-                createDummyIme(true, false,
+        // IME w/ non-Aux and non-ASCII-capable subtype + Non-Aux and ASCII-capable subtype
+        assertThat(InputMethodAndSubtypeUtil.isValidNonAuxAsciiCapableIme(
+                createDummyIme(false,
                         createDummySubtype("keyboard", false, true),
                         createDummySubtype("keyboard", false, false))))
                 .isTrue();
-
-        // Non-system IME w/ non-Aux and ASCII-capable "keyboard" subtype
-        assertThat(InputMethodAndSubtypeUtil.isValidSystemNonAuxAsciiCapableIme(
-                createDummyIme(false, false, createDummySubtype("keyboard", false, true))))
-                .isFalse();
    }
 
-    private static InputMethodInfo createDummyIme(boolean isSystem, boolean isAuxIme,
+    private static InputMethodInfo createDummyIme(boolean isAuxIme,
             InputMethodSubtype... subtypes) {
         final ResolveInfo ri = new ResolveInfo();
         final ServiceInfo si = new ServiceInfo();
         final ApplicationInfo ai = new ApplicationInfo();
         ai.packageName = "com.example.android.dummyime";
         ai.enabled = true;
-        ai.flags |= (isSystem ? ApplicationInfo.FLAG_SYSTEM : 0);
         si.applicationInfo = ai;
         si.enabled = true;
         si.packageName = "com.example.android.dummyime";

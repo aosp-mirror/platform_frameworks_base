@@ -724,8 +724,8 @@ TEST_F(TableFlattenerTest, FlattenMultipleOverlayable) {
 
   std::string name_two = "com.app.test:integer/overlayable_two";
   OverlayableItem overlayable_item_two(group);
-  overlayable_item_two.policies |= OverlayableItem::Policy::kProduct;
-  overlayable_item_two.policies |= OverlayableItem::Policy::kSystem;
+  overlayable_item_two.policies |= OverlayableItem::Policy::kOdm;
+  overlayable_item_two.policies |= OverlayableItem::Policy::kOem;
   overlayable_item_two.policies |= OverlayableItem::Policy::kVendor;
 
   std::string name_three = "com.app.test:integer/overlayable_three";
@@ -744,6 +744,7 @@ TEST_F(TableFlattenerTest, FlattenMultipleOverlayable) {
           .AddSimple(name_three, ResourceId(0x7f020003))
           .SetOverlayable(name_three, overlayable_item_three)
           .Build();
+
   ResourceTable output_table;
   ASSERT_TRUE(Flatten(context_.get(), {}, table.get(), &output_table));
   auto search_result = output_table.FindResource(test::ParseNameOrDie(name_zero));
@@ -755,6 +756,7 @@ TEST_F(TableFlattenerTest, FlattenMultipleOverlayable) {
   EXPECT_EQ(result_overlayable.overlayable->actor, "overlay://theme");
   EXPECT_EQ(result_overlayable.policies, OverlayableItem::Policy::kSystem
                                          | OverlayableItem::Policy::kProduct);
+
   search_result = output_table.FindResource(test::ParseNameOrDie(name_one));
   ASSERT_TRUE(search_result);
   ASSERT_THAT(search_result.value().entry, NotNull());
@@ -763,6 +765,7 @@ TEST_F(TableFlattenerTest, FlattenMultipleOverlayable) {
   EXPECT_EQ(result_overlayable.overlayable->name, "OtherName");
   EXPECT_EQ(result_overlayable.overlayable->actor, "overlay://customization");
   EXPECT_EQ(result_overlayable.policies, OverlayableItem::Policy::kPublic);
+
   search_result = output_table.FindResource(test::ParseNameOrDie(name_two));
   ASSERT_TRUE(search_result);
   ASSERT_THAT(search_result.value().entry, NotNull());
@@ -770,9 +773,10 @@ TEST_F(TableFlattenerTest, FlattenMultipleOverlayable) {
   result_overlayable = search_result.value().entry->overlayable_item.value();
   EXPECT_EQ(result_overlayable.overlayable->name, "TestName");
   EXPECT_EQ(result_overlayable.overlayable->actor, "overlay://theme");
-  EXPECT_EQ(result_overlayable.policies, OverlayableItem::Policy::kSystem
-                                         | OverlayableItem::Policy::kProduct
+  EXPECT_EQ(result_overlayable.policies, OverlayableItem::Policy::kOdm
+                                         | OverlayableItem::Policy::kOem
                                          | OverlayableItem::Policy::kVendor);
+
   search_result = output_table.FindResource(test::ParseNameOrDie(name_three));
   ASSERT_TRUE(search_result);
   ASSERT_THAT(search_result.value().entry, NotNull());

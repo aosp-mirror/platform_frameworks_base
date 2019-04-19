@@ -167,6 +167,7 @@ public class KeyguardBouncer {
         DejankUtils.postAfterTraversal(mShowRunnable);
 
         mCallback.onBouncerVisiblityChanged(true /* shown */);
+        mExpansionCallback.onStartingToShow();
     }
 
     public boolean isScrimmed() {
@@ -429,8 +430,6 @@ public class KeyguardBouncer {
         mStatusBarHeight = mRoot.getResources().getDimensionPixelOffset(
                 com.android.systemui.R.dimen.status_bar_height);
         mRoot.setVisibility(View.INVISIBLE);
-        mRoot.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight,
-                oldBottom) -> mExpansionCallback.onLayout());
         mRoot.setAccessibilityPaneTitle(mKeyguardView.getAccessibilityTitleForCurrentMode());
 
         final WindowInsets rootInsets = mRoot.getRootWindowInsets();
@@ -510,7 +509,7 @@ public class KeyguardBouncer {
     public interface BouncerExpansionCallback {
         void onFullyShown();
         void onStartingToHide();
+        void onStartingToShow();
         void onFullyHidden();
-        void onLayout();
     }
 }

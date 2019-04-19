@@ -28,7 +28,7 @@
                         <group android:name="_R_G_L_2_G" android:translateX="6"
                                android:translateY="5" android:pivotX="2.25" android:pivotY="2.25"
                                android:scaleX="1" android:scaleY="1">
-                            <path android:name="_R_G_L_2_G_D_0_P_0" android:fillColor="?attr/textColor"
+                            <path android:name="_R_G_L_2_G_D_0_P_0" android:fillColor="#000"
                                   android:fillAlpha="1" android:fillType="nonZero"
                                   android:pathData=" M2.25 0.25 C3.35,0.25 4.25,1.15 4.25,2.25 C4.25,3.35 3.35,4.25 2.25,4.25 C1.15,4.25 0.25,3.35 0.25,2.25 C0.25,1.15 1.15,0.25 2.25,0.25c "/>
                         </group>
@@ -45,7 +45,7 @@
                                android:scaleY="0.125">
                             <group android:name="_R_G_L_1_G" android:translateY="25.029">
                                 <path android:name="_R_G_L_1_G_D_0_P_0"
-                                      android:strokeColor="?attr/textColor" android:strokeLineCap="round"
+                                      android:strokeColor="#000" android:strokeLineCap="round"
                                       android:strokeLineJoin="round" android:strokeWidth="16"
                                       android:strokeAlpha="1"
                                       android:pathData=" M-28.21 -25.03 C-28.21,-25.03 -27.85,-48.38 -27.97,-55.48 C-28,-57.63 -23.5,-79.87 -0.75,-79.82 C22.77,-79.76 27.75,-59.37 27.72,-58.27 C27.55,-52.88 27.93,-26.15 27.93,-26.15 "/>
@@ -62,7 +62,7 @@
                         <group android:name="_R_G_L_0_G" android:translateY="0.04699999999999971"
                                android:pivotX="8.25" android:pivotY="7.25" android:scaleX="1.01562"
                                android:scaleY="1.01563">
-                            <path android:name="_R_G_L_0_G_D_0_P_0" android:fillColor="?attr/textColor"
+                            <path android:name="_R_G_L_0_G_D_0_P_0" android:fillColor="#000"
                                   android:fillAlpha="1" android:fillType="nonZero"
                                   android:pathData=" M14.25 0.25 C14.25,0.25 12.75,0.25 12.75,0.25 C12.75,0.25 10.75,0.25 10.75,0.25 C10.75,0.25 5.75,0.25 5.75,0.25 C5.75,0.25 3.75,0.25 3.75,0.25 C3.75,0.25 2.25,0.25 2.25,0.25 C1.15,0.25 0.25,1.15 0.25,2.25 C0.25,2.25 0.25,12.25 0.25,12.25 C0.25,13.35 1.15,14.25 2.25,14.25 C2.25,14.25 14.25,14.25 14.25,14.25 C15.35,14.25 16.25,13.35 16.25,12.25 C16.25,12.25 16.25,2.25 16.25,2.25 C16.25,1.15 15.35,0.25 14.25,0.25c  M14.25 12.25 C14.25,12.25 2.25,12.25 2.25,12.25 C2.25,12.25 2.25,2.25 2.25,2.25 C2.25,2.25 3.75,2.25 3.75,2.25 C3.75,2.25 12.75,2.25 12.75,2.25 C12.75,2.25 14.25,2.25 14.25,2.25 C14.25,2.25 14.25,12.25 14.25,12.25c "/>
                         </group>
