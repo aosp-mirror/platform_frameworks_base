@@ -37,7 +37,8 @@ public class BatterySaverUtils {
     /**
      * When set to "true" the notification will be a generic confirm message instead of asking the
      * user if they want to turn on battery saver. If set to false the dialog will specifically
-     * talk about turning on battery saver and provide a button for taking the action.
+     * talk about battery saver without giving the option of turning it on. The only button visible
+     * will be a generic confirmation button to acknowledge the dialog.
      */
     public static final String EXTRA_CONFIRM_TEXT_ONLY = "extra_confirm_only";
     /**
