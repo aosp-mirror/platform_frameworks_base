@@ -476,6 +476,11 @@ public abstract class WindowManagerInternal {
     public abstract int getDisplayIdForWindow(IBinder windowToken);
 
     /**
+     * @return The top focused display ID.
+     */
+    public abstract int getTopFocusedDisplayId();
+
+    /**
      * Checks whether this display should support showing system decorations.
      */
     public abstract boolean shouldShowSystemDecorOnDisplay(int displayId);
