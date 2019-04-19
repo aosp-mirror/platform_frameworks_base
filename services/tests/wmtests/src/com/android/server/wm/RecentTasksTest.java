@@ -860,14 +860,19 @@ public class RecentTasksTest extends ActivityTestsBase {
                 .build();
         mRecentTasks.add(t1);
 
-        TaskRecord t2 = createTaskBuilder(".Task1")
-                .setUserId(TEST_USER_1_ID)
+        TaskRecord t2 = createTaskBuilder(".Task2")
+                .setUserId(TEST_QUIET_USER_ID)
                 .build();
         mRecentTasks.add(t2);
 
+        TaskRecord t3 = createTaskBuilder(".Task3")
+                .setUserId(TEST_USER_1_ID)
+                .build();
+        mRecentTasks.add(t3);
+
         // Remove all the visible tasks and ensure that they are removed
         mRecentTasks.removeAllVisibleTasks(TEST_USER_0_ID);
-        assertTrimmed(t1);
+        assertTrimmed(t1, t2);
     }
 
     @Test
