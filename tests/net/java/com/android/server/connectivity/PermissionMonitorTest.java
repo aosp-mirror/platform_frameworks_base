@@ -524,7 +524,7 @@ public class PermissionMonitorTest {
 
         SparseIntArray netdPermissionsAppIds = new SparseIntArray();
         netdPermissionsAppIds.put(MOCK_UID1, INetd.PERMISSION_INTERNET);
-        netdPermissionsAppIds.put(MOCK_UID2, INetd.NO_PERMISSIONS);
+        netdPermissionsAppIds.put(MOCK_UID2, INetd.PERMISSION_NONE);
         netdPermissionsAppIds.put(SYSTEM_UID1, INetd.PERMISSION_INTERNET
                 | INetd.PERMISSION_UPDATE_DEVICE_STATS);
         netdPermissionsAppIds.put(SYSTEM_UID2, INetd.PERMISSION_UPDATE_DEVICE_STATS);
@@ -534,7 +534,7 @@ public class PermissionMonitorTest {
 
         mNetdServiceMonitor.expectPermission(INetd.PERMISSION_INTERNET,
                 new int[]{MOCK_UID1});
-        mNetdServiceMonitor.expectPermission(INetd.NO_PERMISSIONS, new int[]{MOCK_UID2});
+        mNetdServiceMonitor.expectPermission(INetd.PERMISSION_NONE, new int[]{MOCK_UID2});
         mNetdServiceMonitor.expectPermission(INetd.PERMISSION_INTERNET
                 | INetd.PERMISSION_UPDATE_DEVICE_STATS, new int[]{SYSTEM_UID1});
         mNetdServiceMonitor.expectPermission(INetd.PERMISSION_UPDATE_DEVICE_STATS,
@@ -553,8 +553,8 @@ public class PermissionMonitorTest {
         mNetdServiceMonitor.expectPermission(INetd.PERMISSION_INTERNET, new int[]{SYSTEM_UID2});
 
         // Revoke permission from SYSTEM_UID1, expect no permission stored.
-        mPermissionMonitor.sendPackagePermissionsForUid(SYSTEM_UID1, INetd.NO_PERMISSIONS);
-        mNetdServiceMonitor.expectPermission(INetd.NO_PERMISSIONS, new int[]{SYSTEM_UID1});
+        mPermissionMonitor.sendPackagePermissionsForUid(SYSTEM_UID1, INetd.PERMISSION_NONE);
+        mNetdServiceMonitor.expectPermission(INetd.PERMISSION_NONE, new int[]{SYSTEM_UID1});
     }
 
     private PackageInfo addPackage(String packageName, int uid, String[] permissions)
