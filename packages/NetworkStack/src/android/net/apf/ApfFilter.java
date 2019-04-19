@@ -155,7 +155,9 @@ public class ApfFilter {
         DROPPED_ETHERTYPE_BLACKLISTED,
         DROPPED_ARP_REPLY_SPA_NO_HOST,
         DROPPED_IPV4_KEEPALIVE_ACK,
-        DROPPED_IPV6_KEEPALIVE_ACK;
+        DROPPED_IPV6_KEEPALIVE_ACK,
+        DROPPED_IPV4_NATT_KEEPALIVE,
+        DROPPED_IPV6_NATT_KEEPALIVE;
 
         // Returns the negative byte offset from the end of the APF data segment for
         // a given counter.
@@ -857,12 +859,129 @@ public class ApfFilter {
         }
     }
 
-    // A class to hold keepalive ack information.
-    private abstract static class TcpKeepaliveAck {
+    // TODO: Refactor these subclasses to avoid so much repetition.
+    private abstract static class KeepalivePacket {
         // Note that the offset starts from IP header.
         // These must be added ether header length when generating program.
         static final int IP_HEADER_OFFSET = 0;
+        static final int IPV4_SRC_ADDR_OFFSET = IP_HEADER_OFFSET + 12;
 
+        // Append a filter for this keepalive ack to {@code gen}.
+        // Jump to drop if it matches the keepalive ack.
+        // Jump to the next filter if packet doesn't match the keepalive ack.
+        abstract void generateFilterLocked(ApfGenerator gen) throws IllegalInstructionException;
+    }
+
+    // A class to hold NAT-T keepalive ack information.
+    private abstract static class NattKeepaliveAck extends KeepalivePacket {
+        static final int UDP_LENGTH_OFFSET = 4;
+        static final int UDP_HEADER_LEN = 8;
+
+        protected static class NattKeepaliveAckData {
+            public final byte[] srcAddress;
+            public final int srcPort;
+            public final byte[] dstAddress;
+            public final int dstPort;
+
+            NattKeepaliveAckData(final NattKeepalivePacketDataParcelable sentKeepalivePacket) {
+                srcAddress = sentKeepalivePacket.dstAddress;
+                srcPort = sentKeepalivePacket.dstPort;
+                dstAddress = sentKeepalivePacket.srcAddress;
+                dstPort = sentKeepalivePacket.srcPort;
+            }
+        }
+
+        protected final NattKeepaliveAckData mPacket;
+        protected final byte[] mSrcDstAddr;
+        protected final byte[] mPortFingerprint;
+        // NAT-T keepalive packet
+        protected final byte[] mPayload = {(byte) 0xff};
+
+        NattKeepaliveAck(final NattKeepaliveAckData packet,  final byte[] srcDstAddr) {
+            mPacket = packet;
+            mSrcDstAddr = srcDstAddr;
+            mPortFingerprint = generatePortFingerprint(mPacket.srcPort, mPacket.dstPort);
+        }
+
+        static byte[] generatePortFingerprint(int srcPort, int dstPort) {
+            final ByteBuffer fp = ByteBuffer.allocate(4);
+            fp.order(ByteOrder.BIG_ENDIAN);
+            fp.putShort((short) srcPort);
+            fp.putShort((short) dstPort);
+            return fp.array();
+        }
+
+        public String toString() {
+            try {
+                return String.format("%s -> %s",
+                        NetworkStackUtils.addressAndPortToString(
+                                InetAddress.getByAddress(mPacket.srcAddress), mPacket.srcPort),
+                        NetworkStackUtils.addressAndPortToString(
+                                InetAddress.getByAddress(mPacket.dstAddress), mPacket.dstPort));
+            } catch (UnknownHostException e) {
+                return "Unknown host";
+            }
+        }
+    }
+
+    private class NattKeepaliveAckV4 extends NattKeepaliveAck {
+        NattKeepaliveAckV4(final NattKeepalivePacketDataParcelable sentKeepalivePacket) {
+            this(new NattKeepaliveAckData(sentKeepalivePacket));
+        }
+        NattKeepaliveAckV4(final NattKeepaliveAckData packet) {
+            super(packet, concatArrays(packet.srcAddress, packet.dstAddress) /* srcDstAddr */);
+        }
+
+        @Override
+        void generateFilterLocked(ApfGenerator gen) throws IllegalInstructionException {
+            final String nextFilterLabel = "natt_keepalive_filter" + getUniqueNumberLocked();
+
+            gen.addLoadImmediate(Register.R0, ETH_HEADER_LEN + IPV4_SRC_ADDR_OFFSET);
+            gen.addJumpIfBytesNotEqual(Register.R0, mSrcDstAddr, nextFilterLabel);
+
+            // A NAT-T keepalive packet contains 1 byte payload with the value 0xff
+            // Check payload length is 1
+            gen.addLoadFromMemory(Register.R0, gen.IPV4_HEADER_SIZE_MEMORY_SLOT);
+            gen.addAdd(UDP_HEADER_LEN);
+            gen.addSwap();
+            gen.addLoad16(Register.R0, IPV4_TOTAL_LENGTH_OFFSET);
+            gen.addNeg(Register.R1);
+            gen.addAddR1();
+            gen.addJumpIfR0NotEquals(1, nextFilterLabel);
+
+            // R0 = R0 + R1 -> R0 contains IP header
+            gen.addLoadFromMemory(Register.R1, gen.IPV4_HEADER_SIZE_MEMORY_SLOT);
+            gen.addLoadImmediate(Register.R0, ETH_HEADER_LEN);
+            gen.addAddR1();
+            gen.addJumpIfBytesNotEqual(Register.R0, mPortFingerprint, nextFilterLabel);
+
+            // Payload offset = R0 + UDP header length
+            gen.addAdd(UDP_HEADER_LEN);
+            gen.addJumpIfBytesNotEqual(Register.R0, mPayload, nextFilterLabel);
+
+            maybeSetupCounter(gen, Counter.DROPPED_IPV4_NATT_KEEPALIVE);
+            gen.addJump(mCountAndDropLabel);
+            gen.defineLabel(nextFilterLabel);
+        }
+    }
+
+    private class NattKeepaliveAckV6 extends NattKeepaliveAck {
+        NattKeepaliveAckV6(final NattKeepalivePacketDataParcelable sentKeepalivePacket) {
+            this(new NattKeepaliveAckData(sentKeepalivePacket));
+        }
+
+        NattKeepaliveAckV6(final NattKeepaliveAckData packet) {
+            super(packet, concatArrays(packet.srcAddress, packet.dstAddress) /* srcDstAddr */);
+        }
+
+        @Override
+        void generateFilterLocked(ApfGenerator gen) throws IllegalInstructionException {
+            throw new UnsupportedOperationException("IPv6 NAT-T Keepalive is not supported yet");
+        }
+    }
+
+    // A class to hold TCP keepalive ack information.
+    private abstract static class TcpKeepaliveAck extends KeepalivePacket {
         protected static class TcpKeepaliveAckData {
             public final byte[] srcAddress;
             public final int srcPort;
@@ -870,6 +989,7 @@ public class ApfFilter {
             public final int dstPort;
             public final int seq;
             public final int ack;
+
             // Create the characteristics of the ack packet from the sent keepalive packet.
             TcpKeepaliveAckData(final TcpKeepalivePacketDataParcelable sentKeepalivePacket) {
                 srcAddress = sentKeepalivePacket.dstAddress;
@@ -902,28 +1022,18 @@ public class ApfFilter {
             return fp.array();
         }
 
-        static byte[] concatArrays(final byte[]... arr) {
-            int size = 0;
-            for (byte[] a : arr) {
-                size += a.length;
-            }
-            final byte[] result = new byte[size];
-            int offset = 0;
-            for (byte[] a : arr) {
-                System.arraycopy(a, 0, result, offset, a.length);
-                offset += a.length;
-            }
-            return result;
-        }
-
         public String toString() {
-            return String.format("%s(%d) -> %s(%d), seq=%d, ack=%d",
-                    mPacket.srcAddress,
-                    mPacket.srcPort,
-                    mPacket.dstAddress,
-                    mPacket.dstPort,
-                    mPacket.seq,
-                    mPacket.ack);
+            try {
+                return String.format("%s -> %s , seq=%d, ack=%d",
+                        NetworkStackUtils.addressAndPortToString(
+                                InetAddress.getByAddress(mPacket.srcAddress), mPacket.srcPort),
+                        NetworkStackUtils.addressAndPortToString(
+                                InetAddress.getByAddress(mPacket.dstAddress), mPacket.dstPort),
+                        Integer.toUnsignedLong(mPacket.seq),
+                        Integer.toUnsignedLong(mPacket.ack));
+            } catch (UnknownHostException e) {
+                return "Unknown host";
+            }
         }
 
         // Append a filter for this keepalive ack to {@code gen}.
@@ -933,7 +1043,6 @@ public class ApfFilter {
     }
 
     private class TcpKeepaliveAckV4 extends TcpKeepaliveAck {
-        private static final int IPV4_SRC_ADDR_OFFSET = IP_HEADER_OFFSET + 12;
 
         TcpKeepaliveAckV4(final TcpKeepalivePacketDataParcelable sentKeepalivePacket) {
             this(new TcpKeepaliveAckData(sentKeepalivePacket));
@@ -987,7 +1096,7 @@ public class ApfFilter {
 
         @Override
         void generateFilterLocked(ApfGenerator gen) throws IllegalInstructionException {
-            throw new UnsupportedOperationException("IPv6 Keepalive is not supported yet");
+            throw new UnsupportedOperationException("IPv6 TCP Keepalive is not supported yet");
         }
     }
 
@@ -997,7 +1106,7 @@ public class ApfFilter {
     @GuardedBy("this")
     private ArrayList<Ra> mRas = new ArrayList<>();
     @GuardedBy("this")
-    private SparseArray<TcpKeepaliveAck> mKeepaliveAcks = new SparseArray<>();
+    private SparseArray<KeepalivePacket> mKeepalivePackets = new SparseArray<>();
 
     // There is always some marginal benefit to updating the installed APF program when an RA is
     // seen because we can extend the program's lifetime slightly, but there is some cost to
@@ -1171,8 +1280,11 @@ public class ApfFilter {
                 gen.addJumpIfR0Equals(broadcastAddr, mCountAndDropLabel);
             }
 
-            // If any keepalive filter matches, drop
+            // If any TCP keepalive filter matches, drop
             generateV4KeepaliveFilters(gen);
+
+            // If any NAT-T keepalive filter matches, drop
+            generateV4NattKeepaliveFilters(gen);
 
             // Otherwise, this is an IPv4 unicast, pass
             // If L2 broadcast packet, drop.
@@ -1191,25 +1303,36 @@ public class ApfFilter {
         gen.addJump(mCountAndPassLabel);
     }
 
-    private void generateV4KeepaliveFilters(ApfGenerator gen) throws IllegalInstructionException {
-        final String skipV4KeepaliveFilter = "skip_v4_keepalive_filter";
-        final boolean haveV4KeepaliveAcks = NetworkStackUtils.any(mKeepaliveAcks,
-                ack -> ack instanceof TcpKeepaliveAckV4);
+    private void generateFilters(ApfGenerator gen, Class<?> filterType, int proto, int offset,
+            String label) throws IllegalInstructionException {
+        final boolean haveKeepaliveAcks = NetworkStackUtils.any(mKeepalivePackets,
+                ack -> filterType.isInstance(ack));
 
-        // If no keepalive acks
-        if (!haveV4KeepaliveAcks) return;
+        // If no keepalive packets of this type
+        if (!haveKeepaliveAcks) return;
 
-        // If not tcp, skip keepalive filters
-        gen.addLoad8(Register.R0, IPV4_PROTOCOL_OFFSET);
-        gen.addJumpIfR0NotEquals(IPPROTO_TCP, skipV4KeepaliveFilter);
+        // If not the right proto, skip keepalive filters
+        gen.addLoad8(Register.R0, offset);
+        gen.addJumpIfR0NotEquals(proto, label);
 
-        // Drop IPv4 Keepalive acks
-        for (int i = 0; i < mKeepaliveAcks.size(); ++i) {
-            final TcpKeepaliveAck ack = mKeepaliveAcks.valueAt(i);
-            if (ack instanceof TcpKeepaliveAckV4) ack.generateFilterLocked(gen);
+        // Drop Keepalive packets
+        for (int i = 0; i < mKeepalivePackets.size(); ++i) {
+            final KeepalivePacket ack = mKeepalivePackets.valueAt(i);
+            if (filterType.isInstance(ack)) ack.generateFilterLocked(gen);
         }
 
-        gen.defineLabel(skipV4KeepaliveFilter);
+        gen.defineLabel(label);
+    }
+
+    private void generateV4KeepaliveFilters(ApfGenerator gen) throws IllegalInstructionException {
+        generateFilters(gen, TcpKeepaliveAckV4.class, IPPROTO_TCP, IPV4_PROTOCOL_OFFSET,
+                "skip_v4_keepalive_filter");
+    }
+
+    private void generateV4NattKeepaliveFilters(ApfGenerator gen)
+            throws IllegalInstructionException {
+        generateFilters(gen, NattKeepaliveAckV4.class, IPPROTO_UDP, IPV4_PROTOCOL_OFFSET,
+                "skip_v4_nattkeepalive_filter");
     }
 
     /**
@@ -1294,24 +1417,8 @@ public class ApfFilter {
     }
 
     private void generateV6KeepaliveFilters(ApfGenerator gen) throws IllegalInstructionException {
-        final String skipV6KeepaliveFilter = "skip_v6_keepalive_filter";
-        final boolean haveV6KeepaliveAcks = NetworkStackUtils.any(mKeepaliveAcks,
-                ack -> ack instanceof TcpKeepaliveAckV6);
-
-        // If no keepalive acks
-        if (!haveV6KeepaliveAcks) return;
-
-        // If not tcp, skip keepalive filters
-        gen.addLoad8(Register.R0, IPV6_NEXT_HEADER_OFFSET);
-        gen.addJumpIfR0NotEquals(IPPROTO_TCP, skipV6KeepaliveFilter);
-
-        // Drop IPv6 Keepalive acks
-        for (int i = 0; i < mKeepaliveAcks.size(); ++i) {
-            final TcpKeepaliveAck ack = mKeepaliveAcks.valueAt(i);
-            if (ack instanceof TcpKeepaliveAckV6) ack.generateFilterLocked(gen);
-        }
-
-        gen.defineLabel(skipV6KeepaliveFilter);
+        generateFilters(gen, TcpKeepaliveAckV6.class, IPPROTO_TCP, IPV6_NEXT_HEADER_OFFSET,
+                "skip_v6_keepalive_filter");
     }
 
     /**
@@ -1701,11 +1808,11 @@ public class ApfFilter {
     public synchronized void addTcpKeepalivePacketFilter(final int slot,
             final TcpKeepalivePacketDataParcelable sentKeepalivePacket) {
         log("Adding keepalive ack(" + slot + ")");
-        if (null != mKeepaliveAcks.get(slot)) {
+        if (null != mKeepalivePackets.get(slot)) {
             throw new IllegalArgumentException("Keepalive slot " + slot + " is occupied");
         }
         final int ipVersion = sentKeepalivePacket.srcAddress.length == 4 ? 4 : 6;
-        mKeepaliveAcks.put(slot, (ipVersion == 4)
+        mKeepalivePackets.put(slot, (ipVersion == 4)
                 ? new TcpKeepaliveAckV4(sentKeepalivePacket)
                 : new TcpKeepaliveAckV6(sentKeepalivePacket));
         installNewProgramLocked();
@@ -1720,7 +1827,15 @@ public class ApfFilter {
      */
     public synchronized void addNattKeepalivePacketFilter(final int slot,
             final NattKeepalivePacketDataParcelable sentKeepalivePacket) {
-        Log.e(TAG, "APF add NATT keepalive filter is not implemented");
+        log("Adding NAT-T keepalive packet(" + slot + ")");
+        if (null != mKeepalivePackets.get(slot)) {
+            throw new IllegalArgumentException("Natt Keepalive slot " + slot + " is occupied");
+        }
+        final int ipVersion = sentKeepalivePacket.srcAddress.length == 4 ? 4 : 6;
+        mKeepalivePackets.put(slot, (ipVersion == 4)
+                ? new NattKeepaliveAckV4(sentKeepalivePacket)
+                : new NattKeepaliveAckV6(sentKeepalivePacket));
+        installNewProgramLocked();
     }
 
     /**
@@ -1729,7 +1844,8 @@ public class ApfFilter {
      * @param slot The index used to access the filter.
      */
     public synchronized void removeKeepalivePacketFilter(int slot) {
-        mKeepaliveAcks.remove(slot);
+        log("Removing keepalive packet(" + slot + ")");
+        mKeepalivePackets.remove(slot);
         installNewProgramLocked();
     }
 
@@ -1785,14 +1901,29 @@ public class ApfFilter {
         }
         pw.decreaseIndent();
 
-        pw.println("Keepalive filters:");
+        pw.println("TCP Keepalive filters:");
         pw.increaseIndent();
-        for (int i = 0; i < mKeepaliveAcks.size(); ++i) {
-            final TcpKeepaliveAck keepaliveAck = mKeepaliveAcks.valueAt(i);
-            pw.print("Slot ");
-            pw.print(mKeepaliveAcks.keyAt(i));
-            pw.print(" : ");
-            pw.println(keepaliveAck);
+        for (int i = 0; i < mKeepalivePackets.size(); ++i) {
+            final KeepalivePacket keepalivePacket = mKeepalivePackets.valueAt(i);
+            if (keepalivePacket instanceof TcpKeepaliveAck) {
+                pw.print("Slot ");
+                pw.print(mKeepalivePackets.keyAt(i));
+                pw.print(" : ");
+                pw.println(keepalivePacket);
+            }
+        }
+        pw.decreaseIndent();
+
+        pw.println("NAT-T Keepalive filters:");
+        pw.increaseIndent();
+        for (int i = 0; i < mKeepalivePackets.size(); ++i) {
+            final KeepalivePacket keepalivePacket = mKeepalivePackets.valueAt(i);
+            if (keepalivePacket instanceof NattKeepaliveAck) {
+                pw.print("Slot ");
+                pw.print(mKeepalivePackets.keyAt(i));
+                pw.print(" : ");
+                pw.println(keepalivePacket);
+            }
         }
         pw.decreaseIndent();
 
@@ -1857,5 +1988,19 @@ public class ApfFilter {
                 + (uint8(bytes[1]) << 16)
                 + (uint8(bytes[2]) << 8)
                 + (uint8(bytes[3]));
+    }
+
+    private static byte[] concatArrays(final byte[]... arr) {
+        int size = 0;
+        for (byte[] a : arr) {
+            size += a.length;
+        }
+        final byte[] result = new byte[size];
+        int offset = 0;
+        for (byte[] a : arr) {
+            System.arraycopy(a, 0, result, offset, a.length);
+            offset += a.length;
+        }
+        return result;
     }
 }
