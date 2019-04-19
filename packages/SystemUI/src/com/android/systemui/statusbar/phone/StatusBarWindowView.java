@@ -107,12 +107,13 @@ public class StatusBarWindowView extends FrameLayout {
     private boolean mTouchActive;
     private boolean mExpandAnimationRunning;
     private boolean mExpandAnimationPending;
+    private boolean mSuppressingWakeUpGesture;
 
     private final GestureDetector.SimpleOnGestureListener mGestureListener =
             new GestureDetector.SimpleOnGestureListener() {
         @Override
         public boolean onSingleTapConfirmed(MotionEvent e) {
-            if (mSingleTapEnabled) {
+            if (mSingleTapEnabled && !mSuppressingWakeUpGesture) {
                 mService.wakeUpIfDozing(SystemClock.uptimeMillis(), StatusBarWindowView.this,
                         "SINGLE_TAP");
                 return true;
@@ -325,6 +326,10 @@ public class StatusBarWindowView extends FrameLayout {
 
     public void setTouchActive(boolean touchActive) {
         mTouchActive = touchActive;
+    }
+
+    void suppressWakeUpGesture(boolean suppress) {
+        mSuppressingWakeUpGesture = suppress;
     }
 
     @Override
