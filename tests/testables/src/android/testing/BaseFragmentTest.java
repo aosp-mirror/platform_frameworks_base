@@ -52,7 +52,7 @@ public abstract class BaseFragmentTest {
 
     private static final int VIEW_ID = 42;
     private final Class<? extends Fragment> mCls;
-    private Handler mHandler;
+    protected Handler mHandler;
     protected FrameLayout mView;
     protected FragmentController mFragments;
     protected Fragment mFragment;

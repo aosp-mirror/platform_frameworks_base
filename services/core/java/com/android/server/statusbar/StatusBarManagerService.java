@@ -843,10 +843,9 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
     }
 
-    // TODO(b/117478341): support back button change when IME is showing on a external display.
     @Override
-    public void setImeWindowStatus(final IBinder token, final int vis, final int backDisposition,
-            final boolean showImeSwitcher) {
+    public void setImeWindowStatus(int displayId, final IBinder token, final int vis,
+            final int backDisposition, final boolean showImeSwitcher) {
         enforceStatusBar();
 
         if (SPEW) {
@@ -857,18 +856,13 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             // In case of IME change, we need to call up setImeWindowStatus() regardless of
             // mImeWindowVis because mImeWindowVis may not have been set to false when the
             // previous IME was destroyed.
-            // TODO(b/117478341): support back button change when IME is showing on a external
-            // display.
-            getUiState(DEFAULT_DISPLAY)
-                    .setImeWindowState(vis, backDisposition, showImeSwitcher, token);
+            getUiState(displayId).setImeWindowState(vis, backDisposition, showImeSwitcher, token);
 
             mHandler.post(() -> {
                 if (mBar == null) return;
                 try {
-                    // TODO(b/117478341): support back button change when IME is showing on a
-                    // external display.
                     mBar.setImeWindowStatus(
-                            DEFAULT_DISPLAY, token, vis, backDisposition, showImeSwitcher);
+                            displayId, token, vis, backDisposition, showImeSwitcher);
                 } catch (RemoteException ex) { }
             });
         }
