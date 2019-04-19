@@ -147,27 +147,11 @@ public class NotificationInterruptionStateProvider {
      * @return true if the entry should bubble up, false otherwise
      */
     public boolean shouldBubbleUp(NotificationEntry entry) {
-        final StatusBarNotification sbn = entry.notification;
-        if (!entry.canBubble) {
-            if (DEBUG) {
-                Log.d(TAG, "No bubble up: not allowed to bubble: " + sbn.getKey());
-            }
-            return false;
-        }
-
+        StatusBarNotification sbn = entry.notification;
         if (!entry.isBubble()) {
             if (DEBUG) {
                 Log.d(TAG, "No bubble up: notification " + sbn.getKey()
                         + " is bubble? " + entry.isBubble());
-            }
-            return false;
-        }
-
-        final Notification n = sbn.getNotification();
-        if (n.getBubbleMetadata() == null || n.getBubbleMetadata().getIntent() == null) {
-            if (DEBUG) {
-                Log.d(TAG, "No bubble up: notification: " + sbn.getKey()
-                        + " doesn't have valid metadata");
             }
             return false;
         }

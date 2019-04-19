@@ -16,7 +16,6 @@
 
 package com.android.systemui.bubbles;
 
-import static android.app.Notification.FLAG_BUBBLE;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -26,7 +25,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -49,18 +47,15 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -143,7 +138,7 @@ public class BubbleControllerTest extends SysuiTestCase {
 
         // Some bubbles want to suppress notifs
         Notification.BubbleMetadata suppressNotifMetadata =
-                getBuilder().setSuppressNotification(true).build();
+                getBuilder().setSuppressInitialNotification(true).build();
         mSuppressNotifRow = mNotificationTestHelper.createBubble(suppressNotifMetadata,
                 FOREGROUND_TEST_PKG_NAME);
 
@@ -151,15 +146,9 @@ public class BubbleControllerTest extends SysuiTestCase {
         when(mNotificationEntryManager.getNotificationData()).thenReturn(mNotificationData);
         when(mNotificationData.getChannel(mRow.getEntry().key)).thenReturn(mRow.getEntry().channel);
 
-        TestableNotificationInterruptionStateProvider interruptionStateProvider =
-                new TestableNotificationInterruptionStateProvider(mContext);
-        interruptionStateProvider.setUpWithPresenter(
-                mock(NotificationPresenter.class),
-                mock(HeadsUpManager.class),
-                mock(NotificationInterruptionStateProvider.HeadsUpSuppressor.class));
         mBubbleData = new BubbleData(mContext);
         mBubbleController = new TestableBubbleController(mContext, mStatusBarWindowController,
-                mBubbleData, mConfigurationController, interruptionStateProvider);
+                mBubbleData, mConfigurationController);
         mBubbleController.setBubbleStateChangeListener(mBubbleStateChangeListener);
         mBubbleController.setExpandListener(mBubbleExpandListener);
 
@@ -498,41 +487,17 @@ public class BubbleControllerTest extends SysuiTestCase {
         verify(mDeleteIntent, times(2)).send();
     }
 
-    @Test
-    public void testRemoveBubble_noLongerBubbleAfterUpdate()
-            throws PendingIntent.CanceledException {
-        mBubbleController.updateBubble(mRow.getEntry());
-        assertTrue(mBubbleController.hasBubbles());
-
-        mRow.getEntry().notification.getNotification().flags &= ~FLAG_BUBBLE;
-        mEntryListener.onPreEntryUpdated(mRow.getEntry());
-
-        assertFalse(mBubbleController.hasBubbles());
-        verify(mDeleteIntent, never()).send();
-    }
-
     static class TestableBubbleController extends BubbleController {
         // Let's assume surfaces can be synchronized immediately.
         TestableBubbleController(Context context,
                 StatusBarWindowController statusBarWindowController, BubbleData data,
-                ConfigurationController configurationController,
-                NotificationInterruptionStateProvider interruptionStateProvider) {
-            super(context, statusBarWindowController, data, Runnable::run,
-                    configurationController, interruptionStateProvider);
+                ConfigurationController configurationController) {
+            super(context, statusBarWindowController, data, Runnable::run, configurationController);
         }
 
         @Override
         public boolean shouldAutoBubbleForFlags(Context c, NotificationEntry entry) {
             return entry.notification.getNotification().getBubbleMetadata() != null;
-        }
-    }
-
-    public static class TestableNotificationInterruptionStateProvider extends
-            NotificationInterruptionStateProvider {
-
-        public TestableNotificationInterruptionStateProvider(Context context) {
-            super(context);
-            mUseHeadsUp = true;
         }
     }
 
