@@ -60,6 +60,8 @@ final class CoreSettingsObserver extends ContentObserver {
         sGlobalSettingToTypeMap.put(Settings.Global.GAME_DRIVER_OPT_OUT_APPS, String.class);
         sGlobalSettingToTypeMap.put(Settings.Global.GAME_DRIVER_BLACKLIST, String.class);
         sGlobalSettingToTypeMap.put(Settings.Global.GAME_DRIVER_WHITELIST, String.class);
+        sGlobalSettingToTypeMap.put(Settings.Global.GAME_DRIVER_BLACKLISTS, String.class);
+        sGlobalSettingToTypeMap.put(Settings.Global.GAME_DRIVER_SPHAL_LIBRARIES, String.class);
         // add other global settings here...
     }
 
