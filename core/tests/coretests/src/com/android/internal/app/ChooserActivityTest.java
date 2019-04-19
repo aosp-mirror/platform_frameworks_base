@@ -18,6 +18,7 @@ package com.android.internal.app;
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
@@ -245,7 +246,7 @@ public class ChooserActivityTest {
         waitForIdle();
 
         assertThat(activity.getAdapter().getCount(), is(2));
-        onView(withId(R.id.profile_button)).check(matches(not(isDisplayed())));
+        onView(withId(R.id.profile_button)).check(doesNotExist());
 
         ResolveInfo[] chosen = new ResolveInfo[1];
         sOverrides.onSafelyStartCallback = targetInfo -> {
