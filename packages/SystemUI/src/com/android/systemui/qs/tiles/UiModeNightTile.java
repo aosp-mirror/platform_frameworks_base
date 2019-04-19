@@ -81,6 +81,7 @@ public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
         state.icon = mIcon;
         state.expandedAccessibilityClassName = Switch.class.getName();
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
+        state.showRippleEffect = false;
     }
 
     @Override
