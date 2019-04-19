@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.net.metrics;
+package com.android.networkstack.metrics;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -41,7 +41,6 @@ public class DataStallStatsUtils {
     private static int probeResultToEnum(@Nullable final CaptivePortalProbeResult result) {
         if (result == null) return DataStallEventProto.INVALID;
 
-        // TODO: Add partial connectivity support.
         if (result.isSuccessful()) {
             return DataStallEventProto.VALID;
         } else if (result.isPortal()) {
@@ -63,6 +62,12 @@ public class DataStallStatsUtils {
             Log.d(TAG, "write: " + stats + " with result: " + validationResult
                     + ", dns: " + HexDump.toHexString(stats.mDns));
         }
-        // TODO(b/124613085): Send to Statsd once the public StatsLog API is ready.
+        NetworkStackStatsLog.write(NetworkStackStatsLog.DATA_STALL_EVENT,
+                stats.mEvaluationType,
+                validationResult,
+                stats.mNetworkType,
+                stats.mWifiInfo,
+                stats.mCellularInfo,
+                stats.mDns);
     }
 }

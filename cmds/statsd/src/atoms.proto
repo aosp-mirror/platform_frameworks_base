@@ -134,7 +134,7 @@ message Atom {
         LowMemReported low_mem_reported = 81;
         ThermalThrottlingStateChanged thermal_throttling = 86;
         NetworkDnsEventReported network_dns_event_reported = 116;
-        DataStallEvent data_stall_event = 121;
+        DataStallEvent data_stall_event = 121 [(log_from_module) = "network_stack"];
         BluetoothLinkLayerConnectionEvent bluetooth_link_layer_connection_event = 125;
         BluetoothAclConnectionStateChanged bluetooth_acl_connection_state_changed = 126;
         BluetoothScoConnectionStateChanged bluetooth_sco_connection_state_changed = 127;
@@ -165,7 +165,7 @@ message Atom {
         BluetoothSmpPairingEventReported bluetooth_smp_pairing_event_reported = 167;
         ProcessStartTime process_start_time = 169;
         BluetoothSocketConnectionStateChanged bluetooth_socket_connection_state_changed = 171;
-        NetworkStackReported network_stack_reported = 182;
+        NetworkStackReported network_stack_reported = 182 [(log_from_module) = "network_stack"];
     }
 
     // Pulled events will start at field 10000.
