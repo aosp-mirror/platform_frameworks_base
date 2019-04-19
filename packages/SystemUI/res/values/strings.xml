@@ -277,8 +277,6 @@
     <string name="accessibility_send_smart_reply">Send</string>
     <!-- Content description of the manage notification button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_manage_notification">Manage notifications</string>
-    <!-- Click action label for accessibility for the unlock button. [CHAR LIMIT=NONE] -->
-    <string name="unlock_label">unlock</string>
     <!-- Click action label for accessibility for the phone button. [CHAR LIMIT=NONE] -->
     <string name="phone_label">open phone</string>
     <!-- Click action label for accessibility for the voice assist button. This is not shown on-screen and is an accessibility label for the icon which launches the voice assist from the lock screen.[CHAR LIMIT=NONE] -->

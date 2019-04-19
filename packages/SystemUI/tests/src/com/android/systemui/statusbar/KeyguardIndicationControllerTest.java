@@ -40,10 +40,12 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
+import com.android.systemui.statusbar.phone.LockIcon;
 import com.android.systemui.util.wakelock.WakeLockFake;
 
 import org.junit.Before;
@@ -66,6 +68,10 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     private ViewGroup mIndicationArea;
     @Mock
     private KeyguardIndicationTextView mDisclosure;
+    @Mock
+    private LockIcon mLockIcon;
+    @Mock
+    private LockPatternUtils mLockPatternUtils;
     private KeyguardIndicationTextView mTextView;
 
     private KeyguardIndicationController mController;
@@ -95,7 +101,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         if (Looper.myLooper() == null) {
             Looper.prepare();
         }
-        mController = new KeyguardIndicationController(mContext, mIndicationArea, null, mWakeLock);
+        mController = new KeyguardIndicationController(mContext, mIndicationArea, mLockIcon,
+                mLockPatternUtils, mWakeLock);
     }
 
     @Test

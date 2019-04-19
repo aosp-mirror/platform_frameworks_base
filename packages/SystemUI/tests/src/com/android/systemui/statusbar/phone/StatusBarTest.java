@@ -170,6 +170,8 @@ public class StatusBarTest extends SysuiTestCase {
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock
     private AmbientDisplayConfiguration mAmbientDisplayConfiguration;
+    @Mock
+    private StatusBarWindowView mStatusBarWindowView;
 
     private TestableStatusBar mStatusBar;
     private FakeMetricsLogger mMetricsLogger;
@@ -261,7 +263,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mDozeScrimController, mock(NotificationShelf.class),
                 mLockscreenUserManager, mCommandQueue, mNotificationPresenter,
                 mock(BubbleController.class), mock(NavigationBarController.class),
-                mock(AutoHideController.class), mKeyguardUpdateMonitor);
+                mock(AutoHideController.class), mKeyguardUpdateMonitor, mStatusBarWindowView);
         mStatusBar.mContext = mContext;
         mStatusBar.mComponents = mContext.getComponents();
         SystemUIFactory.getInstance().getRootComponent()
@@ -767,7 +769,8 @@ public class StatusBarTest extends SysuiTestCase {
                 BubbleController bubbleController,
                 NavigationBarController navBarController,
                 AutoHideController autoHideController,
-                KeyguardUpdateMonitor keyguardUpdateMonitor) {
+                KeyguardUpdateMonitor keyguardUpdateMonitor,
+                StatusBarWindowView statusBarWindow) {
             mStatusBarKeyguardViewManager = man;
             mUnlockMethodCache = unlock;
             mKeyguardIndicationController = key;
@@ -801,6 +804,7 @@ public class StatusBarTest extends SysuiTestCase {
             mNavigationBarController = navBarController;
             mAutoHideController = autoHideController;
             mKeyguardUpdateMonitor = keyguardUpdateMonitor;
+            mStatusBarWindow = statusBarWindow;
         }
 
         private WakefulnessLifecycle createAwakeWakefulnessLifecycle() {
