@@ -1967,5 +1967,7 @@ interface ITelephony {
 
     boolean isModemEnabledForSlot(int slotIndex, String callingPackage);
 
-    boolean isMmsDataEnabled(int subId, String callingPackage);
+    boolean isDataEnabledForApn(int apnType, int subId, String callingPackage);
+
+    boolean isApnMetered(int apnType, int subId);
 }

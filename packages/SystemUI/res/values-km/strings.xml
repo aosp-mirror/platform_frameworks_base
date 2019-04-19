@@ -185,8 +185,8 @@
     <string name="cell_data_off_content_description" msgid="4356113230238585072">"ទិន្នន័យ​ទូរសព្ទចល័ត​បានបិទ"</string>
     <string name="not_default_data_content_description" msgid="9194667237765917844">"មិនបានកំណត់​ឱ្យប្រើ​ទិន្នន័យ​ទេ"</string>
     <string name="cell_data_off" msgid="1051264981229902873">"បិទ"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ការ​ភ្ជាប់​ប៊្លូធូស។"</string>
-    <string name="accessibility_airplane_mode" msgid="834748999790763092">"របៀប​​ពេលជិះ​យន្តហោះ"</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ការ​ភ្ជាប់​តាមប៊្លូធូស"</string>
+    <string name="accessibility_airplane_mode" msgid="834748999790763092">"ពេល​ជិះ​យន្តហោះ"</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"បើក VPN ។"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"គ្មានស៊ីមកាតទេ។"</string>
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"បណ្តាញ​ក្រុមហ៊ុនសេវាទូរសព្ទ​កំពុងផ្លាស់ប្តូរ"</string>
@@ -368,6 +368,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"រហូត​ដល់​ពេល​ថ្ងៃរះ"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"បើក​នៅម៉ោង <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"រហូតដល់​ម៉ោង <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"រចនាប័ទ្ម​​​ងងឹត"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"បាន​បិទ NFC"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"បាន​បើក NFC"</string>

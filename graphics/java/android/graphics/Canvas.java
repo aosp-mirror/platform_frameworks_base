@@ -1700,10 +1700,7 @@ public class Canvas extends BaseCanvas {
      *
      * @param color the color to draw onto the canvas
      * @param mode the porter-duff mode to apply to the color
-     *
-     * @deprecated use {@link #drawColor(int, BlendMode)} instead
      */
-    @Deprecated
     public void drawColor(@ColorInt int color, @NonNull PorterDuff.Mode mode) {
         super.drawColor(color, mode);
     }

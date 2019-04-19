@@ -419,8 +419,8 @@ public class InputMethodAndSubtypeUtil {
         return configurationLocale;
     }
 
-    public static boolean isValidSystemNonAuxAsciiCapableIme(InputMethodInfo imi) {
-        if (imi.isAuxiliaryIme() || !imi.isSystem()) {
+    public static boolean isValidNonAuxAsciiCapableIme(InputMethodInfo imi) {
+        if (imi.isAuxiliaryIme()) {
             return false;
         }
         final int subtypeCount = imi.getSubtypeCount();

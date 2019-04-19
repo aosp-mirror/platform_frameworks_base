@@ -16,6 +16,8 @@
 
 package com.android.systemui.bubbles;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.Display.INVALID_DISPLAY;
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
@@ -535,6 +537,24 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         return mTempRect;
     }
 
+    /**
+     * The display id of the expanded view, if the stack is expanded and not occluded by the
+     * status bar, otherwise returns {@link Display#INVALID_DISPLAY}.
+     */
+    public int getExpandedDisplayId(Context context) {
+        if (mStackView == null) {
+            return INVALID_DISPLAY;
+        }
+        boolean defaultDisplay = context.getDisplay() != null
+                && context.getDisplay().getDisplayId() == DEFAULT_DISPLAY;
+        Bubble b = mStackView.getExpandedBubble();
+        if (defaultDisplay && b != null && isStackExpanded()
+                && !mStatusBarWindowController.getPanelExpanded()) {
+            return b.expandedView.getVirtualDisplayId();
+        }
+        return INVALID_DISPLAY;
+    }
+
     @VisibleForTesting
     BubbleStackView getStackView() {
         return mStackView;
@@ -595,7 +615,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
     private void updateShowInShadeForSuppressNotification(NotificationEntry entry) {
         boolean suppressNotification = entry.getBubbleMetadata() != null
-                && entry.getBubbleMetadata().getSuppressNotification()
+                && entry.getBubbleMetadata().isNotificationSuppressed()
                 && isForegroundApp(mContext, entry.notification.getPackageName());
         entry.setShowInShadeWhenBubble(!suppressNotification);
     }

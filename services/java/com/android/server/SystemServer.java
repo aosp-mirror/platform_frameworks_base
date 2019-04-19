@@ -158,8 +158,6 @@ import com.android.server.wm.WindowManagerService;
 
 import dalvik.system.VMRuntime;
 
-import com.google.android.startop.iorap.IorapForwardingService;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
@@ -1070,10 +1068,6 @@ public final class SystemServer {
 
             traceBeginAndSlog("PinnerService");
             mSystemServiceManager.startService(PinnerService.class);
-            traceEnd();
-
-            traceBeginAndSlog("IorapForwardingService");
-            mSystemServiceManager.startService(IorapForwardingService.class);
             traceEnd();
 
             traceBeginAndSlog("SignedConfigService");

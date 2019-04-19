@@ -981,6 +981,12 @@ public abstract class ContentResolver implements ContentInterface {
         }
     }
 
+    /** {@hide} */
+    public final @NonNull Uri canonicalizeOrElse(@NonNull Uri uri) {
+        final Uri res = canonicalize(uri);
+        return (res != null) ? res : uri;
+    }
+
     /**
      * Transform the given <var>url</var> to a canonical representation of
      * its referenced resource, which can be used across devices, persisted,

@@ -172,8 +172,7 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G 이상"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
-    <!-- no translation found for data_connection_5ge (4699478963278829331) -->
-    <skip />
+    <string name="data_connection_5ge" msgid="4699478963278829331">"5Ge"</string>
     <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
     <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
@@ -369,6 +368,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"일출까지"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g>에"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g>까지"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"어두운 테마"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC 사용 중지됨"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC 사용 설정됨"</string>
@@ -759,7 +759,7 @@
     <string name="left_icon" msgid="3096287125959387541">"왼쪽 아이콘"</string>
     <string name="right_icon" msgid="3952104823293824311">"오른쪽 아이콘"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"길게 터치하고 드래그하여 타일 추가"</string>
-    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"길게 터치하고 드래그하여 타일을 다시 정렬"</string>
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"길게 터치하고 드래그하여 타일 재정렬"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"여기로 드래그하여 삭제"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"6개 이상의 타일이 필요합니다."</string>
     <string name="qs_edit" msgid="2232596095725105230">"수정"</string>
@@ -850,7 +850,7 @@
     <string name="notification_channel_battery" msgid="5786118169182888462">"배터리"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"스크린샷"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"일반 메시지"</string>
-    <string name="notification_channel_storage" msgid="3077205683020695313">"저장공간"</string>
+    <string name="notification_channel_storage" msgid="3077205683020695313">"저장용량"</string>
     <string name="notification_channel_hints" msgid="7323870212489152689">"힌트"</string>
     <string name="instant_apps" msgid="6647570248119804907">"인스턴트 앱"</string>
     <string name="instant_apps_title" msgid="8738419517367449783">"<xliff:g id="APP">%1$s</xliff:g> 실행 중"</string>

@@ -28,7 +28,7 @@ import java.util.TimeZone;
 public interface ClockPlugin extends Plugin {
 
     String ACTION = "com.android.systemui.action.PLUGIN_CLOCK";
-    int VERSION = 4;
+    int VERSION = 5;
 
     /**
      * Get the name of the clock face.
@@ -70,6 +70,14 @@ public interface ClockPlugin extends Plugin {
     default View getBigClockView() {
         return null;
     }
+
+    /**
+     * Returns the preferred Y position of the clock.
+     *
+     * @param totalHeight Height of the parent container.
+     * @return preferred Y position.
+     */
+    int getPreferredY(int totalHeight);
 
     /**
      * Allows the plugin to clean up resources when no longer needed.

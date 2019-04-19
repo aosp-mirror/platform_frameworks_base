@@ -368,6 +368,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Quyosh chiqqunicha"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g> da yoqish"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g> gacha"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Tungi mavzu"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC o‘chiq"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC yoniq"</string>
@@ -418,7 +419,7 @@
     <string name="guest_exit_guest" msgid="7187359342030096885">"Mehmon rejimini o‘chirish"</string>
     <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"Mehmon hisobi o‘chirib tashlansinmi?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"Ushbu seansdagi barcha ilovalar va ma’lumotlar o‘chirib tashlanadi."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"O‘chirish"</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"Olib tashlash"</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"Xush kelibsiz, mehmon!"</string>
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"Seansni davom ettirmoqchimisiz?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Boshidan boshlansin"</string>
@@ -682,7 +683,7 @@
     <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"O‘ngga qaragan ko‘rsatkichli chiziq"</string>
     <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"Markaziy ko‘rsatkichli chiziq"</string>
     <string name="keyboard_key_tab" msgid="3871485650463164476">"Tab"</string>
-    <string name="keyboard_key_space" msgid="2499861316311153293">"Bo‘sh joy"</string>
+    <string name="keyboard_key_space" msgid="2499861316311153293">"Probel"</string>
     <string name="keyboard_key_enter" msgid="5739632123216118137">"Enter"</string>
     <string name="keyboard_key_backspace" msgid="1559580097512385854">"Backspace"</string>
     <string name="keyboard_key_media_play_pause" msgid="3861975717393887428">"Ijro/Pauza"</string>
@@ -705,12 +706,12 @@
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Orqaga"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"Bildirishnomalar"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"Tezkor tugmalar"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="8413348767825486492">"Klaviatura sxemasini almashtirish"</string>
+    <string name="keyboard_shortcut_group_system_switch_input" msgid="8413348767825486492">"Klaviatura terilmasini almashtirish"</string>
     <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"Ilovalar"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"Yordamchi"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"Brauzer"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2064197111278436375">"Kontaktlar"</string>
-    <string name="keyboard_shortcut_group_applications_email" msgid="6257036897441939004">"E-pochta"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="6257036897441939004">"Email"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="638701213803242744">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="4775559515850922780">"Musiqa"</string>
     <string name="keyboard_shortcut_group_applications_youtube" msgid="6555453761294723317">"YouTube"</string>
@@ -731,7 +732,7 @@
     <string name="switch_bar_on" msgid="1142437840752794229">"Yoniq"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"Yoqilmagan"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Navigatsiya paneli"</string>
-    <string name="nav_bar_layout" msgid="3664072994198772020">"Sxema"</string>
+    <string name="nav_bar_layout" msgid="3664072994198772020">"Tugmalar joylashuvi"</string>
     <string name="left_nav_bar_button_type" msgid="8555981238887546528">"Qo‘shimcha Chapga tugmasi turi"</string>
     <string name="right_nav_bar_button_type" msgid="2481056627065649656">"Qo‘shimcha O‘ngga tugmasi turi"</string>
     <string name="nav_bar_default" msgid="8587114043070993007">"(standart)"</string>
@@ -789,7 +790,7 @@
     <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"<xliff:g id="POSITION">%1$d</xliff:g>-joy, “<xliff:g id="TILE_NAME">%2$s</xliff:g>” tugmasi. Tahrirlash uchun ustiga ikki marta bosing."</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"“<xliff:g id="TILE_NAME">%1$s</xliff:g>” tugmasi. Qo‘shish uchun ustiga ikki marta bosing."</string>
     <string name="accessibility_qs_edit_move_tile" msgid="2461819993780159542">"“<xliff:g id="TILE_NAME">%1$s</xliff:g>” tugmasini ko‘chirish"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"“<xliff:g id="TILE_NAME">%1$s</xliff:g>” tugmasini o‘chirish"</string>
+    <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"<xliff:g id="TILE_NAME">%1$s</xliff:g> tugmasini olib tashlash"</string>
     <string name="accessibility_qs_edit_tile_add" msgid="3520406665865985109">"<xliff:g id="POSITION">%2$d</xliff:g>-joyga buni qo‘shish: <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_move" msgid="3108103090006972938">"<xliff:g id="POSITION">%2$d</xliff:g>-joyga buni ko‘chirish: <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Tezkor sozlamalar muharriri"</string>
@@ -871,7 +872,7 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Almashtirish"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Fonda ishlayotgan ilovalar"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Batareya va trafik sarfi tafsilotlari uchun ustiga bosing"</string>
-    <string name="mobile_data_disable_title" msgid="1068272097382942231">"Mobil internet faolsizlantirilsinmi?"</string>
+    <string name="mobile_data_disable_title" msgid="1068272097382942231">"Mobil internet uzilsinmi?"</string>
     <string name="mobile_data_disable_message" msgid="4756541658791493506">"<xliff:g id="CARRIER">%s</xliff:g> orqali internetdan foydalana olmaysiz. Internet faqat Wi-Fi orqali ishlaydi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"aloqa operatoringiz"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"Ilova ruxsatnoma so‘roviga xalaqit qilayotgani tufayli, “Sozlamalar” ilovasi javobingizni tekshira olmaydi."</string>

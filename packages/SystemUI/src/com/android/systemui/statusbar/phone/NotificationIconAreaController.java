@@ -33,6 +33,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -66,11 +67,15 @@ public class NotificationIconAreaController implements DarkReceiver,
     private int mIconSize;
     private int mIconHPadding;
     private int mIconTint = Color.WHITE;
+    private int mCenteredIconTint = Color.WHITE;
 
     private StatusBar mStatusBar;
     protected View mNotificationIconArea;
     private NotificationIconContainer mNotificationIcons;
     private NotificationIconContainer mShelfIcons;
+    protected View mCenteredIconArea;
+    private NotificationIconContainer mCenteredIcon;
+    private StatusBarIconView mCenteredIconView;
     private final Rect mTintArea = new Rect();
     private ViewGroup mNotificationScrollLayout;
     private Context mContext;
@@ -124,6 +129,9 @@ public class NotificationIconAreaController implements DarkReceiver,
         mNotificationIcons = mNotificationIconArea.findViewById(R.id.notificationIcons);
 
         mNotificationScrollLayout = mStatusBar.getNotificationScrollLayout();
+
+        mCenteredIconArea = layoutInflater.inflate(R.layout.center_icon_area, null);
+        mCenteredIcon = mCenteredIconArea.findViewById(R.id.centeredIcon);
     }
 
     public void setupShelf(NotificationShelf shelf) {
@@ -140,6 +148,10 @@ public class NotificationIconAreaController implements DarkReceiver,
         }
         for (int i = 0; i < mShelfIcons.getChildCount(); i++) {
             View child = mShelfIcons.getChildAt(i);
+            child.setLayoutParams(params);
+        }
+        for (int i = 0; i < mCenteredIcon.getChildCount(); i++) {
+            View child = mCenteredIcon.getChildAt(i);
             child.setLayoutParams(params);
         }
     }
@@ -167,6 +179,13 @@ public class NotificationIconAreaController implements DarkReceiver,
     }
 
     /**
+     * Returns the view that represents the centered notification area.
+     */
+    public View getCenteredNotificationAreaView() {
+        return mCenteredIconArea;
+    }
+
+    /**
      * See {@link com.android.systemui.statusbar.policy.DarkIconDispatcher#setIconsDarkArea}.
      * Sets the color that should be used to tint any icons in the notification area.
      *
@@ -179,12 +198,21 @@ public class NotificationIconAreaController implements DarkReceiver,
         } else {
             mTintArea.set(tintArea);
         }
+
         if (mNotificationIconArea != null) {
             if (DarkIconDispatcher.isInArea(tintArea, mNotificationIconArea)) {
                 mIconTint = iconTint;
             }
         } else {
             mIconTint = iconTint;
+        }
+
+        if (mCenteredIconArea != null) {
+            if (DarkIconDispatcher.isInArea(tintArea, mCenteredIconArea)) {
+                mCenteredIconTint = iconTint;
+            }
+        } else {
+            mCenteredIconTint = iconTint;
         }
 
         applyNotificationIconsTint();
@@ -196,7 +224,13 @@ public class NotificationIconAreaController implements DarkReceiver,
 
     protected boolean shouldShowNotificationIcon(NotificationEntry entry,
             boolean showAmbient, boolean showLowPriority, boolean hideDismissed,
-            boolean hideRepliedMessages, boolean hideCurrentMedia) {
+            boolean hideRepliedMessages, boolean hideCurrentMedia, boolean hideCenteredIcon) {
+
+        final boolean isCenteredNotificationIcon = entry.centeredIcon != null
+                && Objects.equals(entry.centeredIcon, mCenteredIconView);
+        if (hideCenteredIcon == isCenteredNotificationIcon) {
+            return false;
+        }
         if (mEntryManager.getNotificationData().isAmbient(entry.key) && !showAmbient) {
             return false;
         }
@@ -229,26 +263,41 @@ public class NotificationIconAreaController implements DarkReceiver,
      * Updates the notifications with the given list of notifications to display.
      */
     public void updateNotificationIcons() {
-
         updateStatusBarIcons();
         updateShelfIcons();
+        updateCenterIcon();
 
         applyNotificationIconsTint();
     }
 
     private void updateShelfIcons() {
         updateIconsForLayout(entry -> entry.expandedIcon, mShelfIcons,
-                true /* showAmbient */, !mFullyDark /* showLowPriority */,
-                false /* hideDismissed */, mFullyDark /* hideRepliedMessages */,
-                mFullyDark /* hideCurrentMedia */);
+                true /* showAmbient */,
+                !mFullyDark /* showLowPriority */,
+                false /* hideDismissed */,
+                mFullyDark /* hideRepliedMessages */,
+                mFullyDark /* hideCurrentMedia */,
+                true /* hide centered icon */);
     }
 
     public void updateStatusBarIcons() {
         updateIconsForLayout(entry -> entry.icon, mNotificationIcons,
-                false /* showAmbient */, mShowLowPriority /* showLowPriority */,
+                false /* showAmbient */,
+                mShowLowPriority /* showLowPriority */,
                 true /* hideDismissed */,
                 true /* hideRepliedMessages */,
-                false /* hideCurrentMedia */);
+                false /* hideCurrentMedia */,
+                true /* hide centered icon */);
+    }
+
+    private void updateCenterIcon() {
+        updateIconsForLayout(entry -> entry.centeredIcon, mCenteredIcon,
+                false /* showAmbient */,
+                !mFullyDark /* showLowPriority */,
+                false /* hideDismissed */,
+                false /* hideRepliedMessages */,
+                mFullyDark /* hideCurrentMedia */,
+                false /* hide centered icon */);
     }
 
     @VisibleForTesting
@@ -267,7 +316,8 @@ public class NotificationIconAreaController implements DarkReceiver,
      */
     private void updateIconsForLayout(Function<NotificationEntry, StatusBarIconView> function,
             NotificationIconContainer hostLayout, boolean showAmbient, boolean showLowPriority,
-            boolean hideDismissed, boolean hideRepliedMessages, boolean hideCurrentMedia) {
+            boolean hideDismissed, boolean hideRepliedMessages, boolean hideCurrentMedia,
+            boolean hideCenteredIcon) {
         ArrayList<StatusBarIconView> toShow = new ArrayList<>(
                 mNotificationScrollLayout.getChildCount());
 
@@ -277,8 +327,11 @@ public class NotificationIconAreaController implements DarkReceiver,
             if (view instanceof ExpandableNotificationRow) {
                 NotificationEntry ent = ((ExpandableNotificationRow) view).getEntry();
                 if (shouldShowNotificationIcon(ent, showAmbient, showLowPriority, hideDismissed,
-                        hideRepliedMessages, hideCurrentMedia)) {
-                    toShow.add(function.apply(ent));
+                        hideRepliedMessages, hideCurrentMedia, hideCenteredIcon)) {
+                    StatusBarIconView iconView = function.apply(ent);
+                    if (iconView != null) {
+                        toShow.add(iconView);
+                    }
                 }
             }
         }
@@ -368,32 +421,54 @@ public class NotificationIconAreaController implements DarkReceiver,
 
     /**
      * Applies {@link #mIconTint} to the notification icons.
+     * Applies {@link #mCenteredIconTint} to the center notification icon.
      */
     private void applyNotificationIconsTint() {
         for (int i = 0; i < mNotificationIcons.getChildCount(); i++) {
             final StatusBarIconView iv = (StatusBarIconView) mNotificationIcons.getChildAt(i);
             if (iv.getWidth() != 0) {
-                updateTintForIcon(iv);
+                updateTintForIcon(iv, mIconTint);
             } else {
-                iv.executeOnLayout(() -> updateTintForIcon(iv));
+                iv.executeOnLayout(() -> updateTintForIcon(iv, mIconTint));
+            }
+        }
+
+        for (int i = 0; i < mCenteredIcon.getChildCount(); i++) {
+            final StatusBarIconView iv = (StatusBarIconView) mCenteredIcon.getChildAt(i);
+            if (iv.getWidth() != 0) {
+                updateTintForIcon(iv, mCenteredIconTint);
+            } else {
+                iv.executeOnLayout(() -> updateTintForIcon(iv, mCenteredIconTint));
             }
         }
     }
 
-    private void updateTintForIcon(StatusBarIconView v) {
+    private void updateTintForIcon(StatusBarIconView v, int tint) {
         boolean isPreL = Boolean.TRUE.equals(v.getTag(R.id.icon_is_pre_L));
         int color = StatusBarIconView.NO_COLOR;
         boolean colorize = !isPreL || NotificationUtils.isGrayscale(v, mContrastColorUtil);
         if (colorize) {
-            color = DarkIconDispatcher.getTint(mTintArea, v, mIconTint);
+            color = DarkIconDispatcher.getTint(mTintArea, v, tint);
         }
         v.setStaticDrawableColor(color);
-        v.setDecorColor(mIconTint);
+        v.setDecorColor(tint);
     }
 
     public void setDark(boolean dark) {
         mNotificationIcons.setDark(dark, false, 0);
         mShelfIcons.setDark(dark, false, 0);
+        mCenteredIcon.setDark(dark, false, 0);
+    }
+
+    /**
+     * Shows the icon view given in the center.
+     */
+    public void showIconCentered(NotificationEntry entry) {
+        StatusBarIconView icon = entry == null ? null :  entry.centeredIcon;
+        if (!Objects.equals(mCenteredIconView, icon)) {
+            mCenteredIconView = icon;
+            updateNotificationIcons();
+        }
     }
 
     public void showIconIsolated(StatusBarIconView icon, boolean animated) {
@@ -415,6 +490,8 @@ public class NotificationIconAreaController implements DarkReceiver,
         if (mDarkAmount == 0 && !mStatusBarStateController.isDozing()) {
             mNotificationIcons.setTranslationX(0);
             mNotificationIcons.setTranslationY(0);
+            mCenteredIcon.setTranslationX(0);
+            mCenteredIcon.setTranslationY(0);
             return;
         }
 
@@ -423,6 +500,8 @@ public class NotificationIconAreaController implements DarkReceiver,
         int translationY = getBurnInOffset(mBurnInOffset, false /* xAxis */) + yOffset;
         mNotificationIcons.setTranslationX(translationX);
         mNotificationIcons.setTranslationY(translationY);
+        mCenteredIcon.setTranslationX(translationX);
+        mCenteredIcon.setTranslationY(translationY);
     }
 
     @Override

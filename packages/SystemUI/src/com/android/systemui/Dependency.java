@@ -484,8 +484,18 @@ public class Dependency extends SystemUI {
         // with Dependency#get.
         getDependency(DumpController.class);
 
-        pw.println("Dumping existing controllers:");
-        mDependencies.values().stream().filter(obj -> obj instanceof Dumpable)
+        // If an arg is specified, try to dump the dependency
+        String controller = args != null && args.length > 1
+                ? args[1].toLowerCase()
+                : null;
+        if (controller != null) {
+            pw.println("Dumping controller=" + controller + ":");
+        } else {
+            pw.println("Dumping existing controllers:");
+        }
+        mDependencies.values().stream()
+                .filter(obj -> obj instanceof Dumpable && (controller == null
+                        || obj.getClass().getName().toLowerCase().endsWith(controller)))
                 .forEach(o -> ((Dumpable) o).dump(fd, pw, args));
     }
 

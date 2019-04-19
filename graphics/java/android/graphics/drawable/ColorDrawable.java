@@ -215,7 +215,7 @@ public class ColorDrawable extends Drawable {
     }
 
     @Override
-    public void setTintMode(@NonNull BlendMode blendMode) {
+    public void setTintBlendMode(@NonNull BlendMode blendMode) {
         mColorState.mBlendMode = blendMode;
         mBlendModeColorFilter = updateBlendModeFilter(mBlendModeColorFilter, mColorState.mTint,
                 blendMode);

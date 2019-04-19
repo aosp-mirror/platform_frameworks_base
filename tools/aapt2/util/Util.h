@@ -98,6 +98,12 @@ bool IsAndroidSplitName(const android::StringPiece& str);
 Maybe<std::string> GetFullyQualifiedClassName(const android::StringPiece& package,
                                               const android::StringPiece& class_name);
 
+// Retrieves the formatted name of aapt2.
+const char* GetToolName();
+
+// Retrieves the build fingerprint of aapt2.
+std::string GetToolFingerprint();
+
 template <typename T>
 typename std::enable_if<std::is_arithmetic<T>::value, int>::type compare(const T& a, const T& b) {
   if (a < b) {

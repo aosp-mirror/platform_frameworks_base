@@ -488,7 +488,7 @@ public class MenuInflater {
             }
 
             if (mItemIconBlendMode != null) {
-                item.setIconTintMode(mItemIconBlendMode);
+                item.setIconTintBlendMode(mItemIconBlendMode);
             }
 
             if (itemIconTintList != null) {

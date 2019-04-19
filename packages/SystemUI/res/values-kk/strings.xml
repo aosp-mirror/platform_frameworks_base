@@ -172,8 +172,7 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
-    <!-- no translation found for data_connection_5ge (4699478963278829331) -->
-    <skip />
+    <string name="data_connection_5ge" msgid="4699478963278829331">"5Ge"</string>
     <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
     <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
@@ -258,8 +257,8 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"Жұмыс режимі қосулы."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"Жұмыс режимі өшірілді."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"Жұмыс режимі қосылды."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Трафикті үнемдеу функциясы өшірілді."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Трафикті үнемдеу функциясы қосылды."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Data Saver өшірілді."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Data Saver қосылды."</string>
     <string name="accessibility_quick_settings_sensor_privacy_changed_off" msgid="5152819588955163090">"Sensor Privacy функциясы өшірулі."</string>
     <string name="accessibility_quick_settings_sensor_privacy_changed_on" msgid="529705259565826355">"Sensor Privacy функциясы қосулы."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Дисплей жарықтығы"</string>
@@ -369,6 +368,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Күн шыққанға дейін"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Қосылу уақыты: <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g> дейін"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Қараңғы тақырып"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC өшірулі"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC қосулы"</string>
@@ -706,7 +706,7 @@
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Артқа"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"Хабарландырулар"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"Пернелер тіркесімдері"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="8413348767825486492">"Пернетақта орналасуын ауыстыру"</string>
+    <string name="keyboard_shortcut_group_system_switch_input" msgid="8413348767825486492">"Пернетақта форматын ауыстыру"</string>
     <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"Қолданбалар"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"Көмекші"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"Браузер"</string>

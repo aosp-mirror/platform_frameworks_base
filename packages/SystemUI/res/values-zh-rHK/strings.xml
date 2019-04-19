@@ -368,6 +368,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"在日出時關閉"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"在<xliff:g id="TIME">%s</xliff:g>開啟"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"在<xliff:g id="TIME">%s</xliff:g>關閉"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"深色主題背景"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC 已停用"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC 已啟用"</string>

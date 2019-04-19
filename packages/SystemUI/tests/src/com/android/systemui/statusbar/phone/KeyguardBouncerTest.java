@@ -132,6 +132,7 @@ public class KeyguardBouncerTest extends SysuiTestCase {
     public void testShow_notifiesVisibility() {
         mBouncer.show(true);
         verify(mViewMediatorCallback).onBouncerVisiblityChanged(eq(true));
+        verify(mExpansionCallback).onStartingToShow();
 
         // Not called again when visible
         reset(mViewMediatorCallback);

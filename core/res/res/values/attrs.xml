@@ -2104,8 +2104,8 @@
              <p>If the app does not target at least {@link android.os.Build.VERSION_CODES#Q Q},
              this attribute is ignored.
 
-             @see android.view.Window#setEnsuringStatusBarContrastWhenTransparent -->
-        <attr name="ensuringStatusBarContrastWhenTransparent" format="boolean" />
+             @see android.view.Window#setStatusBarContrastEnforced -->
+        <attr name="enforceStatusBarContrast" format="boolean" />
 
         <!-- Sets whether the system should ensure that the navigation bar has enough
              contrast when a fully transparent background is requested.
@@ -2120,8 +2120,8 @@
              <p>If the app does not target at least {@link android.os.Build.VERSION_CODES#Q Q},
              this attribute is ignored.
 
-             @see android.view.Window#setEnsuringNavigationBarContrastWhenTransparent -->
-        <attr name="ensuringNavigationBarContrastWhenTransparent" format="boolean" />
+             @see android.view.Window#setNavigationBarContrastEnforced -->
+        <attr name="enforceNavigationBarContrast" format="boolean" />
 
         <!-- The duration, in milliseconds, of the window background fade duration
              when transitioning into or away from an Activity when called with an
@@ -3778,7 +3778,7 @@
              the settings for this service. -->
         <attr name="settingsActivity"/>
         <!-- Secure Element which the AIDs should be routed to -->
-        <attr name="secureElementName"/>
+        <attr name="secureElementName" format="string"/>
     </declare-styleable>
 
     <!-- Specify one or more <code>aid-group</code> elements inside a
@@ -8995,10 +8995,10 @@
         <!-- @hide From Theme.navigationBarColor, used for the TaskDescription navigation bar
                    color. -->
         <attr name="navigationBarColor"/>
-        <!-- @hide From Window.ensuringStatusBarContrastWhenTransparent -->
-        <attr name="ensuringStatusBarContrastWhenTransparent"/>
-        <!-- @hide From Window.ensuringNavigationBarContrastWhenTransparent -->
-        <attr name="ensuringNavigationBarContrastWhenTransparent"/>
+        <!-- @hide From Window.enforceStatusBarContrast -->
+        <attr name="enforceStatusBarContrast"/>
+        <!-- @hide From Window.enforceNavigationBarContrast -->
+        <attr name="enforceNavigationBarContrast"/>
     </declare-styleable>
 
     <declare-styleable name="Shortcut">

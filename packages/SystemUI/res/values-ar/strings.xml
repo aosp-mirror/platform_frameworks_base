@@ -119,7 +119,7 @@
     <string name="cancel" msgid="6442560571259935130">"إلغاء"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"تأكيد"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"إعادة المحاولة"</string>
-    <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"المس جهاز استشعار بصمات الإصبع"</string>
+    <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"المس زر استشعار بصمات الإصبع"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"رمز بصمة الإصبع"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"جارٍ البحث عن وجهك…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="2658119009870383490">"رمز الوجه"</string>
@@ -172,8 +172,7 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"شبكة الجيل الرابع أو أحدث"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+‎"</string>
-    <!-- no translation found for data_connection_5ge (4699478963278829331) -->
-    <skip />
+    <string name="data_connection_5ge" msgid="4699478963278829331">"5Ge"</string>
     <string name="data_connection_5g" msgid="6357743323196864504">"‏شبكة 5G"</string>
     <string name="data_connection_5g_plus" msgid="3284146603743732965">"‏شبكة 5G‎ والأحدث"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
@@ -186,7 +185,7 @@
     <string name="cell_data_off_content_description" msgid="4356113230238585072">"تم إيقاف بيانات الجوال"</string>
     <string name="not_default_data_content_description" msgid="9194667237765917844">"لم يتم الضبط على استخدام البيانات"</string>
     <string name="cell_data_off" msgid="1051264981229902873">"إيقاف"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ربط البلوتوث."</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"التوصيل عبر البلوتوث"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"وضع الطائرة."</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"‏الشبكة الافتراضية الخاصة (VPN) قيد التشغيل."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"‏ليس هناك شريحة SIM."</string>
@@ -218,7 +217,7 @@
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"‏تم إيقاف Wifi."</string>
     <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"‏تم تشغيل Wifi."</string>
-    <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"الجوال <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"الجوّال <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"البطارية <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_airplane_off" msgid="7786329360056634412">"إيقاف وضع الطائرة."</string>
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"تشغيل وضع الطائرة."</string>
@@ -377,6 +376,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"حتى شروق الشمس"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"تفعيل الإعداد في <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"حتى <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"مظهر الألوان الداكنة"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"‏الاتصالات قصيرة المدى (NFC)"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"تم إيقاف الاتصال القريب المدى"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"تم تفعيل الاتصال القريب المدى"</string>
@@ -726,7 +726,7 @@
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"رجوع"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"الإشعارات"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"اختصارات لوحة المفاتيح"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="8413348767825486492">"تبديل نمط لوحة المفاتيح"</string>
+    <string name="keyboard_shortcut_group_system_switch_input" msgid="8413348767825486492">"تبديل تنسيق لوحة المفاتيح"</string>
     <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"التطبيقات"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"التطبيق المساعد"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"المتصفح"</string>

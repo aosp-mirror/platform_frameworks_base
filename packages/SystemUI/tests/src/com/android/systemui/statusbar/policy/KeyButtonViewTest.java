@@ -18,8 +18,16 @@ import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_FLAGS;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_NAV_ACTION;
 
-import static org.mockito.ArgumentMatchers.argThat;
+import static junit.framework.Assert.assertEquals;
 
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import android.hardware.input.InputManager;
 import android.metrics.LogMaker;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -31,12 +39,15 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.bubbles.BubbleController;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
-import org.mockito.Mockito;
+import org.mockito.Captor;
+import org.mockito.MockitoAnnotations;
 
 import java.util.Objects;
 
@@ -47,12 +58,19 @@ public class KeyButtonViewTest extends SysuiTestCase {
 
     private KeyButtonView mKeyButtonView;
     private MetricsLogger mMetricsLogger;
+    private BubbleController mBubbleController;
+    private InputManager mInputManager = mock(InputManager.class);
+    @Captor
+    private ArgumentCaptor<KeyEvent> mInputEventCaptor;
 
     @Before
     public void setup() throws Exception {
+        MockitoAnnotations.initMocks(this);
         mMetricsLogger = mDependency.injectMockDependency(MetricsLogger.class);
-        TestableLooper.get(this).runWithLooper(() ->
-                mKeyButtonView = new KeyButtonView(mContext, null));
+        mBubbleController = mDependency.injectMockDependency(BubbleController.class);
+        TestableLooper.get(this).runWithLooper(() -> {
+            mKeyButtonView = new KeyButtonView(mContext, null, 0, mInputManager);
+        });
     }
 
     @Test
@@ -63,7 +81,7 @@ public class KeyButtonViewTest extends SysuiTestCase {
         mKeyButtonView.setCode(code);
         mKeyButtonView.sendEvent(action, flags);
 
-        Mockito.verify(mMetricsLogger).write(argThat(new ArgumentMatcher<LogMaker>() {
+        verify(mMetricsLogger).write(argThat(new ArgumentMatcher<LogMaker>() {
             public String mReason;
 
             @Override
@@ -91,4 +109,18 @@ public class KeyButtonViewTest extends SysuiTestCase {
         }));
     }
 
+    @Test
+    public void testBubbleEvents_bubbleExpanded() {
+        when(mBubbleController.getExpandedDisplayId(mContext)).thenReturn(3);
+
+        int action = KeyEvent.ACTION_DOWN;
+        int flags = 0;
+        int code = KeyEvent.KEYCODE_BACK;
+        mKeyButtonView.setCode(code);
+        mKeyButtonView.sendEvent(action, flags);
+
+        verify(mInputManager, times(1)).injectInputEvent(mInputEventCaptor.capture(),
+                anyInt());
+        assertEquals(3, mInputEventCaptor.getValue().getDisplayId());
+    }
 }

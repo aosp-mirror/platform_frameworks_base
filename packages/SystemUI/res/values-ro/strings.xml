@@ -67,7 +67,7 @@
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"Activați USB"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom pt. a umple ecranul"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Înt. pt. a umple ecranul"</string>
-    <string name="global_action_screenshot" msgid="8329831278085426283">"Captură de ecran"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Instantaneu"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Se salv. captura de ecran..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Se salvează captura de ecran..."</string>
     <string name="screenshot_saved_title" msgid="5637073968117370753">"Captură de ecran salvată"</string>
@@ -101,7 +101,7 @@
     <string name="accessibility_menu" msgid="316839303324695949">"Meniu"</string>
     <string name="accessibility_accessibility_button" msgid="7601252764577607915">"Accesibilitate"</string>
     <string name="accessibility_rotate_button" msgid="7402949513740253006">"Rotiți ecranul"</string>
-    <string name="accessibility_recent" msgid="5208608566793607626">"Vizualizare generală"</string>
+    <string name="accessibility_recent" msgid="5208608566793607626">"Recente"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"Căutați"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"Cameră foto"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Telefon"</string>
@@ -211,7 +211,7 @@
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Setări rapide."</string>
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Ecranul de blocare."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"Setări"</string>
-    <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Vizualizare generală"</string>
+    <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Recente"</string>
     <string name="accessibility_desc_work_lock" msgid="4288774420752813383">"Ecran de blocare pentru serviciu"</string>
     <string name="accessibility_desc_close" msgid="7479755364962766729">"Închideți"</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
@@ -370,6 +370,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Până la răsărit"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Activată la <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Până la <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Temă întunecată"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"Serviciul NFC este dezactivat"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"Serviciul NFC este activat"</string>

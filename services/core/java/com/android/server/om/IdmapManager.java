@@ -220,9 +220,19 @@ class IdmapManager {
             return fulfilledPolicies | IIdmap2.POLICY_PRODUCT_PARTITION;
         }
 
+        // Odm partition (/odm)
+        if (ai.isOdm()) {
+            return fulfilledPolicies | IIdmap2.POLICY_ODM_PARTITION;
+        }
+
+        // Oem partition (/oem)
+        if (ai.isOem()) {
+            return fulfilledPolicies | IIdmap2.POLICY_OEM_PARTITION;
+        }
+
         // Check partitions for which there exists no policy so overlays on these partitions will
         // not fulfill the system policy.
-        if (ai.isOem() || ai.isProductServices()) {
+        if (ai.isProductServices()) {
             return fulfilledPolicies;
         }
 

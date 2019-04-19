@@ -65,11 +65,14 @@ final class ContentCaptureServerSession {
      */
     private final int mUid;
 
-    ContentCaptureServerSession(@NonNull IBinder activityToken,
+    private final Object mLock;
+
+    ContentCaptureServerSession(@NonNull Object lock, @NonNull IBinder activityToken,
             @NonNull ContentCapturePerUserService service, @NonNull ComponentName appComponentName,
             @NonNull IResultReceiver sessionStateReceiver, int taskId, int displayId, int sessionId,
             int uid, int flags) {
         Preconditions.checkArgument(sessionId != NO_SESSION_ID);
+        mLock = lock;
         mActivityToken = activityToken;
         mService = service;
         mId = sessionId;
@@ -77,6 +80,11 @@ final class ContentCaptureServerSession {
         mContentCaptureContext = new ContentCaptureContext(/* clientContext= */ null,
                 appComponentName, taskId, displayId, flags);
         mSessionStateReceiver = sessionStateReceiver;
+        try {
+            sessionStateReceiver.asBinder().linkToDeath(() -> onClientDeath(), 0);
+        } catch (Exception e) {
+            Slog.w(TAG, "could not register DeathRecipient for " + activityToken);
+        }
     }
 
     /**
@@ -180,6 +188,19 @@ final class ContentCaptureServerSession {
         if (mService.isVerbose()) Slog.v(TAG, "pausing " + mActivityToken);
         setClientState(mSessionStateReceiver, STATE_DISABLED | STATE_SERVICE_UPDATING,
                 /* binder= */ null);
+    }
+
+    /**
+     * Called when the session client binder object died - typically when its process was killed
+     * and the activity was not properly destroyed.
+     */
+    private void onClientDeath() {
+        if (mService.isVerbose()) {
+            Slog.v(TAG, "onClientDeath(" + mActivityToken + "): removing session " + mId);
+        }
+        synchronized (mLock) {
+            removeSelfLocked(/* notifyRemoteService= */ true);
+        }
     }
 
     @GuardedBy("mLock")
