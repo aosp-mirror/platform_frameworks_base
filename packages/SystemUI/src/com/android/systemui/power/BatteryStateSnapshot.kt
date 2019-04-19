@@ -15,6 +15,7 @@ data class BatteryStateSnapshot(
     val severeLevelThreshold: Int,
     val lowLevelThreshold: Int,
     val timeRemainingMillis: Long,
+    val averageTimeToDischargeMillis: Long,
     val severeThresholdMillis: Long,
     val lowThresholdMillis: Long,
     val isBasedOnUsage: Boolean,
@@ -39,18 +40,19 @@ data class BatteryStateSnapshot(
         severeLevelThreshold: Int,
         lowLevelThreshold: Int
     ) : this(
-        batteryLevel,
-        isPowerSaver,
-        plugged,
-        bucket,
-        batteryStatus,
-        severeLevelThreshold,
-        lowLevelThreshold,
-        NO_ESTIMATE_AVAILABLE.toLong(),
-        NO_ESTIMATE_AVAILABLE.toLong(),
-        NO_ESTIMATE_AVAILABLE.toLong(),
-        false,
-        true
+            batteryLevel,
+            isPowerSaver,
+            plugged,
+            bucket,
+            batteryStatus,
+            severeLevelThreshold,
+            lowLevelThreshold,
+            NO_ESTIMATE_AVAILABLE.toLong(),
+            NO_ESTIMATE_AVAILABLE.toLong(),
+            NO_ESTIMATE_AVAILABLE.toLong(),
+            NO_ESTIMATE_AVAILABLE.toLong(),
+            false,
+            true
     ) {
         this.isHybrid = false
     }
