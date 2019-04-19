@@ -2717,7 +2717,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         if (activityOptions != null) {
             activityType = activityOptions.getLaunchActivityType();
             windowingMode = activityOptions.getLaunchWindowingMode();
-            if (activityOptions.freezeRecentTasksReordering()) {
+            if (activityOptions.freezeRecentTasksReordering()
+                    && mRecentTasks.isCallerRecents(callingUid)) {
                 mRecentTasks.setFreezeTaskListReordering();
             }
         }
