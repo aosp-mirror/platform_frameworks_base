@@ -51,6 +51,7 @@ public class QuickStepContract {
     public static final int SYSUI_STATE_SCREEN_PINNING = 1 << 0;
     public static final int SYSUI_STATE_NAV_BAR_HIDDEN = 1 << 1;
     public static final int SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED = 1 << 2;
+    public static final int SYSUI_STATE_BOUNCER_SHOWING = 1 << 3;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SYSUI_STATE_SCREEN_PINNING,
