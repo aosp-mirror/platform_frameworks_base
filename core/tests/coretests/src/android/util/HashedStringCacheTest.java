@@ -80,6 +80,17 @@ public class HashedStringCacheTest {
         assertThat(cachedResult2.hashedString, is(cachedResult.hashedString));
     }
 
+
+    @Test
+    public void testThatMultipleInputResultInDifferentHash() {
+        HashedStringCache cache = HashedStringCache.getInstance();
+        HashedStringCache.HashResult cachedResult =
+                cache.hashString(mContext, TAG, TEST_STRING, 7);
+        HashedStringCache.HashResult cachedResult2 =
+                cache.hashString(mContext, TAG, "different_test", 7);
+        assertThat(cachedResult2.hashedString, is(not(cachedResult.hashedString)));
+    }
+
     @Test
     public void testThatZeroDaysResultsInNewHash() {
         HashedStringCache cache = HashedStringCache.getInstance();
