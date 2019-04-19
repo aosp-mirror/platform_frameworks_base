@@ -522,7 +522,10 @@ public class MediaSession2 implements AutoCloseable {
          * @see Session2Token#getExtras()
          */
         @NonNull
-        public Builder setExtras(@Nullable Bundle extras) {
+        public Builder setExtras(@NonNull Bundle extras) {
+            if (extras == null) {
+                throw new NullPointerException("extras shouldn't be null");
+            }
             mExtras = extras;
             return this;
         }
