@@ -2794,6 +2794,7 @@
   <java-symbol type="drawable" name="scroll_indicator_material" />
 
   <java-symbol type="layout" name="chooser_row" />
+  <java-symbol type="layout" name="chooser_profile_row" />
   <java-symbol type="color" name="chooser_row_divider" />
   <java-symbol type="layout" name="chooser_row_direct_share" />
   <java-symbol type="bool" name="config_supportDoubleTapWake" />
