@@ -2010,6 +2010,7 @@ package android.os {
     field public static final int EFFECT_STRENGTH_LIGHT = 0; // 0x0
     field public static final int EFFECT_STRENGTH_MEDIUM = 1; // 0x1
     field public static final int EFFECT_STRENGTH_STRONG = 2; // 0x2
+    field public static final int EFFECT_TEXTURE_TICK = 21; // 0x15
     field public static final int EFFECT_THUD = 3; // 0x3
     field public static final int[] RINGTONES;
   }
