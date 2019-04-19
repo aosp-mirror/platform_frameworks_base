@@ -7182,6 +7182,21 @@ message MetricsEvent {
     // OS: Q
     QS_UI_MODE_NIGHT = 1706;
 
+    // OPEN: Settings > Pick SIM dialog
+    // CATEGORY: SETTINGS
+    // OS: Q
+    DIALOG_SIM_LIST = 1707;
+
+    // OPEN: Settings > Pick SIM (that supports calling) dialog
+    // CATEGORY: SETTINGS
+    // OS: Q
+    DIALOG_CALL_SIM_LIST = 1708;
+
+    // OPEN: Settings > Pick preferred SIM dialog
+    // CATEGORY: SETTINGS
+    // OS: Q
+    DIALOG_PREFERRED_SIM_PICKER = 1709;
+
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
