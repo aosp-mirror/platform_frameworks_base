@@ -20,11 +20,16 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
+import android.gamedriver.GameDriverProto.Blacklist;
+import android.gamedriver.GameDriverProto.Blacklists;
 import android.opengl.EGL14;
 import android.os.Build;
 import android.os.SystemProperties;
 import android.provider.Settings;
+import android.util.Base64;
 import android.util.Log;
+
+import com.android.framework.protobuf.InvalidProtocolBufferException;
 
 import dalvik.system.VMRuntime;
 
@@ -33,6 +38,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /** @hide */
 public class GraphicsEnvironment {
@@ -49,7 +57,9 @@ public class GraphicsEnvironment {
     private static final boolean DEBUG = false;
     private static final String TAG = "GraphicsEnvironment";
     private static final String PROPERTY_GFX_DRIVER = "ro.gfx.driver.0";
-    private static final String GUP_WHITELIST_FILENAME = "whitelist.txt";
+    private static final String GAME_DRIVER_WHITELIST_FILENAME = "whitelist.txt";
+    private static final String GAME_DRIVER_BLACKLIST_FLAG = "blacklist";
+    private static final int BASE64_FLAGS = Base64.NO_PADDING | Base64.NO_WRAP;
 
     private ClassLoader mClassLoader;
     private String mLayerPath;
@@ -136,33 +146,25 @@ public class GraphicsEnvironment {
         setLayerPaths(mClassLoader, layerPaths);
     }
 
+    private static List<String> getGlobalSettingsString(Bundle bundle, String globalSetting) {
+        List<String> valueList = null;
+        String settingsValue = bundle.getString(globalSetting);
+
+        if (settingsValue != null) {
+            valueList = new ArrayList<>(Arrays.asList(settingsValue.split(",")));
+        } else {
+            valueList = new ArrayList<>();
+        }
+
+        return valueList;
+    }
+
     /**
      * Choose whether the current process should use the builtin or an updated driver.
      */
     private static void chooseDriver(Context context, Bundle coreSettings) {
         String driverPackageName = SystemProperties.get(PROPERTY_GFX_DRIVER);
         if (driverPackageName == null || driverPackageName.isEmpty()) {
-            return;
-        }
-
-        // To minimize risk of driver updates crippling the device beyond user repair, never use an
-        // updated driver for privileged or non-updated system apps. Presumably pre-installed apps
-        // were tested thoroughly with the pre-installed driver.
-        ApplicationInfo ai = context.getApplicationInfo();
-        if (ai.isPrivilegedApp() || (ai.isSystemApp() && !ai.isUpdatedSystemApp())) {
-            if (DEBUG) Log.v(TAG, "ignoring driver package for privileged/non-updated system app");
-            return;
-        }
-
-        String applicationPackageName = context.getPackageName();
-        String devOptInApplicationName = coreSettings.getString(
-                Settings.Global.GUP_DEV_OPT_IN_APPS);
-        boolean devOptIn = applicationPackageName.equals(devOptInApplicationName);
-        boolean whitelisted = onWhitelist(context, driverPackageName, ai.packageName);
-        if (!devOptIn && !whitelisted) {
-            if (DEBUG) {
-                Log.w(TAG, applicationPackageName + " is not on the whitelist.");
-            }
             return;
         }
 
@@ -182,6 +184,78 @@ public class GraphicsEnvironment {
                 Log.w(TAG, "updated driver package is not known to be compatible with O");
             }
             return;
+        }
+
+        // To minimize risk of driver updates crippling the device beyond user repair, never use an
+        // updated driver for privileged or non-updated system apps. Presumably pre-installed apps
+        // were tested thoroughly with the pre-installed driver.
+        ApplicationInfo ai = context.getApplicationInfo();
+        if (ai.isPrivilegedApp() || (ai.isSystemApp() && !ai.isUpdatedSystemApp())) {
+            if (DEBUG) Log.v(TAG, "ignoring driver package for privileged/non-updated system app");
+            return;
+        }
+
+        // GAME_DRIVER_ALL_APPS
+        // 0: Default (Invalid values fallback to default as well)
+        // 1: All apps use Game Driver
+        // 2: All apps use system graphics driver
+        int gameDriverAllApps = coreSettings.getInt(Settings.Global.GAME_DRIVER_ALL_APPS, 0);
+        if (gameDriverAllApps == 2) {
+            if (DEBUG) {
+                Log.w(TAG, "Game Driver is turned off on this device");
+            }
+            return;
+        }
+
+        if (gameDriverAllApps != 1) {
+            // GAME_DRIVER_OPT_OUT_APPS has higher priority than GAME_DRIVER_OPT_IN_APPS
+            if (getGlobalSettingsString(coreSettings, Settings.Global.GAME_DRIVER_OPT_OUT_APPS)
+                            .contains(ai.packageName)) {
+                if (DEBUG) {
+                    Log.w(TAG, ai.packageName + " opts out from Game Driver.");
+                }
+                return;
+            }
+            boolean isOptIn =
+                    getGlobalSettingsString(coreSettings, Settings.Global.GAME_DRIVER_OPT_IN_APPS)
+                            .contains(ai.packageName);
+
+            if (!isOptIn && !onWhitelist(context, driverPackageName, ai.packageName)) {
+                if (DEBUG) {
+                    Log.w(TAG, ai.packageName + " is not on the whitelist.");
+                }
+                return;
+            }
+
+            if (!isOptIn) {
+                // At this point, the application is on the whitelist only, check whether it's
+                // on the blacklist, terminate early when it's on the blacklist.
+                try {
+                    // TODO(b/121350991) Switch to DeviceConfig with property listener.
+                    String base64String =
+                            coreSettings.getString(Settings.Global.GAME_DRIVER_BLACKLIST);
+                    if (base64String != null && !base64String.isEmpty()) {
+                        Blacklists blacklistsProto = Blacklists.parseFrom(
+                                Base64.decode(base64String, BASE64_FLAGS));
+                        List<Blacklist> blacklists = blacklistsProto.getBlacklistsList();
+                        long driverVersionCode = driverInfo.longVersionCode;
+                        for (Blacklist blacklist : blacklists) {
+                            if (blacklist.getVersionCode() == driverVersionCode) {
+                                for (String packageName : blacklist.getPackageNamesList()) {
+                                    if (packageName == ai.packageName) {
+                                        return;
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+                } catch (InvalidProtocolBufferException e) {
+                    if (DEBUG) {
+                        Log.w(TAG, "Can't parse blacklist, skip and continue...");
+                    }
+                }
+            }
         }
 
         String abi = chooseAbi(driverInfo);
@@ -245,7 +319,7 @@ public class GraphicsEnvironment {
             Context driverContext = context.createPackageContext(driverPackageName,
                                                                  Context.CONTEXT_RESTRICTED);
             AssetManager assets = driverContext.getAssets();
-            InputStream stream = assets.open(GUP_WHITELIST_FILENAME);
+            InputStream stream = assets.open(GAME_DRIVER_WHITELIST_FILENAME);
             BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
             for (String packageName; (packageName = reader.readLine()) != null; ) {
                 if (packageName.equals(applicationPackageName)) {

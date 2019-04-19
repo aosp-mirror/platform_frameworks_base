@@ -687,6 +687,7 @@ java_defaults {
     static_libs: [
         "apex_aidl_interface-java",
         "framework-protos",
+        "game-driver-protos",
         "android.hidl.base-V1.0-java",
         "android.hardware.cas-V1.0-java",
         "android.hardware.contexthub-V1.0-java",
