@@ -69,8 +69,6 @@ import android.net.TrafficStats;
 import android.net.Uri;
 import android.net.captiveportal.CaptivePortalProbeResult;
 import android.net.captiveportal.CaptivePortalProbeSpec;
-import android.net.metrics.DataStallDetectionStats;
-import android.net.metrics.DataStallStatsUtils;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.NetworkEvent;
 import android.net.metrics.ValidationProbeEvent;
@@ -106,6 +104,8 @@ import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 import com.android.internal.util.TrafficStatsConstants;
 import com.android.networkstack.R;
+import com.android.networkstack.metrics.DataStallDetectionStats;
+import com.android.networkstack.metrics.DataStallStatsUtils;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
