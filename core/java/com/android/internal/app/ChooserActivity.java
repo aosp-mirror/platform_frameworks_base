@@ -219,6 +219,8 @@ public class ChooserActivity extends ResolverActivity {
     private static final int SHORTCUT_MANAGER_SHARE_TARGET_RESULT_COMPLETED = 4;
     private static final int LIST_VIEW_UPDATE_MESSAGE = 5;
 
+    private static final int MAX_LOG_RANK_POSITION = 12;
+
     @VisibleForTesting
     public static final int LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS = 250;
 
@@ -1015,6 +1017,7 @@ public class ChooserActivity extends ResolverActivity {
             // Lower values mean the ranking was better.
             int cat = 0;
             int value = which;
+            int directTargetAlsoRanked = -1;
             HashedStringCache.HashResult directTargetHashed = null;
             switch (mChooserListAdapter.getPositionTargetType(which)) {
                 case ChooserListAdapter.TARGET_CALLER:
@@ -1034,6 +1037,7 @@ public class ChooserActivity extends ResolverActivity {
                             target.getComponentName().getPackageName()
                                     + target.getTitle().toString(),
                             mMaxHashSaltDays);
+                    directTargetAlsoRanked = getRankedPosition((SelectableTargetInfo) targetInfo);
                     break;
                 case ChooserListAdapter.TARGET_STANDARD:
                     cat = MetricsEvent.ACTION_ACTIVITY_CHOOSER_PICKED_STANDARD_TARGET;
@@ -1056,6 +1060,8 @@ public class ChooserActivity extends ResolverActivity {
                     targetLogMaker.addTaggedData(
                                     MetricsEvent.FIELD_HASHED_TARGET_SALT_GEN,
                                     directTargetHashed.saltGeneration);
+                    targetLogMaker.addTaggedData(MetricsEvent.FIELD_RANKED_POSITION,
+                                    directTargetAlsoRanked);
                 }
                 getMetricsLogger().write(targetLogMaker);
                 MetricsLogger.action(this, cat, value);
@@ -1072,6 +1078,21 @@ public class ChooserActivity extends ResolverActivity {
                 MetricsLogger.histogram(null, "app_position_for_smart_sharing", value);
             }
         }
+    }
+
+    private int getRankedPosition(SelectableTargetInfo targetInfo) {
+        String targetPackageName =
+                targetInfo.getChooserTarget().getComponentName().getPackageName();
+        int maxRankedResults = Math.min(mChooserListAdapter.mDisplayList.size(),
+                        MAX_LOG_RANK_POSITION);
+
+        for (int i = 0; i < maxRankedResults; i++) {
+            if (mChooserListAdapter.mDisplayList.get(i)
+                    .getResolveInfo().activityInfo.packageName.equals(targetPackageName)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     void queryTargetServices(ChooserListAdapter adapter) {
