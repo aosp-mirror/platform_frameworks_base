@@ -13,6 +13,9 @@
  */
 package lockedregioncodeinjection;
 
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassWriter;
+
 import java.io.BufferedInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -24,8 +27,6 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassWriter;
 
 public class Main {
     public static void main(String[] args) throws IOException {
@@ -74,6 +75,7 @@ public class Main {
         while (srcEntries.hasMoreElements()) {
             ZipEntry entry = srcEntries.nextElement();
             ZipEntry newEntry = new ZipEntry(entry.getName());
+            newEntry.setTime(entry.getTime());
             zos.putNextEntry(newEntry);
             BufferedInputStream bis = new BufferedInputStream(zipSrc.getInputStream(entry));
 
