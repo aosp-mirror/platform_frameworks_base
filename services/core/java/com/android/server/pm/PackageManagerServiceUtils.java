@@ -565,9 +565,9 @@ public class PackageManagerServiceUtils {
         return SystemProperties.getInt("ro.apk_verity.mode", FSVERITY_DISABLED) == FSVERITY_LEGACY;
     }
 
-    /** Returns true to force apk verification if the updated package (in /data) is a priv app. */
-    static boolean isApkVerificationForced(@Nullable PackageSetting disabledPs) {
-        return disabledPs != null && disabledPs.isPrivileged() && (
+    /** Returns true to force apk verification if the package is considered privileged. */
+    static boolean isApkVerificationForced(@Nullable PackageSetting ps) {
+        return ps != null && ps.isPrivileged() && (
                 isApkVerityEnabled() || isLegacyApkVerityEnabled());
     }
 
