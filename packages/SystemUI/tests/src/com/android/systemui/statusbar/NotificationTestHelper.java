@@ -178,10 +178,7 @@ public class NotificationTestHelper {
         Notification n = createNotification(false /* isGroupSummary */,
                 null /* groupKey */, bubbleMetadata);
         n.flags |= FLAG_BUBBLE;
-        ExpandableNotificationRow row = generateRow(n, pkg, UID, USER_HANDLE,
-                0 /* extraInflationFlags */, IMPORTANCE_HIGH);
-        row.getEntry().canBubble = true;
-        return row;
+        return generateRow(n, pkg, UID, USER_HANDLE, 0 /* extraInflationFlags */, IMPORTANCE_HIGH);
     }
 
     /**
