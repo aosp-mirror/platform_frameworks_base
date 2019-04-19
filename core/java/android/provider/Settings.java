@@ -11475,12 +11475,26 @@ public final class Settings {
         public static final String GAME_DRIVER_BLACKLIST = "game_driver_blacklist";
 
         /**
+         * List of blacklists, each blacklist is a blacklist for a specific version of Game Driver.
+         * @hide
+         */
+        public static final String GAME_DRIVER_BLACKLISTS = "game_driver_blacklists";
+
+        /**
          * Apps on the whitelist that are allowed to use Game Driver.
          * The string is a list of application package names, seperated by comma.
          * i.e. <apk1>,<apk2>,...,<apkN>
          * @hide
          */
         public static final String GAME_DRIVER_WHITELIST = "game_driver_whitelist";
+
+        /**
+         * List of libraries in sphal accessible by Game Driver
+         * The string is a list of library names, separated by colon.
+         * i.e. <lib1>:<lib2>:...:<libN>
+         * @hide
+         */
+        public static final String GAME_DRIVER_SPHAL_LIBRARIES = "game_driver_sphal_libraries";
 
         /**
          * Ordered GPU debug layer list
