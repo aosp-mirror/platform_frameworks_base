@@ -544,6 +544,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     private static final int NATIVE_DUMP_TIMEOUT_MS = 2000; // 2 seconds;
 
     final OomAdjuster mOomAdjuster;
+    final LowMemDetector mLowMemDetector;
 
     /** All system services */
     SystemServiceManager mSystemServiceManager;
@@ -2294,6 +2295,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 ? new ActivityManagerConstants(mContext, this, mHandler) : null;
         final ActiveUids activeUids = new ActiveUids(this, false /* postChangesToAtm */);
         mProcessList.init(this, activeUids);
+        mLowMemDetector = null;
         mOomAdjuster = new OomAdjuster(this, mProcessList, activeUids);
 
         mIntentFirewall = hasHandlerThread
@@ -2342,6 +2344,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mConstants = new ActivityManagerConstants(mContext, this, mHandler);
         final ActiveUids activeUids = new ActiveUids(this, true /* postChangesToAtm */);
         mProcessList.init(this, activeUids);
+        mLowMemDetector = new LowMemDetector(this);
         mOomAdjuster = new OomAdjuster(this, mProcessList, activeUids);
 
         // Broadcast policy parameters
@@ -16524,25 +16527,29 @@ public class ActivityManagerService extends IActivityManager.Stub
     final boolean updateLowMemStateLocked(int numCached, int numEmpty, int numTrimming) {
         final int N = mProcessList.getLruSizeLocked();
         final long now = SystemClock.uptimeMillis();
-        // Now determine the memory trimming level of background processes.
-        // Unfortunately we need to start at the back of the list to do this
-        // properly.  We only do this if the number of background apps we
-        // are managing to keep around is less than half the maximum we desire;
-        // if we are keeping a good number around, we'll let them use whatever
-        // memory they want.
-        final int numCachedAndEmpty = numCached + numEmpty;
         int memFactor;
-        if (numCached <= mConstants.CUR_TRIM_CACHED_PROCESSES
-                && numEmpty <= mConstants.CUR_TRIM_EMPTY_PROCESSES) {
-            if (numCachedAndEmpty <= ProcessList.TRIM_CRITICAL_THRESHOLD) {
-                memFactor = ProcessStats.ADJ_MEM_FACTOR_CRITICAL;
-            } else if (numCachedAndEmpty <= ProcessList.TRIM_LOW_THRESHOLD) {
-                memFactor = ProcessStats.ADJ_MEM_FACTOR_LOW;
-            } else {
-                memFactor = ProcessStats.ADJ_MEM_FACTOR_MODERATE;
-            }
+        if (mLowMemDetector != null && mLowMemDetector.isAvailable()) {
+            memFactor = mLowMemDetector.getMemFactor();
         } else {
-            memFactor = ProcessStats.ADJ_MEM_FACTOR_NORMAL;
+            // Now determine the memory trimming level of background processes.
+            // Unfortunately we need to start at the back of the list to do this
+            // properly.  We only do this if the number of background apps we
+            // are managing to keep around is less than half the maximum we desire;
+            // if we are keeping a good number around, we'll let them use whatever
+            // memory they want.
+            if (numCached <= mConstants.CUR_TRIM_CACHED_PROCESSES
+                && numEmpty <= mConstants.CUR_TRIM_EMPTY_PROCESSES) {
+                final int numCachedAndEmpty = numCached + numEmpty;
+                if (numCachedAndEmpty <= ProcessList.TRIM_CRITICAL_THRESHOLD) {
+                    memFactor = ProcessStats.ADJ_MEM_FACTOR_CRITICAL;
+                } else if (numCachedAndEmpty <= ProcessList.TRIM_LOW_THRESHOLD) {
+                    memFactor = ProcessStats.ADJ_MEM_FACTOR_LOW;
+                } else {
+                    memFactor = ProcessStats.ADJ_MEM_FACTOR_MODERATE;
+                }
+            } else {
+                memFactor = ProcessStats.ADJ_MEM_FACTOR_NORMAL;
+            }
         }
         // We always allow the memory level to go up (better).  We only allow it to go
         // down if we are in a state where that is allowed, *and* the total number of processes
