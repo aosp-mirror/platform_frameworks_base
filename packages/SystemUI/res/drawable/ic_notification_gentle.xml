@@ -18,18 +18,18 @@ Copyright (C) 2019 The Android Open Source Project
         android:id="@+id/back">
         <shape android:shape="oval">
             <solid
-                android:color="@color/GM2_green_500" />
+                android:color="@color/notification_silence_color" />
             <size
-                android:height="36dp"
-                android:width="36dp"/>
+                android:height="24dp"
+                android:width="24dp"/>
         </shape>
     </item>
     <item
         android:id="@+id/fore"
         android:gravity="center">
         <vector
-                android:width="32dp"
-                android:height="32dp"
+                android:width="13dp"
+                android:height="13dp"
                 android:viewportWidth="24"
                 android:viewportHeight="24">
             <path
