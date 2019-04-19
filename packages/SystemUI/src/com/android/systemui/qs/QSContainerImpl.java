@@ -103,7 +103,9 @@ public class QSContainerImpl extends FrameLayout {
         if (navBelow) {
             maxQs -= getResources().getDimensionPixelSize(R.dimen.navigation_bar_height);
         }
-        mQSPanel.measure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(maxQs, MeasureSpec.AT_MOST));
+        // Measure with EXACTLY. That way, PagedTileLayout will only use excess height and will be
+        // measured last, after other views and padding is accounted for.
+        mQSPanel.measure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(maxQs, MeasureSpec.EXACTLY));
         int width = mQSPanel.getMeasuredWidth();
         int height = layoutParams.topMargin + layoutParams.bottomMargin
                 + mQSPanel.getMeasuredHeight() + getPaddingBottom();
