@@ -19,6 +19,7 @@
     android:id="@+id/linear_carrier"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
+    android:minWidth="48dp"
     android:orientation="horizontal"
     android:gravity="center_vertical|start"
     android:background="@android:color/transparent"

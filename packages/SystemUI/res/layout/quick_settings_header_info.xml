@@ -19,7 +19,6 @@
     android:layout_width="match_parent"
     android:layout_height="@dimen/qs_header_tooltip_height"
     android:layout_below="@id/quick_status_bar_system_icons"
-    android:layout_marginTop="@dimen/qs_header_top_margin"
     android:paddingStart="@dimen/status_bar_padding_start"
     android:paddingEnd="@dimen/status_bar_padding_end">
 
@@ -27,7 +26,7 @@
         android:id="@+id/long_press_tooltip"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="start|bottom"
+        android:layout_gravity="start|center_vertical"
         android:alpha="0"
         android:text="@string/quick_settings_header_onboarding_text"
         android:textAppearance="@style/TextAppearance.QS.TileLabel"
@@ -36,34 +35,48 @@
 
     <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="start|bottom"
+        android:layout_height="match_parent"
+        android:layout_gravity="start|center_vertical"
         android:gravity="center_vertical">
 
         <LinearLayout
             android:id="@+id/status_container"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_gravity="start|center_vertical"
             android:layout_weight="1"
             android:gravity="center_vertical"
-            android:alpha="0">
+            android:alpha="0" >
 
-            <ImageView
-                android:id="@+id/next_alarm_icon"
-                android:layout_width="@dimen/qs_header_alarm_icon_size"
-                android:layout_height="@dimen/qs_header_alarm_icon_size"
-                android:src="@drawable/stat_sys_alarm"
-                android:tint="?android:attr/textColorPrimary"
-                android:visibility="gone"/>
-
-            <TextView
-                android:id="@+id/next_alarm_text"
+            <LinearLayout
+                android:id = "@+id/alarm_container"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/qs_header_alarm_text_margin_start"
-                android:textAppearance="@style/TextAppearance.QS.Status"
-                android:visibility="gone"/>
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                android:gravity="center_vertical"
+                android:focusable="true"
+                android:clickable="true">
+
+                <ImageView
+                    android:id="@+id/next_alarm_icon"
+                    android:layout_width="@dimen/qs_header_alarm_icon_size"
+                    android:layout_height="@dimen/qs_header_alarm_icon_size"
+                    android:src="@drawable/ic_alarm"
+                    android:tint="?android:attr/textColorPrimary"
+                    android:contentDescription="@string/accessibility_quick_settings_alarm_set"
+                    android:visibility="gone"/>
+
+                <TextView
+                    android:id="@+id/next_alarm_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:singleLine="true"
+                    android:ellipsize="marquee"
+                    android:marqueeRepeatLimit="marquee_forever"
+                    android:layout_marginStart="@dimen/qs_header_alarm_text_margin_start"
+                    android:textAppearance="@style/TextAppearance.QS.Status"
+                    android:visibility="gone"/>
+            </LinearLayout>
 
             <View
                 android:id="@+id/status_separator"
@@ -71,20 +84,33 @@
                 android:layout_height="match_parent"
                 android:visibility="gone"/>
 
-            <ImageView
-                android:id="@+id/ringer_mode_icon"
-                android:layout_width="@dimen/qs_header_alarm_icon_size"
-                android:layout_height="@dimen/qs_header_alarm_icon_size"
-                android:tint="?android:attr/textColorPrimary"
-                android:visibility="gone"/>
-
-            <TextView
-                android:id="@+id/ringer_mode_text"
+            <LinearLayout
+                android:id = "@+id/ringer_container"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/qs_header_alarm_text_margin_start"
-                android:textAppearance="@style/TextAppearance.QS.Status"
-                android:visibility="gone"/>
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                android:gravity="center_vertical"
+                android:focusable="true"
+                android:clickable="true">
+
+                <ImageView
+                    android:id="@+id/ringer_mode_icon"
+                    android:layout_width="@dimen/qs_header_alarm_icon_size"
+                    android:layout_height="@dimen/qs_header_alarm_icon_size"
+                    android:tint="?android:attr/textColorPrimary"
+                    android:visibility="gone"/>
+
+                <TextView
+                    android:id="@+id/ringer_mode_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:singleLine="true"
+                    android:ellipsize="marquee"
+                    android:marqueeRepeatLimit="marquee_forever"
+                    android:layout_marginStart="@dimen/qs_header_alarm_text_margin_start"
+                    android:textAppearance="@style/TextAppearance.QS.Status"
+                    android:visibility="gone"/>
+            </LinearLayout>
         </LinearLayout>
 
         <View
@@ -93,11 +119,13 @@
             android:layout_height="match_parent"
             android:layout_weight="1"/>
 
+
         <include layout="@layout/qs_carrier_group"
                  android:id="@+id/carrier_group"
                  android:layout_width="wrap_content"
-                 android:layout_height="wrap_content"
-                 android_layout_gravity="center vertical|end"/>
+                 android:layout_height="match_parent"
+                 android:layout_gravity="end|center_vertical"
+                 android:focusable="false"/>
     </LinearLayout>
 
 </FrameLayout>

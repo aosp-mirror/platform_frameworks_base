@@ -35,6 +35,7 @@ import android.media.AudioManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.AlarmClock;
+import android.provider.Settings;
 import android.service.notification.ZenModeConfig;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
@@ -133,9 +134,11 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     private ImageView mNextAlarmIcon;
     /** {@link TextView} containing the actual text indicating when the next alarm will go off. */
     private TextView mNextAlarmTextView;
+    private View mNextAlarmContainer;
     private View mStatusSeparator;
     private ImageView mRingerModeIcon;
     private TextView mRingerModeTextView;
+    private View mRingerContainer;
     private Clock mClockView;
     private DateView mDateView;
     private OngoingPrivacyChip mPrivacyChip;
@@ -203,10 +206,14 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mStatusSeparator = findViewById(R.id.status_separator);
         mNextAlarmIcon = findViewById(R.id.next_alarm_icon);
         mNextAlarmTextView = findViewById(R.id.next_alarm_text);
+        mNextAlarmContainer = findViewById(R.id.alarm_container);
+        mNextAlarmContainer.setOnClickListener(this::onClick);
         mRingerModeIcon = findViewById(R.id.ringer_mode_icon);
         mRingerModeTextView = findViewById(R.id.ringer_mode_text);
+        mRingerContainer = findViewById(R.id.ringer_container);
+        mRingerContainer.setOnClickListener(this::onClick);
         mPrivacyChip = findViewById(R.id.privacy_chip);
-        mPrivacyChip.setOnClickListener(this);
+        mPrivacyChip.setOnClickListener(this::onClick);
         mCarrierGroup = findViewById(R.id.carrier_group);
 
 
@@ -236,6 +243,8 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         // QS will always show the estimate, and BatteryMeterView handles the case where
         // it's unavailable or charging
         mBatteryRemainingIcon.setPercentShowMode(BatteryMeterView.MODE_ESTIMATE);
+        mRingerModeTextView.setSelected(true);
+        mNextAlarmTextView.setSelected(true);
     }
 
     private List<String> getIgnoredIconSlots() {
@@ -285,11 +294,11 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         if (!ZenModeConfig.isZenOverridingRinger(mZenController.getZen(),
                 mZenController.getConsolidatedPolicy())) {
             if (mRingerMode == AudioManager.RINGER_MODE_VIBRATE) {
-                mRingerModeIcon.setImageResource(R.drawable.stat_sys_ringer_vibrate);
+                mRingerModeIcon.setImageResource(R.drawable.ic_volume_ringer_vibrate);
                 mRingerModeTextView.setText(R.string.qs_status_phone_vibrate);
                 ringerVisible = true;
             } else if (mRingerMode == AudioManager.RINGER_MODE_SILENT) {
-                mRingerModeIcon.setImageResource(R.drawable.stat_sys_ringer_silent);
+                mRingerModeIcon.setImageResource(R.drawable.ic_volume_ringer_mute);
                 mRingerModeTextView.setText(R.string.qs_status_phone_muted);
                 ringerVisible = true;
             }
@@ -546,7 +555,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
 
     @Override
     public void onClick(View v) {
-        if (v == mClockView) {
+        if (v == mClockView || v == mNextAlarmContainer) {
             mActivityStarter.postStartActivityDismissingKeyguard(new Intent(
                     AlarmClock.ACTION_SHOW_ALARMS),0);
         } else if (v == mPrivacyChip) {
@@ -561,6 +570,9 @@ public class QuickStatusBarHeader extends RelativeLayout implements
                         new Intent(Intent.ACTION_REVIEW_ONGOING_PERMISSION_USAGE), 0);
                 mHost.collapsePanels();
             });
+        } else if (v == mRingerContainer) {
+            mActivityStarter.postStartActivityDismissingKeyguard(new Intent(
+                    Settings.ACTION_SOUND_SETTINGS), 0);
         }
     }
 
@@ -573,7 +585,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     @Override
     public void onZenChanged(int zen) {
         updateStatusText();
-
     }
 
     @Override
@@ -731,8 +742,10 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     public void setMargins(int sideMargins) {
         for (int i = 0; i < getChildCount(); i++) {
             View v = getChildAt(i);
+            // Prevents these views from getting set a margin.
+            // The Icon views all have the same padding set in XML to be aligned.
             if (v == mSystemIconsView || v == mQuickQsStatusIcons || v == mHeaderQsPanel
-                    || v == mPrivacyChip) {
+                    || v == mHeaderTextContainerView) {
                 continue;
             }
             RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) v.getLayoutParams();
