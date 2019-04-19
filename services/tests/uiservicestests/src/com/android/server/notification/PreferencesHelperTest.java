@@ -1644,38 +1644,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testClearData() {
-        ArraySet<String> pkg = new ArraySet<>();
-        pkg.add(PKG_O);
-        mHelper.createNotificationChannel(PKG_O, UID_O, getChannel(), true, false);
-        mHelper.createNotificationChannelGroup(
-                PKG_O, UID_O, new NotificationChannelGroup("1", "bye"), true);
-        mHelper.lockChannelsForOEM(pkg.toArray(new String[]{}));
-        mHelper.updateDefaultApps(UserHandle.getUserId(UID_O), null, pkg);
-        mHelper.setNotificationDelegate(PKG_O, UID_O, "", 1);
-        mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_NONE);
-        mHelper.setBubblesAllowed(PKG_O, UID_O, false);
-        mHelper.setShowBadge(PKG_O, UID_O, false);
-        mHelper.setAppImportanceLocked(PKG_O, UID_O);
-
-        mHelper.clearData(PKG_O, UID_O);
-
-        assertEquals(IMPORTANCE_UNSPECIFIED, mHelper.getImportance(PKG_O, UID_O));
-        assertTrue(mHelper.areBubblesAllowed(PKG_O, UID_O));
-        assertTrue(mHelper.canShowBadge(PKG_O, UID_O));
-        assertNull(mHelper.getNotificationDelegate(PKG_O, UID_O));
-        assertEquals(0, mHelper.getAppLockedFields(PKG_O, UID_O));
-        assertEquals(0, mHelper.getNotificationChannels(PKG_O, UID_O, true).getList().size());
-        assertEquals(0, mHelper.getNotificationChannelGroups(PKG_O, UID_O).size());
-
-        NotificationChannel channel = getChannel();
-        mHelper.createNotificationChannel(PKG_O, UID_O, channel, true, false);
-
-        assertTrue(channel.isImportanceLockedByCriticalDeviceFunction());
-        assertTrue(channel.isImportanceLockedByOEM());
-    }
-
-    @Test
     public void testRecordDefaults() throws Exception {
         assertEquals(NotificationManager.IMPORTANCE_UNSPECIFIED, mHelper.getImportance(PKG_N_MR1,
                 UID_N_MR1));
