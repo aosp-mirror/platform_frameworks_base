@@ -248,7 +248,8 @@ public final class JobServiceContext implements ServiceConnection {
             scheduleOpTimeOutLocked();
             final Intent intent = new Intent().setComponent(job.getServiceComponent());
             boolean binding = mContext.bindServiceAsUser(intent, this,
-                    Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND,
+                    Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
+                    | Context.BIND_NOT_VISIBLE | Context.BIND_ADJUST_BELOW_PERCEPTIBLE,
                     new UserHandle(job.getUserId()));
             if (!binding) {
                 if (DEBUG) {
