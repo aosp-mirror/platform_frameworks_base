@@ -497,9 +497,9 @@ Maybe<int> ParseSdkVersion(const StringPiece& str) {
   }
 
   // Try parsing the code name.
-  std::pair<StringPiece, int> entry = GetDevelopmentSdkCodeNameAndVersion();
-  if (entry.first == trimmed_str) {
-    return entry.second;
+  Maybe<int> entry = GetDevelopmentSdkCodeNameVersion(trimmed_str);
+  if (entry) {
+    return entry.value();
   }
   return {};
 }
