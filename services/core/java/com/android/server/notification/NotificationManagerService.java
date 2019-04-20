@@ -308,8 +308,7 @@ public class NotificationManagerService extends SystemService {
     static final String[] DEFAULT_ALLOWED_ADJUSTMENTS = new String[] {
             Adjustment.KEY_IMPORTANCE,
             Adjustment.KEY_CONTEXTUAL_ACTIONS,
-            Adjustment.KEY_TEXT_REPLIES,
-            Adjustment.KEY_USER_SENTIMENT};
+            Adjustment.KEY_TEXT_REPLIES};
 
     static final String[] NON_BLOCKABLE_DEFAULT_ROLES = new String[] {
             RoleManager.ROLE_DIALER,
@@ -7324,7 +7323,7 @@ public class NotificationManagerService extends SystemService {
 
         private static final String ATT_USER_SET = "user_set";
         // TODO: STOPSHIP (b/127994217) switch to final value when onboarding flow is implemented
-        private static final String TAG_ALLOWED_ADJUSTMENT_TYPES = "allowed_adjustments_tmp";
+        private static final String TAG_ALLOWED_ADJUSTMENT_TYPES = "allowed_adjustments_tmp2";
         private static final String ATT_TYPES = "types";
 
         private final Object mLock = new Object();
