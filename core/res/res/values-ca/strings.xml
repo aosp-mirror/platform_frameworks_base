@@ -84,7 +84,7 @@
     <string name="RestrictedStateContent" msgid="6538703255570997248">"L\'operador de telefonia mòbil ho ha desactivat temporalment"</string>
     <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"L\'operador de telefonia mòbil ho ha desactivat temporalment per a la SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="6982395015324165258">"No es pot accedir a la xarxa mòbil"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"Prova de canviar de xarxa preferida. Toca per canviar-la."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"Prova de canviar de xarxa preferent. Toca per canviar-la."</string>
     <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"Les trucades d\'emergència no estan disponibles"</string>
     <string name="EmergencyCallWarningSummary" msgid="1899692069750260619">"No es poden fer trucades d\'emergència per Wi-Fi"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Alertes"</string>
@@ -292,7 +292,7 @@
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"Vols permetre que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; enviï i llegeixi missatges SMS?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Emmagatzematge"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"accedir a fotos, contingut multimèdia i fitxers del dispositiu"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Vols permetre que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; accedeixi a les fotos, al contingut multimèdia i als fitxers del dispositiu?"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Vols permetre que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; accedeixi a fotos, contingut multimèdia i fitxers del dispositiu?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Micròfon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"gravar àudio"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Vols permetre que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; gravi àudio?"</string>
@@ -560,8 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"Apropa el telèfon."</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"Mou el telèfon més amunt."</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"Mou el telèfon més avall."</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"Mou el telèfon cap a la dreta."</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"Mou el telèfon cap a l\'esquerra."</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"Mou el telèfon cap a l\'esquerra."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"Mou el telèfon cap a la dreta."</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Mira la pantalla amb els ulls oberts."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"No se\'t veu la cara. Mira el telèfon."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Massa moviment. Subjecta bé el telèfon."</string>
@@ -1364,7 +1364,7 @@
     <string name="show_ime" msgid="2506087537466597099">"Mantén-lo en pantalla mentre el teclat físic està actiu"</string>
     <string name="hardware" msgid="194658061510127999">"Mostra el teclat virtual"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Configura el teclat físic"</string>
-    <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Toca per seleccionar l\'idioma i el disseny"</string>
+    <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Toca per seleccionar l\'idioma i la disposició"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Mostra sobre altres aplicacions"</string>

@@ -198,7 +198,7 @@
     <string name="silent_mode" msgid="7167703389802618663">"Chế độ im lặng"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Bật không dây"</string>
     <string name="turn_off_radio" msgid="8198784949987062346">"Tắt không dây"</string>
-    <string name="screen_lock" msgid="799094655496098153">"Khoá màn hình"</string>
+    <string name="screen_lock" msgid="799094655496098153">"Phương thức khoá màn hình"</string>
     <string name="power_off" msgid="4266614107412865048">"Tắt nguồn"</string>
     <string name="silent_mode_silent" msgid="319298163018473078">"Tắt chuông"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Chuông rung"</string>
@@ -222,12 +222,12 @@
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Tùy chọn máy tính bảng"</string>
     <string name="global_actions" product="tv" msgid="7240386462508182976">"Tùy chọn TV"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Tùy chọn điện thoại"</string>
-    <string name="global_action_lock" msgid="2844945191792119712">"Khoá màn hình"</string>
+    <string name="global_action_lock" msgid="2844945191792119712">"Phương thức khoá màn hình"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Tắt nguồn"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"Khẩn cấp"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Báo cáo lỗi"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Kết thúc phiên"</string>
-    <string name="global_action_screenshot" msgid="8329831278085426283">"Chụp ảnh màn hình"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Chụp màn hình"</string>
     <string name="bugreport_title" msgid="5981047024855257269">"Báo cáo lỗi"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Báo cáo này sẽ thu thập thông tin về tình trạng thiết bị hiện tại của bạn, để gửi dưới dạng thông báo qua email. Sẽ mất một chút thời gian kể từ khi bắt đầu báo cáo lỗi cho tới khi báo cáo sẵn sàng để gửi; xin vui lòng kiên nhẫn."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Báo cáo tương tác"</string>
@@ -251,7 +251,7 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"Thông báo mới"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Bàn phím ảo"</string>
-    <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"Bàn phím thực"</string>
+    <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"Bàn phím vật lý"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"Bảo mật"</string>
     <string name="notification_channel_car_mode" msgid="3553380307619874564">"Chế độ trên ô tô"</string>
     <string name="notification_channel_account" msgid="7577959168463122027">"Trạng thái tài khoản"</string>
@@ -281,7 +281,7 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Vị trí"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"truy cập vị trí của thiết bị này"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"Cho phép &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; truy cập vào vị trí của thiết bị này?"</string>
-    <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"Ứng dụng này sẽ chỉ có quyền truy cập vào vị trí trong khi bạn sử dụng"</string>
+    <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"Ứng dụng này sẽ chỉ có quyền truy cập vào vị trí khi bạn đang sử dụng ứng dụng này"</string>
     <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"Bạn muốn cho phép &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; truy cập vào vị trí của thiết bị này &lt;b&gt;trong mọi trường hợp&lt;/b&gt;?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="4597006851453417387">"Hiện tại, ứng dụng này chỉ có thể truy cập vào vị trí trong khi bạn dùng"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Lịch"</string>
@@ -377,7 +377,7 @@
     <string name="permdesc_foregroundService" msgid="6471634326171344622">"Cho phép ứng dụng sử dụng các dịch vụ trên nền trước."</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"đo dung lượng lưu trữ ứng dụng"</string>
     <string name="permdesc_getPackageSize" msgid="3921068154420738296">"Cho phép ứng dụng truy xuất mã, dữ liệu và kích thước bộ nhớ đệm của chính ứng dụng"</string>
-    <string name="permlab_writeSettings" msgid="2226195290955224730">"sửa đổi cài đặt hệ thống"</string>
+    <string name="permlab_writeSettings" msgid="2226195290955224730">"sửa đổi các tùy chọn cài đặt hệ thống"</string>
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Cho phép ứng dụng sửa đổi dữ liệu cài đặt của hệ thống. Ứng dụng độc hại có thể làm hỏng cấu hình hệ thống của bạn."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"chạy khi khởi động"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Cho phép ứng dụng tự chạy ngay khi hệ thống khởi động xong. Quyền này có thể khiến máy tính bảng mất nhiều thời gian khởi động hơn và cho phép ứng dụng làm chậm toàn bộ máy tính bảng do ứng dụng luôn chạy."</string>
@@ -560,8 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"Đưa điện thoại lại gần hơn."</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"Nâng điện thoại lên cao hơn."</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"Hạ thấp điện thoại xuống."</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"Đưa điện thoại sang bên phải."</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"Đưa điện thoại sang bên trái."</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"Đưa điện thoại sang bên trái."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"Đưa điện thoại sang bên phải."</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Mở mắt và nhìn vào màn hình."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Không thấy khuôn mặt bạn. Hãy nhìn vào điện thoại."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Thiết bị di chuyển quá nhiều. Giữ yên thiết bị."</string>
@@ -654,8 +654,8 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Giám sát số lần nhập sai mật khẩu khi mở khóa màn hình và khóa máy tính bảng hoặc xóa tất cả dữ liệu của người dùng này nếu nhập sai mật khẩu quá nhiều lần."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Giám sát số lần nhập sai mật khẩu khi mở khóa màn hình và khóa TV hoặc xóa tất cả dữ liệu của người dùng này nếu nhập sai mật khẩu quá nhiều lần."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Giám sát số lần nhập sai mật khẩu khi mở khóa màn hình và khóa điện thoại hoặc xóa tất cả dữ liệu của người dùng này nếu nhập sai mật khẩu quá nhiều lần."</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"Thay đổi khóa màn hình"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Thay đổi khóa màn hình."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Thay đổi phương thức khóa màn hình"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Thay đổi phương thức khóa màn hình."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Khóa màn hình"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Kiểm soát cách và thời điểm khóa màn hình."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Xóa tất cả dữ liệu"</string>
@@ -674,8 +674,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Yêu cầu dữ liệu ứng dụng được lưu trữ phải được mã hóa."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Vô hiệu hóa máy ảnh"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Ngăn sử dụng tất cả máy ảnh của thiết bị."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Tắt một số tính năng khóa màn hình"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Ngăn sử dụng một số tính năng khóa màn hình."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Tắt một số tính năng của phương thức khóa màn hình"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Ngăn sử dụng một số tính năng của phương thức khóa màn hình."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Nhà riêng"</item>
     <item msgid="869923650527136615">"Di Động"</item>
@@ -1361,9 +1361,9 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"CHIA SẺ"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"TỪ CHỐI"</string>
     <string name="select_input_method" msgid="4653387336791222978">"Chọn phương thức nhập"</string>
-    <string name="show_ime" msgid="2506087537466597099">"Hiển thị bàn phím ảo trên màn hình trong khi bàn phím thực đang hoạt động"</string>
+    <string name="show_ime" msgid="2506087537466597099">"Hiển thị bàn phím ảo trên màn hình trong khi bàn phím vật lý đang hoạt động"</string>
     <string name="hardware" msgid="194658061510127999">"Hiển thị bàn phím ảo"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Định cấu hình bàn phím thực"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Định cấu hình bàn phím vật lý"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Nhấn để chọn ngôn ngữ và bố cục"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1609,7 +1609,7 @@
     <string name="activity_starter_block_bg_activity_starts_permissive" msgid="6995473033438879646">"Tính năng bắt đầu hoạt động trong nền từ <xliff:g id="PACKAGENAME">%1$s</xliff:g> này sẽ bị chặn ở các bản dựng Q trong tương lai. Hãy xem trang g.co/dev/bgblock để biết thêm chi tiết."</string>
     <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="3317816771072146229">"Tính năng bắt đầu hoạt động trong nền từ <xliff:g id="PACKAGENAME">%1$s</xliff:g> đã bị chặn. Hãy xem trang g.co/dev/bgblock để biết thêm chi tiết."</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Đã quên hình"</string>
-    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Hình sai"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Hình không chính xác"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Mật khẩu sai"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"PIN sai"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="8790651267324125694">
@@ -1798,7 +1798,7 @@
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Trình tiết kiệm pin tắt hoặc hạn chế hoạt động trong nền, một số hiệu ứng hình ảnh và tính năng công suất cao khác để kéo dài thời lượng pin. "<annotation id="url">"Tìm hiểu thêm"</annotation></string>
     <string name="battery_saver_description" msgid="6413346684861241431">"Trình tiết kiệm pin tắt hoặc hạn chế hoạt động trong nền, một số hiệu ứng hình ảnh và tính năng công suất cao khác để kéo dài thời lượng pin."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Để giúp giảm mức sử dụng dữ liệu, Trình tiết kiệm dữ liệu sẽ chặn một số ứng dụng gửi hoặc nhận dữ liệu trong nền. Một ứng dụng mà bạn hiện sử dụng có thể truy cập dữ liệu nhưng tần suất sẽ giảm. Ví dụ: hình ảnh sẽ không hiển thị cho đến khi bạn nhấn vào hình ảnh đó."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Để giúp giảm mức sử dụng dữ liệu, Trình tiết kiệm dữ liệu sẽ chặn một số ứng dụng gửi hoặc nhận dữ liệu trong nền. Ứng dụng mà bạn hiện sử dụng có thể dùng dữ liệu nhưng tần suất sẽ giảm. Ví dụ: hình ảnh sẽ không hiển thị cho đến khi bạn nhấn vào hình ảnh đó."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Bật Trình tiết kiệm dữ liệu?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Bật"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

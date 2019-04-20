@@ -302,7 +302,7 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"şəkil çəkin və video yazın"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tətbiqinə şəkil və video çəkmək icazəsi verilsin?"</string>
-    <string name="permgrouplab_calllog" msgid="8798646184930388160">"Zənd qeydləri"</string>
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"Zəng qeydləri"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"telefonun zəng qeydini oxuyun və yazın"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tətbiqinə telefonun zəng qeydlərinə daxil olmaq icazəsi verilsin?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
@@ -560,8 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"Telefonu yaxına tutun."</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"Telefonu yuxarı tutun."</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"Telefonu aşağı tutun."</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"Telefonu sağa köçürün."</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"Telefonu sola tutun."</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"Telefonu sola hərəkət etdirin."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"Telefonu sağa hərəkət etdirin."</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Gözləriniz açıq şəkildə ekrana baxın."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Üzünüz görünmür. Telefona baxın."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Cihaz stabil deyil. Telefonu tərpətməyin."</string>

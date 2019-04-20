@@ -199,7 +199,7 @@
     <string name="turn_on_radio" msgid="3912793092339962371">"უსადენო კავშირის ჩართვა"</string>
     <string name="turn_off_radio" msgid="8198784949987062346">"უსადენო ინტერნეტის გამორთვა"</string>
     <string name="screen_lock" msgid="799094655496098153">"ეკრანის დაბლოკვა"</string>
-    <string name="power_off" msgid="4266614107412865048">"გამორთვა"</string>
+    <string name="power_off" msgid="4266614107412865048">"გამორთვ."</string>
     <string name="silent_mode_silent" msgid="319298163018473078">"მრეკავი გათიშულია"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"ვიბრაციის რეჟიმი"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"ზარი ჩართულია"</string>
@@ -223,7 +223,7 @@
     <string name="global_actions" product="tv" msgid="7240386462508182976">"ტელევიზორის პარამეტრები"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"ტელეფონის პარამეტრები"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"ეკრანის დაბლოკვა"</string>
-    <string name="global_action_power_off" msgid="4471879440839879722">"კვების გამორთვა"</string>
+    <string name="global_action_power_off" msgid="4471879440839879722">"გამორთვ."</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"საგანგებო სამსახურები"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"ხარვეზის შესახებ ანგარიში"</string>
     <string name="global_action_logout" msgid="935179188218826050">"სესიის დასრულება"</string>
@@ -560,8 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"მიიტანეთ ტელეფონი უფრო ახლოს."</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"გადაანაცვლეთ ტელეფონი ზემოთ."</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"გადაანაცვლეთ ტელეფონი ქვემოთ."</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"გადაანაცვლეთ ტელეფონი მარჯვნივ."</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"გადაანაცვლეთ ტელეფონი მარცხნივ."</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"გადაანაცვლეთ ტელეფონი მარცხნივ."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"გადაანაცვლეთ ტელეფონი მარჯვნივ."</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"შეხედეთ ეკრანს გახელილი თვალებით."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"თქვენი სახე არ ჩანს. შეხედეთ ტელეფონს."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"მეტისმეტად მოძრაობთ. მყარად დაიჭირეთ ტელეფონი."</string>
@@ -674,8 +674,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"საჭიროა შენახული აპის მონაცემების დაშიფრვა."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"კამერების გათიშვა"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"მოწყობილობის კამერების გამოყენების აღკვეთა."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"დაბლოკვის ელემენტების გათიშვა"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"ეკრანის დაბლოკვის ზოგიერთი ელემენტის გამოყენების თავიდან აცილება."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"დაბლოკვის ზოგი ფუნქციის გათიშვა"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"ეკრანის დაბლოკვის ზოგიერთი ფუნქციის გამოყენების თავიდან აცილება."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"სახლი"</item>
     <item msgid="869923650527136615">"მობილური"</item>

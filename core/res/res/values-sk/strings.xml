@@ -228,10 +228,10 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Možnosti telefónu"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Zámka obrazovky"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Vypnúť"</string>
-    <string name="global_action_emergency" msgid="7112311161137421166">"Tiesňové volanie"</string>
+    <string name="global_action_emergency" msgid="7112311161137421166">"Tieseň"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Hlásenie o chybách"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Ukončiť reláciu"</string>
-    <string name="global_action_screenshot" msgid="8329831278085426283">"Snímka obrazovky"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Snímka"</string>
     <string name="bugreport_title" msgid="5981047024855257269">"Hlásenie chyby"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Týmto zhromaždíte informácie o aktuálnom stave zariadenia. Informácie je potom možné odoslať e-mailom, chvíľu však potrvá, kým bude hlásenie chyby pripravené na odoslanie. Prosíme vás preto o trpezlivosť."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktívne nahlásenie"</string>
@@ -566,8 +566,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"Priblížte telefón."</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"Posuňte telefón vyššie."</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"Posuňte telefón nižšie."</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"Posuňte telefón doprava."</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"Posuňte telefón doľava."</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"Posuňte telefón doľava."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"Posuňte telefón doprava."</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Pozrite sa na obrazovku s otvorenými očami."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Nie je vidieť vašu tvár. Pozrite sa na telefón."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Priveľa pohybu. Nehýbte telefónom."</string>
@@ -681,7 +681,7 @@
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Zakázať fotoaparáty"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Zakázať používanie všetkých fotoaparátov zariadenia."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Deaktivovať niektoré funkcie zámky obrazovky"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Zabráňte používaniu niektorých funkcií zámky obrazovky."</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Zabrániť používaniu niektorých funkcií zámky obrazovky."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Domov"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -1176,7 +1176,7 @@
     <string name="whichSendToApplication" msgid="8272422260066642057">"Odoslať pomocou aplikácie"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"Odoslať pomocou aplikácie %1$s"</string>
     <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"Odoslať"</string>
-    <string name="whichHomeApplication" msgid="4307587691506919691">"Výber aplikácie na plochu"</string>
+    <string name="whichHomeApplication" msgid="4307587691506919691">"Výber vstupnej aplikácie"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Ako plochu používať aplikáciu %1$s"</string>
     <string name="whichHomeApplicationLabel" msgid="809529747002918649">"Nasnímať fotografiu"</string>
     <string name="whichImageCaptureApplication" msgid="3680261417470652882">"Nasnímať fotografiu pomocou aplikácie"</string>
@@ -1347,7 +1347,7 @@
     <string name="sms_control_title" msgid="7296612781128917719">"Odosielanie správ SMS"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"Aplikácia &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; posiela veľký počet správ SMS. Chcete tejto aplikácií povoliť, aby aj naďalej posielala správy?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"Povoliť"</string>
-    <string name="sms_control_no" msgid="625438561395534982">"Odmietnuť"</string>
+    <string name="sms_control_no" msgid="625438561395534982">"Zamietnuť"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; chce odoslať správu na adresu &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
     <string name="sms_short_code_details" msgid="5873295990846059400">"Táto akcia "<b>"môže viesť k zaúčtovaniu poplatkov"</b>" na váš účet u mobilného operátora."</string>
     <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"Táto akcia povedie k zaúčtovaniu poplatku na váš účet u mobilného operátora."</b></string>
@@ -1507,7 +1507,7 @@
     <string name="vpn_lockdown_config" msgid="8151951501116759194">"Zmeniť sieť alebo nastavenia VPN"</string>
     <string name="upload_file" msgid="2897957172366730416">"Zvoliť súbor"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Nie je vybratý žiadny súbor"</string>
-    <string name="reset" msgid="2448168080964209908">"Obnoviť"</string>
+    <string name="reset" msgid="2448168080964209908">"Resetovať"</string>
     <string name="submit" msgid="1602335572089911941">"Odoslať"</string>
     <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"Aplikácia na šoférovanie je spustená"</string>
     <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"Klepnutím ukončíte aplikáciu na šoférovanie"</string>
@@ -1839,7 +1839,7 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Práca – <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2. <xliff:g id="LABEL">%1$s</xliff:g> do práce"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3. <xliff:g id="LABEL">%1$s</xliff:g> do práce"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Pred uvoľnením požiadať o číslo PIN"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Pred odopnutím požiadať o číslo PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Pred uvoľnením požiadať o bezpečnostný vzor"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Pred uvoľnením požiadať o heslo"</string>
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Nainštaloval správca"</string>
@@ -1848,7 +1848,7 @@
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Šetrič batérie vypne alebo obmedzí aktivitu na pozadí, niektoré vizuálne efekty a ďalšie energeticky náročné funkcie, aby predĺžil výdrž batérie. "<annotation id="url">"Ďalšie informácie"</annotation></string>
     <string name="battery_saver_description" msgid="6413346684861241431">"Šetrič batérie vypne alebo obmedzí aktivitu na pozadí, niektoré vizuálne efekty a ďalšie energeticky náročné funkcie, aby predĺžil výdrž batérie."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Šetrič dát bráni niektorým aplikáciám odosielať alebo prijímať dáta na pozadí s cieľom znížiť spotrebu dát. Aplikácia, ktorú momentálne používate, môže prenášať dáta, ale môže to robiť menej často. Znamená to napríklad, že sa nezobrazia obrázky, kým na ne neklepnete."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"S cieľom znížiť spotrebu dát bráni šetrič dát niektorým aplikáciám odosielať alebo prijímať dáta na pozadí. Aplikácia, ktorú práve používate, môže využívať dáta, ale možno to bude robiť menej často. Znamená to napríklad, že sa nezobrazia obrázky, kým na ne neklepnete."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Chcete zapnúť šetrič dát?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Zapnúť"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

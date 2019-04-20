@@ -563,8 +563,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"Približite telefon."</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"Pomaknite telefon više."</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"Pomaknite telefon niže."</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"Pomaknite telefon udesno."</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"Pomaknite telefon ulijevo."</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"Pomaknite telefon ulijevo."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"Pomaknite telefon udesno."</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Pogledajte zaslon s otvorenim očima."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Vaše se lice ne vidi. Pogledajte telefon."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Previše kretanja. Držite telefon mirno."</string>
@@ -1823,7 +1823,7 @@
     <string name="confirm_battery_saver" msgid="639106420541753635">"U redu"</string>
     <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Štednja baterije isključuje ili ograničava aktivnosti u pozadini, neke vizualne efekte i druge značajke koje troše mnogo energije kako bi se produljilo trajanje baterije. "<annotation id="url">"Saznajte više"</annotation></string>
     <string name="battery_saver_description" msgid="6413346684861241431">"Štednja baterije isključuje ili ograničava aktivnosti u pozadini, neke vizualne efekte i druge značajke koje troše mnogo energije kako bi se produljilo trajanje baterije."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Da bi se smanjio podatkovni promet, Štednja podatkovnog prometa onemogućuje nekim aplikacijama slanje ili primanje podataka u pozadini. Aplikacija koju trenutačno upotrebljavate može pristupiti podacima, no možda će to činiti rjeđe. To može značiti da se, na primjer, slike neće prikazivati dok ih ne dodirnete."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Da bi se smanjio podatkovni promet, značajka Štednja podatkovnog prometa onemogućuje nekim aplikacijama slanje ili primanje podataka u pozadini. Aplikacija koju trenutačno upotrebljavate može pristupiti podacima, no možda će to činiti rjeđe. To može značiti da se, na primjer, slike neće prikazivati dok ih ne dodirnete."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Uključiti Uštedu podataka?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Uključi"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

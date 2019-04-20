@@ -560,8 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"ফ’নটো ওচৰলৈ আনক।"</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"ফ’নটো ওপৰলৈ নিয়ক।"</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"ফ’নটো তললৈ নিয়ক"</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"ফ’নটো সোঁফালে নিয়ক।"</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"ফ’নটো বাওঁফালে নিয়ক।"</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"ফ’নটো বাওঁফালে নিয়ক।"</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"ফ’নটো সোঁফালে নিয়ক।"</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"আপোনাৰ চকু খোলা ৰাখি স্ক্ৰীণলৈ চাওক।"</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"আপোনাৰ মুখমণ্ডল দেখা নাই। ফ’নটোলৈ চাওক।"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"বেছি লৰচৰ কৰি আছে। ফ’নটো স্থিৰকৈ ধৰক।"</string>

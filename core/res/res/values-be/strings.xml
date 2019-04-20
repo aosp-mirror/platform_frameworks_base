@@ -566,8 +566,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"Перамясціце тэлефон бліжэй."</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"Перамясціце тэлефон вышэй."</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"Перамясціце тэлефон ніжэй."</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"Перамясціце тэлефон управа."</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"Перамясціце тэлефон улева."</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"Перамясціце тэлефон улева."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"Перамясціце тэлефон управа."</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Глядзіце на экран."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Не відаць твару. Глядзіце на тэлефон."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Трымайце прыладу нерухома. Трымайце тэлефон роўна."</string>
@@ -1328,7 +1328,7 @@
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Праграма %1$s хоча падлучыцца да сеткі Wi-Fi %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Праграма"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Пачаць работу Wi-Fi Direct. Гэта адключыць кліента або кропку доступу Wi-Fi."</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Пачаць работу Wi-Fi Direct. Гэта адключыць кліента або хот-спот Wi-Fi."</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Немагчыма запусціць Wi-Fi Direct."</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct уключаны"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"Дакраніцеся, каб убачыць налады"</string>
@@ -1511,7 +1511,7 @@
     <string name="submit" msgid="1602335572089911941">"Перадаць"</string>
     <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"Праграма для ваджэння ўключана"</string>
     <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"Націсніце, каб выйсці з праграмы для ваджэння."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"USB-мадэм або кропка доступу Wi-Fi актыўныя"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"USB-мадэм або хот-спот Wi-Fi актыўныя"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"Дакраніцеся, каб наладзіць."</string>
     <string name="disable_tether_notification_title" msgid="7526977944111313195">"Рэжым мадэма адключаны"</string>
     <string name="disable_tether_notification_message" msgid="2913366428516852495">"Звярніцеся да адміністратара па падрабязную інфармацыю"</string>

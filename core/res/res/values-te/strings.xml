@@ -281,7 +281,7 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"స్థానం"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"ఈ పరికర స్థానాన్ని యాక్సెస్ చేయడానికి"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"ఈ పరికర స్థానాన్ని యాక్సెస్ చేయడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని అనుమతించాలా?"</string>
-    <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"మీరు యాప్‌ను ఉపయోగిస్తున్నప్పుడు మాత్రమే యాప్ స్థానానికి యాక్సెస్ కలిగి ఉంటుంది"</string>
+    <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"మీరు యాప్‌ను ఉపయోగిస్తున్నప్పుడు మాత్రమే స్థానానికి యాప్ యాక్సెస్ కలిగి ఉంటుంది"</string>
     <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"ఈ పరికర స్థానాన్ని &lt;b&gt;అన్ని సమయాలలో&lt;/b&gt; యాక్సెస్ చేయడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ను అనుమతించాలా?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="4597006851453417387">"యాప్ ప్రస్తుతం మీరు ఆ యాప్‌ను ఉపయోగిస్తున్నప్పుడు మాత్రమే స్థానాన్ని యాక్సెస్ చేయగలుగుతుంది"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"క్యాలెండర్"</string>
@@ -560,8 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"ఫోన్‌ను దగ్గరగా పట్టుకోండి"</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"ఫోన్‌ను పైకి పట్టుకోండి."</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"ఫోన్‌ను కిందికి దించండి."</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"ఫోన్‌ను కుడివైపునకు జరపండి."</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"ఫోన్‌ను ఎడమవైపునకు జరపండి."</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"ఫోన్‌ను ఎడమవైపునకు జరపండి."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"ఫోన్‌ను కుడివైపునకు జరపండి."</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"మీ కళ్లు తెరిచి ఉంచి, స్క్రీన్ వైపు చూడండి."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"మీ ముఖం కనిపించడం లేదు. ఫోన్ వైపు చూడండి."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"బాగా కదుపుతున్నారు. ఫోన్‌ను స్థిరంగా పట్టుకోండి"</string>
@@ -1799,7 +1799,7 @@
     <string name="confirm_battery_saver" msgid="639106420541753635">"సరే"</string>
     <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"బ్యాటరీ జీవిత కాలాన్ని మరింత పొడిగించేందుకు, బ్యాటరీ సేవర్ నేపథ్య కార్యకలాపం, కొన్ని దృశ్య ప్రభావాలు, అలాగే అధిక శక్తిని వినియోగించే ఇతర ఫీచర్‌లను ఆఫ్ చేస్తుంది లేదా పరిమితం చేస్తుంది. "<annotation id="url">"మరింత తెలుసుకోండి"</annotation></string>
     <string name="battery_saver_description" msgid="6413346684861241431">"బ్యాటరీ జీవిత కాలాన్ని మరింత పొడిగించేందుకు, బ్యాటరీ సేవర్ నేపథ్య కార్యకలాపం, కొన్ని దృశ్య ప్రభావాలు, అలాగే అధిక శక్తిని వినియోగించే ఇతర ఫీచర్‌లను ఆఫ్ చేస్తుంది లేదా పరిమితం చేస్తుంది."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"డేటా వినియోగాన్ని తగ్గించడంలో సహాయకరంగా ఉండటానికి, డేటా సేవర్ కొన్ని యాప్‌లను నేపథ్యంలో డేటాను పంపకుండా లేదా స్వీకరించకుండా నిరోధిస్తుంది. మీరు ప్రస్తుతం ఉపయోగిస్తున్న యాప్‌ డేటాను యాక్సెస్ చేయగలదు కానీ అలా అరుదుగా చేయవచ్చు. అంటే, ఉదాహరణకు, మీరు ఆ చిత్రాలను నొక్కే వరకు అవి ప్రదర్శించబడవు."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"డేటా వినియోగాన్ని తగ్గించడంలో డేటా సేవర్ సహాయకరంగా ఉంటుంది. బ్యాక్‌గ్రౌండ్‌లో కొన్ని యాప్‌లు డేటాను పంపకుండా లేదా స్వీకరించకుండా నిరోధిస్తుంది. మీరు ప్రస్తుతం ఉపయోగిస్తోన్న యాప్‌ డేటాను యాక్సెస్ చేయగలదు. కానీ అలా అరుదుగా చేయవచ్చు. ఉదాహరణకు, మీరు చిత్రాలను నొక్కే వరకు అవి ప్రదర్శించబడవు."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"డేటా సేవర్‌ను ఆన్ చేయాలా?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ఆన్ చేయి"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

@@ -303,14 +303,14 @@
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"pristup vašoj fizičkoj aktivnosti"</string>
     <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"Dopustiti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; da pristupi informacijama o vašoj fizičkoj aktivnosti?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
-    <string name="permgroupdesc_camera" msgid="3250611594678347720">"slika i snima videozapise"</string>
-    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; snimanje slika i videozapisa?"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"snima fotografije i videozapise"</string>
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; snimanje fotografija i videozapisa?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"Zapisnici poziva"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"čitanje i pisanje zapisnika telefonskih poziva"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; pristup zapisnicima poziva?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"poziva i upravlja pozivima"</string>
-    <string name="permgrouprequest_phone" msgid="9166979577750581037">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uspostavljanje poziva i njihovo upravljanje?"</string>
+    <string name="permgrouprequest_phone" msgid="9166979577750581037">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; upućivanje poziva i upravljanje njima?"</string>
     <string name="permgrouplab_sensors" msgid="4838614103153567532">"Tjelesni senzori"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"pristupa podacima senzora o vašim vitalnim funkcijama"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; pristup senzornim podacima o vašim vitalnim znacima?"</string>
@@ -376,8 +376,8 @@
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Omogućava aplikaciji da neke svoje dijelove pohrani trajno u memoriji. Ovo može ograničiti veličinu raspoložive memorije za druge aplikacije i tako usporiti tablet."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Dozvoljava aplikaciji da jednim dijelom trajno ostaje u memoriji. Time se ostalim aplikacijama dostupna memorija može ograničiti te usporiti rad TV-a."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Omogućava aplikaciji da neke svoje dijelove pohrani trajno u memoriji. Ovo može ograničiti veličinu raspoložive memorije za druge aplikacije i tako usporiti telefon."</string>
-    <string name="permlab_foregroundService" msgid="3310786367649133115">"pokretanje usluge u prednjem planu"</string>
-    <string name="permdesc_foregroundService" msgid="6471634326171344622">"Dopušta aplikaciji korištenje usluga u prednjem planu."</string>
+    <string name="permlab_foregroundService" msgid="3310786367649133115">"pokretanje usluge u prvom planu"</string>
+    <string name="permdesc_foregroundService" msgid="6471634326171344622">"Dopušta aplikaciji korištenje usluga u prvom planu."</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"mjerenje prostora kojeg aplikacije zauzimaju u pohrani"</string>
     <string name="permdesc_getPackageSize" msgid="3921068154420738296">"Dozvoljava aplikaciji preuzimanje svog koda, podataka i veličine keš memorije"</string>
     <string name="permlab_writeSettings" msgid="2226195290955224730">"izmjena postavki sistema"</string>
@@ -529,7 +529,7 @@
     <string name="biometric_error_canceled" msgid="349665227864885880">"Autentifikacija je otkazana"</string>
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"Nije postavljen PIN, uzorak niti lozinka"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Otkriven je djelomičan otisak prsta. Pokušajte ponovo."</string>
-    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Nije uspjela obrada otiska prsta. Pokušajte ponovo."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Obrada otiska prsta nije uspjela. Pokušajte ponovo."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Senzor za otisak prsta je prljav. Očistite ga i pokušajte ponovo."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Prst je uklonjen prebrzo. Pokušajte ponovo."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Prst je uklonjen presporo. Pokušajte ponovo."</string>
@@ -563,8 +563,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"Primaknite telefon."</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"Podignite telefon."</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"Spustite telefon."</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"Pomjerite telefon udesno."</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"Pomjerite telefon ulijevo."</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"Pomjerite telefon ulijevo."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"Pomjerite telefon udesno."</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Gledajte u ekran i otvorite oči."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Ne vidi se lice. Gledajte u telefon."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Previše pokreta. Držite telefon mirno."</string>
@@ -1199,7 +1199,7 @@
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Uvijek prikaži"</string>
     <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> je napravljena za verziju operativnog sistema Android koja nije kompatibilna i može se ponašati neočekivano. Ažurirana verzija aplikacije može biti dostupna."</string>
     <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"Uvijek prikaži"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Provjerite ima li ažuriranja"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Provjeri ima li ažuriranja"</string>
     <string name="smv_application" msgid="3307209192155442829">"Aplikacija <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) prekršila je vlastita StrictMode pravila."</string>
     <string name="smv_process" msgid="5120397012047462446">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> prekršio je vlastita StrictMode pravila."</string>
     <string name="android_upgrading_title" product="default" msgid="7513829952443484438">"Ažuriranje telefona…"</string>
@@ -1274,7 +1274,7 @@
     <string name="wifi_suggestion_content" msgid="5883181205841582873">"Predlaže <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Da"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Ne"</string>
-    <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi veza će se automatski uključiti"</string>
+    <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"WiFi će se uključiti automatski"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Kada ste u blizini sačuvane mreže visokog kvaliteta"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Nemoj ponovo uključiti"</string>
     <string name="wifi_wakeup_enabled_title" msgid="6534603733173085309">"Wi‑Fi veza se automatski uključila"</string>
@@ -1487,7 +1487,7 @@
     <string name="vpn_lockdown_config" msgid="8151951501116759194">"Promijenite postavke mreže ili VPN-a"</string>
     <string name="upload_file" msgid="2897957172366730416">"Odabir fajla"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Nije izabran nijedan fajl"</string>
-    <string name="reset" msgid="2448168080964209908">"Vraćanje na zadano"</string>
+    <string name="reset" msgid="2448168080964209908">"Vrati na zadano"</string>
     <string name="submit" msgid="1602335572089911941">"Potvrdi"</string>
     <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"Aplikacija za vožnju je pokrenuta"</string>
     <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"Dodirnite za izlaz iz aplikacije za vožnju."</string>

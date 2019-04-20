@@ -519,7 +519,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Hiermee sta je de app toe je fotocollectie aan te passen."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"locaties van je mediacollecties bekijken"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Hiermee sta je de app toe locaties van je mediacollectie te bekijken."</string>
-    <string name="biometric_dialog_default_title" msgid="881952973720613213">"Verifieer je identiteit"</string>
+    <string name="biometric_dialog_default_title" msgid="881952973720613213">"Bevestig dat jij het bent"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Biometrische hardware niet beschikbaar"</string>
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"Verificatie geannuleerd"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Niet herkend"</string>
@@ -560,8 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"Houd de telefoon dichterbij."</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"Houd de telefoon hoger."</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"Houd de telefoon lager."</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"Beweeg je telefoon meer naar rechts."</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"Beweeg je telefoon meer naar links."</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"Beweeg je telefoon meer naar links."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"Beweeg je telefoon meer naar rechts."</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Kijk met beide ogen open naar het scherm."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Je gezicht is niet te zien. Kijk naar de telefoon."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Te veel beweging. Houd je telefoon stil."</string>
@@ -655,13 +655,13 @@
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Bijhouden hoe vaak onjuiste wachtwoorden worden ingevoerd wanneer het scherm wordt ontgrendeld en de tv vergrendelen of alle gegevens van deze gebruiker wissen als te veel onjuiste wachtwoorden worden ingevoerd."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Bijhouden hoe vaak onjuiste wachtwoorden worden ingevoerd wanneer het scherm wordt ontgrendeld en de telefoon vergrendelen of alle gegevens van deze gebruiker wissen als te veel onjuiste wachtwoorden worden ingevoerd."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"De schermvergrendeling wijzigen"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Wijzig de schermvergrendeling."</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"De schermvergrendeling wijzigen."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Het scherm vergrendelen"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"Beheer hoe en wanneer het scherm wordt vergrendeld."</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"Beheren hoe en wanneer het scherm wordt vergrendeld."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Alle gegevens wissen"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"De gegevens van de tablet zonder waarschuwing wissen door de fabrieksinstellingen te herstellen."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"De gegevens van de tv zonder waarschuwing wissen door de fabrieksinstellingen te herstellen."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Wis de gegevens van de telefoon zonder waarschuwing door de fabrieksinstellingen te herstellen."</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"De gegevens van de telefoon zonder waarschuwing wissen door de fabrieksinstellingen te herstellen."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Gebruikersgegevens wissen"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"De gegevens van deze gebruiker op deze tablet zonder waarschuwing wissen."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"De gegevens van deze gebruiker op deze tv zonder waarschuwing wissen."</string>
@@ -675,7 +675,7 @@
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Camera\'s uitschakelen"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Het gebruik van alle apparaatcamera\'s voorkomen."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Bepaalde functies voor schermvergrendeling uitschakelen"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Voorkom het gebruik van bepaalde functies voor schermvergrendeling."</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Gebruik van bepaalde functies voor schermvergrendeling voorkomen."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Thuis"</item>
     <item msgid="869923650527136615">"Mobiel"</item>
@@ -1226,7 +1226,7 @@
     <string name="ringtone_default" msgid="3789758980357696936">"Standaardbeltoon"</string>
     <string name="ringtone_default_with_actual" msgid="1767304850491060581">"Standaard (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"Geen"</string>
-    <string name="ringtone_picker_title" msgid="3515143939175119094">"Beltonen"</string>
+    <string name="ringtone_picker_title" msgid="3515143939175119094">"Ringtones"</string>
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Alarmgeluiden"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Meldingsgeluiden"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Onbekend"</string>
@@ -1389,7 +1389,7 @@
     <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"Sommige functies werken mogelijk niet correct. Plaats nieuw opslagapparaat."</string>
     <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"<xliff:g id="NAME">%s</xliff:g> uitwerpen"</string>
     <string name="ext_media_unmounting_notification_message" msgid="1003926904442321115">"Niet verwijderen"</string>
-    <string name="ext_media_init_action" msgid="7952885510091978278">"Configureren"</string>
+    <string name="ext_media_init_action" msgid="7952885510091978278">"Instellen"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Uitwerpen"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Verkennen"</string>
     <string name="ext_media_seamless_action" msgid="6575980560886881233">"Uitvoer wijzigen"</string>
@@ -1498,7 +1498,7 @@
     <string name="sync_undo_deletes" msgid="2941317360600338602">"Verwijderingen ongedaan maken"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"Nu niets doen."</string>
     <string name="choose_account_label" msgid="5655203089746423927">"Een account selecteren"</string>
-    <string name="add_account_label" msgid="2935267344849993553">"Een account toevoegen"</string>
+    <string name="add_account_label" msgid="2935267344849993553">"Account toevoegen"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"Account toevoegen"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"Verhogen"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"Verlagen"</string>

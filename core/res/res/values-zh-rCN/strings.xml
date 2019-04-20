@@ -48,7 +48,7 @@
     <string name="invalidPin" msgid="3850018445187475377">"输入一个4至8位数的PIN码。"</string>
     <string name="invalidPuk" msgid="8761456210898036513">"请输入至少8位数字的PUK码。"</string>
     <string name="needPuk" msgid="919668385956251611">"您的 SIM 卡已用 PUK 码锁定。请输入 PUK 码将其解锁。"</string>
-    <string name="needPuk2" msgid="4526033371987193070">"输入PUK2码以解锁SIM卡。"</string>
+    <string name="needPuk2" msgid="4526033371987193070">"输入 PUK2 码以解锁 SIM 卡。"</string>
     <string name="enablePin" msgid="209412020907207950">"失败，请开启 SIM/RUIM 卡锁定设置。"</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
       <item quantity="other">您还可尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次。如果仍不正确，SIM 卡将被锁定。</item>
@@ -245,7 +245,7 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"已开启飞行模式"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"未开启飞行模式"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"设置"</string>
-    <string name="global_action_assist" msgid="3892832961594295030">"助手应用"</string>
+    <string name="global_action_assist" msgid="3892832961594295030">"助理"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"语音助理"</string>
     <string name="global_action_lockdown" msgid="1099326950891078929">"锁定"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
@@ -280,7 +280,7 @@
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"允许&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;访问您的通讯录吗？"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"位置信息"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"获取此设备的位置信息"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"要允许<xliff:g id="APP_NAME">%1$s</xliff:g>获取此设备的位置信息吗？"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"允许“<xliff:g id="APP_NAME">%1$s</xliff:g>”获取此设备的位置信息吗？"</string>
     <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"只有当您使用该应用时，该应用才有权访问位置信息"</string>
     <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"要&lt;b&gt;一律允许&lt;/b&gt;允许&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;访问此设备的位置信息吗？"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="4597006851453417387">"目前只有当您使用该应用时，该应用才能访问位置信息"</string>
@@ -560,8 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"请将手机拿近一点。"</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"请将手机举高一点。"</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"请将手机拿低一点。"</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"请将手机向右移动。"</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"请将手机向左移动。"</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"请将手机向左移动。"</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"请将手机向右移动。"</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"请直视屏幕并张开双眼。"</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"看不清您的脸部，请直视手机。"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"摄像头过于晃动。请将手机拿稳。"</string>
@@ -832,7 +832,7 @@
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM 卡已用 PUK 码锁定。"</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"请参阅《用户指南》或与客服人员联系。"</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM 卡已被锁定。"</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"正在解锁SIM卡..."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"正在解锁 SIM 卡..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"您已连续 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次画错解锁图案。\n\n请在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒后重试。"</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"您已连续 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次输错密码。\n\n请在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒后重试。"</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"您已经<xliff:g id="NUMBER_0">%1$d</xliff:g>次输错了PIN码。\n\n请在<xliff:g id="NUMBER_1">%2$d</xliff:g>秒后重试。"</string>

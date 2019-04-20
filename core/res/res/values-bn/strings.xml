@@ -302,7 +302,7 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"ক্যামেরা"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ছবি তোলা এবং ভিডিও রেকর্ড"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-কে ফটো তুলতে এবং ভিডিও রেকর্ড করতে দেবেন?"</string>
-    <string name="permgrouplab_calllog" msgid="8798646184930388160">"কল লগগুলি"</string>
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"কল লগ"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"ফোন কল লগ পড়ে এবং দেখে"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"আপনার ফোন কল লগ অ্যাক্সেস করার অনুমতি &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; কে দেবেন?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ফোন"</string>
@@ -560,8 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"ফোনটি আরও কাছে নিয়ে আসুন।"</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"ফোন উঁচুতে তুলুন।"</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"ফোন নিচে নামান।"</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"ফোনটি ডানদিকে সরান।"</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"ফোনটি বাঁদিকে সরান।"</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"ফোনটি বাঁদিকে সরান।"</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"ফোনটি ডানদিকে সরান।"</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"চোখ খুলে স্ক্রিনের দিকে তাকান।"</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"আপনার মুখ দেখা যাচ্ছে না। ফোনের দিকে তাকান।"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"খুব বেশি নড়ছে। ফোনটি যাতে না কাঁপে সেইভাবে ধরুন।"</string>
@@ -654,14 +654,14 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"স্ক্রিন আনলক করার সময় ভুলভাবে লেখা পাসওয়ার্ড প্রবেশের সংখ্যা মনিটার করে, এবং ট্যাবলেট লক করে এবং অনেক বার পাসওয়ার্ড ভুল ভাবে লেখা হলে ব্যবহারকারীর ডেটা মুছে ফেলে৷"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"স্ক্রিন আনলক করার সময় ভুলভাবে লেখা পাসওয়ার্ড প্রবেশের সংখ্যা মনিটার করে, এবং টিভি লক করে এবং অনেক বার পাসওয়ার্ড ভুল ভাবে লেখা হলে ব্যবহারকারীর ডেটা মুছে ফেলে৷"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"স্ক্রিন আনলক করার সময় ভুলভাবে লেখা পাসওয়ার্ড প্রবেশের সংখ্যা মনিটার করে, এবং ফোন লক করে এবং অনেক বার পাসওয়ার্ড ভুল ভাবে লেখা হলে ব্যবহারকারীর ডেটা মুছে ফেলে৷"</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"স্ক্রিন লক পরিবর্তন করুন"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"স্ক্রিন লক পরিবর্তন করে"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"স্ক্রিন লক পরিবর্তন করুন৷"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"স্ক্রিনটি লক করে"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"স্ক্রিন কখন কীভাবে লক হবে তা নিয়ন্ত্রণ করে৷"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"সমস্ত ডেটা মুছে দেয়"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"ফ্যাক্টরি ডেটা আবার সেট কার্য সম্পাদনার দ্বারা কোনো রকম সতর্কতা ছাড়াই ট্যাবলেটের ডেটা মোছে৷"</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"সতর্কীকরণ ছাড়াই একটি ফ্যাক্টরি ডেটা আবার সেট করার দ্বারা টিভির ডেটা মুছে ফেলে৷"</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"ফ্যাক্টরি ডেটা আবার সেট কার্য সম্পাদনার দ্বারা কোনো রকম সতর্কতা ছাড়াই ফোনের ডেটা মোছে৷"</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"ফ্যাক্টরি ডেটা রিসেট করে কোনও সতর্কতা ছাড়াই ফোনের ডেটা মোছে৷"</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"ব্যবহারকারীর ডেটা মুছুন"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"সতর্কীকরণ ছাড়াই এই ট্যাবলেটে থাকা ব্যাবহারকার্রী ডেটা মুছে ফেলে৷"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"সতর্কীকরণ ছাড়াই এই টিভিতে থাকা ব্যাবহারকার্রী ডেটা মুছে ফেলে৷"</string>
@@ -674,7 +674,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"এই সঞ্চিত অ্যাপ্লিকেশন ডেটা এনক্রিপ্ট করা দরকার৷"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"ক্যামেরাগুলি অক্ষম করে"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"সমস্ত ডিভাইসের ক্যামেরার ব্যবহার আটকায়৷"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"কিছু স্ক্রিন লক বৈশিষ্ট্য অক্ষম করুন"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"কিছু স্ক্রিন লক বৈশিষ্ট্য বন্ধ করুন"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"কিছু স্ক্রিন লক বৈশিষ্ট্যের ব্যবহার আটকান।"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"বাড়ি"</item>
@@ -957,7 +957,7 @@
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"enter"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"মুছুন"</string>
     <string name="search_go" msgid="8298016669822141719">"খুঁজুন"</string>
-    <string name="search_hint" msgid="1733947260773056054">"সার্চ..."</string>
+    <string name="search_hint" msgid="1733947260773056054">"সার্চ করুন..."</string>
     <string name="searchview_description_search" msgid="6749826639098512120">"খুঁজুন"</string>
     <string name="searchview_description_query" msgid="5911778593125355124">"সার্চ ক্যোয়ারী"</string>
     <string name="searchview_description_clear" msgid="1330281990951833033">"ক্যোয়ারী সাফ করুন"</string>
@@ -1464,7 +1464,7 @@
     <string name="vpn_lockdown_config" msgid="8151951501116759194">"নেটওয়ার্ক অথবা VPN সেটিংস পরিবর্তন করুন"</string>
     <string name="upload_file" msgid="2897957172366730416">"ফাইল বেছে নিন"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"কোনো ফাইল নির্বাচন করা হয়নি"</string>
-    <string name="reset" msgid="2448168080964209908">"আবার সেট করুন"</string>
+    <string name="reset" msgid="2448168080964209908">"রিসেট করুন"</string>
     <string name="submit" msgid="1602335572089911941">"জমা দিন"</string>
     <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"ড্রাইভিং অ্যাপ চালু আছে"</string>
     <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"ড্রাইভিং অ্যাপ বন্ধ করতে ট্যাপ করুন।"</string>

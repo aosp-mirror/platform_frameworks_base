@@ -527,7 +527,7 @@
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"ပင်နံပါတ်၊ လော့ခ်ပုံစံ သို့မဟုတ် စကားဝှက် သတ်မှတ်မထားပါ"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"လက်ဗွေရဦ တစ်ပိုင်းတစ်စ တွေ့ရှိသည်။ ကျေးဇူးပြု၍ ထပ်မံကြိုးစားပါ။"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"လက်ဗွေရာယူခြင်း မဆောင်ရွက်နိုင်ပါ။ ထပ်မံကြိုးစားပါ။"</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"လက်ဗွေရာဖတ်ကိရိယာ ညစ်ပေနေသည်။ ကျေးဇူးပြု၍ ရှင်းလင်းကာ ထပ်မံကြိုးစားပါ။"</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"လက်ဗွေဖတ်ကိရိယာ ညစ်ပေနေသည်။ ကျေးဇူးပြု၍ သန့်ရှင်းလိုက်ပြီး ပြန်စမ်းကြည့်ပါ။"</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"လက်ညှိုး အလွန်မြန်ဆန်စွာ ရွေ့ခဲ့သည်။ ထပ်မံ ကြိုးစားပါ။"</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"လက်ညှိုးအလွန်နှေးကွေးစွာ ရွေ့ခဲ့သည်။ ကျေးဇူးပြု၍ ထပ်မံကြိုးစားပါ။"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -560,8 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"ဖုန်းကို အနားသို့ ပိုတိုးပါ။"</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"ဖုန်းကို ပိုမြှင့်လိုက်ပါ။"</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"ဖုန်းကို အောက်ပိုနှိမ့်ပါ။"</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"ဖုန်းကို ညာဘက်သို့ ရွှေ့ပါ။"</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"ဖုန်းကို ဘယ်ဘက်သို့ရွှေ့ပါ။"</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"ဖုန်းကို ဘယ်ဘက်သို့ရွှေ့ပါ။"</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"ဖုန်းကို ညာဘက်သို့ ရွှေ့ပါ။"</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"မျက်လုံးဖွင့်ထားပြီး ဖန်သားပြင်ကို ကြည့်ပါ။"</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"သင့်မျက်နှာကို မမြင်ရပါ။ ဖုန်းကိုကြည့်ပါ။"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"လှုပ်လွန်းသည်။ ဖုန်းကို ငြိမ်ငြိမ်ကိုင်ပါ။"</string>
@@ -655,13 +655,13 @@
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"ဖန်မျက်နှာပြင်အား သော့ဖွင့်စဉ် လျှို့ဝှက်ကုဒ်အမှားများ ရိုက်သွင်းမှုအား စောင့်ကြည့်ရန်နှင့်၊ လျှို့ဝှက်ကုဒ်အမှားများ များစွာ ရိုက်သွင်းပါက တီဗွီအား သော့ချခြင်း သို့မဟုတ် တီဗွီ၏ အချက်အလက်များအား ဖျက်ပစ်ခြင်းများ ပြုလုပ်မည်။"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"ဖန်မျက်နှာပြင်အား သော့ဖွင့်စဉ် လျှို့ဝှက်ကုဒ်အမှားများ ရိုက်သွင်းမှုအား စောင့်ကြည့်ရန်နှင့်၊ လျှို့ဝှက်ကုဒ်အမှားများ များစွာ ရိုက်သွင်းပါက ဖုန်းအား သော့ချခြင်း သို့မဟုတ် ဖုန်း၏ အချက်အလက်များအား ဖျက်ပစ်ခြင်းများ ပြုလုပ်မည်။"</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"မျက်နှာပြင်လော့ခ်ပြောင်းခြင်း"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"မျက်နှာပြင်လော့ခ်ပြောင်းခြင်း"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"မျက်နှာပြင်လော့ခ်ပြောင်းသည်။"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"မျက်နှာပြင်အား လော့ခ်ချခြင်း"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"မည်သည့်အချိန်တွင် ဖန်သားပြင်အား မည်ကဲ့သို့နည်းဖြင် သော့ချရန် ထိန်းချုပ်ခြင်း"</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"ဖန်သားပြင် လော့ခ်ချချိန်၊ လော့ချနည်းကို ထိမ်းချုပ်သည်။"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"ဒေတာအားလုံးအားဖျက်ခြင်း"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"စက်ရုံထုတ် အခြေအနေအား ပြန်ပြောင်းခြင်းဖြင့် တက်ဘလက်ရှိ အချက်အလက်များအား ကြိုတင်သတိပေးမှုမရှိပဲ ဖျက်စီးရန်"</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"စက်ရုံထုတ်အခြေအနေအားပြန်လည်ရယူပါက တီဗွီရှိ အချက်အလက်များအား ကြိုတင်အသိပေးခြင်းမရှိဘဲ ဖျက်ပစ်နိုင်သည်။"</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"စက်ရုံထုတ် အခြေအနေအား ပြန်ပြောင်းခြင်းဖြင့် ဖုန်းရှိ အချက်အလက်များအား ကြိုတင်သတိပေးမှုမရှိပဲ ဖျက်စီးရန်"</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"စက်ရုံထုတ်အခြေအနေသို့ ပြန်ပြောင်းခြင်းဖြင့် ဖုန်းရှိဒေတာများကို သတိပေးခြင်း မရှိဘဲ ဖျက်သည်။"</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"အသုံးပြုသူဒေတာကို ဖျက်မည်"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"သတိပေးခြင်းမရှိဘဲ ဤတက်ဘလက်ပေါ်ရှိ ထိုအသုံးပြုသူ၏ဒေတာအား ဖျက်မည်။"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"သတိပေးခြင်းမရှိဘဲ ဤတီဗွီပေါ်ရှိ ထိုအသုံးပြုသူ၏ဒေတာအား ဖျက်မည်။"</string>
@@ -675,7 +675,7 @@
     <string name="policylab_disableCamera" msgid="6395301023152297826">"ကင်မရာအား ပိတ်ခြင်း"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"စက်မှ ကင်မရာအားလုံး အသုံးပြုမှုအား ကန့်သတ်ရန်"</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"ဖန်သားပြင် လော့ခ်ချသည့် ဝန်ဆောင်မှုအချို့ ပိတ်ခြင်း"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"ဖန်သားပြင်သော့ခတ်နိုင်သည့်အင်္ဂါရပ် အချို့ အသုံးပြုမှုအား ကာကွယ်ပါ။"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"ဖန်သားပြင်လော့ခ်ချသည့် ဝန်ဆောင်မှုအချို့ အသုံးပြုခြင်းကို တားဆီးသည်။"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"အိမ်"</item>
     <item msgid="869923650527136615">"မိုဘိုင်း"</item>
@@ -1177,7 +1177,7 @@
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"အမြဲပြပါ"</string>
     <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"ကိုက်ညီမှုမရှိသည့် Android OS ဗားရှင်းအတွက် <xliff:g id="APP_NAME">%1$s</xliff:g> ကို ပြုလုပ်ထားခြင်းဖြစ်ပြီး ပုံမှန်အလုပ်မလုပ်နိုင်ပါ။ ဤအက်ပ်အတွက် အပ်ဒိတ်လုပ်ထားသည့် ဗားရှင်း ရနိုင်ပါမည်။"</string>
     <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"အမြဲပြရန်"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"အပ်ဒိတ်အတွက် စစ်ကြည့်ရန်"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"အပ်ဒိတ်စစ်ရန်"</string>
     <string name="smv_application" msgid="3307209192155442829">"app <xliff:g id="APPLICATION">%1$s</xliff:g> (လုပ်ငန်းစဉ် <xliff:g id="PROCESS">%2$s</xliff:g>) က ကိုယ်တိုင် ပြဌာန်းခဲ့သည့် StrictMode မူဝါဒကို ချိုးဖောက်ခဲ့သည်။"</string>
     <string name="smv_process" msgid="5120397012047462446">"ဤ<xliff:g id="PROCESS">%1$s</xliff:g>ဖြစ်စဥ်မှာ ကိုယ်တိုင်အကျိုးသက်ရောက်သော StrictModeမူဝါဒအား ချိုးဖောက်သည်"</string>
     <string name="android_upgrading_title" product="default" msgid="7513829952443484438">"ဖုန်းကို အပ်ဒိတ်လုပ်နေသည်…"</string>
@@ -1390,7 +1390,7 @@
     <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"အချို့လုပ်ဆောင်ချက်များ ကောင်းစွာ အလုပ်မလုပ်နိုင်ပါ။ သိုလှောင်ခန်းအသစ် ထည့်သွင်းပါ။"</string>
     <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"<xliff:g id="NAME">%s</xliff:g> ကို ထုတ်နေသည်"</string>
     <string name="ext_media_unmounting_notification_message" msgid="1003926904442321115">"မဖယ်ရှားပါနှင့်"</string>
-    <string name="ext_media_init_action" msgid="7952885510091978278">"စဖွင့်သတ်မှတ်"</string>
+    <string name="ext_media_init_action" msgid="7952885510091978278">"သတ်မှတ်ရန်"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"ထုတ်မည်"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"စူးစမ်းရန်"</string>
     <string name="ext_media_seamless_action" msgid="6575980560886881233">"မီဒီယာအထွက် ပြောင်းရန်"</string>
@@ -1799,7 +1799,7 @@
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"ဘက်ထရီသက်တမ်း ပိုရှည်စေရန် \'ဘက်ထရီအားထိန်း\' က နောက်ခံလုပ်ဆောင်ချက်၊ အချို့ အမြင်အာရုံဆိုင်ရာ အထူးပြုလုပ်ချက်များနှင့် အခြား ပါဝါအလွန်သုံးသော ဝန်ဆောင်မှုများကို ပိတ်ခြင်း သို့မဟုတ် ကန့်သတ်ခြင်းတို့ ပြုလုပ်သည်။ "<annotation id="url">"ပိုမိုလေ့လာရန်"</annotation></string>
     <string name="battery_saver_description" msgid="6413346684861241431">"ဘက်ထရီသက်တမ်း ပိုရှည်စေရန် \'ဘက်ထရီအားထိန်း\' က နောက်ခံလုပ်ဆောင်ချက်၊ အချို့ အမြင်အာရုံဆိုင်ရာ အထူးပြုလုပ်ချက်များနှင့် အခြား ပါဝါအလွန်သုံးသော ဝန်ဆောင်မှုများကို ပိတ်ခြင်း သို့မဟုတ် ကန့်သတ်ခြင်းတို့ ပြုလုပ်သည်။"</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"ဒေတာအသုံးလျှော့ချနိုင်ရန်အတွက် အက်ပ်များကို နောက်ခံတွင် ဒေတာပို့ခြင်းနှင့် လက်ခံခြင်းမပြုရန် ဒေတာချွေတာမှုစနစ်က တားဆီးထားပါသည်။ ယခုအက်ပ်ဖြင့် ဒေတာအသုံးပြုနိုင်သော်လည်း အကြိမ်လျှော့၍သုံးရပါမည်။ ဥပမာ၊ သင်က မတို့မချင်း ပုံများပေါ်လာမည် မဟုတ်ပါ။"</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"ဒေတာအသုံးလျှော့ချနိုင်ရန်အတွက် အက်ပ်များကို နောက်ခံတွင် ဒေတာပို့ခြင်းနှင့် လက်ခံခြင်းမပြုရန် \'ဒေတာချွေတာမှု\' စနစ်က တားဆီးထားပါသည်။ ယခုအက်ပ်ဖြင့် ဒေတာအသုံးပြုနိုင်သော်လည်း အကြိမ်လျှော့၍သုံးရပါမည်။ ဥပမာ၊ သင်က မတို့မချင်း ပုံများပေါ်လာမည် မဟုတ်ပါ။"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ဒေတာအသုံးပြုမှု ချွေတာမှုစနစ်ကို ဖွင့်မလား။"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ဖွင့်ပါ"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1893,7 +1893,7 @@
     <string name="work_mode_off_message" msgid="5130856710614337649">"သင်၏ အလုပ်အက်ပ်၊ အကြောင်းကြားချက်၊ ဒေတာနှင့် အခြားအလုပ်ပရိုဖိုင် ဝန်ဆောင်မှုများကို ဖွင့်လိုက်ပါမည်"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"ဖွင့်ပါ"</string>
     <string name="deprecated_target_sdk_message" msgid="1449696506742572767">"ဤအက်ပ်ကို Android ဗားရှင်းဟောင်းအတွက် ပြုလုပ်ထားခြင်းဖြစ်ပြီး ပုံမှန်အလုပ်မလုပ်နိုင်ပါ။ အပ်ဒိတ်များအတွက် ရှာကြည့်ပါ သို့မဟုတ် ဆော့ဖ်ဝဲအင်ဂျင်နီယာကို ဆက်သွယ်ပါ။"</string>
-    <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"အပ်ဒိတ်အတွက် စစ်ကြည့်ရန်"</string>
+    <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"အပ်ဒိတ်စစ်ရန်"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"သင့်ထံတွင် စာအသစ်များရောက်နေသည်"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"ကြည့်ရှုရန် SMS အက်ပ်ကိုဖွင့်ပါ"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"အချို့လုပ်ဆောင်ချက်များ ကန့်သတ်ချက်ရှိနိုင်သည်"</string>

@@ -175,7 +175,7 @@
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Меморија таблета је пуна! Избришите неке датотеке да бисте ослободили простор."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Меморија сата је пуна. Избришите неке датотеке да бисте ослободили простор."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"Меморијски простор на ТВ-у је попуњен. Избришите неке датотеке да бисте ослободили простор."</string>
-    <string name="low_memory" product="default" msgid="3475999286680000541">"Складиште телефона је пуно! Избришите неке датотеке како бисте ослободили простор."</string>
+    <string name="low_memory" product="default" msgid="3475999286680000541">"Меморија телефона је пуна! Избришите неке датотеке да бисте ослободили простор."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
       <item quantity="one">Инсталирани су ауторитети за издавање сертификата</item>
       <item quantity="few">Инсталирани су ауторитети за издавање сертификата</item>
@@ -293,9 +293,9 @@
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"шаље и прегледа SMS поруке"</string>
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"Желите ли да омогућите да &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; шаље и прегледа SMS-ове?"</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"Складиште"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Меморијски простор"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"приступа сликама, медијима и датотекама на уређају"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Желите ли да омогућите да &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;приступа сликама, медијским датотекама и датотекама на уређају?"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Желите ли да омогућите да &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; приступа сликама, медијским датотекама и датотекама на уређају?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"снима звук"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Желите ли да омогућите да &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; снима звук?"</string>
@@ -563,8 +563,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"Приближите телефон."</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"Померите телефон нагоре."</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"Померите телефон надоле."</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"Померите телефон удесно."</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"Померите телефон улево."</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"Померите телефон улево."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"Померите телефон удесно."</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Погледајте у екран са отвореним очима."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Не види се лице. Гледајте у телефон."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Много се померате. Држите телефон мирно."</string>
@@ -677,7 +677,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Захтева да сачувани подаци апликације буду шифровани."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Онемогућавање камера"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Спречите коришћење свих камера уређаја."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Онемогућава неке функ. закључавања екрана"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Онемогућава функције закључавања екрана"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Спречава коришћење неких функција закључавања екрана."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Кућа"</item>
@@ -1391,7 +1391,7 @@
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Приказ преко других апликација"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"Апликација <xliff:g id="NAME">%s</xliff:g> се приказује преко других апликација"</string>
-    <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> се приказује преко других аплик."</string>
+    <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> се приказује преко других апл."</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Ако не желите ову функцију за <xliff:g id="NAME">%s</xliff:g>, додирните да бисте отворили подешавања и искључили је."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"Искључи"</string>
     <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"Проверава се <xliff:g id="NAME">%s</xliff:g>…"</string>

@@ -34,7 +34,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"‏مشکل در اتصال یا کد MMI نامعتبر."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"عملکرد فقط به شماره‌های شماره‌گیری ثابت محدود است."</string>
-    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"وقتی درحال رومینگ هستید، نمی‌توانید تنظیمات هدایت تماس را از تلفنتان تغییر دهید."</string>
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"وقتی درحال فراگردی هستید، نمی‌توانید تنظیمات هدایت تماس را از تلفنتان تغییر دهید."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"سرویس فعال شد."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"سرویس فعال شد برای:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"سرویس غیرفعال شده است."</string>
@@ -107,19 +107,19 @@
     <string name="serviceClassDataSync" msgid="7530000519646054776">"همگام‌سازی"</string>
     <string name="serviceClassPacket" msgid="6991006557993423453">"بسته"</string>
     <string name="serviceClassPAD" msgid="3235259085648271037">"PAD"</string>
-    <string name="roamingText0" msgid="7170335472198694945">"نشانگر رومینگ روشن"</string>
-    <string name="roamingText1" msgid="5314861519752538922">"نشانگر رومینگ خاموش"</string>
-    <string name="roamingText2" msgid="8969929049081268115">"نشانگر چشمک زن رومینگ"</string>
+    <string name="roamingText0" msgid="7170335472198694945">"نشانگر فراگردی روشن"</string>
+    <string name="roamingText1" msgid="5314861519752538922">"نشانگر فراگردی خاموش"</string>
+    <string name="roamingText2" msgid="8969929049081268115">"نشانگر چشمک زن فراگردی"</string>
     <string name="roamingText3" msgid="5148255027043943317">"خارج از محله"</string>
     <string name="roamingText4" msgid="8808456682550796530">"خارج از ساختمان"</string>
-    <string name="roamingText5" msgid="7604063252850354350">"رومینگ - سیستم برگزیده"</string>
-    <string name="roamingText6" msgid="2059440825782871513">"رومینگ - سیستم موجود"</string>
-    <string name="roamingText7" msgid="7112078724097233605">"رومینگ - شریک"</string>
-    <string name="roamingText8" msgid="5989569778604089291">"رومینگ - شریک ویژه"</string>
-    <string name="roamingText9" msgid="7969296811355152491">"رومینگ - عملکرد کامل سرویس"</string>
-    <string name="roamingText10" msgid="3992906999815316417">"رومینگ - عملکرد جزئی سرویس"</string>
-    <string name="roamingText11" msgid="4154476854426920970">"اعلان رومینگ روشن"</string>
-    <string name="roamingText12" msgid="1189071119992726320">"اعلان رومینگ خاموش"</string>
+    <string name="roamingText5" msgid="7604063252850354350">"فراگردی - سیستم برگزیده"</string>
+    <string name="roamingText6" msgid="2059440825782871513">"فراگردی - سیستم موجود"</string>
+    <string name="roamingText7" msgid="7112078724097233605">"فراگردی - شریک"</string>
+    <string name="roamingText8" msgid="5989569778604089291">"فراگردی - شریک ویژه"</string>
+    <string name="roamingText9" msgid="7969296811355152491">"فراگردی - عملکرد کامل سرویس"</string>
+    <string name="roamingText10" msgid="3992906999815316417">"فراگردی - عملکرد جزئی سرویس"</string>
+    <string name="roamingText11" msgid="4154476854426920970">"اعلان فراگردی روشن"</string>
+    <string name="roamingText12" msgid="1189071119992726320">"اعلان فراگردی خاموش"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"جستجوی سرویس"</string>
     <string name="wfcRegErrorTitle" msgid="3855061241207182194">"‏تماس ازطریق Wi‑Fi تنظیم نشد"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
@@ -560,8 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"تلفن را نزدیک‌تر بیاورید."</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"تلفن را بالاتر ببرید."</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"تلفن را پایین‌تر بیاورید."</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"تلفن را به سمت راست حرکت دهید."</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"تلفن را به‌سمت چپ حرکت دهید."</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"تلفن را به‌سمت چپ حرکت دهید."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"تلفن را به سمت راست حرکت دهید."</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"با چشمان باز به صفحه نگاه کنید."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"چهره‌تان دیده نمی‌شود. به تلفن نگاه کنید."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"حرکت خیلی زیاد است. تلفن را ثابت نگه‌دارید."</string>
@@ -1338,7 +1338,7 @@
     <string name="usb_supplying_notification_title" msgid="4631045789893086181">"‏درحال شارژ کردن دستگاه متصل‌‌شده ازطریق USB"</string>
     <string name="usb_mtp_notification_title" msgid="4238227258391151029">"‏انتقال فایل ازطریق USB روشن شد"</string>
     <string name="usb_ptp_notification_title" msgid="5425857879922006878">"‏PTP ازطریق USB روشن شد"</string>
-    <string name="usb_tether_notification_title" msgid="3716143122035802501">"‏اتصال به اینترنت با USB تلفن همراه روشن شد"</string>
+    <string name="usb_tether_notification_title" msgid="3716143122035802501">"‏اشتراک‌گذاری اینترنت با USB روشن شد"</string>
     <string name="usb_midi_notification_title" msgid="5356040379749154805">"‏MIDI ازطریق USB روشن شد"</string>
     <string name="usb_accessory_notification_title" msgid="1785694450621427730">"‏وسیله جانبی USB متصل است"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"برای گزینه‌های بیشتر ضربه بزنید."</string>
@@ -1467,9 +1467,9 @@
     <string name="submit" msgid="1602335572089911941">"ارسال"</string>
     <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"برنامه رانندگی درحال اجرا است"</string>
     <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"برای خروج از برنامه رانندگی ضربه بزنید."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"اتصال داده با سیم یا نقطه اتصال فعال"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"اشتراک‌گذاری اینترنت یا نقطه اتصال فعال"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"برای راه‌اندازی ضربه بزنید."</string>
-    <string name="disable_tether_notification_title" msgid="7526977944111313195">"اتصال به اینترنت با تلفن همراه غیرفعال شده است"</string>
+    <string name="disable_tether_notification_title" msgid="7526977944111313195">"اشتراک‌گذاری اینترنت غیرفعال است"</string>
     <string name="disable_tether_notification_message" msgid="2913366428516852495">"برای جزئیات، با سرپرستتان تماس بگیرید"</string>
     <string name="back_button_label" msgid="2300470004503343439">"برگشت"</string>
     <string name="next_button_label" msgid="1080555104677992408">"بعدی"</string>
@@ -1545,11 +1545,11 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"ویرایش"</string>
     <string name="data_usage_warning_title" msgid="6499834033204801605">"هشدار داده"</string>
     <string name="data_usage_warning_body" msgid="7340198905103751676">"<xliff:g id="APP">%s</xliff:g> از داده را مصرف کرده‌اید"</string>
-    <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"مصرف داده به حد مجاز رسیده است"</string>
-    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"‏به حد مجاز مصرف داده Wi-Fi رسید"</string>
+    <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"بیش‌از حدمجاز داده تلفن همراه است"</string>
+    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"‏بیش‌از حدمجاز داده Wi-Fi است"</string>
     <string name="data_usage_limit_body" msgid="2908179506560812973">"برای بقیه دوره، داده موقتاً‌ متوقف می‌شود"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"بیش از حداکثر مجاز داده تلفن همراه"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"‏بیش از حداکثر مجاز داده Wi-Fi"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"بیش‌از حدمجاز داده تلفن همراه"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"‏بیش‌از حدمجاز داده Wi-Fi"</string>
     <string name="data_usage_limit_snoozed_body" msgid="1671222777207603301">"مصرف داده شما <xliff:g id="SIZE">%s</xliff:g> از حداکثر مجاز بیشتر شده است"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"داده پس‌زمینه محدود شد"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"برای برداشتن محدودیت ضربه بزنید."</string>
@@ -1798,7 +1798,7 @@
     <string name="confirm_battery_saver" msgid="639106420541753635">"تأیید"</string>
     <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"بهینه‌سازی باتری فعالیت پس‌زمینه، برخی جلوه‌های دیداری، و سایر ویژگی‌های با مصرف بالای نیرو را خاموش یا محدود می‌کند تا عمر باتری افزایش یابد. "<annotation id="url">"بیشتر بدانید"</annotation></string>
     <string name="battery_saver_description" msgid="6413346684861241431">"بهینه‌سازی باتری فعالیت پس‌زمینه، برخی جلوه‌های دیداری، و سایر ویژگی‌های با مصرف بالای نیرو را خاموش یا محدود می‌کند تا عمر باتری افزایش یابد."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"برای کمک به کاهش مصرف داده، «صرفه‌جویی داده» از ارسال و دریافت داده در پس‌زمینه از طرف بعضی برنامه‌ها جلوگیری می‌کند. برنامه‌ای که درحال‌حاضر استفاده می‌کنید می‌تواند به داده‌ها دسترسی داشته باشد اما دفعات دسترسی آن محدود است.این یعنی، برای مثال، تصاویر تا زمانی که روی آنها ضربه نزنید نشان داده نمی‌شوند."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"برای کمک به کاهش مصرف داده، «صرفه‌جویی داده» از ارسال و دریافت داده در پس‌زمینه ازطرف بعضی برنامه‌ها جلوگیری می‌کند. برنامه‌ای که درحال‌حاضر استفاده می‌کنید می‌تواند به داده‌ها دسترسی داشته باشد اما دفعات دسترسی آن محدود است.این یعنی، برای مثال، تصاویر تا زمانی که روی آن‌ها ضربه نزنید نشان داده نمی‌شوند."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"صرفه‌جویی داده روشن شود؟"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"روشن کردن"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

@@ -560,8 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"Ilapit pa ang telepono."</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"Itaas pa ang telepono."</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"Ibaba pa ang telepono."</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"Igalaw ang telepono pakanan."</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"Igalaw ang telepono pakaliwa."</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"Igalaw ang telepono pakaliwa."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"Igalaw ang telepono pakanan."</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Tingnan ang screen nang nakadilat."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Hindi makita ang mukha mo. Tumingin sa telepono."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Masyadong magalaw. Hawakang mabuti ang telepono."</string>
@@ -1079,7 +1079,7 @@
     <string name="redo" msgid="7759464876566803888">"Gawing muli"</string>
     <string name="autofill" msgid="3035779615680565188">"I-autofill"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Pagpili ng teksto"</string>
-    <string name="addToDictionary" msgid="4352161534510057874">"Idagdag sa diksyonaryo"</string>
+    <string name="addToDictionary" msgid="4352161534510057874">"Idagdag sa diksyunaryo"</string>
     <string name="deleteText" msgid="6979668428458199034">"I-delete"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Pamamaraan ng pag-input"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Pagkilos ng teksto"</string>
@@ -1617,7 +1617,7 @@
       <item quantity="other">Subukang muli sa loob ng <xliff:g id="NUMBER">%d</xliff:g> na segundo.</item>
     </plurals>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Iguhit ang iyong pattern"</string>
-    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Ilagay ang SIM PIN"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Ilagay ang PIN ng SIM"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Ilagay ang PIN"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Ilagay ang Password"</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"Hindi na pinagana ang SIM ngayon. Maglagay ng PUK code upang magpatuloy. Makipag-ugnay sa carrier para sa mga detalye."</string>
