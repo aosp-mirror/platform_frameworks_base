@@ -34,4 +34,8 @@ public class BlockingQueueIntentReceiver extends BroadcastReceiver {
     public Intent waitForIntent() throws InterruptedException {
         return mQueue.poll(10, TimeUnit.SECONDS);
     }
+
+    public Intent waitForIntentShortDelay() throws InterruptedException {
+        return mQueue.poll(3, TimeUnit.SECONDS);
+    }
 }
