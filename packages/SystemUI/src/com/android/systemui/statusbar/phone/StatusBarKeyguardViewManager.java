@@ -250,6 +250,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     private void updateLockIcon() {
+        // Not all form factors have a lock icon
+        if (mLockIconContainer == null) {
+            return;
+        }
         boolean keyguardWithoutQs = mStatusBarStateController.getState() == StatusBarState.KEYGUARD
                 && !mNotificationPanelView.isQsExpanded();
         int lockVisibility = (mBouncer.isShowing() || keyguardWithoutQs)

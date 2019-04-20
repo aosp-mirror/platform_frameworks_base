@@ -134,7 +134,10 @@ public class KeyguardIndicationController implements StateListener {
                 mTextView.getTextColors() : ColorStateList.valueOf(Color.WHITE);
         mDisclosure = indicationArea.findViewById(R.id.keyguard_indication_enterprise_disclosure);
         mLockIcon = lockIcon;
-        mLockIcon.setOnLongClickListener(this::handleTrustCircleClick);
+        // lock icon is not used on all form factors.
+        if (mLockIcon != null) {
+            mLockIcon.setOnLongClickListener(this::handleTrustCircleClick);
+        }
         mWakeLock = new SettableWakeLock(wakeLock, TAG);
         mLockPatternUtils = lockPatternUtils;
 
