@@ -100,6 +100,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.policy.InflatedSmartReplies.SmartRepliesAndActions;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -3192,6 +3193,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     public void setAmbientGoingAway(boolean goingAway) {
         mAmbientGoingAway = goingAway;
+    }
+
+    /**
+     * Returns the Smart Suggestions backing the smart suggestion buttons in the notification.
+     */
+    public SmartRepliesAndActions getExistingSmartRepliesAndActions() {
+        return mPrivateLayout.getCurrentSmartRepliesAndActions();
     }
 
     @VisibleForTesting

@@ -16,6 +16,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.InsetDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.text.Layout;
 import android.text.TextPaint;
 import android.text.method.TransformationMethod;
@@ -213,14 +214,16 @@ public class SmartReplyView extends ViewGroup {
      */
     public List<Button> inflateRepliesFromRemoteInput(
             @NonNull SmartReplies smartReplies,
-            SmartReplyController smartReplyController, NotificationEntry entry) {
+            SmartReplyController smartReplyController, NotificationEntry entry,
+            boolean delayOnClickListener) {
         List<Button> buttons = new ArrayList<>();
 
         if (smartReplies.remoteInput != null && smartReplies.pendingIntent != null) {
             if (smartReplies.choices != null) {
                 for (int i = 0; i < smartReplies.choices.length; ++i) {
                     buttons.add(inflateReplyButton(
-                            this, getContext(), i, smartReplies, smartReplyController, entry));
+                            this, getContext(), i, smartReplies, smartReplyController, entry,
+                            delayOnClickListener));
                 }
                 this.mSmartRepliesGeneratedByAssistant = smartReplies.fromAssistant;
             }
@@ -234,7 +237,7 @@ public class SmartReplyView extends ViewGroup {
      */
     public List<Button> inflateSmartActions(@NonNull SmartActions smartActions,
             SmartReplyController smartReplyController, NotificationEntry entry,
-            HeadsUpManager headsUpManager) {
+            HeadsUpManager headsUpManager, boolean delayOnClickListener) {
         List<Button> buttons = new ArrayList<>();
         int numSmartActions = smartActions.actions.size();
         for (int n = 0; n < numSmartActions; n++) {
@@ -242,7 +245,7 @@ public class SmartReplyView extends ViewGroup {
             if (action.actionIntent != null) {
                 buttons.add(inflateActionButton(
                         this, getContext(), n, smartActions, smartReplyController, entry,
-                        headsUpManager));
+                        headsUpManager, delayOnClickListener));
             }
         }
         return buttons;
@@ -259,7 +262,7 @@ public class SmartReplyView extends ViewGroup {
     @VisibleForTesting
     static Button inflateReplyButton(SmartReplyView smartReplyView, Context context,
             int replyIndex, SmartReplies smartReplies, SmartReplyController smartReplyController,
-            NotificationEntry entry) {
+            NotificationEntry entry, boolean useDelayedOnClickListener) {
         Button b = (Button) LayoutInflater.from(context).inflate(
                 R.layout.smart_reply_button, smartReplyView, false);
         CharSequence choice = smartReplies.choices[replyIndex];
@@ -299,9 +302,13 @@ public class SmartReplyView extends ViewGroup {
             return false; // do not defer
         };
 
-        b.setOnClickListener(view -> {
+        OnClickListener onClickListener = view ->
             smartReplyView.mKeyguardDismissUtil.executeWhenUnlocked(action);
-        });
+        if (useDelayedOnClickListener) {
+            onClickListener = new DelayedOnClickListener(onClickListener,
+                    smartReplyView.mConstants.getOnClickInitDelay());
+        }
+        b.setOnClickListener(onClickListener);
 
         b.setAccessibilityDelegate(new AccessibilityDelegate() {
             public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
@@ -322,7 +329,7 @@ public class SmartReplyView extends ViewGroup {
     static Button inflateActionButton(SmartReplyView smartReplyView, Context context,
             int actionIndex, SmartActions smartActions,
             SmartReplyController smartReplyController, NotificationEntry entry,
-            HeadsUpManager headsUpManager) {
+            HeadsUpManager headsUpManager, boolean useDelayedOnClickListener) {
         Notification.Action action = smartActions.actions.get(actionIndex);
         Button button = (Button) LayoutInflater.from(context).inflate(
                 R.layout.smart_action_button, smartReplyView, false);
@@ -335,14 +342,19 @@ public class SmartReplyView extends ViewGroup {
         iconDrawable.setBounds(0, 0, newIconSize, newIconSize);
         button.setCompoundDrawables(iconDrawable, null, null, null);
 
-        button.setOnClickListener(view ->
+        OnClickListener onClickListener = view ->
                 smartReplyView.getActivityStarter().startPendingIntentDismissingKeyguard(
                         action.actionIntent,
                         () -> {
                             smartReplyController.smartActionClicked(
                                     entry, actionIndex, action, smartActions.fromAssistant);
                             headsUpManager.removeNotification(entry.key, true);
-                        }));
+                        });
+        if (useDelayedOnClickListener) {
+            onClickListener = new DelayedOnClickListener(onClickListener,
+                    smartReplyView.mConstants.getOnClickInitDelay());
+        }
+        button.setOnClickListener(onClickListener);
 
         // Mark this as an Action button
         final LayoutParams lp = (LayoutParams) button.getLayoutParams();
@@ -956,6 +968,34 @@ public class SmartReplyView extends ViewGroup {
         public SmartActions(List<Notification.Action> actions, boolean fromAssistant) {
             this.actions = actions;
             this.fromAssistant = fromAssistant;
+        }
+    }
+
+    /**
+     * An OnClickListener wrapper that blocks the underlying OnClickListener for a given amount of
+     * time.
+     */
+    private static class DelayedOnClickListener implements OnClickListener {
+        private final OnClickListener mActualListener;
+        private final long mInitDelayMs;
+        private final long mInitTimeMs;
+
+        DelayedOnClickListener(OnClickListener actualOnClickListener, long initDelayMs) {
+            mActualListener = actualOnClickListener;
+            mInitDelayMs = initDelayMs;
+            mInitTimeMs = SystemClock.elapsedRealtime();
+        }
+
+        public void onClick(View v) {
+            if (hasFinishedInitialization()) {
+                mActualListener.onClick(v);
+            } else {
+                Log.i(TAG, "Accidental Smart Suggestion click registered, delay: " + mInitDelayMs);
+            }
+        }
+
+        private boolean hasFinishedInitialization() {
+            return SystemClock.elapsedRealtime() >= mInitTimeMs + mInitDelayMs;
         }
     }
 }
