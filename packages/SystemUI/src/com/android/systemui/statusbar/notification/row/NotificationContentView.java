@@ -93,6 +93,7 @@ public class NotificationContentView extends FrameLayout {
     private SmartReplyController mSmartReplyController;
     private InflatedSmartReplies mExpandedInflatedSmartReplies;
     private InflatedSmartReplies mHeadsUpInflatedSmartReplies;
+    private SmartRepliesAndActions mCurrentSmartRepliesAndActions;
 
     private NotificationViewWrapper mContractedWrapper;
     private NotificationViewWrapper mExpandedWrapper;
@@ -1259,18 +1260,18 @@ public class NotificationContentView extends FrameLayout {
         // the same SmartRepliesAndActions to avoid discrepancies between the two views. We here
         // reuse that object for our local SmartRepliesAndActions to avoid discrepancies between
         // this class and the InflatedSmartReplies classes.
-        SmartRepliesAndActions smartRepliesAndActions = mExpandedInflatedSmartReplies != null
+        mCurrentSmartRepliesAndActions = mExpandedInflatedSmartReplies != null
                 ? mExpandedInflatedSmartReplies.getSmartRepliesAndActions()
                 : mHeadsUpInflatedSmartReplies.getSmartRepliesAndActions();
         if (DEBUG) {
             Log.d(TAG, String.format("Adding suggestions for %s, %d actions, and %d replies.",
                     entry.notification.getKey(),
-                    smartRepliesAndActions.smartActions == null ? 0 :
-                            smartRepliesAndActions.smartActions.actions.size(),
-                    smartRepliesAndActions.smartReplies == null ? 0 :
-                            smartRepliesAndActions.smartReplies.choices.length));
+                    mCurrentSmartRepliesAndActions.smartActions == null ? 0 :
+                            mCurrentSmartRepliesAndActions.smartActions.actions.size(),
+                    mCurrentSmartRepliesAndActions.smartReplies == null ? 0 :
+                            mCurrentSmartRepliesAndActions.smartReplies.choices.length));
         }
-        applySmartReplyView(smartRepliesAndActions, entry);
+        applySmartReplyView(mCurrentSmartRepliesAndActions, entry);
     }
 
     private void applyRemoteInput(NotificationEntry entry, boolean hasFreeformRemoteInput) {
@@ -1470,6 +1471,13 @@ public class NotificationContentView extends FrameLayout {
         if (inflatedSmartReplies == null) {
             mHeadsUpSmartReplyView = null;
         }
+    }
+
+    /**
+     * Returns the smart replies and actions currently shown in the notification.
+     */
+    @Nullable public SmartRepliesAndActions getCurrentSmartRepliesAndActions() {
+        return mCurrentSmartRepliesAndActions;
     }
 
     public void closeRemoteInput() {

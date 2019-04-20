@@ -28,15 +28,19 @@ import android.util.Log;
 import android.util.Pair;
 import android.widget.Button;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.DevicePolicyManagerWrapper;
 import com.android.systemui.shared.system.PackageManagerWrapper;
+import com.android.systemui.statusbar.NotificationUiAdjustment;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -79,29 +83,52 @@ public class InflatedSmartReplies {
             NotificationEntry entry,
             SmartReplyConstants smartReplyConstants,
             SmartReplyController smartReplyController,
-            HeadsUpManager headsUpManager) {
-        SmartRepliesAndActions smartRepliesAndActions =
+            HeadsUpManager headsUpManager,
+            SmartRepliesAndActions existingSmartRepliesAndActions) {
+        SmartRepliesAndActions newSmartRepliesAndActions =
                 chooseSmartRepliesAndActions(smartReplyConstants, entry);
-        if (!shouldShowSmartReplyView(entry, smartRepliesAndActions)) {
+        if (!shouldShowSmartReplyView(entry, newSmartRepliesAndActions)) {
             return new InflatedSmartReplies(null /* smartReplyView */,
-                    null /* smartSuggestionButtons */, smartRepliesAndActions);
+                    null /* smartSuggestionButtons */, newSmartRepliesAndActions);
         }
+
+        // Only block clicks if the smart buttons are different from the previous set - to avoid
+        // scenarios where a user incorrectly cannot click smart buttons because the notification is
+        // updated.
+        boolean delayOnClickListener =
+                !areSuggestionsSimilar(existingSmartRepliesAndActions, newSmartRepliesAndActions);
 
         SmartReplyView smartReplyView = SmartReplyView.inflate(context);
 
         List<Button> suggestionButtons = new ArrayList<>();
-        if (smartRepliesAndActions.smartReplies != null) {
+        if (newSmartRepliesAndActions.smartReplies != null) {
             suggestionButtons.addAll(smartReplyView.inflateRepliesFromRemoteInput(
-                    smartRepliesAndActions.smartReplies, smartReplyController, entry));
+                    newSmartRepliesAndActions.smartReplies, smartReplyController, entry,
+                    delayOnClickListener));
         }
-        if (smartRepliesAndActions.smartActions != null) {
+        if (newSmartRepliesAndActions.smartActions != null) {
             suggestionButtons.addAll(
-                    smartReplyView.inflateSmartActions(smartRepliesAndActions.smartActions,
-                            smartReplyController, entry, headsUpManager));
+                    smartReplyView.inflateSmartActions(newSmartRepliesAndActions.smartActions,
+                            smartReplyController, entry, headsUpManager,
+                            delayOnClickListener));
         }
 
         return new InflatedSmartReplies(smartReplyView, suggestionButtons,
-                smartRepliesAndActions);
+                newSmartRepliesAndActions);
+    }
+
+    @VisibleForTesting
+    static boolean areSuggestionsSimilar(
+            SmartRepliesAndActions left, SmartRepliesAndActions right) {
+        if (left == right) return true;
+        if (left == null || right == null) return false;
+
+        if (!Arrays.equals(left.getSmartReplies(), right.getSmartReplies())) {
+            return false;
+        }
+
+        return !NotificationUiAdjustment.areDifferent(
+                left.getSmartActions(), right.getSmartActions());
     }
 
     /**
@@ -259,6 +286,14 @@ public class InflatedSmartReplies {
                 @Nullable SmartReplyView.SmartActions smartActions) {
             this.smartReplies = smartReplies;
             this.smartActions = smartActions;
+        }
+
+        @NonNull public CharSequence[] getSmartReplies() {
+            return smartReplies == null ? new CharSequence[0] : smartReplies.choices;
+        }
+
+        @NonNull public List<Notification.Action> getSmartActions() {
+            return smartActions == null ? Collections.emptyList() : smartActions.actions;
         }
     }
 }
