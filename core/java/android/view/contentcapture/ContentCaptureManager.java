@@ -192,7 +192,7 @@ import java.util.Set;
  * <p>If your view provides its own virtual hierarchy (for example, if it's a browser that draws
  * the HTML using {@link Canvas} or native libraries in a different render process), then the view
  * is also responsible to notify the session when the virtual elements appear and disappear - see
- * {@link View#onProvideContentCaptureStructure(ViewStructure, int)} for more info.
+ * {@code View#onProvideContentCaptureStructure(ViewStructure, int)} for more info.
  */
 @SystemService(Context.CONTENT_CAPTURE_MANAGER_SERVICE)
 public final class ContentCaptureManager {
