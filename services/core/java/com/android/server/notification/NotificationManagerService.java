@@ -2863,7 +2863,8 @@ public class NotificationManagerService extends SystemService {
 
             // Reset notification preferences
             if (!fromApp) {
-                mPreferencesHelper.clearData(packageName, uid);
+                mPreferencesHelper.onPackagesChanged(
+                        true, UserHandle.getCallingUserId(), packages, uids);
             }
 
             handleSavePolicyFile();
