@@ -88,7 +88,7 @@
     <string name="no_connection_to_printer" msgid="2159246915977282728">"प्रिंटर के लिए कोई कनेक्शन नहीं"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"अज्ञात"</string>
     <string name="print_service_security_warning_title" msgid="2160752291246775320">"<xliff:g id="SERVICE">%1$s</xliff:g> का उपयोग करें?"</string>
-    <string name="print_service_security_warning_summary" msgid="1427434625361692006">"प्रिंटर पर जाते समय आपका दस्तावेज़ एक या अधिक सर्वर से गुज़र सकता है."</string>
+    <string name="print_service_security_warning_summary" msgid="1427434625361692006">"प्रिंटर पर जाते समय आपका दस्तावेज़ एक या ज़्यादा सर्वर से गुज़र सकता है."</string>
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"श्याम और श्वेत"</item>
     <item msgid="2762241247228983754">"रंग"</item>
