@@ -8447,6 +8447,20 @@ public class PackageParser {
         // Collect certificates
         if ((flags & PackageManager.GET_SIGNING_CERTIFICATES) != 0) {
             collectCertificates(p, apexFile, false);
+            // Keep legacy mechanism for handling signatures. While this is deprecated, it's
+            // still part of the public API and needs to be maintained
+            if (p.mSigningDetails.hasPastSigningCertificates()) {
+                // Package has included signing certificate rotation information.  Return
+                // the oldest cert so that programmatic checks keep working even if unaware
+                // of key rotation.
+                pi.signatures = new Signature[1];
+                pi.signatures[0] = p.mSigningDetails.pastSigningCertificates[0];
+            } else if (p.mSigningDetails.hasSignatures()) {
+                // otherwise keep old behavior
+                int numberOfSigs = p.mSigningDetails.signatures.length;
+                pi.signatures = new Signature[numberOfSigs];
+                System.arraycopy(p.mSigningDetails.signatures, 0, pi.signatures, 0, numberOfSigs);
+            }
             if (p.mSigningDetails != SigningDetails.UNKNOWN) {
                 // only return a valid SigningInfo if there is signing information to report
                 pi.signingInfo = new SigningInfo(p.mSigningDetails);
