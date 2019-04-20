@@ -238,7 +238,8 @@ public class PhoneStatusBarPolicy
         mIconController.setIconVisibility(mSlotLocation, false);
 
         // sensors off
-        mIconController.setIcon(mSlotSensorsOff, R.drawable.stat_sys_sensors_off, null);
+        mIconController.setIcon(mSlotSensorsOff, R.drawable.stat_sys_sensors_off,
+                mContext.getString(R.string.accessibility_sensors_off_active));
         mIconController.setIconVisibility(mSlotSensorsOff,
                 mSensorPrivacyController.isSensorPrivacyEnabled());
 
