@@ -112,7 +112,6 @@
     <string name="accessibility_scanning_face" msgid="769545173211758586">"Skanowanie twarzy"</string>
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Wyślij"</string>
     <string name="accessibility_manage_notification" msgid="2026361503393549753">"Zarządzanie powiadomieniami"</string>
-    <string name="unlock_label" msgid="8779712358041029439">"odblokuj"</string>
     <string name="phone_label" msgid="2320074140205331708">"otwórz telefon"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"otwórz pomoc głosową"</string>
     <string name="camera_label" msgid="7261107956054836961">"otwórz aparat"</string>
@@ -410,7 +409,8 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Całkowita\ncisza"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Tylko\npriorytetowe"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Tylko\nalarmy"</string>
-    <string name="keyguard_indication_charging_time_wireless" msgid="5376059837186496558">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Ładowanie bezprzewodowe (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> do pełnego naładowania)"</string>
+    <!-- no translation found for keyguard_indication_charging_time_wireless (6959284458466962592) -->
+    <skip />
     <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Ładowanie (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> do końca)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Szybkie ładowanie (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> do końca)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Wolne ładowanie (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> do końca)"</string>
@@ -515,8 +515,8 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Masz połączenie z aplikacją <xliff:g id="APPLICATION">%1$s</xliff:g>, która może monitorować Twoją prywatną aktywność w sieci, w tym e-maile, aplikacje i strony internetowe."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Organizacja <xliff:g id="ORGANIZATION">%1$s</xliff:g> zarządza Twoim profilem do pracy. Profil jest połączony z aplikacją <xliff:g id="APPLICATION">%2$s</xliff:g>, która może monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe.\n\nSkontaktuj się z administratorem, aby uzyskać więcej informacji."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Organizacja <xliff:g id="ORGANIZATION">%1$s</xliff:g> zarządza Twoim profilem do pracy. Profil jest połączony z aplikacją <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, która może monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe.\n\nMasz też połączenie z aplikacją <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, która może monitorować Twoją osobistą aktywność w sieci."</string>
-    <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"Odblokowano dla: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_indication_trust_managed" msgid="8319646760022357585">"Aplikacja <xliff:g id="TRUST_AGENT">%1$s</xliff:g> jest uruchomiona"</string>
+    <!-- no translation found for keyguard_indication_trust_unlocked (2712865815371519117) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Urządzenie pozostanie zablokowane, aż odblokujesz je ręcznie"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Szybszy dostęp do powiadomień"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Zobacz powiadomienia, jeszcze zanim odblokujesz ekran"</string>
@@ -529,6 +529,12 @@
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Zwiń"</string>
     <string name="volume_odi_captions_tip" msgid="1193653197906918269">"Autom. napisy do multimediów"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"Zamknij wskazówkę dotyczącą napisów"</string>
+    <!-- no translation found for volume_odi_captions_content_description (2950736796270214785) -->
+    <skip />
+    <!-- no translation found for volume_odi_captions_hint_enable (49750248924730302) -->
+    <skip />
+    <!-- no translation found for volume_odi_captions_hint_disable (8980842810619956593) -->
+    <skip />
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"Przełącz urządzenie wyjściowe"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ekran jest przypięty"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Ekran będzie widoczny, dopóki go nie odepniesz. Aby to zrobić, kliknij i przytrzymaj Wstecz oraz Przegląd."</string>
@@ -862,7 +868,7 @@
     <string name="notification_channel_battery" msgid="5786118169182888462">"Bateria"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Zrzuty ekranu"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Wiadomości"</string>
-    <string name="notification_channel_storage" msgid="3077205683020695313">"Pamięć wewnętrzna"</string>
+    <string name="notification_channel_storage" msgid="3077205683020695313">"Pamięć"</string>
     <string name="notification_channel_hints" msgid="7323870212489152689">"Wskazówki"</string>
     <string name="instant_apps" msgid="6647570248119804907">"Aplikacje błyskawiczne"</string>
     <string name="instant_apps_title" msgid="8738419517367449783">"Aplikacja <xliff:g id="APP">%1$s</xliff:g> działa"</string>

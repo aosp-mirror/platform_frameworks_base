@@ -34,14 +34,15 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"Mã PIN không chính xác."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Thẻ không hợp lệ."</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"Đã sạc đầy"</string>
-    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Đang sạc không dây"</string>
+    <!-- no translation found for keyguard_plugged_in_wireless (8404159927155454732) -->
+    <skip />
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Đang sạc"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Đang sạc nhanh"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Đang sạc chậm"</string>
     <string name="keyguard_low_battery" msgid="9218432555787624490">"Kết nối bộ sạc của bạn."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"Nhấn vào Menu để mở khóa."</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"Mạng đã bị khóa"</string>
-    <string name="keyguard_missing_sim_message_short" msgid="6327533369959764518">"Không có thẻ SIM nào"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="6327533369959764518">"Không có thẻ SIM"</string>
     <string name="keyguard_missing_sim_message" product="tablet" msgid="4550152848200783542">"Không có thẻ SIM nào trong máy tính bảng."</string>
     <string name="keyguard_missing_sim_message" product="default" msgid="6585414237800161146">"Không có thẻ SIM nào trong điện thoại."</string>
     <string name="keyguard_missing_sim_instructions" msgid="7350295932015220392">"Lắp thẻ SIM."</string>

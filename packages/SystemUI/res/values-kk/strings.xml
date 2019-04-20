@@ -112,7 +112,6 @@
     <string name="accessibility_scanning_face" msgid="769545173211758586">"Бетті сканерлеу"</string>
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Жіберу"</string>
     <string name="accessibility_manage_notification" msgid="2026361503393549753">"Хабарландыруларды басқару"</string>
-    <string name="unlock_label" msgid="8779712358041029439">"бекітпесін ашу"</string>
     <string name="phone_label" msgid="2320074140205331708">"телефонды ашу"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"ашық дауыс көмекшісі"</string>
     <string name="camera_label" msgid="7261107956054836961">"камераны ашу"</string>
@@ -317,7 +316,7 @@
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Орын өшірулі"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Meдиа құрылғысы"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI (алынған сигнал қуатының көрсеткіші)"</string>
-    <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Тек қана төтенше қоңыраулар"</string>
+    <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Құтқару қызметіне ғана қоңырау шалынады"</string>
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"Параметрлер"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"Уақыт"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"Мен"</string>
@@ -404,7 +403,8 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Толық\nтыныштық"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Тек\nбасымдық"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Тек\nдабылдар"</string>
-    <string name="keyguard_indication_charging_time_wireless" msgid="5376059837186496558">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Сымсыз зарядтау (толық зарядталуға <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> қалды)"</string>
+    <!-- no translation found for keyguard_indication_charging_time_wireless (6959284458466962592) -->
+    <skip />
     <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Зарядталуда (толуына <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> қалды)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Жылдам зарядталуда (толуына <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> қалды)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Баяу зарядталуда (толуына <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> қалды)"</string>
@@ -507,8 +507,8 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Жеке желідегі әрекеттеріңізді, соның ішінде электрондық пошта хабарларын, қолданбаларды және вебсайттарды бақылай алатын <xliff:g id="APPLICATION">%1$s</xliff:g> қолданбасына қосылғансыз."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Жұмыс профиліңізді <xliff:g id="ORGANIZATION">%1$s</xliff:g> басқарады. Бұл профиль жұмыс желісіндегі белсенділігіңізді, соның ішінде электрондық хабарларды, қолданбаларды және веб-сайттарды бақылай алатын <xliff:g id="APPLICATION">%2$s</xliff:g> қолданбасына қосылған.\n\nҚосымша ақпарат алу үшін әкімшіге хабарласыңыз."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Жұмыс профиліңізді <xliff:g id="ORGANIZATION">%1$s</xliff:g> басқарады. Бұл профиль жұмыс желісіндегі белсенділігіңізді, соның ішінде электрондық хабарларды, қолданбаларды және веб-сайттарды бақылай алатын <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> қолданбасына қосылған.\n\nСондай-ақ сіз жеке желідегі белсенділігіңізді бақылай алатын <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> қолданбасына қосылғансыз."</string>
-    <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"<xliff:g id="USER_NAME">%1$s</xliff:g> үшін құлпы ашылды"</string>
-    <string name="keyguard_indication_trust_managed" msgid="8319646760022357585">"<xliff:g id="TRUST_AGENT">%1$s</xliff:g> белсенді"</string>
+    <!-- no translation found for keyguard_indication_trust_unlocked (2712865815371519117) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Қолмен бекітпесін ашқанша құрылғы бекітілген күйде қалады"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Хабарландыруларды тезірек алу"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Бекітпесін ашу алдында оларды көру"</string>
@@ -521,6 +521,12 @@
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Жию"</string>
     <string name="volume_odi_captions_tip" msgid="1193653197906918269">"Автоматты субтитр медиасы"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"Субтитрлер кеңесі"</string>
+    <!-- no translation found for volume_odi_captions_content_description (2950736796270214785) -->
+    <skip />
+    <!-- no translation found for volume_odi_captions_hint_enable (49750248924730302) -->
+    <skip />
+    <!-- no translation found for volume_odi_captions_hint_disable (8980842810619956593) -->
+    <skip />
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"Шығыс құрылғыны ауыстыру"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Экран түйрелді"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Экран босатылғанға дейін көрсетіліп тұрады. Оны босату үшін \"Артқа\" және \"Шолу\" түймелерін басып тұрыңыз."</string>
@@ -750,7 +756,7 @@
   </string-array>
     <string name="menu_ime" msgid="4998010205321292416">"Пернетақта ауыстырғышы"</string>
     <string name="save" msgid="2311877285724540644">"Сақтау"</string>
-    <string name="reset" msgid="2448168080964209908">"Қайта реттеу"</string>
+    <string name="reset" msgid="2448168080964209908">"Бастапқы күйге қайтару"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Түйме енін реттеу"</string>
     <string name="clipboard" msgid="1313879395099896312">"Буфер"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Арнаулы шарлау түймесі"</string>
