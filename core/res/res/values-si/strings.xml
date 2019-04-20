@@ -199,7 +199,7 @@
     <string name="turn_on_radio" msgid="3912793092339962371">"නොරැහන් සක්‍රිය කරන්න"</string>
     <string name="turn_off_radio" msgid="8198784949987062346">"නොරැහැන් අක්‍රිය කරන්න"</string>
     <string name="screen_lock" msgid="799094655496098153">"තිර අගුල"</string>
-    <string name="power_off" msgid="4266614107412865048">"බල රහිත කරන්න"</string>
+    <string name="power_off" msgid="4266614107412865048">"බල රහිත"</string>
     <string name="silent_mode_silent" msgid="319298163018473078">"හඬ නඟනය අක්‍රියයි"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"හඬ නඟනය කම්පනය"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"හඬ නඟනය සක්‍රීයයි"</string>
@@ -223,7 +223,7 @@
     <string name="global_actions" product="tv" msgid="7240386462508182976">"රූපවාහිනී විකල්ප"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"දුරකථන විකල්ප"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"තිර අගුල"</string>
-    <string name="global_action_power_off" msgid="4471879440839879722">"බල රහිත කරන්න"</string>
+    <string name="global_action_power_off" msgid="4471879440839879722">"බල රහිත"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"හදිසි"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"දෝෂ වර්තාව"</string>
     <string name="global_action_logout" msgid="935179188218826050">"සැසිය අවසන් කරන්න"</string>

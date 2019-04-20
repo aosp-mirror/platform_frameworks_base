@@ -196,7 +196,7 @@
     <string name="power_dialog" product="tv" msgid="6153888706430556356">"Chaguo za runinga"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Machaguo ya simu"</string>
     <string name="silent_mode" msgid="7167703389802618663">"Hali ya kimya"</string>
-    <string name="turn_on_radio" msgid="3912793092339962371">"Washa mtandao-hewa"</string>
+    <string name="turn_on_radio" msgid="3912793092339962371">"Washa mtandaopepe"</string>
     <string name="turn_off_radio" msgid="8198784949987062346">"Zima pasiwaya"</string>
     <string name="screen_lock" msgid="799094655496098153">"Funga skrini"</string>
     <string name="power_off" msgid="4266614107412865048">"Zima"</string>
@@ -227,7 +227,7 @@
     <string name="global_action_emergency" msgid="7112311161137421166">"Dharura"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Ripoti ya hitilafu"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Maliza kipindi"</string>
-    <string name="global_action_screenshot" msgid="8329831278085426283">"Picha ya skrini"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Pichaskrini"</string>
     <string name="bugreport_title" msgid="5981047024855257269">"Ripoti ya hitilafu"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Hii itakusanya maelezo kuhusu hali ya kifaa chako kwa sasa, na itume kama barua pepe. Itachukua muda mfupi tangu ripoti ya hitilafu ianze kuzalishwa hadi iwe tayari kutumwa; vumilia."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Ripoti ya kushirikiana"</string>
@@ -1278,13 +1278,13 @@
     <item msgid="8257233890381651999">"VPN"</item>
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"aina ya mtandao isiyojulikana"</string>
-    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Haikuweza kuunganisha kwa Mtandao-Hewa"</string>
+    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Imeshindwa kuunganisha Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" inao muunganisho duni wa wavuti."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Ungepenga kuruhusu muunganisho?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Programu ya %1$s ingependa kuunganisha kwenye Mtandao wa Wifi wa %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Programu"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Moja kwa Moja"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Anzisha Wi-Fi Moja kwa Moja. Hii itazima mteja/mtandao-hewa wa Wi-Fi."</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Anzisha Wi-Fi Moja kwa Moja. Hii itazima kiteja cha Wi-Fi/mtandaopepe."</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Haikuweza kuanzisha Wi-Fi Moja kwa Moja."</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Moja kwa Moja imewashwa"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"Gusa ili uweke mipangilio"</string>
