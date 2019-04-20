@@ -135,7 +135,6 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
             return;
         }
 
-
         // Sending empty PIN here to query the number of remaining PIN attempts
         new CheckSimPin("", mSubId) {
             void onSimCheckResponse(final int result, final int attemptsRemaining) {
@@ -216,20 +215,15 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
     }
 
     @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
+    public void showUsabilityHint() {
+
+    }
+
+    @Override
+    public void onResume(int reason) {
+        super.onResume(reason);
         KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mUpdateMonitorCallback);
         resetState();
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        KeyguardUpdateMonitor.getInstance(mContext).removeCallback(mUpdateMonitorCallback);
-    }
-
-    @Override
-    public void showUsabilityHint() {
     }
 
     @Override
@@ -239,6 +233,7 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
             mSimUnlockProgressDialog.dismiss();
             mSimUnlockProgressDialog = null;
         }
+        KeyguardUpdateMonitor.getInstance(mContext).removeCallback(mUpdateMonitorCallback);
     }
 
     /**
